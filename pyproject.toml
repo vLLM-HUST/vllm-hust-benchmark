@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vllm-hust-benchmark"
+description = "Independent benchmark harness mirroring upstream vLLM benchmark entrypoints and scenario structure."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [
+  {name = "IntelliStream Team"}
+]
+dynamic = ["version"]
+dependencies = []
+
+[project.scripts]
+vllm-hust-benchmark = "vllm_hust_benchmark.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+vllm_hust_benchmark = ["data/*.json"]
+
+[tool.setuptools.dynamic]
+version = {attr = "vllm_hust_benchmark._version.__version__"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
