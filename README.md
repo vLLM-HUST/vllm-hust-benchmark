@@ -1,43 +1,39 @@
 # vllm-hust-benchmark
 
-Independent benchmark repository for vllm-hust.
+Wrapper benchmark repository for vllm-hust.
 
-The goal is not to fork random legacy scripts from upstream vLLM. The goal is to mirror the current upstream benchmark boundary, keep the command surface compatible with `vllm bench`, and add a clean scenario registry so new AGI4S and domestic-hardware workloads can be added without turning the repo into a pile of ad-hoc shell scripts.
+The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while the real benchmark implementations stay in `vllm-hust`. This repo resolves the sibling `vllm-hust` and `vllm-hust-website` repositories, invokes the benchmark entrypoints from there, and keeps result export and website publication flows in one place.
 
-## What This Repo Mirrors From Upstream vLLM
+Use the already configured conda environment for this workspace. Do not rely on the system Python installation for benchmark execution or validation.
 
-Upstream vLLM has already moved the main benchmark entrypoints into CLI subcommands:
+## What This Repo Wraps
+
+The actual benchmark implementations live in the sibling `vllm-hust` repository:
 
 - `vllm bench serve`
 - `vllm bench throughput`
 - `vllm bench latency`
 - `vllm bench sweep ...`
+- `benchmarks/*.py`
 
-The real implementation boundary now lives in:
+This repository adds a stable orchestration layer around them:
 
-- `vllm/entrypoints/cli/benchmark/`
-- `vllm/benchmarks/`
+- upstream performance test discovery from `vllm-hust/.buildkite/performance-benchmarks/tests/*.json`
+- upstream suite delegation via `vllm-hust/.buildkite/performance-benchmarks/scripts/run-performance-benchmarks.sh`
+- scenario registry and command construction
+- sibling-repo path resolution
+- standard leaderboard artifact export
+- website snapshot aggregation via `vllm-hust-website/scripts/aggregate_results.py`
 
-Within that boundary, the most important upstream ideas are:
+Within that boundary, the important design point is:
 
-1. Benchmark entrypoints are CLI-first, not standalone scripts.
-2. Dataset handling is centralized around a shared registry and sampling layer.
-3. Result production is standardized around throughput, TTFT, TPOT, ITL, E2EL, and related metrics.
-4. Online and offline benchmarks share common request and dataset abstractions.
-5. CI and regression runs are driven by explicit scenario definitions rather than hand-written command fragments.
-
-## What This Repo Adds
-
-This independent repo adds a scenario registry on top of upstream parity:
-
-1. Official vLLM benchmark scenarios are recorded as data, not scattered across docs and CI JSON files.
-2. Command construction is separated from scenario definition.
-3. New scenarios can be added by extending a JSON manifest instead of rewriting the CLI.
-4. The command builder can print or execute the exact upstream `vllm bench ...` command.
+1. `vllm-hust-benchmark` should stay thin and should not re-implement benchmark runtime logic that already belongs in `vllm-hust`.
+2. Benchmark result shaping and website publishing can still live here because they are cross-repo orchestration concerns.
 
 ## Repository Layout
 
 - `src/vllm_hust_benchmark/cli.py`: CLI entrypoint
+- `src/vllm_hust_benchmark/integration.py`: sibling repo resolution and wrapper execution helpers
 - `src/vllm_hust_benchmark/models.py`: scenario data model and command rendering
 - `src/vllm_hust_benchmark/registry.py`: official scenario loading and lookup
 - `src/vllm_hust_benchmark/leaderboard_export.py`: website-compatible artifact and manifest exporter
@@ -49,14 +45,35 @@ This independent repo adds a scenario registry on top of upstream parity:
 ## Quick Start
 
 ```bash
+# inspect the resolved sibling repositories
+python -m vllm_hust_benchmark.cli show-repos --validate
+
+# list upstream official tests directly from sibling vllm-hust
+python -m vllm_hust_benchmark.cli list-tests --benchmark-type serve
+
+# inspect one upstream test and the wrapped commands it would use
+python -m vllm_hust_benchmark.cli show-test serving_llama8B_tp1_sharegpt
+
+# delegate one official test run to vllm-hust's own performance suite
+python -m vllm_hust_benchmark.cli run-test serving_llama8B_tp1_sharegpt --execute
+
+# delegate the whole upstream suite from this repository entrypoint
+python -m vllm_hust_benchmark.cli run-suite --execute
+
 # list the mirrored upstream scenarios
 python -m vllm_hust_benchmark.cli list-scenarios
 
 # build the upstream-equivalent command for an official serving scenario
 python -m vllm_hust_benchmark.cli build-command sharegpt-online --model meta-llama/Llama-3.1-8B-Instruct
 
-# execute the constructed command directly
+# execute the constructed command through the sibling vllm-hust repo
 python -m vllm_hust_benchmark.cli run sharegpt-online --model meta-llama/Llama-3.1-8B-Instruct --execute
+
+# run a raw vllm bench command from the sibling vllm-hust repo
+python -m vllm_hust_benchmark.cli bench -- serve --model meta-llama/Llama-3.1-8B-Instruct --dataset-name sharegpt
+
+# run a specific script from vllm-hust/benchmarks
+python -m vllm_hust_benchmark.cli run-script benchmark_serving.py -- --help
 
 # inspect how scenarios map to leaderboard fields
 python -m vllm_hust_benchmark.cli list-leaderboard-map
@@ -72,6 +89,27 @@ python -m vllm_hust_benchmark.cli export-leaderboard-artifact \
 	--model-name meta-llama/Llama-3.1-8B-Instruct \
 	--hardware-chip-model Ascend-910B \
 	--submitter ci
+
+# export directly from a raw vllm bench result json plus constraints metrics
+python -m vllm_hust_benchmark.cli export-leaderboard-artifact \
+	sharegpt-online \
+	--benchmark-result-file ../vllm-hust/benchmarks/results/serving_llama8B_tp1_sharegpt_qps_inf_concurrency_200.json \
+	--constraints-file docs/examples/constraints_metrics.sample.json \
+	--peak-mem-mb 10240 \
+	--output-dir .benchmarks/exports/run-002 \
+	--run-id run-002 \
+	--engine vllm-hust \
+	--engine-version 0.7.3 \
+	--model-name meta-llama/Llama-3.1-8B-Instruct \
+	--hardware-chip-model Ascend-910B \
+	--submitter ci \
+	--publish-website \
+	--execute
+
+# aggregate exported artifacts into the sibling vllm-hust-website repo
+python -m vllm_hust_benchmark.cli publish-website \
+	--source-dir .benchmarks/exports/run-001 \
+	--execute
 ```
 
 ## Extending With New Scenarios
@@ -87,11 +125,11 @@ The intended extension path is:
 
 The intended production chain is:
 
-1. Run benchmark scenarios from this repository.
+1. Run `vllm-hust` benchmark entrypoints or the upstream performance suite from this repository.
 2. Convert measured metrics to a standard leaderboard artifact with `export-leaderboard-artifact`.
-3. Upload the export directory to Hugging Face dataset storage.
-4. In website CI, run `vllm-hust-website/scripts/aggregate_results.py` against the downloaded HF snapshot.
-5. Publish `leaderboard_single.json`, `leaderboard_multi.json`, and `leaderboard_compare.json` to website data.
+3. Optionally run `publish-website`, or pass `--publish-website --execute` to `export-leaderboard-artifact`, to aggregate exports directly into the sibling `vllm-hust-website` checkout for local validation.
+4. Upload the aggregated snapshot or raw export directory to the production data channel.
+5. Website consumes the generated `leaderboard_single.json`, `leaderboard_multi.json`, and `leaderboard_compare.json` snapshots.
 
 `export-leaderboard-artifact` writes two files:
 
@@ -99,5 +137,7 @@ The intended production chain is:
 - `leaderboard_manifest.json`: manifest that points to artifact files and idempotency keys.
 
 This is the exact input pattern consumed by website aggregation.
+
+If you already have a raw `vllm bench` result JSON, you do not need to hand-author the full metrics payload anymore. The wrapper can derive the main website metrics from the raw result and only requires a separate constraints metrics JSON.
 
 For the upstream benchmark analysis behind this design, see `docs/UPSTREAM_ANALYSIS.md`.

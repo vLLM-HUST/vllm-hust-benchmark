@@ -3,9 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import platform
-import sys
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -67,6 +66,104 @@ def _load_metrics_payload(metrics_file: Path) -> dict[str, Any]:
     return payload
 
 
+def _load_constraints_metrics(constraints_file: Path) -> dict[str, Any]:
+    payload = json.loads(constraints_file.read_text(encoding="utf-8"))
+    constraints_metrics = payload.get("constraints_metrics", payload)
+    if not isinstance(constraints_metrics, dict):
+        raise ValueError("constraints file must be a JSON object or include constraints_metrics")
+
+    missing_constraints = [
+        key for key in REQUIRED_CONSTRAINT_METRIC_KEYS if key not in constraints_metrics
+    ]
+    if missing_constraints:
+        raise ValueError(
+            "constraints_metrics missing required keys: " + ", ".join(missing_constraints)
+        )
+    return dict(constraints_metrics)
+
+
+def _safe_float(value: Any) -> float | None:
+    try:
+        if value is None:
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _derive_metrics_from_benchmark_result(
+    benchmark_result_file: Path,
+    *,
+    peak_mem_mb: float | None,
+) -> dict[str, Any]:
+    payload = json.loads(benchmark_result_file.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("benchmark result file must be a JSON object")
+
+    completed = int(payload.get("completed") or 0)
+    failed = int(payload.get("failed") or 0)
+    total = completed + failed
+    errors = payload.get("errors") or []
+    if total == 0 and isinstance(errors, list) and errors:
+        failed = sum(1 for item in errors if item)
+        completed = len(errors) - failed
+        total = len(errors)
+
+    mean_ttft_ms = _safe_float(payload.get("mean_ttft_ms"))
+    if mean_ttft_ms is None:
+        avg_latency_seconds = _safe_float(payload.get("avg_latency"))
+        if avg_latency_seconds is not None:
+            mean_ttft_ms = avg_latency_seconds * 1000.0
+
+    throughput_tps = (
+        _safe_float(payload.get("output_throughput"))
+        or _safe_float(payload.get("tokens_per_second"))
+        or _safe_float(payload.get("total_token_throughput"))
+        or _safe_float(payload.get("requests_per_second"))
+        or _safe_float(payload.get("request_throughput"))
+        or 0.0
+    )
+
+    if total > 0:
+        error_rate = failed / total
+    else:
+        error_rate = 0.0
+
+    metrics = {
+        "ttft_ms": float(mean_ttft_ms or 0.0),
+        "throughput_tps": float(throughput_tps),
+        "peak_mem_mb": float(peak_mem_mb or payload.get("peak_mem_mb") or 0.0),
+        "error_rate": float(error_rate),
+    }
+
+    missing_metrics = [key for key in REQUIRED_METRIC_KEYS if key not in metrics]
+    if missing_metrics:
+        raise ValueError(f"derived metrics missing required keys: {', '.join(missing_metrics)}")
+    return metrics
+
+
+def load_export_payload(
+    *,
+    metrics_file: Path | None,
+    benchmark_result_file: Path | None,
+    constraints_file: Path | None,
+    peak_mem_mb: float | None,
+) -> dict[str, Any]:
+    if metrics_file is not None:
+        return _load_metrics_payload(metrics_file)
+    if benchmark_result_file is None or constraints_file is None:
+        raise ValueError(
+            "provide either metrics_file, or benchmark_result_file together with constraints_file"
+        )
+    return {
+        "metrics": _derive_metrics_from_benchmark_result(
+            benchmark_result_file,
+            peak_mem_mb=peak_mem_mb,
+        ),
+        "constraints_metrics": _load_constraints_metrics(constraints_file),
+    }
+
+
 def _infer_config_type(
     *, chip_count: int, node_count: int, scenario: ScenarioDefinition
 ) -> str:
@@ -114,7 +211,9 @@ def _build_idempotency_key(
 def export_leaderboard_artifacts(
     *,
     scenario: ScenarioDefinition,
-    metrics_file: Path,
+    metrics_file: Path | None,
+    benchmark_result_file: Path | None,
+    constraints_file: Path | None,
     output_dir: Path,
     artifact_name: str,
     run_id: str,
@@ -139,12 +238,18 @@ def export_leaderboard_artifacts(
     protocol_version: str,
     backend_version: str,
     core_version: str,
+    peak_mem_mb: float | None,
 ) -> tuple[Path, Path]:
-    payload = _load_metrics_payload(metrics_file)
+    payload = load_export_payload(
+        metrics_file=metrics_file,
+        benchmark_result_file=benchmark_result_file,
+        constraints_file=constraints_file,
+        peak_mem_mb=peak_mem_mb,
+    )
     metrics = dict(payload["metrics"])
     constraints_metrics = dict(payload["constraints_metrics"])
 
-    submitted_at = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    submitted_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     config_type = _infer_config_type(
         chip_count=chip_count, node_count=node_count, scenario=scenario
     )
