@@ -10,11 +10,15 @@ from vllm_hust_benchmark.integration import (
     build_benchmark_script_command,
     build_performance_suite_command,
     build_vllm_bench_command,
+    build_vllm_serve_command,
     resolve_repo_layout,
     run_external_command,
+    run_local_serve_benchmark,
+    split_vllm_serve_scenario_parameters,
     validate_repo_layout,
 )
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
+from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import filter_scenarios, get_scenario
 from vllm_hust_benchmark.upstream_tests import (
     build_inspection_commands,
@@ -23,13 +27,32 @@ from vllm_hust_benchmark.upstream_tests import (
 )
 
 
-def _parse_set_arguments(values: list[str] | None) -> dict[str, str]:
-    parsed: dict[str, str] = {}
+def _parse_override_value(raw_value: str) -> object:
+    value = raw_value.strip()
+    lowered = value.lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    try:
+        return int(value)
+    except ValueError:
+        pass
+    try:
+        return float(value)
+    except ValueError:
+        pass
+    return value
+
+
+def _parse_set_arguments(values: list[str] | None) -> dict[str, object]:
+    parsed: dict[str, object] = {}
     for item in values or []:
         if "=" not in item:
             raise ValueError(f"Invalid override: {item}. Expected key=value")
         key, value = item.split("=", 1)
-        parsed[key.strip()] = value.strip()
+        normalized_key = key.strip().replace("-", "_")
+        parsed[normalized_key] = _parse_override_value(value)
     return parsed
 
 
@@ -461,7 +484,45 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     scenario = get_scenario(args.scenario)
-    command = scenario.render_command(model=args.model, overrides=overrides)
+    merged_parameters = scenario.merge_parameters(overrides)
+
+    if scenario.benchmark_type == "serve":
+        bench_parameters, serve_parameters = split_vllm_serve_scenario_parameters(
+            merged_parameters
+        )
+        command = [
+            "vllm",
+            "bench",
+            "serve",
+            "--model",
+            args.model,
+            *render_parameter_flags(bench_parameters),
+        ]
+
+        if serve_parameters:
+            server_command = build_vllm_serve_command(
+                args.model, render_parameter_flags(serve_parameters)
+            )
+            client_command = build_vllm_bench_command(command[2:])
+            if args.command == "build-command" or not args.execute:
+                print(f"server_command: {shlex.join(server_command)}")
+                print(f"client_command: {shlex.join(client_command)}")
+                return 0
+
+            layout = resolve_repo_layout()
+            try:
+                validate_repo_layout(layout)
+            except ValueError as error:
+                print(str(error), file=sys.stderr)
+                return 2
+            return run_local_serve_benchmark(
+                layout=layout,
+                model=args.model,
+                bench_parameters=bench_parameters,
+                serve_parameters=serve_parameters,
+            )
+    else:
+        command = scenario.render_command(model=args.model, overrides=overrides)
 
     if args.command == "build-command":
         print(shlex.join(command))

@@ -1,7 +1,10 @@
 from pathlib import Path
+from unittest.mock import patch
 
+from vllm_hust_benchmark.cli import _parse_set_arguments
 from vllm_hust_benchmark.cli import main
 from vllm_hust_benchmark.integration import RepoLayout
+from vllm_hust_benchmark.integration import build_vllm_bench_command
 
 
 def test_build_command_prints_upstream_equivalent(capsys) -> None:
@@ -34,6 +37,52 @@ def test_run_without_execute_only_prints(capsys) -> None:
     assert exit_code == 0
     assert "vllm bench latency" in captured.out
     assert "--input-len 2048" in captured.out
+
+
+def test_parse_set_arguments_normalizes_hyphenated_keys() -> None:
+    parsed = _parse_set_arguments([
+        "input-len=8",
+        "output_len=4",
+        "enforce-eager=true",
+        "no-enable-prefix-caching=true",
+        "gpu-memory-utilization=0.6",
+    ])
+
+    assert parsed == {
+        "input_len": 8,
+        "output_len": 4,
+        "enforce_eager": True,
+        "no_enable_prefix_caching": True,
+        "gpu_memory_utilization": 0.6,
+    }
+
+
+def test_run_without_execute_accepts_hyphenated_overrides(capsys) -> None:
+    exit_code = main(
+        [
+            "run",
+            "random-latency",
+            "--model",
+            "meta-llama/Llama-3.1-8B-Instruct",
+            "--set",
+            "input-len=8",
+            "--set",
+            "output-len=4",
+            "--set",
+            "enforce-eager=true",
+            "--set",
+            "no-enable-prefix-caching=true",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out.count("--input-len") == 1
+    assert captured.out.count("--output-len") == 1
+    assert "--input-len 8" in captured.out
+    assert "--output-len 4" in captured.out
+    assert "--enforce-eager" in captured.out
+    assert "--no-enable-prefix-caching" in captured.out
 
 
 def test_show_repos_prints_resolved_layout(capsys, monkeypatch, tmp_path: Path) -> None:
@@ -174,7 +223,7 @@ def test_bench_without_execute_prints_wrapped_command(
 
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert "-m vllm.entrypoints.cli.main bench serve --model foo/bar" in captured.out
+    assert "vllm bench serve --model foo/bar" in captured.out
 
 
 def test_publish_website_without_execute_prints_aggregate_command(
@@ -335,3 +384,91 @@ def test_export_leaderboard_artifact_from_raw_benchmark_result(tmp_path) -> None
     assert exit_code == 0
     assert (output_dir / "run_leaderboard.json").is_file()
     assert (output_dir / "leaderboard_manifest.json").is_file()
+
+
+
+def test_build_vllm_bench_command_prefers_console_script():
+    with patch("vllm_hust_benchmark.integration.shutil.which", return_value="/fake/bin/vllm"):
+        command = build_vllm_bench_command(["latency", "--model", "tiny-model"])
+
+    assert command == ["/fake/bin/vllm", "bench", "latency", "--model", "tiny-model"]
+
+
+def test_build_vllm_bench_command_falls_back_to_python_module():
+    with patch("vllm_hust_benchmark.integration.shutil.which", return_value=None), patch(
+        "vllm_hust_benchmark.integration.sys.executable", "/usr/bin/python3"
+    ):
+        command = build_vllm_bench_command(["latency", "--model", "tiny-model"])
+
+    assert command == ["/usr/bin/python3", "-m", "vllm", "bench", "latency", "--model", "tiny-model"]
+
+
+def test_build_command_prints_server_and_client_commands_for_local_serve(
+    capsys, monkeypatch
+) -> None:
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.split_vllm_serve_scenario_parameters",
+        lambda merged: (
+            {
+                key: merged[key]
+                for key in (
+                    "backend",
+                    "endpoint",
+                    "dataset_name",
+                    "num_prompts",
+                    "input_len",
+                    "output_len",
+                    "num_warmups",
+                    "random_batch_size",
+                )
+                if key in merged
+            },
+            {
+                key: value
+                for key, value in merged.items()
+                if key
+                not in {
+                    "backend",
+                    "endpoint",
+                    "dataset_name",
+                    "num_prompts",
+                    "input_len",
+                    "output_len",
+                    "num_warmups",
+                    "random_batch_size",
+                }
+            },
+        ),
+    )
+
+    exit_code = main(
+        [
+            "build-command",
+            "random-online",
+            "--model",
+            "foo/bar",
+            "--set",
+            "input-len=8",
+            "--set",
+            "output-len=8",
+            "--set",
+            "batch-size=1",
+            "--set",
+            "num-iters-warmup=1",
+            "--set",
+            "gpu-memory-utilization=0.6",
+            "--set",
+            "enforce-eager=true",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "server_command:" in captured.out
+    assert "client_command:" in captured.out
+    assert "--random-batch-size 1" in captured.out
+    assert "--num-warmups 1" in captured.out
+    assert "--gpu-memory-utilization 0.6" in captured.out
+    assert "--enforce-eager" in captured.out
+    assert "--batch-size" not in captured.out
+    assert "--num-iters-warmup" not in captured.out

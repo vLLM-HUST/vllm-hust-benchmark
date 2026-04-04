@@ -2,6 +2,7 @@ from pathlib import Path
 
 import pytest
 
+from vllm_hust_benchmark import integration
 from vllm_hust_benchmark.integration import (
     RepoLayout,
     aggregate_to_website,
@@ -20,8 +21,9 @@ def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> 
 
     layout = resolve_repo_layout()
 
-    assert layout.workspace_root == Path("/home/shuhao").resolve()
-    assert layout.vllm_hust_repo == Path("/home/shuhao/vllm-hust").resolve()
+    expected_workspace_root = Path(integration.__file__).resolve().parents[3]
+    assert layout.workspace_root == expected_workspace_root
+    assert layout.vllm_hust_repo == (expected_workspace_root / "vllm-hust").resolve()
 
 
 def test_resolve_repo_layout_from_workspace_env(monkeypatch, tmp_path: Path) -> None:
@@ -64,9 +66,20 @@ def test_build_benchmark_script_command(tmp_path: Path) -> None:
     assert command[-1] == "--help"
 
 
-def test_build_vllm_bench_command() -> None:
+def test_build_vllm_bench_command_prefers_console_script(monkeypatch) -> None:
+    monkeypatch.setattr(integration.shutil, "which", lambda name: "/tmp/bin/vllm")
+
     command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
-    assert command[1:4] == ["-m", "vllm.entrypoints.cli.main", "bench"]
+
+    assert command == ["/tmp/bin/vllm", "bench", "serve", "--model", "foo/bar"]
+
+
+def test_build_vllm_bench_command_falls_back_to_python_module(monkeypatch) -> None:
+    monkeypatch.setattr(integration.shutil, "which", lambda name: None)
+
+    command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
+
+    assert command[:4] == [integration.sys.executable, "-m", "vllm", "bench"]
     assert command[-3:] == ["serve", "--model", "foo/bar"]
 
 
@@ -110,3 +123,131 @@ def test_aggregate_to_website_without_execute_prints_command(
     assert exit_code == 0
     assert "aggregate_results.py" in captured.out
     assert "--output-dir" in captured.out
+
+def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None:
+    monkeypatch.setattr(
+        integration,
+        "discover_vllm_flags",
+        lambda *parts: frozenset(
+            {
+                "backend",
+                "endpoint",
+                "dataset_name",
+                "num_prompts",
+                "input_len",
+                "output_len",
+                "num_warmups",
+                "random_batch_size",
+            }
+        ),
+    )
+
+    bench_parameters, serve_parameters = integration.split_vllm_serve_scenario_parameters(
+        {
+            "backend": "vllm",
+            "dataset_name": "random",
+            "input_len": 8,
+            "output_len": 8,
+            "num_warmups": 1,
+            "random_batch_size": 1,
+            "gpu_memory_utilization": 0.6,
+            "enforce_eager": True,
+        }
+    )
+
+    assert bench_parameters == {
+        "backend": "vllm",
+        "dataset_name": "random",
+        "input_len": 8,
+        "output_len": 8,
+        "num_warmups": 1,
+        "random_batch_size": 1,
+    }
+    assert serve_parameters == {
+        "gpu_memory_utilization": 0.6,
+        "enforce_eager": True,
+    }
+
+
+def test_run_local_serve_benchmark_starts_server_then_client(monkeypatch, tmp_path: Path) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+
+    popen_calls: list[list[str]] = []
+    run_calls: list[list[str]] = []
+    wait_calls: list[str] = []
+
+    class DummyProcess:
+        def __init__(self, command: list[str]) -> None:
+            self.command = command
+            self.returncode = None
+
+        def poll(self):
+            return self.returncode
+
+        def terminate(self) -> None:
+            self.returncode = 0
+
+        def wait(self, timeout: int | None = None) -> int:
+            self.returncode = 0
+            return 0
+
+        def kill(self) -> None:
+            self.returncode = -9
+
+    def fake_popen(command, cwd, env):
+        popen_calls.append(command)
+        return DummyProcess(command)
+
+    def fake_run(command, cwd, check, env):
+        run_calls.append(command)
+
+        class Result:
+            returncode = 0
+
+        return Result()
+
+    monkeypatch.setattr(integration.subprocess, "Popen", fake_popen)
+    monkeypatch.setattr(integration.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        integration,
+        "_wait_for_local_server_ready",
+        lambda base_url, timeout_seconds: wait_calls.append(base_url),
+    )
+
+    exit_code = integration.run_local_serve_benchmark(
+        layout=layout,
+        model="foo/bar",
+        bench_parameters={"backend": "vllm", "dataset_name": "random", "input_len": 8},
+        serve_parameters={"gpu_memory_utilization": 0.6, "enforce_eager": True},
+    )
+
+    assert exit_code == 0
+    assert popen_calls == [
+        [
+            *integration.build_vllm_command(["serve", "foo/bar", "--gpu-memory-utilization", "0.6", "--enforce-eager"]),
+        ]
+    ]
+    assert run_calls == [
+        [
+            *integration.build_vllm_command(
+                [
+                    "bench",
+                    "serve",
+                    "--model",
+                    "foo/bar",
+                    "--backend",
+                    "vllm",
+                    "--dataset-name",
+                    "random",
+                    "--input-len",
+                    "8",
+                ]
+            ),
+        ]
+    ]
+    assert wait_calls == ["http://127.0.0.1:8000"]
