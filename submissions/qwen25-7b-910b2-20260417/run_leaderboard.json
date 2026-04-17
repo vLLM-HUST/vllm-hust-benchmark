@@ -1,0 +1,91 @@
+{
+  "entry_id": "fddae0b8-180c-49ce-8ce0-46c15573f9bd",
+  "engine": "vllm-hust",
+  "engine_version": "0.1.dev2743+g7f888566e",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "Ascend-910B2",
+    "chip_count": 1,
+    "interconnect": "unknown"
+  },
+  "model": {
+    "name": "Qwen2.5-7B-Instruct",
+    "parameters": "7B",
+    "precision": "BF16",
+    "quantization": null
+  },
+  "workload": {
+    "name": "sharegpt-online",
+    "input_length": 1024,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null,
+    "dataset": "sharegpt"
+  },
+  "metrics": {
+    "ttft_ms": 1916.7414716590429,
+    "throughput_tps": 154.57739501109546,
+    "peak_mem_mb": 0.0,
+    "error_rate": 0.0
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Ascend-class",
+      "representative_model_band": "7B-13B",
+      "representative_business_scenario": "online-chat",
+      "baseline_engine": "vllm",
+      "owner_confirmed": null,
+      "notes": null
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": 92.0,
+      "typical_throughput_ratio_vs_baseline": 2.2,
+      "typical_ttft_reduction_pct_vs_baseline": 23.0,
+      "typical_tpot_reduction_pct_vs_baseline": 25.0,
+      "long_context_length": 32768,
+      "long_context_throughput_stable": true,
+      "long_context_ttft_p95_ms": 80.0,
+      "long_context_ttft_p99_ms": 95.0,
+      "long_context_tpot_p95_ms": 9.0,
+      "long_context_tpot_p99_ms": 10.0,
+      "long_context_ttft_p95_stable": true,
+      "long_context_ttft_p99_stable": true,
+      "long_context_tpot_p95_stable": true,
+      "long_context_tpot_p99_stable": true,
+      "unit_token_cost_reduction_pct": 35.0,
+      "multi_tenant_high_utilization": true
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "N/A",
+    "backend": "N/A",
+    "core": "N/A",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.11.15",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null
+  },
+  "metadata": {
+    "submitted_at": "2026-04-17T08:45:13Z",
+    "submitter": "hust-team",
+    "data_source": "vllm-hust-benchmark",
+    "engine": "vllm-hust",
+    "engine_version": "0.1.dev2743+g7f888566e",
+    "reproducible_cmd": null,
+    "git_commit": null,
+    "release_date": null,
+    "changelog_url": null,
+    "notes": null,
+    "verified": null,
+    "idempotency_key": "3f572c5c439b5abe1d61351876e925cc9fca3fcf25dcebd545c320a62b28feca",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0"
+  }
+}

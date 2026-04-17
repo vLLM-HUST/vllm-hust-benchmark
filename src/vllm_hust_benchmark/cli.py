@@ -606,6 +606,7 @@ def main(argv: list[str] | None = None) -> int:
                 benchmark_result_file=benchmark_result_file,
                 constraints_file=constraints_file,
                 output_dir=output_dir,
+                artifact_name="run_leaderboard.json",
                 run_id=args.run_id,
                 engine=args.engine,
                 engine_version=args.engine_version,
