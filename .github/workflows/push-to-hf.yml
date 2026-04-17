@@ -20,8 +20,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout benchmark repo
         uses: actions/checkout@v4
+
+      - name: Checkout website repo (for aggregate script and schema)
+        uses: actions/checkout@v4
+        with:
+          repository: intellistream/vllm-hust-website
+          path: vllm-hust-website
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,7 +35,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install -e ".[publish]" jsonschema
+        run: pip install jsonschema "huggingface_hub>=0.20"
 
       - name: Validate all submission artifacts
         run: |
@@ -38,9 +44,9 @@ jobs:
           from pathlib import Path
           from jsonschema import Draft7Validator
 
-          schema_path = Path("data/schemas/leaderboard_v1.schema.json")
+          schema_path = Path("vllm-hust-website/data/schemas/leaderboard_v1.schema.json")
           if not schema_path.exists():
-              print("No local schema — skipping schema validation")
+              print("No schema found — skipping validation")
               sys.exit(0)
 
           schema = json.loads(schema_path.read_text())
@@ -68,24 +74,67 @@ jobs:
           sys.exit(1 if errors_found else 0)
           PYEOF
 
+      - name: Aggregate submissions into leaderboard JSON
+        run: |
+          python vllm-hust-website/scripts/aggregate_results.py \
+            --source-dir submissions \
+            --output-dir /tmp/leaderboard-data
+
+      - name: Show aggregated stats
+        run: |
+          echo "Single entries: $(python -c "import json; print(len(json.load(open('/tmp/leaderboard-data/leaderboard_single.json'))))")"
+          echo "Multi  entries: $(python -c "import json; print(len(json.load(open('/tmp/leaderboard-data/leaderboard_multi.json'))))")"
+
       - name: Upload to HuggingFace
         if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          python -m vllm_hust_benchmark.cli publish-hf \
-            --repo-id intellistream/vllm-hust-benchmark-results \
-            --aggregate-first \
-            --source-dir submissions \
-            --commit-message "chore: update leaderboard from ${GITHUB_REF} @ ${GITHUB_SHA:0:8}" \
-            --execute
+          python - << 'PYEOF'
+          import os, sys
+          from pathlib import Path
+          from huggingface_hub import HfApi, CommitOperationAdd
+
+          token = os.environ.get("HF_TOKEN")
+          if not token:
+              print("ERROR: HF_TOKEN secret is not set.")
+              print("Go to: GitHub repo → Settings → Secrets → Actions → New secret")
+              print("Name: HF_TOKEN, Value: your HuggingFace write token")
+              sys.exit(1)
+
+          repo_id = "intellistream/vllm-hust-benchmark-results"
+          data_dir = Path("/tmp/leaderboard-data")
+          filenames = [
+              "leaderboard_single.json",
+              "leaderboard_multi.json",
+              "leaderboard_compare.json",
+              "last_updated.json",
+          ]
+
+          api = HfApi(token=token)
+          operations = []
+          for name in filenames:
+              p = data_dir / name
+              if p.exists():
+                  size_kb = p.stat().st_size / 1024
+                  print(f"  staging {name}  ({size_kb:.1f} KB)")
+                  operations.append(CommitOperationAdd(path_in_repo=name, path_or_fileobj=p))
+
+          ref = os.environ.get("GITHUB_REF", "unknown")
+          sha = os.environ.get("GITHUB_SHA", "")[:8]
+          commit = api.create_commit(
+              repo_id=repo_id,
+              repo_type="dataset",
+              branch="main",
+              operations=operations,
+              commit_message=f"chore: update leaderboard from {ref} @ {sha}",
+          )
+          print(f"✅ Uploaded {len(operations)} file(s)")
+          print(f"   commit: {getattr(commit, 'commit_url', commit)}")
+          PYEOF
 
       - name: Dry run summary
         if: ${{ github.event.inputs.dry_run == 'true' }}
         run: |
-          python -m vllm_hust_benchmark.cli publish-hf \
-            --repo-id intellistream/vllm-hust-benchmark-results \
-            --aggregate-first \
-            --source-dir submissions \
-            --dry-run \
-            --execute
+          echo "=== DRY RUN: files that would be uploaded ==="
+          ls -lh /tmp/leaderboard-data/
