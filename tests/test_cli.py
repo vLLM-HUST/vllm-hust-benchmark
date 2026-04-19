@@ -223,7 +223,11 @@ def test_bench_without_execute_prints_wrapped_command(
 
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert "vllm bench serve --model foo/bar" in captured.out
+    assert "bench serve --model foo/bar" in captured.out
+    assert any(
+        prefix in captured.out
+        for prefix in ("vllm-hust", "vllm ", "-m vllm")
+    )
 
 
 def test_publish_website_without_execute_prints_aggregate_command(

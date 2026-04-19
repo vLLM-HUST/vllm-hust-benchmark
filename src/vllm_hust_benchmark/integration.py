@@ -20,6 +20,25 @@ FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
 DEFAULT_LOCAL_SERVER_HOST = "127.0.0.1"
 DEFAULT_LOCAL_SERVER_PORT = 8000
 DEFAULT_READY_TIMEOUT_SECONDS = 180.0
+FALLBACK_VLLM_BENCH_SERVE_FLAGS = frozenset(
+    {
+        "backend",
+        "base_url",
+        "dataset_name",
+        "dataset_path",
+        "endpoint",
+        "hf_split",
+        "host",
+        "input_len",
+        "max_concurrency",
+        "num_prompts",
+        "num_warmups",
+        "output_len",
+        "port",
+        "random_batch_size",
+        "request_rate",
+    }
+)
 
 
 def _default_workspace_root() -> Path:
@@ -84,6 +103,10 @@ def validate_repo_layout(layout: RepoLayout) -> None:
 
 
 def build_vllm_command(command_args: list[str]) -> list[str]:
+    vllm_hust_executable = shutil.which("vllm-hust")
+    if vllm_hust_executable:
+        return [vllm_hust_executable, *command_args]
+
     vllm_executable = shutil.which("vllm")
     if vllm_executable:
         return [vllm_executable, *command_args]
@@ -105,6 +128,8 @@ def discover_vllm_flags(*command_parts: str) -> frozenset[str]:
         for match in FLAG_PATTERN.finditer(help_text)
     }
     if not flags:
+        if command_parts == ("bench", "serve"):
+            return FALLBACK_VLLM_BENCH_SERVE_FLAGS
         raise RuntimeError(
             f"Unable to discover flags for {' '.join(command_parts)}. "
             f"Command exited with code {completed.returncode}."

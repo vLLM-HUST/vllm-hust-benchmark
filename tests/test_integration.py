@@ -67,7 +67,29 @@ def test_build_benchmark_script_command(tmp_path: Path) -> None:
 
 
 def test_build_vllm_bench_command_prefers_console_script(monkeypatch) -> None:
-    monkeypatch.setattr(integration.shutil, "which", lambda name: "/tmp/bin/vllm")
+    monkeypatch.setattr(
+        integration.shutil,
+        "which",
+        lambda name: "/tmp/bin/vllm-hust" if name == "vllm-hust" else None,
+    )
+
+    command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
+
+    assert command == [
+        "/tmp/bin/vllm-hust",
+        "bench",
+        "serve",
+        "--model",
+        "foo/bar",
+    ]
+
+
+def test_build_vllm_bench_command_falls_back_to_vllm_console_script(monkeypatch) -> None:
+    monkeypatch.setattr(
+        integration.shutil,
+        "which",
+        lambda name: "/tmp/bin/vllm" if name == "vllm" else None,
+    )
 
     command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
 
@@ -81,6 +103,26 @@ def test_build_vllm_bench_command_falls_back_to_python_module(monkeypatch) -> No
 
     assert command[:4] == [integration.sys.executable, "-m", "vllm", "bench"]
     assert command[-3:] == ["serve", "--model", "foo/bar"]
+
+
+def test_discover_vllm_flags_falls_back_for_bench_serve(monkeypatch) -> None:
+    def fake_run(*args, **kwargs):
+        class Result:
+            returncode = 1
+            stdout = ""
+            stderr = "No module named vllm"
+
+        return Result()
+
+    monkeypatch.setattr(integration.subprocess, "run", fake_run)
+    integration.discover_vllm_flags.cache_clear()
+
+    flags = integration.discover_vllm_flags("bench", "serve")
+
+    assert "dataset_name" in flags
+    assert "endpoint" in flags
+    assert "num_prompts" in flags
+    integration.discover_vllm_flags.cache_clear()
 
 
 def test_build_performance_suite_command(tmp_path: Path) -> None:
