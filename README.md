@@ -87,7 +87,7 @@ python -m vllm_hust_benchmark.cli export-leaderboard-artifact \
 	--engine vllm-hust \
 	--engine-version 0.7.3 \
 	--model-name meta-llama/Llama-3.1-8B-Instruct \
-	--hardware-chip-model Ascend-910B \
+	--hardware-chip-model <hardware-chip-model> \
 	--submitter ci
 
 # export directly from a raw vllm bench result json plus constraints metrics
@@ -101,7 +101,7 @@ python -m vllm_hust_benchmark.cli export-leaderboard-artifact \
 	--engine vllm-hust \
 	--engine-version 0.7.3 \
 	--model-name meta-llama/Llama-3.1-8B-Instruct \
-	--hardware-chip-model Ascend-910B \
+	--hardware-chip-model <hardware-chip-model> \
 	--submitter ci \
 	--publish-website \
 	--execute
@@ -135,6 +135,10 @@ The intended production chain is:
 
 - `run_leaderboard.json` (configurable): one schema-compatible leaderboard entry.
 - `leaderboard_manifest.json`: manifest that points to artifact files and idempotency keys.
+
+When `export-leaderboard-artifact` or `submit` runs inside GitHub Actions, the exporter now also captures GitHub provenance into `metadata`, including the triggering user, commit SHA, commit URL, repository, ref, and optional PR metadata. You can override any of those fields explicitly with `--git-commit`, `--github-user`, `--github-commit-url`, `--github-repository`, `--github-ref`, `--github-event-name`, `--github-pr-number`, and `--github-pr-url`.
+
+For cross-repository CI, `sync-submission-to-hf` is the preferred publish entrypoint after a run has already been exported into one submission directory. It downloads historical raw submissions from a Hugging Face dataset prefix, merges in the new submission, regenerates `leaderboard_single.json`, `leaderboard_multi.json`, `leaderboard_compare.json`, and `last_updated.json`, and uploads both the refreshed snapshots and the new raw submission in one commit.
 
 This is the exact input pattern consumed by website aggregation.
 
