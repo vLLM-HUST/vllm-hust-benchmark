@@ -790,7 +790,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"manifest : {manifest_path}")
         print(f"")
         print(f"Next steps:")
-        print(f"  git add {output_dir.relative_to(layout.benchmark_repo)}/")
+        try:
+            output_dir_hint = output_dir.relative_to(layout.benchmark_repo)
+        except ValueError:
+            output_dir_hint = Path(os.path.relpath(output_dir, layout.benchmark_repo))
+        print(f"  git add {output_dir_hint}/")
         print(f"  git commit -m \"feat: add benchmark result {args.run_id}\"")
         print(f"  git push")
         print(f"  → GitHub Actions will aggregate and upload to HuggingFace automatically.")
