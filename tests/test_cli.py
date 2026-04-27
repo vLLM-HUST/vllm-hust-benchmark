@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+import vllm_hust_benchmark.cli as cli_module
 from vllm_hust_benchmark.cli import _parse_set_arguments
 from vllm_hust_benchmark.cli import main
 from vllm_hust_benchmark.integration import RepoLayout
@@ -250,6 +251,52 @@ def test_publish_website_without_execute_prints_aggregate_command(
     assert exit_code == 0
     assert "aggregate_results.py" in captured.out
     assert f"--source-dir {source_dir}" in captured.out
+
+
+def test_sync_submission_to_hf_accepts_multiple_submission_dirs(
+    monkeypatch, tmp_path: Path
+) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+    monkeypatch.setattr(cli_module, "resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr(cli_module, "validate_repo_layout", lambda _layout: None)
+
+    captured: dict[str, object] = {}
+
+    def fake_sync_submission_to_huggingface(**kwargs):
+        captured.update(kwargs)
+        return 0
+
+    monkeypatch.setattr(
+        cli_module,
+        "sync_submission_to_huggingface",
+        fake_sync_submission_to_huggingface,
+    )
+
+    first = tmp_path / "submission-a"
+    second = tmp_path / "submission-b"
+
+    exit_code = main(
+        [
+            "sync-submission-to-hf",
+            "--submission-dir",
+            str(first),
+            "--submission-dir",
+            str(second),
+            "--aggregate-output-dir",
+            str(tmp_path / "aggregated"),
+            "--repo-id",
+            "owner/repo",
+            "--execute",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["submission_dirs"] == [first.resolve(), second.resolve()]
 
 
 def test_export_leaderboard_artifact(tmp_path) -> None:

@@ -9,6 +9,7 @@ import sys
 import tempfile
 import time
 import urllib.error
+from collections.abc import Sequence
 import urllib.request
 from dataclasses import dataclass
 from functools import lru_cache
@@ -346,7 +347,7 @@ def _resolve_hf_token(token: str | None) -> str | None:
 def sync_submission_to_huggingface(
     *,
     layout: RepoLayout,
-    submission_dir: Path,
+    submission_dirs: Path | Sequence[Path],
     aggregate_output_dir: Path,
     repo_id: str,
     token: str | None = None,
@@ -366,9 +367,19 @@ def sync_submission_to_huggingface(
         )
         return 2
 
-    if not submission_dir.is_dir():
-        print(f"submission directory not found: {submission_dir}", file=sys.stderr)
+    if isinstance(submission_dirs, Path):
+        normalized_submission_dirs = [submission_dirs]
+    else:
+        normalized_submission_dirs = list(submission_dirs)
+
+    if not normalized_submission_dirs:
+        print("at least one submission directory is required", file=sys.stderr)
         return 2
+
+    for submission_dir in normalized_submission_dirs:
+        if not submission_dir.is_dir():
+            print(f"submission directory not found: {submission_dir}", file=sys.stderr)
+            return 2
 
     resolved_token = _resolve_hf_token(token)
     api = HfApi(token=resolved_token)
@@ -404,8 +415,11 @@ def sync_submission_to_huggingface(
             )
             shutil.copy2(downloaded_path, local_path)
 
-        current_submission_target = merged_source_dir / submission_dir.name
-        shutil.copytree(submission_dir, current_submission_target, dirs_exist_ok=True)
+        current_submission_targets: list[tuple[Path, Path]] = []
+        for submission_dir in normalized_submission_dirs:
+            current_submission_target = merged_source_dir / submission_dir.name
+            shutil.copytree(submission_dir, current_submission_target, dirs_exist_ok=True)
+            current_submission_targets.append((submission_dir, current_submission_target))
 
         aggregate_rc = aggregate_to_website(
             layout=layout,
@@ -435,19 +449,20 @@ def sync_submission_to_huggingface(
             )
             planned_paths.append(file_name)
 
-        for local_file in sorted(current_submission_target.rglob("*")):
-            if not local_file.is_file():
-                continue
-            relative_path = local_file.relative_to(current_submission_target).as_posix()
-            repo_path = "/".join(
-                part
-                for part in [normalized_prefix, submission_dir.name, relative_path]
-                if part
-            )
-            operations.append(
-                CommitOperationAdd(path_in_repo=repo_path, path_or_fileobj=local_file)
-            )
-            planned_paths.append(repo_path)
+        for submission_dir, current_submission_target in current_submission_targets:
+            for local_file in sorted(current_submission_target.rglob("*")):
+                if not local_file.is_file():
+                    continue
+                relative_path = local_file.relative_to(current_submission_target).as_posix()
+                repo_path = "/".join(
+                    part
+                    for part in [normalized_prefix, submission_dir.name, relative_path]
+                    if part
+                )
+                operations.append(
+                    CommitOperationAdd(path_in_repo=repo_path, path_or_fileobj=local_file)
+                )
+                planned_paths.append(repo_path)
 
         if dry_run:
             print(f"[dry-run] Would upload {len(planned_paths)} file(s) to {repo_id}@{branch}:")

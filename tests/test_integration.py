@@ -402,7 +402,7 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
     aggregate_output_dir = tmp_path / "aggregated"
     exit_code = sync_submission_to_huggingface(
         layout=layout,
-        submission_dir=submission_dir,
+        submission_dirs=submission_dir,
         aggregate_output_dir=aggregate_output_dir,
         repo_id="owner/repo",
         submissions_prefix="submissions-auto",
@@ -413,6 +413,130 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
     assert merged_markers == {"existing": True, "current": True}
     assert "leaderboard_single.json" in uploaded_paths
     assert "submissions-auto/submission-a/run_leaderboard.json" in uploaded_paths
+
+
+def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
+    monkeypatch, tmp_path: Path
+) -> None:
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+    submission_a = tmp_path / "submission-a"
+    submission_a.mkdir()
+    (submission_a / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
+    (submission_a / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+
+    submission_b = tmp_path / "submission-b"
+    submission_b.mkdir()
+    (submission_b / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
+    (submission_b / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+
+    downloaded_submission = tmp_path / "downloaded-existing.json"
+    downloaded_submission.write_text("{}\n", encoding="utf-8")
+
+    merged_markers: dict[str, bool] = {}
+    uploaded_paths: list[str] = []
+
+    def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
+        merged_markers["existing"] = source_dir.joinpath(
+            "existing-run", "run_leaderboard.json"
+        ).exists()
+        merged_markers["submission_a"] = source_dir.joinpath(
+            "submission-a", "run_leaderboard.json"
+        ).exists()
+        merged_markers["submission_b"] = source_dir.joinpath(
+            "submission-b", "run_leaderboard.json"
+        ).exists()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for file_name in (
+            "leaderboard_single.json",
+            "leaderboard_multi.json",
+            "leaderboard_compare.json",
+            "last_updated.json",
+        ):
+            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        return 0
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            uploaded_paths.append(path_in_repo)
+            self.path_in_repo = path_in_repo
+            self.path_or_fileobj = path_or_fileobj
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            return ["submissions-auto/existing-run/run_leaderboard.json"]
+
+        def repo_info(self, repo_id, repo_type):
+            return {"repo_id": repo_id, "repo_type": repo_type}
+
+        def create_repo(self, repo_id, repo_type, private, exist_ok):
+            return None
+
+        def create_commit(
+            self,
+            repo_id,
+            repo_type,
+            operations,
+            commit_message,
+            revision=None,
+        ):
+            return {
+                "repo_id": repo_id,
+                "repo_type": repo_type,
+                "branch": revision,
+                "commit_message": commit_message,
+                "count": len(operations),
+            }
+
+    def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
+        return str(downloaded_submission)
+
+    monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        HfApi=FakeHfApi,
+        hf_hub_download=fake_hf_hub_download,
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    aggregate_output_dir = tmp_path / "aggregated"
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=[submission_a, submission_b],
+        aggregate_output_dir=aggregate_output_dir,
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+    )
+
+    assert exit_code == 0
+    assert merged_markers == {
+        "existing": True,
+        "submission_a": True,
+        "submission_b": True,
+    }
+    assert "submissions-auto/submission-a/run_leaderboard.json" in uploaded_paths
+    assert "submissions-auto/submission-b/run_leaderboard.json" in uploaded_paths
 
 
 def test_sync_submission_to_huggingface_requires_submission_dir(
@@ -427,7 +551,7 @@ def test_sync_submission_to_huggingface_requires_submission_dir(
 
     exit_code = sync_submission_to_huggingface(
         layout=layout,
-        submission_dir=tmp_path / "missing",
+        submission_dirs=tmp_path / "missing",
         aggregate_output_dir=tmp_path / "aggregated",
         repo_id="owner/repo",
     )
