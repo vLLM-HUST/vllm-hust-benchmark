@@ -452,6 +452,78 @@ def test_export_leaderboard_artifact_from_raw_benchmark_result(tmp_path) -> None
     assert artifact["metadata"]["github_user"] == "benchmark-bot"
 
 
+def test_export_leaderboard_artifact_rejects_zero_long_context_length(
+    tmp_path: Path, capsys
+) -> None:
+    benchmark_result = tmp_path / "serve_result.json"
+    benchmark_result.write_text(
+        """
+{
+    "completed": 2,
+    "failed": 0,
+    "output_throughput": 10.0,
+    "mean_ttft_ms": 42.0
+}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    constraints_file = tmp_path / "constraints.json"
+    constraints_file.write_text(
+        """
+{
+    "single_chip_effective_utilization_pct": null,
+    "typical_throughput_ratio_vs_baseline": null,
+    "typical_ttft_reduction_pct_vs_baseline": null,
+    "typical_tpot_reduction_pct_vs_baseline": null,
+    "long_context_length": 0,
+    "long_context_throughput_stable": null,
+    "long_context_ttft_p95_ms": null,
+    "long_context_ttft_p99_ms": null,
+    "long_context_tpot_p95_ms": null,
+    "long_context_tpot_p99_ms": null,
+    "long_context_ttft_p95_stable": null,
+    "long_context_ttft_p99_stable": null,
+    "long_context_tpot_p95_stable": null,
+    "long_context_tpot_p99_stable": null,
+    "unit_token_cost_reduction_pct": null,
+    "multi_tenant_high_utilization": null
+}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    exit_code = main(
+        [
+            "export-leaderboard-artifact",
+            "random-online",
+            "--benchmark-result-file",
+            str(benchmark_result),
+            "--constraints-file",
+            str(constraints_file),
+            "--output-dir",
+            str(tmp_path / "export_invalid"),
+            "--run-id",
+            "bad-run-1",
+            "--engine",
+            "vllm-ascend-hust",
+            "--engine-version",
+            "28568c22",
+            "--model-name",
+            "Qwen/Qwen2.5-0.5B-Instruct",
+            "--hardware-chip-model",
+            "910B3",
+            "--submitter",
+            "ci",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert "constraints_metrics.long_context_length must be null or >= 1" in captured.err
+
+
 
 def test_build_vllm_bench_command_prefers_console_script():
     with patch("vllm_hust_benchmark.integration.shutil.which", return_value="/fake/bin/vllm"):

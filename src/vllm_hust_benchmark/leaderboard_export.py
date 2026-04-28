@@ -38,6 +38,28 @@ REQUIRED_CONSTRAINT_METRIC_KEYS = (
 )
 
 
+def _validate_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[str, Any]:
+    long_context_length = constraints_metrics.get("long_context_length")
+    if long_context_length is None:
+        return constraints_metrics
+
+    try:
+        normalized_length = int(long_context_length)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            "constraints_metrics.long_context_length must be null or an integer >= 1"
+        ) from exc
+
+    if normalized_length < 1:
+        raise ValueError(
+            "constraints_metrics.long_context_length must be null or >= 1 "
+            "for website leaderboard compatibility"
+        )
+
+    constraints_metrics["long_context_length"] = normalized_length
+    return constraints_metrics
+
+
 def _load_metrics_payload(metrics_file: Path) -> dict[str, Any]:
     payload = json.loads(metrics_file.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -63,6 +85,8 @@ def _load_metrics_payload(metrics_file: Path) -> dict[str, Any]:
             + ", ".join(missing_constraints)
         )
 
+    _validate_constraints_metrics(constraints_metrics)
+
     return payload
 
 
@@ -79,7 +103,7 @@ def _load_constraints_metrics(constraints_file: Path) -> dict[str, Any]:
         raise ValueError(
             "constraints_metrics missing required keys: " + ", ".join(missing_constraints)
         )
-    return dict(constraints_metrics)
+    return _validate_constraints_metrics(dict(constraints_metrics))
 
 
 def _safe_float(value: Any) -> float | None:
