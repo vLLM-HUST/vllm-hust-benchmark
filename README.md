@@ -77,6 +77,9 @@ python -m vllm_hust_benchmark.cli run sharegpt-online --model meta-llama/Llama-3
 # execute the same scenario against the pinned baseline reference-repos/vllm checkout
 python -m vllm_hust_benchmark.cli run sharegpt-online --runtime vllm --model meta-llama/Llama-3.1-8B-Instruct --execute
 
+# execute both runtimes sequentially from one entrypoint
+python -m vllm_hust_benchmark.cli run-both sharegpt-online --model meta-llama/Llama-3.1-8B-Instruct --execute
+
 # run a raw vllm bench command from the sibling vllm-hust repo
 python -m vllm_hust_benchmark.cli bench -- serve --model meta-llama/Llama-3.1-8B-Instruct --dataset-name sharegpt
 

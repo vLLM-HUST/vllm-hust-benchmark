@@ -259,6 +259,15 @@ def _build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--execute", action="store_true")
     add_runtime_argument(run_parser)
 
+    run_both_parser = subparsers.add_parser(
+        "run-both",
+        help="Run or print the same scenario sequentially for vllm-hust and baseline vllm.",
+    )
+    run_both_parser.add_argument("scenario")
+    run_both_parser.add_argument("--model", required=True)
+    run_both_parser.add_argument("--set", action="append", default=[])
+    run_both_parser.add_argument("--execute", action="store_true")
+
     bench_parser = subparsers.add_parser(
         "bench",
         help="Run or print a vllm-hust 'vllm bench ...' command from the sibling vllm-hust repo.",
@@ -601,6 +610,29 @@ def main(argv: list[str] | None = None) -> int:
             execute=args.execute,
             env=env,
         )
+
+    if args.command == "run-both":
+        runtimes = ("vllm-hust", "vllm")
+        for index, runtime in enumerate(runtimes):
+            if index:
+                print("")
+            print(f"runtime: {runtime}")
+            runtime_argv = [
+                "run",
+                args.scenario,
+                "--runtime",
+                runtime,
+                "--model",
+                args.model,
+            ]
+            for override in args.set:
+                runtime_argv.extend(["--set", override])
+            if args.execute:
+                runtime_argv.append("--execute")
+            exit_code = main(runtime_argv)
+            if exit_code != 0:
+                return exit_code
+        return 0
 
     if args.command == "list-scenarios":
         scenarios = filter_scenarios(

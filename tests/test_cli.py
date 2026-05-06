@@ -43,6 +43,73 @@ def test_run_without_execute_only_prints(capsys) -> None:
     assert "--input-len 2048" in captured.out
 
 
+def test_run_both_without_execute_prints_both_runtimes(capsys) -> None:
+    exit_code = main(
+        [
+            "run-both",
+            "random-latency",
+            "--model",
+            "meta-llama/Llama-3.1-8B-Instruct",
+            "--set",
+            "input_len=2048",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "runtime: vllm-hust" in captured.out
+    assert "runtime: vllm" in captured.out
+    assert captured.out.count("vllm bench latency") == 2
+
+
+def test_run_both_execute_runs_runtimes_in_order(monkeypatch, tmp_path: Path) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+        reference_vllm_repo=tmp_path / "reference-repos" / "vllm",
+    )
+    monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_runtime_repo",
+        lambda _layout, runtime, require_benchmarks=False: (
+            layout.reference_vllm_repo if runtime == "vllm" else layout.vllm_hust_repo
+        ),
+    )
+
+    calls: list[tuple[list[str], Path, bool]] = []
+
+    def fake_run_external_command(command, *, cwd, execute, env=None):
+        calls.append((command, cwd, execute))
+        return 0
+
+    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.build_vllm_bench_command",
+        lambda bench_args, runtime_engine=DEFAULT_RUNTIME_ENGINE: [runtime_engine, *bench_args],
+    )
+
+    exit_code = main(
+        [
+            "run-both",
+            "random-latency",
+            "--model",
+            "foo/bar",
+            "--execute",
+        ]
+    )
+
+    assert exit_code == 0
+    assert [cwd for _, cwd, _ in calls] == [
+        layout.vllm_hust_repo,
+        layout.reference_vllm_repo,
+    ]
+    assert [command[0] for command, _, _ in calls] == ["vllm-hust", "vllm"]
+    assert all(execute is True for _, _, execute in calls)
+    assert all("--model" in command and "foo/bar" in command for command, _, _ in calls)
+
+
 def test_parse_set_arguments_normalizes_hyphenated_keys() -> None:
     parsed = _parse_set_arguments([
         "input-len=8",
