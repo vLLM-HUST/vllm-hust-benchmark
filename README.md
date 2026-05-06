@@ -4,6 +4,11 @@ Wrapper benchmark repository for vllm-hust.
 
 The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while the real benchmark implementations stay in `vllm-hust`. This repo resolves the sibling `vllm-hust` and `vllm-hust-website` repositories, invokes the benchmark entrypoints from there, and keeps result export and website publication flows in one place.
 
+For runtime comparisons, the wrapper now understands two execution targets:
+
+- `vllm-hust` (default): the sibling workspace checkout at `../vllm-hust`
+- `vllm`: the baseline checkout at `../reference-repos/vllm` (override with `VLLM_BASELINE_VLLM_REPO`)
+
 Use the already configured conda environment for this workspace. Do not rely on the system Python installation for benchmark execution or validation.
 
 ## What This Repo Wraps
@@ -69,8 +74,14 @@ python -m vllm_hust_benchmark.cli build-command sharegpt-online --model meta-lla
 # execute the constructed command through the sibling vllm-hust repo
 python -m vllm_hust_benchmark.cli run sharegpt-online --model meta-llama/Llama-3.1-8B-Instruct --execute
 
+# execute the same scenario against the pinned baseline reference-repos/vllm checkout
+python -m vllm_hust_benchmark.cli run sharegpt-online --runtime vllm --model meta-llama/Llama-3.1-8B-Instruct --execute
+
 # run a raw vllm bench command from the sibling vllm-hust repo
 python -m vllm_hust_benchmark.cli bench -- serve --model meta-llama/Llama-3.1-8B-Instruct --dataset-name sharegpt
+
+# run a raw vllm bench command from the baseline reference-repos/vllm checkout
+python -m vllm_hust_benchmark.cli bench --runtime vllm -- serve --model meta-llama/Llama-3.1-8B-Instruct --dataset-name sharegpt
 
 # run a specific script from vllm-hust/benchmarks
 python -m vllm_hust_benchmark.cli run-script benchmark_serving.py -- --help

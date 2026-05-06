@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from vllm_hust_benchmark.integration import (
+    DEFAULT_RUNTIME_ENGINE,
     aggregate_to_website,
     upload_to_huggingface,
     sync_submission_to_huggingface,
@@ -18,10 +19,12 @@ from vllm_hust_benchmark.integration import (
     build_vllm_bench_command,
     build_vllm_serve_command,
     resolve_repo_layout,
+    resolve_runtime_repo,
     run_external_command,
     run_local_serve_benchmark,
     split_vllm_serve_scenario_parameters,
     validate_repo_layout,
+    validate_runtime_repo,
 )
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
 from vllm_hust_benchmark.models import render_parameter_flags
@@ -194,6 +197,14 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     repos_parser.add_argument("--validate", action="store_true")
 
+    def add_runtime_argument(command_parser: argparse.ArgumentParser) -> None:
+        command_parser.add_argument(
+            "--runtime",
+            choices=["vllm-hust", "vllm"],
+            default=DEFAULT_RUNTIME_ENGINE,
+            help="Select which runtime repo to execute: sibling vllm-hust or baseline reference-repos/vllm.",
+        )
+
     tests_parser = subparsers.add_parser(
         "list-tests",
         help="List official upstream benchmark tests from the sibling vllm-hust repo.",
@@ -239,12 +250,14 @@ def _build_parser() -> argparse.ArgumentParser:
     build_parser.add_argument("scenario")
     build_parser.add_argument("--model", required=True)
     build_parser.add_argument("--set", action="append", default=[])
+    add_runtime_argument(build_parser)
 
     run_parser = subparsers.add_parser("run", help="Run or print the upstream-equivalent vllm bench command for a scenario.")
     run_parser.add_argument("scenario")
     run_parser.add_argument("--model", required=True)
     run_parser.add_argument("--set", action="append", default=[])
     run_parser.add_argument("--execute", action="store_true")
+    add_runtime_argument(run_parser)
 
     bench_parser = subparsers.add_parser(
         "bench",
@@ -252,6 +265,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     bench_parser.add_argument("bench_args", nargs=argparse.REMAINDER)
     bench_parser.add_argument("--execute", action="store_true")
+    add_runtime_argument(bench_parser)
 
     script_parser = subparsers.add_parser(
         "run-script",
@@ -260,6 +274,7 @@ def _build_parser() -> argparse.ArgumentParser:
     script_parser.add_argument("script_name")
     script_parser.add_argument("script_args", nargs=argparse.REMAINDER)
     script_parser.add_argument("--execute", action="store_true")
+    add_runtime_argument(script_parser)
 
     analyze_parser = subparsers.add_parser("analyze-upstream", help="Print the upstream benchmark boundary and mirrored design points.")
     analyze_parser.add_argument("--format", choices=["text"], default="text")
@@ -521,6 +536,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"workspace_root: {layout.workspace_root}")
         print(f"benchmark_repo: {layout.benchmark_repo}")
         print(f"vllm_hust_repo: {layout.vllm_hust_repo}")
+        print(f"reference_vllm_repo: {resolve_runtime_repo(layout, 'vllm')}")
         print(f"website_repo: {layout.website_repo}")
         return 0
 
@@ -860,28 +876,33 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "bench":
         layout = resolve_repo_layout()
         try:
-            validate_repo_layout(layout)
+            runtime_repo = validate_runtime_repo(layout, args.runtime)
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
         bench_args = list(args.bench_args)
         if bench_args and bench_args[0] == "--":
             bench_args = bench_args[1:]
-        command = build_vllm_bench_command(bench_args)
-        return run_external_command(command, cwd=layout.vllm_hust_repo, execute=args.execute)
+        command = build_vllm_bench_command(bench_args, runtime_engine=args.runtime)
+        return run_external_command(command, cwd=runtime_repo, execute=args.execute)
 
     if args.command == "run-script":
         layout = resolve_repo_layout()
         try:
-            validate_repo_layout(layout)
+            runtime_repo = validate_runtime_repo(layout, args.runtime, require_benchmarks=True)
             script_args = list(args.script_args)
             if script_args and script_args[0] == "--":
                 script_args = script_args[1:]
-            command = build_benchmark_script_command(layout, args.script_name, script_args)
+            command = build_benchmark_script_command(
+                layout,
+                args.script_name,
+                script_args,
+                runtime_engine=args.runtime,
+            )
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
-        return run_external_command(command, cwd=layout.vllm_hust_repo, execute=args.execute)
+        return run_external_command(command, cwd=runtime_repo, execute=args.execute)
 
     try:
         overrides = _parse_set_arguments(args.set)
@@ -893,8 +914,18 @@ def main(argv: list[str] | None = None) -> int:
     merged_parameters = scenario.merge_parameters(overrides)
 
     if scenario.benchmark_type == "serve":
+        runtime_repo = None
+        if args.runtime != DEFAULT_RUNTIME_ENGINE:
+            layout = resolve_repo_layout()
+            try:
+                runtime_repo = str(validate_runtime_repo(layout, args.runtime))
+            except ValueError as error:
+                print(str(error), file=sys.stderr)
+                return 2
         bench_parameters, serve_parameters = split_vllm_serve_scenario_parameters(
-            merged_parameters
+            merged_parameters,
+            runtime_engine=args.runtime,
+            runtime_repo=runtime_repo,
         )
         command = [
             "vllm",
@@ -907,9 +938,14 @@ def main(argv: list[str] | None = None) -> int:
 
         if serve_parameters:
             server_command = build_vllm_serve_command(
-                args.model, render_parameter_flags(serve_parameters)
+                args.model,
+                render_parameter_flags(serve_parameters),
+                runtime_engine=args.runtime,
             )
-            client_command = build_vllm_bench_command(command[2:])
+            client_command = build_vllm_bench_command(
+                command[2:],
+                runtime_engine=args.runtime,
+            )
             if args.command == "build-command" or not args.execute:
                 print(f"server_command: {shlex.join(server_command)}")
                 print(f"client_command: {shlex.join(client_command)}")
@@ -917,7 +953,7 @@ def main(argv: list[str] | None = None) -> int:
 
             layout = resolve_repo_layout()
             try:
-                validate_repo_layout(layout)
+                validate_runtime_repo(layout, args.runtime)
             except ValueError as error:
                 print(str(error), file=sys.stderr)
                 return 2
@@ -926,6 +962,7 @@ def main(argv: list[str] | None = None) -> int:
                 model=args.model,
                 bench_parameters=bench_parameters,
                 serve_parameters=serve_parameters,
+                runtime_engine=args.runtime,
             )
     else:
         command = scenario.render_command(model=args.model, overrides=overrides)
@@ -940,13 +977,13 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         layout = resolve_repo_layout()
         try:
-            validate_repo_layout(layout)
+            runtime_repo = validate_runtime_repo(layout, args.runtime)
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
         return run_external_command(
-            build_vllm_bench_command(command[2:]),
-            cwd=layout.vllm_hust_repo,
+            build_vllm_bench_command(command[2:], runtime_engine=args.runtime),
+            cwd=runtime_repo,
             execute=True,
         )
 
