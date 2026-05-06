@@ -112,17 +112,20 @@ def build_vllm_command(command_args: list[str]) -> list[str]:
     vllm_executable = shutil.which("vllm")
     if vllm_executable:
         return [vllm_executable, *command_args]
-    return [sys.executable, "-m", "vllm", *command_args]
+    return [sys.executable, "-m", "vllm.entrypoints.cli.main", *command_args]
 
 
 @lru_cache(maxsize=8)
 def discover_vllm_flags(*command_parts: str) -> frozenset[str]:
     help_command = build_vllm_command([*command_parts, "--help=all"])
+    layout = resolve_repo_layout()
     completed = subprocess.run(
         help_command,
         check=False,
         capture_output=True,
         text=True,
+        cwd=layout.vllm_hust_repo,
+        env=_build_effective_env(layout.vllm_hust_repo, None),
     )
     help_text = f"{completed.stdout}\n{completed.stderr}"
     flags = {
@@ -194,6 +197,23 @@ def _format_env_prefix(env: Mapping[str, object] | None) -> str:
     return " ".join(f"{key}={shlex.quote(str(value))}" for key, value in env.items()) + " "
 
 
+def _build_effective_env(
+    cwd: Path,
+    env: Mapping[str, object] | None,
+) -> dict[str, str]:
+    effective_env = {key: str(value) for key, value in os.environ.items()}
+    if env:
+        effective_env.update({key: str(value) for key, value in env.items()})
+
+    cwd_str = str(cwd)
+    existing_pythonpath = effective_env.get("PYTHONPATH", "")
+    pythonpath_entries = [entry for entry in existing_pythonpath.split(os.pathsep) if entry]
+    if cwd_str not in pythonpath_entries:
+        pythonpath_entries.insert(0, cwd_str)
+    effective_env["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
+    return effective_env
+
+
 def run_external_command(
     command: list[str],
     *,
@@ -204,9 +224,7 @@ def run_external_command(
     if not execute:
         print(f"{_format_env_prefix(env)}{shlex.join(command)}")
         return 0
-    effective_env = os.environ.copy()
-    if env:
-        effective_env.update(env)
+    effective_env = _build_effective_env(cwd, env)
     completed = subprocess.run(command, cwd=cwd, check=False, env=effective_env)
     return completed.returncode
 
@@ -255,9 +273,7 @@ def run_local_serve_benchmark(
         ["serve", "--model", model, *render_parameter_flags(dict(bench_parameters))]
     )
 
-    effective_env = os.environ.copy()
-    if env:
-        effective_env.update(env)
+    effective_env = _build_effective_env(layout.vllm_hust_repo, env)
 
     server_process = subprocess.Popen(
         serve_command,

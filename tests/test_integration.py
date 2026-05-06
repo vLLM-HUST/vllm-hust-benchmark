@@ -7,6 +7,7 @@ import pytest
 from vllm_hust_benchmark import integration
 from vllm_hust_benchmark.integration import (
     RepoLayout,
+    _build_effective_env,
     aggregate_to_website,
     build_benchmark_script_command,
     build_performance_suite_command,
@@ -104,8 +105,19 @@ def test_build_vllm_bench_command_falls_back_to_python_module(monkeypatch) -> No
 
     command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
 
-    assert command[:4] == [integration.sys.executable, "-m", "vllm", "bench"]
+    assert command[:4] == [integration.sys.executable, "-m", "vllm.entrypoints.cli.main", "bench"]
     assert command[-3:] == ["serve", "--model", "foo/bar"]
+
+
+def test_build_effective_env_stringifies_values_and_prepends_cwd(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("PYTHONPATH", "/existing/path")
+
+    effective_env = _build_effective_env(tmp_path, {"DRY_RUN": 1, "FLAG": True})
+
+    assert effective_env["DRY_RUN"] == "1"
+    assert effective_env["FLAG"] == "True"
+    assert effective_env["PYTHONPATH"].split(":")[0] == str(tmp_path)
+    assert "/existing/path" in effective_env["PYTHONPATH"].split(":")
 
 
 def test_discover_vllm_flags_falls_back_for_bench_serve(monkeypatch) -> None:
