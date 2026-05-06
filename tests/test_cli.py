@@ -228,7 +228,7 @@ def test_bench_without_execute_prints_wrapped_command(
     assert "bench serve --model foo/bar" in captured.out
     assert any(
         prefix in captured.out
-        for prefix in ("vllm-hust", "vllm ", "-m vllm")
+        for prefix in ("vllm-hust", "vllm ", "-m vllm.entrypoints.cli.main")
     )
 
 
@@ -538,7 +538,15 @@ def test_build_vllm_bench_command_falls_back_to_python_module():
     ):
         command = build_vllm_bench_command(["latency", "--model", "tiny-model"])
 
-    assert command == ["/usr/bin/python3", "-m", "vllm", "bench", "latency", "--model", "tiny-model"]
+    assert command == [
+        "/usr/bin/python3",
+        "-m",
+        "vllm.entrypoints.cli.main",
+        "bench",
+        "latency",
+        "--model",
+        "tiny-model",
+    ]
 
 
 def test_build_command_prints_server_and_client_commands_for_local_serve(
