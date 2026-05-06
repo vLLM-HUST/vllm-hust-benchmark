@@ -28,6 +28,9 @@ def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> 
     expected_workspace_root = Path(integration.__file__).resolve().parents[3]
     assert layout.workspace_root == expected_workspace_root
     assert layout.vllm_hust_repo == (expected_workspace_root / "vllm-hust").resolve()
+    assert layout.reference_vllm_repo == (
+        expected_workspace_root / "reference-repos" / "vllm"
+    ).resolve()
 
 
 def test_resolve_repo_layout_from_workspace_env(monkeypatch, tmp_path: Path) -> None:
@@ -36,6 +39,7 @@ def test_resolve_repo_layout_from_workspace_env(monkeypatch, tmp_path: Path) -> 
     layout = resolve_repo_layout()
 
     assert layout.vllm_hust_repo == (tmp_path / "vllm-hust").resolve()
+    assert layout.reference_vllm_repo == (tmp_path / "reference-repos" / "vllm").resolve()
     assert layout.website_repo == (tmp_path / "vllm-hust-website").resolve()
 
 
@@ -56,6 +60,7 @@ def test_build_benchmark_script_command(tmp_path: Path) -> None:
     script = repo / "benchmarks" / "benchmark_serving.py"
     script.parent.mkdir(parents=True)
     script.write_text("print('ok')\n", encoding="utf-8")
+    (repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -227,10 +232,14 @@ def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None
 
 
 def test_run_local_serve_benchmark_starts_server_then_client(monkeypatch, tmp_path: Path) -> None:
+    repo = tmp_path / "vllm-hust"
+    repo.mkdir()
+    (repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+
     layout = RepoLayout(
         workspace_root=tmp_path,
         benchmark_repo=tmp_path / "vllm-hust-benchmark",
-        vllm_hust_repo=tmp_path / "vllm-hust",
+        vllm_hust_repo=repo,
         website_repo=tmp_path / "vllm-hust-website",
     )
 

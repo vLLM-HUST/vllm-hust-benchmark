@@ -19,6 +19,7 @@ from typing import Any, Mapping
 from vllm_hust_benchmark.models import render_parameter_flags
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
+DEFAULT_RUNTIME_ENGINE = "vllm-hust"
 DEFAULT_LOCAL_SERVER_HOST = "127.0.0.1"
 DEFAULT_LOCAL_SERVER_PORT = 8000
 DEFAULT_READY_TIMEOUT_SECONDS = 180.0
@@ -53,6 +54,7 @@ class RepoLayout:
     benchmark_repo: Path
     vllm_hust_repo: Path
     website_repo: Path
+    reference_vllm_repo: Path | None = None
 
 
 def resolve_repo_layout() -> RepoLayout:
@@ -65,6 +67,10 @@ def resolve_repo_layout() -> RepoLayout:
     vllm_hust_repo = Path(
         os.environ.get("VLLM_HUST_REPO") or workspace_root / "vllm-hust"
     ).resolve()
+    reference_vllm_repo = Path(
+        os.environ.get("VLLM_BASELINE_VLLM_REPO")
+        or workspace_root / "reference-repos" / "vllm"
+    ).resolve()
     website_repo = Path(
         os.environ.get("VLLM_HUST_WEBSITE_REPO") or workspace_root / "vllm-hust-website"
     ).resolve()
@@ -72,8 +78,40 @@ def resolve_repo_layout() -> RepoLayout:
         workspace_root=workspace_root,
         benchmark_repo=benchmark_repo,
         vllm_hust_repo=vllm_hust_repo,
+        reference_vllm_repo=reference_vllm_repo,
         website_repo=website_repo,
     )
+
+
+def resolve_runtime_repo(
+    layout: RepoLayout,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
+) -> Path:
+    if runtime_engine == "vllm-hust":
+        return layout.vllm_hust_repo
+    if runtime_engine == "vllm":
+        if layout.reference_vllm_repo is not None:
+            return layout.reference_vllm_repo
+        return (layout.workspace_root / "reference-repos" / "vllm").resolve()
+    raise ValueError(f"Unsupported runtime engine: {runtime_engine}")
+
+
+def validate_runtime_repo(
+    layout: RepoLayout,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
+    *,
+    require_benchmarks: bool = False,
+) -> Path:
+    runtime_repo = resolve_runtime_repo(layout, runtime_engine)
+    if not runtime_repo.joinpath("pyproject.toml").is_file():
+        raise ValueError(
+            f"{runtime_engine} runtime repository not found or invalid: {runtime_repo}"
+        )
+    if require_benchmarks and not runtime_repo.joinpath("benchmarks").is_dir():
+        raise ValueError(
+            f"{runtime_engine} benchmarks directory not found: {runtime_repo / 'benchmarks'}"
+        )
+    return runtime_repo
 
 
 def validate_repo_layout(layout: RepoLayout) -> None:
@@ -104,28 +142,43 @@ def validate_repo_layout(layout: RepoLayout) -> None:
         raise ValueError(f"vllm-hust performance benchmark suite not found: {suite_script}")
 
 
-def build_vllm_command(command_args: list[str]) -> list[str]:
-    vllm_hust_executable = shutil.which("vllm-hust")
-    if vllm_hust_executable:
-        return [vllm_hust_executable, *command_args]
+def build_vllm_command(
+    command_args: list[str],
+    *,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
+) -> list[str]:
+    executable_names = ["vllm-hust", "vllm"]
+    if runtime_engine == "vllm":
+        executable_names = ["vllm"]
+    elif runtime_engine != "vllm-hust":
+        raise ValueError(f"Unsupported runtime engine: {runtime_engine}")
 
-    vllm_executable = shutil.which("vllm")
-    if vllm_executable:
-        return [vllm_executable, *command_args]
+    for executable_name in executable_names:
+        executable_path = shutil.which(executable_name)
+        if executable_path:
+            return [executable_path, *command_args]
     return [sys.executable, "-m", "vllm.entrypoints.cli.main", *command_args]
 
 
 @lru_cache(maxsize=8)
-def discover_vllm_flags(*command_parts: str) -> frozenset[str]:
-    help_command = build_vllm_command([*command_parts, "--help=all"])
+def discover_vllm_flags(
+    *command_parts: str,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
+    runtime_repo: str | None = None,
+) -> frozenset[str]:
+    help_command = build_vllm_command(
+        [*command_parts, "--help=all"],
+        runtime_engine=runtime_engine,
+    )
     layout = resolve_repo_layout()
+    cwd = Path(runtime_repo).resolve() if runtime_repo else resolve_runtime_repo(layout, runtime_engine)
     completed = subprocess.run(
         help_command,
         check=False,
         capture_output=True,
         text=True,
-        cwd=layout.vllm_hust_repo,
-        env=_build_effective_env(layout.vllm_hust_repo, None),
+        cwd=cwd,
+        env=_build_effective_env(cwd, None),
     )
     help_text = f"{completed.stdout}\n{completed.stderr}"
     flags = {
@@ -144,8 +197,19 @@ def discover_vllm_flags(*command_parts: str) -> frozenset[str]:
 
 def split_vllm_serve_scenario_parameters(
     parameters: Mapping[str, Any],
+    *,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
+    runtime_repo: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    bench_flags = discover_vllm_flags("bench", "serve")
+    if runtime_engine == DEFAULT_RUNTIME_ENGINE and runtime_repo is None:
+        bench_flags = discover_vllm_flags("bench", "serve")
+    else:
+        bench_flags = discover_vllm_flags(
+            "bench",
+            "serve",
+            runtime_engine=runtime_engine,
+            runtime_repo=runtime_repo,
+        )
     bench_parameters: dict[str, Any] = {}
     serve_parameters: dict[str, Any] = {}
     for key, value in parameters.items():
@@ -158,23 +222,33 @@ def split_vllm_serve_scenario_parameters(
 
 def build_vllm_bench_command(
     bench_args: list[str],
+    *,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
 ) -> list[str]:
-    return build_vllm_command(["bench", *bench_args])
+    return build_vllm_command(["bench", *bench_args], runtime_engine=runtime_engine)
 
 
 def build_vllm_serve_command(
     model: str,
     serve_args: list[str],
+    *,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
 ) -> list[str]:
-    return build_vllm_command(["serve", model, *serve_args])
+    return build_vllm_command(
+        ["serve", model, *serve_args],
+        runtime_engine=runtime_engine,
+    )
 
 
 def build_benchmark_script_command(
     layout: RepoLayout,
     script_name: str,
     script_args: list[str],
+    *,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
 ) -> list[str]:
-    script_path = layout.vllm_hust_repo / "benchmarks" / script_name
+    runtime_repo = validate_runtime_repo(layout, runtime_engine, require_benchmarks=True)
+    script_path = runtime_repo / "benchmarks" / script_name
     if not script_path.is_file():
         raise ValueError(f"benchmark script not found: {script_path}")
     return [sys.executable, str(script_path), *script_args]
@@ -264,20 +338,24 @@ def run_local_serve_benchmark(
     bench_parameters: Mapping[str, Any],
     serve_parameters: Mapping[str, Any],
     env: Mapping[str, str] | None = None,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
 ) -> int:
+    runtime_repo = validate_runtime_repo(layout, runtime_engine)
     serve_command = build_vllm_serve_command(
         model,
         render_parameter_flags(dict(serve_parameters)),
+        runtime_engine=runtime_engine,
     )
     bench_command = build_vllm_bench_command(
-        ["serve", "--model", model, *render_parameter_flags(dict(bench_parameters))]
+        ["serve", "--model", model, *render_parameter_flags(dict(bench_parameters))],
+        runtime_engine=runtime_engine,
     )
 
-    effective_env = _build_effective_env(layout.vllm_hust_repo, env)
+    effective_env = _build_effective_env(runtime_repo, env)
 
     server_process = subprocess.Popen(
         serve_command,
-        cwd=layout.vllm_hust_repo,
+        cwd=runtime_repo,
         env=effective_env,
     )
     try:
@@ -287,7 +365,7 @@ def run_local_serve_benchmark(
         )
         completed = subprocess.run(
             bench_command,
-            cwd=layout.vllm_hust_repo,
+            cwd=runtime_repo,
             check=False,
             env=effective_env,
         )

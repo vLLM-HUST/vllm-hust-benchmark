@@ -7,6 +7,7 @@ import vllm_hust_benchmark.cli as cli_module
 from vllm_hust_benchmark.cli import _parse_set_arguments
 from vllm_hust_benchmark.cli import main
 from vllm_hust_benchmark.integration import RepoLayout
+from vllm_hust_benchmark.integration import DEFAULT_RUNTIME_ENGINE
 from vllm_hust_benchmark.integration import build_vllm_bench_command
 
 
@@ -94,6 +95,7 @@ def test_show_repos_prints_resolved_layout(capsys, monkeypatch, tmp_path: Path) 
         benchmark_repo=tmp_path / "vllm-hust-benchmark",
         vllm_hust_repo=tmp_path / "vllm-hust",
         website_repo=tmp_path / "vllm-hust-website",
+        reference_vllm_repo=tmp_path / "reference-repos" / "vllm",
     )
     monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
 
@@ -102,6 +104,7 @@ def test_show_repos_prints_resolved_layout(capsys, monkeypatch, tmp_path: Path) 
     captured = capsys.readouterr()
     assert exit_code == 0
     assert str(layout.vllm_hust_repo) in captured.out
+    assert str(layout.reference_vllm_repo) in captured.out
     assert str(layout.website_repo) in captured.out
 
 
@@ -220,7 +223,10 @@ def test_bench_without_execute_prints_wrapped_command(
         website_repo=tmp_path / "vllm-hust-website",
     )
     monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
-    monkeypatch.setattr("vllm_hust_benchmark.cli.validate_repo_layout", lambda _layout: None)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_runtime_repo",
+        lambda _layout, _runtime, require_benchmarks=False: layout.vllm_hust_repo,
+    )
 
     exit_code = main(["bench", "--", "serve", "--model", "foo/bar"])
 
@@ -231,6 +237,84 @@ def test_bench_without_execute_prints_wrapped_command(
         prefix in captured.out
         for prefix in ("vllm-hust", "vllm ", "-m vllm.entrypoints.cli.main")
     )
+
+
+def test_bench_runtime_vllm_uses_reference_repo(capsys, monkeypatch, tmp_path: Path) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+        reference_vllm_repo=tmp_path / "reference-repos" / "vllm",
+    )
+    monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_runtime_repo",
+        lambda _layout, runtime, require_benchmarks=False: (
+            layout.reference_vllm_repo if runtime == "vllm" else layout.vllm_hust_repo
+        ),
+    )
+
+    captured: dict[str, object] = {}
+
+    def fake_run_external_command(command, *, cwd, execute, env=None):
+        captured["command"] = command
+        captured["cwd"] = cwd
+        captured["execute"] = execute
+        return 0
+
+    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.build_vllm_bench_command",
+        lambda bench_args, runtime_engine=DEFAULT_RUNTIME_ENGINE: [runtime_engine, *bench_args],
+    )
+
+    exit_code = main(["bench", "--runtime", "vllm", "--", "serve", "--model", "foo/bar"])
+
+    assert exit_code == 0
+    assert captured["cwd"] == layout.reference_vllm_repo
+    assert captured["command"] == ["vllm", "serve", "--model", "foo/bar"]
+
+
+def test_build_command_runtime_vllm_passes_runtime_to_split(capsys, monkeypatch, tmp_path: Path) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+        reference_vllm_repo=tmp_path / "reference-repos" / "vllm",
+    )
+    monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_runtime_repo",
+        lambda _layout, runtime, require_benchmarks=False: (
+            layout.reference_vllm_repo if runtime == "vllm" else layout.vllm_hust_repo
+        ),
+    )
+
+    captured: dict[str, object] = {}
+
+    def fake_split(merged, *, runtime_engine=DEFAULT_RUNTIME_ENGINE, runtime_repo=None):
+        captured["runtime_engine"] = runtime_engine
+        captured["runtime_repo"] = runtime_repo
+        return ({"backend": "vllm", "dataset_name": "random", "input_len": 8}, {"enforce_eager": True})
+
+    monkeypatch.setattr("vllm_hust_benchmark.cli.split_vllm_serve_scenario_parameters", fake_split)
+
+    exit_code = main([
+        "build-command",
+        "random-online",
+        "--runtime",
+        "vllm",
+        "--model",
+        "foo/bar",
+        "--set",
+        "input-len=8",
+    ])
+
+    assert exit_code == 0
+    assert captured["runtime_engine"] == "vllm"
+    assert captured["runtime_repo"] == str(layout.reference_vllm_repo)
 
 
 def test_publish_website_without_execute_prints_aggregate_command(
@@ -596,7 +680,7 @@ def test_build_command_prints_server_and_client_commands_for_local_serve(
 ) -> None:
     monkeypatch.setattr(
         "vllm_hust_benchmark.cli.split_vllm_serve_scenario_parameters",
-        lambda merged: (
+        lambda merged, runtime_engine=DEFAULT_RUNTIME_ENGINE, runtime_repo=None: (
             {
                 key: merged[key]
                 for key in (
