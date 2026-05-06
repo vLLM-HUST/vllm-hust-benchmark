@@ -1,4 +1,5 @@
 import json
+from argparse import Namespace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -297,6 +298,47 @@ def test_sync_submission_to_hf_accepts_multiple_submission_dirs(
 
     assert exit_code == 0
     assert captured["submission_dirs"] == [first.resolve(), second.resolve()]
+
+
+def test_resolve_github_metadata_falls_back_to_local_git_config(monkeypatch) -> None:
+    monkeypatch.setattr(cli_module, "_load_github_event_payload", lambda: {})
+    monkeypatch.delenv("GITHUB_REPOSITORY", raising=False)
+    monkeypatch.delenv("GITHUB_ACTOR", raising=False)
+    monkeypatch.delenv("GITHUB_SHA", raising=False)
+
+    values = {
+        "remote.origin.url": "git@github.com:vLLM-HUST/vllm-hust.git",
+        "remote.upstream.url": None,
+        "github.user": None,
+        "user.name": "hust-benchmark-bot",
+    }
+    monkeypatch.setattr(cli_module, "_run_git_config", lambda key: values.get(key))
+
+    metadata = cli_module._resolve_github_metadata(Namespace(git_commit="abc123def"))
+
+    assert metadata["github_repository"] == "vLLM-HUST/vllm-hust"
+    assert metadata["github_user"] == "hust-benchmark-bot"
+    assert (
+        metadata["github_commit_url"]
+        == "https://github.com/vLLM-HUST/vllm-hust/commit/abc123def"
+    )
+
+
+def test_resolve_github_metadata_prefers_ci_environment(monkeypatch) -> None:
+    monkeypatch.setattr(cli_module, "_load_github_event_payload", lambda: {})
+    monkeypatch.setenv("GITHUB_REPOSITORY", "vLLM-HUST/vllm-ascend-hust")
+    monkeypatch.setenv("GITHUB_ACTOR", "ci-runner")
+    monkeypatch.setenv("GITHUB_SHA", "def456")
+    monkeypatch.setattr(cli_module, "_run_git_config", lambda _key: "ignored")
+
+    metadata = cli_module._resolve_github_metadata(Namespace())
+
+    assert metadata["github_repository"] == "vLLM-HUST/vllm-ascend-hust"
+    assert metadata["github_user"] == "ci-runner"
+    assert (
+        metadata["github_commit_url"]
+        == "https://github.com/vLLM-HUST/vllm-ascend-hust/commit/def456"
+    )
 
 
 def test_export_leaderboard_artifact(tmp_path) -> None:

@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shlex
+import subprocess
 import sys
 from pathlib import Path
 
@@ -79,18 +81,68 @@ def _coerce_optional_int(value: object) -> int | None:
         return None
 
 
+def _run_git_config(key: str) -> str | None:
+    try:
+        completed = subprocess.run(
+            ["git", "config", "--get", key],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return None
+    if completed.returncode != 0:
+        return None
+    value = completed.stdout.strip()
+    return value or None
+
+
+def _extract_github_repository(remote_url: str | None) -> str | None:
+    if not remote_url:
+        return None
+
+    normalized = remote_url.strip()
+    patterns = [
+        r"^https?://github\.com/([^/]+)/([^/]+?)(?:\.git)?/?$",
+        r"^git@github\.com:([^/]+)/([^/]+?)(?:\.git)?$",
+        r"^ssh://git@github\.com/([^/]+)/([^/]+?)(?:\.git)?/?$",
+    ]
+    for pattern in patterns:
+        match = re.match(pattern, normalized)
+        if match:
+            owner, repo = match.groups()
+            return f"{owner}/{repo}"
+    return None
+
+
+def _detect_local_github_repository() -> str | None:
+    for key in ("remote.origin.url", "remote.upstream.url"):
+        parsed = _extract_github_repository(_run_git_config(key))
+        if parsed:
+            return parsed
+    return None
+
+
 def _resolve_github_metadata(args: argparse.Namespace) -> dict[str, object | None]:
     event_payload = _load_github_event_payload()
     pull_request = event_payload.get("pull_request")
     if not isinstance(pull_request, dict):
         pull_request = {}
 
-    repository = getattr(args, "github_repository", None) or os.environ.get(
-        "GITHUB_REPOSITORY"
+    repository = (
+        getattr(args, "github_repository", None)
+        or os.environ.get("GITHUB_REPOSITORY")
+        or _detect_local_github_repository()
     )
     server_url = os.environ.get("GITHUB_SERVER_URL", "https://github.com")
     git_commit = getattr(args, "git_commit", None) or os.environ.get("GITHUB_SHA")
-    github_user = getattr(args, "github_user", None) or os.environ.get("GITHUB_ACTOR")
+    github_user = (
+        getattr(args, "github_user", None)
+        or os.environ.get("GITHUB_ACTOR")
+        or os.environ.get("GIT_AUTHOR_NAME")
+        or _run_git_config("github.user")
+        or _run_git_config("user.name")
+    )
     github_ref = (
         getattr(args, "github_ref", None)
         or os.environ.get("GITHUB_HEAD_REF")
