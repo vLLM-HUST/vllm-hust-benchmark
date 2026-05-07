@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+PREPARE_SCRIPT=${PREPARE_SCRIPT:-"$REPO_ROOT/scripts/prepare-official-ascend-baseline-env.sh"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
@@ -10,6 +11,12 @@ OFFICIAL_VLLM_REPO=${OFFICIAL_VLLM_REPO:-"$WORKSPACE_ROOT/reference-repos/vllm"}
 OFFICIAL_VLLM_ASCEND_REPO=${OFFICIAL_VLLM_ASCEND_REPO:-"$WORKSPACE_ROOT/reference-repos/vllm-ascend"}
 OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0110"}
 OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0110"}
+OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
+OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/official-ascend-goal-baseline"}
+OFFICIAL_MODEL_PATH=${OFFICIAL_MODEL_PATH:-}
+ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
+ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-"/usr/local/Ascend/nnal/atb/set_env.sh"}
+ASCEND_ATB_CXX_ABI=${ASCEND_ATB_CXX_ABI:-"1"}
 GOAL_BASELINE_ENV_PREFIX=${GOAL_BASELINE_ENV_PREFIX:-}
 RESULT_DIR=${RESULT_DIR:-"$REPO_ROOT/.benchmarks/official-ascend-goal-baseline"}
 RUN_ID=${RUN_ID:-"official-ascend-jan-2026-$(date -u +%Y%m%dT%H%M%SZ)"}
@@ -34,6 +41,64 @@ if [[ ! -d "$REPO_ROOT/src" ]]; then
   exit 2
 fi
 
+if [[ ! -f "$PREPARE_SCRIPT" ]]; then
+  echo "Prepare script not found: $PREPARE_SCRIPT" >&2
+  exit 2
+fi
+
+run_in_official_runtime() {
+  local pythonpath_prefix=$1
+  shift
+  (
+    cd "$OFFICIAL_RUNTIME_CWD"
+    export ZSH_VERSION=""
+    if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+      # shellcheck disable=SC1090
+      source "$ASCEND_TOOLKIT_SET_ENV"
+    fi
+    if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
+      set +u
+      # shellcheck disable=SC1090
+      source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
+      set -u
+    fi
+    export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
+    PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
+      conda run -p "$GOAL_BASELINE_ENV_PREFIX" "$@"
+  )
+}
+
+run_server_command() {
+  (
+    cd "$OFFICIAL_RUNTIME_CWD"
+    export ZSH_VERSION=""
+    if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+      # shellcheck disable=SC1090
+      source "$ASCEND_TOOLKIT_SET_ENV"
+    fi
+    if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
+      set +u
+      # shellcheck disable=SC1090
+      source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
+      set -u
+    fi
+    export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
+    PYTHONUNBUFFERED=1 \
+      PYTHONPATH="$OFFICIAL_RUNTIME_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}" \
+      conda run --no-capture-output -p "$GOAL_BASELINE_ENV_PREFIX" \
+      python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS
+  )
+}
+
+run_client_command() {
+  run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+    python -m vllm.entrypoints.cli.main bench serve \
+    --save-result \
+    --result-dir "$RESULT_DIR" \
+    --result-filename "$(basename "$RAW_RESULT_FILE")" \
+    $CLIENT_ARGS
+}
+
 ensure_worktree() {
   local source_repo=$1
   local target_dir=$2
@@ -53,6 +118,18 @@ json2args() {
   '
 }
 
+resolve_runtime_model() {
+  if [[ -n "$OFFICIAL_MODEL_PATH" ]]; then
+    echo "$OFFICIAL_MODEL_PATH"
+    return 0
+  fi
+
+  run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+    env MODEL_ID="$MODEL" \
+    python -c "import os; from huggingface_hub import snapshot_download; print(snapshot_download(os.environ['MODEL_ID'], local_files_only=True))" \
+    2>/dev/null || return 1
+}
+
 wait_for_server() {
   local host=$1
   local port=$2
@@ -64,7 +141,7 @@ wait_for_server() {
       return 0
     fi
     sleep 1
-    ((waited++))
+    ((waited += 1))
   done
 
   echo "Timed out waiting for official baseline server at ${host}:${port}" >&2
@@ -83,7 +160,10 @@ trap kill_server EXIT
 ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "v0.11.0"
 ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "v0.11.0"
 
+OFFICIAL_RUNTIME_PYTHONPATH="$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE"
+
 mkdir -p "$RESULT_DIR"
+mkdir -p "$OFFICIAL_VLLM_CACHE_ROOT"
 
 SCENARIO=$(jq -r '.scenario' "$SPEC_FILE")
 MODEL=$(jq -r '.model' "$SPEC_FILE")
@@ -108,27 +188,77 @@ CLIENT_PORT=$(jq -r '.client_parameters.port' "$SPEC_FILE")
 INPUT_LEN=$(jq -r '.client_parameters.input_len' "$SPEC_FILE")
 OUTPUT_LEN=$(jq -r '.client_parameters.output_len' "$SPEC_FILE")
 
-SERVER_ARGS=$(json2args "$(jq -c --arg model "$MODEL" '.server_parameters + {model: $model}' "$SPEC_FILE")")
-CLIENT_ARGS=$(json2args "$(jq -c --arg model "$MODEL" '.client_parameters + {model: $model}' "$SPEC_FILE")")
+BENCHMARK_SERVER_PORT="$SERVER_PORT" \
+PREPARE_BENCHMARK_ADMISSION_ONLY=1 \
+ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
+VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
+bash "$PREPARE_SCRIPT"
+
+RUNTIME_MODEL="$MODEL"
+if cached_model_path=$(resolve_runtime_model); then
+  RUNTIME_MODEL="$cached_model_path"
+fi
+
+SERVER_ARGS=$(json2args "$(jq -c --arg model "$RUNTIME_MODEL" '
+  .server_parameters + {model: $model}
+  | if has("enforce_eager") then . else . + {enforce_eager: ""} end
+' "$SPEC_FILE")")
+CLIENT_ARGS=$(json2args "$(jq -c --arg model "$RUNTIME_MODEL" '
+  .client_parameters + {model: $model}
+  | if .dataset_name == "random" then
+      (if has("input_len") then . + {random_input_len: .input_len} | del(.input_len) else . end)
+      | (if has("output_len") then . + {random_output_len: .output_len} | del(.output_len) else . end)
+    else
+      .
+    end
+' "$SPEC_FILE")")
 
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
 
-SERVER_COMMAND="conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
-CLIENT_COMMAND="conda run -p $GOAL_BASELINE_ENV_PREFIX vllm bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
+SERVER_COMMAND="PYTHONUNBUFFERED=1 PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
+CLIENT_COMMAND="PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
 
 echo "[goal-baseline] using worktrees: $OFFICIAL_VLLM_WORKTREE and $OFFICIAL_VLLM_ASCEND_WORKTREE"
+echo "[goal-baseline] neutral cwd: $OFFICIAL_RUNTIME_CWD"
+echo "[goal-baseline] vllm cache root: $OFFICIAL_VLLM_CACHE_ROOT"
+echo "[goal-baseline] export model id: $MODEL"
+echo "[goal-baseline] runtime model source: $RUNTIME_MODEL"
+run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+from importlib import metadata
+
+import vllm
+import vllm_ascend
+
+
+def dist_version(*names: str) -> str:
+  for name in names:
+    try:
+      return metadata.version(name)
+    except metadata.PackageNotFoundError:
+      continue
+  return "not-installed"
+
+
+print(f"[goal-baseline] vllm module: {vllm.__file__}")
+print(f"[goal-baseline] vllm version: {getattr(vllm, '__version__', 'unknown')} (dist={dist_version('vllm')})")
+print(f"[goal-baseline] vllm_ascend module: {vllm_ascend.__file__}")
+print(
+  "[goal-baseline] vllm_ascend version: "
+  f"{getattr(vllm_ascend, '__version__', 'unknown')} "
+  f"(dist={dist_version('vllm-ascend', 'vllm_ascend')})"
+)
+PY
 echo "[goal-baseline] server command: $SERVER_COMMAND"
-bash -lc "$SERVER_COMMAND" &
+run_server_command &
 SERVER_PID=$!
 
 wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
 
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
-bash -lc "$CLIENT_COMMAND"
+run_client_command
 
-PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
-conda run -p "$GOAL_BASELINE_ENV_PREFIX" \
+run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" \
 python -m vllm_hust_benchmark.cli export-leaderboard-artifact \
   "$SCENARIO" \
   --benchmark-result-file "$RAW_RESULT_FILE" \

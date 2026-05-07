@@ -175,6 +175,7 @@ Current baseline target:
 
 Files:
 
+- `scripts/prepare-official-ascend-baseline-env.sh`
 - `scripts/run-official-ascend-goal-baseline.sh`
 - `docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json`
 - `docs/official-baselines/official-ascend-constraints.stub.json`
@@ -182,10 +183,23 @@ Files:
 Example:
 
 ```bash
+export ENV_PREFIX=/root/miniconda3/envs/vllm-ascend-official-v0110
+bash scripts/prepare-official-ascend-baseline-env.sh
+
 export GOAL_BASELINE_ENV_PREFIX=/root/miniconda3/envs/vllm-ascend-official-v0110
 bash scripts/run-official-ascend-goal-baseline.sh \
 	docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
 ```
+
+Notes:
+
+- `prepare-official-ascend-baseline-env.sh` creates or repairs a dedicated conda env for the fixed official baseline only.
+- `prepare-official-ascend-baseline-env.sh` also owns the benchmark admission preflight: it proactively cleans residual `api_server` / `bench serve` / `EngineCore_DP0` processes and clears the benchmark port before a new run is allowed to start.
+- The baseline runtime is pinned to `reference-repos/vllm@v0.11.0` and `reference-repos/vllm-ascend@v0.11.0` worktrees.
+- The prepare script intentionally does not install `vllm-hust` or `vllm-ascend-hust` into the official env, to avoid plugin-entry-point contamination.
+- The runner executes against the pinned worktrees through `PYTHONPATH` and defaults `VLLM_CACHE_ROOT` to `.cache/official-ascend-goal-baseline/` in this repository.
+- The runner calls the same prepare script in admission-only mode immediately before benchmark startup, so residual-process cleanup is a hard precondition rather than a manual step.
+- The runner prefers a locally cached Hugging Face snapshot for the target model when one already exists. You can also force a specific local model directory with `OFFICIAL_MODEL_PATH=/abs/model/path`.
 
 This produces:
 
