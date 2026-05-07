@@ -159,3 +159,37 @@ This is the exact input pattern consumed by website aggregation.
 If you already have a raw `vllm bench` result JSON, you do not need to hand-author the full metrics payload anymore. The wrapper can derive the main website metrics from the raw result and only requires a separate constraints metrics JSON.
 
 For the upstream benchmark analysis behind this design, see `docs/UPSTREAM_ANALYSIS.md`.
+
+## Official Goal Baseline
+
+The canonical home for the official Ascend goal-baseline runner is this repository, not `reference-repos/*`.
+`reference-repos` stays read-only for upstream comparison, while `vllm-hust-benchmark` owns cross-repo orchestration and website artifact export.
+
+Current baseline target:
+
+- official `vllm v0.11.0`
+- official `vllm-ascend v0.11.0`
+- scenario `random-online`
+- model `Qwen/Qwen2.5-14B-Instruct`
+- hardware `Huawei 910B3`
+
+Files:
+
+- `scripts/run-official-ascend-goal-baseline.sh`
+- `docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json`
+- `docs/official-baselines/official-ascend-constraints.stub.json`
+
+Example:
+
+```bash
+export GOAL_BASELINE_ENV_PREFIX=/root/miniconda3/envs/vllm-ascend-official-v0110
+bash scripts/run-official-ascend-goal-baseline.sh \
+	docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
+```
+
+This produces:
+
+- a raw benchmark result under `.benchmarks/official-ascend-goal-baseline/`
+- a website-compatible leaderboard artifact under `.benchmarks/official-ascend-goal-baseline/submission/`
+
+The exported artifact can then be aggregated into `vllm-hust-website` with `publish-website` or `vllm-hust-website/scripts/aggregate_results.py`.
