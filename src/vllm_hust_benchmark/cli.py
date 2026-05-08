@@ -296,6 +296,7 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--metrics-file")
     export_parser.add_argument("--benchmark-result-file")
     export_parser.add_argument("--constraints-file")
+    export_parser.add_argument("--same-spec-file")
     export_parser.add_argument("--output-dir", required=True)
     export_parser.add_argument("--artifact-name", default="run_leaderboard.json")
     export_parser.add_argument("--run-id", required=True)
@@ -329,6 +330,14 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--github-event-name")
     export_parser.add_argument("--github-pr-number", type=int)
     export_parser.add_argument("--github-pr-url")
+    export_parser.add_argument("--runtime-python")
+    export_parser.add_argument("--engine-source-repository")
+    export_parser.add_argument("--engine-source-ref")
+    export_parser.add_argument("--engine-source-commit")
+    export_parser.add_argument("--plugin-source-engine")
+    export_parser.add_argument("--plugin-source-repository")
+    export_parser.add_argument("--plugin-source-ref")
+    export_parser.add_argument("--plugin-source-commit")
     export_parser.add_argument("--publish-website", action="store_true")
     export_parser.add_argument("--website-output-dir")
     export_parser.add_argument("--execute", action="store_true")
@@ -666,12 +675,16 @@ def main(argv: list[str] | None = None) -> int:
         constraints_file = (
             Path(args.constraints_file).resolve() if args.constraints_file else None
         )
+        same_spec_file = (
+            Path(args.same_spec_file).resolve() if args.same_spec_file else None
+        )
         try:
             artifact_path, manifest_path = export_leaderboard_artifacts(
                 scenario=scenario,
                 metrics_file=metrics_file,
                 benchmark_result_file=benchmark_result_file,
                 constraints_file=constraints_file,
+                same_spec_file=same_spec_file,
                 output_dir=Path(args.output_dir),
                 artifact_name=args.artifact_name,
                 run_id=args.run_id,
@@ -705,6 +718,14 @@ def main(argv: list[str] | None = None) -> int:
                 github_event_name=github_metadata["github_event_name"],
                 github_pr_number=github_metadata["github_pr_number"],
                 github_pr_url=github_metadata["github_pr_url"],
+                runtime_python=args.runtime_python,
+                engine_source_repository=args.engine_source_repository,
+                engine_source_ref=args.engine_source_ref,
+                engine_source_commit=args.engine_source_commit,
+                plugin_source_engine=args.plugin_source_engine,
+                plugin_source_repository=args.plugin_source_repository,
+                plugin_source_ref=args.plugin_source_ref,
+                plugin_source_commit=args.plugin_source_commit,
             )
         except (OSError, ValueError) as error:
             print(str(error), file=sys.stderr)

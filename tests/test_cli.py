@@ -645,6 +645,112 @@ def test_export_leaderboard_artifact_from_raw_benchmark_result(tmp_path) -> None
     assert artifact["metadata"]["github_user"] == "benchmark-bot"
 
 
+def test_export_leaderboard_artifact_embeds_same_spec_payload(tmp_path: Path) -> None:
+    metrics_file = tmp_path / "metrics.json"
+    metrics_file.write_text(
+        """
+{
+    "metrics": {
+        "ttft_ms": 150.0,
+        "throughput_tps": 98.5,
+        "peak_mem_mb": 2048,
+        "error_rate": 0.0
+    },
+    "constraints_metrics": {
+        "single_chip_effective_utilization_pct": 91.0,
+        "typical_throughput_ratio_vs_baseline": 2.1,
+        "typical_ttft_reduction_pct_vs_baseline": 22.0,
+        "typical_tpot_reduction_pct_vs_baseline": 21.0,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": true,
+        "long_context_ttft_p95_ms": 100.0,
+        "long_context_ttft_p99_ms": 120.0,
+        "long_context_tpot_p95_ms": 15.0,
+        "long_context_tpot_p99_ms": 18.0,
+        "long_context_ttft_p95_stable": true,
+        "long_context_ttft_p99_stable": true,
+        "long_context_tpot_p95_stable": true,
+        "long_context_tpot_p99_stable": true,
+        "unit_token_cost_reduction_pct": 30.0,
+        "multi_tenant_high_utilization": true
+    }
+}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    same_spec_file = tmp_path / "same_spec.json"
+    same_spec_file.write_text(
+        json.dumps(
+            {
+                "schema_version": "benchmark-same-spec/v1",
+                "spec_id": "spec-1",
+                "resolved_spec_hash": "abc123",
+                "resolved_server_parameters": {"dtype": "float16"},
+                "resolved_client_parameters": {"dataset_name": "random"},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    output_dir = tmp_path / "export_same_spec"
+    exit_code = main(
+        [
+            "export-leaderboard-artifact",
+            "sharegpt-online",
+            "--metrics-file",
+            str(metrics_file),
+            "--same-spec-file",
+            str(same_spec_file),
+            "--output-dir",
+            str(output_dir),
+            "--run-id",
+            "same-spec-run-1",
+            "--engine",
+            "vllm-hust",
+            "--engine-version",
+            "0.7.3",
+            "--model-name",
+            "meta-llama/Llama-3.1-8B-Instruct",
+            "--hardware-chip-model",
+            "Ascend-910B",
+            "--submitter",
+            "ci",
+            "--runtime-python",
+            "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+            "--engine-source-repository",
+            "vLLM-HUST/vllm-hust",
+            "--engine-source-ref",
+            "main",
+            "--engine-source-commit",
+            "abc123def456",
+            "--plugin-source-engine",
+            "vllm-ascend-hust",
+            "--plugin-source-repository",
+            "vLLM-HUST/vllm-ascend-hust",
+            "--plugin-source-ref",
+            "ws/fix/same_spec_current_artifact",
+            "--plugin-source-commit",
+            "fedcba654321",
+        ]
+    )
+
+    assert exit_code == 0
+    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    assert artifact["same_spec"]["spec_id"] == "spec-1"
+    assert artifact["same_spec"]["resolved_spec_hash"] == "abc123"
+    assert artifact["metadata"]["runtime_provenance"]["python"] == (
+        "/root/miniconda3/envs/vllm-hust-dev/bin/python"
+    )
+    assert artifact["metadata"]["runtime_provenance"]["engine"]["repository"] == (
+        "vLLM-HUST/vllm-hust"
+    )
+    assert artifact["metadata"]["runtime_provenance"]["plugin"]["repository"] == (
+        "vLLM-HUST/vllm-ascend-hust"
+    )
+
+
 def test_export_leaderboard_artifact_rejects_zero_long_context_length(
     tmp_path: Path, capsys
 ) -> None:
