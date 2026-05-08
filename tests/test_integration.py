@@ -145,6 +145,45 @@ def test_discover_vllm_flags_falls_back_for_bench_serve(monkeypatch) -> None:
     integration.discover_vllm_flags.cache_clear()
 
 
+def test_discover_vllm_flags_falls_back_to_benchmark_repo_cwd(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    benchmark_repo = tmp_path / "vllm-hust-benchmark"
+    benchmark_repo.mkdir()
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=benchmark_repo,
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+    captured: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["cwd"] = kwargs["cwd"]
+        captured["env"] = kwargs["env"]
+
+        class Result:
+            returncode = 0
+            stdout = "  --dataset-name DATASET_NAME\n  --num-prompts NUM_PROMPTS\n"
+            stderr = ""
+
+        return Result()
+
+    monkeypatch.setattr(integration, "resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr(integration.shutil, "which", lambda name: None)
+    monkeypatch.setattr(integration.subprocess, "run", fake_run)
+    integration.discover_vllm_flags.cache_clear()
+
+    flags = integration.discover_vllm_flags("bench", "serve")
+
+    assert flags == frozenset({"dataset_name", "num_prompts"})
+    assert captured["cwd"] == benchmark_repo
+    assert str(benchmark_repo) in str(captured["env"]["PYTHONPATH"])
+    integration.discover_vllm_flags.cache_clear()
+
+
 def test_build_performance_suite_command(tmp_path: Path) -> None:
     layout = RepoLayout(
         workspace_root=tmp_path,
