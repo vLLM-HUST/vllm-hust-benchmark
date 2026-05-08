@@ -160,6 +160,24 @@ def build_vllm_command(
     return [sys.executable, "-m", "vllm.entrypoints.cli.main", *command_args]
 
 
+def _resolve_flag_discovery_cwd(
+    layout: RepoLayout,
+    *,
+    runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
+    runtime_repo: str | None = None,
+) -> Path:
+    candidate = (
+        Path(runtime_repo).resolve()
+        if runtime_repo
+        else resolve_runtime_repo(layout, runtime_engine)
+    )
+    if candidate.is_dir():
+        return candidate
+    if layout.benchmark_repo.is_dir():
+        return layout.benchmark_repo
+    return Path.cwd().resolve()
+
+
 @lru_cache(maxsize=8)
 def discover_vllm_flags(
     *command_parts: str,
@@ -171,7 +189,11 @@ def discover_vllm_flags(
         runtime_engine=runtime_engine,
     )
     layout = resolve_repo_layout()
-    cwd = Path(runtime_repo).resolve() if runtime_repo else resolve_runtime_repo(layout, runtime_engine)
+    cwd = _resolve_flag_discovery_cwd(
+        layout,
+        runtime_engine=runtime_engine,
+        runtime_repo=runtime_repo,
+    )
     completed = subprocess.run(
         help_command,
         check=False,
