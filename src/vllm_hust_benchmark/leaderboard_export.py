@@ -37,6 +37,14 @@ REQUIRED_CONSTRAINT_METRIC_KEYS = (
     "multi_tenant_high_utilization",
 )
 
+REQUIRED_SAME_SPEC_KEYS = (
+    "schema_version",
+    "spec_id",
+    "resolved_spec_hash",
+    "resolved_server_parameters",
+    "resolved_client_parameters",
+)
+
 
 def _validate_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[str, Any]:
     long_context_length = constraints_metrics.get("long_context_length")
@@ -104,6 +112,23 @@ def _load_constraints_metrics(constraints_file: Path) -> dict[str, Any]:
             "constraints_metrics missing required keys: " + ", ".join(missing_constraints)
         )
     return _validate_constraints_metrics(dict(constraints_metrics))
+
+
+def _load_same_spec_payload(same_spec_file: Path) -> dict[str, Any]:
+    payload = json.loads(same_spec_file.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("same spec file must be a JSON object")
+
+    missing_keys = [key for key in REQUIRED_SAME_SPEC_KEYS if key not in payload]
+    if missing_keys:
+        raise ValueError(
+            "same spec payload missing required keys: " + ", ".join(missing_keys)
+        )
+    if not isinstance(payload.get("resolved_server_parameters"), dict):
+        raise ValueError("same spec resolved_server_parameters must be an object")
+    if not isinstance(payload.get("resolved_client_parameters"), dict):
+        raise ValueError("same spec resolved_client_parameters must be an object")
+    return payload
 
 
 def _safe_float(value: Any) -> float | None:
@@ -246,6 +271,7 @@ def export_leaderboard_artifacts(
     metrics_file: Path | None,
     benchmark_result_file: Path | None,
     constraints_file: Path | None,
+    same_spec_file: Path | None,
     output_dir: Path,
     artifact_name: str,
     run_id: str,
@@ -279,6 +305,14 @@ def export_leaderboard_artifacts(
     github_event_name: str | None,
     github_pr_number: int | None,
     github_pr_url: str | None,
+    runtime_python: str | None,
+    engine_source_repository: str | None,
+    engine_source_ref: str | None,
+    engine_source_commit: str | None,
+    plugin_source_engine: str | None,
+    plugin_source_repository: str | None,
+    plugin_source_ref: str | None,
+    plugin_source_commit: str | None,
 ) -> tuple[Path, Path]:
     payload = load_export_payload(
         metrics_file=metrics_file,
@@ -288,6 +322,9 @@ def export_leaderboard_artifacts(
     )
     metrics = dict(payload["metrics"])
     constraints_metrics = dict(payload["constraints_metrics"])
+    same_spec_payload = (
+        _load_same_spec_payload(same_spec_file) if same_spec_file is not None else None
+    )
 
     submitted_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     config_type = _infer_config_type(
@@ -399,8 +436,24 @@ def export_leaderboard_artifacts(
             "verified": None,
             "idempotency_key": idempotency_key,
             "manifest_source": f"generated-by-vllm-hust-benchmark/{benchmark_version}",
+            "runtime_provenance": {
+                "python": runtime_python,
+                "engine": {
+                    "repository": engine_source_repository,
+                    "ref": engine_source_ref,
+                    "commit": engine_source_commit,
+                },
+                "plugin": {
+                    "engine": plugin_source_engine,
+                    "repository": plugin_source_repository,
+                    "ref": plugin_source_ref,
+                    "commit": plugin_source_commit,
+                },
+            },
         },
     }
+    if same_spec_payload is not None:
+        artifact["same_spec"] = same_spec_payload
 
     output_dir.mkdir(parents=True, exist_ok=True)
     artifact_path = output_dir / artifact_name

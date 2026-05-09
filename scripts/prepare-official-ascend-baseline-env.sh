@@ -47,6 +47,24 @@ run_with_ascend_env() {
   "$@"
 }
 
+list_port_listener_pids() {
+  local port=$1
+
+  if command -v ss >/dev/null 2>&1; then
+    ss -ltnp 2>/dev/null | grep -E ":${port}[[:space:]]" | grep -o 'pid=[0-9]*' | cut -d= -f2 | sort -u || true
+    return 0
+  fi
+
+  if command -v lsof >/dev/null 2>&1; then
+    lsof -ti tcp:"$port" -sTCP:LISTEN 2>/dev/null | sort -u || true
+    return 0
+  fi
+
+  if command -v fuser >/dev/null 2>&1; then
+    fuser "${port}/tcp" 2>/dev/null | tr ' ' '\n' | sed '/^$/d' | sort -u || true
+  fi
+}
+
 list_benchmark_residual_pids() {
   ps -eo pid=,args= | awk '
     /vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main bench serve|EngineCore_DP0/ && !/awk/ {
@@ -56,6 +74,23 @@ list_benchmark_residual_pids() {
 }
 
 cleanup_benchmark_residual_processes() {
+  if [[ "$PREPARE_BENCHMARK_ADMISSION_ONLY" == "1" ]]; then
+    local port_pids
+    port_pids=$(list_port_listener_pids "$BENCHMARK_SERVER_PORT")
+    if [[ -n "$port_pids" ]]; then
+      echo "Port ${BENCHMARK_SERVER_PORT} is already occupied by listening processes: $port_pids" >&2
+      return 1
+    fi
+
+    if [[ -n "$(list_benchmark_residual_pids)" ]]; then
+      echo "Residual benchmark processes still exist during admission check" >&2
+      return 1
+    fi
+
+    echo "[official-env] benchmark admission preflight passed: no residual benchmark processes"
+    return 0
+  fi
+
   local pids
   pids=$(list_benchmark_residual_pids)
 
@@ -71,25 +106,11 @@ cleanup_benchmark_residual_processes() {
     done
   fi
 
-  if command -v fuser >/dev/null 2>&1; then
-    local port_pids
-    port_pids=$(fuser "${BENCHMARK_SERVER_PORT}/tcp" 2>/dev/null || true)
-    if [[ -n "$port_pids" ]]; then
-      echo "[official-env] cleaning residual port ${BENCHMARK_SERVER_PORT} holders: $port_pids"
-      kill $port_pids 2>/dev/null || true
-      for pid in $port_pids; do
-        if kill -0 "$pid" 2>/dev/null; then
-          kill -9 "$pid" 2>/dev/null || true
-        fi
-      done
-    fi
-  fi
-
-  if command -v fuser >/dev/null 2>&1; then
-    if fuser "${BENCHMARK_SERVER_PORT}/tcp" >/dev/null 2>&1; then
-      echo "Port ${BENCHMARK_SERVER_PORT} is still occupied after cleanup" >&2
-      return 1
-    fi
+  local port_pids
+  port_pids=$(list_port_listener_pids "$BENCHMARK_SERVER_PORT")
+  if [[ -n "$port_pids" ]]; then
+    echo "Port ${BENCHMARK_SERVER_PORT} is already occupied by listening processes: $port_pids" >&2
+    return 1
   fi
 
   if [[ -n "$(list_benchmark_residual_pids)" ]]; then
