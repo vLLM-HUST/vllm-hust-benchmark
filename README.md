@@ -65,6 +65,31 @@ python -m vllm_hust_benchmark.cli run-test serving_llama8B_tp1_sharegpt --execut
 # delegate the whole upstream suite from this repository entrypoint
 python -m vllm_hust_benchmark.cli run-suite --execute
 
+# inspect the wrapped Ascend CI benchmark command without executing it
+python -m vllm_hust_benchmark.cli run-ascend-ci \
+	--scenario random-online \
+	--model Qwen/Qwen2.5-14B-Instruct \
+	--num-prompts 200
+
+# execute the same CI wrapper for a ShareGPT-backed run
+python -m vllm_hust_benchmark.cli run-ascend-ci \
+	--execute \
+	--scenario sharegpt-online \
+	--model Qwen/Qwen2.5-14B-Instruct \
+	--dataset-path /data/sharegpt/sharegpt.json \
+	--constraints-file docs/examples/constraints_metrics.sample.json \
+	--num-prompts 200 \
+	--max-concurrency 4
+
+# publish a CI run to HF after export aggregation
+python -m vllm_hust_benchmark.cli run-ascend-ci \
+	--execute \
+	--scenario random-online \
+	--model Qwen/Qwen2.5-14B-Instruct \
+	--publish-to-hf \
+	--allow-random-hf-publish \
+	--hf-repo-id vLLM-HUST/leaderboard-preview
+
 # list the mirrored upstream scenarios
 python -m vllm_hust_benchmark.cli list-scenarios
 
@@ -125,6 +150,13 @@ python -m vllm_hust_benchmark.cli publish-website \
 	--source-dir .benchmarks/exports/run-001 \
 	--execute
 ```
+
+For run-ascend-ci:
+
+1. The command stays a thin wrapper around vllm-hust/.github/workflows/scripts/run_ascend_benchmark_ci.sh, so CI-side defaults still live in that script.
+2. random-online can run with script defaults, but sharegpt-online requires both --dataset-path and --constraints-file.
+3. --publish-to-hf requires --hf-repo-id, and random-online also requires --allow-random-hf-publish as a deliberate safeguard.
+4. Use repeated --env KEY=VALUE when the local Ascend runtime still needs extra environment injection such as toolkit or cache overrides.
 
 ## Extending With New Scenarios
 
