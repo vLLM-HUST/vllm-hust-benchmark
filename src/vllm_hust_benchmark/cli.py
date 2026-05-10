@@ -14,6 +14,7 @@ from vllm_hust_benchmark.integration import (
     aggregate_to_website,
     upload_to_huggingface,
     sync_submission_to_huggingface,
+    build_ascend_benchmark_ci_command,
     build_benchmark_script_command,
     build_performance_suite_command,
     build_vllm_bench_command,
@@ -63,6 +64,71 @@ def _parse_set_arguments(values: list[str] | None) -> dict[str, object]:
         normalized_key = key.strip().replace("-", "_")
         parsed[normalized_key] = _parse_override_value(value)
     return parsed
+
+
+def _format_env_prefix(env: dict[str, object]) -> str:
+    if not env:
+        return ""
+    return " ".join(f"{key}={shlex.quote(str(value))}" for key, value in env.items()) + " "
+
+
+def _set_env_if_not_none(env: dict[str, object], key: str, value: object) -> None:
+    if value is None:
+        return
+    env[key] = value
+
+
+def _collect_ascend_ci_env(args: argparse.Namespace, layout) -> dict[str, object]:
+    env: dict[str, object] = {
+        "WORKSPACE_ROOT": str(layout.workspace_root),
+        "VLLM_HUST_REPO": str(layout.vllm_hust_repo),
+        "VLLM_HUST_BENCHMARK_REPO": str(layout.benchmark_repo),
+        "VLLM_HUST_WEBSITE_REPO": str(layout.website_repo),
+    }
+
+    option_to_env = {
+        "run_id": "RUN_ID",
+        "result_root": "RESULT_ROOT",
+        "raw_result_file": "RAW_RESULT_FILE",
+        "submissions_root": "SUBMISSIONS_ROOT",
+        "submission_dir": "SUBMISSION_DIR",
+        "aggregate_output_dir": "AGGREGATE_OUTPUT_DIR",
+        "server_log": "SERVER_LOG",
+        "scenario": "BENCH_SCENARIO",
+        "dataset_path": "BENCH_DATASET_PATH",
+        "constraints_file": "BENCH_CONSTRAINTS_FILE",
+        "runtime_root": "VLLM_HUST_CI_RUNTIME_ROOT",
+        "model": "MODEL_NAME",
+        "model_parameters": "MODEL_PARAMETERS",
+        "model_precision": "MODEL_PRECISION",
+        "host": "HOST",
+        "port": "PORT",
+        "dtype": "DTYPE",
+        "max_model_len": "MAX_MODEL_LEN",
+        "max_num_seqs": "MAX_NUM_SEQS",
+        "num_prompts": "BENCH_NUM_PROMPTS",
+        "random_input_len": "BENCH_RANDOM_INPUT_LEN",
+        "random_output_len": "BENCH_RANDOM_OUTPUT_LEN",
+        "random_batch_size": "BENCH_RANDOM_BATCH_SIZE",
+        "request_rate": "BENCH_REQUEST_RATE",
+        "max_concurrency": "BENCH_MAX_CONCURRENCY",
+        "input_len": "BENCH_INPUT_LEN",
+        "output_len": "BENCH_OUTPUT_LEN",
+        "hardware_vendor": "HARDWARE_VENDOR",
+        "hardware_chip_model": "HARDWARE_CHIP_MODEL",
+        "chip_count": "CHIP_COUNT",
+        "node_count": "NODE_COUNT",
+        "hf_repo_id": "HF_REPO_ID",
+    }
+    for option_name, env_name in option_to_env.items():
+        _set_env_if_not_none(env, env_name, getattr(args, option_name))
+
+    if args.publish_to_hf:
+        env["PUBLISH_TO_HF"] = "1"
+    if args.allow_random_hf_publish:
+        env["ALLOW_RANDOM_HF_PUBLISH"] = "1"
+
+    return env
 
 
 def _load_github_event_payload() -> dict[str, object]:
@@ -205,6 +271,14 @@ def _build_parser() -> argparse.ArgumentParser:
             help="Select which runtime repo to execute: sibling vllm-hust or baseline reference-repos/vllm.",
         )
 
+    def add_env_argument(command_parser: argparse.ArgumentParser) -> None:
+        command_parser.add_argument(
+            "--env",
+            action="append",
+            default=[],
+            help="Extra environment variable in key=value form. Repeat to pass multiple values.",
+        )
+
     tests_parser = subparsers.add_parser(
         "list-tests",
         help="List official upstream benchmark tests from the sibling vllm-hust repo.",
@@ -235,6 +309,51 @@ def _build_parser() -> argparse.ArgumentParser:
     suite_parser.add_argument("--execute", action="store_true")
     suite_parser.add_argument("--env", action="append", default=[])
 
+    ascend_ci_parser = subparsers.add_parser(
+        "run-ascend-ci",
+        help="Run the vllm-hust Ascend benchmark CI orchestration script from this wrapper repo.",
+    )
+    ascend_ci_parser.add_argument("--execute", action="store_true")
+    add_env_argument(ascend_ci_parser)
+    ascend_ci_parser.add_argument("--run-id")
+    ascend_ci_parser.add_argument("--result-root")
+    ascend_ci_parser.add_argument("--raw-result-file")
+    ascend_ci_parser.add_argument("--submissions-root")
+    ascend_ci_parser.add_argument("--submission-dir")
+    ascend_ci_parser.add_argument("--aggregate-output-dir")
+    ascend_ci_parser.add_argument("--server-log")
+    ascend_ci_parser.add_argument(
+        "--scenario",
+        choices=["random-online", "sharegpt-online"],
+        help="Benchmark scenario forwarded to BENCH_SCENARIO.",
+    )
+    ascend_ci_parser.add_argument("--dataset-path")
+    ascend_ci_parser.add_argument("--constraints-file")
+    ascend_ci_parser.add_argument("--runtime-root")
+    ascend_ci_parser.add_argument("--model")
+    ascend_ci_parser.add_argument("--model-parameters")
+    ascend_ci_parser.add_argument("--model-precision")
+    ascend_ci_parser.add_argument("--host")
+    ascend_ci_parser.add_argument("--port", type=int)
+    ascend_ci_parser.add_argument("--dtype")
+    ascend_ci_parser.add_argument("--max-model-len", type=int)
+    ascend_ci_parser.add_argument("--max-num-seqs", type=int)
+    ascend_ci_parser.add_argument("--num-prompts", type=int)
+    ascend_ci_parser.add_argument("--random-input-len", type=int)
+    ascend_ci_parser.add_argument("--random-output-len", type=int)
+    ascend_ci_parser.add_argument("--random-batch-size", type=int)
+    ascend_ci_parser.add_argument("--request-rate")
+    ascend_ci_parser.add_argument("--max-concurrency", type=int)
+    ascend_ci_parser.add_argument("--input-len", type=int)
+    ascend_ci_parser.add_argument("--output-len", type=int)
+    ascend_ci_parser.add_argument("--hardware-vendor")
+    ascend_ci_parser.add_argument("--hardware-chip-model")
+    ascend_ci_parser.add_argument("--chip-count", type=int)
+    ascend_ci_parser.add_argument("--node-count", type=int)
+    ascend_ci_parser.add_argument("--publish-to-hf", action="store_true")
+    ascend_ci_parser.add_argument("--hf-repo-id")
+    ascend_ci_parser.add_argument("--allow-random-hf-publish", action="store_true")
+
     list_parser = subparsers.add_parser("list-scenarios", help="List official mirrored scenarios.")
     list_parser.add_argument("--benchmark-type", choices=["serve", "throughput", "latency"])
     list_parser.add_argument("--tag")
@@ -258,6 +377,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--set", action="append", default=[])
     run_parser.add_argument("--execute", action="store_true")
     add_runtime_argument(run_parser)
+    add_env_argument(run_parser)
 
     run_both_parser = subparsers.add_parser(
         "run-both",
@@ -267,6 +387,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run_both_parser.add_argument("--model", required=True)
     run_both_parser.add_argument("--set", action="append", default=[])
     run_both_parser.add_argument("--execute", action="store_true")
+    add_env_argument(run_both_parser)
 
     bench_parser = subparsers.add_parser(
         "bench",
@@ -275,6 +396,7 @@ def _build_parser() -> argparse.ArgumentParser:
     bench_parser.add_argument("bench_args", nargs=argparse.REMAINDER)
     bench_parser.add_argument("--execute", action="store_true")
     add_runtime_argument(bench_parser)
+    add_env_argument(bench_parser)
 
     script_parser = subparsers.add_parser(
         "run-script",
@@ -284,6 +406,7 @@ def _build_parser() -> argparse.ArgumentParser:
     script_parser.add_argument("script_args", nargs=argparse.REMAINDER)
     script_parser.add_argument("--execute", action="store_true")
     add_runtime_argument(script_parser)
+    add_env_argument(script_parser)
 
     analyze_parser = subparsers.add_parser("analyze-upstream", help="Print the upstream benchmark boundary and mirrored design points.")
     analyze_parser.add_argument("--format", choices=["text"], default="text")
@@ -620,6 +743,24 @@ def main(argv: list[str] | None = None) -> int:
             env=env,
         )
 
+    if args.command == "run-ascend-ci":
+        layout = resolve_repo_layout()
+        try:
+            validate_repo_layout(layout)
+            user_env = _parse_set_arguments(args.env)
+            command = build_ascend_benchmark_ci_command(layout)
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
+
+        env = {**user_env, **_collect_ascend_ci_env(args, layout)}
+        return run_external_command(
+            command,
+            cwd=layout.vllm_hust_repo,
+            execute=args.execute,
+            env=env,
+        )
+
     if args.command == "run-both":
         runtimes = ("vllm-hust", "vllm")
         for index, runtime in enumerate(runtimes):
@@ -636,6 +777,8 @@ def main(argv: list[str] | None = None) -> int:
             ]
             for override in args.set:
                 runtime_argv.extend(["--set", override])
+            for env_var in args.env:
+                runtime_argv.extend(["--env", env_var])
             if args.execute:
                 runtime_argv.append("--execute")
             exit_code = main(runtime_argv)
@@ -930,6 +1073,7 @@ def main(argv: list[str] | None = None) -> int:
         layout = resolve_repo_layout()
         try:
             runtime_repo = validate_runtime_repo(layout, args.runtime)
+            env = _parse_set_arguments(args.env)
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
@@ -937,12 +1081,13 @@ def main(argv: list[str] | None = None) -> int:
         if bench_args and bench_args[0] == "--":
             bench_args = bench_args[1:]
         command = build_vllm_bench_command(bench_args, runtime_engine=args.runtime)
-        return run_external_command(command, cwd=runtime_repo, execute=args.execute)
+        return run_external_command(command, cwd=runtime_repo, execute=args.execute, env=env)
 
     if args.command == "run-script":
         layout = resolve_repo_layout()
         try:
             runtime_repo = validate_runtime_repo(layout, args.runtime, require_benchmarks=True)
+            env = _parse_set_arguments(args.env)
             script_args = list(args.script_args)
             if script_args and script_args[0] == "--":
                 script_args = script_args[1:]
@@ -955,10 +1100,11 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
-        return run_external_command(command, cwd=runtime_repo, execute=args.execute)
+        return run_external_command(command, cwd=runtime_repo, execute=args.execute, env=env)
 
     try:
         overrides = _parse_set_arguments(args.set)
+        env = _parse_set_arguments(getattr(args, "env", []))
     except ValueError as error:
         print(str(error), file=sys.stderr)
         return 2
@@ -1000,8 +1146,9 @@ def main(argv: list[str] | None = None) -> int:
                 runtime_engine=args.runtime,
             )
             if args.command == "build-command" or not args.execute:
-                print(f"server_command: {shlex.join(server_command)}")
-                print(f"client_command: {shlex.join(client_command)}")
+                env_prefix = _format_env_prefix(env)
+                print(f"server_command: {env_prefix}{shlex.join(server_command)}")
+                print(f"client_command: {env_prefix}{shlex.join(client_command)}")
                 return 0
 
             layout = resolve_repo_layout()
@@ -1015,6 +1162,7 @@ def main(argv: list[str] | None = None) -> int:
                 model=args.model,
                 bench_parameters=bench_parameters,
                 serve_parameters=serve_parameters,
+                env=env,
                 runtime_engine=args.runtime,
             )
     else:
@@ -1026,7 +1174,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "run":
         if not args.execute:
-            print(shlex.join(command))
+            print(f"{_format_env_prefix(env)}{shlex.join(command)}")
             return 0
         layout = resolve_repo_layout()
         try:
@@ -1038,6 +1186,7 @@ def main(argv: list[str] | None = None) -> int:
             build_vllm_bench_command(command[2:], runtime_engine=args.runtime),
             cwd=runtime_repo,
             execute=True,
+            env=env,
         )
 
     parser.error(f"Unsupported command: {args.command}")

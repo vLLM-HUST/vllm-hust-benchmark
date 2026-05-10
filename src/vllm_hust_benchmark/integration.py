@@ -142,6 +142,35 @@ def validate_repo_layout(layout: RepoLayout) -> None:
         raise ValueError(f"vllm-hust performance benchmark suite not found: {suite_script}")
 
 
+def _is_usable_executable(executable_path: str) -> bool:
+    path = Path(executable_path)
+    if not path.is_file() or not os.access(path, os.X_OK):
+        return False
+
+    try:
+        first_line = path.read_bytes().splitlines()[0] if path.stat().st_size else b""
+    except OSError:
+        return False
+
+    if not first_line.startswith(b"#!"):
+        return True
+
+    shebang = first_line[2:].decode("utf-8", errors="ignore").strip()
+    if not shebang:
+        return True
+
+    parts = shlex.split(shebang)
+    if not parts:
+        return True
+
+    interpreter = parts[0]
+    if Path(interpreter).name == "env":
+        if len(parts) < 2:
+            return False
+        return shutil.which(parts[1]) is not None
+    return Path(interpreter).is_file() and os.access(interpreter, os.X_OK)
+
+
 def build_vllm_command(
     command_args: list[str],
     *,
@@ -155,7 +184,7 @@ def build_vllm_command(
 
     for executable_name in executable_names:
         executable_path = shutil.which(executable_name)
-        if executable_path:
+        if executable_path and _is_usable_executable(executable_path):
             return [executable_path, *command_args]
     return [sys.executable, "-m", "vllm.entrypoints.cli.main", *command_args]
 
@@ -273,7 +302,12 @@ def build_benchmark_script_command(
     script_path = runtime_repo / "benchmarks" / script_name
     if not script_path.is_file():
         raise ValueError(f"benchmark script not found: {script_path}")
-    return [sys.executable, str(script_path), *script_args]
+
+    if script_path.suffix == ".py":
+        return [sys.executable, str(script_path), *script_args]
+    if script_path.suffix == ".sh":
+        return ["bash", str(script_path), *script_args]
+    return [str(script_path), *script_args]
 
 
 def build_performance_suite_command(layout: RepoLayout) -> list[str]:
@@ -285,6 +319,19 @@ def build_performance_suite_command(layout: RepoLayout) -> list[str]:
         / "run-performance-benchmarks.sh"
     )
     return ["bash", str(suite_script)]
+
+
+def build_ascend_benchmark_ci_command(layout: RepoLayout) -> list[str]:
+    ci_script = (
+        layout.vllm_hust_repo
+        / ".github"
+        / "workflows"
+        / "scripts"
+        / "run_ascend_benchmark_ci.sh"
+    )
+    if not ci_script.is_file():
+        raise ValueError(f"vllm-hust Ascend benchmark CI script not found: {ci_script}")
+    return ["bash", str(ci_script)]
 
 
 def _format_env_prefix(env: Mapping[str, object] | None) -> str:

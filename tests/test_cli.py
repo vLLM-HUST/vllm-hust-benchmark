@@ -43,6 +43,25 @@ def test_run_without_execute_only_prints(capsys) -> None:
     assert "--input-len 2048" in captured.out
 
 
+def test_run_without_execute_prints_env_prefix(capsys) -> None:
+    exit_code = main(
+        [
+            "run",
+            "random-latency",
+            "--model",
+            "meta-llama/Llama-3.1-8B-Instruct",
+            "--env",
+            "HF_HOME=/tmp/hf-home",
+            "--set",
+            "input_len=64",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "HF_HOME=/tmp/hf-home vllm bench latency" in captured.out
+
+
 def test_run_both_without_execute_prints_both_runtimes(capsys) -> None:
     exit_code = main(
         [
@@ -108,6 +127,34 @@ def test_run_both_execute_runs_runtimes_in_order(monkeypatch, tmp_path: Path) ->
     assert [command[0] for command, _, _ in calls] == ["vllm-hust", "vllm"]
     assert all(execute is True for _, _, execute in calls)
     assert all("--model" in command and "foo/bar" in command for command, _, _ in calls)
+
+
+def test_run_both_forwards_env_to_nested_runs(monkeypatch) -> None:
+    captured_argv: list[list[str]] = []
+    real_main = cli_module.main
+
+    def fake_main(argv=None):
+        if argv and argv[0] == "run":
+            captured_argv.append(list(argv))
+            return 0
+        return real_main(argv)
+
+    monkeypatch.setattr(cli_module, "main", fake_main)
+
+    exit_code = fake_main(
+        [
+            "run-both",
+            "random-latency",
+            "--model",
+            "foo/bar",
+            "--env",
+            "HF_HOME=/tmp/hf-home",
+        ]
+    )
+
+    assert exit_code == 0
+    assert len(captured_argv) == 2
+    assert all("--env" in argv and "HF_HOME=/tmp/hf-home" in argv for argv in captured_argv)
 
 
 def test_parse_set_arguments_normalizes_hyphenated_keys() -> None:
@@ -280,6 +327,110 @@ def test_run_test_without_execute_prints_suite_wrapper(
     assert "TEST_SELECTOR='^latency_llama8B_tp1$' DRY_RUN=1 bash" in captured.out
 
 
+def test_run_ascend_ci_without_execute_prints_wrapped_command(
+    capsys, monkeypatch, tmp_path: Path
+) -> None:
+    vllm_repo = tmp_path / "vllm-hust"
+    vllm_repo.mkdir()
+    (vllm_repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+    (vllm_repo / "benchmarks").mkdir()
+    tests_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "tests"
+    tests_dir.mkdir(parents=True)
+    suite_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "scripts"
+    suite_dir.mkdir(parents=True)
+    (suite_dir / "run-performance-benchmarks.sh").write_text("#!/bin/bash\n", encoding="utf-8")
+    ci_dir = vllm_repo / ".github" / "workflows" / "scripts"
+    ci_dir.mkdir(parents=True)
+    (ci_dir / "run_ascend_benchmark_ci.sh").write_text("#!/bin/bash\n", encoding="utf-8")
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text("print('ok')\n", encoding="utf-8")
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=vllm_repo,
+        website_repo=website_repo,
+    )
+    monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
+
+    exit_code = main([
+        "run-ascend-ci",
+        "--scenario",
+        "random-online",
+        "--model",
+        "foo/bar",
+        "--num-prompts",
+        "4",
+    ])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "WORKSPACE_ROOT=" in captured.out
+    assert "BENCH_SCENARIO=random-online" in captured.out
+    assert "MODEL_NAME=foo/bar" in captured.out
+    assert "BENCH_NUM_PROMPTS=4" in captured.out
+    assert "run_ascend_benchmark_ci.sh" in captured.out
+
+
+def test_run_ascend_ci_execute_forwards_environment(monkeypatch, tmp_path: Path) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+    monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr("vllm_hust_benchmark.cli.validate_repo_layout", lambda _layout: None)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.build_ascend_benchmark_ci_command",
+        lambda _layout: ["bash", "run_ascend_benchmark_ci.sh"],
+    )
+
+    captured: dict[str, object] = {}
+
+    def fake_run_external_command(command, *, cwd, execute, env=None):
+        captured["command"] = command
+        captured["cwd"] = cwd
+        captured["execute"] = execute
+        captured["env"] = env
+        return 0
+
+    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+
+    exit_code = main(
+        [
+            "run-ascend-ci",
+            "--execute",
+            "--env",
+            "EXTRA_FLAG=1",
+            "--scenario",
+            "sharegpt-online",
+            "--dataset-path",
+            "/tmp/sharegpt.json",
+            "--constraints-file",
+            "/tmp/constraints.json",
+            "--publish-to-hf",
+            "--hf-repo-id",
+            "owner/repo",
+            "--max-concurrency",
+            "2",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["command"] == ["bash", "run_ascend_benchmark_ci.sh"]
+    assert captured["cwd"] == layout.vllm_hust_repo
+    assert captured["execute"] is True
+    assert captured["env"]["EXTRA_FLAG"] == 1
+    assert captured["env"]["BENCH_SCENARIO"] == "sharegpt-online"
+    assert captured["env"]["BENCH_DATASET_PATH"] == "/tmp/sharegpt.json"
+    assert captured["env"]["BENCH_CONSTRAINTS_FILE"] == "/tmp/constraints.json"
+    assert captured["env"]["PUBLISH_TO_HF"] == "1"
+    assert captured["env"]["HF_REPO_ID"] == "owner/repo"
+    assert captured["env"]["BENCH_MAX_CONCURRENCY"] == 2
+
+
 def test_bench_without_execute_prints_wrapped_command(
     capsys, monkeypatch, tmp_path: Path
 ) -> None:
@@ -304,6 +455,132 @@ def test_bench_without_execute_prints_wrapped_command(
         prefix in captured.out
         for prefix in ("vllm-hust", "vllm ", "-m vllm.entrypoints.cli.main")
     )
+
+
+def test_bench_execute_forwards_env(monkeypatch, tmp_path: Path) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+    monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_runtime_repo",
+        lambda _layout, _runtime, require_benchmarks=False: layout.vllm_hust_repo,
+    )
+
+    captured: dict[str, object] = {}
+
+    def fake_run_external_command(command, *, cwd, execute, env=None):
+        captured["command"] = command
+        captured["cwd"] = cwd
+        captured["execute"] = execute
+        captured["env"] = env
+        return 0
+
+    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+
+    exit_code = main(
+        [
+            "bench",
+            "--execute",
+            "--env",
+            "HF_HOME=/tmp/hf-home",
+            "throughput",
+            "--model",
+            "foo/bar",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["cwd"] == layout.vllm_hust_repo
+    assert captured["execute"] is True
+    assert captured["env"] == {"HF_HOME": "/tmp/hf-home"}
+
+
+def test_run_script_execute_forwards_env(monkeypatch, tmp_path: Path) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+    monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_runtime_repo",
+        lambda _layout, _runtime, require_benchmarks=False: layout.vllm_hust_repo,
+    )
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.build_benchmark_script_command",
+        lambda _layout, _name, _args, runtime_engine=DEFAULT_RUNTIME_ENGINE: ["bash", "benchmark.sh"],
+    )
+
+    captured: dict[str, object] = {}
+
+    def fake_run_external_command(command, *, cwd, execute, env=None):
+        captured["command"] = command
+        captured["cwd"] = cwd
+        captured["execute"] = execute
+        captured["env"] = env
+        return 0
+
+    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+
+    exit_code = main(
+        [
+            "run-script",
+            "--execute",
+            "--env",
+            "FOO=bar",
+            "run_structured_output_benchmark.sh",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["command"] == ["bash", "benchmark.sh"]
+    assert captured["env"] == {"FOO": "bar"}
+
+
+def test_run_execute_serve_forwards_env_to_local_runner(monkeypatch, tmp_path: Path) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+    monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr("vllm_hust_benchmark.cli.validate_runtime_repo", lambda _layout, _runtime: layout.vllm_hust_repo)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.split_vllm_serve_scenario_parameters",
+        lambda *_args, **_kwargs: (
+            {"backend": "vllm", "dataset_name": "random", "input_len": 8},
+            {"gpu_memory_utilization": 0.4},
+        ),
+    )
+
+    captured: dict[str, object] = {}
+
+    def fake_run_local_serve_benchmark(**kwargs):
+        captured.update(kwargs)
+        return 0
+
+    monkeypatch.setattr("vllm_hust_benchmark.cli.run_local_serve_benchmark", fake_run_local_serve_benchmark)
+
+    exit_code = main(
+        [
+            "run",
+            "random-online",
+            "--model",
+            "foo/bar",
+            "--execute",
+            "--env",
+            "HF_HOME=/tmp/hf-home",
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured["env"] == {"HF_HOME": "/tmp/hf-home"}
 
 
 def test_bench_runtime_vllm_uses_reference_repo(capsys, monkeypatch, tmp_path: Path) -> None:
@@ -824,11 +1101,18 @@ def test_export_leaderboard_artifact_rejects_zero_long_context_length(
 
 
 
-def test_build_vllm_bench_command_prefers_console_script():
-    with patch("vllm_hust_benchmark.integration.shutil.which", return_value="/fake/bin/vllm"):
+def test_build_vllm_bench_command_prefers_console_script(tmp_path: Path):
+    executable = tmp_path / "vllm"
+    executable.write_text(
+        "#!/usr/bin/env python3\nprint('ok')\n",
+        encoding="utf-8",
+    )
+    executable.chmod(0o755)
+
+    with patch("vllm_hust_benchmark.integration.shutil.which", return_value=str(executable)):
         command = build_vllm_bench_command(["latency", "--model", "tiny-model"])
 
-    assert command == ["/fake/bin/vllm", "bench", "latency", "--model", "tiny-model"]
+    assert command == [str(executable), "bench", "latency", "--model", "tiny-model"]
 
 
 def test_build_vllm_bench_command_falls_back_to_python_module():

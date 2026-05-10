@@ -9,6 +9,7 @@ from vllm_hust_benchmark.integration import (
     RepoLayout,
     _build_effective_env,
     aggregate_to_website,
+    build_ascend_benchmark_ci_command,
     build_benchmark_script_command,
     build_performance_suite_command,
     build_vllm_bench_command,
@@ -71,21 +72,56 @@ def test_build_benchmark_script_command(tmp_path: Path) -> None:
 
     command = build_benchmark_script_command(layout, "benchmark_serving.py", ["--help"])
 
+    assert command[0] == integration.sys.executable
     assert command[1] == str(script)
     assert command[-1] == "--help"
 
 
-def test_build_vllm_bench_command_prefers_console_script(monkeypatch) -> None:
+def test_build_benchmark_script_command_uses_bash_for_shell_scripts(tmp_path: Path) -> None:
+    repo = tmp_path / "vllm-hust"
+    script = repo / "benchmarks" / "run_structured_output_benchmark.sh"
+    script.parent.mkdir(parents=True)
+    script.write_text("#!/usr/bin/env bash\necho ok\n", encoding="utf-8")
+    script.chmod(0o755)
+    (repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=repo,
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+
+    command = build_benchmark_script_command(
+        layout,
+        "run_structured_output_benchmark.sh",
+        ["--dry-run"],
+    )
+
+    assert command == ["bash", str(script), "--dry-run"]
+
+
+def test_build_vllm_bench_command_prefers_console_script(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    executable = tmp_path / "vllm-hust"
+    executable.write_text(
+        f"#!{integration.sys.executable}\nprint('ok')\n",
+        encoding="utf-8",
+    )
+    executable.chmod(0o755)
+
     monkeypatch.setattr(
         integration.shutil,
         "which",
-        lambda name: "/tmp/bin/vllm-hust" if name == "vllm-hust" else None,
+        lambda name: str(executable) if name == "vllm-hust" else None,
     )
 
     command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
 
     assert command == [
-        "/tmp/bin/vllm-hust",
+        str(executable),
         "bench",
         "serve",
         "--model",
@@ -93,22 +129,90 @@ def test_build_vllm_bench_command_prefers_console_script(monkeypatch) -> None:
     ]
 
 
-def test_build_vllm_bench_command_falls_back_to_vllm_console_script(monkeypatch) -> None:
+def test_build_vllm_bench_command_falls_back_to_vllm_console_script(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    executable = tmp_path / "vllm"
+    executable.write_text(
+        f"#!{integration.sys.executable}\nprint('ok')\n",
+        encoding="utf-8",
+    )
+    executable.chmod(0o755)
+
     monkeypatch.setattr(
         integration.shutil,
         "which",
-        lambda name: "/tmp/bin/vllm" if name == "vllm" else None,
+        lambda name: str(executable) if name == "vllm" else None,
     )
 
     command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
 
-    assert command == ["/tmp/bin/vllm", "bench", "serve", "--model", "foo/bar"]
+    assert command == [str(executable), "bench", "serve", "--model", "foo/bar"]
 
 
 def test_build_vllm_bench_command_falls_back_to_python_module(monkeypatch) -> None:
     monkeypatch.setattr(integration.shutil, "which", lambda name: None)
 
     command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
+
+    assert command[:4] == [integration.sys.executable, "-m", "vllm.entrypoints.cli.main", "bench"]
+    assert command[-3:] == ["serve", "--model", "foo/bar"]
+
+
+def test_build_vllm_bench_command_skips_broken_console_script(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    broken_vllm_hust = tmp_path / "vllm-hust"
+    broken_vllm_hust.write_text(
+        "#!/missing/python\nprint('broken')\n",
+        encoding="utf-8",
+    )
+    broken_vllm_hust.chmod(0o755)
+    fallback_vllm = tmp_path / "vllm"
+    fallback_vllm.write_text(
+        f"#!{integration.sys.executable}\nprint('ok')\n",
+        encoding="utf-8",
+    )
+    fallback_vllm.chmod(0o755)
+
+    monkeypatch.setattr(
+        integration.shutil,
+        "which",
+        lambda name: (
+            str(broken_vllm_hust)
+            if name == "vllm-hust"
+            else str(fallback_vllm) if name == "vllm" else None
+        ),
+    )
+
+    command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
+
+    assert command == [str(fallback_vllm), "bench", "serve", "--model", "foo/bar"]
+
+
+def test_build_vllm_bench_command_falls_back_when_console_script_shebang_is_stale(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    broken_vllm = tmp_path / "vllm"
+    broken_vllm.write_text(
+        "#!/missing/python\nprint('broken')\n",
+        encoding="utf-8",
+    )
+    broken_vllm.chmod(0o755)
+
+    monkeypatch.setattr(
+        integration.shutil,
+        "which",
+        lambda name: str(broken_vllm) if name == "vllm" else None,
+    )
+
+    command = build_vllm_bench_command(
+        ["serve", "--model", "foo/bar"],
+        runtime_engine="vllm",
+    )
 
     assert command[:4] == [integration.sys.executable, "-m", "vllm.entrypoints.cli.main", "bench"]
     assert command[-3:] == ["serve", "--model", "foo/bar"]
@@ -196,6 +300,24 @@ def test_build_performance_suite_command(tmp_path: Path) -> None:
 
     assert command[0] == "bash"
     assert command[1].endswith("run-performance-benchmarks.sh")
+
+
+def test_build_ascend_benchmark_ci_command(tmp_path: Path) -> None:
+    repo = tmp_path / "vllm-hust"
+    script = repo / ".github" / "workflows" / "scripts" / "run_ascend_benchmark_ci.sh"
+    script.parent.mkdir(parents=True)
+    script.write_text("#!/usr/bin/env bash\necho ok\n", encoding="utf-8")
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=repo,
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+
+    command = build_ascend_benchmark_ci_command(layout)
+
+    assert command == ["bash", str(script)]
 
 
 def test_aggregate_to_website_without_execute_prints_command(
