@@ -239,3 +239,31 @@ This produces:
 - a website-compatible leaderboard artifact under `.benchmarks/official-ascend-goal-baseline/submission/`
 
 The exported artifact can then be aggregated into `vllm-hust-website` with `publish-website` or `vllm-hust-website/scripts/aggregate_results.py`.
+
+## Batch Same-Spec Matrices
+
+When you want to benchmark one machine group under multiple runtime settings and keep every setting visible on the website leaderboard, use the matrix wrapper instead of invoking the single-spec runner repeatedly by hand.
+
+Files:
+
+- `scripts/run-current-ascend-same-spec.sh`: execute one resolved same-spec benchmark and export one submission
+- `scripts/run-current-ascend-same-spec-matrix.sh`: iterate a directory or list of spec files, assign one result directory per spec, and optionally regenerate website data after the whole batch
+
+Examples:
+
+```bash
+# run every JSON spec under one directory
+bash scripts/run-current-ascend-same-spec-matrix.sh docs/spec-matrix/
+
+# run a hand-picked setting list and refresh the local website snapshot afterwards
+PUBLISH_WEBSITE=1 bash scripts/run-current-ascend-same-spec-matrix.sh \
+	docs/spec-matrix/random-online-tp1.json \
+	docs/spec-matrix/random-online-tp2.json \
+	docs/spec-matrix/random-online-tp4.json
+```
+
+Notes:
+
+- The matrix wrapper does not replace the single-spec runner; it only orchestrates repeated calls to it.
+- Every spec gets an isolated `RESULT_DIR` under `.benchmarks/<matrix-run-id>/`, so raw results, resolved same-spec payloads, and exported submissions do not overwrite each other.
+- Set `PUBLISH_WEBSITE=1` only after you are ready to regenerate `vllm-hust-website/data` from the full batch output.

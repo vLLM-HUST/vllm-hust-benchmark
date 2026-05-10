@@ -1,0 +1,33 @@
+{
+  "id": "current-ascend-random-online-qwen25-14b-910b3-throughput",
+  "label": "Current Ascend random-online throughput-lean setting",
+  "scenario": "random-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B3",
+  "chip_count": 1,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 1,
+    "max_num_seqs": 24,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 8000
+  },
+  "client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "random",
+    "num_prompts": 200,
+    "input_len": 1024,
+    "output_len": 256,
+    "request_rate": 8,
+    "host": "127.0.0.1",
+    "port": 8000
+  }
+}
