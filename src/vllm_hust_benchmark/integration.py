@@ -664,6 +664,240 @@ def _normalize_submission_history_baseline_markers(
         )
 
 
+def _get_same_spec_payload(entry: Mapping[str, Any]) -> Mapping[str, Any]:
+    payload = entry.get("same_spec")
+    return payload if isinstance(payload, Mapping) else {}
+
+
+def _get_same_spec_id(entry: Mapping[str, Any]) -> str | None:
+    spec_id = str(_get_same_spec_payload(entry).get("spec_id") or "").strip()
+    return spec_id or None
+
+
+def _get_same_spec_hash(entry: Mapping[str, Any]) -> str | None:
+    spec_hash = str(
+        _get_same_spec_payload(entry).get("resolved_spec_hash") or ""
+    ).strip()
+    return spec_hash or None
+
+
+def _build_compare_setting_signature(entry: Mapping[str, Any]) -> str:
+    same_spec_hash = _get_same_spec_hash(entry)
+    if same_spec_hash:
+        return same_spec_hash
+
+    workload = entry.get("workload") if isinstance(entry.get("workload"), Mapping) else {}
+    same_spec = _get_same_spec_payload(entry)
+    server = same_spec.get("resolved_server_parameters")
+    server = server if isinstance(server, Mapping) else {}
+    client = same_spec.get("resolved_client_parameters")
+    client = client if isinstance(client, Mapping) else {}
+
+    input_length = workload.get("input_length")
+    output_length = workload.get("output_length")
+    tensor_parallel = server.get("tensor_parallel_size")
+    pipeline_parallel = server.get("pipeline_parallel_size")
+    dtype = server.get("dtype")
+    request_rate = client.get("request_rate")
+    return "|".join(
+        [
+            str(input_length if input_length is not None else "unknown-input"),
+            str(output_length if output_length is not None else "unknown-output"),
+            str(tensor_parallel if tensor_parallel is not None else "unknown-tp"),
+            str(pipeline_parallel if pipeline_parallel is not None else "unknown-pp"),
+            str(dtype or "unknown-dtype"),
+            str(request_rate if request_rate is not None else "unknown-rps"),
+        ]
+    )
+
+
+def _build_compare_scope_key_debug(entry: Mapping[str, Any]) -> str:
+    model = str((entry.get("model") or {}).get("name") or "unknown-model")
+    hardware = str(
+        (entry.get("hardware") or {}).get("chip_model") or "unknown-hardware"
+    )
+    precision = str((entry.get("model") or {}).get("precision") or "unknown-precision")
+    workload = _extract_workload_name(entry)
+    config_type = str(entry.get("config_type") or "unknown-config")
+    chip_count = int((entry.get("hardware") or {}).get("chip_count") or 0)
+    node_count = int((entry.get("cluster") or {}).get("node_count") or 1)
+    setting_signature = _build_compare_setting_signature(entry)
+    return "|".join(
+        [
+            model,
+            hardware,
+            precision,
+            workload,
+            config_type,
+            str(chip_count),
+            str(node_count),
+            setting_signature,
+        ]
+    )
+
+
+def _normalize_goal_model_name(model_name: Any) -> str:
+    raw_name = str(model_name or "unknown-model").strip()
+    if not raw_name:
+        return "unknown-model"
+    if "/" not in raw_name:
+        return raw_name
+    return raw_name.rsplit("/", maxsplit=1)[-1] or raw_name
+
+
+def _build_goal_scope_key_debug(entry: Mapping[str, Any]) -> str:
+    model = _normalize_goal_model_name((entry.get("model") or {}).get("name"))
+    hardware = str(
+        (entry.get("hardware") or {}).get("chip_model") or "unknown-hardware"
+    )
+    precision = str((entry.get("model") or {}).get("precision") or "unknown-precision")
+    workload = _extract_workload_name(entry)
+    config_type = str(entry.get("config_type") or "unknown-config")
+    chip_count = int((entry.get("hardware") or {}).get("chip_count") or 0)
+    node_count = int((entry.get("cluster") or {}).get("node_count") or 1)
+    setting_signature = _build_compare_setting_signature(entry)
+    return "|".join(
+        [
+            model,
+            hardware,
+            precision,
+            workload,
+            config_type,
+            str(chip_count),
+            str(node_count),
+            setting_signature,
+        ]
+    )
+
+
+def _is_goal_baseline_entry_debug(entry: Mapping[str, Any]) -> bool:
+    metadata = entry.get("metadata") if isinstance(entry.get("metadata"), Mapping) else {}
+    engine = str(entry.get("engine") or metadata.get("engine") or "unknown").strip().lower()
+    engine_version = str(
+        entry.get("engine_version") or metadata.get("engine_version") or ""
+    ).strip()
+    github_repository = str(metadata.get("github_repository") or "").strip().lower()
+    return (
+        engine == "vllm"
+        and engine_version.startswith("0.11.0")
+        and github_repository == "vllm-project/vllm-ascend"
+    )
+
+
+def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
+    try:
+        single = _load_snapshot_json(data_dir / "leaderboard_single.json")
+        multi = _load_snapshot_json(data_dir / "leaderboard_multi.json")
+        compare = _load_snapshot_json(data_dir / "leaderboard_compare.json")
+    except ValueError as exc:
+        print(f"compare debug unavailable: {exc}", file=sys.stderr)
+        return
+
+    entries = [
+        *(single if isinstance(single, list) else []),
+        *(multi if isinstance(multi, list) else []),
+    ]
+    print("aggregated compare debug: entries", file=sys.stderr)
+    for entry in sorted(
+        entries,
+        key=lambda item: (
+            _normalize_engine(item),
+            str((item.get("model") or {}).get("name") or ""),
+            _extract_workload_name(item),
+            str((item.get("metadata") or {}).get("submitted_at") or ""),
+        ),
+    ):
+        metadata = entry.get("metadata") if isinstance(entry.get("metadata"), Mapping) else {}
+        accountable = {}
+        constraints = entry.get("constraints")
+        if isinstance(constraints, Mapping) and isinstance(
+            constraints.get("accountable_scope"), Mapping
+        ):
+            accountable = constraints.get("accountable_scope")
+        print(
+            "  "
+            + " | ".join(
+                [
+                    f"engine={_normalize_engine(entry)}",
+                    f"engine_version={str(entry.get('engine_version') or metadata.get('engine_version') or '')}",
+                    f"model={str((entry.get('model') or {}).get('name') or '')}",
+                    f"workload={_extract_workload_name(entry)}",
+                    f"config_type={str(entry.get('config_type') or '')}",
+                    f"chip_count={int((entry.get('hardware') or {}).get('chip_count') or 0)}",
+                    f"node_count={int((entry.get('cluster') or {}).get('node_count') or 1)}",
+                    f"baseline_engine={str(accountable.get('baseline_engine') or '')}",
+                    f"spec_id={_get_same_spec_id(entry) or ''}",
+                    f"spec_hash={_get_same_spec_hash(entry) or ''}",
+                    f"github_repository={str(metadata.get('github_repository') or '')}",
+                ]
+            ),
+            file=sys.stderr,
+        )
+
+    compare_grouped: dict[str, list[Mapping[str, Any]]] = {}
+    goal_grouped: dict[str, list[Mapping[str, Any]]] = {}
+    for entry in entries:
+        compare_grouped.setdefault(_build_compare_scope_key_debug(entry), []).append(entry)
+        goal_grouped.setdefault(_build_goal_scope_key_debug(entry), []).append(entry)
+
+    print("aggregated compare debug: compare-scope candidates", file=sys.stderr)
+    for scope_key, scope_entries in sorted(compare_grouped.items()):
+        engines = sorted({_normalize_engine(entry) for entry in scope_entries})
+        if len(engines) < 2:
+            continue
+        print(f"  scope={scope_key}", file=sys.stderr)
+        for entry in scope_entries:
+            print(
+                "    "
+                + " | ".join(
+                    [
+                        f"engine={_normalize_engine(entry)}",
+                        f"model={str((entry.get('model') or {}).get('name') or '')}",
+                        f"spec_hash={_get_same_spec_hash(entry) or ''}",
+                        f"submitted_at={str((entry.get('metadata') or {}).get('submitted_at') or '')}",
+                    ]
+                ),
+                file=sys.stderr,
+            )
+
+    print("aggregated compare debug: goal-scope candidates", file=sys.stderr)
+    for scope_key, scope_entries in sorted(goal_grouped.items()):
+        current_entries = [entry for entry in scope_entries if _normalize_engine(entry) == "vllm-hust"]
+        baseline_entries = [entry for entry in scope_entries if _is_goal_baseline_entry_debug(entry)]
+        if not current_entries and not baseline_entries:
+            continue
+        print(
+            f"  scope={scope_key} | current={len(current_entries)} | baseline={len(baseline_entries)}",
+            file=sys.stderr,
+        )
+        for entry in current_entries + baseline_entries:
+            print(
+                "    "
+                + " | ".join(
+                    [
+                        f"engine={_normalize_engine(entry)}",
+                        f"model={str((entry.get('model') or {}).get('name') or '')}",
+                        f"spec_hash={_get_same_spec_hash(entry) or ''}",
+                        f"github_repository={str((entry.get('metadata') or {}).get('github_repository') or '')}",
+                    ]
+                ),
+                file=sys.stderr,
+            )
+
+    hard_constraints = compare.get("hard_constraints") if isinstance(compare, Mapping) else {}
+    hard_constraints = hard_constraints if isinstance(hard_constraints, Mapping) else {}
+    scopes = hard_constraints.get("scopes") if isinstance(hard_constraints.get("scopes"), list) else []
+    goal_progress = compare.get("goal_progress") if isinstance(compare, Mapping) else {}
+    goal_progress = goal_progress if isinstance(goal_progress, Mapping) else {}
+    print(
+        "aggregated compare debug: summary"
+        f" | compare_group_count={int(compare.get('group_count') or 0) if isinstance(compare, Mapping) else 0}"
+        f" | goal_pair_count={len(goal_progress.get('pairs') or []) if isinstance(goal_progress.get('pairs'), list) else 0}"
+        f" | hard_constraint_scope_count={len(scopes)}",
+        file=sys.stderr,
+    )
+
+
 def validate_aggregated_leaderboard_outputs(data_dir: Path) -> None:
     single = _load_snapshot_json(data_dir / "leaderboard_single.json")
     multi = _load_snapshot_json(data_dir / "leaderboard_multi.json")
@@ -925,6 +1159,7 @@ def sync_submission_to_huggingface(
         try:
             validate_aggregated_leaderboard_outputs(aggregate_output_dir)
         except ValueError as exc:
+            _print_aggregated_compare_diagnostics(aggregate_output_dir)
             print(str(exc), file=sys.stderr)
             return 2
 
