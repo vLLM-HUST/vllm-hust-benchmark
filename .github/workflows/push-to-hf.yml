@@ -169,18 +169,26 @@ jobs:
             extra_args+=(--dry-run)
           fi
 
+          submission_args=()
           while IFS= read -r submission_dir; do
             [[ -z "$submission_dir" ]] && continue
-            echo "=== syncing $submission_dir ==="
-            PYTHONPATH=src python -m vllm_hust_benchmark.cli sync-submission-to-hf \
-              --submission-dir "$submission_dir" \
-              --aggregate-output-dir /tmp/leaderboard-data \
-              --repo-id intellistream/vllm-hust-benchmark-results \
-              --submissions-prefix submissions-auto \
-              --commit-message "chore: sync benchmark submission and leaderboard data from ${GITHUB_REF} @ ${GITHUB_SHA::8}" \
-              --execute \
-              "${extra_args[@]}"
+            echo "=== queueing $submission_dir ==="
+            submission_args+=(--submission-dir "$submission_dir")
           done <<< "${{ steps.resolve-submissions.outputs.dirs }}"
+
+          if [[ ${#submission_args[@]} -eq 0 ]]; then
+            echo "No submission directories resolved; nothing to sync."
+            exit 0
+          fi
+
+          PYTHONPATH=src python -m vllm_hust_benchmark.cli sync-submission-to-hf \
+            "${submission_args[@]}" \
+            --aggregate-output-dir /tmp/leaderboard-data \
+            --repo-id intellistream/vllm-hust-benchmark-results \
+            --submissions-prefix submissions-auto \
+            --commit-message "chore: sync benchmark submission and leaderboard data from ${GITHUB_REF} @ ${GITHUB_SHA::8}" \
+            --execute \
+            "${extra_args[@]}"
 
       - name: Dry run summary
         if: ${{ github.event.inputs.dry_run == 'true' && steps.resolve-submissions.outputs.count != '0' }}
