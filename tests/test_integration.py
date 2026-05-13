@@ -1042,6 +1042,181 @@ def test_sync_submission_to_huggingface_rejects_invalid_aggregated_snapshots(
     assert uploaded_paths == []
 
 
+def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baselines(
+    monkeypatch, tmp_path: Path
+) -> None:
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    benchmark_repo = tmp_path / "vllm-hust-benchmark"
+    official_specs_dir = benchmark_repo / "docs" / "official-baselines"
+    official_specs_dir.mkdir(parents=True)
+    (official_specs_dir / "official-random-online.json").write_text(
+        json.dumps(
+            {
+                "scenario": "random-online",
+                "model": "Qwen/Qwen2.5-14B-Instruct",
+                "hardware_chip_model": "910B3",
+                "chip_count": 1,
+                "node_count": 1,
+                "export": {"baseline_engine": "vllm"},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=benchmark_repo,
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+    submission_dir = tmp_path / "submission-a"
+    submission_dir.mkdir()
+    current_payload = {
+        "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+        "hardware": {"chip_model": "910B3"},
+        "workload": {"name": "random-online"},
+        "config_type": "single_gpu",
+        "constraints": {
+            "accountable_scope": {
+                "baseline_engine": "vllm",
+            }
+        },
+    }
+    (submission_dir / "run_leaderboard.json").write_text(
+        json.dumps(current_payload), encoding="utf-8"
+    )
+    (submission_dir / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+
+    downloaded_run = tmp_path / "downloaded-existing-run.json"
+    downloaded_manifest = tmp_path / "downloaded-existing-manifest.json"
+    downloaded_run.write_text(
+        json.dumps(
+            {
+                "model": {"name": "Qwen2.5-7B-Instruct"},
+                "hardware": {"chip_model": "910B3"},
+                "workload": {"name": "sharegpt-online"},
+                "config_type": "single_gpu",
+                "constraints": {
+                    "accountable_scope": {
+                        "baseline_engine": "vllm",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    downloaded_manifest.write_text("{}\n", encoding="utf-8")
+
+    seen_baselines: dict[str, str] = {}
+
+    def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
+        historical = json.loads(
+            source_dir.joinpath("existing-run", "run_leaderboard.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        current = json.loads(
+            source_dir.joinpath("submission-a", "run_leaderboard.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        seen_baselines["historical"] = historical["constraints"]["accountable_scope"][
+            "baseline_engine"
+        ]
+        seen_baselines["current"] = current["constraints"]["accountable_scope"][
+            "baseline_engine"
+        ]
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for file_name in (
+            "leaderboard_single.json",
+            "leaderboard_multi.json",
+            "leaderboard_compare.json",
+            "last_updated.json",
+        ):
+            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        return 0
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            self.path_in_repo = path_in_repo
+            self.path_or_fileobj = path_or_fileobj
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            return [
+                "submissions-auto/existing-run/leaderboard_manifest.json",
+                "submissions-auto/existing-run/run_leaderboard.json",
+            ]
+
+        def repo_info(self, repo_id, repo_type):
+            return {"repo_id": repo_id, "repo_type": repo_type}
+
+        def create_repo(self, repo_id, repo_type, private, exist_ok):
+            return None
+
+        def create_commit(
+            self,
+            repo_id,
+            repo_type,
+            operations,
+            commit_message,
+            revision=None,
+        ):
+            return {
+                "repo_id": repo_id,
+                "repo_type": repo_type,
+                "branch": revision,
+                "commit_message": commit_message,
+                "count": len(operations),
+            }
+
+    def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
+        if filename.endswith("leaderboard_manifest.json"):
+            return str(downloaded_manifest)
+        return str(downloaded_run)
+
+    monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        HfApi=FakeHfApi,
+        hf_hub_download=fake_hf_hub_download,
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+    monkeypatch.setattr(
+        integration,
+        "validate_aggregated_leaderboard_outputs",
+        lambda _data_dir: None,
+    )
+
+    aggregate_output_dir = tmp_path / "aggregated"
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=submission_dir,
+        aggregate_output_dir=aggregate_output_dir,
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+    )
+
+    assert exit_code == 0
+    assert seen_baselines == {"historical": "", "current": "vllm"}
+
+
 def test_upload_to_huggingface_rejects_invalid_aggregated_snapshots(
     monkeypatch, tmp_path: Path
 ) -> None:

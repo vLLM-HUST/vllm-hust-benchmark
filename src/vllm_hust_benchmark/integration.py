@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from vllm_hust_benchmark.models import render_parameter_flags
+from vllm_hust_benchmark.registry import get_scenario
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
 DEFAULT_RUNTIME_ENGINE = "vllm-hust"
@@ -547,6 +548,122 @@ def _build_baseline_coverage_key(
     return "|".join([engine, model, hardware, workload, config_type])
 
 
+def _classify_config_type(*, chip_count: int, node_count: int) -> str:
+    if node_count > 1:
+        return "multi_node"
+    if chip_count > 1:
+        return "multi_gpu"
+    return "single_gpu"
+
+
+def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
+    official_specs_dir = layout.benchmark_repo / "docs" / "official-baselines"
+    if not official_specs_dir.is_dir():
+        return set()
+
+    coverage_keys: set[str] = set()
+    for spec_path in sorted(official_specs_dir.glob("*.json")):
+        if spec_path.name.endswith("constraints.stub.json"):
+            continue
+
+        try:
+            payload = json.loads(spec_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+
+        if not isinstance(payload, Mapping):
+            continue
+
+        export_payload = payload.get("export")
+        export_payload = export_payload if isinstance(export_payload, Mapping) else {}
+        baseline_engine = str(export_payload.get("baseline_engine") or "").strip().lower()
+        if not baseline_engine:
+            continue
+
+        scenario_name = str(payload.get("scenario") or "").strip()
+        if not scenario_name:
+            continue
+        try:
+            scenario = get_scenario(scenario_name)
+        except KeyError:
+            continue
+
+        workload = scenario.leaderboard.get("workload_name") or scenario_name
+        chip_count = int(payload.get("chip_count") or 1)
+        node_count = int(payload.get("node_count") or 1)
+        coverage_keys.add(
+            _build_baseline_coverage_key(
+                engine=baseline_engine,
+                model=str(payload.get("model") or "unknown-model"),
+                hardware=str(payload.get("hardware_chip_model") or "unknown-hardware"),
+                workload=str(workload),
+                config_type=_classify_config_type(
+                    chip_count=chip_count,
+                    node_count=node_count,
+                ),
+            )
+        )
+    return coverage_keys
+
+
+def _normalize_submission_history_baseline_markers(
+    source_dir: Path,
+    *,
+    official_coverage_keys: set[str],
+    current_submission_names: set[str],
+) -> None:
+    if not official_coverage_keys:
+        return
+
+    for artifact_path in sorted(source_dir.rglob("run_leaderboard.json")):
+        submission_root = artifact_path.parent
+        submission_name = submission_root.name
+        if submission_name in current_submission_names:
+            continue
+
+        try:
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+
+        if not isinstance(payload, dict):
+            continue
+
+        constraints = payload.get("constraints")
+        constraints = constraints if isinstance(constraints, dict) else None
+        if constraints is None:
+            continue
+
+        accountable_scope = constraints.get("accountable_scope")
+        accountable_scope = (
+            accountable_scope if isinstance(accountable_scope, dict) else None
+        )
+        if accountable_scope is None:
+            continue
+
+        baseline_engine = str(accountable_scope.get("baseline_engine") or "").strip().lower()
+        if baseline_engine != "vllm":
+            continue
+
+        baseline_key = _build_baseline_coverage_key(
+            engine=baseline_engine,
+            model=str((payload.get("model") or {}).get("name") or "unknown-model"),
+            hardware=str(
+                (payload.get("hardware") or {}).get("chip_model") or "unknown-hardware"
+            ),
+            workload=_extract_workload_name(payload),
+            config_type=str(payload.get("config_type") or "unknown-config"),
+        )
+        if baseline_key in official_coverage_keys:
+            continue
+
+        accountable_scope["baseline_engine"] = ""
+        artifact_path.write_text(
+            json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+
 def validate_aggregated_leaderboard_outputs(data_dir: Path) -> None:
     single = _load_snapshot_json(data_dir / "leaderboard_single.json")
     multi = _load_snapshot_json(data_dir / "leaderboard_multi.json")
@@ -789,6 +906,12 @@ def sync_submission_to_huggingface(
             current_submission_targets.append(
                 (submission_dir, current_submission_target)
             )
+
+        _normalize_submission_history_baseline_markers(
+            merged_source_dir,
+            official_coverage_keys=_load_official_baseline_coverage_keys(layout),
+            current_submission_names={path.name for path in normalized_submission_dirs},
+        )
 
         aggregate_rc = aggregate_to_website(
             layout=layout,
