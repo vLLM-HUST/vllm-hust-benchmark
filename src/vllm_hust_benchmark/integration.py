@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import re
 import shlex
@@ -62,7 +63,8 @@ def resolve_repo_layout() -> RepoLayout:
         os.environ.get("VLLM_HUST_WORKSPACE_ROOT") or _default_workspace_root()
     ).resolve()
     benchmark_repo = Path(
-        os.environ.get("VLLM_HUST_BENCHMARK_REPO") or workspace_root / "vllm-hust-benchmark"
+        os.environ.get("VLLM_HUST_BENCHMARK_REPO")
+        or workspace_root / "vllm-hust-benchmark"
     ).resolve()
     vllm_hust_repo = Path(
         os.environ.get("VLLM_HUST_REPO") or workspace_root / "vllm-hust"
@@ -128,9 +130,13 @@ def validate_repo_layout(layout: RepoLayout) -> None:
             "vllm-hust-website aggregation script not found: "
             f"{layout.website_repo / 'scripts' / 'aggregate_results.py'}"
         )
-    tests_dir = layout.vllm_hust_repo / ".buildkite" / "performance-benchmarks" / "tests"
+    tests_dir = (
+        layout.vllm_hust_repo / ".buildkite" / "performance-benchmarks" / "tests"
+    )
     if not tests_dir.is_dir():
-        raise ValueError(f"vllm-hust performance benchmark tests not found: {tests_dir}")
+        raise ValueError(
+            f"vllm-hust performance benchmark tests not found: {tests_dir}"
+        )
     suite_script = (
         layout.vllm_hust_repo
         / ".buildkite"
@@ -139,7 +145,9 @@ def validate_repo_layout(layout: RepoLayout) -> None:
         / "run-performance-benchmarks.sh"
     )
     if not suite_script.is_file():
-        raise ValueError(f"vllm-hust performance benchmark suite not found: {suite_script}")
+        raise ValueError(
+            f"vllm-hust performance benchmark suite not found: {suite_script}"
+        )
 
 
 def _is_usable_executable(executable_path: str) -> bool:
@@ -233,8 +241,7 @@ def discover_vllm_flags(
     )
     help_text = f"{completed.stdout}\n{completed.stderr}"
     flags = {
-        match.group(1).replace("-", "_")
-        for match in FLAG_PATTERN.finditer(help_text)
+        match.group(1).replace("-", "_") for match in FLAG_PATTERN.finditer(help_text)
     }
     if not flags:
         if command_parts == ("bench", "serve"):
@@ -298,7 +305,9 @@ def build_benchmark_script_command(
     *,
     runtime_engine: str = DEFAULT_RUNTIME_ENGINE,
 ) -> list[str]:
-    runtime_repo = validate_runtime_repo(layout, runtime_engine, require_benchmarks=True)
+    runtime_repo = validate_runtime_repo(
+        layout, runtime_engine, require_benchmarks=True
+    )
     script_path = runtime_repo / "benchmarks" / script_name
     if not script_path.is_file():
         raise ValueError(f"benchmark script not found: {script_path}")
@@ -337,7 +346,9 @@ def build_ascend_benchmark_ci_command(layout: RepoLayout) -> list[str]:
 def _format_env_prefix(env: Mapping[str, object] | None) -> str:
     if not env:
         return ""
-    return " ".join(f"{key}={shlex.quote(str(value))}" for key, value in env.items()) + " "
+    return (
+        " ".join(f"{key}={shlex.quote(str(value))}" for key, value in env.items()) + " "
+    )
 
 
 def _build_effective_env(
@@ -350,7 +361,9 @@ def _build_effective_env(
 
     cwd_str = str(cwd)
     existing_pythonpath = effective_env.get("PYTHONPATH", "")
-    pythonpath_entries = [entry for entry in existing_pythonpath.split(os.pathsep) if entry]
+    pythonpath_entries = [
+        entry for entry in existing_pythonpath.split(os.pathsep) if entry
+    ]
     if cwd_str not in pythonpath_entries:
         pythonpath_entries.insert(0, cwd_str)
     effective_env["PYTHONPATH"] = os.pathsep.join(pythonpath_entries)
@@ -468,6 +481,190 @@ def aggregate_to_website(
     return run_external_command(command, cwd=layout.website_repo, execute=execute)
 
 
+def _load_snapshot_json(path: Path) -> Any:
+    if not path.is_file():
+        raise ValueError(f"missing aggregated output: {path}")
+
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid JSON in aggregated output {path}: {exc}") from exc
+
+
+def _normalize_engine(entry: Mapping[str, Any]) -> str:
+    return (
+        str(entry.get("engine") or entry.get("metadata", {}).get("engine") or "unknown")
+        .strip()
+        .lower()
+    )
+
+
+def _extract_workload_name(entry: Mapping[str, Any]) -> str:
+    workload = entry.get("workload")
+    if isinstance(workload, Mapping) and workload.get("name"):
+        return str(workload["name"])
+    return str(
+        entry.get("workload_name")
+        or entry.get("metadata", {}).get("workload")
+        or "Other"
+    )
+
+
+def _build_hard_constraint_scope_key(entry: Mapping[str, Any]) -> str:
+    constraints = entry.get("constraints")
+    accountable = (
+        constraints.get("accountable_scope") if isinstance(constraints, Mapping) else {}
+    )
+    accountable = accountable if isinstance(accountable, Mapping) else {}
+    model = entry.get("model") if isinstance(entry.get("model"), Mapping) else {}
+    hardware = (
+        entry.get("hardware") if isinstance(entry.get("hardware"), Mapping) else {}
+    )
+    return "|".join(
+        [
+            _normalize_engine(entry),
+            str(model.get("name") or "unknown-model"),
+            str(hardware.get("chip_model") or "unknown-hardware"),
+            _extract_workload_name(entry),
+            str(entry.get("config_type") or "unknown-config"),
+            str(
+                accountable.get("representative_business_scenario")
+                or "unknown-business-scenario"
+            ),
+            str(accountable.get("baseline_engine") or "unknown-baseline"),
+        ]
+    )
+
+
+def _build_baseline_coverage_key(
+    *,
+    engine: str,
+    model: str,
+    hardware: str,
+    workload: str,
+    config_type: str,
+) -> str:
+    return "|".join([engine, model, hardware, workload, config_type])
+
+
+def validate_aggregated_leaderboard_outputs(data_dir: Path) -> None:
+    single = _load_snapshot_json(data_dir / "leaderboard_single.json")
+    multi = _load_snapshot_json(data_dir / "leaderboard_multi.json")
+    compare = _load_snapshot_json(data_dir / "leaderboard_compare.json")
+
+    tab_engines: dict[str, set[str]] = {
+        "single-chip": set(),
+        "multi-chip": set(),
+        "multi-node": set(),
+    }
+    for entry in single if isinstance(single, list) else []:
+        tab_engines["single-chip"].add(_normalize_engine(entry))
+    for entry in multi if isinstance(multi, list) else []:
+        cluster = entry.get("cluster") if isinstance(entry, Mapping) else {}
+        cluster = cluster if isinstance(cluster, Mapping) else {}
+        node_count = cluster.get("node_count") or 1
+        tab = "multi-node" if node_count > 1 else "multi-chip"
+        tab_engines[tab].add(_normalize_engine(entry))
+
+    populated_tabs = {
+        tab: sorted(engines) for tab, engines in tab_engines.items() if engines
+    }
+    if populated_tabs and all(
+        engines == ["vllm-hust"] for engines in populated_tabs.values()
+    ):
+        raise ValueError(
+            "invalid aggregated leaderboard outputs: all populated tabs contain only vllm-hust entries "
+            f"({populated_tabs})"
+        )
+
+    hard_constraints = (
+        compare.get("hard_constraints") if isinstance(compare, Mapping) else {}
+    )
+    hard_constraints = hard_constraints if isinstance(hard_constraints, Mapping) else {}
+    hard_constraint_scopes = (
+        hard_constraints.get("scopes")
+        if isinstance(hard_constraints.get("scopes"), list)
+        else []
+    )
+    groups = (
+        compare.get("groups")
+        if isinstance(compare, Mapping) and isinstance(compare.get("groups"), list)
+        else []
+    )
+    goal_progress = compare.get("goal_progress") if isinstance(compare, Mapping) else {}
+    goal_progress = goal_progress if isinstance(goal_progress, Mapping) else {}
+    goal_pairs = (
+        goal_progress.get("pairs")
+        if isinstance(goal_progress.get("pairs"), list)
+        else []
+    )
+    if hard_constraint_scopes and not groups and not goal_pairs:
+        raise ValueError(
+            "invalid aggregated leaderboard outputs: leaderboard_compare.json contains hard_constraints.scopes "
+            "but neither groups nor goal_progress.pairs"
+        )
+
+    scope_keys = {
+        _build_hard_constraint_scope_key(entry)
+        for entry in [
+            *(single if isinstance(single, list) else []),
+            *(multi if isinstance(multi, list) else []),
+        ]
+        if _normalize_engine(entry) == "vllm-hust"
+    }
+    missing_scope_keys = [
+        scope.get("scope_key")
+        for scope in hard_constraint_scopes
+        if str(scope.get("scope_key") or "") not in scope_keys
+    ]
+    if missing_scope_keys:
+        raise ValueError(
+            "invalid aggregated leaderboard outputs: hard-constraint scope keys are missing from main snapshots "
+            f"({missing_scope_keys})"
+        )
+
+    baseline_coverage_keys = {
+        _build_baseline_coverage_key(
+            engine=_normalize_engine(entry),
+            model=str((entry.get("model") or {}).get("name") or "unknown-model"),
+            hardware=str(
+                (entry.get("hardware") or {}).get("chip_model") or "unknown-hardware"
+            ),
+            workload=_extract_workload_name(entry),
+            config_type=str(entry.get("config_type") or "unknown-config"),
+        )
+        for entry in [
+            *(single if isinstance(single, list) else []),
+            *(multi if isinstance(multi, list) else []),
+        ]
+    }
+    missing_baseline_coverage = []
+    for scope in hard_constraint_scopes:
+        scope_payload = scope.get("scope") if isinstance(scope, Mapping) else {}
+        scope_payload = scope_payload if isinstance(scope_payload, Mapping) else {}
+        accountable = scope_payload.get("accountable_scope")
+        accountable = accountable if isinstance(accountable, Mapping) else {}
+        baseline_engine = str(accountable.get("baseline_engine") or "").strip().lower()
+        if not baseline_engine:
+            continue
+
+        baseline_key = _build_baseline_coverage_key(
+            engine=baseline_engine,
+            model=str(scope_payload.get("model") or "unknown-model"),
+            hardware=str(scope_payload.get("hardware") or "unknown-hardware"),
+            workload=str(scope_payload.get("workload") or "Other"),
+            config_type=str(scope_payload.get("config_type") or "unknown-config"),
+        )
+        if baseline_key not in baseline_coverage_keys:
+            missing_baseline_coverage.append(scope.get("scope_key") or baseline_key)
+
+    if missing_baseline_coverage:
+        raise ValueError(
+            "invalid aggregated leaderboard outputs: hard-constraint scopes are missing matching baseline rows "
+            f"({missing_baseline_coverage})"
+        )
+
+
 def upload_to_huggingface(
     *,
     data_dir: Path,
@@ -485,6 +682,7 @@ def upload_to_huggingface(
     from vllm_hust_benchmark.hf_publisher import upload_leaderboard_to_hf
 
     try:
+        validate_aggregated_leaderboard_outputs(data_dir)
         upload_leaderboard_to_hf(
             data_dir=data_dir,
             repo_id=repo_id,
@@ -504,7 +702,9 @@ def upload_to_huggingface(
 
 
 def _resolve_hf_token(token: str | None) -> str | None:
-    return token or os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    return (
+        token or os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    )
 
 
 def sync_submission_to_huggingface(
@@ -552,7 +752,9 @@ def sync_submission_to_huggingface(
     with tempfile.TemporaryDirectory(prefix="vllm-hust-hf-sync-") as temp_dir:
         temp_root = Path(temp_dir)
         merged_root = temp_root / "merged_submissions"
-        merged_source_dir = merged_root / normalized_prefix if normalized_prefix else merged_root
+        merged_source_dir = (
+            merged_root / normalized_prefix if normalized_prefix else merged_root
+        )
         merged_source_dir.mkdir(parents=True, exist_ok=True)
 
         try:
@@ -581,8 +783,12 @@ def sync_submission_to_huggingface(
         current_submission_targets: list[tuple[Path, Path]] = []
         for submission_dir in normalized_submission_dirs:
             current_submission_target = merged_source_dir / submission_dir.name
-            shutil.copytree(submission_dir, current_submission_target, dirs_exist_ok=True)
-            current_submission_targets.append((submission_dir, current_submission_target))
+            shutil.copytree(
+                submission_dir, current_submission_target, dirs_exist_ok=True
+            )
+            current_submission_targets.append(
+                (submission_dir, current_submission_target)
+            )
 
         aggregate_rc = aggregate_to_website(
             layout=layout,
@@ -592,6 +798,12 @@ def sync_submission_to_huggingface(
         )
         if aggregate_rc != 0:
             return aggregate_rc
+
+        try:
+            validate_aggregated_leaderboard_outputs(aggregate_output_dir)
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
 
         aggregate_files = [
             "leaderboard_single.json",
@@ -616,19 +828,25 @@ def sync_submission_to_huggingface(
             for local_file in sorted(current_submission_target.rglob("*")):
                 if not local_file.is_file():
                     continue
-                relative_path = local_file.relative_to(current_submission_target).as_posix()
+                relative_path = local_file.relative_to(
+                    current_submission_target
+                ).as_posix()
                 repo_path = "/".join(
                     part
                     for part in [normalized_prefix, submission_dir.name, relative_path]
                     if part
                 )
                 operations.append(
-                    CommitOperationAdd(path_in_repo=repo_path, path_or_fileobj=local_file)
+                    CommitOperationAdd(
+                        path_in_repo=repo_path, path_or_fileobj=local_file
+                    )
                 )
                 planned_paths.append(repo_path)
 
         if dry_run:
-            print(f"[dry-run] Would upload {len(planned_paths)} file(s) to {repo_id}@{branch}:")
+            print(
+                f"[dry-run] Would upload {len(planned_paths)} file(s) to {repo_id}@{branch}:"
+            )
             for repo_path in planned_paths:
                 print(f"  {repo_path}")
             return 0
@@ -636,7 +854,9 @@ def sync_submission_to_huggingface(
         try:
             api.repo_info(repo_id=repo_id, repo_type="dataset")
         except Exception:
-            api.create_repo(repo_id=repo_id, repo_type="dataset", private=True, exist_ok=True)
+            api.create_repo(
+                repo_id=repo_id, repo_type="dataset", private=True, exist_ok=True
+            )
 
         _create_commit_on_branch(
             api,

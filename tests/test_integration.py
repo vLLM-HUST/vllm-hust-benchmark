@@ -1,4 +1,5 @@
 import builtins
+import json
 from pathlib import Path
 import types
 
@@ -15,6 +16,8 @@ from vllm_hust_benchmark.integration import (
     build_vllm_bench_command,
     resolve_repo_layout,
     sync_submission_to_huggingface,
+    upload_to_huggingface,
+    validate_aggregated_leaderboard_outputs,
     validate_repo_layout,
 )
 
@@ -29,9 +32,10 @@ def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> 
     expected_workspace_root = Path(integration.__file__).resolve().parents[3]
     assert layout.workspace_root == expected_workspace_root
     assert layout.vllm_hust_repo == (expected_workspace_root / "vllm-hust").resolve()
-    assert layout.reference_vllm_repo == (
-        expected_workspace_root / "reference-repos" / "vllm"
-    ).resolve()
+    assert (
+        layout.reference_vllm_repo
+        == (expected_workspace_root / "reference-repos" / "vllm").resolve()
+    )
 
 
 def test_resolve_repo_layout_from_workspace_env(monkeypatch, tmp_path: Path) -> None:
@@ -40,7 +44,9 @@ def test_resolve_repo_layout_from_workspace_env(monkeypatch, tmp_path: Path) -> 
     layout = resolve_repo_layout()
 
     assert layout.vllm_hust_repo == (tmp_path / "vllm-hust").resolve()
-    assert layout.reference_vllm_repo == (tmp_path / "reference-repos" / "vllm").resolve()
+    assert (
+        layout.reference_vllm_repo == (tmp_path / "reference-repos" / "vllm").resolve()
+    )
     assert layout.website_repo == (tmp_path / "vllm-hust-website").resolve()
 
 
@@ -61,7 +67,9 @@ def test_build_benchmark_script_command(tmp_path: Path) -> None:
     script = repo / "benchmarks" / "benchmark_serving.py"
     script.parent.mkdir(parents=True)
     script.write_text("print('ok')\n", encoding="utf-8")
-    (repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+    (repo / "pyproject.toml").write_text(
+        "[project]\nname='vllm-hust'\n", encoding="utf-8"
+    )
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -77,13 +85,17 @@ def test_build_benchmark_script_command(tmp_path: Path) -> None:
     assert command[-1] == "--help"
 
 
-def test_build_benchmark_script_command_uses_bash_for_shell_scripts(tmp_path: Path) -> None:
+def test_build_benchmark_script_command_uses_bash_for_shell_scripts(
+    tmp_path: Path,
+) -> None:
     repo = tmp_path / "vllm-hust"
     script = repo / "benchmarks" / "run_structured_output_benchmark.sh"
     script.parent.mkdir(parents=True)
     script.write_text("#!/usr/bin/env bash\necho ok\n", encoding="utf-8")
     script.chmod(0o755)
-    (repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+    (repo / "pyproject.toml").write_text(
+        "[project]\nname='vllm-hust'\n", encoding="utf-8"
+    )
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -156,7 +168,12 @@ def test_build_vllm_bench_command_falls_back_to_python_module(monkeypatch) -> No
 
     command = build_vllm_bench_command(["serve", "--model", "foo/bar"])
 
-    assert command[:4] == [integration.sys.executable, "-m", "vllm.entrypoints.cli.main", "bench"]
+    assert command[:4] == [
+        integration.sys.executable,
+        "-m",
+        "vllm.entrypoints.cli.main",
+        "bench",
+    ]
     assert command[-3:] == ["serve", "--model", "foo/bar"]
 
 
@@ -183,7 +200,9 @@ def test_build_vllm_bench_command_skips_broken_console_script(
         lambda name: (
             str(broken_vllm_hust)
             if name == "vllm-hust"
-            else str(fallback_vllm) if name == "vllm" else None
+            else str(fallback_vllm)
+            if name == "vllm"
+            else None
         ),
     )
 
@@ -214,11 +233,18 @@ def test_build_vllm_bench_command_falls_back_when_console_script_shebang_is_stal
         runtime_engine="vllm",
     )
 
-    assert command[:4] == [integration.sys.executable, "-m", "vllm.entrypoints.cli.main", "bench"]
+    assert command[:4] == [
+        integration.sys.executable,
+        "-m",
+        "vllm.entrypoints.cli.main",
+        "bench",
+    ]
     assert command[-3:] == ["serve", "--model", "foo/bar"]
 
 
-def test_build_effective_env_stringifies_values_and_prepends_cwd(monkeypatch, tmp_path: Path) -> None:
+def test_build_effective_env_stringifies_values_and_prepends_cwd(
+    monkeypatch, tmp_path: Path
+) -> None:
     monkeypatch.setenv("PYTHONPATH", "/existing/path")
 
     effective_env = _build_effective_env(tmp_path, {"DRY_RUN": 1, "FLAG": True})
@@ -347,6 +373,183 @@ def test_aggregate_to_website_without_execute_prints_command(
     assert "aggregate_results.py" in captured.out
     assert "--output-dir" in captured.out
 
+
+def test_validate_aggregated_leaderboard_outputs_rejects_single_engine_distribution(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    (data_dir / "leaderboard_single.json").write_text(
+        json.dumps(
+            [
+                {"engine": "vllm-hust", "config_type": "single_gpu"},
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_multi.json").write_text(
+        json.dumps(
+            [
+                {
+                    "engine": "vllm-hust",
+                    "config_type": "multi_gpu",
+                    "cluster": {"node_count": 1},
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {"groups": [{"scope_key": "dummy"}], "goal_progress": {"pairs": []}}
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="only vllm-hust entries"):
+        validate_aggregated_leaderboard_outputs(data_dir)
+
+
+def test_validate_aggregated_leaderboard_outputs_rejects_incomplete_compare_snapshot(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    single_entry = {
+        "engine": "vllm-hust",
+        "config_type": "single_gpu",
+        "model": {"name": "Qwen2.5-7B-Instruct"},
+        "hardware": {"chip_model": "910B3"},
+        "workload": {"name": "sharegpt-online"},
+        "constraints": {
+            "accountable_scope": {
+                "representative_business_scenario": "online-chat",
+                "baseline_engine": "vllm",
+            }
+        },
+    }
+    (data_dir / "leaderboard_single.json").write_text(
+        json.dumps([single_entry, {**single_entry, "engine": "vllm"}]),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (data_dir / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "groups": [],
+                "goal_progress": {"pairs": []},
+                "hard_constraints": {
+                    "scopes": [
+                        {
+                            "scope_key": "vllm-hust|Qwen2.5-7B-Instruct|910B3|sharegpt-online|single_gpu|online-chat|vllm"
+                        }
+                    ]
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match=r"neither groups nor goal_progress\.pairs"):
+        validate_aggregated_leaderboard_outputs(data_dir)
+
+
+def test_validate_aggregated_leaderboard_outputs_rejects_missing_scope_keys(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    single_entry = {
+        "engine": "vllm-hust",
+        "config_type": "single_gpu",
+        "model": {"name": "Qwen2.5-7B-Instruct"},
+        "hardware": {"chip_model": "910B3"},
+        "workload": {"name": "sharegpt-online"},
+        "constraints": {
+            "accountable_scope": {
+                "representative_business_scenario": "online-chat",
+                "baseline_engine": "vllm",
+            }
+        },
+    }
+    (data_dir / "leaderboard_single.json").write_text(
+        json.dumps([single_entry, {**single_entry, "engine": "vllm"}]),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (data_dir / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "groups": [{"scope_key": "present-group"}],
+                "goal_progress": {"pairs": []},
+                "hard_constraints": {"scopes": [{"scope_key": "missing|scope|key"}]},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="scope keys are missing"):
+        validate_aggregated_leaderboard_outputs(data_dir)
+
+
+def test_validate_aggregated_leaderboard_outputs_rejects_missing_baseline_rows(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    current_entry = {
+        "engine": "vllm-hust",
+        "config_type": "single_gpu",
+        "model": {"name": "Qwen2.5-7B-Instruct"},
+        "hardware": {"chip_model": "910B3"},
+        "workload": {"name": "sharegpt-online"},
+        "constraints": {
+            "accountable_scope": {
+                "representative_business_scenario": "online-chat",
+                "baseline_engine": "vllm",
+            }
+        },
+    }
+    unrelated_baseline_entry = {
+        **current_entry,
+        "engine": "vllm",
+        "workload": {"name": "random-online"},
+    }
+    (data_dir / "leaderboard_single.json").write_text(
+        json.dumps([current_entry, unrelated_baseline_entry]),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (data_dir / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "groups": [{"scope_key": "present-group"}],
+                "goal_progress": {"pairs": []},
+                "hard_constraints": {
+                    "scopes": [
+                        {
+                            "scope_key": "vllm-hust|Qwen2.5-7B-Instruct|910B3|sharegpt-online|single_gpu|online-chat|vllm",
+                            "scope": {
+                                "model": "Qwen2.5-7B-Instruct",
+                                "hardware": "910B3",
+                                "workload": "sharegpt-online",
+                                "config_type": "single_gpu",
+                                "accountable_scope": {
+                                    "baseline_engine": "vllm",
+                                },
+                            },
+                        }
+                    ]
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="missing matching baseline rows"):
+        validate_aggregated_leaderboard_outputs(data_dir)
+
+
 def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None:
     monkeypatch.setattr(
         integration,
@@ -365,17 +568,19 @@ def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None
         ),
     )
 
-    bench_parameters, serve_parameters = integration.split_vllm_serve_scenario_parameters(
-        {
-            "backend": "vllm",
-            "dataset_name": "random",
-            "input_len": 8,
-            "output_len": 8,
-            "num_warmups": 1,
-            "random_batch_size": 1,
-            "gpu_memory_utilization": 0.6,
-            "enforce_eager": True,
-        }
+    bench_parameters, serve_parameters = (
+        integration.split_vllm_serve_scenario_parameters(
+            {
+                "backend": "vllm",
+                "dataset_name": "random",
+                "input_len": 8,
+                "output_len": 8,
+                "num_warmups": 1,
+                "random_batch_size": 1,
+                "gpu_memory_utilization": 0.6,
+                "enforce_eager": True,
+            }
+        )
     )
 
     assert bench_parameters == {
@@ -392,10 +597,14 @@ def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None
     }
 
 
-def test_run_local_serve_benchmark_starts_server_then_client(monkeypatch, tmp_path: Path) -> None:
+def test_run_local_serve_benchmark_starts_server_then_client(
+    monkeypatch, tmp_path: Path
+) -> None:
     repo = tmp_path / "vllm-hust"
     repo.mkdir()
-    (repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+    (repo / "pyproject.toml").write_text(
+        "[project]\nname='vllm-hust'\n", encoding="utf-8"
+    )
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -456,7 +665,15 @@ def test_run_local_serve_benchmark_starts_server_then_client(monkeypatch, tmp_pa
     assert exit_code == 0
     assert popen_calls == [
         [
-            *integration.build_vllm_command(["serve", "foo/bar", "--gpu-memory-utilization", "0.6", "--enforce-eager"]),
+            *integration.build_vllm_command(
+                [
+                    "serve",
+                    "foo/bar",
+                    "--gpu-memory-utilization",
+                    "0.6",
+                    "--enforce-eager",
+                ]
+            ),
         ]
     ]
     assert run_calls == [
@@ -499,9 +716,7 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
     submission_dir = tmp_path / "submission-a"
     submission_dir.mkdir()
     (submission_dir / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
-    (submission_dir / "leaderboard_manifest.json").write_text(
-        "{}\n", encoding="utf-8"
-    )
+    (submission_dir / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
 
     downloaded_submission = tmp_path / "downloaded-existing.json"
     downloaded_submission.write_text("{}\n", encoding="utf-8")
@@ -719,6 +934,155 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
     }
     assert "submissions-auto/submission-a/run_leaderboard.json" in uploaded_paths
     assert "submissions-auto/submission-b/run_leaderboard.json" in uploaded_paths
+
+
+def test_sync_submission_to_huggingface_rejects_invalid_aggregated_snapshots(
+    monkeypatch, tmp_path: Path
+) -> None:
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+    submission_dir = tmp_path / "submission-a"
+    submission_dir.mkdir()
+    (submission_dir / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
+    (submission_dir / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+
+    downloaded_submission = tmp_path / "downloaded-existing.json"
+    downloaded_submission.write_text("{}\n", encoding="utf-8")
+    uploaded_paths: list[str] = []
+
+    def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "leaderboard_single.json").write_text(
+            json.dumps([{"engine": "vllm-hust", "config_type": "single_gpu"}]),
+            encoding="utf-8",
+        )
+        (output_dir / "leaderboard_multi.json").write_text(
+            json.dumps(
+                [
+                    {
+                        "engine": "vllm-hust",
+                        "config_type": "multi_gpu",
+                        "cluster": {"node_count": 1},
+                    }
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (output_dir / "leaderboard_compare.json").write_text(
+            json.dumps(
+                {
+                    "groups": [],
+                    "goal_progress": {"pairs": []},
+                    "hard_constraints": {"scopes": []},
+                }
+            ),
+            encoding="utf-8",
+        )
+        (output_dir / "last_updated.json").write_text("{}\n", encoding="utf-8")
+        return 0
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            uploaded_paths.append(path_in_repo)
+            self.path_in_repo = path_in_repo
+            self.path_or_fileobj = path_or_fileobj
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            return ["submissions-auto/existing-run/run_leaderboard.json"]
+
+        def repo_info(self, repo_id, repo_type):
+            return {"repo_id": repo_id, "repo_type": repo_type}
+
+        def create_repo(self, repo_id, repo_type, private, exist_ok):
+            return None
+
+    def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
+        return str(downloaded_submission)
+
+    monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        HfApi=FakeHfApi,
+        hf_hub_download=fake_hf_hub_download,
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    aggregate_output_dir = tmp_path / "aggregated"
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=submission_dir,
+        aggregate_output_dir=aggregate_output_dir,
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+    )
+
+    assert exit_code == 2
+    assert uploaded_paths == []
+
+
+def test_upload_to_huggingface_rejects_invalid_aggregated_snapshots(
+    monkeypatch, tmp_path: Path
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    (data_dir / "leaderboard_single.json").write_text(
+        json.dumps([{"engine": "vllm-hust", "config_type": "single_gpu"}]),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_multi.json").write_text(
+        json.dumps([]),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "groups": [],
+                "goal_progress": {"pairs": []},
+                "hard_constraints": {"scopes": []},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    called = {"upload": False}
+
+    def fake_upload_leaderboard_to_hf(**kwargs):
+        called["upload"] = True
+
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.hf_publisher.upload_leaderboard_to_hf",
+        fake_upload_leaderboard_to_hf,
+    )
+
+    exit_code = upload_to_huggingface(
+        data_dir=data_dir,
+        repo_id="owner/repo",
+    )
+
+    assert exit_code == 2
+    assert called["upload"] is False
 
 
 def test_sync_submission_to_huggingface_requires_submission_dir(
