@@ -11,6 +11,10 @@ on:
         description: 'Dry run only (do not upload to HF)'
         type: boolean
         default: false
+      submission_dirs:
+        description: 'Optional newline-separated submission directories to sync'
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -24,6 +28,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Checkout vllm-hust repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-hust
+          path: vllm-hust
 
       - name: Checkout website repo (for aggregate script and schema)
         uses: actions/checkout@v4
@@ -87,10 +97,26 @@ jobs:
           event_name = os.environ.get("GITHUB_EVENT_NAME", "")
           before_sha = os.environ.get("BEFORE_SHA", "")
           current_sha = os.environ.get("GITHUB_SHA", "")
+            manual_submission_dirs = os.environ.get("MANUAL_SUBMISSION_DIRS", "")
           submissions_root = Path("submissions")
 
           submission_dirs: list[str] = []
-          if event_name == "push" and before_sha and current_sha and before_sha != "0000000000000000000000000000000000000000":
+            if manual_submission_dirs.strip():
+              seen: set[str] = set()
+              for raw_dir in manual_submission_dirs.splitlines():
+                raw_dir = raw_dir.strip()
+                if not raw_dir:
+                  continue
+                candidate = Path(raw_dir)
+                if not candidate.is_absolute():
+                  candidate = (Path.cwd() / candidate).resolve()
+                manifest = candidate / "leaderboard_manifest.json"
+                if manifest.is_file():
+                  resolved = str(candidate)
+                  if resolved not in seen:
+                    seen.add(resolved)
+                    submission_dirs.append(resolved)
+            elif event_name == "push" and before_sha and current_sha and before_sha != "0000000000000000000000000000000000000000":
               diff_output = subprocess.check_output(
                   ["git", "diff", "--name-only", before_sha, current_sha, "--", "submissions"],
                   text=True,
@@ -123,12 +149,15 @@ jobs:
           PYEOF
         env:
           BEFORE_SHA: ${{ github.event.before }}
+          MANUAL_SUBMISSION_DIRS: ${{ github.event.inputs.submission_dirs }}
 
       - name: Sync submissions into HF leaderboard snapshots
         if: ${{ steps.resolve-submissions.outputs.count != '0' }}
         env:
           HF_TOKEN: ${{ secrets.DATASET_WRITE_TOKEN }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          VLLM_HUST_REPO: ${{ github.workspace }}/vllm-hust
+          VLLM_HUST_WEBSITE_REPO: ${{ github.workspace }}/vllm-hust-website
         run: |
           if [[ -z "${HF_TOKEN:-}" ]]; then
             echo "ERROR: DATASET_WRITE_TOKEN secret is not set."
