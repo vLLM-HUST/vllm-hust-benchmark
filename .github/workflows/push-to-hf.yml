@@ -15,6 +15,13 @@ on:
         description: 'Optional newline-separated submission directories to sync'
         type: string
         required: false
+      website_ref:
+        description: 'Optional vllm-hust-website ref to use for aggregation/schema checkout'
+        type: string
+        required: false
+
+env:
+  VLLM_HUST_WEBSITE_REF: ${{ github.event.inputs.website_ref || vars.VLLM_HUST_WEBSITE_REF || 'ws/leaderboard-compare-scope-align' }}
 
 permissions:
   contents: read
@@ -39,7 +46,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: vLLM-HUST/vllm-hust-website
-          ref: ws/site-hard-constraints-baseline
+          ref: ${{ env.VLLM_HUST_WEBSITE_REF }}
           path: vllm-hust-website
 
       - name: Set up Python
