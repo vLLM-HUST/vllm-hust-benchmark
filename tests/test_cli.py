@@ -1,4 +1,5 @@
 import json
+from types import SimpleNamespace
 from argparse import Namespace
 from pathlib import Path
 from unittest.mock import patch
@@ -6,6 +7,7 @@ from unittest.mock import patch
 import vllm_hust_benchmark.cli as cli_module
 from vllm_hust_benchmark.cli import _parse_set_arguments
 from vllm_hust_benchmark.cli import main
+from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
 from vllm_hust_benchmark.integration import RepoLayout
 from vllm_hust_benchmark.integration import DEFAULT_RUNTIME_ENGINE
 from vllm_hust_benchmark.integration import build_vllm_bench_command
@@ -1099,6 +1101,109 @@ def test_export_leaderboard_artifact_rejects_zero_long_context_length(
     assert exit_code == 2
     assert "constraints_metrics.long_context_length must be null or >= 1" in captured.err
 
+
+
+def test_export_leaderboard_artifacts_sanitizes_dirty_engine_version(
+    tmp_path: Path,
+) -> None:
+    scenario = SimpleNamespace(
+        name="random-online",
+        leaderboard={
+            "workload_name": "random-online",
+            "representative_business_scenario": "general-serving",
+            "default_config_type": "single_gpu",
+        },
+        defaults={
+            "input_len": 1024,
+            "output_len": 256,
+            "dataset_name": "random",
+        },
+    )
+    metrics_file = tmp_path / "metrics.json"
+    metrics_file.write_text(
+        json.dumps(
+            {
+                "metrics": {
+                    "ttft_ms": 10.0,
+                    "throughput_tps": 100.0,
+                    "peak_mem_mb": 1024.0,
+                    "error_rate": 0.0,
+                },
+                "constraints_metrics": {
+                    "single_chip_effective_utilization_pct": 91.0,
+                    "typical_throughput_ratio_vs_baseline": 2.0,
+                    "typical_ttft_reduction_pct_vs_baseline": 20.0,
+                    "typical_tpot_reduction_pct_vs_baseline": 20.0,
+                    "long_context_length": 32768,
+                    "long_context_throughput_stable": True,
+                    "long_context_ttft_p95_ms": 45.0,
+                    "long_context_ttft_p99_ms": 58.0,
+                    "long_context_tpot_p95_ms": 12.0,
+                    "long_context_tpot_p99_ms": 16.0,
+                    "long_context_ttft_p95_stable": True,
+                    "long_context_ttft_p99_stable": True,
+                    "long_context_tpot_p95_stable": True,
+                    "long_context_tpot_p99_stable": True,
+                    "unit_token_cost_reduction_pct": 31.0,
+                    "multi_tenant_high_utilization": True,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    artifact_path, _ = export_leaderboard_artifacts(
+        scenario=scenario,
+        metrics_file=metrics_file,
+        benchmark_result_file=None,
+        constraints_file=None,
+        same_spec_file=None,
+        output_dir=tmp_path / "out",
+        artifact_name="run_leaderboard.json",
+        run_id="test-run",
+        engine="vllm-hust",
+        engine_version="dev\npath string is NULLpath string is NULL",
+        model_name="Qwen/Qwen2.5-14B-Instruct",
+        model_parameters="14B",
+        model_precision="FP16",
+        hardware_vendor="Huawei",
+        hardware_chip_model="910B3",
+        chip_count=1,
+        node_count=1,
+        submitter="same-spec-current",
+        baseline_engine="vllm",
+        domestic_chip_class="Huawei Ascend 910B",
+        representative_model_band="14B",
+        data_source="vllm-hust-benchmark",
+        input_length=1024,
+        output_length=256,
+        batch_size=None,
+        concurrent_requests=None,
+        protocol_version="0.1.0",
+        backend_version="0.1.0",
+        core_version="0.1.0",
+        peak_mem_mb=1024.0,
+        git_commit="d4a408c4710783113780c21c41e6d76279f37245",
+        github_user="moonandlife",
+        github_commit_url=None,
+        github_repository="vLLM-HUST/vllm-hust",
+        github_ref="main",
+        github_event_name="pull_request",
+        github_pr_number=27,
+        github_pr_url=None,
+        runtime_python="python",
+        engine_source_repository="vLLM-HUST/vllm-hust",
+        engine_source_ref="main",
+        engine_source_commit="d4a408c4710783113780c21c41e6d76279f37245",
+        plugin_source_engine="vllm-ascend-hust",
+        plugin_source_repository="vLLM-HUST/vllm-ascend-hust",
+        plugin_source_ref="main",
+        plugin_source_commit="abcdef1234567890",
+    )
+
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    assert artifact["engine_version"] == "gd4a408c4"
+    assert artifact["metadata"]["engine_version"] == "gd4a408c4"
 
 
 def test_build_vllm_bench_command_prefers_console_script(tmp_path: Path):

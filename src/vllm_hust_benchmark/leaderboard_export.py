@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import platform
+import re
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,6 +48,48 @@ REQUIRED_SAME_SPEC_KEYS = (
 
 BASELINE_STATUS_PENDING = "pending-baseline"
 BASELINE_STATUS_NONE = "no-baseline-declared"
+DIRTY_ENGINE_VERSION_MARKERS = (
+    "path string is null",
+)
+ENGINE_VERSION_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
+
+
+def _short_commit(value: Any) -> str:
+    normalized = str(value or "").strip()
+    if not normalized:
+        return ""
+    normalized = normalized.removeprefix("g")
+    return normalized[:8]
+
+
+def _sanitize_engine_version(value: Any, *, git_commit: str | None = None) -> str:
+    raw = str(value or "")
+    saw_multiline = "\n" in raw or "\r" in raw
+    saw_dirty_marker = any(marker in raw.lower() for marker in DIRTY_ENGINE_VERSION_MARKERS)
+
+    candidates: list[str] = []
+    for line in raw.splitlines() or [raw]:
+        normalized = " ".join(str(line).split()).strip()
+        if not normalized:
+            continue
+        if any(marker in normalized.lower() for marker in DIRTY_ENGINE_VERSION_MARKERS):
+            saw_dirty_marker = True
+            continue
+        candidates.append(normalized)
+
+    for candidate in candidates:
+        if any(ch.isdigit() for ch in candidate) and ENGINE_VERSION_PATTERN.match(candidate):
+            return candidate
+
+    if candidates:
+        primary = candidates[0]
+        if ENGINE_VERSION_PATTERN.match(primary) and not (saw_multiline or saw_dirty_marker):
+            return primary
+
+    short_commit = _short_commit(git_commit)
+    if short_commit:
+        return f"g{short_commit}"
+    return "unknown"
 
 
 def _validate_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[str, Any]:
@@ -317,6 +360,7 @@ def export_leaderboard_artifacts(
     plugin_source_ref: str | None,
     plugin_source_commit: str | None,
 ) -> tuple[Path, Path]:
+    engine_version = _sanitize_engine_version(engine_version, git_commit=git_commit)
     payload = load_export_payload(
         metrics_file=metrics_file,
         benchmark_result_file=benchmark_result_file,

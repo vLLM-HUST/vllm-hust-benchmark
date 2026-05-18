@@ -62,6 +62,76 @@ fi
 
 SCRIPT_BASENAME=$(basename "$0")
 
+is_valid_engine_version() {
+  local value=${1//$'\r'/}
+  value=$(printf '%s' "$value" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
+  [[ -n "$value" ]] || return 1
+  [[ "$value" =~ [0-9] ]] || return 1
+  [[ "$value" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]*$ ]]
+}
+
+resolve_current_engine_version_from_git() {
+  local described=""
+
+  if [[ -n "$CURRENT_GIT_COMMIT" ]]; then
+    described=$(git -C "$CURRENT_VLLM_HUST_REPO" describe --tags --always "$CURRENT_GIT_COMMIT" 2>/dev/null || true)
+    if [[ -n "$described" ]]; then
+      printf '%s' "$described"
+      return 0
+    fi
+  fi
+
+  described=$(git -C "$CURRENT_VLLM_HUST_REPO" describe --tags --always HEAD 2>/dev/null || true)
+  if [[ -n "$described" ]]; then
+    printf '%s' "$described"
+    return 0
+  fi
+
+  git -C "$CURRENT_VLLM_HUST_REPO" rev-parse --short HEAD 2>/dev/null || true
+}
+
+detect_current_engine_version() {
+  local raw_output=""
+  local detected=""
+  local fallback=""
+
+  raw_output=$(run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+from importlib import metadata
+
+version = None
+try:
+    import vllm
+    version = getattr(vllm, '__version__', None)
+except Exception:
+    version = None
+
+if not version:
+    try:
+        version = metadata.version('vllm')
+    except Exception:
+        version = None
+
+print(f"__VLLM_HUST_ENGINE_VERSION__={version or ''}")
+PY
+)
+
+  detected=$(printf '%s\n' "$raw_output" | sed -n 's/^__VLLM_HUST_ENGINE_VERSION__=//p' | tail -n 1)
+  detected=$(printf '%s' "$detected" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
+
+  if is_valid_engine_version "$detected"; then
+    printf '%s' "$detected"
+    return 0
+  fi
+
+  fallback=$(resolve_current_engine_version_from_git)
+  if is_valid_engine_version "$fallback"; then
+    printf '%s' "$fallback"
+    return 0
+  fi
+
+  printf '%s' "unknown"
+}
+
 list_port_listener_pids() {
   local port=$1
 
@@ -402,11 +472,7 @@ INPUT_LEN=$(jq -r '.client_parameters.input_len' "$SPEC_FILE")
 OUTPUT_LEN=$(jq -r '.client_parameters.output_len' "$SPEC_FILE")
 
 if [[ -z "$CURRENT_ENGINE_VERSION" ]]; then
-  CURRENT_ENGINE_VERSION=$(run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" "$CURRENT_RUNTIME_PYTHON" - <<'PY'
-import vllm
-print(getattr(vllm, '__version__', 'unknown'))
-PY
-)
+  CURRENT_ENGINE_VERSION=$(detect_current_engine_version)
 fi
 
 RUNTIME_MODEL="$MODEL"
