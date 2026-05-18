@@ -550,6 +550,68 @@ def test_validate_aggregated_leaderboard_outputs_rejects_missing_baseline_rows(
         validate_aggregated_leaderboard_outputs(data_dir)
 
 
+def test_validate_aggregated_leaderboard_outputs_allows_pending_baseline_rows(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    current_entry = {
+        "engine": "vllm-hust",
+        "config_type": "single_gpu",
+        "model": {"name": "Qwen2.5-7B-Instruct"},
+        "hardware": {"chip_model": "910B3"},
+        "workload": {"name": "sharegpt-online"},
+        "constraints": {
+            "accountable_scope": {
+                "representative_business_scenario": "online-chat",
+                "baseline_engine": "",
+                "declared_baseline_engine": "vllm",
+                "baseline_status": "pending-baseline",
+            }
+        },
+    }
+    unrelated_baseline_entry = {
+        **current_entry,
+        "engine": "vllm",
+        "workload": {"name": "random-online"},
+        "constraints": {"accountable_scope": {}},
+    }
+    (data_dir / "leaderboard_single.json").write_text(
+        json.dumps([current_entry, unrelated_baseline_entry]),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (data_dir / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "groups": [{"scope_key": "present-group"}],
+                "goal_progress": {"pairs": []},
+                "hard_constraints": {
+                    "scopes": [
+                        {
+                            "scope_key": "vllm-hust|Qwen2.5-7B-Instruct|910B3|sharegpt-online|single_gpu|online-chat|vllm",
+                            "scope": {
+                                "model": "Qwen2.5-7B-Instruct",
+                                "hardware": "910B3",
+                                "workload": "sharegpt-online",
+                                "config_type": "single_gpu",
+                                "accountable_scope": {
+                                    "baseline_engine": "",
+                                    "declared_baseline_engine": "vllm",
+                                    "baseline_status": "pending-baseline",
+                                },
+                            },
+                        }
+                    ]
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    validate_aggregated_leaderboard_outputs(data_dir)
+
+
 def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None:
     monkeypatch.setattr(
         integration,
@@ -1085,6 +1147,8 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
         "constraints": {
             "accountable_scope": {
                 "baseline_engine": "vllm",
+                "declared_baseline_engine": "vllm",
+                "baseline_status": "pending-baseline",
             }
         },
     }
@@ -1105,6 +1169,8 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
                 "constraints": {
                     "accountable_scope": {
                         "baseline_engine": "vllm",
+                        "declared_baseline_engine": "vllm",
+                        "baseline_status": "pending-baseline",
                     }
                 },
             }
@@ -1113,7 +1179,7 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
     )
     downloaded_manifest.write_text("{}\n", encoding="utf-8")
 
-    seen_baselines: dict[str, str] = {}
+    seen_baselines: dict[str, dict[str, str]] = {}
 
     def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
         historical = json.loads(
@@ -1126,12 +1192,22 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
                 encoding="utf-8"
             )
         )
-        seen_baselines["historical"] = historical["constraints"]["accountable_scope"][
-            "baseline_engine"
-        ]
-        seen_baselines["current"] = current["constraints"]["accountable_scope"][
-            "baseline_engine"
-        ]
+        historical_accountable = historical["constraints"]["accountable_scope"]
+        current_accountable = current["constraints"]["accountable_scope"]
+        seen_baselines["historical"] = {
+            "baseline_engine": historical_accountable["baseline_engine"],
+            "declared_baseline_engine": historical_accountable[
+                "declared_baseline_engine"
+            ],
+            "baseline_status": historical_accountable["baseline_status"],
+        }
+        seen_baselines["current"] = {
+            "baseline_engine": current_accountable["baseline_engine"],
+            "declared_baseline_engine": current_accountable[
+                "declared_baseline_engine"
+            ],
+            "baseline_status": current_accountable["baseline_status"],
+        }
         output_dir.mkdir(parents=True, exist_ok=True)
         for file_name in (
             "leaderboard_single.json",
@@ -1214,7 +1290,18 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
     )
 
     assert exit_code == 0
-    assert seen_baselines == {"historical": "", "current": "vllm"}
+    assert seen_baselines == {
+        "historical": {
+            "baseline_engine": "",
+            "declared_baseline_engine": "vllm",
+            "baseline_status": "pending-baseline",
+        },
+        "current": {
+            "baseline_engine": "vllm",
+            "declared_baseline_engine": "vllm",
+            "baseline_status": "official-covered",
+        },
+    }
 
 
 def test_upload_to_huggingface_rejects_invalid_aggregated_snapshots(
