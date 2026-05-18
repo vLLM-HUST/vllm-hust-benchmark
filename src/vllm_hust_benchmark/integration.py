@@ -25,6 +25,16 @@ DEFAULT_RUNTIME_ENGINE = "vllm-hust"
 DEFAULT_LOCAL_SERVER_HOST = "127.0.0.1"
 DEFAULT_LOCAL_SERVER_PORT = 8000
 DEFAULT_READY_TIMEOUT_SECONDS = 180.0
+BASELINE_STATUS_OFFICIAL_COVERED = "official-covered"
+BASELINE_STATUS_PENDING = "pending-baseline"
+BASELINE_STATUS_NONE = "no-baseline-declared"
+VALID_BASELINE_STATUSES = frozenset(
+    {
+        BASELINE_STATUS_OFFICIAL_COVERED,
+        BASELINE_STATUS_PENDING,
+        BASELINE_STATUS_NONE,
+    }
+)
 FALLBACK_VLLM_BENCH_SERVE_FLAGS = frozenset(
     {
         "backend",
@@ -511,7 +521,107 @@ def _extract_workload_name(entry: Mapping[str, Any]) -> str:
     )
 
 
+def _normalize_baseline_engine(value: Any) -> str:
+    return str(value or "").strip().lower()
+
+
+def _build_entry_baseline_coverage_key(
+    entry: Mapping[str, Any], *, engine: str
+) -> str:
+    model = entry.get("model") if isinstance(entry.get("model"), Mapping) else {}
+    hardware = (
+        entry.get("hardware") if isinstance(entry.get("hardware"), Mapping) else {}
+    )
+    return _build_baseline_coverage_key(
+        engine=engine,
+        model=str(model.get("name") or "unknown-model"),
+        hardware=str(hardware.get("chip_model") or "unknown-hardware"),
+        workload=_extract_workload_name(entry),
+        config_type=str(entry.get("config_type") or "unknown-config"),
+    )
+
+
+def _derive_accountable_scope_baseline_metadata(
+    entry: Mapping[str, Any],
+    *,
+    official_coverage_keys: set[str] | None = None,
+) -> dict[str, str]:
+    constraints = entry.get("constraints")
+    accountable = (
+        constraints.get("accountable_scope") if isinstance(constraints, Mapping) else {}
+    )
+    accountable = accountable if isinstance(accountable, Mapping) else {}
+
+    official_engine = _normalize_baseline_engine(accountable.get("baseline_engine"))
+    declared_engine = _normalize_baseline_engine(
+        accountable.get("declared_baseline_engine") or official_engine
+    )
+    baseline_status = str(accountable.get("baseline_status") or "").strip()
+
+    if official_coverage_keys is not None:
+        if declared_engine:
+            baseline_key = _build_entry_baseline_coverage_key(
+                entry, engine=declared_engine
+            )
+            if baseline_key in official_coverage_keys:
+                baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
+                official_engine = declared_engine
+            else:
+                baseline_status = BASELINE_STATUS_PENDING
+                official_engine = ""
+        else:
+            baseline_status = BASELINE_STATUS_NONE
+            official_engine = ""
+    else:
+        if baseline_status not in VALID_BASELINE_STATUSES:
+            if official_engine:
+                baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
+            elif declared_engine:
+                baseline_status = BASELINE_STATUS_PENDING
+            else:
+                baseline_status = BASELINE_STATUS_NONE
+
+        if baseline_status == BASELINE_STATUS_OFFICIAL_COVERED:
+            official_engine = official_engine or declared_engine
+        else:
+            official_engine = ""
+
+    return {
+        "baseline_engine": official_engine,
+        "declared_baseline_engine": declared_engine,
+        "baseline_status": baseline_status,
+        "scope_baseline_engine": declared_engine or official_engine or "unknown-baseline",
+    }
+
+
+def _normalize_accountable_scope_baseline_metadata(
+    entry: dict[str, Any],
+    *,
+    official_coverage_keys: set[str] | None = None,
+) -> dict[str, Any] | None:
+    constraints = entry.get("constraints")
+    constraints = constraints if isinstance(constraints, dict) else None
+    if constraints is None:
+        return None
+
+    accountable_scope = constraints.get("accountable_scope")
+    accountable_scope = accountable_scope if isinstance(accountable_scope, dict) else None
+    if accountable_scope is None:
+        return None
+
+    baseline_metadata = _derive_accountable_scope_baseline_metadata(
+        entry, official_coverage_keys=official_coverage_keys
+    )
+    accountable_scope["baseline_engine"] = baseline_metadata["baseline_engine"]
+    accountable_scope["declared_baseline_engine"] = baseline_metadata[
+        "declared_baseline_engine"
+    ]
+    accountable_scope["baseline_status"] = baseline_metadata["baseline_status"]
+    return accountable_scope
+
+
 def _build_hard_constraint_scope_key(entry: Mapping[str, Any]) -> str:
+    baseline_metadata = _derive_accountable_scope_baseline_metadata(entry)
     constraints = entry.get("constraints")
     accountable = (
         constraints.get("accountable_scope") if isinstance(constraints, Mapping) else {}
@@ -532,7 +642,7 @@ def _build_hard_constraint_scope_key(entry: Mapping[str, Any]) -> str:
                 accountable.get("representative_business_scenario")
                 or "unknown-business-scenario"
             ),
-            str(accountable.get("baseline_engine") or "unknown-baseline"),
+            baseline_metadata["scope_baseline_engine"],
         ]
     )
 
@@ -606,21 +716,12 @@ def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
     return coverage_keys
 
 
-def _normalize_submission_history_baseline_markers(
+def _normalize_submission_baseline_metadata(
     source_dir: Path,
     *,
     official_coverage_keys: set[str],
-    current_submission_names: set[str],
 ) -> None:
-    if not official_coverage_keys:
-        return
-
     for artifact_path in sorted(source_dir.rglob("run_leaderboard.json")):
-        submission_root = artifact_path.parent
-        submission_name = submission_root.name
-        if submission_name in current_submission_names:
-            continue
-
         try:
             payload = json.loads(artifact_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -629,35 +730,12 @@ def _normalize_submission_history_baseline_markers(
         if not isinstance(payload, dict):
             continue
 
-        constraints = payload.get("constraints")
-        constraints = constraints if isinstance(constraints, dict) else None
-        if constraints is None:
-            continue
-
-        accountable_scope = constraints.get("accountable_scope")
-        accountable_scope = (
-            accountable_scope if isinstance(accountable_scope, dict) else None
+        accountable_scope = _normalize_accountable_scope_baseline_metadata(
+            payload, official_coverage_keys=official_coverage_keys
         )
         if accountable_scope is None:
             continue
 
-        baseline_engine = str(accountable_scope.get("baseline_engine") or "").strip().lower()
-        if baseline_engine != "vllm":
-            continue
-
-        baseline_key = _build_baseline_coverage_key(
-            engine=baseline_engine,
-            model=str((payload.get("model") or {}).get("name") or "unknown-model"),
-            hardware=str(
-                (payload.get("hardware") or {}).get("chip_model") or "unknown-hardware"
-            ),
-            workload=_extract_workload_name(payload),
-            config_type=str(payload.get("config_type") or "unknown-config"),
-        )
-        if baseline_key in official_coverage_keys:
-            continue
-
-        accountable_scope["baseline_engine"] = ""
         artifact_path.write_text(
             json.dumps(payload, ensure_ascii=True, indent=2) + "\n",
             encoding="utf-8",
@@ -995,9 +1073,24 @@ def validate_aggregated_leaderboard_outputs(data_dir: Path) -> None:
         scope_payload = scope_payload if isinstance(scope_payload, Mapping) else {}
         accountable = scope_payload.get("accountable_scope")
         accountable = accountable if isinstance(accountable, Mapping) else {}
-        baseline_engine = str(accountable.get("baseline_engine") or "").strip().lower()
-        if not baseline_engine:
+        declared_baseline_engine = _normalize_baseline_engine(
+            accountable.get("declared_baseline_engine") or accountable.get("baseline_engine")
+        )
+        baseline_status = str(accountable.get("baseline_status") or "").strip()
+        if baseline_status not in VALID_BASELINE_STATUSES:
+            if accountable.get("baseline_engine"):
+                baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
+            elif declared_baseline_engine:
+                baseline_status = BASELINE_STATUS_PENDING
+            else:
+                baseline_status = BASELINE_STATUS_NONE
+
+        if baseline_status != BASELINE_STATUS_OFFICIAL_COVERED:
             continue
+
+        baseline_engine = _normalize_baseline_engine(
+            accountable.get("baseline_engine") or declared_baseline_engine
+        )
 
         baseline_key = _build_baseline_coverage_key(
             engine=baseline_engine,
@@ -1141,10 +1234,9 @@ def sync_submission_to_huggingface(
                 (submission_dir, current_submission_target)
             )
 
-        _normalize_submission_history_baseline_markers(
+        _normalize_submission_baseline_metadata(
             merged_source_dir,
             official_coverage_keys=_load_official_baseline_coverage_keys(layout),
-            current_submission_names={path.name for path in normalized_submission_dirs},
         )
 
         aggregate_rc = aggregate_to_website(

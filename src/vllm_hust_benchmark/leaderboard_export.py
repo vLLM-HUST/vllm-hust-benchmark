@@ -45,6 +45,9 @@ REQUIRED_SAME_SPEC_KEYS = (
     "resolved_client_parameters",
 )
 
+BASELINE_STATUS_PENDING = "pending-baseline"
+BASELINE_STATUS_NONE = "no-baseline-declared"
+
 
 def _validate_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[str, Any]:
     long_context_length = constraints_metrics.get("long_context_length")
@@ -394,7 +397,13 @@ def export_leaderboard_artifacts(
                 "domestic_chip_class": domestic_chip_class,
                 "representative_model_band": representative_model_band,
                 "representative_business_scenario": representative_business_scenario,
-                "baseline_engine": baseline_engine,
+                "baseline_engine": "",
+                "declared_baseline_engine": str(baseline_engine or "").strip().lower(),
+                "baseline_status": (
+                    BASELINE_STATUS_PENDING
+                    if str(baseline_engine or "").strip()
+                    else BASELINE_STATUS_NONE
+                ),
                 "owner_confirmed": None,
                 "notes": None,
             },
