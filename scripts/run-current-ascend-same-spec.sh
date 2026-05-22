@@ -35,6 +35,9 @@ ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-"/usr/local/Ascend/nnal/atb/set_env.sh"
 ASCEND_ATB_CXX_ABI=${ASCEND_ATB_CXX_ABI:-"1"}
 RESULT_DIR=${RESULT_DIR:-"$REPO_ROOT/.benchmarks/current-ascend-same-spec"}
 RUN_ID=${RUN_ID:-"current-ascend-same-spec-$(date -u +%Y%m%dT%H%M%SZ)"}
+READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-600}
+READY_STATUS_INTERVAL_SECONDS=${READY_STATUS_INTERVAL_SECONDS:-30}
+CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-$READY_TIMEOUT_SECONDS}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -421,25 +424,65 @@ assert_target_port_available() {
   fi
 }
 
+probe_server_ready() {
+  local host=$1
+  local port=$2
+  local ready_path
+  local ready_paths=(
+    "/health"
+    "/v1/models"
+  )
+
+  for ready_path in "${ready_paths[@]}"; do
+    if curl -fsS "http://${host}:${port}${ready_path}" >/dev/null 2>&1; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 wait_for_server() {
   local host=$1
   local port=$2
   local waited=0
-  local timeout_sec=${READY_TIMEOUT_SECONDS:-300}
+  local timeout_sec=${READY_TIMEOUT_SECONDS}
+  local status_interval_sec=${READY_STATUS_INTERVAL_SECONDS}
+  local next_status_at=0
+
+  if (( status_interval_sec <= 0 )); then
+    status_interval_sec=30
+  fi
 
   while (( waited < timeout_sec )); do
     if [[ -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then
       echo "Current same-spec server exited before becoming ready" >&2
+      if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+        tail -n 40 "$SERVER_STDOUT_LOG" >&2
+      fi
       return 1
     fi
-    if curl -fsS "http://${host}:${port}/health" >/dev/null; then
+
+    if probe_server_ready "$host" "$port"; then
+      if (( waited > 0 )); then
+        echo "[same-spec-current] current same-spec server became ready after ${waited}s"
+      fi
       return 0
     fi
+
+    if (( waited >= next_status_at )); then
+      echo "[same-spec-current] waiting for current same-spec server at ${host}:${port} (${waited}s/${timeout_sec}s)" >&2
+      next_status_at=$((waited + status_interval_sec))
+    fi
+
     sleep 1
     ((waited += 1))
   done
 
   echo "Timed out waiting for current same-spec server at ${host}:${port}" >&2
+  if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+    tail -n 40 "$SERVER_STDOUT_LOG" >&2
+  fi
   return 1
 }
 
@@ -491,7 +534,17 @@ CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
 assert_target_port_available "Current same-spec benchmark" "$CLIENT_HOST" "$CLIENT_PORT"
 
 SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters | del(.disable_log_requests)' "$SAME_SPEC_FILE")")
-CLIENT_ARGS=$(json2args "$(jq -c '.resolved_client_parameters' "$SAME_SPEC_FILE")")
+CLIENT_ARGS=$(json2args "$({
+  jq -c \
+    --argjson ready_timeout "$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
+    '.resolved_client_parameters
+      | .ready_check_timeout_sec = (
+          if (.ready_check_timeout_sec // 0) > 0
+          then .ready_check_timeout_sec
+          else $ready_timeout
+          end
+        )' "$SAME_SPEC_FILE"
+})")
 
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
