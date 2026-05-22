@@ -153,9 +153,110 @@
     }
   },
   {
+    "entry_id": "ac3e803f-7b27-4198-a70c-95e75fe98cac",
+    "engine": "vllm-hust",
+    "engine_version": "0.1.dev1+gc2fc50187.d20260424",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B3",
+      "chip_count": 1,
+      "interconnect": "unknown"
+    },
+    "model": {
+      "name": "Qwen/Qwen2.5-0.5B-Instruct",
+      "parameters": "0.5B",
+      "precision": "BF16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-online",
+      "input_length": 64,
+      "output_length": 16,
+      "batch_size": null,
+      "concurrent_requests": 4,
+      "dataset": "random"
+    },
+    "metrics": {
+      "ttft_ms": 1982.4178608250804,
+      "tbt_ms": 45.722483952219285,
+      "throughput_tps": 19.640728441214634,
+      "peak_mem_mb": 0.0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "online-chat",
+        "baseline_engine": "",
+        "owner_confirmed": null,
+        "notes": null,
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline"
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": 0.0,
+        "typical_throughput_ratio_vs_baseline": 0.0,
+        "typical_ttft_reduction_pct_vs_baseline": 0.0,
+        "typical_tpot_reduction_pct_vs_baseline": 0.0,
+        "long_context_length": null,
+        "long_context_throughput_stable": false,
+        "long_context_ttft_p95_ms": 0.0,
+        "long_context_ttft_p99_ms": 0.0,
+        "long_context_tpot_p95_ms": 0.0,
+        "long_context_tpot_p99_ms": 0.0,
+        "long_context_ttft_p95_stable": false,
+        "long_context_ttft_p99_stable": false,
+        "long_context_tpot_p95_stable": false,
+        "long_context_tpot_p99_stable": false,
+        "unit_token_cost_reduction_pct": 0.0,
+        "multi_tenant_high_utilization": false
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "N/A",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.6",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-04-24T05:15:00Z",
+      "submitter": "ShuhaoZhangTony",
+      "data_source": "vllm-hust-ci-random-online",
+      "engine": "vllm-hust",
+      "engine_version": "0.1.dev1+gc2fc50187.d20260424",
+      "reproducible_cmd": null,
+      "git_commit": "c2fc5018789311e92b15b6e69bbe090015762bed",
+      "github_user": "ShuhaoZhangTony",
+      "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/c2fc5018789311e92b15b6e69bbe090015762bed",
+      "github_repository": "vLLM-HUST/vllm-hust",
+      "github_ref": "copilot/ascend-pr-benchmark-publish",
+      "github_event_name": "pull_request",
+      "github_pr_number": 2,
+      "github_pr_url": "https://github.com/vLLM-HUST/vllm-hust/pull/2",
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "d625c547b14b23e39fd200794a3cd81616a1c969477542e74f4d7cb9ce1284dd",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0"
+    }
+  },
+  {
     "entry_id": "1030e12d-908b-4e70-8c27-54ab102ea7ad",
     "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+    "engine_version": "gd4a408c4",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -235,7 +336,7 @@
       "submitter": "moonandlife",
       "data_source": "vllm-ascend-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+      "engine_version": "gd4a408c4",
       "reproducible_cmd": null,
       "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
       "github_user": "moonandlife",
@@ -308,7 +409,7 @@
   {
     "entry_id": "947255ab-739d-4f36-9533-cb348d0cbffe",
     "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+    "engine_version": "gd4a408c4",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -388,7 +489,7 @@
       "submitter": "moonandlife",
       "data_source": "vllm-ascend-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+      "engine_version": "gd4a408c4",
       "reproducible_cmd": null,
       "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
       "github_user": "moonandlife",
@@ -461,7 +562,7 @@
   {
     "entry_id": "660e18b5-7ffa-4dfb-8a26-a598e75f5aef",
     "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+    "engine_version": "gd4a408c4",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -541,7 +642,7 @@
       "submitter": "moonandlife",
       "data_source": "vllm-ascend-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+      "engine_version": "gd4a408c4",
       "reproducible_cmd": null,
       "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
       "github_user": "moonandlife",
@@ -614,7 +715,7 @@
   {
     "entry_id": "e133eeb0-e254-4390-9fac-0a8159468d63",
     "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+    "engine_version": "gd4a408c4",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -694,7 +795,7 @@
       "submitter": "moonandlife",
       "data_source": "vllm-ascend-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+      "engine_version": "gd4a408c4",
       "reproducible_cmd": null,
       "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
       "github_user": "moonandlife",
@@ -767,7 +868,7 @@
   {
     "entry_id": "56a4e4fc-b828-479c-8167-ea2b7b65ac73",
     "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+    "engine_version": "gd4a408c4",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -847,7 +948,7 @@
       "submitter": "moonandlife",
       "data_source": "vllm-ascend-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+      "engine_version": "gd4a408c4",
       "reproducible_cmd": null,
       "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
       "github_user": "moonandlife",
@@ -920,7 +1021,7 @@
   {
     "entry_id": "8eda45c4-246b-43bb-bae4-b995383c9de2",
     "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+    "engine_version": "gd4a408c4",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -1000,7 +1101,7 @@
       "submitter": "moonandlife",
       "data_source": "vllm-ascend-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+      "engine_version": "gd4a408c4",
       "reproducible_cmd": null,
       "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
       "github_user": "moonandlife",
@@ -1073,7 +1174,7 @@
   {
     "entry_id": "0de997b3-975f-49d0-8f9d-ea17e374183a",
     "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+    "engine_version": "gd4a408c4",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -1153,7 +1254,7 @@
       "submitter": "moonandlife",
       "data_source": "vllm-ascend-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+      "engine_version": "gd4a408c4",
       "reproducible_cmd": null,
       "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
       "github_user": "moonandlife",
@@ -1226,7 +1327,7 @@
   {
     "entry_id": "e1887cc2-91e0-4f1d-a23d-245448ab0b9f",
     "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+    "engine_version": "gd4a408c4",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -1306,7 +1407,7 @@
       "submitter": "moonandlife",
       "data_source": "vllm-ascend-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+      "engine_version": "gd4a408c4",
       "reproducible_cmd": null,
       "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
       "github_user": "moonandlife",
@@ -1370,6 +1471,312 @@
         "request_rate": 1,
         "host": "127.0.0.1",
         "port": 35409,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "random_input_len": 1024,
+        "random_output_len": 256
+      }
+    }
+  },
+  {
+    "entry_id": "6a6b8250-e8de-4eb6-86b5-a611b3211bc0",
+    "engine": "vllm-hust",
+    "engine_version": "0.17.2rc1.dev450+g289b51ab2.d20260511",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B3",
+      "chip_count": 1,
+      "interconnect": "unknown"
+    },
+    "model": {
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-online",
+      "input_length": 1024,
+      "output_length": 256,
+      "batch_size": null,
+      "concurrent_requests": null,
+      "dataset": "random"
+    },
+    "metrics": {
+      "ttft_ms": 293.5070344794076,
+      "tbt_ms": 106.8622610027806,
+      "throughput_tps": 225.30805722662924,
+      "peak_mem_mb": 0.0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "online-chat",
+        "baseline_engine": "vllm",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "official-covered",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "N/A",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-05-20T10:39:29Z",
+      "submitter": "same-spec-current",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "0.17.2rc1.dev450+g289b51ab2.d20260511",
+      "reproducible_cmd": null,
+      "git_commit": "cee0aff18d987ba6fdd86d5e5fec80a20cfc97eb",
+      "github_user": "cybber695",
+      "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/cee0aff18d987ba6fdd86d5e5fec80a20cfc97eb",
+      "github_repository": "vLLM-HUST/vllm-hust",
+      "github_ref": "main",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "43d9cab36394760dba041ab62383a348eedcb1a8729222c83163cfe96bbcdbb7",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+        "engine": {
+          "repository": "vLLM-HUST/vllm-hust",
+          "ref": "main",
+          "commit": "cee0aff18d987ba6fdd86d5e5fec80a20cfc97eb"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vLLM-HUST/vllm-ascend-hust",
+          "ref": "feat/bidkv-victim-selector-item1-2",
+          "commit": "f16e2c1a419430e4f018ad41a5cdd5e6b48d0702"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3",
+      "spec_label": "Official Ascend Jan 2026 baseline for vllm-hust goal tracking",
+      "spec_source": "/home/cyb/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json",
+      "scenario": "random-online",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B3",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "a31eac56d03eaa3c7c4df6d2aa1ceb82f637f88c94da31b2b63331c18155aae9",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "disable_log_requests": "",
+        "host": "0.0.0.0",
+        "port": 18112,
+        "model": "/data/shared-models/Qwen2.5-14B-Instruct",
+        "dtype": "float16"
+      },
+      "resolved_client_parameters": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "request_rate": 1,
+        "host": "127.0.0.1",
+        "port": 18112,
+        "model": "/data/shared-models/Qwen2.5-14B-Instruct",
+        "random_input_len": 1024,
+        "random_output_len": 256
+      }
+    }
+  },
+  {
+    "entry_id": "63ee433a-e670-4723-ade4-d3e68524185c",
+    "engine": "vllm-hust",
+    "engine_version": "2657b58e",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B3",
+      "chip_count": 1,
+      "interconnect": "unknown"
+    },
+    "model": {
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-online",
+      "input_length": 1024,
+      "output_length": 256,
+      "batch_size": null,
+      "concurrent_requests": null,
+      "dataset": "random"
+    },
+    "metrics": {
+      "ttft_ms": 434.1900033620186,
+      "tbt_ms": 131.80502134120985,
+      "throughput_tps": 220.02408111793983,
+      "peak_mem_mb": 0.0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "online-chat",
+        "baseline_engine": "vllm",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "official-covered",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "N/A",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-05-22T09:35:58Z",
+      "submitter": "moonandlife",
+      "data_source": "vllm-hust-ci-same-spec",
+      "engine": "vllm-hust",
+      "engine_version": "2657b58e",
+      "reproducible_cmd": null,
+      "git_commit": "2657b58e4dd351c66ae594421bed798bf484e5b9",
+      "github_user": "moonandlife",
+      "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/2657b58e4dd351c66ae594421bed798bf484e5b9",
+      "github_repository": "vLLM-HUST/vllm-hust",
+      "github_ref": "ws/fix-actions-26145186169-26145186140",
+      "github_event_name": "pull_request",
+      "github_pr_number": 40,
+      "github_pr_url": "https://github.com/vLLM-HUST/vllm-hust/pull/40",
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "dcf37625b5de10ae15d82882498b58d39d2bcc0a762308770d82234f05173876",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/home/grunner/miniconda3/envs/vllm-hust-dev/bin/python",
+        "engine": {
+          "repository": "vLLM-HUST/vllm-hust",
+          "ref": "ws/fix-actions-26145186169-26145186140",
+          "commit": "2657b58e4dd351c66ae594421bed798bf484e5b9"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vLLM-HUST/vllm-ascend-hust",
+          "ref": "main",
+          "commit": "52835ae58920ca1120d3c13999ccbd7916e9cda8"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3",
+      "spec_label": "Official Ascend Jan 2026 baseline for vllm-hust goal tracking",
+      "spec_source": "/home/grunner/actions-runner/_work/vllm-hust/vllm-hust/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json",
+      "scenario": "random-online",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B3",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "a31eac56d03eaa3c7c4df6d2aa1ceb82f637f88c94da31b2b63331c18155aae9",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "disable_log_requests": "",
+        "host": "0.0.0.0",
+        "port": 38815,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "dtype": "float16"
+      },
+      "resolved_client_parameters": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "request_rate": 1,
+        "host": "127.0.0.1",
+        "port": 38815,
         "model": "Qwen/Qwen2.5-14B-Instruct",
         "random_input_len": 1024,
         "random_output_len": 256
@@ -1616,9 +2023,9 @@
         "domestic_chip_class": "Ascend-class",
         "representative_model_band": "7B-13B",
         "representative_business_scenario": "online-chat",
-        "baseline_engine": "vllm",
+        "baseline_engine": "",
         "declared_baseline_engine": "vllm",
-        "baseline_status": "official-covered",
+        "baseline_status": "pending-baseline",
         "owner_confirmed": null,
         "notes": null
       },
