@@ -186,7 +186,12 @@ When `export-leaderboard-artifact` or `submit` runs inside GitHub Actions, the e
 
 For cross-repository CI, `sync-submission-to-hf` is the preferred publish entrypoint after a run has already been exported into one submission directory. It downloads historical raw submissions from a Hugging Face dataset prefix, merges in the new submission, regenerates `leaderboard_single.json`, `leaderboard_multi.json`, `leaderboard_compare.json`, and `last_updated.json`, and uploads both the refreshed snapshots and the new raw submission in one commit.
 
-This is the exact input pattern consumed by website aggregation.
+Because the production website currently prioritizes `github -> hf -> local`, a successful HF upload alone is not sufficient to refresh the live site. The production chain therefore has two stages:
+
+1. `vllm-hust` benchmark CI publishes refreshed snapshots to the HF dataset.
+2. The same CI mirrors those four snapshot files into `leaderboard-data/snapshots/` on a dedicated benchmark-repo bot branch, and this repository auto-opens and auto-merges a PR back to `main` after `CI` passes.
+
+This keeps the HF dataset as the canonical aggregated source while still satisfying the website's GitHub-first loader.
 
 If you already have a raw `vllm bench` result JSON, you do not need to hand-author the full metrics payload anymore. The wrapper can derive the main website metrics from the raw result and only requires a separate constraints metrics JSON.
 

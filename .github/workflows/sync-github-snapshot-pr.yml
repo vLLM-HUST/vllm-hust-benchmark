@@ -1,0 +1,69 @@
+name: Sync GitHub Snapshot PR
+
+'on':
+  push:
+    branches:
+      - bot/leaderboard-snapshot-sync
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-or-update-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout benchmark repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read snapshot marker
+        id: marker
+        run: |
+          marker=$(python - <<'PY'
+          import json
+          from pathlib import Path
+
+          marker_file = Path('leaderboard-data/snapshots/last_updated.json')
+          if not marker_file.is_file():
+              print('')
+              raise SystemExit(0)
+
+          payload = json.loads(marker_file.read_text(encoding='utf-8'))
+          print(payload.get('last_updated', ''))
+          PY
+          )
+          echo "value=$marker" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update snapshot PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SNAPSHOT_MARKER: ${{ steps.marker.outputs.value }}
+        run: |
+          title="chore(data): sync leaderboard snapshots"
+          if [[ -n "$SNAPSHOT_MARKER" ]]; then
+            title="$title ($SNAPSHOT_MARKER)"
+          fi
+
+          body=$(printf '%s\n' \
+            'This PR mirrors refreshed leaderboard snapshot files into `leaderboard-data/snapshots` for the website GitHub-first data path.' \
+            '' \
+            "- source branch: ${GITHUB_REF_NAME}" \
+            "- source commit: ${GITHUB_SHA}" \
+            "- snapshot marker: ${SNAPSHOT_MARKER:-unknown}")
+
+          pr_number=$(gh pr list \
+            --base main \
+            --head "$GITHUB_REF_NAME" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [[ -n "$pr_number" ]]; then
+            gh pr edit "$pr_number" --title "$title" --body "$body"
+          else
+            gh pr create --base main --head "$GITHUB_REF_NAME" --title "$title" --body "$body"
+          fi

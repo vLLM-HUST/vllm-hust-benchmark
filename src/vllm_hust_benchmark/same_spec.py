@@ -17,6 +17,39 @@ PRECISION_TO_DTYPE = {
 
 NON_SEMANTIC_SERVER_KEYS = {"host", "port", "model"}
 NON_SEMANTIC_CLIENT_KEYS = {"host", "port", "model"}
+LOCAL_MODEL_CONFIG_FILES = ("config.json",)
+LOCAL_MODEL_TOKENIZER_PATTERNS = (
+    "tokenizer.json",
+    "tokenizer.model",
+    "spiece.model",
+    "sentencepiece.bpe.model",
+    "vocab.json",
+    "vocab.txt",
+)
+LOCAL_MODEL_WEIGHT_PATTERNS = (
+    "*.safetensors",
+    "*.bin",
+    "*.pt",
+    "*.pth",
+    "model.safetensors.index.json",
+    "pytorch_model.bin.index.json",
+)
+
+
+def _path_has_any_matching_file(path: Path, patterns: tuple[str, ...]) -> bool:
+    return any(candidate.is_file() for pattern in patterns for candidate in path.glob(pattern))
+
+
+def runtime_model_path_has_required_artifacts(candidate: str | Path) -> bool:
+    path = Path(candidate)
+    if not path.is_dir():
+        return False
+
+    return (
+        _path_has_any_matching_file(path, LOCAL_MODEL_CONFIG_FILES)
+        and _path_has_any_matching_file(path, LOCAL_MODEL_TOKENIZER_PATTERNS)
+        and _path_has_any_matching_file(path, LOCAL_MODEL_WEIGHT_PATTERNS)
+    )
 
 
 def load_benchmark_spec(spec_file: Path) -> dict[str, Any]:
