@@ -458,6 +458,14 @@ probe_server_ready() {
   return 1
 }
 
+server_log_indicates_node_env_failure() {
+  local log_file=$1
+
+  [[ -f "$log_file" ]] || return 1
+
+  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception|Engine core initialization failed" "$log_file"
+}
+
 wait_for_server() {
   local host=$1
   local port=$2
@@ -475,6 +483,10 @@ wait_for_server() {
       echo "Current same-spec server exited before becoming ready" >&2
       if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
         tail -n 40 "$SERVER_STDOUT_LOG" >&2
+        if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG"; then
+          echo "Detected Ascend node-level runtime failure during current same-spec startup" >&2
+          return 86
+        fi
       fi
       return 1
     fi
@@ -498,6 +510,10 @@ wait_for_server() {
   echo "Timed out waiting for current same-spec server at ${host}:${port}" >&2
   if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
     tail -n 40 "$SERVER_STDOUT_LOG" >&2
+    if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG"; then
+      echo "Detected Ascend node-level runtime failure while waiting for current same-spec startup" >&2
+      return 86
+    fi
   fi
   return 1
 }

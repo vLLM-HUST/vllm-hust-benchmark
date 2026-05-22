@@ -189,7 +189,7 @@ For cross-repository CI, `sync-submission-to-hf` is the preferred publish entryp
 Because the production website currently prioritizes `github -> hf -> local`, a successful HF upload alone is not sufficient to refresh the live site. The production chain therefore has two stages:
 
 1. `vllm-hust` benchmark CI publishes refreshed snapshots to the HF dataset.
-2. The same CI mirrors those four snapshot files into `leaderboard-data/snapshots/` on a dedicated benchmark-repo bot branch, and this repository auto-opens and auto-merges a PR back to `main` after `CI` passes.
+2. The same trusted-runner CI mirrors those four snapshot files into `leaderboard-data/snapshots/` on a dedicated benchmark-repo bot branch, opens or updates the PR back to `main`, and this repository auto-merges that PR after `CI` passes.
 
 This keeps the HF dataset as the canonical aggregated source while still satisfying the website's GitHub-first loader.
 
