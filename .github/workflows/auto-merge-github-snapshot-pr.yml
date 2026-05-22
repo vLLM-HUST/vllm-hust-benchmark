@@ -20,6 +20,7 @@ jobs:
       - name: Merge eligible snapshot PR
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO_SLUG: vLLM-HUST/vllm-hust-benchmark
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           if [[ "$HEAD_BRANCH" != "bot/leaderboard-snapshot-sync" ]]; then
@@ -28,6 +29,7 @@ jobs:
           fi
 
           pr_number=$(gh pr list \
+            -R "$REPO_SLUG" \
             --base main \
             --head "$HEAD_BRANCH" \
             --state open \
@@ -39,4 +41,4 @@ jobs:
             exit 0
           fi
 
-          gh pr merge "$pr_number" --squash --delete-branch=false
+          gh pr merge -R "$REPO_SLUG" "$pr_number" --squash --delete-branch=false
