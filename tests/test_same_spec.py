@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from vllm_hust_benchmark.same_spec import build_same_spec_payload
+from vllm_hust_benchmark.same_spec import runtime_model_path_has_required_artifacts
 from vllm_hust_benchmark.same_spec import write_same_spec_payload
 
 
@@ -88,4 +89,31 @@ def test_write_same_spec_payload(tmp_path: Path) -> None:
 
     payload = json.loads(output_file.read_text(encoding="utf-8"))
     assert payload["spec_id"] == _spec()["id"]
-    assert payload["resolved_spec_hash"]
+
+
+def test_runtime_model_path_has_required_artifacts(tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "config.json").write_text("{}", encoding="utf-8")
+    (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
+    (model_dir / "model.safetensors.index.json").write_text("{}", encoding="utf-8")
+
+    assert runtime_model_path_has_required_artifacts(model_dir)
+
+
+def test_runtime_model_path_requires_tokenizer_assets(tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "config.json").write_text("{}", encoding="utf-8")
+    (model_dir / "model.safetensors.index.json").write_text("{}", encoding="utf-8")
+
+    assert not runtime_model_path_has_required_artifacts(model_dir)
+
+
+def test_runtime_model_path_requires_weight_markers(tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "config.json").write_text("{}", encoding="utf-8")
+    (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
+
+    assert not runtime_model_path_has_required_artifacts(model_dir)

@@ -367,6 +367,22 @@ resolve_runtime_model() {
     2>/dev/null || return 1
 }
 
+local_runtime_model_has_required_artifacts() {
+  local runtime_model_candidate=$1
+
+  run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" \
+    env RUNTIME_MODEL_CANDIDATE="$runtime_model_candidate" \
+    "$CURRENT_RUNTIME_PYTHON" - <<'PY' >/dev/null
+import os
+
+from vllm_hust_benchmark.same_spec import runtime_model_path_has_required_artifacts
+
+raise SystemExit(
+    0 if runtime_model_path_has_required_artifacts(os.environ["RUNTIME_MODEL_CANDIDATE"]) else 1
+)
+PY
+}
+
 resolve_same_spec() {
   local resolve_args=(
     "$CURRENT_RUNTIME_PYTHON" -m vllm_hust_benchmark.same_spec resolve
@@ -520,7 +536,11 @@ fi
 
 RUNTIME_MODEL="$MODEL"
 if cached_model_path=$(resolve_runtime_model); then
-  RUNTIME_MODEL="$cached_model_path"
+  if [[ -n "$CURRENT_MODEL_PATH" ]] || local_runtime_model_has_required_artifacts "$cached_model_path"; then
+    RUNTIME_MODEL="$cached_model_path"
+  else
+    echo "[same-spec-current] cached local snapshot is missing tokenizer or weight artifacts; falling back to model ID ${MODEL}" >&2
+  fi
 fi
 
 SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
