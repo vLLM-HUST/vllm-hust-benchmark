@@ -20,6 +20,8 @@ CURRENT_CLIENT_HOST=${CURRENT_CLIENT_HOST:-}
 CURRENT_CLIENT_PORT=${CURRENT_CLIENT_PORT:-$CURRENT_SERVER_PORT}
 CURRENT_ENGINE=${CURRENT_ENGINE:-"vllm-hust"}
 CURRENT_ENGINE_VERSION=${CURRENT_ENGINE_VERSION:-}
+CURRENT_CORE_VERSION=${CURRENT_CORE_VERSION:-}
+CURRENT_BACKEND_VERSION=${CURRENT_BACKEND_VERSION:-}
 CURRENT_SUBMITTER=${CURRENT_SUBMITTER:-"same-spec-current"}
 CURRENT_BASELINE_ENGINE=${CURRENT_BASELINE_ENGINE:-"vllm"}
 CURRENT_DATA_SOURCE=${CURRENT_DATA_SOURCE:-"vllm-hust-benchmark"}
@@ -127,6 +129,70 @@ PY
   fi
 
   fallback=$(resolve_current_engine_version_from_git)
+  if is_valid_engine_version "$fallback"; then
+    printf '%s' "$fallback"
+    return 0
+  fi
+
+  printf '%s' "unknown"
+}
+
+resolve_current_backend_version_from_git() {
+  local described=""
+
+  if [[ -n "$CURRENT_PLUGIN_GIT_COMMIT" ]]; then
+    described=$(git -C "$CURRENT_VLLM_ASCEND_HUST_REPO" describe --tags --always "$CURRENT_PLUGIN_GIT_COMMIT" 2>/dev/null || true)
+    if [[ -n "$described" ]]; then
+      printf '%s' "$described"
+      return 0
+    fi
+  fi
+
+  described=$(git -C "$CURRENT_VLLM_ASCEND_HUST_REPO" describe --tags --always HEAD 2>/dev/null || true)
+  if [[ -n "$described" ]]; then
+    printf '%s' "$described"
+    return 0
+  fi
+
+  git -C "$CURRENT_VLLM_ASCEND_HUST_REPO" rev-parse --short HEAD 2>/dev/null || true
+}
+
+detect_current_backend_version() {
+  local raw_output=""
+  local detected=""
+  local fallback=""
+
+  raw_output=$(run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+from importlib import metadata
+
+version = None
+try:
+    import vllm_ascend
+    version = getattr(vllm_ascend, '__version__', None)
+except Exception:
+    version = None
+
+if not version:
+    for dist_name in ('vllm-ascend-hust', 'vllm-ascend'):
+        try:
+            version = metadata.version(dist_name)
+            break
+        except Exception:
+            continue
+
+print(f"__VLLM_HUST_BACKEND_VERSION__={version or ''}")
+PY
+)
+
+  detected=$(printf '%s\n' "$raw_output" | sed -n 's/^__VLLM_HUST_BACKEND_VERSION__=//p' | tail -n 1)
+  detected=$(printf '%s' "$detected" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
+
+  if is_valid_engine_version "$detected"; then
+    printf '%s' "$detected"
+    return 0
+  fi
+
+  fallback=$(resolve_current_backend_version_from_git)
   if is_valid_engine_version "$fallback"; then
     printf '%s' "$fallback"
     return 0
@@ -550,6 +616,14 @@ if [[ -z "$CURRENT_ENGINE_VERSION" ]]; then
   CURRENT_ENGINE_VERSION=$(detect_current_engine_version)
 fi
 
+if [[ -z "$CURRENT_CORE_VERSION" ]]; then
+  CURRENT_CORE_VERSION="$CURRENT_ENGINE_VERSION"
+fi
+
+if [[ -z "$CURRENT_BACKEND_VERSION" ]]; then
+  CURRENT_BACKEND_VERSION=$(detect_current_backend_version)
+fi
+
 RUNTIME_MODEL="$MODEL"
 if cached_model_path=$(resolve_runtime_model); then
   if [[ -n "$CURRENT_MODEL_PATH" ]] || local_runtime_model_has_required_artifacts "$cached_model_path"; then
@@ -609,6 +683,8 @@ run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RU
   --run-id "$RUN_ID" \
   --engine "$CURRENT_ENGINE" \
   --engine-version "$CURRENT_ENGINE_VERSION" \
+  --core-version "$CURRENT_CORE_VERSION" \
+  --backend-version "$CURRENT_BACKEND_VERSION" \
   --model-name "$MODEL" \
   --model-parameters "$MODEL_PARAMETERS" \
   --model-precision "$MODEL_PRECISION" \
