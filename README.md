@@ -188,10 +188,10 @@ For cross-repository CI, `sync-submission-to-hf` is the preferred publish entryp
 
 Because the production website currently prioritizes `github -> hf -> local`, a successful HF upload alone is not sufficient to refresh the live site. The production chain therefore has two stages:
 
-1. `vllm-hust` benchmark CI publishes refreshed snapshots to the HF dataset.
-2. The same trusted-runner CI mirrors those four snapshot files into `leaderboard-data/snapshots/` on a dedicated benchmark-repo bot branch, opens or updates the PR back to `main`, and this repository auto-merges that PR after `CI` passes.
+1. `vllm-hust` benchmark CI writes the exported `submissions/<run-id>/` payload and refreshed `leaderboard-data/snapshots/` files directly into `vllm-hust-benchmark@main` in one bot-authenticated commit.
+2. The `push-to-hf.yml` workflow in this repository reacts to that `submissions/**` change, syncs the merged raw submission plus refreshed snapshots to the HF dataset, and keeps the GitHub repository itself as the website's first freshness source.
 
-This keeps the HF dataset as the canonical aggregated source while still satisfying the website's GitHub-first loader.
+The older snapshot-PR and auto-merge workflows are obsolete under this model. The HF dataset remains the canonical aggregated source, while the benchmark repository commit satisfies the website's GitHub-first loader immediately.
 
 If you already have a raw `vllm bench` result JSON, you do not need to hand-author the full metrics payload anymore. The wrapper can derive the main website metrics from the raw result and only requires a separate constraints metrics JSON.
 

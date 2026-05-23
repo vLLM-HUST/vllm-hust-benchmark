@@ -18,6 +18,12 @@ Unreleased entries concise and workflow-focused.
   local workspace source trees.
 
 ### Changed
+- Switched trusted benchmark publication back to a direct bot-authenticated
+  commit to `main` that carries both `submissions/<run-id>/` and refreshed
+  `leaderboard-data/snapshots/**`, leaving `push-to-hf.yml` as the only
+  downstream publish step and making the old snapshot PR / auto-merge workflows
+  obsolete.
+
 - Updated `scripts/run-official-ascend-goal-baseline.sh` to resolve runtime
   parameters through the shared same-spec payload before launching the official
   `v0.11.0` baseline.
