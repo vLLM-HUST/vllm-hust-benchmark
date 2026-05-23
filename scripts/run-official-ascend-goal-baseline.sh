@@ -18,6 +18,8 @@ OFFICIAL_SERVER_HOST=${OFFICIAL_SERVER_HOST:-}
 OFFICIAL_SERVER_PORT=${OFFICIAL_SERVER_PORT:-"8000"}
 OFFICIAL_CLIENT_HOST=${OFFICIAL_CLIENT_HOST:-}
 OFFICIAL_CLIENT_PORT=${OFFICIAL_CLIENT_PORT:-$OFFICIAL_SERVER_PORT}
+OFFICIAL_CORE_VERSION=${OFFICIAL_CORE_VERSION:-}
+OFFICIAL_BACKEND_VERSION=${OFFICIAL_BACKEND_VERSION:-}
 ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
 ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-"/usr/local/Ascend/nnal/atb/set_env.sh"}
 ASCEND_ATB_CXX_ABI=${ASCEND_ATB_CXX_ABI:-"1"}
@@ -368,6 +370,97 @@ raise SystemExit(
     0 if runtime_model_path_has_required_artifacts(os.environ["RUNTIME_MODEL_CANDIDATE"]) else 1
 )
 PY
+
+is_valid_engine_version() {
+  local version=${1:-}
+  [[ -n "$version" ]] && [[ "$version" != "unknown" ]] && [[ "$version" != "not-installed" ]] && [[ "$version" != "N/A" ]]
+}
+
+detect_official_core_version() {
+  local raw_output=""
+  local detected=""
+  local fallback=""
+
+  raw_output=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+from importlib import metadata
+
+version = None
+try:
+    import vllm
+    version = getattr(vllm, '__version__', None)
+except Exception:
+    version = None
+
+if not version:
+    try:
+        version = metadata.version('vllm')
+    except Exception:
+        version = None
+
+print(f"__VLLM_HUST_CORE_VERSION__={version or ''}")
+PY
+)
+
+  detected=$(printf '%s\n' "$raw_output" | sed -n 's/^__VLLM_HUST_CORE_VERSION__=//p' | tail -n 1)
+  detected=$(printf '%s' "$detected" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
+
+  if is_valid_engine_version "$detected"; then
+    printf '%s' "$detected"
+    return 0
+  fi
+
+  fallback=$(git -C "$OFFICIAL_VLLM_WORKTREE" describe --tags --always HEAD 2>/dev/null || true)
+  if is_valid_engine_version "$fallback"; then
+    printf '%s' "$fallback"
+    return 0
+  fi
+
+  printf '%s' "unknown"
+}
+
+detect_official_backend_version() {
+  local raw_output=""
+  local detected=""
+  local fallback=""
+
+  raw_output=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+from importlib import metadata
+
+version = None
+try:
+    import vllm_ascend
+    version = getattr(vllm_ascend, '__version__', None)
+except Exception:
+    version = None
+
+if not version:
+    for dist_name in ('vllm-ascend', 'vllm_ascend'):
+        try:
+            version = metadata.version(dist_name)
+            break
+        except Exception:
+            continue
+
+print(f"__VLLM_HUST_BACKEND_VERSION__={version or ''}")
+PY
+)
+
+  detected=$(printf '%s\n' "$raw_output" | sed -n 's/^__VLLM_HUST_BACKEND_VERSION__=//p' | tail -n 1)
+  detected=$(printf '%s' "$detected" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
+
+  if is_valid_engine_version "$detected"; then
+    printf '%s' "$detected"
+    return 0
+  fi
+
+  fallback=$(git -C "$OFFICIAL_VLLM_ASCEND_WORKTREE" describe --tags --always HEAD 2>/dev/null || true)
+  if is_valid_engine_version "$fallback"; then
+    printf '%s' "$fallback"
+    return 0
+  fi
+
+  printf '%s' "unknown"
+}
 }
 
 wait_for_server() {
@@ -428,6 +521,20 @@ GIT_COMMIT=$(jq -r '.export.git_commit' "$SPEC_FILE")
 DATA_SOURCE=$(jq -r '.export.data_source' "$SPEC_FILE")
 INPUT_LEN=$(jq -r '.client_parameters.input_len' "$SPEC_FILE")
 OUTPUT_LEN=$(jq -r '.client_parameters.output_len' "$SPEC_FILE")
+
+if [[ -z "$OFFICIAL_CORE_VERSION" ]]; then
+  OFFICIAL_CORE_VERSION=$(detect_official_core_version)
+fi
+if ! is_valid_engine_version "$OFFICIAL_CORE_VERSION"; then
+  OFFICIAL_CORE_VERSION="$ENGINE_VERSION"
+fi
+
+if [[ -z "$OFFICIAL_BACKEND_VERSION" ]]; then
+  OFFICIAL_BACKEND_VERSION=$(detect_official_backend_version)
+fi
+if ! is_valid_engine_version "$OFFICIAL_BACKEND_VERSION"; then
+  OFFICIAL_BACKEND_VERSION="$ENGINE_VERSION"
+fi
 
 RUNTIME_MODEL="$MODEL"
 if cached_model_path=$(resolve_runtime_model); then
@@ -515,6 +622,8 @@ python -m vllm_hust_benchmark.cli export-leaderboard-artifact \
   --run-id "$RUN_ID" \
   --engine "$ENGINE" \
   --engine-version "$ENGINE_VERSION" \
+  --core-version "$OFFICIAL_CORE_VERSION" \
+  --backend-version "$OFFICIAL_BACKEND_VERSION" \
   --model-name "$MODEL" \
   --model-parameters "$MODEL_PARAMETERS" \
   --model-precision "$MODEL_PRECISION" \
