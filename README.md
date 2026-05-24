@@ -216,9 +216,10 @@ Current baseline target:
 
 - official `vllm v0.11.0`
 - official `vllm-ascend v0.11.0`
-- scenario `random-online`
-- model `Qwen/Qwen2.5-14B-Instruct`
-- hardware `Huawei 910B3`
+- canonical spec set under `docs/official-baselines/*.json`
+- current hardware target `Huawei 910B3`
+
+The official baseline set is no longer a single `random-online` spec. The canonical spec files under `docs/official-baselines/` are the source of truth for all official scenarios that need a baseline under the pinned January 2026 `v0.11.0` runtime pair.
 
 Files:
 
@@ -230,23 +231,48 @@ Files:
 Example:
 
 ```bash
-export ENV_PREFIX=/root/miniconda3/envs/vllm-ascend-official-v0110
+export ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
 bash scripts/prepare-official-ascend-baseline-env.sh
 
-export GOAL_BASELINE_ENV_PREFIX=/root/miniconda3/envs/vllm-ascend-official-v0110
+export GOAL_BASELINE_ENV_PREFIX="$ENV_PREFIX"
 bash scripts/run-official-ascend-goal-baseline.sh \
 	docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
+```
+
+Batch trigger for all official specs:
+
+```bash
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+bash scripts/run-official-ascend-goal-baseline-matrix.sh
+```
+
+Batch trigger with repeated candidate selection for missing canonical specs:
+
+```bash
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh
 ```
 
 Notes:
 
 - `prepare-official-ascend-baseline-env.sh` creates or repairs a dedicated conda env for the fixed official baseline only.
+- `prepare-official-ascend-baseline-env.sh` now starts with a health check. If the existing env already matches the pinned official baseline, it skips the heavy uninstall/reinstall path and reuses the env as-is.
+- If `ENV_PREFIX` is unset, the prepare script now defaults it to `$(conda info --base)/envs/vllm-ascend-official-v0110` instead of assuming `/root/miniconda3/...`.
 - `prepare-official-ascend-baseline-env.sh` also owns the benchmark admission preflight: it proactively cleans residual `api_server` / `bench serve` / `EngineCore_DP0` processes and clears the benchmark port before a new run is allowed to start.
 - The baseline runtime is pinned to `reference-repos/vllm@v0.11.0` and `reference-repos/vllm-ascend@v0.11.0` worktrees.
 - The prepare script intentionally does not install `vllm-hust` or `vllm-ascend-hust` into the official env, to avoid plugin-entry-point contamination.
+- The prepare script now defaults `PYTORCH_CPU_INDEX_URL` to `https://download.pytorch.org/whl/cpu` in addition to the Ascend mirror, so `torch==...+cpu` dependencies from `torch-npu` metadata can resolve.
+- The torch family package pins are configurable with `OFFICIAL_TORCH_VERSION`, `OFFICIAL_TORCH_NPU_VERSION`, `OFFICIAL_TORCHVISION_VERSION`, and `OFFICIAL_TORCHAUDIO_VERSION`.
+- For the default official version set on `Python 3.11`, the prepare script now auto-selects built-in archived wheel URLs for both `x86_64` and `aarch64`, based on the local machine architecture.
+- You can bypass drifting package indexes with explicit wheel URLs: `OFFICIAL_TORCH_WHEEL_URL`, `OFFICIAL_TORCH_NPU_WHEEL_URL`, `OFFICIAL_TORCHVISION_WHEEL_URL`, and `OFFICIAL_TORCHAUDIO_WHEEL_URL`.
+- If you override the default torch-family versions or use a different Python ABI, the script falls back to index-based resolution unless you also provide explicit wheel URLs.
 - The runner executes against the pinned worktrees through `PYTHONPATH` and defaults `VLLM_CACHE_ROOT` to `.cache/official-ascend-goal-baseline/` in this repository.
 - The runner calls the same prepare script in admission-only mode immediately before benchmark startup, so residual-process cleanup is a hard precondition rather than a manual step.
 - The runner prefers a locally cached Hugging Face snapshot for the target model when one already exists. You can also force a specific local model directory with `OFFICIAL_MODEL_PATH=/abs/model/path`.
+- `run-official-ascend-goal-baseline-matrix.sh` is the batch trigger for official baseline establishment. It skips specs that already have canonical submissions under `submissions/<spec-id>/` and prints a hint instead of re-running them.
+- When a spec has no canonical submission yet, `run-official-ascend-goal-baseline-matrix.sh` repeats it `REPEAT_COUNT` times (default `3`), chooses the run whose primary metric is closest to the median candidate, and promotes only that run into `submissions/<spec-id>/`.
+- Set `FORCE_RUN_EXISTING=1` only when you intentionally want a review-only rerun. The matrix runner preserves the current canonical submission and leaves the new result under `.benchmarks/` for manual comparison instead of auto-replacing it.
+- For official baseline workflow dispatch in GitHub Actions, use `.github/workflows/run-official-ascend-baselines.yml`. It runs the same matrix trigger on the self-hosted Ascend runner and uploads the summary plus generated result directories as artifacts, but it does not auto-commit canonical updates.
 
 This produces:
 
@@ -254,6 +280,111 @@ This produces:
 - a website-compatible leaderboard artifact under `.benchmarks/official-ascend-goal-baseline/submission/`
 
 The exported artifact can then be aggregated into `vllm-hust-website` with `publish-website` or `vllm-hust-website/scripts/aggregate_results.py`.
+
+### Triggering Locally
+
+Recommended first establishment run for all missing official specs:
+
+```bash
+cd /path/to/vllm-hust-benchmark
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh
+```
+
+Run only one spec file:
+
+```bash
+cd /path/to/vllm-hust-benchmark
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh \
+	docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-online-qwen25-14b-910b3.json
+```
+
+Run a review-only rerun for a spec that already has canonical data:
+
+```bash
+cd /path/to/vllm-hust-benchmark
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+FORCE_RUN_EXISTING=1 REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh \
+	docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
+```
+
+Useful local switches:
+
+- `PREPARE_OFFICIAL_ENV=1` (default): create or repair the pinned official env before the batch.
+- `FORCE_REPAIR_OFFICIAL_ENV=1`: bypass the prepare script health check and force a full reinstall/repair of the official env.
+- `REPEAT_COUNT=3`: recommended default for establishing a missing canonical spec.
+- `FORCE_RUN_EXISTING=1`: rerun even if canonical data already exists, but do not overwrite canonical automatically.
+- `PUBLISH_WEBSITE=1`: rebuild `vllm-hust-website/data` from the full `submissions/` tree after the batch.
+- `PYTORCH_CPU_INDEX_URL=https://download.pytorch.org/whl/cpu`: default CPU wheel index used by the prepare script for torch-family dependency resolution.
+- `OFFICIAL_TORCH_NPU_WHEEL_URL=<exact-wheel-url>`: preferred escape hatch when the historical `torch-npu` build has disappeared from the live mirror.
+
+Outputs:
+
+- Per-run artifacts go to `.benchmarks/<matrix-run-id>/...`
+- Promoted canonical submissions go to `submissions/<spec-id>/`
+- The batch summary goes to `.benchmarks/<matrix-run-id>/summary.md` unless `MATRIX_SUMMARY_FILE` is overridden.
+
+### Triggering The Workflow
+
+The manual workflow entrypoint is `.github/workflows/run-official-ascend-baselines.yml` and is intended for a self-hosted Ascend runner.
+
+Recommended `workflow_dispatch` inputs for the first full establishment run:
+
+- `spec_paths`: leave blank to cover `docs/official-baselines`
+- `repeat_count`: `3`
+- `force_run_existing`: `false`
+- `prepare_official_env`: `true`
+- `force_repair_official_env`: `false`
+- `publish_website`: `false`
+- `website_ref`: `main`
+- `goal_baseline_env_prefix`: leave blank unless the runner must use a non-default conda base; blank resolves to `$(conda info --base)/envs/vllm-ascend-official-v0110` on the runner
+
+Workflow visibility note:
+
+- GitHub can only dispatch workflows that already exist on the remote repository. Before using `gh workflow run`, commit and push `.github/workflows/run-official-ascend-baselines.yml` to the branch you want to dispatch.
+- If you are validating from a feature branch before merge, pass `--ref <branch>` so GitHub dispatches the workflow definition from that remote branch.
+
+Trigger from GitHub UI:
+
+1. Open the Actions page for this repository.
+2. Select `Run Official Ascend Baselines`.
+3. Click `Run workflow`.
+4. Fill `spec_paths` only when you want a subset. Leave it blank for the full official set.
+
+Trigger from `gh` CLI:
+
+```bash
+cd /path/to/vllm-hust-benchmark
+gh workflow run run-official-ascend-baselines.yml \
+	--ref ws/run-official-baseline \
+	-f repeat_count=3 \
+	-f force_run_existing=false \
+	-f prepare_official_env=true \
+	-f force_repair_official_env=false \
+	-f publish_website=false \
+	-f website_ref=main
+```
+
+Trigger a subset from `gh` CLI by passing newline-separated `spec_paths`:
+
+```bash
+cd /path/to/vllm-hust-benchmark
+gh workflow run run-official-ascend-baselines.yml \
+	--ref ws/run-official-baseline \
+	-f spec_paths='docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-online-qwen25-14b-910b3.json
+docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-throughput-qwen25-14b-910b3.json' \
+	-f repeat_count=3 \
+	-f force_repair_official_env=false \
+	-f force_run_existing=false
+```
+
+Workflow artifacts:
+
+- `official-baseline-summary-<run_id>-<attempt>`: the batch summary markdown.
+- `official-baseline-results-<run_id>-<attempt>`: `.benchmarks/...` results and any promoted `submissions/official-ascend-*` directories.
+
+The workflow does not auto-commit promoted canonical submissions back to the repository. Review the uploaded artifacts or the self-hosted runner workspace first, then decide whether to commit the promoted `submissions/<spec-id>/` directories.
 
 ## Batch Same-Spec Matrices
 
