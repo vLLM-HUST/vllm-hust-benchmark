@@ -53,6 +53,13 @@ DIRTY_ENGINE_VERSION_MARKERS = (
 )
 ENGINE_VERSION_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
 
+KNOWN_MEMORY_PER_CHIP_GB = {
+    # Ascend 910B3 cards in the benchmark fleet expose 64 GB HBM.
+    "910b3": 64.0,
+    "ascend-910b3": 64.0,
+    "ascend 910b3": 64.0,
+}
+
 
 def _short_commit(value: Any) -> str:
     normalized = str(value or "").strip()
@@ -311,6 +318,42 @@ def _build_idempotency_key(
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _normalize_chip_model_key(chip_model: str | None) -> str:
+    return str(chip_model or "").strip().lower()
+
+
+def _resolve_memory_per_chip_gb(
+    hardware_chip_model: str,
+    chip_count: int,
+    memory_per_chip_gb: float | None = None,
+    total_memory_gb: float | None = None,
+) -> float | None:
+    if memory_per_chip_gb is not None:
+        return float(memory_per_chip_gb)
+    if total_memory_gb is not None and chip_count > 0:
+        return float(total_memory_gb) / chip_count
+    return KNOWN_MEMORY_PER_CHIP_GB.get(_normalize_chip_model_key(hardware_chip_model))
+
+
+def _resolve_total_memory_gb(
+    hardware_chip_model: str,
+    chip_count: int,
+    memory_per_chip_gb: float | None = None,
+    total_memory_gb: float | None = None,
+) -> float | None:
+    if total_memory_gb is not None:
+        return float(total_memory_gb)
+    resolved_memory_per_chip_gb = _resolve_memory_per_chip_gb(
+        hardware_chip_model,
+        chip_count,
+        memory_per_chip_gb=memory_per_chip_gb,
+        total_memory_gb=total_memory_gb,
+    )
+    if resolved_memory_per_chip_gb is None or chip_count <= 0:
+        return None
+    return resolved_memory_per_chip_gb * chip_count
+
+
 def export_leaderboard_artifacts(
     *,
     scenario: ScenarioDefinition,
@@ -330,6 +373,8 @@ def export_leaderboard_artifacts(
     hardware_chip_model: str,
     chip_count: int,
     node_count: int,
+    memory_per_chip_gb: float | None = None,
+    total_memory_gb: float | None = None,
     submitter: str,
     baseline_engine: str,
     domestic_chip_class: str,
@@ -371,6 +416,18 @@ def export_leaderboard_artifacts(
     constraints_metrics = dict(payload["constraints_metrics"])
     same_spec_payload = (
         _load_same_spec_payload(same_spec_file) if same_spec_file is not None else None
+    )
+    resolved_memory_per_chip_gb = _resolve_memory_per_chip_gb(
+        hardware_chip_model,
+        chip_count,
+        memory_per_chip_gb=memory_per_chip_gb,
+        total_memory_gb=total_memory_gb,
+    )
+    resolved_total_memory_gb = _resolve_total_memory_gb(
+        hardware_chip_model,
+        chip_count,
+        memory_per_chip_gb=memory_per_chip_gb,
+        total_memory_gb=total_memory_gb,
     )
 
     submitted_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -419,6 +476,8 @@ def export_leaderboard_artifacts(
             "chip_model": hardware_chip_model,
             "chip_count": chip_count,
             "interconnect": "unknown",
+            "memory_per_chip_gb": resolved_memory_per_chip_gb,
+            "total_memory_gb": resolved_total_memory_gb,
         },
         "model": {
             "name": model_name,

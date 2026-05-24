@@ -432,6 +432,8 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--hardware-chip-model", required=True)
     export_parser.add_argument("--chip-count", type=int, default=1)
     export_parser.add_argument("--node-count", type=int, default=1)
+    export_parser.add_argument("--memory-per-chip-gb", type=float)
+    export_parser.add_argument("--total-memory-gb", type=float)
     export_parser.add_argument("--submitter", required=True)
     export_parser.add_argument("--baseline-engine", default="vllm")
     export_parser.add_argument("--domestic-chip-class", default="Ascend-class")
@@ -840,6 +842,8 @@ def main(argv: list[str] | None = None) -> int:
                 hardware_chip_model=args.hardware_chip_model,
                 chip_count=args.chip_count,
                 node_count=args.node_count,
+                memory_per_chip_gb=args.memory_per_chip_gb,
+                total_memory_gb=args.total_memory_gb,
                 submitter=args.submitter,
                 baseline_engine=args.baseline_engine,
                 domestic_chip_class=args.domestic_chip_class,

@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
           python -m pip install --upgrade pip
-          python -m pip install -e . pytest
+          python -m pip install -e .[test]
 
       - name: Run pytest
         env:
