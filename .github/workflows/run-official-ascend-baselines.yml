@@ -60,6 +60,7 @@ jobs:
     timeout-minutes: 360
     env:
       BENCHMARK_CHECKOUT_USE_SSH_443: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
+      VLLM_HUST_WORKSPACE_ROOT: ${{ github.workspace }}
       HF_HUB_DISABLE_TELEMETRY: "1"
       HF_ENDPOINT: ${{ vars.HF_ENDPOINT || 'https://hf-mirror.com' }}
       HF_HOME: ${{ github.workspace }}/../.hf-cache
@@ -144,7 +145,6 @@ jobs:
           persist-credentials: false
 
       - name: Checkout website repo
-        if: ${{ inputs.publish_website }}
         uses: actions/checkout@v4
         with:
           repository: vLLM-HUST/vllm-hust-website
