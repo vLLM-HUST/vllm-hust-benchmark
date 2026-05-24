@@ -259,8 +259,10 @@ def run_ascend_perf_smoke(
 ) -> int:
     manifest = load_combo_manifest(manifest_path)
     runtime_engine = get_runtime_engine(manifest)
+    runtime_root_parent = result_root.parent
+    runtime_root_parent.mkdir(parents=True, exist_ok=True)
     runtime_root_path = runtime_root or Path(
-        tempfile.mkdtemp(prefix="combo-perf-smoke-", dir=str(result_root.parent))
+        tempfile.mkdtemp(prefix="combo-perf-smoke-", dir=str(runtime_root_parent))
     )
     script_preview = "run_ascend_benchmark_ci.sh"
 
