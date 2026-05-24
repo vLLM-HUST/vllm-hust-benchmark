@@ -112,10 +112,45 @@ jobs:
           path: vllm-hust-website
           fetch-depth: 1
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - name: Resolve host Python
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          resolve_host_python() {
+            if command -v python3 >/dev/null 2>&1; then
+              command -v python3
+              return 0
+            fi
+
+            if command -v python >/dev/null 2>&1; then
+              command -v python
+              return 0
+            fi
+
+            if command -v conda >/dev/null 2>&1; then
+              local conda_base
+              conda_base="$(conda info --base 2>/dev/null || true)"
+              if [[ -n "$conda_base" ]] && [[ -x "$conda_base/bin/python" ]]; then
+                printf '%s\n' "$conda_base/bin/python"
+                return 0
+              fi
+            fi
+
+            return 1
+          }
+
+          host_python="$(resolve_host_python)" || {
+            echo "Could not locate a host Python interpreter for benchmark repo utilities" >&2
+            exit 1
+          }
+
+          "$host_python" -c 'import sys; version = sys.version.split()[0]; raise SystemExit(0 if sys.version_info >= (3, 10) else f"Python {version} is too old for vllm-hust-benchmark; require >= 3.10")'
+          host_python_version="$($host_python -c 'import sys; print(sys.version.split()[0])')"
+
+          printf 'PYTHON_BIN=%s\n' "$host_python" >> "$GITHUB_ENV"
+          printf 'HOST_PYTHON_BIN=%s\n' "$host_python" >> "$GITHUB_ENV"
+          echo "Resolved host Python: $host_python ($host_python_version)"
 
       - name: Resolve official env prefix
         shell: bash
