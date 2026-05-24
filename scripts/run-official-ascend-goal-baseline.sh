@@ -23,6 +23,7 @@ OFFICIAL_BACKEND_VERSION=${OFFICIAL_BACKEND_VERSION:-}
 ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
 ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-"/usr/local/Ascend/nnal/atb/set_env.sh"}
 ASCEND_ATB_CXX_ABI=${ASCEND_ATB_CXX_ABI:-"1"}
+HOST_PYTHON_BIN=${HOST_PYTHON_BIN:-$(command -v python3 || command -v python || true)}
 GOAL_BASELINE_ENV_PREFIX=${GOAL_BASELINE_ENV_PREFIX:-}
 RESULT_DIR=${RESULT_DIR:-"$REPO_ROOT/.benchmarks/official-ascend-goal-baseline"}
 RUN_ID=${RUN_ID:-"official-ascend-jan-2026-$(date -u +%Y%m%dT%H%M%SZ)"}
@@ -53,6 +54,16 @@ if [[ ! -f "$PREPARE_SCRIPT" ]]; then
   echo "Prepare script not found: $PREPARE_SCRIPT" >&2
   exit 2
 fi
+
+if [[ -z "$HOST_PYTHON_BIN" ]] || [[ ! -x "$HOST_PYTHON_BIN" ]]; then
+  echo "python3 or python is required for benchmark repo utilities" >&2
+  exit 2
+fi
+
+SPEC_FILE=$(realpath "$SPEC_FILE")
+CONSTRAINTS_FILE=$(realpath "$CONSTRAINTS_FILE")
+RESULT_DIR=$(realpath -m "$RESULT_DIR")
+OFFICIAL_VLLM_CACHE_ROOT=$(realpath -m "$OFFICIAL_VLLM_CACHE_ROOT")
 
 SCRIPT_BASENAME=$(basename "$0")
 
@@ -260,32 +271,68 @@ run_server_command() {
 }
 
 run_client_command() {
-  run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
-    python -m vllm.entrypoints.cli.main bench serve \
-    --save-result \
-    --result-dir "$RESULT_DIR" \
-    --result-filename "$(basename "$RAW_RESULT_FILE")" \
-    $CLIENT_ARGS
+  case "$BENCHMARK_TYPE" in
+    serve)
+      run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+        python -m vllm.entrypoints.cli.main bench serve \
+        --save-result \
+        --result-dir "$RESULT_DIR" \
+        --result-filename "$(basename "$RAW_RESULT_FILE")" \
+        $CLIENT_ARGS
+      ;;
+    throughput|latency)
+      run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+        python -m vllm.entrypoints.cli.main bench "$BENCHMARK_TYPE" \
+        --output-json "$RAW_RESULT_FILE" \
+        $CLIENT_ARGS
+      ;;
+    *)
+      echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2
+      return 2
+      ;;
+  esac
 }
 
 resolve_same_spec() {
   local resolve_args=(
-    python -m vllm_hust_benchmark.same_spec resolve
+    "$HOST_PYTHON_BIN" -m vllm_hust_benchmark.same_spec resolve
     --spec-file "$SPEC_FILE"
     --output-file "$SAME_SPEC_FILE"
     --runtime-model "$RUNTIME_MODEL"
-    --server-port "$OFFICIAL_SERVER_PORT"
-    --client-port "$OFFICIAL_CLIENT_PORT"
   )
 
-  if [[ -n "$OFFICIAL_SERVER_HOST" ]]; then
-    resolve_args+=(--server-host "$OFFICIAL_SERVER_HOST")
-  fi
-  if [[ -n "$OFFICIAL_CLIENT_HOST" ]]; then
-    resolve_args+=(--client-host "$OFFICIAL_CLIENT_HOST")
+  if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
+    resolve_args+=(
+      --server-port "$OFFICIAL_SERVER_PORT"
+      --client-port "$OFFICIAL_CLIENT_PORT"
+    )
+
+    if [[ -n "$OFFICIAL_SERVER_HOST" ]]; then
+      resolve_args+=(--server-host "$OFFICIAL_SERVER_HOST")
+    fi
+    if [[ -n "$OFFICIAL_CLIENT_HOST" ]]; then
+      resolve_args+=(--client-host "$OFFICIAL_CLIENT_HOST")
+    fi
   fi
 
-  run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" "${resolve_args[@]}"
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "${resolve_args[@]}"
+}
+
+resolve_scenario_benchmark_type() {
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    env SCENARIO_NAME="$SCENARIO" \
+    "$HOST_PYTHON_BIN" -c "import os; from vllm_hust_benchmark.registry import get_scenario; print(get_scenario(os.environ['SCENARIO_NAME']).benchmark_type)"
+}
+
+append_export_arg_from_spec() {
+  local flag=$1
+  local jq_filter=$2
+  local value
+
+  value=$(jq -r "$jq_filter // empty" "$SPEC_FILE")
+  if [[ -n "$value" ]] && [[ "$value" != "null" ]]; then
+    EXPORT_ARGS+=("$flag" "$value")
+  fi
 }
 
 port_has_listener() {
@@ -370,6 +417,7 @@ raise SystemExit(
     0 if runtime_model_path_has_required_artifacts(os.environ["RUNTIME_MODEL_CANDIDATE"]) else 1
 )
 PY
+}
 
 is_valid_engine_version() {
   local version=${1:-}
@@ -461,7 +509,6 @@ PY
 
   printf '%s' "unknown"
 }
-}
 
 wait_for_server() {
   local host=$1
@@ -519,8 +566,7 @@ GITHUB_REPOSITORY=$(jq -r '.export.github_repository' "$SPEC_FILE")
 GITHUB_REF=$(jq -r '.export.github_ref' "$SPEC_FILE")
 GIT_COMMIT=$(jq -r '.export.git_commit' "$SPEC_FILE")
 DATA_SOURCE=$(jq -r '.export.data_source' "$SPEC_FILE")
-INPUT_LEN=$(jq -r '.client_parameters.input_len' "$SPEC_FILE")
-OUTPUT_LEN=$(jq -r '.client_parameters.output_len' "$SPEC_FILE")
+BENCHMARK_TYPE=$(resolve_scenario_benchmark_type)
 
 if [[ -z "$OFFICIAL_CORE_VERSION" ]]; then
   OFFICIAL_CORE_VERSION=$(detect_official_core_version)
@@ -548,34 +594,17 @@ fi
 SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
 resolve_same_spec
 
-SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
-SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
-CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
-CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
-
-BENCHMARK_SERVER_PORT="$SERVER_PORT" \
-PREPARE_BENCHMARK_ADMISSION_ONLY=1 \
-ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
-VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
-bash "$PREPARE_SCRIPT"
-
-assert_target_port_available "Official baseline" "$CLIENT_HOST" "$CLIENT_PORT"
-
-SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters' "$SAME_SPEC_FILE")")
 CLIENT_ARGS=$(json2args "$(jq -c '.resolved_client_parameters' "$SAME_SPEC_FILE")")
 
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
 
-SERVER_COMMAND="PYTHONUNBUFFERED=1 PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
-CLIENT_COMMAND="PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
-
 echo "[goal-baseline] using worktrees: $OFFICIAL_VLLM_WORKTREE and $OFFICIAL_VLLM_ASCEND_WORKTREE"
 echo "[goal-baseline] neutral cwd: $OFFICIAL_RUNTIME_CWD"
 echo "[goal-baseline] vllm cache root: $OFFICIAL_VLLM_CACHE_ROOT"
+echo "[goal-baseline] benchmark type: $BENCHMARK_TYPE"
 echo "[goal-baseline] export model id: $MODEL"
 echo "[goal-baseline] runtime model source: $RUNTIME_MODEL"
-echo "[goal-baseline] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
 run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
 from importlib import metadata
 
@@ -601,43 +630,78 @@ print(
   f"(dist={dist_version('vllm-ascend', 'vllm_ascend')})"
 )
 PY
-echo "[goal-baseline] server command: $SERVER_COMMAND"
-run_server_command &
-SERVER_PID=$!
-persist_managed_server_state
 
-wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
-persist_managed_server_state
+case "$BENCHMARK_TYPE" in
+  serve)
+    SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
+    SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
+    CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
+    CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
+    SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters' "$SAME_SPEC_FILE")")
+
+    BENCHMARK_SERVER_PORT="$SERVER_PORT" \
+    PREPARE_BENCHMARK_ADMISSION_ONLY=1 \
+    ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
+    VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
+    bash "$PREPARE_SCRIPT"
+
+    assert_target_port_available "Official baseline" "$CLIENT_HOST" "$CLIENT_PORT"
+
+    SERVER_COMMAND="PYTHONUNBUFFERED=1 PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
+    CLIENT_COMMAND="PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
+
+    echo "[goal-baseline] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
+    echo "[goal-baseline] server command: $SERVER_COMMAND"
+    run_server_command &
+    SERVER_PID=$!
+    persist_managed_server_state
+
+    wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
+    persist_managed_server_state
+    ;;
+  throughput|latency)
+    CLIENT_COMMAND="PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
+    ;;
+  *)
+    echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2
+    exit 2
+    ;;
+esac
 
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
 run_client_command
 
-run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" \
-python -m vllm_hust_benchmark.cli export-leaderboard-artifact \
-  "$SCENARIO" \
-  --benchmark-result-file "$RAW_RESULT_FILE" \
-  --constraints-file "$CONSTRAINTS_FILE" \
-  --same-spec-file "$SAME_SPEC_FILE" \
-  --output-dir "$ARTIFACT_DIR" \
-  --run-id "$RUN_ID" \
-  --engine "$ENGINE" \
-  --engine-version "$ENGINE_VERSION" \
-  --core-version "$OFFICIAL_CORE_VERSION" \
-  --backend-version "$OFFICIAL_BACKEND_VERSION" \
-  --model-name "$MODEL" \
-  --model-parameters "$MODEL_PARAMETERS" \
-  --model-precision "$MODEL_PRECISION" \
-  --hardware-vendor "$HARDWARE_VENDOR" \
-  --hardware-chip-model "$HARDWARE_CHIP_MODEL" \
-  --chip-count "$CHIP_COUNT" \
-  --node-count "$NODE_COUNT" \
-  --submitter "$SUBMITTER" \
-  --baseline-engine "$BASELINE_ENGINE" \
-  --data-source "$DATA_SOURCE" \
-  --input-length "$INPUT_LEN" \
-  --output-length "$OUTPUT_LEN" \
-  --git-commit "$GIT_COMMIT" \
-  --github-repository "$GITHUB_REPOSITORY" \
+EXPORT_ARGS=(
+  python -m vllm_hust_benchmark.cli export-leaderboard-artifact
+  "$SCENARIO"
+  --benchmark-result-file "$RAW_RESULT_FILE"
+  --constraints-file "$CONSTRAINTS_FILE"
+  --same-spec-file "$SAME_SPEC_FILE"
+  --output-dir "$ARTIFACT_DIR"
+  --run-id "$RUN_ID"
+  --engine "$ENGINE"
+  --engine-version "$ENGINE_VERSION"
+  --core-version "$OFFICIAL_CORE_VERSION"
+  --backend-version "$OFFICIAL_BACKEND_VERSION"
+  --model-name "$MODEL"
+  --model-parameters "$MODEL_PARAMETERS"
+  --model-precision "$MODEL_PRECISION"
+  --hardware-vendor "$HARDWARE_VENDOR"
+  --hardware-chip-model "$HARDWARE_CHIP_MODEL"
+  --chip-count "$CHIP_COUNT"
+  --node-count "$NODE_COUNT"
+  --submitter "$SUBMITTER"
+  --baseline-engine "$BASELINE_ENGINE"
+  --data-source "$DATA_SOURCE"
+  --git-commit "$GIT_COMMIT"
+  --github-repository "$GITHUB_REPOSITORY"
   --github-ref "$GITHUB_REF"
+)
+
+append_export_arg_from_spec --input-length '.client_parameters.input_len'
+append_export_arg_from_spec --output-length '.client_parameters.output_len'
+append_export_arg_from_spec --batch-size '.client_parameters.batch_size'
+
+run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" "${EXPORT_ARGS[@]}"
 
 echo "[goal-baseline] exported leaderboard artifact to $ARTIFACT_DIR"
