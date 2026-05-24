@@ -59,6 +59,7 @@ jobs:
       - docker
     timeout-minutes: 360
     env:
+      BENCHMARK_CHECKOUT_USE_SSH_443: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
       HF_HUB_DISABLE_TELEMETRY: "1"
       HF_ENDPOINT: ${{ vars.HF_ENDPOINT || 'https://hf-mirror.com' }}
       HF_HOME: ${{ github.workspace }}/../.hf-cache
@@ -84,10 +85,43 @@ jobs:
                  "$GITHUB_WORKSPACE/artifacts"
           mkdir -p "$GITHUB_WORKSPACE/artifacts/official-baseline"
 
+      - name: Require GitHub SSH checkout key
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$BENCHMARK_CHECKOUT_USE_SSH_443" != "1" ]]; then
+            echo "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY is required because this workflow checks out repositories over SSH." >&2
+            exit 1
+          fi
+
+      - name: Configure GitHub SSH over 443
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+          printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$HOME/.ssh/github_actions"
+          chmod 600 "$HOME/.ssh/github_actions"
+          cat > "$HOME/.ssh/config" <<'EOF'
+          Host github.com
+            HostName ssh.github.com
+            Port 443
+            User git
+            HostKeyAlias github.com
+            IdentityFile ~/.ssh/github_actions
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+          EOF
+          chmod 600 "$HOME/.ssh/config"
+          git config --global url."ssh://git@ssh.github.com:443/".insteadOf https://github.com/
+
       - name: Checkout benchmark repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Checkout upstream vllm reference repo
         uses: actions/checkout@v4
@@ -95,6 +129,9 @@ jobs:
           repository: vllm-project/vllm
           path: reference-repos/vllm
           fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Checkout upstream vllm-ascend reference repo
         uses: actions/checkout@v4
@@ -102,6 +139,9 @@ jobs:
           repository: vllm-project/vllm-ascend
           path: reference-repos/vllm-ascend
           fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Checkout website repo
         if: ${{ inputs.publish_website }}
@@ -111,6 +151,9 @@ jobs:
           ref: ${{ env.VLLM_HUST_WEBSITE_REF }}
           path: vllm-hust-website
           fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Resolve host Python
         shell: bash
