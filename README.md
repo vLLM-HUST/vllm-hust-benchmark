@@ -11,6 +11,16 @@ For runtime comparisons, the wrapper now understands two execution targets:
 
 Use the already configured conda environment for this workspace. Do not rely on the system Python installation for benchmark execution or validation.
 
+## Local Validation Dependencies
+
+Install the benchmark test toolchain from this repository's optional `test` extra before running local validation:
+
+```bash
+python -m pip install -e .[test]
+```
+
+This extra intentionally includes `jsonschema`, because benchmark publication and some regression paths invoke the sibling website aggregation script, which validates leaderboard snapshots with `jsonschema`.
+
 ## What This Repo Wraps
 
 The actual benchmark implementations live in the sibling `vllm-hust` repository:

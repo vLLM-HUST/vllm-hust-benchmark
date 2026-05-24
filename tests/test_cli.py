@@ -845,6 +845,71 @@ def test_export_leaderboard_artifact(tmp_path) -> None:
     assert artifact["metadata"]["github_commit_url"] == "https://github.com/vLLM-HUST/vllm-hust/commit/abc123def456"
 
 
+def test_export_leaderboard_artifact_infers_910b3_memory(tmp_path) -> None:
+    metrics_file = tmp_path / "metrics.json"
+    metrics_file.write_text(
+        """
+{
+    "metrics": {
+        "ttft_ms": 42.0,
+        "throughput_tps": 321.0,
+        "peak_mem_mb": 10240,
+        "error_rate": 0.0
+    },
+    "constraints_metrics": {
+        "single_chip_effective_utilization_pct": 92.0,
+        "typical_throughput_ratio_vs_baseline": 2.2,
+        "typical_ttft_reduction_pct_vs_baseline": 23.0,
+        "typical_tpot_reduction_pct_vs_baseline": 25.0,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": true,
+        "long_context_ttft_p95_ms": 80.0,
+        "long_context_ttft_p99_ms": 95.0,
+        "long_context_tpot_p95_ms": 9.0,
+        "long_context_tpot_p99_ms": 10.0,
+        "long_context_ttft_p95_stable": true,
+        "long_context_ttft_p99_stable": true,
+        "long_context_tpot_p95_stable": true,
+        "long_context_tpot_p99_stable": true,
+        "unit_token_cost_reduction_pct": 35.0,
+        "multi_tenant_high_utilization": true
+    }
+}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    output_dir = tmp_path / "export_with_memory"
+    exit_code = main(
+        [
+            "export-leaderboard-artifact",
+            "sharegpt-online",
+            "--metrics-file",
+            str(metrics_file),
+            "--output-dir",
+            str(output_dir),
+            "--run-id",
+            "smoke-run-memory-1",
+            "--engine",
+            "vllm-hust",
+            "--engine-version",
+            "0.7.3",
+            "--model-name",
+            "meta-llama/Llama-3.1-8B-Instruct",
+            "--hardware-chip-model",
+            "910B3",
+            "--submitter",
+            "ci",
+        ]
+    )
+
+    assert exit_code == 0
+    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    assert artifact["hardware"]["memory_per_chip_gb"] == 64.0
+    assert artifact["hardware"]["total_memory_gb"] == 64.0
+
+
 def test_export_leaderboard_artifact_from_raw_benchmark_result(tmp_path) -> None:
     benchmark_result = tmp_path / "serve_result.json"
     benchmark_result.write_text(
@@ -1204,6 +1269,8 @@ def test_export_leaderboard_artifacts_sanitizes_dirty_engine_version(
     artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
     assert artifact["engine_version"] == "gd4a408c4"
     assert artifact["metadata"]["engine_version"] == "gd4a408c4"
+    assert artifact["hardware"]["memory_per_chip_gb"] == 64.0
+    assert artifact["hardware"]["total_memory_gb"] == 64.0
 
 
 def test_build_vllm_bench_command_prefers_console_script(tmp_path: Path):
