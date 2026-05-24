@@ -353,12 +353,77 @@ list_port_listener_pids() {
   fi
 }
 
-list_benchmark_residual_pids() {
+list_matching_benchmark_pids() {
   ps -eo pid=,args= | awk '
     /vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main bench serve|EngineCore_DP0/ && !/awk/ {
       print $1
     }
   ' | sort -u
+}
+
+process_state() {
+  local pid=$1
+  ps -p "$pid" -o stat= 2>/dev/null | tr -d '[:space:]' || true
+}
+
+process_parent_pid() {
+  local pid=$1
+  ps -p "$pid" -o ppid= 2>/dev/null | tr -d '[:space:]' || true
+}
+
+is_zombie_process() {
+  local pid=$1
+  local state
+
+  state=$(process_state "$pid")
+  [[ -n "$state" ]] && [[ "$state" == Z* ]]
+}
+
+list_benchmark_residual_pids() {
+  local pid
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    if is_zombie_process "$pid"; then
+      continue
+    fi
+    printf '%s\n' "$pid"
+  done < <(list_matching_benchmark_pids) | sort -u
+}
+
+list_benchmark_zombie_pids() {
+  local pid
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    if is_zombie_process "$pid"; then
+      printf '%s\n' "$pid"
+    fi
+  done < <(list_matching_benchmark_pids) | sort -u
+}
+
+reap_benchmark_zombie_parents() {
+  local zombie_pids=$1
+  local pid
+  local parent_pid
+  local parent_pids=""
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    parent_pid=$(process_parent_pid "$pid")
+    if [[ -z "$parent_pid" ]] || [[ "$parent_pid" == "1" ]] || [[ "$parent_pid" == "$$" ]]; then
+      continue
+    fi
+    parent_pids+="$parent_pid"$'\n'
+  done <<< "$zombie_pids"
+
+  parent_pids=$(printf '%s' "$parent_pids" | sed '/^$/d' | sort -u)
+  if [[ -z "$parent_pids" ]]; then
+    return 0
+  fi
+
+  echo "[official-env] reaping zombie benchmark parents: $parent_pids"
+  kill $parent_pids 2>/dev/null || true
 }
 
 wait_for_no_benchmark_residual_pids() {
@@ -393,6 +458,13 @@ cleanup_benchmark_residual_processes() {
     return 0
   fi
 
+  local zombie_pids
+  zombie_pids=$(list_benchmark_zombie_pids)
+  if [[ -n "$zombie_pids" ]]; then
+    echo "[official-env] found zombie benchmark processes: $zombie_pids"
+    reap_benchmark_zombie_parents "$zombie_pids"
+  fi
+
   local pids
   pids=$(list_benchmark_residual_pids)
 
@@ -423,6 +495,12 @@ cleanup_benchmark_residual_processes() {
   if [[ -n "$final_residual_pids" ]]; then
     echo "Residual benchmark processes still exist after cleanup: $final_residual_pids" >&2
     return 1
+  fi
+
+  local final_zombie_pids
+  final_zombie_pids=$(list_benchmark_zombie_pids)
+  if [[ -n "$final_zombie_pids" ]]; then
+    echo "[official-env] continuing with zombie benchmark processes that have no listening port: $final_zombie_pids"
   fi
 
   echo "[official-env] benchmark admission preflight passed: no residual benchmark processes"
