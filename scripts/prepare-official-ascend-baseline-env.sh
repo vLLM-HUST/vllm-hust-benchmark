@@ -361,6 +361,20 @@ list_benchmark_residual_pids() {
   ' | sort -u
 }
 
+wait_for_no_benchmark_residual_pids() {
+  local max_attempts=${1:-10}
+  local attempt
+
+  for attempt in $(seq 1 "$max_attempts"); do
+    if [[ -z "$(list_benchmark_residual_pids)" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  return 1
+}
+
 cleanup_benchmark_residual_processes() {
   if [[ "$PREPARE_BENCHMARK_ADMISSION_ONLY" == "1" ]]; then
     local port_pids
@@ -386,12 +400,15 @@ cleanup_benchmark_residual_processes() {
     echo "[official-env] cleaning residual benchmark processes: $pids"
     kill $pids 2>/dev/null || true
 
-    local pid
-    for pid in $pids; do
-      if kill -0 "$pid" 2>/dev/null; then
-        kill -9 "$pid" 2>/dev/null || true
+    if ! wait_for_no_benchmark_residual_pids 5; then
+      local remaining_pids
+      remaining_pids=$(list_benchmark_residual_pids)
+      if [[ -n "$remaining_pids" ]]; then
+        echo "[official-env] escalating residual benchmark cleanup: $remaining_pids"
+        kill -9 $remaining_pids 2>/dev/null || true
+        wait_for_no_benchmark_residual_pids 5 || true
       fi
-    done
+    fi
   fi
 
   local port_pids
@@ -401,8 +418,10 @@ cleanup_benchmark_residual_processes() {
     return 1
   fi
 
-  if [[ -n "$(list_benchmark_residual_pids)" ]]; then
-    echo "Residual benchmark processes still exist after cleanup" >&2
+  local final_residual_pids
+  final_residual_pids=$(list_benchmark_residual_pids)
+  if [[ -n "$final_residual_pids" ]]; then
+    echo "Residual benchmark processes still exist after cleanup: $final_residual_pids" >&2
     return 1
   fi
 
