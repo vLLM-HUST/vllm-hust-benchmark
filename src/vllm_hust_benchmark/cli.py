@@ -9,6 +9,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+from vllm_hust_benchmark.check_branch_freshness import (
+    REBASE_REQUIRED_EXIT_CODE,
+    evaluate_branch_freshness,
+    render_branch_freshness_markdown,
+)
+from vllm_hust_benchmark.combo_manifest import (
+    DEFAULT_BENCHMARK_PROFILE,
+    build_combo_manifest,
+    write_combo_manifest,
+)
+from vllm_hust_benchmark.compare_combo_baseline import compare_combo_baseline
 from vllm_hust_benchmark.integration import (
     DEFAULT_RUNTIME_ENGINE,
     aggregate_to_website,
@@ -30,6 +41,7 @@ from vllm_hust_benchmark.integration import (
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import filter_scenarios, get_scenario
+from vllm_hust_benchmark.run_ascend_perf_smoke import run_ascend_perf_smoke
 from vllm_hust_benchmark.upstream_tests import (
     build_inspection_commands,
     get_upstream_test,
@@ -353,6 +365,66 @@ def _build_parser() -> argparse.ArgumentParser:
     ascend_ci_parser.add_argument("--publish-to-hf", action="store_true")
     ascend_ci_parser.add_argument("--hf-repo-id")
     ascend_ci_parser.add_argument("--allow-random-hf-publish", action="store_true")
+
+    combo_manifest_parser = subparsers.add_parser(
+        "write-combo-manifest",
+        help="Write a combo-stack benchmark manifest for an L1 perf smoke run.",
+    )
+    combo_manifest_parser.add_argument("--output", required=True)
+    combo_manifest_parser.add_argument(
+        "--trigger-repo",
+        choices=["vllm-hust", "vllm-ascend-hust"],
+        required=True,
+    )
+    combo_manifest_parser.add_argument("--trigger-ref", required=True)
+    combo_manifest_parser.add_argument("--peer-ref", required=True)
+    combo_manifest_parser.add_argument("--trigger-commit")
+    combo_manifest_parser.add_argument("--peer-commit")
+    combo_manifest_parser.add_argument(
+        "--pairing-strategy",
+        default="single-repo-pr-with-peer-main",
+    )
+    combo_manifest_parser.add_argument(
+        "--benchmark-profile",
+        default=DEFAULT_BENCHMARK_PROFILE,
+    )
+    combo_manifest_parser.add_argument("--set", action="append", default=[])
+
+    freshness_parser = subparsers.add_parser(
+        "check-branch-freshness",
+        help="Compute branch freshness status for a candidate perf smoke PR run.",
+    )
+    freshness_parser.add_argument("--repo", required=True)
+    freshness_parser.add_argument("--base-ref", required=True)
+    freshness_parser.add_argument("--head-ref", default="HEAD")
+    freshness_parser.add_argument("--recommended-days", type=int, default=3)
+    freshness_parser.add_argument("--recommended-commits", type=int, default=20)
+    freshness_parser.add_argument("--required-days", type=int, default=7)
+    freshness_parser.add_argument("--required-commits", type=int, default=50)
+    freshness_parser.add_argument("--output")
+    freshness_parser.add_argument("--summary-file")
+
+    perf_smoke_parser = subparsers.add_parser(
+        "run-ascend-perf-smoke",
+        help="Materialize one combo manifest and execute the shared Ascend perf smoke skeleton.",
+    )
+    perf_smoke_parser.add_argument("--combo-manifest", required=True)
+    perf_smoke_parser.add_argument("--output", required=True)
+    perf_smoke_parser.add_argument("--result-root", required=True)
+    perf_smoke_parser.add_argument("--runtime-root")
+    perf_smoke_parser.add_argument("--execute", action="store_true")
+
+    compare_parser = subparsers.add_parser(
+        "compare-combo-baseline",
+        help="Compare one perf smoke result against same-peer ancestor and latest protected combo baselines.",
+    )
+    compare_parser.add_argument("--head-result", required=True)
+    compare_parser.add_argument("--same-peer-ancestor-result")
+    compare_parser.add_argument("--latest-protected-result")
+    compare_parser.add_argument("--branch-freshness-json")
+    compare_parser.add_argument("--summary-file")
+    compare_parser.add_argument("--summary-json")
+    compare_parser.add_argument("--strict", action="store_true")
 
     list_parser = subparsers.add_parser("list-scenarios", help="List official mirrored scenarios.")
     list_parser.add_argument("--benchmark-type", choices=["serve", "throughput", "latency"])
@@ -762,6 +834,106 @@ def main(argv: list[str] | None = None) -> int:
             execute=args.execute,
             env=env,
         )
+
+    if args.command == "write-combo-manifest":
+        try:
+            manifest = build_combo_manifest(
+                trigger_repo=args.trigger_repo,
+                trigger_ref=args.trigger_ref,
+                peer_ref=args.peer_ref,
+                pairing_strategy=args.pairing_strategy,
+                trigger_commit=args.trigger_commit,
+                peer_commit=args.peer_commit,
+                benchmark_profile=args.benchmark_profile,
+                benchmark_config_overrides=_parse_set_arguments(args.set),
+            )
+            output_path = Path(args.output).resolve()
+            write_combo_manifest(output_path, manifest)
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
+        print(output_path)
+        return 0
+
+    if args.command == "check-branch-freshness":
+        try:
+            payload = evaluate_branch_freshness(
+                repo=Path(args.repo).resolve(),
+                base_ref=args.base_ref,
+                head_ref=args.head_ref,
+                recommended_days=args.recommended_days,
+                recommended_commits=args.recommended_commits,
+                required_days=args.required_days,
+                required_commits=args.required_commits,
+            )
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
+
+        if args.output:
+            output_path = Path(args.output).resolve()
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        else:
+            print(json.dumps(payload, indent=2))
+
+        if args.summary_file:
+            summary_path = Path(args.summary_file).resolve()
+            summary_path.parent.mkdir(parents=True, exist_ok=True)
+            summary_path.write_text(
+                render_branch_freshness_markdown(payload),
+                encoding="utf-8",
+            )
+
+        if payload["status"] == "rebase_required":
+            return REBASE_REQUIRED_EXIT_CODE
+        return 0
+
+    if args.command == "run-ascend-perf-smoke":
+        layout = resolve_repo_layout()
+        try:
+            return run_ascend_perf_smoke(
+                layout=layout,
+                manifest_path=Path(args.combo_manifest).resolve(),
+                output_path=Path(args.output).resolve(),
+                result_root=Path(args.result_root).resolve(),
+                runtime_root=Path(args.runtime_root).resolve() if args.runtime_root else None,
+                execute=args.execute,
+            )
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
+
+    if args.command == "compare-combo-baseline":
+        try:
+            return compare_combo_baseline(
+                head_result=Path(args.head_result).resolve(),
+                same_peer_ancestor_result=(
+                    Path(args.same_peer_ancestor_result).resolve()
+                    if args.same_peer_ancestor_result
+                    else None
+                ),
+                latest_protected_result=(
+                    Path(args.latest_protected_result).resolve()
+                    if args.latest_protected_result
+                    else None
+                ),
+                branch_freshness_json=(
+                    Path(args.branch_freshness_json).resolve()
+                    if args.branch_freshness_json
+                    else None
+                ),
+                summary_file=(
+                    Path(args.summary_file).resolve() if args.summary_file else None
+                ),
+                summary_json=(
+                    Path(args.summary_json).resolve() if args.summary_json else None
+                ),
+                strict=args.strict,
+            )
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
 
     if args.command == "run-both":
         runtimes = ("vllm-hust", "vllm")

@@ -66,6 +66,7 @@ class RepoLayout:
     benchmark_repo: Path
     vllm_hust_repo: Path
     website_repo: Path
+    vllm_ascend_hust_repo: Path | None = None
     reference_vllm_repo: Path | None = None
 
 
@@ -80,6 +81,9 @@ def resolve_repo_layout() -> RepoLayout:
     vllm_hust_repo = Path(
         os.environ.get("VLLM_HUST_REPO") or workspace_root / "vllm-hust"
     ).resolve()
+    vllm_ascend_hust_repo = Path(
+        os.environ.get("VLLM_ASCEND_HUST_REPO") or workspace_root / "vllm-ascend-hust"
+    ).resolve()
     reference_vllm_repo = Path(
         os.environ.get("VLLM_BASELINE_VLLM_REPO")
         or workspace_root / "reference-repos" / "vllm"
@@ -91,6 +95,7 @@ def resolve_repo_layout() -> RepoLayout:
         workspace_root=workspace_root,
         benchmark_repo=benchmark_repo,
         vllm_hust_repo=vllm_hust_repo,
+        vllm_ascend_hust_repo=vllm_ascend_hust_repo,
         reference_vllm_repo=reference_vllm_repo,
         website_repo=website_repo,
     )
@@ -341,16 +346,25 @@ def build_performance_suite_command(layout: RepoLayout) -> list[str]:
     return ["bash", str(suite_script)]
 
 
-def build_ascend_benchmark_ci_command(layout: RepoLayout) -> list[str]:
-    ci_script = (
-        layout.vllm_hust_repo
-        / ".github"
-        / "workflows"
-        / "scripts"
-        / "run_ascend_benchmark_ci.sh"
-    )
+def build_ascend_benchmark_ci_command(
+    layout: RepoLayout,
+    *,
+    runtime_engine: str = "vllm-hust",
+) -> list[str]:
+    if runtime_engine == "vllm-hust":
+        runtime_repo = layout.vllm_hust_repo
+    elif runtime_engine == "vllm-ascend-hust":
+        runtime_repo = layout.vllm_ascend_hust_repo or (
+            layout.workspace_root / "vllm-ascend-hust"
+        ).resolve()
+    else:
+        raise ValueError(f"Unsupported Ascend benchmark runtime engine: {runtime_engine}")
+
+    ci_script = runtime_repo / ".github" / "workflows" / "scripts" / "run_ascend_benchmark_ci.sh"
     if not ci_script.is_file():
-        raise ValueError(f"vllm-hust Ascend benchmark CI script not found: {ci_script}")
+        raise ValueError(
+            f"{runtime_engine} Ascend benchmark CI script not found: {ci_script}"
+        )
     return ["bash", str(ci_script)]
 
 

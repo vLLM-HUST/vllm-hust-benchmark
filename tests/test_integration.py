@@ -25,6 +25,7 @@ from vllm_hust_benchmark.integration import (
 def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> None:
     monkeypatch.delenv("VLLM_HUST_WORKSPACE_ROOT", raising=False)
     monkeypatch.delenv("VLLM_HUST_REPO", raising=False)
+    monkeypatch.delenv("VLLM_ASCEND_HUST_REPO", raising=False)
     monkeypatch.delenv("VLLM_HUST_WEBSITE_REPO", raising=False)
 
     layout = resolve_repo_layout()
@@ -32,6 +33,9 @@ def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> 
     expected_workspace_root = Path(integration.__file__).resolve().parents[3]
     assert layout.workspace_root == expected_workspace_root
     assert layout.vllm_hust_repo == (expected_workspace_root / "vllm-hust").resolve()
+    assert layout.vllm_ascend_hust_repo == (
+        expected_workspace_root / "vllm-ascend-hust"
+    ).resolve()
     assert (
         layout.reference_vllm_repo
         == (expected_workspace_root / "reference-repos" / "vllm").resolve()
@@ -44,6 +48,7 @@ def test_resolve_repo_layout_from_workspace_env(monkeypatch, tmp_path: Path) -> 
     layout = resolve_repo_layout()
 
     assert layout.vllm_hust_repo == (tmp_path / "vllm-hust").resolve()
+    assert layout.vllm_ascend_hust_repo == (tmp_path / "vllm-ascend-hust").resolve()
     assert (
         layout.reference_vllm_repo == (tmp_path / "reference-repos" / "vllm").resolve()
     )
@@ -342,6 +347,30 @@ def test_build_ascend_benchmark_ci_command(tmp_path: Path) -> None:
     )
 
     command = build_ascend_benchmark_ci_command(layout)
+
+    assert command == ["bash", str(script)]
+
+
+def test_build_ascend_benchmark_ci_command_for_vllm_ascend_hust(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "vllm-ascend-hust"
+    script = repo / ".github" / "workflows" / "scripts" / "run_ascend_benchmark_ci.sh"
+    script.parent.mkdir(parents=True)
+    script.write_text("#!/usr/bin/env bash\necho ok\n", encoding="utf-8")
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        vllm_ascend_hust_repo=repo,
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+
+    command = build_ascend_benchmark_ci_command(
+        layout,
+        runtime_engine="vllm-ascend-hust",
+    )
 
     assert command == ["bash", str(script)]
 

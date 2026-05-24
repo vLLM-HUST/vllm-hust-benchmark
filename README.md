@@ -55,6 +55,7 @@ Within that boundary, the important design point is:
 - `src/vllm_hust_benchmark/data/official_scenarios.json`: initial official scenario mirror
 - `docs/UPSTREAM_ANALYSIS.md`: analysis of upstream benchmark architecture and why this repo is structured this way
 - `docs/LEADERBOARD_ALIGNMENT.md`: scenario taxonomy and exact mapping to website leaderboard schema
+- `docs/ASCEND_L1_PR_SMOKE_BENCHMARK_PLAN.md`: combo-stack L1 perf smoke design and rollout plan for `vllm-hust` + `vllm-ascend-hust`
 - `tests/`: focused tests for registry loading and command generation
 
 ## Quick Start
@@ -206,6 +207,8 @@ The older snapshot-PR and auto-merge workflows are obsolete under this model. Th
 If you already have a raw `vllm bench` result JSON, you do not need to hand-author the full metrics payload anymore. The wrapper can derive the main website metrics from the raw result and only requires a separate constraints metrics JSON.
 
 For the upstream benchmark analysis behind this design, see `docs/UPSTREAM_ANALYSIS.md`.
+For the combo-stack PR smoke rollout contract that drives the new selector/workflow skeleton, see `docs/ASCEND_L1_PR_SMOKE_BENCHMARK_PLAN.md`.
+
 
 ## Official Goal Baseline
 
