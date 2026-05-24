@@ -1,0 +1,194 @@
+name: Run Official Ascend Baselines
+
+'on':
+  workflow_dispatch:
+    inputs:
+      spec_paths:
+        description: Optional newline-separated spec files or directories. Defaults to docs/official-baselines.
+        required: false
+        type: string
+        default: ""
+      repeat_count:
+        description: Repeat count for specs that do not yet have a canonical run.
+        required: false
+        type: number
+        default: 3
+      force_run_existing:
+        description: Re-run even when canonical submissions already exist. Existing canonical submissions are preserved.
+        required: false
+        type: boolean
+        default: false
+      prepare_official_env:
+        description: Prepare or repair the pinned official baseline conda env before running.
+        required: false
+        type: boolean
+        default: true
+      publish_website:
+        description: Rebuild website data from submissions after the batch.
+        required: false
+        type: boolean
+        default: false
+      force_repair_official_env:
+        description: Skip the prepare-script health check and force a full repair/reinstall of the official env.
+        required: false
+        type: boolean
+        default: false
+      website_ref:
+        description: Optional vllm-hust-website ref to use when publish_website is enabled.
+        required: false
+        type: string
+        default: main
+      goal_baseline_env_prefix:
+        description: Optional conda env prefix for the official v0.11.0 baseline runtime. Leave blank to resolve from conda info --base on the runner.
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run-official-baselines:
+    runs-on:
+      - self-hosted
+      - linux-aarch64-a2b3-0
+      - docker
+    timeout-minutes: 360
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_ENDPOINT: ${{ vars.HF_ENDPOINT || 'https://hf-mirror.com' }}
+      HF_HOME: ${{ github.workspace }}/../.hf-cache
+      HUGGINGFACE_HUB_CACHE: ${{ github.workspace }}/../.hf-cache/hub
+      TRANSFORMERS_CACHE: ${{ github.workspace }}/../.hf-cache/transformers
+      MATRIX_RUN_ID: official-ascend-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+      MATRIX_RESULT_ROOT: ${{ github.workspace }}/.benchmarks/official-ascend-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+      MATRIX_SUMMARY_FILE: ${{ github.workspace }}/artifacts/official-baseline/summary.md
+      REPEAT_COUNT: ${{ github.event.inputs.repeat_count || 3 }}
+      FORCE_RUN_EXISTING: ${{ github.event.inputs.force_run_existing == 'true' && '1' || '0' }}
+      PREPARE_OFFICIAL_ENV: ${{ github.event.inputs.prepare_official_env == 'false' && '0' || '1' }}
+      FORCE_REPAIR_OFFICIAL_ENV: ${{ github.event.inputs.force_repair_official_env == 'true' && '1' || '0' }}
+      PUBLISH_WEBSITE: ${{ github.event.inputs.publish_website == 'true' && '1' || '0' }}
+      VLLM_HUST_WEBSITE_REF: ${{ github.event.inputs.website_ref || 'main' }}
+    steps:
+      - name: Pre-clean generated directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$GITHUB_WORKSPACE/reference-repos" \
+                 "$GITHUB_WORKSPACE/vllm-hust-website" \
+                 "$GITHUB_WORKSPACE/.benchmarks" \
+                 "$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/official-baseline"
+
+      - name: Checkout benchmark repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Checkout upstream vllm reference repo
+        uses: actions/checkout@v4
+        with:
+          repository: vllm-project/vllm
+          path: reference-repos/vllm
+          fetch-depth: 0
+
+      - name: Checkout upstream vllm-ascend reference repo
+        uses: actions/checkout@v4
+        with:
+          repository: vllm-project/vllm-ascend
+          path: reference-repos/vllm-ascend
+          fetch-depth: 0
+
+      - name: Checkout website repo
+        if: ${{ inputs.publish_website }}
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-hust-website
+          ref: ${{ env.VLLM_HUST_WEBSITE_REF }}
+          path: vllm-hust-website
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Resolve official env prefix
+        shell: bash
+        env:
+          GOAL_BASELINE_ENV_PREFIX_INPUT: ${{ github.event.inputs.goal_baseline_env_prefix || '' }}
+        run: |
+          set -euo pipefail
+          env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
+          if [[ -z "${env_prefix//[[:space:]]/}" ]]; then
+            env_prefix="$(conda info --base)/envs/vllm-ascend-official-v0110"
+          fi
+
+          printf 'GOAL_BASELINE_ENV_PREFIX=%s\n' "$env_prefix" >> "$GITHUB_ENV"
+          echo "Resolved GOAL_BASELINE_ENV_PREFIX=$env_prefix"
+          echo "FORCE_REPAIR_OFFICIAL_ENV=$FORCE_REPAIR_OFFICIAL_ENV"
+
+      - name: Resolve spec arguments
+        id: resolve-specs
+        shell: bash
+        env:
+          SPEC_PATHS_INPUT: ${{ github.event.inputs.spec_paths || '' }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SPEC_PATHS_INPUT//[[:space:]]/}" ]]; then
+            {
+              echo 'args<<EOF'
+              echo 'docs/official-baselines'
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo 'args<<EOF'
+            while IFS= read -r line; do
+              [[ -z "${line//[[:space:]]/}" ]] && continue
+              printf '%s\n' "$line"
+            done <<< "$SPEC_PATHS_INPUT"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run official baseline matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          spec_args=()
+          while IFS= read -r item; do
+            [[ -z "$item" ]] && continue
+            spec_args+=("$item")
+          done <<< "${{ steps.resolve-specs.outputs.args }}"
+
+          if [[ ${#spec_args[@]} -eq 0 ]]; then
+            spec_args+=("docs/official-baselines")
+          fi
+
+          bash scripts/run-official-ascend-goal-baseline-matrix.sh "${spec_args[@]}"
+
+      - name: Upload official baseline summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-baseline-summary-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/official-baseline/summary.md
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload official baseline results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-baseline-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .benchmarks/official-ascend-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+            submissions/official-ascend-*
+          if-no-files-found: warn
+          retention-days: 14
