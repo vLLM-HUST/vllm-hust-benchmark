@@ -14,37 +14,52 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     env:
-      BENCHMARK_CHECKOUT_USE_SSH_443: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
+      BENCHMARK_CHECKOUT_USE_SSH: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
     steps:
       - name: Require GitHub SSH checkout key
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$BENCHMARK_CHECKOUT_USE_SSH_443" != "1" ]]; then
+          if [[ "$BENCHMARK_CHECKOUT_USE_SSH" != "1" ]]; then
             echo "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY is required because this workflow checks out repositories over SSH." >&2
             exit 1
           fi
 
-      - name: Configure GitHub SSH over 443
+      - name: Configure GitHub SSH
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.ssh"
-          chmod 700 "$HOME/.ssh"
-          printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$HOME/.ssh/github_actions"
-          chmod 600 "$HOME/.ssh/github_actions"
-          cat > "$HOME/.ssh/config" <<'EOF'
+          ssh_dir="$HOME/.ssh"
+          config_file="$ssh_dir/config"
+          key_file="$ssh_dir/github_actions"
+
+          if [[ ! -d "$ssh_dir" ]]; then
+            mkdir -p "$ssh_dir"
+          fi
+          chmod 700 "$ssh_dir"
+
+          printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$key_file"
+          chmod 600 "$key_file"
+
+          config_block="$(cat <<'EOF'
           Host github.com
-            HostName ssh.github.com
-            Port 443
+            HostName github.com
             User git
-            HostKeyAlias github.com
             IdentityFile ~/.ssh/github_actions
             IdentitiesOnly yes
             StrictHostKeyChecking no
           EOF
-          chmod 600 "$HOME/.ssh/config"
-          git config --global url."ssh://git@ssh.github.com:443/".insteadOf https://github.com/
+          )"
+
+          if [[ ! -f "$config_file" ]]; then
+            printf '%s\n' "$config_block" > "$config_file"
+          elif ! grep -Fq 'Host github.com' "$config_file" \
+            || ! grep -Fq 'HostName github.com' "$config_file" \
+            || ! grep -Fq 'IdentityFile ~/.ssh/github_actions' "$config_file"; then
+            printf '\n%s\n' "$config_block" >> "$config_file"
+          fi
+
+          chmod 600 "$config_file"
 
       - name: Checkout
         uses: actions/checkout@v4
