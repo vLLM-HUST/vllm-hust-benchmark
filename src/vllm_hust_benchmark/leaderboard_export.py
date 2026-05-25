@@ -52,6 +52,7 @@ DIRTY_ENGINE_VERSION_MARKERS = (
     "path string is null",
 )
 ENGINE_VERSION_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
+LEADERBOARD_COMPONENT_VERSION_PATTERN = re.compile(r"^\d+\.\d+[\w.+-]*$")
 
 KNOWN_MEMORY_PER_CHIP_GB = {
     # Ascend 910B3 cards in the benchmark fleet expose 64 GB HBM.
@@ -97,6 +98,25 @@ def _sanitize_engine_version(value: Any, *, git_commit: str | None = None) -> st
     if short_commit:
         return f"g{short_commit}"
     return "unknown"
+
+
+def _sanitize_component_version(value: Any) -> str:
+    raw = str(value or "")
+
+    for line in raw.splitlines() or [raw]:
+        normalized = " ".join(str(line).split()).strip()
+        if not normalized:
+            continue
+        if any(marker in normalized.lower() for marker in DIRTY_ENGINE_VERSION_MARKERS):
+            continue
+        if normalized.upper() == "N/A":
+            return "N/A"
+
+        normalized = normalized.removeprefix("v")
+        if LEADERBOARD_COMPONENT_VERSION_PATTERN.match(normalized):
+            return normalized
+
+    return "N/A"
 
 
 def _validate_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[str, Any]:
@@ -514,10 +534,10 @@ def export_leaderboard_artifacts(
         },
         "cluster": cluster,
         "versions": {
-            "protocol": protocol_version,
-            "backend": backend_version,
-            "core": core_version,
-            "benchmark": benchmark_version,
+            "protocol": _sanitize_component_version(protocol_version),
+            "backend": _sanitize_component_version(backend_version),
+            "core": _sanitize_component_version(core_version),
+            "benchmark": _sanitize_component_version(benchmark_version),
         },
         "environment": {
             "os": platform.platform(),
