@@ -222,8 +222,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -377,8 +377,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -532,8 +532,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -687,8 +687,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -842,8 +842,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -997,8 +997,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -1152,8 +1152,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -1307,8 +1307,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.18.0.post1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -1462,8 +1462,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.18.0.post1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -1617,8 +1617,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.18.0.post1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -1772,8 +1772,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.18.0.post1",
-      "core": "0.17.2.post1",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -2008,6 +2008,161 @@
         "request_rate": 1,
         "host": "127.0.0.1",
         "port": 45987,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "random_input_len": 1024,
+        "random_output_len": 256
+      }
+    }
+  },
+  {
+    "entry_id": "fd20fab5-1733-4bf0-b79b-9c41d09b53db",
+    "engine": "vllm-hust",
+    "engine_version": "234611d1",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B3",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-online",
+      "input_length": 1024,
+      "output_length": 256,
+      "batch_size": null,
+      "concurrent_requests": null,
+      "dataset": "random"
+    },
+    "metrics": {
+      "ttft_ms": 388.1246260507032,
+      "tbt_ms": 117.75629185220026,
+      "throughput_tps": 224.00761741718094,
+      "peak_mem_mb": 0.0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "online-chat",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "0.18.0.post1.dev1+g85927fe",
+      "core": "N/A",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-05-25T06:25:52Z",
+      "submitter": "iliujunn",
+      "data_source": "vllm-hust-ci-same-spec",
+      "engine": "vllm-hust",
+      "engine_version": "234611d1",
+      "reproducible_cmd": null,
+      "git_commit": "234611d110d0130251094dd73ecbf63589b8e760",
+      "github_user": "iliujunn",
+      "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/234611d110d0130251094dd73ecbf63589b8e760",
+      "github_repository": "vLLM-HUST/vllm-hust",
+      "github_ref": "perf/issue-34-avoid-pooling-output-expansion",
+      "github_event_name": "pull_request",
+      "github_pr_number": 45,
+      "github_pr_url": "https://github.com/vLLM-HUST/vllm-hust/pull/45",
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "136bb00e1fd887f3fac2ae34f1180d1cf9471c5efc8fef427b52875945c8e0e6",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/home/grunner/miniconda3/envs/vllm-hust-dev/bin/python",
+        "engine": {
+          "repository": "vLLM-HUST/vllm-hust",
+          "ref": "perf/issue-34-avoid-pooling-output-expansion",
+          "commit": "234611d110d0130251094dd73ecbf63589b8e760"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vLLM-HUST/vllm-ascend-hust",
+          "ref": "main",
+          "commit": "85927fef057e8a2c5f6c50c686dc14660c3115fc"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3",
+      "spec_label": "Official Ascend Jan 2026 baseline for vllm-hust goal tracking",
+      "spec_source": "/home/grunner/actions-runner/_work/vllm-hust/vllm-hust/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json",
+      "scenario": "random-online",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B3",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "a31eac56d03eaa3c7c4df6d2aa1ceb82f637f88c94da31b2b63331c18155aae9",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "disable_log_requests": "",
+        "host": "0.0.0.0",
+        "port": 48889,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "dtype": "float16"
+      },
+      "resolved_client_parameters": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "request_rate": 1,
+        "host": "127.0.0.1",
+        "port": 48889,
         "model": "Qwen/Qwen2.5-14B-Instruct",
         "random_input_len": 1024,
         "random_output_len": 256
@@ -2494,7 +2649,7 @@
     "versions": {
       "protocol": "N/A",
       "backend": "0.1.dev2743+g7f888566e",
-      "core": "0.17.2rc1.dev450+g289b51ab2.d20260417",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
@@ -2593,8 +2748,8 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1.dev2743+g7f888566e",
-      "core": "0.17.2rc1.dev450+g289b51ab2.d20260417",
+      "backend": "N/A",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
