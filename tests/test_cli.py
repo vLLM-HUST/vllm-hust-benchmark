@@ -1273,6 +1273,114 @@ def test_export_leaderboard_artifacts_sanitizes_dirty_engine_version(
     assert artifact["hardware"]["total_memory_gb"] == 64.0
 
 
+def test_export_leaderboard_artifacts_normalizes_invalid_component_versions(
+    tmp_path: Path,
+) -> None:
+    scenario = SimpleNamespace(
+        name="random-online",
+        benchmark_type="serve",
+        leaderboard={
+            "default_config_type": "single_gpu",
+            "workload_name": "random-online",
+            "representative_business_scenario": "online-chat",
+        },
+        defaults={
+            "input_len": 1024,
+            "output_len": 256,
+            "dataset_name": "random",
+        },
+    )
+    metrics_file = tmp_path / "metrics.json"
+    metrics_file.write_text(
+        json.dumps(
+            {
+                "metrics": {
+                    "ttft_ms": 10.0,
+                    "throughput_tps": 100.0,
+                    "peak_mem_mb": 1024.0,
+                    "error_rate": 0.0,
+                },
+                "constraints_metrics": {
+                    "single_chip_effective_utilization_pct": None,
+                    "typical_throughput_ratio_vs_baseline": None,
+                    "typical_ttft_reduction_pct_vs_baseline": None,
+                    "typical_tpot_reduction_pct_vs_baseline": None,
+                    "long_context_length": None,
+                    "long_context_throughput_stable": None,
+                    "long_context_ttft_p95_ms": None,
+                    "long_context_ttft_p99_ms": None,
+                    "long_context_tpot_p95_ms": None,
+                    "long_context_tpot_p99_ms": None,
+                    "long_context_ttft_p95_stable": None,
+                    "long_context_ttft_p99_stable": None,
+                    "long_context_tpot_p95_stable": None,
+                    "long_context_tpot_p99_stable": None,
+                    "unit_token_cost_reduction_pct": None,
+                    "multi_tenant_high_utilization": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    artifact_path, _ = export_leaderboard_artifacts(
+        scenario=scenario,
+        metrics_file=metrics_file,
+        benchmark_result_file=None,
+        constraints_file=None,
+        same_spec_file=None,
+        output_dir=tmp_path / "out",
+        artifact_name="run_leaderboard.json",
+        run_id="test-run",
+        engine="vllm-hust",
+        engine_version="234611d1",
+        model_name="Qwen/Qwen2.5-14B-Instruct",
+        model_parameters="14B",
+        model_precision="FP16",
+        hardware_vendor="Huawei",
+        hardware_chip_model="910B3",
+        chip_count=1,
+        node_count=1,
+        submitter="same-spec-current",
+        baseline_engine="vllm",
+        domestic_chip_class="Ascend-class",
+        representative_model_band="7B-13B",
+        data_source="vllm-hust-ci-same-spec",
+        input_length=1024,
+        output_length=256,
+        batch_size=None,
+        concurrent_requests=None,
+        protocol_version="N/A",
+        backend_version="0.18.0.post1.dev1+g85927fe",
+        core_version="234611d1",
+        peak_mem_mb=0.0,
+        git_commit="234611d110d0130251094dd73ecbf63589b8e760",
+        github_user="iliujunn",
+        github_commit_url=None,
+        github_repository="vLLM-HUST/vllm-hust",
+        github_ref="perf/issue-34-avoid-pooling-output-expansion",
+        github_event_name="pull_request",
+        github_pr_number=45,
+        github_pr_url=None,
+        runtime_python="python",
+        engine_source_repository="vLLM-HUST/vllm-hust",
+        engine_source_ref="perf/issue-34-avoid-pooling-output-expansion",
+        engine_source_commit="234611d110d0130251094dd73ecbf63589b8e760",
+        plugin_source_engine="vllm-ascend-hust",
+        plugin_source_repository="vLLM-HUST/vllm-ascend-hust",
+        plugin_source_ref="main",
+        plugin_source_commit="85927fef057e8a2c5f6c50c686dc14660c3115fc",
+    )
+
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    assert artifact["versions"] == {
+        "protocol": "N/A",
+        "backend": "0.18.0.post1.dev1+g85927fe",
+        "core": "N/A",
+        "benchmark": "0.1.0",
+    }
+
+
 def test_build_vllm_bench_command_prefers_console_script(tmp_path: Path):
     executable = tmp_path / "vllm"
     executable.write_text(
