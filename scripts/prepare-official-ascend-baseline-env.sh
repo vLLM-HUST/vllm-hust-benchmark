@@ -33,6 +33,11 @@ OFFICIAL_TORCH_NPU_WHEEL_URL=${OFFICIAL_TORCH_NPU_WHEEL_URL:-""}
 OFFICIAL_TORCHVISION_WHEEL_URL=${OFFICIAL_TORCHVISION_WHEEL_URL:-""}
 OFFICIAL_TORCHAUDIO_WHEEL_URL=${OFFICIAL_TORCHAUDIO_WHEEL_URL:-""}
 FORCE_REPAIR_OFFICIAL_ENV=${FORCE_REPAIR_OFFICIAL_ENV:-"0"}
+BENCHMARK_RUNTIME_STATE_ROOT=${BENCHMARK_RUNTIME_STATE_ROOT:-"$REPO_ROOT/.benchmarks"}
+MANAGED_BENCHMARK_RUNNER_BASENAME=${MANAGED_BENCHMARK_RUNNER_BASENAME:-"run-official-ascend-goal-baseline.sh"}
+CURRENT_PREPARE_USER_ID=${CURRENT_PREPARE_USER_ID:-$(id -u 2>/dev/null || true)}
+CURRENT_PREPARE_PID_NAMESPACE=${CURRENT_PREPARE_PID_NAMESPACE:-$(readlink /proc/self/ns/pid 2>/dev/null || true)}
+CURRENT_PREPARE_MOUNT_NAMESPACE=${CURRENT_PREPARE_MOUNT_NAMESPACE:-$(readlink /proc/self/ns/mnt 2>/dev/null || true)}
 
 ensure_worktree() {
   local source_repo=$1
@@ -353,12 +358,202 @@ list_port_listener_pids() {
   fi
 }
 
+process_args() {
+  local pid=$1
+  ps -p "$pid" -o args= 2>/dev/null || true
+}
+
+process_user_id() {
+  local pid=$1
+  ps -p "$pid" -o uid= 2>/dev/null | tr -d '[:space:]' || true
+}
+
+process_namespace() {
+  local pid=$1
+  local namespace_name=$2
+
+  readlink "/proc/${pid}/ns/${namespace_name}" 2>/dev/null || true
+}
+
+is_benchmark_process() {
+  local pid=$1
+  local args
+
+  args=$(process_args "$pid")
+  [[ -n "$args" ]] && [[ "$args" =~ vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main\ bench\ serve|EngineCore_DP0 ]]
+}
+
+is_managed_runner_wrapper_process() {
+  local pid=$1
+  local args
+
+  args=$(process_args "$pid")
+  [[ -n "$args" ]] && [[ "$args" == *"$MANAGED_BENCHMARK_RUNNER_BASENAME"* ]]
+}
+
+is_process_in_cleanup_scope() {
+  local pid=$1
+  local candidate_user_id
+  local candidate_pid_namespace
+  local candidate_mount_namespace
+
+  if [[ -z "$pid" ]] || [[ "$pid" == "$$" ]]; then
+    return 1
+  fi
+
+  candidate_user_id=$(process_user_id "$pid")
+  if [[ -z "$candidate_user_id" ]] || [[ "$candidate_user_id" != "$CURRENT_PREPARE_USER_ID" ]]; then
+    return 1
+  fi
+
+  candidate_pid_namespace=$(process_namespace "$pid" pid)
+  if [[ -z "$candidate_pid_namespace" ]] || [[ "$candidate_pid_namespace" != "$CURRENT_PREPARE_PID_NAMESPACE" ]]; then
+    return 1
+  fi
+
+  candidate_mount_namespace=$(process_namespace "$pid" mnt)
+  if [[ -z "$candidate_mount_namespace" ]] || [[ "$candidate_mount_namespace" != "$CURRENT_PREPARE_MOUNT_NAMESPACE" ]]; then
+    return 1
+  fi
+
+  return 0
+}
+
+list_child_pids() {
+  local parent_pid=$1
+  ps -eo pid=,ppid= | awk -v target="$parent_pid" '$2 == target {print $1}'
+}
+
+collect_process_tree_pids() {
+  local root_pid=$1
+  local child_pid
+
+  if ! kill -0 "$root_pid" 2>/dev/null; then
+    return 0
+  fi
+
+  echo "$root_pid"
+  while IFS= read -r child_pid; do
+    [[ -z "$child_pid" ]] && continue
+    collect_process_tree_pids "$child_pid"
+  done < <(list_child_pids "$root_pid")
+}
+
+log_process_snapshots() {
+  local label=$1
+  local pids=$2
+  local pid
+  local snapshot
+  local process_tree
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    snapshot=$(ps -p "$pid" -o pid=,ppid=,stat=,args= 2>/dev/null | sed 's/^[[:space:]]*//')
+    if [[ -n "$snapshot" ]]; then
+      echo "[official-env] ${label}: ${snapshot}"
+      if command -v pstree >/dev/null 2>&1; then
+        process_tree=$(pstree -sp "$pid" 2>/dev/null || true)
+        if [[ -n "$process_tree" ]]; then
+          echo "[official-env] ${label} tree: ${process_tree}"
+        fi
+      fi
+    else
+      echo "[official-env] ${label}: pid=${pid} exited before inspection"
+    fi
+  done <<< "$pids"
+}
+
+terminate_pid_tree() {
+  local pid=$1
+  local description=$2
+  local tree_pids
+  local tree_list
+  local still_running
+  local tree_pid
+  local attempt
+
+  tree_pids=$(collect_process_tree_pids "$pid" | sort -u)
+  [[ -z "$tree_pids" ]] && return 0
+  tree_list=$(printf '%s\n' "$tree_pids" | tr '\n' ' ')
+
+  echo "[official-env] stopping ${description}: ${tree_list}"
+  kill $tree_list 2>/dev/null || true
+
+  for attempt in $(seq 1 5); do
+    still_running=0
+    while IFS= read -r tree_pid; do
+      [[ -z "$tree_pid" ]] && continue
+      if is_live_process "$tree_pid"; then
+        still_running=1
+        break
+      fi
+    done <<< "$tree_pids"
+
+    if [[ "$still_running" == "0" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  kill -9 $tree_list 2>/dev/null || true
+
+  for attempt in $(seq 1 5); do
+    still_running=0
+    while IFS= read -r tree_pid; do
+      [[ -z "$tree_pid" ]] && continue
+      if is_live_process "$tree_pid"; then
+        still_running=1
+        break
+      fi
+    done <<< "$tree_pids"
+
+    if [[ "$still_running" == "0" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  return 1
+}
+
+terminate_benchmark_pid_set() {
+  local pids=$1
+  local pid
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    terminate_pid_tree "$pid" "benchmark residual process tree rooted at ${pid}" || true
+  done <<< "$pids"
+}
+
 list_matching_benchmark_pids() {
   ps -eo pid=,args= | awk '
     /vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main bench serve|EngineCore_DP0/ && !/awk/ {
       print $1
     }
   ' | sort -u
+}
+
+list_managed_runtime_state_dirs() {
+  if [[ ! -d "$BENCHMARK_RUNTIME_STATE_ROOT" ]]; then
+    return 0
+  fi
+
+  find "$BENCHMARK_RUNTIME_STATE_ROOT" -type d -name '.runtime-state' 2>/dev/null | sort || true
+}
+
+list_managed_runtime_state_pids() {
+  local state_dir
+
+  while IFS= read -r state_dir; do
+    [[ -z "$state_dir" ]] && continue
+    if [[ -f "$state_dir/server.wrapper.pid" ]]; then
+      tr '[:space:]' '\n' < "$state_dir/server.wrapper.pid"
+    fi
+    if [[ -f "$state_dir/server.listener.pids" ]]; then
+      tr '[:space:]' '\n' < "$state_dir/server.listener.pids"
+    fi
+  done < <(list_managed_runtime_state_dirs) | sed '/^$/d' | sort -u
 }
 
 process_state() {
@@ -379,16 +574,48 @@ is_zombie_process() {
   [[ -n "$state" ]] && [[ "$state" == Z* ]]
 }
 
+is_live_process() {
+  local pid=$1
+
+  if ! kill -0 "$pid" 2>/dev/null; then
+    return 1
+  fi
+
+  if is_zombie_process "$pid"; then
+    return 1
+  fi
+
+  return 0
+}
+
 list_benchmark_residual_pids() {
   local pid
 
-  while IFS= read -r pid; do
-    [[ -z "$pid" ]] && continue
-    if is_zombie_process "$pid"; then
-      continue
-    fi
-    printf '%s\n' "$pid"
-  done < <(list_matching_benchmark_pids) | sort -u
+  {
+    while IFS= read -r pid; do
+      [[ -z "$pid" ]] && continue
+      if is_zombie_process "$pid"; then
+        continue
+      fi
+      if ! is_process_in_cleanup_scope "$pid"; then
+        continue
+      fi
+      if is_benchmark_process "$pid" || is_managed_runner_wrapper_process "$pid"; then
+        printf '%s\n' "$pid"
+      fi
+    done < <(list_managed_runtime_state_pids)
+
+    while IFS= read -r pid; do
+      [[ -z "$pid" ]] && continue
+      if is_zombie_process "$pid"; then
+        continue
+      fi
+      if ! is_process_in_cleanup_scope "$pid"; then
+        continue
+      fi
+      printf '%s\n' "$pid"
+    done < <(list_matching_benchmark_pids)
+  } | sort -u
 }
 
 list_benchmark_zombie_pids() {
@@ -397,8 +624,26 @@ list_benchmark_zombie_pids() {
   while IFS= read -r pid; do
     [[ -z "$pid" ]] && continue
     if is_zombie_process "$pid"; then
+      if ! is_process_in_cleanup_scope "$pid"; then
+        continue
+      fi
       printf '%s\n' "$pid"
     fi
+  done < <(list_matching_benchmark_pids) | sort -u
+}
+
+list_out_of_scope_benchmark_pids() {
+  local pid
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    if is_zombie_process "$pid"; then
+      continue
+    fi
+    if is_process_in_cleanup_scope "$pid"; then
+      continue
+    fi
+    printf '%s\n' "$pid"
   done < <(list_matching_benchmark_pids) | sort -u
 }
 
@@ -445,12 +690,21 @@ cleanup_benchmark_residual_processes() {
     local port_pids
     port_pids=$(list_port_listener_pids "$BENCHMARK_SERVER_PORT")
     if [[ -n "$port_pids" ]]; then
+      log_process_snapshots "port listener during admission check" "$port_pids"
       echo "Port ${BENCHMARK_SERVER_PORT} is already occupied by listening processes: $port_pids" >&2
       return 1
     fi
 
     if [[ -n "$(list_benchmark_residual_pids)" ]]; then
       echo "Residual benchmark processes still exist during admission check" >&2
+      return 1
+    fi
+
+    local out_of_scope_pids
+    out_of_scope_pids=$(list_out_of_scope_benchmark_pids)
+    if [[ -n "$out_of_scope_pids" ]]; then
+      log_process_snapshots "out-of-scope residual during admission check" "$out_of_scope_pids"
+      echo "Out-of-scope benchmark processes exist outside the runner cleanup scope during admission check: $out_of_scope_pids" >&2
       return 1
     fi
 
@@ -470,14 +724,16 @@ cleanup_benchmark_residual_processes() {
 
   if [[ -n "$pids" ]]; then
     echo "[official-env] cleaning residual benchmark processes: $pids"
-    kill $pids 2>/dev/null || true
+    log_process_snapshots "residual before cleanup" "$pids"
+    terminate_benchmark_pid_set "$pids"
 
     if ! wait_for_no_benchmark_residual_pids 5; then
       local remaining_pids
       remaining_pids=$(list_benchmark_residual_pids)
       if [[ -n "$remaining_pids" ]]; then
         echo "[official-env] escalating residual benchmark cleanup: $remaining_pids"
-        kill -9 $remaining_pids 2>/dev/null || true
+        log_process_snapshots "residual before escalation" "$remaining_pids"
+        terminate_benchmark_pid_set "$remaining_pids"
         wait_for_no_benchmark_residual_pids 5 || true
       fi
     fi
@@ -486,6 +742,7 @@ cleanup_benchmark_residual_processes() {
   local port_pids
   port_pids=$(list_port_listener_pids "$BENCHMARK_SERVER_PORT")
   if [[ -n "$port_pids" ]]; then
+    log_process_snapshots "port listener after cleanup" "$port_pids"
     echo "Port ${BENCHMARK_SERVER_PORT} is already occupied by listening processes: $port_pids" >&2
     return 1
   fi
@@ -493,7 +750,16 @@ cleanup_benchmark_residual_processes() {
   local final_residual_pids
   final_residual_pids=$(list_benchmark_residual_pids)
   if [[ -n "$final_residual_pids" ]]; then
+    log_process_snapshots "residual after cleanup" "$final_residual_pids"
     echo "Residual benchmark processes still exist after cleanup: $final_residual_pids" >&2
+    return 1
+  fi
+
+  local final_out_of_scope_pids
+  final_out_of_scope_pids=$(list_out_of_scope_benchmark_pids)
+  if [[ -n "$final_out_of_scope_pids" ]]; then
+    log_process_snapshots "out-of-scope residual after cleanup" "$final_out_of_scope_pids"
+    echo "Out-of-scope benchmark processes remain outside the runner cleanup scope; refusing to kill them automatically: $final_out_of_scope_pids" >&2
     return 1
   fi
 
