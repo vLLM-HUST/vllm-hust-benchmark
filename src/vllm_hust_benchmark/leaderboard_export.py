@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Any
 
 from vllm_hust_benchmark import __version__ as benchmark_version
+from vllm_hust_benchmark.model_registry import normalize_model_identity_payload
+from vllm_hust_benchmark.model_registry import resolve_model_identity
+from vllm_hust_benchmark.model_registry import validate_model_identity_payload
 from vllm_hust_benchmark.models import ScenarioDefinition
 
 REQUIRED_METRIC_KEYS = (
@@ -317,7 +320,7 @@ def _build_idempotency_key(
     scenario_name: str,
     engine: str,
     engine_version: str,
-    model_name: str,
+    model_identity: str,
     hardware_chip_model: str,
     chip_count: int,
     node_count: int,
@@ -328,7 +331,7 @@ def _build_idempotency_key(
             scenario_name,
             engine,
             engine_version,
-            model_name,
+            model_identity,
             hardware_chip_model,
             str(chip_count),
             str(node_count),
@@ -426,6 +429,7 @@ def export_leaderboard_artifacts(
     plugin_source_commit: str | None,
 ) -> tuple[Path, Path]:
     engine_version = _sanitize_engine_version(engine_version, git_commit=git_commit)
+    model_identity = resolve_model_identity(model_name)
     payload = load_export_payload(
         metrics_file=metrics_file,
         benchmark_result_file=benchmark_result_file,
@@ -465,7 +469,7 @@ def export_leaderboard_artifacts(
         scenario_name=scenario.name,
         engine=engine,
         engine_version=engine_version,
-        model_name=model_name,
+        model_identity=model_identity.canonical_id,
         hardware_chip_model=hardware_chip_model,
         chip_count=chip_count,
         node_count=node_count,
@@ -500,7 +504,11 @@ def export_leaderboard_artifacts(
             "total_memory_gb": resolved_total_memory_gb,
         },
         "model": {
-            "name": model_name,
+            "canonical_id": model_identity.canonical_id,
+            "repo_id": model_identity.repo_id,
+            "short_name": model_identity.short_name,
+            "display_name": model_identity.display_name,
+            "name": model_identity.repo_id,
             "parameters": model_parameters,
             "precision": model_precision,
             "quantization": None,
@@ -584,6 +592,8 @@ def export_leaderboard_artifacts(
             },
         },
     }
+    artifact["model"] = normalize_model_identity_payload(artifact["model"])
+    validate_model_identity_payload(artifact["model"])
     if same_spec_payload is not None:
         artifact["same_spec"] = same_spec_payload
 

@@ -2,6 +2,8 @@
 
 This document defines the contract between benchmark scenarios in this repository and the website leaderboard ingestion pipeline.
 
+See also: `docs/LEADERBOARD_MODEL_IDENTITY_NORMALIZATION.md` for the proposed refactor plan that separates canonical model identity from UI display naming.
+
 ## Goal
 
 Keep benchmark outputs merge-safe and directly consumable by `vllm-hust-website/scripts/aggregate_results.py` without ad-hoc conversion code.
@@ -42,6 +44,8 @@ Current mapping:
 - scenario `leaderboard.workload_name` -> artifact `workload.name`
 - scenario `leaderboard.representative_business_scenario` -> `constraints.accountable_scope.representative_business_scenario`
 - scenario source -> `constraints.scenario_source = vllm-benchmark`
+- exporter model input -> normalized `model.canonical_id`, `model.repo_id`, `model.short_name`, and `model.display_name`
+- exporter compatibility field -> `model.name = model.repo_id` for normalized writes
 - benchmark metrics payload `metrics` -> artifact `metrics`
 - benchmark metrics payload `constraints_metrics` -> `constraints.metrics`
 - run metadata -> `metadata.*`, including deterministic `metadata.idempotency_key`
