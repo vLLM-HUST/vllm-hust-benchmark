@@ -55,8 +55,9 @@ jobs:
   run-official-baselines:
     runs-on:
       - self-hosted
-      - linux-aarch64-a2b3-0
+      - ARM64
       - docker
+      - debug
     timeout-minutes: 360
     env:
       BENCHMARK_CHECKOUT_USE_SSH: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
