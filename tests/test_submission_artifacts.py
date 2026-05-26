@@ -1,13 +1,23 @@
 import json
+from copy import deepcopy
 from pathlib import Path
 
 from jsonschema import Draft7Validator
 
-from vllm_hust_benchmark.submission_artifacts import normalize_submission_artifacts_in_tree
+from vllm_hust_benchmark.submission_artifacts import iter_submission_artifact_paths
+from vllm_hust_benchmark.submission_artifacts import load_submission_artifact
+from vllm_hust_benchmark.submission_artifacts import (
+    normalize_submission_artifacts_in_tree,
+)
+from vllm_hust_benchmark.submission_artifacts import (
+    normalize_submission_artifact_contract,
+)
 from vllm_hust_benchmark.submission_artifacts import validate_manifest_artifacts
 
 
-def test_validate_manifest_artifacts_uses_manifest_referenced_artifact(tmp_path: Path) -> None:
+def test_validate_manifest_artifacts_uses_manifest_referenced_artifact(
+    tmp_path: Path,
+) -> None:
     submission_dir = tmp_path / "submission-a"
     submission_dir.mkdir()
     artifact_path = submission_dir / "custom_leaderboard.json"
@@ -73,3 +83,16 @@ def test_normalize_submission_artifacts_in_tree_backfills_legacy_manifest(
     payload = json.loads(artifact_path.read_text(encoding="utf-8"))
     assert payload["model"]["name"] == "Qwen/Qwen2.5-14B-Instruct"
     assert payload["model"]["canonical_id"] == "hf:Qwen/Qwen2.5-14B-Instruct"
+
+
+def test_checked_in_submissions_are_already_normalized() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    artifact_paths = iter_submission_artifact_paths(repo_root / "submissions")
+
+    assert artifact_paths
+
+    for artifact_path in artifact_paths:
+        payload = load_submission_artifact(artifact_path)
+        normalized = normalize_submission_artifact_contract(deepcopy(payload))
+
+        assert payload == normalized, artifact_path

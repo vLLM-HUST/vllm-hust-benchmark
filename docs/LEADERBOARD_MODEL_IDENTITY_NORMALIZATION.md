@@ -1,8 +1,16 @@
 # Leaderboard Model Identity Normalization RFC
 
-Status: Phase 0 decisions frozen. Implementation pending.
+Status: Implemented and enforced on checked-in benchmark submissions and website snapshots.
 
-This document records the approved Phase 0 decisions for model identity normalization in the vllm-hust leaderboard pipeline. It is the implementation target for the next migration steps, although the live data contract is not fully enforced yet.
+This document records the approved Phase 0 decisions for model identity normalization in the vllm-hust leaderboard pipeline.
+
+Current status:
+
+- checked-in benchmark submissions are backfilled to the normalized identity contract
+- website aggregation no longer uses heuristic fallback to infer repo ids from short names or cache paths
+- website schema/examples require `model.canonical_id`, `model.repo_id`, `model.short_name`, and `model.display_name`
+
+The problem statement below describes the pre-migration state that motivated this RFC.
 
 See also:
 
@@ -189,19 +197,19 @@ Normalization should happen at the benchmark export or aggregation boundary, not
 Required rules:
 
 1. Raw input may arrive as a repo coordinate, a short alias, or a local snapshot path.
-2. The exporter or aggregator resolves the raw input into one canonical model identity record.
-3. Local cache paths must never become published canonical identifiers.
-4. Unknown aliases must fail fast or be surfaced as validation errors instead of silently creating new logical models.
-5. `display_name` is derived from `short_name`, not from `canonical_id`, and never includes the registry prefix or namespace.
-6. The default `display_name` is the industry-standard release string carried by `short_name`, for example `Qwen2.5-14B-Instruct`.
-7. Writers may curate `display_name` only through the central registry; code matches on `canonical_id`, not on `display_name`.
+1. The exporter or aggregator resolves the raw input into one canonical model identity record.
+1. Local cache paths must never become published canonical identifiers.
+1. Unknown aliases must fail fast or be surfaced as validation errors instead of silently creating new logical models.
+1. `display_name` is derived from `short_name`, not from `canonical_id`, and never includes the registry prefix or namespace.
+1. The default `display_name` is the industry-standard release string carried by `short_name`, for example `Qwen2.5-14B-Instruct`.
+1. Writers may curate `display_name` only through the central registry; code matches on `canonical_id`, not on `display_name`.
 
 Required resolution order:
 
 1. explicit model registry metadata from the submission
-2. exact alias-map match
-3. exact repo-id match
-4. explicit rejection with remediation guidance
+1. exact alias-map match
+1. exact repo-id match
+1. explicit rejection with remediation guidance
 
 ## Alias Registry
 

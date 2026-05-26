@@ -84,6 +84,19 @@ def test_validate_model_identity_payload_rejects_name_repo_id_mismatch() -> None
         )
 
 
+def test_validate_model_identity_payload_rejects_canonical_repo_id_mismatch() -> None:
+    with pytest.raises(ValueError, match="canonical_id must embed model.repo_id"):
+        validate_model_identity_payload(
+            {
+                "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+                "repo_id": "Qwen/Qwen2.5-7B-Instruct",
+                "short_name": "Qwen2.5-14B-Instruct",
+                "display_name": "Qwen2.5-14B-Instruct",
+                "name": "Qwen/Qwen2.5-7B-Instruct",
+            }
+        )
+
+
 def test_resolve_model_identity_rejects_unknown_short_alias() -> None:
     with pytest.raises(ValueError, match="unknown short model alias"):
         resolve_model_identity("Llama-3.3-70B-Instruct")
