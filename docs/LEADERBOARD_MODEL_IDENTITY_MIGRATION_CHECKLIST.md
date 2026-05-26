@@ -27,7 +27,7 @@ Seed file:
 
 - `repo_id`: `Qwen/Qwen2.5-14B-Instruct`
 - `short_name`: `Qwen2.5-14B-Instruct`
-- `display_name`: `Qwen 2.5 14B Instruct`
+- `display_name`: `Qwen2.5-14B-Instruct`
 - legacy inputs to normalize:
   - `Qwen/Qwen2.5-14B-Instruct`
   - `Qwen2.5-14B-Instruct`
@@ -36,7 +36,7 @@ Seed file:
 
 - `repo_id`: `Qwen/Qwen2.5-7B-Instruct`
 - `short_name`: `Qwen2.5-7B-Instruct`
-- `display_name`: `Qwen 2.5 7B Instruct`
+- `display_name`: `Qwen2.5-7B-Instruct`
 - legacy inputs to normalize:
   - `Qwen/Qwen2.5-7B-Instruct`
   - `Qwen2.5-7B-Instruct`
