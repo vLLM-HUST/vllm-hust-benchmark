@@ -843,7 +843,7 @@ def test_export_leaderboard_artifact(tmp_path) -> None:
     assert artifact["model"]["canonical_id"] == "hf:meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["model"]["repo_id"] == "meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["model"]["short_name"] == "Llama-3.1-8B-Instruct"
-    assert artifact["model"]["display_name"] == "Llama 3.1 8B Instruct"
+    assert artifact["model"]["display_name"] == "Llama-3.1-8B-Instruct"
     assert artifact["model"]["name"] == "meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["metadata"]["git_commit"] == "abc123def456"
     assert artifact["metadata"]["github_user"] == "octocat"
@@ -1060,7 +1060,7 @@ def test_export_leaderboard_artifact_normalizes_seeded_short_model_alias(tmp_pat
     assert artifact["model"]["canonical_id"] == "hf:Qwen/Qwen2.5-14B-Instruct"
     assert artifact["model"]["repo_id"] == "Qwen/Qwen2.5-14B-Instruct"
     assert artifact["model"]["short_name"] == "Qwen2.5-14B-Instruct"
-    assert artifact["model"]["display_name"] == "Qwen 2.5 14B Instruct"
+    assert artifact["model"]["display_name"] == "Qwen2.5-14B-Instruct"
     assert artifact["model"]["name"] == "Qwen/Qwen2.5-14B-Instruct"
 
 
