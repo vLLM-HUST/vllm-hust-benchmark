@@ -19,6 +19,8 @@ from typing import Any, Mapping
 
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import get_scenario
+from vllm_hust_benchmark.submission_artifacts import iter_submission_artifact_paths
+from vllm_hust_benchmark.submission_artifacts import normalize_submission_artifacts_in_tree
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
 DEFAULT_RUNTIME_ENGINE = "vllm-hust"
@@ -721,7 +723,7 @@ def _normalize_submission_baseline_metadata(
     *,
     official_coverage_keys: set[str],
 ) -> None:
-    for artifact_path in sorted(source_dir.rglob("run_leaderboard.json")):
+    for artifact_path in iter_submission_artifact_paths(source_dir):
         try:
             payload = json.loads(artifact_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -1154,7 +1156,7 @@ def _resolve_hf_token(token: str | None) -> str | None:
 def sync_submission_to_huggingface(
     *,
     layout: RepoLayout,
-    submission_dirs: Path | Sequence[Path],
+    submission_dirs: Path | Sequence[Path] | None,
     aggregate_output_dir: Path,
     repo_id: str,
     token: str | None = None,
@@ -1162,6 +1164,7 @@ def sync_submission_to_huggingface(
     submissions_prefix: str = "submissions-auto",
     commit_message: str = "chore: sync benchmark submission and leaderboard data",
     dry_run: bool = False,
+    allow_existing_only: bool = False,
 ) -> int:
     try:
         from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
@@ -1174,13 +1177,18 @@ def sync_submission_to_huggingface(
         )
         return 2
 
-    if isinstance(submission_dirs, Path):
+    if submission_dirs is None:
+        normalized_submission_dirs: list[Path] = []
+    elif isinstance(submission_dirs, Path):
         normalized_submission_dirs = [submission_dirs]
     else:
         normalized_submission_dirs = list(submission_dirs)
 
-    if not normalized_submission_dirs:
-        print("at least one submission directory is required", file=sys.stderr)
+    if not normalized_submission_dirs and not allow_existing_only:
+        print(
+            "at least one submission directory is required unless --existing-only is set",
+            file=sys.stderr,
+        )
         return 2
 
     for submission_dir in normalized_submission_dirs:
@@ -1224,16 +1232,13 @@ def sync_submission_to_huggingface(
             )
             shutil.copy2(downloaded_path, local_path)
 
-        current_submission_targets: list[tuple[Path, Path]] = []
         for submission_dir in normalized_submission_dirs:
             current_submission_target = merged_source_dir / submission_dir.name
             shutil.copytree(
                 submission_dir, current_submission_target, dirs_exist_ok=True
             )
-            current_submission_targets.append(
-                (submission_dir, current_submission_target)
-            )
 
+        normalize_submission_artifacts_in_tree(merged_source_dir)
         _normalize_submission_baseline_metadata(
             merged_source_dir,
             official_coverage_keys=_load_official_baseline_coverage_keys(layout),
@@ -1274,24 +1279,17 @@ def sync_submission_to_huggingface(
             )
             planned_paths.append(file_name)
 
-        for submission_dir, current_submission_target in current_submission_targets:
-            for local_file in sorted(current_submission_target.rglob("*")):
-                if not local_file.is_file():
-                    continue
-                relative_path = local_file.relative_to(
-                    current_submission_target
-                ).as_posix()
-                repo_path = "/".join(
-                    part
-                    for part in [normalized_prefix, submission_dir.name, relative_path]
-                    if part
-                )
-                operations.append(
-                    CommitOperationAdd(
-                        path_in_repo=repo_path, path_or_fileobj=local_file
-                    )
-                )
-                planned_paths.append(repo_path)
+        for local_file in sorted(merged_source_dir.rglob("*")):
+            if not local_file.is_file():
+                continue
+            relative_path = local_file.relative_to(merged_source_dir).as_posix()
+            repo_path = "/".join(
+                part for part in [normalized_prefix, relative_path] if part
+            )
+            operations.append(
+                CommitOperationAdd(path_in_repo=repo_path, path_or_fileobj=local_file)
+            )
+            planned_paths.append(repo_path)
 
         if dry_run:
             print(

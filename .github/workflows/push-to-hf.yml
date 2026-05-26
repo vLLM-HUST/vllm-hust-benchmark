@@ -11,6 +11,10 @@ on:
         description: 'Dry run only (do not upload to HF)'
         type: boolean
         default: false
+      backfill_existing_only:
+        description: 'Backfill and republish already-hosted HF submissions without new local submissions'
+        type: boolean
+        default: false
       submission_dirs:
         description: 'Optional newline-separated submission directories to sync'
         type: string
@@ -63,6 +67,7 @@ jobs:
           import json, sys
           from pathlib import Path
           from jsonschema import Draft7Validator
+          from vllm_hust_benchmark.submission_artifacts import validate_manifest_artifacts
 
           schema_path = Path("vllm-hust-website/data/schemas/leaderboard_v1.schema.json")
           if not schema_path.exists():
@@ -78,18 +83,14 @@ jobs:
               print("No submission manifests found — nothing to do")
               sys.exit(0)
 
-          for manifest_path in manifests:
-              artifact_path = manifest_path.parent / "run_leaderboard.json"
-              if not artifact_path.exists():
-                  print(f"WARNING: manifest present but artifact missing: {artifact_path}")
-                  continue
-              artifact = json.loads(artifact_path.read_text())
-              errs = sorted(validator.iter_errors(artifact), key=lambda e: list(e.path))
-              if errs:
-                  print(f"FAIL {artifact_path}: {errs[0].message[:120]} @ {list(errs[0].path)}")
-                  errors_found = True
-              else:
-                  print(f"OK   {artifact_path}")
+            errors = validate_manifest_artifacts(manifests=manifests, validator=validator)
+            if errors:
+              errors_found = True
+              for error in errors:
+                print(f"FAIL {error}")
+            else:
+              for manifest_path in manifests:
+                print(f"OK   {manifest_path}")
 
           sys.exit(1 if errors_found else 0)
           PYEOF
@@ -160,10 +161,11 @@ jobs:
           MANUAL_SUBMISSION_DIRS: ${{ github.event.inputs.submission_dirs }}
 
       - name: Sync submissions into HF leaderboard snapshots
-        if: ${{ steps.resolve-submissions.outputs.count != '0' }}
+        if: ${{ steps.resolve-submissions.outputs.count != '0' || github.event.inputs.backfill_existing_only == 'true' }}
         env:
           HF_TOKEN: ${{ secrets.DATASET_WRITE_TOKEN }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          BACKFILL_EXISTING_ONLY: ${{ github.event.inputs.backfill_existing_only || 'false' }}
           VLLM_HUST_REPO: ${{ github.workspace }}/vllm-hust
           VLLM_HUST_WEBSITE_REPO: ${{ github.workspace }}/vllm-hust-website
         run: |
@@ -176,6 +178,9 @@ jobs:
           if [[ "$DRY_RUN" == "true" ]]; then
             extra_args+=(--dry-run)
           fi
+          if [[ "$BACKFILL_EXISTING_ONLY" == "true" ]]; then
+            extra_args+=(--existing-only)
+          fi
 
           submission_args=()
           while IFS= read -r submission_dir; do
@@ -184,7 +189,7 @@ jobs:
             submission_args+=(--submission-dir "$submission_dir")
           done <<< "${{ steps.resolve-submissions.outputs.dirs }}"
 
-          if [[ ${#submission_args[@]} -eq 0 ]]; then
+          if [[ ${#submission_args[@]} -eq 0 && "$BACKFILL_EXISTING_ONLY" != "true" ]]; then
             echo "No submission directories resolved; nothing to sync."
             exit 0
           fi
@@ -199,11 +204,11 @@ jobs:
             "${extra_args[@]}"
 
       - name: Dry run summary
-        if: ${{ github.event.inputs.dry_run == 'true' && steps.resolve-submissions.outputs.count != '0' }}
+        if: ${{ github.event.inputs.dry_run == 'true' && (steps.resolve-submissions.outputs.count != '0' || github.event.inputs.backfill_existing_only == 'true') }}
         run: |
           echo "=== DRY RUN: files that would be uploaded ==="
           ls -lh /tmp/leaderboard-data/
 
       - name: No submissions to sync
-        if: ${{ steps.resolve-submissions.outputs.count == '0' }}
+        if: ${{ steps.resolve-submissions.outputs.count == '0' && github.event.inputs.backfill_existing_only != 'true' }}
         run: echo "No submission directories matched this event; nothing to upload."

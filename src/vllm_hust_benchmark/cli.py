@@ -522,8 +522,12 @@ def _build_parser() -> argparse.ArgumentParser:
     sync_submission_parser.add_argument(
         "--submission-dir",
         action="append",
-        required=True,
         help="Submission directory to merge and upload. Repeat this flag to sync multiple submissions in one rebuild.",
+    )
+    sync_submission_parser.add_argument(
+        "--existing-only",
+        action="store_true",
+        help="Backfill and republish already-hosted HF submissions without supplying any new local submission directory.",
     )
     sync_submission_parser.add_argument("--aggregate-output-dir", required=True)
     sync_submission_parser.add_argument("--repo-id", required=True)
@@ -982,7 +986,11 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return sync_submission_to_huggingface(
             layout=layout,
-            submission_dirs=[Path(path).resolve() for path in args.submission_dir],
+            submission_dirs=(
+                [Path(path).resolve() for path in args.submission_dir]
+                if args.submission_dir
+                else None
+            ),
             aggregate_output_dir=Path(args.aggregate_output_dir).resolve(),
             repo_id=args.repo_id,
             token=getattr(args, "token", None),
@@ -994,6 +1002,7 @@ def main(argv: list[str] | None = None) -> int:
                 "chore: sync benchmark submission and leaderboard data",
             ),
             dry_run=getattr(args, "dry_run", False),
+            allow_existing_only=getattr(args, "existing_only", False),
         )
 
     if args.command == "submit":
