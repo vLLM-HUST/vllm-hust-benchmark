@@ -8,7 +8,9 @@ from functools import lru_cache
 from importlib import resources
 
 DEFAULT_MODEL_REGISTRY = "hf"
-CANONICAL_ID_PATTERN = re.compile(r"^(?P<registry>[a-z0-9][a-z0-9_-]*):(?P<repo_id>.+)$")
+CANONICAL_ID_PATTERN = re.compile(
+    r"^(?P<registry>[a-z0-9][a-z0-9_-]*):(?P<repo_id>.+)$"
+)
 HF_CACHE_PATH_PATTERN = re.compile(
     r"(?:^|/)models--(?P<namespace>[^/]+)--(?P<name>[^/]+)/(?:snapshots|refs)/",
     re.IGNORECASE,
@@ -62,9 +64,11 @@ def _build_fallback_identity(repo_id: str, *, registry: str) -> ModelIdentity:
 
 @lru_cache(maxsize=1)
 def load_model_identity_registry() -> tuple[ModelIdentity, ...]:
-    with resources.files("vllm_hust_benchmark.data").joinpath(
-        "model_identity_registry.json"
-    ).open("r", encoding="utf-8") as handle:
+    with (
+        resources.files("vllm_hust_benchmark.data")
+        .joinpath("model_identity_registry.json")
+        .open("r", encoding="utf-8") as handle
+    ):
         payload = json.load(handle)
 
     models = payload.get("models")
@@ -127,7 +131,11 @@ def resolve_model_identity(
     if canonical is not None:
         registry, repo_id = canonical
         seeded = lookup.get(repo_id)
-        return seeded if seeded is not None else _build_fallback_identity(repo_id, registry=registry)
+        return (
+            seeded
+            if seeded is not None
+            else _build_fallback_identity(repo_id, registry=registry)
+        )
 
     repo_id_from_path = _extract_hf_repo_id_from_path(normalized)
     if repo_id_from_path is not None:
@@ -135,7 +143,9 @@ def resolve_model_identity(
         return (
             seeded
             if seeded is not None
-            else _build_fallback_identity(repo_id_from_path, registry=DEFAULT_MODEL_REGISTRY)
+            else _build_fallback_identity(
+                repo_id_from_path, registry=DEFAULT_MODEL_REGISTRY
+            )
         )
 
     if _looks_like_repo_id(normalized):
@@ -161,7 +171,9 @@ def resolve_model_identity_from_payload(
         if not candidate:
             continue
         return resolve_model_identity(candidate, default_registry=default_registry)
-    raise ValueError("model payload must contain canonical_id, repo_id, name, or short_name")
+    raise ValueError(
+        "model payload must contain canonical_id, repo_id, name, or short_name"
+    )
 
 
 def normalize_model_identity_payload(
@@ -194,10 +206,21 @@ def validate_model_identity_payload(model_payload: Mapping[str, object]) -> None
         "display_name",
         "name",
     )
-    missing = [field for field in required_fields if not str(model_payload.get(field) or "").strip()]
+    missing = [
+        field
+        for field in required_fields
+        if not str(model_payload.get(field) or "").strip()
+    ]
     if missing:
         raise ValueError(
             "model payload missing normalized identity fields: " + ", ".join(missing)
         )
-    if str(model_payload.get("name") or "").strip() != str(model_payload.get("repo_id") or "").strip():
+    canonical_id = str(model_payload.get("canonical_id") or "").strip()
+    repo_id = str(model_payload.get("repo_id") or "").strip()
+    parsed_canonical = _parse_canonical_id(canonical_id)
+    if parsed_canonical is None:
+        raise ValueError("model payload canonical_id must match <registry>:<repo_id>")
+    if parsed_canonical[1] != repo_id:
+        raise ValueError("model payload canonical_id must embed model.repo_id")
+    if str(model_payload.get("name") or "").strip() != repo_id:
         raise ValueError("model payload must set model.name equal to model.repo_id")
