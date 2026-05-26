@@ -22,6 +22,20 @@ from vllm_hust_benchmark.integration import (
 )
 
 
+def _minimal_manifest(artifact_name: str = "run_leaderboard.json") -> str:
+    return json.dumps(
+        {
+            "schema_version": "leaderboard-export-manifest/v2",
+            "generated_at": "2026-05-26T00:00:00Z",
+            "entries": [{"leaderboard_artifact": artifact_name}],
+        }
+    )
+
+
+def _minimal_artifact(model_name: str = "Qwen/Qwen2.5-14B-Instruct") -> str:
+    return json.dumps({"model": {"name": model_name}})
+
+
 def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> None:
     monkeypatch.delenv("VLLM_HUST_WORKSPACE_ROOT", raising=False)
     monkeypatch.delenv("VLLM_HUST_REPO", raising=False)
@@ -612,6 +626,139 @@ def test_validate_aggregated_leaderboard_outputs_allows_pending_baseline_rows(
     validate_aggregated_leaderboard_outputs(data_dir)
 
 
+def test_validate_aggregated_leaderboard_outputs_downgrades_legacy_baselines_not_in_official_specs(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    current_entry = {
+        "engine": "vllm-hust",
+        "config_type": "single_gpu",
+        "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+        "hardware": {"chip_model": "910B3"},
+        "workload": {"name": "prefix-repetition-online"},
+        "constraints": {
+            "accountable_scope": {
+                "representative_business_scenario": "long-context-chat",
+                "baseline_engine": "vllm",
+            }
+        },
+    }
+    unrelated_baseline_entry = {
+        **current_entry,
+        "engine": "vllm",
+        "workload": {"name": "random-online"},
+        "constraints": {"accountable_scope": {}},
+    }
+    (data_dir / "leaderboard_single.json").write_text(
+        json.dumps([current_entry, unrelated_baseline_entry]),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (data_dir / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "groups": [{"scope_key": "present-group"}],
+                "goal_progress": {"pairs": []},
+                "hard_constraints": {
+                    "scopes": [
+                        {
+                            "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B3|prefix-repetition-online|single_gpu|long-context-chat|vllm",
+                            "scope": {
+                                "model": "Qwen/Qwen2.5-14B-Instruct",
+                                "hardware": "910B3",
+                                "workload": "prefix-repetition-online",
+                                "config_type": "single_gpu",
+                                "accountable_scope": {
+                                    "baseline_engine": "vllm",
+                                },
+                            },
+                        }
+                    ]
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="missing matching baseline rows"):
+        validate_aggregated_leaderboard_outputs(data_dir)
+
+    validate_aggregated_leaderboard_outputs(
+        data_dir,
+        official_coverage_keys={
+            integration._build_baseline_coverage_key(
+                engine="vllm",
+                model="Qwen/Qwen2.5-14B-Instruct",
+                hardware="910B3",
+                workload="random-online",
+                config_type="single_gpu",
+            )
+        },
+    )
+
+
+def test_load_official_baseline_coverage_keys_requires_published_submission(
+    tmp_path: Path,
+) -> None:
+    benchmark_repo = tmp_path / "vllm-hust-benchmark"
+    official_specs_dir = benchmark_repo / "docs" / "official-baselines"
+    official_specs_dir.mkdir(parents=True)
+    submissions_root = benchmark_repo / "submissions"
+    submissions_root.mkdir(parents=True)
+
+    for scenario_name in ("random-online", "prefix-repetition-online"):
+        (official_specs_dir / f"official-{scenario_name}.json").write_text(
+            json.dumps(
+                {
+                    "scenario": scenario_name,
+                    "model": "Qwen/Qwen2.5-14B-Instruct",
+                    "hardware_chip_model": "910B3",
+                    "chip_count": 1,
+                    "node_count": 1,
+                    "export": {"baseline_engine": "vllm"},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    official_submission_dir = (
+        submissions_root / "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+    )
+    official_submission_dir.mkdir()
+    (official_submission_dir / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "engine": "vllm",
+                "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+                "hardware": {"chip_model": "910B3"},
+                "workload": {"name": "random-online"},
+                "config_type": "single_gpu",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=benchmark_repo,
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+
+    coverage_keys = integration._load_official_baseline_coverage_keys(layout)
+
+    assert coverage_keys == {
+        integration._build_baseline_coverage_key(
+            engine="vllm",
+            model="Qwen/Qwen2.5-14B-Instruct",
+            hardware="910B3",
+            workload="random-online",
+            config_type="single_gpu",
+        )
+    }
+
+
 def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None:
     monkeypatch.setattr(
         integration,
@@ -777,11 +924,15 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
 
     submission_dir = tmp_path / "submission-a"
     submission_dir.mkdir()
-    (submission_dir / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
-    (submission_dir / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+    (submission_dir / "run_leaderboard.json").write_text(
+        _minimal_artifact() + "\n", encoding="utf-8"
+    )
+    (submission_dir / "leaderboard_manifest.json").write_text(
+        _minimal_manifest() + "\n", encoding="utf-8"
+    )
 
     downloaded_submission = tmp_path / "downloaded-existing.json"
-    downloaded_submission.write_text("{}\n", encoding="utf-8")
+    downloaded_submission.write_text(_minimal_artifact() + "\n", encoding="utf-8")
 
     aggregate_calls: list[tuple[Path, Path]] = []
     merged_markers: dict[str, bool] = {}
@@ -892,16 +1043,24 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
 
     submission_a = tmp_path / "submission-a"
     submission_a.mkdir()
-    (submission_a / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
-    (submission_a / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+    (submission_a / "run_leaderboard.json").write_text(
+        _minimal_artifact() + "\n", encoding="utf-8"
+    )
+    (submission_a / "leaderboard_manifest.json").write_text(
+        _minimal_manifest() + "\n", encoding="utf-8"
+    )
 
     submission_b = tmp_path / "submission-b"
     submission_b.mkdir()
-    (submission_b / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
-    (submission_b / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+    (submission_b / "run_leaderboard.json").write_text(
+        _minimal_artifact("Qwen/Qwen2.5-7B-Instruct") + "\n", encoding="utf-8"
+    )
+    (submission_b / "leaderboard_manifest.json").write_text(
+        _minimal_manifest() + "\n", encoding="utf-8"
+    )
 
     downloaded_submission = tmp_path / "downloaded-existing.json"
-    downloaded_submission.write_text("{}\n", encoding="utf-8")
+    downloaded_submission.write_text(_minimal_artifact() + "\n", encoding="utf-8")
 
     merged_markers: dict[str, bool] = {}
     uploaded_paths: list[str] = []
@@ -1016,11 +1175,15 @@ def test_sync_submission_to_huggingface_rejects_invalid_aggregated_snapshots(
 
     submission_dir = tmp_path / "submission-a"
     submission_dir.mkdir()
-    (submission_dir / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
-    (submission_dir / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+    (submission_dir / "run_leaderboard.json").write_text(
+        _minimal_artifact() + "\n", encoding="utf-8"
+    )
+    (submission_dir / "leaderboard_manifest.json").write_text(
+        _minimal_manifest() + "\n", encoding="utf-8"
+    )
 
     downloaded_submission = tmp_path / "downloaded-existing.json"
-    downloaded_submission.write_text("{}\n", encoding="utf-8")
+    downloaded_submission.write_text(_minimal_artifact() + "\n", encoding="utf-8")
     uploaded_paths: list[str] = []
 
     def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
@@ -1129,6 +1292,24 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
         ),
         encoding="utf-8",
     )
+    official_submission_dir = (
+        benchmark_repo
+        / "submissions"
+        / "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+    )
+    official_submission_dir.mkdir(parents=True)
+    (official_submission_dir / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "engine": "vllm",
+                "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+                "hardware": {"chip_model": "910B3"},
+                "workload": {"name": "random-online"},
+                "config_type": "single_gpu",
+            }
+        ),
+        encoding="utf-8",
+    )
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -1155,7 +1336,9 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
     (submission_dir / "run_leaderboard.json").write_text(
         json.dumps(current_payload), encoding="utf-8"
     )
-    (submission_dir / "leaderboard_manifest.json").write_text("{}\n", encoding="utf-8")
+    (submission_dir / "leaderboard_manifest.json").write_text(
+        _minimal_manifest() + "\n", encoding="utf-8"
+    )
 
     downloaded_run = tmp_path / "downloaded-existing-run.json"
     downloaded_manifest = tmp_path / "downloaded-existing-manifest.json"
@@ -1177,7 +1360,7 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
         ),
         encoding="utf-8",
     )
-    downloaded_manifest.write_text("{}\n", encoding="utf-8")
+    downloaded_manifest.write_text(_minimal_manifest() + "\n", encoding="utf-8")
 
     seen_baselines: dict[str, dict[str, str]] = {}
 
@@ -1277,7 +1460,7 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
     monkeypatch.setattr(
         integration,
         "validate_aggregated_leaderboard_outputs",
-        lambda _data_dir: None,
+        lambda _data_dir, **_kwargs: None,
     )
 
     aggregate_output_dir = tmp_path / "aggregated"
@@ -1302,6 +1485,183 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
             "baseline_status": "official-covered",
         },
     }
+
+
+def test_sync_submission_to_huggingface_existing_only_backfills_historical_artifacts(
+    monkeypatch, tmp_path: Path
+) -> None:
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+    downloaded_submission = tmp_path / "downloaded-existing.json"
+    downloaded_submission.write_text(
+        json.dumps({"model": {"name": "Qwen2.5-7B-Instruct"}}),
+        encoding="utf-8",
+    )
+
+    uploaded_paths: list[str] = []
+    seen_model: dict[str, str] = {}
+
+    def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
+        historical = json.loads(
+            source_dir.joinpath("existing-run", "run_leaderboard.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        seen_model.update(historical["model"])
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for file_name in (
+            "leaderboard_single.json",
+            "leaderboard_multi.json",
+            "leaderboard_compare.json",
+            "last_updated.json",
+        ):
+            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        return 0
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            uploaded_paths.append(path_in_repo)
+            self.path_in_repo = path_in_repo
+            self.path_or_fileobj = path_or_fileobj
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            return ["submissions-auto/existing-run/run_leaderboard.json"]
+
+        def repo_info(self, repo_id, repo_type):
+            return {"repo_id": repo_id, "repo_type": repo_type}
+
+        def create_repo(self, repo_id, repo_type, private, exist_ok):
+            return None
+
+        def create_commit(
+            self,
+            repo_id,
+            repo_type,
+            operations,
+            commit_message,
+            revision=None,
+        ):
+            return {
+                "repo_id": repo_id,
+                "repo_type": repo_type,
+                "branch": revision,
+                "commit_message": commit_message,
+                "count": len(operations),
+            }
+
+    def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
+        return str(downloaded_submission)
+
+    monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    monkeypatch.setattr(
+        integration,
+        "validate_aggregated_leaderboard_outputs",
+        lambda _data_dir, **_kwargs: None,
+    )
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        HfApi=FakeHfApi,
+        hf_hub_download=fake_hf_hub_download,
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    aggregate_output_dir = tmp_path / "aggregated"
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=None,
+        aggregate_output_dir=aggregate_output_dir,
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+        allow_existing_only=True,
+    )
+
+    assert exit_code == 0
+    assert seen_model["name"] == "Qwen/Qwen2.5-7B-Instruct"
+    assert seen_model["repo_id"] == "Qwen/Qwen2.5-7B-Instruct"
+    assert seen_model["canonical_id"] == "hf:Qwen/Qwen2.5-7B-Instruct"
+    assert "submissions-auto/existing-run/run_leaderboard.json" in uploaded_paths
+    assert "submissions-auto/existing-run/leaderboard_manifest.json" in uploaded_paths
+
+
+def test_sync_submission_to_huggingface_reports_hf_listing_failure(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            self.path_in_repo = path_in_repo
+            self.path_or_fileobj = path_or_fileobj
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            raise RuntimeError("network is unreachable")
+
+    def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
+        raise AssertionError("hf_hub_download should not be called when listing fails")
+
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        HfApi=FakeHfApi,
+        hf_hub_download=fake_hf_hub_download,
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=None,
+        aggregate_output_dir=tmp_path / "aggregated",
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+        allow_existing_only=True,
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert "failed to list dataset files from owner/repo@main: network is unreachable" in captured.err
 
 
 def test_upload_to_huggingface_rejects_invalid_aggregated_snapshots(

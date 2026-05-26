@@ -19,6 +19,8 @@ from typing import Any, Mapping
 
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import get_scenario
+from vllm_hust_benchmark.submission_artifacts import iter_submission_artifact_paths
+from vllm_hust_benchmark.submission_artifacts import normalize_submission_artifacts_in_tree
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
 DEFAULT_RUNTIME_ENGINE = "vllm-hust"
@@ -671,7 +673,7 @@ def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
     if not official_specs_dir.is_dir():
         return set()
 
-    coverage_keys: set[str] = set()
+    declared_coverage_keys: set[str] = set()
     for spec_path in sorted(official_specs_dir.glob("*.json")):
         if spec_path.name.endswith("constraints.stub.json"):
             continue
@@ -701,7 +703,7 @@ def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
         workload = scenario.leaderboard.get("workload_name") or scenario_name
         chip_count = int(payload.get("chip_count") or 1)
         node_count = int(payload.get("node_count") or 1)
-        coverage_keys.add(
+        declared_coverage_keys.add(
             _build_baseline_coverage_key(
                 engine=baseline_engine,
                 model=str(payload.get("model") or "unknown-model"),
@@ -713,7 +715,35 @@ def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
                 ),
             )
         )
-    return coverage_keys
+
+    if not declared_coverage_keys:
+        return set()
+
+    submissions_root = layout.benchmark_repo / "submissions"
+    if not submissions_root.is_dir():
+        return set()
+
+    published_coverage_keys: set[str] = set()
+    for artifact_path in sorted(submissions_root.rglob("run_leaderboard.json")):
+        if not artifact_path.parent.name.startswith("official-ascend-"):
+            continue
+
+        try:
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+
+        if not isinstance(payload, Mapping):
+            continue
+
+        coverage_key = _build_entry_baseline_coverage_key(
+            payload,
+            engine=_normalize_engine(payload),
+        )
+        if coverage_key in declared_coverage_keys:
+            published_coverage_keys.add(coverage_key)
+
+    return published_coverage_keys
 
 
 def _normalize_submission_baseline_metadata(
@@ -721,7 +751,7 @@ def _normalize_submission_baseline_metadata(
     *,
     official_coverage_keys: set[str],
 ) -> None:
-    for artifact_path in sorted(source_dir.rglob("run_leaderboard.json")):
+    for artifact_path in iter_submission_artifact_paths(source_dir):
         try:
             payload = json.loads(artifact_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
@@ -976,7 +1006,11 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
     )
 
 
-def validate_aggregated_leaderboard_outputs(data_dir: Path) -> None:
+def validate_aggregated_leaderboard_outputs(
+    data_dir: Path,
+    *,
+    official_coverage_keys: set[str] | None = None,
+) -> None:
     single = _load_snapshot_json(data_dir / "leaderboard_single.json")
     multi = _load_snapshot_json(data_dir / "leaderboard_multi.json")
     compare = _load_snapshot_json(data_dir / "leaderboard_compare.json")
@@ -1073,31 +1107,58 @@ def validate_aggregated_leaderboard_outputs(data_dir: Path) -> None:
         scope_payload = scope_payload if isinstance(scope_payload, Mapping) else {}
         accountable = scope_payload.get("accountable_scope")
         accountable = accountable if isinstance(accountable, Mapping) else {}
+        model_name = str(scope_payload.get("model") or "unknown-model")
+        hardware_name = str(scope_payload.get("hardware") or "unknown-hardware")
+        workload_name = str(scope_payload.get("workload") or "Other")
+        config_type = str(scope_payload.get("config_type") or "unknown-config")
         declared_baseline_engine = _normalize_baseline_engine(
-            accountable.get("declared_baseline_engine") or accountable.get("baseline_engine")
+            accountable.get("declared_baseline_engine")
+            or accountable.get("baseline_engine")
         )
-        baseline_status = str(accountable.get("baseline_status") or "").strip()
-        if baseline_status not in VALID_BASELINE_STATUSES:
-            if accountable.get("baseline_engine"):
-                baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
-            elif declared_baseline_engine:
-                baseline_status = BASELINE_STATUS_PENDING
+        baseline_engine = _normalize_baseline_engine(accountable.get("baseline_engine"))
+
+        if official_coverage_keys is not None:
+            if declared_baseline_engine:
+                expected_coverage_key = _build_baseline_coverage_key(
+                    engine=declared_baseline_engine,
+                    model=model_name,
+                    hardware=hardware_name,
+                    workload=workload_name,
+                    config_type=config_type,
+                )
+                if expected_coverage_key in official_coverage_keys:
+                    baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
+                    baseline_engine = declared_baseline_engine
+                else:
+                    baseline_status = BASELINE_STATUS_PENDING
+                    baseline_engine = ""
             else:
                 baseline_status = BASELINE_STATUS_NONE
+                baseline_engine = ""
+        else:
+            baseline_status = str(accountable.get("baseline_status") or "").strip()
+            if baseline_status not in VALID_BASELINE_STATUSES:
+                if accountable.get("baseline_engine"):
+                    baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
+                elif declared_baseline_engine:
+                    baseline_status = BASELINE_STATUS_PENDING
+                else:
+                    baseline_status = BASELINE_STATUS_NONE
+
+            if baseline_status == BASELINE_STATUS_OFFICIAL_COVERED:
+                baseline_engine = baseline_engine or declared_baseline_engine
+            else:
+                baseline_engine = ""
 
         if baseline_status != BASELINE_STATUS_OFFICIAL_COVERED:
             continue
 
-        baseline_engine = _normalize_baseline_engine(
-            accountable.get("baseline_engine") or declared_baseline_engine
-        )
-
         baseline_key = _build_baseline_coverage_key(
             engine=baseline_engine,
-            model=str(scope_payload.get("model") or "unknown-model"),
-            hardware=str(scope_payload.get("hardware") or "unknown-hardware"),
-            workload=str(scope_payload.get("workload") or "Other"),
-            config_type=str(scope_payload.get("config_type") or "unknown-config"),
+            model=model_name,
+            hardware=hardware_name,
+            workload=workload_name,
+            config_type=config_type,
         )
         if baseline_key not in baseline_coverage_keys:
             missing_baseline_coverage.append(scope.get("scope_key") or baseline_key)
@@ -1154,7 +1215,7 @@ def _resolve_hf_token(token: str | None) -> str | None:
 def sync_submission_to_huggingface(
     *,
     layout: RepoLayout,
-    submission_dirs: Path | Sequence[Path],
+    submission_dirs: Path | Sequence[Path] | None,
     aggregate_output_dir: Path,
     repo_id: str,
     token: str | None = None,
@@ -1162,6 +1223,7 @@ def sync_submission_to_huggingface(
     submissions_prefix: str = "submissions-auto",
     commit_message: str = "chore: sync benchmark submission and leaderboard data",
     dry_run: bool = False,
+    allow_existing_only: bool = False,
 ) -> int:
     try:
         from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
@@ -1174,13 +1236,18 @@ def sync_submission_to_huggingface(
         )
         return 2
 
-    if isinstance(submission_dirs, Path):
+    if submission_dirs is None:
+        normalized_submission_dirs: list[Path] = []
+    elif isinstance(submission_dirs, Path):
         normalized_submission_dirs = [submission_dirs]
     else:
         normalized_submission_dirs = list(submission_dirs)
 
-    if not normalized_submission_dirs:
-        print("at least one submission directory is required", file=sys.stderr)
+    if not normalized_submission_dirs and not allow_existing_only:
+        print(
+            "at least one submission directory is required unless --existing-only is set",
+            file=sys.stderr,
+        )
         return 2
 
     for submission_dir in normalized_submission_dirs:
@@ -1207,12 +1274,27 @@ def sync_submission_to_huggingface(
                 repo_type="dataset",
                 revision=branch,
             )
-        except Exception:
-            repo_files = []
+        except Exception as exc:
+            print(
+                f"failed to list dataset files from {repo_id}@{branch}: {exc}",
+                file=sys.stderr,
+            )
+            return 2
 
-        for repo_path in repo_files:
-            if repo_prefix and not repo_path.startswith(repo_prefix):
-                continue
+        prefixed_repo_files = [
+            repo_path
+            for repo_path in repo_files
+            if not repo_prefix or repo_path.startswith(repo_prefix)
+        ]
+        if allow_existing_only and not prefixed_repo_files:
+            print(
+                f"no historical submissions found under prefix {normalized_prefix!r} "
+                f"in {repo_id}@{branch}",
+                file=sys.stderr,
+            )
+            return 2
+
+        for repo_path in prefixed_repo_files:
             local_path = merged_root / repo_path
             local_path.parent.mkdir(parents=True, exist_ok=True)
             downloaded_path = hf_hub_download(
@@ -1224,19 +1306,18 @@ def sync_submission_to_huggingface(
             )
             shutil.copy2(downloaded_path, local_path)
 
-        current_submission_targets: list[tuple[Path, Path]] = []
         for submission_dir in normalized_submission_dirs:
             current_submission_target = merged_source_dir / submission_dir.name
             shutil.copytree(
                 submission_dir, current_submission_target, dirs_exist_ok=True
             )
-            current_submission_targets.append(
-                (submission_dir, current_submission_target)
-            )
 
+        official_coverage_keys = _load_official_baseline_coverage_keys(layout)
+
+        normalize_submission_artifacts_in_tree(merged_source_dir)
         _normalize_submission_baseline_metadata(
             merged_source_dir,
-            official_coverage_keys=_load_official_baseline_coverage_keys(layout),
+            official_coverage_keys=official_coverage_keys,
         )
 
         aggregate_rc = aggregate_to_website(
@@ -1249,7 +1330,10 @@ def sync_submission_to_huggingface(
             return aggregate_rc
 
         try:
-            validate_aggregated_leaderboard_outputs(aggregate_output_dir)
+            validate_aggregated_leaderboard_outputs(
+                aggregate_output_dir,
+                official_coverage_keys=official_coverage_keys,
+            )
         except ValueError as exc:
             _print_aggregated_compare_diagnostics(aggregate_output_dir)
             print(str(exc), file=sys.stderr)
@@ -1274,24 +1358,17 @@ def sync_submission_to_huggingface(
             )
             planned_paths.append(file_name)
 
-        for submission_dir, current_submission_target in current_submission_targets:
-            for local_file in sorted(current_submission_target.rglob("*")):
-                if not local_file.is_file():
-                    continue
-                relative_path = local_file.relative_to(
-                    current_submission_target
-                ).as_posix()
-                repo_path = "/".join(
-                    part
-                    for part in [normalized_prefix, submission_dir.name, relative_path]
-                    if part
-                )
-                operations.append(
-                    CommitOperationAdd(
-                        path_in_repo=repo_path, path_or_fileobj=local_file
-                    )
-                )
-                planned_paths.append(repo_path)
+        for local_file in sorted(merged_source_dir.rglob("*")):
+            if not local_file.is_file():
+                continue
+            relative_path = local_file.relative_to(merged_source_dir).as_posix()
+            repo_path = "/".join(
+                part for part in [normalized_prefix, relative_path] if part
+            )
+            operations.append(
+                CommitOperationAdd(path_in_repo=repo_path, path_or_fileobj=local_file)
+            )
+            planned_paths.append(repo_path)
 
         if dry_run:
             print(

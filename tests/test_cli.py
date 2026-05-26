@@ -840,6 +840,11 @@ def test_export_leaderboard_artifact(tmp_path) -> None:
     assert (output_dir / "run_leaderboard.json").is_file()
     assert (output_dir / "leaderboard_manifest.json").is_file()
     artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    assert artifact["model"]["canonical_id"] == "hf:meta-llama/Llama-3.1-8B-Instruct"
+    assert artifact["model"]["repo_id"] == "meta-llama/Llama-3.1-8B-Instruct"
+    assert artifact["model"]["short_name"] == "Llama-3.1-8B-Instruct"
+    assert artifact["model"]["display_name"] == "Llama 3.1 8B Instruct"
+    assert artifact["model"]["name"] == "meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["metadata"]["git_commit"] == "abc123def456"
     assert artifact["metadata"]["github_user"] == "octocat"
     assert artifact["metadata"]["github_commit_url"] == "https://github.com/vLLM-HUST/vllm-hust/commit/abc123def456"
@@ -986,7 +991,77 @@ def test_export_leaderboard_artifact_from_raw_benchmark_result(tmp_path) -> None
     assert (output_dir / "run_leaderboard.json").is_file()
     assert (output_dir / "leaderboard_manifest.json").is_file()
     artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    assert artifact["model"]["canonical_id"] == "hf:meta-llama/Llama-3.1-8B-Instruct"
+    assert artifact["model"]["repo_id"] == "meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["metadata"]["github_user"] == "benchmark-bot"
+
+
+def test_export_leaderboard_artifact_normalizes_seeded_short_model_alias(tmp_path) -> None:
+    metrics_file = tmp_path / "metrics.json"
+    metrics_file.write_text(
+        """
+{
+    "metrics": {
+        "ttft_ms": 42.0,
+        "throughput_tps": 321.0,
+        "peak_mem_mb": 10240,
+        "error_rate": 0.0
+    },
+    "constraints_metrics": {
+        "single_chip_effective_utilization_pct": 92.0,
+        "typical_throughput_ratio_vs_baseline": 2.2,
+        "typical_ttft_reduction_pct_vs_baseline": 23.0,
+        "typical_tpot_reduction_pct_vs_baseline": 25.0,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": true,
+        "long_context_ttft_p95_ms": 80.0,
+        "long_context_ttft_p99_ms": 95.0,
+        "long_context_tpot_p95_ms": 9.0,
+        "long_context_tpot_p99_ms": 10.0,
+        "long_context_ttft_p95_stable": true,
+        "long_context_ttft_p99_stable": true,
+        "long_context_tpot_p95_stable": true,
+        "long_context_tpot_p99_stable": true,
+        "unit_token_cost_reduction_pct": 35.0,
+        "multi_tenant_high_utilization": true
+    }
+}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    output_dir = tmp_path / "export_seeded_alias"
+    exit_code = main(
+        [
+            "export-leaderboard-artifact",
+            "random-online",
+            "--metrics-file",
+            str(metrics_file),
+            "--output-dir",
+            str(output_dir),
+            "--run-id",
+            "seeded-alias-run",
+            "--engine",
+            "vllm-hust",
+            "--engine-version",
+            "0.7.3",
+            "--model-name",
+            "Qwen2.5-14B-Instruct",
+            "--hardware-chip-model",
+            "910B3",
+            "--submitter",
+            "ci",
+        ]
+    )
+
+    assert exit_code == 0
+    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    assert artifact["model"]["canonical_id"] == "hf:Qwen/Qwen2.5-14B-Instruct"
+    assert artifact["model"]["repo_id"] == "Qwen/Qwen2.5-14B-Instruct"
+    assert artifact["model"]["short_name"] == "Qwen2.5-14B-Instruct"
+    assert artifact["model"]["display_name"] == "Qwen 2.5 14B Instruct"
+    assert artifact["model"]["name"] == "Qwen/Qwen2.5-14B-Instruct"
 
 
 def test_export_leaderboard_artifact_embeds_same_spec_payload(tmp_path: Path) -> None:
@@ -1271,6 +1346,8 @@ def test_export_leaderboard_artifacts_sanitizes_dirty_engine_version(
     assert artifact["metadata"]["engine_version"] == "gd4a408c4"
     assert artifact["hardware"]["memory_per_chip_gb"] == 64.0
     assert artifact["hardware"]["total_memory_gb"] == 64.0
+    assert artifact["model"]["canonical_id"] == "hf:Qwen/Qwen2.5-14B-Instruct"
+    assert artifact["model"]["repo_id"] == "Qwen/Qwen2.5-14B-Instruct"
 
 
 def test_export_leaderboard_artifacts_normalizes_invalid_component_versions(
