@@ -16,7 +16,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -155,6 +159,327 @@
     }
   },
   {
+    "entry_id": "483a1a3a-3b9f-4277-956a-71653263e845",
+    "engine": "vllm-hust",
+    "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B3",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
+    },
+    "workload": {
+      "name": "prefix-repetition-online",
+      "input_length": 512,
+      "output_length": 238,
+      "batch_size": null,
+      "concurrent_requests": 2,
+      "dataset": "prefix_repetition"
+    },
+    "metrics": {
+      "ttft_ms": 263.9927377458662,
+      "tbt_ms": 78.29123930976981,
+      "throughput_tps": 25.26319130304773,
+      "peak_mem_mb": 0.0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "long-context-chat",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "0.1.dev2792+gc56ccf1e7.d20260505",
+      "core": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.6",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-05-06T02:29:23Z",
+      "submitter": "HUST",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+      "reproducible_cmd": null,
+      "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
+      "github_user": null,
+      "github_commit_url": null,
+      "github_repository": null,
+      "github_ref": null,
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "1dbdf73d9246128538f44704346395cb627231a3fcc84e2e21680272f478bcc0",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0"
+    }
+  },
+  {
+    "entry_id": "83a812e9-5af5-4c2f-8acb-152cc347e0be",
+    "engine": "vllm-hust",
+    "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B3",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
+    },
+    "workload": {
+      "name": "random-latency",
+      "input_length": 1024,
+      "output_length": 128,
+      "batch_size": 1,
+      "concurrent_requests": null,
+      "dataset": null
+    },
+    "metrics": {
+      "ttft_ms": 9728.982931002975,
+      "tbt_ms": null,
+      "throughput_tps": 0.0,
+      "peak_mem_mb": 0.0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "latency-slo",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "0.1.dev2792+gc56ccf1e7.d20260505",
+      "core": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.6",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-05-06T02:29:22Z",
+      "submitter": "HUST",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+      "reproducible_cmd": null,
+      "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
+      "github_user": null,
+      "github_commit_url": null,
+      "github_repository": null,
+      "github_ref": null,
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "0e7541566a9baa2f40dd3c28807b3253f49fbc529f893a149c7cb48990f85cc8",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0"
+    }
+  },
+  {
+    "entry_id": "af209ac5-a290-414b-b417-fd66b6079312",
+    "engine": "vllm-hust",
+    "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B3",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
+    },
+    "workload": {
+      "name": "random-online",
+      "input_length": 1024,
+      "output_length": 256,
+      "batch_size": null,
+      "concurrent_requests": 4,
+      "dataset": "random"
+    },
+    "metrics": {
+      "ttft_ms": 480.25025613605976,
+      "tbt_ms": 79.75843260041894,
+      "throughput_tps": 49.151014964321185,
+      "peak_mem_mb": 0.0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "online-chat",
+        "baseline_engine": "vllm",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "official-covered",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "0.1.dev2792+gc56ccf1e7.d20260505",
+      "core": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.6",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-05-06T02:29:23Z",
+      "submitter": "HUST",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+      "reproducible_cmd": null,
+      "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
+      "github_user": null,
+      "github_commit_url": null,
+      "github_repository": null,
+      "github_ref": null,
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "6e17f806917fa6d5846d50117cc7a6b3ee5c4b4741666ddec35638aed543861e",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0"
+    }
+  },
+  {
     "entry_id": "1030e12d-908b-4e70-8c27-54ab102ea7ad",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-1079-gd4a408c47",
@@ -171,7 +496,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -326,7 +655,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -481,7 +814,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -636,7 +973,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -791,7 +1132,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -946,7 +1291,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -1101,7 +1450,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -1256,7 +1609,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -1411,7 +1768,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -1566,7 +1927,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -1721,7 +2086,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -1876,7 +2245,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -2031,7 +2404,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -2186,7 +2563,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -2341,7 +2722,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -2496,7 +2881,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -2651,7 +3040,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -2806,7 +3199,11 @@
       "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
@@ -2945,9 +3342,9 @@
     }
   },
   {
-    "entry_id": "483a1a3a-3b9f-4277-956a-71653263e845",
+    "entry_id": "b56d6636-4f0b-47dd-97d5-770d5f15abc6",
     "engine": "vllm-hust",
-    "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+    "engine_version": "4ca39960",
     "config_type": "single_gpu",
     "hardware": {
       "vendor": "Huawei",
@@ -2958,229 +3355,27 @@
       "total_memory_gb": 64.0
     },
     "model": {
-      "name": "Qwen2.5-14B-Instruct",
+      "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
-    },
-    "workload": {
-      "name": "prefix-repetition-online",
-      "input_length": 512,
-      "output_length": 238,
-      "batch_size": null,
-      "concurrent_requests": 2,
-      "dataset": "prefix_repetition"
-    },
-    "metrics": {
-      "ttft_ms": 263.9927377458662,
-      "tbt_ms": 78.29123930976981,
-      "throughput_tps": 25.26319130304773,
-      "peak_mem_mb": 0.0,
-      "error_rate": 0.0
-    },
-    "constraints": {
-      "scenario_source": "vllm-benchmark",
-      "accountable_scope": {
-        "domestic_chip_class": "Ascend-class",
-        "representative_model_band": "7B-13B",
-        "representative_business_scenario": "long-context-chat",
-        "baseline_engine": "",
-        "declared_baseline_engine": "vllm",
-        "baseline_status": "pending-baseline",
-        "owner_confirmed": null,
-        "notes": null
-      },
-      "metrics": {
-        "single_chip_effective_utilization_pct": null,
-        "typical_throughput_ratio_vs_baseline": null,
-        "typical_ttft_reduction_pct_vs_baseline": null,
-        "typical_tpot_reduction_pct_vs_baseline": null,
-        "long_context_length": null,
-        "long_context_throughput_stable": null,
-        "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": null,
-        "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": null,
-        "long_context_ttft_p95_stable": null,
-        "long_context_ttft_p99_stable": null,
-        "long_context_tpot_p95_stable": null,
-        "long_context_tpot_p99_stable": null,
-        "unit_token_cost_reduction_pct": null,
-        "multi_tenant_high_utilization": null
-      }
-    },
-    "cluster": null,
-    "versions": {
-      "protocol": "N/A",
-      "backend": "0.1.dev2792+gc56ccf1e7.d20260505",
-      "core": "0.20.1rc1.dev314+g64ff561c7.d20260505",
-      "benchmark": "0.1.0"
-    },
-    "environment": {
-      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
-      "python_version": "3.11.6",
-      "pytorch_version": null,
-      "cuda_version": null,
-      "cann_version": null,
-      "driver_version": null
-    },
-    "metadata": {
-      "submitted_at": "2026-05-06T02:29:23Z",
-      "submitter": "HUST",
-      "data_source": "vllm-hust-benchmark",
-      "engine": "vllm-hust",
-      "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
-      "reproducible_cmd": null,
-      "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
-      "github_user": null,
-      "github_commit_url": null,
-      "github_repository": null,
-      "github_ref": null,
-      "github_event_name": null,
-      "github_pr_number": null,
-      "github_pr_url": null,
-      "release_date": null,
-      "changelog_url": null,
-      "notes": null,
-      "verified": null,
-      "idempotency_key": "1dbdf73d9246128538f44704346395cb627231a3fcc84e2e21680272f478bcc0",
-      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0"
-    }
-  },
-  {
-    "entry_id": "83a812e9-5af5-4c2f-8acb-152cc347e0be",
-    "engine": "vllm-hust",
-    "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
-    "config_type": "single_gpu",
-    "hardware": {
-      "vendor": "Huawei",
-      "chip_model": "910B3",
-      "chip_count": 1,
-      "interconnect": "unknown",
-      "memory_per_chip_gb": 64.0,
-      "total_memory_gb": 64.0
-    },
-    "model": {
-      "name": "Qwen2.5-14B-Instruct",
-      "parameters": "14B",
-      "precision": "FP16",
-      "quantization": null
-    },
-    "workload": {
-      "name": "random-latency",
-      "input_length": 1024,
-      "output_length": 128,
-      "batch_size": 1,
-      "concurrent_requests": null,
-      "dataset": null
-    },
-    "metrics": {
-      "ttft_ms": 9728.982931002975,
-      "tbt_ms": null,
-      "throughput_tps": 0.0,
-      "peak_mem_mb": 0.0,
-      "error_rate": 0.0
-    },
-    "constraints": {
-      "scenario_source": "vllm-benchmark",
-      "accountable_scope": {
-        "domestic_chip_class": "Ascend-class",
-        "representative_model_band": "7B-13B",
-        "representative_business_scenario": "latency-slo",
-        "baseline_engine": "",
-        "declared_baseline_engine": "vllm",
-        "baseline_status": "pending-baseline",
-        "owner_confirmed": null,
-        "notes": null
-      },
-      "metrics": {
-        "single_chip_effective_utilization_pct": null,
-        "typical_throughput_ratio_vs_baseline": null,
-        "typical_ttft_reduction_pct_vs_baseline": null,
-        "typical_tpot_reduction_pct_vs_baseline": null,
-        "long_context_length": null,
-        "long_context_throughput_stable": null,
-        "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": null,
-        "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": null,
-        "long_context_ttft_p95_stable": null,
-        "long_context_ttft_p99_stable": null,
-        "long_context_tpot_p95_stable": null,
-        "long_context_tpot_p99_stable": null,
-        "unit_token_cost_reduction_pct": null,
-        "multi_tenant_high_utilization": null
-      }
-    },
-    "cluster": null,
-    "versions": {
-      "protocol": "N/A",
-      "backend": "0.1.dev2792+gc56ccf1e7.d20260505",
-      "core": "0.20.1rc1.dev314+g64ff561c7.d20260505",
-      "benchmark": "0.1.0"
-    },
-    "environment": {
-      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
-      "python_version": "3.11.6",
-      "pytorch_version": null,
-      "cuda_version": null,
-      "cann_version": null,
-      "driver_version": null
-    },
-    "metadata": {
-      "submitted_at": "2026-05-06T02:29:22Z",
-      "submitter": "HUST",
-      "data_source": "vllm-hust-benchmark",
-      "engine": "vllm-hust",
-      "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
-      "reproducible_cmd": null,
-      "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
-      "github_user": null,
-      "github_commit_url": null,
-      "github_repository": null,
-      "github_ref": null,
-      "github_event_name": null,
-      "github_pr_number": null,
-      "github_pr_url": null,
-      "release_date": null,
-      "changelog_url": null,
-      "notes": null,
-      "verified": null,
-      "idempotency_key": "0e7541566a9baa2f40dd3c28807b3253f49fbc529f893a149c7cb48990f85cc8",
-      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0"
-    }
-  },
-  {
-    "entry_id": "af209ac5-a290-414b-b417-fd66b6079312",
-    "engine": "vllm-hust",
-    "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
-    "config_type": "single_gpu",
-    "hardware": {
-      "vendor": "Huawei",
-      "chip_model": "910B3",
-      "chip_count": 1,
-      "interconnect": "unknown",
-      "memory_per_chip_gb": 64.0,
-      "total_memory_gb": 64.0
-    },
-    "model": {
-      "name": "Qwen2.5-14B-Instruct",
-      "parameters": "14B",
-      "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "random-online",
       "input_length": 1024,
       "output_length": 256,
       "batch_size": null,
-      "concurrent_requests": 4,
+      "concurrent_requests": null,
       "dataset": "random"
     },
     "metrics": {
-      "ttft_ms": 480.25025613605976,
-      "tbt_ms": 79.75843260041894,
-      "throughput_tps": 49.151014964321185,
+      "ttft_ms": 393.87050387915224,
+      "tbt_ms": 122.16964923965232,
+      "throughput_tps": 222.77980582773804,
       "peak_mem_mb": 0.0,
       "error_rate": 0.0
     },
@@ -3190,9 +3385,9 @@
         "domestic_chip_class": "Ascend-class",
         "representative_model_band": "7B-13B",
         "representative_business_scenario": "online-chat",
-        "baseline_engine": "vllm",
+        "baseline_engine": "",
         "declared_baseline_engine": "vllm",
-        "baseline_status": "official-covered",
+        "baseline_status": "pending-baseline",
         "owner_confirmed": null,
         "notes": null
       },
@@ -3218,39 +3413,91 @@
     "cluster": null,
     "versions": {
       "protocol": "N/A",
-      "backend": "0.1.dev2792+gc56ccf1e7.d20260505",
-      "core": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+      "backend": "0.18.0.post1.dev1+g85927fe",
+      "core": "N/A",
       "benchmark": "0.1.0"
     },
     "environment": {
       "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
-      "python_version": "3.11.6",
+      "python_version": "3.11.15",
       "pytorch_version": null,
       "cuda_version": null,
       "cann_version": null,
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-05-06T02:29:23Z",
-      "submitter": "HUST",
-      "data_source": "vllm-hust-benchmark",
+      "submitted_at": "2026-05-26T05:40:20Z",
+      "submitter": "WMASTER123",
+      "data_source": "vllm-hust-ci-same-spec",
       "engine": "vllm-hust",
-      "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+      "engine_version": "4ca39960",
       "reproducible_cmd": null,
-      "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
-      "github_user": null,
-      "github_commit_url": null,
-      "github_repository": null,
-      "github_ref": null,
-      "github_event_name": null,
-      "github_pr_number": null,
-      "github_pr_url": null,
+      "git_commit": "4ca39960f5058498cb8097aa65074d572487cc3b",
+      "github_user": "WMASTER123",
+      "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/4ca39960f5058498cb8097aa65074d572487cc3b",
+      "github_repository": "vLLM-HUST/vllm-hust",
+      "github_ref": "31-perfv1-attention-vectorize-prefilldecode-boundary-computation",
+      "github_event_name": "pull_request",
+      "github_pr_number": 41,
+      "github_pr_url": "https://github.com/vLLM-HUST/vllm-hust/pull/41",
       "release_date": null,
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "6e17f806917fa6d5846d50117cc7a6b3ee5c4b4741666ddec35638aed543861e",
-      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0"
+      "idempotency_key": "d3b361782a9a7876543e336e687d0c5efa9467c998f543b12963d3bdfd21df96",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/home/grunner/miniconda3/envs/vllm-hust-dev/bin/python",
+        "engine": {
+          "repository": "vLLM-HUST/vllm-hust",
+          "ref": "31-perfv1-attention-vectorize-prefilldecode-boundary-computation",
+          "commit": "4ca39960f5058498cb8097aa65074d572487cc3b"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vLLM-HUST/vllm-ascend-hust",
+          "ref": "main",
+          "commit": "85927fef057e8a2c5f6c50c686dc14660c3115fc"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3",
+      "spec_label": "Official Ascend Jan 2026 baseline for vllm-hust goal tracking",
+      "spec_source": "/home/grunner/actions-runner/_work/vllm-hust/vllm-hust/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json",
+      "scenario": "random-online",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B3",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "a31eac56d03eaa3c7c4df6d2aa1ceb82f637f88c94da31b2b63331c18155aae9",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "disable_log_requests": "",
+        "host": "0.0.0.0",
+        "port": 35025,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "dtype": "float16"
+      },
+      "resolved_client_parameters": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "request_rate": 1,
+        "host": "127.0.0.1",
+        "port": 35025,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "random_input_len": 1024,
+        "random_output_len": 256
+      }
     }
   },
   {
@@ -3267,10 +3514,14 @@
       "total_memory_gb": 64.0
     },
     "model": {
-      "name": "Qwen2.5-14B-Instruct",
+      "name": "Qwen/Qwen2.5-14B-Instruct",
       "parameters": "14B",
       "precision": "FP16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct"
     },
     "workload": {
       "name": "sonnet-throughput",
@@ -3370,10 +3621,14 @@
       "total_memory_gb": 64.0
     },
     "model": {
-      "name": "Qwen2.5-7B-Instruct",
+      "name": "Qwen/Qwen2.5-7B-Instruct",
       "parameters": "7B",
       "precision": "BF16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-7B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-7B-Instruct",
+      "short_name": "Qwen2.5-7B-Instruct",
+      "display_name": "Qwen2.5-7B-Instruct"
     },
     "workload": {
       "name": "sharegpt-online",
@@ -3469,10 +3724,14 @@
       "total_memory_gb": 64.0
     },
     "model": {
-      "name": "Qwen2.5-7B-Instruct",
+      "name": "Qwen/Qwen2.5-7B-Instruct",
       "parameters": "7B",
       "precision": "BF16",
-      "quantization": null
+      "quantization": null,
+      "canonical_id": "hf:Qwen/Qwen2.5-7B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-7B-Instruct",
+      "short_name": "Qwen2.5-7B-Instruct",
+      "display_name": "Qwen2.5-7B-Instruct"
     },
     "workload": {
       "name": "sharegpt-online",
