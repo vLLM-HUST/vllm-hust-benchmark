@@ -1,6 +1,15 @@
 # Leaderboard Model Identity Migration Checklist
 
-This checklist tracks the first implementation wave after Phase 0 decisions were frozen in `docs/LEADERBOARD_MODEL_IDENTITY_NORMALIZATION.md`.
+This checklist tracked the implementation wave after Phase 0 decisions were frozen in `docs/LEADERBOARD_MODEL_IDENTITY_NORMALIZATION.md`.
+
+Current status: complete. The transition window is closed.
+
+## Close-Out Summary
+
+- benchmark exporters and validators emit and enforce normalized model identity fields
+- checked-in historical `submissions/**/run_leaderboard.json` artifacts are backfilled to the final contract
+- website schema and examples require normalized model identity fields
+- website aggregation and frontend filters consume normalized identity directly and no longer infer repo ids from short aliases
 
 ## Scope Of The Initial Seed
 
@@ -45,16 +54,14 @@ Note: the checked-in benchmark snapshots currently expose only the short-name fo
 
 ## Implementation Checklist
 
-- [ ] Add a loader helper in the benchmark package that reads `model_identity_registry.json` through `importlib.resources`
-- [ ] Extend leaderboard schema and field spec docs to permit `model.canonical_id`, `model.repo_id`, `model.short_name`, and `model.display_name`
-- [ ] Update `export-leaderboard-artifact` so new writes emit the normalized field set
-- [ ] Freeze `model.name` writes to `model.repo_id` for all new exporters
-- [ ] Update aggregation logic to resolve legacy `model.name` values through the registry before grouping or deduplicating
-- [ ] Keep fallback reads from legacy snapshots during the transition window
-- [ ] Backfill `leaderboard_single.json`, `leaderboard_multi.json`, and `leaderboard_compare.json` from the normalized pipeline
-- [ ] Update website filters and table rendering to use `canonical_id` as value and `display_name` as label
-- [ ] Add tests that prove `Qwen/Qwen2.5-14B-Instruct` and `Qwen2.5-14B-Instruct` collapse to one canonical model
-- [ ] Add tests that reject unknown or ambiguous short aliases at publish time
+- [x] Add a loader helper in the benchmark package that reads `model_identity_registry.json` through `importlib.resources`
+- [x] Extend leaderboard schema and field spec docs to require `model.canonical_id`, `model.repo_id`, `model.short_name`, and `model.display_name`
+- [x] Update `export-leaderboard-artifact` so new writes emit the normalized field set
+- [x] Freeze `model.name` writes to `model.repo_id` for all new exporters
+- [x] Backfill checked-in historical submissions and website snapshots from the normalized pipeline
+- [x] Update website filters and table rendering to use `canonical_id` as value and `display_name` as label
+- [x] Add tests that prove mixed raw inputs collapse to one canonical model during normalization and that legacy short-alias-only writes are rejected at publish/import time
+- [x] Remove website import-boundary heuristic fallback after historical submissions were normalized
 
 ## Touchpoints
 
@@ -72,7 +79,7 @@ Expected first implementation files:
 
 The initial seed is complete when:
 
-- new exports always write normalized model identity fields
-- legacy 14B short-name and repo-id rows collapse into one logical model in filters and compare scopes
-- 7B rows also publish the same normalized identity structure
-- no new checked-in snapshot introduces a bare short alias as the only machine-readable model identifier
+- [x] new exports always write normalized model identity fields
+- [x] legacy short-name and repo-id rows collapse into one logical model in filters and compare scopes
+- [x] checked-in 7B rows publish the same normalized identity structure
+- [x] no checked-in snapshot introduces a bare short alias as the only machine-readable model identifier
