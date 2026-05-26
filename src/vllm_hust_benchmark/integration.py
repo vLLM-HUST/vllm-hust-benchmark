@@ -1118,8 +1118,6 @@ def validate_aggregated_leaderboard_outputs(
         baseline_engine = _normalize_baseline_engine(accountable.get("baseline_engine"))
 
         if official_coverage_keys is not None:
-            expected_coverage_key = ""
-            in_official_specs = False
             if declared_baseline_engine:
                 expected_coverage_key = _build_baseline_coverage_key(
                     engine=declared_baseline_engine,
@@ -1128,8 +1126,7 @@ def validate_aggregated_leaderboard_outputs(
                     workload=workload_name,
                     config_type=config_type,
                 )
-                in_official_specs = expected_coverage_key in official_coverage_keys
-                if in_official_specs:
+                if expected_coverage_key in official_coverage_keys:
                     baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
                     baseline_engine = declared_baseline_engine
                 else:
@@ -1138,17 +1135,6 @@ def validate_aggregated_leaderboard_outputs(
             else:
                 baseline_status = BASELINE_STATUS_NONE
                 baseline_engine = ""
-
-            print(
-                "aggregated compare debug: validation baseline resolution"
-                f" | scope_key={scope.get('scope_key') or ''}"
-                f" | declared_baseline_engine={declared_baseline_engine}"
-                f" | resolved_baseline_engine={baseline_engine}"
-                f" | resolved_status={baseline_status}"
-                f" | expected_coverage_key={expected_coverage_key}"
-                f" | in_official_specs={in_official_specs}",
-                file=sys.stderr,
-            )
         else:
             baseline_status = str(accountable.get("baseline_status") or "").strip()
             if baseline_status not in VALID_BASELINE_STATUSES:
