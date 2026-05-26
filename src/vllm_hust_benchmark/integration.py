@@ -1215,12 +1215,27 @@ def sync_submission_to_huggingface(
                 repo_type="dataset",
                 revision=branch,
             )
-        except Exception:
-            repo_files = []
+        except Exception as exc:
+            print(
+                f"failed to list dataset files from {repo_id}@{branch}: {exc}",
+                file=sys.stderr,
+            )
+            return 2
 
-        for repo_path in repo_files:
-            if repo_prefix and not repo_path.startswith(repo_prefix):
-                continue
+        prefixed_repo_files = [
+            repo_path
+            for repo_path in repo_files
+            if not repo_prefix or repo_path.startswith(repo_prefix)
+        ]
+        if allow_existing_only and not prefixed_repo_files:
+            print(
+                f"no historical submissions found under prefix {normalized_prefix!r} "
+                f"in {repo_id}@{branch}",
+                file=sys.stderr,
+            )
+            return 2
+
+        for repo_path in prefixed_repo_files:
             local_path = merged_root / repo_path
             local_path.parent.mkdir(parents=True, exist_ok=True)
             downloaded_path = hf_hub_download(

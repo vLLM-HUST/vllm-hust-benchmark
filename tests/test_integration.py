@@ -1454,6 +1454,65 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
     assert "submissions-auto/existing-run/leaderboard_manifest.json" in uploaded_paths
 
 
+def test_sync_submission_to_huggingface_reports_hf_listing_failure(
+    monkeypatch, tmp_path: Path, capsys
+) -> None:
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            self.path_in_repo = path_in_repo
+            self.path_or_fileobj = path_or_fileobj
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            raise RuntimeError("network is unreachable")
+
+    def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
+        raise AssertionError("hf_hub_download should not be called when listing fails")
+
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        HfApi=FakeHfApi,
+        hf_hub_download=fake_hf_hub_download,
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=None,
+        aggregate_output_dir=tmp_path / "aggregated",
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+        allow_existing_only=True,
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert "failed to list dataset files from owner/repo@main: network is unreachable" in captured.err
+
+
 def test_upload_to_huggingface_rejects_invalid_aggregated_snapshots(
     monkeypatch, tmp_path: Path
 ) -> None:
