@@ -108,7 +108,7 @@ Recommended shape:
       "registry": "hf",
       "repo_id": "Qwen/Qwen2.5-14B-Instruct",
       "short_name": "Qwen2.5-14B-Instruct",
-      "display_name": "Qwen 2.5 14B Instruct",
+      "display_name": "Qwen2.5-14B-Instruct",
       "aliases": [
         "Qwen/Qwen2.5-14B-Instruct",
         "Qwen2.5-14B-Instruct"
@@ -163,7 +163,7 @@ Recommended model payload:
     "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
     "repo_id": "Qwen/Qwen2.5-14B-Instruct",
     "short_name": "Qwen2.5-14B-Instruct",
-    "display_name": "Qwen 2.5 14B Instruct",
+    "display_name": "Qwen2.5-14B-Instruct",
     "name": "Qwen/Qwen2.5-14B-Instruct",
     "parameters": "14B",
     "precision": "FP16",
@@ -177,7 +177,7 @@ Field semantics:
 - `model.canonical_id`: authoritative machine identifier used by aggregation, compare grouping, and filters
 - `model.repo_id`: upstream repository coordinate when the model comes from a registry such as Hugging Face
 - `model.short_name`: stable human-typed alias without namespace
-- `model.display_name`: UI label shown in dropdowns and tables
+- `model.display_name`: final UI label shown in dropdowns and tables; for the current contract it mirrors the industry-standard public model release string and must not be used as a machine identifier
 - `model.name`: compatibility field kept during migration only; it must mirror `model.repo_id`
 
 The Phase 0 decision is to use prefixed canonical ids from day one, for example `hf:Qwen/Qwen2.5-14B-Instruct`.
@@ -192,6 +192,9 @@ Required rules:
 2. The exporter or aggregator resolves the raw input into one canonical model identity record.
 3. Local cache paths must never become published canonical identifiers.
 4. Unknown aliases must fail fast or be surfaced as validation errors instead of silently creating new logical models.
+5. `display_name` is derived from `short_name`, not from `canonical_id`, and never includes the registry prefix or namespace.
+6. The default `display_name` is the industry-standard release string carried by `short_name`, for example `Qwen2.5-14B-Instruct`.
+7. Writers may curate `display_name` only through the central registry; code matches on `canonical_id`, not on `display_name`.
 
 Required resolution order:
 
@@ -212,7 +215,7 @@ Example:
     "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
     "repo_id": "Qwen/Qwen2.5-14B-Instruct",
     "short_name": "Qwen2.5-14B-Instruct",
-    "display_name": "Qwen 2.5 14B Instruct"
+    "display_name": "Qwen2.5-14B-Instruct"
   }
 }
 ```

@@ -27,7 +27,7 @@ def test_resolve_model_identity_by_short_alias() -> None:
     assert identity.canonical_id == "hf:Qwen/Qwen2.5-14B-Instruct"
     assert identity.repo_id == "Qwen/Qwen2.5-14B-Instruct"
     assert identity.short_name == "Qwen2.5-14B-Instruct"
-    assert identity.display_name == "Qwen 2.5 14B Instruct"
+    assert identity.display_name == "Qwen2.5-14B-Instruct"
 
 
 def test_resolve_model_identity_by_hf_cache_path() -> None:
@@ -40,12 +40,12 @@ def test_resolve_model_identity_by_hf_cache_path() -> None:
 
 
 def test_resolve_model_identity_falls_back_for_unseeded_repo_id() -> None:
-    identity = resolve_model_identity("meta-llama/Llama-3.1-8B-Instruct")
+    identity = resolve_model_identity("meta-llama/Llama-3.2-3B-Instruct")
 
-    assert identity.canonical_id == "hf:meta-llama/Llama-3.1-8B-Instruct"
-    assert identity.repo_id == "meta-llama/Llama-3.1-8B-Instruct"
-    assert identity.short_name == "Llama-3.1-8B-Instruct"
-    assert identity.display_name == "Llama 3.1 8B Instruct"
+    assert identity.canonical_id == "hf:meta-llama/Llama-3.2-3B-Instruct"
+    assert identity.repo_id == "meta-llama/Llama-3.2-3B-Instruct"
+    assert identity.short_name == "Llama-3.2-3B-Instruct"
+    assert identity.display_name == "Llama-3.2-3B-Instruct"
 
 
 def test_resolve_model_identity_from_payload_uses_short_alias() -> None:
@@ -67,7 +67,7 @@ def test_normalize_model_identity_payload_sets_required_contract_fields() -> Non
     assert payload["canonical_id"] == "hf:meta-llama/Llama-3.1-8B-Instruct"
     assert payload["repo_id"] == "meta-llama/Llama-3.1-8B-Instruct"
     assert payload["short_name"] == "Llama-3.1-8B-Instruct"
-    assert payload["display_name"] == "Llama 3.1 8B Instruct"
+    assert payload["display_name"] == "Llama-3.1-8B-Instruct"
     assert payload["name"] == "meta-llama/Llama-3.1-8B-Instruct"
 
 
@@ -78,7 +78,7 @@ def test_validate_model_identity_payload_rejects_name_repo_id_mismatch() -> None
                 "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
                 "repo_id": "Qwen/Qwen2.5-14B-Instruct",
                 "short_name": "Qwen2.5-14B-Instruct",
-                "display_name": "Qwen 2.5 14B Instruct",
+                "display_name": "Qwen2.5-14B-Instruct",
                 "name": "Qwen2.5-14B-Instruct",
             }
         )
