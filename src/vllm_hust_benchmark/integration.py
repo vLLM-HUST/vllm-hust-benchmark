@@ -978,7 +978,11 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
     )
 
 
-def validate_aggregated_leaderboard_outputs(data_dir: Path) -> None:
+def validate_aggregated_leaderboard_outputs(
+    data_dir: Path,
+    *,
+    official_coverage_keys: set[str] | None = None,
+) -> None:
     single = _load_snapshot_json(data_dir / "leaderboard_single.json")
     multi = _load_snapshot_json(data_dir / "leaderboard_multi.json")
     compare = _load_snapshot_json(data_dir / "leaderboard_compare.json")
@@ -1075,31 +1079,58 @@ def validate_aggregated_leaderboard_outputs(data_dir: Path) -> None:
         scope_payload = scope_payload if isinstance(scope_payload, Mapping) else {}
         accountable = scope_payload.get("accountable_scope")
         accountable = accountable if isinstance(accountable, Mapping) else {}
+        model_name = str(scope_payload.get("model") or "unknown-model")
+        hardware_name = str(scope_payload.get("hardware") or "unknown-hardware")
+        workload_name = str(scope_payload.get("workload") or "Other")
+        config_type = str(scope_payload.get("config_type") or "unknown-config")
         declared_baseline_engine = _normalize_baseline_engine(
-            accountable.get("declared_baseline_engine") or accountable.get("baseline_engine")
+            accountable.get("declared_baseline_engine")
+            or accountable.get("baseline_engine")
         )
-        baseline_status = str(accountable.get("baseline_status") or "").strip()
-        if baseline_status not in VALID_BASELINE_STATUSES:
-            if accountable.get("baseline_engine"):
-                baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
-            elif declared_baseline_engine:
-                baseline_status = BASELINE_STATUS_PENDING
+        baseline_engine = _normalize_baseline_engine(accountable.get("baseline_engine"))
+
+        if official_coverage_keys is not None:
+            if declared_baseline_engine:
+                expected_coverage_key = _build_baseline_coverage_key(
+                    engine=declared_baseline_engine,
+                    model=model_name,
+                    hardware=hardware_name,
+                    workload=workload_name,
+                    config_type=config_type,
+                )
+                if expected_coverage_key in official_coverage_keys:
+                    baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
+                    baseline_engine = declared_baseline_engine
+                else:
+                    baseline_status = BASELINE_STATUS_PENDING
+                    baseline_engine = ""
             else:
                 baseline_status = BASELINE_STATUS_NONE
+                baseline_engine = ""
+        else:
+            baseline_status = str(accountable.get("baseline_status") or "").strip()
+            if baseline_status not in VALID_BASELINE_STATUSES:
+                if accountable.get("baseline_engine"):
+                    baseline_status = BASELINE_STATUS_OFFICIAL_COVERED
+                elif declared_baseline_engine:
+                    baseline_status = BASELINE_STATUS_PENDING
+                else:
+                    baseline_status = BASELINE_STATUS_NONE
+
+            if baseline_status == BASELINE_STATUS_OFFICIAL_COVERED:
+                baseline_engine = baseline_engine or declared_baseline_engine
+            else:
+                baseline_engine = ""
 
         if baseline_status != BASELINE_STATUS_OFFICIAL_COVERED:
             continue
 
-        baseline_engine = _normalize_baseline_engine(
-            accountable.get("baseline_engine") or declared_baseline_engine
-        )
-
         baseline_key = _build_baseline_coverage_key(
             engine=baseline_engine,
-            model=str(scope_payload.get("model") or "unknown-model"),
-            hardware=str(scope_payload.get("hardware") or "unknown-hardware"),
-            workload=str(scope_payload.get("workload") or "Other"),
-            config_type=str(scope_payload.get("config_type") or "unknown-config"),
+            model=model_name,
+            hardware=hardware_name,
+            workload=workload_name,
+            config_type=config_type,
         )
         if baseline_key not in baseline_coverage_keys:
             missing_baseline_coverage.append(scope.get("scope_key") or baseline_key)
@@ -1253,10 +1284,12 @@ def sync_submission_to_huggingface(
                 submission_dir, current_submission_target, dirs_exist_ok=True
             )
 
+        official_coverage_keys = _load_official_baseline_coverage_keys(layout)
+
         normalize_submission_artifacts_in_tree(merged_source_dir)
         _normalize_submission_baseline_metadata(
             merged_source_dir,
-            official_coverage_keys=_load_official_baseline_coverage_keys(layout),
+            official_coverage_keys=official_coverage_keys,
         )
 
         aggregate_rc = aggregate_to_website(
@@ -1269,7 +1302,10 @@ def sync_submission_to_huggingface(
             return aggregate_rc
 
         try:
-            validate_aggregated_leaderboard_outputs(aggregate_output_dir)
+            validate_aggregated_leaderboard_outputs(
+                aggregate_output_dir,
+                official_coverage_keys=official_coverage_keys,
+            )
         except ValueError as exc:
             _print_aggregated_compare_diagnostics(aggregate_output_dir)
             print(str(exc), file=sys.stderr)
