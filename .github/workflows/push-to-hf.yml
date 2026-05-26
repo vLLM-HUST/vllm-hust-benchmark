@@ -106,14 +106,14 @@ jobs:
           event_name = os.environ.get("GITHUB_EVENT_NAME", "")
           before_sha = os.environ.get("BEFORE_SHA", "")
           current_sha = os.environ.get("GITHUB_SHA", "")
-            backfill_existing_only = os.environ.get("BACKFILL_EXISTING_ONLY", "").lower() == "true"
+          backfill_existing_only = os.environ.get("BACKFILL_EXISTING_ONLY", "").lower() == "true"
           manual_submission_dirs = os.environ.get("MANUAL_SUBMISSION_DIRS", "")
           submissions_root = Path("submissions")
 
           submission_dirs: list[str] = []
-            if backfill_existing_only:
+          if backfill_existing_only:
               print("Backfill existing-only mode enabled; skipping local submission directory resolution.")
-            elif manual_submission_dirs.strip():
+          elif manual_submission_dirs.strip():
               seen: set[str] = set()
               for raw_dir in manual_submission_dirs.splitlines():
                   raw_dir = raw_dir.strip()
