@@ -698,6 +698,67 @@ def test_validate_aggregated_leaderboard_outputs_downgrades_legacy_baselines_not
     )
 
 
+def test_load_official_baseline_coverage_keys_requires_published_submission(
+    tmp_path: Path,
+) -> None:
+    benchmark_repo = tmp_path / "vllm-hust-benchmark"
+    official_specs_dir = benchmark_repo / "docs" / "official-baselines"
+    official_specs_dir.mkdir(parents=True)
+    submissions_root = benchmark_repo / "submissions"
+    submissions_root.mkdir(parents=True)
+
+    for scenario_name in ("random-online", "prefix-repetition-online"):
+        (official_specs_dir / f"official-{scenario_name}.json").write_text(
+            json.dumps(
+                {
+                    "scenario": scenario_name,
+                    "model": "Qwen/Qwen2.5-14B-Instruct",
+                    "hardware_chip_model": "910B3",
+                    "chip_count": 1,
+                    "node_count": 1,
+                    "export": {"baseline_engine": "vllm"},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    official_submission_dir = (
+        submissions_root / "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+    )
+    official_submission_dir.mkdir()
+    (official_submission_dir / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "engine": "vllm",
+                "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+                "hardware": {"chip_model": "910B3"},
+                "workload": {"name": "random-online"},
+                "config_type": "single_gpu",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=benchmark_repo,
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+
+    coverage_keys = integration._load_official_baseline_coverage_keys(layout)
+
+    assert coverage_keys == {
+        integration._build_baseline_coverage_key(
+            engine="vllm",
+            model="Qwen/Qwen2.5-14B-Instruct",
+            hardware="910B3",
+            workload="random-online",
+            config_type="single_gpu",
+        )
+    }
+
+
 def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None:
     monkeypatch.setattr(
         integration,
@@ -1227,6 +1288,24 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
                 "chip_count": 1,
                 "node_count": 1,
                 "export": {"baseline_engine": "vllm"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    official_submission_dir = (
+        benchmark_repo
+        / "submissions"
+        / "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+    )
+    official_submission_dir.mkdir(parents=True)
+    (official_submission_dir / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "engine": "vllm",
+                "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+                "hardware": {"chip_model": "910B3"},
+                "workload": {"name": "random-online"},
+                "config_type": "single_gpu",
             }
         ),
         encoding="utf-8",

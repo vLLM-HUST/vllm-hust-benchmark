@@ -673,7 +673,7 @@ def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
     if not official_specs_dir.is_dir():
         return set()
 
-    coverage_keys: set[str] = set()
+    declared_coverage_keys: set[str] = set()
     for spec_path in sorted(official_specs_dir.glob("*.json")):
         if spec_path.name.endswith("constraints.stub.json"):
             continue
@@ -703,7 +703,7 @@ def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
         workload = scenario.leaderboard.get("workload_name") or scenario_name
         chip_count = int(payload.get("chip_count") or 1)
         node_count = int(payload.get("node_count") or 1)
-        coverage_keys.add(
+        declared_coverage_keys.add(
             _build_baseline_coverage_key(
                 engine=baseline_engine,
                 model=str(payload.get("model") or "unknown-model"),
@@ -715,7 +715,35 @@ def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
                 ),
             )
         )
-    return coverage_keys
+
+    if not declared_coverage_keys:
+        return set()
+
+    submissions_root = layout.benchmark_repo / "submissions"
+    if not submissions_root.is_dir():
+        return set()
+
+    published_coverage_keys: set[str] = set()
+    for artifact_path in sorted(submissions_root.rglob("run_leaderboard.json")):
+        if not artifact_path.parent.name.startswith("official-ascend-"):
+            continue
+
+        try:
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+
+        if not isinstance(payload, Mapping):
+            continue
+
+        coverage_key = _build_entry_baseline_coverage_key(
+            payload,
+            engine=_normalize_engine(payload),
+        )
+        if coverage_key in declared_coverage_keys:
+            published_coverage_keys.add(coverage_key)
+
+    return published_coverage_keys
 
 
 def _normalize_submission_baseline_metadata(
