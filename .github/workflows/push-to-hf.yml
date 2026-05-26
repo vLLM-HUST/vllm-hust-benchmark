@@ -83,14 +83,14 @@ jobs:
               print("No submission manifests found — nothing to do")
               sys.exit(0)
 
-            errors = validate_manifest_artifacts(manifests=manifests, validator=validator)
-            if errors:
+          errors = validate_manifest_artifacts(manifests=manifests, validator=validator)
+          if errors:
               errors_found = True
               for error in errors:
-                print(f"FAIL {error}")
-            else:
+                  print(f"FAIL {error}")
+          else:
               for manifest_path in manifests:
-                print(f"OK   {manifest_path}")
+                  print(f"OK   {manifest_path}")
 
           sys.exit(1 if errors_found else 0)
           PYEOF
