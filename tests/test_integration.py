@@ -626,6 +626,78 @@ def test_validate_aggregated_leaderboard_outputs_allows_pending_baseline_rows(
     validate_aggregated_leaderboard_outputs(data_dir)
 
 
+def test_validate_aggregated_leaderboard_outputs_downgrades_legacy_baselines_not_in_official_specs(
+    tmp_path: Path,
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    current_entry = {
+        "engine": "vllm-hust",
+        "config_type": "single_gpu",
+        "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+        "hardware": {"chip_model": "910B3"},
+        "workload": {"name": "prefix-repetition-online"},
+        "constraints": {
+            "accountable_scope": {
+                "representative_business_scenario": "long-context-chat",
+                "baseline_engine": "vllm",
+            }
+        },
+    }
+    unrelated_baseline_entry = {
+        **current_entry,
+        "engine": "vllm",
+        "workload": {"name": "random-online"},
+        "constraints": {"accountable_scope": {}},
+    }
+    (data_dir / "leaderboard_single.json").write_text(
+        json.dumps([current_entry, unrelated_baseline_entry]),
+        encoding="utf-8",
+    )
+    (data_dir / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (data_dir / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "groups": [{"scope_key": "present-group"}],
+                "goal_progress": {"pairs": []},
+                "hard_constraints": {
+                    "scopes": [
+                        {
+                            "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B3|prefix-repetition-online|single_gpu|long-context-chat|vllm",
+                            "scope": {
+                                "model": "Qwen/Qwen2.5-14B-Instruct",
+                                "hardware": "910B3",
+                                "workload": "prefix-repetition-online",
+                                "config_type": "single_gpu",
+                                "accountable_scope": {
+                                    "baseline_engine": "vllm",
+                                },
+                            },
+                        }
+                    ]
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="missing matching baseline rows"):
+        validate_aggregated_leaderboard_outputs(data_dir)
+
+    validate_aggregated_leaderboard_outputs(
+        data_dir,
+        official_coverage_keys={
+            integration._build_baseline_coverage_key(
+                engine="vllm",
+                model="Qwen/Qwen2.5-14B-Instruct",
+                hardware="910B3",
+                workload="random-online",
+                config_type="single_gpu",
+            )
+        },
+    )
+
+
 def test_split_vllm_serve_scenario_parameters_uses_cli_help(monkeypatch) -> None:
     monkeypatch.setattr(
         integration,
@@ -1309,7 +1381,7 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
     monkeypatch.setattr(
         integration,
         "validate_aggregated_leaderboard_outputs",
-        lambda _data_dir: None,
+        lambda _data_dir, **_kwargs: None,
     )
 
     aggregate_output_dir = tmp_path / "aggregated"
@@ -1420,7 +1492,7 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
     monkeypatch.setattr(
         integration,
         "validate_aggregated_leaderboard_outputs",
-        lambda _data_dir: None,
+        lambda _data_dir, **_kwargs: None,
     )
     fake_hf_module = types.SimpleNamespace(
         CommitOperationAdd=FakeCommitOperationAdd,
