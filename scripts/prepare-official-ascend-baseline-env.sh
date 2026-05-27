@@ -13,6 +13,7 @@ OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0110"}
 OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0110"}
 OFFICIAL_VLLM_REF=${OFFICIAL_VLLM_REF:-"v0.11.0"}
 OFFICIAL_VLLM_ASCEND_REF=${OFFICIAL_VLLM_ASCEND_REF:-"v0.11.0"}
+OFFICIAL_VLLM_PLUGINS=${OFFICIAL_VLLM_PLUGINS:-"ascend,ascend_kv_connector,ascend_model_loader,ascend_service_profiling,ascend_model"}
 BENCHMARK_SERVER_PORT=${BENCHMARK_SERVER_PORT:-"8000"}
 PREPARE_BENCHMARK_ADMISSION_ONLY=${PREPARE_BENCHMARK_ADMISSION_ONLY:-"0"}
 ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
@@ -73,7 +74,8 @@ run_in_official_env_python() {
   script_file=$(mktemp "${TMPDIR:-/tmp}/official-env-python-XXXXXX.py")
   cat > "$script_file"
 
-  if PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
+  if VLLM_PLUGINS="$OFFICIAL_VLLM_PLUGINS" \
+    PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
     run_with_ascend_env conda run -p "$ENV_PREFIX" "$@" python "$script_file"; then
     status=0
   else
@@ -82,6 +84,39 @@ run_in_official_env_python() {
 
   rm -f "$script_file"
   return "$status"
+}
+
+ensure_vllm_ascend_plugin_metadata() {
+  local version=${OFFICIAL_VLLM_ASCEND_REF#v}
+  local dist_info_dir
+
+  if [[ -z "$version" ]] || [[ "$version" == "$OFFICIAL_VLLM_ASCEND_REF" ]]; then
+    version="0.0.0"
+  fi
+
+  dist_info_dir="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend-${version}.dist-info"
+  mkdir -p "$dist_info_dir"
+
+  cat > "$dist_info_dir/METADATA" <<EOF
+Metadata-Version: 2.1
+Name: vllm-ascend
+Version: $version
+EOF
+
+  cat > "$dist_info_dir/top_level.txt" <<'EOF'
+vllm_ascend
+EOF
+
+  cat > "$dist_info_dir/entry_points.txt" <<'EOF'
+[vllm.platform_plugins]
+ascend = vllm_ascend:register
+
+[vllm.general_plugins]
+ascend_kv_connector = vllm_ascend:register_connector
+ascend_model_loader = vllm_ascend:register_model_loader
+ascend_service_profiling = vllm_ascend:register_service_profiling
+ascend_model = vllm_ascend:register_model
+EOF
 }
 
 normalize_arch() {
@@ -337,7 +372,24 @@ if Version(setuptools_version) not in setuptools_spec:
   )
 
 ensure_absent("vllm", "vllm-hust", "vllm_hust")
-ensure_absent("vllm-ascend", "vllm_ascend", "vllm-ascend-hust", "vllm_ascend_hust")
+ensure_absent("vllm-ascend-hust", "vllm_ascend_hust")
+
+platform_plugins = sorted(ep.name for ep in entry_points(group="vllm.platform_plugins"))
+required_platform_plugins = {"ascend"}
+missing_platform_plugins = sorted(required_platform_plugins.difference(platform_plugins))
+if missing_platform_plugins:
+  fail(f"missing platform plugins: {', '.join(missing_platform_plugins)}")
+
+general_plugins = sorted(ep.name for ep in entry_points(group="vllm.general_plugins"))
+required_general_plugins = {
+  "ascend_kv_connector",
+  "ascend_model_loader",
+  "ascend_service_profiling",
+  "ascend_model",
+}
+missing_general_plugins = sorted(required_general_plugins.difference(general_plugins))
+if missing_general_plugins:
+  fail(f"missing general plugins: {', '.join(missing_general_plugins)}")
 
 print(f"env_prefix={os.environ['ENV_PREFIX']}")
 print(f"torch={torch.__version__}")
@@ -354,8 +406,8 @@ print(f"numba={dist_version('numba')}")
 print(f"transformers={dist_version('transformers')}")
 print(f"numpy={dist_version('numpy')}")
 print(f"opencv_python_headless={dist_version('opencv-python-headless')}")
-print("platform_plugins=" + ",".join(sorted(ep.name for ep in entry_points(group="vllm.platform_plugins"))))
-print("general_plugins=" + ",".join(sorted(ep.name for ep in entry_points(group="vllm.general_plugins"))))
+print("platform_plugins=" + ",".join(platform_plugins))
+print("general_plugins=" + ",".join(general_plugins))
 PY
 }
 
@@ -828,6 +880,7 @@ fi
 
 ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_REF"
 ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_VLLM_ASCEND_REF"
+ensure_vllm_ascend_plugin_metadata
 
 if [[ ! -d "$ENV_PREFIX" ]]; then
   conda create -y -p "$ENV_PREFIX" "python=$PYTHON_VERSION" pip
