@@ -460,6 +460,46 @@ def test_configure_single_card_ascend_device_reselects_after_auto_selection() ->
     ]
 
 
+def test_configure_single_card_ascend_device_returns_busy_status_when_all_devices_busy() -> None:
+    result = _run_bash(
+        _source_run_official_functions(
+            """
+            unset ASCEND_RT_VISIBLE_DEVICES
+            unset ASCEND_VISIBLE_DEVICES
+
+            resolve_npu_smi_bin() {
+                printf '/tmp/fake-npu-smi\n'
+            }
+
+            select_ascend_device() {
+                printf '__ALL_BUSY__\t0,1,2\n'
+            }
+
+            if configure_single_card_ascend_device 1; then
+                echo 'status=unexpected-success'
+            else
+                echo "status=$?"
+            fi
+
+            printf 'devices=%s\n' "${ASCEND_RT_VISIBLE_DEVICES-<unset>}"
+            printf 'preflight=%s\n' "${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE-<unset>}"
+            """
+        )
+    )
+
+    tracked_lines = [
+        line
+        for line in result.stdout.splitlines()
+        if line.startswith(("status=", "devices=", "preflight="))
+    ]
+
+    assert tracked_lines == [
+        "status=75",
+        "devices=<unset>",
+        "preflight=<unset>",
+    ]
+
+
 def test_normalize_engine_version_rejects_dev_and_strips_v_prefix() -> None:
     result = _run_bash(
         _source_run_official_version_functions(
