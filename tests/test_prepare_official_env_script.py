@@ -314,20 +314,38 @@ PY
 def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) -> None:
     worktree_dir = tmp_path / "vllm-ascend-worktree"
     worktree_dir.mkdir()
+    (worktree_dir / "vllm_ascend").mkdir()
+    (worktree_dir / "setup.py").write_text(
+        "entry_points={\n"
+        "    \"vllm.platform_plugins\": [\n"
+        "        \"ascend = vllm_ascend:register\",\n"
+        "    ],\n"
+        "    \"vllm.general_plugins\": [\n"
+        "        \"ascend_enhanced_model = vllm_ascend:register_model\",\n"
+        "        \"ascend_kv_connector = vllm_ascend:register_connector\",\n"
+        "    ],\n"
+        "}\n",
+        encoding="utf-8",
+    )
 
     result = _run_bash(
         _source_prepare_functions(
             f"""
             OFFICIAL_VLLM_ASCEND_WORKTREE={shlex.quote(str(worktree_dir))}
             OFFICIAL_VLLM_ASCEND_REF=v0.11.0
+            OFFICIAL_SOC_VERSION=ascend910b3
+            OFFICIAL_SLEEP_MODE_ENABLED=0
             ensure_vllm_ascend_plugin_metadata
             dist_info_dir=$(printf '%s\n' {shlex.quote(str(worktree_dir))}/vllm_ascend-0.11.0.dist-info)
             [[ -d "$dist_info_dir" ]]
             grep -Fq 'Name: vllm-ascend' "$dist_info_dir/METADATA"
             grep -Fq 'Version: 0.11.0' "$dist_info_dir/METADATA"
             grep -Fq 'ascend = vllm_ascend:register' "$dist_info_dir/entry_points.txt"
-            grep -Fq 'ascend_model = vllm_ascend:register_model' "$dist_info_dir/entry_points.txt"
+            grep -Fq 'ascend_enhanced_model = vllm_ascend:register_model' "$dist_info_dir/entry_points.txt"
+            grep -Fq 'ascend_kv_connector = vllm_ascend:register_connector' "$dist_info_dir/entry_points.txt"
             grep -Fq 'vllm_ascend' "$dist_info_dir/top_level.txt"
+            grep -Fq "__soc_version__ = 'ascend910b3'" {shlex.quote(str(worktree_dir))}/vllm_ascend/_build_info.py
+            grep -Fq '__sleep_mode_enabled__ = False' {shlex.quote(str(worktree_dir))}/vllm_ascend/_build_info.py
             """
         )
     )
