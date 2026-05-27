@@ -211,15 +211,105 @@ jobs:
           printf 'HOST_PYTHON_BIN=%s\n' "$host_python" >> "$GITHUB_ENV"
           echo "Resolved host Python: $host_python ($host_python_version)"
 
+      - name: Resolve conda base
+        shell: bash
+        env:
+          HOST_PYTHON_BIN: ${{ env.HOST_PYTHON_BIN }}
+        run: |
+          set -euo pipefail
+
+          resolve_conda_base() {
+            local host_python=${1:-}
+            local candidate=""
+            local conda_exe_env="${CONDA_EXE:-}"
+
+            if [[ -n "$conda_exe_env" ]] && [[ -x "$conda_exe_env" ]]; then
+              if [[ "$conda_exe_env" == */condabin/conda ]]; then
+                printf '%s\n' "${conda_exe_env%/condabin/conda}"
+              else
+                printf '%s\n' "$(dirname "$(dirname "$conda_exe_env")")"
+              fi
+              return 0
+            fi
+
+            if command -v conda >/dev/null 2>&1; then
+              conda info --base
+              return 0
+            fi
+
+            if [[ -n "$host_python" ]]; then
+              case "$host_python" in
+                */envs/*/bin/python|*/envs/*/bin/python3)
+                  printf '%s\n' "${host_python%%/envs/*}"
+                  return 0
+                  ;;
+                */bin/python|*/bin/python3)
+                  candidate="$(dirname "$(dirname "$host_python")")"
+                  if [[ -x "$candidate/condabin/conda" ]] || [[ -x "$candidate/bin/conda" ]]; then
+                    printf '%s\n' "$candidate"
+                    return 0
+                  fi
+                  ;;
+              esac
+            fi
+
+            local search_roots=(
+              "$HOME/miniconda3"
+              "$HOME/anaconda3"
+              "$HOME/miniforge3"
+              "$HOME/mambaforge"
+              "/home/grunner/miniconda3"
+              "/opt/conda"
+              "/usr/local/miniconda3"
+              "/usr/local/anaconda3"
+            )
+            local root
+            for root in "${search_roots[@]}"; do
+              [[ -z "$root" ]] && continue
+              if [[ -x "$root/condabin/conda" ]] || [[ -x "$root/bin/conda" ]]; then
+                printf '%s\n' "$root"
+                return 0
+              fi
+            done
+
+            return 1
+          }
+
+          conda_base="$(resolve_conda_base "${HOST_PYTHON_BIN:-}")" || {
+            echo "Could not locate conda on the runner; ensure Miniconda/Anaconda is installed and accessible to the runner service" >&2
+            exit 1
+          }
+
+          if [[ -x "$conda_base/condabin/conda" ]]; then
+            conda_exe="$conda_base/condabin/conda"
+          elif [[ -x "$conda_base/bin/conda" ]]; then
+            conda_exe="$conda_base/bin/conda"
+          else
+            echo "Resolved conda base does not contain a runnable conda executable: $conda_base" >&2
+            exit 1
+          fi
+
+          [[ -d "$conda_base/condabin" ]] && printf '%s\n' "$conda_base/condabin" >> "$GITHUB_PATH"
+          [[ -d "$conda_base/bin" ]] && printf '%s\n' "$conda_base/bin" >> "$GITHUB_PATH"
+          printf 'CONDA_BASE=%s\n' "$conda_base" >> "$GITHUB_ENV"
+          printf 'CONDA_EXE=%s\n' "$conda_exe" >> "$GITHUB_ENV"
+          echo "Resolved conda base: $conda_base"
+
       - name: Resolve official env prefix
         shell: bash
         env:
           GOAL_BASELINE_ENV_PREFIX_INPUT: ${{ github.event.inputs.goal_baseline_env_prefix || '' }}
+          CONDA_BASE: ${{ env.CONDA_BASE }}
+          CONDA_EXE: ${{ env.CONDA_EXE }}
         run: |
           set -euo pipefail
           env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
           if [[ -z "${env_prefix//[[:space:]]/}" ]]; then
-            env_prefix="$(conda info --base)/envs/vllm-ascend-official-v0110"
+            if [[ -n "${CONDA_BASE:-}" ]]; then
+              env_prefix="$CONDA_BASE/envs/vllm-ascend-official-v0110"
+            else
+              env_prefix="$("${CONDA_EXE:-conda}" info --base)/envs/vllm-ascend-official-v0110"
+            fi
           fi
 
           printf 'GOAL_BASELINE_ENV_PREFIX=%s\n' "$env_prefix" >> "$GITHUB_ENV"
