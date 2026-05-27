@@ -27,6 +27,14 @@ def _source_run_official_functions(snippet: str) -> str:
     )
 
 
+def _source_run_official_version_functions(snippet: str) -> str:
+    script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
+    return (
+        r"source <(awk 'BEGIN{capture=0} /^normalize_engine_version\(\) \{/ {capture=1} /^kill_server\(\) \{/ {exit} capture {print}' "
+        f"{script_path}) && {snippet}"
+    )
+
+
 def _run_bash(command: str, *, check: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["bash", "-lc", command],
@@ -309,6 +317,83 @@ PY
     assert args[:2] == ["env", "SAMPLE_VAR=1"]
     assert args[-2] == "python"
     assert args[-1] != "-"
+
+
+def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
+    captured_args = tmp_path / "runtime-env-conda-args.txt"
+    captured_version = tmp_path / "runtime-vllm-version.txt"
+
+    result = _run_bash(
+        _source_run_official_functions(
+            f"""
+            GOAL_BASELINE_ENV_PREFIX=/tmp/fake-official-env
+            OFFICIAL_RUNTIME_CWD=/tmp
+            OFFICIAL_VLLM_CACHE_ROOT=/tmp/fake-official-cache
+            OFFICIAL_CORE_VERSION=0.11.0
+            ASCEND_TOOLKIT_SET_ENV=/nonexistent
+            ASCEND_ATB_SET_ENV=/nonexistent
+
+            conda() {{
+                printf '%s\n' "$VLLM_VERSION" > {shlex.quote(str(captured_version))}
+                printf '%s\n' "$@" > {shlex.quote(str(captured_args))}
+            }}
+
+            run_in_official_runtime '/tmp/runtime-a:/tmp/runtime-b' env SAMPLE_VAR=1 true
+            """
+        )
+    )
+
+    assert result.returncode == 0
+    assert captured_version.read_text(encoding="utf-8").strip() == "0.11.0"
+    args = captured_args.read_text(encoding="utf-8").splitlines()
+    assert args[:3] == ["run", "-p", "/tmp/fake-official-env"]
+
+
+def test_normalize_engine_version_rejects_dev_and_strips_v_prefix() -> None:
+    result = _run_bash(
+        _source_run_official_version_functions(
+            """
+            printf 'normalized=%s\n' "$(normalize_engine_version 'v0.11.0')"
+            if is_valid_engine_version dev; then
+                echo 'dev=valid'
+            else
+                echo 'dev=invalid'
+            fi
+            """
+        )
+    )
+
+    assert result.stdout.splitlines() == [
+        "normalized=0.11.0",
+        "dev=invalid",
+    ]
+
+
+def test_wait_for_server_exits_when_server_process_is_gone(tmp_path: Path) -> None:
+    stderr_file = tmp_path / "wait-for-server.stderr"
+
+    result = _run_bash(
+        _source_run_official_version_functions(
+            f"""
+            READY_TIMEOUT_SECONDS=30
+            SERVER_PID=999999
+
+            curl() {{
+                printf 'curl-noise\n' >&2
+                return 1
+            }}
+
+            if wait_for_server 127.0.0.1 8000 2>{shlex.quote(str(stderr_file))}; then
+                exit 1
+            fi
+
+            grep -Fq 'Official baseline server exited before becoming ready at 127.0.0.1:8000' {shlex.quote(str(stderr_file))}
+            ! grep -Fq 'curl-noise' {shlex.quote(str(stderr_file))}
+            """
+        )
+    )
+
+    assert result.returncode == 0
 
 
 def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) -> None:
