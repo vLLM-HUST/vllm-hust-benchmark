@@ -79,6 +79,7 @@ jobs:
       FORCE_REPAIR_OFFICIAL_ENV: ${{ github.event.inputs.force_repair_official_env == 'true' && '1' || '0' }}
       PUBLISH_WEBSITE: ${{ github.event.inputs.publish_website == 'true' && '1' || '0' }}
       VLLM_HUST_WEBSITE_REF: ${{ github.event.inputs.website_ref || 'main' }}
+      ASCEND_RT_VISIBLE_DEVICES: ${{ vars.VLLM_ASCEND_HUST_BENCHMARK_VISIBLE_DEVICES || '' }}
     steps:
       - name: Pre-clean generated directories
         shell: bash

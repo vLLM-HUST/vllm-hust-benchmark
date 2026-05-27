@@ -349,6 +349,56 @@ def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
     assert args[:3] == ["run", "-p", "/tmp/fake-official-env"]
 
 
+def test_configure_single_card_ascend_device_derives_from_generic_visible_devices() -> None:
+    result = _run_bash(
+        _source_run_official_functions(
+            """
+            unset ASCEND_RT_VISIBLE_DEVICES
+            ASCEND_VISIBLE_DEVICES=' 2, 5 '
+
+            configure_single_card_ascend_device
+
+            printf 'devices=%s\n' "$ASCEND_RT_VISIBLE_DEVICES"
+            printf 'preflight=%s\n' "$VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE"
+            """
+        )
+    )
+
+    assert result.stdout.splitlines()[-2:] == [
+        "devices=2,5",
+        "preflight=npu:0",
+    ]
+
+
+def test_configure_single_card_ascend_device_selects_detected_device() -> None:
+    result = _run_bash(
+        _source_run_official_functions(
+            """
+            unset ASCEND_RT_VISIBLE_DEVICES
+            unset ASCEND_VISIBLE_DEVICES
+
+            resolve_npu_smi_bin() {
+                printf '/tmp/fake-npu-smi\n'
+            }
+
+            select_ascend_device() {
+                printf '3\tidle\n'
+            }
+
+            configure_single_card_ascend_device
+
+            printf 'devices=%s\n' "$ASCEND_RT_VISIBLE_DEVICES"
+            printf 'preflight=%s\n' "$VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE"
+            """
+        )
+    )
+
+    assert result.stdout.splitlines()[-2:] == [
+        "devices=3",
+        "preflight=npu:0",
+    ]
+
+
 def test_normalize_engine_version_rejects_dev_and_strips_v_prefix() -> None:
     result = _run_bash(
         _source_run_official_version_functions(
