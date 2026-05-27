@@ -32,6 +32,7 @@ SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
 ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS:-30}
 ASCEND_RUNTIME_READY_POLL_SECONDS=${ASCEND_RUNTIME_READY_POLL_SECONDS:-10}
 RESOURCE_BUSY_EXIT_CODE=${RESOURCE_BUSY_EXIT_CODE:-75}
+NPU_SMI_TIMEOUT_SECONDS=${NPU_SMI_TIMEOUT_SECONDS:-20}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -388,6 +389,33 @@ def list_status_devices(info_output: str) -> list[int]:
     return sorted(status_devices)
 
 
+def list_process_busy_devices(info_output: str) -> set[int]:
+  busy_devices = set()
+  in_process_section = False
+
+  for raw_line in info_output.splitlines():
+    line = raw_line.strip()
+    if not line.startswith("|"):
+      continue
+
+    parts = [part.strip() for part in line.strip("|").split("|")]
+    if len(parts) < 3:
+      continue
+
+    if parts[1] == "Process id":
+      in_process_section = True
+      continue
+
+    if not in_process_section:
+      continue
+
+    left_column = parts[0].split()
+    if len(left_column) >= 2 and left_column[0].isdigit() and parts[1].isdigit():
+      busy_devices.add(int(left_column[0]))
+
+  return busy_devices
+
+
 def list_devnode_devices() -> list[int]:
     devnode_devices = set()
     for device_path in Path("/dev").glob("davinci[0-9]*"):
@@ -401,6 +429,11 @@ def run_npu_smi(*args: str) -> subprocess.CompletedProcess[str] | None:
     npu_smi_bin = os.environ.get("NPU_SMI_BIN")
     if not npu_smi_bin:
         return None
+
+  try:
+    timeout_seconds = float(os.environ.get("NPU_SMI_TIMEOUT_SECONDS", "20"))
+  except ValueError:
+    timeout_seconds = 20.0
 
     clean_env = {
         "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
@@ -416,7 +449,7 @@ def run_npu_smi(*args: str) -> subprocess.CompletedProcess[str] | None:
             check=False,
             capture_output=True,
             text=True,
-            timeout=5,
+          timeout=timeout_seconds,
             env=clean_env,
         )
     except subprocess.TimeoutExpired:
@@ -425,7 +458,11 @@ def run_npu_smi(*args: str) -> subprocess.CompletedProcess[str] | None:
         return None
 
 
-def select_best_idle_device(info_output: str, logical_map: dict[tuple[str, str], int]) -> tuple[int, str] | None:
+    def select_best_idle_device(
+      info_output: str,
+      logical_map: dict[tuple[str, str], int],
+      busy_devices: set[int],
+    ) -> tuple[int, str] | None:
     hbm_usage_pattern = re.compile(r"(\d+)\s*/\s*(\d+)\s*$")
     device_stats = []
     current_npu_id = None
@@ -461,6 +498,9 @@ def select_best_idle_device(info_output: str, logical_map: dict[tuple[str, str],
             logical_id = int(current_npu_id)
             device_source = "status-fallback"
 
+        if logical_id in busy_devices:
+          continue
+
         hbm_match = hbm_usage_pattern.search(parts[2])
         if hbm_match is None:
             continue
@@ -489,17 +529,27 @@ selection_attempt = max(1, int(os.environ.get("ASCEND_DEVICE_SELECTION_ATTEMPT",
 
 info_result = run_npu_smi("info")
 if info_result is not None and info_result.returncode == 0:
-    selected_device = select_best_idle_device(info_result.stdout, logical_map)
+  busy_devices = list_process_busy_devices(info_result.stdout)
+
+  selected_device = select_best_idle_device(info_result.stdout, logical_map, busy_devices)
     if selected_device is not None:
         device_id, device_source = selected_device
         print(f"{device_id}\t{device_source}")
         sys.exit(0)
 
     status_devices = list_status_devices(info_result.stdout)
-    if status_devices:
-        fallback_device = status_devices[(selection_attempt - 1) % len(status_devices)]
+  if busy_devices:
+    status_devices = [device for device in status_devices if device not in busy_devices]
+
+  if status_devices:
+    fallback_device = status_devices[(selection_attempt - 1) % len(status_devices)]
         print(f"{fallback_device}\tstatus-round-robin")
         sys.exit(0)
+
+  if busy_devices:
+    busy_device_list = sorted(busy_devices)
+    print("__ALL_BUSY__\t" + ",".join(str(device) for device in busy_device_list))
+    sys.exit(0)
 
 if logical_devices:
     fallback_device = logical_devices[(selection_attempt - 1) % len(logical_devices)]
@@ -518,6 +568,7 @@ PY
 
 configure_single_card_ascend_device() {
   local start_attempt=${1:-1}
+  local busy_exit_code=${RESOURCE_BUSY_EXIT_CODE:-75}
   local resolved_visible_devices=""
   local resolved_rt_visible_devices=""
   local selected_device_info=""
@@ -556,6 +607,12 @@ configure_single_card_ascend_device() {
   selected_device_info=$(select_ascend_device "$start_attempt" "$npu_smi_bin" 2>/dev/null || true)
   if [[ -n "$selected_device_info" ]]; then
     IFS=$'\t' read -r selected_device selected_source <<< "$selected_device_info"
+    if [[ "$selected_device" == "__ALL_BUSY__" ]]; then
+      unset ASCEND_RT_VISIBLE_DEVICES
+      unset VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE
+      echo "[goal-baseline] all detected Ascend devices are currently busy: ${selected_source:-unknown}" >&2
+      return "$busy_exit_code"
+    fi
     if [[ -n "$selected_device" ]]; then
       export ASCEND_RT_VISIBLE_DEVICES="$selected_device"
       export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="npu:0"
@@ -1055,7 +1112,21 @@ case "$BENCHMARK_TYPE" in
     echo "[goal-baseline] server command: $SERVER_COMMAND"
     server_ready=0
     for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
-      configure_single_card_ascend_device "$start_attempt"
+      if configure_single_card_ascend_device "$start_attempt"; then
+        selection_status=0
+      else
+        selection_status=$?
+      fi
+
+      if [[ "$selection_status" -ne 0 ]]; then
+        if [[ "$selection_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+          echo "[goal-baseline] No idle Ascend device is currently available; retrying device selection in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+          sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+          continue
+        fi
+        exit "$selection_status"
+      fi
+
       echo "[goal-baseline] Ascend visible devices: ${ASCEND_RT_VISIBLE_DEVICES:-<unset>}"
 
       if wait_for_ascend_runtime_ready; then
