@@ -8,12 +8,21 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PREPARE_SCRIPT = REPO_ROOT / "scripts/prepare-official-ascend-baseline-env.sh"
+RUN_OFFICIAL_SCRIPT = REPO_ROOT / "scripts/run-official-ascend-goal-baseline.sh"
 
 
 def _source_prepare_functions(snippet: str) -> str:
     script_path = shlex.quote(str(PREPARE_SCRIPT))
     return (
         "source <(awk '/^if ! command -v conda / {exit} {print}' "
+        f"{script_path}) && {snippet}"
+    )
+
+
+def _source_run_official_functions(snippet: str) -> str:
+    script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
+    return (
+        r"source <(awk 'BEGIN{capture=0} /^run_in_official_runtime\(\) \{/ {capture=1} /^run_server_command\(\) \{/ {exit} capture {print}' "
         f"{script_path}) && {snippet}"
     )
 
@@ -223,3 +232,80 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
                 "out-of-scope:",
                 "602",
         ]
+
+
+def test_run_in_official_env_python_uses_temp_script(tmp_path: Path) -> None:
+    captured_args = tmp_path / "prepare-conda-args.txt"
+    captured_script = tmp_path / "prepare-script-path.txt"
+
+    result = _run_bash(
+        _source_prepare_functions(
+            f"""
+            ENV_PREFIX=/tmp/fake-official-env
+
+            run_with_ascend_env() {{
+                "$@"
+            }}
+
+            conda() {{
+                printf '%s\n' "$@" > {shlex.quote(str(captured_args))}
+                local script_file="${{@: -1}}"
+                printf '%s\n' "$script_file" > {shlex.quote(str(captured_script))}
+                [[ "$script_file" != "-" ]]
+                [[ -f "$script_file" ]]
+                grep -Fq 'print("prepare-ok")' "$script_file"
+            }}
+
+            run_in_official_env_python '/tmp/official-a:/tmp/official-b' env SAMPLE_VAR=1 <<'PY'
+print("prepare-ok")
+PY
+
+            script_file=$(cat {shlex.quote(str(captured_script))})
+            [[ ! -e "$script_file" ]]
+            """
+        )
+    )
+
+    assert result.returncode == 0
+    args = captured_args.read_text(encoding="utf-8").splitlines()
+    assert args[:3] == ["run", "-p", "/tmp/fake-official-env"]
+    assert args[-2] == "python"
+    assert args[-1] != "-"
+
+
+def test_run_in_official_runtime_python_uses_temp_script(tmp_path: Path) -> None:
+    captured_args = tmp_path / "runtime-conda-args.txt"
+    captured_script = tmp_path / "runtime-script-path.txt"
+    captured_pythonpath = tmp_path / "runtime-pythonpath.txt"
+
+    result = _run_bash(
+        _source_run_official_functions(
+            f"""
+            run_in_official_runtime() {{
+                local pythonpath_prefix=$1
+                shift
+                printf '%s\n' "$pythonpath_prefix" > {shlex.quote(str(captured_pythonpath))}
+                printf '%s\n' "$@" > {shlex.quote(str(captured_args))}
+                local script_file="${{@: -1}}"
+                printf '%s\n' "$script_file" > {shlex.quote(str(captured_script))}
+                [[ "$script_file" != "-" ]]
+                [[ -f "$script_file" ]]
+                grep -Fq 'print("runtime-ok")' "$script_file"
+            }}
+
+            run_in_official_runtime_python '/tmp/runtime-a:/tmp/runtime-b' env SAMPLE_VAR=1 <<'PY'
+print("runtime-ok")
+PY
+
+            script_file=$(cat {shlex.quote(str(captured_script))})
+            [[ ! -e "$script_file" ]]
+            """
+        )
+    )
+
+    assert result.returncode == 0
+    assert captured_pythonpath.read_text(encoding="utf-8").strip() == "/tmp/runtime-a:/tmp/runtime-b"
+    args = captured_args.read_text(encoding="utf-8").splitlines()
+    assert args[:2] == ["env", "SAMPLE_VAR=1"]
+    assert args[-2] == "python"
+    assert args[-1] != "-"

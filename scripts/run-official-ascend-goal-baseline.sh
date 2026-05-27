@@ -248,6 +248,25 @@ run_in_official_runtime() {
   )
 }
 
+run_in_official_runtime_python() {
+  local pythonpath_prefix=$1
+  shift
+  local script_file
+  local status=0
+
+  script_file=$(mktemp "${TMPDIR:-/tmp}/official-runtime-python-XXXXXX.py")
+  cat > "$script_file"
+
+  if run_in_official_runtime "$pythonpath_prefix" "$@" python "$script_file"; then
+    status=0
+  else
+    status=$?
+  fi
+
+  rm -f "$script_file"
+  return "$status"
+}
+
 run_server_command() {
   (
     cd "$OFFICIAL_RUNTIME_CWD"
@@ -406,9 +425,8 @@ resolve_runtime_model() {
 local_runtime_model_has_required_artifacts() {
   local runtime_model_candidate=$1
 
-  run_in_official_runtime "$REPO_ROOT/src${OFFICIAL_RUNTIME_PYTHONPATH:+:$OFFICIAL_RUNTIME_PYTHONPATH}" \
-    env RUNTIME_MODEL_CANDIDATE="$runtime_model_candidate" \
-    python - <<'PY' >/dev/null
+  run_in_official_runtime_python "$REPO_ROOT/src${OFFICIAL_RUNTIME_PYTHONPATH:+:$OFFICIAL_RUNTIME_PYTHONPATH}" \
+    env RUNTIME_MODEL_CANDIDATE="$runtime_model_candidate" <<'PY' >/dev/null
 import os
 
 from vllm_hust_benchmark.same_spec import runtime_model_path_has_required_artifacts
@@ -429,7 +447,7 @@ detect_official_core_version() {
   local detected=""
   local fallback=""
 
-  raw_output=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+  raw_output=$(run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY'
 from importlib import metadata
 
 version = None
@@ -471,7 +489,7 @@ detect_official_backend_version() {
   local detected=""
   local fallback=""
 
-  raw_output=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+  raw_output=$(run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY'
 from importlib import metadata
 
 version = None
@@ -605,7 +623,7 @@ echo "[goal-baseline] vllm cache root: $OFFICIAL_VLLM_CACHE_ROOT"
 echo "[goal-baseline] benchmark type: $BENCHMARK_TYPE"
 echo "[goal-baseline] export model id: $MODEL"
 echo "[goal-baseline] runtime model source: $RUNTIME_MODEL"
-run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY'
 from importlib import metadata
 
 import vllm

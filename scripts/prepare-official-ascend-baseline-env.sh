@@ -64,6 +64,26 @@ run_with_ascend_env() {
   "$@"
 }
 
+run_in_official_env_python() {
+  local pythonpath_prefix=$1
+  shift
+  local script_file
+  local status=0
+
+  script_file=$(mktemp "${TMPDIR:-/tmp}/official-env-python-XXXXXX.py")
+  cat > "$script_file"
+
+  if PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
+    run_with_ascend_env conda run -p "$ENV_PREFIX" "$@" python "$script_file"; then
+    status=0
+  else
+    status=$?
+  fi
+
+  rm -f "$script_file"
+  return "$status"
+}
+
 normalize_arch() {
   case "$1" in
     x86_64|amd64)
@@ -193,8 +213,8 @@ emit_prepared_env_summary() {
 }
 
 verify_official_env() {
-  PYTHONPATH="$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE${PYTHONPATH:+:$PYTHONPATH}" \
-  run_with_ascend_env conda run -p "$ENV_PREFIX" env \
+  run_in_official_env_python "$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE" \
+    env \
     OFFICIAL_EXPECTED_PYTHON_VERSION="$PYTHON_VERSION" \
     OFFICIAL_EXPECTED_SETUPTOOLS_SPEC=">=77.0.3,<80.0.0" \
     OFFICIAL_EXPECTED_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
@@ -211,8 +231,7 @@ verify_official_env() {
     OFFICIAL_EXPECTED_XGRAMMAR_VERSION="0.1.25" \
     OFFICIAL_EXPECTED_FASTAPI_VERSION="0.123.10" \
     OFFICIAL_EXPECTED_NUMBA_VERSION="0.61.2" \
-    OFFICIAL_EXPECTED_OPENCV_VERSION="4.11.0.86" \
-    python - <<'PY'
+    OFFICIAL_EXPECTED_OPENCV_VERSION="4.11.0.86" <<'PY'
 import os
 import sys
 from importlib import metadata
