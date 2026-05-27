@@ -424,6 +424,42 @@ def test_configure_single_card_ascend_device_passes_attempt_to_selector() -> Non
     assert result.stdout.splitlines()[-1] == "devices=4"
 
 
+def test_configure_single_card_ascend_device_reselects_after_auto_selection() -> None:
+    result = _run_bash(
+        _source_run_official_functions(
+            """
+            unset ASCEND_RT_VISIBLE_DEVICES
+            unset ASCEND_VISIBLE_DEVICES
+
+            resolve_npu_smi_bin() {
+                printf '/tmp/fake-npu-smi\n'
+            }
+
+            select_ascend_device() {
+                printf '%s\tidle\n' "$1"
+            }
+
+            configure_single_card_ascend_device 1
+            printf 'first=%s\n' "$ASCEND_RT_VISIBLE_DEVICES"
+
+            configure_single_card_ascend_device 2
+            printf 'second=%s\n' "$ASCEND_RT_VISIBLE_DEVICES"
+            """
+        )
+    )
+
+    tracked_lines = [
+        line
+        for line in result.stdout.splitlines()
+        if line.startswith(("first=", "second="))
+    ]
+
+    assert tracked_lines == [
+        "first=1",
+        "second=2",
+    ]
+
+
 def test_normalize_engine_version_rejects_dev_and_strips_v_prefix() -> None:
     result = _run_bash(
         _source_run_official_version_functions(
