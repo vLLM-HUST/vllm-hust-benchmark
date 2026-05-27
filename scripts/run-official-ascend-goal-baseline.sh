@@ -275,6 +275,30 @@ run_in_official_runtime_python() {
   return "$status"
 }
 
+capture_initial_ascend_device_scope() {
+  if [[ "${GOAL_BASELINE_INITIAL_ASCEND_DEVICE_SCOPE_CAPTURED:-0}" == "1" ]]; then
+    return 0
+  fi
+
+  if [[ -n "${ASCEND_VISIBLE_DEVICES+x}" ]]; then
+    GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES_IS_SET=1
+    GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES=${ASCEND_VISIBLE_DEVICES:-}
+  else
+    GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES_IS_SET=0
+    unset GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES
+  fi
+
+  if [[ -n "${ASCEND_RT_VISIBLE_DEVICES+x}" ]]; then
+    GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES_IS_SET=1
+    GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES=${ASCEND_RT_VISIBLE_DEVICES:-}
+  else
+    GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES_IS_SET=0
+    unset GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES
+  fi
+
+  GOAL_BASELINE_INITIAL_ASCEND_DEVICE_SCOPE_CAPTURED=1
+}
+
 normalize_visible_devices() {
   local raw_value=${1:-}
   local device
@@ -501,17 +525,21 @@ configure_single_card_ascend_device() {
   local selected_source=""
   local npu_smi_bin=""
 
-  resolved_visible_devices=$(normalize_visible_devices "${ASCEND_VISIBLE_DEVICES:-}" 2>/dev/null || true)
-  resolved_rt_visible_devices=$(normalize_visible_devices "${ASCEND_RT_VISIBLE_DEVICES:-}" 2>/dev/null || true)
+  capture_initial_ascend_device_scope
+
+  resolved_visible_devices=$(normalize_visible_devices "${GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES:-}" 2>/dev/null || true)
+  resolved_rt_visible_devices=$(normalize_visible_devices "${GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES:-}" 2>/dev/null || true)
 
   if [[ -z "$resolved_rt_visible_devices" && -n "$resolved_visible_devices" ]]; then
     export ASCEND_RT_VISIBLE_DEVICES="$resolved_visible_devices"
     echo "[goal-baseline] derived ASCEND_RT_VISIBLE_DEVICES from ASCEND_VISIBLE_DEVICES: $ASCEND_RT_VISIBLE_DEVICES"
   elif [[ -n "$resolved_rt_visible_devices" ]]; then
     export ASCEND_RT_VISIBLE_DEVICES="$resolved_rt_visible_devices"
-  elif [[ -n "${ASCEND_RT_VISIBLE_DEVICES+x}" ]]; then
+  elif [[ "${GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES_IS_SET:-0}" == "1" ]]; then
     unset ASCEND_RT_VISIBLE_DEVICES
     echo "[goal-baseline] ignoring empty ASCEND_RT_VISIBLE_DEVICES from parent environment"
+  else
+    unset ASCEND_RT_VISIBLE_DEVICES
   fi
 
   if [[ -n "${ASCEND_RT_VISIBLE_DEVICES:-}" ]]; then
