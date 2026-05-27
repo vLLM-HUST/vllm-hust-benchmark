@@ -458,6 +458,26 @@ def run_npu_smi(*args: str) -> subprocess.CompletedProcess[str] | None:
     return None
 
 
+def classify_npu_smi_failure(
+  result: subprocess.CompletedProcess[str] | None,
+) -> str | None:
+  if result is None or result.returncode == 0:
+    return None
+
+  details = f"{result.stdout}\n{result.stderr}".lower()
+  if "device is used" in details or "-8020" in details:
+    return "device-used"
+  if "permission" in details or "ret=4" in details:
+    return "permission-limited"
+  return f"exit-{result.returncode}"
+
+
+def annotate_fallback_source(base_source: str, failure_reason: str | None) -> str:
+  if not failure_reason:
+    return base_source
+  return f"{base_source}+npu-smi-{failure_reason}"
+
+
 def select_best_idle_device(
   info_output: str,
   logical_map: dict[tuple[str, str], int],
@@ -519,6 +539,7 @@ def select_best_idle_device(
 
 
 mapping_result = run_npu_smi("info", "-m")
+mapping_failure_reason = classify_npu_smi_failure(mapping_result)
 logical_map = {}
 logical_devices = []
 if mapping_result is not None and mapping_result.returncode == 0:
@@ -528,6 +549,7 @@ if mapping_result is not None and mapping_result.returncode == 0:
 selection_attempt = max(1, int(os.environ.get("ASCEND_DEVICE_SELECTION_ATTEMPT", "1")))
 
 info_result = run_npu_smi("info")
+info_failure_reason = classify_npu_smi_failure(info_result)
 if info_result is not None and info_result.returncode == 0:
     busy_devices = list_process_busy_devices(info_result.stdout)
 
@@ -551,15 +573,17 @@ if info_result is not None and info_result.returncode == 0:
         print("__ALL_BUSY__\t" + ",".join(str(device) for device in busy_device_list))
         sys.exit(0)
 
+fallback_failure_reason = info_failure_reason or mapping_failure_reason
+
 if logical_devices:
     fallback_device = logical_devices[(selection_attempt - 1) % len(logical_devices)]
-    print(f"{fallback_device}\tlogical-round-robin")
+    print(f"{fallback_device}\t{annotate_fallback_source('logical-round-robin', fallback_failure_reason)}")
     sys.exit(0)
 
 devnode_devices = list_devnode_devices()
 if devnode_devices:
     fallback_device = devnode_devices[(selection_attempt - 1) % len(devnode_devices)]
-    print(f"{fallback_device}\tdevnode-round-robin")
+    print(f"{fallback_device}\t{annotate_fallback_source('devnode-round-robin', fallback_failure_reason)}")
     sys.exit(0)
 
 sys.exit(1)
@@ -614,6 +638,17 @@ configure_single_card_ascend_device() {
       return "$busy_exit_code"
     fi
     if [[ -n "$selected_device" ]]; then
+      case "$selected_source" in
+        *+npu-smi-device-used*)
+          echo "[goal-baseline] npu-smi could not inspect busy devices for the current user because DCMI reported 'device is used'; falling back to ${selected_source%%+*}" >&2
+          ;;
+        *+npu-smi-permission-limited*)
+          echo "[goal-baseline] npu-smi device inspection appears permission-limited for the current user; falling back to ${selected_source%%+*}" >&2
+          ;;
+        *+npu-smi-exit-*)
+          echo "[goal-baseline] npu-smi device inspection failed for the current user (${selected_source#*+npu-smi-}); falling back to ${selected_source%%+*}" >&2
+          ;;
+      esac
       export ASCEND_RT_VISIBLE_DEVICES="$selected_device"
       export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="npu:0"
       echo "[goal-baseline] selected single-card Ascend device: $ASCEND_RT_VISIBLE_DEVICES (${selected_source:-auto})"
