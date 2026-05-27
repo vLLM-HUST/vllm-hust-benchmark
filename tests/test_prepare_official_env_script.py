@@ -399,6 +399,31 @@ def test_configure_single_card_ascend_device_selects_detected_device() -> None:
     ]
 
 
+def test_configure_single_card_ascend_device_passes_attempt_to_selector() -> None:
+    result = _run_bash(
+        _source_run_official_functions(
+            """
+            unset ASCEND_RT_VISIBLE_DEVICES
+            unset ASCEND_VISIBLE_DEVICES
+
+            resolve_npu_smi_bin() {
+                printf '/tmp/fake-npu-smi\n'
+            }
+
+            select_ascend_device() {
+                printf '%s\tidle\n' "$1"
+            }
+
+            configure_single_card_ascend_device 4
+
+            printf 'devices=%s\n' "$ASCEND_RT_VISIBLE_DEVICES"
+            """
+        )
+    )
+
+    assert result.stdout.splitlines()[-1] == "devices=4"
+
+
 def test_normalize_engine_version_rejects_dev_and_strips_v_prefix() -> None:
     result = _run_bash(
         _source_run_official_version_functions(
@@ -441,6 +466,72 @@ def test_wait_for_server_exits_when_server_process_is_gone(tmp_path: Path) -> No
             ! grep -Fq 'curl-noise' {shlex.quote(str(stderr_file))}
             """
         )
+    )
+
+    assert result.returncode == 0
+
+
+def test_wait_for_server_returns_resource_busy_status_when_log_matches(tmp_path: Path) -> None:
+    stderr_file = tmp_path / "wait-for-server-resource-busy.stderr"
+    server_log = tmp_path / "server.stdout.log"
+    server_log.write_text(
+        "RuntimeError: Initialize: error code is 507899\nResource_Busy(EL0005): The resources are busy.\n",
+        encoding="utf-8",
+    )
+
+    result = _run_bash(
+        _source_run_official_version_functions(
+            f"""
+            READY_TIMEOUT_SECONDS=30
+            RESOURCE_BUSY_EXIT_CODE=75
+            SERVER_PID=999999
+            SERVER_STDOUT_LOG={shlex.quote(str(server_log))}
+
+            curl() {{
+                printf 'curl-noise\n' >&2
+                return 1
+            }}
+
+            wait_for_server 127.0.0.1 8000 2>{shlex.quote(str(stderr_file))}
+            status=$?
+            printf 'status=%s\n' "$status"
+            [[ "$status" == '75' ]]
+            grep -Fq 'Resource_Busy(EL0005): The resources are busy.' {shlex.quote(str(stderr_file))}
+            """
+        ),
+        check=False,
+    )
+
+    assert result.returncode == 0
+
+
+def test_wait_for_ascend_runtime_ready_returns_resource_busy_status(tmp_path: Path) -> None:
+    runtime_log = tmp_path / "runtime-ready.log"
+
+    result = _run_bash(
+        _source_run_official_version_functions(
+            f"""
+            ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=1
+            ASCEND_RUNTIME_READY_POLL_SECONDS=1
+            RESOURCE_BUSY_EXIT_CODE=75
+            RUNTIME_READY_LOG={shlex.quote(str(runtime_log))}
+            OFFICIAL_RUNTIME_PYTHONPATH=/tmp/runtime-a:/tmp/runtime-b
+
+            run_in_official_runtime_python() {{
+                cat <<'EOF' >&2
+RuntimeError: Initialize: error code is 507899
+Resource_Busy(EL0005): The resources are busy.
+EOF
+                return 1
+            }}
+
+            wait_for_ascend_runtime_ready
+            status=$?
+            printf 'status=%s\n' "$status"
+            [[ "$status" == '75' ]]
+            """
+        ),
+        check=False,
     )
 
     assert result.returncode == 0

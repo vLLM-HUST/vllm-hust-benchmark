@@ -27,6 +27,11 @@ HOST_PYTHON_BIN=${HOST_PYTHON_BIN:-$(command -v python3 || command -v python || 
 GOAL_BASELINE_ENV_PREFIX=${GOAL_BASELINE_ENV_PREFIX:-}
 RESULT_DIR=${RESULT_DIR:-"$REPO_ROOT/.benchmarks/official-ascend-goal-baseline"}
 RUN_ID=${RUN_ID:-"official-ascend-jan-2026-$(date -u +%Y%m%dT%H%M%SZ)"}
+SERVER_START_RETRIES=${SERVER_START_RETRIES:-8}
+SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
+ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS:-30}
+ASCEND_RUNTIME_READY_POLL_SECONDS=${ASCEND_RUNTIME_READY_POLL_SECONDS:-10}
+RESOURCE_BUSY_EXIT_CODE=${RESOURCE_BUSY_EXIT_CODE:-75}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -488,6 +493,7 @@ PY
 }
 
 configure_single_card_ascend_device() {
+  local start_attempt=${1:-1}
   local resolved_visible_devices=""
   local resolved_rt_visible_devices=""
   local selected_device_info=""
@@ -519,7 +525,7 @@ configure_single_card_ascend_device() {
     echo "[goal-baseline] using npu-smi for device selection: $npu_smi_bin"
   fi
 
-  selected_device_info=$(select_ascend_device "${ASCEND_DEVICE_SELECTION_ATTEMPT:-1}" "$npu_smi_bin" 2>/dev/null || true)
+  selected_device_info=$(select_ascend_device "$start_attempt" "$npu_smi_bin" 2>/dev/null || true)
   if [[ -n "$selected_device_info" ]]; then
     IFS=$'\t' read -r selected_device selected_source <<< "$selected_device_info"
     if [[ -n "$selected_device" ]]; then
@@ -819,6 +825,45 @@ PY
   printf '%s' "unknown"
 }
 
+server_log_indicates_resource_busy() {
+  local log_file=$1
+
+  [[ -f "$log_file" ]] || return 1
+
+  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception|Engine core initialization failed" "$log_file"
+}
+
+wait_for_ascend_runtime_ready() {
+  local max_attempts
+  max_attempts=$(((ASCEND_RUNTIME_READY_TIMEOUT_SECONDS + ASCEND_RUNTIME_READY_POLL_SECONDS - 1) / ASCEND_RUNTIME_READY_POLL_SECONDS))
+  if (( max_attempts < 1 )); then
+    max_attempts=1
+  fi
+
+  for runtime_attempt in $(seq 1 "$max_attempts"); do
+    if run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY' >"$RUNTIME_READY_LOG" 2>&1
+import torch_npu
+
+torch_npu.npu.get_soc_version()
+PY
+    then
+      return 0
+    fi
+
+    cat "$RUNTIME_READY_LOG" >&2
+
+    if [[ "$runtime_attempt" -eq "$max_attempts" ]]; then
+      if server_log_indicates_resource_busy "$RUNTIME_READY_LOG"; then
+        return "$RESOURCE_BUSY_EXIT_CODE"
+      fi
+      return 1
+    fi
+
+    echo "[goal-baseline] Ascend runtime not ready yet; waiting ${ASCEND_RUNTIME_READY_POLL_SECONDS}s before retrying device initialization (${runtime_attempt}/${max_attempts})" >&2
+    sleep "$ASCEND_RUNTIME_READY_POLL_SECONDS"
+  done
+}
+
 wait_for_server() {
   local host=$1
   local port=$2
@@ -828,6 +873,12 @@ wait_for_server() {
   while (( waited < timeout_sec )); do
     if [[ -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then
       echo "Official baseline server exited before becoming ready at ${host}:${port}" >&2
+      if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+        tail -n 40 "$SERVER_STDOUT_LOG" >&2 || true
+        if server_log_indicates_resource_busy "$SERVER_STDOUT_LOG"; then
+          return "$RESOURCE_BUSY_EXIT_CODE"
+        fi
+      fi
       return 1
     fi
 
@@ -839,6 +890,12 @@ wait_for_server() {
   done
 
   echo "Timed out waiting for official baseline server at ${host}:${port}" >&2
+  if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+    tail -n 40 "$SERVER_STDOUT_LOG" >&2 || true
+    if server_log_indicates_resource_busy "$SERVER_STDOUT_LOG"; then
+      return "$RESOURCE_BUSY_EXIT_CODE"
+    fi
+  fi
   return 1
 }
 
@@ -860,10 +917,11 @@ RUNNER_LOCK_FILE="$RUNNER_STATE_DIR/runner.lock"
 MANAGED_SERVER_PORT_FILE="$RUNNER_STATE_DIR/server.port"
 MANAGED_SERVER_WRAPPER_PID_FILE="$RUNNER_STATE_DIR/server.wrapper.pid"
 MANAGED_SERVER_LISTENER_PIDS_FILE="$RUNNER_STATE_DIR/server.listener.pids"
+SERVER_STDOUT_LOG="$RESULT_DIR/server.stdout.log"
+RUNTIME_READY_LOG="$RESULT_DIR/runtime-ready.log"
 
 acquire_runner_lock
 cleanup_managed_server
-configure_single_card_ascend_device
 
 SCENARIO=$(jq -r '.scenario' "$SPEC_FILE")
 MODEL=$(jq -r '.model' "$SPEC_FILE")
@@ -920,7 +978,6 @@ echo "[goal-baseline] vllm cache root: $OFFICIAL_VLLM_CACHE_ROOT"
 echo "[goal-baseline] benchmark type: $BENCHMARK_TYPE"
 echo "[goal-baseline] export model id: $MODEL"
 echo "[goal-baseline] runtime model source: $RUNTIME_MODEL"
-echo "[goal-baseline] Ascend visible devices: ${ASCEND_RT_VISIBLE_DEVICES:-<unset>}"
 run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY'
 from importlib import metadata
 
@@ -968,12 +1025,53 @@ case "$BENCHMARK_TYPE" in
 
     echo "[goal-baseline] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
     echo "[goal-baseline] server command: $SERVER_COMMAND"
-    run_server_command &
-    SERVER_PID=$!
-    persist_managed_server_state
+    server_ready=0
+    for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
+      configure_single_card_ascend_device "$start_attempt"
+      echo "[goal-baseline] Ascend visible devices: ${ASCEND_RT_VISIBLE_DEVICES:-<unset>}"
 
-    wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
-    persist_managed_server_state
+      if wait_for_ascend_runtime_ready; then
+        runtime_ready_status=0
+      else
+        runtime_ready_status=$?
+      fi
+
+      if [[ "$runtime_ready_status" -ne 0 ]]; then
+        echo "[goal-baseline] Ascend runtime did not become ready after ${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS}s" >&2
+        if [[ "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+          echo "[goal-baseline] Retrying server start after runtime readiness failure in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+          sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+          continue
+        fi
+        exit "$runtime_ready_status"
+      fi
+
+      : > "$SERVER_STDOUT_LOG"
+      run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
+      SERVER_PID=$!
+      persist_managed_server_state
+
+      if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then
+        persist_managed_server_state
+        server_ready=1
+        break
+      fi
+
+      server_wait_status=$?
+      if [[ "$server_wait_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+        echo "[goal-baseline] Detected transient Ascend resource busy state; retrying server start in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+        cleanup_managed_server || true
+        sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+        continue
+      fi
+
+      exit "$server_wait_status"
+    done
+
+    if [[ "$server_ready" != "1" ]]; then
+      echo "[goal-baseline] vLLM server did not become ready after ${SERVER_START_RETRIES} start attempt(s)" >&2
+      exit 1
+    fi
     ;;
   throughput|latency)
     CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
