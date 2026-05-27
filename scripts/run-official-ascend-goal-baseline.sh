@@ -270,6 +270,271 @@ run_in_official_runtime_python() {
   return "$status"
 }
 
+normalize_visible_devices() {
+  local raw_value=${1:-}
+  local device
+  local -a devices=()
+  local normalized_devices
+
+  IFS=',' read -r -a raw_devices <<< "$raw_value"
+  for device in "${raw_devices[@]}"; do
+    device=${device//[[:space:]]/}
+    if [[ -n "$device" ]]; then
+      devices+=("$device")
+    fi
+  done
+
+  if [[ ${#devices[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  normalized_devices=$(IFS=','; echo "${devices[*]}")
+  printf '%s\n' "$normalized_devices"
+}
+
+resolve_npu_smi_bin() {
+  local candidate
+
+  if candidate=$(command -v npu-smi 2>/dev/null) && [[ -n "$candidate" ]]; then
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+
+  for candidate in /usr/local/bin/npu-smi /usr/local/sbin/npu-smi /usr/sbin/npu-smi /usr/bin/npu-smi; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+select_ascend_device() {
+  local selection_attempt=${1:-1}
+  local npu_smi_bin=${2:-}
+
+  ASCEND_DEVICE_SELECTION_ATTEMPT="$selection_attempt" \
+    NPU_SMI_BIN="$npu_smi_bin" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+
+def parse_logical_map(mapping_output: str) -> dict[tuple[str, str], int]:
+    logical_map = {}
+    for line in mapping_output.splitlines():
+        parts = line.split()
+        if len(parts) < 3:
+            continue
+        npu_id, chip_id, logical_id = parts[:3]
+        if npu_id.isdigit() and chip_id.isdigit() and logical_id.isdigit():
+            logical_map[(npu_id, chip_id)] = int(logical_id)
+    return logical_map
+
+
+def list_logical_devices(mapping_output: str) -> list[int]:
+    logical_devices = set(parse_logical_map(mapping_output).values())
+    return sorted(logical_devices)
+
+
+def list_status_devices(info_output: str) -> list[int]:
+    status_devices = set()
+    for raw_line in info_output.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
+
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        if len(parts) < 2:
+            continue
+
+        left_column = parts[0].split()
+        if len(left_column) >= 2 and left_column[0].isdigit() and parts[1] and ":" not in parts[1]:
+            status_devices.add(int(left_column[0]))
+
+    return sorted(status_devices)
+
+
+def list_devnode_devices() -> list[int]:
+    devnode_devices = set()
+    for device_path in Path("/dev").glob("davinci[0-9]*"):
+        suffix = device_path.name.removeprefix("davinci")
+        if suffix.isdigit():
+            devnode_devices.add(int(suffix))
+    return sorted(devnode_devices)
+
+
+def run_npu_smi(*args: str) -> subprocess.CompletedProcess[str] | None:
+    npu_smi_bin = os.environ.get("NPU_SMI_BIN")
+    if not npu_smi_bin:
+        return None
+
+    clean_env = {
+        "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
+        "HOME": os.environ.get("HOME", ""),
+        "LANG": os.environ.get("LANG", "C.UTF-8"),
+        "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
+        "LD_LIBRARY_PATH": os.environ.get("LD_LIBRARY_PATH", ""),
+    }
+
+    try:
+        return subprocess.run(
+            [npu_smi_bin, *args],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+            env=clean_env,
+        )
+    except subprocess.TimeoutExpired:
+        return None
+    except Exception:
+        return None
+
+
+def select_best_idle_device(info_output: str, logical_map: dict[tuple[str, str], int]) -> tuple[int, str] | None:
+    hbm_usage_pattern = re.compile(r"(\d+)\s*/\s*(\d+)\s*$")
+    device_stats = []
+    current_npu_id = None
+    current_health = None
+
+    for raw_line in info_output.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
+
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        if len(parts) < 3:
+            continue
+
+        left_column = parts[0].split()
+        if len(left_column) >= 2 and left_column[0].isdigit() and parts[1] and ":" not in parts[1]:
+            current_npu_id = left_column[0]
+            current_health = parts[1]
+            continue
+
+        if current_npu_id is None or current_health != "OK":
+            continue
+
+        if len(left_column) != 1 or not left_column[0].isdigit() or ":" not in parts[1]:
+            continue
+
+        chip_id = left_column[0]
+        logical_id = logical_map.get((current_npu_id, chip_id))
+        device_source = "idle"
+        if logical_id is None:
+            if chip_id != "0":
+                continue
+            logical_id = int(current_npu_id)
+            device_source = "status-fallback"
+
+        hbm_match = hbm_usage_pattern.search(parts[2])
+        if hbm_match is None:
+            continue
+
+        used_memory_mb = int(hbm_match.group(1))
+        total_memory_mb = int(hbm_match.group(2))
+        free_memory_mb = max(0, total_memory_mb - used_memory_mb)
+        device_stats.append((logical_id, free_memory_mb, device_source))
+
+    if not device_stats:
+        return None
+
+    device_stats.sort(key=lambda item: (-item[1], item[0], item[2]))
+    selected_device, _, selected_source = device_stats[0]
+    return selected_device, selected_source
+
+
+mapping_result = run_npu_smi("info", "-m")
+logical_map = {}
+logical_devices = []
+if mapping_result is not None and mapping_result.returncode == 0:
+    logical_map = parse_logical_map(mapping_result.stdout)
+    logical_devices = list_logical_devices(mapping_result.stdout)
+
+selection_attempt = max(1, int(os.environ.get("ASCEND_DEVICE_SELECTION_ATTEMPT", "1")))
+
+info_result = run_npu_smi("info")
+if info_result is not None and info_result.returncode == 0:
+    selected_device = select_best_idle_device(info_result.stdout, logical_map)
+    if selected_device is not None:
+        device_id, device_source = selected_device
+        print(f"{device_id}\t{device_source}")
+        sys.exit(0)
+
+    status_devices = list_status_devices(info_result.stdout)
+    if status_devices:
+        fallback_device = status_devices[(selection_attempt - 1) % len(status_devices)]
+        print(f"{fallback_device}\tstatus-round-robin")
+        sys.exit(0)
+
+if logical_devices:
+    fallback_device = logical_devices[(selection_attempt - 1) % len(logical_devices)]
+    print(f"{fallback_device}\tlogical-round-robin")
+    sys.exit(0)
+
+devnode_devices = list_devnode_devices()
+if devnode_devices:
+    fallback_device = devnode_devices[(selection_attempt - 1) % len(devnode_devices)]
+    print(f"{fallback_device}\tdevnode-round-robin")
+    sys.exit(0)
+
+sys.exit(1)
+PY
+}
+
+configure_single_card_ascend_device() {
+  local resolved_visible_devices=""
+  local resolved_rt_visible_devices=""
+  local selected_device_info=""
+  local selected_device=""
+  local selected_source=""
+  local npu_smi_bin=""
+
+  resolved_visible_devices=$(normalize_visible_devices "${ASCEND_VISIBLE_DEVICES:-}" 2>/dev/null || true)
+  resolved_rt_visible_devices=$(normalize_visible_devices "${ASCEND_RT_VISIBLE_DEVICES:-}" 2>/dev/null || true)
+
+  if [[ -z "$resolved_rt_visible_devices" && -n "$resolved_visible_devices" ]]; then
+    export ASCEND_RT_VISIBLE_DEVICES="$resolved_visible_devices"
+    echo "[goal-baseline] derived ASCEND_RT_VISIBLE_DEVICES from ASCEND_VISIBLE_DEVICES: $ASCEND_RT_VISIBLE_DEVICES"
+  elif [[ -n "$resolved_rt_visible_devices" ]]; then
+    export ASCEND_RT_VISIBLE_DEVICES="$resolved_rt_visible_devices"
+  elif [[ -n "${ASCEND_RT_VISIBLE_DEVICES+x}" ]]; then
+    unset ASCEND_RT_VISIBLE_DEVICES
+    echo "[goal-baseline] ignoring empty ASCEND_RT_VISIBLE_DEVICES from parent environment"
+  fi
+
+  if [[ -n "${ASCEND_RT_VISIBLE_DEVICES:-}" ]]; then
+    export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE:-npu:0}"
+    echo "[goal-baseline] using explicit Ascend visible devices: $ASCEND_RT_VISIBLE_DEVICES"
+    return 0
+  fi
+
+  npu_smi_bin=$(resolve_npu_smi_bin 2>/dev/null || true)
+  if [[ -n "$npu_smi_bin" ]]; then
+    echo "[goal-baseline] using npu-smi for device selection: $npu_smi_bin"
+  fi
+
+  selected_device_info=$(select_ascend_device "${ASCEND_DEVICE_SELECTION_ATTEMPT:-1}" "$npu_smi_bin" 2>/dev/null || true)
+  if [[ -n "$selected_device_info" ]]; then
+    IFS=$'\t' read -r selected_device selected_source <<< "$selected_device_info"
+    if [[ -n "$selected_device" ]]; then
+      export ASCEND_RT_VISIBLE_DEVICES="$selected_device"
+      export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="npu:0"
+      echo "[goal-baseline] selected single-card Ascend device: $ASCEND_RT_VISIBLE_DEVICES (${selected_source:-auto})"
+      return 0
+    fi
+  fi
+
+  unset ASCEND_RT_VISIBLE_DEVICES
+  unset VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE
+  echo "[goal-baseline] could not resolve a single-card Ascend device; running without device scoping" >&2
+}
+
 run_server_command() {
   (
     cd "$OFFICIAL_RUNTIME_CWD"
@@ -598,6 +863,7 @@ MANAGED_SERVER_LISTENER_PIDS_FILE="$RUNNER_STATE_DIR/server.listener.pids"
 
 acquire_runner_lock
 cleanup_managed_server
+configure_single_card_ascend_device
 
 SCENARIO=$(jq -r '.scenario' "$SPEC_FILE")
 MODEL=$(jq -r '.model' "$SPEC_FILE")
@@ -654,6 +920,7 @@ echo "[goal-baseline] vllm cache root: $OFFICIAL_VLLM_CACHE_ROOT"
 echo "[goal-baseline] benchmark type: $BENCHMARK_TYPE"
 echo "[goal-baseline] export model id: $MODEL"
 echo "[goal-baseline] runtime model source: $RUNTIME_MODEL"
+echo "[goal-baseline] Ascend visible devices: ${ASCEND_RT_VISIBLE_DEVICES:-<unset>}"
 run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY'
 from importlib import metadata
 
