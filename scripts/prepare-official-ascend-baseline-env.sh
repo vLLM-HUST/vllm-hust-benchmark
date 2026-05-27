@@ -13,7 +13,8 @@ OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0110"}
 OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0110"}
 OFFICIAL_VLLM_REF=${OFFICIAL_VLLM_REF:-"v0.11.0"}
 OFFICIAL_VLLM_ASCEND_REF=${OFFICIAL_VLLM_ASCEND_REF:-"v0.11.0"}
-OFFICIAL_VLLM_PLUGINS=${OFFICIAL_VLLM_PLUGINS:-"ascend,ascend_kv_connector,ascend_model_loader,ascend_service_profiling,ascend_model"}
+OFFICIAL_SOC_VERSION=${OFFICIAL_SOC_VERSION:-${SOC_VERSION:-"ascend910b3"}}
+OFFICIAL_SLEEP_MODE_ENABLED=${OFFICIAL_SLEEP_MODE_ENABLED:-${COMPILE_CUSTOM_KERNELS:-"0"}}
 BENCHMARK_SERVER_PORT=${BENCHMARK_SERVER_PORT:-"8000"}
 PREPARE_BENCHMARK_ADMISSION_ONLY=${PREPARE_BENCHMARK_ADMISSION_ONLY:-"0"}
 ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
@@ -74,8 +75,7 @@ run_in_official_env_python() {
   script_file=$(mktemp "${TMPDIR:-/tmp}/official-env-python-XXXXXX.py")
   cat > "$script_file"
 
-  if VLLM_PLUGINS="$OFFICIAL_VLLM_PLUGINS" \
-    PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
+  if PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
     run_with_ascend_env conda run -p "$ENV_PREFIX" "$@" python "$script_file"; then
     status=0
   else
@@ -86,12 +86,71 @@ run_in_official_env_python() {
   return "$status"
 }
 
+python_bool_literal() {
+  case "${1,,}" in
+    1|true|yes|on)
+      printf '%s\n' "True"
+      ;;
+    *)
+      printf '%s\n' "False"
+      ;;
+  esac
+}
+
 ensure_vllm_ascend_plugin_metadata() {
   local version=${OFFICIAL_VLLM_ASCEND_REF#v}
   local dist_info_dir
+  local build_info_file
+  local setup_py
+  local line
+  local group=""
+  local entry=""
+  local -a platform_entries=()
+  local -a general_entries=()
+  local sleep_mode_enabled_literal
 
   if [[ -z "$version" ]] || [[ "$version" == "$OFFICIAL_VLLM_ASCEND_REF" ]]; then
     version="0.0.0"
+  fi
+
+  setup_py="$OFFICIAL_VLLM_ASCEND_WORKTREE/setup.py"
+  while IFS= read -r line; do
+    case "$line" in
+      *'"vllm.platform_plugins": ['*)
+        group="platform"
+        continue
+        ;;
+      *'"vllm.general_plugins": ['*)
+        group="general"
+        continue
+        ;;
+      *']'*)
+        if [[ -n "$group" ]]; then
+          group=""
+        fi
+        ;;
+    esac
+
+    if [[ -n "$group" ]]; then
+      entry=$(printf '%s\n' "$line" | sed -n 's/.*"\([^"]*\)".*/\1/p')
+    else
+      entry=""
+    fi
+
+    if [[ -n "$entry" ]]; then
+      case "$group" in
+        platform)
+          platform_entries+=("$entry")
+          ;;
+        general)
+          general_entries+=("$entry")
+          ;;
+      esac
+    fi
+  done < "$setup_py"
+
+  if [[ ${#platform_entries[@]} -eq 0 ]]; then
+    platform_entries+=("ascend = vllm_ascend:register")
   fi
 
   dist_info_dir="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend-${version}.dist-info"
@@ -107,16 +166,26 @@ EOF
 vllm_ascend
 EOF
 
-  cat > "$dist_info_dir/entry_points.txt" <<'EOF'
-[vllm.platform_plugins]
-ascend = vllm_ascend:register
+  {
+    printf '%s\n' '[vllm.platform_plugins]'
+    printf '%s\n' "${platform_entries[@]}"
+    if [[ ${#general_entries[@]} -gt 0 ]]; then
+      printf '\n%s\n' '[vllm.general_plugins]'
+      printf '%s\n' "${general_entries[@]}"
+    fi
+  } > "$dist_info_dir/entry_points.txt"
 
-[vllm.general_plugins]
-ascend_kv_connector = vllm_ascend:register_connector
-ascend_model_loader = vllm_ascend:register_model_loader
-ascend_service_profiling = vllm_ascend:register_service_profiling
-ascend_model = vllm_ascend:register_model
+  mkdir -p "$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend"
+  build_info_file="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend/_build_info.py"
+  sleep_mode_enabled_literal=$(python_bool_literal "$OFFICIAL_SLEEP_MODE_ENABLED")
+  cat > "$build_info_file" <<EOF
+# Auto-generated file
+__soc_version__ = '$OFFICIAL_SOC_VERSION'
+__sleep_mode_enabled__ = $sleep_mode_enabled_literal
 EOF
+
+  OFFICIAL_EXPECTED_PLATFORM_PLUGINS=$(printf '%s\n' "${platform_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
+  OFFICIAL_EXPECTED_GENERAL_PLUGINS=$(printf '%s\n' "${general_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
 }
 
 normalize_arch() {
@@ -252,6 +321,8 @@ verify_official_env() {
     env \
     OFFICIAL_EXPECTED_PYTHON_VERSION="$PYTHON_VERSION" \
     OFFICIAL_EXPECTED_SETUPTOOLS_SPEC=">=77.0.3,<80.0.0" \
+    OFFICIAL_EXPECTED_PLATFORM_PLUGINS="$OFFICIAL_EXPECTED_PLATFORM_PLUGINS" \
+    OFFICIAL_EXPECTED_GENERAL_PLUGINS="$OFFICIAL_EXPECTED_GENERAL_PLUGINS" \
     OFFICIAL_EXPECTED_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
     OFFICIAL_EXPECTED_VLLM_ASCEND_WORKTREE="$OFFICIAL_VLLM_ASCEND_WORKTREE" \
     OFFICIAL_EXPECTED_TORCH_TARGET="$OFFICIAL_TORCH_INSTALL_TARGET" \
@@ -375,21 +446,20 @@ ensure_absent("vllm", "vllm-hust", "vllm_hust")
 ensure_absent("vllm-ascend-hust", "vllm_ascend_hust")
 
 platform_plugins = sorted(ep.name for ep in entry_points(group="vllm.platform_plugins"))
-required_platform_plugins = {"ascend"}
-missing_platform_plugins = sorted(required_platform_plugins.difference(platform_plugins))
-if missing_platform_plugins:
-  fail(f"missing platform plugins: {', '.join(missing_platform_plugins)}")
+expected_platform_plugins = sorted(filter(None, os.environ["OFFICIAL_EXPECTED_PLATFORM_PLUGINS"].split(",")))
+if platform_plugins != expected_platform_plugins:
+  fail(
+    "platform plugins are "
+    f"{','.join(platform_plugins)}, expected {','.join(expected_platform_plugins)}"
+  )
 
 general_plugins = sorted(ep.name for ep in entry_points(group="vllm.general_plugins"))
-required_general_plugins = {
-  "ascend_kv_connector",
-  "ascend_model_loader",
-  "ascend_service_profiling",
-  "ascend_model",
-}
-missing_general_plugins = sorted(required_general_plugins.difference(general_plugins))
-if missing_general_plugins:
-  fail(f"missing general plugins: {', '.join(missing_general_plugins)}")
+expected_general_plugins = sorted(filter(None, os.environ["OFFICIAL_EXPECTED_GENERAL_PLUGINS"].split(",")))
+if general_plugins != expected_general_plugins:
+  fail(
+    "general plugins are "
+    f"{','.join(general_plugins)}, expected {','.join(expected_general_plugins)}"
+  )
 
 print(f"env_prefix={os.environ['ENV_PREFIX']}")
 print(f"torch={torch.__version__}")
