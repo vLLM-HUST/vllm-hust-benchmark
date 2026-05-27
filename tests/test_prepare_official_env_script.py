@@ -500,6 +500,35 @@ def test_configure_single_card_ascend_device_returns_busy_status_when_all_device
     ]
 
 
+def test_configure_single_card_ascend_device_logs_npu_smi_fallback_reason() -> None:
+    result = _run_bash(
+        _source_run_official_functions(
+            """
+            unset ASCEND_RT_VISIBLE_DEVICES
+            unset ASCEND_VISIBLE_DEVICES
+
+            resolve_npu_smi_bin() {
+                printf '/tmp/fake-npu-smi\n'
+            }
+
+            select_ascend_device() {
+                printf '3\tdevnode-round-robin+npu-smi-device-used\n'
+            }
+
+            configure_single_card_ascend_device
+
+            printf 'devices=%s\n' "$ASCEND_RT_VISIBLE_DEVICES"
+            """
+        )
+    )
+
+    assert "devices=3" in result.stdout.splitlines()
+    assert (
+        "npu-smi could not inspect busy devices for the current user"
+        in result.stderr
+    )
+
+
 def test_select_ascend_device_reports_all_busy_with_fake_npu_smi(tmp_path: Path) -> None:
     fake_npu_smi = tmp_path / "npu-smi"
     fake_npu_smi.write_text(
