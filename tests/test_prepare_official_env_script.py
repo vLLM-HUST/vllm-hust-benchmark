@@ -500,6 +500,60 @@ def test_configure_single_card_ascend_device_returns_busy_status_when_all_device
     ]
 
 
+def test_select_ascend_device_reports_all_busy_with_fake_npu_smi(tmp_path: Path) -> None:
+    fake_npu_smi = tmp_path / "npu-smi"
+    fake_npu_smi.write_text(
+        """#!/usr/bin/env bash
+set -euo pipefail
+if [[ \"${1:-}\" == \"info\" && \"${2:-}\" == \"-m\" ]]; then
+cat <<'EOF'
+NPU ID                         Chip ID                        Chip Logic ID                  Chip Name
+0                              0                              0                              Ascend 910B3
+1                              0                              1                              Ascend 910B3
+EOF
+elif [[ \"${1:-}\" == \"info\" ]]; then
+cat <<'EOF'
++------------------------------------------------------------------------------------------------+
+| npu-smi 25.3.rc1                 Version: 25.3.rc1                                             |
++---------------------------+---------------+----------------------------------------------------+
+| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|
+| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |
++===========================+===============+====================================================+
+| 0     910B3               | OK            | 90.4        32                0    / 0             |
+| 0                         | 0000:C1:00.0  | 0           0    / 0          41697/ 65536         |
++===========================+===============+====================================================+
+| 1     910B3               | OK            | 92.9        33                0    / 0             |
+| 0                         | 0000:C2:00.0  | 0           0    / 0          40844/ 65536         |
++===========================+===============+====================================================+
++---------------------------+---------------+----------------------------------------------------+
+| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |
++===========================+===============+====================================================+
+| 0       0                 | 111           | python                   | 37974                   |
++===========================+===============+====================================================+
+| 1       0                 | 222           | python                   | 37286                   |
++===========================+===============+====================================================+
+EOF
+else
+    exit 1
+fi
+""",
+        encoding="utf-8",
+    )
+    fake_npu_smi.chmod(0o755)
+
+    result = _run_bash(
+        _source_run_official_functions(
+            f"""
+            HOST_PYTHON_BIN=$(command -v python3)
+            output=$(select_ascend_device 1 {shlex.quote(str(fake_npu_smi))})
+            printf 'output=%s\n' "$output"
+            """
+        )
+    )
+
+    assert result.stdout.splitlines()[-1] == "output=__ALL_BUSY__\t0,1"
+
+
 def test_normalize_engine_version_rejects_dev_and_strips_v_prefix() -> None:
     result = _run_bash(
         _source_run_official_version_functions(

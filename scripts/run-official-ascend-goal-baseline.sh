@@ -390,30 +390,30 @@ def list_status_devices(info_output: str) -> list[int]:
 
 
 def list_process_busy_devices(info_output: str) -> set[int]:
-  busy_devices = set()
-  in_process_section = False
+    busy_devices = set()
+    in_process_section = False
 
-  for raw_line in info_output.splitlines():
-    line = raw_line.strip()
-    if not line.startswith("|"):
-      continue
+    for raw_line in info_output.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
 
-    parts = [part.strip() for part in line.strip("|").split("|")]
-    if len(parts) < 3:
-      continue
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        if len(parts) < 3:
+            continue
 
-    if parts[1] == "Process id":
-      in_process_section = True
-      continue
+        if parts[1] == "Process id":
+            in_process_section = True
+            continue
 
-    if not in_process_section:
-      continue
+        if not in_process_section:
+            continue
 
-    left_column = parts[0].split()
-    if len(left_column) >= 2 and left_column[0].isdigit() and parts[1].isdigit():
-      busy_devices.add(int(left_column[0]))
+        left_column = parts[0].split()
+        if len(left_column) >= 2 and left_column[0].isdigit() and parts[1].isdigit():
+            busy_devices.add(int(left_column[0]))
 
-  return busy_devices
+    return busy_devices
 
 
 def list_devnode_devices() -> list[int]:
@@ -426,96 +426,96 @@ def list_devnode_devices() -> list[int]:
 
 
 def run_npu_smi(*args: str) -> subprocess.CompletedProcess[str] | None:
-    npu_smi_bin = os.environ.get("NPU_SMI_BIN")
-    if not npu_smi_bin:
-        return None
+  npu_smi_bin = os.environ.get("NPU_SMI_BIN")
+  if not npu_smi_bin:
+    return None
 
   try:
     timeout_seconds = float(os.environ.get("NPU_SMI_TIMEOUT_SECONDS", "20"))
   except ValueError:
     timeout_seconds = 20.0
 
-    clean_env = {
-        "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
-        "HOME": os.environ.get("HOME", ""),
-        "LANG": os.environ.get("LANG", "C.UTF-8"),
-        "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
-        "LD_LIBRARY_PATH": os.environ.get("LD_LIBRARY_PATH", ""),
-    }
+  clean_env = {
+    "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
+    "HOME": os.environ.get("HOME", ""),
+    "LANG": os.environ.get("LANG", "C.UTF-8"),
+    "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
+    "LD_LIBRARY_PATH": os.environ.get("LD_LIBRARY_PATH", ""),
+  }
 
-    try:
-        return subprocess.run(
-            [npu_smi_bin, *args],
-            check=False,
-            capture_output=True,
-            text=True,
-          timeout=timeout_seconds,
-            env=clean_env,
-        )
-    except subprocess.TimeoutExpired:
-        return None
-    except Exception:
-        return None
+  try:
+    return subprocess.run(
+      [npu_smi_bin, *args],
+      check=False,
+      capture_output=True,
+      text=True,
+      timeout=timeout_seconds,
+      env=clean_env,
+    )
+  except subprocess.TimeoutExpired:
+    return None
+  except Exception:
+    return None
 
 
-    def select_best_idle_device(
-      info_output: str,
-      logical_map: dict[tuple[str, str], int],
-      busy_devices: set[int],
-    ) -> tuple[int, str] | None:
-    hbm_usage_pattern = re.compile(r"(\d+)\s*/\s*(\d+)\s*$")
-    device_stats = []
-    current_npu_id = None
-    current_health = None
+def select_best_idle_device(
+  info_output: str,
+  logical_map: dict[tuple[str, str], int],
+  busy_devices: set[int],
+) -> tuple[int, str] | None:
+  hbm_usage_pattern = re.compile(r"(\d+)\s*/\s*(\d+)\s*$")
+  device_stats = []
+  current_npu_id = None
+  current_health = None
 
-    for raw_line in info_output.splitlines():
-        line = raw_line.strip()
-        if not line.startswith("|"):
-            continue
+  for raw_line in info_output.splitlines():
+    line = raw_line.strip()
+    if not line.startswith("|"):
+      continue
 
-        parts = [part.strip() for part in line.strip("|").split("|")]
-        if len(parts) < 3:
-            continue
+    parts = [part.strip() for part in line.strip("|").split("|")]
+    if len(parts) < 3:
+      continue
 
-        left_column = parts[0].split()
-        if len(left_column) >= 2 and left_column[0].isdigit() and parts[1] and ":" not in parts[1]:
-            current_npu_id = left_column[0]
-            current_health = parts[1]
-            continue
+    left_column = parts[0].split()
+    if len(left_column) >= 2 and left_column[0].isdigit() and parts[1] and ":" not in parts[1]:
+      current_npu_id = left_column[0]
+      current_health = parts[1]
+      continue
 
-        if current_npu_id is None or current_health != "OK":
-            continue
+    if current_npu_id is None or current_health != "OK":
+      continue
 
-        if len(left_column) != 1 or not left_column[0].isdigit() or ":" not in parts[1]:
-            continue
+    if len(left_column) != 1 or not left_column[0].isdigit() or ":" not in parts[1]:
+      continue
 
-        chip_id = left_column[0]
-        logical_id = logical_map.get((current_npu_id, chip_id))
-        device_source = "idle"
-        if logical_id is None:
-            if chip_id != "0":
-                continue
-            logical_id = int(current_npu_id)
-            device_source = "status-fallback"
+    chip_id = left_column[0]
+    logical_id = logical_map.get((current_npu_id, chip_id))
+    device_source = "idle"
+    if logical_id is None:
+      if chip_id != "0":
+        continue
+      logical_id = int(current_npu_id)
+      device_source = "status-fallback"
 
-        if logical_id in busy_devices:
-          continue
+    if logical_id in busy_devices:
+      continue
 
-        hbm_match = hbm_usage_pattern.search(parts[2])
-        if hbm_match is None:
-            continue
+    hbm_match = hbm_usage_pattern.search(parts[2])
+    if hbm_match is None:
+      continue
 
-        used_memory_mb = int(hbm_match.group(1))
-        total_memory_mb = int(hbm_match.group(2))
-        free_memory_mb = max(0, total_memory_mb - used_memory_mb)
-        device_stats.append((logical_id, free_memory_mb, device_source))
+    used_memory_mb = int(hbm_match.group(1))
+    total_memory_mb = int(hbm_match.group(2))
+    free_memory_mb = max(0, total_memory_mb - used_memory_mb)
+    device_stats.append((logical_id, free_memory_mb, device_source))
 
-    if not device_stats:
-        return None
+  if not device_stats:
+    return None
 
-    device_stats.sort(key=lambda item: (-item[1], item[0], item[2]))
-    selected_device, _, selected_source = device_stats[0]
-    return selected_device, selected_source
+  device_stats.sort(key=lambda item: (-item[1], item[0], item[2]))
+  selected_device, _, selected_source = device_stats[0]
+  return selected_device, selected_source
 
 
 mapping_result = run_npu_smi("info", "-m")
@@ -529,27 +529,27 @@ selection_attempt = max(1, int(os.environ.get("ASCEND_DEVICE_SELECTION_ATTEMPT",
 
 info_result = run_npu_smi("info")
 if info_result is not None and info_result.returncode == 0:
-  busy_devices = list_process_busy_devices(info_result.stdout)
+    busy_devices = list_process_busy_devices(info_result.stdout)
 
-  selected_device = select_best_idle_device(info_result.stdout, logical_map, busy_devices)
+    selected_device = select_best_idle_device(info_result.stdout, logical_map, busy_devices)
     if selected_device is not None:
         device_id, device_source = selected_device
         print(f"{device_id}\t{device_source}")
         sys.exit(0)
 
     status_devices = list_status_devices(info_result.stdout)
-  if busy_devices:
-    status_devices = [device for device in status_devices if device not in busy_devices]
+    if busy_devices:
+        status_devices = [device for device in status_devices if device not in busy_devices]
 
-  if status_devices:
-    fallback_device = status_devices[(selection_attempt - 1) % len(status_devices)]
+    if status_devices:
+        fallback_device = status_devices[(selection_attempt - 1) % len(status_devices)]
         print(f"{fallback_device}\tstatus-round-robin")
         sys.exit(0)
 
-  if busy_devices:
-    busy_device_list = sorted(busy_devices)
-    print("__ALL_BUSY__\t" + ",".join(str(device) for device in busy_device_list))
-    sys.exit(0)
+    if busy_devices:
+        busy_device_list = sorted(busy_devices)
+        print("__ALL_BUSY__\t" + ",".join(str(device) for device in busy_device_list))
+        sys.exit(0)
 
 if logical_devices:
     fallback_device = logical_devices[(selection_attempt - 1) % len(logical_devices)]
