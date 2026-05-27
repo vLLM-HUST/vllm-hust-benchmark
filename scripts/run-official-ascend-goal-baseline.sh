@@ -243,6 +243,9 @@ run_in_official_runtime() {
       set -u
     fi
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
+    if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
+      export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
+    fi
     PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
       conda run -p "$GOAL_BASELINE_ENV_PREFIX" "$@"
   )
@@ -282,6 +285,9 @@ run_server_command() {
       set -u
     fi
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
+    if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
+      export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
+    fi
     PYTHONUNBUFFERED=1 \
       PYTHONPATH="$OFFICIAL_RUNTIME_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}" \
       conda run --no-capture-output -p "$GOAL_BASELINE_ENV_PREFIX" \
@@ -437,9 +443,29 @@ raise SystemExit(
 PY
 }
 
-is_valid_engine_version() {
+normalize_engine_version() {
   local version=${1:-}
-  [[ -n "$version" ]] && [[ "$version" != "unknown" ]] && [[ "$version" != "not-installed" ]] && [[ "$version" != "N/A" ]]
+
+  version=$(printf '%s' "$version" | tr -d '[:space:]')
+  case "$version" in
+    ""|unknown|Unknown|not-installed|N/A|n/a|dev)
+      return 1
+      ;;
+  esac
+
+  version=${version#v}
+  version=${version#V}
+
+  if [[ "$version" =~ ^[0-9]+(\.[0-9]+){1,2}([A-Za-z0-9._-]+)?$ ]]; then
+    printf '%s' "$version"
+    return 0
+  fi
+
+  return 1
+}
+
+is_valid_engine_version() {
+  normalize_engine_version "$1" >/dev/null
 }
 
 detect_official_core_version() {
@@ -470,13 +496,13 @@ PY
   detected=$(printf '%s\n' "$raw_output" | sed -n 's/^__VLLM_HUST_CORE_VERSION__=//p' | tail -n 1)
   detected=$(printf '%s' "$detected" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
 
-  if is_valid_engine_version "$detected"; then
+  if detected=$(normalize_engine_version "$detected"); then
     printf '%s' "$detected"
     return 0
   fi
 
   fallback=$(git -C "$OFFICIAL_VLLM_WORKTREE" describe --tags --always HEAD 2>/dev/null || true)
-  if is_valid_engine_version "$fallback"; then
+  if fallback=$(normalize_engine_version "$fallback"); then
     printf '%s' "$fallback"
     return 0
   fi
@@ -514,13 +540,13 @@ PY
   detected=$(printf '%s\n' "$raw_output" | sed -n 's/^__VLLM_HUST_BACKEND_VERSION__=//p' | tail -n 1)
   detected=$(printf '%s' "$detected" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
 
-  if is_valid_engine_version "$detected"; then
+  if detected=$(normalize_engine_version "$detected"); then
     printf '%s' "$detected"
     return 0
   fi
 
   fallback=$(git -C "$OFFICIAL_VLLM_ASCEND_WORKTREE" describe --tags --always HEAD 2>/dev/null || true)
-  if is_valid_engine_version "$fallback"; then
+  if fallback=$(normalize_engine_version "$fallback"); then
     printf '%s' "$fallback"
     return 0
   fi
@@ -535,7 +561,12 @@ wait_for_server() {
   local timeout_sec=${READY_TIMEOUT_SECONDS:-300}
 
   while (( waited < timeout_sec )); do
-    if curl -fsS "http://${host}:${port}/health" >/dev/null; then
+    if [[ -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then
+      echo "Official baseline server exited before becoming ready at ${host}:${port}" >&2
+      return 1
+    fi
+
+    if curl -fsS "http://${host}:${port}/health" >/dev/null 2>&1; then
       return 0
     fi
     sleep 1
@@ -665,8 +696,8 @@ case "$BENCHMARK_TYPE" in
 
     assert_target_port_available "Official baseline" "$CLIENT_HOST" "$CLIENT_PORT"
 
-    SERVER_COMMAND="PYTHONUNBUFFERED=1 PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
-    CLIENT_COMMAND="PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
+    SERVER_COMMAND="PYTHONUNBUFFERED=1 VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
+    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
 
     echo "[goal-baseline] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
     echo "[goal-baseline] server command: $SERVER_COMMAND"
@@ -678,7 +709,7 @@ case "$BENCHMARK_TYPE" in
     persist_managed_server_state
     ;;
   throughput|latency)
-    CLIENT_COMMAND="PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
+    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
     ;;
   *)
     echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2
