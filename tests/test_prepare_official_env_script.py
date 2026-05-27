@@ -309,3 +309,27 @@ PY
     assert args[:2] == ["env", "SAMPLE_VAR=1"]
     assert args[-2] == "python"
     assert args[-1] != "-"
+
+
+def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) -> None:
+    worktree_dir = tmp_path / "vllm-ascend-worktree"
+    worktree_dir.mkdir()
+
+    result = _run_bash(
+        _source_prepare_functions(
+            f"""
+            OFFICIAL_VLLM_ASCEND_WORKTREE={shlex.quote(str(worktree_dir))}
+            OFFICIAL_VLLM_ASCEND_REF=v0.11.0
+            ensure_vllm_ascend_plugin_metadata
+            dist_info_dir=$(printf '%s\n' {shlex.quote(str(worktree_dir))}/vllm_ascend-0.11.0.dist-info)
+            [[ -d "$dist_info_dir" ]]
+            grep -Fq 'Name: vllm-ascend' "$dist_info_dir/METADATA"
+            grep -Fq 'Version: 0.11.0' "$dist_info_dir/METADATA"
+            grep -Fq 'ascend = vllm_ascend:register' "$dist_info_dir/entry_points.txt"
+            grep -Fq 'ascend_model = vllm_ascend:register_model' "$dist_info_dir/entry_points.txt"
+            grep -Fq 'vllm_ascend' "$dist_info_dir/top_level.txt"
+            """
+        )
+    )
+
+    assert result.returncode == 0
