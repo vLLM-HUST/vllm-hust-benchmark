@@ -14,6 +14,7 @@ WEBSITE_OUTPUT_DIR=${WEBSITE_OUTPUT_DIR:-"$WORKSPACE_ROOT/vllm-hust-website/data
 FORCE_RUN_EXISTING=${FORCE_RUN_EXISTING:-0}
 REPEAT_COUNT=${REPEAT_COUNT:-3}
 PREPARE_OFFICIAL_ENV=${PREPARE_OFFICIAL_ENV:-1}
+READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-900}
 SUMMARY_FILE=${MATRIX_SUMMARY_FILE:-"$MATRIX_RESULT_ROOT/summary.md"}
 PYTHON_BIN=${PYTHON_BIN:-$(command -v python3 || true)}
 PREPARED_ENV=0
@@ -176,6 +177,111 @@ append_summary() {
   printf '%s\n' "$1" >> "$SUMMARY_FILE"
 }
 
+extract_repeat_failure_reason() {
+  local log_file=$1
+  local line=""
+
+  [[ -f "$log_file" ]] || return 1
+
+  line=$(grep -m1 "Timed out waiting for official baseline server at " "$log_file" || true)
+  if [[ -n "$line" ]]; then
+    printf 'server readiness timeout after %ss: %s\n' "${READY_TIMEOUT_SECONDS:-unknown}" "$line"
+    return 0
+  fi
+
+  line=$(grep -m1 "Ascend runtime did not become ready after " "$log_file" || true)
+  if [[ -n "$line" ]]; then
+    printf '%s\n' "$line"
+    return 0
+  fi
+
+  line=$(grep -m1 "All detected Ascend devices are busy" "$log_file" || true)
+  if [[ -n "$line" ]]; then
+    printf '%s\n' "$line"
+    return 0
+  fi
+
+  line=$(grep -m1 "No idle Ascend device is currently available" "$log_file" || true)
+  if [[ -n "$line" ]]; then
+    printf '%s\n' "$line"
+    return 0
+  fi
+
+  line=$(tail -n 1 "$log_file" | tr -d '\r')
+  if [[ -n "$line" ]]; then
+    printf '%s\n' "$line"
+    return 0
+  fi
+
+  return 1
+}
+
+append_repeat_failure_summary() {
+  local spec_id=$1
+  local repeat_label=$2
+  local result_dir=$3
+  local exit_status=$4
+  local runner_log="$result_dir/runner.log"
+  local server_log="$result_dir/server.stdout.log"
+  local reason=""
+  local model_phase=""
+
+  append_summary "  - ${repeat_label} failed for ${spec_id} (exit=${exit_status})"
+
+  reason=$(extract_repeat_failure_reason "$runner_log" || true)
+  if [[ -n "$reason" ]]; then
+    append_summary "    - ${reason}"
+  fi
+
+  if [[ -f "$server_log" ]]; then
+    model_phase=$(grep -m1 "Starting to load model " "$server_log" || true)
+    if [[ -n "$model_phase" ]]; then
+      append_summary "    - last observed server phase: ${model_phase}"
+    fi
+  fi
+
+  append_summary "    - runner log: ${result_dir}/runner.log"
+}
+
+append_repeat_result_diagnostic() {
+  local repeat_label=$1
+  local result_dir=$2
+  local artifact_file="$result_dir/submission/run_leaderboard.json"
+  local reason=""
+
+  if [[ -f "$artifact_file" ]]; then
+    append_summary "    - ${repeat_label}: leaderboard artifact produced"
+    return 0
+  fi
+
+  append_summary "    - ${repeat_label}: no leaderboard artifact produced"
+  reason=$(extract_repeat_failure_reason "$result_dir/runner.log" || true)
+  if [[ -n "$reason" ]]; then
+    append_summary "      reason: ${reason}"
+  fi
+}
+
+append_selection_failure_summary() {
+  local spec_id=$1
+  local error_log=$2
+  shift 2
+  local selection_reason=""
+  local result_dir=""
+
+  append_summary "  - Candidate selection failed for ${spec_id}"
+
+  if [[ -f "$error_log" ]]; then
+    selection_reason=$(grep -E "ValueError:|RuntimeError:|Error:" "$error_log" | tail -n 1 | tr -d '\r' || true)
+    if [[ -n "$selection_reason" ]]; then
+      append_summary "    - ${selection_reason}"
+    fi
+  fi
+
+  for result_dir in "$@"; do
+    append_repeat_result_diagnostic "$(basename "$result_dir")" "$result_dir"
+  done
+}
+
 resolve_benchmark_type() {
   local spec_file=$1
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" - <<'PY' "$spec_file"
@@ -275,21 +381,40 @@ for spec_file in "${SPEC_FILES[@]}"; do
     repeat_label=$(printf 'repeat-%02d' "$repeat_index")
     result_dir="$MATRIX_RESULT_ROOT/$spec_slug/$repeat_label"
     run_id="$MATRIX_RUN_ID-$spec_slug-$repeat_label"
+    runner_log="$result_dir/runner.log"
 
     echo "[official-baseline-matrix] running $repeat_label for $spec_id"
     append_summary "  - Executing $repeat_label for $spec_id -> $result_dir"
 
+    mkdir -p "$result_dir"
+
+    set +e
     RESULT_DIR="$result_dir" \
     RUN_ID="$run_id" \
     GOAL_BASELINE_ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
     VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
-    bash "$SINGLE_RUNNER" "$spec_file"
+    bash "$SINGLE_RUNNER" "$spec_file" 2>&1 | tee "$runner_log"
+    runner_status=${PIPESTATUS[0]}
+    set -e
+
+    if [[ "$runner_status" -ne 0 ]]; then
+      append_repeat_failure_summary "$spec_id" "$repeat_label" "$result_dir" "$runner_status"
+      exit "$runner_status"
+    fi
 
     repeat_result_dirs+=("$result_dir")
     ((RUN_COUNT+=1))
   done
 
-  selection_json=$(select_canonical_candidate "$benchmark_type" "${repeat_result_dirs[@]}")
+  selection_error_log="$MATRIX_RESULT_ROOT/$spec_slug/candidate-selection.stderr.log"
+  set +e
+  selection_json=$(select_canonical_candidate "$benchmark_type" "${repeat_result_dirs[@]}" 2>"$selection_error_log")
+  selection_status=$?
+  set -e
+  if [[ "$selection_status" -ne 0 ]]; then
+    append_selection_failure_summary "$spec_id" "$selection_error_log" "${repeat_result_dirs[@]}"
+    exit "$selection_status"
+  fi
   selected_result_dir=$(printf '%s' "$selection_json" | jq -r '.selected_result_dir')
   primary_metric_name=$(printf '%s' "$selection_json" | jq -r '.primary_metric_name')
   median_value=$(printf '%s' "$selection_json" | jq -r '.median_value')
