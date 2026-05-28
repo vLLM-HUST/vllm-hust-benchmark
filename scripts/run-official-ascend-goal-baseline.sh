@@ -600,6 +600,8 @@ configure_single_card_ascend_device() {
   local selected_source=""
   local npu_smi_bin=""
 
+  unset GOAL_BASELINE_DEVICE_SELECTION_REASON
+
   capture_initial_ascend_device_scope
 
   resolved_visible_devices=$(normalize_visible_devices "${GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES:-}" 2>/dev/null || true)
@@ -618,6 +620,7 @@ configure_single_card_ascend_device() {
   fi
 
   if [[ -n "${ASCEND_RT_VISIBLE_DEVICES:-}" ]]; then
+    GOAL_BASELINE_DEVICE_SELECTION_REASON="explicit"
     export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE:-npu:0}"
     echo "[goal-baseline] using explicit Ascend visible devices: $ASCEND_RT_VISIBLE_DEVICES"
     return 0
@@ -632,6 +635,7 @@ configure_single_card_ascend_device() {
   if [[ -n "$selected_device_info" ]]; then
     IFS=$'\t' read -r selected_device selected_source <<< "$selected_device_info"
     if [[ "$selected_device" == "__ALL_BUSY__" ]]; then
+      GOAL_BASELINE_DEVICE_SELECTION_REASON="all-busy"
       unset ASCEND_RT_VISIBLE_DEVICES
       unset VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE
       echo "[goal-baseline] all detected Ascend devices are currently busy: ${selected_source:-unknown}" >&2
@@ -649,6 +653,7 @@ configure_single_card_ascend_device() {
           echo "[goal-baseline] npu-smi device inspection failed for the current user (${selected_source#*+npu-smi-}); falling back to ${selected_source%%+*}" >&2
           ;;
       esac
+      GOAL_BASELINE_DEVICE_SELECTION_REASON="selected"
       export ASCEND_RT_VISIBLE_DEVICES="$selected_device"
       export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="npu:0"
       echo "[goal-baseline] selected single-card Ascend device: $ASCEND_RT_VISIBLE_DEVICES (${selected_source:-auto})"
@@ -656,6 +661,7 @@ configure_single_card_ascend_device() {
     fi
   fi
 
+  GOAL_BASELINE_DEVICE_SELECTION_REASON="unscoped"
   unset ASCEND_RT_VISIBLE_DEVICES
   unset VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE
   echo "[goal-baseline] could not resolve a single-card Ascend device; running without device scoping" >&2
@@ -1019,6 +1025,26 @@ wait_for_server() {
   return 1
 }
 
+selection_failure_is_retryable() {
+  local selection_status=${1:-0}
+  local start_attempt=${2:-1}
+  local max_attempts=${3:-1}
+
+  if [[ "$selection_status" -ne "$RESOURCE_BUSY_EXIT_CODE" ]]; then
+    return 1
+  fi
+
+  if [[ "$start_attempt" -ge "$max_attempts" ]]; then
+    return 1
+  fi
+
+  if [[ "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
+    return 1
+  fi
+
+  return 0
+}
+
 kill_server() {
   cleanup_managed_server || true
 }
@@ -1154,10 +1180,13 @@ case "$BENCHMARK_TYPE" in
       fi
 
       if [[ "$selection_status" -ne 0 ]]; then
-        if [[ "$selection_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+        if selection_failure_is_retryable "$selection_status" "$start_attempt" "$SERVER_START_RETRIES"; then
           echo "[goal-baseline] No idle Ascend device is currently available; retrying device selection in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
           sleep "$SERVER_START_RETRY_DELAY_SECONDS"
           continue
+        fi
+        if [[ "$selection_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
+          echo "[goal-baseline] All detected Ascend devices are busy; failing fast without further device-selection retries" >&2
         fi
         exit "$selection_status"
       fi

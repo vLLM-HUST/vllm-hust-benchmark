@@ -483,6 +483,7 @@ def test_configure_single_card_ascend_device_returns_busy_status_when_all_device
 
             printf 'devices=%s\n' "${ASCEND_RT_VISIBLE_DEVICES-<unset>}"
             printf 'preflight=%s\n' "${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE-<unset>}"
+            printf 'reason=%s\n' "${GOAL_BASELINE_DEVICE_SELECTION_REASON-<unset>}"
             """
         )
     )
@@ -490,13 +491,14 @@ def test_configure_single_card_ascend_device_returns_busy_status_when_all_device
     tracked_lines = [
         line
         for line in result.stdout.splitlines()
-        if line.startswith(("status=", "devices=", "preflight="))
+        if line.startswith(("status=", "devices=", "preflight=", "reason="))
     ]
 
     assert tracked_lines == [
         "status=75",
         "devices=<unset>",
         "preflight=<unset>",
+        "reason=all-busy",
     ]
 
 
@@ -694,6 +696,44 @@ EOF
     )
 
     assert result.returncode == 0
+
+
+def test_selection_failure_is_not_retryable_when_all_devices_busy() -> None:
+    result = _run_bash(
+        _source_run_official_version_functions(
+            """
+            RESOURCE_BUSY_EXIT_CODE=75
+            GOAL_BASELINE_DEVICE_SELECTION_REASON=all-busy
+
+            if selection_failure_is_retryable 75 1 8; then
+                echo 'retry=yes'
+            else
+                echo 'retry=no'
+            fi
+            """
+        )
+    )
+
+    assert result.stdout.splitlines()[-1] == "retry=no"
+
+
+def test_selection_failure_is_retryable_for_transient_busy() -> None:
+    result = _run_bash(
+        _source_run_official_version_functions(
+            """
+            RESOURCE_BUSY_EXIT_CODE=75
+            GOAL_BASELINE_DEVICE_SELECTION_REASON=selected
+
+            if selection_failure_is_retryable 75 1 8; then
+                echo 'retry=yes'
+            else
+                echo 'retry=no'
+            fi
+            """
+        )
+    )
+
+    assert result.stdout.splitlines()[-1] == "retry=yes"
 
 
 def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) -> None:
