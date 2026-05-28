@@ -40,12 +40,42 @@ def _spec() -> dict:
     }
 
 
+def _prefix_repetition_spec() -> dict:
+    spec = _spec()
+    spec["id"] = "official-ascend-jan-2026-v0.11.0-prefix-repetition-online-qwen25-14b-910b3"
+    spec["label"] = "Official Ascend Jan 2026 prefix repetition online baseline for vllm-hust goal tracking"
+    spec["scenario"] = "prefix-repetition-online"
+    spec["client_parameters"] = {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "prefix_repetition",
+        "num_prompts": 200,
+        "input_len": 4096,
+        "output_len": 256,
+        "request_rate": 1,
+        "host": "127.0.0.1",
+        "port": 8000,
+    }
+    return spec
+
+
 def test_build_same_spec_payload_injects_dtype() -> None:
     payload = build_same_spec_payload(_spec())
 
     assert payload["resolved_server_parameters"]["dtype"] == "float16"
     assert payload["resolved_client_parameters"]["random_input_len"] == 1024
     assert payload["resolved_client_parameters"]["random_output_len"] == 256
+    assert "input_len" not in payload["resolved_client_parameters"]
+    assert "output_len" not in payload["resolved_client_parameters"]
+
+
+def test_build_same_spec_payload_maps_prefix_repetition_legacy_lengths() -> None:
+    payload = build_same_spec_payload(_prefix_repetition_spec())
+
+    assert payload["resolved_client_parameters"]["prefix_repetition_prefix_len"] == 3840
+    assert payload["resolved_client_parameters"]["prefix_repetition_suffix_len"] == 256
+    assert payload["resolved_client_parameters"]["prefix_repetition_num_prefixes"] == 10
+    assert payload["resolved_client_parameters"]["prefix_repetition_output_len"] == 256
     assert "input_len" not in payload["resolved_client_parameters"]
     assert "output_len" not in payload["resolved_client_parameters"]
 

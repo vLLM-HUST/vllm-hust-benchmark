@@ -34,6 +34,8 @@ LOCAL_MODEL_WEIGHT_PATTERNS = (
     "model.safetensors.index.json",
     "pytorch_model.bin.index.json",
 )
+PREFIX_REPETITION_DEFAULT_SUFFIX_LEN = 256
+PREFIX_REPETITION_DEFAULT_NUM_PREFIXES = 10
 
 
 def _path_has_any_matching_file(path: Path, patterns: tuple[str, ...]) -> bool:
@@ -122,6 +124,33 @@ def resolve_client_parameters(
             resolved["random_input_len"] = resolved.pop("input_len")
         if "output_len" in resolved and "random_output_len" not in resolved:
             resolved["random_output_len"] = resolved.pop("output_len")
+
+    if resolved.get("dataset_name") == "prefix_repetition":
+        total_input_len = resolved.pop("input_len", None)
+
+        if "output_len" in resolved:
+            if "prefix_repetition_output_len" not in resolved:
+                resolved["prefix_repetition_output_len"] = resolved["output_len"]
+            resolved.pop("output_len", None)
+
+        if "prefix_repetition_num_prefixes" not in resolved:
+            resolved["prefix_repetition_num_prefixes"] = PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
+
+        if total_input_len is not None:
+            total_input_len = int(total_input_len)
+            if "prefix_repetition_suffix_len" not in resolved:
+                # Legacy specs only carry the total input length. Keep the
+                # default varying suffix budget and assign the rest to the
+                # shared prefix so the prompt length remains unchanged.
+                resolved["prefix_repetition_suffix_len"] = min(
+                    PREFIX_REPETITION_DEFAULT_SUFFIX_LEN,
+                    total_input_len,
+                )
+            if "prefix_repetition_prefix_len" not in resolved:
+                resolved["prefix_repetition_prefix_len"] = max(
+                    total_input_len - int(resolved["prefix_repetition_suffix_len"]),
+                    0,
+                )
     return resolved
 
 
