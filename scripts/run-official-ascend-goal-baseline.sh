@@ -29,6 +29,8 @@ RESULT_DIR=${RESULT_DIR:-"$REPO_ROOT/.benchmarks/official-ascend-goal-baseline"}
 RUN_ID=${RUN_ID:-"official-ascend-jan-2026-$(date -u +%Y%m%dT%H%M%SZ)"}
 SERVER_START_RETRIES=${SERVER_START_RETRIES:-8}
 SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
+DEVICE_SELECTION_RETRIES=${DEVICE_SELECTION_RETRIES:-20}
+DEVICE_SELECTION_RETRY_DELAY_SECONDS=${DEVICE_SELECTION_RETRY_DELAY_SECONDS:-30}
 READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-900}
 ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS:-30}
 ASCEND_RUNTIME_READY_POLL_SECONDS=${ASCEND_RUNTIME_READY_POLL_SECONDS:-10}
@@ -1037,24 +1039,40 @@ wait_for_server() {
   return 1
 }
 
-selection_failure_is_retryable() {
-  local selection_status=${1:-0}
-  local start_attempt=${2:-1}
-  local max_attempts=${3:-1}
+wait_for_single_card_ascend_device() {
+  local max_attempts=${DEVICE_SELECTION_RETRIES:-1}
+  local retry_delay=${DEVICE_SELECTION_RETRY_DELAY_SECONDS:-0}
+  local selection_attempt
+  local selection_status=0
 
-  if [[ "$selection_status" -ne "$RESOURCE_BUSY_EXIT_CODE" ]]; then
-    return 1
+  if (( max_attempts < 1 )); then
+    max_attempts=1
   fi
 
-  if [[ "$start_attempt" -ge "$max_attempts" ]]; then
-    return 1
-  fi
+  for selection_attempt in $(seq 1 "$max_attempts"); do
+    if configure_single_card_ascend_device "$selection_attempt"; then
+      return 0
+    else
+      selection_status=$?
+    fi
 
-  if [[ "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
-    return 1
-  fi
+    if [[ "$selection_status" -ne "$RESOURCE_BUSY_EXIT_CODE" ]]; then
+      return "$selection_status"
+    fi
 
-  return 0
+    if [[ "$selection_attempt" -ge "$max_attempts" ]]; then
+      return "$selection_status"
+    fi
+
+    if [[ "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
+      echo "[goal-baseline] All detected Ascend devices are busy; waiting ${retry_delay}s for an idle card (attempt ${selection_attempt}/${max_attempts})" >&2
+    else
+      echo "[goal-baseline] No idle Ascend device is currently available; retrying device selection in ${retry_delay}s (attempt ${selection_attempt}/${max_attempts})" >&2
+    fi
+    sleep "$retry_delay"
+  done
+
+  return "$selection_status"
 }
 
 kill_server() {
@@ -1185,20 +1203,15 @@ case "$BENCHMARK_TYPE" in
     echo "[goal-baseline] server command: $SERVER_COMMAND"
     server_ready=0
     for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
-      if configure_single_card_ascend_device "$start_attempt"; then
+      if wait_for_single_card_ascend_device; then
         selection_status=0
       else
         selection_status=$?
       fi
 
       if [[ "$selection_status" -ne 0 ]]; then
-        if selection_failure_is_retryable "$selection_status" "$start_attempt" "$SERVER_START_RETRIES"; then
-          echo "[goal-baseline] No idle Ascend device is currently available; retrying device selection in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
-          sleep "$SERVER_START_RETRY_DELAY_SECONDS"
-          continue
-        fi
         if [[ "$selection_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
-          echo "[goal-baseline] All detected Ascend devices are busy; failing fast without further device-selection retries" >&2
+          echo "[goal-baseline] All detected Ascend devices remained busy after ${DEVICE_SELECTION_RETRIES} selection attempt(s)" >&2
         fi
         exit "$selection_status"
       fi
