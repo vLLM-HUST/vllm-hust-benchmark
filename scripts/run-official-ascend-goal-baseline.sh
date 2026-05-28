@@ -233,22 +233,43 @@ cleanup_managed_server() {
   fi
 }
 
+set_ascend_visible_devices_scope() {
+  local visible_devices=${1:-}
+
+  if [[ -n "$visible_devices" ]]; then
+    export ASCEND_VISIBLE_DEVICES="$visible_devices"
+    export ASCEND_RT_VISIBLE_DEVICES="$visible_devices"
+    return 0
+  fi
+
+  unset ASCEND_VISIBLE_DEVICES
+  unset ASCEND_RT_VISIBLE_DEVICES
+}
+
+source_ascend_runtime_env() {
+  export ZSH_VERSION=""
+
+  if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+    set +u
+    # shellcheck disable=SC1090
+    source "$ASCEND_TOOLKIT_SET_ENV"
+    set -u
+  fi
+
+  if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
+    set +u
+    # shellcheck disable=SC1090
+    source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
+    set -u
+  fi
+}
+
 run_in_official_runtime() {
   local pythonpath_prefix=$1
   shift
   (
     cd "$OFFICIAL_RUNTIME_CWD"
-    export ZSH_VERSION=""
-    if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
-      # shellcheck disable=SC1090
-      source "$ASCEND_TOOLKIT_SET_ENV"
-    fi
-    if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
-      set +u
-      # shellcheck disable=SC1090
-      source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
-      set -u
-    fi
+    source_ascend_runtime_env
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
@@ -609,21 +630,21 @@ configure_single_card_ascend_device() {
   resolved_rt_visible_devices=$(normalize_visible_devices "${GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES:-}" 2>/dev/null || true)
 
   if [[ -z "$resolved_rt_visible_devices" && -n "$resolved_visible_devices" ]]; then
-    export ASCEND_RT_VISIBLE_DEVICES="$resolved_visible_devices"
-    echo "[goal-baseline] derived ASCEND_RT_VISIBLE_DEVICES from ASCEND_VISIBLE_DEVICES: $ASCEND_RT_VISIBLE_DEVICES"
+    set_ascend_visible_devices_scope "$resolved_visible_devices"
+    echo "[goal-baseline] derived Ascend visible devices from ASCEND_VISIBLE_DEVICES: $ASCEND_VISIBLE_DEVICES"
   elif [[ -n "$resolved_rt_visible_devices" ]]; then
-    export ASCEND_RT_VISIBLE_DEVICES="$resolved_rt_visible_devices"
+    set_ascend_visible_devices_scope "$resolved_rt_visible_devices"
   elif [[ "${GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES_IS_SET:-0}" == "1" ]]; then
-    unset ASCEND_RT_VISIBLE_DEVICES
+    set_ascend_visible_devices_scope ""
     echo "[goal-baseline] ignoring empty ASCEND_RT_VISIBLE_DEVICES from parent environment"
   else
-    unset ASCEND_RT_VISIBLE_DEVICES
+    set_ascend_visible_devices_scope ""
   fi
 
   if [[ -n "${ASCEND_RT_VISIBLE_DEVICES:-}" ]]; then
     GOAL_BASELINE_DEVICE_SELECTION_REASON="explicit"
     export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE:-npu:0}"
-    echo "[goal-baseline] using explicit Ascend visible devices: $ASCEND_RT_VISIBLE_DEVICES"
+    echo "[goal-baseline] using explicit Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-$ASCEND_RT_VISIBLE_DEVICES}"
     return 0
   fi
 
@@ -637,7 +658,7 @@ configure_single_card_ascend_device() {
     IFS=$'\t' read -r selected_device selected_source <<< "$selected_device_info"
     if [[ "$selected_device" == "__ALL_BUSY__" ]]; then
       GOAL_BASELINE_DEVICE_SELECTION_REASON="all-busy"
-      unset ASCEND_RT_VISIBLE_DEVICES
+      set_ascend_visible_devices_scope ""
       unset VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE
       echo "[goal-baseline] all detected Ascend devices are currently busy: ${selected_source:-unknown}" >&2
       return "$busy_exit_code"
@@ -655,15 +676,15 @@ configure_single_card_ascend_device() {
           ;;
       esac
       GOAL_BASELINE_DEVICE_SELECTION_REASON="selected"
-      export ASCEND_RT_VISIBLE_DEVICES="$selected_device"
+      set_ascend_visible_devices_scope "$selected_device"
       export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="npu:0"
-      echo "[goal-baseline] selected single-card Ascend device: $ASCEND_RT_VISIBLE_DEVICES (${selected_source:-auto})"
+      echo "[goal-baseline] selected single-card Ascend device: ${ASCEND_VISIBLE_DEVICES:-$selected_device} (${selected_source:-auto})"
       return 0
     fi
   fi
 
   GOAL_BASELINE_DEVICE_SELECTION_REASON="unscoped"
-  unset ASCEND_RT_VISIBLE_DEVICES
+  set_ascend_visible_devices_scope ""
   unset VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE
   echo "[goal-baseline] could not resolve a single-card Ascend device; running without device scoping" >&2
 }
@@ -671,17 +692,7 @@ configure_single_card_ascend_device() {
 run_server_command() {
   (
     cd "$OFFICIAL_RUNTIME_CWD"
-    export ZSH_VERSION=""
-    if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
-      # shellcheck disable=SC1090
-      source "$ASCEND_TOOLKIT_SET_ENV"
-    fi
-    if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
-      set +u
-      # shellcheck disable=SC1090
-      source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
-      set -u
-    fi
+    source_ascend_runtime_env
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
@@ -1192,7 +1203,7 @@ case "$BENCHMARK_TYPE" in
         exit "$selection_status"
       fi
 
-      echo "[goal-baseline] Ascend visible devices: ${ASCEND_RT_VISIBLE_DEVICES:-<unset>}"
+      echo "[goal-baseline] Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-<unset>} (rt=${ASCEND_RT_VISIBLE_DEVICES:-<unset>})"
 
       if wait_for_ascend_runtime_ready; then
         runtime_ready_status=0
