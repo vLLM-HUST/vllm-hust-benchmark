@@ -29,6 +29,7 @@ RESULT_DIR=${RESULT_DIR:-"$REPO_ROOT/.benchmarks/official-ascend-goal-baseline"}
 RUN_ID=${RUN_ID:-"official-ascend-jan-2026-$(date -u +%Y%m%dT%H%M%SZ)"}
 SERVER_START_RETRIES=${SERVER_START_RETRIES:-8}
 SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
+READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-900}
 ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS:-30}
 ASCEND_RUNTIME_READY_POLL_SECONDS=${ASCEND_RUNTIME_READY_POLL_SECONDS:-10}
 RESOURCE_BUSY_EXIT_CODE=${RESOURCE_BUSY_EXIT_CODE:-75}
@@ -994,7 +995,7 @@ wait_for_server() {
   local host=$1
   local port=$2
   local waited=0
-  local timeout_sec=${READY_TIMEOUT_SECONDS:-300}
+  local timeout_sec=$READY_TIMEOUT_SECONDS
 
   while (( waited < timeout_sec )); do
     if [[ -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then

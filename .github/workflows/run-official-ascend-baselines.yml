@@ -350,6 +350,8 @@ jobs:
 
       - name: Run official baseline matrix
         shell: bash
+        env:
+          READY_TIMEOUT_SECONDS: 900
         run: |
           set -euo pipefail
           spec_args=()
