@@ -27,6 +27,14 @@ def _source_run_official_functions(snippet: str) -> str:
     )
 
 
+def _source_run_client_functions(snippet: str) -> str:
+    script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
+    return (
+        r"source <(awk 'BEGIN{capture=0} /^run_client_command\(\) \{/ {capture=1} /^resolve_same_spec\(\) \{/ {exit} capture {print}' "
+        f"{script_path}) && {snippet}"
+    )
+
+
 def _source_run_official_version_functions(snippet: str) -> str:
     script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
     return (
@@ -242,6 +250,26 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
         ]
 
 
+def test_list_matching_benchmark_pids_matches_cli_compat_process() -> None:
+    result = _run_bash(
+        _source_prepare_functions(
+            """
+            ps() {
+                cat <<'EOF'
+101 python /tmp/run_vllm_cli_compat.py bench serve --model foo
+102 python -m vllm.entrypoints.cli.main bench serve --model foo
+103 python /tmp/other.py serve --model foo
+EOF
+            }
+
+            list_matching_benchmark_pids
+            """
+        )
+    )
+
+    assert result.stdout.splitlines() == ["101", "102"]
+
+
 def test_run_in_official_env_python_uses_temp_script(tmp_path: Path) -> None:
     captured_args = tmp_path / "prepare-conda-args.txt"
     captured_script = tmp_path / "prepare-script-path.txt"
@@ -347,6 +375,43 @@ def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
     assert captured_version.read_text(encoding="utf-8").strip() == "0.11.0"
     args = captured_args.read_text(encoding="utf-8").splitlines()
     assert args[:3] == ["run", "-p", "/tmp/fake-official-env"]
+
+
+def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> None:
+    captured_pythonpath = tmp_path / "client-pythonpath.txt"
+    captured_args = tmp_path / "client-args.txt"
+
+    result = _run_bash(
+        _source_run_client_functions(
+            f"""
+            BENCHMARK_TYPE=serve
+            OFFICIAL_RUNTIME_PYTHONPATH=/tmp/runtime-a:/tmp/runtime-b
+            VLLM_CLI_COMPAT=/tmp/run_vllm_cli_compat.py
+            RESULT_DIR=/tmp/result-dir
+            RAW_RESULT_FILE=/tmp/result-dir/raw_benchmark_result.json
+            CLIENT_ARGS='--backend vllm --model foo/bar'
+
+            run_in_official_runtime() {{
+                local pythonpath_prefix=$1
+                shift
+                printf '%s\n' "$pythonpath_prefix" > {shlex.quote(str(captured_pythonpath))}
+                printf '%s\n' "$@" > {shlex.quote(str(captured_args))}
+            }}
+
+            run_client_command
+            """
+        )
+    )
+
+    assert result.returncode == 0
+    assert captured_pythonpath.read_text(encoding="utf-8").strip() == "/tmp/runtime-a:/tmp/runtime-b"
+    assert captured_args.read_text(encoding="utf-8").splitlines()[:5] == [
+        "python",
+        "/tmp/run_vllm_cli_compat.py",
+        "bench",
+        "serve",
+        "--save-result",
+    ]
 
 
 def test_configure_single_card_ascend_device_derives_from_generic_visible_devices() -> None:
