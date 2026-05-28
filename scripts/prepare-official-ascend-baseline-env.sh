@@ -523,7 +523,7 @@ is_benchmark_process() {
   local args
 
   args=$(process_args "$pid")
-  [[ -n "$args" ]] && [[ "$args" =~ vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main\ bench\ serve|EngineCore_DP0 ]]
+  [[ -n "$args" ]] && [[ "$args" =~ vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main\ bench\ serve|run_vllm_benchmark\.py\ (serve|throughput|latency)|EngineCore_DP0 ]]
 }
 
 is_managed_runner_wrapper_process() {
@@ -671,7 +671,7 @@ terminate_benchmark_pid_set() {
 
 list_matching_benchmark_pids() {
   ps -eo pid=,args= | awk '
-    /vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main bench serve|EngineCore_DP0/ && !/awk/ {
+    /vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main bench serve|run_vllm_benchmark\.py (serve|throughput|latency)|EngineCore_DP0/ && !/awk/ {
       print $1
     }
   ' | sort -u

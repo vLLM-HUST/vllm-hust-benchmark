@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 PREPARE_SCRIPT=${PREPARE_SCRIPT:-"$REPO_ROOT/scripts/prepare-official-ascend-baseline-env.sh"}
+VLLM_BENCHMARK_WRAPPER=${VLLM_BENCHMARK_WRAPPER:-"$REPO_ROOT/scripts/run_vllm_benchmark.py"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
@@ -63,6 +64,11 @@ fi
 
 if [[ ! -f "$PREPARE_SCRIPT" ]]; then
   echo "Prepare script not found: $PREPARE_SCRIPT" >&2
+  exit 2
+fi
+
+if [[ ! -f "$VLLM_BENCHMARK_WRAPPER" ]]; then
+  echo "Benchmark wrapper not found: $VLLM_BENCHMARK_WRAPPER" >&2
   exit 2
 fi
 
@@ -712,7 +718,7 @@ run_client_command() {
   case "$BENCHMARK_TYPE" in
     serve)
       run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
-        python -m vllm.entrypoints.cli.main bench serve \
+        python "$VLLM_BENCHMARK_WRAPPER" serve \
         --save-result \
         --result-dir "$RESULT_DIR" \
         --result-filename "$(basename "$RAW_RESULT_FILE")" \
@@ -720,7 +726,7 @@ run_client_command() {
       ;;
     throughput|latency)
       run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
-        python -m vllm.entrypoints.cli.main bench "$BENCHMARK_TYPE" \
+        python "$VLLM_BENCHMARK_WRAPPER" "$BENCHMARK_TYPE" \
         --output-json "$RAW_RESULT_FILE" \
         $CLIENT_ARGS
       ;;
@@ -1242,7 +1248,7 @@ case "$BENCHMARK_TYPE" in
     assert_target_port_available "Official baseline" "$CLIENT_HOST" "$CLIENT_PORT"
 
     SERVER_COMMAND="PYTHONUNBUFFERED=1 VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
-    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
+    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python $VLLM_BENCHMARK_WRAPPER serve --save-result --result-dir $RESULT_DIR --result-filename $(basename \"$RAW_RESULT_FILE\") $CLIENT_ARGS"
 
     echo "[goal-baseline] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
     echo "[goal-baseline] server command: $SERVER_COMMAND"
@@ -1307,7 +1313,7 @@ case "$BENCHMARK_TYPE" in
     fi
     ;;
   throughput|latency)
-    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
+    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python $VLLM_BENCHMARK_WRAPPER $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
     ;;
   *)
     echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2
