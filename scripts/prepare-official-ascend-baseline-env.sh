@@ -54,8 +54,10 @@ ensure_worktree() {
 run_with_ascend_env() {
   export ZSH_VERSION=""
   if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+    set +u
     # shellcheck disable=SC1090
     source "$ASCEND_TOOLKIT_SET_ENV"
+    set -u
   fi
   if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
     set +u

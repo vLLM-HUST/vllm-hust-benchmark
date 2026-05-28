@@ -351,7 +351,11 @@ jobs:
       - name: Run official baseline matrix
         shell: bash
         env:
+          CLIENT_READY_CHECK_TIMEOUT_SECONDS: 900
+          DEVICE_SELECTION_RETRIES: 20
+          DEVICE_SELECTION_RETRY_DELAY_SECONDS: 30
           READY_TIMEOUT_SECONDS: 900
+          READY_STATUS_INTERVAL_SECONDS: 30
         run: |
           set -euo pipefail
           spec_args=()
