@@ -1,0 +1,158 @@
+{
+  "entry_id": "04762a22-151a-4e76-9171-1a31bbbdda8c",
+  "engine": "vllm",
+  "engine_version": "0.11.0",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B3",
+    "chip_count": 1,
+    "interconnect": "unknown",
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 64.0
+  },
+  "model": {
+    "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+    "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+    "short_name": "Qwen2.5-14B-Instruct",
+    "display_name": "Qwen2.5-14B-Instruct",
+    "name": "Qwen/Qwen2.5-14B-Instruct",
+    "parameters": "14B",
+    "precision": "FP16",
+    "quantization": null
+  },
+  "workload": {
+    "name": "sharegpt-online",
+    "input_length": 1024,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null,
+    "dataset": "sharegpt"
+  },
+  "metrics": {
+    "ttft_ms": 152.62223643032485,
+    "tbt_ms": 71.7839484012433,
+    "throughput_tps": 185.0267344533577,
+    "peak_mem_mb": 0.0,
+    "error_rate": 0.0
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Ascend-class",
+      "representative_model_band": "7B-13B",
+      "representative_business_scenario": "online-chat",
+      "baseline_engine": "",
+      "declared_baseline_engine": "vllm",
+      "baseline_status": "pending-baseline",
+      "owner_confirmed": null,
+      "notes": null
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": null,
+      "long_context_throughput_stable": null,
+      "long_context_ttft_p95_ms": null,
+      "long_context_ttft_p99_ms": null,
+      "long_context_tpot_p95_ms": null,
+      "long_context_tpot_p99_ms": null,
+      "long_context_ttft_p95_stable": null,
+      "long_context_ttft_p99_stable": null,
+      "long_context_tpot_p95_stable": null,
+      "long_context_tpot_p99_stable": null,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "N/A",
+    "backend": "0.11.0",
+    "core": "0.11.0",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.11.15",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null
+  },
+  "metadata": {
+    "submitted_at": "2026-05-29T06:04:54Z",
+    "submitter": "official-ascend-baseline",
+    "data_source": "reference-vllm-ascend-benchmark",
+    "engine": "vllm",
+    "engine_version": "0.11.0",
+    "reproducible_cmd": null,
+    "git_commit": "2f1aed98ccdb0fcbe1ff4fd0abab225bfd8d0367",
+    "github_user": "moonandlife",
+    "github_commit_url": "https://github.com/vllm-project/vllm-ascend/commit/2f1aed98ccdb0fcbe1ff4fd0abab225bfd8d0367",
+    "github_repository": "vllm-project/vllm-ascend",
+    "github_ref": "v0.11.0",
+    "github_event_name": "workflow_dispatch",
+    "github_pr_number": null,
+    "github_pr_url": null,
+    "release_date": null,
+    "changelog_url": null,
+    "notes": null,
+    "verified": null,
+    "idempotency_key": "c6454c5ca8be8ed855617dda19d16bd824b1615ab5beaa8f8700855338f07597",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "runtime_provenance": {
+      "python": null,
+      "engine": {
+        "repository": null,
+        "ref": null,
+        "commit": null
+      },
+      "plugin": {
+        "engine": null,
+        "repository": null,
+        "ref": null,
+        "commit": null
+      }
+    }
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "official-ascend-jan-2026-v0.11.0-sharegpt-online-qwen25-14b-910b3",
+    "spec_label": "Official Ascend Jan 2026 ShareGPT online baseline for vllm-hust goal tracking",
+    "spec_source": "/workspace/vllm-hust-dev-hub/actions-runner/_work/vllm-hust-benchmark/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-online-qwen25-14b-910b3.json",
+    "scenario": "sharegpt-online",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "model_parameters": "14B",
+    "model_precision": "FP16",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B3",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_spec_hash": "32bc486be07eed1c91bd3123b6ac53b851f960424e139700fef1394927686592",
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "disable_log_requests": "",
+      "host": "0.0.0.0",
+      "port": 8000,
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "dtype": "float16"
+    },
+    "resolved_client_parameters": {
+      "backend": "vllm",
+      "endpoint": "/v1/completions",
+      "dataset_name": "sharegpt",
+      "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+      "num_prompts": 200,
+      "request_rate": 1,
+      "host": "127.0.0.1",
+      "port": 8000,
+      "model": "Qwen/Qwen2.5-14B-Instruct"
+    }
+  }
+}
