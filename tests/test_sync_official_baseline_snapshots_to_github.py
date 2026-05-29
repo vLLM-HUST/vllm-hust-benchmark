@@ -164,3 +164,27 @@ def test_sync_official_baseline_snapshots_to_github_pushes_and_is_idempotent(
     assert second_run.returncode == 0, second_run.stderr
     assert "already up to date" in second_run.stdout
     assert pushed_head == _git(target_repo, "rev-parse", "HEAD").stdout.strip()
+
+
+def test_sync_official_baseline_snapshots_to_github_can_skip_empty_source(
+    tmp_path: Path,
+) -> None:
+    source_repo = tmp_path / "benchmark-source"
+    (source_repo / "submissions").mkdir(parents=True)
+    _, target_repo = _create_target_repo(tmp_path)
+    website_repo = _create_dummy_website_repo(tmp_path)
+
+    env = {
+        **dict(subprocess.os.environ),
+        "ALLOW_LOCAL_GIT_RESET": "1",
+        "ALLOW_EMPTY_SNAPSHOT_SOURCE": "1",
+        "SOURCE_BENCHMARK_REPO_DIR": str(source_repo),
+        "TARGET_BENCHMARK_REPO_DIR": str(target_repo),
+        "WEBSITE_REPO_DIR": str(website_repo),
+        "PYTHON_BIN": sys.executable,
+        "SNAPSHOT_SOURCE_PATTERN": "official-ascend-*",
+    }
+
+    completed = _run(["bash", str(SYNC_SCRIPT)], env=env, check=False)
+    assert completed.returncode == 0, completed.stderr
+    assert "skipping publication sync" in completed.stdout.lower()

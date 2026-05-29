@@ -9,19 +9,27 @@ SINGLE_RUNNER=${SINGLE_RUNNER:-"$SCRIPT_DIR/run-official-ascend-goal-baseline.sh
 MATRIX_RUN_ID=${MATRIX_RUN_ID:-"official-ascend-goal-baseline-matrix-$(date -u +%Y%m%dT%H%M%SZ)"}
 MATRIX_RESULT_ROOT=${MATRIX_RESULT_ROOT:-"$REPO_ROOT/.benchmarks/$MATRIX_RUN_ID"}
 CANONICAL_SUBMISSIONS_ROOT=${CANONICAL_SUBMISSIONS_ROOT:-"$REPO_ROOT/submissions"}
+EXISTING_CANONICAL_SUBMISSIONS_ROOT=${EXISTING_CANONICAL_SUBMISSIONS_ROOT:-"$CANONICAL_SUBMISSIONS_ROOT"}
 PUBLISH_WEBSITE=${PUBLISH_WEBSITE:-0}
+PUBLISH_RESULTS=${PUBLISH_RESULTS:-0}
 WEBSITE_OUTPUT_DIR=${WEBSITE_OUTPUT_DIR:-"$WORKSPACE_ROOT/vllm-hust-website/data"}
 FORCE_RUN_EXISTING=${FORCE_RUN_EXISTING:-0}
 REPEAT_COUNT=${REPEAT_COUNT:-3}
+MIN_SUCCESSFUL_REPEATS=${MIN_SUCCESSFUL_REPEATS:-}
+MAX_REPEAT_ATTEMPTS=${MAX_REPEAT_ATTEMPTS:-}
 PREPARE_OFFICIAL_ENV=${PREPARE_OFFICIAL_ENV:-1}
 READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-900}
 SUMMARY_FILE=${MATRIX_SUMMARY_FILE:-"$MATRIX_RESULT_ROOT/summary.md"}
 PYTHON_BIN=${PYTHON_BIN:-$(command -v python3 || true)}
+PUBLICATION_SYNC_HELPER=${PUBLICATION_SYNC_HELPER:-}
+PUBLICATION_COMMIT_MESSAGE_PREFIX=${PUBLICATION_COMMIT_MESSAGE_PREFIX:-"chore(data): publish official ascend baseline"}
 PREPARED_ENV=0
 SKIPPED_COUNT=0
 RUN_COUNT=0
 PROMOTED_COUNT=0
 REVIEW_COUNT=0
+FAILED_COUNT=0
+FAILED_SPECS=()
 
 usage() {
   cat <<'EOF'
@@ -33,10 +41,12 @@ Behavior:
   - Skips specs that already have canonical submissions under submissions/<spec-id>/
   - Runs specs without canonical submissions through scripts/run-official-ascend-goal-baseline.sh
   - Repeats missing-canonical specs REPEAT_COUNT times (default: 3)
+  - Allows bounded repeat failures and still selects a canonical candidate when enough successful repeats exist
   - Chooses the repeat whose primary metric is closest to the median run and promotes only that candidate into canonical submissions/<spec-id>/
   - Set FORCE_RUN_EXISTING=1 to run specs even when a canonical submission already exists
     Existing canonical submissions are preserved and the new run is left in .benchmarks/ for manual review
   - Set PUBLISH_WEBSITE=1 to rebuild website data from the full submissions/ tree after the batch
+  - Set PUBLISH_RESULTS=1 together with publication helper env vars to publish each promoted spec immediately
 
 Examples:
   export GOAL_BASELINE_ENV_PREFIX=/root/miniconda3/envs/vllm-ascend-official-v0110
@@ -124,9 +134,23 @@ print(get_canonical_submission_dir(spec, submissions_root=Path(sys.argv[2])).res
 PY
 }
 
+resolve_existing_canonical_dir() {
+  local spec_file=$1
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" - <<'PY' "$spec_file" "$EXISTING_CANONICAL_SUBMISSIONS_ROOT"
+from pathlib import Path
+import sys
+
+from vllm_hust_benchmark.official_baselines import get_canonical_submission_dir
+from vllm_hust_benchmark.official_baselines import load_official_baseline_spec
+
+spec = load_official_baseline_spec(Path(sys.argv[1]))
+print(get_canonical_submission_dir(spec, submissions_root=Path(sys.argv[2])).resolve())
+PY
+}
+
 has_canonical_run() {
   local spec_file=$1
-  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" - <<'PY' "$spec_file" "$CANONICAL_SUBMISSIONS_ROOT"
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" - <<'PY' "$spec_file" "$EXISTING_CANONICAL_SUBMISSIONS_ROOT"
 from pathlib import Path
 import sys
 
@@ -175,6 +199,15 @@ promote_submission_to_canonical() {
 
 append_summary() {
   printf '%s\n' "$1" >> "$SUMMARY_FILE"
+}
+
+record_failed_spec() {
+  local spec_id=$1
+  local reason=$2
+
+  FAILED_SPECS+=("${spec_id}: ${reason}")
+  ((FAILED_COUNT+=1))
+  append_summary "- Failed spec: ${spec_id} (${reason})"
 }
 
 extract_repeat_failure_reason() {
@@ -282,6 +315,31 @@ append_selection_failure_summary() {
   done
 }
 
+publish_promoted_spec() {
+  local spec_id=$1
+  local snapshot_output_dir=${LOCAL_SNAPSHOT_OUTPUT_DIR:-}
+  local spec_snapshot_output_dir=""
+
+  if [[ "$PUBLISH_RESULTS" != "1" ]]; then
+    return 0
+  fi
+
+  if [[ -z "$PUBLICATION_SYNC_HELPER" ]] || [[ ! -f "$PUBLICATION_SYNC_HELPER" ]]; then
+    echo "Publication sync helper is required when PUBLISH_RESULTS=1: $PUBLICATION_SYNC_HELPER" >&2
+    return 2
+  fi
+
+  if [[ -n "$snapshot_output_dir" ]]; then
+    spec_snapshot_output_dir="$snapshot_output_dir/$spec_id"
+  fi
+
+  SOURCE_BENCHMARK_REPO_DIR="$REPO_ROOT" \
+  SNAPSHOT_SOURCE_PATTERN="$spec_id" \
+  SNAPSHOT_COMMIT_MESSAGE="${PUBLICATION_COMMIT_MESSAGE_PREFIX} ${spec_id} from ${MATRIX_RUN_ID}" \
+  LOCAL_SNAPSHOT_OUTPUT_DIR="$spec_snapshot_output_dir" \
+  bash "$PUBLICATION_SYNC_HELPER"
+}
+
 resolve_benchmark_type() {
   local spec_file=$1
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" - <<'PY' "$spec_file"
@@ -338,6 +396,7 @@ echo "[official-baseline-matrix] resolved ${#SPEC_FILES[@]} spec file(s)"
 append_summary "## Official Baseline Matrix"
 append_summary "- Result root: $MATRIX_RESULT_ROOT"
 append_summary "- Canonical submissions root: $CANONICAL_SUBMISSIONS_ROOT"
+append_summary "- Existing canonical submissions root: $EXISTING_CANONICAL_SUBMISSIONS_ROOT"
 append_summary "- Force rerun existing canonical: $FORCE_RUN_EXISTING"
 append_summary "- Repeat count for missing canonical specs: $REPEAT_COUNT"
 
@@ -345,6 +404,7 @@ for spec_file in "${SPEC_FILES[@]}"; do
   spec_slug=$(slugify "$spec_file")
   spec_id=$(resolve_spec_id "$spec_file")
   canonical_dir=$(resolve_canonical_dir "$spec_file")
+  existing_canonical_dir=$(resolve_existing_canonical_dir "$spec_file")
   benchmark_type=$(resolve_benchmark_type "$spec_file")
 
   echo
@@ -354,14 +414,14 @@ for spec_file in "${SPEC_FILES[@]}"; do
 
   if has_canonical_run "$spec_file"; then
     if [[ "$FORCE_RUN_EXISTING" != "1" ]]; then
-      echo "[official-baseline-matrix] skip: canonical run already exists at $canonical_dir"
-      append_summary "- Skip existing canonical: $spec_id -> $canonical_dir"
+      echo "[official-baseline-matrix] skip: canonical run already exists at $existing_canonical_dir"
+      append_summary "- Skip existing canonical: $spec_id -> $existing_canonical_dir"
       ((SKIPPED_COUNT+=1))
       continue
     fi
 
     echo "[official-baseline-matrix] canonical run already exists; re-running for manual review only"
-    append_summary "- Re-run for review only: $spec_id (canonical preserved at $canonical_dir)"
+    append_summary "- Re-run for review only: $spec_id (canonical preserved at $existing_canonical_dir)"
     should_promote=0
   else
     echo "[official-baseline-matrix] no canonical run found; executing and promoting on success"
@@ -371,13 +431,49 @@ for spec_file in "${SPEC_FILES[@]}"; do
 
   prepare_official_env_once
 
-  repeat_total=1
+  target_successful_repeats=1
+  min_successful_repeats=1
+  max_repeat_attempts=1
   if [[ "$should_promote" == "1" ]]; then
-    repeat_total="$REPEAT_COUNT"
+    target_successful_repeats="$REPEAT_COUNT"
+    if [[ -n "$MIN_SUCCESSFUL_REPEATS" ]]; then
+      min_successful_repeats="$MIN_SUCCESSFUL_REPEATS"
+    elif (( REPEAT_COUNT < 2 )); then
+      min_successful_repeats="$REPEAT_COUNT"
+    else
+      min_successful_repeats=2
+    fi
+
+    if [[ -n "$MAX_REPEAT_ATTEMPTS" ]]; then
+      max_repeat_attempts="$MAX_REPEAT_ATTEMPTS"
+    else
+      max_repeat_attempts=$((REPEAT_COUNT + 1))
+    fi
   fi
 
+  if (( target_successful_repeats < 1 )); then
+    target_successful_repeats=1
+  fi
+  if (( min_successful_repeats < 1 )); then
+    min_successful_repeats=1
+  fi
+  if (( min_successful_repeats > target_successful_repeats )); then
+    min_successful_repeats=$target_successful_repeats
+  fi
+  if (( max_repeat_attempts < target_successful_repeats )); then
+    max_repeat_attempts=$target_successful_repeats
+  fi
+
+  append_summary "  - Repeat policy for $spec_id: target_successes=${target_successful_repeats}, min_successes=${min_successful_repeats}, max_attempts=${max_repeat_attempts}"
+
   repeat_result_dirs=()
-  for repeat_index in $(seq 1 "$repeat_total"); do
+  successful_repeat_count=0
+  repeat_failure_count=0
+  for repeat_index in $(seq 1 "$max_repeat_attempts"); do
+    if (( successful_repeat_count >= target_successful_repeats )); then
+      break
+    fi
+
     repeat_label=$(printf 'repeat-%02d' "$repeat_index")
     result_dir="$MATRIX_RESULT_ROOT/$spec_slug/$repeat_label"
     run_id="$MATRIX_RUN_ID-$spec_slug-$repeat_label"
@@ -399,12 +495,28 @@ for spec_file in "${SPEC_FILES[@]}"; do
 
     if [[ "$runner_status" -ne 0 ]]; then
       append_repeat_failure_summary "$spec_id" "$repeat_label" "$result_dir" "$runner_status"
-      exit "$runner_status"
+      ((repeat_failure_count+=1))
+      remaining_attempts=$((max_repeat_attempts - repeat_index))
+      if (( successful_repeat_count + remaining_attempts < min_successful_repeats )); then
+        append_summary "    - stopping early: cannot reach minimum successful repeats for $spec_id after ${repeat_label}"
+        break
+      fi
+      continue
     fi
 
     repeat_result_dirs+=("$result_dir")
+    ((successful_repeat_count+=1))
     ((RUN_COUNT+=1))
   done
+
+  if (( successful_repeat_count < min_successful_repeats )); then
+    record_failed_spec "$spec_id" "only ${successful_repeat_count}/${min_successful_repeats} successful repeat(s) across ${max_repeat_attempts} attempt(s)"
+    continue
+  fi
+
+  if (( successful_repeat_count < target_successful_repeats )); then
+    append_summary "  - Proceeding with degraded sample count for $spec_id: ${successful_repeat_count}/${target_successful_repeats} successful repeat(s), failures=${repeat_failure_count}"
+  fi
 
   selection_error_log="$MATRIX_RESULT_ROOT/$spec_slug/candidate-selection.stderr.log"
   set +e
@@ -413,7 +525,8 @@ for spec_file in "${SPEC_FILES[@]}"; do
   set -e
   if [[ "$selection_status" -ne 0 ]]; then
     append_selection_failure_summary "$spec_id" "$selection_error_log" "${repeat_result_dirs[@]}"
-    exit "$selection_status"
+    record_failed_spec "$spec_id" "candidate selection failed"
+    continue
   fi
   selected_result_dir=$(printf '%s' "$selection_json" | jq -r '.selected_result_dir')
   primary_metric_name=$(printf '%s' "$selection_json" | jq -r '.primary_metric_name')
@@ -428,6 +541,16 @@ for spec_file in "${SPEC_FILES[@]}"; do
     promote_submission_to_canonical "$selected_result_dir" "$canonical_dir" "$spec_id"
     append_summary "  - Selected canonical candidate: $selected_result_dir"
     ((PROMOTED_COUNT+=1))
+
+    if [[ "$PUBLISH_RESULTS" == "1" ]]; then
+      if publish_promoted_spec "$spec_id"; then
+        append_summary "  - Published canonical submission for $spec_id"
+      else
+        publish_status=$?
+        record_failed_spec "$spec_id" "publication failed with exit=${publish_status}"
+        continue
+      fi
+    fi
   else
     echo "[official-baseline-matrix] review hint: selected rerun candidate is $selected_result_dir; canonical remains $canonical_dir"
     append_summary "  - Review hint: selected rerun candidate is $selected_result_dir; canonical remains $canonical_dir"
@@ -449,6 +572,12 @@ append_summary "- Skipped existing canonical runs: $SKIPPED_COUNT"
 append_summary "- Executed runs: $RUN_COUNT"
 append_summary "- Promoted new canonical runs: $PROMOTED_COUNT"
 append_summary "- Review-only reruns: $REVIEW_COUNT"
+append_summary "- Failed specs: $FAILED_COUNT"
+if (( FAILED_COUNT > 0 )); then
+  for failed_spec in "${FAILED_SPECS[@]}"; do
+    append_summary "  - $failed_spec"
+  done
+fi
 
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
   cat "$SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY"
@@ -459,4 +588,9 @@ echo "[official-baseline-matrix] skipped existing canonical runs: $SKIPPED_COUNT
 echo "[official-baseline-matrix] executed runs: $RUN_COUNT"
 echo "[official-baseline-matrix] promoted new canonical runs: $PROMOTED_COUNT"
 echo "[official-baseline-matrix] review-only reruns: $REVIEW_COUNT"
+echo "[official-baseline-matrix] failed specs: $FAILED_COUNT"
 echo "[official-baseline-matrix] summary: $SUMMARY_FILE"
+
+if (( FAILED_COUNT > 0 )); then
+  exit 1
+fi
