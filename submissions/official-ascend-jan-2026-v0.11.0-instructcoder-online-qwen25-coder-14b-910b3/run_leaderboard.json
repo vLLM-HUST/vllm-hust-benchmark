@@ -1,0 +1,158 @@
+{
+  "entry_id": "f469dd29-5bb0-452a-9837-64bb50393256",
+  "engine": "vllm",
+  "engine_version": "0.11.0",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B3",
+    "chip_count": 1,
+    "interconnect": "unknown",
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 64.0
+  },
+  "model": {
+    "canonical_id": "hf:Qwen/Qwen2.5-Coder-14B-Instruct",
+    "repo_id": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "short_name": "Qwen2.5-Coder-14B-Instruct",
+    "display_name": "Qwen2.5-Coder-14B-Instruct",
+    "name": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "parameters": "14B",
+    "precision": "FP16",
+    "quantization": null
+  },
+  "workload": {
+    "name": "instructcoder-online",
+    "input_length": 1024,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null,
+    "dataset": "hf"
+  },
+  "metrics": {
+    "ttft_ms": 137.42898824062877,
+    "tbt_ms": 69.90379941756544,
+    "throughput_tps": 125.67135720284112,
+    "peak_mem_mb": 0.0,
+    "error_rate": 0.0
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Ascend-class",
+      "representative_model_band": "7B-13B",
+      "representative_business_scenario": "code-assistant",
+      "baseline_engine": "",
+      "declared_baseline_engine": "vllm",
+      "baseline_status": "pending-baseline",
+      "owner_confirmed": null,
+      "notes": null
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": null,
+      "long_context_throughput_stable": null,
+      "long_context_ttft_p95_ms": null,
+      "long_context_ttft_p99_ms": null,
+      "long_context_tpot_p95_ms": null,
+      "long_context_tpot_p99_ms": null,
+      "long_context_ttft_p95_stable": null,
+      "long_context_ttft_p99_stable": null,
+      "long_context_tpot_p95_stable": null,
+      "long_context_tpot_p99_stable": null,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "N/A",
+    "backend": "0.11.0",
+    "core": "0.11.0",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.11.15",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null
+  },
+  "metadata": {
+    "submitted_at": "2026-05-29T04:34:30Z",
+    "submitter": "official-ascend-baseline",
+    "data_source": "reference-vllm-ascend-benchmark",
+    "engine": "vllm",
+    "engine_version": "0.11.0",
+    "reproducible_cmd": null,
+    "git_commit": "2f1aed98ccdb0fcbe1ff4fd0abab225bfd8d0367",
+    "github_user": "moonandlife",
+    "github_commit_url": "https://github.com/vllm-project/vllm-ascend/commit/2f1aed98ccdb0fcbe1ff4fd0abab225bfd8d0367",
+    "github_repository": "vllm-project/vllm-ascend",
+    "github_ref": "v0.11.0",
+    "github_event_name": "workflow_dispatch",
+    "github_pr_number": null,
+    "github_pr_url": null,
+    "release_date": null,
+    "changelog_url": null,
+    "notes": null,
+    "verified": null,
+    "idempotency_key": "071c877ecb8c80a1c3771b2290da13826e70eef8cb25e49df7c5ae3eb6be4b56",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "runtime_provenance": {
+      "python": null,
+      "engine": {
+        "repository": null,
+        "ref": null,
+        "commit": null
+      },
+      "plugin": {
+        "engine": null,
+        "repository": null,
+        "ref": null,
+        "commit": null
+      }
+    }
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "official-ascend-jan-2026-v0.11.0-instructcoder-online-qwen25-coder-14b-910b3",
+    "spec_label": "Official Ascend Jan 2026 InstructCoder online baseline for vllm-hust goal tracking",
+    "spec_source": "/workspace/vllm-hust-dev-hub/actions-runner/_work/vllm-hust-benchmark/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0110-instructcoder-online-qwen25-coder-14b-910b3.json",
+    "scenario": "instructcoder-online",
+    "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "model_parameters": "14B",
+    "model_precision": "FP16",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B3",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_spec_hash": "ea680601f62f7987d4020b65874c5c97281a9d871325749141829bc3634c9662",
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "disable_log_requests": "",
+      "host": "0.0.0.0",
+      "port": 8000,
+      "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+      "dtype": "float16"
+    },
+    "resolved_client_parameters": {
+      "backend": "vllm",
+      "endpoint": "/v1/completions",
+      "dataset_name": "hf",
+      "dataset_path": "likaixin/InstructCoder",
+      "num_prompts": 2048,
+      "request_rate": 1,
+      "host": "127.0.0.1",
+      "port": 8000,
+      "model": "Qwen/Qwen2.5-Coder-14B-Instruct"
+    }
+  }
+}
