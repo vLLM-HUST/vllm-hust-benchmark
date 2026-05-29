@@ -9,6 +9,7 @@ SNAPSHOT_TARGET_BRANCH=${SNAPSHOT_TARGET_BRANCH:-main}
 SNAPSHOT_OUTPUT_DIR=${SNAPSHOT_OUTPUT_DIR:-$TARGET_BENCHMARK_REPO_DIR/leaderboard-data/snapshots}
 LOCAL_SNAPSHOT_OUTPUT_DIR=${LOCAL_SNAPSHOT_OUTPUT_DIR:-}
 SNAPSHOT_SOURCE_PATTERN=${SNAPSHOT_SOURCE_PATTERN:-official-ascend-*}
+ALLOW_EMPTY_SNAPSHOT_SOURCE=${ALLOW_EMPTY_SNAPSHOT_SOURCE:-0}
 SNAPSHOT_MAX_PUSH_ATTEMPTS=${SNAPSHOT_MAX_PUSH_ATTEMPTS:-4}
 SNAPSHOT_PUSH_RETRY_SECONDS=${SNAPSHOT_PUSH_RETRY_SECONDS:-5}
 SNAPSHOT_COMMIT_MESSAGE=${SNAPSHOT_COMMIT_MESSAGE:-chore(data): publish official ascend baseline snapshots}
@@ -83,6 +84,11 @@ source_submission_dirs=("$SOURCE_BENCHMARK_REPO_DIR"/submissions/$SNAPSHOT_SOURC
 shopt -u nullglob
 
 if [[ ${#source_submission_dirs[@]} -eq 0 ]]; then
+  if [[ "$ALLOW_EMPTY_SNAPSHOT_SOURCE" == "1" ]]; then
+    echo "No source submissions matched pattern '$SNAPSHOT_SOURCE_PATTERN'; skipping publication sync"
+    write_github_env GITHUB_SNAPSHOT_SYNC_STATUS skipped-empty
+    exit 0
+  fi
   echo "no source submissions matched pattern '$SNAPSHOT_SOURCE_PATTERN' under $SOURCE_BENCHMARK_REPO_DIR/submissions" >&2
   exit 2
 fi

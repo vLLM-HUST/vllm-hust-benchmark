@@ -13,6 +13,16 @@ name: Run Official Ascend Baselines
         required: false
         type: number
         default: 3
+      min_successful_repeats:
+        description: Minimum number of successful repeats required to accept a canonical candidate. Use 0 for the workflow default.
+        required: false
+        type: number
+        default: 0
+      max_repeat_attempts:
+        description: Maximum repeat attempts per missing-canonical spec, including retries after transient failures. Use 0 for the workflow default.
+        required: false
+        type: number
+        default: 0
       force_run_existing:
         description: Re-run even when canonical submissions already exist. Existing canonical submissions are preserved.
         required: false
@@ -390,6 +400,9 @@ jobs:
           DEVICE_SELECTION_RETRY_DELAY_SECONDS: 30
           READY_TIMEOUT_SECONDS: 900
           READY_STATUS_INTERVAL_SECONDS: 30
+          BENCHMARK_REPO_SSH_KEY: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          MIN_SUCCESSFUL_REPEATS_INPUT: ${{ github.event.inputs.min_successful_repeats || 0 }}
+          MAX_REPEAT_ATTEMPTS_INPUT: ${{ github.event.inputs.max_repeat_attempts || 0 }}
         run: |
           set -euo pipefail
           spec_args=()
@@ -402,10 +415,29 @@ jobs:
             spec_args+=("docs/official-baselines")
           fi
 
+          if [[ "${MIN_SUCCESSFUL_REPEATS_INPUT:-0}" =~ ^[1-9][0-9]*$ ]]; then
+            export MIN_SUCCESSFUL_REPEATS="$MIN_SUCCESSFUL_REPEATS_INPUT"
+          fi
+          if [[ "${MAX_REPEAT_ATTEMPTS_INPUT:-0}" =~ ^[1-9][0-9]*$ ]]; then
+            export MAX_REPEAT_ATTEMPTS="$MAX_REPEAT_ATTEMPTS_INPUT"
+          fi
+
+          if [[ "$PUBLISH_RESULTS" == "1" ]]; then
+            export EXISTING_CANONICAL_SUBMISSIONS_ROOT="$GITHUB_WORKSPACE/publication-target/vllm-hust-benchmark/submissions"
+            export PUBLICATION_SYNC_HELPER="$GITHUB_WORKSPACE/.github/workflows/scripts/sync_official_baseline_snapshots_to_github.sh"
+            export TARGET_BENCHMARK_REPO_DIR="$GITHUB_WORKSPACE/publication-target/vllm-hust-benchmark"
+            export WEBSITE_REPO_DIR="$GITHUB_WORKSPACE/vllm-hust-website"
+            export SNAPSHOT_TARGET_BRANCH="$PUBLICATION_TARGET_BRANCH"
+            export LOCAL_SNAPSHOT_OUTPUT_DIR="$GITHUB_WORKSPACE/artifacts/official-baseline/published-snapshots"
+            export PUBLICATION_COMMIT_MESSAGE_PREFIX="chore(data): publish official ascend baseline"
+            export BENCHMARK_REPO_SLUG="vLLM-HUST/vllm-hust-benchmark"
+            export BENCHMARK_REPO_REMOTE="origin"
+          fi
+
           bash scripts/run-official-ascend-goal-baseline-matrix.sh "${spec_args[@]}"
 
       - name: Publish official baseline snapshots
-        if: ${{ env.PUBLISH_RESULTS == '1' }}
+        if: ${{ always() && env.PUBLISH_RESULTS == '1' }}
         shell: bash
         env:
           SOURCE_BENCHMARK_REPO_DIR: ${{ github.workspace }}
@@ -418,6 +450,7 @@ jobs:
           BENCHMARK_REPO_SLUG: vLLM-HUST/vllm-hust-benchmark
           BENCHMARK_REPO_REMOTE: origin
           BENCHMARK_REPO_SSH_KEY: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ALLOW_EMPTY_SNAPSHOT_SOURCE: "1"
         run: |
           set -euo pipefail
           bash .github/workflows/scripts/sync_official_baseline_snapshots_to_github.sh

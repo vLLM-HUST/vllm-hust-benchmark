@@ -270,8 +270,10 @@ Notes:
 - The runner calls the same prepare script in admission-only mode immediately before benchmark startup, so residual-process cleanup is a hard precondition rather than a manual step.
 - The runner prefers a locally cached Hugging Face snapshot for the target model when one already exists. You can also force a specific local model directory with `OFFICIAL_MODEL_PATH=/abs/model/path`.
 - `run-official-ascend-goal-baseline-matrix.sh` is the batch trigger for official baseline establishment. It skips specs that already have canonical submissions under `submissions/<spec-id>/` and prints a hint instead of re-running them.
-- When a spec has no canonical submission yet, `run-official-ascend-goal-baseline-matrix.sh` repeats it `REPEAT_COUNT` times (default `3`), chooses the run whose primary metric is closest to the median candidate, and promotes only that run into `submissions/<spec-id>/`.
+- When a spec has no canonical submission yet, `run-official-ascend-goal-baseline-matrix.sh` targets `REPEAT_COUNT` successful runs (default `3`), allows bounded transient repeat failures, chooses the run whose primary metric is closest to the median successful candidate set, and promotes only that run into `submissions/<spec-id>/`.
 - Set `FORCE_RUN_EXISTING=1` only when you intentionally want a review-only rerun. The matrix runner preserves the current canonical submission and leaves the new result under `.benchmarks/` for manual comparison instead of auto-replacing it.
+- By default the matrix runner accepts a degraded but still usable sample set when at least `2` successful repeats exist (`1` when `REPEAT_COUNT=1`). Override with `MIN_SUCCESSFUL_REPEATS=<n>` if you need a stricter bar.
+- The matrix runner uses `MAX_REPEAT_ATTEMPTS` (default `REPEAT_COUNT + 1`) to absorb transient engine or runtime crashes without throwing away earlier successful repeats.
 - For official baseline workflow dispatch in GitHub Actions, use `.github/workflows/run-official-ascend-baselines.yml`. It runs the same matrix trigger on the self-hosted Ascend runner, promotes missing canonical `submissions/official-ascend-*`, and now publishes those canonical directories plus refreshed `leaderboard-data/snapshots/` to `vllm-hust-benchmark@main` by default so the website can see the result.
 
 This produces:
@@ -315,6 +317,8 @@ Useful local switches:
 - `FORCE_REPAIR_OFFICIAL_ENV=1`: bypass the prepare script health check and force a full reinstall/repair of the official env.
 - `REPEAT_COUNT=3`: recommended default for establishing a missing canonical spec.
 - `FORCE_RUN_EXISTING=1`: rerun even if canonical data already exists, but do not overwrite canonical automatically.
+- `MIN_SUCCESSFUL_REPEATS=<n>`: minimum successful repeats required before canonical selection is allowed. Default is `2` when `REPEAT_COUNT >= 2`, otherwise `1`.
+- `MAX_REPEAT_ATTEMPTS=<n>`: hard cap on total attempts per missing canonical spec, including retries after transient failures. Default is `REPEAT_COUNT + 1`.
 - `PUBLISH_WEBSITE=1`: rebuild the checked-out local `vllm-hust-website/data` from the full `submissions/` tree after the batch. This is a local workspace refresh, not the live publication path.
 - `PYTORCH_CPU_INDEX_URL=https://download.pytorch.org/whl/cpu`: default CPU wheel index used by the prepare script for torch-family dependency resolution.
 - `OFFICIAL_TORCH_NPU_WHEEL_URL=<exact-wheel-url>`: preferred escape hatch when the historical `torch-npu` build has disappeared from the live mirror.
@@ -333,6 +337,8 @@ Recommended `workflow_dispatch` inputs for the first full establishment run:
 
 - `spec_paths`: leave blank to cover `docs/official-baselines`
 - `repeat_count`: `3`
+- `min_successful_repeats`: `0` (workflow default; resolves to `2` when `repeat_count >= 2`)
+- `max_repeat_attempts`: `0` (workflow default; resolves to `repeat_count + 1`)
 - `force_run_existing`: `false`
 - `prepare_official_env`: `true`
 - `force_repair_official_env`: `false`
@@ -361,6 +367,8 @@ cd /path/to/vllm-hust-benchmark
 gh workflow run run-official-ascend-baselines.yml \
 	--ref ws/run-official-baseline \
 	-f repeat_count=3 \
+	-f min_successful_repeats=0 \
+	-f max_repeat_attempts=0 \
 	-f force_run_existing=false \
 	-f prepare_official_env=true \
 	-f force_repair_official_env=false \
@@ -388,7 +396,7 @@ Workflow artifacts:
 - `official-baseline-summary-<run_id>-<attempt>`: the batch summary markdown.
 - `official-baseline-results-<run_id>-<attempt>`: `.benchmarks/...` results and any promoted `submissions/official-ascend-*` directories.
 
-`publish_results=true` is the formal publication path. It syncs the promoted `submissions/official-ascend-*` directories into `vllm-hust-benchmark@main`, regenerates `leaderboard-data/snapshots/`, and pushes the result so the website's GitHub-first loader can see it. Set `publish_results=false` only when you intentionally want an artifact-only dry run.
+`publish_results=true` is the formal publication path. It now checks `vllm-hust-benchmark@main` for already-published canonical submissions before launching a missing spec, publishes each newly promoted spec immediately, regenerates `leaderboard-data/snapshots/`, and still runs a final safety sync at the end. This means a later spec failure no longer forces you to rerun already-published official baselines.
 
 `publish_website=true` remains a local-only convenience switch. It refreshes the checked-out `vllm-hust-website/data/` workspace copy after the batch, but by itself it does not update the live benchmark data source.
 
