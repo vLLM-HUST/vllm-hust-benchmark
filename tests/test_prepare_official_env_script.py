@@ -22,7 +22,7 @@ def _source_prepare_functions(snippet: str) -> str:
 def _source_run_official_functions(snippet: str) -> str:
     script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
     return (
-        r"source <(awk 'BEGIN{capture=0} /^run_in_official_runtime\(\) \{/ {capture=1} /^run_server_command\(\) \{/ {exit} capture {print}' "
+        r"source <(awk 'BEGIN{capture=0} /^set_ascend_visible_devices_scope\(\) \{/ {capture=1} /^run_server_command\(\) \{/ {exit} capture {print}' "
         f"{script_path}) && {snippet}"
     )
 
@@ -414,6 +414,61 @@ def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> No
     ]
 
 
+def test_run_client_command_prepares_single_card_runtime_for_offline_benchmarks(
+    tmp_path: Path,
+) -> None:
+    captured_events = tmp_path / "offline-events.txt"
+    captured_args = tmp_path / "offline-client-args.txt"
+
+    result = _run_bash(
+        _source_run_client_functions(
+            f"""
+            BENCHMARK_TYPE=latency
+            OFFICIAL_RUNTIME_PYTHONPATH=/tmp/runtime-a:/tmp/runtime-b
+            VLLM_CLI_COMPAT=/tmp/run_vllm_cli_compat.py
+            RAW_RESULT_FILE=/tmp/result-dir/raw_benchmark_result.json
+            CLIENT_ARGS='--model foo/bar'
+            RESOURCE_BUSY_EXIT_CODE=75
+            DEVICE_SELECTION_RETRIES=20
+            ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=30
+            ASCEND_VISIBLE_DEVICES=3
+            ASCEND_RT_VISIBLE_DEVICES=3
+
+            wait_for_single_card_ascend_device() {{
+                printf 'select\n' >> {shlex.quote(str(captured_events))}
+            }}
+
+            wait_for_ascend_runtime_ready() {{
+                printf 'ready\n' >> {shlex.quote(str(captured_events))}
+            }}
+
+            run_in_official_runtime() {{
+                local pythonpath_prefix=$1
+                shift
+                printf 'run\n' >> {shlex.quote(str(captured_events))}
+                printf '%s\n' "$@" > {shlex.quote(str(captured_args))}
+            }}
+
+            run_client_command
+            """
+        )
+    )
+
+    assert result.returncode == 0
+    assert captured_events.read_text(encoding="utf-8").splitlines() == [
+        "select",
+        "ready",
+        "run",
+    ]
+    assert captured_args.read_text(encoding="utf-8").splitlines()[:5] == [
+        "python",
+        "/tmp/run_vllm_cli_compat.py",
+        "bench",
+        "latency",
+        "--output-json",
+    ]
+
+
 def test_configure_single_card_ascend_device_derives_from_generic_visible_devices() -> None:
     result = _run_bash(
         _source_run_official_functions(
@@ -761,44 +816,6 @@ EOF
     )
 
     assert result.returncode == 0
-
-
-def test_selection_failure_is_not_retryable_when_all_devices_busy() -> None:
-    result = _run_bash(
-        _source_run_official_version_functions(
-            """
-            RESOURCE_BUSY_EXIT_CODE=75
-            GOAL_BASELINE_DEVICE_SELECTION_REASON=all-busy
-
-            if selection_failure_is_retryable 75 1 8; then
-                echo 'retry=yes'
-            else
-                echo 'retry=no'
-            fi
-            """
-        )
-    )
-
-    assert result.stdout.splitlines()[-1] == "retry=no"
-
-
-def test_selection_failure_is_retryable_for_transient_busy() -> None:
-    result = _run_bash(
-        _source_run_official_version_functions(
-            """
-            RESOURCE_BUSY_EXIT_CODE=75
-            GOAL_BASELINE_DEVICE_SELECTION_REASON=selected
-
-            if selection_failure_is_retryable 75 1 8; then
-                echo 'retry=yes'
-            else
-                echo 'retry=no'
-            fi
-            """
-        )
-    )
-
-    assert result.stdout.splitlines()[-1] == "retry=yes"
 
 
 def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) -> None:
