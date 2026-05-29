@@ -727,6 +727,8 @@ run_client_command() {
         $CLIENT_ARGS
       ;;
     throughput|latency)
+      prepare_offline_benchmark_runtime || return $?
+
       run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
         python "$VLLM_CLI_COMPAT" bench "$BENCHMARK_TYPE" \
         --output-json "$RAW_RESULT_FILE" \
@@ -737,6 +739,34 @@ run_client_command() {
       return 2
       ;;
   esac
+}
+
+prepare_offline_benchmark_runtime() {
+  local selection_status=0
+  local runtime_ready_status=0
+
+  if wait_for_single_card_ascend_device; then
+    selection_status=0
+  else
+    selection_status=$?
+  fi
+
+  if [[ "$selection_status" -ne 0 ]]; then
+    if [[ "$selection_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
+      echo "[goal-baseline] All detected Ascend devices remained busy after ${DEVICE_SELECTION_RETRIES} selection attempt(s)" >&2
+    fi
+    return "$selection_status"
+  fi
+
+  echo "[goal-baseline] Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-<unset>} (rt=${ASCEND_RT_VISIBLE_DEVICES:-<unset>})"
+
+  if wait_for_ascend_runtime_ready; then
+    return 0
+  fi
+
+  runtime_ready_status=$?
+  echo "[goal-baseline] Ascend runtime did not become ready after ${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS}s" >&2
+  return "$runtime_ready_status"
 }
 
 resolve_same_spec() {
@@ -1262,6 +1292,24 @@ GITHUB_REF=$(jq -r '.export.github_ref' "$SPEC_FILE")
 GIT_COMMIT=$(jq -r '.export.git_commit' "$SPEC_FILE")
 DATA_SOURCE=$(jq -r '.export.data_source' "$SPEC_FILE")
 BENCHMARK_TYPE=$(resolve_scenario_benchmark_type)
+OFFICIAL_CORE_SOURCE_REPOSITORY=${OFFICIAL_CORE_SOURCE_REPOSITORY:-"vllm-project/vllm"}
+OFFICIAL_BACKEND_SOURCE_ENGINE=${OFFICIAL_BACKEND_SOURCE_ENGINE:-"vllm-ascend"}
+OFFICIAL_BACKEND_SOURCE_REPOSITORY=${OFFICIAL_BACKEND_SOURCE_REPOSITORY:-"vllm-project/vllm-ascend"}
+OFFICIAL_CORE_SOURCE_REF=$(jq -r '.baseline_target.vllm_ref // empty' "$SPEC_FILE")
+OFFICIAL_BACKEND_SOURCE_REF=$(jq -r '.baseline_target.vllm_ascend_ref // empty' "$SPEC_FILE")
+
+if [[ -z "$OFFICIAL_CORE_SOURCE_REF" ]] || [[ "$OFFICIAL_CORE_SOURCE_REF" == "null" ]]; then
+  OFFICIAL_CORE_SOURCE_REF="$OFFICIAL_VLLM_REF"
+fi
+if [[ -z "$OFFICIAL_BACKEND_SOURCE_REF" ]] || [[ "$OFFICIAL_BACKEND_SOURCE_REF" == "null" ]]; then
+  OFFICIAL_BACKEND_SOURCE_REF="$OFFICIAL_VLLM_ASCEND_REF"
+fi
+
+OFFICIAL_CORE_SOURCE_COMMIT=$(git -C "$OFFICIAL_VLLM_WORKTREE" rev-parse HEAD 2>/dev/null || true)
+OFFICIAL_BACKEND_SOURCE_COMMIT=$(git -C "$OFFICIAL_VLLM_ASCEND_WORKTREE" rev-parse HEAD 2>/dev/null || true)
+if [[ -z "$OFFICIAL_BACKEND_SOURCE_COMMIT" ]]; then
+  OFFICIAL_BACKEND_SOURCE_COMMIT="$GIT_COMMIT"
+fi
 
 if [[ -z "$OFFICIAL_CORE_VERSION" ]]; then
   OFFICIAL_CORE_VERSION=$(detect_official_core_version)
@@ -1432,8 +1480,8 @@ EXPORT_ARGS=(
   --run-id "$RUN_ID"
   --engine "$ENGINE"
   --engine-version "$ENGINE_VERSION"
-  --core-version "$OFFICIAL_CORE_VERSION"
-  --backend-version "$OFFICIAL_BACKEND_VERSION"
+  --core-version N/A
+  --backend-version N/A
   --model-name "$MODEL"
   --model-parameters "$MODEL_PARAMETERS"
   --model-precision "$MODEL_PRECISION"
@@ -1447,6 +1495,13 @@ EXPORT_ARGS=(
   --git-commit "$GIT_COMMIT"
   --github-repository "$GITHUB_REPOSITORY"
   --github-ref "$GITHUB_REF"
+  --engine-source-repository "$OFFICIAL_CORE_SOURCE_REPOSITORY"
+  --engine-source-ref "$OFFICIAL_CORE_SOURCE_REF"
+  --engine-source-commit "$OFFICIAL_CORE_SOURCE_COMMIT"
+  --plugin-source-engine "$OFFICIAL_BACKEND_SOURCE_ENGINE"
+  --plugin-source-repository "$OFFICIAL_BACKEND_SOURCE_REPOSITORY"
+  --plugin-source-ref "$OFFICIAL_BACKEND_SOURCE_REF"
+  --plugin-source-commit "$OFFICIAL_BACKEND_SOURCE_COMMIT"
 )
 
 append_export_arg_from_spec --input-length '.client_parameters.input_len'
