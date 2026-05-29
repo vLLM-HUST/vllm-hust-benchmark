@@ -14,6 +14,8 @@ OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0110"}
 OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0110"}
 OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
 OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/official-ascend-goal-baseline"}
+OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"$OFFICIAL_VLLM_CACHE_ROOT/datasets"}
+OFFICIAL_SHAREGPT_DATASET_URL=${OFFICIAL_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
 OFFICIAL_MODEL_PATH=${OFFICIAL_MODEL_PATH:-}
 OFFICIAL_SERVER_HOST=${OFFICIAL_SERVER_HOST:-}
 OFFICIAL_SERVER_PORT=${OFFICIAL_SERVER_PORT:-"8000"}
@@ -835,6 +837,109 @@ json2args() {
   '
 }
 
+download_file() {
+  local url=$1
+  local target_file=$2
+
+  mkdir -p "$(dirname "$target_file")"
+  if command -v wget >/dev/null 2>&1; then
+    wget -O "$target_file" "$url"
+    return 0
+  fi
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -L --fail --output "$target_file" "$url"
+    return 0
+  fi
+
+  echo "wget or curl is required to download benchmark datasets" >&2
+  return 2
+}
+
+ensure_runtime_dataset_available() {
+  local dataset_path=${1:-}
+  local sharegpt_target
+
+  [[ -z "$dataset_path" ]] && return 0
+
+  case "$dataset_path" in
+    /*)
+      if [[ ! -f "$dataset_path" ]]; then
+        echo "runtime dataset path not found: $dataset_path" >&2
+        return 2
+      fi
+      return 0
+      ;;
+    ShareGPT_V3_unfiltered_cleaned_split.json)
+      sharegpt_target="$OFFICIAL_BENCHMARK_DATASET_ROOT/$dataset_path"
+      if [[ -f "$sharegpt_target" ]]; then
+        return 0
+      fi
+      echo "[goal-baseline] downloading ShareGPT benchmark dataset to $sharegpt_target"
+      download_file "$OFFICIAL_SHAREGPT_DATASET_URL" "$sharegpt_target"
+      ;;
+    benchmarks/*)
+      if [[ ! -f "$OFFICIAL_VLLM_WORKTREE/$dataset_path" ]]; then
+        echo "benchmark dataset path not found in official vllm worktree: $OFFICIAL_VLLM_WORKTREE/$dataset_path" >&2
+        return 2
+      fi
+      ;;
+  esac
+}
+
+normalized_server_parameters_json() {
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    SAME_SPEC_FILE="$SAME_SPEC_FILE" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.official_runtime_inputs import normalize_server_parameters
+
+payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+print(
+    json.dumps(
+        normalize_server_parameters(payload["resolved_server_parameters"]),
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+)
+PY
+}
+
+normalized_client_parameters_json() {
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    SAME_SPEC_FILE="$SAME_SPEC_FILE" \
+    BENCHMARK_TYPE="$BENCHMARK_TYPE" \
+    CLIENT_READY_CHECK_TIMEOUT_SECONDS="$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
+    OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
+    OFFICIAL_BENCHMARK_DATASET_ROOT="$OFFICIAL_BENCHMARK_DATASET_ROOT" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
+
+payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
+print(
+    json.dumps(
+        normalize_client_parameters(
+            payload["resolved_client_parameters"],
+            benchmark_type=os.environ["BENCHMARK_TYPE"],
+            ready_check_timeout_sec=ready_timeout,
+            vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
+            dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
+        ),
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+)
+PY
+}
+
 resolve_runtime_model() {
   if [[ -n "$OFFICIAL_MODEL_PATH" ]]; then
     echo "$OFFICIAL_MODEL_PATH"
@@ -1184,17 +1289,10 @@ fi
 SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
 resolve_same_spec
 
-CLIENT_ARGS=$(json2args "$({
-  jq -c \
-    --argjson ready_timeout "$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
-    '.resolved_client_parameters
-      | .ready_check_timeout_sec = (
-          if (.ready_check_timeout_sec // 0) > 0
-          then .ready_check_timeout_sec
-          else $ready_timeout
-          end
-        )' "$SAME_SPEC_FILE"
-})")
+resolved_dataset_path=$(jq -r '.resolved_client_parameters.dataset_path // empty' "$SAME_SPEC_FILE")
+ensure_runtime_dataset_available "$resolved_dataset_path"
+
+CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
@@ -1237,7 +1335,7 @@ case "$BENCHMARK_TYPE" in
     SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
     CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
     CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
-    SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters | del(.disable_log_requests)' "$SAME_SPEC_FILE")")
+    SERVER_ARGS=$(json2args "$(normalized_server_parameters_json | jq -c 'del(.disable_log_requests)')")
 
     BENCHMARK_SERVER_PORT="$SERVER_PORT" \
     PREPARE_BENCHMARK_ADMISSION_ONLY=1 \
