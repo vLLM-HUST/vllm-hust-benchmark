@@ -24,15 +24,25 @@ name: Run Official Ascend Baselines
         type: boolean
         default: true
       publish_website:
-        description: Rebuild website data from submissions after the batch.
+        description: Rebuild the checked-out local website data directory after the batch. This does not publish live benchmark snapshots.
         required: false
         type: boolean
         default: false
+      publish_results:
+        description: Publish promoted official canonical submissions to vllm-hust-benchmark@main and refresh live leaderboard snapshots.
+        required: false
+        type: boolean
+        default: true
       force_repair_official_env:
         description: Skip the prepare-script health check and force a full repair/reinstall of the official env.
         required: false
         type: boolean
         default: false
+      publication_target_branch:
+        description: Target branch in vLLM-HUST/vllm-hust-benchmark for formal publication.
+        required: false
+        type: string
+        default: main
       website_ref:
         description: Optional vllm-hust-website ref to use when publish_website is enabled.
         required: false
@@ -78,6 +88,8 @@ jobs:
       PREPARE_OFFICIAL_ENV: ${{ github.event.inputs.prepare_official_env == 'false' && '0' || '1' }}
       FORCE_REPAIR_OFFICIAL_ENV: ${{ github.event.inputs.force_repair_official_env == 'true' && '1' || '0' }}
       PUBLISH_WEBSITE: ${{ github.event.inputs.publish_website == 'true' && '1' || '0' }}
+      PUBLISH_RESULTS: ${{ github.event.inputs.publish_results == 'false' && '0' || '1' }}
+      PUBLICATION_TARGET_BRANCH: ${{ github.event.inputs.publication_target_branch || 'main' }}
       VLLM_HUST_WEBSITE_REF: ${{ github.event.inputs.website_ref || 'main' }}
       ASCEND_RT_VISIBLE_DEVICES: ${{ vars.VLLM_ASCEND_HUST_BENCHMARK_VISIBLE_DEVICES || '' }}
     steps:
@@ -87,10 +99,11 @@ jobs:
           set -euo pipefail
           rm -rf "$GITHUB_WORKSPACE/reference-repos" \
              "$GITHUB_WORKSPACE/.ci-home" \
-                 "$GITHUB_WORKSPACE/vllm-hust-website" \
-                 "$GITHUB_WORKSPACE/.benchmarks" \
-                 "$GITHUB_WORKSPACE/artifacts"
-           mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
+             "$GITHUB_WORKSPACE/vllm-hust-website" \
+             "$GITHUB_WORKSPACE/publication-target" \
+             "$GITHUB_WORKSPACE/.benchmarks" \
+             "$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
           mkdir -p "$GITHUB_WORKSPACE/artifacts/official-baseline"
 
       - name: Require GitHub SSH checkout key
@@ -177,6 +190,18 @@ jobs:
           ssh-strict: false
           persist-credentials: false
 
+      - name: Checkout benchmark publication target
+        if: ${{ env.PUBLISH_RESULTS == '1' }}
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-hust-benchmark
+          ref: ${{ env.PUBLICATION_TARGET_BRANCH }}
+          path: publication-target/vllm-hust-benchmark
+          fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
       - name: Resolve host Python
         shell: bash
         run: |
@@ -216,6 +241,15 @@ jobs:
           printf 'PYTHON_BIN=%s\n' "$host_python" >> "$GITHUB_ENV"
           printf 'HOST_PYTHON_BIN=%s\n' "$host_python" >> "$GITHUB_ENV"
           echo "Resolved host Python: $host_python ($host_python_version)"
+
+      - name: Install publication aggregation dependency
+        if: ${{ env.PUBLISH_RESULTS == '1' || env.PUBLISH_WEBSITE == '1' }}
+        shell: bash
+        env:
+          HOST_PYTHON_BIN: ${{ env.HOST_PYTHON_BIN }}
+        run: |
+          set -euo pipefail
+          "$HOST_PYTHON_BIN" -m pip install --user --disable-pip-version-check 'jsonschema>=4'
 
       - name: Resolve conda base
         shell: bash
@@ -370,6 +404,34 @@ jobs:
 
           bash scripts/run-official-ascend-goal-baseline-matrix.sh "${spec_args[@]}"
 
+      - name: Publish official baseline snapshots
+        if: ${{ env.PUBLISH_RESULTS == '1' }}
+        shell: bash
+        env:
+          SOURCE_BENCHMARK_REPO_DIR: ${{ github.workspace }}
+          TARGET_BENCHMARK_REPO_DIR: ${{ github.workspace }}/publication-target/vllm-hust-benchmark
+          WEBSITE_REPO_DIR: ${{ github.workspace }}/vllm-hust-website
+          PYTHON_BIN: ${{ env.HOST_PYTHON_BIN }}
+          SNAPSHOT_TARGET_BRANCH: ${{ env.PUBLICATION_TARGET_BRANCH }}
+          LOCAL_SNAPSHOT_OUTPUT_DIR: ${{ github.workspace }}/artifacts/official-baseline/published-snapshots
+          SNAPSHOT_COMMIT_MESSAGE: "chore(data): publish official ascend baselines from run ${{ github.run_id }}-${{ github.run_attempt }}"
+          BENCHMARK_REPO_SLUG: vLLM-HUST/vllm-hust-benchmark
+          BENCHMARK_REPO_REMOTE: origin
+          BENCHMARK_REPO_SSH_KEY: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          bash .github/workflows/scripts/sync_official_baseline_snapshots_to_github.sh
+
+      - name: Summarize publication result
+        if: ${{ always() && env.PUBLISH_RESULTS == '1' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "- Snapshot publication status: ${GITHUB_SNAPSHOT_SYNC_STATUS:-unknown}" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -n "${GITHUB_SNAPSHOT_SYNC_COMMIT:-}" ]]; then
+            echo "- Snapshot publication commit: ${GITHUB_SNAPSHOT_SYNC_COMMIT}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Upload official baseline summary
         if: always()
         uses: actions/upload-artifact@v4
@@ -386,6 +448,7 @@ jobs:
           name: official-baseline-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             .benchmarks/official-ascend-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+            artifacts/official-baseline/published-snapshots
             submissions/official-ascend-*
           if-no-files-found: warn
           retention-days: 14

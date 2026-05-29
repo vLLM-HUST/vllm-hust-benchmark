@@ -272,7 +272,7 @@ Notes:
 - `run-official-ascend-goal-baseline-matrix.sh` is the batch trigger for official baseline establishment. It skips specs that already have canonical submissions under `submissions/<spec-id>/` and prints a hint instead of re-running them.
 - When a spec has no canonical submission yet, `run-official-ascend-goal-baseline-matrix.sh` repeats it `REPEAT_COUNT` times (default `3`), chooses the run whose primary metric is closest to the median candidate, and promotes only that run into `submissions/<spec-id>/`.
 - Set `FORCE_RUN_EXISTING=1` only when you intentionally want a review-only rerun. The matrix runner preserves the current canonical submission and leaves the new result under `.benchmarks/` for manual comparison instead of auto-replacing it.
-- For official baseline workflow dispatch in GitHub Actions, use `.github/workflows/run-official-ascend-baselines.yml`. It runs the same matrix trigger on the self-hosted Ascend runner and uploads the summary plus generated result directories as artifacts, but it does not auto-commit canonical updates.
+- For official baseline workflow dispatch in GitHub Actions, use `.github/workflows/run-official-ascend-baselines.yml`. It runs the same matrix trigger on the self-hosted Ascend runner, promotes missing canonical `submissions/official-ascend-*`, and now publishes those canonical directories plus refreshed `leaderboard-data/snapshots/` to `vllm-hust-benchmark@main` by default so the website can see the result.
 
 This produces:
 
@@ -315,7 +315,7 @@ Useful local switches:
 - `FORCE_REPAIR_OFFICIAL_ENV=1`: bypass the prepare script health check and force a full reinstall/repair of the official env.
 - `REPEAT_COUNT=3`: recommended default for establishing a missing canonical spec.
 - `FORCE_RUN_EXISTING=1`: rerun even if canonical data already exists, but do not overwrite canonical automatically.
-- `PUBLISH_WEBSITE=1`: rebuild `vllm-hust-website/data` from the full `submissions/` tree after the batch.
+- `PUBLISH_WEBSITE=1`: rebuild the checked-out local `vllm-hust-website/data` from the full `submissions/` tree after the batch. This is a local workspace refresh, not the live publication path.
 - `PYTORCH_CPU_INDEX_URL=https://download.pytorch.org/whl/cpu`: default CPU wheel index used by the prepare script for torch-family dependency resolution.
 - `OFFICIAL_TORCH_NPU_WHEEL_URL=<exact-wheel-url>`: preferred escape hatch when the historical `torch-npu` build has disappeared from the live mirror.
 
@@ -336,7 +336,9 @@ Recommended `workflow_dispatch` inputs for the first full establishment run:
 - `force_run_existing`: `false`
 - `prepare_official_env`: `true`
 - `force_repair_official_env`: `false`
+- `publish_results`: `true`
 - `publish_website`: `false`
+- `publication_target_branch`: `main`
 - `website_ref`: `main`
 - `goal_baseline_env_prefix`: leave blank unless the runner must use a non-default conda base; blank resolves to `$(conda info --base)/envs/vllm-ascend-official-v0110` on the runner
 
@@ -362,7 +364,9 @@ gh workflow run run-official-ascend-baselines.yml \
 	-f force_run_existing=false \
 	-f prepare_official_env=true \
 	-f force_repair_official_env=false \
+	-f publish_results=true \
 	-f publish_website=false \
+	-f publication_target_branch=main \
 	-f website_ref=main
 ```
 
@@ -384,7 +388,9 @@ Workflow artifacts:
 - `official-baseline-summary-<run_id>-<attempt>`: the batch summary markdown.
 - `official-baseline-results-<run_id>-<attempt>`: `.benchmarks/...` results and any promoted `submissions/official-ascend-*` directories.
 
-The workflow does not auto-commit promoted canonical submissions back to the repository. Review the uploaded artifacts or the self-hosted runner workspace first, then decide whether to commit the promoted `submissions/<spec-id>/` directories.
+`publish_results=true` is the formal publication path. It syncs the promoted `submissions/official-ascend-*` directories into `vllm-hust-benchmark@main`, regenerates `leaderboard-data/snapshots/`, and pushes the result so the website's GitHub-first loader can see it. Set `publish_results=false` only when you intentionally want an artifact-only dry run.
+
+`publish_website=true` remains a local-only convenience switch. It refreshes the checked-out `vllm-hust-website/data/` workspace copy after the batch, but by itself it does not update the live benchmark data source.
 
 ## Batch Same-Spec Matrices
 
