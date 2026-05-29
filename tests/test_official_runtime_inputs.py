@@ -53,6 +53,21 @@ def test_normalize_client_parameters_injects_ready_timeout_for_serve(tmp_path: P
     assert normalized["dataset_path"] == str(cache_root / SHAREGPT_DATASET_FILENAME)
 
 
+def test_normalize_client_parameters_forces_eager_for_offline_when_requested() -> None:
+    normalized = normalize_client_parameters(
+        {
+            "dataset_name": "random",
+            "input_len": 1024,
+            "output_len": 128,
+            "batch_size": 8,
+        },
+        benchmark_type="latency",
+        force_eager=True,
+    )
+
+    assert normalized["enforce_eager"] == ""
+
+
 def test_normalize_server_parameters_parses_limit_mm_per_prompt() -> None:
     normalized = normalize_server_parameters({"limit_mm_per_prompt": "image=1,video=0"})
 
