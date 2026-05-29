@@ -939,12 +939,19 @@ PY
 }
 
 normalized_client_parameters_json() {
+  local force_eager_offline=0
+
+  if should_force_eager_for_offline_benchmark; then
+    force_eager_offline=1
+  fi
+
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
     SAME_SPEC_FILE="$SAME_SPEC_FILE" \
     BENCHMARK_TYPE="$BENCHMARK_TYPE" \
     CLIENT_READY_CHECK_TIMEOUT_SECONDS="$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
     OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
     OFFICIAL_BENCHMARK_DATASET_ROOT="$OFFICIAL_BENCHMARK_DATASET_ROOT" \
+    OFFICIAL_FORCE_EAGER_OFFLINE="$force_eager_offline" \
     "$HOST_PYTHON_BIN" - <<'PY'
 import json
 import os
@@ -962,6 +969,7 @@ print(
             ready_check_timeout_sec=ready_timeout,
             vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
             dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
+            force_eager=os.environ.get("OFFICIAL_FORCE_EAGER_OFFLINE") == "1",
         ),
         separators=(",", ":"),
         ensure_ascii=True,
@@ -1006,12 +1014,60 @@ normalize_engine_version() {
       return 1
       ;;
   esac
-
   version=${version#v}
   version=${version#V}
 
   if [[ "$version" =~ ^[0-9]+(\.[0-9]+){1,2}([A-Za-z0-9._-]+)?$ ]]; then
     printf '%s' "$version"
+    return 0
+  fi
+
+  return 1
+}
+
+official_runtime_supports_aclgraph_weak_ref_tensor() {
+  local probe_status=0
+
+  if run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY' >/dev/null 2>&1
+import torch
+
+has_namespace = hasattr(torch.ops, "_C_ascend")
+has_weak_ref = has_namespace and hasattr(torch.ops._C_ascend, "weak_ref_tensor")
+
+raise SystemExit(0 if has_weak_ref else 3)
+PY
+  then
+    return 0
+  fi
+
+  probe_status=$?
+  if [[ "$probe_status" -eq 3 ]]; then
+    return 1
+  fi
+
+  echo "[goal-baseline] failed to probe official ACL graph weak_ref_tensor support (status=${probe_status}); leaving graph mode unchanged" >&2
+  return 2
+}
+
+should_force_eager_for_offline_benchmark() {
+  local probe_status=0
+
+  case "${BENCHMARK_TYPE:-}" in
+    throughput|latency)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  if official_runtime_supports_aclgraph_weak_ref_tensor; then
+    return 1
+  else
+    probe_status=$?
+  fi
+
+  if [[ "$probe_status" -eq 1 ]]; then
+    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark"
     return 0
   fi
 

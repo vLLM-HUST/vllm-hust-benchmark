@@ -69,6 +69,7 @@ def normalize_client_parameters(
     ready_check_timeout_sec: int | None = None,
     vllm_worktree: str | None = None,
     dataset_cache_root: str | None = None,
+    force_eager: bool = False,
 ) -> dict[str, Any]:
     normalized = dict(parameters)
 
@@ -81,6 +82,9 @@ def normalize_client_parameters(
     if benchmark_type == "throughput":
         # v0.11.0 throughput CLI does not accept this newer flag.
         normalized.pop("num_warmups", None)
+
+    if force_eager and benchmark_type in {"throughput", "latency"}:
+        normalized["enforce_eager"] = ""
 
     if "dataset_path" in normalized:
         normalized["dataset_path"] = resolve_runtime_dataset_path(

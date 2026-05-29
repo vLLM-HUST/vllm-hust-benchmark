@@ -818,6 +818,29 @@ EOF
     assert result.returncode == 0
 
 
+def test_should_force_eager_for_offline_benchmark_when_aclgraph_weak_ref_is_missing() -> None:
+    result = _run_bash(
+        _source_run_official_version_functions(
+            """
+            BENCHMARK_TYPE=throughput
+
+            official_runtime_supports_aclgraph_weak_ref_tensor() {
+                return 1
+            }
+
+            should_force_eager_for_offline_benchmark
+            status=$?
+            printf 'status=%s\n' "$status"
+            [[ "$status" == '0' ]]
+            """
+        ),
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "forcing --enforce-eager" in result.stdout
+
+
 def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) -> None:
     worktree_dir = tmp_path / "vllm-ascend-worktree"
     worktree_dir.mkdir()
