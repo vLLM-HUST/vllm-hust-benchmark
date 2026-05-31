@@ -729,16 +729,69 @@ run_client_command() {
     throughput|latency)
       prepare_offline_benchmark_runtime || return $?
 
-      run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
-        python "$VLLM_CLI_COMPAT" bench "$BENCHMARK_TYPE" \
-        --output-json "$RAW_RESULT_FILE" \
-        $CLIENT_ARGS
+      run_offline_client_command_with_aclgraph_fallback
       ;;
     *)
       echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2
       return 2
       ;;
   esac
+}
+
+run_offline_client_command() {
+  local effective_client_args=${1:-$CLIENT_ARGS}
+
+  run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+    python "$VLLM_CLI_COMPAT" bench "$BENCHMARK_TYPE" \
+    --output-json "$RAW_RESULT_FILE" \
+    $effective_client_args
+}
+
+append_enforce_eager_flag() {
+  local client_args=${1:-}
+
+  if [[ "$client_args" == *"--enforce-eager"* ]]; then
+    printf '%s\n' "$client_args"
+    return 0
+  fi
+
+  if [[ -n "$client_args" ]]; then
+    printf '%s --enforce-eager\n' "$client_args"
+  else
+    printf '%s\n' "--enforce-eager"
+  fi
+}
+
+run_offline_client_command_with_aclgraph_fallback() {
+  local failure_log=""
+  local runner_status=0
+  local eager_client_args=""
+
+  failure_log=$(mktemp "${TMPDIR:-/tmp}/official-baseline-offline-client-XXXXXX.log")
+  : > "$failure_log"
+
+  if run_offline_client_command "$CLIENT_ARGS" \
+    > >(tee -a "$failure_log") \
+    2> >(tee -a "$failure_log" >&2); then
+    rm -f "$failure_log"
+    return 0
+  fi
+  runner_status=$?
+
+  if ! grep -Fq "weak_ref_tensor" "$failure_log"; then
+    rm -f "$failure_log"
+    return "$runner_status"
+  fi
+
+  eager_client_args=$(append_enforce_eager_flag "$CLIENT_ARGS")
+  if [[ "$eager_client_args" == "$CLIENT_ARGS" ]]; then
+    rm -f "$failure_log"
+    return "$runner_status"
+  fi
+
+  echo "[goal-baseline] observed weak_ref_tensor failure during ${BENCHMARK_TYPE} benchmark; retrying with --enforce-eager" >&2
+  rm -f "$failure_log"
+  run_offline_client_command "$eager_client_args"
 }
 
 prepare_offline_benchmark_runtime() {
