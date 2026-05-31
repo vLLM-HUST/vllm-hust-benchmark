@@ -393,6 +393,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Run official baseline matrix
+        id: run-matrix
         shell: bash
         env:
           CLIENT_READY_CHECK_TIMEOUT_SECONDS: 900
@@ -437,7 +438,7 @@ jobs:
           bash scripts/run-official-ascend-goal-baseline-matrix.sh "${spec_args[@]}"
 
       - name: Publish official baseline snapshots
-        if: ${{ always() && env.PUBLISH_RESULTS == '1' }}
+        if: ${{ steps.run-matrix.outcome == 'success' && env.PUBLISH_RESULTS == '1' }}
         shell: bash
         env:
           SOURCE_BENCHMARK_REPO_DIR: ${{ github.workspace }}
@@ -456,7 +457,7 @@ jobs:
           bash .github/workflows/scripts/sync_official_baseline_snapshots_to_github.sh
 
       - name: Summarize publication result
-        if: ${{ always() && env.PUBLISH_RESULTS == '1' }}
+        if: ${{ always() && steps.run-matrix.outcome == 'success' && env.PUBLISH_RESULTS == '1' }}
         shell: bash
         run: |
           set -euo pipefail

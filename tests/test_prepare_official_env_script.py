@@ -469,6 +469,61 @@ def test_run_client_command_prepares_single_card_runtime_for_offline_benchmarks(
     ]
 
 
+def test_run_client_command_retries_with_enforce_eager_on_weak_ref_failure(
+    tmp_path: Path,
+) -> None:
+    first_args = tmp_path / "offline-first-args.txt"
+    retry_args = tmp_path / "offline-retry-args.txt"
+    first_attempt = tmp_path / "offline-first-attempt.txt"
+
+    result = _run_bash(
+        _source_run_client_functions(
+            f"""
+            BENCHMARK_TYPE=throughput
+            OFFICIAL_RUNTIME_PYTHONPATH=/tmp/runtime-a:/tmp/runtime-b
+            VLLM_CLI_COMPAT=/tmp/run_vllm_cli_compat.py
+            RAW_RESULT_FILE=/tmp/result-dir/raw_benchmark_result.json
+            CLIENT_ARGS='--model foo/bar'
+            RESOURCE_BUSY_EXIT_CODE=75
+            DEVICE_SELECTION_RETRIES=20
+            ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=30
+            ASCEND_VISIBLE_DEVICES=3
+            ASCEND_RT_VISIBLE_DEVICES=3
+
+            wait_for_single_card_ascend_device() {{
+                return 0
+            }}
+
+            wait_for_ascend_runtime_ready() {{
+                return 0
+            }}
+
+            run_in_official_runtime() {{
+                local pythonpath_prefix=$1
+                shift
+                if [[ ! -f {shlex.quote(str(first_attempt))} ]]; then
+                    printf '%s\n' "$@" > {shlex.quote(str(first_args))}
+                    printf '1\n' > {shlex.quote(str(first_attempt))}
+                    cat <<'EOF' >&2
+AttributeError: '_OpNamespace' '_C_ascend' object has no attribute 'weak_ref_tensor'
+EOF
+                    return 1
+                fi
+
+                printf '%s\n' "$@" > {shlex.quote(str(retry_args))}
+            }}
+
+            run_client_command
+            """
+        )
+    )
+
+    assert result.returncode == 0
+    assert "--enforce-eager" not in first_args.read_text(encoding="utf-8").splitlines()
+    assert "--enforce-eager" in retry_args.read_text(encoding="utf-8").splitlines()
+    assert "retrying with --enforce-eager" in result.stderr
+
+
 def test_configure_single_card_ascend_device_derives_from_generic_visible_devices() -> None:
     result = _run_bash(
         _source_run_official_functions(
