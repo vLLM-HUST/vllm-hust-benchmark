@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 PREPARE_SCRIPT=${PREPARE_SCRIPT:-"$REPO_ROOT/scripts/prepare-official-ascend-baseline-env.sh"}
+VLLM_CLI_COMPAT=${VLLM_CLI_COMPAT:-"$REPO_ROOT/scripts/run_vllm_cli_compat.py"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
@@ -13,6 +14,8 @@ OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0110"}
 OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0110"}
 OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
 OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/official-ascend-goal-baseline"}
+OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"$OFFICIAL_VLLM_CACHE_ROOT/datasets"}
+OFFICIAL_SHAREGPT_DATASET_URL=${OFFICIAL_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
 OFFICIAL_MODEL_PATH=${OFFICIAL_MODEL_PATH:-}
 OFFICIAL_SERVER_HOST=${OFFICIAL_SERVER_HOST:-}
 OFFICIAL_SERVER_PORT=${OFFICIAL_SERVER_PORT:-"8000"}
@@ -27,6 +30,18 @@ HOST_PYTHON_BIN=${HOST_PYTHON_BIN:-$(command -v python3 || command -v python || 
 GOAL_BASELINE_ENV_PREFIX=${GOAL_BASELINE_ENV_PREFIX:-}
 RESULT_DIR=${RESULT_DIR:-"$REPO_ROOT/.benchmarks/official-ascend-goal-baseline"}
 RUN_ID=${RUN_ID:-"official-ascend-jan-2026-$(date -u +%Y%m%dT%H%M%SZ)"}
+SERVER_START_RETRIES=${SERVER_START_RETRIES:-8}
+SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
+DEVICE_SELECTION_RETRIES=${DEVICE_SELECTION_RETRIES:-20}
+DEVICE_SELECTION_RETRY_DELAY_SECONDS=${DEVICE_SELECTION_RETRY_DELAY_SECONDS:-30}
+READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-900}
+READY_STATUS_INTERVAL_SECONDS=${READY_STATUS_INTERVAL_SECONDS:-30}
+CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-$READY_TIMEOUT_SECONDS}
+ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS:-30}
+ASCEND_RUNTIME_READY_POLL_SECONDS=${ASCEND_RUNTIME_READY_POLL_SECONDS:-10}
+RESOURCE_BUSY_EXIT_CODE=${RESOURCE_BUSY_EXIT_CODE:-75}
+NPU_SMI_TIMEOUT_SECONDS=${NPU_SMI_TIMEOUT_SECONDS:-20}
+GOAL_BASELINE_DEVICE_PREFERENCE_FILE=${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -52,6 +67,11 @@ fi
 
 if [[ ! -f "$PREPARE_SCRIPT" ]]; then
   echo "Prepare script not found: $PREPARE_SCRIPT" >&2
+  exit 2
+fi
+
+if [[ ! -f "$VLLM_CLI_COMPAT" ]]; then
+  echo "CLI compatibility wrapper not found: $VLLM_CLI_COMPAT" >&2
   exit 2
 fi
 
@@ -226,43 +246,540 @@ cleanup_managed_server() {
   fi
 }
 
+set_ascend_visible_devices_scope() {
+  local visible_devices=${1:-}
+
+  if [[ -n "$visible_devices" ]]; then
+    export ASCEND_VISIBLE_DEVICES="$visible_devices"
+    export ASCEND_RT_VISIBLE_DEVICES="$visible_devices"
+    return 0
+  fi
+
+  unset ASCEND_VISIBLE_DEVICES
+  unset ASCEND_RT_VISIBLE_DEVICES
+}
+
+read_preferred_ascend_device() {
+  local preference_file=${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}
+  local preferred_device=""
+
+  [[ -n "$preference_file" ]] || return 1
+  [[ -f "$preference_file" ]] || return 1
+
+  preferred_device=$(tr -d '[:space:]' < "$preference_file")
+  [[ "$preferred_device" =~ ^[0-9]+$ ]] || return 1
+
+  printf '%s\n' "$preferred_device"
+}
+
+persist_preferred_ascend_device() {
+  local selected_device=${1:-}
+  local preference_file=${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}
+
+  [[ -n "$preference_file" ]] || return 0
+  [[ "$selected_device" =~ ^[0-9]+$ ]] || return 0
+
+  mkdir -p "$(dirname "$preference_file")"
+  printf '%s\n' "$selected_device" > "$preference_file"
+}
+
+source_ascend_runtime_env() {
+  export ZSH_VERSION=""
+
+  if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+    set +u
+    # shellcheck disable=SC1090
+    source "$ASCEND_TOOLKIT_SET_ENV"
+    set -u
+  fi
+
+  if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
+    set +u
+    # shellcheck disable=SC1090
+    source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
+    set -u
+  fi
+}
+
 run_in_official_runtime() {
   local pythonpath_prefix=$1
   shift
   (
     cd "$OFFICIAL_RUNTIME_CWD"
-    export ZSH_VERSION=""
-    if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
-      # shellcheck disable=SC1090
-      source "$ASCEND_TOOLKIT_SET_ENV"
-    fi
-    if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
-      set +u
-      # shellcheck disable=SC1090
-      source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
-      set -u
-    fi
+    source_ascend_runtime_env
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
+    if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
+      export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
+    fi
     PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
       conda run -p "$GOAL_BASELINE_ENV_PREFIX" "$@"
   )
 }
 
+run_in_official_runtime_python() {
+  local pythonpath_prefix=$1
+  shift
+  local script_file
+  local status=0
+
+  script_file=$(mktemp "${TMPDIR:-/tmp}/official-runtime-python-XXXXXX.py")
+  cat > "$script_file"
+
+  if run_in_official_runtime "$pythonpath_prefix" "$@" python "$script_file"; then
+    status=0
+  else
+    status=$?
+  fi
+
+  rm -f "$script_file"
+  return "$status"
+}
+
+capture_initial_ascend_device_scope() {
+  if [[ "${GOAL_BASELINE_INITIAL_ASCEND_DEVICE_SCOPE_CAPTURED:-0}" == "1" ]]; then
+    return 0
+  fi
+
+  if [[ -n "${ASCEND_VISIBLE_DEVICES+x}" ]]; then
+    GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES_IS_SET=1
+    GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES=${ASCEND_VISIBLE_DEVICES:-}
+  else
+    GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES_IS_SET=0
+    unset GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES
+  fi
+
+  if [[ -n "${ASCEND_RT_VISIBLE_DEVICES+x}" ]]; then
+    GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES_IS_SET=1
+    GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES=${ASCEND_RT_VISIBLE_DEVICES:-}
+  else
+    GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES_IS_SET=0
+    unset GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES
+  fi
+
+  GOAL_BASELINE_INITIAL_ASCEND_DEVICE_SCOPE_CAPTURED=1
+}
+
+normalize_visible_devices() {
+  local raw_value=${1:-}
+  local device
+  local -a devices=()
+  local normalized_devices
+
+  IFS=',' read -r -a raw_devices <<< "$raw_value"
+  for device in "${raw_devices[@]}"; do
+    device=${device//[[:space:]]/}
+    if [[ -n "$device" ]]; then
+      devices+=("$device")
+    fi
+  done
+
+  if [[ ${#devices[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  normalized_devices=$(IFS=','; echo "${devices[*]}")
+  printf '%s\n' "$normalized_devices"
+}
+
+resolve_npu_smi_bin() {
+  local candidate
+
+  if candidate=$(command -v npu-smi 2>/dev/null) && [[ -n "$candidate" ]]; then
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+
+  for candidate in /usr/local/bin/npu-smi /usr/local/sbin/npu-smi /usr/sbin/npu-smi /usr/bin/npu-smi; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+select_ascend_device() {
+  local selection_attempt=${1:-1}
+  local npu_smi_bin=${2:-}
+  local preferred_device=${3:-}
+
+  ASCEND_DEVICE_SELECTION_ATTEMPT="$selection_attempt" \
+    NPU_SMI_BIN="$npu_smi_bin" \
+    PREFERRED_ASCEND_DEVICE="$preferred_device" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+
+def parse_logical_map(mapping_output: str) -> dict[tuple[str, str], int]:
+    logical_map = {}
+    for line in mapping_output.splitlines():
+        parts = line.split()
+        if len(parts) < 3:
+            continue
+        npu_id, chip_id, logical_id = parts[:3]
+        if npu_id.isdigit() and chip_id.isdigit() and logical_id.isdigit():
+            logical_map[(npu_id, chip_id)] = int(logical_id)
+    return logical_map
+
+
+def list_logical_devices(mapping_output: str) -> list[int]:
+    logical_devices = set(parse_logical_map(mapping_output).values())
+    return sorted(logical_devices)
+
+
+def list_status_devices(info_output: str) -> list[int]:
+    status_devices = set()
+    for raw_line in info_output.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
+
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        if len(parts) < 2:
+            continue
+
+        left_column = parts[0].split()
+        if len(left_column) >= 2 and left_column[0].isdigit() and parts[1] and ":" not in parts[1]:
+            status_devices.add(int(left_column[0]))
+
+    return sorted(status_devices)
+
+
+def list_process_busy_devices(info_output: str) -> set[int]:
+    busy_devices = set()
+    in_process_section = False
+
+    for raw_line in info_output.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
+
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        if len(parts) < 3:
+            continue
+
+        if parts[1] == "Process id":
+            in_process_section = True
+            continue
+
+        if not in_process_section:
+            continue
+
+        left_column = parts[0].split()
+        if len(left_column) >= 2 and left_column[0].isdigit() and parts[1].isdigit():
+            busy_devices.add(int(left_column[0]))
+
+    return busy_devices
+
+
+def list_devnode_devices() -> list[int]:
+    devnode_devices = set()
+    for device_path in Path("/dev").glob("davinci[0-9]*"):
+        suffix = device_path.name.removeprefix("davinci")
+        if suffix.isdigit():
+            devnode_devices.add(int(suffix))
+    return sorted(devnode_devices)
+
+
+def run_npu_smi(*args: str) -> subprocess.CompletedProcess[str] | None:
+  npu_smi_bin = os.environ.get("NPU_SMI_BIN")
+  if not npu_smi_bin:
+    return None
+
+  try:
+    timeout_seconds = float(os.environ.get("NPU_SMI_TIMEOUT_SECONDS", "20"))
+  except ValueError:
+    timeout_seconds = 20.0
+
+  clean_env = {
+    "PATH": os.environ.get("PATH", "/usr/local/bin:/usr/bin:/bin"),
+    "HOME": os.environ.get("HOME", ""),
+    "LANG": os.environ.get("LANG", "C.UTF-8"),
+    "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
+    "LD_LIBRARY_PATH": os.environ.get("LD_LIBRARY_PATH", ""),
+  }
+
+  try:
+    return subprocess.run(
+      [npu_smi_bin, *args],
+      check=False,
+      capture_output=True,
+      text=True,
+      timeout=timeout_seconds,
+      env=clean_env,
+    )
+  except subprocess.TimeoutExpired:
+    return None
+  except Exception:
+    return None
+
+
+def classify_npu_smi_failure(
+  result: subprocess.CompletedProcess[str] | None,
+) -> str | None:
+  if result is None or result.returncode == 0:
+    return None
+
+  details = f"{result.stdout}\n{result.stderr}".lower()
+  if "device is used" in details or "-8020" in details:
+    return "device-used"
+  if "permission" in details or "ret=4" in details:
+    return "permission-limited"
+  return f"exit-{result.returncode}"
+
+
+def annotate_fallback_source(base_source: str, failure_reason: str | None) -> str:
+  if not failure_reason:
+    return base_source
+  return f"{base_source}+npu-smi-{failure_reason}"
+
+
+def parse_preferred_device() -> int | None:
+  raw_value = os.environ.get("PREFERRED_ASCEND_DEVICE", "").strip()
+  if raw_value.isdigit():
+    return int(raw_value)
+  return None
+
+
+def select_best_idle_device(
+  info_output: str,
+  logical_map: dict[tuple[str, str], int],
+  busy_devices: set[int],
+  preferred_device: int | None,
+) -> tuple[int, str] | None:
+  hbm_usage_pattern = re.compile(r"(\d+)\s*/\s*(\d+)\s*$")
+  device_stats = []
+  current_npu_id = None
+  current_health = None
+
+  for raw_line in info_output.splitlines():
+    line = raw_line.strip()
+    if not line.startswith("|"):
+      continue
+
+    parts = [part.strip() for part in line.strip("|").split("|")]
+    if len(parts) < 3:
+      continue
+
+    left_column = parts[0].split()
+    if len(left_column) >= 2 and left_column[0].isdigit() and parts[1] and ":" not in parts[1]:
+      current_npu_id = left_column[0]
+      current_health = parts[1]
+      continue
+
+    if current_npu_id is None or current_health != "OK":
+      continue
+
+    if len(left_column) != 1 or not left_column[0].isdigit() or ":" not in parts[1]:
+      continue
+
+    chip_id = left_column[0]
+    logical_id = logical_map.get((current_npu_id, chip_id))
+    device_source = "idle"
+    if logical_id is None:
+      if chip_id != "0":
+        continue
+      logical_id = int(current_npu_id)
+      device_source = "status-fallback"
+
+    if logical_id in busy_devices:
+      continue
+
+    hbm_match = hbm_usage_pattern.search(parts[2])
+    if hbm_match is None:
+      continue
+
+    used_memory_mb = int(hbm_match.group(1))
+    total_memory_mb = int(hbm_match.group(2))
+    free_memory_mb = max(0, total_memory_mb - used_memory_mb)
+    device_stats.append((logical_id, free_memory_mb, device_source))
+
+  if not device_stats:
+    return None
+
+  if preferred_device is not None:
+    for logical_id, _, device_source in device_stats:
+      if logical_id == preferred_device:
+        return logical_id, f"preferred-{device_source}"
+
+  device_stats.sort(key=lambda item: (-item[1], item[0], item[2]))
+  selected_device, _, selected_source = device_stats[0]
+  return selected_device, selected_source
+
+
+mapping_result = run_npu_smi("info", "-m")
+mapping_failure_reason = classify_npu_smi_failure(mapping_result)
+logical_map = {}
+logical_devices = []
+if mapping_result is not None and mapping_result.returncode == 0:
+    logical_map = parse_logical_map(mapping_result.stdout)
+    logical_devices = list_logical_devices(mapping_result.stdout)
+
+selection_attempt = max(1, int(os.environ.get("ASCEND_DEVICE_SELECTION_ATTEMPT", "1")))
+preferred_device = parse_preferred_device()
+
+info_result = run_npu_smi("info")
+info_failure_reason = classify_npu_smi_failure(info_result)
+if info_result is not None and info_result.returncode == 0:
+    busy_devices = list_process_busy_devices(info_result.stdout)
+
+    selected_device = select_best_idle_device(
+        info_result.stdout,
+        logical_map,
+        busy_devices,
+        preferred_device,
+    )
+    if selected_device is not None:
+        device_id, device_source = selected_device
+        print(f"{device_id}\t{device_source}")
+        sys.exit(0)
+
+    status_devices = list_status_devices(info_result.stdout)
+    if busy_devices:
+        status_devices = [device for device in status_devices if device not in busy_devices]
+
+    if preferred_device is not None and preferred_device in status_devices:
+        print(f"{preferred_device}\tpreferred-status")
+        sys.exit(0)
+
+    if status_devices:
+        fallback_device = status_devices[(selection_attempt - 1) % len(status_devices)]
+        print(f"{fallback_device}\tstatus-round-robin")
+        sys.exit(0)
+
+    if busy_devices:
+        busy_device_list = sorted(busy_devices)
+        print("__ALL_BUSY__\t" + ",".join(str(device) for device in busy_device_list))
+        sys.exit(0)
+
+fallback_failure_reason = info_failure_reason or mapping_failure_reason
+
+if preferred_device is not None and preferred_device in logical_devices:
+    print(
+        f"{preferred_device}\tpreferred-"
+        f"{annotate_fallback_source('logical-round-robin', fallback_failure_reason)}"
+    )
+    sys.exit(0)
+
+if logical_devices:
+    fallback_device = logical_devices[(selection_attempt - 1) % len(logical_devices)]
+    print(f"{fallback_device}\t{annotate_fallback_source('logical-round-robin', fallback_failure_reason)}")
+    sys.exit(0)
+
+devnode_devices = list_devnode_devices()
+if preferred_device is not None and preferred_device in devnode_devices:
+    print(
+        f"{preferred_device}\tpreferred-"
+        f"{annotate_fallback_source('devnode-round-robin', fallback_failure_reason)}"
+    )
+    sys.exit(0)
+
+if devnode_devices:
+    fallback_device = devnode_devices[(selection_attempt - 1) % len(devnode_devices)]
+    print(f"{fallback_device}\t{annotate_fallback_source('devnode-round-robin', fallback_failure_reason)}")
+    sys.exit(0)
+
+sys.exit(1)
+PY
+}
+
+configure_single_card_ascend_device() {
+  local start_attempt=${1:-1}
+  local busy_exit_code=${RESOURCE_BUSY_EXIT_CODE:-75}
+  local resolved_visible_devices=""
+  local resolved_rt_visible_devices=""
+  local preferred_device=""
+  local selected_device_info=""
+  local selected_device=""
+  local selected_source=""
+  local npu_smi_bin=""
+
+  unset GOAL_BASELINE_DEVICE_SELECTION_REASON
+
+  capture_initial_ascend_device_scope
+
+  resolved_visible_devices=$(normalize_visible_devices "${GOAL_BASELINE_INITIAL_ASCEND_VISIBLE_DEVICES:-}" 2>/dev/null || true)
+  resolved_rt_visible_devices=$(normalize_visible_devices "${GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES:-}" 2>/dev/null || true)
+
+  if [[ -z "$resolved_rt_visible_devices" && -n "$resolved_visible_devices" ]]; then
+    set_ascend_visible_devices_scope "$resolved_visible_devices"
+    echo "[goal-baseline] derived Ascend visible devices from ASCEND_VISIBLE_DEVICES: $ASCEND_VISIBLE_DEVICES"
+  elif [[ -n "$resolved_rt_visible_devices" ]]; then
+    set_ascend_visible_devices_scope "$resolved_rt_visible_devices"
+  elif [[ "${GOAL_BASELINE_INITIAL_ASCEND_RT_VISIBLE_DEVICES_IS_SET:-0}" == "1" ]]; then
+    set_ascend_visible_devices_scope ""
+    echo "[goal-baseline] ignoring empty ASCEND_RT_VISIBLE_DEVICES from parent environment"
+  else
+    set_ascend_visible_devices_scope ""
+  fi
+
+  if [[ -n "${ASCEND_RT_VISIBLE_DEVICES:-}" ]]; then
+    GOAL_BASELINE_DEVICE_SELECTION_REASON="explicit"
+    export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE:-npu:0}"
+    echo "[goal-baseline] using explicit Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-$ASCEND_RT_VISIBLE_DEVICES}"
+    return 0
+  fi
+
+  npu_smi_bin=$(resolve_npu_smi_bin 2>/dev/null || true)
+  if [[ -n "$npu_smi_bin" ]]; then
+    echo "[goal-baseline] using npu-smi for device selection: $npu_smi_bin"
+  fi
+
+  preferred_device=$(read_preferred_ascend_device 2>/dev/null || true)
+  if [[ -n "$preferred_device" ]]; then
+    echo "[goal-baseline] preferring previously selected Ascend device: $preferred_device"
+  fi
+
+  selected_device_info=$(select_ascend_device "$start_attempt" "$npu_smi_bin" "$preferred_device" 2>/dev/null || true)
+  if [[ -n "$selected_device_info" ]]; then
+    IFS=$'\t' read -r selected_device selected_source <<< "$selected_device_info"
+    if [[ "$selected_device" == "__ALL_BUSY__" ]]; then
+      GOAL_BASELINE_DEVICE_SELECTION_REASON="all-busy"
+      set_ascend_visible_devices_scope ""
+      unset VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE
+      echo "[goal-baseline] all detected Ascend devices are currently busy: ${selected_source:-unknown}" >&2
+      return "$busy_exit_code"
+    fi
+    if [[ -n "$selected_device" ]]; then
+      case "$selected_source" in
+        *+npu-smi-device-used*)
+          echo "[goal-baseline] npu-smi could not inspect busy devices for the current user because DCMI reported 'device is used'; falling back to ${selected_source%%+*}" >&2
+          ;;
+        *+npu-smi-permission-limited*)
+          echo "[goal-baseline] npu-smi device inspection appears permission-limited for the current user; falling back to ${selected_source%%+*}" >&2
+          ;;
+        *+npu-smi-exit-*)
+          echo "[goal-baseline] npu-smi device inspection failed for the current user (${selected_source#*+npu-smi-}); falling back to ${selected_source%%+*}" >&2
+          ;;
+      esac
+      GOAL_BASELINE_DEVICE_SELECTION_REASON="selected"
+      set_ascend_visible_devices_scope "$selected_device"
+      persist_preferred_ascend_device "$selected_device"
+      export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="npu:0"
+      echo "[goal-baseline] selected single-card Ascend device: ${ASCEND_VISIBLE_DEVICES:-$selected_device} (${selected_source:-auto})"
+      return 0
+    fi
+  fi
+
+  GOAL_BASELINE_DEVICE_SELECTION_REASON="unscoped"
+  set_ascend_visible_devices_scope ""
+  unset VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE
+  echo "[goal-baseline] could not resolve a single-card Ascend device; running without device scoping" >&2
+}
+
 run_server_command() {
   (
     cd "$OFFICIAL_RUNTIME_CWD"
-    export ZSH_VERSION=""
-    if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
-      # shellcheck disable=SC1090
-      source "$ASCEND_TOOLKIT_SET_ENV"
-    fi
-    if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
-      set +u
-      # shellcheck disable=SC1090
-      source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
-      set -u
-    fi
+    source_ascend_runtime_env
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
+    if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
+      export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
+    fi
     PYTHONUNBUFFERED=1 \
       PYTHONPATH="$OFFICIAL_RUNTIME_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}" \
       conda run --no-capture-output -p "$GOAL_BASELINE_ENV_PREFIX" \
@@ -274,23 +791,106 @@ run_client_command() {
   case "$BENCHMARK_TYPE" in
     serve)
       run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
-        python -m vllm.entrypoints.cli.main bench serve \
+        python "$VLLM_CLI_COMPAT" bench serve \
         --save-result \
         --result-dir "$RESULT_DIR" \
         --result-filename "$(basename "$RAW_RESULT_FILE")" \
         $CLIENT_ARGS
       ;;
     throughput|latency)
-      run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
-        python -m vllm.entrypoints.cli.main bench "$BENCHMARK_TYPE" \
-        --output-json "$RAW_RESULT_FILE" \
-        $CLIENT_ARGS
+      prepare_offline_benchmark_runtime || return $?
+
+      run_offline_client_command_with_aclgraph_fallback
       ;;
     *)
       echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2
       return 2
       ;;
   esac
+}
+
+run_offline_client_command() {
+  local effective_client_args=${1:-$CLIENT_ARGS}
+
+  run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+    python "$VLLM_CLI_COMPAT" bench "$BENCHMARK_TYPE" \
+    --output-json "$RAW_RESULT_FILE" \
+    $effective_client_args
+}
+
+append_enforce_eager_flag() {
+  local client_args=${1:-}
+
+  if [[ "$client_args" == *"--enforce-eager"* ]]; then
+    printf '%s\n' "$client_args"
+    return 0
+  fi
+
+  if [[ -n "$client_args" ]]; then
+    printf '%s --enforce-eager\n' "$client_args"
+  else
+    printf '%s\n' "--enforce-eager"
+  fi
+}
+
+run_offline_client_command_with_aclgraph_fallback() {
+  local failure_log=""
+  local runner_status=0
+  local eager_client_args=""
+
+  failure_log=$(mktemp "${TMPDIR:-/tmp}/official-baseline-offline-client-XXXXXX.log")
+  : > "$failure_log"
+
+  if run_offline_client_command "$CLIENT_ARGS" \
+    > >(tee -a "$failure_log") \
+    2> >(tee -a "$failure_log" >&2); then
+    rm -f "$failure_log"
+    return 0
+  fi
+  runner_status=$?
+
+  if ! grep -Fq "weak_ref_tensor" "$failure_log"; then
+    rm -f "$failure_log"
+    return "$runner_status"
+  fi
+
+  eager_client_args=$(append_enforce_eager_flag "$CLIENT_ARGS")
+  if [[ "$eager_client_args" == "$CLIENT_ARGS" ]]; then
+    rm -f "$failure_log"
+    return "$runner_status"
+  fi
+
+  echo "[goal-baseline] observed weak_ref_tensor failure during ${BENCHMARK_TYPE} benchmark; retrying with --enforce-eager" >&2
+  rm -f "$failure_log"
+  run_offline_client_command "$eager_client_args"
+}
+
+prepare_offline_benchmark_runtime() {
+  local selection_status=0
+  local runtime_ready_status=0
+
+  if wait_for_single_card_ascend_device; then
+    selection_status=0
+  else
+    selection_status=$?
+  fi
+
+  if [[ "$selection_status" -ne 0 ]]; then
+    if [[ "$selection_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
+      echo "[goal-baseline] All detected Ascend devices remained busy after ${DEVICE_SELECTION_RETRIES} selection attempt(s)" >&2
+    fi
+    return "$selection_status"
+  fi
+
+  echo "[goal-baseline] Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-<unset>} (rt=${ASCEND_RT_VISIBLE_DEVICES:-<unset>})"
+
+  if wait_for_ascend_runtime_ready; then
+    return 0
+  fi
+
+  runtime_ready_status=$?
+  echo "[goal-baseline] Ascend runtime did not become ready after ${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS}s" >&2
+  return "$runtime_ready_status"
 }
 
 resolve_same_spec() {
@@ -391,37 +991,337 @@ json2args() {
   '
 }
 
-resolve_runtime_model() {
-  if [[ -n "$OFFICIAL_MODEL_PATH" ]]; then
-    echo "$OFFICIAL_MODEL_PATH"
+download_file() {
+  local url=$1
+  local target_file=$2
+
+  mkdir -p "$(dirname "$target_file")"
+  if command -v wget >/dev/null 2>&1; then
+    wget -O "$target_file" "$url"
     return 0
   fi
 
-  run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+  if command -v curl >/dev/null 2>&1; then
+    curl -L --fail --output "$target_file" "$url"
+    return 0
+  fi
+
+  echo "wget or curl is required to download benchmark datasets" >&2
+  return 2
+}
+
+ensure_runtime_dataset_available() {
+  local dataset_path=${1:-}
+  local sharegpt_target
+
+  [[ -z "$dataset_path" ]] && return 0
+
+  case "$dataset_path" in
+    /*)
+      if [[ ! -f "$dataset_path" ]]; then
+        echo "runtime dataset path not found: $dataset_path" >&2
+        return 2
+      fi
+      return 0
+      ;;
+    ShareGPT_V3_unfiltered_cleaned_split.json)
+      sharegpt_target="$OFFICIAL_BENCHMARK_DATASET_ROOT/$dataset_path"
+      if [[ -f "$sharegpt_target" ]]; then
+        return 0
+      fi
+      echo "[goal-baseline] downloading ShareGPT benchmark dataset to $sharegpt_target"
+      download_file "$OFFICIAL_SHAREGPT_DATASET_URL" "$sharegpt_target"
+      ;;
+    benchmarks/*)
+      if [[ ! -f "$OFFICIAL_VLLM_WORKTREE/$dataset_path" ]]; then
+        echo "benchmark dataset path not found in official vllm worktree: $OFFICIAL_VLLM_WORKTREE/$dataset_path" >&2
+        return 2
+      fi
+      ;;
+  esac
+}
+
+normalized_server_parameters_json() {
+  local force_eager_server=0
+
+  if should_force_eager_for_server_benchmark; then
+    force_eager_server=1
+  fi
+
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    SAME_SPEC_FILE="$SAME_SPEC_FILE" \
+    OFFICIAL_FORCE_EAGER_SERVER="$force_eager_server" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.official_runtime_inputs import normalize_server_parameters
+
+payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+normalized = normalize_server_parameters(payload["resolved_server_parameters"])
+if os.environ.get("OFFICIAL_FORCE_EAGER_SERVER") == "1":
+  normalized["enforce_eager"] = ""
+print(
+    json.dumps(
+    normalized,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+)
+PY
+}
+
+normalized_client_parameters_json() {
+  local force_eager_offline=0
+
+  if should_force_eager_for_offline_benchmark; then
+    force_eager_offline=1
+  fi
+
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    SAME_SPEC_FILE="$SAME_SPEC_FILE" \
+    BENCHMARK_TYPE="$BENCHMARK_TYPE" \
+    CLIENT_READY_CHECK_TIMEOUT_SECONDS="$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
+    OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
+    OFFICIAL_BENCHMARK_DATASET_ROOT="$OFFICIAL_BENCHMARK_DATASET_ROOT" \
+    OFFICIAL_FORCE_EAGER_OFFLINE="$force_eager_offline" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
+
+payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
+print(
+    json.dumps(
+        normalize_client_parameters(
+            payload["resolved_client_parameters"],
+            benchmark_type=os.environ["BENCHMARK_TYPE"],
+            ready_check_timeout_sec=ready_timeout,
+            vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
+            dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
+            force_eager=os.environ.get("OFFICIAL_FORCE_EAGER_OFFLINE") == "1",
+        ),
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+)
+PY
+}
+
+resolve_runtime_model() {
+  local runtime_model_candidate=""
+  local complete_runtime_model=""
+
+  if [[ -n "$OFFICIAL_MODEL_PATH" ]]; then
+    printf '%s\n' "$OFFICIAL_MODEL_PATH"
+    return 0
+  fi
+
+  runtime_model_candidate=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
     env MODEL_ID="$MODEL" \
     python -c "import os; from huggingface_hub import snapshot_download; print(snapshot_download(os.environ['MODEL_ID'], local_files_only=True))" \
-    2>/dev/null || return 1
+    2>/dev/null) || return 1
+
+  complete_runtime_model=$(resolve_complete_local_runtime_model_candidate "$runtime_model_candidate") || return 2
+  printf '%s\n' "$complete_runtime_model"
+}
+
+path_has_matching_file() {
+  local path=$1
+  shift
+  local pattern
+  local candidate
+  local had_nullglob=0
+
+  if shopt -q nullglob; then
+    had_nullglob=1
+  fi
+  shopt -s nullglob
+
+  for pattern in "$@"; do
+    for candidate in "$path"/$pattern; do
+      if [[ -f "$candidate" ]]; then
+        if [[ "$had_nullglob" == "0" ]]; then
+          shopt -u nullglob
+        fi
+        return 0
+      fi
+    done
+  done
+
+  if [[ "$had_nullglob" == "0" ]]; then
+    shopt -u nullglob
+  fi
+  return 1
 }
 
 local_runtime_model_has_required_artifacts() {
   local runtime_model_candidate=$1
 
-  run_in_official_runtime "$REPO_ROOT/src${OFFICIAL_RUNTIME_PYTHONPATH:+:$OFFICIAL_RUNTIME_PYTHONPATH}" \
-    env RUNTIME_MODEL_CANDIDATE="$runtime_model_candidate" \
-    python - <<'PY' >/dev/null
-import os
+  [[ -d "$runtime_model_candidate" ]] || return 1
 
-from vllm_hust_benchmark.same_spec import runtime_model_path_has_required_artifacts
+  path_has_matching_file "$runtime_model_candidate" "config.json" || return 1
+  path_has_matching_file \
+    "$runtime_model_candidate" \
+    "tokenizer.json" \
+    "tokenizer.model" \
+    "spiece.model" \
+    "sentencepiece.bpe.model" \
+    "vocab.json" \
+    "vocab.txt" || return 1
+  path_has_matching_file \
+    "$runtime_model_candidate" \
+    "*.safetensors" \
+    "*.bin" \
+    "*.pt" \
+    "*.pth" \
+    "model.safetensors.index.json" \
+    "pytorch_model.bin.index.json"
+}
 
-raise SystemExit(
-    0 if runtime_model_path_has_required_artifacts(os.environ["RUNTIME_MODEL_CANDIDATE"]) else 1
-)
+resolve_complete_local_runtime_model_candidate() {
+  local runtime_model_candidate=$1
+  local snapshots_dir=""
+  local sibling_candidate
+  local had_nullglob=0
+
+  if local_runtime_model_has_required_artifacts "$runtime_model_candidate"; then
+    printf '%s\n' "$runtime_model_candidate"
+    return 0
+  fi
+
+  if [[ "$(basename "$(dirname "$runtime_model_candidate")")" != "snapshots" ]]; then
+    return 1
+  fi
+
+  snapshots_dir=$(dirname "$runtime_model_candidate")
+  if shopt -q nullglob; then
+    had_nullglob=1
+  fi
+  shopt -s nullglob
+
+  for sibling_candidate in "$snapshots_dir"/*; do
+    [[ "$sibling_candidate" == "$runtime_model_candidate" ]] && continue
+    [[ -d "$sibling_candidate" ]] || continue
+
+    if local_runtime_model_has_required_artifacts "$sibling_candidate"; then
+      if [[ "$had_nullglob" == "0" ]]; then
+        shopt -u nullglob
+      fi
+      printf '%s\n' "$sibling_candidate"
+      return 0
+    fi
+  done
+
+  if [[ "$had_nullglob" == "0" ]]; then
+    shopt -u nullglob
+  fi
+  return 1
+}
+
+normalize_engine_version() {
+  local version=${1:-}
+
+  version=$(printf '%s' "$version" | tr -d '[:space:]')
+  case "$version" in
+    ""|unknown|Unknown|not-installed|N/A|n/a|dev)
+      return 1
+      ;;
+  esac
+  version=${version#v}
+  version=${version#V}
+
+  if [[ "$version" =~ ^[0-9]+(\.[0-9]+){1,2}([A-Za-z0-9._-]+)?$ ]]; then
+    printf '%s' "$version"
+    return 0
+  fi
+
+  return 1
+}
+
+official_runtime_supports_aclgraph_weak_ref_tensor() {
+  local probe_status=0
+
+  set +e
+  run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY' >/dev/null 2>&1
+import torch
+
+has_namespace = hasattr(torch.ops, "_C_ascend")
+has_weak_ref = has_namespace and hasattr(torch.ops._C_ascend, "weak_ref_tensor")
+
+raise SystemExit(0 if has_weak_ref else 3)
 PY
+  probe_status=$?
+  set -e
+
+  if [[ "$probe_status" -eq 0 ]]; then
+    return 0
+  fi
+
+  if [[ "$probe_status" -eq 3 ]]; then
+    return 1
+  fi
+
+  echo "[goal-baseline] failed to probe official ACL graph weak_ref_tensor support (status=${probe_status}); leaving graph mode unchanged" >&2
+  return 2
+}
+
+should_force_eager_for_offline_benchmark() {
+  local probe_status=0
+
+  case "${BENCHMARK_TYPE:-}" in
+    throughput|latency)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  if official_runtime_supports_aclgraph_weak_ref_tensor; then
+    return 1
+  else
+    probe_status=$?
+  fi
+
+  if [[ "$probe_status" -eq 1 ]]; then
+    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark"
+    return 0
+  fi
+
+  return 1
+}
+
+should_force_eager_for_server_benchmark() {
+  local probe_status=0
+
+  case "${BENCHMARK_TYPE:-}" in
+    serve)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  if official_runtime_supports_aclgraph_weak_ref_tensor; then
+    return 1
+  else
+    probe_status=$?
+  fi
+
+  if [[ "$probe_status" -eq 1 ]]; then
+    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for serve benchmark server"
+    return 0
+  fi
+
+  return 1
 }
 
 is_valid_engine_version() {
-  local version=${1:-}
-  [[ -n "$version" ]] && [[ "$version" != "unknown" ]] && [[ "$version" != "not-installed" ]] && [[ "$version" != "N/A" ]]
+  normalize_engine_version "$1" >/dev/null
 }
 
 detect_official_core_version() {
@@ -429,7 +1329,7 @@ detect_official_core_version() {
   local detected=""
   local fallback=""
 
-  raw_output=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+  raw_output=$(run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY'
 from importlib import metadata
 
 version = None
@@ -452,13 +1352,13 @@ PY
   detected=$(printf '%s\n' "$raw_output" | sed -n 's/^__VLLM_HUST_CORE_VERSION__=//p' | tail -n 1)
   detected=$(printf '%s' "$detected" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
 
-  if is_valid_engine_version "$detected"; then
+  if detected=$(normalize_engine_version "$detected"); then
     printf '%s' "$detected"
     return 0
   fi
 
   fallback=$(git -C "$OFFICIAL_VLLM_WORKTREE" describe --tags --always HEAD 2>/dev/null || true)
-  if is_valid_engine_version "$fallback"; then
+  if fallback=$(normalize_engine_version "$fallback"); then
     printf '%s' "$fallback"
     return 0
   fi
@@ -471,7 +1371,7 @@ detect_official_backend_version() {
   local detected=""
   local fallback=""
 
-  raw_output=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+  raw_output=$(run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY'
 from importlib import metadata
 
 version = None
@@ -496,13 +1396,13 @@ PY
   detected=$(printf '%s\n' "$raw_output" | sed -n 's/^__VLLM_HUST_BACKEND_VERSION__=//p' | tail -n 1)
   detected=$(printf '%s' "$detected" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')
 
-  if is_valid_engine_version "$detected"; then
+  if detected=$(normalize_engine_version "$detected"); then
     printf '%s' "$detected"
     return 0
   fi
 
   fallback=$(git -C "$OFFICIAL_VLLM_ASCEND_WORKTREE" describe --tags --always HEAD 2>/dev/null || true)
-  if is_valid_engine_version "$fallback"; then
+  if fallback=$(normalize_engine_version "$fallback"); then
     printf '%s' "$fallback"
     return 0
   fi
@@ -510,22 +1410,147 @@ PY
   printf '%s' "unknown"
 }
 
+server_log_indicates_resource_busy() {
+  local log_file=$1
+
+  [[ -f "$log_file" ]] || return 1
+
+  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception|Engine core initialization failed" "$log_file"
+}
+
+wait_for_ascend_runtime_ready() {
+  local max_attempts
+  max_attempts=$(((ASCEND_RUNTIME_READY_TIMEOUT_SECONDS + ASCEND_RUNTIME_READY_POLL_SECONDS - 1) / ASCEND_RUNTIME_READY_POLL_SECONDS))
+  if (( max_attempts < 1 )); then
+    max_attempts=1
+  fi
+
+  for runtime_attempt in $(seq 1 "$max_attempts"); do
+    if run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY' >"$RUNTIME_READY_LOG" 2>&1
+import torch_npu
+
+torch_npu.npu.get_soc_version()
+PY
+    then
+      return 0
+    fi
+
+    cat "$RUNTIME_READY_LOG" >&2
+
+    if [[ "$runtime_attempt" -eq "$max_attempts" ]]; then
+      if server_log_indicates_resource_busy "$RUNTIME_READY_LOG"; then
+        return "$RESOURCE_BUSY_EXIT_CODE"
+      fi
+      return 1
+    fi
+
+    echo "[goal-baseline] Ascend runtime not ready yet; waiting ${ASCEND_RUNTIME_READY_POLL_SECONDS}s before retrying device initialization (${runtime_attempt}/${max_attempts})" >&2
+    sleep "$ASCEND_RUNTIME_READY_POLL_SECONDS"
+  done
+}
+
+probe_server_ready() {
+  local host=$1
+  local port=$2
+  local ready_path
+  local ready_paths=(
+    "/health"
+    "/v1/models"
+  )
+
+  for ready_path in "${ready_paths[@]}"; do
+    if curl -fsS "http://${host}:${port}${ready_path}" >/dev/null 2>&1; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 wait_for_server() {
   local host=$1
   local port=$2
   local waited=0
-  local timeout_sec=${READY_TIMEOUT_SECONDS:-300}
+  local timeout_sec=$READY_TIMEOUT_SECONDS
+  local status_interval_sec=${READY_STATUS_INTERVAL_SECONDS:-30}
+  local next_status_at=0
+
+  if (( status_interval_sec <= 0 )); then
+    status_interval_sec=30
+  fi
 
   while (( waited < timeout_sec )); do
-    if curl -fsS "http://${host}:${port}/health" >/dev/null; then
+    if [[ -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then
+      echo "Official baseline server exited before becoming ready at ${host}:${port}" >&2
+      if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+        tail -n 40 "$SERVER_STDOUT_LOG" >&2 || true
+        if server_log_indicates_resource_busy "$SERVER_STDOUT_LOG"; then
+          return "$RESOURCE_BUSY_EXIT_CODE"
+        fi
+      fi
+      return 1
+    fi
+
+    if probe_server_ready "$host" "$port"; then
+      if (( waited > 0 )); then
+        echo "[goal-baseline] official baseline server became ready after ${waited}s"
+      fi
       return 0
     fi
+
+    if (( waited >= next_status_at )); then
+      echo "[goal-baseline] waiting for official baseline server at ${host}:${port} (${waited}s/${timeout_sec}s)" >&2
+      next_status_at=$((waited + status_interval_sec))
+    fi
+
     sleep 1
     ((waited += 1))
   done
 
   echo "Timed out waiting for official baseline server at ${host}:${port}" >&2
+  if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+    tail -n 40 "$SERVER_STDOUT_LOG" >&2 || true
+    if server_log_indicates_resource_busy "$SERVER_STDOUT_LOG"; then
+      return "$RESOURCE_BUSY_EXIT_CODE"
+    fi
+  fi
   return 1
+}
+
+wait_for_single_card_ascend_device() {
+  local max_attempts=${DEVICE_SELECTION_RETRIES:-1}
+  local retry_delay=${DEVICE_SELECTION_RETRY_DELAY_SECONDS:-0}
+  local selection_attempt
+  local selection_status=0
+
+  if (( max_attempts < 1 )); then
+    max_attempts=1
+  fi
+
+  for selection_attempt in $(seq 1 "$max_attempts"); do
+    if configure_single_card_ascend_device "$selection_attempt"; then
+      return 0
+    else
+      selection_status=$?
+    fi
+
+    if [[ "$selection_status" -ne "$RESOURCE_BUSY_EXIT_CODE" ]]; then
+      return "$selection_status"
+    fi
+
+    if [[ "$selection_attempt" -ge "$max_attempts" ]]; then
+      return "$selection_status"
+    fi
+
+    if [[ "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
+      echo "[goal-baseline] All detected Ascend devices are busy; waiting ${retry_delay}s for an idle card (attempt ${selection_attempt}/${max_attempts})" >&2
+    else
+      echo "[goal-baseline] No idle Ascend device is currently available; retrying device selection in ${retry_delay}s (attempt ${selection_attempt}/${max_attempts})" >&2
+    fi
+    sleep "$retry_delay"
+  done
+
+  return "$selection_status"
 }
 
 kill_server() {
@@ -546,6 +1571,8 @@ RUNNER_LOCK_FILE="$RUNNER_STATE_DIR/runner.lock"
 MANAGED_SERVER_PORT_FILE="$RUNNER_STATE_DIR/server.port"
 MANAGED_SERVER_WRAPPER_PID_FILE="$RUNNER_STATE_DIR/server.wrapper.pid"
 MANAGED_SERVER_LISTENER_PIDS_FILE="$RUNNER_STATE_DIR/server.listener.pids"
+SERVER_STDOUT_LOG="$RESULT_DIR/server.stdout.log"
+RUNTIME_READY_LOG="$RESULT_DIR/runtime-ready.log"
 
 acquire_runner_lock
 cleanup_managed_server
@@ -567,6 +1594,24 @@ GITHUB_REF=$(jq -r '.export.github_ref' "$SPEC_FILE")
 GIT_COMMIT=$(jq -r '.export.git_commit' "$SPEC_FILE")
 DATA_SOURCE=$(jq -r '.export.data_source' "$SPEC_FILE")
 BENCHMARK_TYPE=$(resolve_scenario_benchmark_type)
+OFFICIAL_CORE_SOURCE_REPOSITORY=${OFFICIAL_CORE_SOURCE_REPOSITORY:-"vllm-project/vllm"}
+OFFICIAL_BACKEND_SOURCE_ENGINE=${OFFICIAL_BACKEND_SOURCE_ENGINE:-"vllm-ascend"}
+OFFICIAL_BACKEND_SOURCE_REPOSITORY=${OFFICIAL_BACKEND_SOURCE_REPOSITORY:-"vllm-project/vllm-ascend"}
+OFFICIAL_CORE_SOURCE_REF=$(jq -r '.baseline_target.vllm_ref // empty' "$SPEC_FILE")
+OFFICIAL_BACKEND_SOURCE_REF=$(jq -r '.baseline_target.vllm_ascend_ref // empty' "$SPEC_FILE")
+
+if [[ -z "$OFFICIAL_CORE_SOURCE_REF" ]] || [[ "$OFFICIAL_CORE_SOURCE_REF" == "null" ]]; then
+  OFFICIAL_CORE_SOURCE_REF="$OFFICIAL_VLLM_REF"
+fi
+if [[ -z "$OFFICIAL_BACKEND_SOURCE_REF" ]] || [[ "$OFFICIAL_BACKEND_SOURCE_REF" == "null" ]]; then
+  OFFICIAL_BACKEND_SOURCE_REF="$OFFICIAL_VLLM_ASCEND_REF"
+fi
+
+OFFICIAL_CORE_SOURCE_COMMIT=$(git -C "$OFFICIAL_VLLM_WORKTREE" rev-parse HEAD 2>/dev/null || true)
+OFFICIAL_BACKEND_SOURCE_COMMIT=$(git -C "$OFFICIAL_VLLM_ASCEND_WORKTREE" rev-parse HEAD 2>/dev/null || true)
+if [[ -z "$OFFICIAL_BACKEND_SOURCE_COMMIT" ]]; then
+  OFFICIAL_BACKEND_SOURCE_COMMIT="$GIT_COMMIT"
+fi
 
 if [[ -z "$OFFICIAL_CORE_VERSION" ]]; then
   OFFICIAL_CORE_VERSION=$(detect_official_core_version)
@@ -583,10 +1628,12 @@ if ! is_valid_engine_version "$OFFICIAL_BACKEND_VERSION"; then
 fi
 
 RUNTIME_MODEL="$MODEL"
+cached_model_status=0
 if cached_model_path=$(resolve_runtime_model); then
-  if [[ -n "$OFFICIAL_MODEL_PATH" ]] || local_runtime_model_has_required_artifacts "$cached_model_path"; then
-    RUNTIME_MODEL="$cached_model_path"
-  else
+  RUNTIME_MODEL="$cached_model_path"
+else
+  cached_model_status=$?
+  if [[ "$cached_model_status" -eq 2 ]]; then
     echo "[goal-baseline] cached local snapshot is missing tokenizer or weight artifacts; falling back to model ID ${MODEL}" >&2
   fi
 fi
@@ -594,7 +1641,10 @@ fi
 SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
 resolve_same_spec
 
-CLIENT_ARGS=$(json2args "$(jq -c '.resolved_client_parameters' "$SAME_SPEC_FILE")")
+resolved_dataset_path=$(jq -r '.resolved_client_parameters.dataset_path // empty' "$SAME_SPEC_FILE")
+ensure_runtime_dataset_available "$resolved_dataset_path"
+
+CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
@@ -605,7 +1655,7 @@ echo "[goal-baseline] vllm cache root: $OFFICIAL_VLLM_CACHE_ROOT"
 echo "[goal-baseline] benchmark type: $BENCHMARK_TYPE"
 echo "[goal-baseline] export model id: $MODEL"
 echo "[goal-baseline] runtime model source: $RUNTIME_MODEL"
-run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY'
 from importlib import metadata
 
 import vllm
@@ -637,7 +1687,7 @@ case "$BENCHMARK_TYPE" in
     SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
     CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
     CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
-    SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters' "$SAME_SPEC_FILE")")
+    SERVER_ARGS=$(json2args "$(normalized_server_parameters_json | jq -c 'del(.disable_log_requests)')")
 
     BENCHMARK_SERVER_PORT="$SERVER_PORT" \
     PREPARE_BENCHMARK_ADMISSION_ONLY=1 \
@@ -647,20 +1697,73 @@ case "$BENCHMARK_TYPE" in
 
     assert_target_port_available "Official baseline" "$CLIENT_HOST" "$CLIENT_PORT"
 
-    SERVER_COMMAND="PYTHONUNBUFFERED=1 PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
-    CLIENT_COMMAND="PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
+    SERVER_COMMAND="PYTHONUNBUFFERED=1 VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
+    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python $VLLM_CLI_COMPAT bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
 
     echo "[goal-baseline] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
     echo "[goal-baseline] server command: $SERVER_COMMAND"
-    run_server_command &
-    SERVER_PID=$!
-    persist_managed_server_state
+    server_ready=0
+    for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
+      if wait_for_single_card_ascend_device; then
+        selection_status=0
+      else
+        selection_status=$?
+      fi
 
-    wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
-    persist_managed_server_state
+      if [[ "$selection_status" -ne 0 ]]; then
+        if [[ "$selection_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "${GOAL_BASELINE_DEVICE_SELECTION_REASON:-}" == "all-busy" ]]; then
+          echo "[goal-baseline] All detected Ascend devices remained busy after ${DEVICE_SELECTION_RETRIES} selection attempt(s)" >&2
+        fi
+        exit "$selection_status"
+      fi
+
+      echo "[goal-baseline] Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-<unset>} (rt=${ASCEND_RT_VISIBLE_DEVICES:-<unset>})"
+
+      if wait_for_ascend_runtime_ready; then
+        runtime_ready_status=0
+      else
+        runtime_ready_status=$?
+      fi
+
+      if [[ "$runtime_ready_status" -ne 0 ]]; then
+        echo "[goal-baseline] Ascend runtime did not become ready after ${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS}s" >&2
+        if [[ "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+          echo "[goal-baseline] Retrying server start after runtime readiness failure in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+          sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+          continue
+        fi
+        exit "$runtime_ready_status"
+      fi
+
+      : > "$SERVER_STDOUT_LOG"
+      run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
+      SERVER_PID=$!
+      persist_managed_server_state
+
+      if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then
+        persist_managed_server_state
+        server_ready=1
+        break
+      fi
+
+      server_wait_status=$?
+      if [[ "$server_wait_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+        echo "[goal-baseline] Detected transient Ascend resource busy state; retrying server start in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+        cleanup_managed_server || true
+        sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+        continue
+      fi
+
+      exit "$server_wait_status"
+    done
+
+    if [[ "$server_ready" != "1" ]]; then
+      echo "[goal-baseline] vLLM server did not become ready after ${SERVER_START_RETRIES} start attempt(s)" >&2
+      exit 1
+    fi
     ;;
   throughput|latency)
-    CLIENT_COMMAND="PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python -m vllm.entrypoints.cli.main bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
+    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python $VLLM_CLI_COMPAT bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
     ;;
   *)
     echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2
@@ -681,8 +1784,8 @@ EXPORT_ARGS=(
   --run-id "$RUN_ID"
   --engine "$ENGINE"
   --engine-version "$ENGINE_VERSION"
-  --core-version "$OFFICIAL_CORE_VERSION"
-  --backend-version "$OFFICIAL_BACKEND_VERSION"
+  --core-version N/A
+  --backend-version N/A
   --model-name "$MODEL"
   --model-parameters "$MODEL_PARAMETERS"
   --model-precision "$MODEL_PRECISION"
@@ -696,6 +1799,13 @@ EXPORT_ARGS=(
   --git-commit "$GIT_COMMIT"
   --github-repository "$GITHUB_REPOSITORY"
   --github-ref "$GITHUB_REF"
+  --engine-source-repository "$OFFICIAL_CORE_SOURCE_REPOSITORY"
+  --engine-source-ref "$OFFICIAL_CORE_SOURCE_REF"
+  --engine-source-commit "$OFFICIAL_CORE_SOURCE_COMMIT"
+  --plugin-source-engine "$OFFICIAL_BACKEND_SOURCE_ENGINE"
+  --plugin-source-repository "$OFFICIAL_BACKEND_SOURCE_REPOSITORY"
+  --plugin-source-ref "$OFFICIAL_BACKEND_SOURCE_REF"
+  --plugin-source-commit "$OFFICIAL_BACKEND_SOURCE_COMMIT"
 )
 
 append_export_arg_from_spec --input-length '.client_parameters.input_len'

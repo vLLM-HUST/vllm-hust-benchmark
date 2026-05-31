@@ -13,6 +13,16 @@ name: Run Official Ascend Baselines
         required: false
         type: number
         default: 3
+      min_successful_repeats:
+        description: Minimum number of successful repeats required to accept a canonical candidate. Use 0 for the workflow default.
+        required: false
+        type: number
+        default: 0
+      max_repeat_attempts:
+        description: Maximum repeat attempts per missing-canonical spec, including retries after transient failures. Use 0 for the workflow default.
+        required: false
+        type: number
+        default: 0
       force_run_existing:
         description: Re-run even when canonical submissions already exist. Existing canonical submissions are preserved.
         required: false
@@ -24,15 +34,25 @@ name: Run Official Ascend Baselines
         type: boolean
         default: true
       publish_website:
-        description: Rebuild website data from submissions after the batch.
+        description: Rebuild the checked-out local website data directory after the batch. This does not publish live benchmark snapshots.
         required: false
         type: boolean
         default: false
+      publish_results:
+        description: Publish promoted official canonical submissions to vllm-hust-benchmark@main and refresh live leaderboard snapshots.
+        required: false
+        type: boolean
+        default: true
       force_repair_official_env:
         description: Skip the prepare-script health check and force a full repair/reinstall of the official env.
         required: false
         type: boolean
         default: false
+      publication_target_branch:
+        description: Target branch in vLLM-HUST/vllm-hust-benchmark for formal publication.
+        required: false
+        type: string
+        default: main
       website_ref:
         description: Optional vllm-hust-website ref to use when publish_website is enabled.
         required: false
@@ -55,10 +75,16 @@ jobs:
   run-official-baselines:
     runs-on:
       - self-hosted
-      - linux-aarch64-a2b3-0
+      - ARM64
       - docker
+      - debug
     timeout-minutes: 360
     env:
+      BENCHMARK_CHECKOUT_USE_SSH: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
+      VLLM_HUST_WORKSPACE_ROOT: ${{ github.workspace }}
+      HOME: ${{ github.workspace }}/.ci-home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.ci-home/.cache
+      XDG_CONFIG_HOME: ${{ github.workspace }}/.ci-home/.config
       HF_HUB_DISABLE_TELEMETRY: "1"
       HF_ENDPOINT: ${{ vars.HF_ENDPOINT || 'https://hf-mirror.com' }}
       HF_HOME: ${{ github.workspace }}/../.hf-cache
@@ -72,22 +98,76 @@ jobs:
       PREPARE_OFFICIAL_ENV: ${{ github.event.inputs.prepare_official_env == 'false' && '0' || '1' }}
       FORCE_REPAIR_OFFICIAL_ENV: ${{ github.event.inputs.force_repair_official_env == 'true' && '1' || '0' }}
       PUBLISH_WEBSITE: ${{ github.event.inputs.publish_website == 'true' && '1' || '0' }}
+      PUBLISH_RESULTS: ${{ github.event.inputs.publish_results == 'false' && '0' || '1' }}
+      PUBLICATION_TARGET_BRANCH: ${{ github.event.inputs.publication_target_branch || 'main' }}
       VLLM_HUST_WEBSITE_REF: ${{ github.event.inputs.website_ref || 'main' }}
+      ASCEND_RT_VISIBLE_DEVICES: ${{ vars.VLLM_ASCEND_HUST_BENCHMARK_VISIBLE_DEVICES || '' }}
     steps:
       - name: Pre-clean generated directories
         shell: bash
         run: |
           set -euo pipefail
           rm -rf "$GITHUB_WORKSPACE/reference-repos" \
-                 "$GITHUB_WORKSPACE/vllm-hust-website" \
-                 "$GITHUB_WORKSPACE/.benchmarks" \
-                 "$GITHUB_WORKSPACE/artifacts"
+             "$GITHUB_WORKSPACE/.ci-home" \
+             "$GITHUB_WORKSPACE/vllm-hust-website" \
+             "$GITHUB_WORKSPACE/publication-target" \
+             "$GITHUB_WORKSPACE/.benchmarks" \
+             "$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
           mkdir -p "$GITHUB_WORKSPACE/artifacts/official-baseline"
+
+      - name: Require GitHub SSH checkout key
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$BENCHMARK_CHECKOUT_USE_SSH" != "1" ]]; then
+            echo "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY is required because this workflow checks out repositories over SSH." >&2
+            exit 1
+          fi
+
+      - name: Configure GitHub SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_dir="$HOME/.ssh"
+          config_file="$ssh_dir/config"
+          key_file="$ssh_dir/github_actions"
+
+          if [[ ! -d "$ssh_dir" ]]; then
+            mkdir -p "$ssh_dir"
+          fi
+          chmod 700 "$ssh_dir"
+
+          printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$key_file"
+          chmod 600 "$key_file"
+
+          config_block="$(cat <<'EOF'
+          Host github.com
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/github_actions
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+          EOF
+          )"
+
+          if [[ ! -f "$config_file" ]]; then
+            printf '%s\n' "$config_block" > "$config_file"
+          elif ! grep -Fq 'Host github.com' "$config_file" \
+            || ! grep -Fq 'HostName github.com' "$config_file" \
+            || ! grep -Fq 'IdentityFile ~/.ssh/github_actions' "$config_file"; then
+            printf '\n%s\n' "$config_block" >> "$config_file"
+          fi
+
+          chmod 600 "$config_file"
 
       - name: Checkout benchmark repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Checkout upstream vllm reference repo
         uses: actions/checkout@v4
@@ -95,6 +175,9 @@ jobs:
           repository: vllm-project/vllm
           path: reference-repos/vllm
           fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Checkout upstream vllm-ascend reference repo
         uses: actions/checkout@v4
@@ -102,33 +185,203 @@ jobs:
           repository: vllm-project/vllm-ascend
           path: reference-repos/vllm-ascend
           fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Checkout website repo
-        if: ${{ inputs.publish_website }}
         uses: actions/checkout@v4
         with:
           repository: vLLM-HUST/vllm-hust-website
           ref: ${{ env.VLLM_HUST_WEBSITE_REF }}
           path: vllm-hust-website
           fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Checkout benchmark publication target
+        if: ${{ env.PUBLISH_RESULTS == '1' }}
+        uses: actions/checkout@v4
         with:
-          python-version: '3.11'
+          repository: vLLM-HUST/vllm-hust-benchmark
+          ref: ${{ env.PUBLICATION_TARGET_BRANCH }}
+          path: publication-target/vllm-hust-benchmark
+          fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
-      - name: Resolve official env prefix
+      - name: Resolve tooling and official env
         shell: bash
         env:
           GOAL_BASELINE_ENV_PREFIX_INPUT: ${{ github.event.inputs.goal_baseline_env_prefix || '' }}
         run: |
           set -euo pipefail
-          env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
-          if [[ -z "${env_prefix//[[:space:]]/}" ]]; then
-            env_prefix="$(conda info --base)/envs/vllm-ascend-official-v0110"
+
+          python_satisfies_min_version() {
+            local python_bin=${1:-}
+            [[ -n "$python_bin" ]] && [[ -x "$python_bin" ]] || return 1
+            "$python_bin" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1
+          }
+
+          python_version_string() {
+            local python_bin=$1
+            "$python_bin" -c 'import sys; print(sys.version.split()[0])'
+          }
+
+          python_has_pip() {
+            local python_bin=${1:-}
+            [[ -n "$python_bin" ]] && [[ -x "$python_bin" ]] || return 1
+            "$python_bin" -m pip --version >/dev/null 2>&1
+          }
+
+          resolve_conda_base() {
+            local conda_exe_env="${CONDA_EXE:-}"
+            local root=""
+            local search_roots=(
+              "$HOME/miniconda3"
+              "$HOME/anaconda3"
+              "$HOME/miniforge3"
+              "$HOME/mambaforge"
+              "/home/grunner/miniconda3"
+              "/root/miniconda3"
+              "/opt/conda"
+              "/usr/local/miniconda3"
+              "/usr/local/anaconda3"
+            )
+
+            if [[ -n "$conda_exe_env" ]] && [[ -x "$conda_exe_env" ]]; then
+              if [[ "$conda_exe_env" == */condabin/conda ]]; then
+                printf '%s\n' "${conda_exe_env%/condabin/conda}"
+              else
+                printf '%s\n' "$(dirname "$(dirname "$conda_exe_env")")"
+              fi
+              return 0
+            fi
+
+            if command -v conda >/dev/null 2>&1; then
+              conda info --base
+              return 0
+            fi
+
+            for root in "${search_roots[@]}"; do
+              [[ -z "$root" ]] && continue
+              if [[ -x "$root/condabin/conda" ]] || [[ -x "$root/bin/conda" ]]; then
+                printf '%s\n' "$root"
+                return 0
+              fi
+            done
+
+            return 1
+          }
+
+          resolve_tooling_python() {
+            local conda_base=$1
+            local python3_bin=""
+            local python_bin=""
+
+            if python_satisfies_min_version "$conda_base/bin/python"; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            python3_bin="$(command -v python3 2>/dev/null || true)"
+            if python_satisfies_min_version "$python3_bin"; then
+              printf '%s\n' "$python3_bin"
+              return 0
+            fi
+
+            python_bin="$(command -v python 2>/dev/null || true)"
+            if python_satisfies_min_version "$python_bin"; then
+              printf '%s\n' "$python_bin"
+              return 0
+            fi
+
+            return 1
+          }
+
+          resolve_pip_python() {
+            local current_python=$1
+            local conda_base=$2
+            local python3_bin=""
+            local python_bin=""
+
+            if python_has_pip "$current_python"; then
+              printf '%s\n' "$current_python"
+              return 0
+            fi
+
+            if python_has_pip "$conda_base/bin/python"; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            python3_bin="$(command -v python3 2>/dev/null || true)"
+            if python_has_pip "$python3_bin"; then
+              printf '%s\n' "$python3_bin"
+              return 0
+            fi
+
+            python_bin="$(command -v python 2>/dev/null || true)"
+            if python_has_pip "$python_bin"; then
+              printf '%s\n' "$python_bin"
+              return 0
+            fi
+
+            return 1
+          }
+
+          conda_base="$(resolve_conda_base)" || {
+            echo "Could not locate conda on the runner; ensure Miniconda/Anaconda is installed and accessible to the runner service" >&2
+            exit 1
+          }
+
+          if [[ -x "$conda_base/condabin/conda" ]]; then
+            conda_exe="$conda_base/condabin/conda"
+          elif [[ -x "$conda_base/bin/conda" ]]; then
+            conda_exe="$conda_base/bin/conda"
+          else
+            echo "Resolved conda base does not contain a runnable conda executable: $conda_base" >&2
+            exit 1
           fi
 
+          tooling_python="$(resolve_tooling_python "$conda_base")" || {
+            echo "Could not locate a Python >= 3.10 interpreter for benchmark repo utilities" >&2
+            exit 1
+          }
+          tooling_python_version="$(python_version_string "$tooling_python")"
+
+          if [[ "$PUBLISH_RESULTS" == "1" || "$PUBLISH_WEBSITE" == "1" ]]; then
+            pip_python="$(resolve_pip_python "$tooling_python" "$conda_base")" || {
+              echo "Could not locate a pip-capable Python interpreter for publication aggregation dependency installation" >&2
+              exit 1
+            }
+
+            if [[ "$pip_python" != "$tooling_python" ]]; then
+              tooling_python="$pip_python"
+              tooling_python_version="$(python_version_string "$tooling_python")"
+              echo "Switched tooling Python to pip-capable interpreter: $tooling_python"
+            fi
+
+            "$tooling_python" -m pip install --user --disable-pip-version-check 'jsonschema>=4'
+          fi
+
+          env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
+          if [[ -z "${env_prefix//[[:space:]]/}" ]]; then
+            env_prefix="$conda_base/envs/vllm-ascend-official-v0110"
+          fi
+
+          [[ -d "$conda_base/condabin" ]] && printf '%s\n' "$conda_base/condabin" >> "$GITHUB_PATH"
+          [[ -d "$conda_base/bin" ]] && printf '%s\n' "$conda_base/bin" >> "$GITHUB_PATH"
+          printf 'CONDA_BASE=%s\n' "$conda_base" >> "$GITHUB_ENV"
+          printf 'CONDA_EXE=%s\n' "$conda_exe" >> "$GITHUB_ENV"
+          printf 'PYTHON_BIN=%s\n' "$tooling_python" >> "$GITHUB_ENV"
+          printf 'HOST_PYTHON_BIN=%s\n' "$tooling_python" >> "$GITHUB_ENV"
           printf 'GOAL_BASELINE_ENV_PREFIX=%s\n' "$env_prefix" >> "$GITHUB_ENV"
+
+          echo "Resolved conda base: $conda_base"
+          echo "Resolved tooling Python: $tooling_python ($tooling_python_version)"
           echo "Resolved GOAL_BASELINE_ENV_PREFIX=$env_prefix"
           echo "FORCE_REPAIR_OFFICIAL_ENV=$FORCE_REPAIR_OFFICIAL_ENV"
 
@@ -158,7 +411,17 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Run official baseline matrix
+        id: run-matrix
         shell: bash
+        env:
+          CLIENT_READY_CHECK_TIMEOUT_SECONDS: 900
+          DEVICE_SELECTION_RETRIES: 20
+          DEVICE_SELECTION_RETRY_DELAY_SECONDS: 30
+          READY_TIMEOUT_SECONDS: 900
+          READY_STATUS_INTERVAL_SECONDS: 30
+          BENCHMARK_REPO_SSH_KEY: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          MIN_SUCCESSFUL_REPEATS_INPUT: ${{ github.event.inputs.min_successful_repeats || 0 }}
+          MAX_REPEAT_ATTEMPTS_INPUT: ${{ github.event.inputs.max_repeat_attempts || 0 }}
         run: |
           set -euo pipefail
           spec_args=()
@@ -171,7 +434,54 @@ jobs:
             spec_args+=("docs/official-baselines")
           fi
 
+          if [[ "${MIN_SUCCESSFUL_REPEATS_INPUT:-0}" =~ ^[1-9][0-9]*$ ]]; then
+            export MIN_SUCCESSFUL_REPEATS="$MIN_SUCCESSFUL_REPEATS_INPUT"
+          fi
+          if [[ "${MAX_REPEAT_ATTEMPTS_INPUT:-0}" =~ ^[1-9][0-9]*$ ]]; then
+            export MAX_REPEAT_ATTEMPTS="$MAX_REPEAT_ATTEMPTS_INPUT"
+          fi
+
+          if [[ "$PUBLISH_RESULTS" == "1" ]]; then
+            export EXISTING_CANONICAL_SUBMISSIONS_ROOT="$GITHUB_WORKSPACE/publication-target/vllm-hust-benchmark/submissions"
+            export PUBLICATION_SYNC_HELPER="$GITHUB_WORKSPACE/.github/workflows/scripts/sync_official_baseline_snapshots_to_github.sh"
+            export TARGET_BENCHMARK_REPO_DIR="$GITHUB_WORKSPACE/publication-target/vllm-hust-benchmark"
+            export WEBSITE_REPO_DIR="$GITHUB_WORKSPACE/vllm-hust-website"
+            export SNAPSHOT_TARGET_BRANCH="$PUBLICATION_TARGET_BRANCH"
+            export LOCAL_SNAPSHOT_OUTPUT_DIR="$GITHUB_WORKSPACE/artifacts/official-baseline/published-snapshots"
+            export PUBLICATION_COMMIT_MESSAGE_PREFIX="chore(data): publish official ascend baseline"
+            export BENCHMARK_REPO_SLUG="vLLM-HUST/vllm-hust-benchmark"
+            export BENCHMARK_REPO_REMOTE="origin"
+          fi
+
           bash scripts/run-official-ascend-goal-baseline-matrix.sh "${spec_args[@]}"
+
+      - name: Publish official baseline snapshots
+        if: ${{ steps.run-matrix.outcome == 'success' && env.PUBLISH_RESULTS == '1' }}
+        shell: bash
+        env:
+          SOURCE_BENCHMARK_REPO_DIR: ${{ github.workspace }}
+          TARGET_BENCHMARK_REPO_DIR: ${{ github.workspace }}/publication-target/vllm-hust-benchmark
+          WEBSITE_REPO_DIR: ${{ github.workspace }}/vllm-hust-website
+          SNAPSHOT_TARGET_BRANCH: ${{ env.PUBLICATION_TARGET_BRANCH }}
+          LOCAL_SNAPSHOT_OUTPUT_DIR: ${{ github.workspace }}/artifacts/official-baseline/published-snapshots
+          SNAPSHOT_COMMIT_MESSAGE: "chore(data): publish official ascend baselines from run ${{ github.run_id }}-${{ github.run_attempt }}"
+          BENCHMARK_REPO_SLUG: vLLM-HUST/vllm-hust-benchmark
+          BENCHMARK_REPO_REMOTE: origin
+          BENCHMARK_REPO_SSH_KEY: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ALLOW_EMPTY_SNAPSHOT_SOURCE: "1"
+        run: |
+          set -euo pipefail
+          bash .github/workflows/scripts/sync_official_baseline_snapshots_to_github.sh
+
+      - name: Summarize publication result
+        if: ${{ always() && steps.run-matrix.outcome == 'success' && env.PUBLISH_RESULTS == '1' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "- Snapshot publication status: ${GITHUB_SNAPSHOT_SYNC_STATUS:-unknown}" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -n "${GITHUB_SNAPSHOT_SYNC_COMMIT:-}" ]]; then
+            echo "- Snapshot publication commit: ${GITHUB_SNAPSHOT_SYNC_COMMIT}" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload official baseline summary
         if: always()
@@ -189,6 +499,7 @@ jobs:
           name: official-baseline-results-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             .benchmarks/official-ascend-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+            artifacts/official-baseline/published-snapshots
             submissions/official-ascend-*
           if-no-files-found: warn
           retention-days: 14

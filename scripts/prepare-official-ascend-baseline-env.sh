@@ -13,6 +13,8 @@ OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0110"}
 OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0110"}
 OFFICIAL_VLLM_REF=${OFFICIAL_VLLM_REF:-"v0.11.0"}
 OFFICIAL_VLLM_ASCEND_REF=${OFFICIAL_VLLM_ASCEND_REF:-"v0.11.0"}
+OFFICIAL_SOC_VERSION=${OFFICIAL_SOC_VERSION:-${SOC_VERSION:-"ascend910b3"}}
+OFFICIAL_SLEEP_MODE_ENABLED=${OFFICIAL_SLEEP_MODE_ENABLED:-${COMPILE_CUSTOM_KERNELS:-"0"}}
 BENCHMARK_SERVER_PORT=${BENCHMARK_SERVER_PORT:-"8000"}
 PREPARE_BENCHMARK_ADMISSION_ONLY=${PREPARE_BENCHMARK_ADMISSION_ONLY:-"0"}
 ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
@@ -33,6 +35,11 @@ OFFICIAL_TORCH_NPU_WHEEL_URL=${OFFICIAL_TORCH_NPU_WHEEL_URL:-""}
 OFFICIAL_TORCHVISION_WHEEL_URL=${OFFICIAL_TORCHVISION_WHEEL_URL:-""}
 OFFICIAL_TORCHAUDIO_WHEEL_URL=${OFFICIAL_TORCHAUDIO_WHEEL_URL:-""}
 FORCE_REPAIR_OFFICIAL_ENV=${FORCE_REPAIR_OFFICIAL_ENV:-"0"}
+BENCHMARK_RUNTIME_STATE_ROOT=${BENCHMARK_RUNTIME_STATE_ROOT:-"$REPO_ROOT/.benchmarks"}
+MANAGED_BENCHMARK_RUNNER_BASENAME=${MANAGED_BENCHMARK_RUNNER_BASENAME:-"run-official-ascend-goal-baseline.sh"}
+CURRENT_PREPARE_USER_ID=${CURRENT_PREPARE_USER_ID:-$(id -u 2>/dev/null || true)}
+CURRENT_PREPARE_PID_NAMESPACE=${CURRENT_PREPARE_PID_NAMESPACE:-$(readlink /proc/self/ns/pid 2>/dev/null || true)}
+CURRENT_PREPARE_MOUNT_NAMESPACE=${CURRENT_PREPARE_MOUNT_NAMESPACE:-$(readlink /proc/self/ns/mnt 2>/dev/null || true)}
 
 ensure_worktree() {
   local source_repo=$1
@@ -47,8 +54,10 @@ ensure_worktree() {
 run_with_ascend_env() {
   export ZSH_VERSION=""
   if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+    set +u
     # shellcheck disable=SC1090
     source "$ASCEND_TOOLKIT_SET_ENV"
+    set -u
   fi
   if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
     set +u
@@ -57,6 +66,128 @@ run_with_ascend_env() {
     set -u
   fi
   "$@"
+}
+
+run_in_official_env_python() {
+  local pythonpath_prefix=$1
+  shift
+  local script_file
+  local status=0
+
+  script_file=$(mktemp "${TMPDIR:-/tmp}/official-env-python-XXXXXX.py")
+  cat > "$script_file"
+
+  if PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
+    run_with_ascend_env conda run -p "$ENV_PREFIX" "$@" python "$script_file"; then
+    status=0
+  else
+    status=$?
+  fi
+
+  rm -f "$script_file"
+  return "$status"
+}
+
+python_bool_literal() {
+  case "${1,,}" in
+    1|true|yes|on)
+      printf '%s\n' "True"
+      ;;
+    *)
+      printf '%s\n' "False"
+      ;;
+  esac
+}
+
+ensure_vllm_ascend_plugin_metadata() {
+  local version=${OFFICIAL_VLLM_ASCEND_REF#v}
+  local dist_info_dir
+  local build_info_file
+  local setup_py
+  local line
+  local group=""
+  local entry=""
+  local -a platform_entries=()
+  local -a general_entries=()
+  local sleep_mode_enabled_literal
+
+  if [[ -z "$version" ]] || [[ "$version" == "$OFFICIAL_VLLM_ASCEND_REF" ]]; then
+    version="0.0.0"
+  fi
+
+  setup_py="$OFFICIAL_VLLM_ASCEND_WORKTREE/setup.py"
+  while IFS= read -r line; do
+    case "$line" in
+      *'"vllm.platform_plugins": ['*)
+        group="platform"
+        continue
+        ;;
+      *'"vllm.general_plugins": ['*)
+        group="general"
+        continue
+        ;;
+      *']'*)
+        if [[ -n "$group" ]]; then
+          group=""
+        fi
+        ;;
+    esac
+
+    if [[ -n "$group" ]]; then
+      entry=$(printf '%s\n' "$line" | sed -n 's/.*"\([^"]*\)".*/\1/p')
+    else
+      entry=""
+    fi
+
+    if [[ -n "$entry" ]]; then
+      case "$group" in
+        platform)
+          platform_entries+=("$entry")
+          ;;
+        general)
+          general_entries+=("$entry")
+          ;;
+      esac
+    fi
+  done < "$setup_py"
+
+  if [[ ${#platform_entries[@]} -eq 0 ]]; then
+    platform_entries+=("ascend = vllm_ascend:register")
+  fi
+
+  dist_info_dir="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend-${version}.dist-info"
+  mkdir -p "$dist_info_dir"
+
+  cat > "$dist_info_dir/METADATA" <<EOF
+Metadata-Version: 2.1
+Name: vllm-ascend
+Version: $version
+EOF
+
+  cat > "$dist_info_dir/top_level.txt" <<'EOF'
+vllm_ascend
+EOF
+
+  {
+    printf '%s\n' '[vllm.platform_plugins]'
+    printf '%s\n' "${platform_entries[@]}"
+    if [[ ${#general_entries[@]} -gt 0 ]]; then
+      printf '\n%s\n' '[vllm.general_plugins]'
+      printf '%s\n' "${general_entries[@]}"
+    fi
+  } > "$dist_info_dir/entry_points.txt"
+
+  mkdir -p "$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend"
+  build_info_file="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend/_build_info.py"
+  sleep_mode_enabled_literal=$(python_bool_literal "$OFFICIAL_SLEEP_MODE_ENABLED")
+  cat > "$build_info_file" <<EOF
+# Auto-generated file
+__soc_version__ = '$OFFICIAL_SOC_VERSION'
+__sleep_mode_enabled__ = $sleep_mode_enabled_literal
+EOF
+
+  OFFICIAL_EXPECTED_PLATFORM_PLUGINS=$(printf '%s\n' "${platform_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
+  OFFICIAL_EXPECTED_GENERAL_PLUGINS=$(printf '%s\n' "${general_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
 }
 
 normalize_arch() {
@@ -188,10 +319,12 @@ emit_prepared_env_summary() {
 }
 
 verify_official_env() {
-  PYTHONPATH="$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE${PYTHONPATH:+:$PYTHONPATH}" \
-  run_with_ascend_env conda run -p "$ENV_PREFIX" env \
+  run_in_official_env_python "$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE" \
+    env \
     OFFICIAL_EXPECTED_PYTHON_VERSION="$PYTHON_VERSION" \
     OFFICIAL_EXPECTED_SETUPTOOLS_SPEC=">=77.0.3,<80.0.0" \
+    OFFICIAL_EXPECTED_PLATFORM_PLUGINS="$OFFICIAL_EXPECTED_PLATFORM_PLUGINS" \
+    OFFICIAL_EXPECTED_GENERAL_PLUGINS="$OFFICIAL_EXPECTED_GENERAL_PLUGINS" \
     OFFICIAL_EXPECTED_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
     OFFICIAL_EXPECTED_VLLM_ASCEND_WORKTREE="$OFFICIAL_VLLM_ASCEND_WORKTREE" \
     OFFICIAL_EXPECTED_TORCH_TARGET="$OFFICIAL_TORCH_INSTALL_TARGET" \
@@ -206,8 +339,7 @@ verify_official_env() {
     OFFICIAL_EXPECTED_XGRAMMAR_VERSION="0.1.25" \
     OFFICIAL_EXPECTED_FASTAPI_VERSION="0.123.10" \
     OFFICIAL_EXPECTED_NUMBA_VERSION="0.61.2" \
-    OFFICIAL_EXPECTED_OPENCV_VERSION="4.11.0.86" \
-    python - <<'PY'
+    OFFICIAL_EXPECTED_OPENCV_VERSION="4.11.0.86" <<'PY'
 import os
 import sys
 from importlib import metadata
@@ -313,7 +445,23 @@ if Version(setuptools_version) not in setuptools_spec:
   )
 
 ensure_absent("vllm", "vllm-hust", "vllm_hust")
-ensure_absent("vllm-ascend", "vllm_ascend", "vllm-ascend-hust", "vllm_ascend_hust")
+ensure_absent("vllm-ascend-hust", "vllm_ascend_hust")
+
+platform_plugins = sorted(ep.name for ep in entry_points(group="vllm.platform_plugins"))
+expected_platform_plugins = sorted(filter(None, os.environ["OFFICIAL_EXPECTED_PLATFORM_PLUGINS"].split(",")))
+if platform_plugins != expected_platform_plugins:
+  fail(
+    "platform plugins are "
+    f"{','.join(platform_plugins)}, expected {','.join(expected_platform_plugins)}"
+  )
+
+general_plugins = sorted(ep.name for ep in entry_points(group="vllm.general_plugins"))
+expected_general_plugins = sorted(filter(None, os.environ["OFFICIAL_EXPECTED_GENERAL_PLUGINS"].split(",")))
+if general_plugins != expected_general_plugins:
+  fail(
+    "general plugins are "
+    f"{','.join(general_plugins)}, expected {','.join(expected_general_plugins)}"
+  )
 
 print(f"env_prefix={os.environ['ENV_PREFIX']}")
 print(f"torch={torch.__version__}")
@@ -330,8 +478,8 @@ print(f"numba={dist_version('numba')}")
 print(f"transformers={dist_version('transformers')}")
 print(f"numpy={dist_version('numpy')}")
 print(f"opencv_python_headless={dist_version('opencv-python-headless')}")
-print("platform_plugins=" + ",".join(sorted(ep.name for ep in entry_points(group="vllm.platform_plugins"))))
-print("general_plugins=" + ",".join(sorted(ep.name for ep in entry_points(group="vllm.general_plugins"))))
+print("platform_plugins=" + ",".join(platform_plugins))
+print("general_plugins=" + ",".join(general_plugins))
 PY
 }
 
@@ -353,12 +501,331 @@ list_port_listener_pids() {
   fi
 }
 
-list_benchmark_residual_pids() {
+process_args() {
+  local pid=$1
+  ps -p "$pid" -o args= 2>/dev/null || true
+}
+
+process_user_id() {
+  local pid=$1
+  ps -p "$pid" -o uid= 2>/dev/null | tr -d '[:space:]' || true
+}
+
+process_namespace() {
+  local pid=$1
+  local namespace_name=$2
+
+  readlink "/proc/${pid}/ns/${namespace_name}" 2>/dev/null || true
+}
+
+is_benchmark_process() {
+  local pid=$1
+  local args
+
+  args=$(process_args "$pid")
+  [[ -n "$args" ]] && [[ "$args" =~ vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main\ bench\ serve|run_vllm_cli_compat\.py\ bench\ (serve|throughput|latency)|EngineCore_DP0 ]]
+}
+
+is_managed_runner_wrapper_process() {
+  local pid=$1
+  local args
+
+  args=$(process_args "$pid")
+  [[ -n "$args" ]] && [[ "$args" == *"$MANAGED_BENCHMARK_RUNNER_BASENAME"* ]]
+}
+
+is_process_in_cleanup_scope() {
+  local pid=$1
+  local candidate_user_id
+  local candidate_pid_namespace
+  local candidate_mount_namespace
+
+  if [[ -z "$pid" ]] || [[ "$pid" == "$$" ]]; then
+    return 1
+  fi
+
+  candidate_user_id=$(process_user_id "$pid")
+  if [[ -z "$candidate_user_id" ]] || [[ "$candidate_user_id" != "$CURRENT_PREPARE_USER_ID" ]]; then
+    return 1
+  fi
+
+  candidate_pid_namespace=$(process_namespace "$pid" pid)
+  if [[ -z "$candidate_pid_namespace" ]] || [[ "$candidate_pid_namespace" != "$CURRENT_PREPARE_PID_NAMESPACE" ]]; then
+    return 1
+  fi
+
+  candidate_mount_namespace=$(process_namespace "$pid" mnt)
+  if [[ -z "$candidate_mount_namespace" ]] || [[ "$candidate_mount_namespace" != "$CURRENT_PREPARE_MOUNT_NAMESPACE" ]]; then
+    return 1
+  fi
+
+  return 0
+}
+
+list_child_pids() {
+  local parent_pid=$1
+  ps -eo pid=,ppid= | awk -v target="$parent_pid" '$2 == target {print $1}'
+}
+
+collect_process_tree_pids() {
+  local root_pid=$1
+  local child_pid
+
+  if ! kill -0 "$root_pid" 2>/dev/null; then
+    return 0
+  fi
+
+  echo "$root_pid"
+  while IFS= read -r child_pid; do
+    [[ -z "$child_pid" ]] && continue
+    collect_process_tree_pids "$child_pid"
+  done < <(list_child_pids "$root_pid")
+}
+
+log_process_snapshots() {
+  local label=$1
+  local pids=$2
+  local pid
+  local snapshot
+  local process_tree
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    snapshot=$(ps -p "$pid" -o pid=,ppid=,stat=,args= 2>/dev/null | sed 's/^[[:space:]]*//')
+    if [[ -n "$snapshot" ]]; then
+      echo "[official-env] ${label}: ${snapshot}"
+      if command -v pstree >/dev/null 2>&1; then
+        process_tree=$(pstree -sp "$pid" 2>/dev/null || true)
+        if [[ -n "$process_tree" ]]; then
+          echo "[official-env] ${label} tree: ${process_tree}"
+        fi
+      fi
+    else
+      echo "[official-env] ${label}: pid=${pid} exited before inspection"
+    fi
+  done <<< "$pids"
+}
+
+terminate_pid_tree() {
+  local pid=$1
+  local description=$2
+  local tree_pids
+  local tree_list
+  local still_running
+  local tree_pid
+  local attempt
+
+  tree_pids=$(collect_process_tree_pids "$pid" | sort -u)
+  [[ -z "$tree_pids" ]] && return 0
+  tree_list=$(printf '%s\n' "$tree_pids" | tr '\n' ' ')
+
+  echo "[official-env] stopping ${description}: ${tree_list}"
+  kill $tree_list 2>/dev/null || true
+
+  for attempt in $(seq 1 5); do
+    still_running=0
+    while IFS= read -r tree_pid; do
+      [[ -z "$tree_pid" ]] && continue
+      if is_live_process "$tree_pid"; then
+        still_running=1
+        break
+      fi
+    done <<< "$tree_pids"
+
+    if [[ "$still_running" == "0" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  kill -9 $tree_list 2>/dev/null || true
+
+  for attempt in $(seq 1 5); do
+    still_running=0
+    while IFS= read -r tree_pid; do
+      [[ -z "$tree_pid" ]] && continue
+      if is_live_process "$tree_pid"; then
+        still_running=1
+        break
+      fi
+    done <<< "$tree_pids"
+
+    if [[ "$still_running" == "0" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  return 1
+}
+
+terminate_benchmark_pid_set() {
+  local pids=$1
+  local pid
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    terminate_pid_tree "$pid" "benchmark residual process tree rooted at ${pid}" || true
+  done <<< "$pids"
+}
+
+list_matching_benchmark_pids() {
   ps -eo pid=,args= | awk '
-    /vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main bench serve|EngineCore_DP0/ && !/awk/ {
+    /vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main bench serve|run_vllm_cli_compat\.py bench (serve|throughput|latency)|EngineCore_DP0/ && !/awk/ {
       print $1
     }
   ' | sort -u
+}
+
+list_managed_runtime_state_dirs() {
+  if [[ ! -d "$BENCHMARK_RUNTIME_STATE_ROOT" ]]; then
+    return 0
+  fi
+
+  find "$BENCHMARK_RUNTIME_STATE_ROOT" -type d -name '.runtime-state' 2>/dev/null | sort || true
+}
+
+list_managed_runtime_state_pids() {
+  local state_dir
+
+  while IFS= read -r state_dir; do
+    [[ -z "$state_dir" ]] && continue
+    if [[ -f "$state_dir/server.wrapper.pid" ]]; then
+      tr '[:space:]' '\n' < "$state_dir/server.wrapper.pid"
+    fi
+    if [[ -f "$state_dir/server.listener.pids" ]]; then
+      tr '[:space:]' '\n' < "$state_dir/server.listener.pids"
+    fi
+  done < <(list_managed_runtime_state_dirs) | sed '/^$/d' | sort -u
+}
+
+process_state() {
+  local pid=$1
+  ps -p "$pid" -o stat= 2>/dev/null | tr -d '[:space:]' || true
+}
+
+process_parent_pid() {
+  local pid=$1
+  ps -p "$pid" -o ppid= 2>/dev/null | tr -d '[:space:]' || true
+}
+
+is_zombie_process() {
+  local pid=$1
+  local state
+
+  state=$(process_state "$pid")
+  [[ -n "$state" ]] && [[ "$state" == Z* ]]
+}
+
+is_live_process() {
+  local pid=$1
+
+  if ! kill -0 "$pid" 2>/dev/null; then
+    return 1
+  fi
+
+  if is_zombie_process "$pid"; then
+    return 1
+  fi
+
+  return 0
+}
+
+list_benchmark_residual_pids() {
+  local pid
+
+  {
+    while IFS= read -r pid; do
+      [[ -z "$pid" ]] && continue
+      if is_zombie_process "$pid"; then
+        continue
+      fi
+      if ! is_process_in_cleanup_scope "$pid"; then
+        continue
+      fi
+      if is_benchmark_process "$pid" || is_managed_runner_wrapper_process "$pid"; then
+        printf '%s\n' "$pid"
+      fi
+    done < <(list_managed_runtime_state_pids)
+
+    while IFS= read -r pid; do
+      [[ -z "$pid" ]] && continue
+      if is_zombie_process "$pid"; then
+        continue
+      fi
+      if ! is_process_in_cleanup_scope "$pid"; then
+        continue
+      fi
+      printf '%s\n' "$pid"
+    done < <(list_matching_benchmark_pids)
+  } | sort -u
+}
+
+list_benchmark_zombie_pids() {
+  local pid
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    if is_zombie_process "$pid"; then
+      if ! is_process_in_cleanup_scope "$pid"; then
+        continue
+      fi
+      printf '%s\n' "$pid"
+    fi
+  done < <(list_matching_benchmark_pids) | sort -u
+}
+
+list_out_of_scope_benchmark_pids() {
+  local pid
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    if is_zombie_process "$pid"; then
+      continue
+    fi
+    if is_process_in_cleanup_scope "$pid"; then
+      continue
+    fi
+    printf '%s\n' "$pid"
+  done < <(list_matching_benchmark_pids) | sort -u
+}
+
+reap_benchmark_zombie_parents() {
+  local zombie_pids=$1
+  local pid
+  local parent_pid
+  local parent_pids=""
+
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    parent_pid=$(process_parent_pid "$pid")
+    if [[ -z "$parent_pid" ]] || [[ "$parent_pid" == "1" ]] || [[ "$parent_pid" == "$$" ]]; then
+      continue
+    fi
+    parent_pids+="$parent_pid"$'\n'
+  done <<< "$zombie_pids"
+
+  parent_pids=$(printf '%s' "$parent_pids" | sed '/^$/d' | sort -u)
+  if [[ -z "$parent_pids" ]]; then
+    return 0
+  fi
+
+  echo "[official-env] reaping zombie benchmark parents: $parent_pids"
+  kill $parent_pids 2>/dev/null || true
+}
+
+wait_for_no_benchmark_residual_pids() {
+  local max_attempts=${1:-10}
+  local attempt
+
+  for attempt in $(seq 1 "$max_attempts"); do
+    if [[ -z "$(list_benchmark_residual_pids)" ]]; then
+      return 0
+    fi
+    sleep 1
+  done
+
+  return 1
 }
 
 cleanup_benchmark_residual_processes() {
@@ -366,6 +833,7 @@ cleanup_benchmark_residual_processes() {
     local port_pids
     port_pids=$(list_port_listener_pids "$BENCHMARK_SERVER_PORT")
     if [[ -n "$port_pids" ]]; then
+      log_process_snapshots "port listener during admission check" "$port_pids"
       echo "Port ${BENCHMARK_SERVER_PORT} is already occupied by listening processes: $port_pids" >&2
       return 1
     fi
@@ -375,8 +843,23 @@ cleanup_benchmark_residual_processes() {
       return 1
     fi
 
+    local out_of_scope_pids
+    out_of_scope_pids=$(list_out_of_scope_benchmark_pids)
+    if [[ -n "$out_of_scope_pids" ]]; then
+      log_process_snapshots "out-of-scope residual during admission check" "$out_of_scope_pids"
+      echo "Out-of-scope benchmark processes exist outside the runner cleanup scope during admission check: $out_of_scope_pids" >&2
+      return 1
+    fi
+
     echo "[official-env] benchmark admission preflight passed: no residual benchmark processes"
     return 0
+  fi
+
+  local zombie_pids
+  zombie_pids=$(list_benchmark_zombie_pids)
+  if [[ -n "$zombie_pids" ]]; then
+    echo "[official-env] found zombie benchmark processes: $zombie_pids"
+    reap_benchmark_zombie_parents "$zombie_pids"
   fi
 
   local pids
@@ -384,26 +867,49 @@ cleanup_benchmark_residual_processes() {
 
   if [[ -n "$pids" ]]; then
     echo "[official-env] cleaning residual benchmark processes: $pids"
-    kill $pids 2>/dev/null || true
+    log_process_snapshots "residual before cleanup" "$pids"
+    terminate_benchmark_pid_set "$pids"
 
-    local pid
-    for pid in $pids; do
-      if kill -0 "$pid" 2>/dev/null; then
-        kill -9 "$pid" 2>/dev/null || true
+    if ! wait_for_no_benchmark_residual_pids 5; then
+      local remaining_pids
+      remaining_pids=$(list_benchmark_residual_pids)
+      if [[ -n "$remaining_pids" ]]; then
+        echo "[official-env] escalating residual benchmark cleanup: $remaining_pids"
+        log_process_snapshots "residual before escalation" "$remaining_pids"
+        terminate_benchmark_pid_set "$remaining_pids"
+        wait_for_no_benchmark_residual_pids 5 || true
       fi
-    done
+    fi
   fi
 
   local port_pids
   port_pids=$(list_port_listener_pids "$BENCHMARK_SERVER_PORT")
   if [[ -n "$port_pids" ]]; then
+    log_process_snapshots "port listener after cleanup" "$port_pids"
     echo "Port ${BENCHMARK_SERVER_PORT} is already occupied by listening processes: $port_pids" >&2
     return 1
   fi
 
-  if [[ -n "$(list_benchmark_residual_pids)" ]]; then
-    echo "Residual benchmark processes still exist after cleanup" >&2
+  local final_residual_pids
+  final_residual_pids=$(list_benchmark_residual_pids)
+  if [[ -n "$final_residual_pids" ]]; then
+    log_process_snapshots "residual after cleanup" "$final_residual_pids"
+    echo "Residual benchmark processes still exist after cleanup: $final_residual_pids" >&2
     return 1
+  fi
+
+  local final_out_of_scope_pids
+  final_out_of_scope_pids=$(list_out_of_scope_benchmark_pids)
+  if [[ -n "$final_out_of_scope_pids" ]]; then
+    log_process_snapshots "out-of-scope residual after cleanup" "$final_out_of_scope_pids"
+    echo "Out-of-scope benchmark processes remain outside the runner cleanup scope; refusing to kill them automatically: $final_out_of_scope_pids" >&2
+    return 1
+  fi
+
+  local final_zombie_pids
+  final_zombie_pids=$(list_benchmark_zombie_pids)
+  if [[ -n "$final_zombie_pids" ]]; then
+    echo "[official-env] continuing with zombie benchmark processes that have no listening port: $final_zombie_pids"
   fi
 
   echo "[official-env] benchmark admission preflight passed: no residual benchmark processes"
@@ -446,6 +952,7 @@ fi
 
 ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_REF"
 ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_VLLM_ASCEND_REF"
+ensure_vllm_ascend_plugin_metadata
 
 if [[ ! -d "$ENV_PREFIX" ]]; then
   conda create -y -p "$ENV_PREFIX" "python=$PYTHON_VERSION" pip

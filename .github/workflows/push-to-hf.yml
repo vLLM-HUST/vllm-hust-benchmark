@@ -33,18 +33,71 @@ permissions:
 jobs:
   upload-to-hf:
     runs-on: ubuntu-latest
+    env:
+      BENCHMARK_CHECKOUT_USE_SSH: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
 
     steps:
+      - name: Require GitHub SSH checkout key
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$BENCHMARK_CHECKOUT_USE_SSH" != "1" ]]; then
+            echo "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY is required because this workflow checks out repositories over SSH." >&2
+            exit 1
+          fi
+
+      - name: Configure GitHub SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_dir="$HOME/.ssh"
+          config_file="$ssh_dir/config"
+          key_file="$ssh_dir/github_actions"
+
+          if [[ ! -d "$ssh_dir" ]]; then
+            mkdir -p "$ssh_dir"
+          fi
+          chmod 700 "$ssh_dir"
+
+          printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$key_file"
+          chmod 600 "$key_file"
+
+          config_block="$(cat <<'EOF'
+          Host github.com
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/github_actions
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+          EOF
+          )"
+
+          if [[ ! -f "$config_file" ]]; then
+            printf '%s\n' "$config_block" > "$config_file"
+          elif ! grep -Fq 'Host github.com' "$config_file" \
+            || ! grep -Fq 'HostName github.com' "$config_file" \
+            || ! grep -Fq 'IdentityFile ~/.ssh/github_actions' "$config_file"; then
+            printf '\n%s\n' "$config_block" >> "$config_file"
+          fi
+
+          chmod 600 "$config_file"
+
       - name: Checkout benchmark repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Checkout vllm-hust repo
         uses: actions/checkout@v4
         with:
           repository: vLLM-HUST/vllm-hust
           path: vllm-hust
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Checkout website repo (for aggregate script and schema)
         uses: actions/checkout@v4
@@ -52,6 +105,9 @@ jobs:
           repository: vLLM-HUST/vllm-hust-website
           ref: ${{ env.VLLM_HUST_WEBSITE_REF }}
           path: vllm-hust-website
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
