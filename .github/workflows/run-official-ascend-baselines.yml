@@ -212,58 +212,32 @@ jobs:
           ssh-strict: false
           persist-credentials: false
 
-      - name: Resolve host Python
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          resolve_host_python() {
-            if command -v python3 >/dev/null 2>&1; then
-              command -v python3
-              return 0
-            fi
-
-            if command -v python >/dev/null 2>&1; then
-              command -v python
-              return 0
-            fi
-
-            if command -v conda >/dev/null 2>&1; then
-              local conda_base
-              conda_base="$(conda info --base 2>/dev/null || true)"
-              if [[ -n "$conda_base" ]] && [[ -x "$conda_base/bin/python" ]]; then
-                printf '%s\n' "$conda_base/bin/python"
-                return 0
-              fi
-            fi
-
-            return 1
-          }
-
-          host_python="$(resolve_host_python)" || {
-            echo "Could not locate a host Python interpreter for benchmark repo utilities" >&2
-            exit 1
-          }
-
-          "$host_python" -c 'import sys; version = sys.version.split()[0]; raise SystemExit(0 if sys.version_info >= (3, 10) else f"Python {version} is too old for vllm-hust-benchmark; require >= 3.10")'
-          host_python_version="$($host_python -c 'import sys; print(sys.version.split()[0])')"
-
-          printf 'PYTHON_BIN=%s\n' "$host_python" >> "$GITHUB_ENV"
-          printf 'HOST_PYTHON_BIN=%s\n' "$host_python" >> "$GITHUB_ENV"
-          echo "Resolved host Python: $host_python ($host_python_version)"
-
-      - name: Install publication aggregation dependency
-        if: ${{ env.PUBLISH_RESULTS == '1' || env.PUBLISH_WEBSITE == '1' }}
+      - name: Resolve tooling and official env
         shell: bash
         env:
-          HOST_PYTHON_BIN: ${{ env.HOST_PYTHON_BIN }}
+          GOAL_BASELINE_ENV_PREFIX_INPUT: ${{ github.event.inputs.goal_baseline_env_prefix || '' }}
         run: |
           set -euo pipefail
 
-          resolve_pip_python() {
-            local candidate="${HOST_PYTHON_BIN:-}"
+          python_satisfies_min_version() {
+            local python_bin=${1:-}
+            [[ -n "$python_bin" ]] && [[ -x "$python_bin" ]] || return 1
+            "$python_bin" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1
+          }
+
+          python_version_string() {
+            local python_bin=$1
+            "$python_bin" -c 'import sys; print(sys.version.split()[0])'
+          }
+
+          python_has_pip() {
+            local python_bin=${1:-}
+            [[ -n "$python_bin" ]] && [[ -x "$python_bin" ]] || return 1
+            "$python_bin" -m pip --version >/dev/null 2>&1
+          }
+
+          resolve_conda_base() {
             local conda_exe_env="${CONDA_EXE:-}"
-            local conda_base=""
             local root=""
             local search_roots=(
               "$HOME/miniconda3"
@@ -276,62 +250,6 @@ jobs:
               "/usr/local/miniconda3"
               "/usr/local/anaconda3"
             )
-
-            if [[ -n "$candidate" ]] && [[ -x "$candidate" ]] && "$candidate" -m pip --version >/dev/null 2>&1; then
-              printf '%s\n' "$candidate"
-              return 0
-            fi
-
-            if [[ -n "$conda_exe_env" ]] && [[ -x "$conda_exe_env" ]]; then
-              if [[ "$conda_exe_env" == */condabin/conda ]]; then
-                conda_base="${conda_exe_env%/condabin/conda}"
-              else
-                conda_base="$(dirname "$(dirname "$conda_exe_env")")"
-              fi
-            elif command -v conda >/dev/null 2>&1; then
-              conda_base="$(conda info --base 2>/dev/null || true)"
-            fi
-
-            if [[ -n "$conda_base" ]] && [[ -x "$conda_base/bin/python" ]] && "$conda_base/bin/python" -m pip --version >/dev/null 2>&1; then
-              printf '%s\n' "$conda_base/bin/python"
-              return 0
-            fi
-
-            for root in "${search_roots[@]}"; do
-              [[ -z "$root" ]] && continue
-              if [[ -x "$root/bin/python" ]] && "$root/bin/python" -m pip --version >/dev/null 2>&1; then
-                printf '%s\n' "$root/bin/python"
-                return 0
-              fi
-            done
-
-            return 1
-          }
-
-          pip_python="$(resolve_pip_python)" || {
-            echo "Could not locate a pip-capable Python interpreter for publication aggregation dependency installation" >&2
-            exit 1
-          }
-
-          if [[ "$pip_python" != "${HOST_PYTHON_BIN:-}" ]]; then
-            printf 'HOST_PYTHON_BIN=%s\n' "$pip_python" >> "$GITHUB_ENV"
-            printf 'PYTHON_BIN=%s\n' "$pip_python" >> "$GITHUB_ENV"
-            echo "Switched host Python to pip-capable interpreter: $pip_python"
-          fi
-
-          "$pip_python" -m pip install --user --disable-pip-version-check 'jsonschema>=4'
-
-      - name: Resolve conda base
-        shell: bash
-        env:
-          HOST_PYTHON_BIN: ${{ env.HOST_PYTHON_BIN }}
-        run: |
-          set -euo pipefail
-
-          resolve_conda_base() {
-            local host_python=${1:-}
-            local candidate=""
-            local conda_exe_env="${CONDA_EXE:-}"
 
             if [[ -n "$conda_exe_env" ]] && [[ -x "$conda_exe_env" ]]; then
               if [[ "$conda_exe_env" == */condabin/conda ]]; then
@@ -347,34 +265,6 @@ jobs:
               return 0
             fi
 
-            if [[ -n "$host_python" ]]; then
-              case "$host_python" in
-                */envs/*/bin/python|*/envs/*/bin/python3)
-                  printf '%s\n' "${host_python%%/envs/*}"
-                  return 0
-                  ;;
-                */bin/python|*/bin/python3)
-                  candidate="$(dirname "$(dirname "$host_python")")"
-                  if [[ -x "$candidate/condabin/conda" ]] || [[ -x "$candidate/bin/conda" ]]; then
-                    printf '%s\n' "$candidate"
-                    return 0
-                  fi
-                  ;;
-              esac
-            fi
-
-            local search_roots=(
-              "$HOME/miniconda3"
-              "$HOME/anaconda3"
-              "$HOME/miniforge3"
-              "$HOME/mambaforge"
-              "/home/grunner/miniconda3"
-              "/root/miniconda3"
-              "/opt/conda"
-              "/usr/local/miniconda3"
-              "/usr/local/anaconda3"
-            )
-            local root
             for root in "${search_roots[@]}"; do
               [[ -z "$root" ]] && continue
               if [[ -x "$root/condabin/conda" ]] || [[ -x "$root/bin/conda" ]]; then
@@ -386,7 +276,63 @@ jobs:
             return 1
           }
 
-          conda_base="$(resolve_conda_base "${HOST_PYTHON_BIN:-}")" || {
+          resolve_tooling_python() {
+            local conda_base=$1
+            local python3_bin=""
+            local python_bin=""
+
+            if python_satisfies_min_version "$conda_base/bin/python"; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            python3_bin="$(command -v python3 2>/dev/null || true)"
+            if python_satisfies_min_version "$python3_bin"; then
+              printf '%s\n' "$python3_bin"
+              return 0
+            fi
+
+            python_bin="$(command -v python 2>/dev/null || true)"
+            if python_satisfies_min_version "$python_bin"; then
+              printf '%s\n' "$python_bin"
+              return 0
+            fi
+
+            return 1
+          }
+
+          resolve_pip_python() {
+            local current_python=$1
+            local conda_base=$2
+            local python3_bin=""
+            local python_bin=""
+
+            if python_has_pip "$current_python"; then
+              printf '%s\n' "$current_python"
+              return 0
+            fi
+
+            if python_has_pip "$conda_base/bin/python"; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            python3_bin="$(command -v python3 2>/dev/null || true)"
+            if python_has_pip "$python3_bin"; then
+              printf '%s\n' "$python3_bin"
+              return 0
+            fi
+
+            python_bin="$(command -v python 2>/dev/null || true)"
+            if python_has_pip "$python_bin"; then
+              printf '%s\n' "$python_bin"
+              return 0
+            fi
+
+            return 1
+          }
+
+          conda_base="$(resolve_conda_base)" || {
             echo "Could not locate conda on the runner; ensure Miniconda/Anaconda is installed and accessible to the runner service" >&2
             exit 1
           }
@@ -400,30 +346,42 @@ jobs:
             exit 1
           fi
 
+          tooling_python="$(resolve_tooling_python "$conda_base")" || {
+            echo "Could not locate a Python >= 3.10 interpreter for benchmark repo utilities" >&2
+            exit 1
+          }
+          tooling_python_version="$(python_version_string "$tooling_python")"
+
+          if [[ "$PUBLISH_RESULTS" == "1" || "$PUBLISH_WEBSITE" == "1" ]]; then
+            pip_python="$(resolve_pip_python "$tooling_python" "$conda_base")" || {
+              echo "Could not locate a pip-capable Python interpreter for publication aggregation dependency installation" >&2
+              exit 1
+            }
+
+            if [[ "$pip_python" != "$tooling_python" ]]; then
+              tooling_python="$pip_python"
+              tooling_python_version="$(python_version_string "$tooling_python")"
+              echo "Switched tooling Python to pip-capable interpreter: $tooling_python"
+            fi
+
+            "$tooling_python" -m pip install --user --disable-pip-version-check 'jsonschema>=4'
+          fi
+
+          env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
+          if [[ -z "${env_prefix//[[:space:]]/}" ]]; then
+            env_prefix="$conda_base/envs/vllm-ascend-official-v0110"
+          fi
+
           [[ -d "$conda_base/condabin" ]] && printf '%s\n' "$conda_base/condabin" >> "$GITHUB_PATH"
           [[ -d "$conda_base/bin" ]] && printf '%s\n' "$conda_base/bin" >> "$GITHUB_PATH"
           printf 'CONDA_BASE=%s\n' "$conda_base" >> "$GITHUB_ENV"
           printf 'CONDA_EXE=%s\n' "$conda_exe" >> "$GITHUB_ENV"
-          echo "Resolved conda base: $conda_base"
-
-      - name: Resolve official env prefix
-        shell: bash
-        env:
-          GOAL_BASELINE_ENV_PREFIX_INPUT: ${{ github.event.inputs.goal_baseline_env_prefix || '' }}
-          CONDA_BASE: ${{ env.CONDA_BASE }}
-          CONDA_EXE: ${{ env.CONDA_EXE }}
-        run: |
-          set -euo pipefail
-          env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
-          if [[ -z "${env_prefix//[[:space:]]/}" ]]; then
-            if [[ -n "${CONDA_BASE:-}" ]]; then
-              env_prefix="$CONDA_BASE/envs/vllm-ascend-official-v0110"
-            else
-              env_prefix="$("${CONDA_EXE:-conda}" info --base)/envs/vllm-ascend-official-v0110"
-            fi
-          fi
-
+          printf 'PYTHON_BIN=%s\n' "$tooling_python" >> "$GITHUB_ENV"
+          printf 'HOST_PYTHON_BIN=%s\n' "$tooling_python" >> "$GITHUB_ENV"
           printf 'GOAL_BASELINE_ENV_PREFIX=%s\n' "$env_prefix" >> "$GITHUB_ENV"
+
+          echo "Resolved conda base: $conda_base"
+          echo "Resolved tooling Python: $tooling_python ($tooling_python_version)"
           echo "Resolved GOAL_BASELINE_ENV_PREFIX=$env_prefix"
           echo "FORCE_REPAIR_OFFICIAL_ENV=$FORCE_REPAIR_OFFICIAL_ENV"
 
@@ -504,7 +462,6 @@ jobs:
           SOURCE_BENCHMARK_REPO_DIR: ${{ github.workspace }}
           TARGET_BENCHMARK_REPO_DIR: ${{ github.workspace }}/publication-target/vllm-hust-benchmark
           WEBSITE_REPO_DIR: ${{ github.workspace }}/vllm-hust-website
-          PYTHON_BIN: ${{ env.HOST_PYTHON_BIN }}
           SNAPSHOT_TARGET_BRANCH: ${{ env.PUBLICATION_TARGET_BRANCH }}
           LOCAL_SNAPSHOT_OUTPUT_DIR: ${{ github.workspace }}/artifacts/official-baseline/published-snapshots
           SNAPSHOT_COMMIT_MESSAGE: "chore(data): publish official ascend baselines from run ${{ github.run_id }}-${{ github.run_attempt }}"
