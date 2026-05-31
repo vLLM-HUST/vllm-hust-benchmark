@@ -55,6 +55,7 @@ Within that boundary, the important design point is:
 - `src/vllm_hust_benchmark/data/official_scenarios.json`: initial official scenario mirror
 - `docs/UPSTREAM_ANALYSIS.md`: analysis of upstream benchmark architecture and why this repo is structured this way
 - `docs/LEADERBOARD_ALIGNMENT.md`: scenario taxonomy and exact mapping to website leaderboard schema
+- `docs/LEADERBOARD_HANDOFF.md`: handoff guide for the leaderboard publication chain and official baseline operations
 - `tests/`: focused tests for registry loading and command generation
 
 ## Quick Start
@@ -194,7 +195,7 @@ The intended production chain is:
 
 When `export-leaderboard-artifact` or `submit` runs inside GitHub Actions, the exporter now also captures GitHub provenance into `metadata`, including the triggering user, commit SHA, commit URL, repository, ref, and optional PR metadata. You can override any of those fields explicitly with `--git-commit`, `--github-user`, `--github-commit-url`, `--github-repository`, `--github-ref`, `--github-event-name`, `--github-pr-number`, and `--github-pr-url`.
 
-For cross-repository CI, `sync-submission-to-hf` is the preferred publish entrypoint after a run has already been exported into one submission directory. It downloads historical raw submissions from a Hugging Face dataset prefix, merges in the new submission, regenerates `leaderboard_single.json`, `leaderboard_multi.json`, `leaderboard_compare.json`, and `last_updated.json`, and uploads both the refreshed snapshots and the new raw submission in one commit.
+For cross-repository CI, `sync-submission-to-hf` is the preferred publish entrypoint after a run has already been exported into one submission directory. It downloads historical raw submissions from the production Hugging Face dataset `intellistream/vllm-hust-benchmark-results`, merges in the new submission, regenerates `leaderboard_single.json`, `leaderboard_multi.json`, `leaderboard_compare.json`, and `last_updated.json`, and uploads both the refreshed snapshots and the new raw submission in one commit.
 
 Because the production website currently prioritizes `github -> hf -> local`, a successful HF upload alone is not sufficient to refresh the live site. The production chain therefore has two stages:
 
@@ -323,6 +324,11 @@ Useful local switches:
 - `PYTORCH_CPU_INDEX_URL=https://download.pytorch.org/whl/cpu`: default CPU wheel index used by the prepare script for torch-family dependency resolution.
 - `OFFICIAL_TORCH_NPU_WHEEL_URL=<exact-wheel-url>`: preferred escape hatch when the historical `torch-npu` build has disappeared from the live mirror.
 
+Operational behavior notes:
+
+- Each matrix run now persists a preferred single-card Ascend device in `.benchmarks/<matrix-run-id>/preferred-ascend-device`, so later repeats and later specs in the same batch reuse the same idle NPU when it remains available.
+- `FORCE_RUN_EXISTING=1` is a manual-review path for an existing canonical spec. It reruns that spec once, suppresses canonical promotion, and collapses the repeat-selection knobs to a single attempt even if `REPEAT_COUNT` is larger.
+
 Outputs:
 
 - Per-run artifacts go to `.benchmarks/<matrix-run-id>/...`
@@ -365,7 +371,7 @@ Trigger from `gh` CLI:
 ```bash
 cd /path/to/vllm-hust-benchmark
 gh workflow run run-official-ascend-baselines.yml \
-	--ref ws/run-official-baseline \
+	--ref ws/official-baseline-v2 \
 	-f repeat_count=3 \
 	-f min_successful_repeats=0 \
 	-f max_repeat_attempts=0 \
@@ -383,7 +389,7 @@ Trigger a subset from `gh` CLI by passing newline-separated `spec_paths`:
 ```bash
 cd /path/to/vllm-hust-benchmark
 gh workflow run run-official-ascend-baselines.yml \
-	--ref ws/run-official-baseline \
+	--ref ws/official-baseline-v2 \
 	-f spec_paths='docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-online-qwen25-14b-910b3.json
 docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-throughput-qwen25-14b-910b3.json' \
 	-f repeat_count=3 \
