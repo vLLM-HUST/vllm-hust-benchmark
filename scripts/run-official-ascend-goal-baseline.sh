@@ -971,8 +971,15 @@ ensure_runtime_dataset_available() {
 }
 
 normalized_server_parameters_json() {
+  local force_eager_server=0
+
+  if should_force_eager_for_server_benchmark; then
+    force_eager_server=1
+  fi
+
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
     SAME_SPEC_FILE="$SAME_SPEC_FILE" \
+    OFFICIAL_FORCE_EAGER_SERVER="$force_eager_server" \
     "$HOST_PYTHON_BIN" - <<'PY'
 import json
 import os
@@ -981,9 +988,12 @@ from pathlib import Path
 from vllm_hust_benchmark.official_runtime_inputs import normalize_server_parameters
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+normalized = normalize_server_parameters(payload["resolved_server_parameters"])
+if os.environ.get("OFFICIAL_FORCE_EAGER_SERVER") == "1":
+  normalized["enforce_eager"] = ""
 print(
     json.dumps(
-        normalize_server_parameters(payload["resolved_server_parameters"]),
+    normalized,
         separators=(",", ":"),
         ensure_ascii=True,
     )
@@ -1032,30 +1042,114 @@ PY
 }
 
 resolve_runtime_model() {
+  local runtime_model_candidate=""
+  local complete_runtime_model=""
+
   if [[ -n "$OFFICIAL_MODEL_PATH" ]]; then
-    echo "$OFFICIAL_MODEL_PATH"
+    printf '%s\n' "$OFFICIAL_MODEL_PATH"
     return 0
   fi
 
-  run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+  runtime_model_candidate=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
     env MODEL_ID="$MODEL" \
     python -c "import os; from huggingface_hub import snapshot_download; print(snapshot_download(os.environ['MODEL_ID'], local_files_only=True))" \
-    2>/dev/null || return 1
+    2>/dev/null) || return 1
+
+  complete_runtime_model=$(resolve_complete_local_runtime_model_candidate "$runtime_model_candidate") || return 2
+  printf '%s\n' "$complete_runtime_model"
+}
+
+path_has_matching_file() {
+  local path=$1
+  shift
+  local pattern
+  local candidate
+  local had_nullglob=0
+
+  if shopt -q nullglob; then
+    had_nullglob=1
+  fi
+  shopt -s nullglob
+
+  for pattern in "$@"; do
+    for candidate in "$path"/$pattern; do
+      if [[ -f "$candidate" ]]; then
+        if [[ "$had_nullglob" == "0" ]]; then
+          shopt -u nullglob
+        fi
+        return 0
+      fi
+    done
+  done
+
+  if [[ "$had_nullglob" == "0" ]]; then
+    shopt -u nullglob
+  fi
+  return 1
 }
 
 local_runtime_model_has_required_artifacts() {
   local runtime_model_candidate=$1
 
-  run_in_official_runtime_python "$REPO_ROOT/src${OFFICIAL_RUNTIME_PYTHONPATH:+:$OFFICIAL_RUNTIME_PYTHONPATH}" \
-    env RUNTIME_MODEL_CANDIDATE="$runtime_model_candidate" <<'PY' >/dev/null
-import os
+  [[ -d "$runtime_model_candidate" ]] || return 1
 
-from vllm_hust_benchmark.same_spec import runtime_model_path_has_required_artifacts
+  path_has_matching_file "$runtime_model_candidate" "config.json" || return 1
+  path_has_matching_file \
+    "$runtime_model_candidate" \
+    "tokenizer.json" \
+    "tokenizer.model" \
+    "spiece.model" \
+    "sentencepiece.bpe.model" \
+    "vocab.json" \
+    "vocab.txt" || return 1
+  path_has_matching_file \
+    "$runtime_model_candidate" \
+    "*.safetensors" \
+    "*.bin" \
+    "*.pt" \
+    "*.pth" \
+    "model.safetensors.index.json" \
+    "pytorch_model.bin.index.json"
+}
 
-raise SystemExit(
-    0 if runtime_model_path_has_required_artifacts(os.environ["RUNTIME_MODEL_CANDIDATE"]) else 1
-)
-PY
+resolve_complete_local_runtime_model_candidate() {
+  local runtime_model_candidate=$1
+  local snapshots_dir=""
+  local sibling_candidate
+  local had_nullglob=0
+
+  if local_runtime_model_has_required_artifacts "$runtime_model_candidate"; then
+    printf '%s\n' "$runtime_model_candidate"
+    return 0
+  fi
+
+  if [[ "$(basename "$(dirname "$runtime_model_candidate")")" != "snapshots" ]]; then
+    return 1
+  fi
+
+  snapshots_dir=$(dirname "$runtime_model_candidate")
+  if shopt -q nullglob; then
+    had_nullglob=1
+  fi
+  shopt -s nullglob
+
+  for sibling_candidate in "$snapshots_dir"/*; do
+    [[ "$sibling_candidate" == "$runtime_model_candidate" ]] && continue
+    [[ -d "$sibling_candidate" ]] || continue
+
+    if local_runtime_model_has_required_artifacts "$sibling_candidate"; then
+      if [[ "$had_nullglob" == "0" ]]; then
+        shopt -u nullglob
+      fi
+      printf '%s\n' "$sibling_candidate"
+      return 0
+    fi
+  done
+
+  if [[ "$had_nullglob" == "0" ]]; then
+    shopt -u nullglob
+  fi
+  return 1
 }
 
 normalize_engine_version() {
@@ -1081,7 +1175,8 @@ normalize_engine_version() {
 official_runtime_supports_aclgraph_weak_ref_tensor() {
   local probe_status=0
 
-  if run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY' >/dev/null 2>&1
+  set +e
+  run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY' >/dev/null 2>&1
 import torch
 
 has_namespace = hasattr(torch.ops, "_C_ascend")
@@ -1089,11 +1184,13 @@ has_weak_ref = has_namespace and hasattr(torch.ops._C_ascend, "weak_ref_tensor")
 
 raise SystemExit(0 if has_weak_ref else 3)
 PY
-  then
+  probe_status=$?
+  set -e
+
+  if [[ "$probe_status" -eq 0 ]]; then
     return 0
   fi
 
-  probe_status=$?
   if [[ "$probe_status" -eq 3 ]]; then
     return 1
   fi
@@ -1121,6 +1218,31 @@ should_force_eager_for_offline_benchmark() {
 
   if [[ "$probe_status" -eq 1 ]]; then
     echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark"
+    return 0
+  fi
+
+  return 1
+}
+
+should_force_eager_for_server_benchmark() {
+  local probe_status=0
+
+  case "${BENCHMARK_TYPE:-}" in
+    serve)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  if official_runtime_supports_aclgraph_weak_ref_tensor; then
+    return 1
+  else
+    probe_status=$?
+  fi
+
+  if [[ "$probe_status" -eq 1 ]]; then
+    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for serve benchmark server"
     return 0
   fi
 
@@ -1435,10 +1557,12 @@ if ! is_valid_engine_version "$OFFICIAL_BACKEND_VERSION"; then
 fi
 
 RUNTIME_MODEL="$MODEL"
+cached_model_status=0
 if cached_model_path=$(resolve_runtime_model); then
-  if [[ -n "$OFFICIAL_MODEL_PATH" ]] || local_runtime_model_has_required_artifacts "$cached_model_path"; then
-    RUNTIME_MODEL="$cached_model_path"
-  else
+  RUNTIME_MODEL="$cached_model_path"
+else
+  cached_model_status=$?
+  if [[ "$cached_model_status" -eq 2 ]]; then
     echo "[goal-baseline] cached local snapshot is missing tokenizer or weight artifacts; falling back to model ID ${MODEL}" >&2
   fi
 fi

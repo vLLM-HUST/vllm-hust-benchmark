@@ -43,6 +43,14 @@ def _source_run_official_version_functions(snippet: str) -> str:
     )
 
 
+def _source_run_official_runtime_model_functions(snippet: str) -> str:
+    script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
+    return (
+        r"source <(awk 'BEGIN{capture=0} /^normalized_server_parameters_json\(\) \{/ {capture=1} /^kill_server\(\) \{/ {exit} capture {print}' "
+        f"{script_path}) && {snippet}"
+    )
+
+
 def _run_bash(command: str, *, check: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["bash", "-lc", command],
@@ -894,6 +902,115 @@ def test_should_force_eager_for_offline_benchmark_when_aclgraph_weak_ref_is_miss
 
     assert result.returncode == 0
     assert "forcing --enforce-eager" in result.stdout
+
+
+def test_official_runtime_supports_aclgraph_weak_ref_tensor_preserves_probe_status() -> None:
+    result = _run_bash(
+        _source_run_official_version_functions(
+            """
+            run_in_official_runtime_python() {
+                return 3
+            }
+
+            if official_runtime_supports_aclgraph_weak_ref_tensor; then
+                echo 'status=unexpected-success'
+            else
+                echo "status=$?"
+            fi
+            """
+        ),
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert result.stdout.splitlines() == ["status=1"]
+
+
+def test_should_force_eager_for_server_benchmark_when_aclgraph_weak_ref_is_missing() -> None:
+    result = _run_bash(
+        _source_run_official_version_functions(
+            """
+            BENCHMARK_TYPE=serve
+
+            official_runtime_supports_aclgraph_weak_ref_tensor() {
+                return 1
+            }
+
+            should_force_eager_for_server_benchmark
+            status=$?
+            printf 'status=%s\n' "$status"
+            [[ "$status" == '0' ]]
+            """
+        ),
+        check=False,
+    )
+
+    assert result.returncode == 0
+    assert "forcing --enforce-eager" in result.stdout
+
+
+def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested(
+    tmp_path: Path,
+) -> None:
+    same_spec_file = tmp_path / "resolved_same_spec.json"
+    same_spec_file.write_text(
+        '{"resolved_server_parameters":{"model":"foo/bar","port":8000}}',
+        encoding="utf-8",
+    )
+
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
+            HOST_PYTHON_BIN=$(command -v python3)
+            BENCHMARK_TYPE=serve
+            SAME_SPEC_FILE={shlex.quote(str(same_spec_file))}
+
+            official_runtime_supports_aclgraph_weak_ref_tensor() {{
+                return 1
+            }}
+
+            server_json=$(normalized_server_parameters_json)
+            printf '%s\n' "$server_json"
+            grep -Fq '"enforce_eager":""' <<< "$server_json"
+            """
+        )
+    )
+
+    assert result.returncode == 0
+
+
+def test_resolve_runtime_model_prefers_complete_snapshot_sibling(tmp_path: Path) -> None:
+    snapshots_dir = tmp_path / "hub" / "models--foo--bar" / "snapshots"
+    incomplete_snapshot = snapshots_dir / "000-incomplete"
+    complete_snapshot = snapshots_dir / "111-complete"
+    incomplete_snapshot.mkdir(parents=True)
+    complete_snapshot.mkdir(parents=True)
+
+    (incomplete_snapshot / "config.json").write_text("{}\n", encoding="utf-8")
+
+    (complete_snapshot / "config.json").write_text("{}\n", encoding="utf-8")
+    (complete_snapshot / "tokenizer.json").write_text("{}\n", encoding="utf-8")
+    (complete_snapshot / "model-00001-of-00001.safetensors").write_text("weights\n", encoding="utf-8")
+
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            MODEL=foo/bar
+            OFFICIAL_MODEL_PATH=
+
+            run_in_official_runtime() {{
+                printf '%s\n' {shlex.quote(str(incomplete_snapshot))}
+            }}
+
+            resolved=$(resolve_runtime_model)
+            printf 'resolved=%s\n' "$resolved"
+            [[ "$resolved" == {shlex.quote(str(complete_snapshot))} ]]
+            """
+        )
+    )
+
+    assert result.returncode == 0
 
 
 def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) -> None:
