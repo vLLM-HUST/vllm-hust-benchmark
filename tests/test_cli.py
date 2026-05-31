@@ -1458,6 +1458,115 @@ def test_export_leaderboard_artifacts_normalizes_invalid_component_versions(
     }
 
 
+def test_export_leaderboard_artifact_keeps_official_upstream_stack_out_of_hust_component_slots(
+    tmp_path: Path,
+) -> None:
+    metrics_file = tmp_path / "metrics.json"
+    metrics_file.write_text(
+        json.dumps(
+            {
+                "metrics": {
+                    "ttft_ms": 10.0,
+                    "throughput_tps": 100.0,
+                    "peak_mem_mb": 1024.0,
+                    "error_rate": 0.0,
+                },
+                "constraints_metrics": {
+                    "single_chip_effective_utilization_pct": None,
+                    "typical_throughput_ratio_vs_baseline": None,
+                    "typical_ttft_reduction_pct_vs_baseline": None,
+                    "typical_tpot_reduction_pct_vs_baseline": None,
+                    "long_context_length": None,
+                    "long_context_throughput_stable": None,
+                    "long_context_ttft_p95_ms": None,
+                    "long_context_ttft_p99_ms": None,
+                    "long_context_tpot_p95_ms": None,
+                    "long_context_tpot_p99_ms": None,
+                    "long_context_ttft_p95_stable": None,
+                    "long_context_ttft_p99_stable": None,
+                    "long_context_tpot_p95_stable": None,
+                    "long_context_tpot_p99_stable": None,
+                    "unit_token_cost_reduction_pct": None,
+                    "multi_tenant_high_utilization": None,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = main(
+        [
+            "export-leaderboard-artifact",
+            "random-online",
+            "--metrics-file",
+            str(metrics_file),
+            "--output-dir",
+            str(tmp_path / "official"),
+            "--run-id",
+            "official-run-1",
+            "--engine",
+            "vllm",
+            "--engine-version",
+            "0.11.0",
+            "--core-version",
+            "N/A",
+            "--backend-version",
+            "N/A",
+            "--model-name",
+            "Qwen/Qwen2.5-14B-Instruct",
+            "--hardware-chip-model",
+            "910B3",
+            "--submitter",
+            "official-ascend-baseline",
+            "--data-source",
+            "reference-vllm-ascend-benchmark",
+            "--github-repository",
+            "vllm-project/vllm-ascend",
+            "--github-ref",
+            "v0.11.0",
+            "--git-commit",
+            "2f1aed98ccdb0fcbe1ff4fd0abab225bfd8d0367",
+            "--engine-source-repository",
+            "vllm-project/vllm",
+            "--engine-source-ref",
+            "v0.11.0",
+            "--engine-source-commit",
+            "5d688a543f27d28b0c45d3a7c5f0d96e07a3047c",
+            "--plugin-source-engine",
+            "vllm-ascend",
+            "--plugin-source-repository",
+            "vllm-project/vllm-ascend",
+            "--plugin-source-ref",
+            "v0.11.0",
+            "--plugin-source-commit",
+            "2f1aed98ccdb0fcbe1ff4fd0abab225bfd8d0367",
+        ]
+    )
+
+    assert exit_code == 0
+    artifact = json.loads(
+        (tmp_path / "official" / "run_leaderboard.json").read_text(encoding="utf-8")
+    )
+    assert artifact["engine"] == "vllm"
+    assert artifact["versions"] == {
+        "protocol": "N/A",
+        "backend": "N/A",
+        "core": "N/A",
+        "benchmark": "0.1.0",
+    }
+    assert artifact["metadata"]["runtime_provenance"]["engine"] == {
+        "repository": "vllm-project/vllm",
+        "ref": "v0.11.0",
+        "commit": "5d688a543f27d28b0c45d3a7c5f0d96e07a3047c",
+    }
+    assert artifact["metadata"]["runtime_provenance"]["plugin"] == {
+        "engine": "vllm-ascend",
+        "repository": "vllm-project/vllm-ascend",
+        "ref": "v0.11.0",
+        "commit": "2f1aed98ccdb0fcbe1ff4fd0abab225bfd8d0367",
+    }
+
+
 def test_build_vllm_bench_command_prefers_console_script(tmp_path: Path):
     executable = tmp_path / "vllm"
     executable.write_text(
