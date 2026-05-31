@@ -41,6 +41,7 @@ ASCEND_RUNTIME_READY_TIMEOUT_SECONDS=${ASCEND_RUNTIME_READY_TIMEOUT_SECONDS:-30}
 ASCEND_RUNTIME_READY_POLL_SECONDS=${ASCEND_RUNTIME_READY_POLL_SECONDS:-10}
 RESOURCE_BUSY_EXIT_CODE=${RESOURCE_BUSY_EXIT_CODE:-75}
 NPU_SMI_TIMEOUT_SECONDS=${NPU_SMI_TIMEOUT_SECONDS:-20}
+GOAL_BASELINE_DEVICE_PREFERENCE_FILE=${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -258,6 +259,30 @@ set_ascend_visible_devices_scope() {
   unset ASCEND_RT_VISIBLE_DEVICES
 }
 
+read_preferred_ascend_device() {
+  local preference_file=${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}
+  local preferred_device=""
+
+  [[ -n "$preference_file" ]] || return 1
+  [[ -f "$preference_file" ]] || return 1
+
+  preferred_device=$(tr -d '[:space:]' < "$preference_file")
+  [[ "$preferred_device" =~ ^[0-9]+$ ]] || return 1
+
+  printf '%s\n' "$preferred_device"
+}
+
+persist_preferred_ascend_device() {
+  local selected_device=${1:-}
+  local preference_file=${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}
+
+  [[ -n "$preference_file" ]] || return 0
+  [[ "$selected_device" =~ ^[0-9]+$ ]] || return 0
+
+  mkdir -p "$(dirname "$preference_file")"
+  printf '%s\n' "$selected_device" > "$preference_file"
+}
+
 source_ascend_runtime_env() {
   export ZSH_VERSION=""
 
@@ -377,9 +402,11 @@ resolve_npu_smi_bin() {
 select_ascend_device() {
   local selection_attempt=${1:-1}
   local npu_smi_bin=${2:-}
+  local preferred_device=${3:-}
 
   ASCEND_DEVICE_SELECTION_ATTEMPT="$selection_attempt" \
     NPU_SMI_BIN="$npu_smi_bin" \
+    PREFERRED_ASCEND_DEVICE="$preferred_device" \
     "$HOST_PYTHON_BIN" - <<'PY'
 import os
 from pathlib import Path
@@ -512,10 +539,18 @@ def annotate_fallback_source(base_source: str, failure_reason: str | None) -> st
   return f"{base_source}+npu-smi-{failure_reason}"
 
 
+def parse_preferred_device() -> int | None:
+  raw_value = os.environ.get("PREFERRED_ASCEND_DEVICE", "").strip()
+  if raw_value.isdigit():
+    return int(raw_value)
+  return None
+
+
 def select_best_idle_device(
   info_output: str,
   logical_map: dict[tuple[str, str], int],
   busy_devices: set[int],
+  preferred_device: int | None,
 ) -> tuple[int, str] | None:
   hbm_usage_pattern = re.compile(r"(\d+)\s*/\s*(\d+)\s*$")
   device_stats = []
@@ -567,6 +602,11 @@ def select_best_idle_device(
   if not device_stats:
     return None
 
+  if preferred_device is not None:
+    for logical_id, _, device_source in device_stats:
+      if logical_id == preferred_device:
+        return logical_id, f"preferred-{device_source}"
+
   device_stats.sort(key=lambda item: (-item[1], item[0], item[2]))
   selected_device, _, selected_source = device_stats[0]
   return selected_device, selected_source
@@ -581,13 +621,19 @@ if mapping_result is not None and mapping_result.returncode == 0:
     logical_devices = list_logical_devices(mapping_result.stdout)
 
 selection_attempt = max(1, int(os.environ.get("ASCEND_DEVICE_SELECTION_ATTEMPT", "1")))
+preferred_device = parse_preferred_device()
 
 info_result = run_npu_smi("info")
 info_failure_reason = classify_npu_smi_failure(info_result)
 if info_result is not None and info_result.returncode == 0:
     busy_devices = list_process_busy_devices(info_result.stdout)
 
-    selected_device = select_best_idle_device(info_result.stdout, logical_map, busy_devices)
+    selected_device = select_best_idle_device(
+        info_result.stdout,
+        logical_map,
+        busy_devices,
+        preferred_device,
+    )
     if selected_device is not None:
         device_id, device_source = selected_device
         print(f"{device_id}\t{device_source}")
@@ -596,6 +642,10 @@ if info_result is not None and info_result.returncode == 0:
     status_devices = list_status_devices(info_result.stdout)
     if busy_devices:
         status_devices = [device for device in status_devices if device not in busy_devices]
+
+    if preferred_device is not None and preferred_device in status_devices:
+        print(f"{preferred_device}\tpreferred-status")
+        sys.exit(0)
 
     if status_devices:
         fallback_device = status_devices[(selection_attempt - 1) % len(status_devices)]
@@ -609,12 +659,26 @@ if info_result is not None and info_result.returncode == 0:
 
 fallback_failure_reason = info_failure_reason or mapping_failure_reason
 
+if preferred_device is not None and preferred_device in logical_devices:
+    print(
+        f"{preferred_device}\tpreferred-"
+        f"{annotate_fallback_source('logical-round-robin', fallback_failure_reason)}"
+    )
+    sys.exit(0)
+
 if logical_devices:
     fallback_device = logical_devices[(selection_attempt - 1) % len(logical_devices)]
     print(f"{fallback_device}\t{annotate_fallback_source('logical-round-robin', fallback_failure_reason)}")
     sys.exit(0)
 
 devnode_devices = list_devnode_devices()
+if preferred_device is not None and preferred_device in devnode_devices:
+    print(
+        f"{preferred_device}\tpreferred-"
+        f"{annotate_fallback_source('devnode-round-robin', fallback_failure_reason)}"
+    )
+    sys.exit(0)
+
 if devnode_devices:
     fallback_device = devnode_devices[(selection_attempt - 1) % len(devnode_devices)]
     print(f"{fallback_device}\t{annotate_fallback_source('devnode-round-robin', fallback_failure_reason)}")
@@ -629,6 +693,7 @@ configure_single_card_ascend_device() {
   local busy_exit_code=${RESOURCE_BUSY_EXIT_CODE:-75}
   local resolved_visible_devices=""
   local resolved_rt_visible_devices=""
+  local preferred_device=""
   local selected_device_info=""
   local selected_device=""
   local selected_source=""
@@ -665,7 +730,12 @@ configure_single_card_ascend_device() {
     echo "[goal-baseline] using npu-smi for device selection: $npu_smi_bin"
   fi
 
-  selected_device_info=$(select_ascend_device "$start_attempt" "$npu_smi_bin" 2>/dev/null || true)
+  preferred_device=$(read_preferred_ascend_device 2>/dev/null || true)
+  if [[ -n "$preferred_device" ]]; then
+    echo "[goal-baseline] preferring previously selected Ascend device: $preferred_device"
+  fi
+
+  selected_device_info=$(select_ascend_device "$start_attempt" "$npu_smi_bin" "$preferred_device" 2>/dev/null || true)
   if [[ -n "$selected_device_info" ]]; then
     IFS=$'\t' read -r selected_device selected_source <<< "$selected_device_info"
     if [[ "$selected_device" == "__ALL_BUSY__" ]]; then
@@ -689,6 +759,7 @@ configure_single_card_ascend_device() {
       esac
       GOAL_BASELINE_DEVICE_SELECTION_REASON="selected"
       set_ascend_visible_devices_scope "$selected_device"
+      persist_preferred_ascend_device "$selected_device"
       export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="npu:0"
       echo "[goal-baseline] selected single-card Ascend device: ${ASCEND_VISIBLE_DEVICES:-$selected_device} (${selected_source:-auto})"
       return 0
