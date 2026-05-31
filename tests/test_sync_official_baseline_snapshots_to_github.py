@@ -14,6 +14,15 @@ SYNC_SCRIPT = (
 )
 
 
+def _script_env(**overrides: str) -> dict[str, str]:
+    env = dict(subprocess.os.environ)
+    env.pop("GITHUB_ACTIONS", None)
+    env.pop("GITHUB_ENV", None)
+    env.pop("GITHUB_OUTPUT", None)
+    env.update(overrides)
+    return env
+
+
 def _run(
     command: list[str],
     *,
@@ -122,16 +131,15 @@ def test_sync_official_baseline_snapshots_to_github_pushes_and_is_idempotent(
     website_repo = _create_dummy_website_repo(tmp_path)
     local_snapshot_output_dir = tmp_path / "published-snapshots"
 
-    env = {
-        **dict(subprocess.os.environ),
-        "ALLOW_LOCAL_GIT_RESET": "1",
-        "SOURCE_BENCHMARK_REPO_DIR": str(source_repo),
-        "TARGET_BENCHMARK_REPO_DIR": str(target_repo),
-        "WEBSITE_REPO_DIR": str(website_repo),
-        "PYTHON_BIN": sys.executable,
-        "LOCAL_SNAPSHOT_OUTPUT_DIR": str(local_snapshot_output_dir),
-        "SNAPSHOT_COMMIT_MESSAGE": "test: publish official baseline snapshots",
-    }
+    env = _script_env(
+        ALLOW_LOCAL_GIT_RESET="1",
+        SOURCE_BENCHMARK_REPO_DIR=str(source_repo),
+        TARGET_BENCHMARK_REPO_DIR=str(target_repo),
+        WEBSITE_REPO_DIR=str(website_repo),
+        PYTHON_BIN=sys.executable,
+        LOCAL_SNAPSHOT_OUTPUT_DIR=str(local_snapshot_output_dir),
+        SNAPSHOT_COMMIT_MESSAGE="test: publish official baseline snapshots",
+    )
 
     first_run = _run(["bash", str(SYNC_SCRIPT)], env=env, check=False)
     assert first_run.returncode == 0, first_run.stderr
@@ -174,16 +182,15 @@ def test_sync_official_baseline_snapshots_to_github_can_skip_empty_source(
     _, target_repo = _create_target_repo(tmp_path)
     website_repo = _create_dummy_website_repo(tmp_path)
 
-    env = {
-        **dict(subprocess.os.environ),
-        "ALLOW_LOCAL_GIT_RESET": "1",
-        "ALLOW_EMPTY_SNAPSHOT_SOURCE": "1",
-        "SOURCE_BENCHMARK_REPO_DIR": str(source_repo),
-        "TARGET_BENCHMARK_REPO_DIR": str(target_repo),
-        "WEBSITE_REPO_DIR": str(website_repo),
-        "PYTHON_BIN": sys.executable,
-        "SNAPSHOT_SOURCE_PATTERN": "official-ascend-*",
-    }
+    env = _script_env(
+        ALLOW_LOCAL_GIT_RESET="1",
+        ALLOW_EMPTY_SNAPSHOT_SOURCE="1",
+        SOURCE_BENCHMARK_REPO_DIR=str(source_repo),
+        TARGET_BENCHMARK_REPO_DIR=str(target_repo),
+        WEBSITE_REPO_DIR=str(website_repo),
+        PYTHON_BIN=sys.executable,
+        SNAPSHOT_SOURCE_PATTERN="official-ascend-*",
+    )
 
     completed = _run(["bash", str(SYNC_SCRIPT)], env=env, check=False)
     assert completed.returncode == 0, completed.stderr
