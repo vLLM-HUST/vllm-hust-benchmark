@@ -607,19 +607,25 @@ def test_configure_single_card_ascend_device_passes_attempt_to_selector() -> Non
     assert result.stdout.splitlines()[-1] == "devices=4"
 
 
-def test_configure_single_card_ascend_device_reselects_after_auto_selection() -> None:
-    result = _run_bash(
-        _source_run_official_functions(
-            """
+def test_configure_single_card_ascend_device_reuses_preferred_device_from_state_file(
+    tmp_path: Path,
+) -> None:
+    preference_file = tmp_path / "preferred-ascend-device"
+    snippet = """
             unset ASCEND_RT_VISIBLE_DEVICES
             unset ASCEND_VISIBLE_DEVICES
+            GOAL_BASELINE_DEVICE_PREFERENCE_FILE=__PREFERENCE_FILE__
 
             resolve_npu_smi_bin() {
                 printf '/tmp/fake-npu-smi\n'
             }
 
             select_ascend_device() {
-                printf '%s\tidle\n' "$1"
+                if [[ -n "${3:-}" ]]; then
+                    printf '%s\tpreferred-idle\n' "$3"
+                else
+                    printf '%s\tidle\n' "$1"
+                fi
             }
 
             configure_single_card_ascend_device 1
@@ -627,19 +633,24 @@ def test_configure_single_card_ascend_device_reselects_after_auto_selection() ->
 
             configure_single_card_ascend_device 2
             printf 'second=%s\n' "$ASCEND_RT_VISIBLE_DEVICES"
-            """
-        )
+
+            printf 'stored=%s\n' "$(cat "$GOAL_BASELINE_DEVICE_PREFERENCE_FILE")"
+            """.replace("__PREFERENCE_FILE__", shlex.quote(str(preference_file)))
+
+    result = _run_bash(
+        _source_run_official_functions(snippet)
     )
 
     tracked_lines = [
         line
         for line in result.stdout.splitlines()
-        if line.startswith(("first=", "second="))
+        if line.startswith(("first=", "second=", "stored="))
     ]
 
     assert tracked_lines == [
         "first=1",
-        "second=2",
+        "second=1",
+        "stored=1",
     ]
 
 
@@ -766,6 +777,58 @@ fi
     )
 
     assert result.stdout.splitlines()[-1] == "output=__ALL_BUSY__\t0,1"
+
+
+def test_select_ascend_device_prefers_previously_selected_idle_device(
+    tmp_path: Path,
+) -> None:
+    fake_npu_smi = tmp_path / "npu-smi"
+    fake_npu_smi.write_text(
+        """#!/usr/bin/env bash
+set -euo pipefail
+if [[ \"${1:-}\" == \"info\" && \"${2:-}\" == \"-m\" ]]; then
+cat <<'EOF'
+NPU ID                         Chip ID                        Chip Logic ID                  Chip Name
+0                              0                              0                              Ascend 910B3
+1                              0                              1                              Ascend 910B3
+EOF
+elif [[ \"${1:-}\" == \"info\" ]]; then
+cat <<'EOF'
++------------------------------------------------------------------------------------------------+
+| npu-smi 25.3.rc1                 Version: 25.3.rc1                                             |
++---------------------------+---------------+----------------------------------------------------+
+| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|
+| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |
++===========================+===============+====================================================+
+| 0     910B3               | OK            | 90.4        32                0    / 0             |
+| 0                         | 0000:C1:00.0  | 0           0    / 0          1024 / 65536         |
++===========================+===============+====================================================+
+| 1     910B3               | OK            | 92.9        33                0    / 0             |
+| 0                         | 0000:C2:00.0  | 0           0    / 0          2048 / 65536         |
++===========================+===============+====================================================+
++---------------------------+---------------+----------------------------------------------------+
+| NPU     Chip              | Process id    | Process name             | Process memory(MB)      |
++===========================+===============+====================================================+
+EOF
+else
+    exit 1
+fi
+""",
+        encoding="utf-8",
+    )
+    fake_npu_smi.chmod(0o755)
+
+    result = _run_bash(
+        _source_run_official_functions(
+            f"""
+            HOST_PYTHON_BIN=$(command -v python3)
+            output=$(select_ascend_device 1 {shlex.quote(str(fake_npu_smi))} 1)
+            printf 'output=%s\n' "$output"
+            """
+        )
+    )
+
+    assert result.stdout.splitlines()[-1] == "output=1\tpreferred-idle"
 
 
 def test_normalize_engine_version_rejects_dev_and_strips_v_prefix() -> None:

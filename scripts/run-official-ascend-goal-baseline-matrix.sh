@@ -20,6 +20,7 @@ MAX_REPEAT_ATTEMPTS=${MAX_REPEAT_ATTEMPTS:-}
 PREPARE_OFFICIAL_ENV=${PREPARE_OFFICIAL_ENV:-1}
 READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-900}
 SUMMARY_FILE=${MATRIX_SUMMARY_FILE:-"$MATRIX_RESULT_ROOT/summary.md"}
+MATRIX_DEVICE_PREFERENCE_FILE=${MATRIX_DEVICE_PREFERENCE_FILE:-"$MATRIX_RESULT_ROOT/preferred-ascend-device"}
 PYTHON_BIN=${PYTHON_BIN:-$(command -v python3 || true)}
 PUBLICATION_SYNC_HELPER=${PUBLICATION_SYNC_HELPER:-}
 PUBLICATION_COMMIT_MESSAGE_PREFIX=${PUBLICATION_COMMIT_MESSAGE_PREFIX:-"chore(data): publish official ascend baseline"}
@@ -392,10 +393,12 @@ fi
 
 echo "[official-baseline-matrix] result root: $MATRIX_RESULT_ROOT"
 echo "[official-baseline-matrix] canonical submissions root: $CANONICAL_SUBMISSIONS_ROOT"
+echo "[official-baseline-matrix] sticky Ascend device preference file: $MATRIX_DEVICE_PREFERENCE_FILE"
 echo "[official-baseline-matrix] resolved ${#SPEC_FILES[@]} spec file(s)"
 append_summary "## Official Baseline Matrix"
 append_summary "- Result root: $MATRIX_RESULT_ROOT"
 append_summary "- Canonical submissions root: $CANONICAL_SUBMISSIONS_ROOT"
+append_summary "- Sticky Ascend device preference file: $MATRIX_DEVICE_PREFERENCE_FILE"
 append_summary "- Existing canonical submissions root: $EXISTING_CANONICAL_SUBMISSIONS_ROOT"
 append_summary "- Force rerun existing canonical: $FORCE_RUN_EXISTING"
 append_summary "- Repeat count for missing canonical specs: $REPEAT_COUNT"
@@ -488,6 +491,7 @@ for spec_file in "${SPEC_FILES[@]}"; do
     RESULT_DIR="$result_dir" \
     RUN_ID="$run_id" \
     GOAL_BASELINE_ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
+    GOAL_BASELINE_DEVICE_PREFERENCE_FILE="$MATRIX_DEVICE_PREFERENCE_FILE" \
     VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
     bash "$SINGLE_RUNNER" "$spec_file" 2>&1 | tee "$runner_log"
     runner_status=${PIPESTATUS[0]}
