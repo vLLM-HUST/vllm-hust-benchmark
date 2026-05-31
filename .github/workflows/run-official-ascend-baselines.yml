@@ -259,7 +259,67 @@ jobs:
           HOST_PYTHON_BIN: ${{ env.HOST_PYTHON_BIN }}
         run: |
           set -euo pipefail
-          "$HOST_PYTHON_BIN" -m pip install --user --disable-pip-version-check 'jsonschema>=4'
+
+          resolve_pip_python() {
+            local candidate="${HOST_PYTHON_BIN:-}"
+            local conda_exe_env="${CONDA_EXE:-}"
+            local conda_base=""
+            local root=""
+            local search_roots=(
+              "$HOME/miniconda3"
+              "$HOME/anaconda3"
+              "$HOME/miniforge3"
+              "$HOME/mambaforge"
+              "/home/grunner/miniconda3"
+              "/root/miniconda3"
+              "/opt/conda"
+              "/usr/local/miniconda3"
+              "/usr/local/anaconda3"
+            )
+
+            if [[ -n "$candidate" ]] && [[ -x "$candidate" ]] && "$candidate" -m pip --version >/dev/null 2>&1; then
+              printf '%s\n' "$candidate"
+              return 0
+            fi
+
+            if [[ -n "$conda_exe_env" ]] && [[ -x "$conda_exe_env" ]]; then
+              if [[ "$conda_exe_env" == */condabin/conda ]]; then
+                conda_base="${conda_exe_env%/condabin/conda}"
+              else
+                conda_base="$(dirname "$(dirname "$conda_exe_env")")"
+              fi
+            elif command -v conda >/dev/null 2>&1; then
+              conda_base="$(conda info --base 2>/dev/null || true)"
+            fi
+
+            if [[ -n "$conda_base" ]] && [[ -x "$conda_base/bin/python" ]] && "$conda_base/bin/python" -m pip --version >/dev/null 2>&1; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            for root in "${search_roots[@]}"; do
+              [[ -z "$root" ]] && continue
+              if [[ -x "$root/bin/python" ]] && "$root/bin/python" -m pip --version >/dev/null 2>&1; then
+                printf '%s\n' "$root/bin/python"
+                return 0
+              fi
+            done
+
+            return 1
+          }
+
+          pip_python="$(resolve_pip_python)" || {
+            echo "Could not locate a pip-capable Python interpreter for publication aggregation dependency installation" >&2
+            exit 1
+          }
+
+          if [[ "$pip_python" != "${HOST_PYTHON_BIN:-}" ]]; then
+            printf 'HOST_PYTHON_BIN=%s\n' "$pip_python" >> "$GITHUB_ENV"
+            printf 'PYTHON_BIN=%s\n' "$pip_python" >> "$GITHUB_ENV"
+            echo "Switched host Python to pip-capable interpreter: $pip_python"
+          fi
+
+          "$pip_python" -m pip install --user --disable-pip-version-check 'jsonschema>=4'
 
       - name: Resolve conda base
         shell: bash
