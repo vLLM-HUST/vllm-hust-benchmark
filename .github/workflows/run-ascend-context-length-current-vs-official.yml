@@ -1,0 +1,460 @@
+name: Run Ascend Context Length Current vs Official
+
+on:
+  workflow_dispatch:
+    inputs:
+      spec_paths:
+        description: Optional newline-separated spec files or directories. Defaults to docs/official-baselines/context-length-sweep-random-online-qwen25-14b-910b3.
+        required: false
+        type: string
+        default: ""
+      prepare_official_env:
+        description: Prepare or repair the pinned official baseline conda env before running.
+        required: false
+        type: boolean
+        default: true
+      force_repair_official_env:
+        description: Skip the prepare-script health check and force a full repair/reinstall of the official env.
+        required: false
+        type: boolean
+        default: false
+      publish_website:
+        description: Aggregate generated current and official submissions into website snapshot files.
+        required: false
+        type: boolean
+        default: true
+      website_ref:
+        description: Optional vllm-hust-website ref used for local aggregation validation.
+        required: false
+        type: string
+        default: main
+      current_vllm_ref:
+        description: Ref for vLLM-HUST/vllm-hust used as the current runtime.
+        required: false
+        type: string
+        default: main
+      current_vllm_ascend_ref:
+        description: Ref for vLLM-HUST/vllm-ascend-hust used as the current Ascend plugin runtime.
+        required: false
+        type: string
+        default: main
+      current_env_prefix:
+        description: Optional conda env prefix for the current vllm-hust runtime. Leave blank to resolve from conda info --base on the runner.
+        required: false
+        type: string
+        default: ""
+      goal_baseline_env_prefix:
+        description: Optional conda env prefix for the official v0.11.0 baseline runtime. Leave blank to resolve from conda info --base on the runner.
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run-context-length-sweep:
+    runs-on:
+      - self-hosted
+      - ARM64
+      - docker
+      - debug
+    timeout-minutes: 360
+    env:
+      BENCHMARK_CHECKOUT_USE_SSH: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
+      VLLM_HUST_WORKSPACE_ROOT: ${{ github.workspace }}
+      HOME: ${{ github.workspace }}/.ci-home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.ci-home/.cache
+      XDG_CONFIG_HOME: ${{ github.workspace }}/.ci-home/.config
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      HF_ENDPOINT: ${{ vars.HF_ENDPOINT || 'https://hf-mirror.com' }}
+      HF_HOME: ${{ github.workspace }}/../.hf-cache
+      HUGGINGFACE_HUB_CACHE: ${{ github.workspace }}/../.hf-cache/hub
+      TRANSFORMERS_CACHE: ${{ github.workspace }}/../.hf-cache/transformers
+      MATRIX_RUN_ID: context-length-sweep-${{ github.run_id }}-${{ github.run_attempt }}
+      MATRIX_RESULT_ROOT: ${{ github.workspace }}/.benchmarks/context-length-sweep-${{ github.run_id }}-${{ github.run_attempt }}
+      MATRIX_SUMMARY_FILE: ${{ github.workspace }}/artifacts/context-length-sweep/summary.md
+      WEBSITE_OUTPUT_DIR: ${{ github.workspace }}/artifacts/context-length-sweep/website-data
+      PREPARE_OFFICIAL_ENV: ${{ github.event.inputs.prepare_official_env == 'false' && '0' || '1' }}
+      FORCE_REPAIR_OFFICIAL_ENV: ${{ github.event.inputs.force_repair_official_env == 'true' && '1' || '0' }}
+      PUBLISH_WEBSITE: ${{ github.event.inputs.publish_website == 'false' && '0' || '1' }}
+      VLLM_HUST_WEBSITE_REF: ${{ github.event.inputs.website_ref || 'main' }}
+      CURRENT_VLLM_REF: ${{ github.event.inputs.current_vllm_ref || 'main' }}
+      CURRENT_VLLM_ASCEND_REF: ${{ github.event.inputs.current_vllm_ascend_ref || 'main' }}
+      ASCEND_RT_VISIBLE_DEVICES: ${{ vars.VLLM_ASCEND_HUST_BENCHMARK_VISIBLE_DEVICES || '' }}
+    steps:
+      - name: Pre-clean generated directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$GITHUB_WORKSPACE/reference-repos" \
+             "$GITHUB_WORKSPACE/vllm-hust" \
+             "$GITHUB_WORKSPACE/vllm-ascend-hust" \
+             "$GITHUB_WORKSPACE/vllm-hust-website" \
+             "$GITHUB_WORKSPACE/.ci-home" \
+             "$GITHUB_WORKSPACE/.benchmarks" \
+             "$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/context-length-sweep"
+
+      - name: Require GitHub SSH checkout key
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$BENCHMARK_CHECKOUT_USE_SSH" != "1" ]]; then
+            echo "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY is required because this workflow checks out repositories over SSH." >&2
+            exit 1
+          fi
+
+      - name: Configure GitHub SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_dir="$HOME/.ssh"
+          config_file="$ssh_dir/config"
+          key_file="$ssh_dir/github_actions"
+
+          mkdir -p "$ssh_dir"
+          chmod 700 "$ssh_dir"
+
+          printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$key_file"
+          chmod 600 "$key_file"
+
+          config_block="$(cat <<'EOF'
+          Host github.com
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/github_actions
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+          EOF
+          )"
+
+          if [[ ! -f "$config_file" ]]; then
+            printf '%s\n' "$config_block" > "$config_file"
+          elif ! grep -Fq 'Host github.com' "$config_file" \
+            || ! grep -Fq 'HostName github.com' "$config_file" \
+            || ! grep -Fq 'IdentityFile ~/.ssh/github_actions' "$config_file"; then
+            printf '\n%s\n' "$config_block" >> "$config_file"
+          fi
+
+          chmod 600 "$config_file"
+
+      - name: Checkout benchmark repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout current vllm-hust repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-hust
+          ref: ${{ env.CURRENT_VLLM_REF }}
+          path: vllm-hust
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout current vllm-ascend-hust repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-ascend-hust
+          ref: ${{ env.CURRENT_VLLM_ASCEND_REF }}
+          path: vllm-ascend-hust
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout upstream vllm reference repo
+        uses: actions/checkout@v4
+        with:
+          repository: vllm-project/vllm
+          path: reference-repos/vllm
+          fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout upstream vllm-ascend reference repo
+        uses: actions/checkout@v4
+        with:
+          repository: vllm-project/vllm-ascend
+          path: reference-repos/vllm-ascend
+          fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout website repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-hust-website
+          ref: ${{ env.VLLM_HUST_WEBSITE_REF }}
+          path: vllm-hust-website
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Resolve tooling and runtime envs
+        shell: bash
+        env:
+          GOAL_BASELINE_ENV_PREFIX_INPUT: ${{ github.event.inputs.goal_baseline_env_prefix || '' }}
+          CURRENT_ENV_PREFIX_INPUT: ${{ github.event.inputs.current_env_prefix || '' }}
+        run: |
+          set -euo pipefail
+
+          python_satisfies_min_version() {
+            local python_bin=${1:-}
+            [[ -n "$python_bin" ]] && [[ -x "$python_bin" ]] || return 1
+            "$python_bin" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1
+          }
+
+          python_version_string() {
+            local python_bin=$1
+            "$python_bin" -c 'import sys; print(sys.version.split()[0])'
+          }
+
+          python_has_pip() {
+            local python_bin=${1:-}
+            [[ -n "$python_bin" ]] && [[ -x "$python_bin" ]] || return 1
+            "$python_bin" -m pip --version >/dev/null 2>&1
+          }
+
+          resolve_conda_base() {
+            local conda_exe_env="${CONDA_EXE:-}"
+            local root=""
+            local search_roots=(
+              "$HOME/miniconda3"
+              "$HOME/anaconda3"
+              "$HOME/miniforge3"
+              "$HOME/mambaforge"
+              "/home/grunner/miniconda3"
+              "/root/miniconda3"
+              "/opt/conda"
+              "/usr/local/miniconda3"
+              "/usr/local/anaconda3"
+            )
+
+            if [[ -n "$conda_exe_env" ]] && [[ -x "$conda_exe_env" ]]; then
+              if [[ "$conda_exe_env" == */condabin/conda ]]; then
+                printf '%s\n' "${conda_exe_env%/condabin/conda}"
+              else
+                printf '%s\n' "$(dirname "$(dirname "$conda_exe_env")")"
+              fi
+              return 0
+            fi
+
+            if command -v conda >/dev/null 2>&1; then
+              conda info --base
+              return 0
+            fi
+
+            for root in "${search_roots[@]}"; do
+              [[ -z "$root" ]] && continue
+              if [[ -x "$root/condabin/conda" ]] || [[ -x "$root/bin/conda" ]]; then
+                printf '%s\n' "$root"
+                return 0
+              fi
+            done
+
+            return 1
+          }
+
+          resolve_tooling_python() {
+            local conda_base=$1
+            local python3_bin=""
+            local python_bin=""
+
+            if python_satisfies_min_version "$conda_base/bin/python"; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            python3_bin="$(command -v python3 2>/dev/null || true)"
+            if python_satisfies_min_version "$python3_bin"; then
+              printf '%s\n' "$python3_bin"
+              return 0
+            fi
+
+            python_bin="$(command -v python 2>/dev/null || true)"
+            if python_satisfies_min_version "$python_bin"; then
+              printf '%s\n' "$python_bin"
+              return 0
+            fi
+
+            return 1
+          }
+
+          resolve_pip_python() {
+            local current_python=$1
+            local conda_base=$2
+            local python3_bin=""
+            local python_bin=""
+
+            if python_has_pip "$current_python"; then
+              printf '%s\n' "$current_python"
+              return 0
+            fi
+
+            if python_has_pip "$conda_base/bin/python"; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            python3_bin="$(command -v python3 2>/dev/null || true)"
+            if python_has_pip "$python3_bin"; then
+              printf '%s\n' "$python3_bin"
+              return 0
+            fi
+
+            python_bin="$(command -v python 2>/dev/null || true)"
+            if python_has_pip "$python_bin"; then
+              printf '%s\n' "$python_bin"
+              return 0
+            fi
+
+            return 1
+          }
+
+          conda_base="$(resolve_conda_base)" || {
+            echo "Could not locate conda on the runner; ensure Miniconda/Anaconda is installed and accessible to the runner service" >&2
+            exit 1
+          }
+
+          if [[ -x "$conda_base/condabin/conda" ]]; then
+            conda_exe="$conda_base/condabin/conda"
+          elif [[ -x "$conda_base/bin/conda" ]]; then
+            conda_exe="$conda_base/bin/conda"
+          else
+            echo "Resolved conda base does not contain a runnable conda executable: $conda_base" >&2
+            exit 1
+          fi
+
+          tooling_python="$(resolve_tooling_python "$conda_base")" || {
+            echo "Could not locate a Python >= 3.10 interpreter for benchmark repo utilities" >&2
+            exit 1
+          }
+          tooling_python_version="$(python_version_string "$tooling_python")"
+
+          if [[ "$PUBLISH_WEBSITE" == "1" ]]; then
+            pip_python="$(resolve_pip_python "$tooling_python" "$conda_base")" || {
+              echo "Could not locate a pip-capable Python interpreter for aggregation dependency installation" >&2
+              exit 1
+            }
+
+            if [[ "$pip_python" != "$tooling_python" ]]; then
+              tooling_python="$pip_python"
+              tooling_python_version="$(python_version_string "$tooling_python")"
+            fi
+
+            "$tooling_python" -m pip install --user --disable-pip-version-check 'jsonschema>=4'
+          fi
+
+          goal_env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
+          if [[ -z "${goal_env_prefix//[[:space:]]/}" ]]; then
+            goal_env_prefix="$conda_base/envs/vllm-ascend-official-v0110"
+          fi
+
+          current_env_prefix="${CURRENT_ENV_PREFIX_INPUT}"
+          if [[ -z "${current_env_prefix//[[:space:]]/}" ]]; then
+            current_env_prefix="$conda_base/envs/vllm-hust-dev"
+          fi
+
+          current_runtime_python="$current_env_prefix/bin/python"
+          if [[ ! -x "$current_runtime_python" ]]; then
+            echo "Current runtime Python is not executable: $current_runtime_python" >&2
+            exit 1
+          fi
+
+          [[ -d "$conda_base/condabin" ]] && printf '%s\n' "$conda_base/condabin" >> "$GITHUB_PATH"
+          [[ -d "$conda_base/bin" ]] && printf '%s\n' "$conda_base/bin" >> "$GITHUB_PATH"
+          printf 'CONDA_BASE=%s\n' "$conda_base" >> "$GITHUB_ENV"
+          printf 'CONDA_EXE=%s\n' "$conda_exe" >> "$GITHUB_ENV"
+          printf 'PYTHON_BIN=%s\n' "$tooling_python" >> "$GITHUB_ENV"
+          printf 'HOST_PYTHON_BIN=%s\n' "$tooling_python" >> "$GITHUB_ENV"
+          printf 'GOAL_BASELINE_ENV_PREFIX=%s\n' "$goal_env_prefix" >> "$GITHUB_ENV"
+          printf 'CURRENT_ENV_PREFIX=%s\n' "$current_env_prefix" >> "$GITHUB_ENV"
+          printf 'CURRENT_RUNTIME_PYTHON=%s\n' "$current_runtime_python" >> "$GITHUB_ENV"
+
+          echo "Resolved conda base: $conda_base"
+          echo "Resolved tooling Python: $tooling_python ($tooling_python_version)"
+          echo "Resolved GOAL_BASELINE_ENV_PREFIX=$goal_env_prefix"
+          echo "Resolved CURRENT_ENV_PREFIX=$current_env_prefix"
+
+      - name: Resolve spec arguments
+        id: resolve-specs
+        shell: bash
+        env:
+          SPEC_PATHS_INPUT: ${{ github.event.inputs.spec_paths || '' }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SPEC_PATHS_INPUT//[[:space:]]/}" ]]; then
+            {
+              echo 'args<<EOF'
+              echo 'docs/official-baselines/context-length-sweep-random-online-qwen25-14b-910b3'
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo 'args<<EOF'
+            while IFS= read -r line; do
+              [[ -z "${line//[[:space:]]/}" ]] && continue
+              printf '%s\n' "$line"
+            done <<< "$SPEC_PATHS_INPUT"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run current vs official context sweep
+        id: run-sweep
+        shell: bash
+        env:
+          CLIENT_READY_CHECK_TIMEOUT_SECONDS: 900
+          DEVICE_SELECTION_RETRIES: 20
+          DEVICE_SELECTION_RETRY_DELAY_SECONDS: 30
+          READY_TIMEOUT_SECONDS: 900
+          READY_STATUS_INTERVAL_SECONDS: 30
+        run: |
+          set -euo pipefail
+          spec_args=()
+          while IFS= read -r item; do
+            [[ -z "$item" ]] && continue
+            spec_args+=("$item")
+          done <<< "${{ steps.resolve-specs.outputs.args }}"
+
+          if [[ ${#spec_args[@]} -eq 0 ]]; then
+            spec_args+=("docs/official-baselines/context-length-sweep-random-online-qwen25-14b-910b3")
+          fi
+
+          bash scripts/run-ascend-context-length-current-vs-official.sh "${spec_args[@]}"
+
+      - name: Upload context sweep summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: context-length-sweep-summary-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/context-length-sweep/summary.md
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload context sweep results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: context-length-sweep-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .benchmarks/context-length-sweep-${{ github.run_id }}-${{ github.run_attempt }}
+            artifacts/context-length-sweep/website-data
+          if-no-files-found: warn
+          retention-days: 14
