@@ -87,9 +87,9 @@ def test_context_sweep_skips_aggregation_when_no_manifests_exist(tmp_path: Path)
     assert "- Failed runs: 2" in summary_text
 
 
-def test_current_same_spec_runner_limits_general_plugins() -> None:
+def test_current_same_spec_runner_limits_plugins_without_service_profiling() -> None:
     script_text = CURRENT_RUNNER_SCRIPT.read_text(encoding="utf-8")
 
-    assert 'CURRENT_VLLM_PLUGINS=${CURRENT_VLLM_PLUGINS:-"ascend_kv_connector,ascend_model_loader"}' in script_text
+    assert 'CURRENT_VLLM_PLUGINS=${CURRENT_VLLM_PLUGINS:-"ascend,ascend_kv_connector,ascend_model_loader"}' in script_text
     assert 'export VLLM_PLUGINS="$CURRENT_VLLM_PLUGINS"' in script_text
     assert 'ascend_service_profiling' not in script_text
