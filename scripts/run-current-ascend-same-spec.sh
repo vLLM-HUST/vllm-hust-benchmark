@@ -11,6 +11,9 @@ CURRENT_VLLM_HUST_REPO=${CURRENT_VLLM_HUST_REPO:-"$WORKSPACE_ROOT/vllm-hust"}
 CURRENT_VLLM_ASCEND_HUST_REPO=${CURRENT_VLLM_ASCEND_HUST_REPO:-"$WORKSPACE_ROOT/vllm-ascend-hust"}
 CURRENT_RUNTIME_PYTHONPATH=${CURRENT_RUNTIME_PYTHONPATH:-}
 CURRENT_VLLM_PLUGINS=${CURRENT_VLLM_PLUGINS:-"ascend,ascend_kv_connector,ascend_model_loader"}
+CURRENT_ASCEND_VISIBLE_DEVICES=${CURRENT_ASCEND_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
+CURRENT_ASCEND_RT_VISIBLE_DEVICES=${CURRENT_ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_RT_VISIBLE_DEVICES:-}}
+CURRENT_DEVICE_PREFERENCE_FILE=${CURRENT_DEVICE_PREFERENCE_FILE:-${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}}
 CURRENT_ENV_PREFIX=${CURRENT_ENV_PREFIX:-"/root/miniconda3/envs/vllm-hust-dev"}
 CURRENT_RUNTIME_PYTHON=${CURRENT_RUNTIME_PYTHON:-"$CURRENT_ENV_PREFIX/bin/python"}
 CURRENT_VLLM_CACHE_ROOT=${CURRENT_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/current-ascend-same-spec"}
@@ -67,6 +70,69 @@ if [[ ! -f "$CONSTRAINTS_FILE" ]]; then
 fi
 
 SCRIPT_BASENAME=$(basename "$0")
+
+normalize_visible_devices() {
+  local raw_value=${1:-}
+  local device
+  local -a devices=()
+  local normalized_devices
+
+  IFS=',' read -r -a raw_devices <<< "$raw_value"
+  for device in "${raw_devices[@]}"; do
+    device=${device//[[:space:]]/}
+    if [[ -n "$device" ]]; then
+      devices+=("$device")
+    fi
+  done
+
+  if [[ ${#devices[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  normalized_devices=$(IFS=','; echo "${devices[*]}")
+  printf '%s\n' "$normalized_devices"
+}
+
+configure_current_ascend_device_scope() {
+  local visible_devices=""
+  local rt_visible_devices=""
+  local preferred_device=""
+
+  visible_devices=$(normalize_visible_devices "$CURRENT_ASCEND_VISIBLE_DEVICES" 2>/dev/null || true)
+  rt_visible_devices=$(normalize_visible_devices "$CURRENT_ASCEND_RT_VISIBLE_DEVICES" 2>/dev/null || true)
+
+  if [[ -z "$visible_devices" ]] && [[ -z "$rt_visible_devices" ]] && [[ -n "$CURRENT_DEVICE_PREFERENCE_FILE" ]] && [[ -f "$CURRENT_DEVICE_PREFERENCE_FILE" ]]; then
+    preferred_device=$(tr -d '[:space:]' < "$CURRENT_DEVICE_PREFERENCE_FILE")
+    if [[ "$preferred_device" =~ ^[0-9]+$ ]]; then
+      visible_devices="$preferred_device"
+      rt_visible_devices="$preferred_device"
+      echo "[same-spec-current] reusing Ascend device from preference file: $preferred_device"
+    fi
+  fi
+
+  if [[ -z "$rt_visible_devices" ]] && [[ -n "$visible_devices" ]]; then
+    rt_visible_devices="$visible_devices"
+  elif [[ -z "$visible_devices" ]] && [[ -n "$rt_visible_devices" ]]; then
+    visible_devices="$rt_visible_devices"
+  fi
+
+  if [[ -n "$visible_devices" ]]; then
+    export ASCEND_VISIBLE_DEVICES="$visible_devices"
+  else
+    unset ASCEND_VISIBLE_DEVICES
+  fi
+
+  if [[ -n "$rt_visible_devices" ]]; then
+    export ASCEND_RT_VISIBLE_DEVICES="$rt_visible_devices"
+  else
+    unset ASCEND_RT_VISIBLE_DEVICES
+  fi
+
+  if [[ -n "${ASCEND_VISIBLE_DEVICES:-}" ]] || [[ -n "${ASCEND_RT_VISIBLE_DEVICES:-}" ]]; then
+    export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE:-npu:0}"
+    echo "[same-spec-current] Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-<unset>} (rt=${ASCEND_RT_VISIBLE_DEVICES:-<unset>})"
+  fi
+}
 
 is_valid_engine_version() {
   local value=${1//$'\r'/}
@@ -649,6 +715,7 @@ CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
 CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
 
 assert_target_port_available "Current same-spec benchmark" "$CLIENT_HOST" "$CLIENT_PORT"
+configure_current_ascend_device_scope
 
 SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters | del(.disable_log_requests)' "$SAME_SPEC_FILE")")
 CLIENT_ARGS=$(json2args "$({

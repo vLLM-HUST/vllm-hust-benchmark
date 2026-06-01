@@ -8,6 +8,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SWEEP_SCRIPT = REPO_ROOT / "scripts" / "run-ascend-context-length-current-vs-official.sh"
 CURRENT_RUNNER_SCRIPT = REPO_ROOT / "scripts" / "run-current-ascend-same-spec.sh"
+OFFICIAL_RUNNER_SCRIPT = REPO_ROOT / "scripts" / "run-official-ascend-goal-baseline.sh"
 
 
 def _write_spec(spec_file: Path) -> None:
@@ -93,3 +94,29 @@ def test_current_same_spec_runner_limits_plugins_without_service_profiling() -> 
     assert 'CURRENT_VLLM_PLUGINS=${CURRENT_VLLM_PLUGINS:-"ascend,ascend_kv_connector,ascend_model_loader"}' in script_text
     assert 'export VLLM_PLUGINS="$CURRENT_VLLM_PLUGINS"' in script_text
     assert 'ascend_service_profiling' not in script_text
+
+
+def test_current_same_spec_runner_reuses_selected_ascend_device() -> None:
+    script_text = CURRENT_RUNNER_SCRIPT.read_text(encoding="utf-8")
+
+    assert 'CURRENT_DEVICE_PREFERENCE_FILE=${CURRENT_DEVICE_PREFERENCE_FILE:-${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}}' in script_text
+    assert '[same-spec-current] reusing Ascend device from preference file:' in script_text
+    assert 'export ASCEND_VISIBLE_DEVICES="$visible_devices"' in script_text
+    assert 'export ASCEND_RT_VISIBLE_DEVICES="$rt_visible_devices"' in script_text
+
+
+def test_official_runner_force_eager_messages_use_stderr() -> None:
+    script_text = OFFICIAL_RUNNER_SCRIPT.read_text(encoding="utf-8")
+
+    assert 'forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark" >&2' in script_text
+    assert 'forcing --enforce-eager for serve benchmark server" >&2' in script_text
+
+
+def test_context_sweep_runner_shares_device_preference_and_long_max_len() -> None:
+    script_text = SWEEP_SCRIPT.read_text(encoding="utf-8")
+
+    assert 'ASCEND_DEVICE_PREFERENCE_FILE=${ASCEND_DEVICE_PREFERENCE_FILE:-"$MATRIX_RESULT_ROOT/.runtime-state/preferred-ascend-device.txt"}' in script_text
+    assert 'CONTEXT_SWEEP_ALLOW_LONG_MAX_MODEL_LEN=${CONTEXT_SWEEP_ALLOW_LONG_MAX_MODEL_LEN:-1}' in script_text
+    assert 'GOAL_BASELINE_DEVICE_PREFERENCE_FILE="$ASCEND_DEVICE_PREFERENCE_FILE"' in script_text
+    assert 'CURRENT_DEVICE_PREFERENCE_FILE="$ASCEND_DEVICE_PREFERENCE_FILE"' in script_text
+    assert 'VLLM_ALLOW_LONG_MAX_MODEL_LEN="$CONTEXT_SWEEP_ALLOW_LONG_MAX_MODEL_LEN"' in script_text
