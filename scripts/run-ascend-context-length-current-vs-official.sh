@@ -293,16 +293,22 @@ for index in "${!SPEC_FILES[@]}"; do
 done
 
 if [[ "$PUBLISH_WEBSITE" == "1" ]]; then
-  echo
-  echo "[context-sweep] aggregating website snapshots from $MATRIX_RESULT_ROOT"
-  mkdir -p "$WEBSITE_OUTPUT_DIR"
-  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
-    "$HOST_PYTHON_BIN" -m vllm_hust_benchmark.cli publish-website \
-      --source-dir "$MATRIX_RESULT_ROOT" \
-      --output-dir "$WEBSITE_OUTPUT_DIR" \
-      --execute
+  manifest_count=$(find "$MATRIX_RESULT_ROOT" -type f -name 'leaderboard_manifest.json' | wc -l | tr -d '[:space:]')
+  if [[ "$manifest_count" == "0" ]]; then
+    echo
+    echo "[context-sweep] skipping website aggregation because no leaderboard manifests were generated"
+    append_summary "- Website aggregation skipped: no leaderboard_manifest.json files were generated"
+  else
+    echo
+    echo "[context-sweep] aggregating website snapshots from $MATRIX_RESULT_ROOT"
+    mkdir -p "$WEBSITE_OUTPUT_DIR"
+    PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+      "$HOST_PYTHON_BIN" -m vllm_hust_benchmark.cli publish-website \
+        --source-dir "$MATRIX_RESULT_ROOT" \
+        --output-dir "$WEBSITE_OUTPUT_DIR" \
+        --execute
 
-  compare_group_count=$(PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" WEBSITE_OUTPUT_DIR="$WEBSITE_OUTPUT_DIR" "$HOST_PYTHON_BIN" - <<'PY'
+    compare_group_count=$(PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" WEBSITE_OUTPUT_DIR="$WEBSITE_OUTPUT_DIR" "$HOST_PYTHON_BIN" - <<'PY'
 import json
 import os
 from pathlib import Path
@@ -315,8 +321,9 @@ else:
     print(int(payload.get("group_count") or 0))
 PY
 )
-  append_summary "- Website snapshots rebuilt at: $WEBSITE_OUTPUT_DIR"
-  append_summary "- Compare group count: ${compare_group_count}"
+    append_summary "- Website snapshots rebuilt at: $WEBSITE_OUTPUT_DIR"
+    append_summary "- Compare group count: ${compare_group_count}"
+  fi
 fi
 
 append_summary "- Successful runs: $RUN_COUNT"

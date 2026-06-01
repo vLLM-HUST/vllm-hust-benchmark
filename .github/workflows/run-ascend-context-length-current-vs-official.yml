@@ -95,6 +95,7 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf "$GITHUB_WORKSPACE/reference-repos" \
+             "$GITHUB_WORKSPACE/ascend-runtime-manager" \
              "$GITHUB_WORKSPACE/vllm-hust" \
              "$GITHUB_WORKSPACE/vllm-ascend-hust" \
              "$GITHUB_WORKSPACE/vllm-hust-website" \
@@ -121,7 +122,9 @@ jobs:
           config_file="$ssh_dir/config"
           key_file="$ssh_dir/github_actions"
 
-          mkdir -p "$ssh_dir"
+          if [[ ! -d "$ssh_dir" ]]; then
+            mkdir -p "$ssh_dir"
+          fi
           chmod 700 "$ssh_dir"
 
           printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$key_file"
@@ -172,6 +175,16 @@ jobs:
           repository: vLLM-HUST/vllm-ascend-hust
           ref: ${{ env.CURRENT_VLLM_ASCEND_REF }}
           path: vllm-ascend-hust
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout ascend-runtime-manager repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/ascend-runtime-manager
+          path: ascend-runtime-manager
           fetch-depth: 1
           ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
           ssh-strict: false
@@ -418,6 +431,96 @@ jobs:
             done <<< "$SPEC_PATHS_INPUT"
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
+
+      - name: Resolve current benchmark runtime
+        shell: bash
+        env:
+          CURRENT_ENV_PREFIX_INPUT: ${{ github.event.inputs.current_env_prefix || '' }}
+          HUST_ASCEND_MANAGER_REPO: ${{ github.workspace }}/ascend-runtime-manager
+          VLLM_ASCEND_HUST_REPO: ${{ github.workspace }}/vllm-ascend-hust
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${CURRENT_ENV_PREFIX_INPUT//[[:space:]]/}" ]]; then
+            current_env_prefix="$CURRENT_ENV_PREFIX_INPUT"
+            current_runtime_python="$current_env_prefix/bin/python"
+            if [[ ! -x "$current_runtime_python" ]]; then
+              echo "Current runtime Python is not executable: $current_runtime_python" >&2
+              exit 1
+            fi
+          else
+            source "${VLLM_ASCEND_HUST_REPO}/scripts/hust_ascend_manager_helper.sh"
+            source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
+            current_runtime_python="$(hust_resolve_python_bin)"
+            if [[ -z "$current_runtime_python" || ! -x "$current_runtime_python" ]]; then
+              echo "Could not resolve the current benchmark Python from the Ascend manager helper" >&2
+              exit 1
+            fi
+            current_env_prefix="$(cd "$(dirname "$current_runtime_python")/.." && pwd -P)"
+          fi
+
+          printf 'CURRENT_ENV_PREFIX=%s\n' "$current_env_prefix" >> "$GITHUB_ENV"
+          printf 'CURRENT_RUNTIME_PYTHON=%s\n' "$current_runtime_python" >> "$GITHUB_ENV"
+
+          echo "Resolved CURRENT_ENV_PREFIX=$current_env_prefix"
+          echo "Resolved CURRENT_RUNTIME_PYTHON=$current_runtime_python"
+
+      - name: Prepare current benchmark runtime
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        env:
+          HUST_ASCEND_MANAGER_REPO: ${{ github.workspace }}/ascend-runtime-manager
+          VLLM_ASCEND_HUST_REPO: ${{ github.workspace }}/vllm-ascend-hust
+        run: |
+          set -euo pipefail
+
+          export VLLM_HUST_CONDA_PREFIX="$CURRENT_ENV_PREFIX"
+          export VLLM_HUST_PYTHON_BIN="$CURRENT_RUNTIME_PYTHON"
+          source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
+          bash "${VLLM_ASCEND_HUST_REPO}/scripts/install_local_ascend_plugin.sh" "$VLLM_ASCEND_HUST_REPO"
+          "${CURRENT_RUNTIME_PYTHON}" -m pip install -e "$GITHUB_WORKSPACE/vllm-hust" --no-build-isolation --no-deps
+          "${CURRENT_RUNTIME_PYTHON}" -m pip install -e ".[publish]" jsonschema
+
+      - name: Verify current benchmark runtime
+        shell: bash
+        env:
+          TORCH_DEVICE_BACKEND_AUTOLOAD: "0"
+          HUST_ASCEND_MANAGER_REPO: ${{ github.workspace }}/ascend-runtime-manager
+          VLLM_ASCEND_HUST_REPO: ${{ github.workspace }}/vllm-ascend-hust
+        run: |
+          set -euo pipefail
+
+          export VLLM_HUST_CONDA_PREFIX="$CURRENT_ENV_PREFIX"
+          export VLLM_HUST_PYTHON_BIN="$CURRENT_RUNTIME_PYTHON"
+          source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
+          "${CURRENT_RUNTIME_PYTHON}" - <<'PY'
+          import os
+          from pathlib import Path
+
+          import torch
+          import vllm
+          import vllm_ascend
+          import vllm_hust_benchmark
+
+
+          workspace_root = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          expected_plugin_root = (workspace_root / "vllm-ascend-hust").resolve()
+
+          print(f"torch version: {torch.__version__}")
+          print(f"vllm module: {Path(vllm.__file__).resolve()}")
+          print(f"vllm_ascend module: {Path(vllm_ascend.__file__).resolve()}")
+          print(f"vllm_hust_benchmark module: {Path(vllm_hust_benchmark.__file__).resolve()}")
+
+          if expected_plugin_root not in Path(vllm_ascend.__file__).resolve().parents:
+              raise SystemExit(
+                  "vllm_ascend is not imported from the checked-out vllm-ascend-hust repo"
+              )
+
+          if workspace_root not in Path(vllm_hust_benchmark.__file__).resolve().parents:
+              raise SystemExit(
+                  "vllm_hust_benchmark is not imported from the checked-out benchmark repo"
+              )
+          PY
 
       - name: Run current vs official context sweep
         id: run-sweep

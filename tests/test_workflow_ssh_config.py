@@ -7,6 +7,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_PATHS = [
     ".github/workflows/ci.yml",
     ".github/workflows/push-to-hf.yml",
+    ".github/workflows/run-ascend-context-length-current-vs-official.yml",
     ".github/workflows/run-official-ascend-baselines.yml",
 ]
 
