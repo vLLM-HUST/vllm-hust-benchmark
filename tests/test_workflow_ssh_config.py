@@ -67,18 +67,18 @@ def test_context_sweep_workflow_preflights_source_runtime_before_plugin_install(
     assert 'import torch; import torch_npu; import transformers; import tokenizers; import huggingface_hub; import vllm; import vllm_ascend' in workflow_text
     assert runtime_preflight in workflow_text
     assert 'hust_ascend_manager_run runtime repair \\' not in workflow_text
+    assert '"${CURRENT_RUNTIME_PYTHON}" -m pip install --upgrade "torch-npu==2.9.0"' in workflow_text
+    assert '"tokenizers>=0.22.0,<=0.23.0"' in workflow_text
     assert direct_vllm_install not in workflow_text
     assert workflow_text.index(runtime_preflight) < workflow_text.index(install_command)
 
 
-def test_context_sweep_workflow_falls_back_to_fresh_current_env() -> None:
+def test_context_sweep_workflow_heals_current_env_dependencies() -> None:
     workflow_text = (
         REPO_ROOT / ".github/workflows/run-ascend-context-length-current-vs-official.yml"
     ).read_text(encoding="utf-8")
 
-    assert 'probe_current_runtime() {' in workflow_text
-    assert 'vllm-ascend-official-v0110-fresh' in workflow_text
-    assert '--clone "$GOAL_BASELINE_ENV_PREFIX"' in workflow_text
-    assert 'vllm-hust-current-runtime' in workflow_text
-    assert 'import torch; import torch_npu; import transformers; import tokenizers; import huggingface_hub' in workflow_text
-    assert '[WARN] Falling back to $fallback_env_prefix for current benchmark runtime' in workflow_text
+    assert '[WARN] Current runtime is missing torch_npu; installing torch-npu==2.9.0' in workflow_text
+    assert '[WARN] Current runtime has incompatible transformers/tokenizers/huggingface_hub versions; re-pinning them' in workflow_text
+    assert '--clone "$GOAL_BASELINE_ENV_PREFIX"' not in workflow_text
+    assert 'vllm-hust-current-runtime' not in workflow_text
