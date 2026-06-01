@@ -68,6 +68,7 @@ def test_context_sweep_workflow_repairs_current_runtime_before_plugin_install() 
     assert runtime_repair in workflow_text
     assert '--repo "$GITHUB_WORKSPACE/vllm-hust" \\' in workflow_text
     assert '--python "$CURRENT_RUNTIME_PYTHON"' in workflow_text
+    assert '--skip-build-deps' in workflow_text
     assert '--require-npu' in workflow_text
     assert direct_vllm_install not in workflow_text
     assert workflow_text.index(runtime_repair) < workflow_text.index(install_command)

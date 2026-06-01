@@ -486,7 +486,8 @@ jobs:
             echo "[WARN] Current runtime check failed; attempting runtime repair"
             hust_ascend_manager_run runtime repair \
               --repo "$GITHUB_WORKSPACE/vllm-hust" \
-              --python "$CURRENT_RUNTIME_PYTHON"
+              --python "$CURRENT_RUNTIME_PYTHON" \
+              --skip-build-deps
           fi
           hust_ascend_manager_run runtime check \
             --repo "$GITHUB_WORKSPACE/vllm-hust" \
