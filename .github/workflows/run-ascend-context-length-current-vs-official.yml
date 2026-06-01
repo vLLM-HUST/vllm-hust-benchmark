@@ -450,13 +450,35 @@ jobs:
             fi
           else
             source "${VLLM_ASCEND_HUST_REPO}/scripts/hust_ascend_manager_helper.sh"
-            source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
             current_runtime_python="$(hust_resolve_python_bin)"
             if [[ -z "$current_runtime_python" || ! -x "$current_runtime_python" ]]; then
               echo "Could not resolve the current benchmark Python from the Ascend manager helper" >&2
               exit 1
             fi
             current_env_prefix="$(cd "$(dirname "$current_runtime_python")/.." && pwd -P)"
+
+            probe_current_runtime() {
+              local candidate_env_prefix="$1"
+              local candidate_python="$2"
+
+              (
+                set -euo pipefail
+                export VLLM_HUST_CONDA_PREFIX="$candidate_env_prefix"
+                export VLLM_HUST_PYTHON_BIN="$candidate_python"
+                source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh" >/dev/null
+                "$candidate_python" -c "import torch; import torch_npu; import transformers; import tokenizers; import huggingface_hub; print('runtime_probe_ok')"
+              )
+            }
+
+            if ! probe_current_runtime "$current_env_prefix" "$current_runtime_python"; then
+              fallback_env_prefix="${CONDA_BASE}/envs/vllm-ascend-official-v0110-fresh"
+              fallback_runtime_python="$fallback_env_prefix/bin/python"
+              if [[ -x "$fallback_runtime_python" ]] && probe_current_runtime "$fallback_env_prefix" "$fallback_runtime_python"; then
+                echo "[WARN] Falling back to $fallback_env_prefix for current benchmark runtime because the default env failed the Ascend preflight"
+                current_env_prefix="$fallback_env_prefix"
+                current_runtime_python="$fallback_runtime_python"
+              fi
+            fi
           fi
 
           printf 'CURRENT_ENV_PREFIX=%s\n' "$current_env_prefix" >> "$GITHUB_ENV"
@@ -488,6 +510,10 @@ jobs:
               --repo "$GITHUB_WORKSPACE/vllm-hust" \
               --python "$CURRENT_RUNTIME_PYTHON" \
               --skip-build-deps
+            "${CURRENT_RUNTIME_PYTHON}" -m pip install --upgrade --force-reinstall \
+              "transformers>=4.56.0,<5" \
+              "tokenizers>=0.22.0,<=0.23.0" \
+              "huggingface_hub>=0.36.0,<1.0"
           fi
           hust_ascend_manager_run runtime check \
             --repo "$GITHUB_WORKSPACE/vllm-hust" \

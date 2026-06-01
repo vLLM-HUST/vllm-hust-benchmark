@@ -69,6 +69,18 @@ def test_context_sweep_workflow_repairs_current_runtime_before_plugin_install() 
     assert '--repo "$GITHUB_WORKSPACE/vllm-hust" \\' in workflow_text
     assert '--python "$CURRENT_RUNTIME_PYTHON"' in workflow_text
     assert '--skip-build-deps' in workflow_text
+    assert '"tokenizers>=0.22.0,<=0.23.0"' in workflow_text
     assert '--require-npu' in workflow_text
     assert direct_vllm_install not in workflow_text
     assert workflow_text.index(runtime_repair) < workflow_text.index(install_command)
+
+
+def test_context_sweep_workflow_falls_back_to_fresh_current_env() -> None:
+    workflow_text = (
+        REPO_ROOT / ".github/workflows/run-ascend-context-length-current-vs-official.yml"
+    ).read_text(encoding="utf-8")
+
+    assert 'probe_current_runtime() {' in workflow_text
+    assert 'vllm-ascend-official-v0110-fresh' in workflow_text
+    assert 'import torch; import torch_npu; import transformers; import tokenizers; import huggingface_hub' in workflow_text
+    assert '[WARN] Falling back to $fallback_env_prefix for current benchmark runtime' in workflow_text
