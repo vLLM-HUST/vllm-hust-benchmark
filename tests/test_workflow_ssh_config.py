@@ -49,13 +49,12 @@ def test_context_sweep_workflow_sets_soc_version_before_plugin_install() -> None
     assert workflow_text.index(soc_export) < workflow_text.index(install_command)
 
 
-def test_context_sweep_workflow_repairs_current_runtime_before_plugin_install() -> None:
+def test_context_sweep_workflow_preflights_source_runtime_before_plugin_install() -> None:
     workflow_text = (
         REPO_ROOT / ".github/workflows/run-ascend-context-length-current-vs-official.yml"
     ).read_text(encoding="utf-8")
 
-    runtime_check = 'hust_ascend_manager_run runtime check \\'
-    runtime_repair = 'hust_ascend_manager_run runtime repair \\'
+    runtime_preflight = 'current_runtime_preflight_ok'
     direct_vllm_install = (
         '"${CURRENT_RUNTIME_PYTHON}" -m pip install -e "$GITHUB_WORKSPACE/vllm-hust"'
     )
@@ -64,15 +63,12 @@ def test_context_sweep_workflow_repairs_current_runtime_before_plugin_install() 
         '"$VLLM_ASCEND_HUST_REPO"'
     )
 
-    assert runtime_check in workflow_text
-    assert runtime_repair in workflow_text
-    assert '--repo "$GITHUB_WORKSPACE/vllm-hust" \\' in workflow_text
-    assert '--python "$CURRENT_RUNTIME_PYTHON"' in workflow_text
-    assert '--skip-build-deps' in workflow_text
-    assert '"tokenizers>=0.22.0,<=0.23.0"' in workflow_text
-    assert '--require-npu' in workflow_text
+    assert 'current_runtime_source_pythonpath="$GITHUB_WORKSPACE/vllm-ascend-hust:$GITHUB_WORKSPACE/vllm-hust"' in workflow_text
+    assert 'import torch; import torch_npu; import transformers; import tokenizers; import huggingface_hub; import vllm; import vllm_ascend' in workflow_text
+    assert runtime_preflight in workflow_text
+    assert 'hust_ascend_manager_run runtime repair \\' not in workflow_text
     assert direct_vllm_install not in workflow_text
-    assert workflow_text.index(runtime_repair) < workflow_text.index(install_command)
+    assert workflow_text.index(runtime_preflight) < workflow_text.index(install_command)
 
 
 def test_context_sweep_workflow_falls_back_to_fresh_current_env() -> None:
@@ -82,5 +78,7 @@ def test_context_sweep_workflow_falls_back_to_fresh_current_env() -> None:
 
     assert 'probe_current_runtime() {' in workflow_text
     assert 'vllm-ascend-official-v0110-fresh' in workflow_text
+    assert '--clone "$GOAL_BASELINE_ENV_PREFIX"' in workflow_text
+    assert 'vllm-hust-current-runtime' in workflow_text
     assert 'import torch; import torch_npu; import transformers; import tokenizers; import huggingface_hub' in workflow_text
     assert '[WARN] Falling back to $fallback_env_prefix for current benchmark runtime' in workflow_text

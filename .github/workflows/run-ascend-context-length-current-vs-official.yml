@@ -477,6 +477,21 @@ jobs:
                 echo "[WARN] Falling back to $fallback_env_prefix for current benchmark runtime because the default env failed the Ascend preflight"
                 current_env_prefix="$fallback_env_prefix"
                 current_runtime_python="$fallback_runtime_python"
+              elif [[ -n "${GOAL_BASELINE_ENV_PREFIX:-}" && -x "${GOAL_BASELINE_ENV_PREFIX}/bin/python" && -n "${CONDA_EXE:-}" && -x "${CONDA_EXE}" ]]; then
+                clone_env_prefix="${RUNNER_TEMP}/vllm-hust-current-runtime"
+                echo "[WARN] Cloning $GOAL_BASELINE_ENV_PREFIX into $clone_env_prefix for an isolated current benchmark runtime"
+                rm -rf "$clone_env_prefix"
+                "$CONDA_EXE" create -y --prefix "$clone_env_prefix" --clone "$GOAL_BASELINE_ENV_PREFIX"
+                clone_runtime_python="$clone_env_prefix/bin/python"
+                if ! probe_current_runtime "$clone_env_prefix" "$clone_runtime_python"; then
+                  echo "Cloned current runtime failed the Ascend preflight: $clone_env_prefix" >&2
+                  exit 1
+                fi
+                current_env_prefix="$clone_env_prefix"
+                current_runtime_python="$clone_runtime_python"
+              else
+                echo "No healthy current benchmark runtime found and no isolated fallback could be created" >&2
+                exit 1
               fi
             fi
           fi
@@ -496,29 +511,14 @@ jobs:
         run: |
           set -euo pipefail
 
+          current_runtime_source_pythonpath="$GITHUB_WORKSPACE/vllm-ascend-hust:$GITHUB_WORKSPACE/vllm-hust"
           export VLLM_HUST_CONDA_PREFIX="$CURRENT_ENV_PREFIX"
           export VLLM_HUST_PYTHON_BIN="$CURRENT_RUNTIME_PYTHON"
           source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
           export SOC_VERSION="${SOC_VERSION:-ascend910b3}"
           echo "Using SOC_VERSION=$SOC_VERSION for current runtime plugin build"
-          if ! hust_ascend_manager_run runtime check \
-            --repo "$GITHUB_WORKSPACE/vllm-hust" \
-            --python "$CURRENT_RUNTIME_PYTHON" \
-            --require-npu; then
-            echo "[WARN] Current runtime check failed; attempting runtime repair"
-            hust_ascend_manager_run runtime repair \
-              --repo "$GITHUB_WORKSPACE/vllm-hust" \
-              --python "$CURRENT_RUNTIME_PYTHON" \
-              --skip-build-deps
-            "${CURRENT_RUNTIME_PYTHON}" -m pip install --upgrade --force-reinstall \
-              "transformers>=4.56.0,<5" \
-              "tokenizers>=0.22.0,<=0.23.0" \
-              "huggingface_hub>=0.36.0,<1.0"
-          fi
-          hust_ascend_manager_run runtime check \
-            --repo "$GITHUB_WORKSPACE/vllm-hust" \
-            --python "$CURRENT_RUNTIME_PYTHON" \
-            --require-npu
+          PYTHONPATH="$current_runtime_source_pythonpath${PYTHONPATH:+:$PYTHONPATH}" \
+          "${CURRENT_RUNTIME_PYTHON}" -c "import torch; import torch_npu; import transformers; import tokenizers; import huggingface_hub; import vllm; import vllm_ascend; print('current_runtime_preflight_ok')"
           bash "${VLLM_ASCEND_HUST_REPO}/scripts/install_local_ascend_plugin.sh" "$VLLM_ASCEND_HUST_REPO"
           "${CURRENT_RUNTIME_PYTHON}" -m pip install -e ".[publish]" jsonschema
 
@@ -534,6 +534,8 @@ jobs:
           export VLLM_HUST_CONDA_PREFIX="$CURRENT_ENV_PREFIX"
           export VLLM_HUST_PYTHON_BIN="$CURRENT_RUNTIME_PYTHON"
           source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
+          current_runtime_source_pythonpath="$GITHUB_WORKSPACE/vllm-ascend-hust:$GITHUB_WORKSPACE/vllm-hust"
+          PYTHONPATH="$current_runtime_source_pythonpath${PYTHONPATH:+:$PYTHONPATH}" \
           "${CURRENT_RUNTIME_PYTHON}" - <<'PY'
           import os
           from pathlib import Path
