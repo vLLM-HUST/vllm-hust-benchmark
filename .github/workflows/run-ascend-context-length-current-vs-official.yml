@@ -477,6 +477,8 @@ jobs:
           export VLLM_HUST_CONDA_PREFIX="$CURRENT_ENV_PREFIX"
           export VLLM_HUST_PYTHON_BIN="$CURRENT_RUNTIME_PYTHON"
           source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
+          export SOC_VERSION="${SOC_VERSION:-ascend910b3}"
+          echo "Using SOC_VERSION=$SOC_VERSION for current runtime plugin build"
           bash "${VLLM_ASCEND_HUST_REPO}/scripts/install_local_ascend_plugin.sh" "$VLLM_ASCEND_HUST_REPO"
           "${CURRENT_RUNTIME_PYTHON}" -m pip install -e "$GITHUB_WORKSPACE/vllm-hust" --no-build-isolation --no-deps
           "${CURRENT_RUNTIME_PYTHON}" -m pip install -e ".[publish]" jsonschema

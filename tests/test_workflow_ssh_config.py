@@ -31,3 +31,19 @@ def test_workflows_use_standard_github_ssh_without_overwriting_config(
     assert 'HostName github.com' in workflow_text
     assert 'IdentityFile ~/.ssh/github_actions' in workflow_text
     assert "printf '\\n%s\\n' \"$config_block\" >> \"$config_file\"" in workflow_text
+
+
+def test_context_sweep_workflow_sets_soc_version_before_plugin_install() -> None:
+    workflow_text = (
+        REPO_ROOT / ".github/workflows/run-ascend-context-length-current-vs-official.yml"
+    ).read_text(encoding="utf-8")
+
+    soc_export = 'export SOC_VERSION="${SOC_VERSION:-ascend910b3}"'
+    install_command = (
+        'bash "${VLLM_ASCEND_HUST_REPO}/scripts/install_local_ascend_plugin.sh" '
+        '"$VLLM_ASCEND_HUST_REPO"'
+    )
+
+    assert soc_export in workflow_text
+    assert install_command in workflow_text
+    assert workflow_text.index(soc_export) < workflow_text.index(install_command)
