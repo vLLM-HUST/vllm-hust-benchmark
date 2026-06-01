@@ -479,8 +479,20 @@ jobs:
           source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
           export SOC_VERSION="${SOC_VERSION:-ascend910b3}"
           echo "Using SOC_VERSION=$SOC_VERSION for current runtime plugin build"
+          if ! hust_ascend_manager_run runtime check \
+            --repo "$GITHUB_WORKSPACE/vllm-hust" \
+            --python "$CURRENT_RUNTIME_PYTHON" \
+            --require-npu; then
+            echo "[WARN] Current runtime check failed; attempting runtime repair"
+            hust_ascend_manager_run runtime repair \
+              --repo "$GITHUB_WORKSPACE/vllm-hust" \
+              --python "$CURRENT_RUNTIME_PYTHON"
+          fi
+          hust_ascend_manager_run runtime check \
+            --repo "$GITHUB_WORKSPACE/vllm-hust" \
+            --python "$CURRENT_RUNTIME_PYTHON" \
+            --require-npu
           bash "${VLLM_ASCEND_HUST_REPO}/scripts/install_local_ascend_plugin.sh" "$VLLM_ASCEND_HUST_REPO"
-          "${CURRENT_RUNTIME_PYTHON}" -m pip install -e "$GITHUB_WORKSPACE/vllm-hust" --no-build-isolation --no-deps
           "${CURRENT_RUNTIME_PYTHON}" -m pip install -e ".[publish]" jsonschema
 
       - name: Verify current benchmark runtime
@@ -506,12 +518,18 @@ jobs:
 
 
           workspace_root = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          expected_vllm_root = (workspace_root / "vllm-hust").resolve()
           expected_plugin_root = (workspace_root / "vllm-ascend-hust").resolve()
 
           print(f"torch version: {torch.__version__}")
           print(f"vllm module: {Path(vllm.__file__).resolve()}")
           print(f"vllm_ascend module: {Path(vllm_ascend.__file__).resolve()}")
           print(f"vllm_hust_benchmark module: {Path(vllm_hust_benchmark.__file__).resolve()}")
+
+          if expected_vllm_root not in Path(vllm.__file__).resolve().parents:
+              raise SystemExit(
+                  "vllm is not imported from the checked-out vllm-hust repo"
+              )
 
           if expected_plugin_root not in Path(vllm_ascend.__file__).resolve().parents:
               raise SystemExit(

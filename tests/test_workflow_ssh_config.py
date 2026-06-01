@@ -47,3 +47,27 @@ def test_context_sweep_workflow_sets_soc_version_before_plugin_install() -> None
     assert soc_export in workflow_text
     assert install_command in workflow_text
     assert workflow_text.index(soc_export) < workflow_text.index(install_command)
+
+
+def test_context_sweep_workflow_repairs_current_runtime_before_plugin_install() -> None:
+    workflow_text = (
+        REPO_ROOT / ".github/workflows/run-ascend-context-length-current-vs-official.yml"
+    ).read_text(encoding="utf-8")
+
+    runtime_check = 'hust_ascend_manager_run runtime check \\'
+    runtime_repair = 'hust_ascend_manager_run runtime repair \\'
+    direct_vllm_install = (
+        '"${CURRENT_RUNTIME_PYTHON}" -m pip install -e "$GITHUB_WORKSPACE/vllm-hust"'
+    )
+    install_command = (
+        'bash "${VLLM_ASCEND_HUST_REPO}/scripts/install_local_ascend_plugin.sh" '
+        '"$VLLM_ASCEND_HUST_REPO"'
+    )
+
+    assert runtime_check in workflow_text
+    assert runtime_repair in workflow_text
+    assert '--repo "$GITHUB_WORKSPACE/vllm-hust" \\' in workflow_text
+    assert '--python "$CURRENT_RUNTIME_PYTHON"' in workflow_text
+    assert '--require-npu' in workflow_text
+    assert direct_vllm_install not in workflow_text
+    assert workflow_text.index(runtime_repair) < workflow_text.index(install_command)
