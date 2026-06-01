@@ -1,0 +1,121 @@
+{
+  "entry_id": "a80b3e53-03dd-4780-b39c-efc3ea92538a",
+  "engine": "vllm-hust",
+  "engine_version": "manual",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "Ascend-910B",
+    "chip_count": 1,
+    "interconnect": "unknown",
+    "memory_per_chip_gb": null,
+    "total_memory_gb": null
+  },
+  "model": {
+    "canonical_id": "hf:meta-llama/Llama-3.1-8B-Instruct",
+    "repo_id": "meta-llama/Llama-3.1-8B-Instruct",
+    "short_name": "Llama-3.1-8B-Instruct",
+    "display_name": "Llama-3.1-8B-Instruct",
+    "name": "meta-llama/Llama-3.1-8B-Instruct",
+    "parameters": "8B",
+    "precision": "BF16",
+    "quantization": null
+  },
+  "workload": {
+    "name": "sharegpt-online",
+    "input_length": 1024,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null,
+    "dataset": "sharegpt"
+  },
+  "metrics": {
+    "ttft_ms": 2297.991288487101,
+    "tbt_ms": 69.59880405803683,
+    "throughput_tps": 833.1903481268787,
+    "peak_mem_mb": 10240.0,
+    "error_rate": 0.0
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Ascend-class",
+      "representative_model_band": "7B-13B",
+      "representative_business_scenario": "online-chat",
+      "baseline_engine": "",
+      "declared_baseline_engine": "vllm",
+      "baseline_status": "pending-baseline",
+      "owner_confirmed": null,
+      "notes": null
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": 92.0,
+      "typical_throughput_ratio_vs_baseline": 2.2,
+      "typical_ttft_reduction_pct_vs_baseline": 23.0,
+      "typical_tpot_reduction_pct_vs_baseline": 25.0,
+      "long_context_length": 32768,
+      "long_context_throughput_stable": true,
+      "long_context_ttft_p95_ms": 80.0,
+      "long_context_ttft_p99_ms": 95.0,
+      "long_context_tpot_p95_ms": 9.0,
+      "long_context_tpot_p99_ms": 10.0,
+      "long_context_ttft_p95_stable": true,
+      "long_context_ttft_p99_stable": true,
+      "long_context_tpot_p95_stable": true,
+      "long_context_tpot_p99_stable": true,
+      "unit_token_cost_reduction_pct": 35.0,
+      "multi_tenant_high_utilization": true
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "N/A",
+    "backend": "N/A",
+    "core": "N/A",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+    "python_version": "3.11.15",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null
+  },
+  "metadata": {
+    "submitted_at": "2026-06-01T08:17:51Z",
+    "submitter": "Raing5Days",
+    "data_source": "vllm-hust-benchmark",
+    "engine": "vllm-hust",
+    "engine_version": "manual",
+    "reproducible_cmd": null,
+    "git_commit": null,
+    "github_user": "Raing5Days",
+    "github_commit_url": null,
+    "github_repository": "vLLM-HUST/vllm-hust-benchmark",
+    "github_ref": null,
+    "github_event_name": null,
+    "github_pr_number": null,
+    "github_pr_url": null,
+    "release_date": null,
+    "changelog_url": null,
+    "notes": null,
+    "verified": null,
+    "idempotency_key": "82111528932452cc36254f1809813c98bb531b09cdfb1105195f12b605e8693e",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "runtime_provenance": {
+      "python": null,
+      "engine": {
+        "repository": null,
+        "ref": null,
+        "commit": null
+      },
+      "plugin": {
+        "engine": null,
+        "repository": null,
+        "ref": null,
+        "commit": null
+      }
+    }
+  }
+}
