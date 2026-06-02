@@ -292,6 +292,8 @@ run_current_for_spec() {
   READY_TIMEOUT_SECONDS="$READY_TIMEOUT_SECONDS" \
   READY_STATUS_INTERVAL_SECONDS="$READY_STATUS_INTERVAL_SECONDS" \
   CLIENT_READY_CHECK_TIMEOUT_SECONDS="$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
+  DEVICE_SELECTION_RETRIES="$DEVICE_SELECTION_RETRIES" \
+  DEVICE_SELECTION_RETRY_DELAY_SECONDS="$DEVICE_SELECTION_RETRY_DELAY_SECONDS" \
   bash "$CURRENT_RUNNER" "$spec_file" 2>&1 | tee "$runner_log"
   local runner_status=${PIPESTATUS[0]}
   set -e
@@ -414,6 +416,8 @@ for index in "${!SPEC_FILES[@]}"; do
   fi
 
   if ! restore_result_dir_from_checkpoint "current" "$spec_file" "$spec_slug" "$spec_hash"; then
+    echo "[context-sweep] waiting 10s for NPU resource release before current run"
+    sleep 10
     if ! run_current_for_spec "$spec_file" "$spec_slug" "$index"; then
       append_summary "  - current log: $MATRIX_RESULT_ROOT/current/$spec_slug/runner.log"
     fi

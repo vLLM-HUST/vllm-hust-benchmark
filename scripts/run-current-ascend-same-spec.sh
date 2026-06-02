@@ -44,6 +44,13 @@ RUN_ID=${RUN_ID:-"current-ascend-same-spec-$(date -u +%Y%m%dT%H%M%SZ)"}
 READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-600}
 READY_STATUS_INTERVAL_SECONDS=${READY_STATUS_INTERVAL_SECONDS:-30}
 CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-$READY_TIMEOUT_SECONDS}
+SERVER_START_RETRIES=${SERVER_START_RETRIES:-4}
+SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-15}
+DEVICE_SELECTION_RETRIES=${DEVICE_SELECTION_RETRIES:-10}
+DEVICE_SELECTION_RETRY_DELAY_SECONDS=${DEVICE_SELECTION_RETRY_DELAY_SECONDS:-30}
+readonly _RUNTIME_READY_TIMEOUT=30
+readonly _RUNTIME_READY_POLL=10
+readonly _RESOURCE_BUSY_EXIT=75
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -132,6 +139,47 @@ configure_current_ascend_device_scope() {
     export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE:-npu:0}"
     echo "[same-spec-current] Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-<unset>} (rt=${ASCEND_RT_VISIBLE_DEVICES:-<unset>})"
   fi
+}
+
+wait_for_ascend_runtime_ready() {
+  local max_attempts=$(((_RUNTIME_READY_TIMEOUT + _RUNTIME_READY_POLL - 1) / _RUNTIME_READY_POLL))
+  (( max_attempts < 1 )) && max_attempts=1
+
+  for runtime_attempt in $(seq 1 "$max_attempts"); do
+    if run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" "$CURRENT_RUNTIME_PYTHON" -c \
+      "import torch_npu; torch_npu.npu.get_soc_version()" >/dev/null 2>&1; then
+      return 0
+    fi
+
+    [[ "$runtime_attempt" -eq "$max_attempts" ]] && return 1
+
+    echo "[same-spec-current] Ascend runtime not ready; waiting ${_RUNTIME_READY_POLL}s (${runtime_attempt}/${max_attempts})" >&2
+    sleep "$_RUNTIME_READY_POLL"
+  done
+}
+
+wait_for_device_available() {
+  local max_attempts=${DEVICE_SELECTION_RETRIES:-1}
+  local retry_delay=${DEVICE_SELECTION_RETRY_DELAY_SECONDS:-30}
+
+  (( max_attempts < 1 )) && max_attempts=1
+
+  for selection_attempt in $(seq 1 "$max_attempts"); do
+    if wait_for_ascend_runtime_ready; then
+      echo "[same-spec-current] Ascend runtime ready on attempt ${selection_attempt}/${max_attempts}"
+      return 0
+    fi
+
+    if [[ "$selection_attempt" -ge "$max_attempts" ]]; then
+      echo "[same-spec-current] Ascend runtime did not become ready after ${max_attempts} attempt(s)" >&2
+      return "$_RESOURCE_BUSY_EXIT"
+    fi
+
+    echo "[same-spec-current] Ascend device not ready; retrying in ${retry_delay}s (attempt ${selection_attempt}/${max_attempts})" >&2
+    sleep "$retry_delay"
+  done
+
+  return "$_RESOURCE_BUSY_EXIT"
 }
 
 is_valid_engine_version() {
@@ -739,11 +787,48 @@ echo "[same-spec-current] vllm cache root: $CURRENT_VLLM_CACHE_ROOT"
 echo "[same-spec-current] runtime model source: $RUNTIME_MODEL"
 echo "[same-spec-current] resolved spec file: $SAME_SPEC_FILE"
 echo "[same-spec-current] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
-run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
-SERVER_PID=$!
-persist_managed_server_state
 
-wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
+server_ready=0
+for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
+  if ! wait_for_device_available; then
+    echo "[same-spec-current] Ascend device remained unavailable after retries; aborting" >&2
+    exit "$_RESOURCE_BUSY_EXIT"
+  fi
+
+  : > "$SERVER_STDOUT_LOG"
+  run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
+  SERVER_PID=$!
+  persist_managed_server_state
+
+  if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then
+    persist_managed_server_state
+    server_ready=1
+    break
+  fi
+
+  server_wait_status=$?
+  if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG" && [[ "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+    echo "[same-spec-current] Detected transient Ascend resource busy; retrying in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+    cleanup_managed_server || true
+    sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+    continue
+  fi
+
+  if [[ "$start_attempt" -ge "$SERVER_START_RETRIES" ]]; then
+    echo "[same-spec-current] server failed to start after ${SERVER_START_RETRIES} attempt(s)" >&2
+    exit "$server_wait_status"
+  fi
+
+  cleanup_managed_server || true
+  echo "[same-spec-current] server start failed; retrying in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+  sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+done
+
+if [[ "$server_ready" != "1" ]]; then
+  echo "[same-spec-current] vLLM server did not become ready after ${SERVER_START_RETRIES} start attempt(s)" >&2
+  exit 1
+fi
+
 persist_managed_server_state
 run_client_command
 
