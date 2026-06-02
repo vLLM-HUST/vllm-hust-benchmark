@@ -73,6 +73,21 @@ def test_context_sweep_workflow_preflights_source_runtime_before_plugin_install(
     assert workflow_text.index(runtime_preflight) < workflow_text.index(install_command)
 
 
+def test_context_sweep_workflow_restores_checkpoint_without_gh_cli() -> None:
+    workflow_text = (
+        REPO_ROOT / ".github/workflows/run-ascend-context-length-current-vs-official.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "gh run list" not in workflow_text
+    assert "gh run download" not in workflow_text
+    assert 'python_bin="$(command -v python3 || command -v python || true)"' in workflow_text
+    assert '[checkpoint] python is unavailable; skipping checkpoint restore' in workflow_text
+    assert '/actions/workflows?per_page=100' in workflow_text
+    assert '/actions/runs/{candidate_run_id}/artifacts?per_page=100' in workflow_text
+    assert 'archive_download_url' in workflow_text
+    assert 'no resumable context sweep artifact found; continuing without checkpoint restore' in workflow_text
+
+
 def test_context_sweep_workflow_heals_current_env_dependencies() -> None:
     workflow_text = (
         REPO_ROOT / ".github/workflows/run-ascend-context-length-current-vs-official.yml"

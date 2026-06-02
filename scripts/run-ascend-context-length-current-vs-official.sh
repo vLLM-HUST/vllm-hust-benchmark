@@ -176,8 +176,12 @@ restore_result_dir_from_checkpoint() {
   result_dir_has_submission "$source_dir" || return 1
 
   current_spec_id=$(jq -r '.id // empty' "$spec_file")
-  source_spec_id=$(jq -r '.same_spec.spec_id // empty' "$source_dir/resolved_same_spec.json")
+  source_spec_id=$(jq -r '.same_spec.spec_id // .spec_id // empty' "$source_dir/resolved_same_spec.json")
   source_spec_hash=$(jq -r '.same_spec.resolved_spec_hash // empty' "$source_dir/submission/run_leaderboard.json")
+
+  if [[ -z "$source_spec_hash" ]]; then
+    source_spec_hash=$(jq -r '.resolved_spec_hash // empty' "$source_dir/resolved_same_spec.json")
+  fi
 
   [[ -n "$current_spec_id" ]] || return 1
   [[ "$source_spec_id" == "$current_spec_id" ]] || return 1

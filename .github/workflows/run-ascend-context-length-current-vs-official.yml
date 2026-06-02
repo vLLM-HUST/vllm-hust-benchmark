@@ -556,30 +556,168 @@ jobs:
           checkpoint_dir="$GITHUB_WORKSPACE/artifacts/context-length-sweep/resume-checkpoint"
           mkdir -p "$checkpoint_dir"
 
-          latest_run_json=$(gh run list \
-            --workflow .github/workflows/run-ascend-context-length-current-vs-official.yml \
-            --branch "$GITHUB_REF_NAME" \
-            --limit 20 \
-            --json databaseId,attempt,status,conclusion,createdAt \
-            | jq -c --arg run_id "$GITHUB_RUN_ID" '
-                map(select((.databaseId|tostring) != $run_id))
-                | map(select(.status == "completed"))
-                | sort_by(.createdAt)
-                | last // empty
-              ')
-
-          if [[ -z "$latest_run_json" ]]; then
+          python_bin="$(command -v python3 || command -v python || true)"
+          if [[ -z "$python_bin" ]]; then
+          echo "[checkpoint] python is unavailable; skipping checkpoint restore" >&2
             echo "resume_checkpoint_root=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          run_id=$(printf '%s' "$latest_run_json" | jq -r '.databaseId')
-          attempt=$(printf '%s' "$latest_run_json" | jq -r '.attempt // 1')
-          artifact_name="context-length-sweep-results-${run_id}-${attempt}"
+          checkpoint_err_log="$RUNNER_TEMP/context-sweep-resume-checkpoint.stderr.log"
+          : > "$checkpoint_err_log"
 
-          if gh run download "$run_id" -n "$artifact_name" -D "$checkpoint_dir"; then
-            echo "resume_checkpoint_root=$checkpoint_dir" >> "$GITHUB_OUTPUT"
+          if checkpoint_output=$(CHECKPOINT_DIR="$checkpoint_dir" "$python_bin" - <<'PY' 2>"$checkpoint_err_log"
+          from __future__ import annotations
+
+          import io
+          import json
+          import os
+          import shutil
+          import sys
+          import urllib.parse
+          import urllib.request
+          import zipfile
+          from pathlib import Path
+
+
+          WORKFLOW_PATH = ".github/workflows/run-ascend-context-length-current-vs-official.yml"
+
+          api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com").rstrip("/")
+          token = os.environ.get("GH_TOKEN", "").strip()
+          repo = os.environ["GITHUB_REPOSITORY"]
+          branch = os.environ["GITHUB_REF_NAME"]
+          current_run_id = os.environ["GITHUB_RUN_ID"]
+          checkpoint_dir = Path(os.environ["CHECKPOINT_DIR"])
+
+          if not token:
+            raise SystemExit(0)
+
+          headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+          }
+
+
+          def fetch_json(path: str) -> dict:
+            request = urllib.request.Request(f"{api_url}{path}", headers=headers)
+            with urllib.request.urlopen(request) as response:
+              return json.load(response)
+
+
+          def find_workflow_id() -> int | None:
+            payload = fetch_json(f"/repos/{repo}/actions/workflows?per_page=100")
+            for workflow in payload.get("workflows", []):
+              if workflow.get("path") == WORKFLOW_PATH:
+                workflow_id = workflow.get("id")
+                return int(workflow_id) if workflow_id is not None else None
+            return None
+
+
+          def iter_candidate_runs(workflow_id: int):
+            branch_param = urllib.parse.quote(branch, safe="")
+            payload = fetch_json(
+              f"/repos/{repo}/actions/workflows/{workflow_id}/runs"
+              f"?branch={branch_param}&status=completed&per_page=50"
+            )
+            runs = payload.get("workflow_runs", [])
+            return sorted(
+              (
+                run
+                for run in runs
+                if str(run.get("id") or "") != current_run_id
+              ),
+              key=lambda run: run.get("created_at", ""),
+              reverse=True,
+            )
+
+
+          def download_artifact(artifact: dict) -> None:
+            download_url = artifact.get("archive_download_url")
+            if not download_url:
+              raise ValueError("artifact is missing archive_download_url")
+
+            request = urllib.request.Request(download_url, headers=headers)
+            with urllib.request.urlopen(request) as response:
+              archive_bytes = response.read()
+
+            shutil.rmtree(checkpoint_dir, ignore_errors=True)
+            checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+              archive.extractall(checkpoint_dir)
+
+
+          def try_restore_checkpoint() -> str:
+            workflow_id = find_workflow_id()
+            if workflow_id is None:
+              print("[checkpoint] workflow id not found; skipping checkpoint restore", file=sys.stderr)
+              return ""
+
+            for candidate_run in iter_candidate_runs(workflow_id):
+              candidate_run_id = candidate_run.get("id")
+              if candidate_run_id is None:
+                continue
+
+              run_attempt = int(candidate_run.get("run_attempt") or 1)
+              artifact_name = f"context-length-sweep-results-{candidate_run_id}-{run_attempt}"
+
+              try:
+                artifacts_payload = fetch_json(
+                  f"/repos/{repo}/actions/runs/{candidate_run_id}/artifacts?per_page=100"
+                )
+              except Exception as exc:
+                print(
+                  f"[checkpoint] failed to inspect artifacts for run {candidate_run_id}: {exc}",
+                  file=sys.stderr,
+                )
+                continue
+
+              artifact = next(
+                (
+                  item
+                  for item in artifacts_payload.get("artifacts", [])
+                  if item.get("name") == artifact_name and not item.get("expired", False)
+                ),
+                None,
+              )
+              if artifact is None:
+                continue
+
+              try:
+                download_artifact(artifact)
+              except Exception as exc:
+                print(
+                  f"[checkpoint] failed to download artifact {artifact_name}: {exc}",
+                  file=sys.stderr,
+                )
+                continue
+
+              print(
+                f"[checkpoint] restored checkpoint artifact {artifact_name} from run {candidate_run_id}",
+                file=sys.stderr,
+              )
+              return str(checkpoint_dir)
+
+            print("[checkpoint] no resumable context sweep artifact found; continuing without checkpoint restore", file=sys.stderr)
+            return ""
+
+
+          try:
+            print(try_restore_checkpoint(), end="")
+          except Exception as exc:
+            print(
+              f"[checkpoint] failed to inspect or download a previous checkpoint: {exc}",
+              file=sys.stderr,
+            )
+            print("", end="")
+          PY
+          ); then
+            if [[ -s "$checkpoint_err_log" ]]; then
+              cat "$checkpoint_err_log" >&2
+            fi
+            echo "resume_checkpoint_root=$checkpoint_output" >> "$GITHUB_OUTPUT"
           else
+            cat "$checkpoint_err_log" >&2 || true
             rm -rf "$checkpoint_dir"
             mkdir -p "$checkpoint_dir"
             echo "resume_checkpoint_root=" >> "$GITHUB_OUTPUT"
