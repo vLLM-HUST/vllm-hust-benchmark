@@ -54,7 +54,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -128,7 +128,9 @@ jobs:
           fi
           chmod 700 "$ssh_dir"
 
+          set +x
           printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$key_file"
+          set -x
           chmod 600 "$key_file"
 
           config_block="$(cat <<'EOF'
@@ -755,6 +757,7 @@ jobs:
           path: artifacts/context-length-sweep/summary.md
           if-no-files-found: warn
           retention-days: 14
+          overwrite: true
 
       - name: Upload context sweep results
         if: always()
@@ -766,3 +769,4 @@ jobs:
             artifacts/context-length-sweep/website-data
           if-no-files-found: warn
           retention-days: 14
+          overwrite: true

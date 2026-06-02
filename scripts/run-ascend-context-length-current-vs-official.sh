@@ -32,8 +32,12 @@ READY_STATUS_INTERVAL_SECONDS=${READY_STATUS_INTERVAL_SECONDS:-30}
 CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-900}
 DEVICE_SELECTION_RETRIES=${DEVICE_SELECTION_RETRIES:-20}
 DEVICE_SELECTION_RETRY_DELAY_SECONDS=${DEVICE_SELECTION_RETRY_DELAY_SECONDS:-30}
+SPEC_TIMEOUT_SECONDS=${SPEC_TIMEOUT_SECONDS:-3600}
+JOB_START_EPOCH=$(date +%s)
+JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS:-19800}  # 5.5h safety margin within 6h job timeout
 RESUME_CHECKPOINT_ROOT=${RESUME_CHECKPOINT_ROOT:-}
 RESUME_FROM_CHECKPOINT=${RESUME_FROM_CHECKPOINT:-1}
+CHECKPOINT_MAX_AGE_HOURS=${CHECKPOINT_MAX_AGE_HOURS:-48}
 CURRENT_GIT_COMMIT=${CURRENT_GIT_COMMIT:-$(git -C "$CURRENT_VLLM_HUST_REPO" rev-parse HEAD 2>/dev/null || true)}
 CURRENT_PLUGIN_GIT_COMMIT=${CURRENT_PLUGIN_GIT_COMMIT:-$(git -C "$CURRENT_VLLM_ASCEND_HUST_REPO" rev-parse HEAD 2>/dev/null || true)}
 OFFICIAL_GIT_COMMIT=${OFFICIAL_GIT_COMMIT:-$(git -C "$WORKSPACE_ROOT/reference-repos/vllm" rev-parse HEAD 2>/dev/null || true)}
@@ -45,6 +49,16 @@ FAILED_ITEMS=()
 RUN_COUNT=0
 RESUMED_COUNT=0
 RESUMED_ITEMS=()
+
+# Issue 2: trap to write summary on cancellation so partial results are captured
+trap_write_partial_summary() {
+  if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]] && [[ -f "$SUMMARY_FILE" ]]; then
+    echo "" >> "$GITHUB_STEP_SUMMARY"
+    echo "**Job interrupted (signal received)**" >> "$GITHUB_STEP_SUMMARY"
+    cat "$SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+  fi
+}
+trap trap_write_partial_summary SIGTERM SIGINT
 
 usage() {
   cat <<'EOF'
@@ -174,6 +188,19 @@ restore_result_dir_from_checkpoint() {
   source_dir="$checkpoint_root/$side/$spec_slug"
   [[ -d "$source_dir" ]] || return 1
   result_dir_has_submission "$source_dir" || return 1
+
+  # Issue 3: checkpoint staleness check
+  if [[ "$CHECKPOINT_MAX_AGE_HOURS" -gt 0 ]]; then
+    local checkpoint_mtime
+    checkpoint_mtime=$(stat -c '%Y' "$source_dir/raw_benchmark_result.json" 2>/dev/null || echo 0)
+    local now_epoch
+    now_epoch=$(date +%s)
+    local max_age_seconds=$((CHECKPOINT_MAX_AGE_HOURS * 3600))
+    if (( (now_epoch - checkpoint_mtime) > max_age_seconds )); then
+      echo "[context-sweep] checkpoint for ${side}:${spec_slug} is older than ${CHECKPOINT_MAX_AGE_HOURS}h; skipping restore" >&2
+      return 1
+    fi
+  fi
 
   current_spec_id=$(jq -r '.id // empty' "$spec_file")
   source_spec_id=$(jq -r '.same_spec.spec_id // .spec_id // empty' "$source_dir/resolved_same_spec.json")
@@ -400,10 +427,27 @@ for index in "${!SPEC_FILES[@]}"; do
   output_len=$(jq -r '.client_parameters.output_len' "$spec_file")
   spec_hash=$(resolve_spec_hash "$spec_file")
 
+  # Issue 1: check remaining time budget before starting a new spec pair
+  elapsed_seconds=$(( $(date +%s) - JOB_START_EPOCH ))
+  remaining_seconds=$(( JOB_TIMEOUT_SECONDS - elapsed_seconds ))
+  if (( remaining_seconds < SPEC_TIMEOUT_SECONDS )); then
+    echo
+    echo "[context-sweep] WARNING: only ${remaining_seconds}s remaining (need ${SPEC_TIMEOUT_SECONDS}s per spec); skipping remaining specs" >&2
+    append_summary "### SKIPPED (time budget)"
+    append_summary "- Specs skipped from index ${index}: insufficient time budget (${remaining_seconds}s < ${SPEC_TIMEOUT_SECONDS}s)"
+    for skip_idx in $(seq "$index" "$((${#SPEC_FILES[@]} - 1))"); do
+      skip_file="${SPEC_FILES[$skip_idx]}"
+      skip_id=$(jq -r '.id' "$skip_file")
+      record_failure "${skip_id}" "time-budget-exceeded"
+    done
+    break
+  fi
+
   echo
   echo "[context-sweep] spec: $spec_file"
   echo "[context-sweep] spec id: $spec_id"
   echo "[context-sweep] workload: input_len=${input_len}, output_len=${output_len}"
+  echo "[context-sweep] time budget: ${remaining_seconds}s remaining"
   append_summary "### ${spec_id}"
   append_summary "- Spec file: ${spec_file}"
   append_summary "- Workload: input_len=${input_len}, output_len=${output_len}"
@@ -413,6 +457,8 @@ for index in "${!SPEC_FILES[@]}"; do
     if ! run_official_for_spec "$spec_file" "$spec_slug" "$index"; then
       append_summary "  - official log: $MATRIX_RESULT_ROOT/official/$spec_slug/runner.log"
     fi
+    # Issue 8: brief port-release wait after runner completes
+    sleep 3
   fi
 
   if ! restore_result_dir_from_checkpoint "current" "$spec_file" "$spec_slug" "$spec_hash"; then
@@ -421,7 +467,18 @@ for index in "${!SPEC_FILES[@]}"; do
     if ! run_current_for_spec "$spec_file" "$spec_slug" "$index"; then
       append_summary "  - current log: $MATRIX_RESULT_ROOT/current/$spec_slug/runner.log"
     fi
+    # Issue 8: brief port-release wait after runner completes
+    sleep 3
   fi
+
+  # Issue 6: write intermediate progress to GITHUB_STEP_SUMMARY
+  if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+    echo "**Progress: spec $((index + 1))/${#SPEC_FILES[@]} complete** (${spec_id})" >> "$GITHUB_STEP_SUMMARY"
+    echo "" >> "$GITHUB_STEP_SUMMARY"
+  fi
+
+  # Issue 2: write intermediate results marker for artifact upload
+  echo "$((index + 1))/${#SPEC_FILES[@]} ${spec_id}" > "$MATRIX_RESULT_ROOT/.last-completed-spec"
 done
 
 if [[ "$PUBLISH_WEBSITE" == "1" ]]; then
