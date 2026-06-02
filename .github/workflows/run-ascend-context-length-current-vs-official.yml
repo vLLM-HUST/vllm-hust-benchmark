@@ -58,6 +58,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   run-context-length-sweep:
@@ -544,6 +545,46 @@ jobs:
               )
           PY
 
+      - name: Restore previous context sweep checkpoint
+        id: restore-checkpoint
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          checkpoint_dir="$GITHUB_WORKSPACE/artifacts/context-length-sweep/resume-checkpoint"
+          mkdir -p "$checkpoint_dir"
+
+          latest_run_json=$(gh run list \
+            --workflow .github/workflows/run-ascend-context-length-current-vs-official.yml \
+            --branch "$GITHUB_REF_NAME" \
+            --limit 20 \
+            --json databaseId,attempt,status,conclusion,createdAt \
+            | jq -c --arg run_id "$GITHUB_RUN_ID" '
+                map(select((.databaseId|tostring) != $run_id))
+                | map(select(.status == "completed"))
+                | sort_by(.createdAt)
+                | last // empty
+              ')
+
+          if [[ -z "$latest_run_json" ]]; then
+            echo "resume_checkpoint_root=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          run_id=$(printf '%s' "$latest_run_json" | jq -r '.databaseId')
+          attempt=$(printf '%s' "$latest_run_json" | jq -r '.attempt // 1')
+          artifact_name="context-length-sweep-results-${run_id}-${attempt}"
+
+          if gh run download "$run_id" -n "$artifact_name" -D "$checkpoint_dir"; then
+            echo "resume_checkpoint_root=$checkpoint_dir" >> "$GITHUB_OUTPUT"
+          else
+            rm -rf "$checkpoint_dir"
+            mkdir -p "$checkpoint_dir"
+            echo "resume_checkpoint_root=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run current vs official context sweep
         id: run-sweep
         shell: bash
@@ -553,6 +594,7 @@ jobs:
           DEVICE_SELECTION_RETRY_DELAY_SECONDS: 30
           READY_TIMEOUT_SECONDS: 900
           READY_STATUS_INTERVAL_SECONDS: 30
+          RESUME_CHECKPOINT_ROOT: ${{ steps.restore-checkpoint.outputs.resume_checkpoint_root || '' }}
         run: |
           set -euo pipefail
           spec_args=()

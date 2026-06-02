@@ -32,11 +32,19 @@ READY_STATUS_INTERVAL_SECONDS=${READY_STATUS_INTERVAL_SECONDS:-30}
 CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-900}
 DEVICE_SELECTION_RETRIES=${DEVICE_SELECTION_RETRIES:-20}
 DEVICE_SELECTION_RETRY_DELAY_SECONDS=${DEVICE_SELECTION_RETRY_DELAY_SECONDS:-30}
+RESUME_CHECKPOINT_ROOT=${RESUME_CHECKPOINT_ROOT:-}
+RESUME_FROM_CHECKPOINT=${RESUME_FROM_CHECKPOINT:-1}
+CURRENT_GIT_COMMIT=${CURRENT_GIT_COMMIT:-$(git -C "$CURRENT_VLLM_HUST_REPO" rev-parse HEAD 2>/dev/null || true)}
+CURRENT_PLUGIN_GIT_COMMIT=${CURRENT_PLUGIN_GIT_COMMIT:-$(git -C "$CURRENT_VLLM_ASCEND_HUST_REPO" rev-parse HEAD 2>/dev/null || true)}
+OFFICIAL_GIT_COMMIT=${OFFICIAL_GIT_COMMIT:-$(git -C "$WORKSPACE_ROOT/reference-repos/vllm" rev-parse HEAD 2>/dev/null || true)}
+OFFICIAL_PLUGIN_GIT_COMMIT=${OFFICIAL_PLUGIN_GIT_COMMIT:-$(git -C "$WORKSPACE_ROOT/reference-repos/vllm-ascend" rev-parse HEAD 2>/dev/null || true)}
 
 PREPARED_ENV=0
 FAILED_COUNT=0
 FAILED_ITEMS=()
 RUN_COUNT=0
+RESUMED_COUNT=0
+RESUMED_ITEMS=()
 
 usage() {
   cat <<'EOF'
@@ -94,6 +102,109 @@ record_failure() {
   FAILED_ITEMS+=("${item}: ${reason}")
   ((FAILED_COUNT+=1))
   append_summary "- Failure: ${item} (${reason})"
+}
+
+record_resume() {
+  local item=$1
+  local reason=$2
+  RESUMED_ITEMS+=("${item}: ${reason}")
+  ((RESUMED_COUNT+=1))
+  append_summary "- Resumed: ${item} (${reason})"
+}
+
+resolve_spec_hash() {
+  local spec_file=$1
+  local tmp_dir tmp_file resolved_hash
+
+  tmp_dir=$(mktemp -d)
+  tmp_file="$tmp_dir/resolved_same_spec.json"
+
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    "$HOST_PYTHON_BIN" -m vllm_hust_benchmark.same_spec resolve \
+      --spec-file "$spec_file" \
+      --output-file "$tmp_file" >/dev/null
+
+  resolved_hash=$(jq -r '.resolved_spec_hash // empty' "$tmp_file")
+  rm -rf "$tmp_dir"
+
+  if [[ -z "$resolved_hash" ]]; then
+    return 1
+  fi
+
+  printf '%s\n' "$resolved_hash"
+}
+
+checkpoint_benchmark_root() {
+  local checkpoint_root=${1:-}
+  local benchmark_root
+
+  [[ -n "$checkpoint_root" ]] || return 1
+  [[ -d "$checkpoint_root/.benchmarks" ]] || return 1
+
+  benchmark_root=$(find "$checkpoint_root/.benchmarks" -maxdepth 1 -type d -name 'context-length-sweep-*' | sort | tail -n 1)
+  [[ -n "$benchmark_root" ]] || return 1
+
+  printf '%s\n' "$benchmark_root"
+}
+
+result_dir_has_submission() {
+  local result_dir=$1
+
+  [[ -f "$result_dir/raw_benchmark_result.json" ]] \
+    && [[ -f "$result_dir/resolved_same_spec.json" ]] \
+    && [[ -f "$result_dir/submission/leaderboard_manifest.json" ]] \
+    && [[ -f "$result_dir/submission/run_leaderboard.json" ]]
+}
+
+restore_result_dir_from_checkpoint() {
+  local side=$1
+  local spec_file=$2
+  local spec_slug=$3
+  local current_spec_hash=$4
+  local checkpoint_root
+  local source_dir
+  local target_dir="$MATRIX_RESULT_ROOT/$side/$spec_slug"
+  local source_spec_id source_spec_hash
+  local current_spec_id
+
+  [[ "$RESUME_FROM_CHECKPOINT" == "1" ]] || return 1
+  [[ -n "$RESUME_CHECKPOINT_ROOT" ]] || return 1
+
+  checkpoint_root=$(checkpoint_benchmark_root "$RESUME_CHECKPOINT_ROOT") || return 1
+  source_dir="$checkpoint_root/$side/$spec_slug"
+  [[ -d "$source_dir" ]] || return 1
+  result_dir_has_submission "$source_dir" || return 1
+
+  current_spec_id=$(jq -r '.id // empty' "$spec_file")
+  source_spec_id=$(jq -r '.same_spec.spec_id // empty' "$source_dir/resolved_same_spec.json")
+  source_spec_hash=$(jq -r '.same_spec.resolved_spec_hash // empty' "$source_dir/submission/run_leaderboard.json")
+
+  [[ -n "$current_spec_id" ]] || return 1
+  [[ "$source_spec_id" == "$current_spec_id" ]] || return 1
+  [[ "$source_spec_hash" == "$current_spec_hash" ]] || return 1
+
+  case "$side" in
+    current)
+      [[ $(jq -r '.metadata.submitter // empty' "$source_dir/submission/run_leaderboard.json") == "same-spec-current" ]] || return 1
+      [[ $(jq -r '.metadata.runtime_provenance.engine.commit // empty' "$source_dir/submission/run_leaderboard.json") == "$CURRENT_GIT_COMMIT" ]] || return 1
+      [[ $(jq -r '.metadata.runtime_provenance.plugin.commit // empty' "$source_dir/submission/run_leaderboard.json") == "$CURRENT_PLUGIN_GIT_COMMIT" ]] || return 1
+      ;;
+    official)
+      [[ $(jq -r '.metadata.submitter // empty' "$source_dir/submission/run_leaderboard.json") == "official-ascend-baseline" ]] || return 1
+      [[ $(jq -r '.metadata.github_repository // empty' "$source_dir/submission/run_leaderboard.json") == "vllm-project/vllm-ascend" ]] || return 1
+      [[ $(jq -r '.metadata.github_ref // empty' "$source_dir/submission/run_leaderboard.json") == "v0.11.0" ]] || return 1
+      [[ $(jq -r '.metadata.runtime_provenance.plugin.commit // empty' "$source_dir/submission/run_leaderboard.json") == "$OFFICIAL_PLUGIN_GIT_COMMIT" ]] || return 1
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  mkdir -p "$(dirname "$target_dir")"
+  rm -rf "$target_dir"
+  cp -a "$source_dir" "$target_dir"
+  record_resume "${side}:${spec_slug}" "restored from checkpoint"
+  return 0
 }
 
 prepare_official_env_once() {
@@ -268,6 +379,9 @@ append_summary "- Current runtime repo: $CURRENT_VLLM_HUST_REPO"
 append_summary "- Current plugin repo: $CURRENT_VLLM_ASCEND_HUST_REPO"
 append_summary "- Official env prefix: $GOAL_BASELINE_ENV_PREFIX"
 append_summary "- Current env prefix: $CURRENT_ENV_PREFIX"
+if [[ -n "$RESUME_CHECKPOINT_ROOT" ]]; then
+  append_summary "- Resume checkpoint root: $RESUME_CHECKPOINT_ROOT"
+fi
 
 echo "[context-sweep] result root: $MATRIX_RESULT_ROOT"
 echo "[context-sweep] resolved ${#SPEC_FILES[@]} spec file(s)"
@@ -278,6 +392,7 @@ for index in "${!SPEC_FILES[@]}"; do
   spec_id=$(jq -r '.id' "$spec_file")
   input_len=$(jq -r '.client_parameters.input_len' "$spec_file")
   output_len=$(jq -r '.client_parameters.output_len' "$spec_file")
+  spec_hash=$(resolve_spec_hash "$spec_file")
 
   echo
   echo "[context-sweep] spec: $spec_file"
@@ -287,14 +402,17 @@ for index in "${!SPEC_FILES[@]}"; do
   append_summary "- Spec file: ${spec_file}"
   append_summary "- Workload: input_len=${input_len}, output_len=${output_len}"
 
-  prepare_official_env_once
-
-  if ! run_official_for_spec "$spec_file" "$spec_slug" "$index"; then
-    append_summary "  - official log: $MATRIX_RESULT_ROOT/official/$spec_slug/runner.log"
+  if ! restore_result_dir_from_checkpoint "official" "$spec_file" "$spec_slug" "$spec_hash"; then
+    prepare_official_env_once
+    if ! run_official_for_spec "$spec_file" "$spec_slug" "$index"; then
+      append_summary "  - official log: $MATRIX_RESULT_ROOT/official/$spec_slug/runner.log"
+    fi
   fi
 
-  if ! run_current_for_spec "$spec_file" "$spec_slug" "$index"; then
-    append_summary "  - current log: $MATRIX_RESULT_ROOT/current/$spec_slug/runner.log"
+  if ! restore_result_dir_from_checkpoint "current" "$spec_file" "$spec_slug" "$spec_hash"; then
+    if ! run_current_for_spec "$spec_file" "$spec_slug" "$index"; then
+      append_summary "  - current log: $MATRIX_RESULT_ROOT/current/$spec_slug/runner.log"
+    fi
   fi
 done
 
@@ -332,11 +450,18 @@ PY
   fi
 fi
 
-append_summary "- Successful runs: $RUN_COUNT"
+append_summary "- Successful runs: $((RUN_COUNT + RESUMED_COUNT))"
+append_summary "- Executed runs: $RUN_COUNT"
+append_summary "- Resumed runs: $RESUMED_COUNT"
 append_summary "- Failed runs: $FAILED_COUNT"
 if (( FAILED_COUNT > 0 )); then
   for failed_item in "${FAILED_ITEMS[@]}"; do
     append_summary "  - $failed_item"
+  done
+fi
+if (( RESUMED_COUNT > 0 )); then
+  for resumed_item in "${RESUMED_ITEMS[@]}"; do
+    append_summary "  - $resumed_item"
   done
 fi
 
@@ -345,7 +470,9 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
 fi
 
 echo
-echo "[context-sweep] successful runs: $RUN_COUNT"
+echo "[context-sweep] successful runs: $((RUN_COUNT + RESUMED_COUNT))"
+echo "[context-sweep] executed runs: $RUN_COUNT"
+echo "[context-sweep] resumed runs: $RESUMED_COUNT"
 echo "[context-sweep] failed runs: $FAILED_COUNT"
 echo "[context-sweep] summary: $SUMMARY_FILE"
 
