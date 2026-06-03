@@ -1,21 +1,21 @@
 {
-  "id": "official-ascend-jan-2026-v0.11.0-instructcoder-online-qwen25-coder-14b-910b3",
-  "label": "Official Ascend Jan 2026 InstructCoder online baseline for vllm-hust goal tracking",
+  "id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+  "label": "Official Ascend Jan 2026 prefix repetition online baseline for vllm-hust goal tracking",
   "baseline_target": {
-    "id": "official-ascend-jan-2026-v0.11.0",
+    "id": "official-ascend-jan-2026-v0.18.0",
     "label": "Official Ascend Jan 2026",
     "engine": "vllm",
-    "engine_version": "0.11.0",
+    "engine_version": "0.18.0",
     "github_repository": "vllm-project/vllm-ascend",
-    "vllm_ref": "v0.11.0",
-    "vllm_ascend_ref": "v0.11.0"
+    "vllm_ref": "v0.18.0",
+    "vllm_ascend_ref": "v0.18.0"
   },
-  "scenario": "instructcoder-online",
-  "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+  "scenario": "prefix-repetition-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
   "model_parameters": "14B",
   "model_precision": "FP16",
   "hardware_vendor": "Huawei",
-  "hardware_chip_model": "910B3",
+  "hardware_chip_model": "910B2",
   "chip_count": 1,
   "node_count": 1,
   "server_parameters": {
@@ -30,21 +30,22 @@
   "client_parameters": {
     "backend": "vllm",
     "endpoint": "/v1/completions",
-    "dataset_name": "hf",
-    "dataset_path": "likaixin/InstructCoder",
-    "num_prompts": 2048,
+    "dataset_name": "prefix_repetition",
+    "num_prompts": 200,
+    "input_len": 4096,
+    "output_len": 256,
     "request_rate": 1,
     "host": "127.0.0.1",
     "port": 8000
   },
   "export": {
     "engine": "vllm",
-    "engine_version": "0.11.0",
+    "engine_version": "0.18.0",
     "submitter": "official-ascend-baseline",
     "baseline_engine": "vllm",
     "github_repository": "vllm-project/vllm-ascend",
-    "github_ref": "v0.11.0",
-    "git_commit": "2f1aed98ccdb0fcbe1ff4fd0abab225bfd8d0367",
+    "github_ref": "v0.18.0",
+    "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
     "data_source": "reference-vllm-ascend-benchmark"
   }
 }
