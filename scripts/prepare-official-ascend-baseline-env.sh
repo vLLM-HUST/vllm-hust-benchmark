@@ -39,6 +39,7 @@ OFFICIAL_XGRAMMAR_VERSION=${OFFICIAL_XGRAMMAR_VERSION:-"0.1.32"}
 OFFICIAL_FASTAPI_VERSION=${OFFICIAL_FASTAPI_VERSION:-"0.123.10"}
 OFFICIAL_NUMBA_VERSION=${OFFICIAL_NUMBA_VERSION:-"0.61.2"}
 OFFICIAL_OPENCV_VERSION=${OFFICIAL_OPENCV_VERSION:-"4.11.0.86"}
+OFFICIAL_UVLOOP_TARGET=${OFFICIAL_UVLOOP_TARGET:-"uvloop"}
 OFFICIAL_TORCH_WHEEL_URL=${OFFICIAL_TORCH_WHEEL_URL:-""}
 OFFICIAL_TORCH_NPU_WHEEL_URL=${OFFICIAL_TORCH_NPU_WHEEL_URL:-""}
 OFFICIAL_TORCHVISION_WHEEL_URL=${OFFICIAL_TORCHVISION_WHEEL_URL:-""}
@@ -465,6 +466,7 @@ if actual_python_version != expected_python_version:
 
 import torch
 import torch_npu
+import uvloop
 import vllm
 import vllm_ascend
 
@@ -1064,6 +1066,7 @@ run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip uninstall -y \
   llguidance \
   xgrammar \
   fastapi \
+  uvloop \
   numba || true
 
 run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip install --upgrade --force-reinstall \
@@ -1093,6 +1096,7 @@ run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip install --upgrade -
   "llguidance==$OFFICIAL_LLGUIDANCE_VERSION" \
   "xgrammar==$OFFICIAL_XGRAMMAR_VERSION" \
   "fastapi==$OFFICIAL_FASTAPI_VERSION" \
+  "$OFFICIAL_UVLOOP_TARGET" \
   "numba==$OFFICIAL_NUMBA_VERSION" \
   "opencv-python-headless==$OFFICIAL_OPENCV_VERSION"
 
@@ -1110,6 +1114,7 @@ run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip install --upgrade -
   "llguidance==$OFFICIAL_LLGUIDANCE_VERSION" \
   "xgrammar==$OFFICIAL_XGRAMMAR_VERSION" \
   "fastapi==$OFFICIAL_FASTAPI_VERSION" \
+  "$OFFICIAL_UVLOOP_TARGET" \
   "numba==$OFFICIAL_NUMBA_VERSION"
 
 PYTHONPATH="$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE${PYTHONPATH:+:$PYTHONPATH}" \

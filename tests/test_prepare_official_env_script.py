@@ -1146,6 +1146,7 @@ def test_prepare_script_defaults_match_current_official_baseline_dependency_vers
               "$OFFICIAL_LLGUIDANCE_VERSION" \
               "$OFFICIAL_XGRAMMAR_VERSION" \
               "$OFFICIAL_FASTAPI_VERSION" \
+                            "$OFFICIAL_UVLOOP_TARGET" \
               "$OFFICIAL_NUMBA_VERSION" \
               "$OFFICIAL_OPENCV_VERSION"
             """
@@ -1159,6 +1160,7 @@ def test_prepare_script_defaults_match_current_official_baseline_dependency_vers
         "1.3.0",
         "0.1.32",
         "0.123.10",
+        "uvloop",
         "0.61.2",
         "4.11.0.86",
     ]
@@ -1213,3 +1215,11 @@ def test_prepare_script_health_check_allows_extra_general_plugins() -> None:
     assert "missing_general_plugins = sorted(set(expected_general_plugins) - set(general_plugins))" in script_text
     assert "if missing_general_plugins:" in script_text
     assert "missing required" in script_text
+
+
+def test_prepare_script_health_check_requires_uvloop_runtime_dependency() -> None:
+    script_text = PREPARE_SCRIPT.read_text(encoding="utf-8")
+
+    assert "OFFICIAL_UVLOOP_TARGET=${OFFICIAL_UVLOOP_TARGET:-\"uvloop\"}" in script_text
+    assert 'import uvloop' in script_text
+    assert script_text.count('"$OFFICIAL_UVLOOP_TARGET"') >= 2
