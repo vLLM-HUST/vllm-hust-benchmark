@@ -33,6 +33,8 @@ class TwoStageReport:
     stage2: StageComparison | None = None
 
 
+EXPECTED_PERFGATE_SPEC_ID = "perfgate-ascend-qwen25-05b-910b3"
+
 METRICS: tuple[tuple[str, str], ...] = (
     ("throughput_tps", "higher_is_better"),
     ("ttft_ms", "lower_is_better"),
@@ -79,28 +81,33 @@ def _extract_metrics(path: Path) -> dict[str, float]:
     return metrics
 
 
-def _same_spec_identity(path: Path) -> tuple[str | None, str | None]:
+def _same_spec_identity(path: Path) -> tuple[str, str]:
     payload = _load_json(path)
     same_spec = payload.get("same_spec")
     if not isinstance(same_spec, dict):
-        return None, None
-    spec_id = same_spec.get("spec_id")
-    spec_hash = same_spec.get("resolved_spec_hash")
-    return (
-        str(spec_id).strip() if spec_id is not None else None,
-        str(spec_hash).strip() if spec_hash is not None else None,
-    )
+        raise ValueError(f"{path} must include object key: same_spec")
+    spec_id = str(same_spec.get("spec_id") or "").strip()
+    spec_hash = str(same_spec.get("resolved_spec_hash") or "").strip()
+    if not spec_id:
+        raise ValueError(f"{path} same_spec.spec_id must be non-empty")
+    if not spec_hash:
+        raise ValueError(f"{path} same_spec.resolved_spec_hash must be non-empty")
+    if spec_id != EXPECTED_PERFGATE_SPEC_ID:
+        raise ValueError(
+            f"{path} same_spec.spec_id must be {EXPECTED_PERFGATE_SPEC_ID!r}, got {spec_id!r}"
+        )
+    return spec_id, spec_hash
 
 
 def _validate_same_spec(current_path: Path, baseline_path: Path) -> None:
     current_spec_id, current_hash = _same_spec_identity(current_path)
     baseline_spec_id, baseline_hash = _same_spec_identity(baseline_path)
-    if current_spec_id and baseline_spec_id and current_spec_id != baseline_spec_id:
+    if current_spec_id != baseline_spec_id:
         raise ValueError(
             "same_spec.spec_id mismatch: "
             f"current={current_spec_id!r} baseline={baseline_spec_id!r}"
         )
-    if current_hash and baseline_hash and current_hash != baseline_hash:
+    if current_hash != baseline_hash:
         raise ValueError(
             "same_spec.resolved_spec_hash mismatch: "
             f"current={current_hash!r} baseline={baseline_hash!r}"
@@ -171,6 +178,28 @@ def _stage_status(comparison: StageComparison) -> str:
     return "PASS" if comparison.passed else "FAIL"
 
 
+def _validate_two_stage_inputs(
+    *,
+    fork_point: str | None,
+    m2_commit: str | None,
+    stage2_current_file: Path | str | None,
+    stage2_baseline_file: Path | str | None,
+    stage2_rebase_conflict: bool,
+    stage2_skipped: bool,
+) -> None:
+    if stage2_rebase_conflict and stage2_skipped:
+        raise ValueError("stage2 cannot be both rebase-conflict and skipped")
+    if stage2_skipped:
+        if not fork_point or not m2_commit:
+            raise ValueError("stage2 skipped requires both fork-point and m2-commit")
+        if fork_point != m2_commit:
+            raise ValueError("stage2 can be skipped only when fork-point equals m2-commit")
+        if stage2_current_file or stage2_baseline_file:
+            raise ValueError("stage2 current/baseline files must not be provided when stage2 is skipped")
+    if stage2_rebase_conflict and (stage2_current_file or stage2_baseline_file):
+        raise ValueError("stage2 current/baseline files must not be provided when stage2 has rebase conflict")
+
+
 def generate_two_stage_report(
     *,
     stage1_current_file: Path | str,
@@ -185,6 +214,14 @@ def generate_two_stage_report(
     stage2_skip_reason: str | None = None,
     mode: str = "report",
 ) -> TwoStageReport:
+    _validate_two_stage_inputs(
+        fork_point=fork_point,
+        m2_commit=m2_commit,
+        stage2_current_file=stage2_current_file,
+        stage2_baseline_file=stage2_baseline_file,
+        stage2_rebase_conflict=stage2_rebase_conflict,
+        stage2_skipped=stage2_skipped,
+    )
     stage1 = compare_benchmark_results(Path(stage1_current_file), Path(stage1_baseline_file))
     stage2: StageComparison | None = None
     lines = ["## Performance Gate Result", "", "### Stage 1: B1 vs M1 (fork-point)", "", _format_metric_table(stage1), ""]
@@ -278,7 +315,8 @@ def main(argv: list[str] | None = None) -> int:
             report = generate_two_stage_report(
                 stage1_current_file=args.current,
                 stage1_baseline_file=args.baseline,
-                fork_point=args.fork_point,
+                fork_point=args.fork_point or "single-stage",
+                m2_commit=args.fork_point or "single-stage",
                 stage2_skipped=True,
                 stage2_skip_reason="single-stage comparison",
                 mode=args.mode,
