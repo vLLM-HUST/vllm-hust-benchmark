@@ -123,7 +123,6 @@ jobs:
              "$GITHUB_WORKSPACE/.benchmarks" \
              "$GITHUB_WORKSPACE/artifacts"
           mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
-          mkdir -p "$GITHUB_WORKSPACE/artifacts/random-online-current-vs-official"
 
       - name: Require GitHub SSH checkout key
         shell: bash
@@ -250,6 +249,18 @@ jobs:
           ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
           ssh-strict: false
           persist-credentials: false
+
+      - name: Initialize comparison output directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p \
+            "$RUN_ROOT" \
+            "$OFFICIAL_RESULT_ROOT" \
+            "$CURRENT_RESULT_ROOT" \
+            "$(dirname "$DEVICE_PREFERENCE_FILE")" \
+            "$(dirname "$SUMMARY_FILE")" \
+            "$WEBSITE_OUTPUT_DIR"
 
       - name: Resolve official spec metadata
         shell: bash
