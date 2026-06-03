@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -59,14 +60,51 @@ def _extract_metrics(path: Path) -> dict[str, float]:
         raise ValueError(f"{path} must include object key: metrics")
 
     metrics: dict[str, float] = {}
+    missing: list[str] = []
     for name, _direction in METRICS:
-        if name not in raw_metrics:
-            raise ValueError(f"{path} metrics missing required key: {name}")
+        if name not in raw_metrics or raw_metrics[name] is None:
+            missing.append(name)
+            continue
         try:
-            metrics[name] = float(raw_metrics[name])
+            value = float(raw_metrics[name])
         except (TypeError, ValueError) as exc:
             raise ValueError(f"{path} metrics.{name} must be numeric") from exc
+        if not math.isfinite(value):
+            raise ValueError(f"{path} metrics.{name} must be finite")
+        if value < 0:
+            raise ValueError(f"{path} metrics.{name} must be non-negative")
+        metrics[name] = value
+    if missing:
+        raise ValueError(f"{path} metrics missing required non-null keys: {', '.join(missing)}")
     return metrics
+
+
+def _same_spec_identity(path: Path) -> tuple[str | None, str | None]:
+    payload = _load_json(path)
+    same_spec = payload.get("same_spec")
+    if not isinstance(same_spec, dict):
+        return None, None
+    spec_id = same_spec.get("spec_id")
+    spec_hash = same_spec.get("resolved_spec_hash")
+    return (
+        str(spec_id).strip() if spec_id is not None else None,
+        str(spec_hash).strip() if spec_hash is not None else None,
+    )
+
+
+def _validate_same_spec(current_path: Path, baseline_path: Path) -> None:
+    current_spec_id, current_hash = _same_spec_identity(current_path)
+    baseline_spec_id, baseline_hash = _same_spec_identity(baseline_path)
+    if current_spec_id and baseline_spec_id and current_spec_id != baseline_spec_id:
+        raise ValueError(
+            "same_spec.spec_id mismatch: "
+            f"current={current_spec_id!r} baseline={baseline_spec_id!r}"
+        )
+    if current_hash and baseline_hash and current_hash != baseline_hash:
+        raise ValueError(
+            "same_spec.resolved_spec_hash mismatch: "
+            f"current={current_hash!r} baseline={baseline_hash!r}"
+        )
 
 
 def _compare_metric(name: str, current: float, baseline: float, direction: str) -> MetricComparison:
@@ -95,6 +133,7 @@ def _compare_metric(name: str, current: float, baseline: float, direction: str) 
 def compare_benchmark_results(current: Path | str, baseline: Path | str) -> StageComparison:
     current_path = Path(current)
     baseline_path = Path(baseline)
+    _validate_same_spec(current_path, baseline_path)
     current_metrics = _extract_metrics(current_path)
     baseline_metrics = _extract_metrics(baseline_path)
 
@@ -165,6 +204,8 @@ def generate_two_stage_report(
         if stage2_rebase_conflict_file:
             conflict_path = Path(stage2_rebase_conflict_file)
             details = conflict_path.read_text(encoding="utf-8") if conflict_path.exists() else ""
+            if len(details) > 12000:
+                details = details[:12000] + "\n... truncated ...\n"
             if details:
                 lines.extend([
                     "",
