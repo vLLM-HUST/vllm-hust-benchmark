@@ -19,6 +19,7 @@ def _write_run_leaderboard(path: Path, *, throughput: float, ttft: float, tbt: f
                 },
                 "same_spec": {
                     "spec_id": "perfgate-ascend-qwen25-05b-910b3",
+                    "resolved_spec_hash": "abc123",
                 },
             }
         ),
@@ -128,6 +129,41 @@ def test_compare2_cli_writes_report_and_returns_failure_for_stage2_regression(tm
     assert "Stage 1: PASS" in report
     assert "Stage 2: FAIL" in report
     assert "**Overall: FAIL**" in report
+
+
+def test_compare_benchmark_results_rejects_same_spec_mismatch(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline.json"
+    current = tmp_path / "current.json"
+    _write_run_leaderboard(baseline, throughput=100.0, ttft=50.0, tbt=10.0)
+    _write_run_leaderboard(current, throughput=103.0, ttft=45.0, tbt=9.5)
+    payload = json.loads(current.read_text(encoding="utf-8"))
+    payload["same_spec"]["resolved_spec_hash"] = "different"
+    current.write_text(json.dumps(payload), encoding="utf-8")
+
+    try:
+        perfgate.compare_benchmark_results(current, baseline)
+    except ValueError as error:
+        assert "same_spec.resolved_spec_hash mismatch" in str(error)
+    else:  # pragma: no cover - assertion guard
+        raise AssertionError("expected same-spec mismatch to fail")
+
+
+def test_compare_benchmark_results_requires_non_null_tbt(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline.json"
+    current = tmp_path / "current.json"
+    _write_run_leaderboard(baseline, throughput=100.0, ttft=50.0, tbt=10.0)
+    _write_run_leaderboard(current, throughput=103.0, ttft=45.0, tbt=9.5)
+    payload = json.loads(current.read_text(encoding="utf-8"))
+    payload["metrics"]["tbt_ms"] = None
+    current.write_text(json.dumps(payload), encoding="utf-8")
+
+    try:
+        perfgate.compare_benchmark_results(current, baseline)
+    except ValueError as error:
+        assert "tbt_ms" in str(error)
+        assert "non-null" in str(error)
+    else:  # pragma: no cover - assertion guard
+        raise AssertionError("expected null tbt_ms to fail")
 
 
 def test_compare2_cli_report_mode_does_not_block_on_failure(tmp_path: Path) -> None:
