@@ -1109,6 +1109,7 @@ def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) 
             grep -Fq 'ascend_enhanced_model = vllm_ascend:register_model' "$dist_info_dir/entry_points.txt"
             grep -Fq 'ascend_kv_connector = vllm_ascend:register_connector' "$dist_info_dir/entry_points.txt"
             grep -Fq 'vllm_ascend' "$dist_info_dir/top_level.txt"
+            grep -Fq "__device_type__ = 'A2'" {shlex.quote(str(worktree_dir))}/vllm_ascend/_build_info.py
             grep -Fq "__soc_version__ = 'ascend910b3'" {shlex.quote(str(worktree_dir))}/vllm_ascend/_build_info.py
             grep -Fq '__sleep_mode_enabled__ = False' {shlex.quote(str(worktree_dir))}/vllm_ascend/_build_info.py
             """
@@ -1223,3 +1224,12 @@ def test_prepare_script_health_check_requires_uvloop_runtime_dependency() -> Non
     assert "OFFICIAL_UVLOOP_TARGET=${OFFICIAL_UVLOOP_TARGET:-\"uvloop\"}" in script_text
     assert 'import uvloop' in script_text
     assert script_text.count('"$OFFICIAL_UVLOOP_TARGET"') >= 2
+
+
+def test_prepare_script_health_check_requires_ascend_device_type_metadata() -> None:
+    script_text = PREPARE_SCRIPT.read_text(encoding="utf-8")
+
+    assert 'OFFICIAL_EXPECTED_ASCEND_DEVICE_TYPE="$(resolve_ascend_device_type "$OFFICIAL_SOC_VERSION")"' in script_text
+    assert 'from vllm_ascend import _build_info' in script_text
+    assert 'actual_device_type = getattr(_build_info, "__device_type__", None)' in script_text
+    assert 'expected_device_type = os.environ["OFFICIAL_EXPECTED_ASCEND_DEVICE_TYPE"]' in script_text

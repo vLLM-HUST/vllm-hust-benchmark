@@ -109,6 +109,29 @@ python_bool_literal() {
   esac
 }
 
+resolve_ascend_device_type() {
+  local soc_version=${1,,}
+
+  case "$soc_version" in
+    ascend950*)
+      printf '%s\n' "A5"
+      ;;
+    910b|ascend910b1|ascend910b2|ascend910b2c|ascend910b3|ascend910b4|ascend910b4-1)
+      printf '%s\n' "A2"
+      ;;
+    910c|ascend910_9391|ascend910_9381|ascend910_9372|ascend910_9392|ascend910_9382|ascend910_9362)
+      printf '%s\n' "A3"
+      ;;
+    310p|ascend310p1|ascend310p3|ascend310p5|ascend310p7|ascend310p3vir01|ascend310p3vir02|ascend310p3vir04|ascend310p3vir08)
+      printf '%s\n' "_310P"
+      ;;
+    *)
+      echo "Unsupported OFFICIAL_SOC_VERSION for vllm-ascend build metadata: $1" >&2
+      return 1
+      ;;
+  esac
+}
+
 ensure_vllm_ascend_plugin_metadata() {
   local version=${OFFICIAL_VLLM_ASCEND_REF#v}
   local dist_info_dir
@@ -120,6 +143,7 @@ ensure_vllm_ascend_plugin_metadata() {
   local -a platform_entries=()
   local -a general_entries=()
   local sleep_mode_enabled_literal
+  local device_type
 
   if [[ -z "$version" ]] || [[ "$version" == "$OFFICIAL_VLLM_ASCEND_REF" ]]; then
     version="0.0.0"
@@ -190,8 +214,10 @@ EOF
   mkdir -p "$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend"
   build_info_file="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend/_build_info.py"
   sleep_mode_enabled_literal=$(python_bool_literal "$OFFICIAL_SLEEP_MODE_ENABLED")
+  device_type=$(resolve_ascend_device_type "$OFFICIAL_SOC_VERSION")
   cat > "$build_info_file" <<EOF
 # Auto-generated file
+__device_type__ = '$device_type'
 __soc_version__ = '$OFFICIAL_SOC_VERSION'
 __sleep_mode_enabled__ = $sleep_mode_enabled_literal
 EOF
@@ -362,6 +388,7 @@ verify_official_env() {
     OFFICIAL_EXPECTED_SETUPTOOLS_SPEC=">=77.0.3,<80.0.0" \
     OFFICIAL_EXPECTED_PLATFORM_PLUGINS="$OFFICIAL_EXPECTED_PLATFORM_PLUGINS" \
     OFFICIAL_EXPECTED_GENERAL_PLUGINS="$OFFICIAL_EXPECTED_GENERAL_PLUGINS" \
+    OFFICIAL_EXPECTED_ASCEND_DEVICE_TYPE="$(resolve_ascend_device_type "$OFFICIAL_SOC_VERSION")" \
     OFFICIAL_EXPECTED_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
     OFFICIAL_EXPECTED_VLLM_ASCEND_WORKTREE="$OFFICIAL_VLLM_ASCEND_WORKTREE" \
     OFFICIAL_EXPECTED_TORCH_TARGET="$OFFICIAL_TORCH_INSTALL_TARGET" \
@@ -469,9 +496,15 @@ import torch_npu
 import uvloop
 import vllm
 import vllm_ascend
+from vllm_ascend import _build_info
 
 assert_loaded_from(vllm.__file__, os.environ["OFFICIAL_EXPECTED_VLLM_WORKTREE"], "vllm")
 assert_loaded_from(vllm_ascend.__file__, os.environ["OFFICIAL_EXPECTED_VLLM_ASCEND_WORKTREE"], "vllm_ascend")
+
+actual_device_type = getattr(_build_info, "__device_type__", None)
+expected_device_type = os.environ["OFFICIAL_EXPECTED_ASCEND_DEVICE_TYPE"]
+if actual_device_type != expected_device_type:
+  fail(f"ascend build device type is {actual_device_type}, expected {expected_device_type}")
 
 expected_versions = (
   (("torch",), expected_version_from_target(os.environ["OFFICIAL_EXPECTED_TORCH_TARGET"])),
