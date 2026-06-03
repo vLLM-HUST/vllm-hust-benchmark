@@ -5,13 +5,13 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 PREPARE_SCRIPT=${PREPARE_SCRIPT:-"$REPO_ROOT/scripts/prepare-official-ascend-baseline-env.sh"}
 VLLM_CLI_COMPAT=${VLLM_CLI_COMPAT:-"$REPO_ROOT/scripts/run_vllm_cli_compat.py"}
-SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json"}
+SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
 OFFICIAL_VLLM_REPO=${OFFICIAL_VLLM_REPO:-"$WORKSPACE_ROOT/reference-repos/vllm"}
 OFFICIAL_VLLM_ASCEND_REPO=${OFFICIAL_VLLM_ASCEND_REPO:-"$WORKSPACE_ROOT/reference-repos/vllm-ascend"}
-OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0110"}
-OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0110"}
+OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0180"}
+OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0180"}
 OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
 OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/official-ascend-goal-baseline"}
 OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"$OFFICIAL_VLLM_CACHE_ROOT/datasets"}
@@ -308,6 +308,7 @@ run_in_official_runtime() {
     cd "$OFFICIAL_RUNTIME_CWD"
     source_ascend_runtime_env
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
+    export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
     fi
@@ -777,6 +778,7 @@ run_server_command() {
     cd "$OFFICIAL_RUNTIME_CWD"
     source_ascend_runtime_env
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
+    export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
     fi
@@ -1288,7 +1290,7 @@ should_force_eager_for_offline_benchmark() {
   fi
 
   if [[ "$probe_status" -eq 1 ]]; then
-    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark"
+    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark" >&2
     return 0
   fi
 
@@ -1313,7 +1315,7 @@ should_force_eager_for_server_benchmark() {
   fi
 
   if [[ "$probe_status" -eq 1 ]]; then
-    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for serve benchmark server"
+    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for serve benchmark server" >&2
     return 0
   fi
 
@@ -1559,8 +1561,10 @@ kill_server() {
 
 trap kill_server EXIT
 
-ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "v0.11.0"
-ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "v0.11.0"
+OFFICIAL_VLLM_REF=${OFFICIAL_VLLM_REF:-$(jq -r '.baseline_target.vllm_ref // "v0.18.0"' "$SPEC_FILE")}
+OFFICIAL_VLLM_ASCEND_REF=${OFFICIAL_VLLM_ASCEND_REF:-$(jq -r '.baseline_target.vllm_ascend_ref // "v0.18.0"' "$SPEC_FILE")}
+ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_REF"
+ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_VLLM_ASCEND_REF"
 
 OFFICIAL_RUNTIME_PYTHONPATH="$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE"
 
