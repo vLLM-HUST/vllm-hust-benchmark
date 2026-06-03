@@ -1197,3 +1197,11 @@ def test_prepare_script_filters_explicitly_managed_dependency_constraints(tmp_pa
     )
 
     assert result.stdout.splitlines() == ["cachetools"]
+
+
+def test_prepare_script_health_check_allows_local_version_suffix_for_base_match() -> None:
+    script_text = PREPARE_SCRIPT.read_text(encoding="utf-8")
+
+    assert "def versions_match(actual: str, expected: str) -> bool:" in script_text
+    assert "actual_version.base_version == expected_version.base_version" in script_text
+    assert "expected_version.local is None" in script_text

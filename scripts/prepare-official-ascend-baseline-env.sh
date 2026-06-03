@@ -435,9 +435,28 @@ def assert_loaded_from(path_value: str, expected_root: str, label: str) -> None:
 
 try:
   from packaging.specifiers import SpecifierSet
-  from packaging.version import Version
+  from packaging.version import InvalidVersion, Version
 except Exception as exc:  # pragma: no cover - repair path handles this.
   fail(f"required health-check dependency packaging is unavailable: {exc}")
+
+
+def versions_match(actual: str, expected: str) -> bool:
+  try:
+    actual_version = Version(actual)
+    expected_version = Version(expected)
+  except InvalidVersion:
+    return actual == expected
+
+  if actual_version == expected_version:
+    return True
+
+  # CPU wheels commonly report a local version suffix such as +cpu while the
+  # workflow input is expressed as torch==2.9.0. Treat that as compatible when
+  # the upstream base version matches and the expectation did not pin a local tag.
+  if actual_version.base_version == expected_version.base_version and expected_version.local is None:
+    return True
+
+  return False
 
 expected_python_version = os.environ["OFFICIAL_EXPECTED_PYTHON_VERSION"]
 actual_python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
@@ -470,7 +489,7 @@ expected_versions = (
 
 for names, expected_version in expected_versions:
   actual_version = dist_version(*names)
-  if actual_version != expected_version:
+  if not versions_match(actual_version, expected_version):
     fail(f"{names[0]} version is {actual_version}, expected {expected_version}")
 
 setuptools_version = dist_version("setuptools")
