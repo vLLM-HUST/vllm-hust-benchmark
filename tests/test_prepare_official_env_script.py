@@ -1116,3 +1116,20 @@ def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) 
     )
 
     assert result.returncode == 0
+
+
+def test_run_official_script_uses_configured_official_refs_for_worktrees() -> None:
+    script_text = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+
+    assert (
+        'ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_REF"'
+        in script_text
+    )
+    assert (
+        'ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_VLLM_ASCEND_REF"'
+        in script_text
+    )
+    assert 'OFFICIAL_VLLM_REF="$OFFICIAL_VLLM_REF" \\' in script_text
+    assert 'OFFICIAL_VLLM_ASCEND_REF="$OFFICIAL_VLLM_ASCEND_REF" \\' in script_text
+    assert 'OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \\' in script_text
+    assert 'OFFICIAL_VLLM_ASCEND_WORKTREE="$OFFICIAL_VLLM_ASCEND_WORKTREE" \\' in script_text

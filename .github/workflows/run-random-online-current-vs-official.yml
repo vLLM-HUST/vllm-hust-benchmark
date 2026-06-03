@@ -1,0 +1,719 @@
+name: Run Random Online Current vs Official
+
+on:
+  workflow_dispatch:
+    inputs:
+      official_repeat_count:
+        description: Repeat count for the official random-online baseline before selecting the canonical candidate.
+        required: false
+        type: number
+        default: 3
+      prepare_official_env:
+        description: Prepare or repair the pinned official baseline conda env before running.
+        required: false
+        type: boolean
+        default: true
+      force_repair_official_env:
+        description: Skip the prepare-script health check and force a full repair/reinstall of the official env.
+        required: false
+        type: boolean
+        default: false
+      publish_results:
+        description: Publish the official baseline and current comparison submission to vllm-hust-benchmark@main.
+        required: false
+        type: boolean
+        default: true
+      publication_target_branch:
+        description: Target branch in vLLM-HUST/vllm-hust-benchmark for formal publication.
+        required: false
+        type: string
+        default: main
+      website_ref:
+        description: Optional vllm-hust-website ref used for snapshot aggregation.
+        required: false
+        type: string
+        default: main
+      current_vllm_ref:
+        description: Ref for vLLM-HUST/vllm-hust used as the current runtime.
+        required: false
+        type: string
+        default: main
+      current_vllm_ascend_ref:
+        description: Ref for vLLM-HUST/vllm-ascend-hust used as the current Ascend plugin runtime.
+        required: false
+        type: string
+        default: main
+      current_env_prefix:
+        description: Optional conda env prefix for the current vllm-hust runtime. Leave blank to auto-resolve on the runner.
+        required: false
+        type: string
+        default: ""
+      goal_baseline_env_prefix:
+        description: Optional conda env prefix for the official v0.17.2rc0 / v0.18.0 baseline runtime. Leave blank to auto-resolve on the runner.
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  run-random-online-current-vs-official:
+    runs-on:
+      - self-hosted
+      - ARM64
+      - docker
+      - debug
+    timeout-minutes: 360
+    env:
+      BENCHMARK_CHECKOUT_USE_SSH: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY != '' && '1' || '0' }}
+      VLLM_HUST_WORKSPACE_ROOT: ${{ github.workspace }}
+      HOME: ${{ github.workspace }}/.ci-home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.ci-home/.cache
+      XDG_CONFIG_HOME: ${{ github.workspace }}/.ci-home/.config
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      HF_ENDPOINT: ${{ vars.HF_ENDPOINT || 'https://hf-mirror.com' }}
+      HF_HOME: ${{ github.workspace }}/../.hf-cache
+      HUGGINGFACE_HUB_CACHE: ${{ github.workspace }}/../.hf-cache/hub
+      TRANSFORMERS_CACHE: ${{ github.workspace }}/../.hf-cache/transformers
+      RANDOM_ONLINE_SPEC: docs/official-baselines/version-rotations/official-ascend-jun-2026-v0172rc0-random-online-qwen25-14b-910b3.json
+      OFFICIAL_VLLM_REF: 54a62a79f70982742a227c845b96148e6401d0e7
+      OFFICIAL_VLLM_ASCEND_REF: e18643f8a4d5bd9990727654318ad069ea0b56e2
+      OFFICIAL_VLLM_WORKTREE: /tmp/vllm-54a62a79
+      OFFICIAL_VLLM_ASCEND_WORKTREE: /tmp/vllm-ascend-e18643f8
+      OFFICIAL_TORCH_VERSION: '2.9.0'
+      OFFICIAL_TORCH_NPU_VERSION: '2.9.0'
+      OFFICIAL_TORCHVISION_VERSION: '0.24.0'
+      OFFICIAL_TORCHAUDIO_VERSION: '2.9.0'
+      OFFICIAL_REPEAT_COUNT: ${{ github.event.inputs.official_repeat_count || 3 }}
+      PREPARE_OFFICIAL_ENV: ${{ github.event.inputs.prepare_official_env == 'false' && '0' || '1' }}
+      FORCE_REPAIR_OFFICIAL_ENV: ${{ github.event.inputs.force_repair_official_env == 'true' && '1' || '0' }}
+      PUBLISH_RESULTS: ${{ github.event.inputs.publish_results == 'false' && '0' || '1' }}
+      PUBLICATION_TARGET_BRANCH: ${{ github.event.inputs.publication_target_branch || 'main' }}
+      VLLM_HUST_WEBSITE_REF: ${{ github.event.inputs.website_ref || 'main' }}
+      CURRENT_VLLM_REF: ${{ github.event.inputs.current_vllm_ref || 'main' }}
+      CURRENT_VLLM_ASCEND_REF: ${{ github.event.inputs.current_vllm_ascend_ref || 'main' }}
+      RUN_ROOT: ${{ github.workspace }}/.benchmarks/random-online-current-vs-official-${{ github.run_id }}-${{ github.run_attempt }}
+      OFFICIAL_RESULT_ROOT: ${{ github.workspace }}/.benchmarks/random-online-current-vs-official-${{ github.run_id }}-${{ github.run_attempt }}/official
+      CURRENT_RESULT_ROOT: ${{ github.workspace }}/.benchmarks/random-online-current-vs-official-${{ github.run_id }}-${{ github.run_attempt }}/current
+      DEVICE_PREFERENCE_FILE: ${{ github.workspace }}/.benchmarks/random-online-current-vs-official-${{ github.run_id }}-${{ github.run_attempt }}/preferred-ascend-device.txt
+      SUMMARY_FILE: ${{ github.workspace }}/artifacts/random-online-current-vs-official/summary.md
+      WEBSITE_OUTPUT_DIR: ${{ github.workspace }}/artifacts/random-online-current-vs-official/published-snapshots
+      ASCEND_RT_VISIBLE_DEVICES: ${{ vars.VLLM_ASCEND_HUST_BENCHMARK_VISIBLE_DEVICES || '' }}
+    steps:
+      - name: Pre-clean generated directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$GITHUB_WORKSPACE/reference-repos" \
+             "$GITHUB_WORKSPACE/ascend-runtime-manager" \
+             "$GITHUB_WORKSPACE/vllm-hust" \
+             "$GITHUB_WORKSPACE/vllm-ascend-hust" \
+             "$GITHUB_WORKSPACE/vllm-hust-website" \
+             "$GITHUB_WORKSPACE/publication-target" \
+             "$GITHUB_WORKSPACE/.ci-home" \
+             "$GITHUB_WORKSPACE/.benchmarks" \
+             "$GITHUB_WORKSPACE/artifacts"
+          mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts/random-online-current-vs-official"
+
+      - name: Require GitHub SSH checkout key
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$BENCHMARK_CHECKOUT_USE_SSH" != '1' ]]; then
+            echo 'VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY is required because this workflow checks out repositories over SSH.' >&2
+            exit 1
+          fi
+
+      - name: Configure GitHub SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh_dir="$HOME/.ssh"
+          config_file="$ssh_dir/config"
+          key_file="$ssh_dir/github_actions"
+
+          mkdir -p "$ssh_dir"
+          chmod 700 "$ssh_dir"
+
+          printf '%s\n' '${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}' > "$key_file"
+          chmod 600 "$key_file"
+
+          config_block="$(cat <<'EOF'
+          Host github.com
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/github_actions
+            IdentitiesOnly yes
+            StrictHostKeyChecking no
+          EOF
+          )"
+
+          if [[ ! -f "$config_file" ]]; then
+            printf '%s\n' "$config_block" > "$config_file"
+          elif ! grep -Fq 'Host github.com' "$config_file" \
+            || ! grep -Fq 'HostName github.com' "$config_file" \
+            || ! grep -Fq 'IdentityFile ~/.ssh/github_actions' "$config_file"; then
+            printf '\n%s\n' "$config_block" >> "$config_file"
+          fi
+
+          chmod 600 "$config_file"
+
+      - name: Checkout benchmark repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout current vllm-hust repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-hust
+          ref: ${{ env.CURRENT_VLLM_REF }}
+          path: vllm-hust
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout current vllm-ascend-hust repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-ascend-hust
+          ref: ${{ env.CURRENT_VLLM_ASCEND_REF }}
+          path: vllm-ascend-hust
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout ascend-runtime-manager repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/ascend-runtime-manager
+          path: ascend-runtime-manager
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout upstream vllm reference repo
+        uses: actions/checkout@v4
+        with:
+          repository: vllm-project/vllm
+          path: reference-repos/vllm
+          fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout upstream vllm-ascend reference repo
+        uses: actions/checkout@v4
+        with:
+          repository: vllm-project/vllm-ascend
+          path: reference-repos/vllm-ascend
+          fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout website repo
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-hust-website
+          ref: ${{ env.VLLM_HUST_WEBSITE_REF }}
+          path: vllm-hust-website
+          fetch-depth: 1
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Checkout benchmark publication target
+        if: ${{ env.PUBLISH_RESULTS == '1' }}
+        uses: actions/checkout@v4
+        with:
+          repository: vLLM-HUST/vllm-hust-benchmark
+          ref: ${{ env.PUBLICATION_TARGET_BRANCH }}
+          path: publication-target/vllm-hust-benchmark
+          fetch-depth: 0
+          ssh-key: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ssh-strict: false
+          persist-credentials: false
+
+      - name: Resolve official spec metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          official_spec_id=$(jq -r '.id' "$RANDOM_ONLINE_SPEC")
+          printf 'OFFICIAL_SPEC_ID=%s\n' "$official_spec_id" >> "$GITHUB_ENV"
+          printf '## Random Online Current vs Official\n' > "$SUMMARY_FILE"
+          printf -- '- Official spec: %s\n' "$official_spec_id" >> "$SUMMARY_FILE"
+          printf -- '- Official vLLM ref: %s\n' "$OFFICIAL_VLLM_REF" >> "$SUMMARY_FILE"
+          printf -- '- Official vLLM-Ascend ref: %s\n' "$OFFICIAL_VLLM_ASCEND_REF" >> "$SUMMARY_FILE"
+          printf -- '- Current vllm-hust ref: %s\n' "$CURRENT_VLLM_REF" >> "$SUMMARY_FILE"
+          printf -- '- Current vllm-ascend-hust ref: %s\n' "$CURRENT_VLLM_ASCEND_REF" >> "$SUMMARY_FILE"
+
+      - name: Resolve tooling and official env
+        shell: bash
+        env:
+          GOAL_BASELINE_ENV_PREFIX_INPUT: ${{ github.event.inputs.goal_baseline_env_prefix || '' }}
+        run: |
+          set -euo pipefail
+
+          python_satisfies_min_version() {
+            local python_bin=${1:-}
+            [[ -n "$python_bin" ]] && [[ -x "$python_bin" ]] || return 1
+            "$python_bin" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)' >/dev/null 2>&1
+          }
+
+          python_version_string() {
+            local python_bin=$1
+            "$python_bin" -c 'import sys; print(sys.version.split()[0])'
+          }
+
+          python_has_pip() {
+            local python_bin=${1:-}
+            [[ -n "$python_bin" ]] && [[ -x "$python_bin" ]] || return 1
+            "$python_bin" -m pip --version >/dev/null 2>&1
+          }
+
+          resolve_conda_base() {
+            local conda_exe_env="${CONDA_EXE:-}"
+            local root=""
+            local search_roots=(
+              "$HOME/miniconda3"
+              "$HOME/anaconda3"
+              "$HOME/miniforge3"
+              "$HOME/mambaforge"
+              "/home/grunner/miniconda3"
+              "/root/miniconda3"
+              "/opt/conda"
+              "/usr/local/miniconda3"
+              "/usr/local/anaconda3"
+            )
+
+            if [[ -n "$conda_exe_env" ]] && [[ -x "$conda_exe_env" ]]; then
+              if [[ "$conda_exe_env" == */condabin/conda ]]; then
+                printf '%s\n' "${conda_exe_env%/condabin/conda}"
+              else
+                printf '%s\n' "$(dirname "$(dirname "$conda_exe_env")")"
+              fi
+              return 0
+            fi
+
+            if command -v conda >/dev/null 2>&1; then
+              conda info --base
+              return 0
+            fi
+
+            for root in "${search_roots[@]}"; do
+              [[ -z "$root" ]] && continue
+              if [[ -x "$root/condabin/conda" ]] || [[ -x "$root/bin/conda" ]]; then
+                printf '%s\n' "$root"
+                return 0
+              fi
+            done
+
+            return 1
+          }
+
+          resolve_tooling_python() {
+            local conda_base=$1
+            local python3_bin=""
+            local python_bin=""
+
+            if python_satisfies_min_version "$conda_base/bin/python"; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            python3_bin="$(command -v python3 2>/dev/null || true)"
+            if python_satisfies_min_version "$python3_bin"; then
+              printf '%s\n' "$python3_bin"
+              return 0
+            fi
+
+            python_bin="$(command -v python 2>/dev/null || true)"
+            if python_satisfies_min_version "$python_bin"; then
+              printf '%s\n' "$python_bin"
+              return 0
+            fi
+
+            return 1
+          }
+
+          resolve_pip_python() {
+            local current_python=$1
+            local conda_base=$2
+            local python3_bin=""
+            local python_bin=""
+
+            if python_has_pip "$current_python"; then
+              printf '%s\n' "$current_python"
+              return 0
+            fi
+
+            if python_has_pip "$conda_base/bin/python"; then
+              printf '%s\n' "$conda_base/bin/python"
+              return 0
+            fi
+
+            python3_bin="$(command -v python3 2>/dev/null || true)"
+            if python_has_pip "$python3_bin"; then
+              printf '%s\n' "$python3_bin"
+              return 0
+            fi
+
+            python_bin="$(command -v python 2>/dev/null || true)"
+            if python_has_pip "$python_bin"; then
+              printf '%s\n' "$python_bin"
+              return 0
+            fi
+
+            return 1
+          }
+
+          conda_base="$(resolve_conda_base)" || {
+            echo 'Could not locate conda on the runner; ensure Miniconda/Anaconda is installed and accessible to the runner service' >&2
+            exit 1
+          }
+
+          if [[ -x "$conda_base/condabin/conda" ]]; then
+            conda_exe="$conda_base/condabin/conda"
+          elif [[ -x "$conda_base/bin/conda" ]]; then
+            conda_exe="$conda_base/bin/conda"
+          else
+            echo "Resolved conda base does not contain a runnable conda executable: $conda_base" >&2
+            exit 1
+          fi
+
+          tooling_python="$(resolve_tooling_python "$conda_base")" || {
+            echo 'Could not locate a Python >= 3.10 interpreter for benchmark repo utilities' >&2
+            exit 1
+          }
+          tooling_python_version="$(python_version_string "$tooling_python")"
+
+          if [[ "$PUBLISH_RESULTS" == '1' ]]; then
+            pip_python="$(resolve_pip_python "$tooling_python" "$conda_base")" || {
+              echo 'Could not locate a pip-capable Python interpreter for publication dependency installation' >&2
+              exit 1
+            }
+
+            if [[ "$pip_python" != "$tooling_python" ]]; then
+              tooling_python="$pip_python"
+              tooling_python_version="$(python_version_string "$tooling_python")"
+            fi
+
+            "$tooling_python" -m pip install --user --disable-pip-version-check 'jsonschema>=4'
+          fi
+
+          goal_env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
+          if [[ -z "${goal_env_prefix//[[:space:]]/}" ]]; then
+            goal_env_prefix="$conda_base/envs/vllm-ascend-official-v0172rc0-v0180"
+          fi
+
+          [[ -d "$conda_base/condabin" ]] && printf '%s\n' "$conda_base/condabin" >> "$GITHUB_PATH"
+          [[ -d "$conda_base/bin" ]] && printf '%s\n' "$conda_base/bin" >> "$GITHUB_PATH"
+          printf 'CONDA_BASE=%s\n' "$conda_base" >> "$GITHUB_ENV"
+          printf 'CONDA_EXE=%s\n' "$conda_exe" >> "$GITHUB_ENV"
+          printf 'PYTHON_BIN=%s\n' "$tooling_python" >> "$GITHUB_ENV"
+          printf 'HOST_PYTHON_BIN=%s\n' "$tooling_python" >> "$GITHUB_ENV"
+          printf 'GOAL_BASELINE_ENV_PREFIX=%s\n' "$goal_env_prefix" >> "$GITHUB_ENV"
+
+          echo "Resolved conda base: $conda_base"
+          echo "Resolved tooling Python: $tooling_python ($tooling_python_version)"
+          echo "Resolved GOAL_BASELINE_ENV_PREFIX=$goal_env_prefix"
+
+      - name: Resolve current benchmark runtime
+        shell: bash
+        env:
+          CURRENT_ENV_PREFIX_INPUT: ${{ github.event.inputs.current_env_prefix || '' }}
+          HUST_ASCEND_MANAGER_REPO: ${{ github.workspace }}/ascend-runtime-manager
+          VLLM_ASCEND_HUST_REPO: ${{ github.workspace }}/vllm-ascend-hust
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${CURRENT_ENV_PREFIX_INPUT//[[:space:]]/}" ]]; then
+            current_env_prefix="$CURRENT_ENV_PREFIX_INPUT"
+            current_runtime_python="$current_env_prefix/bin/python"
+            if [[ ! -x "$current_runtime_python" ]]; then
+              echo "Current runtime Python is not executable: $current_runtime_python" >&2
+              exit 1
+            fi
+          else
+            source "${VLLM_ASCEND_HUST_REPO}/scripts/hust_ascend_manager_helper.sh"
+            current_runtime_python="$(hust_resolve_python_bin)"
+            if [[ -z "$current_runtime_python" || ! -x "$current_runtime_python" ]]; then
+              echo 'Could not resolve the current benchmark Python from the Ascend manager helper' >&2
+              exit 1
+            fi
+            current_env_prefix="$(cd "$(dirname "$current_runtime_python")/.." && pwd -P)"
+          fi
+
+          printf 'CURRENT_ENV_PREFIX=%s\n' "$current_env_prefix" >> "$GITHUB_ENV"
+          printf 'CURRENT_RUNTIME_PYTHON=%s\n' "$current_runtime_python" >> "$GITHUB_ENV"
+
+          echo "Resolved CURRENT_ENV_PREFIX=$current_env_prefix"
+          echo "Resolved CURRENT_RUNTIME_PYTHON=$current_runtime_python"
+
+      - name: Prepare current benchmark runtime
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        env:
+          HUST_ASCEND_MANAGER_REPO: ${{ github.workspace }}/ascend-runtime-manager
+          VLLM_ASCEND_HUST_REPO: ${{ github.workspace }}/vllm-ascend-hust
+        run: |
+          set -euo pipefail
+
+          current_runtime_source_pythonpath="$GITHUB_WORKSPACE/vllm-ascend-hust:$GITHUB_WORKSPACE/vllm-hust"
+          export VLLM_HUST_CONDA_PREFIX="$CURRENT_ENV_PREFIX"
+          export VLLM_HUST_PYTHON_BIN="$CURRENT_RUNTIME_PYTHON"
+          source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
+          export SOC_VERSION="${SOC_VERSION:-ascend910b3}"
+          echo "Using SOC_VERSION=$SOC_VERSION for current runtime plugin build"
+
+          if ! "$CURRENT_RUNTIME_PYTHON" -c 'import torch_npu' >/dev/null 2>&1; then
+            echo '[WARN] Current runtime is missing torch_npu; installing torch-npu==2.9.0'
+            "$CURRENT_RUNTIME_PYTHON" -m pip install --upgrade 'torch-npu==2.9.0'
+          fi
+
+          if ! "$CURRENT_RUNTIME_PYTHON" -c 'import transformers, tokenizers, huggingface_hub' >/dev/null 2>&1; then
+            echo '[WARN] Current runtime has incompatible transformers/tokenizers/huggingface_hub versions; re-pinning them'
+            "$CURRENT_RUNTIME_PYTHON" -m pip install --upgrade --force-reinstall \
+              'transformers>=4.56.0,<5' \
+              'tokenizers>=0.22.0,<=0.23.0' \
+              'huggingface_hub>=0.36.0,<1.0'
+          fi
+
+          PYTHONPATH="$current_runtime_source_pythonpath${PYTHONPATH:+:$PYTHONPATH}" \
+            "$CURRENT_RUNTIME_PYTHON" -c 'import torch; import torch_npu; import transformers; import tokenizers; import huggingface_hub; import vllm; import vllm_ascend; print("current_runtime_preflight_ok")'
+
+          bash "${VLLM_ASCEND_HUST_REPO}/scripts/install_local_ascend_plugin.sh" "$VLLM_ASCEND_HUST_REPO"
+          "$CURRENT_RUNTIME_PYTHON" -m pip install -e '.[publish]' jsonschema
+
+      - name: Verify current benchmark runtime
+        shell: bash
+        env:
+          TORCH_DEVICE_BACKEND_AUTOLOAD: '0'
+          HUST_ASCEND_MANAGER_REPO: ${{ github.workspace }}/ascend-runtime-manager
+          VLLM_ASCEND_HUST_REPO: ${{ github.workspace }}/vllm-ascend-hust
+        run: |
+          set -euo pipefail
+
+          export VLLM_HUST_CONDA_PREFIX="$CURRENT_ENV_PREFIX"
+          export VLLM_HUST_PYTHON_BIN="$CURRENT_RUNTIME_PYTHON"
+          source "${VLLM_ASCEND_HUST_REPO}/scripts/use_single_ascend_env.sh"
+          current_runtime_source_pythonpath="$GITHUB_WORKSPACE/vllm-ascend-hust:$GITHUB_WORKSPACE/vllm-hust"
+          PYTHONPATH="$current_runtime_source_pythonpath${PYTHONPATH:+:$PYTHONPATH}" \
+          "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+          import os
+          from pathlib import Path
+
+          import torch
+          import vllm
+          import vllm_ascend
+          import vllm_hust_benchmark
+
+
+          workspace_root = Path(os.environ['GITHUB_WORKSPACE']).resolve()
+          expected_vllm_root = (workspace_root / 'vllm-hust').resolve()
+          expected_plugin_root = (workspace_root / 'vllm-ascend-hust').resolve()
+
+          print(f'torch version: {torch.__version__}')
+          print(f'vllm module: {Path(vllm.__file__).resolve()}')
+          print(f'vllm_ascend module: {Path(vllm_ascend.__file__).resolve()}')
+          print(f'vllm_hust_benchmark module: {Path(vllm_hust_benchmark.__file__).resolve()}')
+
+          if expected_vllm_root not in Path(vllm.__file__).resolve().parents:
+              raise SystemExit('vllm is not imported from the checked-out vllm-hust repo')
+
+          if expected_plugin_root not in Path(vllm_ascend.__file__).resolve().parents:
+              raise SystemExit('vllm_ascend is not imported from the checked-out vllm-ascend-hust repo')
+
+          if workspace_root not in Path(vllm_hust_benchmark.__file__).resolve().parents:
+              raise SystemExit('vllm_hust_benchmark is not imported from the checked-out benchmark repo')
+          PY
+
+      - name: Prepare official baseline env
+        if: ${{ env.PREPARE_OFFICIAL_ENV == '1' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
+          FORCE_REPAIR_OFFICIAL_ENV="$FORCE_REPAIR_OFFICIAL_ENV" \
+          VLLM_HUST_WORKSPACE_ROOT="$GITHUB_WORKSPACE" \
+          OFFICIAL_VLLM_REF="$OFFICIAL_VLLM_REF" \
+          OFFICIAL_VLLM_ASCEND_REF="$OFFICIAL_VLLM_ASCEND_REF" \
+          OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
+          OFFICIAL_VLLM_ASCEND_WORKTREE="$OFFICIAL_VLLM_ASCEND_WORKTREE" \
+          OFFICIAL_TORCH_VERSION="$OFFICIAL_TORCH_VERSION" \
+          OFFICIAL_TORCH_NPU_VERSION="$OFFICIAL_TORCH_NPU_VERSION" \
+          OFFICIAL_TORCHVISION_VERSION="$OFFICIAL_TORCHVISION_VERSION" \
+          OFFICIAL_TORCHAUDIO_VERSION="$OFFICIAL_TORCHAUDIO_VERSION" \
+          bash scripts/prepare-official-ascend-baseline-env.sh
+
+      - name: Run official random-online baseline matrix
+        id: run-official-matrix
+        shell: bash
+        env:
+          READY_TIMEOUT_SECONDS: '900'
+          CLIENT_READY_CHECK_TIMEOUT_SECONDS: '900'
+          DEVICE_SELECTION_RETRIES: '20'
+          DEVICE_SELECTION_RETRY_DELAY_SECONDS: '30'
+          READY_STATUS_INTERVAL_SECONDS: '30'
+        run: |
+          set -euo pipefail
+          export GOAL_BASELINE_ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX"
+          export PREPARE_OFFICIAL_ENV=0
+          export REPEAT_COUNT="$OFFICIAL_REPEAT_COUNT"
+          export CANONICAL_SUBMISSIONS_ROOT="$GITHUB_WORKSPACE/submissions"
+          export MATRIX_RUN_ID="official-random-online-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          export MATRIX_RESULT_ROOT="$OFFICIAL_RESULT_ROOT"
+          export MATRIX_SUMMARY_FILE="$OFFICIAL_RESULT_ROOT/summary.md"
+          export MATRIX_DEVICE_PREFERENCE_FILE="$DEVICE_PREFERENCE_FILE"
+          export PYTHON_BIN="$PYTHON_BIN"
+          export VLLM_HUST_WORKSPACE_ROOT="$GITHUB_WORKSPACE"
+          export OFFICIAL_VLLM_REF="$OFFICIAL_VLLM_REF"
+          export OFFICIAL_VLLM_ASCEND_REF="$OFFICIAL_VLLM_ASCEND_REF"
+          export OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE"
+          export OFFICIAL_VLLM_ASCEND_WORKTREE="$OFFICIAL_VLLM_ASCEND_WORKTREE"
+          export OFFICIAL_TORCH_VERSION="$OFFICIAL_TORCH_VERSION"
+          export OFFICIAL_TORCH_NPU_VERSION="$OFFICIAL_TORCH_NPU_VERSION"
+          export OFFICIAL_TORCHVISION_VERSION="$OFFICIAL_TORCHVISION_VERSION"
+          export OFFICIAL_TORCHAUDIO_VERSION="$OFFICIAL_TORCHAUDIO_VERSION"
+          if [[ "$PUBLISH_RESULTS" == '1' ]]; then
+            export EXISTING_CANONICAL_SUBMISSIONS_ROOT="$GITHUB_WORKSPACE/publication-target/vllm-hust-benchmark/submissions"
+          fi
+          bash scripts/run-official-ascend-goal-baseline-matrix.sh "$RANDOM_ONLINE_SPEC"
+
+      - name: Publish official canonical submission
+        if: ${{ steps.run-official-matrix.outcome == 'success' && env.PUBLISH_RESULTS == '1' }}
+        shell: bash
+        env:
+          SOURCE_BENCHMARK_REPO_DIR: ${{ github.workspace }}
+          TARGET_BENCHMARK_REPO_DIR: ${{ github.workspace }}/publication-target/vllm-hust-benchmark
+          WEBSITE_REPO_DIR: ${{ github.workspace }}/vllm-hust-website
+          SNAPSHOT_TARGET_BRANCH: ${{ env.PUBLICATION_TARGET_BRANCH }}
+          LOCAL_SNAPSHOT_OUTPUT_DIR: ${{ env.WEBSITE_OUTPUT_DIR }}
+          BENCHMARK_REPO_SLUG: vLLM-HUST/vllm-hust-benchmark
+          BENCHMARK_REPO_REMOTE: origin
+          BENCHMARK_REPO_SSH_KEY: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+          ALLOW_EMPTY_SNAPSHOT_SOURCE: '1'
+        run: |
+          set -euo pipefail
+          if [[ ! -d "$GITHUB_WORKSPACE/submissions/$OFFICIAL_SPEC_ID" ]]; then
+            echo 'OFFICIAL_PUBLICATION_STATUS=skipped-existing' >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          export SNAPSHOT_SOURCE_PATTERN="$OFFICIAL_SPEC_ID"
+          export SNAPSHOT_COMMIT_MESSAGE="chore(data): publish official random-online baseline from run ${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          bash .github/workflows/scripts/sync_official_baseline_snapshots_to_github.sh
+          echo "OFFICIAL_PUBLICATION_STATUS=${GITHUB_SNAPSHOT_SYNC_STATUS:-unknown}" >> "$GITHUB_ENV"
+
+      - name: Run current random-online benchmark
+        id: run-current
+        shell: bash
+        env:
+          READY_TIMEOUT_SECONDS: '900'
+          CLIENT_READY_CHECK_TIMEOUT_SECONDS: '900'
+          READY_STATUS_INTERVAL_SECONDS: '30'
+        run: |
+          set -euo pipefail
+          short_current_commit="$(git -C "$GITHUB_WORKSPACE/vllm-hust" rev-parse --short HEAD)"
+          current_submission_id="current-ascend-random-online-${short_current_commit}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          current_run_id="current-random-online-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+          RESULT_DIR="$CURRENT_RESULT_ROOT" \
+          RUN_ID="$current_run_id" \
+          VLLM_HUST_WORKSPACE_ROOT="$GITHUB_WORKSPACE" \
+          CURRENT_ENV_PREFIX="$CURRENT_ENV_PREFIX" \
+          CURRENT_RUNTIME_PYTHON="$CURRENT_RUNTIME_PYTHON" \
+          CURRENT_VLLM_HUST_REPO="$GITHUB_WORKSPACE/vllm-hust" \
+          CURRENT_VLLM_ASCEND_HUST_REPO="$GITHUB_WORKSPACE/vllm-ascend-hust" \
+          CURRENT_GITHUB_REF="$CURRENT_VLLM_REF" \
+          CURRENT_PLUGIN_GITHUB_REF="$CURRENT_VLLM_ASCEND_REF" \
+          CURRENT_DEVICE_PREFERENCE_FILE="$DEVICE_PREFERENCE_FILE" \
+          bash scripts/run-current-ascend-same-spec.sh "$RANDOM_ONLINE_SPEC"
+
+          rm -rf "$GITHUB_WORKSPACE/submissions/$current_submission_id"
+          mkdir -p "$GITHUB_WORKSPACE/submissions/$current_submission_id"
+          cp -a "$CURRENT_RESULT_ROOT/submission/." "$GITHUB_WORKSPACE/submissions/$current_submission_id/"
+
+          printf 'CURRENT_SUBMISSION_ID=%s\n' "$current_submission_id" >> "$GITHUB_ENV"
+          printf 'CURRENT_RUN_ID=%s\n' "$current_run_id" >> "$GITHUB_ENV"
+
+      - name: Publish current comparison submission
+        if: ${{ steps.run-current.outcome == 'success' && env.PUBLISH_RESULTS == '1' }}
+        shell: bash
+        env:
+          SOURCE_BENCHMARK_REPO_DIR: ${{ github.workspace }}
+          TARGET_BENCHMARK_REPO_DIR: ${{ github.workspace }}/publication-target/vllm-hust-benchmark
+          WEBSITE_REPO_DIR: ${{ github.workspace }}/vllm-hust-website
+          SNAPSHOT_TARGET_BRANCH: ${{ env.PUBLICATION_TARGET_BRANCH }}
+          LOCAL_SNAPSHOT_OUTPUT_DIR: ${{ env.WEBSITE_OUTPUT_DIR }}
+          BENCHMARK_REPO_SLUG: vLLM-HUST/vllm-hust-benchmark
+          BENCHMARK_REPO_REMOTE: origin
+          BENCHMARK_REPO_SSH_KEY: ${{ secrets.VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          export SNAPSHOT_SOURCE_PATTERN="$CURRENT_SUBMISSION_ID"
+          export SNAPSHOT_COMMIT_MESSAGE="chore(data): publish current random-online comparison from run ${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          bash .github/workflows/scripts/sync_official_baseline_snapshots_to_github.sh
+          echo "CURRENT_PUBLICATION_STATUS=${GITHUB_SNAPSHOT_SYNC_STATUS:-unknown}" >> "$GITHUB_ENV"
+
+      - name: Summarize run
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo
+            echo "- Official canonical submission: ${OFFICIAL_SPEC_ID}"
+            echo "- Current submission: ${CURRENT_SUBMISSION_ID:-not-generated}"
+            echo "- Official publication: ${OFFICIAL_PUBLICATION_STATUS:-not-run}"
+            echo "- Current publication: ${CURRENT_PUBLICATION_STATUS:-not-run}"
+            echo "- Official result root: ${OFFICIAL_RESULT_ROOT}"
+            echo "- Current result root: ${CURRENT_RESULT_ROOT}"
+            echo "- Snapshot output: ${WEBSITE_OUTPUT_DIR}"
+          } >> "$SUMMARY_FILE"
+
+          if [[ -f "$OFFICIAL_RESULT_ROOT/summary.md" ]]; then
+            echo >> "$SUMMARY_FILE"
+            echo "### Official Matrix Summary" >> "$SUMMARY_FILE"
+            cat "$OFFICIAL_RESULT_ROOT/summary.md" >> "$SUMMARY_FILE"
+          fi
+
+          if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+            cat "$SUMMARY_FILE" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload comparison summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: random-online-current-vs-official-summary-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/random-online-current-vs-official/summary.md
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload comparison results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: random-online-current-vs-official-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .benchmarks/random-online-current-vs-official-${{ github.run_id }}-${{ github.run_attempt }}
+            artifacts/random-online-current-vs-official/published-snapshots
+            submissions/official-ascend-jun-2026-v0.17.2rc0-random-online-qwen25-14b-910b3
+            submissions/current-ascend-random-online-*
+          if-no-files-found: warn
+          retention-days: 14

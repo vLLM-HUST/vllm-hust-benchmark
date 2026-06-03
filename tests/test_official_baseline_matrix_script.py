@@ -199,3 +199,12 @@ def test_matrix_script_uses_published_canonical_root_for_resume(tmp_path: Path) 
     ]
     summary_text = summary_file.read_text(encoding="utf-8")
     assert f"Skip existing canonical: {spec_id}" in summary_text
+
+
+def test_matrix_prepare_step_uses_configured_official_refs() -> None:
+    script_text = MATRIX_SCRIPT.read_text(encoding="utf-8")
+
+    assert 'OFFICIAL_VLLM_REF="$OFFICIAL_VLLM_REF" \\' in script_text
+    assert 'OFFICIAL_VLLM_ASCEND_REF="$OFFICIAL_VLLM_ASCEND_REF" \\' in script_text
+    assert 'OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \\' in script_text
+    assert 'OFFICIAL_VLLM_ASCEND_WORKTREE="$OFFICIAL_VLLM_ASCEND_WORKTREE" \\' in script_text
