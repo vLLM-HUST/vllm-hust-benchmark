@@ -512,10 +512,11 @@ if platform_plugins != expected_platform_plugins:
 
 general_plugins = sorted(ep.name for ep in entry_points(group="vllm.general_plugins"))
 expected_general_plugins = sorted(filter(None, os.environ["OFFICIAL_EXPECTED_GENERAL_PLUGINS"].split(",")))
-if general_plugins != expected_general_plugins:
+missing_general_plugins = sorted(set(expected_general_plugins) - set(general_plugins))
+if missing_general_plugins:
   fail(
     "general plugins are "
-    f"{','.join(general_plugins)}, expected {','.join(expected_general_plugins)}"
+    f"{','.join(general_plugins)}, missing required {','.join(missing_general_plugins)}"
   )
 
 print(f"env_prefix={os.environ['ENV_PREFIX']}")

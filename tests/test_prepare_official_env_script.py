@@ -1205,3 +1205,11 @@ def test_prepare_script_health_check_allows_local_version_suffix_for_base_match(
     assert "def versions_match(actual: str, expected: str) -> bool:" in script_text
     assert "actual_version.base_version == expected_version.base_version" in script_text
     assert "expected_version.local is None" in script_text
+
+
+def test_prepare_script_health_check_allows_extra_general_plugins() -> None:
+    script_text = PREPARE_SCRIPT.read_text(encoding="utf-8")
+
+    assert "missing_general_plugins = sorted(set(expected_general_plugins) - set(general_plugins))" in script_text
+    assert "if missing_general_plugins:" in script_text
+    assert "missing required" in script_text
