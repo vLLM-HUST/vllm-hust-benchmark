@@ -4,13 +4,22 @@ from __future__ import annotations
 import sys
 
 
+def _load_flexible_argument_parser():
+    try:
+        from vllm.utils.argparse_utils import FlexibleArgumentParser
+    except ImportError:
+        from vllm.utils import FlexibleArgumentParser
+
+    return FlexibleArgumentParser
+
+
 def build_parser():
     from vllm.entrypoints.cli.benchmark import latency, serve, throughput  # noqa: F401
     from vllm.entrypoints.cli.benchmark.main import BenchmarkSubcommand
     from vllm.entrypoints.utils import VLLM_SUBCMD_PARSER_EPILOG, cli_env_setup
-    from vllm.utils import FlexibleArgumentParser
 
     cli_env_setup()
+    FlexibleArgumentParser = _load_flexible_argument_parser()
 
     parser = FlexibleArgumentParser(
         description="vLLM CLI",
