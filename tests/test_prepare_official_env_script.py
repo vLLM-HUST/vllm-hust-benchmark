@@ -1162,3 +1162,38 @@ def test_prepare_script_defaults_match_current_official_baseline_dependency_vers
         "0.61.2",
         "4.11.0.86",
     ]
+
+
+def test_prepare_script_filters_explicitly_managed_dependency_constraints(tmp_path: Path) -> None:
+    source_file = tmp_path / "requirements.in"
+    target_file = tmp_path / "requirements.out"
+    source_file.write_text(
+        "\n".join(
+            [
+                "torch==2.9.0",
+                "transformers>=4.56.0,<5",
+                "compressed-tensors==0.13.0",
+                "compressed_tensors>=0.11.0",
+                "depyf==0.20.0",
+                "llguidance>=1.3.0,<1.4.0",
+                "xgrammar>=0.1.30",
+                "fastapi[standard]>=0.115.0",
+                "numba",
+                "opencv-python-headless>=4.13.0",
+                "cachetools",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    result = _run_bash(
+        _source_prepare_functions(
+            f"""
+            create_filtered_requirements_file {shlex.quote(str(source_file))} {shlex.quote(str(target_file))}
+            cat {shlex.quote(str(target_file))}
+            """
+        )
+    )
+
+    assert result.stdout.splitlines() == ["cachetools"]

@@ -288,6 +288,33 @@ create_filtered_requirements_file() {
     /^[[:space:]]*(torch|torch-npu|torch_npu|torchvision|torchaudio)([[:space:]]|[<>=!~].*)?$/ {
       next
     }
+    /^[[:space:]]*numpy([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
+    /^[[:space:]]*transformers([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
+    /^[[:space:]]*(compressed-tensors|compressed_tensors)([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
+    /^[[:space:]]*depyf([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
+    /^[[:space:]]*llguidance([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
+    /^[[:space:]]*xgrammar([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
+    /^[[:space:]]*fastapi(\[[^]]+\])?([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
+    /^[[:space:]]*numba([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
+    /^[[:space:]]*opencv-python-headless([[:space:]]|[<>=!~].*)?$/ {
+      next
+    }
     {
       print
     }
