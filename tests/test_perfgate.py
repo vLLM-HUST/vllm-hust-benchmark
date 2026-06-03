@@ -67,6 +67,7 @@ def test_generate_two_stage_report_marks_rebase_conflict_as_overall_fail(tmp_pat
         stage1_current_file=stage1_current,
         stage1_baseline_file=stage1_baseline,
         fork_point="aaa11111",
+        m2_commit="bbb22222",
         stage2_rebase_conflict=True,
         stage2_rebase_conflict_file=conflict_file,
         mode="enforce",
@@ -88,6 +89,7 @@ def test_generate_two_stage_report_uses_stage1_when_stage2_skipped(tmp_path: Pat
         stage1_current_file=stage1_current,
         stage1_baseline_file=stage1_baseline,
         fork_point="aaa11111",
+        m2_commit="aaa11111",
         stage2_skipped=True,
         stage2_skip_reason="fork-point is already latest main",
         mode="enforce",
@@ -166,6 +168,83 @@ def test_compare_benchmark_results_requires_non_null_tbt(tmp_path: Path) -> None
         raise AssertionError("expected null tbt_ms to fail")
 
 
+def test_compare_benchmark_results_rejects_missing_same_spec(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline.json"
+    current = tmp_path / "current.json"
+    _write_run_leaderboard(baseline, throughput=100.0, ttft=50.0, tbt=10.0)
+    _write_run_leaderboard(current, throughput=103.0, ttft=45.0, tbt=9.5)
+    payload = json.loads(current.read_text(encoding="utf-8"))
+    payload.pop("same_spec")
+    current.write_text(json.dumps(payload), encoding="utf-8")
+
+    try:
+        perfgate.compare_benchmark_results(current, baseline)
+    except ValueError as error:
+        assert "same_spec" in str(error)
+    else:  # pragma: no cover - assertion guard
+        raise AssertionError("expected missing same_spec to fail")
+
+
+def test_compare_benchmark_results_rejects_wrong_spec_id(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline.json"
+    current = tmp_path / "current.json"
+    _write_run_leaderboard(baseline, throughput=100.0, ttft=50.0, tbt=10.0)
+    _write_run_leaderboard(current, throughput=103.0, ttft=45.0, tbt=9.5)
+    payload = json.loads(current.read_text(encoding="utf-8"))
+    payload["same_spec"]["spec_id"] = "qwen25-14b-old"
+    current.write_text(json.dumps(payload), encoding="utf-8")
+
+    try:
+        perfgate.compare_benchmark_results(current, baseline)
+    except ValueError as error:
+        assert "perfgate-ascend-qwen25-05b-910b3" in str(error)
+    else:  # pragma: no cover - assertion guard
+        raise AssertionError("expected wrong spec_id to fail")
+
+
+def test_compare2_rejects_stage2_skip_when_fork_point_differs_from_m2(tmp_path: Path) -> None:
+    stage1_baseline = tmp_path / "m1.json"
+    stage1_current = tmp_path / "b1.json"
+    _write_run_leaderboard(stage1_baseline, throughput=100.0, ttft=50.0, tbt=10.0)
+    _write_run_leaderboard(stage1_current, throughput=101.0, ttft=49.0, tbt=9.0)
+
+    exit_code = perfgate.main(
+        [
+            "compare2",
+            "--stage1-current", str(stage1_current),
+            "--stage1-baseline", str(stage1_baseline),
+            "--stage2-skipped",
+            "--fork-point", "aaa11111",
+            "--m2-commit", "bbb22222",
+            "--mode", "enforce",
+        ]
+    )
+
+    assert exit_code == 2
+
+
+def test_compare2_rejects_conflict_and_skipped_together(tmp_path: Path) -> None:
+    stage1_baseline = tmp_path / "m1.json"
+    stage1_current = tmp_path / "b1.json"
+    _write_run_leaderboard(stage1_baseline, throughput=100.0, ttft=50.0, tbt=10.0)
+    _write_run_leaderboard(stage1_current, throughput=101.0, ttft=49.0, tbt=9.0)
+
+    exit_code = perfgate.main(
+        [
+            "compare2",
+            "--stage1-current", str(stage1_current),
+            "--stage1-baseline", str(stage1_baseline),
+            "--stage2-skipped",
+            "--stage2-rebase-conflict",
+            "--fork-point", "aaa11111",
+            "--m2-commit", "aaa11111",
+            "--mode", "enforce",
+        ]
+    )
+
+    assert exit_code == 2
+
+
 def test_compare2_cli_report_mode_does_not_block_on_failure(tmp_path: Path) -> None:
     stage1_baseline = tmp_path / "m1.json"
     stage1_current = tmp_path / "b1.json"
@@ -179,6 +258,8 @@ def test_compare2_cli_report_mode_does_not_block_on_failure(tmp_path: Path) -> N
             "--stage1-current", str(stage1_current),
             "--stage1-baseline", str(stage1_baseline),
             "--stage2-skipped",
+            "--fork-point", "aaa11111",
+            "--m2-commit", "aaa11111",
             "--report-file", str(report_file),
             "--mode", "report",
         ]
