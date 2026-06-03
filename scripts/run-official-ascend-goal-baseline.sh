@@ -1776,7 +1776,36 @@ case "$BENCHMARK_TYPE" in
 esac
 
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
+
+# Pre-flight: verify server is still alive before starting the client.
+# The server may have crashed silently after passing the health check.
+if [[ -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then
+  echo "[goal-baseline] ERROR: server process (PID $SERVER_PID) exited before client started" >&2
+  if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+    echo "[goal-baseline] --- last 80 lines of server log ---" >&2
+    tail -n 80 "$SERVER_STDOUT_LOG" >&2 || true
+    echo "[goal-baseline] --- end of server log ---" >&2
+  fi
+  exit 1
+fi
+
+set +e
 run_client_command
+client_status=$?
+set -e
+
+# Post-flight: if client failed, dump the server log to aid diagnosis.
+if [[ "$client_status" -ne 0 ]]; then
+  if [[ "$BENCHMARK_TYPE" == "serve" && -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    echo "[goal-baseline] server process (PID $SERVER_PID) exited during client run" >&2
+  fi
+  if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+    echo "[goal-baseline] --- last 80 lines of server log (post-client) ---" >&2
+    tail -n 80 "$SERVER_STDOUT_LOG" >&2 || true
+    echo "[goal-baseline] --- end of server log ---" >&2
+  fi
+  exit "$client_status"
+fi
 
 EXPORT_ARGS=(
   python -m vllm_hust_benchmark.cli export-leaderboard-artifact
