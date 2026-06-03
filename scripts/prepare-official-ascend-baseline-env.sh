@@ -5,6 +5,9 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
 
+# Source helper scripts
+source "$SCRIPT_DIR/patch-vllm-ascend-sampler.sh"
+
 ENV_PREFIX=${ENV_PREFIX:-""}
 PYTHON_VERSION=${PYTHON_VERSION:-"3.11"}
 OFFICIAL_VLLM_REPO=${OFFICIAL_VLLM_REPO:-"$WORKSPACE_ROOT/reference-repos/vllm"}
@@ -224,6 +227,46 @@ EOF
 
   OFFICIAL_EXPECTED_PLATFORM_PLUGINS=$(printf '%s\n' "${platform_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
   OFFICIAL_EXPECTED_GENERAL_PLUGINS=$(printf '%s\n' "${general_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
+}
+
+# Patch sampler.py to gracefully fall back to PyTorch implementation when the
+# custom C++ operator (npu_apply_top_k_top_p) is not available.
+# This happens when vllm-ascend C++ extensions have not been compiled.
+patch_vllm_ascend_sampler_for_missing_cpp_ops() {
+  local sampler_py="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend/sample/sampler.py"
+  if [[ ! -f "$sampler_py" ]]; then
+    return 0
+  fi
+
+  # Check if already patched
+  if grep -q "_apply_top_k_top_p_ascendc_available" "$sampler_py" 2>/dev/null; then
+    echo "[official-env] sampler.py already patched for missing C++ ops"
+    return 0
+  fi
+
+  # Replace the apply_top_k_top_p selection logic with a runtime check
+  # Original:
+  #   apply_top_k_top_p = (
+  #       _apply_top_k_top_p_ascendc
+  #       if get_ascend_device_type() in [AscendDeviceType.A2, AscendDeviceType.A3]
+  #       else _apply_top_k_top_p_pytorch
+  #   )
+  # Patched:
+  #   _apply_top_k_top_p_ascendc_available = (
+  #       get_ascend_device_type() in [AscendDeviceType.A2, AscendDeviceType.A3]
+  #       and hasattr(torch.ops._C_ascend, "npu_apply_top_k_top_p")
+  #   )
+  #   apply_top_k_top_p = (
+  #       _apply_top_k_top_p_ascendc
+  #       if _apply_top_k_top_p_ascendc_available
+  #       else _apply_top_k_top_p_pytorch
+  #   )
+  if sed -i 's/apply_top_k_top_p = (/\n_apply_top_k_top_p_ascendc_available = (\n        get_ascend_device_type() in [AscendDeviceType.A2, AscendDeviceType.A3]\n        and hasattr(torch.ops._C_ascend, "npu_apply_top_k_top_p")\n    )\n\n    apply_top_k_top_p = (/' "$sampler_py" 2>/dev/null; then
+    # Also update the condition to use the new variable
+    if sed -i 's/if get_ascend_device_type() in \[AscendDeviceType.A2, AscendDeviceType.A3\]/if _apply_top_k_top_p_ascendc_available/' "$sampler_py" 2>/dev/null; then
+      echo "[official-env] patched sampler.py to check for npu_apply_top_k_top_p availability"
+    fi
+  fi
 }
 
 normalize_arch() {
@@ -1042,6 +1085,7 @@ fi
 ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_REF"
 ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_VLLM_ASCEND_REF"
 ensure_vllm_ascend_plugin_metadata
+patch_vllm_ascend_sampler_for_missing_cpp_ops
 
 if [[ ! -d "$ENV_PREFIX" ]]; then
   conda create -y -p "$ENV_PREFIX" "python=$PYTHON_VERSION" pip
@@ -1053,7 +1097,6 @@ PIP_EXTRA_INDEX_ARGS=()
 add_pip_extra_index_arg "$EXTRA_PYPI_INDEX"
 add_pip_extra_index_arg "$PYTORCH_CPU_INDEX_URL"
 
-OFFICIAL_TORCH_INSTALL_TARGET=$(resolve_package_install_target torch "$OFFICIAL_TORCH_VERSION" "$OFFICIAL_TORCH_WHEEL_URL")
 OFFICIAL_TORCH_NPU_INSTALL_TARGET=$(resolve_package_install_target torch-npu "$OFFICIAL_TORCH_NPU_VERSION" "$OFFICIAL_TORCH_NPU_WHEEL_URL")
 OFFICIAL_TORCHVISION_INSTALL_TARGET=$(resolve_package_install_target torchvision "$OFFICIAL_TORCHVISION_VERSION" "$OFFICIAL_TORCHVISION_WHEEL_URL")
 OFFICIAL_TORCHAUDIO_INSTALL_TARGET=$(resolve_package_install_target torchaudio "$OFFICIAL_TORCHAUDIO_VERSION" "$OFFICIAL_TORCHAUDIO_WHEEL_URL")
