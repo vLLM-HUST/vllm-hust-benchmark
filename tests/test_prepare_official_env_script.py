@@ -1133,3 +1133,32 @@ def test_run_official_script_uses_configured_official_refs_for_worktrees() -> No
     assert 'OFFICIAL_VLLM_ASCEND_REF="$OFFICIAL_VLLM_ASCEND_REF" \\' in script_text
     assert 'OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \\' in script_text
     assert 'OFFICIAL_VLLM_ASCEND_WORKTREE="$OFFICIAL_VLLM_ASCEND_WORKTREE" \\' in script_text
+
+
+def test_prepare_script_defaults_match_current_official_baseline_dependency_versions() -> None:
+    result = _run_bash(
+        _source_prepare_functions(
+            """
+            printf '%s\n' \
+              "$OFFICIAL_TRANSFORMERS_VERSION" \
+              "$OFFICIAL_COMPRESSED_TENSORS_VERSION" \
+              "$OFFICIAL_DEPYF_VERSION" \
+              "$OFFICIAL_LLGUIDANCE_VERSION" \
+              "$OFFICIAL_XGRAMMAR_VERSION" \
+              "$OFFICIAL_FASTAPI_VERSION" \
+              "$OFFICIAL_NUMBA_VERSION" \
+              "$OFFICIAL_OPENCV_VERSION"
+            """
+        )
+    )
+
+    assert result.stdout.splitlines() == [
+        "4.57.4",
+        "0.13.0",
+        "0.20.0",
+        "1.3.0",
+        "0.1.32",
+        "0.123.10",
+        "0.61.2",
+        "4.11.0.86",
+    ]
