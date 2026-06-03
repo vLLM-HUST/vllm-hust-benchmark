@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - ws/random-online-official-v0172rc0-*
+      - ws/random-online-official-v0180-*
   workflow_dispatch:
     inputs:
       official_repeat_count:
@@ -52,7 +53,7 @@ on:
         type: string
         default: ""
       goal_baseline_env_prefix:
-        description: Optional conda env prefix for the official v0.17.2rc0 / v0.18.0 baseline runtime. Leave blank to auto-resolve on the runner.
+        description: Optional conda env prefix for the official v0.18.0 / v0.18.0 baseline runtime. Leave blank to auto-resolve on the runner.
         required: false
         type: string
         default: ""
@@ -84,10 +85,10 @@ jobs:
       HF_HOME: ${{ github.workspace }}/../.hf-cache
       HUGGINGFACE_HUB_CACHE: ${{ github.workspace }}/../.hf-cache/hub
       TRANSFORMERS_CACHE: ${{ github.workspace }}/../.hf-cache/transformers
-      RANDOM_ONLINE_SPEC: docs/official-baselines/version-rotations/official-ascend-jun-2026-v0172rc0-random-online-qwen25-14b-910b3.json
-      OFFICIAL_VLLM_REF: 54a62a79f70982742a227c845b96148e6401d0e7
+      RANDOM_ONLINE_SPEC: docs/official-baselines/version-rotations/official-ascend-jun-2026-v0180-random-online-qwen25-14b-910b3.json
+      OFFICIAL_VLLM_REF: bcf2be96120005e9aea171927f85055a6a5c0cf6
       OFFICIAL_VLLM_ASCEND_REF: e18643f8a4d5bd9990727654318ad069ea0b56e2
-      OFFICIAL_VLLM_WORKTREE: /tmp/vllm-54a62a79
+      OFFICIAL_VLLM_WORKTREE: /tmp/vllm-bcf2be96
       OFFICIAL_VLLM_ASCEND_WORKTREE: /tmp/vllm-ascend-e18643f8
       OFFICIAL_TORCH_VERSION: '2.9.0'
       OFFICIAL_TORCH_NPU_VERSION: '2.9.0'
@@ -431,7 +432,7 @@ jobs:
 
           goal_env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
           if [[ -z "${goal_env_prefix//[[:space:]]/}" ]]; then
-            goal_env_prefix="$conda_base/envs/vllm-ascend-official-v0172rc0-v0180"
+            goal_env_prefix="$conda_base/envs/vllm-ascend-official-v0180-v0180"
           fi
 
           [[ -d "$conda_base/condabin" ]] && printf '%s\n' "$conda_base/condabin" >> "$GITHUB_PATH"
@@ -727,7 +728,7 @@ jobs:
           path: |
             .benchmarks/random-online-current-vs-official-${{ github.run_id }}-${{ github.run_attempt }}
             artifacts/random-online-current-vs-official/published-snapshots
-            submissions/official-ascend-jun-2026-v0.17.2rc0-random-online-qwen25-14b-910b3
+            submissions/official-ascend-jun-2026-v0.18.0-random-online-qwen25-14b-910b3
             submissions/current-ascend-random-online-*
           if-no-files-found: warn
           retention-days: 14
