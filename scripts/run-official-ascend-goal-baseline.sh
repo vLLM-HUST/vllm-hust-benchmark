@@ -1288,7 +1288,7 @@ should_force_eager_for_offline_benchmark() {
   fi
 
   if [[ "$probe_status" -eq 1 ]]; then
-    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark"
+    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark" >&2
     return 0
   fi
 
@@ -1313,7 +1313,7 @@ should_force_eager_for_server_benchmark() {
   fi
 
   if [[ "$probe_status" -eq 1 ]]; then
-    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for serve benchmark server"
+    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for serve benchmark server" >&2
     return 0
   fi
 

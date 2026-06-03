@@ -51,6 +51,14 @@ def _source_run_official_runtime_model_functions(snippet: str) -> str:
     )
 
 
+def _source_run_official_arg_pipeline_functions(snippet: str) -> str:
+    script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
+    return (
+        r"source <(awk 'BEGIN{capture=0} /^json2args\(\) \{/ {capture=1} /^kill_server\(\) \{/ {exit} capture {print}' "
+        f"{script_path}) && {snippet}"
+    )
+
+
 def _run_bash(command: str, *, check: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["bash", "-lc", command],
@@ -964,7 +972,7 @@ def test_should_force_eager_for_offline_benchmark_when_aclgraph_weak_ref_is_miss
     )
 
     assert result.returncode == 0
-    assert "forcing --enforce-eager" in result.stdout
+    assert "forcing --enforce-eager" in result.stderr
 
 
 def test_official_runtime_supports_aclgraph_weak_ref_tensor_preserves_probe_status() -> None:
@@ -1009,7 +1017,7 @@ def test_should_force_eager_for_server_benchmark_when_aclgraph_weak_ref_is_missi
     )
 
     assert result.returncode == 0
-    assert "forcing --enforce-eager" in result.stdout
+    assert "forcing --enforce-eager" in result.stderr
 
 
 def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested(
@@ -1035,12 +1043,59 @@ def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested
 
             server_json=$(normalized_server_parameters_json)
             printf '%s\n' "$server_json"
-            grep -Fq '"enforce_eager":""' <<< "$server_json"
+            python3 - <<'PY' "$server_json"
+import json
+import sys
+
+payload = json.loads(sys.argv[1])
+assert payload["enforce_eager"] == ""
+assert payload["model"] == "foo/bar"
+assert payload["port"] == 8000
+PY
             """
         )
     )
 
     assert result.returncode == 0
+    assert "forcing --enforce-eager" in result.stderr
+
+
+def test_server_arg_pipeline_preserves_json_output_when_force_eager_is_requested(
+    tmp_path: Path,
+) -> None:
+    same_spec_file = tmp_path / "resolved_same_spec.json"
+    same_spec_file.write_text(
+        '{"resolved_server_parameters":{"model":"foo/bar","port":8000,"host":"0.0.0.0"}}',
+        encoding="utf-8",
+    )
+
+    result = _run_bash(
+        _source_run_official_arg_pipeline_functions(
+            f"""
+            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
+            HOST_PYTHON_BIN=$(command -v python3)
+            BENCHMARK_TYPE=serve
+            SAME_SPEC_FILE={shlex.quote(str(same_spec_file))}
+            CLIENT_READY_CHECK_TIMEOUT_SECONDS=900
+            OFFICIAL_VLLM_WORKTREE=/tmp/vllm-test-worktree
+            OFFICIAL_BENCHMARK_DATASET_ROOT=/tmp/vllm-test-datasets
+
+            official_runtime_supports_aclgraph_weak_ref_tensor() {{
+                return 1
+            }}
+
+            server_args=$(json2args "$(normalized_server_parameters_json | jq -c 'del(.disable_log_requests)')")
+            printf '%s\n' "$server_args"
+            grep -Fq -- '--model foo/bar' <<< "$server_args"
+            grep -Fq -- '--host 0.0.0.0' <<< "$server_args"
+            grep -Fq -- '--port 8000' <<< "$server_args"
+            grep -Fq -- '--enforce-eager' <<< "$server_args"
+            """
+        )
+    )
+
+    assert result.returncode == 0
+    assert "forcing --enforce-eager" in result.stderr
 
 
 def test_resolve_runtime_model_prefers_complete_snapshot_sibling(tmp_path: Path) -> None:
