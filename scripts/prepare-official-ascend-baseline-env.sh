@@ -285,34 +285,34 @@ create_filtered_requirements_file() {
   local target_file=$2
 
   awk '
-    /^[[:space:]]*(torch|torch-npu|torch_npu|torchvision|torchaudio)([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*(torch|torch-npu|torch_npu|torchvision|torchaudio)([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*numpy([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*numpy([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*transformers([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*transformers([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*(compressed-tensors|compressed_tensors)([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*(compressed-tensors|compressed_tensors)([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*depyf([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*depyf([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*llguidance([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*llguidance([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*xgrammar([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*xgrammar([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*fastapi(\[[^]]+\])?([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*fastapi(\[[^]]+\])?([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*numba([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*numba([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
-    /^[[:space:]]*opencv-python-headless([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*opencv-python-headless([[:space:]].*|[<>=!~].*)?$/ {
       next
     }
     {
