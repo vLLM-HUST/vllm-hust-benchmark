@@ -1,0 +1,27 @@
+{
+  "id": "current-ascend-sharegpt-throughput-qwen25-14b-910b3-pinned-2048-256",
+  "label": "Current Ascend sharegpt-throughput with pinned max_num_batched_tokens=2048, max_num_seqs=256 (match v0.11 defaults)",
+  "scenario": "sharegpt-throughput",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B3",
+  "chip_count": 1,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 1,
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 2048,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": ""
+  },
+  "client_parameters": {
+    "backend": "vllm",
+    "dataset_name": "sharegpt",
+    "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+    "num_prompts": 200,
+    "num_warmups": 0
+  }
+}

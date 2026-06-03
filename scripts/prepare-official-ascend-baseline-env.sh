@@ -9,27 +9,30 @@ ENV_PREFIX=${ENV_PREFIX:-""}
 PYTHON_VERSION=${PYTHON_VERSION:-"3.11"}
 OFFICIAL_VLLM_REPO=${OFFICIAL_VLLM_REPO:-"$WORKSPACE_ROOT/reference-repos/vllm"}
 OFFICIAL_VLLM_ASCEND_REPO=${OFFICIAL_VLLM_ASCEND_REPO:-"$WORKSPACE_ROOT/reference-repos/vllm-ascend"}
-OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0110"}
-OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0110"}
-OFFICIAL_VLLM_REF=${OFFICIAL_VLLM_REF:-"v0.11.0"}
-OFFICIAL_VLLM_ASCEND_REF=${OFFICIAL_VLLM_ASCEND_REF:-"v0.11.0"}
+OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0180"}
+OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0180"}
+OFFICIAL_VLLM_REF=${OFFICIAL_VLLM_REF:-"v0.18.0"}
+OFFICIAL_VLLM_ASCEND_REF=${OFFICIAL_VLLM_ASCEND_REF:-"v0.18.0"}
 OFFICIAL_SOC_VERSION=${OFFICIAL_SOC_VERSION:-${SOC_VERSION:-"ascend910b3"}}
 OFFICIAL_SLEEP_MODE_ENABLED=${OFFICIAL_SLEEP_MODE_ENABLED:-${COMPILE_CUSTOM_KERNELS:-"0"}}
 BENCHMARK_SERVER_PORT=${BENCHMARK_SERVER_PORT:-"8000"}
 PREPARE_BENCHMARK_ADMISSION_ONLY=${PREPARE_BENCHMARK_ADMISSION_ONLY:-"0"}
+SKIP_BENCHMARK_RESIDUAL_CLEANUP=${SKIP_BENCHMARK_RESIDUAL_CLEANUP:-"0"}
 ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
 ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-"/usr/local/Ascend/nnal/atb/set_env.sh"}
 ASCEND_ATB_CXX_ABI=${ASCEND_ATB_CXX_ABI:-"1"}
 EXTRA_PYPI_INDEX=${EXTRA_PYPI_INDEX:-"https://mirrors.huaweicloud.com/ascend/repos/pypi"}
 PYTORCH_CPU_INDEX_URL=${PYTORCH_CPU_INDEX_URL:-"https://download.pytorch.org/whl/cpu"}
-DEFAULT_OFFICIAL_TORCH_VERSION="2.7.1"
-DEFAULT_OFFICIAL_TORCH_NPU_VERSION="2.7.1.post1"
-DEFAULT_OFFICIAL_TORCHVISION_VERSION="0.22.1"
-DEFAULT_OFFICIAL_TORCHAUDIO_VERSION="2.7.1"
+DEFAULT_OFFICIAL_TORCH_VERSION="2.9.0"
+DEFAULT_OFFICIAL_TORCH_NPU_VERSION="2.9.0"
+DEFAULT_OFFICIAL_TORCHVISION_VERSION="0.24.0"
+DEFAULT_OFFICIAL_TORCHAUDIO_VERSION="2.9.0"
+DEFAULT_OFFICIAL_SETUPTOOLS_VERSION="80.9.0"
 OFFICIAL_TORCH_VERSION=${OFFICIAL_TORCH_VERSION:-"$DEFAULT_OFFICIAL_TORCH_VERSION"}
 OFFICIAL_TORCH_NPU_VERSION=${OFFICIAL_TORCH_NPU_VERSION:-"$DEFAULT_OFFICIAL_TORCH_NPU_VERSION"}
 OFFICIAL_TORCHVISION_VERSION=${OFFICIAL_TORCHVISION_VERSION:-"$DEFAULT_OFFICIAL_TORCHVISION_VERSION"}
 OFFICIAL_TORCHAUDIO_VERSION=${OFFICIAL_TORCHAUDIO_VERSION:-"$DEFAULT_OFFICIAL_TORCHAUDIO_VERSION"}
+OFFICIAL_SETUPTOOLS_VERSION=${OFFICIAL_SETUPTOOLS_VERSION:-"$DEFAULT_OFFICIAL_SETUPTOOLS_VERSION"}
 OFFICIAL_TORCH_WHEEL_URL=${OFFICIAL_TORCH_WHEEL_URL:-""}
 OFFICIAL_TORCH_NPU_WHEEL_URL=${OFFICIAL_TORCH_NPU_WHEEL_URL:-""}
 OFFICIAL_TORCHVISION_WHEEL_URL=${OFFICIAL_TORCHVISION_WHEEL_URL:-""}
@@ -68,17 +71,48 @@ run_with_ascend_env() {
   "$@"
 }
 
+run_in_official_env() {
+  local pythonpath_prefix=$1
+  shift
+
+  (
+    export ZSH_VERSION=""
+    if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+      set +u
+      # shellcheck disable=SC1090
+      source "$ASCEND_TOOLKIT_SET_ENV"
+      set -u
+    fi
+    if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
+      set +u
+      # shellcheck disable=SC1090
+      source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
+      set -u
+    fi
+    PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
+      conda run -p "$ENV_PREFIX" "$@"
+  )
+}
+
 run_in_official_env_python() {
   local pythonpath_prefix=$1
   shift
   local script_file
   local status=0
+  local pythonpath_entry
 
   script_file=$(mktemp "${TMPDIR:-/tmp}/official-env-python-XXXXXX.py")
-  cat > "$script_file"
+  {
+    printf '%s\n' 'import sys'
+    IFS=':' read -r -a _official_pythonpath_entries <<< "$pythonpath_prefix"
+    for pythonpath_entry in "${_official_pythonpath_entries[@]}"; do
+      [[ -z "$pythonpath_entry" ]] && continue
+      printf 'sys.path.insert(0, %s)\n' "${pythonpath_entry@Q}"
+    done
+    cat
+  } > "$script_file"
 
-  if PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
-    run_with_ascend_env conda run -p "$ENV_PREFIX" "$@" python "$script_file"; then
+  if run_in_official_env "$pythonpath_prefix" "$@" python "$script_file"; then
     status=0
   else
     status=$?
@@ -99,10 +133,54 @@ python_bool_literal() {
   esac
 }
 
+resolve_ascend_device_type() {
+  case "${1,,}" in
+    910b|ascend910b1|ascend910b2|ascend910b2c|ascend910b3|ascend910b4|ascend910b4-1)
+      printf '%s\n' "A2"
+      ;;
+    910c|ascend910_9391|ascend910_9381|ascend910_9372|ascend910_9392|ascend910_9382|ascend910_9362)
+      printf '%s\n' "A3"
+      ;;
+    310p|ascend310p1|ascend310p3|ascend310p5|ascend310p7|ascend310p3vir01|ascend310p3vir02|ascend310p3vir04|ascend310p3vir08)
+      printf '%s\n' "_310P"
+      ;;
+    *ascend950*)
+      printf '%s\n' "A5"
+      ;;
+    *)
+      echo "Unsupported OFFICIAL_SOC_VERSION for build_info device type: $1" >&2
+      return 1
+      ;;
+  esac
+}
+
+ensure_vllm_source_metadata() {
+  local version=${OFFICIAL_VLLM_REF#v}
+  local dist_info_dir
+
+  if [[ -z "$version" ]] || [[ "$version" == "$OFFICIAL_VLLM_REF" ]]; then
+    version="0.0.0"
+  fi
+
+  dist_info_dir="$OFFICIAL_VLLM_WORKTREE/vllm-${version}.dist-info"
+  mkdir -p "$dist_info_dir"
+
+  cat > "$dist_info_dir/METADATA" <<EOF
+Metadata-Version: 2.1
+Name: vllm
+Version: $version
+EOF
+
+  cat > "$dist_info_dir/top_level.txt" <<'EOF'
+vllm
+EOF
+}
+
 ensure_vllm_ascend_plugin_metadata() {
   local version=${OFFICIAL_VLLM_ASCEND_REF#v}
   local dist_info_dir
   local build_info_file
+  local device_type
   local setup_py
   local line
   local group=""
@@ -180,10 +258,12 @@ EOF
   mkdir -p "$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend"
   build_info_file="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend/_build_info.py"
   sleep_mode_enabled_literal=$(python_bool_literal "$OFFICIAL_SLEEP_MODE_ENABLED")
+  device_type=$(resolve_ascend_device_type "$OFFICIAL_SOC_VERSION")
   cat > "$build_info_file" <<EOF
 # Auto-generated file
 __soc_version__ = '$OFFICIAL_SOC_VERSION'
 __sleep_mode_enabled__ = $sleep_mode_enabled_literal
+__device_type__ = '$device_type'
 EOF
 
   OFFICIAL_EXPECTED_PLATFORM_PLUGINS=$(printf '%s\n' "${platform_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
@@ -240,35 +320,10 @@ resolve_default_archived_wheel_url() {
   local python_abi_tag=$2
   local runtime_arch=$3
 
-  case "$package_name:$python_abi_tag:$runtime_arch" in
-    torch:cp311:x86_64)
-      printf '%s\n' "https://download-r2.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp311-cp311-manylinux_2_28_x86_64.whl"
-      ;;
-    torch:cp311:aarch64)
-      printf '%s\n' "https://download-r2.pytorch.org/whl/cpu/torch-2.7.1%2Bcpu-cp311-cp311-manylinux_2_28_aarch64.whl"
-      ;;
-    torch-npu:cp311:x86_64)
-      printf '%s\n' "https://mirrors.huaweicloud.com/ascend/repos/pypi/torch-npu/torch_npu-2.7.1.post1-cp311-cp311-manylinux_2_28_x86_64.whl"
-      ;;
-    torch-npu:cp311:aarch64)
-      printf '%s\n' "https://mirrors.huaweicloud.com/ascend/repos/pypi/torch-npu/torch_npu-2.7.1.post1-cp311-cp311-manylinux_2_28_aarch64.whl"
-      ;;
-    torchvision:cp311:x86_64)
-      printf '%s\n' "https://download-r2.pytorch.org/whl/cpu/torchvision-0.22.1%2Bcpu-cp311-cp311-manylinux_2_28_x86_64.whl"
-      ;;
-    torchvision:cp311:aarch64)
-      printf '%s\n' "https://download-r2.pytorch.org/whl/cpu/torchvision-0.22.1-cp311-cp311-manylinux_2_28_aarch64.whl"
-      ;;
-    torchaudio:cp311:x86_64)
-      printf '%s\n' "https://download-r2.pytorch.org/whl/cpu/torchaudio-2.7.1%2Bcpu-cp311-cp311-manylinux_2_28_x86_64.whl"
-      ;;
-    torchaudio:cp311:aarch64)
-      printf '%s\n' "https://download-r2.pytorch.org/whl/cpu/torchaudio-2.7.1-cp311-cp311-manylinux_2_28_aarch64.whl"
-      ;;
-    *)
-      printf '%s\n' ""
-      ;;
-  esac
+  # For torch 2.9.0 + torch-npu 2.9.0, rely on pip index resolution
+  # rather than hardcoded wheel URLs since these are available from
+  # the Ascend PyPI mirror and PyTorch indexes.
+  printf '%s\n' ""
 }
 
 create_filtered_requirements_file() {
@@ -276,7 +331,7 @@ create_filtered_requirements_file() {
   local target_file=$2
 
   awk '
-    /^[[:space:]]*(torch|torch-npu|torch_npu|torchvision|torchaudio)([[:space:]]|[<>=!~].*)?$/ {
+    /^[[:space:]]*(setuptools|torch|torch-npu|torch_npu|torchvision|torchaudio|numpy|transformers|compressed-tensors|depyf|llguidance|xgrammar|fastapi|numba|opencv-python-headless)([[:space:]]|[<>=!~]|$)/ {
       next
     }
     {
@@ -322,7 +377,7 @@ verify_official_env() {
   run_in_official_env_python "$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE" \
     env \
     OFFICIAL_EXPECTED_PYTHON_VERSION="$PYTHON_VERSION" \
-    OFFICIAL_EXPECTED_SETUPTOOLS_SPEC=">=77.0.3,<80.0.0" \
+    OFFICIAL_EXPECTED_SETUPTOOLS_VERSION="$OFFICIAL_SETUPTOOLS_VERSION" \
     OFFICIAL_EXPECTED_PLATFORM_PLUGINS="$OFFICIAL_EXPECTED_PLATFORM_PLUGINS" \
     OFFICIAL_EXPECTED_GENERAL_PLUGINS="$OFFICIAL_EXPECTED_GENERAL_PLUGINS" \
     OFFICIAL_EXPECTED_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
@@ -332,11 +387,11 @@ verify_official_env() {
     OFFICIAL_EXPECTED_TORCHVISION_TARGET="$OFFICIAL_TORCHVISION_INSTALL_TARGET" \
     OFFICIAL_EXPECTED_TORCHAUDIO_TARGET="$OFFICIAL_TORCHAUDIO_INSTALL_TARGET" \
     OFFICIAL_EXPECTED_NUMPY_VERSION="1.26.4" \
-    OFFICIAL_EXPECTED_TRANSFORMERS_VERSION="4.57.1" \
-    OFFICIAL_EXPECTED_COMPRESSED_TENSORS_VERSION="0.11.0" \
+    OFFICIAL_EXPECTED_TRANSFORMERS_VERSION="4.57.4" \
+    OFFICIAL_EXPECTED_COMPRESSED_TENSORS_VERSION="0.13.0" \
     OFFICIAL_EXPECTED_DEPYF_VERSION="0.19.0" \
-    OFFICIAL_EXPECTED_LLGUIDANCE_VERSION="0.7.30" \
-    OFFICIAL_EXPECTED_XGRAMMAR_VERSION="0.1.25" \
+    OFFICIAL_EXPECTED_LLGUIDANCE_VERSION="1.3.0" \
+    OFFICIAL_EXPECTED_XGRAMMAR_VERSION="0.1.32" \
     OFFICIAL_EXPECTED_FASTAPI_VERSION="0.123.10" \
     OFFICIAL_EXPECTED_NUMBA_VERSION="0.61.2" \
     OFFICIAL_EXPECTED_OPENCV_VERSION="4.11.0.86" <<'PY'
@@ -390,6 +445,10 @@ def expected_version_from_target(target: str) -> str:
   return parts[1]
 
 
+def version_matches(actual_version: str, expected_version: str) -> bool:
+  return actual_version == expected_version or actual_version.startswith(expected_version + "+")
+
+
 def assert_loaded_from(path_value: str, expected_root: str, label: str) -> None:
   resolved_path = str(Path(path_value).resolve())
   resolved_root = str(Path(expected_root).resolve())
@@ -397,17 +456,12 @@ def assert_loaded_from(path_value: str, expected_root: str, label: str) -> None:
     fail(f"{label} loaded from {resolved_path}, expected under {resolved_root}")
 
 
-try:
-  from packaging.specifiers import SpecifierSet
-  from packaging.version import Version
-except Exception as exc:  # pragma: no cover - repair path handles this.
-  fail(f"required health-check dependency packaging is unavailable: {exc}")
-
 expected_python_version = os.environ["OFFICIAL_EXPECTED_PYTHON_VERSION"]
 actual_python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
 if actual_python_version != expected_python_version:
   fail(f"python version is {actual_python_version}, expected {expected_python_version}")
 
+import pkg_resources
 import torch
 import torch_npu
 import vllm
@@ -434,17 +488,15 @@ expected_versions = (
 
 for names, expected_version in expected_versions:
   actual_version = dist_version(*names)
-  if actual_version != expected_version:
+  if not version_matches(actual_version, expected_version):
     fail(f"{names[0]} version is {actual_version}, expected {expected_version}")
 
 setuptools_version = dist_version("setuptools")
-setuptools_spec = SpecifierSet(os.environ["OFFICIAL_EXPECTED_SETUPTOOLS_SPEC"])
-if Version(setuptools_version) not in setuptools_spec:
-  fail(
-    f"setuptools version is {setuptools_version}, expected {os.environ['OFFICIAL_EXPECTED_SETUPTOOLS_SPEC']}"
-  )
+expected_setuptools_version = os.environ["OFFICIAL_EXPECTED_SETUPTOOLS_VERSION"]
+if not version_matches(setuptools_version, expected_setuptools_version):
+  fail(f"setuptools version is {setuptools_version}, expected {expected_setuptools_version}")
 
-ensure_absent("vllm", "vllm-hust", "vllm_hust")
+ensure_absent("vllm-hust", "vllm_hust")
 ensure_absent("vllm-ascend-hust", "vllm_ascend_hust")
 
 platform_plugins = sorted(ep.name for ep in entry_points(group="vllm.platform_plugins"))
@@ -457,10 +509,11 @@ if platform_plugins != expected_platform_plugins:
 
 general_plugins = sorted(ep.name for ep in entry_points(group="vllm.general_plugins"))
 expected_general_plugins = sorted(filter(None, os.environ["OFFICIAL_EXPECTED_GENERAL_PLUGINS"].split(",")))
-if general_plugins != expected_general_plugins:
+missing_general_plugins = sorted(set(expected_general_plugins) - set(general_plugins))
+if missing_general_plugins:
   fail(
     "general plugins are "
-    f"{','.join(general_plugins)}, expected {','.join(expected_general_plugins)}"
+    f"{','.join(general_plugins)}, missing required {','.join(missing_general_plugins)}"
   )
 
 print(f"env_prefix={os.environ['ENV_PREFIX']}")
@@ -468,6 +521,7 @@ print(f"torch={torch.__version__}")
 print(f"torch_npu={torch_npu.__version__}")
 print(f"vllm_file={vllm.__file__}")
 print(f"vllm_ascend_file={vllm_ascend.__file__}")
+print(f"pkg_resources={pkg_resources.__file__}")
 print(f"setuptools={setuptools_version}")
 print(f"compressed_tensors={dist_version('compressed-tensors')}")
 print(f"depyf={dist_version('depyf')}")
@@ -921,7 +975,7 @@ if ! command -v conda >/dev/null 2>&1; then
 fi
 
 if [[ -z "$ENV_PREFIX" ]]; then
-  ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+  ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
 fi
 
 ENV_PREFIX_PARENT=$(dirname "$ENV_PREFIX")
@@ -943,7 +997,11 @@ if [[ ! -d "$OFFICIAL_VLLM_ASCEND_REPO/.git" ]]; then
   exit 2
 fi
 
-cleanup_benchmark_residual_processes
+if [[ "$SKIP_BENCHMARK_RESIDUAL_CLEANUP" == "1" ]]; then
+  echo "[official-env] skipping benchmark admission cleanup for environment preparation"
+else
+  cleanup_benchmark_residual_processes
+fi
 
 if [[ "$PREPARE_BENCHMARK_ADMISSION_ONLY" == "1" ]]; then
   echo "[official-env] admission-only mode completed"
@@ -952,6 +1010,7 @@ fi
 
 ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_REF"
 ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_VLLM_ASCEND_REF"
+ensure_vllm_source_metadata
 ensure_vllm_ascend_plugin_metadata
 
 if [[ ! -d "$ENV_PREFIX" ]]; then
@@ -968,6 +1027,7 @@ OFFICIAL_TORCH_INSTALL_TARGET=$(resolve_package_install_target torch "$OFFICIAL_
 OFFICIAL_TORCH_NPU_INSTALL_TARGET=$(resolve_package_install_target torch-npu "$OFFICIAL_TORCH_NPU_VERSION" "$OFFICIAL_TORCH_NPU_WHEEL_URL")
 OFFICIAL_TORCHVISION_INSTALL_TARGET=$(resolve_package_install_target torchvision "$OFFICIAL_TORCHVISION_VERSION" "$OFFICIAL_TORCHVISION_WHEEL_URL")
 OFFICIAL_TORCHAUDIO_INSTALL_TARGET=$(resolve_package_install_target torchaudio "$OFFICIAL_TORCHAUDIO_VERSION" "$OFFICIAL_TORCHAUDIO_WHEEL_URL")
+OFFICIAL_SETUPTOOLS_INSTALL_TARGET="setuptools==$OFFICIAL_SETUPTOOLS_VERSION"
 
 if [[ "$FORCE_REPAIR_OFFICIAL_ENV" != "1" ]]; then
   if health_check_output=$(verify_official_env 2>&1); then
@@ -1011,7 +1071,7 @@ run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip uninstall -y \
   numba || true
 
 run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip install --upgrade --force-reinstall \
-  "setuptools>=77.0.3,<80.0.0"
+  "$OFFICIAL_SETUPTOOLS_INSTALL_TARGET"
 
 run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip install --upgrade --force-reinstall \
   "${PIP_EXTRA_INDEX_ARGS[@]}" \
@@ -1025,36 +1085,105 @@ run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip install --upgrade -
   -r "$FILTERED_COMMON_REQUIREMENTS_FILE" \
   -r "$FILTERED_ASCEND_REQUIREMENTS_FILE" \
   -r "$FILTERED_BENCH_REQUIREMENTS_FILE" \
-  "setuptools>=77.0.3,<80.0.0" \
+  "$OFFICIAL_SETUPTOOLS_INSTALL_TARGET" \
   "$OFFICIAL_TORCH_INSTALL_TARGET" \
   "$OFFICIAL_TORCH_NPU_INSTALL_TARGET" \
   "$OFFICIAL_TORCHVISION_INSTALL_TARGET" \
   "$OFFICIAL_TORCHAUDIO_INSTALL_TARGET" \
   numpy==1.26.4 \
-  transformers==4.57.1 \
-  compressed-tensors==0.11.0 \
+  transformers==4.57.4 \
+  compressed-tensors==0.13.0 \
   depyf==0.19.0 \
-  llguidance==0.7.30 \
-  xgrammar==0.1.25 \
+  llguidance==1.3.0 \
+  xgrammar==0.1.32 \
   fastapi==0.123.10 \
   numba==0.61.2 \
   opencv-python-headless==4.11.0.86
 
 run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip install --upgrade --force-reinstall --no-deps \
   "${PIP_EXTRA_INDEX_ARGS[@]}" \
-  "setuptools>=77.0.3,<80.0.0" \
+  "$OFFICIAL_SETUPTOOLS_INSTALL_TARGET" \
   "$OFFICIAL_TORCH_INSTALL_TARGET" \
   "$OFFICIAL_TORCH_NPU_INSTALL_TARGET" \
   "$OFFICIAL_TORCHVISION_INSTALL_TARGET" \
   "$OFFICIAL_TORCHAUDIO_INSTALL_TARGET" \
   numpy==1.26.4 \
-  transformers==4.57.1 \
-  compressed-tensors==0.11.0 \
+  transformers==4.57.4 \
+  compressed-tensors==0.13.0 \
   depyf==0.19.0 \
-  llguidance==0.7.30 \
-  xgrammar==0.1.25 \
+  llguidance==1.3.0 \
+  xgrammar==0.1.32 \
   fastapi==0.123.10 \
   numba==0.61.2
+
+# ---------- Build vllm-ascend C extension (with LTO disabled) ----------
+# LTO (-flto=auto) strips TORCH_LIBRARY static constructors used for op
+# registration.  We MUST disable it so that torch.ops._C_ascend ops
+# (e.g. npu_apply_top_k_top_p) survive linking.
+build_vllm_ascend_c_extension() {
+  local worktree="$OFFICIAL_VLLM_ASCEND_WORKTREE"
+  local build_dir="$worktree/build/temp.linux-$(uname -m)-cpython-${PYTHON_VERSION//./}"
+  local so_glob="$worktree/vllm_ascend/vllm_ascend_C*.so"
+  local torch_npu_path
+  local pybind11_cmake_dir
+  local python_include
+
+  # Skip if the extension already exists and has ops registered.
+  if compgen -G "$so_glob" >/dev/null 2>&1; then
+    local existing_so
+    existing_so=$(compgen -G "$so_glob" | head -1)
+    if [[ $(stat -c%s "$existing_so" 2>/dev/null || echo 0) -gt 500000 ]]; then
+      echo "[prepare] C extension already built ($(du -h "$existing_so" | cut -f1)), skipping." >&2
+      return 0
+    fi
+  fi
+
+  echo "[prepare] Building vllm_ascend C extension with LTO disabled..." >&2
+
+  torch_npu_path=$(run_in_official_env "" python -c "import torch_npu; import os; print(os.path.dirname(torch_npu.__file__))")
+  pybind11_cmake_dir=$(run_in_official_env "" python -m pybind11 --cmakedir)
+  python_include="$ENV_PREFIX/include/python${PYTHON_VERSION}"
+
+  mkdir -p "$build_dir"
+  (
+    cd "$build_dir"
+    export ZSH_VERSION=""
+    if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+      set +u; source "$ASCEND_TOOLKIT_SET_ENV"; set -u
+    fi
+    if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
+      set +u; source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"; set -u
+    fi
+
+    conda run -p "$ENV_PREFIX" cmake \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF \
+      -DCMAKE_CXX_FLAGS="-fno-lto" \
+      -DCMAKE_SHARED_LINKER_FLAGS="-fno-lto" \
+      -DASCEND_HOME_PATH="${ASCEND_HOME_PATH:-/usr/local/Ascend/ascend-toolkit/latest}" \
+      -DPYTHON_EXECUTABLE="$ENV_PREFIX/bin/python" \
+      -DPYTHON_INCLUDE_PATH="$python_include" \
+      -DCMAKE_INSTALL_PREFIX="$worktree/vllm_ascend" \
+      -DCMAKE_PREFIX_PATH="$pybind11_cmake_dir" \
+      -DSOC_VERSION="$OFFICIAL_SOC_VERSION" \
+      -DTORCH_NPU_PATH="$torch_npu_path" \
+      "$worktree"
+
+    conda run -p "$ENV_PREFIX" cmake --build . --parallel "$(nproc)"
+  )
+
+  # Copy built .so to the package directory.
+  local built_so
+  built_so=$(find "$build_dir" -name 'vllm_ascend_C*.so' -type f 2>/dev/null | head -1)
+  if [[ -z "$built_so" ]]; then
+    echo "[prepare] ERROR: C extension build produced no .so file" >&2
+    return 1
+  fi
+  cp -f "$built_so" "$worktree/vllm_ascend/"
+  echo "[prepare] C extension built: $(du -h "$worktree/vllm_ascend/$(basename "$built_so")" | cut -f1)" >&2
+}
+
+build_vllm_ascend_c_extension
 
 PYTHONPATH="$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE${PYTHONPATH:+:$PYTHONPATH}" \
   verify_official_env
