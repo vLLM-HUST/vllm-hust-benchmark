@@ -996,6 +996,98 @@ def test_export_leaderboard_artifact_from_raw_benchmark_result(tmp_path) -> None
     assert artifact["metadata"]["github_user"] == "benchmark-bot"
 
 
+def test_export_leaderboard_artifact_derives_long_context_constraints_from_raw_result(
+    tmp_path,
+) -> None:
+    benchmark_result = tmp_path / "serve_result.json"
+    benchmark_result.write_text(
+        """
+{
+    "completed": 10,
+    "failed": 0,
+    "output_throughput": 321.0,
+    "mean_ttft_ms": 42.0,
+    "p95_ttft_ms": 80.0,
+    "p99_ttft_ms": 95.0,
+    "p99_tpot_ms": 10.0
+}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    constraints_file = tmp_path / "constraints_partial.json"
+    constraints_file.write_text(
+        """
+{
+    "single_chip_effective_utilization_pct": 49.6,
+    "multi_tenant_high_utilization": true
+}
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    same_spec_file = tmp_path / "same_spec.json"
+    same_spec_file.write_text(
+        json.dumps(
+            {
+                "schema_version": "benchmark-same-spec/v1",
+                "spec_id": "spec-derive-long-context",
+                "resolved_spec_hash": "abc123",
+                "resolved_server_parameters": {"max_model_len": 30720},
+                "resolved_client_parameters": {"dataset_name": "prefix_repetition"},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    output_dir = tmp_path / "export_derived_constraints"
+    exit_code = main(
+        [
+            "export-leaderboard-artifact",
+            "prefix-repetition-online",
+            "--benchmark-result-file",
+            str(benchmark_result),
+            "--constraints-file",
+            str(constraints_file),
+            "--same-spec-file",
+            str(same_spec_file),
+            "--peak-mem-mb",
+            "10240",
+            "--output-dir",
+            str(output_dir),
+            "--run-id",
+            "derive-long-context-run",
+            "--engine",
+            "vllm-hust",
+            "--engine-version",
+            "0.7.3",
+            "--model-name",
+            "Qwen/Qwen2.5-14B-Instruct",
+            "--hardware-chip-model",
+            "910B2",
+            "--submitter",
+            "ci",
+        ]
+    )
+
+    assert exit_code == 0
+    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    constraints_metrics = artifact["constraints"]["metrics"]
+    assert constraints_metrics["single_chip_effective_utilization_pct"] == 49.6
+    assert constraints_metrics["multi_tenant_high_utilization"] is True
+    assert constraints_metrics["long_context_length"] == 30720
+    assert constraints_metrics["long_context_throughput_stable"] is True
+    assert constraints_metrics["long_context_ttft_p95_ms"] == 80.0
+    assert constraints_metrics["long_context_ttft_p99_ms"] == 95.0
+    assert constraints_metrics["long_context_tpot_p95_ms"] is None
+    assert constraints_metrics["long_context_tpot_p99_ms"] == 10.0
+    assert constraints_metrics["long_context_ttft_p95_stable"] is True
+    assert constraints_metrics["long_context_ttft_p99_stable"] is True
+    assert constraints_metrics["long_context_tpot_p95_stable"] is None
+    assert constraints_metrics["long_context_tpot_p99_stable"] is True
+
+
 def test_export_leaderboard_artifact_normalizes_seeded_short_model_alias(tmp_path) -> None:
     metrics_file = tmp_path / "metrics.json"
     metrics_file.write_text(

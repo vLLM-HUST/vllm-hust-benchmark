@@ -16,6 +16,7 @@ OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
 OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/official-ascend-goal-baseline"}
 OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"$OFFICIAL_VLLM_CACHE_ROOT/datasets"}
 OFFICIAL_SHAREGPT_DATASET_URL=${OFFICIAL_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
+OFFICIAL_RUNTIME_PYTHON=${OFFICIAL_RUNTIME_PYTHON:-"$GOAL_BASELINE_ENV_PREFIX/bin/python"}
 OFFICIAL_MODEL_PATH=${OFFICIAL_MODEL_PATH:-}
 OFFICIAL_SERVER_HOST=${OFFICIAL_SERVER_HOST:-}
 OFFICIAL_SERVER_PORT=${OFFICIAL_SERVER_PORT:-"8000"}
@@ -47,6 +48,11 @@ RUNNER_LOCK_FD=""
 
 if [[ -z "$GOAL_BASELINE_ENV_PREFIX" ]]; then
   echo "GOAL_BASELINE_ENV_PREFIX is required" >&2
+  exit 2
+fi
+
+if [[ ! -x "$OFFICIAL_RUNTIME_PYTHON" ]]; then
+  echo "OFFICIAL_RUNTIME_PYTHON is not executable: $OFFICIAL_RUNTIME_PYTHON" >&2
   exit 2
 fi
 
@@ -312,8 +318,9 @@ run_in_official_runtime() {
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
     fi
+    export PATH="$GOAL_BASELINE_ENV_PREFIX/bin:$PATH"
     PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
-      conda run -p "$GOAL_BASELINE_ENV_PREFIX" "$@"
+      "$@"
   )
 }
 
@@ -782,10 +789,10 @@ run_server_command() {
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
     fi
+    export PATH="$GOAL_BASELINE_ENV_PREFIX/bin:$PATH"
     PYTHONUNBUFFERED=1 \
       PYTHONPATH="$OFFICIAL_RUNTIME_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}" \
-      conda run --no-capture-output -p "$GOAL_BASELINE_ENV_PREFIX" \
-      python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS
+      "$OFFICIAL_RUNTIME_PYTHON" -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS
   )
 }
 
@@ -1161,6 +1168,44 @@ path_has_matching_file() {
   return 1
 }
 
+path_has_complete_indexed_weights() {
+  local runtime_model_candidate=$1
+  local index_file
+
+  for index_file in \
+    "$runtime_model_candidate/model.safetensors.index.json" \
+    "$runtime_model_candidate/pytorch_model.bin.index.json"; do
+    [[ -f "$index_file" ]] || continue
+
+    if MODEL_DIR="$runtime_model_candidate" INDEX_FILE="$index_file" "$OFFICIAL_RUNTIME_PYTHON" - <<'PY' >/dev/null 2>&1
+import json
+import os
+
+model_dir = os.environ["MODEL_DIR"]
+index_file = os.environ["INDEX_FILE"]
+
+with open(index_file, encoding="utf-8") as fh:
+    payload = json.load(fh)
+
+weight_map = payload.get("weight_map") or {}
+if not weight_map:
+    raise SystemExit(1)
+
+missing = [
+    filename for filename in sorted(set(weight_map.values()))
+    if not os.path.isfile(os.path.join(model_dir, filename))
+]
+
+raise SystemExit(0 if not missing else 1)
+PY
+    then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 local_runtime_model_has_required_artifacts() {
   local runtime_model_candidate=$1
 
@@ -1175,14 +1220,16 @@ local_runtime_model_has_required_artifacts() {
     "sentencepiece.bpe.model" \
     "vocab.json" \
     "vocab.txt" || return 1
-  path_has_matching_file \
+  if path_has_matching_file \
     "$runtime_model_candidate" \
     "*.safetensors" \
     "*.bin" \
     "*.pt" \
-    "*.pth" \
-    "model.safetensors.index.json" \
-    "pytorch_model.bin.index.json"
+    "*.pth"; then
+    return 0
+  fi
+
+  path_has_complete_indexed_weights "$runtime_model_candidate"
 }
 
 resolve_complete_local_runtime_model_candidate() {
@@ -1701,8 +1748,8 @@ case "$BENCHMARK_TYPE" in
 
     assert_target_port_available "Official baseline" "$CLIENT_HOST" "$CLIENT_PORT"
 
-    SERVER_COMMAND="PYTHONUNBUFFERED=1 VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run --no-capture-output -p $GOAL_BASELINE_ENV_PREFIX python -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
-    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python $VLLM_CLI_COMPAT bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
+    SERVER_COMMAND="PYTHONUNBUFFERED=1 VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} $OFFICIAL_RUNTIME_PYTHON -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
+    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} $OFFICIAL_RUNTIME_PYTHON $VLLM_CLI_COMPAT bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
 
     echo "[goal-baseline] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
     echo "[goal-baseline] server command: $SERVER_COMMAND"
@@ -1767,7 +1814,7 @@ case "$BENCHMARK_TYPE" in
     fi
     ;;
   throughput|latency)
-    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} conda run -p $GOAL_BASELINE_ENV_PREFIX python $VLLM_CLI_COMPAT bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
+    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} $OFFICIAL_RUNTIME_PYTHON $VLLM_CLI_COMPAT bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
     ;;
   *)
     echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2

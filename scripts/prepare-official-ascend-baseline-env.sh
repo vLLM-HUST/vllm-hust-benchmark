@@ -616,6 +616,25 @@ is_process_in_cleanup_scope() {
   return 0
 }
 
+is_process_conflicting_with_benchmark_port() {
+  local pid=$1
+  local args
+
+  args=$(process_args "$pid")
+  [[ -n "$args" ]] || return 1
+
+  if [[ "$args" =~ vllm\.entrypoints\.openai\.api_server|vllm\.entrypoints\.cli\.main\ bench\ serve|run_vllm_cli_compat\.py\ bench\ serve ]]; then
+    if [[ "$args" == *"--port $BENCHMARK_SERVER_PORT"* ]]; then
+      return 0
+    fi
+    if [[ "$args" =~ --port[[:space:]][0-9]+ ]]; then
+      return 1
+    fi
+  fi
+
+  return 0
+}
+
 list_child_pids() {
   local parent_pid=$1
   ps -eo pid=,ppid= | awk -v target="$parent_pid" '$2 == target {print $1}'
@@ -840,6 +859,9 @@ list_out_of_scope_benchmark_pids() {
     if is_process_in_cleanup_scope "$pid"; then
       continue
     fi
+    if ! is_process_conflicting_with_benchmark_port "$pid"; then
+      continue
+    fi
     printf '%s\n' "$pid"
   done < <(list_matching_benchmark_pids) | sort -u
 }
@@ -892,8 +914,11 @@ cleanup_benchmark_residual_processes() {
       return 1
     fi
 
-    if [[ -n "$(list_benchmark_residual_pids)" ]]; then
-      echo "Residual benchmark processes still exist during admission check" >&2
+    local residual_pids
+    residual_pids=$(list_benchmark_residual_pids)
+    if [[ -n "$residual_pids" ]]; then
+      log_process_snapshots "residual benchmark process during admission check" "$residual_pids"
+      echo "Residual benchmark processes still exist during admission check: $residual_pids" >&2
       return 1
     fi
 

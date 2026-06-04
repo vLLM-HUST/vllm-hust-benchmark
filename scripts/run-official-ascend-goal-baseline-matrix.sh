@@ -170,6 +170,7 @@ prepare_official_env_once() {
 
   echo "[official-baseline-matrix] preparing official baseline environment: $GOAL_BASELINE_ENV_PREFIX"
   ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
+  BENCHMARK_SERVER_PORT="${OFFICIAL_SERVER_PORT:-8000}" \
   VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
   bash "$PREPARE_SCRIPT"
   PREPARED_ENV=1
