@@ -964,7 +964,7 @@ def test_should_force_eager_for_offline_benchmark_when_aclgraph_weak_ref_is_miss
     )
 
     assert result.returncode == 0
-    assert "forcing --enforce-eager" in result.stdout + result.stderr
+    assert "forcing --enforce-eager" in result.stdout
 
 
 def test_official_runtime_supports_aclgraph_weak_ref_tensor_preserves_probe_status() -> None:
@@ -1009,7 +1009,7 @@ def test_should_force_eager_for_server_benchmark_when_aclgraph_weak_ref_is_missi
     )
 
     assert result.returncode == 0
-    assert "forcing --enforce-eager" in result.stdout + result.stderr
+    assert "forcing --enforce-eager" in result.stdout
 
 
 def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested(
