@@ -33,8 +33,6 @@ class TwoStageReport:
     stage2: StageComparison | None = None
 
 
-EXPECTED_PERFGATE_SPEC_ID = "perfgate-ascend-qwen25-05b-910b3"
-
 METRICS: tuple[tuple[str, str], ...] = (
     ("throughput_tps", "higher_is_better"),
     ("ttft_ms", "lower_is_better"),
@@ -81,7 +79,7 @@ def _extract_metrics(path: Path) -> dict[str, float]:
     return metrics
 
 
-def _same_spec_identity(path: Path) -> tuple[str, str]:
+def _same_spec_identity(path: Path, *, expected_spec_id: str | None = None) -> tuple[str, str]:
     payload = _load_json(path)
     same_spec = payload.get("same_spec")
     if not isinstance(same_spec, dict):
@@ -92,16 +90,14 @@ def _same_spec_identity(path: Path) -> tuple[str, str]:
         raise ValueError(f"{path} same_spec.spec_id must be non-empty")
     if not spec_hash:
         raise ValueError(f"{path} same_spec.resolved_spec_hash must be non-empty")
-    if spec_id != EXPECTED_PERFGATE_SPEC_ID:
-        raise ValueError(
-            f"{path} same_spec.spec_id must be {EXPECTED_PERFGATE_SPEC_ID!r}, got {spec_id!r}"
-        )
+    if expected_spec_id and spec_id != expected_spec_id:
+        raise ValueError(f"{path} same_spec.spec_id must be {expected_spec_id!r}, got {spec_id!r}")
     return spec_id, spec_hash
 
 
-def _validate_same_spec(current_path: Path, baseline_path: Path) -> None:
-    current_spec_id, current_hash = _same_spec_identity(current_path)
-    baseline_spec_id, baseline_hash = _same_spec_identity(baseline_path)
+def _validate_same_spec(current_path: Path, baseline_path: Path, *, expected_spec_id: str | None = None) -> None:
+    current_spec_id, current_hash = _same_spec_identity(current_path, expected_spec_id=expected_spec_id)
+    baseline_spec_id, baseline_hash = _same_spec_identity(baseline_path, expected_spec_id=expected_spec_id)
     if current_spec_id != baseline_spec_id:
         raise ValueError(
             "same_spec.spec_id mismatch: "
@@ -137,10 +133,15 @@ def _compare_metric(name: str, current: float, baseline: float, direction: str) 
     )
 
 
-def compare_benchmark_results(current: Path | str, baseline: Path | str) -> StageComparison:
+def compare_benchmark_results(
+    current: Path | str,
+    baseline: Path | str,
+    *,
+    expected_spec_id: str | None = None,
+) -> StageComparison:
     current_path = Path(current)
     baseline_path = Path(baseline)
-    _validate_same_spec(current_path, baseline_path)
+    _validate_same_spec(current_path, baseline_path, expected_spec_id=expected_spec_id)
     current_metrics = _extract_metrics(current_path)
     baseline_metrics = _extract_metrics(baseline_path)
 
@@ -166,7 +167,10 @@ def _format_metric_table(comparison: StageComparison) -> str:
     ]
     for name, _direction in METRICS:
         metric = comparison.metrics[name]
-        delta = f"{metric.delta_percent:+.2f}%"
+        if math.isinf(metric.delta_percent):
+            delta = "+∞%"
+        else:
+            delta = f"{metric.delta_percent:+.2f}%"
         status = "PASS" if metric.passed else "FAIL"
         lines.append(
             f"| {DISPLAY_NAMES[name]} | {metric.baseline:.2f} | {metric.current:.2f} | {delta} | {status} |"
@@ -218,6 +222,7 @@ def generate_two_stage_report(
     stage2_skip_reason: str | None = None,
     stage2_not_run: bool = False,
     stage2_not_run_reason: str | None = None,
+    expected_spec_id: str | None = None,
     mode: str = "report",
 ) -> TwoStageReport:
     _validate_two_stage_inputs(
@@ -229,7 +234,11 @@ def generate_two_stage_report(
         stage2_skipped=stage2_skipped,
         stage2_not_run=stage2_not_run,
     )
-    stage1 = compare_benchmark_results(Path(stage1_current_file), Path(stage1_baseline_file))
+    stage1 = compare_benchmark_results(
+        Path(stage1_current_file),
+        Path(stage1_baseline_file),
+        expected_spec_id=expected_spec_id,
+    )
     stage2: StageComparison | None = None
     lines = ["## Performance Gate Result", "", "### Stage 1: B1 vs M1 (fork-point)", "", _format_metric_table(stage1), ""]
     lines.append(f"**Stage 1: {_stage_status(stage1)}**")
@@ -273,7 +282,11 @@ def generate_two_stage_report(
     else:
         if not stage2_current_file or not stage2_baseline_file:
             raise ValueError("stage2 current/baseline files are required unless stage2 is skipped or conflicted")
-        stage2 = compare_benchmark_results(Path(stage2_current_file), Path(stage2_baseline_file))
+        stage2 = compare_benchmark_results(
+            Path(stage2_current_file),
+            Path(stage2_baseline_file),
+            expected_spec_id=expected_spec_id,
+        )
         overall_passed = stage1.passed and stage2.passed
         lines.extend([_format_metric_table(stage2), "", f"**Stage 2: {_stage_status(stage2)}**"])
         if m2_commit:
@@ -300,6 +313,7 @@ def _build_parser() -> argparse.ArgumentParser:
     compare.add_argument("--baseline", required=True)
     compare.add_argument("--fork-point")
     compare.add_argument("--report-file")
+    compare.add_argument("--expected-spec-id")
     compare.add_argument("--mode", choices=["report", "enforce"], default="report")
 
     compare2 = subparsers.add_parser("compare2", help="Run two-stage performance gate comparison.")
@@ -316,6 +330,7 @@ def _build_parser() -> argparse.ArgumentParser:
     compare2.add_argument("--stage2-not-run", action="store_true")
     compare2.add_argument("--stage2-not-run-reason")
     compare2.add_argument("--report-file")
+    compare2.add_argument("--expected-spec-id")
     compare2.add_argument("--mode", choices=["report", "enforce"], default="report")
     return parser
 
@@ -332,6 +347,7 @@ def main(argv: list[str] | None = None) -> int:
                 m2_commit=args.fork_point or "single-stage",
                 stage2_skipped=True,
                 stage2_skip_reason="single-stage comparison",
+                expected_spec_id=args.expected_spec_id,
                 mode=args.mode,
             )
         else:
@@ -348,6 +364,7 @@ def main(argv: list[str] | None = None) -> int:
                 stage2_skip_reason=args.stage2_skip_reason,
                 stage2_not_run=args.stage2_not_run,
                 stage2_not_run_reason=args.stage2_not_run_reason,
+                expected_spec_id=args.expected_spec_id,
                 mode=args.mode,
             )
         _write_report(Path(args.report_file) if args.report_file else None, report.markdown)
