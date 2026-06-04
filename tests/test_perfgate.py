@@ -5,6 +5,8 @@ from pathlib import Path
 
 from vllm_hust_benchmark import perfgate
 
+PERFGATE_SPEC_ID = "perfgate-ascend-qwen25-3b-910b3"
+
 
 def _write_run_leaderboard(path: Path, *, throughput: float, ttft: float, tbt: float) -> None:
     path.write_text(
@@ -18,7 +20,7 @@ def _write_run_leaderboard(path: Path, *, throughput: float, ttft: float, tbt: f
                     "error_rate": 0.0,
                 },
                 "same_spec": {
-                    "spec_id": "perfgate-ascend-qwen25-05b-910b3",
+                    "spec_id": PERFGATE_SPEC_ID,
                     "resolved_spec_hash": "abc123",
                 },
             }
@@ -195,11 +197,30 @@ def test_compare_benchmark_results_rejects_wrong_spec_id(tmp_path: Path) -> None
     current.write_text(json.dumps(payload), encoding="utf-8")
 
     try:
-        perfgate.compare_benchmark_results(current, baseline)
+        perfgate.compare_benchmark_results(current, baseline, expected_spec_id=PERFGATE_SPEC_ID)
     except ValueError as error:
-        assert "perfgate-ascend-qwen25-05b-910b3" in str(error)
+        assert PERFGATE_SPEC_ID in str(error)
     else:  # pragma: no cover - assertion guard
         raise AssertionError("expected wrong spec_id to fail")
+
+
+def test_format_metric_table_renders_infinite_delta_readably(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline.json"
+    current = tmp_path / "current.json"
+    _write_run_leaderboard(baseline, throughput=0.0, ttft=0.0, tbt=0.0)
+    _write_run_leaderboard(current, throughput=1.0, ttft=1.0, tbt=1.0)
+
+    report = perfgate.generate_two_stage_report(
+        stage1_current_file=current,
+        stage1_baseline_file=baseline,
+        fork_point="aaa11111",
+        m2_commit="aaa11111",
+        stage2_skipped=True,
+        expected_spec_id=PERFGATE_SPEC_ID,
+    )
+
+    assert "+∞%" in report.markdown
+    assert "inf%" not in report.markdown
 
 
 def test_compare2_rejects_stage2_skip_when_fork_point_differs_from_m2(tmp_path: Path) -> None:
