@@ -186,9 +186,11 @@ def _validate_two_stage_inputs(
     stage2_baseline_file: Path | str | None,
     stage2_rebase_conflict: bool,
     stage2_skipped: bool,
+    stage2_not_run: bool = False,
 ) -> None:
-    if stage2_rebase_conflict and stage2_skipped:
-        raise ValueError("stage2 cannot be both rebase-conflict and skipped")
+    active_states = sum(1 for value in (stage2_rebase_conflict, stage2_skipped, stage2_not_run) if value)
+    if active_states > 1:
+        raise ValueError("stage2 states are mutually exclusive")
     if stage2_skipped:
         if not fork_point or not m2_commit:
             raise ValueError("stage2 skipped requires both fork-point and m2-commit")
@@ -198,6 +200,8 @@ def _validate_two_stage_inputs(
             raise ValueError("stage2 current/baseline files must not be provided when stage2 is skipped")
     if stage2_rebase_conflict and (stage2_current_file or stage2_baseline_file):
         raise ValueError("stage2 current/baseline files must not be provided when stage2 has rebase conflict")
+    if stage2_not_run and (stage2_current_file or stage2_baseline_file):
+        raise ValueError("stage2 current/baseline files must not be provided when stage2 was not run")
 
 
 def generate_two_stage_report(
@@ -212,6 +216,8 @@ def generate_two_stage_report(
     stage2_rebase_conflict_file: Path | str | None = None,
     stage2_skipped: bool = False,
     stage2_skip_reason: str | None = None,
+    stage2_not_run: bool = False,
+    stage2_not_run_reason: str | None = None,
     mode: str = "report",
 ) -> TwoStageReport:
     _validate_two_stage_inputs(
@@ -221,6 +227,7 @@ def generate_two_stage_report(
         stage2_baseline_file=stage2_baseline_file,
         stage2_rebase_conflict=stage2_rebase_conflict,
         stage2_skipped=stage2_skipped,
+        stage2_not_run=stage2_not_run,
     )
     stage1 = compare_benchmark_results(Path(stage1_current_file), Path(stage1_baseline_file))
     stage2: StageComparison | None = None
@@ -259,6 +266,10 @@ def generate_two_stage_report(
         overall_passed = stage1.passed
         reason = stage2_skip_reason or "fork-point is already latest main"
         lines.append(f"**Stage 2: SKIPPED** — {reason}")
+    elif stage2_not_run:
+        overall_passed = False
+        reason = stage2_not_run_reason or "Stage 2 was not run"
+        lines.append(f"**Stage 2: NOT RUN** — {reason}")
     else:
         if not stage2_current_file or not stage2_baseline_file:
             raise ValueError("stage2 current/baseline files are required unless stage2 is skipped or conflicted")
@@ -302,6 +313,8 @@ def _build_parser() -> argparse.ArgumentParser:
     compare2.add_argument("--stage2-rebase-conflict-file")
     compare2.add_argument("--stage2-skipped", action="store_true")
     compare2.add_argument("--stage2-skip-reason")
+    compare2.add_argument("--stage2-not-run", action="store_true")
+    compare2.add_argument("--stage2-not-run-reason")
     compare2.add_argument("--report-file")
     compare2.add_argument("--mode", choices=["report", "enforce"], default="report")
     return parser
@@ -333,6 +346,8 @@ def main(argv: list[str] | None = None) -> int:
                 stage2_rebase_conflict_file=args.stage2_rebase_conflict_file,
                 stage2_skipped=args.stage2_skipped,
                 stage2_skip_reason=args.stage2_skip_reason,
+                stage2_not_run=args.stage2_not_run,
+                stage2_not_run_reason=args.stage2_not_run_reason,
                 mode=args.mode,
             )
         _write_report(Path(args.report_file) if args.report_file else None, report.markdown)
