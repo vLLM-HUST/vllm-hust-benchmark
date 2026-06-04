@@ -245,6 +245,34 @@ def test_compare2_rejects_conflict_and_skipped_together(tmp_path: Path) -> None:
     assert exit_code == 2
 
 
+def test_compare2_marks_stage2_not_run_as_overall_fail(tmp_path: Path) -> None:
+    stage1_baseline = tmp_path / "m1.json"
+    stage1_current = tmp_path / "b1.json"
+    report_file = tmp_path / "report.md"
+    _write_run_leaderboard(stage1_baseline, throughput=100.0, ttft=50.0, tbt=10.0)
+    _write_run_leaderboard(stage1_current, throughput=90.0, ttft=55.0, tbt=11.0)
+
+    exit_code = perfgate.main(
+        [
+            "compare2",
+            "--stage1-current", str(stage1_current),
+            "--stage1-baseline", str(stage1_baseline),
+            "--stage2-not-run",
+            "--stage2-not-run-reason", "Stage 1 did not pass; Stage 2 was not run",
+            "--fork-point", "aaa11111",
+            "--m2-commit", "bbb22222",
+            "--report-file", str(report_file),
+            "--mode", "enforce",
+        ]
+    )
+
+    assert exit_code == 1
+    report = report_file.read_text(encoding="utf-8")
+    assert "Stage 2: NOT RUN" in report
+    assert "Stage 1 did not pass" in report
+    assert "**Overall: FAIL**" in report
+
+
 def test_compare2_cli_report_mode_does_not_block_on_failure(tmp_path: Path) -> None:
     stage1_baseline = tmp_path / "m1.json"
     stage1_current = tmp_path / "b1.json"
