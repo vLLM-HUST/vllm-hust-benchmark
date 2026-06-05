@@ -8,7 +8,10 @@ def build_parser():
     from vllm.entrypoints.cli.benchmark import latency, serve, throughput  # noqa: F401
     from vllm.entrypoints.cli.benchmark.main import BenchmarkSubcommand
     from vllm.entrypoints.utils import VLLM_SUBCMD_PARSER_EPILOG, cli_env_setup
-    from vllm.utils import FlexibleArgumentParser
+    try:
+        from vllm.utils import FlexibleArgumentParser
+    except ImportError:
+        from vllm.utils.argparse_utils import FlexibleArgumentParser
 
     cli_env_setup()
 

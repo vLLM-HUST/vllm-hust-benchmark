@@ -83,6 +83,13 @@ Exporter input is a JSON file with both blocks:
 }
 ```
 
+When exporting from `--benchmark-result-file`, the exporter will also backfill any
+missing long-context constraint fields from the raw benchmark payload when they are
+available there, and it will use `same_spec.resolved_server_parameters.max_model_len`
+as `long_context_length` when a same-spec payload is provided. Fields that cannot be
+reliably derived, such as utilization or baseline-relative cost deltas, should still
+be supplied in the constraints file or left as `null`.
+
 ## HF Delivery Convention
 
 Recommended HF dataset layout:

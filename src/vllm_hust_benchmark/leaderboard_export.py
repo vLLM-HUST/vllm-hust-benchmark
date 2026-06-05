@@ -41,6 +41,19 @@ REQUIRED_CONSTRAINT_METRIC_KEYS = (
     "multi_tenant_high_utilization",
 )
 
+DERIVABLE_LONG_CONTEXT_METRIC_KEYS = (
+    "long_context_length",
+    "long_context_throughput_stable",
+    "long_context_ttft_p95_ms",
+    "long_context_ttft_p99_ms",
+    "long_context_tpot_p95_ms",
+    "long_context_tpot_p99_ms",
+    "long_context_ttft_p95_stable",
+    "long_context_ttft_p99_stable",
+    "long_context_tpot_p95_stable",
+    "long_context_tpot_p99_stable",
+)
+
 REQUIRED_SAME_SPEC_KEYS = (
     "schema_version",
     "spec_id",
@@ -144,6 +157,96 @@ def _validate_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[s
     return constraints_metrics
 
 
+def _default_constraints_metrics() -> dict[str, Any]:
+    return {key: None for key in REQUIRED_CONSTRAINT_METRIC_KEYS}
+
+
+def _normalize_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[str, Any]:
+    merged = _default_constraints_metrics()
+    merged.update(constraints_metrics)
+    return _validate_constraints_metrics(merged)
+
+
+def _load_benchmark_result_payload(benchmark_result_file: Path) -> dict[str, Any]:
+    payload = json.loads(benchmark_result_file.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("benchmark result file must be a JSON object")
+    return payload
+
+
+def _derive_long_context_constraints(
+    benchmark_result_payload: dict[str, Any],
+    *,
+    same_spec_payload: dict[str, Any] | None,
+) -> dict[str, Any]:
+    completed = int(benchmark_result_payload.get("completed") or 0)
+    failed = int(benchmark_result_payload.get("failed") or 0)
+    throughput = _safe_float(
+        benchmark_result_payload.get("output_throughput")
+        or benchmark_result_payload.get("tokens_per_second")
+        or benchmark_result_payload.get("total_token_throughput")
+        or benchmark_result_payload.get("request_throughput")
+    )
+    is_stable = completed > 0 and failed == 0 and bool(throughput and throughput > 0)
+
+    resolved_server_parameters = {}
+    if isinstance(same_spec_payload, dict):
+        resolved_server_parameters = (
+            same_spec_payload.get("resolved_server_parameters") or {}
+        )
+        if not isinstance(resolved_server_parameters, dict):
+            resolved_server_parameters = {}
+
+    return {
+        "long_context_length": resolved_server_parameters.get("max_model_len"),
+        "long_context_throughput_stable": is_stable,
+        "long_context_ttft_p95_ms": _safe_float(
+            benchmark_result_payload.get("p95_ttft_ms")
+        ),
+        "long_context_ttft_p99_ms": _safe_float(
+            benchmark_result_payload.get("p99_ttft_ms")
+        ),
+        "long_context_tpot_p95_ms": _safe_float(
+            benchmark_result_payload.get("p95_tpot_ms")
+        ),
+        "long_context_tpot_p99_ms": _safe_float(
+            benchmark_result_payload.get("p99_tpot_ms")
+        ),
+        "long_context_ttft_p95_stable": (
+            is_stable if benchmark_result_payload.get("p95_ttft_ms") is not None else None
+        ),
+        "long_context_ttft_p99_stable": (
+            is_stable if benchmark_result_payload.get("p99_ttft_ms") is not None else None
+        ),
+        "long_context_tpot_p95_stable": (
+            is_stable if benchmark_result_payload.get("p95_tpot_ms") is not None else None
+        ),
+        "long_context_tpot_p99_stable": (
+            is_stable if benchmark_result_payload.get("p99_tpot_ms") is not None else None
+        ),
+    }
+
+
+def _merge_derived_constraints_metrics(
+    constraints_metrics: dict[str, Any],
+    *,
+    benchmark_result_payload: dict[str, Any] | None,
+    same_spec_payload: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if benchmark_result_payload is None:
+        return _normalize_constraints_metrics(constraints_metrics)
+
+    merged = dict(constraints_metrics)
+    derived = _derive_long_context_constraints(
+        benchmark_result_payload,
+        same_spec_payload=same_spec_payload,
+    )
+    for key in DERIVABLE_LONG_CONTEXT_METRIC_KEYS:
+        if merged.get(key) is None and derived.get(key) is not None:
+            merged[key] = derived[key]
+    return _normalize_constraints_metrics(merged)
+
+
 def _load_metrics_payload(metrics_file: Path) -> dict[str, Any]:
     payload = json.loads(metrics_file.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -160,16 +263,7 @@ def _load_metrics_payload(metrics_file: Path) -> dict[str, Any]:
     if missing_metrics:
         raise ValueError(f"metrics missing required keys: {', '.join(missing_metrics)}")
 
-    missing_constraints = [
-        key for key in REQUIRED_CONSTRAINT_METRIC_KEYS if key not in constraints_metrics
-    ]
-    if missing_constraints:
-        raise ValueError(
-            "constraints_metrics missing required keys: "
-            + ", ".join(missing_constraints)
-        )
-
-    _validate_constraints_metrics(constraints_metrics)
+    payload["constraints_metrics"] = _normalize_constraints_metrics(constraints_metrics)
 
     return payload
 
@@ -179,15 +273,7 @@ def _load_constraints_metrics(constraints_file: Path) -> dict[str, Any]:
     constraints_metrics = payload.get("constraints_metrics", payload)
     if not isinstance(constraints_metrics, dict):
         raise ValueError("constraints file must be a JSON object or include constraints_metrics")
-
-    missing_constraints = [
-        key for key in REQUIRED_CONSTRAINT_METRIC_KEYS if key not in constraints_metrics
-    ]
-    if missing_constraints:
-        raise ValueError(
-            "constraints_metrics missing required keys: " + ", ".join(missing_constraints)
-        )
-    return _validate_constraints_metrics(dict(constraints_metrics))
+    return _normalize_constraints_metrics(dict(constraints_metrics))
 
 
 def _load_same_spec_payload(same_spec_file: Path) -> dict[str, Any]:
@@ -217,42 +303,38 @@ def _safe_float(value: Any) -> float | None:
 
 
 def _derive_metrics_from_benchmark_result(
-    benchmark_result_file: Path,
+    benchmark_result_payload: dict[str, Any],
     *,
     peak_mem_mb: float | None,
 ) -> dict[str, Any]:
-    payload = json.loads(benchmark_result_file.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise ValueError("benchmark result file must be a JSON object")
-
-    completed = int(payload.get("completed") or 0)
-    failed = int(payload.get("failed") or 0)
+    completed = int(benchmark_result_payload.get("completed") or 0)
+    failed = int(benchmark_result_payload.get("failed") or 0)
     total = completed + failed
-    errors = payload.get("errors") or []
+    errors = benchmark_result_payload.get("errors") or []
     if total == 0 and isinstance(errors, list) and errors:
         failed = sum(1 for item in errors if item)
         completed = len(errors) - failed
         total = len(errors)
 
-    mean_ttft_ms = _safe_float(payload.get("mean_ttft_ms"))
+    mean_ttft_ms = _safe_float(benchmark_result_payload.get("mean_ttft_ms"))
     if mean_ttft_ms is None:
-        avg_latency_seconds = _safe_float(payload.get("avg_latency"))
+        avg_latency_seconds = _safe_float(benchmark_result_payload.get("avg_latency"))
         if avg_latency_seconds is not None:
             mean_ttft_ms = avg_latency_seconds * 1000.0
 
     mean_tbt_ms = (
-        _safe_float(payload.get("mean_tpot_ms"))
-        or _safe_float(payload.get("mean_tbt_ms"))
-        or _safe_float(payload.get("tpot_ms"))
-        or _safe_float(payload.get("tbt_ms"))
+        _safe_float(benchmark_result_payload.get("mean_tpot_ms"))
+        or _safe_float(benchmark_result_payload.get("mean_tbt_ms"))
+        or _safe_float(benchmark_result_payload.get("tpot_ms"))
+        or _safe_float(benchmark_result_payload.get("tbt_ms"))
     )
 
     throughput_tps = (
-        _safe_float(payload.get("output_throughput"))
-        or _safe_float(payload.get("tokens_per_second"))
-        or _safe_float(payload.get("total_token_throughput"))
-        or _safe_float(payload.get("requests_per_second"))
-        or _safe_float(payload.get("request_throughput"))
+        _safe_float(benchmark_result_payload.get("output_throughput"))
+        or _safe_float(benchmark_result_payload.get("tokens_per_second"))
+        or _safe_float(benchmark_result_payload.get("total_token_throughput"))
+        or _safe_float(benchmark_result_payload.get("requests_per_second"))
+        or _safe_float(benchmark_result_payload.get("request_throughput"))
         or 0.0
     )
 
@@ -265,7 +347,9 @@ def _derive_metrics_from_benchmark_result(
         "ttft_ms": float(mean_ttft_ms or 0.0),
         "tbt_ms": float(mean_tbt_ms) if mean_tbt_ms is not None else None,
         "throughput_tps": float(throughput_tps),
-        "peak_mem_mb": float(peak_mem_mb or payload.get("peak_mem_mb") or 0.0),
+        "peak_mem_mb": float(
+            peak_mem_mb or benchmark_result_payload.get("peak_mem_mb") or 0.0
+        ),
         "error_rate": float(error_rate),
     }
 
@@ -283,17 +367,21 @@ def load_export_payload(
     peak_mem_mb: float | None,
 ) -> dict[str, Any]:
     if metrics_file is not None:
-        return _load_metrics_payload(metrics_file)
+        payload = _load_metrics_payload(metrics_file)
+        payload["benchmark_result_payload"] = None
+        return payload
     if benchmark_result_file is None or constraints_file is None:
         raise ValueError(
             "provide either metrics_file, or benchmark_result_file together with constraints_file"
         )
+    benchmark_result_payload = _load_benchmark_result_payload(benchmark_result_file)
     return {
         "metrics": _derive_metrics_from_benchmark_result(
-            benchmark_result_file,
+            benchmark_result_payload,
             peak_mem_mb=peak_mem_mb,
         ),
         "constraints_metrics": _load_constraints_metrics(constraints_file),
+        "benchmark_result_payload": benchmark_result_payload,
     }
 
 
@@ -437,9 +525,13 @@ def export_leaderboard_artifacts(
         peak_mem_mb=peak_mem_mb,
     )
     metrics = dict(payload["metrics"])
-    constraints_metrics = dict(payload["constraints_metrics"])
     same_spec_payload = (
         _load_same_spec_payload(same_spec_file) if same_spec_file is not None else None
+    )
+    constraints_metrics = _merge_derived_constraints_metrics(
+        dict(payload["constraints_metrics"]),
+        benchmark_result_payload=payload.get("benchmark_result_payload"),
+        same_spec_payload=same_spec_payload,
     )
     resolved_memory_per_chip_gb = _resolve_memory_per_chip_gb(
         hardware_chip_model,

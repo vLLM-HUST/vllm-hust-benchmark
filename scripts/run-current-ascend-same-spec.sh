@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+VLLM_CLI_COMPAT=${VLLM_CLI_COMPAT:-"$REPO_ROOT/scripts/run_vllm_cli_compat.py"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
@@ -13,6 +14,8 @@ CURRENT_RUNTIME_PYTHONPATH=${CURRENT_RUNTIME_PYTHONPATH:-}
 CURRENT_ENV_PREFIX=${CURRENT_ENV_PREFIX:-"/root/miniconda3/envs/vllm-hust-dev"}
 CURRENT_RUNTIME_PYTHON=${CURRENT_RUNTIME_PYTHON:-"$CURRENT_ENV_PREFIX/bin/python"}
 CURRENT_VLLM_CACHE_ROOT=${CURRENT_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/current-ascend-same-spec"}
+CURRENT_BENCHMARK_DATASET_ROOT=${CURRENT_BENCHMARK_DATASET_ROOT:-"$REPO_ROOT/.cache/current-benchmark-datasets"}
+CURRENT_SHAREGPT_DATASET_URL=${CURRENT_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
 CURRENT_MODEL_PATH=${CURRENT_MODEL_PATH:-}
 CURRENT_SERVER_HOST=${CURRENT_SERVER_HOST:-}
 CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-"8001"}
@@ -40,6 +43,8 @@ RUN_ID=${RUN_ID:-"current-ascend-same-spec-$(date -u +%Y%m%dT%H%M%SZ)"}
 READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-600}
 READY_STATUS_INTERVAL_SECONDS=${READY_STATUS_INTERVAL_SECONDS:-30}
 CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-$READY_TIMEOUT_SECONDS}
+SERVER_START_RETRIES=${SERVER_START_RETRIES:-3}
+SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -62,6 +67,11 @@ fi
 
 if [[ ! -f "$CONSTRAINTS_FILE" ]]; then
   echo "Constraints stub not found: $CONSTRAINTS_FILE" >&2
+  exit 2
+fi
+
+if [[ ! -f "$VLLM_CLI_COMPAT" ]]; then
+  echo "CLI compatibility wrapper not found: $VLLM_CLI_COMPAT" >&2
   exit 2
 fi
 
@@ -199,6 +209,15 @@ PY
   fi
 
   printf '%s' "unknown"
+}
+
+append_export_arg_if_present() {
+  local flag=$1
+  local value=$2
+
+  if [[ -n "$value" ]] && [[ "$value" != "null" ]]; then
+    EXPORT_ARGS+=("$flag" "$value")
+  fi
 }
 
 list_port_listener_pids() {
@@ -404,12 +423,26 @@ run_server_command() {
 }
 
 run_client_command() {
-  run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
-    "$CURRENT_RUNTIME_PYTHON" -m vllm.entrypoints.cli.main bench serve \
-    --save-result \
-    --result-dir "$RESULT_DIR" \
-    --result-filename "$(basename "$RAW_RESULT_FILE")" \
-    $CLIENT_ARGS
+  case "$BENCHMARK_TYPE" in
+    serve)
+      run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
+        "$CURRENT_RUNTIME_PYTHON" "$VLLM_CLI_COMPAT" bench serve \
+        --save-result \
+        --result-dir "$RESULT_DIR" \
+        --result-filename "$(basename "$RAW_RESULT_FILE")" \
+        $CLIENT_ARGS
+      ;;
+    throughput|latency)
+      run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
+        "$CURRENT_RUNTIME_PYTHON" "$VLLM_CLI_COMPAT" bench "$BENCHMARK_TYPE" \
+        --output-json "$RAW_RESULT_FILE" \
+        $CLIENT_ARGS
+      ;;
+    *)
+      echo "Unsupported benchmark type for current same-spec runner: $BENCHMARK_TYPE" >&2
+      return 2
+      ;;
+  esac
 }
 
 json2args() {
@@ -419,6 +452,88 @@ json2args() {
     map(if (.value | tostring) == "" then "--" + (.key | gsub("_"; "-")) else "--" + (.key | gsub("_"; "-")) + " " + (.value | tostring) end) |
     join(" ")
   '
+}
+
+download_file() {
+  local url=$1
+  local target_file=$2
+
+  mkdir -p "$(dirname "$target_file")"
+  if command -v wget >/dev/null 2>&1; then
+    wget -O "$target_file" "$url"
+    return 0
+  fi
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -L --fail --output "$target_file" "$url"
+    return 0
+  fi
+
+  echo "wget or curl is required to download benchmark datasets" >&2
+  return 2
+}
+
+ensure_runtime_dataset_available() {
+  local dataset_path=${1:-}
+  local sharegpt_target
+
+  [[ -z "$dataset_path" ]] && return 0
+
+  case "$dataset_path" in
+    /*)
+      if [[ ! -f "$dataset_path" ]]; then
+        echo "runtime dataset path not found: $dataset_path" >&2
+        return 2
+      fi
+      return 0
+      ;;
+    ShareGPT_V3_unfiltered_cleaned_split.json)
+      sharegpt_target="$CURRENT_BENCHMARK_DATASET_ROOT/$dataset_path"
+      if [[ -f "$sharegpt_target" ]]; then
+        return 0
+      fi
+      echo "[same-spec-current] downloading ShareGPT benchmark dataset to $sharegpt_target"
+      download_file "$CURRENT_SHAREGPT_DATASET_URL" "$sharegpt_target"
+      ;;
+    benchmarks/*)
+      if [[ ! -f "$CURRENT_VLLM_HUST_REPO/$dataset_path" ]]; then
+        echo "benchmark dataset path not found in current vllm worktree: $CURRENT_VLLM_HUST_REPO/$dataset_path" >&2
+        return 2
+      fi
+      ;;
+  esac
+}
+
+normalized_client_parameters_json() {
+  run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" \
+    env SAME_SPEC_FILE="$SAME_SPEC_FILE" \
+    BENCHMARK_TYPE="$BENCHMARK_TYPE" \
+    CLIENT_READY_CHECK_TIMEOUT_SECONDS="$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
+    CURRENT_VLLM_WORKTREE="$CURRENT_VLLM_HUST_REPO" \
+    CURRENT_BENCHMARK_DATASET_ROOT="$CURRENT_BENCHMARK_DATASET_ROOT" \
+    "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
+
+payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
+print(
+    json.dumps(
+        normalize_client_parameters(
+            payload["resolved_client_parameters"],
+            benchmark_type=os.environ["BENCHMARK_TYPE"],
+            ready_check_timeout_sec=ready_timeout,
+            vllm_worktree=os.environ.get("CURRENT_VLLM_WORKTREE"),
+            dataset_cache_root=os.environ.get("CURRENT_BENCHMARK_DATASET_ROOT"),
+        ),
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+)
+PY
 }
 
 resolve_runtime_model() {
@@ -455,18 +570,29 @@ resolve_same_spec() {
     --spec-file "$SPEC_FILE"
     --output-file "$SAME_SPEC_FILE"
     --runtime-model "$RUNTIME_MODEL"
-    --server-port "$CURRENT_SERVER_PORT"
-    --client-port "$CURRENT_CLIENT_PORT"
   )
 
-  if [[ -n "$CURRENT_SERVER_HOST" ]]; then
-    resolve_args+=(--server-host "$CURRENT_SERVER_HOST")
-  fi
-  if [[ -n "$CURRENT_CLIENT_HOST" ]]; then
-    resolve_args+=(--client-host "$CURRENT_CLIENT_HOST")
+  if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
+    resolve_args+=(
+      --server-port "$CURRENT_SERVER_PORT"
+      --client-port "$CURRENT_CLIENT_PORT"
+    )
+
+    if [[ -n "$CURRENT_SERVER_HOST" ]]; then
+      resolve_args+=(--server-host "$CURRENT_SERVER_HOST")
+    fi
+    if [[ -n "$CURRENT_CLIENT_HOST" ]]; then
+      resolve_args+=(--client-host "$CURRENT_CLIENT_HOST")
+    fi
   fi
 
   run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" "${resolve_args[@]}"
+}
+
+resolve_scenario_benchmark_type() {
+  run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" \
+    env SCENARIO_NAME="$SCENARIO" \
+    "$CURRENT_RUNTIME_PYTHON" -c "import os; from vllm_hust_benchmark.registry import get_scenario; print(get_scenario(os.environ['SCENARIO_NAME']).benchmark_type)"
 }
 
 port_has_listener() {
@@ -611,6 +737,7 @@ NODE_COUNT=$(jq -r '.node_count' "$SPEC_FILE")
 SCENARIO=$(jq -r '.scenario' "$SPEC_FILE")
 INPUT_LEN=$(jq -r '.client_parameters.input_len' "$SPEC_FILE")
 OUTPUT_LEN=$(jq -r '.client_parameters.output_len' "$SPEC_FILE")
+BENCHMARK_TYPE=$(resolve_scenario_benchmark_type)
 
 if [[ -z "$CURRENT_ENGINE_VERSION" ]]; then
   CURRENT_ENGINE_VERSION=$(detect_current_engine_version)
@@ -636,77 +763,108 @@ fi
 SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
 resolve_same_spec
 
-SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
-SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
-CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
-CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
+resolved_dataset_path=$(jq -r '.resolved_client_parameters.dataset_path // empty' "$SAME_SPEC_FILE")
+ensure_runtime_dataset_available "$resolved_dataset_path"
 
-assert_target_port_available "Current same-spec benchmark" "$CLIENT_HOST" "$CLIENT_PORT"
-
-SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters | del(.disable_log_requests)' "$SAME_SPEC_FILE")")
-CLIENT_ARGS=$(json2args "$({
-  jq -c \
-    --argjson ready_timeout "$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
-    '.resolved_client_parameters
-      | .ready_check_timeout_sec = (
-          if (.ready_check_timeout_sec // 0) > 0
-          then .ready_check_timeout_sec
-          else $ready_timeout
-          end
-        )' "$SAME_SPEC_FILE"
-})")
+SERVER_HOST=""
+SERVER_PORT=""
+CLIENT_HOST=""
+CLIENT_PORT=""
+SERVER_ARGS=""
+CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
 SERVER_STDOUT_LOG="$RESULT_DIR/server.stdout.log"
 
+if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
+  SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
+  SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
+  CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
+  CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
+
+  assert_target_port_available "Current same-spec benchmark" "$CLIENT_HOST" "$CLIENT_PORT"
+  SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters | del(.disable_log_requests)' "$SAME_SPEC_FILE")")
+fi
+
 echo "[same-spec-current] neutral cwd: $CURRENT_RUNTIME_CWD"
 echo "[same-spec-current] vllm cache root: $CURRENT_VLLM_CACHE_ROOT"
 echo "[same-spec-current] runtime model source: $RUNTIME_MODEL"
 echo "[same-spec-current] resolved spec file: $SAME_SPEC_FILE"
-echo "[same-spec-current] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
-run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
-SERVER_PID=$!
-persist_managed_server_state
+echo "[same-spec-current] benchmark type: $BENCHMARK_TYPE"
+if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
+  echo "[same-spec-current] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
+  server_ready=0
+  for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
+    : >"$SERVER_STDOUT_LOG"
+    run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
+    SERVER_PID=$!
+    persist_managed_server_state
 
-wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
-persist_managed_server_state
+    if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then
+      persist_managed_server_state
+      server_ready=1
+      break
+    fi
+
+    server_wait_status=$?
+    if [[ "$server_wait_status" -eq 86 && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+      echo "[same-spec-current] detected transient Ascend runtime startup failure; retrying server start in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+      cleanup_managed_server || true
+      sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+      continue
+    fi
+
+    exit "$server_wait_status"
+  done
+
+  if [[ "$server_ready" != "1" ]]; then
+    echo "[same-spec-current] vLLM server did not become ready after ${SERVER_START_RETRIES} start attempt(s)" >&2
+    exit 1
+  fi
+fi
+
 run_client_command
+
+EXPORT_ARGS=(
+  "$SCENARIO"
+  --benchmark-result-file "$RAW_RESULT_FILE"
+  --constraints-file "$CONSTRAINTS_FILE"
+  --same-spec-file "$SAME_SPEC_FILE"
+  --output-dir "$ARTIFACT_DIR"
+  --run-id "$RUN_ID"
+  --engine "$CURRENT_ENGINE"
+  --engine-version "$CURRENT_ENGINE_VERSION"
+  --core-version "$CURRENT_CORE_VERSION"
+  --backend-version "$CURRENT_BACKEND_VERSION"
+  --model-name "$MODEL"
+  --model-parameters "$MODEL_PARAMETERS"
+  --model-precision "$MODEL_PRECISION"
+  --hardware-vendor "$HARDWARE_VENDOR"
+  --hardware-chip-model "$HARDWARE_CHIP_MODEL"
+  --chip-count "$CHIP_COUNT"
+  --node-count "$NODE_COUNT"
+  --submitter "$CURRENT_SUBMITTER"
+  --baseline-engine "$CURRENT_BASELINE_ENGINE"
+  --data-source "$CURRENT_DATA_SOURCE"
+  --git-commit "$CURRENT_GIT_COMMIT"
+  --github-repository "$CURRENT_GITHUB_REPOSITORY"
+  --github-ref "$CURRENT_GITHUB_REF"
+  --runtime-python "$CURRENT_RUNTIME_PYTHON"
+  --engine-source-repository "$CURRENT_GITHUB_REPOSITORY"
+  --engine-source-ref "$CURRENT_GITHUB_REF"
+  --engine-source-commit "$CURRENT_GIT_COMMIT"
+  --plugin-source-engine "$CURRENT_PLUGIN_ENGINE"
+  --plugin-source-repository "$CURRENT_PLUGIN_GITHUB_REPOSITORY"
+  --plugin-source-ref "$CURRENT_PLUGIN_GITHUB_REF"
+  --plugin-source-commit "$CURRENT_PLUGIN_GIT_COMMIT"
+)
+
+append_export_arg_if_present --input-length "$INPUT_LEN"
+append_export_arg_if_present --output-length "$OUTPUT_LEN"
 
 run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" \
 "$CURRENT_RUNTIME_PYTHON" -m vllm_hust_benchmark.cli export-leaderboard-artifact \
-  "$SCENARIO" \
-  --benchmark-result-file "$RAW_RESULT_FILE" \
-  --constraints-file "$CONSTRAINTS_FILE" \
-  --same-spec-file "$SAME_SPEC_FILE" \
-  --output-dir "$ARTIFACT_DIR" \
-  --run-id "$RUN_ID" \
-  --engine "$CURRENT_ENGINE" \
-  --engine-version "$CURRENT_ENGINE_VERSION" \
-  --core-version "$CURRENT_CORE_VERSION" \
-  --backend-version "$CURRENT_BACKEND_VERSION" \
-  --model-name "$MODEL" \
-  --model-parameters "$MODEL_PARAMETERS" \
-  --model-precision "$MODEL_PRECISION" \
-  --hardware-vendor "$HARDWARE_VENDOR" \
-  --hardware-chip-model "$HARDWARE_CHIP_MODEL" \
-  --chip-count "$CHIP_COUNT" \
-  --node-count "$NODE_COUNT" \
-  --submitter "$CURRENT_SUBMITTER" \
-  --baseline-engine "$CURRENT_BASELINE_ENGINE" \
-  --data-source "$CURRENT_DATA_SOURCE" \
-  --input-length "$INPUT_LEN" \
-  --output-length "$OUTPUT_LEN" \
-  --git-commit "$CURRENT_GIT_COMMIT" \
-  --github-repository "$CURRENT_GITHUB_REPOSITORY" \
-  --github-ref "$CURRENT_GITHUB_REF" \
-  --runtime-python "$CURRENT_RUNTIME_PYTHON" \
-  --engine-source-repository "$CURRENT_GITHUB_REPOSITORY" \
-  --engine-source-ref "$CURRENT_GITHUB_REF" \
-  --engine-source-commit "$CURRENT_GIT_COMMIT" \
-  --plugin-source-engine "$CURRENT_PLUGIN_ENGINE" \
-  --plugin-source-repository "$CURRENT_PLUGIN_GITHUB_REPOSITORY" \
-  --plugin-source-ref "$CURRENT_PLUGIN_GITHUB_REF" \
-  --plugin-source-commit "$CURRENT_PLUGIN_GIT_COMMIT"
+  "${EXPORT_ARGS[@]}"
 
 echo "[same-spec-current] exported leaderboard artifact to $ARTIFACT_DIR"

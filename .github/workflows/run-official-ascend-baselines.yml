@@ -59,7 +59,7 @@ name: Run Official Ascend Baselines
         type: string
         default: main
       goal_baseline_env_prefix:
-        description: Optional conda env prefix for the official v0.11.0 baseline runtime. Leave blank to resolve from conda info --base on the runner.
+        description: Optional conda env prefix for the official v0.18.0 baseline runtime. Leave blank to resolve from conda info --base on the runner.
         required: false
         type: string
         default: ""
@@ -369,7 +369,7 @@ jobs:
 
           env_prefix="${GOAL_BASELINE_ENV_PREFIX_INPUT}"
           if [[ -z "${env_prefix//[[:space:]]/}" ]]; then
-            env_prefix="$conda_base/envs/vllm-ascend-official-v0110"
+            env_prefix="$conda_base/envs/vllm-ascend-official-v0180"
           fi
 
           [[ -d "$conda_base/condabin" ]] && printf '%s\n' "$conda_base/condabin" >> "$GITHUB_PATH"

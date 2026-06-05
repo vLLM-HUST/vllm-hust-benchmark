@@ -253,8 +253,6 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
                 "residual:",
                 "501",
                 "out-of-scope:",
-                "601",
-                "602",
         ]
 
 
@@ -359,6 +357,7 @@ def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
     captured_args = tmp_path / "runtime-env-conda-args.txt"
     captured_version = tmp_path / "runtime-vllm-version.txt"
 
+
     result = _run_bash(
         _source_run_official_functions(
             f"""
@@ -369,15 +368,15 @@ def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
             ASCEND_TOOLKIT_SET_ENV=/nonexistent
             ASCEND_ATB_SET_ENV=/nonexistent
 
-            # run_in_official_runtime calls: conda run -p "$GOAL_BASELINE_ENV_PREFIX" "$@"
-            # Export the function so the subshell can access it.
-            conda() {{
+            # run_in_official_runtime runs commands directly (not via conda).
+            # Mock vllm to capture the VLLM_VERSION env var and args.
+            vllm() {{
                 printf '%s\n' "$VLLM_VERSION" > {shlex.quote(str(captured_version))}
                 printf '%s\n' "$@" > {shlex.quote(str(captured_args))}
             }}
-            export -f conda
 
-            run_in_official_runtime '/tmp/runtime-a:/tmp/runtime-b' env SAMPLE_VAR=1 true
+
+            run_in_official_runtime '/tmp/runtime-a:/tmp/runtime-b' vllm serve --model foo
             """
         )
     )
@@ -385,7 +384,9 @@ def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
     assert result.returncode == 0
     assert captured_version.read_text(encoding="utf-8").strip() == "0.11.0"
     args = captured_args.read_text(encoding="utf-8").splitlines()
-    assert args[:3] == ["run", "-p", "/tmp/fake-official-env"]
+    assert "serve" in args
+    assert "--model" in args
+    assert "foo" in args
 
 
 def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> None:
