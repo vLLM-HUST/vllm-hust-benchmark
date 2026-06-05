@@ -1,0 +1,47 @@
+{
+  "id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-8chip-910b2",
+  "label": "Official Ascend Jan 2026 sonnet throughput 8-chip baseline for vllm-hust goal tracking",
+  "baseline_target": {
+    "id": "official-ascend-jan-2026-v0.18.0",
+    "label": "Official Ascend Jan 2026",
+    "engine": "vllm",
+    "engine_version": "0.18.0",
+    "github_repository": "vllm-project/vllm-ascend",
+    "vllm_ref": "v0.18.0",
+    "vllm_ascend_ref": "v0.18.0"
+  },
+  "scenario": "sonnet-throughput-8chip",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 8,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 8,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": ""
+  },
+  "client_parameters": {
+    "backend": "vllm",
+    "dataset_name": "sonnet",
+    "dataset_path": "benchmarks/sonnet.txt",
+    "tensor_parallel_size": 8,
+    "dtype": "float16",
+    "kv_cache_memory_bytes": 21474836480,
+    "num_prompts": 200,
+    "num_warmups": 0
+  },
+  "export": {
+    "engine": "vllm",
+    "engine_version": "0.18.0",
+    "submitter": "official-ascend-baseline",
+    "baseline_engine": "vllm",
+    "github_repository": "vllm-project/vllm-ascend",
+    "github_ref": "v0.18.0",
+    "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+    "data_source": "reference-vllm-ascend-benchmark"
+  }
+}
