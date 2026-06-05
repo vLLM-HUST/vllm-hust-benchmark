@@ -1,0 +1,54 @@
+{
+  "id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+  "label": "Official Ascend Jan 2026 VisionArena online baseline for vllm-hust goal tracking",
+  "baseline_target": {
+    "id": "official-ascend-jan-2026-v0.18.0",
+    "label": "Official Ascend Jan 2026",
+    "engine": "vllm",
+    "engine_version": "0.18.0",
+    "github_repository": "vllm-project/vllm-ascend",
+    "vllm_ref": "v0.18.0",
+    "vllm_ascend_ref": "v0.18.0"
+  },
+  "scenario": "visionarena-online",
+  "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+  "model_parameters": "7B",
+  "model_precision": "FP16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 1,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 1,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "limit_mm_per_prompt": {
+      "image": 1
+    },
+    "host": "0.0.0.0",
+    "port": 8000
+  },
+  "client_parameters": {
+    "backend": "openai-chat",
+    "endpoint": "/v1/chat/completions",
+    "dataset_name": "hf",
+    "dataset_path": "lmarena-ai/VisionArena-Chat",
+    "hf_split": "train",
+    "num_prompts": 1000,
+    "request_rate": 1,
+    "host": "127.0.0.1",
+    "port": 8000
+  },
+  "export": {
+    "engine": "vllm",
+    "engine_version": "0.18.0",
+    "submitter": "official-ascend-baseline",
+    "baseline_engine": "vllm",
+    "github_repository": "vllm-project/vllm-ascend",
+    "github_ref": "v0.18.0",
+    "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+    "data_source": "reference-vllm-ascend-benchmark"
+  }
+}

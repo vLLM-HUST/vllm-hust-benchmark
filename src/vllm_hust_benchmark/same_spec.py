@@ -3,8 +3,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any
+
+from vllm_hust_benchmark.registry import get_scenario
 
 PRECISION_TO_DTYPE = {
     "FP32": "float32",
@@ -31,15 +34,97 @@ LOCAL_MODEL_WEIGHT_PATTERNS = (
     "*.bin",
     "*.pt",
     "*.pth",
+)
+LOCAL_MODEL_INDEX_FILES = (
     "model.safetensors.index.json",
     "pytorch_model.bin.index.json",
 )
 PREFIX_REPETITION_DEFAULT_SUFFIX_LEN = 256
 PREFIX_REPETITION_DEFAULT_NUM_PREFIXES = 10
+GPU_MEMORY_UTILIZATION_ENV = "SAME_SPEC_GPU_MEMORY_UTILIZATION"
+MAX_MODEL_LEN_ENV = "SAME_SPEC_MAX_MODEL_LEN"
 
 
 def _path_has_any_matching_file(path: Path, patterns: tuple[str, ...]) -> bool:
     return any(candidate.is_file() for pattern in patterns for candidate in path.glob(pattern))
+
+
+def _path_has_complete_indexed_weights(path: Path) -> bool:
+    for index_name in LOCAL_MODEL_INDEX_FILES:
+        index_path = path / index_name
+        if not index_path.is_file():
+            continue
+
+        payload = json.loads(index_path.read_text(encoding="utf-8"))
+        weight_map = payload.get("weight_map") or {}
+        if not isinstance(weight_map, dict) or not weight_map:
+            continue
+
+        shard_names = {str(filename) for filename in weight_map.values() if filename}
+        if shard_names and all((path / shard_name).is_file() for shard_name in shard_names):
+            return True
+
+    return False
+
+
+def _benchmark_type_for_spec(spec: dict[str, Any]) -> str:
+    return get_scenario(_require_string(spec, "scenario")).benchmark_type
+
+
+def _maybe_apply_gpu_memory_utilization_override(
+    spec: dict[str, Any],
+    resolved: dict[str, Any],
+    *,
+    parameter_set: str,
+) -> None:
+    if "gpu_memory_utilization" in resolved:
+        return
+
+    if parameter_set == "client" and _benchmark_type_for_spec(spec) == "serve":
+        return
+
+    override = os.environ.get(GPU_MEMORY_UTILIZATION_ENV, "").strip()
+    if not override:
+        return
+
+    try:
+        resolved["gpu_memory_utilization"] = float(override)
+    except ValueError as exc:
+        raise ValueError(
+            f"{GPU_MEMORY_UTILIZATION_ENV} must be a float, got {override!r}"
+        ) from exc
+
+
+def _maybe_apply_max_model_len_override(
+    spec: dict[str, Any],
+    resolved: dict[str, Any],
+    *,
+    parameter_set: str,
+) -> None:
+    if "max_model_len" in resolved:
+        return
+
+    if parameter_set not in {"server", "client"}:
+        return
+
+    if parameter_set == "client" and _benchmark_type_for_spec(spec) == "serve":
+        return
+
+    override = os.environ.get(MAX_MODEL_LEN_ENV, "").strip()
+    if not override:
+        return
+
+    try:
+        max_model_len = int(override)
+    except ValueError as exc:
+        raise ValueError(
+            f"{MAX_MODEL_LEN_ENV} must be an integer, got {override!r}"
+        ) from exc
+
+    if max_model_len <= 0:
+        raise ValueError(f"{MAX_MODEL_LEN_ENV} must be > 0, got {override!r}")
+
+    resolved["max_model_len"] = max_model_len
 
 
 def runtime_model_path_has_required_artifacts(candidate: str | Path) -> bool:
@@ -50,7 +135,10 @@ def runtime_model_path_has_required_artifacts(candidate: str | Path) -> bool:
     return (
         _path_has_any_matching_file(path, LOCAL_MODEL_CONFIG_FILES)
         and _path_has_any_matching_file(path, LOCAL_MODEL_TOKENIZER_PATTERNS)
-        and _path_has_any_matching_file(path, LOCAL_MODEL_WEIGHT_PATTERNS)
+        and (
+            _path_has_any_matching_file(path, LOCAL_MODEL_WEIGHT_PATTERNS)
+            or _path_has_complete_indexed_weights(path)
+        )
     )
 
 
@@ -98,6 +186,8 @@ def resolve_server_parameters(
         resolved["host"] = host
     if port is not None:
         resolved["port"] = port
+    _maybe_apply_gpu_memory_utilization_override(spec, resolved, parameter_set="server")
+    _maybe_apply_max_model_len_override(spec, resolved, parameter_set="server")
     if "dtype" not in resolved:
         resolved["dtype"] = precision_to_runtime_dtype(_require_string(spec, "model_precision"))
     if "enforce_eager" not in resolved:
@@ -118,6 +208,8 @@ def resolve_client_parameters(
         resolved["host"] = host
     if port is not None:
         resolved["port"] = port
+    _maybe_apply_gpu_memory_utilization_override(spec, resolved, parameter_set="client")
+    _maybe_apply_max_model_len_override(spec, resolved, parameter_set="client")
 
     if resolved.get("dataset_name") == "random":
         if "input_len" in resolved and "random_input_len" not in resolved:
