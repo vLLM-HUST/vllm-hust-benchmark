@@ -1330,10 +1330,11 @@ should_force_eager_for_offline_benchmark() {
       ;;
   esac
 
-  if official_runtime_supports_aclgraph_weak_ref_tensor; then
+  official_runtime_supports_aclgraph_weak_ref_tensor
+  probe_status=$?
+
+  if [[ "$probe_status" -eq 0 ]]; then
     return 1
-  else
-    probe_status=$?
   fi
 
   if [[ "$probe_status" -eq 1 ]]; then
@@ -1355,10 +1356,11 @@ should_force_eager_for_server_benchmark() {
       ;;
   esac
 
-  if official_runtime_supports_aclgraph_weak_ref_tensor; then
+  official_runtime_supports_aclgraph_weak_ref_tensor
+  probe_status=$?
+
+  if [[ "$probe_status" -eq 0 ]]; then
     return 1
-  else
-    probe_status=$?
   fi
 
   if [[ "$probe_status" -eq 1 ]]; then
