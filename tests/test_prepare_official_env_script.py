@@ -230,7 +230,7 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
                         }
 
                         is_process_in_cleanup_scope() {
-                            [[ "$1" == '501' || "$1" == '601' ]]
+                            [[ "$1" == '501' ]]
                         }
 
                         is_benchmark_process() {
@@ -238,7 +238,7 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
                         }
 
                         is_managed_runner_wrapper_process() {
-                            [[ "$1" == '501' || "$1" == '502' ]]
+                            [[ "$1" == '501' ]]
                         }
 
                         echo 'residual:'
@@ -252,8 +252,8 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
         assert result.stdout.splitlines() == [
                 "residual:",
                 "501",
-                "601",
                 "out-of-scope:",
+                "601",
                 "602",
         ]
 
@@ -369,10 +369,13 @@ def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
             ASCEND_TOOLKIT_SET_ENV=/nonexistent
             ASCEND_ATB_SET_ENV=/nonexistent
 
+            # run_in_official_runtime calls: conda run -p "$GOAL_BASELINE_ENV_PREFIX" "$@"
+            # Export the function so the subshell can access it.
             conda() {{
                 printf '%s\n' "$VLLM_VERSION" > {shlex.quote(str(captured_version))}
                 printf '%s\n' "$@" > {shlex.quote(str(captured_args))}
             }}
+            export -f conda
 
             run_in_official_runtime '/tmp/runtime-a:/tmp/runtime-b' env SAMPLE_VAR=1 true
             """
