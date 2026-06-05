@@ -198,6 +198,25 @@
         "input_len": 1024,
         "output_len": 128
       }
+    },
+    {
+      "name": "agent-research-online",
+      "title": "EvoScientist AI research agent workload",
+      "benchmark_type": "serve",
+      "description": "Real-world workload trace from EvoScientist multi-agent research system. Captures the request pattern of an autonomous research agent doing literature review, code generation, and analysis.",
+      "tags": ["agent", "online", "multi-turn", "real-world"],
+      "leaderboard": {
+        "workload_name": "agent-research-online",
+        "representative_business_scenario": "agent-workload",
+        "default_config_type": "single_gpu"
+      },
+      "defaults": {
+        "backend": "openai-chat",
+        "endpoint": "/v1/chat/completions",
+        "dataset_name": "custom",
+        "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
+        "num_prompts": 32
+      }
     }
   ]
 }
