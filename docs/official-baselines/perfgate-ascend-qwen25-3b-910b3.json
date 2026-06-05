@@ -1,0 +1,55 @@
+{
+  "id": "perfgate-ascend-qwen25-3b-910b3",
+  "label": "Performance gate Ascend baseline for Qwen2.5-3B on 910B3",
+  "baseline_target": {
+    "id": "perfgate-ascend-smoke",
+    "label": "Performance Gate Ascend Smoke",
+    "engine": "vllm-hust",
+    "engine_version": "main",
+    "github_repository": "vLLM-HUST/vllm-hust",
+    "vllm_ref": "main",
+    "vllm_ascend_ref": "main"
+  },
+  "scenario": "random-online",
+  "model": "Qwen/Qwen2.5-3B-Instruct",
+  "model_parameters": "3B",
+  "model_precision": "BF16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B3",
+  "chip_count": 1,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 1,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 8000,
+    "dtype": "bfloat16",
+    "max_model_len": 256,
+    "max_num_seqs": 1
+  },
+  "client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "random",
+    "num_prompts": 8,
+    "input_len": 64,
+    "output_len": 16,
+    "request_rate": "inf",
+    "max_concurrency": 4,
+    "host": "127.0.0.1",
+    "port": 8000
+  },
+  "export": {
+    "engine": "vllm-hust",
+    "engine_version": "main",
+    "submitter": "vllm-hust-perfgate",
+    "baseline_engine": "vllm-hust",
+    "github_repository": "vLLM-HUST/vllm-hust",
+    "github_ref": "main",
+    "git_commit": null,
+    "data_source": "vllm-hust-ci-perfgate-same-spec"
+  }
+}
