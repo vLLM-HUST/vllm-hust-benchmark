@@ -133,6 +133,40 @@
       }
     },
     {
+      "name": "sonnet-throughput-4chip",
+      "title": "Official sonnet offline throughput benchmark (4-chip)",
+      "benchmark_type": "throughput",
+      "description": "Lightweight sonnet throughput benchmark on 4-chip Ascend 910B2 configuration.",
+      "tags": ["official", "offline", "text", "lightweight", "multi-chip"],
+      "leaderboard": {
+        "workload_name": "sonnet-throughput-4chip",
+        "representative_business_scenario": "offline-batch-serving",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "dataset_name": "sonnet",
+        "dataset_path": "benchmarks/sonnet.txt",
+        "num_prompts": 200
+      }
+    },
+    {
+      "name": "sonnet-throughput-8chip",
+      "title": "Official sonnet offline throughput benchmark (8-chip)",
+      "benchmark_type": "throughput",
+      "description": "Lightweight sonnet throughput benchmark on 8-chip Ascend 910B2 configuration.",
+      "tags": ["official", "offline", "text", "lightweight", "multi-chip"],
+      "leaderboard": {
+        "workload_name": "sonnet-throughput-8chip",
+        "representative_business_scenario": "offline-batch-serving",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "dataset_name": "sonnet",
+        "dataset_path": "benchmarks/sonnet.txt",
+        "num_prompts": 200
+      }
+    },
+    {
       "name": "random-latency",
       "title": "Official synthetic latency benchmark",
       "benchmark_type": "latency",
