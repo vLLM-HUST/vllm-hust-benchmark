@@ -126,7 +126,14 @@ def test_runtime_model_path_has_required_artifacts(tmp_path: Path) -> None:
     model_dir.mkdir()
     (model_dir / "config.json").write_text("{}", encoding="utf-8")
     (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
-    (model_dir / "model.safetensors.index.json").write_text("{}", encoding="utf-8")
+    # _path_has_complete_indexed_weights requires index file + shard files referenced in weight_map
+    index_file = model_dir / "model.safetensors.index.json"
+    shard_file = model_dir / "model-00001-of-00002.safetensors"
+    shard_file.touch()
+    index_file.write_text(
+        json.dumps({"weight_map": {"model embedder": "model-00001-of-00002.safetensors"}}),
+        encoding="utf-8",
+    )
 
     assert runtime_model_path_has_required_artifacts(model_dir)
 
