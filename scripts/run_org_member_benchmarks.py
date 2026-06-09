@@ -231,7 +231,13 @@ class WorktreeManager:
                 # pip may return non-zero due to warnings (e.g. path string NULL
                 # from SWIG, deprecation warnings). Verify the package is actually
                 # importable before declaring failure.
-                import_name = name.replace("-", "_")
+                # Map package name to actual Python import name
+                # (e.g. vllm-ascend-hust -> vllm_ascend, not vllm_ascend_hust)
+                IMPORT_NAME_MAP = {
+                    "vllm-hust": "vllm",
+                    "vllm-ascend-hust": "vllm_ascend",
+                }
+                import_name = IMPORT_NAME_MAP.get(name, name.replace("-", "_"))
                 try:
                     verify = subprocess.run(
                         [conda_python, "-c", f"import {import_name}"],
@@ -365,6 +371,7 @@ class Config:
     include_upstream: bool = True
     upstream_commits: str = ""  # comma-separated upstream commit SHAs for baseline
     baseline_lookup: str = ""  # path to benchmark repo or GitHub raw URL for existing results
+    fail_fast: bool = False  # exit on first group failure (for debugging)
 
     # Paths (set dynamically)
     script_dir: Path = field(default_factory=Path)
@@ -2140,7 +2147,12 @@ class BenchmarkRunner:
             return True
 
         try:
-            subprocess.run(["git", "add", "submissions/", self.config.attribution_file],
+            # Only add files that exist to avoid git add exit 128
+            add_targets = ["submissions/"]
+            attr_file = Path(self.config.attribution_file)
+            if attr_file.is_file():
+                add_targets.append(str(attr_file))
+            subprocess.run(["git", "add"] + add_targets,
                          cwd=self.config.benchmark_repo, capture_output=True, check=True)
 
             result = subprocess.run(["git", "commit", "-m", message],
@@ -2289,6 +2301,15 @@ class BenchmarkRunner:
                     }
                     self.checkpoint.benchmarks_completed["failed"] += 1
                     self.checkpoint.to_file(Path(self.config.checkpoint_file))
+
+                    if self.config.fail_fast:
+                        self._log(
+                            f"Fail-fast: aborting after first group failure "
+                            f"({group.group_id}). Remaining {len(unprocessed) - i} "
+                            f"group(s) skipped.",
+                            "error",
+                        )
+                        break
 
                 print()
 
@@ -2804,6 +2825,7 @@ def create_parser() -> argparse.ArgumentParser:
     run_parser = subparsers.add_parser("run", help="Run benchmarks for org members")
     run_parser.add_argument("--dry-run", action="store_true", help="Simulate without pushing")
     run_parser.add_argument("--resume", action="store_true", help="Resume from checkpoint")
+    run_parser.add_argument("--fail-fast", action="store_true", help="Exit on first group failure (for debugging)")
     run_parser.add_argument("--vllm-hust-repo", help="Path to Va stable vllm-hust worktree (enables worktree mode)")
     run_parser.add_argument("--vllm-ascend-hust-repo", help="Path to Va stable vllm-ascend-hust worktree (enables worktree mode)")
     run_parser.add_argument("--benchmark-repo", help="Path to vllm-hust-benchmark repo (auto-detected if sibling)")
@@ -2900,6 +2922,7 @@ def main():
         html_report_file=get_arg("html", "contribution-report.html"),
         dry_run=get_arg("dry_run", False),
         resume_mode=get_arg("resume", False),
+        fail_fast=get_arg("fail_fast", False),
         include_upstream=bool(get_arg("include_upstream", True)),
         upstream_commits=get_arg("upstream_commits", ""),
         baseline_lookup=get_arg("baseline_lookup", ""),
