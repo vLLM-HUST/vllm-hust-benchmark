@@ -1187,20 +1187,30 @@ class BenchmarkRunner:
             self._ci_script_stable_path = stable_path
             self._log(f"CI script saved to stable path: {stable_path}")
         else:
-            # Try to extract from git (main branch)
+            # Try to extract from git (main branch) — but only if the file exists
             try:
-                result = subprocess.run(
-                    ["git", "show", f"origin/main:{ci_script_rel}"],
-                    cwd=git_repo, capture_output=True, text=True, check=True,
+                # Verify the file exists in origin/main before attempting git show
+                check = subprocess.run(
+                    ["git", "ls-tree", "origin/main", ci_script_rel],
+                    cwd=git_repo, capture_output=True, text=True,
                 )
-                import tempfile
-                tmp_dir = Path(tempfile.gettempdir()) / "vllm-hust-benchmark-ci"
-                tmp_dir.mkdir(parents=True, exist_ok=True)
-                stable_path = tmp_dir / "run_ascend_benchmark_ci.sh"
-                stable_path.write_text(result.stdout)
-                stable_path.chmod(0o755)
-                self._ci_script_stable_path = stable_path
-                self._log(f"CI script extracted from origin/main to: {stable_path}")
+                if check.returncode != 0 or not check.stdout.strip():
+                    self._log(f"CI script not found in origin/main ({ci_script_rel}), skipping", "warn")
+                else:
+                    result = subprocess.run(
+                        ["git", "show", f"origin/main:{ci_script_rel}"],
+                        cwd=git_repo, capture_output=True, text=True, check=True,
+                    )
+                    import tempfile
+                    tmp_dir = Path(tempfile.gettempdir()) / "vllm-hust-benchmark-ci"
+                    tmp_dir.mkdir(parents=True, exist_ok=True)
+                    stable_path = tmp_dir / "run_ascend_benchmark_ci.sh"
+                    stable_path.write_text(result.stdout)
+                    stable_path.chmod(0o755)
+                    self._ci_script_stable_path = stable_path
+                    self._log(f"CI script extracted from origin/main to: {stable_path}")
+            except subprocess.CalledProcessError as e:
+                self._log(f"Failed to save CI script copy: {e.stderr.strip()}", "warn")
             except Exception as e:
                 self._log(f"Failed to save CI script copy: {e}", "warn")
 
@@ -1218,18 +1228,29 @@ class BenchmarkRunner:
             self._constraints_file_stable_path = stable_constraints
             self._log(f"Constraints file saved to: {stable_constraints}")
         else:
+            # Try to extract from git (main branch) — but only if the file exists
             try:
-                result = subprocess.run(
-                    ["git", "show", f"origin/main:{constraints_rel}"],
-                    cwd=git_repo, capture_output=True, text=True, check=True,
+                # Verify the file exists in origin/main before attempting git show
+                check = subprocess.run(
+                    ["git", "ls-tree", "origin/main", constraints_rel],
+                    cwd=git_repo, capture_output=True, text=True,
                 )
-                import tempfile
-                tmp_dir = Path(tempfile.gettempdir()) / "vllm-hust-benchmark-ci"
-                tmp_dir.mkdir(parents=True, exist_ok=True)
-                stable_constraints = tmp_dir / "random-online-ci-constraints.json"
-                stable_constraints.write_text(result.stdout)
-                self._constraints_file_stable_path = stable_constraints
-                self._log(f"Constraints file extracted from origin/main to: {stable_constraints}")
+                if check.returncode != 0 or not check.stdout.strip():
+                    self._log(f"Constraints file not found in origin/main ({constraints_rel}), skipping", "warn")
+                else:
+                    result = subprocess.run(
+                        ["git", "show", f"origin/main:{constraints_rel}"],
+                        cwd=git_repo, capture_output=True, text=True, check=True,
+                    )
+                    import tempfile
+                    tmp_dir = Path(tempfile.gettempdir()) / "vllm-hust-benchmark-ci"
+                    tmp_dir.mkdir(parents=True, exist_ok=True)
+                    stable_constraints = tmp_dir / "random-online-ci-constraints.json"
+                    stable_constraints.write_text(result.stdout)
+                    self._constraints_file_stable_path = stable_constraints
+                    self._log(f"Constraints file extracted from origin/main to: {stable_constraints}")
+            except subprocess.CalledProcessError as e:
+                self._log(f"Failed to save constraints file: {e.stderr.strip()}", "warn")
             except Exception as e:
                 self._log(f"Failed to save constraints file: {e}", "warn")
 
