@@ -15,6 +15,11 @@ HF_CACHE_PATH_PATTERN = re.compile(
     r"(?:^|/)models--(?P<namespace>[^/]+)--(?P<name>[^/]+)/(?:snapshots|refs)/",
     re.IGNORECASE,
 )
+# Matches custom model directory format: /data/shared_models/Namespace--Name
+# Used when models are stored with ``--`` as separator instead of ``/``.
+CUSTOM_MODEL_PATH_PATTERN = re.compile(
+    r"(?:^|/)(?P<namespace>[A-Za-z0-9][A-Za-z0-9._-]*)--(?P<name>[A-Za-z0-9][A-Za-z0-9._-]*)$"
+)
 
 
 @dataclass(frozen=True)
@@ -48,6 +53,19 @@ def _extract_hf_repo_id_from_path(value: str) -> str | None:
     namespace = match.group("namespace")
     name = match.group("name")
     return f"{namespace}/{name}"
+
+
+def _extract_repo_id_from_custom_path(value: str) -> str | None:
+    """Extract HF repo id from custom directory format (``Namespace--Name``).
+
+    Handles paths like ``/data/shared_models/Qwen--Qwen2.5-14B-Instruct``
+    where the model name uses ``--`` as a separator instead of ``/``.
+    """
+    stripped = value.rstrip("/")
+    match = CUSTOM_MODEL_PATH_PATTERN.search(stripped)
+    if not match:
+        return None
+    return f"{match.group('namespace')}/{match.group('name')}"
 
 
 def _build_fallback_identity(repo_id: str, *, registry: str) -> ModelIdentity:
@@ -145,6 +163,18 @@ def resolve_model_identity(
             if seeded is not None
             else _build_fallback_identity(
                 repo_id_from_path, registry=DEFAULT_MODEL_REGISTRY
+            )
+        )
+
+    # Custom model directory format (e.g. /data/shared_models/Qwen--Qwen2.5-14B)
+    custom_repo_id = _extract_repo_id_from_custom_path(normalized)
+    if custom_repo_id is not None:
+        seeded = lookup.get(custom_repo_id)
+        return (
+            seeded
+            if seeded is not None
+            else _build_fallback_identity(
+                custom_repo_id, registry=DEFAULT_MODEL_REGISTRY
             )
         )
 
