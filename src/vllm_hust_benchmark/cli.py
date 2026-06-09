@@ -580,6 +580,15 @@ def _build_parser() -> argparse.ArgumentParser:
     submit_parser.add_argument("--github-event-name")
     submit_parser.add_argument("--github-pr-number", type=int)
     submit_parser.add_argument("--github-pr-url")
+    submit_parser.add_argument("--same-spec-file", help="Path to same-spec benchmark spec file.")
+    submit_parser.add_argument("--runtime-python", help="Python interpreter used to run the engine.")
+    submit_parser.add_argument("--engine-source-repository")
+    submit_parser.add_argument("--engine-source-ref")
+    submit_parser.add_argument("--engine-source-commit")
+    submit_parser.add_argument("--plugin-source-engine")
+    submit_parser.add_argument("--plugin-source-repository")
+    submit_parser.add_argument("--plugin-source-ref")
+    submit_parser.add_argument("--plugin-source-commit")
     submit_parser.add_argument(
         "--submissions-dir",
         help="Root submissions directory (default: <benchmark_repo>/submissions).",
@@ -1025,12 +1034,16 @@ def main(argv: list[str] | None = None) -> int:
         constraints_file = (
             Path(args.constraints_file).resolve() if args.constraints_file else None
         )
+        same_spec_file = (
+            Path(args.same_spec_file).resolve() if getattr(args, "same_spec_file", None) else None
+        )
         try:
             artifact_path, manifest_path = export_leaderboard_artifacts(
                 scenario=scenario,
                 metrics_file=metrics_file,
                 benchmark_result_file=benchmark_result_file,
                 constraints_file=constraints_file,
+                same_spec_file=same_spec_file,
                 output_dir=output_dir,
                 artifact_name="run_leaderboard.json",
                 run_id=args.run_id,
@@ -1064,6 +1077,14 @@ def main(argv: list[str] | None = None) -> int:
                 github_event_name=github_metadata["github_event_name"],
                 github_pr_number=github_metadata["github_pr_number"],
                 github_pr_url=github_metadata["github_pr_url"],
+                runtime_python=getattr(args, "runtime_python", None),
+                engine_source_repository=getattr(args, "engine_source_repository", None),
+                engine_source_ref=getattr(args, "engine_source_ref", None),
+                engine_source_commit=getattr(args, "engine_source_commit", None),
+                plugin_source_engine=getattr(args, "plugin_source_engine", None),
+                plugin_source_repository=getattr(args, "plugin_source_repository", None),
+                plugin_source_ref=getattr(args, "plugin_source_ref", None),
+                plugin_source_commit=getattr(args, "plugin_source_commit", None),
             )
         except (OSError, ValueError) as error:
             print(str(error), file=sys.stderr)
