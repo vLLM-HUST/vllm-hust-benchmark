@@ -1443,6 +1443,21 @@ class BenchmarkRunner:
                 fallback_ascend_sha=fallback_ascend_sha,
             )
             env = self._build_worktree_env(worktrees, output_dir)
+
+            # Pre-flight: verify ascend plugin can be imported with the
+            # vllm-hust version under test.  Catches cross-repo API
+            # incompatabilities (e.g. ascend imports a symbol that does
+            # not exist in this vllm-hust commit) BEFORE spending minutes
+            # running the benchmark.
+            preflight_ok = self._preflight_ascend_import(conda_python, env)
+            if not preflight_ok:
+                self._log(
+                    f"Skipping {run_id}: vllm-ascend-hust is incompatible "
+                    f"with vllm-hust@{latest_commit[:12]}",
+                    "error",
+                )
+                return None
+
             return self._run_benchmark_cli(cmd, conda_python, output_dir, env)
 
 
@@ -1945,6 +1960,45 @@ class BenchmarkRunner:
 
         return env
 
+    def _preflight_ascend_import(
+        self,
+        conda_python: str,
+        env: dict[str, str],
+    ) -> bool:
+        """Quick check that vllm_ascend can be imported in the current env.
+
+        Catches cross-repo API incompatibilities (e.g. the ascend plugin
+        imports ``vllm_is_batch_invariant`` from vllm but the vllm-hust
+        commit under test does not expose that symbol) *before* the full
+        benchmark is launched.
+
+        Returns True if the import succeeds (or cannot be verified),
+        False if it definitively fails.
+        """
+        try:
+            result = subprocess.run(
+                [conda_python, "-c", "import vllm_ascend"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                env=env,
+            )
+            if result.returncode == 0:
+                self._log("  [preflight] vllm_ascend import OK", "success")
+                return True
+            # Import failed — extract the missing symbol for diagnostics
+            stderr = result.stderr or ""
+            self._log(f"  [preflight] vllm_ascend import FAILED:", "error")
+            for line in stderr.strip().splitlines()[-5:]:
+                self._log(f"    {line}", "error")
+            return False
+        except subprocess.TimeoutExpired:
+            self._log("  [preflight] import check timed out, proceeding anyway", "warn")
+            return True  # assume OK on timeout
+        except Exception as exc:
+            self._log(f"  [preflight] import check error: {exc}, proceeding anyway", "warn")
+            return True  # assume OK on unexpected error
+
     def _run_benchmark_cli(
         self,
         cmd: list[str],
@@ -1999,6 +2053,22 @@ class BenchmarkRunner:
                 for tail_line in output_lines[-20:]:
                     self._tee_print(tail_line)
                 self._log("--- end of output ---", "warn")
+
+            # Detect ascend plugin version incompatibility
+            full_output = "\n".join(output_lines)
+            if "ImportError" in full_output and "cannot import name" in full_output:
+                self._log(
+                    "Root cause: vllm-ascend-hust worktree is incompatible with "
+                    "the vllm-hust commit under test. The ascend plugin imports a "
+                    "symbol that does not exist in this vllm-hust version.",
+                    "error",
+                )
+                self._log(
+                    "Fix: use a vllm-ascend-hust commit that is compatible with "
+                    "the vllm-hust commit, or update the time-based SHA resolution "
+                    "to pick an older ascend commit.",
+                    "warn",
+                )
             return None
 
         elapsed = time.monotonic() - start_time
