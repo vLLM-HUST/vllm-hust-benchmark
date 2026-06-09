@@ -1894,6 +1894,16 @@ class BenchmarkRunner:
         env["VLLM_HUST_REPO"] = str(vb_vllm_hust)
         env["VLLM_ASCEND_HUST_REPO"] = str(vb_vllm_ascend)
         env["VLLM_HUST_WORKSPACE_ROOT"] = str(self.config.benchmark_repo.parent)
+        # Explicitly set VLLM_HUST_WEBSITE_REPO so the CI script uses the
+        # correct sibling path instead of deriving it from WORKSPACE_ROOT.
+        # When benchmark_repo is the scripts/ subdirectory, its parent is the
+        # actual benchmark repo, and the workspace root is the grand-parent.
+        website_candidate = self.config.benchmark_repo.parent / "vllm-hust-website"
+        if website_candidate.is_dir():
+            env["VLLM_HUST_WEBSITE_REPO"] = str(website_candidate)
+        else:
+            # Fallback: use benchmark_repo itself as base (for non-standard layouts)
+            env["VLLM_HUST_WEBSITE_REPO"] = str(self.config.benchmark_repo / "vllm-hust-website")
 
         # CI script: use Va's infrastructure (always stable)
         if va_vllm_hust:
@@ -2899,12 +2909,21 @@ def main():
     if benchmark_repo_arg:
         benchmark_repo = Path(benchmark_repo_arg).resolve()
     else:
-        # Look for sibling directory vllm-hust-benchmark
-        sibling = script_dir.parent / "vllm-hust-benchmark"
+        # Look for sibling directory vllm-hust-benchmark.
+        # script_dir is the scripts/ subdirectory, so:
+        #   benchmark_repo  = script_dir            (when scripts/ is inside vllm-hust-benchmark/)
+        #   benchmark_repo  = script_dir.parent      (when scripts/ is the repo root itself)
+        # We check both: scripts/ parent IS the repo, or scripts/ parent/parent IS the repo.
+        candidate = script_dir  # scripts/ subdirectory
+        sibling = candidate.parent / "vllm-hust-benchmark"
+        if not (sibling.exists() and sibling.is_dir()):
+            # scripts/ is inside vllm-hust-benchmark/ (normal layout)
+            candidate = script_dir.parent  # scripts/ -> vllm-hust-benchmark/
+        sibling = candidate / "vllm-hust-benchmark"
         if sibling.exists() and sibling.is_dir():
             benchmark_repo = sibling
         else:
-            benchmark_repo = script_dir
+            benchmark_repo = candidate
 
     # Va (stable infrastructure): vllm-hust worktree
     vllm_hust_repo_arg = get_arg("vllm_hust_repo", "")
