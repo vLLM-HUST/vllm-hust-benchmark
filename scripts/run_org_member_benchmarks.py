@@ -444,12 +444,13 @@ def download_model_from_hub(
     
     try:
         # Use 'hf download' command (replaces deprecated 'huggingface-cli download')
+        # Note: huggingface_hub.commands.huggingface_cli was removed in huggingface_hub >= 1.0.0
+        # Use the standalone 'hf' CLI instead, which is available in the conda environment.
         env = os.environ.copy()
         env["HF_ENDPOINT"] = hf_endpoint
-        
+
         result = subprocess.run(
-            [conda_python, "-m", "huggingface_hub.commands.huggingface_cli", "download",
-             "--repo-id", model_id,
+            ["hf", "download", model_id,
              "--local-dir", target_dir],
             env=env,
             capture_output=True,
