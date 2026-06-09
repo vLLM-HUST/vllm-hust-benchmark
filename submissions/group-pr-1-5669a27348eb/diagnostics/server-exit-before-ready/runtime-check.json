@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/root/miniconda3/envs/vllm-hust-dev/bin/hust-ascend-manager", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspace/benchmark_backfill/ascend-runtime-manager/src/hust_ascend_manager/cli.py", line 183, in main
+    return check_vllm_runtime(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/benchmark_backfill/ascend-runtime-manager/src/hust_ascend_manager/runtime.py", line 330, in check_vllm_runtime
+    report = _runtime_report(resolved_repo, resolved_python, library_path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/benchmark_backfill/ascend-runtime-manager/src/hust_ascend_manager/runtime.py", line 257, in _runtime_report
+    provider_check = _provider_check(
+                     ^^^^^^^^^^^^^^^^
+  File "/workspace/benchmark_backfill/ascend-runtime-manager/src/hust_ascend_manager/runtime.py", line 165, in _provider_check
+    _provider_check_cmd(
+  File "/workspace/benchmark_backfill/ascend-runtime-manager/src/hust_ascend_manager/runtime.py", line 141, in _provider_check_cmd
+    raise FileNotFoundError(
+FileNotFoundError: Missing provider validation helper: /workspace/benchmark_backfill/.benchmarks/worktrees/vllm-hust--5669a27348eb/scripts/ensure_vllm_provider.py. Update the target vllm-hust checkout first.
