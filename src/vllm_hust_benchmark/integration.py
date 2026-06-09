@@ -343,9 +343,38 @@ def build_performance_suite_command(layout: RepoLayout) -> list[str]:
     return ["bash", str(suite_script)]
 
 
+def _resolve_stable_repo(worktree_path: Path) -> Path:
+    """Resolve the stable (non-worktree) vllm-hust repo from a worktree path.
+
+    A git worktree's .git is a file (not a directory) pointing to the actual
+    .git directory: 'gitdir: /path/to/main/.git/worktrees/<name>'.
+    We read this to find the main repo's .git/worktrees/ and then navigate
+    up to the main repo root.
+    """
+    git_file = worktree_path / ".git"
+    if not git_file.is_file():
+        return worktree_path  # Not a worktree, use as-is
+    content = git_file.read_text().strip()
+    if not content.startswith("gitdir: "):
+        return worktree_path  # Not a worktree .git file
+    # e.g. "gitdir: /path/to/main/.git/worktrees/vllm-hust--abc123"
+    gitdir = Path(content.split(": ", 1)[1].strip())
+    # The gitdir is .git/worktrees/<name>, go up two levels to main repo root
+    main_git_dir = gitdir.parent.parent  # -> /path/to/main/.git
+    main_repo = main_git_dir.parent  # -> /path/to/main
+    if main_repo.is_dir():
+        return main_repo
+    return worktree_path  # Fallback
+
+
 def build_ascend_benchmark_ci_command(layout: RepoLayout) -> list[str]:
+    # CI script is an infrastructure file that only exists on the stable branch,
+    # not in arbitrary commit worktrees. Detect if we are inside a worktree and
+    # resolve to the stable main repo to avoid:
+    #   "vllm-hust Ascend benchmark CI script not found: .../worktrees/vllm-hust--<sha>/..."
+    repo = _resolve_stable_repo(layout.vllm_hust_repo)
     ci_script = (
-        layout.vllm_hust_repo
+        repo
         / ".github"
         / "workflows"
         / "scripts"
