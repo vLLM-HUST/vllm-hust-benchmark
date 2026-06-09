@@ -249,6 +249,8 @@ class WorktreeManager:
                         # stderr likely contains benign warnings; only log as error if
                         # the package is truly not importable.
                         stderr_lines = (result.stderr or "").strip().split("\n")
+                        # Also check stdout — cmake error output often goes there
+                        stdout_lines = (result.stdout or "").strip().split("\n")
                         # Filter out known benign warning patterns
                         benign = [
                             line for line in stderr_lines
@@ -258,7 +260,17 @@ class WorktreeManager:
                             and not line.startswith("WARNING:")
                         ]
                         if benign:
-                            self._log(f"[{name}] Editable install failed (exit {result.returncode}): {' | '.join(benign[:3])}", "error")
+                            self._log(f"[{name}] Editable install failed (exit {result.returncode})", "error")
+                            # Show the first 10 non-benign lines for diagnostics
+                            for line in benign[:10]:
+                                self._log(f"    {line}", "error")
+                            # Also show last 10 lines from stdout (cmake error often there)
+                            if stdout_lines:
+                                cmake_lines = [l for l in stdout_lines if l.strip()]
+                                if cmake_lines:
+                                    self._log(f"  cmake output (last {min(10, len(cmake_lines))} lines):", "warn")
+                                    for line in cmake_lines[-10:]:
+                                        self._log(f"    {line}", "warn")
                         else:
                             self._log(f"[{name}] Editable install OK (pip exit {result.returncode}, only warnings)", "success")
                 except Exception:
