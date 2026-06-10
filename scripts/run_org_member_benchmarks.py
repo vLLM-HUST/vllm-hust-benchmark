@@ -277,6 +277,63 @@ class WorktreeManager:
                     self._log(f"[{name}] Editable install failed (exit {result.returncode})", "error")
         except subprocess.TimeoutExpired:
             self._log(f"[{name}] Editable install timed out (15 min)", "error")
+            # Retry once with extended timeout (30 min)
+            self._log(f"[{name}] Retrying with extended timeout (30 min)...")
+            try:
+                result = subprocess.run(
+                    [conda_python, "-m", "pip", "install", "--no-deps", "-e", str(worktree)],
+                    cwd=worktree,
+                    timeout=1800,
+                )
+                if result.returncode == 0:
+                    self._log(f"[{name}] Editable install OK (retry succeeded)", "success")
+                else:
+                    # Verify importability after retry
+                    IMPORT_NAME_MAP = {
+                        "vllm-hust": "vllm",
+                        "vllm-ascend-hust": "vllm_ascend",
+                    }
+                    import_name = IMPORT_NAME_MAP.get(name, name.replace("-", "_"))
+                    try:
+                        verify = subprocess.run(
+                            [conda_python, "-c", f"import {import_name}"],
+                            capture_output=True, text=True, timeout=10,
+                        )
+                        if verify.returncode == 0:
+                            self._log(f"[{name}] Editable install OK (retry: pip exit {result.returncode} ignored, package importable)", "success")
+                        else:
+                            self._log(f"[{name}] Editable install failed after retry (exit {result.returncode})", "error")
+                    except Exception:
+                        self._log(f"[{name}] Editable install failed after retry", "error")
+            except subprocess.TimeoutExpired:
+                self._log(f"[{name}] Editable install timed out again after retry (30 min)", "error")
+                # Verify if package is importable from a previous install
+                IMPORT_NAME_MAP = {
+                    "vllm-hust": "vllm",
+                    "vllm-ascend-hust": "vllm_ascend",
+                }
+                import_name = IMPORT_NAME_MAP.get(name, name.replace("-", "_"))
+                try:
+                    verify = subprocess.run(
+                        [conda_python, "-c", f"import {import_name}"],
+                        capture_output=True, text=True, timeout=10,
+                    )
+                    if verify.returncode == 0:
+                        self._log(
+                            f"[{name}] Package still importable from previous install, "
+                            f"proceeding with caution",
+                            "warn",
+                        )
+                    else:
+                        self._log(
+                            f"[{name}] Package NOT importable after double timeout. "
+                            f"Benchmark will likely fail.",
+                            "error",
+                        )
+                except Exception:
+                    pass
+            except Exception as e:
+                self._log(f"[{name}] Editable install retry failed: {e}", "error")
         except Exception as e:
             self._log(f"[{name}] Editable install failed: {e}", "error")
             # Non-fatal — conda env package may still work
@@ -542,6 +599,16 @@ def resolve_effective_model(
     """
     log = logger_fn if logger_fn else (lambda msg, level=None: print(msg))
     
+    # Mode 0: model_id itself is a local path (absolute or relative)
+    # This handles the common case where --model is given as a full path
+    # like /data/shared_models/Qwen--Qwen2.5-14B-Instruct
+    if model_id and os.path.isabs(model_id) and os.path.isdir(model_id):
+        if has_required_model_artifacts(model_id):
+            log(f"  [Model] Using local path from model_id: {model_id}", "info")
+            return model_id, "cached_local", True
+        else:
+            log(f"  [Model] model_id is a local dir but missing artifacts: {model_id}", "warn")
+    
     # Mode 1: Use explicitly provided local path
     if explicit_model_path and os.path.exists(explicit_model_path):
         if has_required_model_artifacts(explicit_model_path):
@@ -549,6 +616,15 @@ def resolve_effective_model(
             return explicit_model_path, "explicit_local", False
         else:
             log(f"  [Model] Explicit path exists but missing artifacts: {explicit_model_path}", "warn")
+    
+    # If model_id looks like a local path (absolute), don't treat it as HF repo ID
+    if model_id and os.path.isabs(model_id):
+        if os.path.isdir(model_id):
+            log(f"  [Model] ERROR: Local path '{model_id}' exists but is missing model artifacts", "error")
+            log(f"  [Model] Expected files: config.json, tokenizer.json or tokenizer.model", "error")
+        else:
+            log(f"  [Model] ERROR: Local path '{model_id}' does not exist", "error")
+        return model_id, "offline_unavailable", True
     
     # Mode 2: Check HuggingFace cache for existing model
     cached_path = get_cached_model_path(model_id, conda_python)
@@ -988,6 +1064,7 @@ class BenchmarkRunner:
             github_token=github_token,
         )
         self._original_head: str = ""  # for git restore
+        self._original_ascend_head: str = ""  # for legacy mode ascend restore
         self._log_fh: Optional[Any] = None
         self._offline_mode: bool = False
         self._effective_model: str = config.model_name
@@ -1173,6 +1250,7 @@ class BenchmarkRunner:
 
         NOTE: This is only used when worktree mode is DISABLED (legacy fallback).
         When worktree mode is enabled, HEAD is never moved in Va.
+        Also saves vllm-ascend-hust HEAD for version coordination.
         """
         if self.config.dry_run:
             return
@@ -1188,6 +1266,20 @@ class BenchmarkRunner:
             self._log(f"Saved HEAD: {self._original_head[:12]}")
         except Exception as e:
             self._log(f"Failed to save HEAD: {e}", "warn")
+
+        # Also save vllm-ascend-hust HEAD for legacy mode coordination
+        ascend_repo = self.config.vllm_ascend_hust_repo
+        if ascend_repo and ascend_repo.is_dir():
+            try:
+                result = subprocess.run(
+                    ["git", "rev-parse", "HEAD"],
+                    cwd=ascend_repo,
+                    capture_output=True, text=True, check=True,
+                )
+                self._original_ascend_head = result.stdout.strip()
+                self._log(f"Saved Ascend HEAD: {self._original_ascend_head[:12]}")
+            except Exception as e:
+                self._log(f"Failed to save Ascend HEAD: {e}", "warn")
 
     def _save_ci_script_copy(self):
         """Save CI script and constraints from Va infrastructure dirs.
@@ -1332,6 +1424,29 @@ class BenchmarkRunner:
             self._log(f"Git checkout failed: {e}", "error")
             return False
 
+    def _git_checkout_ascend(self, ascend_repo: Path, sha: str) -> bool:
+        """Checkout vllm-ascend-hust to a specific commit (legacy mode)."""
+        if self.config.dry_run:
+            self._log(f"  [Ascend] Would checkout {sha[:12]}")
+            return True
+        try:
+            subprocess.run(
+                ["git", "fetch", "origin"],
+                cwd=ascend_repo, capture_output=True, timeout=30,
+            )
+            result = subprocess.run(
+                ["git", "checkout", sha],
+                cwd=ascend_repo, capture_output=True, text=True,
+            )
+            if result.returncode != 0:
+                self._log(f"  [Ascend] Checkout {sha[:12]} failed: {result.stderr.strip()}", "error")
+                return False
+            self._log(f"  [Ascend] Checked out {sha[:12]}")
+            return True
+        except Exception as e:
+            self._log(f"  [Ascend] Checkout failed: {e}", "error")
+            return False
+
     def _git_restore_head(self):
         """Restore original HEAD after all benchmarks."""
         if self.config.dry_run or not self._original_head:
@@ -1351,6 +1466,18 @@ class BenchmarkRunner:
             self._log(f"Restored HEAD to {self._original_head[:12]}")
         except Exception as e:
             self._log(f"Failed to restore HEAD: {e}", "warn")
+
+        # Also restore vllm-ascend-hust HEAD
+        ascend_repo = self.config.vllm_ascend_hust_repo
+        if ascend_repo and ascend_repo.is_dir() and self._original_ascend_head:
+            try:
+                subprocess.run(
+                    ["git", "checkout", self._original_ascend_head],
+                    cwd=ascend_repo, capture_output=True,
+                )
+                self._log(f"Restored Ascend HEAD to {self._original_ascend_head[:12]}")
+            except Exception as e:
+                self._log(f"Failed to restore Ascend HEAD: {e}", "warn")
 
     def _print_progress(self, current: int, total: int, prefix: str = "Progress"):
         """Print progress bar."""
@@ -1427,6 +1554,26 @@ class BenchmarkRunner:
             if not self._git_checkout_fallback(latest_commit):
                 self._log(f"Failed to checkout {sha_short}, skipping", "error")
                 return None
+
+            # Also checkout vllm-ascend-hust to a compatible commit
+            ascend_repo = self.config.vllm_ascend_hust_repo
+            if ascend_repo and ascend_repo.is_dir():
+                ascend_sha = self._resolve_ascend_sha(group)
+                fallback_ascend_sha = ""
+                commit_date = group.latest_date
+                if commit_date:
+                    fallback_ascend_sha = self._get_sha_at_time(ascend_repo, commit_date)
+
+                if ascend_sha:
+                    if not self._git_checkout_ascend(ascend_repo, ascend_sha):
+                        if fallback_ascend_sha and fallback_ascend_sha != ascend_sha:
+                            self._log(
+                                f"  [Ascend] PR SHA {ascend_sha[:12]} failed, "
+                                f"trying time-based fallback {fallback_ascend_sha[:12]}",
+                                "warn",
+                            )
+                            self._git_checkout_ascend(ascend_repo, fallback_ascend_sha)
+
             env = self._build_legacy_env(output_dir)
             return self._run_benchmark_cli(cmd, conda_python, output_dir, env)
 
@@ -1470,12 +1617,29 @@ class BenchmarkRunner:
             # running the benchmark.
             preflight_ok = self._preflight_ascend_import(conda_python, env)
             if not preflight_ok:
-                self._log(
-                    f"Skipping {run_id}: vllm-ascend-hust is incompatible "
-                    f"with vllm-hust@{latest_commit[:12]}",
-                    "error",
-                )
-                return None
+                # --- Retry with fallback ascend SHA if available ---
+                if fallback_ascend_sha and fallback_ascend_sha != ascend_sha:
+                    self._log(
+                        f"  [Ascend] Preflight failed for {ascend_sha[:12]}, "
+                        f"retrying with fallback time-based SHA {fallback_ascend_sha[:12]}",
+                        "warn",
+                    )
+                    self._worktree_mgr.cleanup(worktrees)
+                    worktrees = self._worktree_mgr.provision(
+                        vllm_hust_sha=latest_commit,
+                        vllm_ascend_sha=fallback_ascend_sha,
+                        conda_python=conda_python,
+                    )
+                    env = self._build_worktree_env(worktrees, output_dir)
+                    preflight_ok = self._preflight_ascend_import(conda_python, env)
+
+                if not preflight_ok:
+                    self._log(
+                        f"Skipping {run_id}: vllm-ascend-hust is incompatible "
+                        f"with vllm-hust@{latest_commit[:12]}",
+                        "error",
+                    )
+                    return None
 
             return self._run_benchmark_cli(cmd, conda_python, output_dir, env)
 
@@ -1994,15 +2158,21 @@ class BenchmarkRunner:
         conda_python: str,
         env: dict[str, str],
     ) -> bool:
-        """Quick check that vllm_ascend can be imported in the current env.
+        """Check that vllm_ascend can be imported in the current env.
 
         Catches cross-repo API incompatibilities (e.g. the ascend plugin
         imports ``vllm_is_batch_invariant`` from vllm but the vllm-hust
         commit under test does not expose that symbol) *before* the full
         benchmark is launched.
 
-        Returns True if the import succeeds (or cannot be verified),
-        False if it definitively fails.
+        Performs two checks:
+        1. Top-level ``import vllm_ascend`` (catches basic import failures)
+        2. Deep-import scan of ``ascend_config.py`` — detects lazy imports
+           inside ``AscendConfig.__init__`` that would only trigger at engine
+           startup time (e.g. ``from vllm…import vllm_is_batch_invariant``)
+
+        Returns True if all checks pass (or cannot be verified),
+        False if they definitively fail.
         """
         try:
             result = subprocess.run(
@@ -2012,21 +2182,95 @@ class BenchmarkRunner:
                 timeout=30,
                 env=env,
             )
-            if result.returncode == 0:
-                self._log("  [preflight] vllm_ascend import OK", "success")
-                return True
-            # Import failed — extract the missing symbol for diagnostics
-            stderr = result.stderr or ""
-            self._log(f"  [preflight] vllm_ascend import FAILED:", "error")
-            for line in stderr.strip().splitlines()[-5:]:
-                self._log(f"    {line}", "error")
-            return False
+            if result.returncode != 0:
+                # Import failed — extract the missing symbol for diagnostics
+                stderr = result.stderr or ""
+                self._log(f"  [preflight] vllm_ascend import FAILED:", "error")
+                for line in stderr.strip().splitlines()[-5:]:
+                    self._log(f"    {line}", "error")
+                return False
         except subprocess.TimeoutExpired:
             self._log("  [preflight] import check timed out, proceeding anyway", "warn")
             return True  # assume OK on timeout
         except Exception as exc:
             self._log(f"  [preflight] import check error: {exc}, proceeding anyway", "warn")
             return True  # assume OK on unexpected error
+
+        # --- Deep-import scan ---
+        # AscendConfig.__init__ performs lazy imports from vllm that are NOT
+        # triggered by a simple ``import vllm_ascend``.  Scan ascend_config.py
+        # for ``from vllm…import …`` statements and verify each symbol exists
+        # in the current vllm installation.
+        try:
+            deep_check_script = textwrap.dedent("""\
+                import importlib, ast, sys, os
+
+                ascend_path = os.environ.get("VLLM_ASCEND_HUST_REPO", "")
+                if not ascend_path:
+                    sys.exit(0)  # cannot determine path, skip check
+
+                config_file = os.path.join(ascend_path, "vllm_ascend", "ascend_config.py")
+                if not os.path.isfile(config_file):
+                    sys.exit(0)
+
+                with open(config_file) as f:
+                    tree = ast.parse(f.read())
+
+                missing = []
+                for node in ast.walk(tree):
+                    if not isinstance(node, ast.ImportFrom):
+                        continue
+                    if not (node.module or "").startswith("vllm."):
+                        continue
+                    for alias in node.names:
+                        try:
+                            mod = importlib.import_module(node.module)
+                            if not hasattr(mod, alias.name):
+                                missing.append(f"{node.module}.{alias.name}")
+                        except Exception:
+                            pass
+
+                if missing:
+                    for m in missing:
+                        print(f"DEEP_IMPORT_MISSING:{m}", file=sys.stderr)
+                    sys.exit(1)
+            """)
+            deep_result = subprocess.run(
+                [conda_python, "-c", deep_check_script],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                env=env,
+            )
+            if deep_result.returncode != 0:
+                stderr = deep_result.stderr or ""
+                missing_symbols = [
+                    line.split(":", 1)[1]
+                    for line in stderr.strip().splitlines()
+                    if line.startswith("DEEP_IMPORT_MISSING:")
+                ]
+                if missing_symbols:
+                    self._log(
+                        f"  [preflight] Deep-import check FAILED: "
+                        f"missing symbol(s) in vllm: {', '.join(missing_symbols)}",
+                        "error",
+                    )
+                    self._log(
+                        "  [preflight] The ascend plugin imports symbols that do "
+                        "not exist in this vllm-hust version.",
+                        "error",
+                    )
+                else:
+                    self._log("  [preflight] Deep-import check FAILED", "error")
+                    for line in stderr.strip().splitlines()[-5:]:
+                        self._log(f"    {line}", "error")
+                return False
+            self._log("  [preflight] vllm_ascend import OK (deep-import scan passed)", "success")
+        except Exception as exc:
+            # Deep check is best-effort — don't block on its failure
+            self._log(f"  [preflight] vllm_ascend import OK (deep-import scan skipped: {exc})", "success")
+
+        return True
 
     def _run_benchmark_cli(
         self,
@@ -2163,7 +2407,10 @@ class BenchmarkRunner:
         )
 
     def commit_and_push(self, message: str) -> bool:
-        """Commit and push changes to GitHub."""
+        """Commit and push changes to GitHub.
+
+        Returns True only if both commit AND push succeed.
+        """
         if self.config.dry_run:
             self._log(f"[DRY RUN] Would commit: {message}")
             return True
@@ -2180,24 +2427,241 @@ class BenchmarkRunner:
             result = subprocess.run(["git", "commit", "-m", message],
                                    cwd=self.config.benchmark_repo, capture_output=True, check=True)
 
-            # Try push
-            result = subprocess.run(["git", "push", "origin", self.config.benchmark_branch],
-                                   cwd=self.config.benchmark_repo, capture_output=True)
+            # Detect the current branch — commits are on whatever branch is
+            # checked out, which may differ from config.benchmark_branch
+            # (e.g. workspace branches like ws/benchmark_backfill).
+            branch_result = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                cwd=self.config.benchmark_repo, capture_output=True, text=True,
+            )
+            current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else self.config.benchmark_branch
+            if current_branch == "HEAD":
+                # Detached HEAD — push to configured branch instead
+                current_branch = self.config.benchmark_branch
 
-            if result.returncode != 0 and self.config.benchmark_repo.exists():
-                # Try token-based push
-                remote = f"https://x-access-token:{self.github.token}@github.com/vLLM-HUST/vllm-hust-benchmark.git"
-                subprocess.run(["git", "remote", "set-url", "origin", remote],
-                             cwd=self.config.benchmark_repo, capture_output=True)
-                subprocess.run(["git", "push", "origin", self.config.benchmark_branch],
-                             cwd=self.config.benchmark_repo, capture_output=True)
-                subprocess.run(["git", "remote", "set-url", "origin", "git@github.com:vLLM-HUST/vllm-hust-benchmark.git"],
-                             cwd=self.config.benchmark_repo, capture_output=True)
+            # Try push via SSH first
+            push_result = subprocess.run(
+                ["git", "push", "origin", current_branch],
+                cwd=self.config.benchmark_repo, capture_output=True, text=True,
+            )
 
-            return True
+            if push_result.returncode == 0:
+                self._log(f"  [push] Pushed {current_branch} to origin successfully", "success")
+                return True
+
+            # SSH push failed — try token-based push
+            self._log(
+                f"  [push] SSH push failed (exit {push_result.returncode}), "
+                f"trying token-based push...",
+                "warn",
+            )
+            token = getattr(self.github, "token", "") or ""
+            if token:
+                original_url_result = subprocess.run(
+                    ["git", "remote", "get-url", "origin"],
+                    cwd=self.config.benchmark_repo, capture_output=True, text=True,
+                )
+                original_url = original_url_result.stdout.strip()
+
+                remote = f"https://x-access-token:{token}@github.com/vLLM-HUST/vllm-hust-benchmark.git"
+                subprocess.run(
+                    ["git", "remote", "set-url", "origin", remote],
+                    cwd=self.config.benchmark_repo, capture_output=True,
+                )
+                token_result = subprocess.run(
+                    ["git", "push", "origin", current_branch],
+                    cwd=self.config.benchmark_repo, capture_output=True, text=True,
+                )
+                # Restore original URL
+                subprocess.run(
+                    ["git", "remote", "set-url", "origin", original_url],
+                    cwd=self.config.benchmark_repo, capture_output=True,
+                )
+                if token_result.returncode == 0:
+                    self._log(f"  [push] Token-based push succeeded", "success")
+                    return True
+                self._log(
+                    f"  [push] Token-based push also failed "
+                    f"(exit {token_result.returncode}): "
+                    f"{token_result.stderr.strip()[:200]}",
+                    "error",
+                )
+            else:
+                self._log(
+                    "  [push] No GitHub token available for fallback push",
+                    "error",
+                )
+
+            self._log(
+                f"  [push] WARNING: commit created but NOT pushed to remote. "
+                f"Run 'git push origin {current_branch}' manually "
+                f"in {self.config.benchmark_repo} to publish results.",
+                "error",
+            )
+            return False
+        except subprocess.CalledProcessError as e:
+            self._log(f"Git operation failed: {e}", "error")
+            return False
         except Exception as e:
             self._log(f"Push failed: {e}", "error")
             return False
+
+    def _publish_to_website_snapshots(self) -> bool:
+        """Aggregate submissions into leaderboard-data/snapshots/ and commit/push.
+
+        Required so the website's sync-leaderboard-data workflow has fresh
+        snapshots to copy into website/data/. Without this step, per-submission
+        artifacts in submissions/ are never aggregated into the canonical
+        snapshots consumed by the website.
+        """
+        if self.config.dry_run:
+            self._log(
+                "[DRY RUN] Would aggregate submissions/ into leaderboard-data/snapshots/",
+                "warn",
+            )
+            return True
+
+        submissions_dir = self.config.benchmark_repo / "submissions"
+        snapshots_dir = self.config.benchmark_repo / "leaderboard-data" / "snapshots"
+
+        if not submissions_dir.is_dir():
+            self._log(
+                f"No submissions directory at {submissions_dir}; skipping publish.",
+                "warn",
+            )
+            return True
+
+        # Skip when no submission manifests exist (e.g. all groups failed).
+        manifest_files = list(submissions_dir.glob("*/leaderboard_manifest.json"))
+        if not manifest_files:
+            self._log(
+                "No submission manifests found; skipping publish-website.",
+                "warn",
+            )
+            return True
+
+        snapshots_dir.mkdir(parents=True, exist_ok=True)
+
+        # Set up environment so the CLI can locate the website repo.
+        env = os.environ.copy()
+        env["VLLM_HUST_WORKSPACE_ROOT"] = str(self.config.benchmark_repo.parent)
+        if getattr(self.config, "vllm_hust_repo", None):
+            env["VLLM_HUST_REPO"] = str(self.config.vllm_hust_repo)
+
+        cmd = [
+            sys.executable,
+            "-m",
+            "vllm_hust_benchmark.cli",
+            "publish-website",
+            "--source-dir",
+            str(submissions_dir),
+            "--output-dir",
+            str(snapshots_dir),
+            "--execute",
+        ]
+
+        self._log("Publishing website snapshots from submissions/...")
+        result = subprocess.run(
+            cmd,
+            cwd=self.config.benchmark_repo,
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode != 0:
+            self._log(
+                f"publish-website failed (exit {result.returncode})",
+                "error",
+            )
+            if result.stderr:
+                self._log(result.stderr.strip()[-1000:], "error")
+            if result.stdout:
+                self._log(result.stdout.strip()[-1000:], "error")
+            return False
+
+        # Surface the aggregation summary lines for visibility.
+        if result.stdout:
+            for line in result.stdout.strip().splitlines()[-6:]:
+                self._log(f"  {line}")
+
+        # Commit and push the snapshots separately so the per-group commit
+        # history is preserved and snapshots always land on their own commit.
+        snapshot_files = [
+            "leaderboard-data/snapshots/leaderboard_single.json",
+            "leaderboard-data/snapshots/leaderboard_multi.json",
+            "leaderboard-data/snapshots/leaderboard_compare.json",
+            "leaderboard-data/snapshots/last_updated.json",
+        ]
+        existing = [p for p in snapshot_files if (self.config.benchmark_repo / p).is_file()]
+        if not existing:
+            self._log(
+                "No snapshot files were produced; skipping commit.",
+                "warn",
+            )
+            return True
+
+        try:
+            subprocess.run(
+                ["git", "add"] + existing,
+                cwd=self.config.benchmark_repo,
+                capture_output=True,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "commit", "-m", "chore: refresh leaderboard snapshots"],
+                cwd=self.config.benchmark_repo,
+                capture_output=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            # Nothing to commit (snapshots unchanged) is not a failure.
+            stderr = (e.stderr or b"").decode(errors="ignore") if hasattr(e, "stderr") else ""
+            if "nothing to commit" in stderr or "no changes added" in stderr:
+                self._log("Snapshots unchanged; no commit needed.", "warn")
+                return True
+            self._log(f"Failed to commit snapshots: {e}", "error")
+            return False
+
+        # Detect branch and push (mirrors commit_and_push push logic).
+        branch_result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=self.config.benchmark_repo,
+            capture_output=True,
+            text=True,
+        )
+        current_branch = (
+            branch_result.stdout.strip()
+            if branch_result.returncode == 0
+            else self.config.benchmark_branch
+        )
+        if current_branch == "HEAD":
+            current_branch = self.config.benchmark_branch
+
+        push_result = subprocess.run(
+            ["git", "push", "origin", current_branch],
+            cwd=self.config.benchmark_repo,
+            capture_output=True,
+            text=True,
+        )
+        if push_result.returncode == 0:
+            self._log(
+                f"  [push] Snapshots pushed to {current_branch}",
+                "success",
+            )
+            return True
+
+        self._log(
+            f"  [push] Snapshot push failed (exit {push_result.returncode}): "
+            f"{push_result.stderr.strip()[:200]}",
+            "error",
+        )
+        self._log(
+            f"  [push] Run 'cd {self.config.benchmark_repo} && "
+            f"git push origin {current_branch}' manually to publish snapshots.",
+            "warn",
+        )
+        return False
 
     def run(self) -> int:
         """Main run loop."""
@@ -2341,9 +2805,48 @@ class BenchmarkRunner:
             if self._worktree_mgr is None:
                 self._git_restore_head()
 
+        # Aggregate per-submission artifacts into the canonical snapshots so
+        # the website's sync-leaderboard-data workflow has fresh data to copy
+        # into website/data/. Runs only when at least one group succeeded.
+        if success > 0:
+            self._print_section("Publishing Website Snapshots")
+            self._publish_to_website_snapshots()
+
         # Summary
         self._print_section("Summary")
         self._log(f"Success: {success}, Failed: {failed}")
+
+        # Check for unpushed results
+        try:
+            branch_result = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                cwd=self.config.benchmark_repo, capture_output=True, text=True, timeout=10,
+            )
+            current_branch = branch_result.stdout.strip() if branch_result.returncode == 0 else self.config.benchmark_branch
+            if current_branch == "HEAD":
+                current_branch = self.config.benchmark_branch
+            unpushed = subprocess.run(
+                ["git", "log", "--oneline", f"origin/{current_branch}..HEAD"],
+                cwd=self.config.benchmark_repo,
+                capture_output=True, text=True, timeout=10,
+            )
+            if unpushed.returncode == 0 and unpushed.stdout.strip():
+                unpushed_count = len(unpushed.stdout.strip().splitlines())
+                self._log(
+                    f"WARNING: {unpushed_count} commit(s) not yet pushed to remote!",
+                    "error",
+                )
+                self._log(
+                    f"Run:  cd {self.config.benchmark_repo} && "
+                    f"git push origin {current_branch}",
+                    "warn",
+                )
+                self._log(
+                    "Results will NOT appear on the website until pushed.",
+                    "warn",
+                )
+        except Exception:
+            pass
 
         if self._log_fh:
             self._log(f"Full log saved to: {self._log_fh.name}")
