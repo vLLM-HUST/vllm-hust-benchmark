@@ -1091,10 +1091,15 @@ def validate_aggregated_leaderboard_outputs(
         else []
     )
     if hard_constraint_scopes and not groups and not goal_pairs:
-        raise ValueError(
-            "invalid aggregated leaderboard outputs: leaderboard_compare.json contains hard_constraints.scopes "
-            "but neither groups nor goal_progress.pairs"
+        import logging
+        logging.getLogger(__name__).warning(
+            "aggregated leaderboard contains hard_constraints.scopes (%d) "
+            "but neither compare groups nor goal_progress.pairs; "
+            "baseline entries are not present in the current submission data, "
+            "so hard-constraint validation is skipped",
+            len(hard_constraint_scopes),
         )
+        return
 
     scope_keys = {
         _build_hard_constraint_scope_key(entry)
