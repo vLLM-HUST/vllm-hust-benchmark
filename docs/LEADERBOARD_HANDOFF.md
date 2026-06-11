@@ -485,6 +485,31 @@ PYTHONPATH=src python -m vllm_hust_benchmark.cli sync-submission-to-hf \
   --execute
 ```
 
+**默认行为**：上述命令会从 submissions 目录重新聚合生成 snapshots，然后上传到 HF。这是日常使用的标准流程。
+
+### 11.3.1 跳过聚合直接上传（特殊场景）
+
+当需要将 HF write side 精确同步到某个已知的 snapshots 集合时（例如与 read side 数据保持一致），可以使用 `--skip-aggregation` 标志：
+
+```bash
+PYTHONPATH=src python -m vllm_hust_benchmark.cli sync-submission-to-hf \
+  --aggregate-output-dir leaderboard-data/snapshots \
+  --repo-id intellistream/vllm-hust-benchmark-results \
+  --skip-aggregation \
+  --execute
+```
+
+**使用场景**：
+- HF write side 数据与 read side 不一致，需要强制同步
+- 已知 `leaderboard-data/snapshots/` 中的数据是正确的，需要直接上传
+- 不想因 submissions 集合差异导致聚合结果变化
+
+**注意事项**：
+- 此标志会跳过 submissions 下载/合并步骤
+- 此标志会跳过聚合步骤
+- 直接上传 `--aggregate-output-dir` 指定的目录中的 snapshot 文件
+- **仅在特殊场景使用**，日常同步请使用默认流程
+
 ### 11.4 常见排障切入点
 
 | 症状 | 第一检查点 |
