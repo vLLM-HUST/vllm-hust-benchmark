@@ -1241,6 +1241,81 @@ def _resolve_hf_token(token: str | None) -> str | None:
     )
 
 
+def _upload_existing_snapshots(
+    *,
+    api,
+    repo_id: str,
+    branch: str,
+    aggregate_output_dir: Path,
+    commit_message: str,
+    dry_run: bool,
+) -> int:
+    """Directly upload existing leaderboard snapshots without re-aggregation.
+
+    Used by --skip-aggregation to sync HF write side to match a known-good
+    snapshot set (e.g. the read-side data) without re-running aggregation
+    from submissions.
+    """
+    try:
+        from huggingface_hub import CommitOperationAdd
+        from vllm_hust_benchmark.hf_publisher import _create_commit_on_branch
+    except ImportError:
+        print(
+            "huggingface_hub is required for HF submission sync. Install with: "
+            "pip install 'vllm-hust-benchmark[publish]'",
+            file=sys.stderr,
+        )
+        return 2
+
+    aggregate_files = [
+        "leaderboard_single.json",
+        "leaderboard_multi.json",
+        "leaderboard_compare.json",
+        "last_updated.json",
+    ]
+
+    operations: list[CommitOperationAdd] = []
+    planned_paths: list[str] = []
+
+    for file_name in aggregate_files:
+        local_file = aggregate_output_dir / file_name
+        if not local_file.is_file():
+            print(f"missing aggregated output: {local_file}", file=sys.stderr)
+            return 2
+        operations.append(
+            CommitOperationAdd(path_in_repo=file_name, path_or_fileobj=local_file)
+        )
+        planned_paths.append(file_name)
+
+    if dry_run:
+        print(
+            f"[dry-run] Would upload {len(planned_paths)} snapshot file(s) to {repo_id}@{branch}:"
+        )
+        for repo_path in planned_paths:
+            print(f"  {repo_path}")
+        return 0
+
+    print(f"Uploading {len(planned_paths)} snapshot file(s) to {repo_id}@{branch}...")
+
+    try:
+        api.repo_info(repo_id=repo_id, repo_type="dataset")
+    except Exception:
+        api.create_repo(
+            repo_id=repo_id, repo_type="dataset", private=True, exist_ok=True
+        )
+
+    _create_commit_on_branch(
+        api,
+        repo_id=repo_id,
+        repo_type="dataset",
+        branch=branch,
+        operations=operations,
+        commit_message=commit_message,
+    )
+    print("Upload complete.")
+    return 0
+
+
 def sync_submission_to_huggingface(
     *,
     layout: RepoLayout,
@@ -1253,6 +1328,7 @@ def sync_submission_to_huggingface(
     commit_message: str = "chore: sync benchmark submission and leaderboard data",
     dry_run: bool = False,
     allow_existing_only: bool = False,
+    skip_aggregation: bool = False,
 ) -> int:
     try:
         from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
@@ -1272,9 +1348,9 @@ def sync_submission_to_huggingface(
     else:
         normalized_submission_dirs = list(submission_dirs)
 
-    if not normalized_submission_dirs and not allow_existing_only:
+    if not normalized_submission_dirs and not allow_existing_only and not skip_aggregation:
         print(
-            "at least one submission directory is required unless --existing-only is set",
+            "at least one submission directory is required unless --existing-only or --skip-aggregation is set",
             file=sys.stderr,
         )
         return 2
@@ -1288,6 +1364,18 @@ def sync_submission_to_huggingface(
     api = HfApi(token=resolved_token)
     normalized_prefix = submissions_prefix.strip("/")
     repo_prefix = f"{normalized_prefix}/" if normalized_prefix else ""
+
+    # When --skip-aggregation is set, directly upload existing snapshots
+    # without re-aggregating from submissions.
+    if skip_aggregation:
+        return _upload_existing_snapshots(
+            api=api,
+            repo_id=repo_id,
+            branch=branch,
+            aggregate_output_dir=aggregate_output_dir,
+            commit_message=commit_message,
+            dry_run=dry_run,
+        )
 
     with tempfile.TemporaryDirectory(prefix="vllm-hust-hf-sync-") as temp_dir:
         temp_root = Path(temp_dir)

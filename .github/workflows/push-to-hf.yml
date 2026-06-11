@@ -23,6 +23,10 @@ on:
         description: 'Optional vllm-hust-website ref to use for aggregation/schema checkout'
         type: string
         required: false
+      skip_aggregation:
+        description: 'Skip re-aggregation and directly upload existing leaderboard-data/snapshots/ files'
+        type: boolean
+        default: false
 
 env:
   VLLM_HUST_WEBSITE_REF: ${{ github.event.inputs.website_ref || vars.VLLM_HUST_WEBSITE_REF || 'main' }}
@@ -221,11 +225,12 @@ jobs:
           MANUAL_SUBMISSION_DIRS: ${{ github.event.inputs.submission_dirs }}
 
       - name: Sync submissions into HF leaderboard snapshots
-        if: ${{ steps.resolve-submissions.outputs.count != '0' || github.event.inputs.backfill_existing_only == 'true' }}
+        if: ${{ steps.resolve-submissions.outputs.count != '0' || github.event.inputs.backfill_existing_only == 'true' || github.event.inputs.skip_aggregation == 'true' }}
         env:
           HF_TOKEN: ${{ secrets.DATASET_WRITE_TOKEN }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
           BACKFILL_EXISTING_ONLY: ${{ github.event.inputs.backfill_existing_only || 'false' }}
+          SKIP_AGGREGATION: ${{ github.event.inputs.skip_aggregation || 'false' }}
           VLLM_HUST_REPO: ${{ github.workspace }}/vllm-hust
           VLLM_HUST_WEBSITE_REPO: ${{ github.workspace }}/vllm-hust-website
         run: |
@@ -241,22 +246,29 @@ jobs:
           if [[ "$BACKFILL_EXISTING_ONLY" == "true" ]]; then
             extra_args+=(--existing-only)
           fi
+          if [[ "$SKIP_AGGREGATION" == "true" ]]; then
+            extra_args+=(--skip-aggregation)
+          fi
 
           submission_args=()
-          while IFS= read -r submission_dir; do
-            [[ -z "$submission_dir" ]] && continue
-            echo "=== queueing $submission_dir ==="
-            submission_args+=(--submission-dir "$submission_dir")
-          done <<< "${{ steps.resolve-submissions.outputs.dirs }}"
+          if [[ "$SKIP_AGGREGATION" != "true" ]]; then
+            while IFS= read -r submission_dir; do
+              [[ -z "$submission_dir" ]] && continue
+              echo "=== queueing $submission_dir ==="
+              submission_args+=(--submission-dir "$submission_dir")
+            done <<< "${{ steps.resolve-submissions.outputs.dirs }}"
 
-          if [[ ${#submission_args[@]} -eq 0 && "$BACKFILL_EXISTING_ONLY" != "true" ]]; then
-            echo "No submission directories resolved; nothing to sync."
-            exit 0
+            if [[ ${#submission_args[@]} -eq 0 && "$BACKFILL_EXISTING_ONLY" != "true" ]]; then
+              echo "No submission directories resolved; nothing to sync."
+              exit 0
+            fi
+          else
+            echo "=== skip-aggregation mode: uploading existing snapshots directly ==="
           fi
 
           PYTHONPATH=src python -m vllm_hust_benchmark.cli sync-submission-to-hf \
             "${submission_args[@]}" \
-            --aggregate-output-dir /tmp/leaderboard-data \
+            --aggregate-output-dir leaderboard-data/snapshots \
             --repo-id intellistream/vllm-hust-benchmark-results \
             --submissions-prefix submissions-auto \
             --commit-message "chore: sync benchmark submission and leaderboard data from ${GITHUB_REF} @ ${GITHUB_SHA::8}" \
