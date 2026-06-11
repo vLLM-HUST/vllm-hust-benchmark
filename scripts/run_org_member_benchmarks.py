@@ -2663,6 +2663,80 @@ class BenchmarkRunner:
         )
         return False
 
+    def _sync_to_hf_write_side(self) -> bool:
+        """Upload local snapshots to HF write side using --skip-aggregation.
+
+        This preserves the local aggregation results instead of letting the
+        HF workflow re-aggregate from submissions (which can produce different
+        results due to submission set differences).
+        """
+        if self.config.dry_run:
+            self._log(
+                "[DRY RUN] Would sync leaderboard-data/snapshots/ to HF write side",
+                "warn",
+            )
+            return True
+
+        snapshots_dir = self.config.benchmark_repo / "leaderboard-data" / "snapshots"
+        if not snapshots_dir.is_dir():
+            self._log(
+                f"No snapshots directory at {snapshots_dir}; skipping HF sync.",
+                "warn",
+            )
+            return True
+
+        # Check if snapshot files exist
+        snapshot_files = [
+            "leaderboard_single.json",
+            "leaderboard_multi.json",
+            "leaderboard_compare.json",
+            "last_updated.json",
+        ]
+        existing = [f for f in snapshot_files if (snapshots_dir / f).is_file()]
+        if not existing:
+            self._log("No snapshot files found; skipping HF sync.", "warn")
+            return True
+
+        cmd = [
+            sys.executable,
+            "-m",
+            "vllm_hust_benchmark.cli",
+            "sync-submission-to-hf",
+            "--aggregate-output-dir",
+            str(snapshots_dir),
+            "--repo-id",
+            "intellistream/vllm-hust-benchmark-results",
+            "--skip-aggregation",
+            "--execute",
+        ]
+
+        self._log("Syncing snapshots to HF write side (skip-aggregation mode)...")
+        result = subprocess.run(
+            cmd,
+            cwd=self.config.benchmark_repo,
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode != 0:
+            self._log(
+                f"HF sync failed (exit {result.returncode})",
+                "error",
+            )
+            if result.stderr:
+                self._log(result.stderr.strip()[-1000:], "error")
+            if result.stdout:
+                self._log(result.stdout.strip()[-1000:], "error")
+            return False
+
+        # Surface the upload summary lines for visibility.
+        if result.stdout:
+            for line in result.stdout.strip().splitlines()[-6:]:
+                self._log(f"  {line}")
+
+        self._log("  [HF sync] Snapshots uploaded to intellistream/vllm-hust-benchmark-results", "success")
+        return True
+
     def run(self) -> int:
         """Main run loop."""
         self._print_section("vLLM-HUST Member Benchmark (Delta Attribution)")
@@ -2811,6 +2885,9 @@ class BenchmarkRunner:
         if success > 0:
             self._print_section("Publishing Website Snapshots")
             self._publish_to_website_snapshots()
+            # Upload snapshots to HF write side using --skip-aggregation
+            # to preserve the local aggregation results.
+            self._sync_to_hf_write_side()
 
         # Summary
         self._print_section("Summary")
