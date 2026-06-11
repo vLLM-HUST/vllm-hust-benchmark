@@ -540,6 +540,12 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     sync_submission_parser.add_argument("--dry-run", action="store_true")
     sync_submission_parser.add_argument("--execute", action="store_true")
+    sync_submission_parser.add_argument(
+        "--skip-aggregation",
+        action="store_true",
+        help="Skip re-aggregation and directly upload existing leaderboard-data/snapshots/ files. "
+        "Use this to sync HF write side to match a known-good snapshot set without re-running aggregation.",
+    )
 
     submit_parser = subparsers.add_parser(
         "submit",
@@ -987,7 +993,8 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
-        if not args.execute:
+        skip_aggregation = getattr(args, "skip_aggregation", False)
+        if not args.execute and not skip_aggregation:
             print(
                 "sync-submission-to-hf requires --execute because it regenerates local snapshots before upload",
                 file=sys.stderr,
@@ -1012,6 +1019,7 @@ def main(argv: list[str] | None = None) -> int:
             ),
             dry_run=getattr(args, "dry_run", False),
             allow_existing_only=getattr(args, "existing_only", False),
+            skip_aggregation=skip_aggregation,
         )
 
     if args.command == "submit":
