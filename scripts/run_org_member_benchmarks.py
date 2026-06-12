@@ -1617,7 +1617,7 @@ class BenchmarkRunner:
             # running the benchmark.
             preflight_ok = self._preflight_ascend_import(conda_python, env)
             if not preflight_ok:
-                # --- Retry with fallback ascend SHA if available ---
+                # --- Retry 1: fallback ascend SHA (time-based) ---
                 if fallback_ascend_sha and fallback_ascend_sha != ascend_sha:
                     self._log(
                         f"  [Ascend] Preflight failed for {ascend_sha[:12]}, "
@@ -1632,6 +1632,30 @@ class BenchmarkRunner:
                     )
                     env = self._build_worktree_env(worktrees, output_dir)
                     preflight_ok = self._preflight_ascend_import(conda_python, env)
+                    ascend_sha = fallback_ascend_sha  # update for next retry
+
+                # --- Retry 2: find compatible vllm-hust commit ---
+                if not preflight_ok:
+                    vllm_hust_repo = self.config.benchmark_repo
+                    ascend_repo = self.config.vllm_ascend_hust_repo
+                    compat_sha = self._find_compatible_vllm_hust_commit(
+                        vllm_hust_repo, ascend_sha, ascend_repo
+                    )
+                    if compat_sha and compat_sha != latest_commit:
+                        self._log(
+                            f"  [Compat] Preflight failed for vllm-hust@{latest_commit[:12]}, "
+                            f"retrying with compatible vllm-hust@{compat_sha[:12]}",
+                            "warn",
+                        )
+                        self._worktree_mgr.cleanup(worktrees)
+                        worktrees = self._worktree_mgr.provision(
+                            vllm_hust_sha=compat_sha,
+                            vllm_ascend_sha=ascend_sha,
+                            conda_python=conda_python,
+                        )
+                        env = self._build_worktree_env(worktrees, output_dir)
+                        preflight_ok = self._preflight_ascend_import(conda_python, env)
+                        latest_commit = compat_sha  # update for benchmark run
 
                 if not preflight_ok:
                     self._log(
@@ -1723,6 +1747,51 @@ class BenchmarkRunner:
                 return result.stdout.strip()
         except Exception:
             pass
+        return ""
+
+    def _find_compatible_vllm_hust_commit(
+        self,
+        vllm_hust_repo: Path,
+        ascend_sha: str,
+        ascend_repo: Path | None,
+    ) -> str:
+        """Find a vllm-hust commit compatible with the given vllm-ascend-hust commit.
+
+        Strategy: Find the latest vllm-hust commit at or before the vllm-ascend-hust
+        commit's timestamp. This ensures the vllm-hust version has all the APIs
+        that vllm-ascend-hust expects.
+
+        Returns the SHA of a compatible commit, or empty string if not found.
+        """
+        if not ascend_repo:
+            return ""
+
+        try:
+            # Get the timestamp of the ascend commit
+            result = subprocess.run(
+                ["git", "log", "-1", "--format=%ci", ascend_sha],
+                cwd=ascend_repo,
+                capture_output=True,
+                text=True,
+                timeout=15,
+            )
+            if result.returncode != 0 or not result.stdout.strip():
+                self._log(f"  [Compat] Failed to get timestamp for ascend commit {ascend_sha[:12]}", "warn")
+                return ""
+
+            ascend_date = result.stdout.strip()
+            self._log(f"  [Compat] Ascend commit {ascend_sha[:12]} date: {ascend_date[:10]}")
+
+            # Find the latest vllm-hust commit at or before this date
+            sha = self._get_sha_at_time(vllm_hust_repo, ascend_date)
+            if sha:
+                self._log(f"  [Compat] Found compatible vllm-hust commit: {sha[:12]} (at {ascend_date[:10]})")
+                return sha
+
+            self._log(f"  [Compat] No compatible vllm-hust commit found", "warn")
+        except Exception as e:
+            self._log(f"  [Compat] Error finding compatible commit: {e}", "warn")
+
         return ""
 
     # -------------------------------------------------------------------------
