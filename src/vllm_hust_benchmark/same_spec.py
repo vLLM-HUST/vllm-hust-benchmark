@@ -13,9 +13,11 @@ PRECISION_TO_DTYPE = {
     "FP32": "float32",
     "FP16": "float16",
     "BF16": "bfloat16",
+    "INT8": "int8",
     "fp32": "float32",
     "fp16": "float16",
     "bf16": "bfloat16",
+    "int8": "int8",
 }
 
 NON_SEMANTIC_SERVER_KEYS = {"host", "port", "model"}
