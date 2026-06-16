@@ -29,6 +29,10 @@ CURRENT_SUBMITTER=${CURRENT_SUBMITTER:-"same-spec-current"}
 CURRENT_BASELINE_ENGINE=${CURRENT_BASELINE_ENGINE:-"vllm"}
 CURRENT_DATA_SOURCE=${CURRENT_DATA_SOURCE:-"vllm-hust-benchmark"}
 CURRENT_DTYPE=${CURRENT_DTYPE:-}
+CURRENT_MODEL_NAME=${CURRENT_MODEL_NAME:-}
+CURRENT_MODEL_PARAMETERS=${CURRENT_MODEL_PARAMETERS:-}
+CURRENT_MODEL_PRECISION=${CURRENT_MODEL_PRECISION:-}
+CURRENT_HARDWARE_CHIP_MODEL=${CURRENT_HARDWARE_CHIP_MODEL:-}
 CURRENT_GITHUB_REPOSITORY=${CURRENT_GITHUB_REPOSITORY:-"vLLM-HUST/vllm-hust"}
 CURRENT_GITHUB_REF=${CURRENT_GITHUB_REF:-$(git -C "$CURRENT_VLLM_HUST_REPO" branch --show-current 2>/dev/null || echo main)}
 CURRENT_GIT_COMMIT=${CURRENT_GIT_COMMIT:-$(git -C "$CURRENT_VLLM_HUST_REPO" rev-parse HEAD 2>/dev/null || true)}
@@ -580,6 +584,21 @@ resolve_same_spec() {
   if [[ -n "$CURRENT_DTYPE" ]]; then
     resolve_args+=(--dtype "$CURRENT_DTYPE")
   fi
+  if [[ -n "$CURRENT_MODEL_NAME" ]]; then
+    resolve_args+=(--model "$CURRENT_MODEL_NAME")
+  fi
+  if [[ -n "$CURRENT_MODEL_PARAMETERS" ]]; then
+    resolve_args+=(--model-parameters "$CURRENT_MODEL_PARAMETERS")
+  fi
+  if [[ -n "$CURRENT_MODEL_PRECISION" ]]; then
+    resolve_args+=(--model-precision "$CURRENT_MODEL_PRECISION")
+  fi
+  if [[ -n "$MODEL_QUANTIZATION" ]]; then
+    resolve_args+=(--model-quantization "$MODEL_QUANTIZATION")
+  fi
+  if [[ -n "$CURRENT_HARDWARE_CHIP_MODEL" ]]; then
+    resolve_args+=(--hardware-chip-model "$CURRENT_HARDWARE_CHIP_MODEL")
+  fi
 
   if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
     resolve_args+=(
@@ -740,12 +759,23 @@ MODEL=$(jq -r '.model' "$SPEC_FILE")
 MODEL_PARAMETERS=$(jq -r '.model_parameters' "$SPEC_FILE")
 MODEL_PRECISION=$(jq -r '.model_precision' "$SPEC_FILE")
 MODEL_QUANTIZATION=$(jq -r '.model_quantization // empty' "$SPEC_FILE")
-# Allow env var override for quantization (used by CI workflow)
+if [[ -n "$CURRENT_MODEL_NAME" ]]; then
+  MODEL="$CURRENT_MODEL_NAME"
+fi
+if [[ -n "$CURRENT_MODEL_PARAMETERS" ]]; then
+  MODEL_PARAMETERS="$CURRENT_MODEL_PARAMETERS"
+fi
+if [[ -n "$CURRENT_MODEL_PRECISION" ]]; then
+  MODEL_PRECISION="$CURRENT_MODEL_PRECISION"
+fi
 if [[ -n "${CURRENT_MODEL_QUANTIZATION:-}" ]]; then
   MODEL_QUANTIZATION="$CURRENT_MODEL_QUANTIZATION"
 fi
 HARDWARE_VENDOR=$(jq -r '.hardware_vendor' "$SPEC_FILE")
 HARDWARE_CHIP_MODEL=$(jq -r '.hardware_chip_model' "$SPEC_FILE")
+if [[ -n "$CURRENT_HARDWARE_CHIP_MODEL" ]]; then
+  HARDWARE_CHIP_MODEL="$CURRENT_HARDWARE_CHIP_MODEL"
+fi
 CHIP_COUNT=$(jq -r '.chip_count' "$SPEC_FILE")
 NODE_COUNT=$(jq -r '.node_count' "$SPEC_FILE")
 SCENARIO=$(jq -r '.scenario' "$SPEC_FILE")

@@ -182,6 +182,7 @@ def resolve_server_parameters(
     host: str | None = None,
     port: int | None = None,
     dtype_override: str | None = None,
+    model_precision_override: str | None = None,
 ) -> dict[str, Any]:
     resolved = _require_dict(spec, "server_parameters")
     resolved["model"] = runtime_model or _require_string(spec, "model")
@@ -194,7 +195,9 @@ def resolve_server_parameters(
     if dtype_override:
         resolved["dtype"] = dtype_override
     elif "dtype" not in resolved:
-        resolved["dtype"] = precision_to_runtime_dtype(_require_string(spec, "model_precision"))
+        resolved["dtype"] = precision_to_runtime_dtype(
+            model_precision_override or _require_string(spec, "model_precision")
+        )
     if "enforce_eager" not in resolved:
         resolved["enforce_eager"] = ""
     return resolved
@@ -267,15 +270,26 @@ def build_same_spec_payload(
     client_host: str | None = None,
     client_port: int | None = None,
     dtype_override: str | None = None,
+    model_override: str | None = None,
+    model_parameters_override: str | None = None,
+    model_precision_override: str | None = None,
+    model_quantization_override: str | None = None,
+    hardware_chip_model_override: str | None = None,
 ) -> dict[str, Any]:
     spec_id = _require_string(spec, "id")
-    canonical_model = _require_string(spec, "model")
+    canonical_model = model_override or _require_string(spec, "model")
+    model_parameters = model_parameters_override or _require_string(spec, "model_parameters")
+    model_precision = model_precision_override or _require_string(spec, "model_precision")
+    model_quantization = model_quantization_override or str(spec.get("model_quantization") or "")
+    hardware_vendor = _require_string(spec, "hardware_vendor")
+    hardware_chip_model = hardware_chip_model_override or _require_string(spec, "hardware_chip_model")
     resolved_server_parameters = resolve_server_parameters(
         spec,
         runtime_model=runtime_model or canonical_model,
         host=server_host,
         port=server_port,
         dtype_override=dtype_override,
+        model_precision_override=model_precision,
     )
     resolved_client_parameters = resolve_client_parameters(
         spec,
@@ -288,10 +302,11 @@ def build_same_spec_payload(
         "spec_id": spec_id,
         "scenario": _require_string(spec, "scenario"),
         "model": canonical_model,
-        "model_parameters": _require_string(spec, "model_parameters"),
-        "model_precision": _require_string(spec, "model_precision"),
-        "hardware_vendor": _require_string(spec, "hardware_vendor"),
-        "hardware_chip_model": _require_string(spec, "hardware_chip_model"),
+        "model_parameters": model_parameters,
+        "model_precision": model_precision,
+        "model_quantization": model_quantization,
+        "hardware_vendor": hardware_vendor,
+        "hardware_chip_model": hardware_chip_model,
         "chip_count": int(spec.get("chip_count") or 0),
         "node_count": int(spec.get("node_count") or 0),
         "resolved_server_parameters": _normalize_for_hash(
@@ -301,6 +316,7 @@ def build_same_spec_payload(
                 host=server_host,
                 port=server_port,
                 dtype_override=dtype_override,
+                model_precision_override=model_precision,
             ),
             drop_keys=NON_SEMANTIC_SERVER_KEYS,
         ),
@@ -329,10 +345,11 @@ def build_same_spec_payload(
         "spec_source": str(spec_source.resolve()) if spec_source is not None else None,
         "scenario": _require_string(spec, "scenario"),
         "model": canonical_model,
-        "model_parameters": _require_string(spec, "model_parameters"),
-        "model_precision": _require_string(spec, "model_precision"),
-        "hardware_vendor": _require_string(spec, "hardware_vendor"),
-        "hardware_chip_model": _require_string(spec, "hardware_chip_model"),
+        "model_parameters": model_parameters,
+        "model_precision": model_precision,
+        "model_quantization": model_quantization,
+        "hardware_vendor": hardware_vendor,
+        "hardware_chip_model": hardware_chip_model,
         "chip_count": int(spec.get("chip_count") or 0),
         "node_count": int(spec.get("node_count") or 0),
         "resolved_spec_hash": resolved_spec_hash,
@@ -351,6 +368,11 @@ def write_same_spec_payload(
     client_host: str | None = None,
     client_port: int | None = None,
     dtype_override: str | None = None,
+    model_override: str | None = None,
+    model_parameters_override: str | None = None,
+    model_precision_override: str | None = None,
+    model_quantization_override: str | None = None,
+    hardware_chip_model_override: str | None = None,
 ) -> Path:
     payload = build_same_spec_payload(
         load_benchmark_spec(spec_file),
@@ -361,6 +383,11 @@ def write_same_spec_payload(
         client_host=client_host,
         client_port=client_port,
         dtype_override=dtype_override,
+        model_override=model_override,
+        model_parameters_override=model_parameters_override,
+        model_precision_override=model_precision_override,
+        model_quantization_override=model_quantization_override,
+        hardware_chip_model_override=hardware_chip_model_override,
     )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(
@@ -394,6 +421,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--client-host")
     parser.add_argument("--client-port", type=int)
     parser.add_argument("--dtype")
+    parser.add_argument("--model")
+    parser.add_argument("--model-parameters")
+    parser.add_argument("--model-precision")
+    parser.add_argument("--model-quantization")
+    parser.add_argument("--hardware-chip-model")
     args = parser.parse_args(argv)
 
     try:
@@ -406,6 +438,11 @@ def main(argv: list[str] | None = None) -> int:
             client_host=args.client_host,
             client_port=args.client_port,
             dtype_override=args.dtype,
+            model_override=args.model,
+            model_parameters_override=args.model_parameters,
+            model_precision_override=args.model_precision,
+            model_quantization_override=args.model_quantization,
+            hardware_chip_model_override=args.hardware_chip_model,
         )
     except (OSError, ValueError) as error:
         print(str(error))
