@@ -387,8 +387,10 @@ run_in_current_runtime() {
     cd "$CURRENT_RUNTIME_CWD"
     export ZSH_VERSION=""
     if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+      set +u
       # shellcheck disable=SC1090
       source "$ASCEND_TOOLKIT_SET_ENV"
+      set -u
     fi
     if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
       set +u
@@ -407,8 +409,10 @@ run_server_command() {
     cd "$CURRENT_RUNTIME_CWD"
     export ZSH_VERSION=""
     if [[ -f "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+      set +u
       # shellcheck disable=SC1090
       source "$ASCEND_TOOLKIT_SET_ENV"
+      set -u
     fi
     if [[ -f "$ASCEND_ATB_SET_ENV" ]]; then
       set +u
