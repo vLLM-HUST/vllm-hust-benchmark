@@ -181,6 +181,7 @@ def resolve_server_parameters(
     runtime_model: str | None = None,
     host: str | None = None,
     port: int | None = None,
+    dtype_override: str | None = None,
 ) -> dict[str, Any]:
     resolved = _require_dict(spec, "server_parameters")
     resolved["model"] = runtime_model or _require_string(spec, "model")
@@ -190,7 +191,9 @@ def resolve_server_parameters(
         resolved["port"] = port
     _maybe_apply_gpu_memory_utilization_override(spec, resolved, parameter_set="server")
     _maybe_apply_max_model_len_override(spec, resolved, parameter_set="server")
-    if "dtype" not in resolved:
+    if dtype_override:
+        resolved["dtype"] = dtype_override
+    elif "dtype" not in resolved:
         resolved["dtype"] = precision_to_runtime_dtype(_require_string(spec, "model_precision"))
     if "enforce_eager" not in resolved:
         resolved["enforce_eager"] = ""
@@ -263,6 +266,7 @@ def build_same_spec_payload(
     server_port: int | None = None,
     client_host: str | None = None,
     client_port: int | None = None,
+    dtype_override: str | None = None,
 ) -> dict[str, Any]:
     spec_id = _require_string(spec, "id")
     canonical_model = _require_string(spec, "model")
@@ -271,6 +275,7 @@ def build_same_spec_payload(
         runtime_model=runtime_model or canonical_model,
         host=server_host,
         port=server_port,
+        dtype_override=dtype_override,
     )
     resolved_client_parameters = resolve_client_parameters(
         spec,
@@ -295,6 +300,7 @@ def build_same_spec_payload(
                 runtime_model=canonical_model,
                 host=server_host,
                 port=server_port,
+                dtype_override=dtype_override,
             ),
             drop_keys=NON_SEMANTIC_SERVER_KEYS,
         ),
@@ -344,6 +350,7 @@ def write_same_spec_payload(
     server_port: int | None = None,
     client_host: str | None = None,
     client_port: int | None = None,
+    dtype_override: str | None = None,
 ) -> Path:
     payload = build_same_spec_payload(
         load_benchmark_spec(spec_file),
@@ -353,6 +360,7 @@ def write_same_spec_payload(
         server_port=server_port,
         client_host=client_host,
         client_port=client_port,
+        dtype_override=dtype_override,
     )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(
@@ -385,6 +393,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--server-port", type=int)
     parser.add_argument("--client-host")
     parser.add_argument("--client-port", type=int)
+    parser.add_argument("--dtype")
     args = parser.parse_args(argv)
 
     try:
@@ -396,6 +405,7 @@ def main(argv: list[str] | None = None) -> int:
             server_port=args.server_port,
             client_host=args.client_host,
             client_port=args.client_port,
+            dtype_override=args.dtype,
         )
     except (OSError, ValueError) as error:
         print(str(error))
