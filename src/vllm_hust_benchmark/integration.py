@@ -1090,7 +1090,21 @@ def validate_aggregated_leaderboard_outputs(
         if isinstance(goal_progress.get("pairs"), list)
         else []
     )
-    if hard_constraint_scopes and not groups and not goal_pairs:
+    # Skip validation for quantized models (non-FP16/BF16 precision)
+    # Quantized models have different spec_hashes and can't form comparison pairs with FP16 baselines
+    all_entries = [
+        *(single if isinstance(single, list) else []),
+        *(multi if isinstance(multi, list) else []),
+    ]
+    vllm_hust_entries = [
+        entry for entry in all_entries if _normalize_engine(entry) == "vllm-hust"
+    ]
+    has_quantized_entries = any(
+        str((entry.get("model") or {}).get("precision") or "").upper()
+        not in ("FP16", "BF16", "FLOAT16", "BFLOAT16", "")
+        for entry in vllm_hust_entries
+    )
+    if hard_constraint_scopes and not groups and not goal_pairs and not has_quantized_entries:
         raise ValueError(
             "invalid aggregated leaderboard outputs: leaderboard_compare.json contains hard_constraints.scopes "
             "but neither groups nor goal_progress.pairs"

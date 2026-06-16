@@ -28,6 +28,7 @@ CURRENT_BACKEND_VERSION=${CURRENT_BACKEND_VERSION:-}
 CURRENT_SUBMITTER=${CURRENT_SUBMITTER:-"same-spec-current"}
 CURRENT_BASELINE_ENGINE=${CURRENT_BASELINE_ENGINE:-"vllm"}
 CURRENT_DATA_SOURCE=${CURRENT_DATA_SOURCE:-"vllm-hust-benchmark"}
+CURRENT_DTYPE=${CURRENT_DTYPE:-}
 CURRENT_GITHUB_REPOSITORY=${CURRENT_GITHUB_REPOSITORY:-"vLLM-HUST/vllm-hust"}
 CURRENT_GITHUB_REF=${CURRENT_GITHUB_REF:-$(git -C "$CURRENT_VLLM_HUST_REPO" branch --show-current 2>/dev/null || echo main)}
 CURRENT_GIT_COMMIT=${CURRENT_GIT_COMMIT:-$(git -C "$CURRENT_VLLM_HUST_REPO" rev-parse HEAD 2>/dev/null || true)}
@@ -571,6 +572,10 @@ resolve_same_spec() {
     --output-file "$SAME_SPEC_FILE"
     --runtime-model "$RUNTIME_MODEL"
   )
+
+  if [[ -n "$CURRENT_DTYPE" ]]; then
+    resolve_args+=(--dtype "$CURRENT_DTYPE")
+  fi
 
   if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
     resolve_args+=(
