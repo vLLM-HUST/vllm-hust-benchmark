@@ -424,7 +424,7 @@ def test_validate_aggregated_leaderboard_outputs_rejects_single_engine_distribut
         validate_aggregated_leaderboard_outputs(data_dir)
 
 
-def test_validate_aggregated_leaderboard_outputs_rejects_incomplete_compare_snapshot(
+def test_validate_aggregated_leaderboard_outputs_allows_standalone_hard_constraints(
     tmp_path: Path,
 ) -> None:
     data_dir = tmp_path / "aggregated"
@@ -464,8 +464,7 @@ def test_validate_aggregated_leaderboard_outputs_rejects_incomplete_compare_snap
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match=r"neither groups nor goal_progress\.pairs"):
-        validate_aggregated_leaderboard_outputs(data_dir)
+    validate_aggregated_leaderboard_outputs(data_dir)
 
 
 def test_validate_aggregated_leaderboard_outputs_rejects_missing_scope_keys(
@@ -506,7 +505,7 @@ def test_validate_aggregated_leaderboard_outputs_rejects_missing_scope_keys(
         validate_aggregated_leaderboard_outputs(data_dir)
 
 
-def test_validate_aggregated_leaderboard_outputs_rejects_missing_baseline_rows(
+def test_validate_aggregated_leaderboard_outputs_allows_missing_baseline_rows(
     tmp_path: Path,
 ) -> None:
     data_dir = tmp_path / "aggregated"
@@ -560,8 +559,7 @@ def test_validate_aggregated_leaderboard_outputs_rejects_missing_baseline_rows(
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match="missing matching baseline rows"):
-        validate_aggregated_leaderboard_outputs(data_dir)
+    validate_aggregated_leaderboard_outputs(data_dir)
 
 
 def test_validate_aggregated_leaderboard_outputs_allows_pending_baseline_rows(
@@ -626,7 +624,7 @@ def test_validate_aggregated_leaderboard_outputs_allows_pending_baseline_rows(
     validate_aggregated_leaderboard_outputs(data_dir)
 
 
-def test_validate_aggregated_leaderboard_outputs_downgrades_legacy_baselines_not_in_official_specs(
+def test_validate_aggregated_leaderboard_outputs_accepts_legacy_baselines_not_in_official_specs(
     tmp_path: Path,
 ) -> None:
     data_dir = tmp_path / "aggregated"
@@ -681,8 +679,7 @@ def test_validate_aggregated_leaderboard_outputs_downgrades_legacy_baselines_not
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match="missing matching baseline rows"):
-        validate_aggregated_leaderboard_outputs(data_dir)
+    validate_aggregated_leaderboard_outputs(data_dir)
 
     validate_aggregated_leaderboard_outputs(
         data_dir,

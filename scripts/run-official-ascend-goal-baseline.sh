@@ -1634,6 +1634,11 @@ SCENARIO=$(jq -r '.scenario' "$SPEC_FILE")
 MODEL=$(jq -r '.model' "$SPEC_FILE")
 MODEL_PARAMETERS=$(jq -r '.model_parameters' "$SPEC_FILE")
 MODEL_PRECISION=$(jq -r '.model_precision' "$SPEC_FILE")
+MODEL_QUANTIZATION=$(jq -r '.model_quantization // empty' "$SPEC_FILE")
+# Allow env var override for quantization (used by CI workflow)
+if [[ -n "${CURRENT_MODEL_QUANTIZATION:-}" ]]; then
+  MODEL_QUANTIZATION="$CURRENT_MODEL_QUANTIZATION"
+fi
 HARDWARE_VENDOR=$(jq -r '.hardware_vendor' "$SPEC_FILE")
 HARDWARE_CHIP_MODEL=$(jq -r '.hardware_chip_model' "$SPEC_FILE")
 CHIP_COUNT=$(jq -r '.chip_count' "$SPEC_FILE")
@@ -1842,6 +1847,7 @@ EXPORT_ARGS=(
   --model-name "$MODEL"
   --model-parameters "$MODEL_PARAMETERS"
   --model-precision "$MODEL_PRECISION"
+  ${MODEL_QUANTIZATION:+--quantization "$MODEL_QUANTIZATION"}
   --hardware-vendor "$HARDWARE_VENDOR"
   --hardware-chip-model "$HARDWARE_CHIP_MODEL"
   --chip-count "$CHIP_COUNT"
