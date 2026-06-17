@@ -101,6 +101,20 @@ python -m vllm_hust_benchmark.cli run-ascend-ci \
 	--allow-random-hf-publish \
 	--hf-repo-id vLLM-HUST/leaderboard-preview
 
+# run the Ascend W8A8 quantized model path; dtype=auto is required for modelslim
+# quantized models and should be propagated through the same-spec resolver.
+python -m vllm_hust_benchmark.cli run-ascend-ci \
+	--execute \
+	--scenario random-online \
+	--model aly16/Qwen2.5-14B-W8A8 \
+	--model-precision INT8 \
+	--env MODEL_QUANTIZATION=W8A8 \
+	--dtype auto \
+	--hardware-chip-model 910B2 \
+	--num-prompts 200 \
+	--request-rate 8 \
+	--max-concurrency 4
+
 # list the mirrored upstream scenarios
 python -m vllm_hust_benchmark.cli list-scenarios
 
