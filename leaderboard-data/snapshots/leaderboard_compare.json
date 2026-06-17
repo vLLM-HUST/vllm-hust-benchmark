@@ -1,6 +1,6 @@
 {
   "schema_version": "leaderboard-compare-snapshot/v1",
-  "generated_at": "2026-06-16T09:33:51.893940+00:00",
+  "generated_at": "2026-06-17T02:38:24.907849+00:00",
   "group_count": 1,
   "preferred_pair_count": 1,
   "groups": [
@@ -616,10 +616,10 @@
   },
   "hard_constraints": {
     "schema_version": "leaderboard-hard-constraints/v1",
-    "generated_at": "2026-06-16T09:33:51.892994+00:00",
-    "scope_count": 8,
+    "generated_at": "2026-06-17T02:38:24.906858+00:00",
+    "scope_count": 9,
     "pass_count": 2,
-    "fail_count": 6,
+    "fail_count": 7,
     "best_scope_key": "vllm-hust|Qwen/Qwen2.5-7B-Instruct|910B3|sharegpt-online|multi_gpu|online-chat|vllm",
     "scopes": [
       {
@@ -985,6 +985,92 @@
         "selection_rank": 3
       },
       {
+        "scope_key": "vllm-hust|aly16/Qwen2.5-14B-W8A8|910B2|random-online|single_gpu|online-chat|vllm",
+        "scope": {
+          "engine": "vllm-hust",
+          "model": "aly16/Qwen2.5-14B-W8A8",
+          "model_canonical_id": "hf:aly16/Qwen2.5-14B-W8A8",
+          "model_short_name": "Qwen2.5-14B-W8A8",
+          "model_display_name": "Qwen2.5-14B-W8A8",
+          "hardware": "910B2",
+          "workload": "random-online",
+          "config_type": "single_gpu",
+          "accountable_scope": {
+            "domestic_chip_class": "Ascend-class",
+            "representative_model_band": "7B-13B",
+            "representative_business_scenario": "online-chat",
+            "baseline_engine": "",
+            "declared_baseline_engine": "vllm",
+            "baseline_status": "pending-baseline",
+            "owner_confirmed": null,
+            "notes": null
+          }
+        },
+        "latest": {
+          "entry_id": "07669629-ac6b-45b3-8f87-aaf161ec6fa7",
+          "engine": "vllm-hust",
+          "engine_version": "7a63f81",
+          "submitted_at": "2026-06-17T02:37:54Z",
+          "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",
+          "scenario_source": "vllm-benchmark",
+          "accountable_scope": {
+            "domestic_chip_class": "Ascend-class",
+            "representative_model_band": "7B-13B",
+            "representative_business_scenario": "online-chat",
+            "baseline_engine": "",
+            "declared_baseline_engine": "vllm",
+            "baseline_status": "pending-baseline",
+            "owner_confirmed": null,
+            "notes": null
+          },
+          "evaluation": {
+            "checks": {
+              "effective_utilization_ge_90": false,
+              "typical_scene_ge_2x_and_ttft_tpot_reduction_gt_20": false,
+              "long_context_ge_32k_and_p95_p99_stable": false,
+              "single_business_cost_down_ge_30_and_multi_tenant_high_utilization": false
+            },
+            "overall_pass": false,
+            "metrics": {
+              "single_chip_effective_utilization_pct": null,
+              "typical_throughput_ratio_vs_baseline": null,
+              "typical_ttft_reduction_pct_vs_baseline": null,
+              "typical_tpot_reduction_pct_vs_baseline": null,
+              "long_context_length": null,
+              "long_context_throughput_stable": false,
+              "long_context_ttft_p95_ms": 360.092942439951,
+              "long_context_ttft_p99_ms": 423.21575498674093,
+              "long_context_tpot_p95_ms": null,
+              "long_context_tpot_p99_ms": 99.87749168757058,
+              "long_context_ttft_p95_stable": false,
+              "long_context_ttft_p99_stable": false,
+              "long_context_tpot_p95_stable": null,
+              "long_context_tpot_p99_stable": false,
+              "unit_token_cost_reduction_pct": null,
+              "multi_tenant_high_utilization": null
+            },
+            "thresholds": {
+              "single_chip_effective_utilization_pct": 90.0,
+              "typical_throughput_ratio_vs_baseline": 2.0,
+              "typical_ttft_reduction_pct_vs_baseline": 20.0,
+              "typical_tpot_reduction_pct_vs_baseline": 20.0,
+              "long_context_length": 32768,
+              "unit_token_cost_reduction_pct": 30.0
+            }
+          }
+        },
+        "previous": null,
+        "metric_deltas": {
+          "single_chip_effective_utilization_pct": null,
+          "typical_throughput_ratio_vs_baseline": null,
+          "typical_ttft_reduction_pct_vs_baseline": null,
+          "typical_tpot_reduction_pct_vs_baseline": null,
+          "unit_token_cost_reduction_pct": null
+        },
+        "overall_pass": false,
+        "selection_rank": 4
+      },
+      {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B3|random-online|single_gpu|online-chat|vllm",
         "scope": {
           "engine": "vllm-hust",
@@ -1120,7 +1206,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 4
+        "selection_rank": 5
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B3|sonnet-throughput|multi_gpu|offline-batch-serving|vllm",
@@ -1258,7 +1344,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 5
+        "selection_rank": 6
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B3|prefix-repetition-online|single_gpu|long-context-chat|vllm",
@@ -1344,7 +1430,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 6
+        "selection_rank": 7
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B3|sonnet-throughput|single_gpu|offline-batch-serving|vllm",
@@ -1430,7 +1516,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 7
+        "selection_rank": 8
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B3|random-latency|single_gpu|latency-slo|vllm",
@@ -1516,7 +1602,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 8
+        "selection_rank": 9
       }
     ]
   }
