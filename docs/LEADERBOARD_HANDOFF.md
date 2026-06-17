@@ -193,7 +193,35 @@ FE -> HF : GitHub 不可用时回退 HF snapshots
 @enduml
 ```
 
-### 5.2 官方 Ascend baseline 批量刷新
+### 5.2 Quantized Ascend workflow-dispatch runbook
+
+量化模型 benchmark 通过 `vllm-ascend-hust` 的 `Ascend Benchmark Leaderboard`
+workflow 手动触发。合入主线后，所有仓库 ref 默认应保持 `main`，只覆盖模型与量化相关字段：
+
+| workflow input | 合入主线后的默认值 / 量化运行取值 | 说明 |
+| --- | --- | --- |
+| `ascend_hust_target` | `vLLM-HUST/vllm-ascend-hust@main` | 被测 Ascend plugin ref；分支验证时才填 `ws/*`。 |
+| `vllm_hust_ref` | `main` | paired runtime ref。 |
+| `benchmark_ref` | `main` | benchmark runner/export ref；合入后不得默认依赖功能分支。 |
+| `model_name` | `aly16/Qwen2.5-14B-W8A8` | Hugging Face model id 或本地模型路径，不能填 git branch。 |
+| `model_precision` | `INT8` | leaderboard precision metadata。 |
+| `model_quantization` | `W8A8` | 量化方案 metadata。 |
+| `dtype` | `auto` | Ascend modelslim/W8A8 必须使用 `auto`，不要填 `int8`。 |
+| `hardware_chip_model` | `910B2` | 与实际 runner 芯片一致。 |
+| `dataset_path` / `constraints_file` | empty for `random-online` | ShareGPT/formal workload 才需要外部路径。 |
+
+运行链路必须保证 workflow input 逐层传播：`workflow_dispatch` ->
+`run_ascend_benchmark_ci.sh` -> `run-current-ascend-same-spec.sh` ->
+`same_spec.py` -> leaderboard exporter。尤其是 `DTYPE=auto` 必须覆盖 spec 中
+由 `model_precision` 推导出的默认 dtype，否则量化模型可能在 vLLM/Ascend 权重加载阶段失败。
+
+`leaderboard_compare.json` 的 `hard_constraints.scopes` 是独立 snapshot：即使
+`groups=[]` 且 `goal_progress.pairs=[]` 也可以合法存在。校验不应要求每个
+hard-constraint scope 同时具备 compare pair 或 baseline row，只需确认
+`scope_key` 能在 `leaderboard_single.json` / `leaderboard_multi.json` 的
+`vllm-hust` entry 中找到。
+
+### 5.3 官方 Ascend baseline 批量刷新
 
 这是当前分支最重要的新增能力。它的目标不是做一次普通 benchmark，而是生成“可长期对照、可 canonical 化、可 compare 使用”的官方基线。
 
@@ -231,7 +259,7 @@ WF --> M : summary / artifacts / optional publish
 @enduml
 ```
 
-### 5.3 Website 消费链路
+### 5.4 Website 消费链路
 
 website 不是 leaderboard 的生产者，只是标准 snapshot 的消费者。
 

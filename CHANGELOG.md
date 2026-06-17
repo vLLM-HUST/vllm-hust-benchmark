@@ -8,6 +8,11 @@ Unreleased entries concise and workflow-focused.
 ## [Unreleased]
 
 ### Added
+- Added quantized Ascend same-spec benchmark support so workflow-dispatch runs
+  can override the runtime model, precision, quantization scheme, dtype, and
+  hardware chip metadata without mutating the official FP16 spec files.
+- Registered the W8A8 benchmark model identity for `aly16/Qwen2.5-14B-W8A8`
+  so exported leaderboard artifacts preserve canonical quantized-model metadata.
 - Added a shared same-spec resolver in `src/vllm_hust_benchmark/same_spec.py` so
   official baseline runs and current runs now materialize server/client
   parameters from the same benchmark spec instead of duplicating shell-side
@@ -18,6 +23,17 @@ Unreleased entries concise and workflow-focused.
   local workspace source trees.
 
 ### Changed
+- Updated current same-spec export to carry workflow-provided model identity,
+  model parameters, precision, quantization, chip model, runtime provenance, and
+  resolved dtype into `run_leaderboard.json` and same-spec metadata.
+- Hardened Ascend same-spec startup by disabling Bash nounset only while
+  sourcing Ascend toolkit environment scripts, avoiding `CMAKE_PREFIX_PATH`
+  unbound-variable failures without weakening the rest of the runner.
+- Corrected leaderboard aggregation validation for hard-constraint snapshots:
+  `hard_constraints.scopes` is valid as a standalone section and does not
+  require compare groups, goal-progress pairs, or matching baseline rows in the
+  current merged snapshot.
+
 - Switched trusted benchmark publication back to a direct bot-authenticated
   commit to `main` that carries both `submissions/<run-id>/` and refreshed
   `leaderboard-data/snapshots/**`, leaving `push-to-hf.yml` as the only
