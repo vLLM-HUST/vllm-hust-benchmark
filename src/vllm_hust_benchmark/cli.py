@@ -428,6 +428,8 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--model-name", required=True)
     export_parser.add_argument("--model-parameters", default="7B")
     export_parser.add_argument("--model-precision", default="BF16")
+    export_parser.add_argument("--quantization", default=None,
+        help="Quantization scheme (e.g. W8A8, W4A4, GPTQ, AWQ). Leave unset for unquantized models.")
     export_parser.add_argument("--hardware-vendor", default="Huawei")
     export_parser.add_argument("--hardware-chip-model", required=True)
     export_parser.add_argument("--chip-count", type=int, default=1)
@@ -561,6 +563,8 @@ def _build_parser() -> argparse.ArgumentParser:
     submit_parser.add_argument("--model-name", required=True)
     submit_parser.add_argument("--model-parameters", default="7B")
     submit_parser.add_argument("--model-precision", default="BF16")
+    submit_parser.add_argument("--quantization", default=None,
+        help="Quantization scheme (e.g. W8A8, W4A4, GPTQ, AWQ). Leave unset for unquantized models.")
     submit_parser.add_argument("--hardware-vendor", default="Huawei")
     submit_parser.add_argument("--hardware-chip-model", required=True)
     submit_parser.add_argument("--chip-count", type=int, default=1)
@@ -857,6 +861,7 @@ def main(argv: list[str] | None = None) -> int:
                 model_name=args.model_name,
                 model_parameters=args.model_parameters,
                 model_precision=args.model_precision,
+                model_quantization=getattr(args, "quantization", None),
                 hardware_vendor=args.hardware_vendor,
                 hardware_chip_model=args.hardware_chip_model,
                 chip_count=args.chip_count,
@@ -1060,6 +1065,7 @@ def main(argv: list[str] | None = None) -> int:
                 model_name=args.model_name,
                 model_parameters=args.model_parameters,
                 model_precision=args.model_precision,
+                model_quantization=getattr(args, "quantization", None),
                 hardware_vendor=args.hardware_vendor,
                 hardware_chip_model=args.hardware_chip_model,
                 chip_count=args.chip_count,

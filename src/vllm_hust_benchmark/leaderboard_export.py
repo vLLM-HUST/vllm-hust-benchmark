@@ -71,9 +71,12 @@ ENGINE_VERSION_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
 LEADERBOARD_COMPONENT_VERSION_PATTERN = re.compile(r"^\d+\.\d+[\w.+-]*$")
 
 KNOWN_MEMORY_PER_CHIP_GB = {
-    # Ascend 910B3 cards in the benchmark fleet expose 64 GB HBM.
+    # Ascend 910B series cards in the benchmark fleet expose 64 GB HBM.
+    "910b2": 64.0,
     "910b3": 64.0,
+    "ascend-910b2": 64.0,
     "ascend-910b3": 64.0,
+    "ascend 910b2": 64.0,
     "ascend 910b3": 64.0,
 }
 
@@ -480,6 +483,7 @@ def export_leaderboard_artifacts(
     model_name: str,
     model_parameters: str,
     model_precision: str,
+    model_quantization: str | None = None,
     hardware_vendor: str,
     hardware_chip_model: str,
     chip_count: int,
@@ -603,7 +607,7 @@ def export_leaderboard_artifacts(
             "name": model_identity.repo_id,
             "parameters": model_parameters,
             "precision": model_precision,
-            "quantization": None,
+            "quantization": model_quantization,
         },
         "workload": {
             "name": workload_name,
