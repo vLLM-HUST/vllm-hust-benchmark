@@ -9,6 +9,7 @@ This folder is the Git-repo-hosted source for leaderboard publishing.
 - `snapshots/leaderboard_compare.json`
 - `snapshots/last_updated.json`
 - `../submissions/` (raw run exports, each run has `run_leaderboard.json` and `leaderboard_manifest.json`)
+- `../archive/` (archived submissions not included in aggregation, see `archive/pre-v0.18.0/README.md`)
 
 ## Refresh snapshots from submissions
 
