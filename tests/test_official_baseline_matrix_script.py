@@ -98,7 +98,7 @@ def _run_matrix(spec_file: Path, env: dict[str, str]) -> subprocess.CompletedPro
 
 
 def test_matrix_script_accepts_partial_successful_repeats(tmp_path: Path) -> None:
-    spec_id = "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+    spec_id = "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
     spec_file = tmp_path / "spec.json"
     prepare_stub = tmp_path / "prepare.sh"
     runner_stub = tmp_path / "runner.sh"
@@ -145,7 +145,7 @@ def test_matrix_script_accepts_partial_successful_repeats(tmp_path: Path) -> Non
 
 
 def test_matrix_script_uses_published_canonical_root_for_resume(tmp_path: Path) -> None:
-    spec_id = "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+    spec_id = "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
     spec_file = tmp_path / "spec.json"
     prepare_stub = tmp_path / "prepare.sh"
     runner_stub = tmp_path / "runner.sh"
