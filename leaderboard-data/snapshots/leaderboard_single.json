@@ -3194,6 +3194,275 @@
     }
   },
   {
+    "entry_id": "14bfc1e8-b319-5892-a78f-7dc0f3c851ed",
+    "engine": "vllm-hust",
+    "engine_version": "0.20.1.post1.dev316+g79c65f726",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "chips_per_node": null,
+      "intra_node_interconnect": null,
+      "inter_node_interconnect": null,
+      "node_count": 1,
+      "gpu_memory_gb": 64,
+      "cpu_model": null,
+      "cpu_cores": null,
+      "memory_gb": null,
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "canonical_id": "hf:Qwen/Qwen3-8B",
+      "repo_id": "Qwen/Qwen3-8B",
+      "short_name": "Qwen3-8B",
+      "display_name": "Qwen3-8B",
+      "name": "Qwen/Qwen3-8B",
+      "parameters": "8B",
+      "precision": "BF16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-online",
+      "input_length": 1024,
+      "output_length": 256
+    },
+    "metrics": {
+      "ttft_ms": 0.0,
+      "tbt_ms": null,
+      "throughput_tps": 32.2615,
+      "output_throughput_tps": 32.2615,
+      "error_rate": 0.0,
+      "peak_mem_mb": null
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend 910B2",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "random-online",
+        "baseline_engine": "vllm-hust",
+        "declared_baseline_engine": "vllm-hust",
+        "baseline_status": "official-covered"
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": 2.5093,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "0.20.1.post1.dev316+g79c65f726",
+      "vllm_version": "0.20.1.post1.dev316+g79c65f726",
+      "torch_version": "2.9.0+cpu",
+      "python_version": "3.11.15",
+      "os_version": "Linux"
+    },
+    "environment": {
+      "os": "Linux",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null,
+      "hardware_summary": "Ascend 910B2 x1",
+      "software_summary": "vLLM-HUST 0.20.1.post1.dev316+g79c65f726, PyTorch 2.9.0+cpu",
+      "env_details": {
+        "eagle3_draft_model": "qwen3_8b_eagle3",
+        "num_speculative_tokens": 4,
+        "draft_tensor_parallel_size": 1,
+        "workload": "random-online",
+        "num_prompts": 200,
+        "random_input_len": 1024,
+        "random_output_len": 256,
+        "max_num_seqs": 1,
+        "request_rate": 1
+      }
+    },
+    "metadata": {
+      "submitted_at": "2026-06-24T15:20:08.289731+00:00",
+      "submitter": "manual-eagle3-benchmark",
+      "data_source": "manual-benchmark",
+      "submitted_by": "manual-eagle3-benchmark",
+      "github_repository": "vLLM-HUST/vllm-hust",
+      "git_commit": null,
+      "spec_id": "eagle3-qwen3-8b-random-online",
+      "idempotency_key": "eagle3-qwen3-8b-random-online-manual",
+      "workload": "random-online",
+      "num_prompts": 200,
+      "random_input_len": 1024,
+      "random_output_len": 256,
+      "eagle3_config": {
+        "draft_model": "qwen3_8b_eagle3",
+        "num_speculative_tokens": 4,
+        "draft_tensor_parallel_size": 1
+      },
+      "tags": [
+        "eagle3",
+        "speculative-decoding",
+        "qwen3-8b",
+        "random-online",
+        "manual-benchmark"
+      ],
+      "engine_version": "0.20.1.post1.dev316+g79c65f726"
+    },
+    "cluster": null,
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "eagle3-qwen3-8b-random-online",
+      "label": "EAGLE-3 Qwen3-8B Random Online",
+      "description": "EAGLE-3 speculative decoding benchmark with Qwen3-8B on random-online workload"
+    }
+  },
+  {
+    "entry_id": "9aaa2491-7148-585d-b4a2-425c3a5e07a6",
+    "engine": "vllm-hust",
+    "engine_version": "0.20.1.post1.dev316+g79c65f726",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "chips_per_node": null,
+      "intra_node_interconnect": null,
+      "inter_node_interconnect": null,
+      "node_count": 1,
+      "gpu_memory_gb": 64,
+      "cpu_model": null,
+      "cpu_cores": null,
+      "memory_gb": null,
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "canonical_id": "hf:Qwen/Qwen3-8B",
+      "repo_id": "Qwen/Qwen3-8B",
+      "short_name": "Qwen3-8B",
+      "display_name": "Qwen3-8B",
+      "name": "Qwen/Qwen3-8B",
+      "parameters": "8B",
+      "precision": "BF16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-online",
+      "input_length": 1024,
+      "output_length": 256
+    },
+    "metrics": {
+      "ttft_ms": 0.0,
+      "tbt_ms": null,
+      "throughput_tps": 12.8569,
+      "output_throughput_tps": 12.8569,
+      "error_rate": 0.0,
+      "peak_mem_mb": null
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend 910B2",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "random-online",
+        "baseline_engine": "vllm-hust",
+        "declared_baseline_engine": "vllm-hust",
+        "baseline_status": "official-covered"
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": 1.0,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "0.20.1.post1.dev316+g79c65f726",
+      "vllm_version": "0.20.1.post1.dev316+g79c65f726",
+      "torch_version": "2.9.0+cpu",
+      "python_version": "3.11.15",
+      "os_version": "Linux"
+    },
+    "environment": {
+      "os": "Linux",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null,
+      "hardware_summary": "Ascend 910B2 x1",
+      "software_summary": "vLLM-HUST 0.20.1.post1.dev316+g79c65f726, PyTorch 2.9.0+cpu",
+      "env_details": {
+        "speculation": "disabled",
+        "workload": "random-online",
+        "num_prompts": 200,
+        "random_input_len": 1024,
+        "random_output_len": 256,
+        "max_num_seqs": 1,
+        "request_rate": 1
+      }
+    },
+    "metadata": {
+      "submitted_at": "2026-06-24T15:20:08.289757+00:00",
+      "submitter": "manual-eagle3-benchmark",
+      "data_source": "manual-benchmark",
+      "submitted_by": "manual-eagle3-benchmark",
+      "github_repository": "vLLM-HUST/vllm-hust",
+      "git_commit": null,
+      "spec_id": "baseline-qwen3-8b-random-online",
+      "idempotency_key": "baseline-qwen3-8b-random-online-manual",
+      "workload": "random-online",
+      "num_prompts": 200,
+      "random_input_len": 1024,
+      "random_output_len": 256,
+      "tags": [
+        "baseline",
+        "no-speculation",
+        "qwen3-8b",
+        "random-online",
+        "manual-benchmark"
+      ],
+      "engine_version": "0.20.1.post1.dev316+g79c65f726"
+    },
+    "cluster": null,
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "baseline-qwen3-8b-random-online",
+      "label": "Baseline Qwen3-8B Random Online",
+      "description": "Baseline vLLM-HUST benchmark with Qwen3-8B on random-online workload"
+    }
+  },
+  {
     "entry_id": "07669629-ac6b-45b3-8f87-aaf161ec6fa7",
     "engine": "vllm-hust",
     "engine_version": "7a63f81",
