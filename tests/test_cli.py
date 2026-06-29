@@ -1340,6 +1340,7 @@ def test_export_leaderboard_artifacts_sanitizes_dirty_engine_version(
 ) -> None:
     scenario = SimpleNamespace(
         name="random-online",
+        benchmark_type="serve",
         leaderboard={
             "workload_name": "random-online",
             "representative_business_scenario": "general-serving",

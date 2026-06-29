@@ -309,6 +309,7 @@ def _derive_metrics_from_benchmark_result(
     benchmark_result_payload: dict[str, Any],
     *,
     peak_mem_mb: float | None,
+    benchmark_type: str = "serve",
 ) -> dict[str, Any]:
     completed = int(benchmark_result_payload.get("completed") or 0)
     failed = int(benchmark_result_payload.get("failed") or 0)
@@ -347,7 +348,7 @@ def _derive_metrics_from_benchmark_result(
         error_rate = 0.0
 
     metrics = {
-        "ttft_ms": float(mean_ttft_ms or 0.0),
+        "ttft_ms": float(mean_ttft_ms) if mean_ttft_ms is not None else None,
         "tbt_ms": float(mean_tbt_ms) if mean_tbt_ms is not None else None,
         "throughput_tps": float(throughput_tps),
         "peak_mem_mb": float(
@@ -355,6 +356,16 @@ def _derive_metrics_from_benchmark_result(
         ),
         "error_rate": float(error_rate),
     }
+
+    # 根据 benchmark_type 覆盖不适用指标
+    if benchmark_type == "throughput":
+        # throughput 不测量 TTFT 和 TBT/TPOT
+        metrics["ttft_ms"] = None
+        # tbt_ms 已由上面的解析逻辑处理为 None，无需重复
+    elif benchmark_type == "latency":
+        # latency 不测吞吐，错误率不适用
+        metrics["throughput_tps"] = None
+        metrics["error_rate"] = None
 
     missing_metrics = [key for key in REQUIRED_METRIC_KEYS if key not in metrics]
     if missing_metrics:
@@ -368,6 +379,7 @@ def load_export_payload(
     benchmark_result_file: Path | None,
     constraints_file: Path | None,
     peak_mem_mb: float | None,
+    benchmark_type: str = "serve",
 ) -> dict[str, Any]:
     if metrics_file is not None:
         payload = _load_metrics_payload(metrics_file)
@@ -382,6 +394,7 @@ def load_export_payload(
         "metrics": _derive_metrics_from_benchmark_result(
             benchmark_result_payload,
             peak_mem_mb=peak_mem_mb,
+            benchmark_type=benchmark_type,
         ),
         "constraints_metrics": _load_constraints_metrics(constraints_file),
         "benchmark_result_payload": benchmark_result_payload,
@@ -527,6 +540,7 @@ def export_leaderboard_artifacts(
         benchmark_result_file=benchmark_result_file,
         constraints_file=constraints_file,
         peak_mem_mb=peak_mem_mb,
+        benchmark_type=scenario.benchmark_type,
     )
     metrics = dict(payload["metrics"])
     same_spec_payload = (
