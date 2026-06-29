@@ -17,6 +17,15 @@ SUPPORTED_MANIFEST_SCHEMA_VERSIONS = {
     "leaderboard-export-manifest/v2",
 }
 
+# Canonical version keys defined by the leaderboard export schema.
+# Any extraneous keys in artifact.versions will be stripped during normalization.
+CANONICAL_VERSION_KEYS = frozenset({
+    "protocol",
+    "backend",
+    "core",
+    "benchmark",
+})
+
 RELEASE_LIKE_ENGINE_VERSION_PATTERN = re.compile(
     r"^v?\d+(?:\.\d+)+(?:[A-Za-z0-9._+-]*)?$"
 )
@@ -298,6 +307,14 @@ def normalize_submission_artifact_contract(artifact: dict[str, Any]) -> dict[str
     artifact = _normalize_component_versions_in_place(artifact)
     artifact = _backfill_versions_from_repository(artifact)
     artifact = _backfill_versions_from_historical_source(artifact, keys=("backend",))
+    # Strip any version keys not in the canonical schema to prevent
+    # extraneous fields (e.g. os_version, vllm_version) from causing
+    # normalization drift for externally-generated artifacts.
+    versions = _get_component_versions(artifact)
+    if versions is not None:
+        artifact["versions"] = {
+            k: v for k, v in versions.items() if k in CANONICAL_VERSION_KEYS
+        }
     return artifact
 
 
