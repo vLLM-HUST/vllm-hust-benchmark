@@ -388,11 +388,11 @@ The workflow does not auto-commit promoted canonical submissions back to the rep
 
 ## Ascend msprof Profiling
 
-For a same-spec run that needs Ascend `msprof` collection, use the profiling wrapper:
+For a same-spec run that needs Ascend `msprof` collection, use the profiling wrapper. With no argument, it uses the current default Ascend same-spec baseline, so confirm the target model and hardware before starting a long profiling run:
 
 ```bash
 bash scripts/run-current-ascend-same-spec-msprof.sh \
-	docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
+  docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
 ```
 
 It keeps the existing current same-spec runner as the workload and writes this layout:
@@ -410,14 +410,17 @@ Default `msprof` settings live in `scripts/run-current-ascend-same-spec-msprof.e
 Useful overrides:
 
 - `CONFIG_FILE`: load another shell config file instead of `scripts/run-current-ascend-same-spec-msprof.env`.
+- `MSPROF_EXECUTABLE`: use a specific `msprof` binary path.
 - `PROFILE_RUN_ID` or `PROFILE_RUN_DIR`: choose the output location.
-- `MSPROF_FLAGS`: replace the default `--ascendcl=on --runtime-api=on --task-time=l1 --hccl=on --type=text`.
+- `PROFILE_RUN_OVERWRITE=1`: allow reusing an existing output location.
+- `MSPROF_FLAGS`: replace the default `--ascendcl=on --runtime-api=on --task-time=l1 --hccl=on --type=text`. This is split on whitespace.
+- `MSPROF_ARGS`: in a sourced config file, define a bash array for arguments that need quoting, for example `MSPROF_ARGS=(--foo "a b")`.
 
 The raw profile directory can be analyzed later by a separate analyzer. For example, with TraceLoom:
 
 ```bash
 traceloom analysis .benchmarks/current-ascend-msprof/<run-id>/msprof_raw \
-	--out-dir .benchmarks/current-ascend-msprof/<run-id>/analysis
+  --out-dir .benchmarks/current-ascend-msprof/<run-id>/analysis
 ```
 
 ## Batch Same-Spec Matrices
