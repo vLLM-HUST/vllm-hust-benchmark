@@ -420,6 +420,43 @@ Workflow artifacts:
 
 `publish_website=true` remains a local-only convenience switch. It refreshes the checked-out `vllm-hust-website/data/` workspace copy after the batch, but by itself it does not update the live benchmark data source.
 
+## Ascend msprof Profiling
+
+For a same-spec run that needs Ascend `msprof` collection, use the profiling wrapper. With no argument, it uses the current default Ascend same-spec baseline, so confirm the target model and hardware before starting a long profiling run:
+
+```bash
+bash scripts/run-current-ascend-same-spec-msprof.sh \
+  docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
+```
+
+It keeps the existing current same-spec runner as the workload and writes this layout:
+
+```text
+.benchmarks/current-ascend-msprof/<run-id>/
+  msprof_raw/
+  benchmark/
+  msprof.log
+  run_meta.env
+```
+
+Default `msprof` settings live in `scripts/run-current-ascend-same-spec-msprof.env`.
+
+Useful overrides:
+
+- `CONFIG_FILE`: load another shell config file instead of `scripts/run-current-ascend-same-spec-msprof.env`.
+- `MSPROF_EXECUTABLE`: use a specific `msprof` binary path.
+- `PROFILE_RUN_ID` or `PROFILE_RUN_DIR`: choose the output location.
+- `PROFILE_RUN_OVERWRITE=1`: allow reusing an existing output location.
+- `MSPROF_FLAGS`: replace the default `--ascendcl=on --runtime-api=on --task-time=l1 --hccl=on --type=text`. This is split on whitespace.
+- `MSPROF_ARGS`: in a sourced config file, define a bash array for arguments that need quoting, for example `MSPROF_ARGS=(--foo "a b")`.
+
+The raw profile directory can be analyzed later by a separate analyzer. For example, with TraceLoom:
+
+```bash
+traceloom analysis .benchmarks/current-ascend-msprof/<run-id>/msprof_raw \
+  --out-dir .benchmarks/current-ascend-msprof/<run-id>/analysis
+```
+
 ## Batch Same-Spec Matrices
 
 When you want to benchmark one machine group under multiple runtime settings and keep every setting visible on the website leaderboard, use the matrix wrapper instead of invoking the single-spec runner repeatedly by hand.
@@ -427,6 +464,8 @@ When you want to benchmark one machine group under multiple runtime settings and
 Files:
 
 - `scripts/run-current-ascend-same-spec.sh`: execute one resolved same-spec benchmark and export one submission
+- `scripts/run-current-ascend-same-spec-msprof.sh`: wrap one same-spec benchmark with `msprof`
+- `scripts/run-current-ascend-same-spec-msprof.env`: default `msprof` wrapper configuration
 - `scripts/run-current-ascend-same-spec-matrix.sh`: iterate a directory or list of spec files, assign one result directory per spec, and optionally regenerate website data after the whole batch
 
 Examples:
