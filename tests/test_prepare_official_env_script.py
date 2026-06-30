@@ -217,6 +217,24 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
         result = _run_bash(
                 _source_prepare_functions(
                         """
+                        # Mock all helper functions to ensure test isolation
+                        process_user_id() {
+                            echo "$CURRENT_PREPARE_USER_ID"
+                        }
+
+                        process_namespace() {
+                            if [[ "$2" == "pid" ]]; then
+                                echo "$CURRENT_PREPARE_PID_NAMESPACE"
+                            elif [[ "$2" == "mnt" ]]; then
+                                echo "$CURRENT_PREPARE_MOUNT_NAMESPACE"
+                            fi
+                        }
+
+                        process_args() {
+                            # Return empty to ensure no port conflicts
+                            echo ""
+                        }
+
                         list_managed_runtime_state_pids() {
                             printf '501\n502\n'
                         }
@@ -239,6 +257,10 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
 
                         is_managed_runner_wrapper_process() {
                             [[ "$1" == '501' ]]
+                        }
+
+                        is_process_conflicting_with_benchmark_port() {
+                            return 1
                         }
 
                         echo 'residual:'
