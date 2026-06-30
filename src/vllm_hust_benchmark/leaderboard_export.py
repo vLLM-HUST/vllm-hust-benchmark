@@ -351,9 +351,9 @@ def _derive_metrics_from_benchmark_result(
         "ttft_ms": float(mean_ttft_ms) if mean_ttft_ms is not None else None,
         "tbt_ms": float(mean_tbt_ms) if mean_tbt_ms is not None else None,
         "throughput_tps": float(throughput_tps),
-        "peak_mem_mb": float(
+        "peak_mem_mb": int(
             peak_mem_mb or benchmark_result_payload.get("peak_mem_mb") or 0.0
-        ),
+        ) if (peak_mem_mb or benchmark_result_payload.get("peak_mem_mb") or 0.0) is not None else None,
         "error_rate": float(error_rate),
     }
 
