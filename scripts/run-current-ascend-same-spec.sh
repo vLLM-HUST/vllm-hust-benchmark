@@ -13,9 +13,13 @@ CURRENT_VLLM_ASCEND_HUST_REPO=${CURRENT_VLLM_ASCEND_HUST_REPO:-"$WORKSPACE_ROOT/
 CURRENT_RUNTIME_PYTHONPATH=${CURRENT_RUNTIME_PYTHONPATH:-}
 CURRENT_ENV_PREFIX=${CURRENT_ENV_PREFIX:-"/root/miniconda3/envs/vllm-hust-dev"}
 CURRENT_RUNTIME_PYTHON=${CURRENT_RUNTIME_PYTHON:-"$CURRENT_ENV_PREFIX/bin/python"}
-CURRENT_VLLM_CACHE_ROOT=${CURRENT_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/current-ascend-same-spec"}
-CURRENT_BENCHMARK_DATASET_ROOT=${CURRENT_BENCHMARK_DATASET_ROOT:-"$REPO_ROOT/.cache/current-benchmark-datasets"}
+CURRENT_VLLM_CACHE_ROOT=${CURRENT_VLLM_CACHE_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/current-ascend-same-spec-cache"}
+CURRENT_BENCHMARK_DATASET_ROOT=${CURRENT_BENCHMARK_DATASET_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/current-benchmark-datasets"}
 CURRENT_SHAREGPT_DATASET_URL=${CURRENT_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
+HF_HOME=${HF_HOME:-"/data/shared_datasets/vllm-hust-benchmark/huggingface"}
+HF_HUB_CACHE=${HF_HUB_CACHE:-"$HF_HOME/hub"}
+TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-"$HF_HOME/transformers"}
+export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE
 CURRENT_MODEL_PATH=${CURRENT_MODEL_PATH:-}
 CURRENT_SERVER_HOST=${CURRENT_SERVER_HOST:-}
 CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-"8001"}
@@ -527,6 +531,34 @@ download_file() {
   return 2
 }
 
+download_json_file_atomic() {
+  local url=$1
+  local target_file=$2
+  local lock_file="$target_file.lock"
+  local tmp_file="$target_file.tmp.$$"
+
+  if [[ "$url" != https://hf-mirror.com/* ]]; then
+    echo "benchmark dataset downloads must use hf-mirror.com: $url" >&2
+    return 2
+  fi
+
+  mkdir -p "$(dirname "$target_file")"
+  (
+    flock -x 9
+    if [[ -f "$target_file" ]] && "$CURRENT_RUNTIME_PYTHON" -m json.tool "$target_file" >/dev/null 2>&1; then
+      return 0
+    fi
+
+    rm -f "$tmp_file"
+    download_file "$url" "$tmp_file"
+    "$CURRENT_RUNTIME_PYTHON" -m json.tool "$tmp_file" >/dev/null
+    mv -f "$tmp_file" "$target_file"
+  ) 9>"$lock_file"
+  local status=$?
+  rm -f "$tmp_file"
+  return "$status"
+}
+
 ensure_runtime_dataset_available() {
   local dataset_path=${1:-}
   local sharegpt_target
@@ -543,11 +575,11 @@ ensure_runtime_dataset_available() {
       ;;
     ShareGPT_V3_unfiltered_cleaned_split.json)
       sharegpt_target="$CURRENT_BENCHMARK_DATASET_ROOT/$dataset_path"
-      if [[ -f "$sharegpt_target" ]]; then
+      if [[ -f "$sharegpt_target" ]] && "$CURRENT_RUNTIME_PYTHON" -m json.tool "$sharegpt_target" >/dev/null 2>&1; then
         return 0
       fi
       echo "[same-spec-current] downloading ShareGPT benchmark dataset to $sharegpt_target"
-      download_file "$CURRENT_SHAREGPT_DATASET_URL" "$sharegpt_target"
+      download_json_file_atomic "$CURRENT_SHAREGPT_DATASET_URL" "$sharegpt_target"
       ;;
     benchmarks/*)
       if [[ ! -f "$CURRENT_VLLM_HUST_REPO/$dataset_path" ]]; then
@@ -584,13 +616,13 @@ parameters = normalize_client_parameters(
     dataset_cache_root=os.environ.get("CURRENT_BENCHMARK_DATASET_ROOT"),
 )
 client_model_name = os.environ.get("CURRENT_CLIENT_MODEL_NAME", "").strip()
-if client_model_name:
+if os.environ["BENCHMARK_TYPE"] == "serve" and client_model_name:
     parameters["model"] = client_model_name
 client_tokenizer = os.environ.get("CURRENT_CLIENT_TOKENIZER", "").strip()
 if client_tokenizer:
     parameters["tokenizer"] = client_tokenizer
 client_temperature = os.environ.get("CURRENT_CLIENT_TEMPERATURE", "").strip()
-if client_temperature:
+if os.environ["BENCHMARK_TYPE"] == "serve" and client_temperature:
     parameters["temperature"] = client_temperature
 print(
     json.dumps(

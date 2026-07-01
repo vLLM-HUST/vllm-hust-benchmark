@@ -13,9 +13,13 @@ OFFICIAL_VLLM_ASCEND_REPO=${OFFICIAL_VLLM_ASCEND_REPO:-"$WORKSPACE_ROOT/referenc
 OFFICIAL_VLLM_WORKTREE=${OFFICIAL_VLLM_WORKTREE:-"/tmp/vllm-v0180"}
 OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend-v0180"}
 OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
-OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/official-ascend-goal-baseline"}
-OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"$OFFICIAL_VLLM_CACHE_ROOT/datasets"}
+OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/official-ascend-goal-baseline-cache"}
+OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/official-baseline-datasets"}
 OFFICIAL_SHAREGPT_DATASET_URL=${OFFICIAL_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
+HF_HOME=${HF_HOME:-"/data/shared_datasets/vllm-hust-benchmark/huggingface"}
+HF_HUB_CACHE=${HF_HUB_CACHE:-"$HF_HOME/hub"}
+TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-"$HF_HOME/transformers"}
+export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE
 OFFICIAL_RUNTIME_PYTHON=${OFFICIAL_RUNTIME_PYTHON:-"$GOAL_BASELINE_ENV_PREFIX/bin/python"}
 OFFICIAL_MODEL_PATH=${OFFICIAL_MODEL_PATH:-}
 OFFICIAL_SERVER_HOST=${OFFICIAL_SERVER_HOST:-}
@@ -314,7 +318,9 @@ run_in_official_runtime() {
     cd "$OFFICIAL_RUNTIME_CWD"
     source_ascend_runtime_env
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
-    export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"
+    export HF_HOME="${HF_HOME:-/data/shared_datasets/vllm-hust-benchmark/huggingface}"
+    export HF_HUB_CACHE="${HF_HUB_CACHE:-$HF_HOME/hub}"
+    export TRANSFORMERS_CACHE="${TRANSFORMERS_CACHE:-$HF_HOME/transformers}"
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
     fi
@@ -785,7 +791,9 @@ run_server_command() {
     cd "$OFFICIAL_RUNTIME_CWD"
     source_ascend_runtime_env
     export VLLM_CACHE_ROOT="$OFFICIAL_VLLM_CACHE_ROOT"
-    export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"
+    export HF_HOME="${HF_HOME:-/data/shared_datasets/vllm-hust-benchmark/huggingface}"
+    export HF_HUB_CACHE="${HF_HUB_CACHE:-$HF_HOME/hub}"
+    export TRANSFORMERS_CACHE="${TRANSFORMERS_CACHE:-$HF_HOME/transformers}"
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
     fi
@@ -1019,6 +1027,34 @@ download_file() {
   return 2
 }
 
+download_json_file_atomic() {
+  local url=$1
+  local target_file=$2
+  local lock_file="$target_file.lock"
+  local tmp_file="$target_file.tmp.$$"
+
+  if [[ "$url" != https://hf-mirror.com/* ]]; then
+    echo "benchmark dataset downloads must use hf-mirror.com: $url" >&2
+    return 2
+  fi
+
+  mkdir -p "$(dirname "$target_file")"
+  (
+    flock -x 9
+    if [[ -f "$target_file" ]] && "$HOST_PYTHON_BIN" -m json.tool "$target_file" >/dev/null 2>&1; then
+      return 0
+    fi
+
+    rm -f "$tmp_file"
+    download_file "$url" "$tmp_file"
+    "$HOST_PYTHON_BIN" -m json.tool "$tmp_file" >/dev/null
+    mv -f "$tmp_file" "$target_file"
+  ) 9>"$lock_file"
+  local status=$?
+  rm -f "$tmp_file"
+  return "$status"
+}
+
 ensure_runtime_dataset_available() {
   local dataset_path=${1:-}
   local sharegpt_target
@@ -1035,11 +1071,11 @@ ensure_runtime_dataset_available() {
       ;;
     ShareGPT_V3_unfiltered_cleaned_split.json)
       sharegpt_target="$OFFICIAL_BENCHMARK_DATASET_ROOT/$dataset_path"
-      if [[ -f "$sharegpt_target" ]]; then
+      if [[ -f "$sharegpt_target" ]] && "$HOST_PYTHON_BIN" -m json.tool "$sharegpt_target" >/dev/null 2>&1; then
         return 0
       fi
       echo "[goal-baseline] downloading ShareGPT benchmark dataset to $sharegpt_target"
-      download_file "$OFFICIAL_SHAREGPT_DATASET_URL" "$sharegpt_target"
+      download_json_file_atomic "$OFFICIAL_SHAREGPT_DATASET_URL" "$sharegpt_target"
       ;;
     benchmarks/*)
       if [[ ! -f "$OFFICIAL_VLLM_WORKTREE/$dataset_path" ]]; then
