@@ -1,5 +1,5 @@
 {
-  "entry_id": "2fdc72d3-f073-4b89-aee1-fb166e3bd2cc",
+  "entry_id": "bb9e0f2f-02a9-4fdf-a329-81521e652610",
   "engine": "vllm-hust",
   "engine_version": "v0.20.1rc0-535-gceec19abb0",
   "config_type": "single_gpu",
@@ -12,27 +12,27 @@
     "total_memory_gb": 64.0
   },
   "model": {
-    "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
-    "repo_id": "Qwen/Qwen2.5-14B-Instruct",
-    "short_name": "Qwen2.5-14B-Instruct",
-    "display_name": "Qwen2.5-14B-Instruct",
-    "name": "Qwen/Qwen2.5-14B-Instruct",
-    "parameters": "14B",
+    "canonical_id": "hf:Qwen/Qwen2.5-VL-7B-Instruct",
+    "repo_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "short_name": "Qwen2.5-VL-7B-Instruct",
+    "display_name": "Qwen2.5-VL-7B-Instruct",
+    "name": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "parameters": "7B",
     "precision": "FP16",
     "quantization": null
   },
   "workload": {
-    "name": "random-online",
+    "name": "visionarena-online",
     "input_length": 1024,
     "output_length": 256,
     "batch_size": null,
     "concurrent_requests": null,
-    "dataset": "random"
+    "dataset": "hf"
   },
   "metrics": {
-    "ttft_ms": 55146.3120996824,
-    "tbt_ms": 97.62777245765115,
-    "throughput_tps": 152.4171101127745,
+    "ttft_ms": 399.3004795203451,
+    "tbt_ms": 63.46882341786113,
+    "throughput_tps": 118.67675186272194,
     "peak_mem_mb": 0,
     "error_rate": 0.0
   },
@@ -41,7 +41,7 @@
     "accountable_scope": {
       "domestic_chip_class": "Ascend-class",
       "representative_model_band": "7B-13B",
-      "representative_business_scenario": "online-chat",
+      "representative_business_scenario": "multimodal-chat",
       "baseline_engine": "",
       "declared_baseline_engine": "vllm",
       "baseline_status": "pending-baseline",
@@ -55,10 +55,10 @@
       "typical_tpot_reduction_pct_vs_baseline": null,
       "long_context_length": null,
       "long_context_throughput_stable": true,
-      "long_context_ttft_p95_ms": 103621.62314991001,
-      "long_context_ttft_p99_ms": 113896.92917944163,
+      "long_context_ttft_p95_ms": 581.1091185081749,
+      "long_context_ttft_p99_ms": 869.7076083812861,
       "long_context_tpot_p95_ms": null,
-      "long_context_tpot_p99_ms": 100.79844497893846,
+      "long_context_tpot_p99_ms": 78.88393544179462,
       "long_context_ttft_p95_stable": true,
       "long_context_ttft_p99_stable": true,
       "long_context_tpot_p95_stable": null,
@@ -83,7 +83,7 @@
     "driver_version": null
   },
   "metadata": {
-    "submitted_at": "2026-07-01T17:52:50Z",
+    "submitted_at": "2026-07-01T18:03:50Z",
     "submitter": "historical-pr-backfill",
     "data_source": "real-online-historical-pr-backfill",
     "engine": "vllm-hust",
@@ -101,7 +101,7 @@
     "changelog_url": null,
     "notes": null,
     "verified": null,
-    "idempotency_key": "b2490eade86139f935c2e2b4ad4756d633e51cbba26a652284a8ad4fc100d5ab",
+    "idempotency_key": "03b130f6759e8703f925bd405b1a5c7368144f751715ce0c720195e436caa7c4",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
       "python": "/home/shuhao/miniconda3/envs/vllm-hust-dev/bin/python",
@@ -120,41 +120,44 @@
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
-    "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
-    "spec_label": "Official Ascend Jan 2026 baseline for vllm-hust goal tracking",
-    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
-    "scenario": "random-online",
-    "model": "Qwen/Qwen2.5-14B-Instruct",
-    "model_parameters": "14B",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+    "spec_label": "Official Ascend Jan 2026 VisionArena online baseline for vllm-hust goal tracking",
+    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json",
+    "scenario": "visionarena-online",
+    "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "model_parameters": "7B",
     "model_precision": "FP16",
     "model_quantization": "",
     "hardware_vendor": "Huawei",
     "hardware_chip_model": "910B2",
     "chip_count": 1,
     "node_count": 1,
-    "resolved_spec_hash": "fe96e51c305c87add96b7716716f3ee04b98f93d51d907de97d4058eb16aea9b",
+    "resolved_spec_hash": "f4627019b64077d6d7bf8f3afc3890d0cb48dd3b96322c1b4013f975405b0aa3",
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
       "enforce_eager": "",
       "trust_remote_code": "",
       "disable_log_stats": "",
       "disable_log_requests": "",
+      "limit_mm_per_prompt": {
+        "image": 1
+      },
       "host": "0.0.0.0",
-      "port": 8124,
-      "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+      "port": 8116,
+      "model": "/data/shared_models/Qwen--Qwen2.5-VL-7B-Instruct",
       "dtype": "float16"
     },
     "resolved_client_parameters": {
-      "backend": "vllm",
-      "endpoint": "/v1/completions",
-      "dataset_name": "random",
-      "num_prompts": 200,
+      "backend": "openai-chat",
+      "endpoint": "/v1/chat/completions",
+      "dataset_name": "hf",
+      "dataset_path": "lmarena-ai/VisionArena-Chat",
+      "hf_split": "train",
+      "num_prompts": 1000,
       "request_rate": 1,
       "host": "127.0.0.1",
-      "port": 8124,
-      "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
-      "random_input_len": 1024,
-      "random_output_len": 256
+      "port": 8116,
+      "model": "/data/shared_models/Qwen--Qwen2.5-VL-7B-Instruct"
     }
   }
 }
