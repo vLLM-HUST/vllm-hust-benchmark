@@ -35,6 +35,11 @@ DEFAULT_ASCEND_TOOLKIT_SET_ENV_CANDIDATES = (
 IMPORTANT_REF_GREP = (
     "perf|performance|optimi|throughput|latency|decode|scheduler|cache|prefix|kv"
 )
+DEV_HUB_SECRET_ENV_KEYS = (
+    "VLLM_HUST_API_KEY",
+    "VLLM_ENGINE_API_KEY",
+    "OPENAI_API_KEY",
+)
 
 
 @dataclass(frozen=True)
@@ -95,6 +100,42 @@ def slugify(value: str) -> str:
 
 def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def parse_dotenv(path: Path) -> dict[str, str]:
+    if not path.is_file():
+        return {}
+    values: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, value = stripped.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if not key or key.startswith("export "):
+            key = key.removeprefix("export ").strip()
+        if (
+            len(value) >= 2
+            and value[0] == value[-1]
+            and value[0] in {"'", '"'}
+        ):
+            value = value[1:-1]
+        values[key] = value
+    return values
+
+
+def dev_hub_secret_env(dev_hub_dir: str | Path) -> dict[str, str]:
+    dotenv = parse_dotenv(Path(dev_hub_dir).resolve() / ".env")
+    secrets = {
+        key: dotenv[key]
+        for key in DEV_HUB_SECRET_ENV_KEYS
+        if dotenv.get(key) and not os.environ.get(key)
+    }
+    api_key = secrets.get("VLLM_HUST_API_KEY") or os.environ.get("VLLM_HUST_API_KEY")
+    if api_key and not os.environ.get("OPENAI_API_KEY"):
+        secrets.setdefault("OPENAI_API_KEY", api_key)
+    return secrets
 
 
 def scenario_to_workload(scenario: str) -> str:
@@ -439,6 +480,7 @@ def start_managed_server(
     }
     env = {
         **os.environ,
+        **dev_hub_secret_env(args.dev_hub_dir),
         "VLLM_ENGINE_MODEL_PATH": model_path,
         "VLLM_ENGINE_SERVED_MODEL_NAME": served_model_name(spec.model),
         "VLLM_ENGINE_PORT": str(args.server_port),
@@ -704,6 +746,7 @@ def run_target_spec(
     result_dir = Path(args.result_root).resolve() / "runs" / run_id
     env = {
         **os.environ,
+        **dev_hub_secret_env(args.dev_hub_dir),
         "VLLM_TARGET_DEVICE": "npu",
         "ASCEND_RT_VISIBLE_DEVICES": args.managed_npu_devices,
         "ASCEND_VISIBLE_DEVICES": args.managed_npu_devices,
