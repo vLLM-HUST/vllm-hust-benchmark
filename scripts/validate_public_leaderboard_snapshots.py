@@ -11,6 +11,9 @@ from typing import Any
 
 PUBLIC_BASELINE_ENGINE = "vllm"
 PUBLIC_BASELINE_VERSION = "0.18.0"
+PUBLIC_BASELINE_CHIP = "910B2"
+RETIRED_PUBLIC_MODELS = ("Qwen/Qwen3-8B",)
+RETIRED_PUBLIC_PRECISIONS = ("BF16",)
 RETIRED_BASELINE_TOKENS = ("v0.11.0", "v0110", "0.11.0")
 OFFICIAL_PUBLIC_WORKLOADS = {
     "instructcoder-online",
@@ -81,6 +84,18 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
             f"{source.name}:{entry_id}: retired baseline spec_id {spec_id!r}"
         )
 
+    entry_model_name = str(model.get("name") or model.get("repo_id") or "")
+    entry_precision_value = str(model.get("precision") or "")
+    if entry_model_name in RETIRED_PUBLIC_MODELS:
+        errors.append(
+            f"{source.name}:{entry_id}: retired public model {entry_model_name!r}"
+        )
+    if entry_precision_value in RETIRED_PUBLIC_PRECISIONS:
+        errors.append(
+            f"{source.name}:{entry_id}: retired public precision "
+            f"{entry_precision_value!r}"
+        )
+
     if engine == "vllm-hust" and workload in OFFICIAL_PUBLIC_WORKLOADS and not spec_id:
         errors.append(
             f"{source.name}:{entry_id}: public vllm-hust official workload "
@@ -99,7 +114,7 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         )
 
     if spec_id.startswith(OFFICIAL_V0180_SPEC_PREFIX):
-        expected_chip = "910B2" if spec_id.endswith("-910b2") else None
+        expected_chip = PUBLIC_BASELINE_CHIP if spec_id.endswith("-910b2") else None
         entry_precision = str(model.get("precision") or "")
         spec_precision = str(same_spec.get("model_precision") or "")
         entry_chip = str(hardware.get("chip_model") or "")
