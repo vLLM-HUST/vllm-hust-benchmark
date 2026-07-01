@@ -138,6 +138,28 @@ def dev_hub_secret_env(dev_hub_dir: str | Path) -> dict[str, str]:
     return secrets
 
 
+def hf_mirror_cache_env() -> dict[str, str]:
+    return {
+        "HF_ENDPOINT": os.environ.get("HF_ENDPOINT", "https://hf-mirror.com"),
+        "HF_HOME": os.environ.get(
+            "HF_HOME",
+            "/data/shared_datasets/vllm-hust-benchmark/huggingface",
+        ),
+        "HF_HUB_CACHE": os.environ.get(
+            "HF_HUB_CACHE",
+            "/data/shared_datasets/vllm-hust-benchmark/huggingface/hub",
+        ),
+        "HUGGINGFACE_HUB_CACHE": os.environ.get(
+            "HUGGINGFACE_HUB_CACHE",
+            "/data/shared_datasets/vllm-hust-benchmark/huggingface/hub",
+        ),
+        "HF_DATASETS_CACHE": os.environ.get(
+            "HF_DATASETS_CACHE",
+            "/data/shared_datasets/vllm-hust-benchmark/huggingface/datasets",
+        ),
+    }
+
+
 def scenario_to_workload(scenario: str) -> str:
     return scenario
 
@@ -480,6 +502,7 @@ def start_managed_server(
     }
     env = {
         **os.environ,
+        **hf_mirror_cache_env(),
         **dev_hub_secret_env(args.dev_hub_dir),
         "VLLM_ENGINE_MODEL_PATH": model_path,
         "VLLM_ENGINE_SERVED_MODEL_NAME": served_model_name(spec.model),
@@ -508,14 +531,18 @@ def start_managed_server(
         "VLLM_ENGINE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
         "VLLM_ENGINE_BASE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
         "VLLM_PLUGINS": "ascend",
-        "VLLM_ENGINE_EXTRA_ENV_PREFIXES": "",
+        # dev-hub intentionally filters environment variable names containing
+        # KEY/TOKEN/SECRET, so prefix forwarding is required for HF cache vars.
+        "VLLM_ENGINE_EXTRA_ENV_PREFIXES": "HF_,HUGGINGFACE_,VLLM_SEGMENT_REUSE_",
         "COMPILE_CUSTOM_KERNELS": "0",
         "VLLM_ASCEND_ENABLE_FUSED_MC2": "0",
+        "TORCH_DEVICE_BACKEND_AUTOLOAD": "0",
         "HF_HUB_OFFLINE": "0" if args.allow_model_downloads else "1",
         "TRANSFORMERS_OFFLINE": "0" if args.allow_model_downloads else "1",
         "VLLM_ENGINE_CONTAINER_LOG_FILE": (
             f"/tmp/vllm-hust-backfill-{slugify(target.label)}-{slugify(spec.workload)}.log"
         ),
+        "VLLM_ENGINE_RECREATE_CONTAINER": "true",
     }
     if args.managed_container:
         env["VLLM_ENGINE_CONTAINER"] = args.managed_container
@@ -746,6 +773,7 @@ def run_target_spec(
     result_dir = Path(args.result_root).resolve() / "runs" / run_id
     env = {
         **os.environ,
+        **hf_mirror_cache_env(),
         **dev_hub_secret_env(args.dev_hub_dir),
         "VLLM_TARGET_DEVICE": "npu",
         "ASCEND_RT_VISIBLE_DEVICES": args.managed_npu_devices,

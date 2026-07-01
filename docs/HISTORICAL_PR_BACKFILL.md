@@ -12,6 +12,10 @@ leaderboard export path stay in the existing runner.
 - Historical PR backfills must launch the serving system through
   `/home/shuhao/vllm-hust-dev-hub/manage.sh` with `--managed-dev-hub`. Do not
   bypass dev-hub by manually running `vllm.entrypoints.openai.api_server`.
+- Managed runs must use a real systemd unit name ending in `.service`, for
+  example `vllm-hust-bf-pr66-random.service`. A bare unit filename can be
+  written by `manage.sh` but then `systemctl --user restart <name>.service`
+  cannot find it.
 - The runner uses detached git worktrees for historical refs. It must not mutate
   the active `/home/shuhao/vllm-hust` or `/home/shuhao/vllm-ascend-hust`
   checkouts.
@@ -34,6 +38,15 @@ leaderboard export path stay in the existing runner.
   Never relabel a result to make two incomparable rows look comparable.
 - A failed startup, failed health probe, or failed client benchmark must not be
   published, mirrored to website data, or committed.
+- Benchmark submissions and `leaderboard-data/snapshots/` in this repository are
+  the real data source. The website repository must only mirror those snapshots;
+  do not make website-local data authoritative and do not add a local-first
+  loader mode that can hide fresher GitHub or HF results from other users.
+- For top-level compare cards, never display an arithmetic average across
+  unrelated rows. Choose one representative matched same-spec sample: same
+  workload, precision, model, hardware chip model/count, node count, and baseline
+  target. If no matched sample exists, show the scope as blocked for comparison
+  instead of synthesizing a value.
 - In managed-server mode, the host-side benchmark client is only an HTTP load
   generator. It must not import the historical `vllm-ascend-hust` source tree;
   server-side Ascend plugin code is loaded only inside the dev-hub container
@@ -48,6 +61,10 @@ leaderboard export path stay in the existing runner.
 - Online backfill requests are run greedily (`temperature=0`) and the managed
   server is launched with `--generation-config vllm`; do not let a model's
   bundled generation config silently enable top-k/top-p sampling paths.
+- Dataset and model downloads must use `HF_ENDPOINT=https://hf-mirror.com` and
+  cache under `/data/shared_datasets/vllm-hust-benchmark/huggingface` or another
+  explicit `/data` path. Do not let backfills populate `$HOME` with HF datasets,
+  model caches, or benchmark artifacts.
 - When `--publish-each` is enabled, every completed submission is immediately
   merged into the HF dataset and the local benchmark snapshots are regenerated.
 - When `--sync-website-each` is enabled, the website data mirror is updated from

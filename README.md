@@ -216,7 +216,7 @@ Because the production website currently prioritizes `github -> hf -> local`, a 
 1. `vllm-hust` benchmark CI writes the exported `submissions/<run-id>/` payload and refreshed `leaderboard-data/snapshots/` files directly into `vllm-hust-benchmark@main` in one bot-authenticated commit.
 2. The `push-to-hf.yml` workflow in this repository reacts to that `submissions/**` change, syncs the merged raw submission plus refreshed snapshots to the HF dataset, and keeps the GitHub repository itself as the website's first freshness source.
 
-The older snapshot-PR and auto-merge workflows are obsolete under this model. The HF dataset remains the canonical aggregated source, while the benchmark repository commit satisfies the website's GitHub-first loader immediately.
+The older snapshot-PR and auto-merge workflows are obsolete under this model. The benchmark repository submission directories and generated snapshots are the authoritative source for public leaderboard data; the HF dataset is a synchronized distribution mirror for consumers that cannot read the GitHub snapshots directly.
 
 If you already have a raw `vllm bench` result JSON, you do not need to hand-author the full metrics payload anymore. The wrapper can derive the main website metrics from the raw result and only requires a separate constraints metrics JSON.
 
