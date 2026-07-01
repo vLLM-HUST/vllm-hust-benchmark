@@ -74,3 +74,20 @@ def test_load_plan_defaults_plugin_ref_and_label(tmp_path: Path) -> None:
     assert targets[0].core_ref == "abcdef1234567890"
     assert targets[0].plugin_ref == "main"
     assert targets[0].pr_number == 42
+
+
+def test_parse_npu_smi_chip_models_ignores_chip_index_rows() -> None:
+    module = load_module()
+    output = """
+| NPU   Name                | Health        | Power(W)    Temp(C)           Hugepages-Usage(page)|
+| Chip                      | Bus-Id        | AICore(%)   Memory-Usage(MB)  HBM-Usage(MB)        |
++===========================+===============+====================================================+
+| 0     910B2               | OK            | 95.2        38                0    / 0             |
+| 0                         | 0000:C1:00.0  | 0           0    / 0          3423 / 65536         |
++===========================+===============+====================================================+
+| 1     910B2               | OK            | 89.8        35                0    / 0             |
+| 0                         | 0000:C2:00.0  | 0           0    / 0          3417 / 65536         |
+"""
+
+    assert module.parse_npu_smi_chip_models(output, "0") == ["910B2"]
+    assert module.parse_npu_smi_chip_models(output, "0,1") == ["910B2", "910B2"]

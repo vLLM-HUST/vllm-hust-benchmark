@@ -21,6 +21,7 @@ CURRENT_SERVER_HOST=${CURRENT_SERVER_HOST:-}
 CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-"8001"}
 CURRENT_CLIENT_HOST=${CURRENT_CLIENT_HOST:-}
 CURRENT_CLIENT_PORT=${CURRENT_CLIENT_PORT:-$CURRENT_SERVER_PORT}
+CURRENT_USE_MANAGED_SERVER=${CURRENT_USE_MANAGED_SERVER:-0}
 CURRENT_ENGINE=${CURRENT_ENGINE:-"vllm-hust"}
 CURRENT_ENGINE_VERSION=${CURRENT_ENGINE_VERSION:-}
 CURRENT_CORE_VERSION=${CURRENT_CORE_VERSION:-}
@@ -32,6 +33,9 @@ CURRENT_DTYPE=${CURRENT_DTYPE:-}
 CURRENT_MODEL_NAME=${CURRENT_MODEL_NAME:-}
 CURRENT_MODEL_PARAMETERS=${CURRENT_MODEL_PARAMETERS:-}
 CURRENT_MODEL_PRECISION=${CURRENT_MODEL_PRECISION:-}
+CURRENT_CLIENT_MODEL_NAME=${CURRENT_CLIENT_MODEL_NAME:-}
+CURRENT_CLIENT_TOKENIZER=${CURRENT_CLIENT_TOKENIZER:-}
+CURRENT_CLIENT_TEMPERATURE=${CURRENT_CLIENT_TEMPERATURE:-}
 CURRENT_HARDWARE_CHIP_MODEL=${CURRENT_HARDWARE_CHIP_MODEL:-}
 CURRENT_GITHUB_REPOSITORY=${CURRENT_GITHUB_REPOSITORY:-"vLLM-HUST/vllm-hust"}
 CURRENT_GITHUB_REF=${CURRENT_GITHUB_REF:-$(git -C "$CURRENT_VLLM_HUST_REPO" branch --show-current 2>/dev/null || echo main)}
@@ -40,8 +44,8 @@ CURRENT_PLUGIN_ENGINE=${CURRENT_PLUGIN_ENGINE:-"vllm-ascend-hust"}
 CURRENT_PLUGIN_GITHUB_REPOSITORY=${CURRENT_PLUGIN_GITHUB_REPOSITORY:-"vLLM-HUST/vllm-ascend-hust"}
 CURRENT_PLUGIN_GITHUB_REF=${CURRENT_PLUGIN_GITHUB_REF:-$(git -C "$CURRENT_VLLM_ASCEND_HUST_REPO" branch --show-current 2>/dev/null || echo main)}
 CURRENT_PLUGIN_GIT_COMMIT=${CURRENT_PLUGIN_GIT_COMMIT:-$(git -C "$CURRENT_VLLM_ASCEND_HUST_REPO" rev-parse HEAD 2>/dev/null || true)}
-ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
-ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-"/usr/local/Ascend/nnal/atb/set_env.sh"}
+ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-}
+ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-}
 ASCEND_ATB_CXX_ABI=${ASCEND_ATB_CXX_ABI:-"1"}
 RESULT_DIR=${RESULT_DIR:-"$REPO_ROOT/.benchmarks/current-ascend-same-spec"}
 RUN_ID=${RUN_ID:-"current-ascend-same-spec-$(date -u +%Y%m%dT%H%M%SZ)"}
@@ -53,7 +57,11 @@ SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
-CURRENT_RUNTIME_SOURCE_PYTHONPATH="$CURRENT_VLLM_ASCEND_HUST_REPO:$CURRENT_VLLM_HUST_REPO"
+if [[ "$CURRENT_USE_MANAGED_SERVER" == "1" ]]; then
+  CURRENT_RUNTIME_SOURCE_PYTHONPATH="$CURRENT_VLLM_HUST_REPO"
+else
+  CURRENT_RUNTIME_SOURCE_PYTHONPATH="$CURRENT_VLLM_ASCEND_HUST_REPO:$CURRENT_VLLM_HUST_REPO"
+fi
 if [[ -n "$CURRENT_RUNTIME_PYTHONPATH" ]]; then
   CURRENT_RUNTIME_PYTHONPATH="$CURRENT_RUNTIME_SOURCE_PYTHONPATH:$CURRENT_RUNTIME_PYTHONPATH"
 else
@@ -78,6 +86,33 @@ fi
 if [[ ! -f "$VLLM_CLI_COMPAT" ]]; then
   echo "CLI compatibility wrapper not found: $VLLM_CLI_COMPAT" >&2
   exit 2
+fi
+
+detect_first_existing_file() {
+  local candidate
+  for candidate in "$@"; do
+    if [[ -f "$candidate" ]]; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if [[ -z "$ASCEND_TOOLKIT_SET_ENV" ]]; then
+  ASCEND_TOOLKIT_SET_ENV=$(detect_first_existing_file \
+    "/opt/hust-ascend-cann/Ascend/cann-8.5.0/set_env.sh" \
+    "/usr/local/Ascend/ascend-toolkit/set_env.sh" \
+    "/usr/local/Ascend/latest/set_env.sh" \
+    "/usr/local/Ascend/ascend-toolkit/latest/set_env.sh" \
+    || true)
+fi
+
+if [[ -z "$ASCEND_ATB_SET_ENV" ]]; then
+  ASCEND_ATB_SET_ENV=$(detect_first_existing_file \
+    "/usr/local/Ascend/nnal/atb/set_env.sh" \
+    "/opt/hust-ascend-cann/Ascend/nnal/atb/set_env.sh" \
+    || true)
 fi
 
 SCRIPT_BASENAME=$(basename "$0")
@@ -402,6 +437,13 @@ run_in_current_runtime() {
       source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
       set -u
     fi
+    if [[ -d "$CURRENT_ENV_PREFIX/lib" ]]; then
+      export LD_LIBRARY_PATH="$CURRENT_ENV_PREFIX/lib:${LD_LIBRARY_PATH:-}"
+    fi
+    if [[ "$CURRENT_USE_MANAGED_SERVER" == "1" ]]; then
+      export VLLM_PLUGINS=""
+      export TORCH_DEVICE_BACKEND_AUTOLOAD=0
+    fi
     export VLLM_CACHE_ROOT="$CURRENT_VLLM_CACHE_ROOT"
     PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
       "$@"
@@ -423,6 +465,9 @@ run_server_command() {
       # shellcheck disable=SC1090
       source "$ASCEND_ATB_SET_ENV" --cxx_abi="$ASCEND_ATB_CXX_ABI"
       set -u
+    fi
+    if [[ -d "$CURRENT_ENV_PREFIX/lib" ]]; then
+      export LD_LIBRARY_PATH="$CURRENT_ENV_PREFIX/lib:${LD_LIBRARY_PATH:-}"
     fi
     export VLLM_CACHE_ROOT="$CURRENT_VLLM_CACHE_ROOT"
     PYTHONUNBUFFERED=1 \
@@ -529,15 +574,25 @@ from vllm_hust_benchmark.official_runtime_inputs import normalize_client_paramet
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
+parameters = normalize_client_parameters(
+    payload["resolved_client_parameters"],
+    benchmark_type=os.environ["BENCHMARK_TYPE"],
+    ready_check_timeout_sec=ready_timeout,
+    vllm_worktree=os.environ.get("CURRENT_VLLM_WORKTREE"),
+    dataset_cache_root=os.environ.get("CURRENT_BENCHMARK_DATASET_ROOT"),
+)
+client_model_name = os.environ.get("CURRENT_CLIENT_MODEL_NAME", "").strip()
+if client_model_name:
+    parameters["model"] = client_model_name
+client_tokenizer = os.environ.get("CURRENT_CLIENT_TOKENIZER", "").strip()
+if client_tokenizer:
+    parameters["tokenizer"] = client_tokenizer
+client_temperature = os.environ.get("CURRENT_CLIENT_TEMPERATURE", "").strip()
+if client_temperature:
+    parameters["temperature"] = client_temperature
 print(
     json.dumps(
-        normalize_client_parameters(
-            payload["resolved_client_parameters"],
-            benchmark_type=os.environ["BENCHMARK_TYPE"],
-            ready_check_timeout_sec=ready_timeout,
-            vllm_worktree=os.environ.get("CURRENT_VLLM_WORKTREE"),
-            dataset_cache_root=os.environ.get("CURRENT_BENCHMARK_DATASET_ROOT"),
-        ),
+        parameters,
         separators=(",", ":"),
         ensure_ascii=True,
     )
@@ -827,7 +882,9 @@ if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
   CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
   CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
 
-  assert_target_port_available "Current same-spec benchmark" "$CLIENT_HOST" "$CLIENT_PORT"
+  if [[ "$CURRENT_USE_MANAGED_SERVER" != "1" ]]; then
+    assert_target_port_available "Current same-spec benchmark" "$CLIENT_HOST" "$CLIENT_PORT"
+  fi
   SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters | del(.disable_log_requests)' "$SAME_SPEC_FILE")")
 fi
 
@@ -838,33 +895,38 @@ echo "[same-spec-current] resolved spec file: $SAME_SPEC_FILE"
 echo "[same-spec-current] benchmark type: $BENCHMARK_TYPE"
 if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
   echo "[same-spec-current] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
-  server_ready=0
-  for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
-    : >"$SERVER_STDOUT_LOG"
-    run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
-    SERVER_PID=$!
-    persist_managed_server_state
-
-    if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then
+  if [[ "$CURRENT_USE_MANAGED_SERVER" == "1" ]]; then
+    echo "[same-spec-current] using externally managed server"
+    wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
+  else
+    server_ready=0
+    for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
+      : >"$SERVER_STDOUT_LOG"
+      run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
+      SERVER_PID=$!
       persist_managed_server_state
-      server_ready=1
-      break
+
+      if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then
+        persist_managed_server_state
+        server_ready=1
+        break
+      fi
+
+      server_wait_status=$?
+      if [[ "$server_wait_status" -eq 86 && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
+        echo "[same-spec-current] detected transient Ascend runtime startup failure; retrying server start in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
+        cleanup_managed_server || true
+        sleep "$SERVER_START_RETRY_DELAY_SECONDS"
+        continue
+      fi
+
+      exit "$server_wait_status"
+    done
+
+    if [[ "$server_ready" != "1" ]]; then
+      echo "[same-spec-current] vLLM server did not become ready after ${SERVER_START_RETRIES} start attempt(s)" >&2
+      exit 1
     fi
-
-    server_wait_status=$?
-    if [[ "$server_wait_status" -eq 86 && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
-      echo "[same-spec-current] detected transient Ascend runtime startup failure; retrying server start in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
-      cleanup_managed_server || true
-      sleep "$SERVER_START_RETRY_DELAY_SECONDS"
-      continue
-    fi
-
-    exit "$server_wait_status"
-  done
-
-  if [[ "$server_ready" != "1" ]]; then
-    echo "[same-spec-current] vLLM server did not become ready after ${SERVER_START_RETRIES} start attempt(s)" >&2
-    exit 1
   fi
 fi
 
