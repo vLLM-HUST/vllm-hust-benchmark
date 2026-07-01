@@ -414,6 +414,8 @@ stop
 10. website 数据源优先级当前是 `github -> hf -> local`。如果调整这个策略，需要同时考虑 freshness、缓存 marker、回滚路径和 outage 行为。
 11. GitHub repo 中的 `leaderboard-data/snapshots/` 不是冗余副本，而是线上第一优先级读取源；不能简单删除。
 12. 数据错误优先在 exporter / submission 源头修，不在 website data 层热修补。
+13. 公开 leaderboard 的硬件与精度标签必须来自实际运行 artifact，并在发布前与 same-spec/runtime 元数据一致；禁止从文件名、run id、分支名或页面截图推断 `910B2`/`910B3`、`FP16`/`BF16`。
+14. website 顶部 overview 卡片只允许展示一个具体对齐 workload/scope 的实际样本值，禁止跨 workload、模型、硬件、精度或 setting 取平均。多组可见时，选择 `vllm-hust` 相对官方 `vllm 0.18.0` 吞吐提升最大的完整 compare scope。
 
 ## 9. 当前完成情况
 
