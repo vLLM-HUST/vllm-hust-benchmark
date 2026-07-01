@@ -128,3 +128,44 @@ def test_ensure_plugin_build_info_materializes_source_worktree_file(tmp_path: Pa
         "# Auto-generated file for benchmark source worktree\n"
         "__device_type__ = 'A2'\n"
     )
+
+
+def test_dev_hub_secret_env_maps_vllm_key_to_openai_key(
+    tmp_path: Path, monkeypatch
+) -> None:
+    module = load_module()
+    dev_hub = tmp_path / "dev-hub"
+    dev_hub.mkdir()
+    (dev_hub / ".env").write_text(
+        "VLLM_HUST_API_KEY='local-secret'\n"
+        "OPENAI_API_KEY='openai-secret'\n"
+        "UNRELATED=value\n",
+        encoding="utf-8",
+    )
+    monkeypatch.delenv("VLLM_HUST_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    env = module.dev_hub_secret_env(dev_hub)
+
+    assert env == {
+        "VLLM_HUST_API_KEY": "local-secret",
+        "OPENAI_API_KEY": "openai-secret",
+    }
+
+
+def test_dev_hub_secret_env_does_not_override_process_env(
+    tmp_path: Path, monkeypatch
+) -> None:
+    module = load_module()
+    dev_hub = tmp_path / "dev-hub"
+    dev_hub.mkdir()
+    (dev_hub / ".env").write_text(
+        "VLLM_HUST_API_KEY=local-secret\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("OPENAI_API_KEY", "process-openai-secret")
+    monkeypatch.delenv("VLLM_HUST_API_KEY", raising=False)
+
+    env = module.dev_hub_secret_env(dev_hub)
+
+    assert env == {"VLLM_HUST_API_KEY": "local-secret"}
