@@ -227,44 +227,49 @@ For the upstream benchmark analysis behind this design, see `docs/UPSTREAM_ANALY
 The canonical home for the official Ascend goal-baseline runner is this repository, not `reference-repos/*`.
 `reference-repos` stays read-only for upstream comparison, while `vllm-hust-benchmark` owns cross-repo orchestration and website artifact export.
 
-Current baseline target:
+Current public baseline target:
 
-- official `vllm v0.11.0`
-- official `vllm-ascend v0.11.0`
+- official `vllm v0.18.0`
+- official `vllm-ascend v0.18.0`
 - canonical spec set under `docs/official-baselines/*.json`
-- current hardware target `Huawei 910B3`
+- current hardware target `Huawei 910B2`
 
-The official baseline set is no longer a single `random-online` spec. The canonical spec files under `docs/official-baselines/` are the source of truth for all official scenarios that need a baseline under the pinned January 2026 `v0.11.0` runtime pair.
+The official baseline set is no longer a single `random-online` spec. The canonical spec files under `docs/official-baselines/` are the source of truth for all official scenarios that need a baseline under the pinned January 2026 `v0.18.0` runtime pair.
+
+Retired `vllm v0.11.0` / `vllm-ascend v0.11.0` runs must not be republished to
+`leaderboard-data/snapshots`, the website mirror, or the HF snapshot root. Run
+`python scripts/validate_public_leaderboard_snapshots.py` before publishing
+curated leaderboard data.
 
 Files:
 
 - `scripts/prepare-official-ascend-baseline-env.sh`
 - `scripts/run-official-ascend-goal-baseline.sh`
-- `docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json`
+- `docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json`
 - `docs/official-baselines/official-ascend-constraints.stub.json`
 
 Example:
 
 ```bash
-export ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+export ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
 bash scripts/prepare-official-ascend-baseline-env.sh
 
 export GOAL_BASELINE_ENV_PREFIX="$ENV_PREFIX"
 bash scripts/run-official-ascend-goal-baseline.sh \
-	docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
+	docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json
 ```
 
 Batch trigger for all official specs:
 
 ```bash
-export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
 bash scripts/run-official-ascend-goal-baseline-matrix.sh
 ```
 
 Batch trigger with repeated candidate selection for missing canonical specs:
 
 ```bash
-export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
 REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh
 ```
 
@@ -272,7 +277,7 @@ Notes:
 
 - `prepare-official-ascend-baseline-env.sh` creates or repairs a dedicated conda env for the fixed official baseline only.
 - `prepare-official-ascend-baseline-env.sh` now starts with a health check. If the existing env already matches the pinned official baseline, it skips the heavy uninstall/reinstall path and reuses the env as-is.
-- If `ENV_PREFIX` is unset, the prepare script now defaults it to `$(conda info --base)/envs/vllm-ascend-official-v0110` instead of assuming `/root/miniconda3/...`.
+- If `ENV_PREFIX` is unset, the prepare script now defaults it to `$(conda info --base)/envs/vllm-ascend-official-v0180` instead of assuming `/root/miniconda3/...`.
 - `prepare-official-ascend-baseline-env.sh` also owns the benchmark admission preflight: it proactively cleans residual `api_server` / `bench serve` / `EngineCore_DP0` processes and clears the benchmark port before a new run is allowed to start.
 - The baseline runtime is pinned to `reference-repos/vllm@v0.11.0` and `reference-repos/vllm-ascend@v0.11.0` worktrees.
 - The prepare script intentionally does not install `vllm-hust` or `vllm-ascend-hust` into the official env, to avoid plugin-entry-point contamination.
@@ -304,7 +309,7 @@ Recommended first establishment run for all missing official specs:
 
 ```bash
 cd /path/to/vllm-hust-benchmark
-export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
 REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh
 ```
 
@@ -312,18 +317,18 @@ Run only one spec file:
 
 ```bash
 cd /path/to/vllm-hust-benchmark
-export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
 REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh \
-	docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-online-qwen25-14b-910b3.json
+	docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json
 ```
 
 Run a review-only rerun for a spec that already has canonical data:
 
 ```bash
 cd /path/to/vllm-hust-benchmark
-export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0110"
+export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
 FORCE_RUN_EXISTING=1 REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh \
-	docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
+	docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json
 ```
 
 Useful local switches:
@@ -366,7 +371,7 @@ Recommended `workflow_dispatch` inputs for the first full establishment run:
 - `publish_website`: `false`
 - `publication_target_branch`: `main`
 - `website_ref`: `main`
-- `goal_baseline_env_prefix`: leave blank unless the runner must use a non-default conda base; blank resolves to `$(conda info --base)/envs/vllm-ascend-official-v0110` on the runner
+- `goal_baseline_env_prefix`: leave blank unless the runner must use a non-default conda base; blank resolves to `$(conda info --base)/envs/vllm-ascend-official-v0180` on the runner
 
 Workflow visibility note:
 
@@ -404,8 +409,8 @@ Trigger a subset from `gh` CLI by passing newline-separated `spec_paths`:
 cd /path/to/vllm-hust-benchmark
 gh workflow run run-official-ascend-baselines.yml \
 	--ref ws/official-baseline-v2 \
-	-f spec_paths='docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-online-qwen25-14b-910b3.json
-docs/official-baselines/official-ascend-jan-2026-v0110-sharegpt-throughput-qwen25-14b-910b3.json' \
+	-f spec_paths='docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json
+docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json' \
 	-f repeat_count=3 \
 	-f force_repair_official_env=false \
 	-f force_run_existing=false
@@ -426,7 +431,7 @@ For a same-spec run that needs Ascend `msprof` collection, use the profiling wra
 
 ```bash
 bash scripts/run-current-ascend-same-spec-msprof.sh \
-  docs/official-baselines/official-ascend-jan-2026-v0110-random-online-qwen25-14b-910b3.json
+  docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json
 ```
 
 It keeps the existing current same-spec runner as the workload and writes this layout:

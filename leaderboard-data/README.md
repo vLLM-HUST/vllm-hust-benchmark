@@ -7,6 +7,11 @@ file under `submissions/`. The raw submissions directory may contain old CI
 probes, failed tuning attempts, and historical experiments that are useful for
 audit but should not automatically appear on the website.
 
+The public baseline is `vllm 0.18.0` plus the matching `vllm-ascend 0.18.0`
+official Ascend baseline. Older `vllm 0.11.0` / `v0110` baseline runs are
+retired and must not appear in `snapshots/`, even if they still exist in a
+local archive or external dataset history.
+
 ## Layout
 
 - `snapshots/leaderboard_single.json`
@@ -31,6 +36,9 @@ Before committing refreshed snapshots, curate the publish set and verify that
 the website mirror remains identical:
 
 ```bash
+python scripts/validate_public_leaderboard_snapshots.py \
+  --snapshot-dir leaderboard-data/snapshots
+
 python ../vllm-hust-website/scripts/sync_leaderboard_snapshots.py \
   --source-dir leaderboard-data/snapshots \
   --target-dir ../vllm-hust-website/data \

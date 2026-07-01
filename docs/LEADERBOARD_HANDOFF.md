@@ -52,7 +52,7 @@
 | leaderboard 场景定义 | `src/vllm_hust_benchmark/data/official_scenarios.json` | `vllm-hust-benchmark` | exporter、CLI、website 聚合 | workload/business scenario/config 映射在这里冻结 |
 | 标准 submission contract | `leaderboard_manifest.json` + `run_leaderboard.json` + website schema | `vllm-hust-benchmark` exporter | website 聚合、HF 同步 | 这是跨仓边界，不允许 ad hoc JSON |
 | model identity contract | benchmark model registry + website schema | `vllm-hust-benchmark` | website filters、compare grouping | 已完成 canonical_id/repo_id/display_name 正规化 |
-| official baseline spec | `docs/official-baselines/*.json` | `vllm-hust-benchmark` | official runner、same-spec、baseline coverage | 当前官方目标固定为 Ascend + `v0.11.0` |
+| official baseline spec | `docs/official-baselines/*.json` | `vllm-hust-benchmark` | official runner、same-spec、baseline coverage | 当前公开官方目标固定为 Ascend + `v0.18.0`; `v0.11.0` 已退役，不得进入 public snapshots |
 | website 聚合输出 | `leaderboard_single.json` / `leaderboard_multi.json` / `leaderboard_compare.json` / `last_updated.json` | 聚合脚本生成 | website 前端 | website 不应手工维护这些文件 |
 | website 数据源优先级 | `assets/hf-data-loader.js` | `vllm-hust-website` | 前端 | 当前优先级是 `github -> hf -> local` |
 | baseline 线上分发 | benchmark repo snapshots + HF dataset | benchmark workflows | website 前端 | GitHub 仓库提供第一优先级 freshness，HF 提供 canonical aggregate |
@@ -84,8 +84,8 @@ package "vllm-hust\n运行时语义" as HUST {
 }
 
 package "reference-repos\n只读参考" as REF {
-  [vllm@v0.11.0]
-  [vllm-ascend@v0.11.0]
+  [vllm@v0.18.0]
+  [vllm-ascend@v0.18.0]
 }
 
 package "vllm-hust-website\n消费与展示" as WEB {
@@ -239,7 +239,7 @@ database "submissions/<spec-id>/" as SUB
 
 M -> WF : workflow_dispatch
 WF -> PREP : 准备 pinned conda env + worktrees
-PREP -> REF : checkout / verify v0.11.0 runtime
+PREP -> REF : checkout / verify v0.18.0 runtime
 WF -> MATRIX : 遍历 official specs
 MATRIX -> SUB : 检查 canonical 是否已存在
 alt 已存在且未强制重跑
@@ -410,7 +410,7 @@ stop
 6. `model.name` 仅作为兼容字段，语义冻结为 `repo_id` 的镜像，不再承载短名或 UI label。
 7. official baseline compare 继续依赖 same-spec payload；没有 same-spec 的记录不应被伪装成正式对照基线。
 8. `baseline_status` 语义继续保持 `official-covered` / `pending-baseline` / `no-baseline-declared` 三态，不要再引入自由文本状态。
-9. official Ascend baseline 当前 pin 到 `vllm v0.11.0` + `vllm-ascend v0.11.0` + `Huawei 910B3`。版本轮转应通过新增 spec / target，而不是覆盖旧 target。
+9. official Ascend public baseline 当前 pin 到 `vllm v0.18.0` + `vllm-ascend v0.18.0` + `Huawei 910B2`。`v0.11.0` 历史运行已退役，不得重新发布到 public snapshots / website / HF snapshot root。
 10. website 数据源优先级当前是 `github -> hf -> local`。如果调整这个策略，需要同时考虑 freshness、缓存 marker、回滚路径和 outage 行为。
 11. GitHub repo 中的 `leaderboard-data/snapshots/` 不是冗余副本，而是线上第一优先级读取源；不能简单删除。
 12. 数据错误优先在 exporter / submission 源头修，不在 website data 层热修补。
@@ -437,7 +437,7 @@ stop
 | 项目 | 当前状态 |
 | --- | --- |
 | official baseline spec 数量 | 8 个 |
-| 当前已提交的 official canonical submission | 1 个：`official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3` |
+| 当前已提交的 official canonical submission | `official-ascend-jan-2026-v0.18.0-*` curated set |
 | 非官方 submission 存量 | 已存在多批 CI 与实验 submission，可作为聚合链路回归样本 |
 | website snapshot 目录 | 已存在并可用于当前分支的本地/仓内验证 |
 
@@ -558,7 +558,7 @@ PYTHONPATH=src python -m vllm_hust_benchmark.cli sync-submission-to-hf \
 - 能独立 dry-run 或执行一次 official baseline matrix。
 - 能独立排查 website 未刷新时是 GitHub 源、HF 源还是 local fallback 问题。
 - 能确认并维护 `intellistream/vllm-hust-benchmark-results` 的发布链路。
-- 能给出下一轮 official baseline 版本轮转方案，而不破坏现有 `v0.11.0` 目标的可追溯性。
+- 能给出下一轮 official baseline 版本轮转方案，而不破坏现有 `v0.18.0` 公开目标的可追溯性，并保持 `v0.11.0` 退役数据不再发布。
 
 ## 13. 建议继续阅读的文件
 
