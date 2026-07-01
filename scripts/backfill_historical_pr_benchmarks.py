@@ -132,7 +132,7 @@ def collect_official_specs(
     return specs
 
 
-def load_plan(plan_file: Path) -> list[TargetRef]:
+def load_plan(plan_file: Path, *, default_plugin_ref: str = "main") -> list[TargetRef]:
     payload = load_json(plan_file)
     if not isinstance(payload, dict):
         raise ValueError(f"{plan_file}: plan must be a JSON object")
@@ -147,7 +147,7 @@ def load_plan(plan_file: Path) -> list[TargetRef]:
         core_ref = str(target.get("core_ref") or "").strip()
         if not core_ref:
             raise ValueError(f"{plan_file}: targets[{index}].core_ref is required")
-        plugin_ref = str(target.get("plugin_ref") or "main").strip()
+        plugin_ref = str(target.get("plugin_ref") or default_plugin_ref).strip()
         label = str(target.get("label") or core_ref[:12]).strip()
         pr_number = target.get("pr_number")
         parsed.append(
@@ -758,12 +758,19 @@ def main() -> int:
 
     core_repo = Path(args.core_repo).resolve()
     plugin_repo = Path(args.plugin_repo).resolve()
+    resolved_default_plugin_ref = capture_command(
+        ["git", "rev-parse", args.default_plugin_ref],
+        cwd=plugin_repo,
+    )
     if args.plan_file:
-        targets = load_plan(args.plan_file.resolve())
+        targets = load_plan(
+            args.plan_file.resolve(),
+            default_plugin_ref=resolved_default_plugin_ref,
+        )
     elif args.discover_from_log:
         targets = discover_targets_from_git(
             repo=core_repo,
-            plugin_ref=args.default_plugin_ref,
+            plugin_ref=resolved_default_plugin_ref,
             max_refs=args.max_discovered_refs,
             grep=args.discover_grep,
         )
@@ -773,7 +780,7 @@ def main() -> int:
             TargetRef(
                 label=f"current-{core_head[:10]}",
                 core_ref=core_head,
-                plugin_ref=args.default_plugin_ref,
+                plugin_ref=resolved_default_plugin_ref,
                 notes="current core HEAD",
             )
         ]
