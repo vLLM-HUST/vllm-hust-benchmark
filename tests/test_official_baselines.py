@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
 from vllm_hust_benchmark.official_baselines import get_canonical_submission_dir
 from vllm_hust_benchmark.official_baselines import get_primary_metric_name_for_benchmark_type
 from vllm_hust_benchmark.official_baselines import has_canonical_run
@@ -145,3 +147,20 @@ def test_select_canonical_candidate_prefers_lower_error_rate(tmp_path: Path) -> 
     )
 
     assert Path(payload["selected_result_dir"]) == repeat_b.resolve()
+
+
+def test_public_official_baseline_specs_are_v0180_910b2_fp16() -> None:
+    spec_dir = REPO_ROOT / "docs" / "official-baselines"
+    spec_paths = [
+        path
+        for path in spec_dir.glob("*.json")
+        if path.name != "official-ascend-constraints.stub.json"
+    ]
+
+    assert spec_paths
+    for path in spec_paths:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        spec_id = str(payload.get("id") or "")
+        assert "v0180" in path.name or "v0.18.0" in spec_id
+        assert payload.get("hardware_chip_model") == "910B2"
+        assert payload.get("model_precision") == "FP16"

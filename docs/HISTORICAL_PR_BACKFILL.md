@@ -18,6 +18,10 @@ leaderboard export path stay in the existing runner.
 - Each completed result is a `real-online-historical-pr-backfill` submission.
 - Do not republish archived `v0.11.0`, `910B3`, BF16, or missing-same-spec
   records as substitutes for a real run.
+- Keep `docs/official-baselines/` curated to public comparable specs only:
+  `vllm 0.18.0`, `vllm-ascend 0.18.0`, `910B2`, `FP16`, and the actual
+  workload model. Do not place perfgate, tuning, `910B3`, BF16, or 3B
+  experiment specs in this directory.
 - Do not let previous optimization experiments leak into backfills. The managed
   backfill defaults explicitly use an isolated container/unit, a dedicated port,
   `--enforce-eager`, no prefix caching, no chunked prefill, no custom kernels,
@@ -159,3 +163,8 @@ future experiment needs graph mode, prefix caching, chunked prefill, BF16, B3, o
 another non-default setting, create a separate plan and label the data source so
 it cannot enter the `v0.18.0`, `910B2`, single-chip public leaderboard by
 accident.
+
+The old `perfgate-ascend-qwen25-3b-910b3.json` spec was removed from
+`docs/official-baselines/` because it described a BF16 3B run on 910B3 and was
+not comparable with the public v0.18.0 / 910B2 / FP16 leaderboard. Keep any
+future non-public performance gates outside the official-baseline directory.
