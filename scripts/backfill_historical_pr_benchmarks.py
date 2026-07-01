@@ -24,7 +24,7 @@ DEFAULT_HF_REPO = "intellistream/vllm-hust-benchmark-results"
 DEFAULT_OFFICIAL_SPEC_DIR = REPO_ROOT / "docs" / "official-baselines"
 DEFAULT_RESULT_ROOT = REPO_ROOT / ".benchmarks" / "historical-pr-backfill"
 DEFAULT_PUBLISH_LOCK = DEFAULT_RESULT_ROOT / "publish.lock"
-DEFAULT_CURRENT_PYTHON = "/root/miniconda3/envs/vllm-hust-dev/bin/python"
+DEFAULT_CURRENT_PYTHON = str(Path.home() / "miniconda3/envs/vllm-hust-dev/bin/python")
 DEFAULT_DEV_HUB_DIR = REPO_ROOT.parent / "vllm-hust-dev-hub"
 DEFAULT_ASCEND_TOOLKIT_SET_ENV_CANDIDATES = (
     Path("/opt/hust-ascend-cann/Ascend/cann-8.5.0/set_env.sh"),
