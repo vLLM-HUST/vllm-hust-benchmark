@@ -87,6 +87,17 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
             f"{workload!r} must include same_spec"
         )
 
+    if (
+        engine == "vllm-hust"
+        and workload in OFFICIAL_PUBLIC_WORKLOADS
+        and spec_id
+        and not spec_id.startswith(OFFICIAL_V0180_SPEC_PREFIX)
+    ):
+        errors.append(
+            f"{source.name}:{entry_id}: public vllm-hust official workload "
+            f"{workload!r} must use official v0.18.0 same_spec, got {spec_id!r}"
+        )
+
     if spec_id.startswith(OFFICIAL_V0180_SPEC_PREFIX):
         expected_chip = "910B2" if spec_id.endswith("-910b2") else None
         entry_precision = str(model.get("precision") or "")
