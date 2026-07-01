@@ -1,0 +1,131 @@
+{
+  "entry_id": "f839b3aa-3b23-5e8b-be9f-49b6264c68d9",
+  "engine": "vllm-hust",
+  "engine_version": "0.20.1.post1.dev316+g79c65f726",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "interconnect": "unknown",
+    "chips_per_node": null,
+    "intra_node_interconnect": null,
+    "inter_node_interconnect": null,
+    "node_count": 1,
+    "gpu_memory_gb": 64,
+    "cpu_model": null,
+    "cpu_cores": null,
+    "memory_gb": null
+  },
+  "model": {
+    "canonical_id": "hf:Qwen/Qwen3-8B",
+    "repo_id": "Qwen/Qwen3-8B",
+    "short_name": "Qwen3-8B",
+    "display_name": "Qwen3-8B",
+    "name": "Qwen/Qwen3-8B",
+    "parameters": "8B",
+    "precision": "BF16",
+    "quantization": null
+  },
+  "workload": {
+    "name": "sharegpt-throughput",
+    "input_length": 392,
+    "output_length": 256
+  },
+  "metrics": {
+    "ttft_ms": 0.0,
+    "tbt_ms": null,
+    "throughput_tps": 235.3907,
+    "output_throughput_tps": 92.9544,
+    "error_rate": 0.0,
+    "peak_mem_mb": null
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Ascend 910B2",
+      "representative_model_band": "7B-13B",
+      "representative_business_scenario": "offline-batch-serving",
+      "baseline_engine": "vllm-hust"
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": 1.0,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": null,
+      "long_context_throughput_stable": null,
+      "long_context_ttft_p95_ms": null,
+      "long_context_ttft_p99_ms": null,
+      "long_context_tpot_p95_ms": null,
+      "long_context_tpot_p99_ms": null,
+      "long_context_ttft_p95_stable": null,
+      "long_context_ttft_p99_stable": null,
+      "long_context_tpot_p95_stable": null,
+      "long_context_tpot_p99_stable": null,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
+    }
+  },
+  "versions": {
+    "protocol": "N/A",
+    "backend": "N/A",
+    "core": "0.20.1.post1.dev316+g79c65f726",
+    "vllm_version": "0.20.1.post1.dev316+g79c65f726",
+    "torch_version": "2.9.0+cpu",
+    "python_version": "3.11.15",
+    "os_version": "Linux"
+  },
+  "environment": {
+    "os": "Linux",
+    "python_version": "3.11.15",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null,
+    "hardware_summary": "Ascend 910B2 x1",
+    "software_summary": "vLLM-HUST 0.20.1.post1.dev316+g79c65f726, PyTorch 2.9.0+cpu",
+    "env_details": {
+      "scenario": "sharegpt-throughput",
+      "speculation": "disabled",
+      "workload": "sharegpt-throughput",
+      "num_prompts": 200,
+      "temperature": 0,
+      "successful_requests": 200,
+      "failed_requests": 0
+    }
+  },
+  "metadata": {
+    "submitted_at": "2026-07-01T01:08:34.387845+00:00",
+    "submitter": "manual-eagle3-benchmark",
+    "data_source": "manual-benchmark",
+    "submitted_by": "manual-eagle3-benchmark",
+    "github_repository": "vLLM-HUST/vllm-hust",
+    "git_commit": null,
+    "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen3-8b-910b2",
+    "idempotency_key": "baseline-qwen3-8b-sharegpt-throughput-manual",
+    "workload": "sharegpt-throughput",
+    "num_prompts": 200,
+    "tags": [
+      "baseline",
+      "no-speculation",
+      "qwen3-8b",
+      "sharegpt-throughput",
+      "manual-benchmark"
+    ]
+  },
+  "cluster": null,
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen3-8b-910b2",
+    "label": "Baseline Qwen3-8B sharegpt-throughput",
+    "description": "Baseline vLLM-HUST benchmark with Qwen3-8B on sharegpt-throughput workload",
+    "model": "Qwen/Qwen3-8B",
+    "model_parameters": "8B",
+    "model_precision": "BF16",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1
+  }
+}
