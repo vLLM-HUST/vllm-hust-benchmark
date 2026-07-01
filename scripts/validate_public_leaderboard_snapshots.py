@@ -12,6 +12,17 @@ from typing import Any
 PUBLIC_BASELINE_ENGINE = "vllm"
 PUBLIC_BASELINE_VERSION = "0.18.0"
 RETIRED_BASELINE_TOKENS = ("v0.11.0", "v0110", "0.11.0")
+OFFICIAL_PUBLIC_WORKLOADS = {
+    "instructcoder-online",
+    "prefix-repetition-online",
+    "random-latency",
+    "random-online",
+    "sharegpt-online",
+    "sharegpt-throughput",
+    "sonnet-throughput",
+    "visionarena-online",
+}
+OFFICIAL_V0180_SPEC_PREFIX = "official-ascend-jan-2026-v0.18.0-"
 SNAPSHOT_FILES = (
     "leaderboard_single.json",
     "leaderboard_multi.json",
@@ -47,6 +58,9 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     entry_id = str(entry.get("entry_id") or "<missing-entry-id>")
     engine = str(entry.get("engine") or "").strip().lower()
     engine_version = str(entry.get("engine_version") or "").strip()
+    workload = str((entry.get("workload") or {}).get("name") or "").strip()
+    model = entry.get("model") if isinstance(entry.get("model"), dict) else {}
+    hardware = entry.get("hardware") if isinstance(entry.get("hardware"), dict) else {}
     same_spec = entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
     spec_id = str(same_spec.get("spec_id") or "")
 
@@ -66,6 +80,32 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         errors.append(
             f"{source.name}:{entry_id}: retired baseline spec_id {spec_id!r}"
         )
+
+    if engine == "vllm-hust" and workload in OFFICIAL_PUBLIC_WORKLOADS and not spec_id:
+        errors.append(
+            f"{source.name}:{entry_id}: public vllm-hust official workload "
+            f"{workload!r} must include same_spec"
+        )
+
+    if spec_id.startswith(OFFICIAL_V0180_SPEC_PREFIX):
+        expected_chip = "910B2" if spec_id.endswith("-910b2") else None
+        entry_precision = str(model.get("precision") or "")
+        spec_precision = str(same_spec.get("model_precision") or "")
+        entry_chip = str(hardware.get("chip_model") or "")
+        spec_chip = str(same_spec.get("hardware_chip_model") or "")
+
+        if not spec_precision or entry_precision != spec_precision:
+            errors.append(
+                f"{source.name}:{entry_id}: official v0.18.0 public spec "
+                f"precision must match same_spec; entry={entry_precision!r} "
+                f"same_spec={spec_precision!r}"
+            )
+        if expected_chip and (entry_chip != expected_chip or spec_chip != expected_chip):
+            errors.append(
+                f"{source.name}:{entry_id}: official v0.18.0 public spec "
+                f"{spec_id!r} must be {expected_chip}; entry={entry_chip!r} "
+                f"same_spec={spec_chip!r}"
+            )
 
     return errors
 
