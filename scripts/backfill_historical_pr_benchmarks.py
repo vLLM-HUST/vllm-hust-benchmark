@@ -534,6 +534,12 @@ def publish_result_locked(
 ) -> None:
     publish_submission = submission_dir
     python = args.runtime_python if Path(args.runtime_python).is_file() else sys.executable
+    publish_env = {
+        **os.environ,
+        "PYTHONPATH": str(REPO_ROOT / "src"),
+        "HF_HUB_OFFLINE": "0",
+        "TRANSFORMERS_OFFLINE": "0",
+    }
     if not execute:
         print(f"[dry-run] would publish submission: {submission_dir}")
     elif args.mirror_to_benchmark_submissions:
@@ -564,7 +570,7 @@ def publish_result_locked(
             ],
             cwd=REPO_ROOT,
             execute=execute,
-            env={**os.environ, "PYTHONPATH": str(REPO_ROOT / "src")},
+            env=publish_env,
         )
     else:
         run_command(
@@ -581,7 +587,7 @@ def publish_result_locked(
             ],
             cwd=REPO_ROOT,
             execute=execute,
-            env={**os.environ, "PYTHONPATH": str(REPO_ROOT / "src")},
+            env=publish_env,
         )
 
     run_command(
