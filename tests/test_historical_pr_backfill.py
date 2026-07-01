@@ -76,6 +76,19 @@ def test_load_plan_defaults_plugin_ref_and_label(tmp_path: Path) -> None:
     assert targets[0].pr_number == 42
 
 
+def test_load_plan_uses_resolved_default_plugin_ref(tmp_path: Path) -> None:
+    module = load_module()
+    plan = tmp_path / "plan.json"
+    plan.write_text(
+        json.dumps({"targets": [{"core_ref": "abcdef1234567890"}]}),
+        encoding="utf-8",
+    )
+
+    targets = module.load_plan(plan, default_plugin_ref="51e577b17b46")
+
+    assert targets[0].plugin_ref == "51e577b17b46"
+
+
 def test_parse_npu_smi_chip_models_ignores_chip_index_rows() -> None:
     module = load_module()
     output = """
