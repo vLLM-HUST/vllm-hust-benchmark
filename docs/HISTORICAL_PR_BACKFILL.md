@@ -9,12 +9,41 @@ leaderboard export path stay in the existing runner.
 
 - Default workload coverage is the official `v0.18.0`, `910B2`, single-chip spec
   set under `docs/official-baselines/`.
+- Historical PR backfills must launch the serving system through
+  `/home/shuhao/vllm-hust-dev-hub/manage.sh` with `--managed-dev-hub`. Do not
+  bypass dev-hub by manually running `vllm.entrypoints.openai.api_server`.
 - The runner uses detached git worktrees for historical refs. It must not mutate
   the active `/home/shuhao/vllm-hust` or `/home/shuhao/vllm-ascend-hust`
   checkouts.
 - Each completed result is a `real-online-historical-pr-backfill` submission.
 - Do not republish archived `v0.11.0`, `910B3`, BF16, or missing-same-spec
   records as substitutes for a real run.
+- Do not let previous optimization experiments leak into backfills. The managed
+  backfill defaults explicitly use an isolated container/unit, a dedicated port,
+  `--enforce-eager`, no prefix caching, no chunked prefill, no custom kernels,
+  and disabled Ascend fusion passes unless a run plan explicitly opts in.
+- Hardware metadata is detected from the actual managed NPU devices before a
+  run. If the real chip model does not match the official same-spec baseline
+  chip model, the run must fail instead of exporting data.
+- Precision metadata comes from the official same-spec file. `FP16` workloads
+  must launch the server with `float16`; `BF16` must launch with `bfloat16`.
+  Never relabel a result to make two incomparable rows look comparable.
+- A failed startup, failed health probe, or failed client benchmark must not be
+  published, mirrored to website data, or committed.
+- In managed-server mode, the host-side benchmark client is only an HTTP load
+  generator. It must not import the historical `vllm-ascend-hust` source tree;
+  server-side Ascend plugin code is loaded only inside the dev-hub container
+  launched by `manage.sh`.
+- The managed dev-hub service requires a real API key. The backfill runner maps
+  `VLLM_HUST_API_KEY` to the client's `OPENAI_API_KEY` environment variable; do
+  not pass bearer tokens through command-line `--header` arguments.
+- Keep model identity and request routing separate. Leaderboard metadata should
+  keep the official model ID, while the online client request should use the
+  server's `served_model_name` when dev-hub starts the model under a basename.
+  The client tokenizer should still point at the local model snapshot path.
+- Online backfill requests are run greedily (`temperature=0`) and the managed
+  server is launched with `--generation-config vllm`; do not let a model's
+  bundled generation config silently enable top-k/top-p sampling paths.
 - When `--publish-each` is enabled, every completed submission is immediately
   merged into the HF dataset and the local benchmark snapshots are regenerated.
 - When `--sync-website-each` is enabled, the website data mirror is updated from
@@ -48,12 +77,20 @@ python scripts/backfill_historical_pr_benchmarks.py \
 
 ## Real Run
 
-Run a curated plan, upload every completed result to HF, refresh the website
-mirror, and push both repositories:
+Run a curated plan through the dev-hub managed service, upload every completed
+result to HF, refresh the website mirror, and push both repositories:
 
 ```bash
 PYTHONPATH=src python scripts/backfill_historical_pr_benchmarks.py \
   --plan-file docs/historical-pr-backfill-plan.json \
+  --managed-dev-hub \
+  --dev-hub-dir /home/shuhao/vllm-hust-dev-hub \
+  --managed-container vllm-hust-backfill \
+  --managed-systemd-unit vllm-hust-backfill.service \
+  --managed-npu-devices 0 \
+  --server-port 8001 \
+  --runtime-python /home/shuhao/miniconda3/envs/vllm-hust-dev/bin/python \
+  --current-env-prefix /home/shuhao/miniconda3/envs/vllm-hust-dev \
   --execute \
   --publish-each \
   --sync-website-each \
@@ -66,6 +103,13 @@ To run only one workload while debugging:
 PYTHONPATH=src python scripts/backfill_historical_pr_benchmarks.py \
   --plan-file docs/historical-pr-backfill-plan.json \
   --workload sharegpt-online \
+  --managed-dev-hub \
+  --managed-container vllm-hust-backfill \
+  --managed-systemd-unit vllm-hust-backfill.service \
+  --managed-npu-devices 0 \
+  --server-port 8001 \
+  --runtime-python /home/shuhao/miniconda3/envs/vllm-hust-dev/bin/python \
+  --current-env-prefix /home/shuhao/miniconda3/envs/vllm-hust-dev \
   --execute \
   --publish-each \
   --sync-website-each
@@ -96,3 +140,22 @@ The default official `910B2` single-chip workload set currently resolves to:
 
 Multi-chip sonnet specs are excluded by default. Use `--include-multi-chip` only
 when the corresponding leaderboard view and hardware reservation are intended.
+
+## Incident Notes
+
+Recent local optimization experiments left service-manager state that could have
+corrupted historical results if reused blindly:
+
+- dev-hub `.env` had graph-mode compilation, prefix caching, chunked prefill,
+  custom kernel, and optimization-plugin settings intended for a separate
+  experiment;
+- host-side client benchmarks failed when the CANN `set_env.sh` path was not
+  sourced, even though the containerized server was healthy;
+- stale assumptions around `910B2` versus `910B3`, and `FP16` versus `BF16`,
+  made rows look comparable when they were not.
+
+The backfill harness now treats these as hard failures or explicit opt-ins. If a
+future experiment needs graph mode, prefix caching, chunked prefill, BF16, B3, or
+another non-default setting, create a separate plan and label the data source so
+it cannot enter the `v0.18.0`, `910B2`, single-chip public leaderboard by
+accident.

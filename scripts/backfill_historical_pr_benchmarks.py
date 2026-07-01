@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,6 +22,13 @@ DEFAULT_HF_REPO = "intellistream/vllm-hust-benchmark-results"
 DEFAULT_OFFICIAL_SPEC_DIR = REPO_ROOT / "docs" / "official-baselines"
 DEFAULT_RESULT_ROOT = REPO_ROOT / ".benchmarks" / "historical-pr-backfill"
 DEFAULT_CURRENT_PYTHON = "/root/miniconda3/envs/vllm-hust-dev/bin/python"
+DEFAULT_DEV_HUB_DIR = REPO_ROOT.parent / "vllm-hust-dev-hub"
+DEFAULT_ASCEND_TOOLKIT_SET_ENV_CANDIDATES = (
+    Path("/opt/hust-ascend-cann/Ascend/cann-8.5.0/set_env.sh"),
+    Path("/usr/local/Ascend/ascend-toolkit/set_env.sh"),
+    Path("/usr/local/Ascend/latest/set_env.sh"),
+    Path("/usr/local/Ascend/ascend-toolkit/latest/set_env.sh"),
+)
 IMPORTANT_REF_GREP = (
     "perf|performance|optimi|throughput|latency|decode|scheduler|cache|prefix|kv"
 )
@@ -243,6 +251,228 @@ def copy_submission_to_repo(submission_dir: Path, submissions_root: Path) -> Pat
     return target
 
 
+def to_container_workspace_path(path: Path) -> str:
+    resolved = path.resolve()
+    home = Path("/home/shuhao")
+    try:
+        relative = resolved.relative_to(home)
+    except ValueError:
+        return str(resolved)
+    return "/workspace/" + relative.as_posix()
+
+
+def find_local_model_path(model_id: str) -> str | None:
+    known = {
+        "Qwen/Qwen2.5-14B-Instruct": [
+            Path("/data/shared_models/Qwen--Qwen2.5-14B-Instruct"),
+            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct"),
+        ],
+        "Qwen/Qwen2.5-Coder-14B-Instruct": [
+            Path("/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct"),
+            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-Coder-14B-Instruct"),
+        ],
+        "Qwen/Qwen2.5-VL-7B-Instruct": [
+            Path("/data/shared_models/Qwen--Qwen2.5-VL-7B-Instruct"),
+            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-VL-7B-Instruct"),
+        ],
+    }
+    for candidate in known.get(model_id, []):
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+
+def dtype_for_precision(precision: str) -> str:
+    normalized = precision.strip().upper()
+    if normalized in {"FP16", "FLOAT16"}:
+        return "float16"
+    if normalized in {"BF16", "BFLOAT16"}:
+        return "bfloat16"
+    return "auto"
+
+
+def served_model_name(model_id: str) -> str:
+    return model_id.rsplit("/", 1)[-1]
+
+
+def first_existing_path(candidates: tuple[Path, ...]) -> str:
+    for candidate in candidates:
+        if candidate.is_file():
+            return str(candidate)
+    return ""
+
+
+def managed_device_ids(devices: str) -> list[int]:
+    parsed: list[int] = []
+    for item in devices.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        try:
+            parsed.append(int(item))
+        except ValueError as exc:
+            raise ValueError(f"managed NPU device must be numeric, got {item!r}") from exc
+    return parsed
+
+
+def parse_npu_smi_chip_models(output: str, devices: str) -> list[str]:
+    ids = set(managed_device_ids(devices))
+    if not ids:
+        return []
+    found: dict[int, str] = {}
+    for line in output.splitlines():
+        match = re.match(r"^\|\s*(\d+)\s+(\S+)\s+\|", line)
+        if not match:
+            continue
+        device_id = int(match.group(1))
+        chip_model = match.group(2)
+        if device_id in ids and not chip_model.isdigit():
+            found[device_id] = chip_model
+    return [found[device_id] for device_id in sorted(ids) if device_id in found]
+
+
+def detect_npu_chip_models(devices: str) -> list[str]:
+    try:
+        output = subprocess.check_output(["npu-smi", "info"], text=True)
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return parse_npu_smi_chip_models(output, devices)
+
+
+def actual_chip_model_for_run(args: argparse.Namespace, spec: OfficialSpec) -> str:
+    if not args.managed_dev_hub:
+        return spec.chip_model
+    chip_models = detect_npu_chip_models(args.managed_npu_devices)
+    if not chip_models:
+        raise RuntimeError(
+            f"could not detect chip model for NPU device(s) {args.managed_npu_devices}"
+        )
+    unique = sorted(set(chip_models))
+    if len(unique) != 1:
+        raise RuntimeError(
+            f"managed NPU devices {args.managed_npu_devices} have mixed chip models: {unique}"
+        )
+    actual = unique[0]
+    if actual != spec.chip_model:
+        raise RuntimeError(
+            f"actual chip model {actual} does not match official spec chip model {spec.chip_model}; "
+            "refusing to publish incompatible backfill data"
+        )
+    return actual
+
+
+def describe_git_ref(repo: Path, ref: str) -> str:
+    described = capture_command(["git", "describe", "--tags", "--always", ref], cwd=repo)
+    return described or ref[:12]
+
+
+def start_managed_server(
+    *,
+    args: argparse.Namespace,
+    target: TargetRef,
+    spec: OfficialSpec,
+    core_worktree: Path,
+    plugin_worktree: Path,
+    execute: bool,
+) -> None:
+    model_path = find_local_model_path(spec.model)
+    if model_path is None:
+        if not args.allow_model_downloads:
+            raise RuntimeError(
+                f"no local model path found for {spec.model}; pass --allow-model-downloads "
+                "only if downloading during backfill is intended"
+            )
+        model_path = spec.model
+
+    core_container_path = to_container_workspace_path(core_worktree)
+    plugin_container_path = to_container_workspace_path(plugin_worktree)
+    additional_config = {
+        "ascend_compilation_config": {
+            "fuse_norm_quant": False,
+            "fuse_qknorm_rope": False,
+            "fuse_allreduce_rms": False,
+            "fuse_muls_add": False,
+        },
+        "ascend_fusion_config": {
+            "fusion_ops_gmmswigluquant": False,
+        },
+    }
+    env = {
+        **os.environ,
+        "VLLM_ENGINE_MODEL_PATH": model_path,
+        "VLLM_ENGINE_SERVED_MODEL_NAME": served_model_name(spec.model),
+        "VLLM_ENGINE_PORT": str(args.server_port),
+        "VLLM_ENGINE_TP_SIZE": str(spec.chip_count),
+        "VLLM_ENGINE_NPU_DEVICES": args.managed_npu_devices,
+        "ASCEND_RT_VISIBLE_DEVICES": args.managed_npu_devices,
+        "ASCEND_VISIBLE_DEVICES": args.managed_npu_devices,
+        "VLLM_ENGINE_DTYPE": dtype_for_precision(spec.precision),
+        "VLLM_ENGINE_MAX_MODEL_LEN": str(args.managed_max_model_len),
+        "VLLM_ENGINE_MAX_NUM_BATCHED_TOKENS": str(args.managed_max_model_len),
+        "VLLM_ENGINE_MAX_NUM_SEQS": str(args.managed_max_num_seqs),
+        "VLLM_ENGINE_GPU_MEM_UTIL": str(args.managed_gpu_mem_util),
+        "VLLM_ENGINE_ENABLE_PREFIX_CACHING": "1" if args.managed_enable_prefix_caching else "0",
+        "VLLM_ENGINE_ENABLE_CHUNKED_PREFILL": "1" if args.managed_enable_chunked_prefill else "0",
+        "VLLM_ENGINE_ENFORCE_EAGER": "1" if args.managed_enforce_eager else "0",
+        "VLLM_ENGINE_COMPILATION_CONFIG": "{}",
+        "VLLM_ENGINE_EXTRA_ARGS_JSON": json.dumps(
+            [
+                "--generation-config",
+                "vllm",
+                "--additional-config",
+                json.dumps(additional_config, separators=(",", ":")),
+            ]
+        ),
+        "VLLM_ENGINE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
+        "VLLM_ENGINE_BASE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
+        "VLLM_PLUGINS": "ascend",
+        "VLLM_ENGINE_EXTRA_ENV_PREFIXES": "",
+        "COMPILE_CUSTOM_KERNELS": "0",
+        "VLLM_ASCEND_ENABLE_FUSED_MC2": "0",
+        "HF_HUB_OFFLINE": "0" if args.allow_model_downloads else "1",
+        "TRANSFORMERS_OFFLINE": "0" if args.allow_model_downloads else "1",
+        "VLLM_ENGINE_CONTAINER_LOG_FILE": (
+            f"/tmp/vllm-hust-backfill-{slugify(target.label)}-{slugify(spec.workload)}.log"
+        ),
+    }
+    if args.managed_container:
+        env["VLLM_ENGINE_CONTAINER"] = args.managed_container
+    if args.managed_systemd_unit:
+        env["VLLM_ENGINE_SYSTEMD_UNIT"] = args.managed_systemd_unit
+
+    manage = Path(args.dev_hub_dir).resolve() / "manage.sh"
+    run_command([str(manage), "restart"], cwd=Path(args.dev_hub_dir).resolve(), execute=execute, env=env)
+    deadline = time.monotonic() + args.managed_ready_timeout_seconds
+    while True:
+        health = run_command(
+            [str(manage), "health"],
+            cwd=Path(args.dev_hub_dir).resolve(),
+            execute=execute,
+            env=env,
+            check=False,
+        )
+        if health.returncode == 0:
+            return
+        if not execute:
+            return
+        if time.monotonic() >= deadline:
+            raise RuntimeError(
+                f"managed dev-hub server did not become healthy within "
+                f"{args.managed_ready_timeout_seconds}s"
+            )
+        time.sleep(args.managed_health_interval_seconds)
+
+
+def stop_managed_server(*, args: argparse.Namespace, execute: bool) -> None:
+    env = {**os.environ}
+    if args.managed_container:
+        env["VLLM_ENGINE_CONTAINER"] = args.managed_container
+    if args.managed_systemd_unit:
+        env["VLLM_ENGINE_SYSTEMD_UNIT"] = args.managed_systemd_unit
+    manage = Path(args.dev_hub_dir).resolve() / "manage.sh"
+    run_command([str(manage), "stop"], cwd=Path(args.dev_hub_dir).resolve(), execute=execute, env=env, check=False)
+
+
 def git_has_changes(repo: Path) -> bool:
     return bool(capture_command(["git", "status", "--short"], cwd=repo))
 
@@ -267,6 +497,7 @@ def publish_result(
     execute: bool,
 ) -> None:
     publish_submission = submission_dir
+    python = args.runtime_python if Path(args.runtime_python).is_file() else sys.executable
     if not execute:
         print(f"[dry-run] would publish submission: {submission_dir}")
     elif args.mirror_to_benchmark_submissions:
@@ -277,7 +508,7 @@ def publish_result(
     if args.publish_each:
         run_command(
             [
-                sys.executable,
+                python,
                 "-m",
                 "vllm_hust_benchmark.cli",
                 "sync-submission-to-hf",
@@ -302,7 +533,7 @@ def publish_result(
     else:
         run_command(
             [
-                sys.executable,
+                python,
                 "-m",
                 "vllm_hust_benchmark.cli",
                 "publish-website",
@@ -332,7 +563,7 @@ def publish_result(
         website_repo = Path(args.website_repo).resolve()
         run_command(
             [
-                sys.executable,
+                python,
                 "scripts/sync_leaderboard_snapshots.py",
                 "--source-dir",
                 str(REPO_ROOT / "leaderboard-data" / "snapshots"),
@@ -378,6 +609,10 @@ def run_target_spec(
             ["git", "rev-parse", target.plugin_ref], cwd=Path(args.plugin_repo)
         )
     )
+    actual_chip_model = actual_chip_model_for_run(args, spec)
+    core_version = describe_git_ref(core_worktree, core_commit)
+    plugin_version = describe_git_ref(plugin_worktree, plugin_commit)
+    local_model_path = find_local_model_path(spec.model) or ""
     run_id = "-".join(
         [
             "historical-pr",
@@ -395,15 +630,34 @@ def run_target_spec(
         "CURRENT_RUNTIME_PYTHON": args.runtime_python,
         "CURRENT_SUBMITTER": args.submitter,
         "CURRENT_DATA_SOURCE": "real-online-historical-pr-backfill",
+        "CURRENT_ENGINE_VERSION": core_version,
+        "CURRENT_CORE_VERSION": core_version,
         "CURRENT_GIT_COMMIT": core_commit,
         "CURRENT_GITHUB_REF": target.label,
         "CURRENT_GITHUB_REPOSITORY": args.core_github_repository,
+        "CURRENT_BACKEND_VERSION": plugin_version,
         "CURRENT_PLUGIN_GIT_COMMIT": plugin_commit,
         "CURRENT_PLUGIN_GITHUB_REF": target.plugin_ref,
         "CURRENT_PLUGIN_GITHUB_REPOSITORY": args.plugin_github_repository,
+        "CURRENT_CLIENT_MODEL_NAME": served_model_name(spec.model),
+        "CURRENT_CLIENT_TOKENIZER": local_model_path,
+        "CURRENT_CLIENT_TEMPERATURE": "0",
+        "CURRENT_MODEL_PATH": local_model_path,
+        "CURRENT_HARDWARE_CHIP_MODEL": actual_chip_model,
         "RESULT_DIR": str(result_dir),
         "RUN_ID": run_id,
     }
+    ascend_toolkit_set_env = args.ascend_toolkit_set_env or first_existing_path(
+        DEFAULT_ASCEND_TOOLKIT_SET_ENV_CANDIDATES
+    )
+    if ascend_toolkit_set_env:
+        env["ASCEND_TOOLKIT_SET_ENV"] = ascend_toolkit_set_env
+    env["PYTHONNOUSERSITE"] = "1"
+    env["TORCH_DEVICE_BACKEND_AUTOLOAD"] = "0"
+    if env.get("VLLM_HUST_API_KEY") and not env.get("OPENAI_API_KEY"):
+        env["OPENAI_API_KEY"] = env["VLLM_HUST_API_KEY"]
+    if args.managed_dev_hub:
+        env["CURRENT_USE_MANAGED_SERVER"] = "1"
     if args.current_env_prefix:
         env["CURRENT_ENV_PREFIX"] = args.current_env_prefix
     if args.server_port:
@@ -454,7 +708,37 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--website-repo", default=str(REPO_ROOT.parent / "vllm-hust-website"))
     parser.add_argument("--runtime-python", default=DEFAULT_CURRENT_PYTHON)
     parser.add_argument("--current-env-prefix", default="")
+    parser.add_argument("--ascend-toolkit-set-env", default="")
     parser.add_argument("--server-port", default="")
+    parser.add_argument("--managed-dev-hub", action="store_true")
+    parser.add_argument("--dev-hub-dir", default=str(DEFAULT_DEV_HUB_DIR))
+    parser.add_argument("--managed-npu-devices", default="0")
+    parser.add_argument("--managed-container", default="")
+    parser.add_argument("--managed-systemd-unit", default="")
+    parser.add_argument("--managed-max-model-len", type=int, default=32768)
+    parser.add_argument("--managed-max-num-seqs", type=int, default=16)
+    parser.add_argument("--managed-gpu-mem-util", default="0.90")
+    parser.add_argument(
+        "--managed-enforce-eager",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Use --enforce-eager for historical backfills by default to avoid inheriting graph-mode experiment tails.",
+    )
+    parser.add_argument(
+        "--managed-enable-prefix-caching",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Enable prefix caching only for an explicitly scoped experiment.",
+    )
+    parser.add_argument(
+        "--managed-enable-chunked-prefill",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Enable chunked prefill only for an explicitly scoped experiment.",
+    )
+    parser.add_argument("--managed-ready-timeout-seconds", type=int, default=600)
+    parser.add_argument("--managed-health-interval-seconds", type=int, default=10)
+    parser.add_argument("--allow-model-downloads", action="store_true")
     parser.add_argument("--submitter", default="historical-pr-backfill")
     parser.add_argument("--core-github-repository", default="vLLM-HUST/vllm-hust")
     parser.add_argument("--plugin-github-repository", default="vLLM-HUST/vllm-ascend-hust")
@@ -539,6 +823,15 @@ def main() -> int:
             if execute:
                 write_state(state_file, state)
             try:
+                if args.managed_dev_hub:
+                    start_managed_server(
+                        args=args,
+                        target=target,
+                        spec=spec,
+                        core_worktree=core_worktree,
+                        plugin_worktree=plugin_worktree,
+                        execute=execute,
+                    )
                 submission_dir = run_target_spec(
                     args=args,
                     target=target,
@@ -549,7 +842,7 @@ def main() -> int:
                 )
                 if execute and not submission_dir.is_dir():
                     raise RuntimeError(f"missing submission dir: {submission_dir}")
-                if args.publish_each or args.sync_website_each or args.mirror_to_benchmark_submissions:
+                if args.publish_each or args.sync_website_each or args.commit_push_each:
                     publish_result(
                         args=args,
                         submission_dir=submission_dir,
@@ -576,6 +869,9 @@ def main() -> int:
                 print(f"[backfill] failed: {target.label} / {spec.workload}: {exc}", file=sys.stderr)
                 if execute:
                     return 1
+            finally:
+                if args.managed_dev_hub:
+                    stop_managed_server(args=args, execute=execute)
 
     print("[backfill] done")
     return 0
