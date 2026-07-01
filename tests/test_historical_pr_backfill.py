@@ -91,3 +91,13 @@ def test_parse_npu_smi_chip_models_ignores_chip_index_rows() -> None:
 
     assert module.parse_npu_smi_chip_models(output, "0") == ["910B2"]
     assert module.parse_npu_smi_chip_models(output, "0,1") == ["910B2", "910B2"]
+
+
+def test_managed_dev_hub_defaults_use_isolated_backfill_service(monkeypatch) -> None:
+    module = load_module()
+    monkeypatch.setattr(sys, "argv", ["backfill_historical_pr_benchmarks.py"])
+
+    args = module.parse_args()
+
+    assert args.managed_container == "vllm-hust-backfill"
+    assert args.managed_systemd_unit == "vllm-hust-backfill.service"
