@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import fcntl
 import json
 import os
 import re
@@ -21,6 +23,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_HF_REPO = "intellistream/vllm-hust-benchmark-results"
 DEFAULT_OFFICIAL_SPEC_DIR = REPO_ROOT / "docs" / "official-baselines"
 DEFAULT_RESULT_ROOT = REPO_ROOT / ".benchmarks" / "historical-pr-backfill"
+DEFAULT_PUBLISH_LOCK = DEFAULT_RESULT_ROOT / "publish.lock"
 DEFAULT_CURRENT_PYTHON = "/root/miniconda3/envs/vllm-hust-dev/bin/python"
 DEFAULT_DEV_HUB_DIR = REPO_ROOT.parent / "vllm-hust-dev-hub"
 DEFAULT_ASCEND_TOOLKIT_SET_ENV_CANDIDATES = (
@@ -489,7 +492,40 @@ def commit_and_push(repo: Path, *, message: str, execute: bool) -> None:
     run_command(["git", "push", "origin", "main"], cwd=repo, execute=execute)
 
 
+@contextlib.contextmanager
+def publish_lock(lock_file: Path, *, execute: bool):
+    if not execute:
+        yield
+        return
+    lock_file.parent.mkdir(parents=True, exist_ok=True)
+    with lock_file.open("w") as handle:
+        print(f"[publish] waiting for lock: {lock_file}")
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        print(f"[publish] acquired lock: {lock_file}")
+        try:
+            yield
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            print(f"[publish] released lock: {lock_file}")
+
+
 def publish_result(
+    *,
+    args: argparse.Namespace,
+    submission_dir: Path,
+    run_id: str,
+    execute: bool,
+) -> None:
+    with publish_lock(Path(args.publish_lock).resolve(), execute=execute):
+        publish_result_locked(
+            args=args,
+            submission_dir=submission_dir,
+            run_id=run_id,
+            execute=execute,
+        )
+
+
+def publish_result_locked(
     *,
     args: argparse.Namespace,
     submission_dir: Path,
@@ -700,6 +736,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--publish-each", action="store_true")
     parser.add_argument("--sync-website-each", action="store_true")
     parser.add_argument("--commit-push-each", action="store_true")
+    parser.add_argument("--publish-lock", default=str(DEFAULT_PUBLISH_LOCK))
     parser.add_argument(
         "--mirror-to-benchmark-submissions",
         action=argparse.BooleanOptionalAction,
