@@ -85,6 +85,7 @@ def normalize_client_parameters(
             normalized["ready_check_timeout_sec"] = ready_check_timeout_sec
     else:
         normalized.pop("ready_check_timeout_sec", None)
+        normalized.pop("temperature", None)
 
     if benchmark_type == "throughput":
         # v0.11.0 throughput CLI does not accept this newer flag.

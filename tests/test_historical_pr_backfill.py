@@ -114,3 +114,17 @@ def test_managed_dev_hub_defaults_use_isolated_backfill_service(monkeypatch) -> 
 
     assert args.managed_container == "vllm-hust-backfill"
     assert args.managed_systemd_unit == "vllm-hust-backfill.service"
+
+
+def test_ensure_plugin_build_info_materializes_source_worktree_file(tmp_path: Path) -> None:
+    module = load_module()
+    plugin_worktree = tmp_path / "plugin"
+    package_dir = plugin_worktree / "vllm_ascend"
+    package_dir.mkdir(parents=True)
+
+    module.ensure_plugin_build_info(plugin_worktree, chip_model="910B2")
+
+    assert (package_dir / "_build_info.py").read_text(encoding="utf-8") == (
+        "# Auto-generated file for benchmark source worktree\n"
+        "__device_type__ = 'A2'\n"
+    )

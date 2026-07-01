@@ -51,6 +51,7 @@ class OfficialSpec:
     path: Path
     scenario: str
     workload: str
+    benchmark_type: str
     model: str
     precision: str
     chip_model: str
@@ -100,6 +101,16 @@ def scenario_to_workload(scenario: str) -> str:
     return scenario
 
 
+def infer_benchmark_type(scenario: str) -> str:
+    if scenario.endswith("-online"):
+        return "serve"
+    if "latency" in scenario:
+        return "latency"
+    if "throughput" in scenario:
+        return "throughput"
+    return "serve"
+
+
 def collect_official_specs(
     spec_dir: Path,
     *,
@@ -125,6 +136,7 @@ def collect_official_specs(
                 path=path,
                 scenario=scenario,
                 workload=workload,
+                benchmark_type=str(payload.get("benchmark_type") or infer_benchmark_type(scenario)),
                 model=str(payload.get("model") or ""),
                 precision=str(payload.get("model_precision") or ""),
                 chip_model=chip_model,
@@ -244,6 +256,31 @@ def ensure_worktree(
         execute=execute,
     )
     return path
+
+
+def device_type_for_chip_model(chip_model: str) -> str:
+    normalized = chip_model.strip().upper()
+    if normalized in {"910B", "910B1", "910B2", "910B3", "910B4"}:
+        return "A2"
+    if normalized in {"910C", "910C1", "910C2"}:
+        return "A3"
+    if normalized.startswith("310P"):
+        return "_310P"
+    if normalized.startswith("950") or normalized.startswith("A5"):
+        return "A5"
+    raise ValueError(f"unsupported Ascend chip model for build info: {chip_model!r}")
+
+
+def ensure_plugin_build_info(plugin_worktree: Path, *, chip_model: str) -> None:
+    package_dir = plugin_worktree / "vllm_ascend"
+    if not package_dir.is_dir():
+        return
+    build_info = package_dir / "_build_info.py"
+    device_type = device_type_for_chip_model(chip_model)
+    desired = "# Auto-generated file for benchmark source worktree\n" f"__device_type__ = '{device_type}'\n"
+    if build_info.is_file() and build_info.read_text(encoding="utf-8") == desired:
+        return
+    build_info.write_text(desired, encoding="utf-8")
 
 
 def copy_submission_to_repo(submission_dir: Path, submissions_root: Path) -> Path:
@@ -667,6 +704,9 @@ def run_target_spec(
     result_dir = Path(args.result_root).resolve() / "runs" / run_id
     env = {
         **os.environ,
+        "VLLM_TARGET_DEVICE": "npu",
+        "ASCEND_RT_VISIBLE_DEVICES": args.managed_npu_devices,
+        "ASCEND_VISIBLE_DEVICES": args.managed_npu_devices,
         "CURRENT_VLLM_HUST_REPO": str(core_worktree),
         "CURRENT_VLLM_ASCEND_HUST_REPO": str(plugin_worktree),
         "CURRENT_RUNTIME_PYTHON": args.runtime_python,
@@ -715,7 +755,7 @@ def run_target_spec(
         env["PATH"] = f"{local_bin}:{env.get('PATH', '')}"
     if env.get("VLLM_HUST_API_KEY") and not env.get("OPENAI_API_KEY"):
         env["OPENAI_API_KEY"] = env["VLLM_HUST_API_KEY"]
-    if args.managed_dev_hub:
+    if args.managed_dev_hub and spec.benchmark_type == "serve":
         env["CURRENT_USE_MANAGED_SERVER"] = "1"
     if args.current_env_prefix:
         env["CURRENT_ENV_PREFIX"] = args.current_env_prefix
@@ -880,6 +920,8 @@ def main() -> int:
                 print(f"[backfill] skip completed: {target.label} / {spec.workload}")
                 continue
 
+            if execute:
+                ensure_plugin_build_info(plugin_worktree, chip_model=spec.chip_model)
             print(f"[backfill] running: {target.label} / {spec.workload}")
             state["runs"][key] = {
                 "status": "running",
@@ -890,7 +932,8 @@ def main() -> int:
             if execute:
                 write_state(state_file, state)
             try:
-                if args.managed_dev_hub:
+                uses_managed_server = args.managed_dev_hub and spec.benchmark_type == "serve"
+                if uses_managed_server:
                     start_managed_server(
                         args=args,
                         target=target,
@@ -937,7 +980,7 @@ def main() -> int:
                 if execute:
                     return 1
             finally:
-                if args.managed_dev_hub:
+                if args.managed_dev_hub and spec.benchmark_type == "serve":
                     stop_managed_server(args=args, execute=execute)
 
     print("[backfill] done")

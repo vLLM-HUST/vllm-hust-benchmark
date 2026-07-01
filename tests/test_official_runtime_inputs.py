@@ -19,6 +19,7 @@ def test_normalize_client_parameters_strips_unsupported_offline_flags(tmp_path: 
         "num_prompts": 200,
         "num_warmups": 0,
         "ready_check_timeout_sec": 900,
+        "temperature": 0,
     }
 
     normalized = normalize_client_parameters(
@@ -30,6 +31,7 @@ def test_normalize_client_parameters_strips_unsupported_offline_flags(tmp_path: 
 
     assert "num_warmups" not in normalized
     assert "ready_check_timeout_sec" not in normalized
+    assert "temperature" not in normalized
     assert normalized["dataset_path"] == str(worktree / "benchmarks" / "sonnet.txt")
 
 
