@@ -697,6 +697,13 @@ def run_target_spec(
             if env.get("LD_LIBRARY_PATH")
             else str(runtime_lib)
         )
+    local_python_deps = REPO_ROOT / ".benchmarks" / "python-deps"
+    if local_python_deps.is_dir():
+        env["CURRENT_RUNTIME_PYTHONPATH"] = (
+            f"{local_python_deps}:{env['CURRENT_RUNTIME_PYTHONPATH']}"
+            if env.get("CURRENT_RUNTIME_PYTHONPATH")
+            else str(local_python_deps)
+        )
     local_bin = REPO_ROOT / ".benchmarks" / "bin"
     if local_bin.is_dir():
         env["PATH"] = f"{local_bin}:{env.get('PATH', '')}"
