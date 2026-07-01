@@ -654,6 +654,9 @@ def run_target_spec(
         env["ASCEND_TOOLKIT_SET_ENV"] = ascend_toolkit_set_env
     env["PYTHONNOUSERSITE"] = "1"
     env["TORCH_DEVICE_BACKEND_AUTOLOAD"] = "0"
+    local_bin = REPO_ROOT / ".benchmarks" / "bin"
+    if local_bin.is_dir():
+        env["PATH"] = f"{local_bin}:{env.get('PATH', '')}"
     if env.get("VLLM_HUST_API_KEY") and not env.get("OPENAI_API_KEY"):
         env["OPENAI_API_KEY"] = env["VLLM_HUST_API_KEY"]
     if args.managed_dev_hub:
