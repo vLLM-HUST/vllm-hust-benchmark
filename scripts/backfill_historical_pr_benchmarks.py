@@ -690,6 +690,13 @@ def run_target_spec(
         env["ASCEND_TOOLKIT_SET_ENV"] = ascend_toolkit_set_env
     env["PYTHONNOUSERSITE"] = "1"
     env["TORCH_DEVICE_BACKEND_AUTOLOAD"] = "0"
+    runtime_lib = Path(args.runtime_python).resolve().parent.parent / "lib"
+    if runtime_lib.is_dir():
+        env["LD_LIBRARY_PATH"] = (
+            f"{runtime_lib}:{env['LD_LIBRARY_PATH']}"
+            if env.get("LD_LIBRARY_PATH")
+            else str(runtime_lib)
+        )
     local_bin = REPO_ROOT / ".benchmarks" / "bin"
     if local_bin.is_dir():
         env["PATH"] = f"{local_bin}:{env.get('PATH', '')}"
