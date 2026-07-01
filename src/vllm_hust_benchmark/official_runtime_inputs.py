@@ -40,6 +40,7 @@ def resolve_runtime_dataset_path(
     dataset_path: Any,
     *,
     vllm_worktree: str | None = None,
+    benchmark_repo: str | None = None,
     dataset_cache_root: str | None = None,
 ) -> Any:
     if not isinstance(dataset_path, str) or not dataset_path.strip():
@@ -59,6 +60,11 @@ def resolve_runtime_dataset_path(
         if worktree_candidate.is_file():
             return str(worktree_candidate)
 
+    if benchmark_repo:
+        benchmark_candidate = Path(benchmark_repo) / dataset_path
+        if benchmark_candidate.is_file():
+            return str(benchmark_candidate)
+
     return dataset_path
 
 
@@ -68,6 +74,7 @@ def normalize_client_parameters(
     benchmark_type: str,
     ready_check_timeout_sec: int | None = None,
     vllm_worktree: str | None = None,
+    benchmark_repo: str | None = None,
     dataset_cache_root: str | None = None,
     force_eager: bool = False,
 ) -> dict[str, Any]:
@@ -90,6 +97,7 @@ def normalize_client_parameters(
         normalized["dataset_path"] = resolve_runtime_dataset_path(
             normalized["dataset_path"],
             vllm_worktree=vllm_worktree,
+            benchmark_repo=benchmark_repo,
             dataset_cache_root=dataset_cache_root,
         )
 

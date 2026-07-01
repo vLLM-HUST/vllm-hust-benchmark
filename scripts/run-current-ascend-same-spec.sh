@@ -564,6 +564,7 @@ normalized_client_parameters_json() {
     BENCHMARK_TYPE="$BENCHMARK_TYPE" \
     CLIENT_READY_CHECK_TIMEOUT_SECONDS="$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
     CURRENT_VLLM_WORKTREE="$CURRENT_VLLM_HUST_REPO" \
+    BENCHMARK_REPO_ROOT="$REPO_ROOT" \
     CURRENT_BENCHMARK_DATASET_ROOT="$CURRENT_BENCHMARK_DATASET_ROOT" \
     "$CURRENT_RUNTIME_PYTHON" - <<'PY'
 import json
@@ -579,6 +580,7 @@ parameters = normalize_client_parameters(
     benchmark_type=os.environ["BENCHMARK_TYPE"],
     ready_check_timeout_sec=ready_timeout,
     vllm_worktree=os.environ.get("CURRENT_VLLM_WORKTREE"),
+    benchmark_repo=os.environ.get("BENCHMARK_REPO_ROOT"),
     dataset_cache_root=os.environ.get("CURRENT_BENCHMARK_DATASET_ROOT"),
 )
 client_model_name = os.environ.get("CURRENT_CLIENT_MODEL_NAME", "").strip()

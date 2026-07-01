@@ -53,6 +53,27 @@ def test_normalize_client_parameters_injects_ready_timeout_for_serve(tmp_path: P
     assert normalized["dataset_path"] == str(cache_root / SHAREGPT_DATASET_FILENAME)
 
 
+def test_normalize_client_parameters_resolves_benchmark_repo_dataset_path(
+    tmp_path: Path,
+) -> None:
+    benchmark_repo = tmp_path / "benchmark"
+    dataset = benchmark_repo / "scripts" / "traces" / "agent.jsonl"
+    dataset.parent.mkdir(parents=True)
+    dataset.write_text('{"prompt":"hi"}\n', encoding="utf-8")
+
+    normalized = normalize_client_parameters(
+        {
+            "dataset_name": "custom",
+            "dataset_path": "scripts/traces/agent.jsonl",
+            "num_prompts": 1,
+        },
+        benchmark_type="serve",
+        benchmark_repo=str(benchmark_repo),
+    )
+
+    assert normalized["dataset_path"] == str(dataset)
+
+
 def test_normalize_client_parameters_forces_eager_for_offline_when_requested() -> None:
     normalized = normalize_client_parameters(
         {
