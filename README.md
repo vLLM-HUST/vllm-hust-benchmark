@@ -243,12 +243,41 @@ curated leaderboard data.
 
 Files:
 
+- `scripts/run-official-v0180-baselines.sh`
 - `scripts/prepare-official-ascend-baseline-env.sh`
 - `scripts/run-official-ascend-goal-baseline.sh`
 - `docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json`
 - `docs/official-baselines/official-ascend-constraints.stub.json`
 
-Example:
+One-command local entrypoint:
+
+```bash
+bash scripts/run-official-v0180-baselines.sh
+```
+
+This wrapper sets the local 910B2 defaults used by the public baseline run:
+`/data` result and HF cache paths, `HF_ENDPOINT=https://hf-mirror.com`, the
+pinned `vllm-ascend-official-v0180` conda env, local Qwen2.5-14B model path
+when present, single-threaded CPU libraries, and
+`SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD=1` so official v0.18 uses the sampler
+fallback instead of the fragile custom-op registration path.
+
+Useful one-command variants:
+
+```bash
+# Run all missing official baselines with three candidate repeats.
+bash scripts/run-official-v0180-baselines.sh --repeat-count 3
+
+# Run one spec on one card.
+bash scripts/run-official-v0180-baselines.sh --devices 0 \
+	docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json
+
+# Rerun existing canonical specs for review without replacing canonical data.
+bash scripts/run-official-v0180-baselines.sh --review-existing --devices 0 \
+	docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json
+```
+
+Lower-level example:
 
 ```bash
 export ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
@@ -279,7 +308,7 @@ Notes:
 - `prepare-official-ascend-baseline-env.sh` now starts with a health check. If the existing env already matches the pinned official baseline, it skips the heavy uninstall/reinstall path and reuses the env as-is.
 - If `ENV_PREFIX` is unset, the prepare script now defaults it to `$(conda info --base)/envs/vllm-ascend-official-v0180` instead of assuming `/root/miniconda3/...`.
 - `prepare-official-ascend-baseline-env.sh` also owns the benchmark admission preflight: it proactively cleans residual `api_server` / `bench serve` / `EngineCore_DP0` processes and clears the benchmark port before a new run is allowed to start.
-- The baseline runtime is pinned to `reference-repos/vllm@v0.11.0` and `reference-repos/vllm-ascend@v0.11.0` worktrees.
+- The baseline runtime is pinned to `reference-repos/vllm@v0.18.0` and `reference-repos/vllm-ascend@v0.18.0` worktrees.
 - The prepare script intentionally does not install `vllm-hust` or `vllm-ascend-hust` into the official env, to avoid plugin-entry-point contamination.
 - The prepare script now defaults `PYTORCH_CPU_INDEX_URL` to `https://download.pytorch.org/whl/cpu` in addition to the Ascend mirror, so `torch==...+cpu` dependencies from `torch-npu` metadata can resolve.
 - The torch family package pins are configurable with `OFFICIAL_TORCH_VERSION`, `OFFICIAL_TORCH_NPU_VERSION`, `OFFICIAL_TORCHVISION_VERSION`, and `OFFICIAL_TORCHAUDIO_VERSION`.
@@ -309,16 +338,14 @@ Recommended first establishment run for all missing official specs:
 
 ```bash
 cd /path/to/vllm-hust-benchmark
-export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
-REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh
+bash scripts/run-official-v0180-baselines.sh --repeat-count 3
 ```
 
 Run only one spec file:
 
 ```bash
 cd /path/to/vllm-hust-benchmark
-export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
-REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh \
+bash scripts/run-official-v0180-baselines.sh --repeat-count 3 \
 	docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json
 ```
 
@@ -326,8 +353,7 @@ Run a review-only rerun for a spec that already has canonical data:
 
 ```bash
 cd /path/to/vllm-hust-benchmark
-export GOAL_BASELINE_ENV_PREFIX="$(conda info --base)/envs/vllm-ascend-official-v0180"
-FORCE_RUN_EXISTING=1 REPEAT_COUNT=3 bash scripts/run-official-ascend-goal-baseline-matrix.sh \
+bash scripts/run-official-v0180-baselines.sh --review-existing --repeat-count 3 \
 	docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json
 ```
 
