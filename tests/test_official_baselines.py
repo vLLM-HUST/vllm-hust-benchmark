@@ -1,12 +1,13 @@
 import json
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-
 from vllm_hust_benchmark.official_baselines import get_canonical_submission_dir
 from vllm_hust_benchmark.official_baselines import get_primary_metric_name_for_benchmark_type
 from vllm_hust_benchmark.official_baselines import has_canonical_run
 from vllm_hust_benchmark.official_baselines import select_canonical_candidate
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _spec() -> dict:
@@ -19,6 +20,26 @@ def _spec() -> dict:
 def test_get_canonical_submission_dir_uses_spec_id(tmp_path: Path) -> None:
     canonical_dir = get_canonical_submission_dir(_spec(), submissions_root=tmp_path)
     assert canonical_dir == tmp_path / _spec()["id"]
+
+
+def test_perfgate_ascend_smoke_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-qwen25-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+
+    assert spec["id"] == "perfgate-ascend-qwen25-3b-910b2"
+    assert spec["scenario"] == "random-online"
+    assert spec["model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert spec["server_parameters"]["max_model_len"] == 256
+    assert spec["client_parameters"]["input_len"] == 64
+    assert spec["client_parameters"]["output_len"] == 16
 
 
 def test_has_canonical_run_requires_matching_spec_id_and_submitter(tmp_path: Path) -> None:
@@ -155,6 +176,7 @@ def test_public_official_baseline_specs_are_v0180_910b2_fp16() -> None:
         path
         for path in spec_dir.glob("*.json")
         if path.name != "official-ascend-constraints.stub.json"
+        and not path.name.startswith("perfgate-")
     ]
 
     assert spec_paths
