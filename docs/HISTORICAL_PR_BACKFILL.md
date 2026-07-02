@@ -27,9 +27,17 @@ leaderboard export path stay in the existing runner.
   workload model. Do not place perfgate, tuning, `910B3`, BF16, or 3B
   experiment specs in this directory.
 - Do not let previous optimization experiments leak into backfills. The managed
-  backfill defaults explicitly use an isolated container/unit, a dedicated port,
-  `--enforce-eager`, no prefix caching, no chunked prefill, no custom kernels,
-  and disabled Ascend fusion passes unless a run plan explicitly opts in.
+  backfill must use an isolated container/unit and a dedicated port. Formal
+  leaderboard data must not enable `--enforce-eager` by default, because that
+  changes the serving execution path and can make the result incomparable with
+  the managed dev-hub / official baseline graph-mode path. Only use
+  `--managed-enforce-eager` for a separately labelled diagnostic experiment.
+  Prefix caching, chunked prefill, custom kernels, or disabled Ascend fusion
+  passes likewise require an explicit run-plan note.
+- Official baseline collection must also fail or be marked blocked if the
+  graph-mode official runtime is unavailable. Do not auto-retry with
+  `--enforce-eager`, and do not publish eager fallback output into the public
+  leaderboard snapshots.
 - Hardware metadata is detected from the actual managed NPU devices before a
   run. If the real chip model does not match the official same-spec baseline
   chip model, the run must fail instead of exporting data.

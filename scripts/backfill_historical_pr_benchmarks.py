@@ -160,6 +160,19 @@ def hf_mirror_cache_env() -> dict[str, str]:
     }
 
 
+def data_tmp_env() -> dict[str, str]:
+    tmpdir = os.environ.get(
+        "TMPDIR",
+        "/data/shared_datasets/vllm-hust-benchmark/tmp",
+    )
+    return {
+        "TMPDIR": tmpdir,
+        "TEMP": os.environ.get("TEMP", tmpdir),
+        "TMP": os.environ.get("TMP", tmpdir),
+        "CURRENT_RUNTIME_CWD": os.environ.get("CURRENT_RUNTIME_CWD", tmpdir),
+    }
+
+
 def scenario_to_workload(scenario: str) -> str:
     return scenario
 
@@ -505,19 +518,28 @@ def start_managed_server(
         plugin_worktree,
         purpose="plugin worktree",
     )
-    additional_config = {
-        "ascend_compilation_config": {
-            "fuse_norm_quant": False,
-            "fuse_qknorm_rope": False,
-            "fuse_allreduce_rms": False,
-            "fuse_muls_add": False,
-        },
-        "ascend_fusion_config": {
-            "fusion_ops_gmmswigluquant": False,
-        },
-    }
+    extra_args = ["--generation-config", "vllm"]
+    if args.managed_disable_ascend_fusion:
+        additional_config = {
+            "ascend_compilation_config": {
+                "fuse_norm_quant": False,
+                "fuse_qknorm_rope": False,
+                "fuse_allreduce_rms": False,
+                "fuse_muls_add": False,
+            },
+            "ascend_fusion_config": {
+                "fusion_ops_gmmswigluquant": False,
+            },
+        }
+        extra_args.extend(
+            [
+                "--additional-config",
+                json.dumps(additional_config, separators=(",", ":")),
+            ]
+        )
     env = {
         **os.environ,
+        **data_tmp_env(),
         **hf_mirror_cache_env(),
         **dev_hub_secret_env(args.dev_hub_dir),
         "VLLM_ENGINE_MODEL_PATH": model_path,
@@ -536,14 +558,7 @@ def start_managed_server(
         "VLLM_ENGINE_ENABLE_CHUNKED_PREFILL": "1" if args.managed_enable_chunked_prefill else "0",
         "VLLM_ENGINE_ENFORCE_EAGER": "1" if args.managed_enforce_eager else "0",
         "VLLM_ENGINE_COMPILATION_CONFIG": "{}",
-        "VLLM_ENGINE_EXTRA_ARGS_JSON": json.dumps(
-            [
-                "--generation-config",
-                "vllm",
-                "--additional-config",
-                json.dumps(additional_config, separators=(",", ":")),
-            ]
-        ),
+        "VLLM_ENGINE_EXTRA_ARGS_JSON": json.dumps(extra_args),
         "VLLM_ENGINE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
         "VLLM_ENGINE_BASE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
         "VLLM_PLUGINS": "ascend",
@@ -789,6 +804,7 @@ def run_target_spec(
     result_dir = Path(args.result_root).resolve() / "runs" / run_id
     env = {
         **os.environ,
+        **data_tmp_env(),
         **hf_mirror_cache_env(),
         **dev_hub_secret_env(args.dev_hub_dir),
         "VLLM_TARGET_DEVICE": "npu",
@@ -927,8 +943,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--managed-enforce-eager",
         action=argparse.BooleanOptionalAction,
-        default=True,
-        help="Use --enforce-eager for historical backfills by default to avoid inheriting graph-mode experiment tails.",
+        default=False,
+        help=(
+            "Enable --enforce-eager only for an explicitly scoped experiment. "
+            "Leaderboard backfills default to graph mode so they match the "
+            "managed dev-hub / official baseline serving path."
+        ),
     )
     parser.add_argument(
         "--managed-enable-prefix-caching",
@@ -941,6 +961,16 @@ def parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Enable chunked prefill only for an explicitly scoped experiment.",
+    )
+    parser.add_argument(
+        "--managed-disable-ascend-fusion",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Disable selected Ascend fusion passes only for a labelled "
+            "diagnostic experiment. Formal leaderboard backfills leave fusion "
+            "policy to the managed dev-hub/default serving path."
+        ),
     )
     parser.add_argument("--managed-ready-timeout-seconds", type=int, default=600)
     parser.add_argument("--managed-health-interval-seconds", type=int, default=10)

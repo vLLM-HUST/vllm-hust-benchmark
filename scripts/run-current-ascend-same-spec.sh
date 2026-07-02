@@ -7,7 +7,7 @@ VLLM_CLI_COMPAT=${VLLM_CLI_COMPAT:-"$REPO_ROOT/scripts/run_vllm_cli_compat.py"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
-CURRENT_RUNTIME_CWD=${CURRENT_RUNTIME_CWD:-"/tmp"}
+CURRENT_RUNTIME_CWD=${CURRENT_RUNTIME_CWD:-"/data/shared_datasets/vllm-hust-benchmark/tmp"}
 CURRENT_VLLM_HUST_REPO=${CURRENT_VLLM_HUST_REPO:-"$WORKSPACE_ROOT/vllm-hust"}
 CURRENT_VLLM_ASCEND_HUST_REPO=${CURRENT_VLLM_ASCEND_HUST_REPO:-"$WORKSPACE_ROOT/vllm-ascend-hust"}
 CURRENT_RUNTIME_PYTHONPATH=${CURRENT_RUNTIME_PYTHONPATH:-}
@@ -507,7 +507,15 @@ json2args() {
   local json_string=$1
   echo "$json_string" | jq -r '
     to_entries |
-    map(if (.value | tostring) == "" then "--" + (.key | gsub("_"; "-")) else "--" + (.key | gsub("_"; "-")) + " " + (.value | tostring) end) |
+    map(
+      if (.value == null or .value == false or (.value | tostring) == "") then
+        empty
+      elif .value == true then
+        "--" + (.key | gsub("_"; "-"))
+      else
+        "--" + (.key | gsub("_"; "-")) + " " + (.value | tostring)
+      end
+    ) |
     join(" ")
   '
 }
@@ -976,7 +984,10 @@ if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
       echo "[same-spec-current] vLLM server did not become ready after ${SERVER_START_RETRIES} start attempt(s)" >&2
       exit 1
     fi
-  fi
+	fi
+elif [[ "${CURRENT_ALLOW_OFFLINE_EAGER_BENCHMARK:-0}" != "1" ]]; then
+	echo "Offline throughput/latency benchmark paths are blocked for formal leaderboard runs because the current vLLM bench engine can fall back to enforce_eager=True on Ascend. Use the managed serve path or fix the offline runner to preserve graph mode before publishing this workload." >&2
+	exit 86
 fi
 
 run_client_command
