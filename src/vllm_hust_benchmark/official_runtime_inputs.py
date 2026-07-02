@@ -6,6 +6,20 @@ from typing import Mapping
 
 
 SHAREGPT_DATASET_FILENAME = "ShareGPT_V3_unfiltered_cleaned_split.json"
+OFFLINE_SERVER_PARAMETER_KEYS = {
+    "dtype",
+    "enforce_eager",
+    "gpu_memory_utilization",
+    "limit_mm_per_prompt",
+    "max_model_len",
+    "max_num_batched_tokens",
+    "max_num_seqs",
+    "model",
+    "quantization",
+    "tensor_parallel_size",
+    "tokenizer",
+    "trust_remote_code",
+}
 
 
 def _parse_limit_mm_per_prompt(value: Any) -> Any:
@@ -101,5 +115,47 @@ def normalize_client_parameters(
             benchmark_repo=benchmark_repo,
             dataset_cache_root=dataset_cache_root,
         )
+
+    return normalized
+
+
+def normalize_offline_benchmark_parameters(
+    client_parameters: Mapping[str, Any],
+    server_parameters: Mapping[str, Any],
+    *,
+    benchmark_type: str,
+    ready_check_timeout_sec: int | None = None,
+    vllm_worktree: str | None = None,
+    benchmark_repo: str | None = None,
+    dataset_cache_root: str | None = None,
+    force_eager: bool = False,
+) -> dict[str, Any]:
+    """Build parameters for offline vllm bench throughput/latency runs.
+
+    Throughput and latency benchmarks instantiate the engine in-process, so
+    model/runtime knobs from same-spec server parameters must be carried into
+    the benchmark CLI. Otherwise the artifact can say FP16 while the real
+    engine silently falls back to its default dtype.
+    """
+
+    normalized = normalize_client_parameters(
+        client_parameters,
+        benchmark_type=benchmark_type,
+        ready_check_timeout_sec=ready_check_timeout_sec,
+        vllm_worktree=vllm_worktree,
+        benchmark_repo=benchmark_repo,
+        dataset_cache_root=dataset_cache_root,
+        force_eager=force_eager,
+    )
+    normalized_server = normalize_server_parameters(server_parameters)
+
+    for key in OFFLINE_SERVER_PARAMETER_KEYS:
+        value = normalized_server.get(key)
+        if value is None:
+            continue
+        if key == "model":
+            normalized.setdefault(key, value)
+        else:
+            normalized[key] = value
 
     return normalized

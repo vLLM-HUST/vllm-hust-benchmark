@@ -603,26 +603,41 @@ import json
 import os
 from pathlib import Path
 
-from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
+from vllm_hust_benchmark.official_runtime_inputs import (
+    normalize_client_parameters,
+    normalize_offline_benchmark_parameters,
+)
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
-parameters = normalize_client_parameters(
-    payload["resolved_client_parameters"],
-    benchmark_type=os.environ["BENCHMARK_TYPE"],
-    ready_check_timeout_sec=ready_timeout,
-    vllm_worktree=os.environ.get("CURRENT_VLLM_WORKTREE"),
-    benchmark_repo=os.environ.get("BENCHMARK_REPO_ROOT"),
-    dataset_cache_root=os.environ.get("CURRENT_BENCHMARK_DATASET_ROOT"),
-)
+benchmark_type = os.environ["BENCHMARK_TYPE"]
+if benchmark_type in {"throughput", "latency"}:
+    parameters = normalize_offline_benchmark_parameters(
+        payload["resolved_client_parameters"],
+        payload["resolved_server_parameters"],
+        benchmark_type=benchmark_type,
+        ready_check_timeout_sec=ready_timeout,
+        vllm_worktree=os.environ.get("CURRENT_VLLM_WORKTREE"),
+        benchmark_repo=os.environ.get("BENCHMARK_REPO_ROOT"),
+        dataset_cache_root=os.environ.get("CURRENT_BENCHMARK_DATASET_ROOT"),
+    )
+else:
+    parameters = normalize_client_parameters(
+        payload["resolved_client_parameters"],
+        benchmark_type=benchmark_type,
+        ready_check_timeout_sec=ready_timeout,
+        vllm_worktree=os.environ.get("CURRENT_VLLM_WORKTREE"),
+        benchmark_repo=os.environ.get("BENCHMARK_REPO_ROOT"),
+        dataset_cache_root=os.environ.get("CURRENT_BENCHMARK_DATASET_ROOT"),
+    )
 client_model_name = os.environ.get("CURRENT_CLIENT_MODEL_NAME", "").strip()
-if os.environ["BENCHMARK_TYPE"] == "serve" and client_model_name:
+if benchmark_type == "serve" and client_model_name:
     parameters["model"] = client_model_name
 client_tokenizer = os.environ.get("CURRENT_CLIENT_TOKENIZER", "").strip()
 if client_tokenizer:
     parameters["tokenizer"] = client_tokenizer
 client_temperature = os.environ.get("CURRENT_CLIENT_TEMPERATURE", "").strip()
-if os.environ["BENCHMARK_TYPE"] == "serve" and client_temperature:
+if benchmark_type == "serve" and client_temperature:
     parameters["temperature"] = client_temperature
 print(
     json.dumps(
