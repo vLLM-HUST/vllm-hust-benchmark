@@ -27,16 +27,16 @@ def test_perfgate_ascend_smoke_spec_is_available_for_ci() -> None:
         REPO_ROOT
         / "docs"
         / "official-baselines"
-        / "perfgate-ascend-qwen25-3b-910b3.json"
+        / "perfgate-ascend-qwen25-3b-910b2.json"
     )
     spec = json.loads(spec_file.read_text(encoding="utf-8"))
 
-    assert spec["id"] == "perfgate-ascend-qwen25-3b-910b3"
+    assert spec["id"] == "perfgate-ascend-qwen25-3b-910b2"
     assert spec["scenario"] == "random-online"
     assert spec["model"] == "Qwen/Qwen2.5-3B-Instruct"
     assert spec["model_parameters"] == "3B"
     assert spec["model_precision"] == "BF16"
-    assert spec["hardware_chip_model"] == "910B3"
+    assert spec["hardware_chip_model"] == "910B2"
     assert spec["server_parameters"]["max_model_len"] == 256
     assert spec["client_parameters"]["input_len"] == 64
     assert spec["client_parameters"]["output_len"] == 16
