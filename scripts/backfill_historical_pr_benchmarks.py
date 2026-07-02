@@ -364,6 +364,16 @@ def to_container_workspace_path(path: Path) -> str:
     return "/workspace/" + relative.as_posix()
 
 
+def require_container_workspace_path(path: Path, *, purpose: str) -> str:
+    container_path = to_container_workspace_path(path)
+    if not container_path.startswith("/workspace/"):
+        raise RuntimeError(
+            f"{purpose} path {path} does not map into the dev-hub /workspace mount; "
+            "use --worktree-root under /home/shuhao for managed historical runs"
+        )
+    return container_path
+
+
 def find_local_model_path(model_id: str) -> str | None:
     known = {
         "Qwen/Qwen2.5-14B-Instruct": [
@@ -487,8 +497,14 @@ def start_managed_server(
             )
         model_path = spec.model
 
-    core_container_path = to_container_workspace_path(core_worktree)
-    plugin_container_path = to_container_workspace_path(plugin_worktree)
+    core_container_path = require_container_workspace_path(
+        core_worktree,
+        purpose="core worktree",
+    )
+    plugin_container_path = require_container_workspace_path(
+        plugin_worktree,
+        purpose="plugin worktree",
+    )
     additional_config = {
         "ascend_compilation_config": {
             "fuse_norm_quant": False,
@@ -863,6 +879,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--workload", action="append", default=[])
     parser.add_argument("--include-multi-chip", action="store_true")
     parser.add_argument("--result-root", default=str(DEFAULT_RESULT_ROOT))
+    parser.add_argument(
+        "--worktree-root",
+        default="",
+        help=(
+            "Optional git worktree root. Use a path visible inside the dev-hub "
+            "container, such as a directory under /home/shuhao, when managed "
+            "dev-hub needs to import historical source refs. Large result "
+            "artifacts can still stay under --result-root."
+        ),
+    )
     parser.add_argument("--state-file")
     parser.add_argument("--rerun-completed", action="store_true")
     parser.add_argument("--publish-each", action="store_true")
@@ -930,7 +956,7 @@ def main() -> int:
     execute = bool(args.execute)
     result_root = Path(args.result_root).resolve()
     state_file = Path(args.state_file).resolve() if args.state_file else result_root / "state.json"
-    worktree_root = result_root / "worktrees"
+    worktree_root = Path(args.worktree_root).resolve() if args.worktree_root else result_root / "worktrees"
     state = read_state(state_file)
 
     core_repo = Path(args.core_repo).resolve()

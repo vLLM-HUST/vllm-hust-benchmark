@@ -91,6 +91,30 @@ Multi-node remains uncovered because no official multi-node scenario/spec was
 added in this batch. Add a standard multi-node spec first, then run both vLLM
 baseline and vLLM-HUST current through the same submission/snapshot path.
 
+## Single-Chip Gap Fill
+
+The follow-up single-chip gap-fill batch added three real-online
+`instructcoder-online` historical points. Each service was launched through
+`/home/shuhao/vllm-hust-dev-hub/manage.sh`; source worktrees were placed under
+`/home/shuhao/.cache/vllm-hust-benchmark-worktrees/...` so the container loaded
+the actual historical refs through `/workspace/.cache/...`. Large artifacts and
+state stayed under `/data/shared_datasets/vllm-hust-benchmark/...`.
+
+| workload | core ref | plugin ref | throughput_tps | TTFT ms | TBT/TPOT ms | error_rate | same_spec hash |
+|---|---|---|---:|---:|---:|---:|---|
+| instructcoder-online | `2fb7859dd0` | `51e577b17b` | 158.98 | 32166.16 | 95.51 | 0.0 | `4c318a855603082fb2a6734eb3a210b350c428731f155ebe1539322f32661d9a` |
+| instructcoder-online | `dcc06b18f3` | `51e577b17b` | 157.86 | 16609.29 | 93.42 | 0.0005 | `4c318a855603082fb2a6734eb3a210b350c428731f155ebe1539322f32661d9a` |
+| instructcoder-online | `ec4847981f` | `51e577b17b` | 159.68 | 7217.66 | 88.40 | 0.0 | `4c318a855603082fb2a6734eb3a210b350c428731f155ebe1539322f32661d9a` |
+
+`instructcoder-online` now has eight throughput-visible points in
+`leaderboard_single.json`: the official vLLM 0.18 baseline, the earlier
+`2206f1f7b7` point, three existing current/plugin points, and the three added
+historical core refs above. The official vLLM baseline still carries the older
+resolved spec hash `cd594ec89...`; this hash drift is preserved in the report
+and should be eliminated by rerunning the official instructcoder baseline under
+the current spec before claiming fully hash-identical comparison for this
+workload.
+
 ## Operational Notes From This Run
 
 - Official vLLM baseline runs and managed-dev-hub vLLM-HUST runs should be
@@ -104,6 +128,10 @@ baseline and vLLM-HUST current through the same submission/snapshot path.
 - Keep using `/data/shared_datasets/vllm-hust-benchmark/...` for result roots,
   datasets, model caches, and state files. Do not write large artifacts under
   `$HOME`.
+- For managed historical runs, put source worktrees under `/home/shuhao` via
+  `--worktree-root`, because the dev-hub container maps `/home/shuhao` to
+  `/workspace`. A worktree located only under `/data` is not a valid server
+  source path unless the container explicitly mounts it.
 - `sonnet-throughput` with chip_count 2 is an old naming residue. New work must
   use `sonnet-throughput-2chip` or another explicit chip-count workload name.
 
