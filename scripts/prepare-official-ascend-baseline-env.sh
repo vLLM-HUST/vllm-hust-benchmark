@@ -270,6 +270,113 @@ EOF
   OFFICIAL_EXPECTED_GENERAL_PLUGINS=$(printf '%s\n' "${general_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
 }
 
+patch_vllm_ascend_cann_stdlib_includes() {
+  local cmake_file="$OFFICIAL_VLLM_ASCEND_WORKTREE/CMakeLists.txt"
+  local marker="vllm-hust official baseline: CANN stdlib includes"
+
+  [[ -f "$cmake_file" ]] || return 0
+  if grep -q "$marker" "$cmake_file"; then
+    return 0
+  fi
+
+  python - <<'PY' "$cmake_file" "$marker"
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+marker = sys.argv[2]
+text = path.read_text(encoding="utf-8")
+needle = """ascendc_library(vllm_ascend_kernels SHARED
+    ${VLLM_ASCEND_CUSTOM_OP}
+)
+"""
+insert = needle + f"""
+# {marker}
+ascendc_include_directories(vllm_ascend_kernels PRIVATE
+    ${{ASCEND_HOME_PATH}}/tools/hcc/aarch64-target-linux-gnu/include/c++/7.3.0
+    ${{ASCEND_HOME_PATH}}/tools/hcc/aarch64-target-linux-gnu/include/c++/7.3.0/aarch64-target-linux-gnu
+    /usr/include/c++/11
+    /usr/include/aarch64-linux-gnu/c++/11
+)
+"""
+if needle not in text:
+    raise SystemExit(f"could not find ascendc_library block in {path}")
+path.write_text(text.replace(needle, insert, 1), encoding="utf-8")
+PY
+}
+
+patch_vllm_ascend_sampler_top_k_top_p_fallback() {
+  local sampler_file="$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend/sample/sampler.py"
+
+  [[ -f "$sampler_file" ]] || return 0
+
+  "$ENV_PREFIX/bin/python" - "$sampler_file" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+
+if "from vllm.logger import init_logger" not in text:
+    text = text.replace(
+        "import torch\n",
+        "import torch\nfrom vllm.logger import init_logger\n",
+        1,
+    )
+
+if "logger = init_logger(__name__)" not in text:
+    text = text.replace(
+        'DEFAULT_LOGPROBS_MODE = "raw_logprobs"\n',
+        'DEFAULT_LOGPROBS_MODE = "raw_logprobs"\nlogger = init_logger(__name__)\n',
+        1,
+    )
+
+if "def _has_ascend_top_k_top_p_op" in text:
+    path.write_text(text, encoding="utf-8")
+    raise SystemExit(0)
+
+old = """apply_top_k_top_p = (
+    _apply_top_k_top_p_ascendc
+    if get_ascend_device_type() in [AscendDeviceType.A2, AscendDeviceType.A3]
+    else _apply_top_k_top_p_pytorch
+)
+"""
+new = """_MISSING_TOP_K_TOP_P_OP_WARNED = False
+
+
+def _has_ascend_top_k_top_p_op() -> bool:
+    ascend_namespace = getattr(torch.ops, "_C_ascend", None)
+    return hasattr(ascend_namespace, "npu_apply_top_k_top_p")
+
+
+def apply_top_k_top_p(
+    logits: torch.Tensor,
+    k: torch.Tensor,
+    p: torch.Tensor,
+) -> torch.Tensor:
+    global _MISSING_TOP_K_TOP_P_OP_WARNED
+
+    if get_ascend_device_type() not in [AscendDeviceType.A2, AscendDeviceType.A3]:
+        return _apply_top_k_top_p_pytorch(logits, k, p)
+
+    if _has_ascend_top_k_top_p_op():
+        return _apply_top_k_top_p_ascendc(logits, k, p)
+
+    if not _MISSING_TOP_K_TOP_P_OP_WARNED:
+        logger.warning(
+            "Custom op npu_apply_top_k_top_p is unavailable; falling back to the pytorch implementation."
+        )
+        _MISSING_TOP_K_TOP_P_OP_WARNED = True
+    return _apply_top_k_top_p_pytorch(logits, k, p)
+"""
+
+if old not in text:
+    raise SystemExit(f"could not locate apply_top_k_top_p assignment in {path}")
+
+path.write_text(text.replace(old, new), encoding="utf-8")
+PY
+}
+
 normalize_arch() {
   case "$1" in
     x86_64|amd64)
@@ -1037,6 +1144,8 @@ ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_
 ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_VLLM_ASCEND_REF"
 ensure_vllm_source_metadata
 ensure_vllm_ascend_plugin_metadata
+patch_vllm_ascend_cann_stdlib_includes
+patch_vllm_ascend_sampler_top_k_top_p_fallback
 
 if [[ ! -d "$ENV_PREFIX" ]]; then
   conda create -y -p "$ENV_PREFIX" "python=$PYTHON_VERSION" pip
@@ -1168,6 +1277,12 @@ build_vllm_ascend_c_extension() {
   torch_npu_path=$(run_in_official_env "" python -c "import torch_npu; import os; print(os.path.dirname(torch_npu.__file__))")
   pybind11_cmake_dir=$(run_in_official_env "" python -m pybind11 --cmakedir)
   python_include="$ENV_PREFIX/include/python${PYTHON_VERSION}"
+  local cxx_flags="-fno-lto"
+  if [[ -n "${ASCEND_HOME_PATH:-}" ]]; then
+    cxx_flags+=" -I${ASCEND_HOME_PATH}/tools/hcc/aarch64-target-linux-gnu/include/c++/7.3.0"
+    cxx_flags+=" -I${ASCEND_HOME_PATH}/tools/hcc/aarch64-target-linux-gnu/include/c++/7.3.0/aarch64-target-linux-gnu"
+  fi
+  cxx_flags+=" -I/usr/include/c++/11 -I/usr/include/aarch64-linux-gnu/c++/11"
 
   mkdir -p "$build_dir"
   (
@@ -1183,7 +1298,7 @@ build_vllm_ascend_c_extension() {
     conda run -p "$ENV_PREFIX" cmake \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF \
-      -DCMAKE_CXX_FLAGS="-fno-lto" \
+      -DCMAKE_CXX_FLAGS="$cxx_flags" \
       -DCMAKE_SHARED_LINKER_FLAGS="-fno-lto" \
       -DASCEND_HOME_PATH="${ASCEND_HOME_PATH:-/usr/local/Ascend/ascend-toolkit/latest}" \
       -DPYTHON_EXECUTABLE="$ENV_PREFIX/bin/python" \
@@ -1208,7 +1323,13 @@ build_vllm_ascend_c_extension() {
   echo "[prepare] C extension built: $(du -h "$worktree/vllm_ascend/$(basename "$built_so")" | cut -f1)" >&2
 }
 
-build_vllm_ascend_c_extension
+if [[ "${SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD:-0}" == "1" ]]; then
+  rm -f "$OFFICIAL_VLLM_ASCEND_WORKTREE"/vllm_ascend/vllm_ascend_C*.so
+  rm -rf "$OFFICIAL_VLLM_ASCEND_WORKTREE/vllm_ascend/lib"
+  echo "[prepare] Skipping vllm_ascend C extension build (SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD=1)." >&2
+else
+  build_vllm_ascend_c_extension
+fi
 
 PYTHONPATH="$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE${PYTHONPATH:+:$PYTHONPATH}" \
   verify_official_env

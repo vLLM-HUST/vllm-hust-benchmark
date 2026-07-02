@@ -1,15 +1,15 @@
 {
-  "entry_id": "e09707c0-3d28-4e61-9507-c63c0c687110",
+  "entry_id": "922f3a84-5b57-499a-9d6f-55bc9454d142",
   "engine": "vllm",
   "engine_version": "0.18.0",
   "config_type": "multi_gpu",
   "hardware": {
     "vendor": "Huawei",
     "chip_model": "910B2",
-    "chip_count": 2,
+    "chip_count": 4,
     "interconnect": "unknown",
     "memory_per_chip_gb": 64.0,
-    "total_memory_gb": 128.0
+    "total_memory_gb": 256.0
   },
   "model": {
     "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
@@ -22,7 +22,7 @@
     "quantization": null
   },
   "workload": {
-    "name": "sonnet-throughput-2chip",
+    "name": "sonnet-throughput-4chip",
     "input_length": 1024,
     "output_length": 256,
     "batch_size": null,
@@ -32,7 +32,7 @@
   "metrics": {
     "ttft_ms": null,
     "tbt_ms": null,
-    "throughput_tps": 3724.275619384353,
+    "throughput_tps": 4677.0027068578665,
     "peak_mem_mb": 0,
     "error_rate": 0.0
   },
@@ -83,7 +83,7 @@
     "driver_version": null
   },
   "metadata": {
-    "submitted_at": "2026-07-02T01:26:07Z",
+    "submitted_at": "2026-07-02T01:29:13Z",
     "submitter": "official-ascend-baseline",
     "data_source": "reference-vllm-ascend-benchmark",
     "engine": "vllm",
@@ -101,7 +101,7 @@
     "changelog_url": null,
     "notes": null,
     "verified": null,
-    "idempotency_key": "80362f950ba9a880a84eed333f1e0e4300b1c29abe941ab8393cbe8449760dcf",
+    "idempotency_key": "96968a341678cca5445452a7f73c77d1aa3339efec5c634ff8a0c03b304e74d7",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
       "python": null,
@@ -120,21 +120,21 @@
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
-    "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
-    "spec_label": "Official Ascend Jan 2026 sonnet throughput 2-chip baseline for vllm-hust goal tracking",
-    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-2chip-910b2.json",
-    "scenario": "sonnet-throughput-2chip",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
+    "spec_label": "Official Ascend Jan 2026 sonnet throughput 4-chip baseline for vllm-hust goal tracking",
+    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-4chip-910b2.json",
+    "scenario": "sonnet-throughput-4chip",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
     "model_precision": "FP16",
     "model_quantization": "",
     "hardware_vendor": "Huawei",
     "hardware_chip_model": "910B2",
-    "chip_count": 2,
+    "chip_count": 4,
     "node_count": 1,
-    "resolved_spec_hash": "378603219b0e520a5afdabeee2f629b4d3b1a517b1ea929a2ca7e95b9da7057c",
+    "resolved_spec_hash": "9ed51a0a3fceb940baaa120c6addc19edfd9e5a2d91c16b49c0336c59fe7352f",
     "resolved_server_parameters": {
-      "tensor_parallel_size": 2,
+      "tensor_parallel_size": 4,
       "enforce_eager": "",
       "trust_remote_code": "",
       "disable_log_stats": "",
@@ -145,7 +145,7 @@
       "backend": "vllm",
       "dataset_name": "sonnet",
       "dataset_path": "benchmarks/sonnet.txt",
-      "tensor_parallel_size": 2,
+      "tensor_parallel_size": 4,
       "dtype": "float16",
       "gpu_memory_utilization": 0.6,
       "num_prompts": 200,

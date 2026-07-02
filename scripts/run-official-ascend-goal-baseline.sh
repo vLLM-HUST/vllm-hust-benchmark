@@ -1129,6 +1129,7 @@ normalized_client_parameters_json() {
     BENCHMARK_TYPE="$BENCHMARK_TYPE" \
     CLIENT_READY_CHECK_TIMEOUT_SECONDS="$CLIENT_READY_CHECK_TIMEOUT_SECONDS" \
     OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
+    BENCHMARK_REPO="$REPO_ROOT" \
     OFFICIAL_BENCHMARK_DATASET_ROOT="$OFFICIAL_BENCHMARK_DATASET_ROOT" \
     OFFICIAL_FORCE_EAGER_OFFLINE="$force_eager_offline" \
     "$HOST_PYTHON_BIN" - <<'PY'
@@ -1147,6 +1148,7 @@ print(
             benchmark_type=os.environ["BENCHMARK_TYPE"],
             ready_check_timeout_sec=ready_timeout,
             vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
+            benchmark_repo=os.environ.get("BENCHMARK_REPO"),
             dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
             force_eager=os.environ.get("OFFICIAL_FORCE_EAGER_OFFLINE") == "1",
         ),
