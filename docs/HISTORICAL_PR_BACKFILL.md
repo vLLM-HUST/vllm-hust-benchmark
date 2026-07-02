@@ -58,9 +58,11 @@ leaderboard export path stay in the existing runner.
   keep the official model ID, while the online client request should use the
   server's `served_model_name` when dev-hub starts the model under a basename.
   The client tokenizer should still point at the local model snapshot path.
-- Online backfill requests are run greedily (`temperature=0`) and the managed
-  server is launched with `--generation-config vllm`; do not let a model's
-  bundled generation config silently enable top-k/top-p sampling paths.
+- Online backfill requests follow the same-spec client parameters by default.
+  Only pass `--current-client-temperature 0` when the matching official
+  baseline/spec explicitly uses that override. The managed server is still
+  launched with `--generation-config vllm`; do not let a model's bundled
+  generation config silently enable top-k/top-p sampling paths.
 - Dataset and model downloads must use `HF_ENDPOINT=https://hf-mirror.com` and
   cache under `/data/shared_datasets/vllm-hust-benchmark/huggingface` or another
   explicit `/data` path. Do not let backfills populate `$HOME` with HF datasets,
