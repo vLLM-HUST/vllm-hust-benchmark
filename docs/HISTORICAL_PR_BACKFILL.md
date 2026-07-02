@@ -51,6 +51,13 @@ leaderboard export path stay in the existing runner.
   generator. It must not import the historical `vllm-ascend-hust` source tree;
   server-side Ascend plugin code is loaded only inside the dev-hub container
   launched by `manage.sh`.
+- Managed historical source worktrees must be visible inside the dev-hub
+  container. The container maps `/home/shuhao` to `/workspace`, so use
+  `--worktree-root` under `/home/shuhao` for historical source refs. Keep large
+  result roots, model caches, and dataset caches under `/data`, but do not put
+  managed source worktrees only under `/data`; otherwise the server can fall
+  back to the default `/workspace/vllm-hust` checkout while metadata claims a
+  historical commit.
 - The managed dev-hub service requires a real API key. The backfill runner maps
   `VLLM_HUST_API_KEY` to the client's `OPENAI_API_KEY` environment variable; do
   not pass bearer tokens through command-line `--header` arguments.
@@ -114,6 +121,8 @@ PYTHONPATH=src python scripts/backfill_historical_pr_benchmarks.py \
   --server-port 8001 \
   --runtime-python /home/shuhao/miniconda3/envs/vllm-hust-dev/bin/python \
   --current-env-prefix /home/shuhao/miniconda3/envs/vllm-hust-dev \
+  --result-root /data/shared_datasets/vllm-hust-benchmark/historical-pr-backfill \
+  --worktree-root /home/shuhao/.cache/vllm-hust-benchmark-worktrees/historical-pr-backfill \
   --execute \
   --publish-each \
   --sync-website-each \
@@ -133,6 +142,8 @@ PYTHONPATH=src python scripts/backfill_historical_pr_benchmarks.py \
   --server-port 8001 \
   --runtime-python /home/shuhao/miniconda3/envs/vllm-hust-dev/bin/python \
   --current-env-prefix /home/shuhao/miniconda3/envs/vllm-hust-dev \
+  --result-root /data/shared_datasets/vllm-hust-benchmark/historical-pr-backfill \
+  --worktree-root /home/shuhao/.cache/vllm-hust-benchmark-worktrees/historical-pr-backfill \
   --execute \
   --publish-each \
   --sync-website-each
