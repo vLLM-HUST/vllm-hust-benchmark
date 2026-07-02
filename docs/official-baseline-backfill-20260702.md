@@ -42,9 +42,11 @@ was moved out of canonical submissions and replaced by
 ## P0 Multi-Chip Current Backfill
 
 The first managed-dev-hub vLLM-HUST 2-chip current batch was run on 910B2
-devices 4 and 6 with `vllm-hust@ceec19abb0ba590f536d32c8fea6fd569a8ce7ad`
-and `vllm-ascend-hust@2db7d065429b936a75c989648c0bdc7f18baba3a`. Each
-service was launched through `/home/shuhao/vllm-hust-dev-hub/manage.sh` by
+devices 4 and 6. The matching 4-chip current batch was run on 910B2 devices
+0, 1, 2, and 3. Both used
+`vllm-hust@ceec19abb0ba590f536d32c8fea6fd569a8ce7ad` and
+`vllm-ascend-hust@2db7d065429b936a75c989648c0bdc7f18baba3a`. Each service was
+launched through `/home/shuhao/vllm-hust-dev-hub/manage.sh` by
 `scripts/backfill_historical_pr_benchmarks.py --managed-dev-hub`; no manual
 server command was used.
 
@@ -54,14 +56,18 @@ server command was used.
 | prefix-repetition-online-2chip | vllm-hust | 2 | 105.76 | 109945.58 | 141.04 | `c1d04eeac1c9ee6c113430955d59ee368e7b5b617d33b4fea4c09754baf11f46` |
 | random-online-2chip | vllm-hust | 2 | 125.29 | 91107.15 | 119.48 | `18dde0cb1ccf9d4aa6d005976597b18dc2d0656d6ec1b42dcaa78e0203344455` |
 | sharegpt-online-2chip | vllm-hust | 2 | 120.06 | 40394.04 | 112.60 | `c887cb407873f7931ec7f392f26d33cd530e6325c51f09fc6c0121a704f6b040` |
+| agent-research-online-4chip | vllm-hust | 4 | 110.05 | 7210.49 | 117.16 | `6e6c49bde94d8d7f758d1ba4609208f156b598d0ecc614738a6cdfa251d351a2` |
+| prefix-repetition-online-4chip | vllm-hust | 4 | 118.26 | 88196.33 | 124.53 | `f15ebe6780f7aef9f9f8291db066ab2dcec5004723b81d4275cfbf9f04259e64` |
+| random-online-4chip | vllm-hust | 4 | 128.09 | 83971.91 | 117.13 | `9ac40d05cabbad50f3ce18aeb6dae80da6e976b1db1bbd11922fe230aec96f4c` |
+| sharegpt-online-4chip | vllm-hust | 4 | 116.01 | 44291.44 | 115.90 | `edfe4ba54abd2e9b152f215ed951417a38b9ea52a6c118f9692c1e744ea07489` |
 
-All four 2-chip scopes now have exactly matching vLLM and vLLM-HUST same-spec
-hashes and can form preferred pairs. The high TTFT values are preserved as
-measured; they are not synthetic corrections.
+All eight P0 2-chip/4-chip online scopes now have exactly matching vLLM and
+vLLM-HUST same-spec hashes and can form preferred pairs. The high TTFT values
+are preserved as measured; they are not synthetic corrections.
 
 ## Coverage After P0 Batch
 
-`leaderboard_multi.json` now has 21 entries:
+`leaderboard_multi.json` now has 25 entries:
 
 | workload | chip_count | engines present | throughput points | TTFT points | TBT points | status |
 |---|---:|---|---:|---:|---:|---|
@@ -71,15 +77,15 @@ measured; they are not synthetic corrections.
 | sharegpt-online-2chip | 2 | vllm, vllm-hust | 2 | 2 | 2 | comparable |
 | sonnet-throughput-2chip | 2 | vllm, vllm-hust | 4 | 0 | 0 | comparable throughput trend |
 | sonnet-throughput-4chip | 4 | vllm, vllm-hust | 4 | 0 | 0 | comparable throughput trend |
-| agent-research-online-4chip | 4 | vllm only | 1 | 1 | 1 | needs vllm-hust current/history |
-| prefix-repetition-online-4chip | 4 | vllm only | 1 | 1 | 1 | needs vllm-hust current/history |
-| random-online-4chip | 4 | vllm only | 1 | 1 | 1 | needs vllm-hust current/history |
-| sharegpt-online-4chip | 4 | vllm only | 1 | 1 | 1 | needs vllm-hust current/history |
+| agent-research-online-4chip | 4 | vllm, vllm-hust | 2 | 2 | 2 | comparable |
+| prefix-repetition-online-4chip | 4 | vllm, vllm-hust | 2 | 2 | 2 | comparable |
+| random-online-4chip | 4 | vllm, vllm-hust | 2 | 2 | 2 | comparable |
+| sharegpt-online-4chip | 4 | vllm, vllm-hust | 2 | 2 | 2 | comparable |
 | sonnet-throughput | 2 | vllm only | 1 | 0 | 0 | stale retired workload name; do not extend |
 
-`leaderboard_compare.json` has 15 preferred pairs and every preferred pair
-contains `vllm` and `vllm-hust`. The newly added 2-chip online scopes have
-matching same-spec hashes across both engines.
+`leaderboard_compare.json` has 19 preferred pairs and every preferred pair
+contains `vllm` and `vllm-hust`. The newly added 2-chip and 4-chip online
+scopes have matching same-spec hashes across both engines.
 
 Multi-node remains uncovered because no official multi-node scenario/spec was
 added in this batch. Add a standard multi-node spec first, then run both vLLM
