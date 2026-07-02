@@ -794,12 +794,13 @@ def run_target_spec(
         "CURRENT_PLUGIN_GITHUB_REPOSITORY": args.plugin_github_repository,
         "CURRENT_CLIENT_MODEL_NAME": served_model_name(spec.model),
         "CURRENT_CLIENT_TOKENIZER": local_model_path,
-        "CURRENT_CLIENT_TEMPERATURE": "0",
         "CURRENT_MODEL_PATH": local_model_path,
         "CURRENT_HARDWARE_CHIP_MODEL": actual_chip_model,
         "RESULT_DIR": str(result_dir),
         "RUN_ID": run_id,
     }
+    if args.current_client_temperature is not None:
+        env["CURRENT_CLIENT_TEMPERATURE"] = args.current_client_temperature
     ascend_toolkit_set_env = args.ascend_toolkit_set_env or first_existing_path(
         DEFAULT_ASCEND_TOOLKIT_SET_ENV_CANDIDATES
     )
@@ -879,6 +880,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--website-repo", default=str(REPO_ROOT.parent / "vllm-hust-website"))
     parser.add_argument("--runtime-python", default=DEFAULT_CURRENT_PYTHON)
     parser.add_argument("--current-env-prefix", default="")
+    parser.add_argument(
+        "--current-client-temperature",
+        default=None,
+        help=(
+            "Optional client temperature override. Leave unset to follow the "
+            "same-spec client parameters exactly."
+        ),
+    )
     parser.add_argument("--ascend-toolkit-set-env", default="")
     parser.add_argument("--server-port", default="")
     parser.add_argument("--managed-dev-hub", action="store_true")

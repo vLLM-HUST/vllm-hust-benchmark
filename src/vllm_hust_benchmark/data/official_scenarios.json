@@ -5,7 +5,12 @@
       "title": "Official ShareGPT online serving benchmark",
       "benchmark_type": "serve",
       "description": "Mirror of the standard upstream online serving benchmark on ShareGPT.",
-      "tags": ["official", "online", "text", "regression"],
+      "tags": [
+        "official",
+        "online",
+        "text",
+        "regression"
+      ],
       "leaderboard": {
         "workload_name": "sharegpt-online",
         "representative_business_scenario": "online-chat",
@@ -24,7 +29,12 @@
       "title": "Official synthetic online serving benchmark",
       "benchmark_type": "serve",
       "description": "Mirror of the upstream synthetic online benchmark for smoke and regression validation.",
-      "tags": ["official", "online", "synthetic", "smoke"],
+      "tags": [
+        "official",
+        "online",
+        "synthetic",
+        "smoke"
+      ],
       "leaderboard": {
         "workload_name": "random-online",
         "representative_business_scenario": "online-chat",
@@ -44,7 +54,12 @@
       "title": "Official prefix repetition online serving benchmark",
       "benchmark_type": "serve",
       "description": "Mirror of upstream prefix repetition requests for cache-sensitive serving behavior.",
-      "tags": ["official", "online", "prefix-cache", "long-context"],
+      "tags": [
+        "official",
+        "online",
+        "prefix-cache",
+        "long-context"
+      ],
       "leaderboard": {
         "workload_name": "prefix-repetition-online",
         "representative_business_scenario": "long-context-chat",
@@ -64,7 +79,12 @@
       "title": "Official InstructCoder online serving benchmark",
       "benchmark_type": "serve",
       "description": "Mirror of upstream HuggingFace InstructCoder benchmark, commonly used with speculative decoding tests.",
-      "tags": ["official", "online", "coding", "hf"],
+      "tags": [
+        "official",
+        "online",
+        "coding",
+        "hf"
+      ],
       "leaderboard": {
         "workload_name": "instructcoder-online",
         "representative_business_scenario": "code-assistant",
@@ -83,7 +103,12 @@
       "title": "Official VisionArena multimodal serving benchmark",
       "benchmark_type": "serve",
       "description": "Mirror of upstream VisionArena chat benchmark for multimodal serving.",
-      "tags": ["official", "online", "multimodal", "hf"],
+      "tags": [
+        "official",
+        "online",
+        "multimodal",
+        "hf"
+      ],
       "leaderboard": {
         "workload_name": "visionarena-online",
         "representative_business_scenario": "multimodal-chat",
@@ -103,7 +128,12 @@
       "title": "Official ShareGPT offline throughput benchmark",
       "benchmark_type": "throughput",
       "description": "Mirror of the standard upstream offline throughput benchmark on ShareGPT-like traffic.",
-      "tags": ["official", "offline", "text", "regression"],
+      "tags": [
+        "official",
+        "offline",
+        "text",
+        "regression"
+      ],
       "leaderboard": {
         "workload_name": "sharegpt-throughput",
         "representative_business_scenario": "offline-batch-serving",
@@ -120,7 +150,12 @@
       "title": "Official sonnet offline throughput benchmark",
       "benchmark_type": "throughput",
       "description": "Mirror of the lightweight upstream sonnet throughput benchmark.",
-      "tags": ["official", "offline", "text", "lightweight"],
+      "tags": [
+        "official",
+        "offline",
+        "text",
+        "lightweight"
+      ],
       "leaderboard": {
         "workload_name": "sonnet-throughput",
         "representative_business_scenario": "offline-batch-serving",
@@ -137,7 +172,13 @@
       "title": "Official sonnet offline throughput benchmark (2-chip)",
       "benchmark_type": "throughput",
       "description": "Lightweight sonnet throughput benchmark on 2-chip Ascend 910B2 configuration.",
-      "tags": ["official", "offline", "text", "lightweight", "multi-chip"],
+      "tags": [
+        "official",
+        "offline",
+        "text",
+        "lightweight",
+        "multi-chip"
+      ],
       "leaderboard": {
         "workload_name": "sonnet-throughput-2chip",
         "representative_business_scenario": "offline-batch-serving",
@@ -154,7 +195,13 @@
       "title": "Official sonnet offline throughput benchmark (4-chip)",
       "benchmark_type": "throughput",
       "description": "Lightweight sonnet throughput benchmark on 4-chip Ascend 910B2 configuration.",
-      "tags": ["official", "offline", "text", "lightweight", "multi-chip"],
+      "tags": [
+        "official",
+        "offline",
+        "text",
+        "lightweight",
+        "multi-chip"
+      ],
       "leaderboard": {
         "workload_name": "sonnet-throughput-4chip",
         "representative_business_scenario": "offline-batch-serving",
@@ -171,7 +218,13 @@
       "title": "Official sonnet offline throughput benchmark (8-chip)",
       "benchmark_type": "throughput",
       "description": "Lightweight sonnet throughput benchmark on 8-chip Ascend 910B2 configuration.",
-      "tags": ["official", "offline", "text", "lightweight", "multi-chip"],
+      "tags": [
+        "official",
+        "offline",
+        "text",
+        "lightweight",
+        "multi-chip"
+      ],
       "leaderboard": {
         "workload_name": "sonnet-throughput-8chip",
         "representative_business_scenario": "offline-batch-serving",
@@ -188,7 +241,11 @@
       "title": "Official synthetic latency benchmark",
       "benchmark_type": "latency",
       "description": "Mirror of upstream latency evaluation with synthetic prompts.",
-      "tags": ["official", "latency", "synthetic"],
+      "tags": [
+        "official",
+        "latency",
+        "synthetic"
+      ],
       "leaderboard": {
         "workload_name": "random-latency",
         "representative_business_scenario": "latency-slo",
@@ -204,11 +261,228 @@
       "title": "EvoScientist AI research agent workload",
       "benchmark_type": "serve",
       "description": "Real-world workload trace from EvoScientist multi-agent research system. Captures the request pattern of an autonomous research agent doing literature review, code generation, and analysis.",
-      "tags": ["agent", "online", "multi-turn", "real-world"],
+      "tags": [
+        "agent",
+        "online",
+        "multi-turn",
+        "real-world"
+      ],
       "leaderboard": {
         "workload_name": "agent-research-online",
         "representative_business_scenario": "agent-workload",
         "default_config_type": "single_gpu"
+      },
+      "defaults": {
+        "backend": "openai-chat",
+        "endpoint": "/v1/chat/completions",
+        "dataset_name": "custom",
+        "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
+        "num_prompts": 32
+      }
+    },
+    {
+      "name": "random-online-2chip",
+      "title": "Official synthetic online serving benchmark (2-chip)",
+      "benchmark_type": "serve",
+      "description": "Mirror of the upstream synthetic online benchmark for smoke and regression validation. This multi-chip variant uses tensor parallel size 2.",
+      "tags": [
+        "official",
+        "online",
+        "synthetic",
+        "smoke",
+        "multi-chip",
+        "2chip"
+      ],
+      "leaderboard": {
+        "workload_name": "random-online-2chip",
+        "representative_business_scenario": "online-chat",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "input_len": 1024,
+        "output_len": 256
+      }
+    },
+    {
+      "name": "random-online-4chip",
+      "title": "Official synthetic online serving benchmark (4-chip)",
+      "benchmark_type": "serve",
+      "description": "Mirror of the upstream synthetic online benchmark for smoke and regression validation. This multi-chip variant uses tensor parallel size 4.",
+      "tags": [
+        "official",
+        "online",
+        "synthetic",
+        "smoke",
+        "multi-chip",
+        "4chip"
+      ],
+      "leaderboard": {
+        "workload_name": "random-online-4chip",
+        "representative_business_scenario": "online-chat",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "input_len": 1024,
+        "output_len": 256
+      }
+    },
+    {
+      "name": "sharegpt-online-2chip",
+      "title": "Official ShareGPT online serving benchmark (2-chip)",
+      "benchmark_type": "serve",
+      "description": "Mirror of the standard upstream online serving benchmark on ShareGPT. This multi-chip variant uses tensor parallel size 2.",
+      "tags": [
+        "official",
+        "online",
+        "text",
+        "regression",
+        "multi-chip",
+        "2chip"
+      ],
+      "leaderboard": {
+        "workload_name": "sharegpt-online-2chip",
+        "representative_business_scenario": "online-chat",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "sharegpt",
+        "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+        "num_prompts": 200
+      }
+    },
+    {
+      "name": "sharegpt-online-4chip",
+      "title": "Official ShareGPT online serving benchmark (4-chip)",
+      "benchmark_type": "serve",
+      "description": "Mirror of the standard upstream online serving benchmark on ShareGPT. This multi-chip variant uses tensor parallel size 4.",
+      "tags": [
+        "official",
+        "online",
+        "text",
+        "regression",
+        "multi-chip",
+        "4chip"
+      ],
+      "leaderboard": {
+        "workload_name": "sharegpt-online-4chip",
+        "representative_business_scenario": "online-chat",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "sharegpt",
+        "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+        "num_prompts": 200
+      }
+    },
+    {
+      "name": "prefix-repetition-online-2chip",
+      "title": "Official prefix repetition online serving benchmark (2-chip)",
+      "benchmark_type": "serve",
+      "description": "Mirror of upstream prefix repetition requests for cache-sensitive serving behavior. This multi-chip variant uses tensor parallel size 2.",
+      "tags": [
+        "official",
+        "online",
+        "prefix-cache",
+        "long-context",
+        "multi-chip",
+        "2chip"
+      ],
+      "leaderboard": {
+        "workload_name": "prefix-repetition-online-2chip",
+        "representative_business_scenario": "long-context-chat",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "prefix_repetition",
+        "num_prompts": 200,
+        "input_len": 4096,
+        "output_len": 256
+      }
+    },
+    {
+      "name": "prefix-repetition-online-4chip",
+      "title": "Official prefix repetition online serving benchmark (4-chip)",
+      "benchmark_type": "serve",
+      "description": "Mirror of upstream prefix repetition requests for cache-sensitive serving behavior. This multi-chip variant uses tensor parallel size 4.",
+      "tags": [
+        "official",
+        "online",
+        "prefix-cache",
+        "long-context",
+        "multi-chip",
+        "4chip"
+      ],
+      "leaderboard": {
+        "workload_name": "prefix-repetition-online-4chip",
+        "representative_business_scenario": "long-context-chat",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "prefix_repetition",
+        "num_prompts": 200,
+        "input_len": 4096,
+        "output_len": 256
+      }
+    },
+    {
+      "name": "agent-research-online-2chip",
+      "title": "EvoScientist AI research agent workload (2-chip)",
+      "benchmark_type": "serve",
+      "description": "Real-world workload trace from EvoScientist multi-agent research system. Captures the request pattern of an autonomous research agent doing literature review, code generation, and analysis. This multi-chip variant uses tensor parallel size 2.",
+      "tags": [
+        "agent",
+        "online",
+        "multi-turn",
+        "real-world",
+        "multi-chip",
+        "2chip"
+      ],
+      "leaderboard": {
+        "workload_name": "agent-research-online-2chip",
+        "representative_business_scenario": "agent-workload",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "backend": "openai-chat",
+        "endpoint": "/v1/chat/completions",
+        "dataset_name": "custom",
+        "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
+        "num_prompts": 32
+      }
+    },
+    {
+      "name": "agent-research-online-4chip",
+      "title": "EvoScientist AI research agent workload (4-chip)",
+      "benchmark_type": "serve",
+      "description": "Real-world workload trace from EvoScientist multi-agent research system. Captures the request pattern of an autonomous research agent doing literature review, code generation, and analysis. This multi-chip variant uses tensor parallel size 4.",
+      "tags": [
+        "agent",
+        "online",
+        "multi-turn",
+        "real-world",
+        "multi-chip",
+        "4chip"
+      ],
+      "leaderboard": {
+        "workload_name": "agent-research-online-4chip",
+        "representative_business_scenario": "agent-workload",
+        "default_config_type": "multi_gpu"
       },
       "defaults": {
         "backend": "openai-chat",
