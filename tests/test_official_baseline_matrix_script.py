@@ -7,6 +7,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MATRIX_SCRIPT = REPO_ROOT / "scripts" / "run-official-ascend-goal-baseline-matrix.sh"
+ONE_CLICK_SCRIPT = REPO_ROOT / "scripts" / "run-official-v0180-baselines.sh"
 
 
 def _write_spec(spec_file: Path, spec_id: str) -> None:
@@ -95,6 +96,28 @@ def _run_matrix(spec_file: Path, env: dict[str, str]) -> subprocess.CompletedPro
         text=True,
         check=False,
     )
+
+
+def test_one_click_official_v0180_wrapper_has_help_and_valid_syntax() -> None:
+    syntax = subprocess.run(
+        ["bash", "-n", str(ONE_CLICK_SCRIPT)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert syntax.returncode == 0, syntax.stderr
+
+    help_result = subprocess.run(
+        ["bash", str(ONE_CLICK_SCRIPT), "--help"],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert help_result.returncode == 0, help_result.stderr
+    assert "run-official-ascend-goal-baseline-matrix.sh" in help_result.stdout
+    assert "SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD" in help_result.stdout
 
 
 def test_matrix_script_accepts_partial_successful_repeats(tmp_path: Path) -> None:
