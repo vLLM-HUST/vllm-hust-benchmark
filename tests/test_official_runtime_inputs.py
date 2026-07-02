@@ -4,6 +4,7 @@ from pathlib import Path
 
 from vllm_hust_benchmark.official_runtime_inputs import SHAREGPT_DATASET_FILENAME
 from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
+from vllm_hust_benchmark.official_runtime_inputs import normalize_offline_benchmark_parameters
 from vllm_hust_benchmark.official_runtime_inputs import normalize_server_parameters
 from vllm_hust_benchmark.official_runtime_inputs import resolve_runtime_dataset_path
 
@@ -89,6 +90,47 @@ def test_normalize_client_parameters_forces_eager_for_offline_when_requested() -
     )
 
     assert normalized["enforce_eager"] == ""
+
+
+def test_normalize_offline_benchmark_parameters_carries_engine_runtime_knobs(
+    tmp_path: Path,
+) -> None:
+    worktree = tmp_path / "vllm"
+    (worktree / "benchmarks").mkdir(parents=True)
+    (worktree / "benchmarks" / "sonnet.txt").write_text("sonnet\n", encoding="utf-8")
+
+    normalized = normalize_offline_benchmark_parameters(
+        {
+            "backend": "vllm",
+            "dataset_name": "sonnet",
+            "dataset_path": "benchmarks/sonnet.txt",
+            "num_prompts": 200,
+            "num_warmups": 0,
+        },
+        {
+            "host": "0.0.0.0",
+            "port": 8001,
+            "model": "/data/models/qwen",
+            "dtype": "float16",
+            "tensor_parallel_size": 1,
+            "trust_remote_code": "",
+            "enforce_eager": "",
+            "disable_log_stats": "",
+        },
+        benchmark_type="throughput",
+        vllm_worktree=str(worktree),
+    )
+
+    assert normalized["model"] == "/data/models/qwen"
+    assert normalized["dtype"] == "float16"
+    assert normalized["tensor_parallel_size"] == 1
+    assert normalized["trust_remote_code"] == ""
+    assert normalized["enforce_eager"] == ""
+    assert "host" not in normalized
+    assert "port" not in normalized
+    assert "disable_log_stats" not in normalized
+    assert "num_warmups" not in normalized
+    assert normalized["dataset_path"] == str(worktree / "benchmarks" / "sonnet.txt")
 
 
 def test_normalize_server_parameters_parses_limit_mm_per_prompt() -> None:
