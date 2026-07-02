@@ -41,8 +41,8 @@ TORCHVISION_VERSION="0.24.0"
 TORCHAUDIO_VERSION="2.9.0"
 SETUPTOOLS_VERSION="80.9.0"
 SOC_VERSION="${SOC_VERSION:-ascend910b2}"
-ASCEND_TOOLKIT_SET_ENV="/usr/local/Ascend/ascend-toolkit/set_env.sh"
-ASCEND_ATB_SET_ENV="/usr/local/Ascend/nnal/atb/set_env.sh"
+ASCEND_TOOLKIT_SET_ENV="${ASCEND_TOOLKIT_SET_ENV:-/usr/local/Ascend/ascend-toolkit/set_env.sh}"
+ASCEND_ATB_SET_ENV="${ASCEND_ATB_SET_ENV:-/usr/local/Ascend/nnal/atb/set_env.sh}"
 SKIP_MODEL=0
 # ---------- end configurable ----------
 
@@ -123,6 +123,7 @@ OFFICIAL_TORCH_NPU_VERSION="$TORCH_NPU_VERSION" \
 OFFICIAL_TORCHVISION_VERSION="$TORCHVISION_VERSION" \
 OFFICIAL_TORCHAUDIO_VERSION="$TORCHAUDIO_VERSION" \
 OFFICIAL_SETUPTOOLS_VERSION="$SETUPTOOLS_VERSION" \
+SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD="${SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD:-0}" \
 SKIP_BENCHMARK_RESIDUAL_CLEANUP="1" \
 VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
 bash "$PREPARE_SCRIPT"
@@ -164,9 +165,11 @@ log "Step 3/3: Running health check (including C extension ops)..."
   cd /tmp
   source_ascend_env
   PYTHONPATH="$VLLM_ASCEND_WORKTREE:$VLLM_WORKTREE${PYTHONPATH:+:$PYTHONPATH}" \
+  SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD="${SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD:-0}" \
   VLLM_CACHE_ROOT="$REPO_ROOT/.cache/official-v0180" \
   "$PYTHON" - <<'PY' 2>&1
 import importlib.metadata as md
+import os
 import pkg_resources
 import torch
 import torch_npu
@@ -186,11 +189,14 @@ import transformers
 print(f'  transformers: {transformers.__version__}')
 
 # Verify C extension ops are properly registered (LTO fix validation)
-from vllm_ascend.utils import enable_custom_op
-enable_custom_op()
-assert hasattr(torch.ops._C_ascend, 'npu_apply_top_k_top_p'), \
-    "FATAL: npu_apply_top_k_top_p not registered! C extension built with LTO stripping constructors."
-print(f'  C extension: torch.ops._C_ascend.npu_apply_top_k_top_p = OK')
+if os.environ.get("SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD") == "1":
+    print("  C extension: skipped by SKIP_OFFICIAL_ASCEND_C_EXTENSION_BUILD=1")
+else:
+    from vllm_ascend.utils import enable_custom_op
+    enable_custom_op()
+    assert hasattr(torch.ops._C_ascend, 'npu_apply_top_k_top_p'), \
+        "FATAL: npu_apply_top_k_top_p not registered! C extension built with LTO stripping constructors."
+    print(f'  C extension: torch.ops._C_ascend.npu_apply_top_k_top_p = OK')
 print()
 print('  Health check PASSED.')
 PY
