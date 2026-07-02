@@ -1,38 +1,38 @@
 {
-  "entry_id": "a0d75a76-eb10-46d9-8692-91bf8f221860",
+  "entry_id": "bfa47027-0b1f-4c5f-b4a6-a6f5c7dcb4b4",
   "engine": "vllm-hust",
-  "engine_version": "v0.20.1rc0-532-gdcc06b18f3",
-  "config_type": "single_gpu",
+  "engine_version": "v0.20.1rc0-535-gceec19abb0",
+  "config_type": "multi_gpu",
   "hardware": {
     "vendor": "Huawei",
     "chip_model": "910B2",
-    "chip_count": 1,
+    "chip_count": 2,
     "interconnect": "unknown",
     "memory_per_chip_gb": 64.0,
-    "total_memory_gb": 64.0
+    "total_memory_gb": 128.0
   },
   "model": {
-    "canonical_id": "hf:Qwen/Qwen2.5-Coder-14B-Instruct",
-    "repo_id": "Qwen/Qwen2.5-Coder-14B-Instruct",
-    "short_name": "Qwen2.5-Coder-14B-Instruct",
-    "display_name": "Qwen2.5-Coder-14B-Instruct",
-    "name": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+    "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+    "short_name": "Qwen2.5-14B-Instruct",
+    "display_name": "Qwen2.5-14B-Instruct",
+    "name": "Qwen/Qwen2.5-14B-Instruct",
     "parameters": "14B",
     "precision": "FP16",
     "quantization": null
   },
   "workload": {
-    "name": "instructcoder-online",
-    "input_length": 1024,
+    "name": "prefix-repetition-online-2chip",
+    "input_length": 4096,
     "output_length": 256,
     "batch_size": null,
     "concurrent_requests": null,
-    "dataset": "hf"
+    "dataset": "prefix_repetition"
   },
   "metrics": {
-    "ttft_ms": 298.6185737785263,
-    "tbt_ms": 56.95034911189985,
-    "throughput_tps": 165.85006567273763,
+    "ttft_ms": 10904.754600560991,
+    "tbt_ms": 71.10393476240486,
+    "throughput_tps": 203.8604142316974,
     "peak_mem_mb": 0,
     "error_rate": 0.0
   },
@@ -41,7 +41,7 @@
     "accountable_scope": {
       "domestic_chip_class": "Ascend-class",
       "representative_model_band": "7B-13B",
-      "representative_business_scenario": "code-assistant",
+      "representative_business_scenario": "long-context-chat",
       "baseline_engine": "",
       "declared_baseline_engine": "vllm",
       "baseline_status": "pending-baseline",
@@ -55,10 +55,10 @@
       "typical_tpot_reduction_pct_vs_baseline": null,
       "long_context_length": null,
       "long_context_throughput_stable": true,
-      "long_context_ttft_p95_ms": 592.7768719149743,
-      "long_context_ttft_p99_ms": 2654.7838649200266,
+      "long_context_ttft_p95_ms": 24526.953982259143,
+      "long_context_ttft_p99_ms": 26853.391058512498,
       "long_context_tpot_p95_ms": null,
-      "long_context_tpot_p99_ms": 62.59986118260474,
+      "long_context_tpot_p99_ms": 84.4638817459418,
       "long_context_ttft_p95_stable": true,
       "long_context_ttft_p99_stable": true,
       "long_context_tpot_p95_stable": null,
@@ -71,7 +71,7 @@
   "versions": {
     "protocol": "N/A",
     "backend": "N/A",
-    "core": "0.20.1rc0-532-gdcc06b18f3",
+    "core": "0.20.1rc0-535-gceec19abb0",
     "benchmark": "0.1.0"
   },
   "environment": {
@@ -83,17 +83,17 @@
     "driver_version": null
   },
   "metadata": {
-    "submitted_at": "2026-07-02T14:37:25Z",
-    "submitter": "historical-pr-backfill-noeager",
+    "submitted_at": "2026-07-02T15:51:29Z",
+    "submitter": "historical-pr-backfill",
     "data_source": "real-online-historical-pr-backfill",
     "engine": "vllm-hust",
-    "engine_version": "v0.20.1rc0-532-gdcc06b18f3",
+    "engine_version": "v0.20.1rc0-535-gceec19abb0",
     "reproducible_cmd": null,
-    "git_commit": "dcc06b18f32404abafe6922910117f1b9f66054b",
+    "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
     "github_user": "Shuhao Zhang (Tony)",
-    "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/dcc06b18f32404abafe6922910117f1b9f66054b",
+    "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
     "github_repository": "vLLM-HUST/vllm-hust",
-    "github_ref": "align-perfgate-baseline-spec-source",
+    "github_ref": "audit-rerun-ceec19-d40e-2chip",
     "github_event_name": null,
     "github_pr_number": null,
     "github_pr_url": null,
@@ -101,59 +101,62 @@
     "changelog_url": null,
     "notes": null,
     "verified": null,
-    "idempotency_key": "3081067864b7381aff27899f56cf9c73b724d73e96f69bd3469b4537d21619c7",
+    "idempotency_key": "996fdf42028d217e7af010bbdc2f856f0069638529c28855c7f74dfbfef854cf",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
       "python": "/home/shuhao/miniconda3/envs/vllm-hust-dev/bin/python",
       "engine": {
         "repository": "vLLM-HUST/vllm-hust",
-        "ref": "align-perfgate-baseline-spec-source",
-        "commit": "dcc06b18f32404abafe6922910117f1b9f66054b"
+        "ref": "audit-rerun-ceec19-d40e-2chip",
+        "commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad"
       },
       "plugin": {
         "engine": "vllm-ascend-hust",
         "repository": "vLLM-HUST/vllm-ascend-hust",
-        "ref": "51e577b17b46babba210858686d577161296a420",
-        "commit": "51e577b17b46babba210858686d577161296a420"
+        "ref": "d40e28c3482588b86beef3612212320d4b23d4c7",
+        "commit": "d40e28c3482588b86beef3612212320d4b23d4c7"
       }
     }
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
-    "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
-    "spec_label": "Official Ascend Jan 2026 InstructCoder online baseline for vllm-hust goal tracking",
-    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
-    "scenario": "instructcoder-online",
-    "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
+    "spec_label": "Official Ascend Jan 2026 prefix repetition online baseline for vllm-hust goal tracking",
+    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-2chip-910b2.json",
+    "scenario": "prefix-repetition-online-2chip",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
     "model_precision": "FP16",
     "model_quantization": "",
     "hardware_vendor": "Huawei",
     "hardware_chip_model": "910B2",
-    "chip_count": 1,
+    "chip_count": 2,
     "node_count": 1,
-    "resolved_spec_hash": "4c318a855603082fb2a6734eb3a210b350c428731f155ebe1539322f32661d9a",
+    "resolved_spec_hash": "c1d04eeac1c9ee6c113430955d59ee368e7b5b617d33b4fea4c09754baf11f46",
     "resolved_server_parameters": {
-      "tensor_parallel_size": 1,
+      "tensor_parallel_size": 2,
       "enforce_eager": "",
       "trust_remote_code": "",
       "disable_log_stats": "",
       "disable_log_requests": "",
       "host": "0.0.0.0",
-      "port": 8063,
-      "model": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct",
+      "port": 8092,
+      "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
       "dtype": "float16"
     },
     "resolved_client_parameters": {
       "backend": "vllm",
       "endpoint": "/v1/completions",
-      "dataset_name": "hf",
-      "dataset_path": "likaixin/InstructCoder",
-      "num_prompts": 2048,
+      "dataset_name": "prefix_repetition",
+      "num_prompts": 200,
       "request_rate": 1,
       "host": "127.0.0.1",
-      "port": 8063,
-      "model": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct"
+      "port": 8092,
+      "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+      "prefix_repetition_output_len": 256,
+      "prefix_repetition_num_prefixes": 10,
+      "prefix_repetition_suffix_len": 256,
+      "prefix_repetition_prefix_len": 3840
     }
   }
 }

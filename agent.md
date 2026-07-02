@@ -40,6 +40,13 @@ compatibility shortcut.
 
 - Do not fabricate, replay, simulate, or manually edit benchmark metrics to make
   leaderboard lines look better. Submissions must come from real runs.
+- Do not use `--enforce-eager` for formal leaderboard data, official baselines,
+  historical PR backfills, or website-facing snapshots. Do not enable eager mode
+  through wrapper flags, environment variables, empty same-spec fields, retry
+  fallbacks, or generated argument lists. If graph-mode serving cannot run, mark
+  the experiment failed or blocked instead of publishing an eager fallback.
+  Eager mode is allowed only for separately labelled diagnostic runs that never
+  mix into public leaderboard snapshots.
 - All real submissions must preserve full provenance: engine, package versions,
   git commit or PR number, workload, model identity, precision, chip model,
   chip count, node count, same-spec id/hash, server parameters, client
@@ -73,4 +80,3 @@ compatibility shortcut.
   test that checks the intended path.
 - If you change a hardware label or precision, update documentation explaining
   why the new value is verified and where the evidence came from.
-
