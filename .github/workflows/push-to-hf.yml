@@ -170,6 +170,23 @@ jobs:
           manual_submission_dirs = os.environ.get("MANUAL_SUBMISSION_DIRS", "")
           submissions_root = Path("submissions")
 
+          def collect_submission_dirs_from_diff(diff_args: list[str]) -> list[str]:
+              diff_output = subprocess.check_output(diff_args, text=True)
+              resolved_dirs: list[str] = []
+              seen: set[str] = set()
+              for raw_path in diff_output.splitlines():
+                  path = Path(raw_path.strip())
+                  if len(path.parts) < 2 or path.parts[0] != "submissions":
+                      continue
+                  candidate = submissions_root / path.parts[1]
+                  manifest = candidate / "leaderboard_manifest.json"
+                  if manifest.is_file():
+                      resolved = str(candidate.resolve())
+                      if resolved not in seen:
+                          seen.add(resolved)
+                          resolved_dirs.append(resolved)
+              return resolved_dirs
+
           submission_dirs: list[str] = []
           if backfill_existing_only:
               print("Backfill existing-only mode enabled; skipping local submission directory resolution.")
@@ -189,22 +206,16 @@ jobs:
                           seen.add(resolved)
                           submission_dirs.append(resolved)
           elif event_name == "push" and before_sha and current_sha and before_sha != "0000000000000000000000000000000000000000":
-              diff_output = subprocess.check_output(
-                  ["git", "diff", "--name-only", before_sha, current_sha, "--", "submissions"],
-                  text=True,
-              )
-              seen: set[str] = set()
-              for raw_path in diff_output.splitlines():
-                  path = Path(raw_path.strip())
-                  if len(path.parts) < 2 or path.parts[0] != "submissions":
-                      continue
-                  candidate = submissions_root / path.parts[1]
-                  manifest = candidate / "leaderboard_manifest.json"
-                  if manifest.is_file():
-                      resolved = str(candidate.resolve())
-                      if resolved not in seen:
-                          seen.add(resolved)
-                          submission_dirs.append(resolved)
+              diff_args = ["git", "diff", "--name-only", before_sha, current_sha, "--", "submissions"]
+              try:
+                  submission_dirs = collect_submission_dirs_from_diff(diff_args)
+              except subprocess.CalledProcessError:
+                  fallback_args = ["git", "diff", "--name-only", "origin/main...HEAD", "--", "submissions"]
+                  print(
+                      f"Unable to diff push range {before_sha}..{current_sha}; "
+                      "falling back to origin/main...HEAD."
+                  )
+                  submission_dirs = collect_submission_dirs_from_diff(fallback_args)
           else:
               submission_dirs = [str(path.parent.resolve()) for path in sorted(submissions_root.rglob("leaderboard_manifest.json"))]
 
