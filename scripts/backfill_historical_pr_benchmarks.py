@@ -40,16 +40,6 @@ DEV_HUB_SECRET_ENV_KEYS = (
     "VLLM_ENGINE_API_KEY",
     "OPENAI_API_KEY",
 )
-SUSPECT_TARGET_REFS = (
-    {
-        "core_ref": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
-        "plugin_ref": "c56ccf1e778b59bb7f29bba2152c453ab162811f",
-        "reason": (
-            "archived 2026-07-03: prefix-repetition metadata/same-spec mismatch; "
-            "clean graph-mode rerun fails during vllm_ascend.ops import"
-        ),
-    },
-)
 
 
 @dataclass(frozen=True)
@@ -261,21 +251,6 @@ def load_plan(plan_file: Path, *, default_plugin_ref: str = "main") -> list[Targ
             )
         )
     return parsed
-
-
-def _ref_matches(value: str, suspect: str) -> bool:
-    left = str(value or "").strip()
-    right = str(suspect or "").strip()
-    return bool(left and right and (left.startswith(right) or right.startswith(left)))
-
-
-def suspect_target_reason(target: TargetRef) -> str | None:
-    for suspect in SUSPECT_TARGET_REFS:
-        if _ref_matches(target.core_ref, suspect["core_ref"]) and _ref_matches(
-            target.plugin_ref, suspect["plugin_ref"]
-        ):
-            return str(suspect["reason"])
-    return None
 
 
 def discover_targets_from_git(
@@ -1042,19 +1017,6 @@ def main() -> int:
                 notes="current core HEAD",
             )
         ]
-
-    allowed_targets: list[TargetRef] = []
-    for target in targets:
-        suspect_reason = suspect_target_reason(target)
-        if suspect_reason:
-            print(
-                f"[backfill] skip suspect target: {target.label} "
-                f"({target.core_ref[:12]} / {target.plugin_ref[:12]}): "
-                f"{suspect_reason}"
-            )
-            continue
-        allowed_targets.append(target)
-    targets = allowed_targets
 
     specs = collect_official_specs(
         args.spec_dir.resolve(),
