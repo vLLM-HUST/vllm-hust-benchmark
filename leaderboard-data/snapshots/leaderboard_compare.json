@@ -1,11 +1,11 @@
 {
   "schema_version": "leaderboard-compare-snapshot/v1",
-  "generated_at": "2026-07-03T03:18:16.089260+00:00",
+  "generated_at": "2026-07-03T10:07:33.336539+00:00",
   "group_count": 19,
   "preferred_pair_count": 19,
   "groups": [
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -189,7 +189,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -285,44 +285,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "273863db-1c8b-4276-b8c7-ee57e8431f5b",
-          "submitted_at": "2026-07-02T04:25:53Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
-            "resolved_spec_hash": "6e6c49bde94d8d7f758d1ba4609208f156b598d0ecc614738a6cdfa251d351a2"
-          },
-          "metrics": {
-            "ttft_ms": 7210.49353799026,
-            "tbt_ms": 117.16129361499469,
-            "throughput_tps": 110.05229832506572,
-            "output_throughput_tps": 110.05229832506572,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 17063.72128133662,
-            "long_context_ttft_p99_ms": 17413.525149584748,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 123.86615950450776,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "da84b1fc-f351-40ea-b7db-ec2caa430865",
@@ -360,20 +322,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "273863db-1c8b-4276-b8c7-ee57e8431f5b",
+          "submitted_at": "2026-07-02T04:25:53Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
+            "resolved_spec_hash": "6e6c49bde94d8d7f758d1ba4609208f156b598d0ecc614738a6cdfa251d351a2"
+          },
+          "metrics": {
+            "ttft_ms": 7210.49353799026,
+            "tbt_ms": 117.16129361499469,
+            "throughput_tps": 110.05229832506572,
+            "output_throughput_tps": 110.05229832506572,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 17063.72128133662,
+            "long_context_ttft_p99_ms": 17413.525149584748,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 123.86615950450776,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -9.0465,
-          "ttft_pct_left_vs_right": 2158.4057,
-          "tbt_pct_left_vs_right": -4.3004
+          "throughput_pct_left_vs_right": 9.9463,
+          "ttft_pct_left_vs_right": -95.5721,
+          "tbt_pct_left_vs_right": 4.4937
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "left"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -557,7 +557,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|prefix-repetition-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -653,44 +653,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "bfa47027-0b1f-4c5f-b4a6-a6f5c7dcb4b4",
-          "submitted_at": "2026-07-02T15:51:29Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
-            "resolved_spec_hash": "c1d04eeac1c9ee6c113430955d59ee368e7b5b617d33b4fea4c09754baf11f46"
-          },
-          "metrics": {
-            "ttft_ms": 10904.754600560991,
-            "tbt_ms": 71.10393476240486,
-            "throughput_tps": 203.8604142316974,
-            "output_throughput_tps": 203.8604142316974,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 24526.953982259143,
-            "long_context_ttft_p99_ms": 26853.391058512498,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 84.4638817459418,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "191c0ce0-8510-4a54-a3f9-2143130f7be6",
@@ -728,20 +690,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "bfa47027-0b1f-4c5f-b4a6-a6f5c7dcb4b4",
+          "submitted_at": "2026-07-02T15:51:29Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
+            "resolved_spec_hash": "c1d04eeac1c9ee6c113430955d59ee368e7b5b617d33b4fea4c09754baf11f46"
+          },
+          "metrics": {
+            "ttft_ms": 10904.754600560991,
+            "tbt_ms": 71.10393476240486,
+            "throughput_tps": 203.8604142316974,
+            "output_throughput_tps": 203.8604142316974,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 24526.953982259143,
+            "long_context_ttft_p99_ms": 26853.391058512498,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 84.4638817459418,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -6.5183,
-          "ttft_pct_left_vs_right": 3062.8642,
-          "tbt_pct_left_vs_right": -36.9862
+          "throughput_pct_left_vs_right": 6.9728,
+          "ttft_pct_left_vs_right": -96.8383,
+          "tbt_pct_left_vs_right": 58.6955
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "left"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|prefix-repetition-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -837,44 +837,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "09c506de-e5da-4212-bb90-1415673c5463",
-          "submitted_at": "2026-07-02T04:36:31Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
-            "resolved_spec_hash": "f15ebe6780f7aef9f9f8291db066ab2dcec5004723b81d4275cfbf9f04259e64"
-          },
-          "metrics": {
-            "ttft_ms": 88196.32630861248,
-            "tbt_ms": 124.533990332442,
-            "throughput_tps": 118.25853545926961,
-            "output_throughput_tps": 118.25853545926961,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 175392.59127280675,
-            "long_context_ttft_p99_ms": 185654.41439592038,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 144.7854638759972,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "3383cf19-a4dd-41a3-a62e-68235c940e26",
@@ -912,20 +874,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "09c506de-e5da-4212-bb90-1415673c5463",
+          "submitted_at": "2026-07-02T04:36:31Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
+            "resolved_spec_hash": "f15ebe6780f7aef9f9f8291db066ab2dcec5004723b81d4275cfbf9f04259e64"
+          },
+          "metrics": {
+            "ttft_ms": 88196.32630861248,
+            "tbt_ms": 124.533990332442,
+            "throughput_tps": 118.25853545926961,
+            "output_throughput_tps": 118.25853545926961,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 175392.59127280675,
+            "long_context_ttft_p99_ms": 185654.41439592038,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 144.7854638759972,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -45.2947,
-          "ttft_pct_left_vs_right": 24770.3625,
-          "tbt_pct_left_vs_right": 2.2826
+          "throughput_pct_left_vs_right": 82.7976,
+          "ttft_pct_left_vs_right": -99.5979,
+          "tbt_pct_left_vs_right": -2.2317
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "right"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "left"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|prefix-repetition-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -1059,57 +1059,57 @@
           }
         },
         "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "d320aedc-6bbb-40bc-8dfe-07d1dbc8aaac",
-          "submitted_at": "2026-06-03T18:16:20Z",
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-460-gf273f9c5e2",
+          "entry_id": "052e97c4-cfc3-483f-8953-9862f576e070",
+          "submitted_at": "2026-07-02T16:02:44Z",
           "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-            "resolved_spec_hash": "bf91964dedd11af753de9fa69a78c187810bc34a74cbb7eb7d896a372aa9452a"
+            "resolved_spec_hash": "61631866a6b54f329d84fcc2a263b9e3401e632cea76fb6e45d417aec7bd15cc"
           },
           "metrics": {
-            "ttft_ms": 8260.135450431417,
-            "tbt_ms": 105.09351418081553,
-            "throughput_tps": 199.6803911992217,
-            "output_throughput_tps": 199.6803911992217,
-            "error_rate": 0.005
+            "ttft_ms": 10710.221404698677,
+            "tbt_ms": 106.90380520397831,
+            "throughput_tps": 146.0920011031212,
+            "output_throughput_tps": 146.0920011031212,
+            "error_rate": 0.0
           },
           "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 16485.191681724973,
+            "long_context_ttft_p99_ms": 19856.36991304577,
             "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
+            "long_context_tpot_p99_ms": 278.30695041397115,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
             "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
           }
         },
         "deltas": {
-          "throughput_pct_left_vs_right": -21.4191,
-          "ttft_pct_left_vs_right": 38.9344,
-          "tbt_pct_left_vs_right": -4.8277
+          "throughput_pct_left_vs_right": 7.4054,
+          "ttft_pct_left_vs_right": 7.1516,
+          "tbt_pct_left_vs_right": -6.4394
         },
         "winners": {
-          "throughput": "right",
+          "throughput": "left",
           "ttft": "right",
           "tbt": "left"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-latency|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-latency|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -1206,18 +1206,18 @@
       "preferred_pair": {
         "left": {
           "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "d54941e2-47b4-4aba-9f0d-018eb13b6db1",
-          "submitted_at": "2026-07-01T14:50:49Z",
+          "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+          "entry_id": "83a812e9-5af5-4c2f-8acb-152cc347e0be",
+          "submitted_at": "2026-05-06T02:29:22Z",
           "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "github_repository": null,
+          "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
-            "resolved_spec_hash": "a1922190dcc0f8d2fe39c68662f4467f04428ae67f3a3b18603b47305160413c"
+            "resolved_spec_hash": "32413cf16410685d43610e6d5363b3ba38917c21f3a2bf421dd6052b0039d100"
           },
           "metrics": {
-            "ttft_ms": 6874.877021748884,
+            "ttft_ms": 9728.982931002975,
             "tbt_ms": 0.0,
             "throughput_tps": 0.0,
             "output_throughput_tps": 0.0,
@@ -1229,7 +1229,7 @@
             "typical_ttft_reduction_pct_vs_baseline": null,
             "typical_tpot_reduction_pct_vs_baseline": null,
             "long_context_length": null,
-            "long_context_throughput_stable": false,
+            "long_context_throughput_stable": null,
             "long_context_ttft_p95_ms": null,
             "long_context_ttft_p99_ms": null,
             "long_context_tpot_p95_ms": null,
@@ -1282,7 +1282,7 @@
         },
         "deltas": {
           "throughput_pct_left_vs_right": null,
-          "ttft_pct_left_vs_right": -44.7808,
+          "ttft_pct_left_vs_right": -21.8566,
           "tbt_pct_left_vs_right": null
         },
         "winners": {
@@ -1293,7 +1293,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -1477,7 +1477,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -1573,44 +1573,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "935fd97a-1fee-4d8e-9ade-908a5821da97",
-          "submitted_at": "2026-07-02T04:46:50Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
-            "resolved_spec_hash": "9ac40d05cabbad50f3ce18aeb6dae80da6e976b1db1bbd11922fe230aec96f4c"
-          },
-          "metrics": {
-            "ttft_ms": 83971.91407308681,
-            "tbt_ms": 117.13496873561549,
-            "throughput_tps": 128.0867355414647,
-            "output_throughput_tps": 128.0867355414647,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 157511.31031686673,
-            "long_context_ttft_p99_ms": 172194.68938408187,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 119.10051600914448,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "6f71ae01-0b3e-4683-b13b-4329c4d96aa9",
@@ -1648,20 +1610,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "935fd97a-1fee-4d8e-9ade-908a5821da97",
+          "submitted_at": "2026-07-02T04:46:50Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
+            "resolved_spec_hash": "9ac40d05cabbad50f3ce18aeb6dae80da6e976b1db1bbd11922fe230aec96f4c"
+          },
+          "metrics": {
+            "ttft_ms": 83971.91407308681,
+            "tbt_ms": 117.13496873561549,
+            "throughput_tps": 128.0867355414647,
+            "output_throughput_tps": 128.0867355414647,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 157511.31031686673,
+            "long_context_ttft_p99_ms": 172194.68938408187,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 119.10051600914448,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -40.1155,
-          "ttft_pct_left_vs_right": 24719.4343,
-          "tbt_pct_left_vs_right": -7.2246
+          "throughput_pct_left_vs_right": 66.988,
+          "ttft_pct_left_vs_right": -99.5971,
+          "tbt_pct_left_vs_right": 7.7872
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "left"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -1795,57 +1795,57 @@
           }
         },
         "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "bbd407e5-00b1-4f8a-9a3d-e0592efcba22",
-          "submitted_at": "2026-06-03T18:33:53Z",
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-460-gf273f9c5e2",
+          "entry_id": "774b96b7-95a4-4d85-b69d-f18ee9eb21cd",
+          "submitted_at": "2026-07-02T16:02:31Z",
           "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
-            "resolved_spec_hash": "245580fc65876969225df96070c89551590bcd0a2b39228fab9384520dcbbdcf"
+            "resolved_spec_hash": "fe96e51c305c87add96b7716716f3ee04b98f93d51d907de97d4058eb16aea9b"
           },
           "metrics": {
-            "ttft_ms": 268.78517493081745,
-            "tbt_ms": 95.26832097792979,
-            "throughput_tps": 228.1495394644097,
-            "output_throughput_tps": 228.1495394644097,
+            "ttft_ms": 2243.397351723397,
+            "tbt_ms": 55.8324628194301,
+            "throughput_tps": 236.86996143257514,
+            "output_throughput_tps": 236.86996143257514,
             "error_rate": 0.0
           },
           "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 7075.602195505052,
+            "long_context_ttft_p99_ms": 8370.354929291641,
             "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
+            "long_context_tpot_p99_ms": 58.21057147737228,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
             "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
           }
         },
         "deltas": {
-          "throughput_pct_left_vs_right": 3.9502,
-          "ttft_pct_left_vs_right": 523.7924,
-          "tbt_pct_left_vs_right": -42.7617
+          "throughput_pct_left_vs_right": 0.1232,
+          "ttft_pct_left_vs_right": -25.2624,
+          "tbt_pct_left_vs_right": -2.3329
         },
         "winners": {
           "throughput": "left",
-          "ttft": "right",
+          "ttft": "left",
           "tbt": "left"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -2029,7 +2029,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -2125,44 +2125,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "dddcc249-e90e-489a-9fc7-d2daf919557d",
-          "submitted_at": "2026-07-02T04:56:28Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
-            "resolved_spec_hash": "edfe4ba54abd2e9b152f215ed951417a38b9ea52a6c118f9692c1e744ea07489"
-          },
-          "metrics": {
-            "ttft_ms": 44291.44202603027,
-            "tbt_ms": 115.89577355798805,
-            "throughput_tps": 116.0104504768203,
-            "output_throughput_tps": 116.0104504768203,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 96730.10548339225,
-            "long_context_ttft_p99_ms": 99591.15738383027,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 128.59861840214154,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "c6689556-63fe-427b-aa83-b662d0371aa1",
@@ -2200,20 +2162,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "dddcc249-e90e-489a-9fc7-d2daf919557d",
+          "submitted_at": "2026-07-02T04:56:28Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
+            "resolved_spec_hash": "edfe4ba54abd2e9b152f215ed951417a38b9ea52a6c118f9692c1e744ea07489"
+          },
+          "metrics": {
+            "ttft_ms": 44291.44202603027,
+            "tbt_ms": 115.89577355798805,
+            "throughput_tps": 116.0104504768203,
+            "output_throughput_tps": 116.0104504768203,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 96730.10548339225,
+            "long_context_ttft_p99_ms": 99591.15738383027,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 128.59861840214154,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -26.4186,
-          "ttft_pct_left_vs_right": 14316.2819,
-          "tbt_pct_left_vs_right": -1.6219
+          "throughput_pct_left_vs_right": 35.904,
+          "ttft_pct_left_vs_right": -99.3063,
+          "tbt_pct_left_vs_right": 1.6486
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "left"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -2310,6 +2310,44 @@
       "preferred_pair": {
         "left": {
           "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-464-g51621c35bc",
+          "entry_id": "e1a72d14-9be2-4905-99ba-d02702429ba4",
+          "submitted_at": "2026-07-02T16:03:14Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "51621c35bcce749cc34539bc1a48d32f264924a0",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+            "resolved_spec_hash": "ba078928e4cd2b19a7b1dafc7bec52b62607fe777b7df346f458518095594d31"
+          },
+          "metrics": {
+            "ttft_ms": 219.03118476853706,
+            "tbt_ms": 51.84033422118267,
+            "throughput_tps": 192.14834443973996,
+            "output_throughput_tps": 192.14834443973996,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 247.06989369587967,
+            "long_context_ttft_p99_ms": 678.3852224936574,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 62.67879993059775,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
+        "right": {
+          "engine": "vllm-hust",
           "engine_version": "v0.20.1rc0-486-g7a63f81e86",
           "entry_id": "3b3c0134-b988-45ec-8175-a69183b8db94",
           "submitted_at": "2026-07-02T16:15:40Z",
@@ -2346,58 +2384,20 @@
             "multi_tenant_high_utilization": null
           }
         },
-        "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "fd320f6d-1c42-4d9a-8943-c80a2e064610",
-          "submitted_at": "2026-06-03T18:41:34Z",
-          "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
-            "resolved_spec_hash": "c0e8dba9570dd27e69a61439fd0ba75cc837677cfcec48dd39ff505cf41478e9"
-          },
-          "metrics": {
-            "ttft_ms": 248.15935311315116,
-            "tbt_ms": 96.44200152610334,
-            "throughput_tps": 173.62097648101778,
-            "output_throughput_tps": 173.62097648101778,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
-          }
-        },
         "deltas": {
-          "throughput_pct_left_vs_right": 10.6633,
-          "ttft_pct_left_vs_right": -19.0144,
-          "tbt_pct_left_vs_right": -50.1909
+          "throughput_pct_left_vs_right": 0.0071,
+          "ttft_pct_left_vs_right": 8.9851,
+          "tbt_pct_left_vs_right": 7.9178
         },
         "winners": {
           "throughput": "left",
-          "ttft": "left",
-          "tbt": "left"
+          "ttft": "right",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -2495,6 +2495,44 @@
         "left": {
           "engine": "vllm-hust",
           "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "2eef75a0-e0ff-4320-929f-2bddf4f64864",
+          "submitted_at": "2026-07-01T14:53:49Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+            "resolved_spec_hash": "6f28e08d59cfa3b348e36fcb285995a43109112f7fe8036712e756cdffc0b76f"
+          },
+          "metrics": {
+            "ttft_ms": 0.0,
+            "tbt_ms": 0.0,
+            "throughput_tps": 1567.6813763333623,
+            "output_throughput_tps": 1567.6813763333623,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": false,
+            "long_context_ttft_p95_ms": null,
+            "long_context_ttft_p99_ms": null,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": null,
+            "long_context_ttft_p95_stable": null,
+            "long_context_ttft_p99_stable": null,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": null,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
           "entry_id": "f2cdc01c-ae1b-4809-a579-de6899542c03",
           "submitted_at": "2026-07-02T09:46:40Z",
           "canonical_path": null,
@@ -2530,46 +2568,8 @@
             "multi_tenant_high_utilization": null
           }
         },
-        "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "99ca704d-a2cc-49f0-af44-76da3ce1cf47",
-          "submitted_at": "2026-06-03T18:45:27Z",
-          "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
-            "resolved_spec_hash": "08890fb3f8c5f876afbd603d07404d7cd56ac10f74de3b6480697d03ae38ca1c"
-          },
-          "metrics": {
-            "ttft_ms": 0.0,
-            "tbt_ms": 0.0,
-            "throughput_tps": 1040.430211813821,
-            "output_throughput_tps": 1040.430211813821,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
-          }
-        },
         "deltas": {
-          "throughput_pct_left_vs_right": 2.5735,
+          "throughput_pct_left_vs_right": 46.8959,
           "ttft_pct_left_vs_right": null,
           "tbt_pct_left_vs_right": null
         },
@@ -2581,7 +2581,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -2765,7 +2765,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -2949,7 +2949,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -3046,21 +3046,21 @@
       "preferred_pair": {
         "left": {
           "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-601-g83cf83ff20",
-          "entry_id": "ccff4651-b107-4a3a-946e-1b8ad8c09c48",
-          "submitted_at": "2026-07-02T09:28:43Z",
+          "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+          "entry_id": "05e8e92c-d74e-483f-a845-f387ca3d8715",
+          "submitted_at": "2026-05-06T02:29:22Z",
           "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "83cf83ff20a880d70b6ba916977c49304d598d9c",
+          "github_repository": null,
+          "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
-            "resolved_spec_hash": "41236e381ac0c80d58f36c60bfba40176afc17225c3e5b17c3d06d6c4d6d6309"
+            "resolved_spec_hash": "b40e543c53135301cdad55b4c4e15609086dda1536fc2a1977f6fafa9a434d51"
           },
           "metrics": {
             "ttft_ms": 0.0,
             "tbt_ms": 0.0,
-            "throughput_tps": 4239.415489588993,
-            "output_throughput_tps": 4239.415489588993,
+            "throughput_tps": 2702.5481191603694,
+            "output_throughput_tps": 2702.5481191603694,
             "error_rate": 0.0
           },
           "constraints": {
@@ -3069,7 +3069,7 @@
             "typical_ttft_reduction_pct_vs_baseline": null,
             "typical_tpot_reduction_pct_vs_baseline": null,
             "long_context_length": null,
-            "long_context_throughput_stable": false,
+            "long_context_throughput_stable": null,
             "long_context_ttft_p95_ms": null,
             "long_context_ttft_p99_ms": null,
             "long_context_tpot_p95_ms": null,
@@ -3121,7 +3121,7 @@
           }
         },
         "deltas": {
-          "throughput_pct_left_vs_right": 124.116,
+          "throughput_pct_left_vs_right": 42.8698,
           "ttft_pct_left_vs_right": null,
           "tbt_pct_left_vs_right": null
         },
@@ -3133,7 +3133,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-Coder-14B-Instruct|910B2|FP16|instructcoder-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-Coder-14B-Instruct|910B2|FP16|none|instructcoder-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
@@ -3229,44 +3229,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-460-gf273f9c5e2",
-          "entry_id": "f1d74bd6-45ac-419f-8c0a-558ba484c067",
-          "submitted_at": "2026-07-03T02:03:36Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
-            "resolved_spec_hash": "22a3c6d23d451fb04d0276094a8d874993c6e581c96a225d4c442eeda368c55b"
-          },
-          "metrics": {
-            "ttft_ms": 241.03534614937416,
-            "tbt_ms": 49.49049293415358,
-            "throughput_tps": 169.6666727494001,
-            "output_throughput_tps": 169.6666727494001,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 311.79264078382346,
-            "long_context_ttft_p99_ms": 2195.667776234909,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 55.36377036269227,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "cd18f8ec-f598-4161-a6f7-b41b8b7329a7",
@@ -3304,20 +3266,58 @@
             "multi_tenant_high_utilization": false
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-441-g2206f1f7b",
+          "entry_id": "5d82a08d-6da0-491c-86af-3ebefa04c040",
+          "submitted_at": "2026-06-04T01:49:37Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+            "resolved_spec_hash": "cd594ec89da85940f5899b7a875e96b92999c3da56a02a94072d7d9ca9e9caf1"
+          },
+          "metrics": {
+            "ttft_ms": 239.36072860834656,
+            "tbt_ms": 92.02514726468495,
+            "throughput_tps": 125.3294783026658,
+            "output_throughput_tps": 125.3294783026658,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": 49.6,
+            "typical_throughput_ratio_vs_baseline": 1.0036352777929667,
+            "typical_ttft_reduction_pct_vs_baseline": -6.253978782311578,
+            "typical_tpot_reduction_pct_vs_baseline": 0.6978173569965187,
+            "long_context_length": 30720.0,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 27184.58087974577,
+            "long_context_ttft_p99_ms": 31084.884598635836,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 173.20170315814312,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": 31.90994468680953,
+            "multi_tenant_high_utilization": true
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": 34.8958,
-          "ttft_pct_left_vs_right": -2.8959,
-          "tbt_pct_left_vs_right": -47.9721
+          "throughput_pct_left_vs_right": 0.3563,
+          "ttft_pct_left_vs_right": 3.7028,
+          "tbt_pct_left_vs_right": 3.3662
         },
         "winners": {
           "throughput": "left",
-          "ttft": "left",
-          "tbt": "left"
+          "ttft": "right",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-VL-7B-Instruct|910B2|FP16|visionarena-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-VL-7B-Instruct|910B2|FP16|none|visionarena-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-VL-7B-Instruct",
@@ -3414,6 +3414,44 @@
       "preferred_pair": {
         "left": {
           "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "bb9e0f2f-02a9-4fdf-a329-81521e652610",
+          "submitted_at": "2026-07-01T18:03:50Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+            "resolved_spec_hash": "f4627019b64077d6d7bf8f3afc3890d0cb48dd3b96322c1b4013f975405b0aa3"
+          },
+          "metrics": {
+            "ttft_ms": 399.3004795203451,
+            "tbt_ms": 63.46882341786113,
+            "throughput_tps": 118.67675186272194,
+            "output_throughput_tps": 118.67675186272194,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 581.1091185081749,
+            "long_context_ttft_p99_ms": 869.7076083812861,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 78.88393544179462,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
+        "right": {
+          "engine": "vllm-hust",
           "engine_version": "v0.20.1rc0-521-g2fb7859dd0",
           "entry_id": "17cc2447-49fe-4369-b3c8-3dc57c6ccb58",
           "submitted_at": "2026-07-02T08:56:38Z",
@@ -3450,60 +3488,22 @@
             "multi_tenant_high_utilization": null
           }
         },
-        "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "c00bb0bf-84d0-4045-9c22-3f04803c1b9d",
-          "submitted_at": "2026-06-03T19:30:41Z",
-          "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
-            "resolved_spec_hash": "1b77107cbbabbb9880698c974516117163406a01e14c2afdcc6e83b63928da04"
-          },
-          "metrics": {
-            "ttft_ms": 1341.740622754895,
-            "tbt_ms": 66.69854310012335,
-            "throughput_tps": 113.73801469788552,
-            "output_throughput_tps": 113.73801469788552,
-            "error_rate": 0.001
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
-          }
-        },
         "deltas": {
-          "throughput_pct_left_vs_right": 2.6883,
-          "ttft_pct_left_vs_right": -68.9942,
-          "tbt_pct_left_vs_right": 0.285
+          "throughput_pct_left_vs_right": 1.6106,
+          "ttft_pct_left_vs_right": -4.0184,
+          "tbt_pct_left_vs_right": -5.1127
         },
         "winners": {
           "throughput": "left",
           "ttft": "left",
-          "tbt": "right"
+          "tbt": "left"
         }
       }
     }
   ],
   "preferred_pairs": [
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -3687,7 +3687,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -3783,44 +3783,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "273863db-1c8b-4276-b8c7-ee57e8431f5b",
-          "submitted_at": "2026-07-02T04:25:53Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
-            "resolved_spec_hash": "6e6c49bde94d8d7f758d1ba4609208f156b598d0ecc614738a6cdfa251d351a2"
-          },
-          "metrics": {
-            "ttft_ms": 7210.49353799026,
-            "tbt_ms": 117.16129361499469,
-            "throughput_tps": 110.05229832506572,
-            "output_throughput_tps": 110.05229832506572,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 17063.72128133662,
-            "long_context_ttft_p99_ms": 17413.525149584748,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 123.86615950450776,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "da84b1fc-f351-40ea-b7db-ec2caa430865",
@@ -3858,20 +3820,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "273863db-1c8b-4276-b8c7-ee57e8431f5b",
+          "submitted_at": "2026-07-02T04:25:53Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
+            "resolved_spec_hash": "6e6c49bde94d8d7f758d1ba4609208f156b598d0ecc614738a6cdfa251d351a2"
+          },
+          "metrics": {
+            "ttft_ms": 7210.49353799026,
+            "tbt_ms": 117.16129361499469,
+            "throughput_tps": 110.05229832506572,
+            "output_throughput_tps": 110.05229832506572,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 17063.72128133662,
+            "long_context_ttft_p99_ms": 17413.525149584748,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 123.86615950450776,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -9.0465,
-          "ttft_pct_left_vs_right": 2158.4057,
-          "tbt_pct_left_vs_right": -4.3004
+          "throughput_pct_left_vs_right": 9.9463,
+          "ttft_pct_left_vs_right": -95.5721,
+          "tbt_pct_left_vs_right": 4.4937
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "left"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -4055,7 +4055,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|prefix-repetition-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -4151,44 +4151,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "bfa47027-0b1f-4c5f-b4a6-a6f5c7dcb4b4",
-          "submitted_at": "2026-07-02T15:51:29Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
-            "resolved_spec_hash": "c1d04eeac1c9ee6c113430955d59ee368e7b5b617d33b4fea4c09754baf11f46"
-          },
-          "metrics": {
-            "ttft_ms": 10904.754600560991,
-            "tbt_ms": 71.10393476240486,
-            "throughput_tps": 203.8604142316974,
-            "output_throughput_tps": 203.8604142316974,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 24526.953982259143,
-            "long_context_ttft_p99_ms": 26853.391058512498,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 84.4638817459418,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "191c0ce0-8510-4a54-a3f9-2143130f7be6",
@@ -4226,20 +4188,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "bfa47027-0b1f-4c5f-b4a6-a6f5c7dcb4b4",
+          "submitted_at": "2026-07-02T15:51:29Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
+            "resolved_spec_hash": "c1d04eeac1c9ee6c113430955d59ee368e7b5b617d33b4fea4c09754baf11f46"
+          },
+          "metrics": {
+            "ttft_ms": 10904.754600560991,
+            "tbt_ms": 71.10393476240486,
+            "throughput_tps": 203.8604142316974,
+            "output_throughput_tps": 203.8604142316974,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 24526.953982259143,
+            "long_context_ttft_p99_ms": 26853.391058512498,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 84.4638817459418,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -6.5183,
-          "ttft_pct_left_vs_right": 3062.8642,
-          "tbt_pct_left_vs_right": -36.9862
+          "throughput_pct_left_vs_right": 6.9728,
+          "ttft_pct_left_vs_right": -96.8383,
+          "tbt_pct_left_vs_right": 58.6955
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "left"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|prefix-repetition-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -4335,44 +4335,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "09c506de-e5da-4212-bb90-1415673c5463",
-          "submitted_at": "2026-07-02T04:36:31Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
-            "resolved_spec_hash": "f15ebe6780f7aef9f9f8291db066ab2dcec5004723b81d4275cfbf9f04259e64"
-          },
-          "metrics": {
-            "ttft_ms": 88196.32630861248,
-            "tbt_ms": 124.533990332442,
-            "throughput_tps": 118.25853545926961,
-            "output_throughput_tps": 118.25853545926961,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 175392.59127280675,
-            "long_context_ttft_p99_ms": 185654.41439592038,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 144.7854638759972,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "3383cf19-a4dd-41a3-a62e-68235c940e26",
@@ -4410,20 +4372,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "09c506de-e5da-4212-bb90-1415673c5463",
+          "submitted_at": "2026-07-02T04:36:31Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
+            "resolved_spec_hash": "f15ebe6780f7aef9f9f8291db066ab2dcec5004723b81d4275cfbf9f04259e64"
+          },
+          "metrics": {
+            "ttft_ms": 88196.32630861248,
+            "tbt_ms": 124.533990332442,
+            "throughput_tps": 118.25853545926961,
+            "output_throughput_tps": 118.25853545926961,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 175392.59127280675,
+            "long_context_ttft_p99_ms": 185654.41439592038,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 144.7854638759972,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -45.2947,
-          "ttft_pct_left_vs_right": 24770.3625,
-          "tbt_pct_left_vs_right": 2.2826
+          "throughput_pct_left_vs_right": 82.7976,
+          "ttft_pct_left_vs_right": -99.5979,
+          "tbt_pct_left_vs_right": -2.2317
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "right"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "left"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|prefix-repetition-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -4557,57 +4557,57 @@
           }
         },
         "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "d320aedc-6bbb-40bc-8dfe-07d1dbc8aaac",
-          "submitted_at": "2026-06-03T18:16:20Z",
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-460-gf273f9c5e2",
+          "entry_id": "052e97c4-cfc3-483f-8953-9862f576e070",
+          "submitted_at": "2026-07-02T16:02:44Z",
           "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-            "resolved_spec_hash": "bf91964dedd11af753de9fa69a78c187810bc34a74cbb7eb7d896a372aa9452a"
+            "resolved_spec_hash": "61631866a6b54f329d84fcc2a263b9e3401e632cea76fb6e45d417aec7bd15cc"
           },
           "metrics": {
-            "ttft_ms": 8260.135450431417,
-            "tbt_ms": 105.09351418081553,
-            "throughput_tps": 199.6803911992217,
-            "output_throughput_tps": 199.6803911992217,
-            "error_rate": 0.005
+            "ttft_ms": 10710.221404698677,
+            "tbt_ms": 106.90380520397831,
+            "throughput_tps": 146.0920011031212,
+            "output_throughput_tps": 146.0920011031212,
+            "error_rate": 0.0
           },
           "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 16485.191681724973,
+            "long_context_ttft_p99_ms": 19856.36991304577,
             "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
+            "long_context_tpot_p99_ms": 278.30695041397115,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
             "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
           }
         },
         "deltas": {
-          "throughput_pct_left_vs_right": -21.4191,
-          "ttft_pct_left_vs_right": 38.9344,
-          "tbt_pct_left_vs_right": -4.8277
+          "throughput_pct_left_vs_right": 7.4054,
+          "ttft_pct_left_vs_right": 7.1516,
+          "tbt_pct_left_vs_right": -6.4394
         },
         "winners": {
-          "throughput": "right",
+          "throughput": "left",
           "ttft": "right",
           "tbt": "left"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-latency|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-latency|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -4704,18 +4704,18 @@
       "preferred_pair": {
         "left": {
           "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "d54941e2-47b4-4aba-9f0d-018eb13b6db1",
-          "submitted_at": "2026-07-01T14:50:49Z",
+          "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+          "entry_id": "83a812e9-5af5-4c2f-8acb-152cc347e0be",
+          "submitted_at": "2026-05-06T02:29:22Z",
           "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "github_repository": null,
+          "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
-            "resolved_spec_hash": "a1922190dcc0f8d2fe39c68662f4467f04428ae67f3a3b18603b47305160413c"
+            "resolved_spec_hash": "32413cf16410685d43610e6d5363b3ba38917c21f3a2bf421dd6052b0039d100"
           },
           "metrics": {
-            "ttft_ms": 6874.877021748884,
+            "ttft_ms": 9728.982931002975,
             "tbt_ms": 0.0,
             "throughput_tps": 0.0,
             "output_throughput_tps": 0.0,
@@ -4727,7 +4727,7 @@
             "typical_ttft_reduction_pct_vs_baseline": null,
             "typical_tpot_reduction_pct_vs_baseline": null,
             "long_context_length": null,
-            "long_context_throughput_stable": false,
+            "long_context_throughput_stable": null,
             "long_context_ttft_p95_ms": null,
             "long_context_ttft_p99_ms": null,
             "long_context_tpot_p95_ms": null,
@@ -4780,7 +4780,7 @@
         },
         "deltas": {
           "throughput_pct_left_vs_right": null,
-          "ttft_pct_left_vs_right": -44.7808,
+          "ttft_pct_left_vs_right": -21.8566,
           "tbt_pct_left_vs_right": null
         },
         "winners": {
@@ -4791,7 +4791,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -4975,7 +4975,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -5071,44 +5071,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "935fd97a-1fee-4d8e-9ade-908a5821da97",
-          "submitted_at": "2026-07-02T04:46:50Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
-            "resolved_spec_hash": "9ac40d05cabbad50f3ce18aeb6dae80da6e976b1db1bbd11922fe230aec96f4c"
-          },
-          "metrics": {
-            "ttft_ms": 83971.91407308681,
-            "tbt_ms": 117.13496873561549,
-            "throughput_tps": 128.0867355414647,
-            "output_throughput_tps": 128.0867355414647,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 157511.31031686673,
-            "long_context_ttft_p99_ms": 172194.68938408187,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 119.10051600914448,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "6f71ae01-0b3e-4683-b13b-4329c4d96aa9",
@@ -5146,20 +5108,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "935fd97a-1fee-4d8e-9ade-908a5821da97",
+          "submitted_at": "2026-07-02T04:46:50Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
+            "resolved_spec_hash": "9ac40d05cabbad50f3ce18aeb6dae80da6e976b1db1bbd11922fe230aec96f4c"
+          },
+          "metrics": {
+            "ttft_ms": 83971.91407308681,
+            "tbt_ms": 117.13496873561549,
+            "throughput_tps": 128.0867355414647,
+            "output_throughput_tps": 128.0867355414647,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 157511.31031686673,
+            "long_context_ttft_p99_ms": 172194.68938408187,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 119.10051600914448,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -40.1155,
-          "ttft_pct_left_vs_right": 24719.4343,
-          "tbt_pct_left_vs_right": -7.2246
+          "throughput_pct_left_vs_right": 66.988,
+          "ttft_pct_left_vs_right": -99.5971,
+          "tbt_pct_left_vs_right": 7.7872
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "left"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -5293,57 +5293,57 @@
           }
         },
         "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "bbd407e5-00b1-4f8a-9a3d-e0592efcba22",
-          "submitted_at": "2026-06-03T18:33:53Z",
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-460-gf273f9c5e2",
+          "entry_id": "774b96b7-95a4-4d85-b69d-f18ee9eb21cd",
+          "submitted_at": "2026-07-02T16:02:31Z",
           "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
-            "resolved_spec_hash": "245580fc65876969225df96070c89551590bcd0a2b39228fab9384520dcbbdcf"
+            "resolved_spec_hash": "fe96e51c305c87add96b7716716f3ee04b98f93d51d907de97d4058eb16aea9b"
           },
           "metrics": {
-            "ttft_ms": 268.78517493081745,
-            "tbt_ms": 95.26832097792979,
-            "throughput_tps": 228.1495394644097,
-            "output_throughput_tps": 228.1495394644097,
+            "ttft_ms": 2243.397351723397,
+            "tbt_ms": 55.8324628194301,
+            "throughput_tps": 236.86996143257514,
+            "output_throughput_tps": 236.86996143257514,
             "error_rate": 0.0
           },
           "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 7075.602195505052,
+            "long_context_ttft_p99_ms": 8370.354929291641,
             "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
+            "long_context_tpot_p99_ms": 58.21057147737228,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
             "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
           }
         },
         "deltas": {
-          "throughput_pct_left_vs_right": 3.9502,
-          "ttft_pct_left_vs_right": 523.7924,
-          "tbt_pct_left_vs_right": -42.7617
+          "throughput_pct_left_vs_right": 0.1232,
+          "ttft_pct_left_vs_right": -25.2624,
+          "tbt_pct_left_vs_right": -2.3329
         },
         "winners": {
           "throughput": "left",
-          "ttft": "right",
+          "ttft": "left",
           "tbt": "left"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -5527,7 +5527,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -5623,44 +5623,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-535-gceec19abb0",
-          "entry_id": "dddcc249-e90e-489a-9fc7-d2daf919557d",
-          "submitted_at": "2026-07-02T04:56:28Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
-            "resolved_spec_hash": "edfe4ba54abd2e9b152f215ed951417a38b9ea52a6c118f9692c1e744ea07489"
-          },
-          "metrics": {
-            "ttft_ms": 44291.44202603027,
-            "tbt_ms": 115.89577355798805,
-            "throughput_tps": 116.0104504768203,
-            "output_throughput_tps": 116.0104504768203,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 96730.10548339225,
-            "long_context_ttft_p99_ms": 99591.15738383027,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 128.59861840214154,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "c6689556-63fe-427b-aa83-b662d0371aa1",
@@ -5698,20 +5660,58 @@
             "multi_tenant_high_utilization": null
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "dddcc249-e90e-489a-9fc7-d2daf919557d",
+          "submitted_at": "2026-07-02T04:56:28Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
+            "resolved_spec_hash": "edfe4ba54abd2e9b152f215ed951417a38b9ea52a6c118f9692c1e744ea07489"
+          },
+          "metrics": {
+            "ttft_ms": 44291.44202603027,
+            "tbt_ms": 115.89577355798805,
+            "throughput_tps": 116.0104504768203,
+            "output_throughput_tps": 116.0104504768203,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 96730.10548339225,
+            "long_context_ttft_p99_ms": 99591.15738383027,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 128.59861840214154,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": -26.4186,
-          "ttft_pct_left_vs_right": 14316.2819,
-          "tbt_pct_left_vs_right": -1.6219
+          "throughput_pct_left_vs_right": 35.904,
+          "ttft_pct_left_vs_right": -99.3063,
+          "tbt_pct_left_vs_right": 1.6486
         },
         "winners": {
-          "throughput": "right",
-          "ttft": "right",
-          "tbt": "left"
+          "throughput": "left",
+          "ttft": "left",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -5808,6 +5808,44 @@
       "preferred_pair": {
         "left": {
           "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-464-g51621c35bc",
+          "entry_id": "e1a72d14-9be2-4905-99ba-d02702429ba4",
+          "submitted_at": "2026-07-02T16:03:14Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "51621c35bcce749cc34539bc1a48d32f264924a0",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+            "resolved_spec_hash": "ba078928e4cd2b19a7b1dafc7bec52b62607fe777b7df346f458518095594d31"
+          },
+          "metrics": {
+            "ttft_ms": 219.03118476853706,
+            "tbt_ms": 51.84033422118267,
+            "throughput_tps": 192.14834443973996,
+            "output_throughput_tps": 192.14834443973996,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 247.06989369587967,
+            "long_context_ttft_p99_ms": 678.3852224936574,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 62.67879993059775,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
+        "right": {
+          "engine": "vllm-hust",
           "engine_version": "v0.20.1rc0-486-g7a63f81e86",
           "entry_id": "3b3c0134-b988-45ec-8175-a69183b8db94",
           "submitted_at": "2026-07-02T16:15:40Z",
@@ -5844,58 +5882,20 @@
             "multi_tenant_high_utilization": null
           }
         },
-        "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "fd320f6d-1c42-4d9a-8943-c80a2e064610",
-          "submitted_at": "2026-06-03T18:41:34Z",
-          "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
-            "resolved_spec_hash": "c0e8dba9570dd27e69a61439fd0ba75cc837677cfcec48dd39ff505cf41478e9"
-          },
-          "metrics": {
-            "ttft_ms": 248.15935311315116,
-            "tbt_ms": 96.44200152610334,
-            "throughput_tps": 173.62097648101778,
-            "output_throughput_tps": 173.62097648101778,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
-          }
-        },
         "deltas": {
-          "throughput_pct_left_vs_right": 10.6633,
-          "ttft_pct_left_vs_right": -19.0144,
-          "tbt_pct_left_vs_right": -50.1909
+          "throughput_pct_left_vs_right": 0.0071,
+          "ttft_pct_left_vs_right": 8.9851,
+          "tbt_pct_left_vs_right": 7.9178
         },
         "winners": {
           "throughput": "left",
-          "ttft": "left",
-          "tbt": "left"
+          "ttft": "right",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -5993,6 +5993,44 @@
         "left": {
           "engine": "vllm-hust",
           "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "2eef75a0-e0ff-4320-929f-2bddf4f64864",
+          "submitted_at": "2026-07-01T14:53:49Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+            "resolved_spec_hash": "6f28e08d59cfa3b348e36fcb285995a43109112f7fe8036712e756cdffc0b76f"
+          },
+          "metrics": {
+            "ttft_ms": 0.0,
+            "tbt_ms": 0.0,
+            "throughput_tps": 1567.6813763333623,
+            "output_throughput_tps": 1567.6813763333623,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": false,
+            "long_context_ttft_p95_ms": null,
+            "long_context_ttft_p99_ms": null,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": null,
+            "long_context_ttft_p95_stable": null,
+            "long_context_ttft_p99_stable": null,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": null,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
           "entry_id": "f2cdc01c-ae1b-4809-a579-de6899542c03",
           "submitted_at": "2026-07-02T09:46:40Z",
           "canonical_path": null,
@@ -6028,46 +6066,8 @@
             "multi_tenant_high_utilization": null
           }
         },
-        "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "99ca704d-a2cc-49f0-af44-76da3ce1cf47",
-          "submitted_at": "2026-06-03T18:45:27Z",
-          "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
-            "resolved_spec_hash": "08890fb3f8c5f876afbd603d07404d7cd56ac10f74de3b6480697d03ae38ca1c"
-          },
-          "metrics": {
-            "ttft_ms": 0.0,
-            "tbt_ms": 0.0,
-            "throughput_tps": 1040.430211813821,
-            "output_throughput_tps": 1040.430211813821,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
-          }
-        },
         "deltas": {
-          "throughput_pct_left_vs_right": 2.5735,
+          "throughput_pct_left_vs_right": 46.8959,
           "ttft_pct_left_vs_right": null,
           "tbt_pct_left_vs_right": null
         },
@@ -6079,7 +6079,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -6263,7 +6263,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -6447,7 +6447,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -6544,21 +6544,21 @@
       "preferred_pair": {
         "left": {
           "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-601-g83cf83ff20",
-          "entry_id": "ccff4651-b107-4a3a-946e-1b8ad8c09c48",
-          "submitted_at": "2026-07-02T09:28:43Z",
+          "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
+          "entry_id": "05e8e92c-d74e-483f-a845-f387ca3d8715",
+          "submitted_at": "2026-05-06T02:29:22Z",
           "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "83cf83ff20a880d70b6ba916977c49304d598d9c",
+          "github_repository": null,
+          "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
-            "resolved_spec_hash": "41236e381ac0c80d58f36c60bfba40176afc17225c3e5b17c3d06d6c4d6d6309"
+            "resolved_spec_hash": "b40e543c53135301cdad55b4c4e15609086dda1536fc2a1977f6fafa9a434d51"
           },
           "metrics": {
             "ttft_ms": 0.0,
             "tbt_ms": 0.0,
-            "throughput_tps": 4239.415489588993,
-            "output_throughput_tps": 4239.415489588993,
+            "throughput_tps": 2702.5481191603694,
+            "output_throughput_tps": 2702.5481191603694,
             "error_rate": 0.0
           },
           "constraints": {
@@ -6567,7 +6567,7 @@
             "typical_ttft_reduction_pct_vs_baseline": null,
             "typical_tpot_reduction_pct_vs_baseline": null,
             "long_context_length": null,
-            "long_context_throughput_stable": false,
+            "long_context_throughput_stable": null,
             "long_context_ttft_p95_ms": null,
             "long_context_ttft_p99_ms": null,
             "long_context_tpot_p95_ms": null,
@@ -6619,7 +6619,7 @@
           }
         },
         "deltas": {
-          "throughput_pct_left_vs_right": 124.116,
+          "throughput_pct_left_vs_right": 42.8698,
           "ttft_pct_left_vs_right": null,
           "tbt_pct_left_vs_right": null
         },
@@ -6631,7 +6631,7 @@
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-Coder-14B-Instruct|910B2|FP16|instructcoder-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-Coder-14B-Instruct|910B2|FP16|none|instructcoder-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
@@ -6727,44 +6727,6 @@
       ],
       "preferred_pair": {
         "left": {
-          "engine": "vllm-hust",
-          "engine_version": "v0.20.1rc0-460-gf273f9c5e2",
-          "entry_id": "f1d74bd6-45ac-419f-8c0a-558ba484c067",
-          "submitted_at": "2026-07-03T02:03:36Z",
-          "canonical_path": null,
-          "github_repository": "vLLM-HUST/vllm-hust",
-          "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
-            "resolved_spec_hash": "22a3c6d23d451fb04d0276094a8d874993c6e581c96a225d4c442eeda368c55b"
-          },
-          "metrics": {
-            "ttft_ms": 241.03534614937416,
-            "tbt_ms": 49.49049293415358,
-            "throughput_tps": 169.6666727494001,
-            "output_throughput_tps": 169.6666727494001,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": true,
-            "long_context_ttft_p95_ms": 311.79264078382346,
-            "long_context_ttft_p99_ms": 2195.667776234909,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 55.36377036269227,
-            "long_context_ttft_p95_stable": true,
-            "long_context_ttft_p99_stable": true,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": true,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "right": {
           "engine": "vllm",
           "engine_version": "0.18.0",
           "entry_id": "cd18f8ec-f598-4161-a6f7-b41b8b7329a7",
@@ -6802,20 +6764,58 @@
             "multi_tenant_high_utilization": false
           }
         },
+        "right": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-441-g2206f1f7b",
+          "entry_id": "5d82a08d-6da0-491c-86af-3ebefa04c040",
+          "submitted_at": "2026-06-04T01:49:37Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+            "resolved_spec_hash": "cd594ec89da85940f5899b7a875e96b92999c3da56a02a94072d7d9ca9e9caf1"
+          },
+          "metrics": {
+            "ttft_ms": 239.36072860834656,
+            "tbt_ms": 92.02514726468495,
+            "throughput_tps": 125.3294783026658,
+            "output_throughput_tps": 125.3294783026658,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": 49.6,
+            "typical_throughput_ratio_vs_baseline": 1.0036352777929667,
+            "typical_ttft_reduction_pct_vs_baseline": -6.253978782311578,
+            "typical_tpot_reduction_pct_vs_baseline": 0.6978173569965187,
+            "long_context_length": 30720.0,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 27184.58087974577,
+            "long_context_ttft_p99_ms": 31084.884598635836,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 173.20170315814312,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": 31.90994468680953,
+            "multi_tenant_high_utilization": true
+          }
+        },
         "deltas": {
-          "throughput_pct_left_vs_right": 34.8958,
-          "ttft_pct_left_vs_right": -2.8959,
-          "tbt_pct_left_vs_right": -47.9721
+          "throughput_pct_left_vs_right": 0.3563,
+          "ttft_pct_left_vs_right": 3.7028,
+          "tbt_pct_left_vs_right": 3.3662
         },
         "winners": {
           "throughput": "left",
-          "ttft": "left",
-          "tbt": "left"
+          "ttft": "right",
+          "tbt": "right"
         }
       }
     },
     {
-      "scope_key": "hf:Qwen/Qwen2.5-VL-7B-Instruct|910B2|FP16|visionarena-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-VL-7B-Instruct|910B2|FP16|none|visionarena-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-VL-7B-Instruct",
@@ -6912,6 +6912,44 @@
       "preferred_pair": {
         "left": {
           "engine": "vllm-hust",
+          "engine_version": "v0.20.1rc0-535-gceec19abb0",
+          "entry_id": "bb9e0f2f-02a9-4fdf-a329-81521e652610",
+          "submitted_at": "2026-07-01T18:03:50Z",
+          "canonical_path": null,
+          "github_repository": "vLLM-HUST/vllm-hust",
+          "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+            "resolved_spec_hash": "f4627019b64077d6d7bf8f3afc3890d0cb48dd3b96322c1b4013f975405b0aa3"
+          },
+          "metrics": {
+            "ttft_ms": 399.3004795203451,
+            "tbt_ms": 63.46882341786113,
+            "throughput_tps": 118.67675186272194,
+            "output_throughput_tps": 118.67675186272194,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": null,
+            "typical_throughput_ratio_vs_baseline": null,
+            "typical_ttft_reduction_pct_vs_baseline": null,
+            "typical_tpot_reduction_pct_vs_baseline": null,
+            "long_context_length": null,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 581.1091185081749,
+            "long_context_ttft_p99_ms": 869.7076083812861,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 78.88393544179462,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": null,
+            "multi_tenant_high_utilization": null
+          }
+        },
+        "right": {
+          "engine": "vllm-hust",
           "engine_version": "v0.20.1rc0-521-g2fb7859dd0",
           "entry_id": "17cc2447-49fe-4369-b3c8-3dc57c6ccb58",
           "submitted_at": "2026-07-02T08:56:38Z",
@@ -6948,53 +6986,15 @@
             "multi_tenant_high_utilization": null
           }
         },
-        "right": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "c00bb0bf-84d0-4045-9c22-3f04803c1b9d",
-          "submitted_at": "2026-06-03T19:30:41Z",
-          "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
-            "resolved_spec_hash": "1b77107cbbabbb9880698c974516117163406a01e14c2afdcc6e83b63928da04"
-          },
-          "metrics": {
-            "ttft_ms": 1341.740622754895,
-            "tbt_ms": 66.69854310012335,
-            "throughput_tps": 113.73801469788552,
-            "output_throughput_tps": 113.73801469788552,
-            "error_rate": 0.001
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
-          }
-        },
         "deltas": {
-          "throughput_pct_left_vs_right": 2.6883,
-          "ttft_pct_left_vs_right": -68.9942,
-          "tbt_pct_left_vs_right": 0.285
+          "throughput_pct_left_vs_right": 1.6106,
+          "ttft_pct_left_vs_right": -4.0184,
+          "tbt_pct_left_vs_right": -5.1127
         },
         "winners": {
           "throughput": "left",
           "ttft": "left",
-          "tbt": "right"
+          "tbt": "left"
         }
       }
     }
@@ -7008,9 +7008,9 @@
       "github_repository": "vllm-project/vllm-ascend",
       "vllm_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
     },
-    "pair_count": 15,
+    "pair_count": 14,
     "headline_pair": {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7124,7 +7124,7 @@
     },
     "pairs": [
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7237,7 +7237,7 @@
         "meets_goal": true
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7350,7 +7350,7 @@
         "meets_goal": true
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|prefix-repetition-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7463,7 +7463,7 @@
         "meets_goal": false
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7576,7 +7576,7 @@
         "meets_goal": false
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7689,7 +7689,7 @@
         "meets_goal": true
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sharegpt-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sharegpt-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7802,7 +7802,7 @@
         "meets_goal": false
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7915,7 +7915,7 @@
         "meets_goal": false
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|prefix-repetition-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -8028,7 +8028,7 @@
         "meets_goal": false
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|agent-research-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|agent-research-online-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -8141,7 +8141,7 @@
         "meets_goal": false
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput-4chip|multi_gpu|4|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -8254,7 +8254,7 @@
         "meets_goal": true
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput-2chip|multi_gpu|2|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -8367,7 +8367,7 @@
         "meets_goal": true
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-Coder-14B-Instruct|910B2|FP16|instructcoder-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-Coder-14B-Instruct|910B2|FP16|none|instructcoder-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
@@ -8480,120 +8480,7 @@
         "meets_goal": false
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|prefix-repetition-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-        "category": "single",
-        "scope": {
-          "model": "Qwen/Qwen2.5-14B-Instruct",
-          "model_canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
-          "model_short_name": "Qwen2.5-14B-Instruct",
-          "model_display_name": "Qwen2.5-14B-Instruct",
-          "hardware": "910B2",
-          "precision": "FP16",
-          "workload": "prefix-repetition-online",
-          "config_type": "single_gpu",
-          "chip_count": 1,
-          "node_count": 1,
-          "setting_signature": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-          "setting_summary": "IO 512/238 • TP1 • FP16 • RPS 1 • CC 2 • official spec"
-        },
-        "current": {
-          "engine": "vllm-hust",
-          "engine_version": "0.20.1rc1.dev314+g64ff561c7.d20260505",
-          "entry_id": "483a1a3a-3b9f-4277-956a-71653263e845",
-          "submitted_at": "2026-05-06T02:29:23Z",
-          "canonical_path": null,
-          "github_repository": null,
-          "git_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-            "resolved_spec_hash": "bf91964dedd11af753de9fa69a78c187810bc34a74cbb7eb7d896a372aa9452a"
-          },
-          "metrics": {
-            "ttft_ms": 263.9927377458662,
-            "tbt_ms": 78.29123930976981,
-            "throughput_tps": 25.26319130304773,
-            "output_throughput_tps": 25.26319130304773,
-            "error_rate": 0.0
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": null,
-            "typical_throughput_ratio_vs_baseline": null,
-            "typical_ttft_reduction_pct_vs_baseline": null,
-            "typical_tpot_reduction_pct_vs_baseline": null,
-            "long_context_length": null,
-            "long_context_throughput_stable": null,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": null,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": null,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": null,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": null,
-            "unit_token_cost_reduction_pct": null,
-            "multi_tenant_high_utilization": null
-          }
-        },
-        "baseline": {
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "entry_id": "d320aedc-6bbb-40bc-8dfe-07d1dbc8aaac",
-          "submitted_at": "2026-06-03T18:16:20Z",
-          "canonical_path": null,
-          "github_repository": "vllm-project/vllm-ascend",
-          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
-          "same_spec": {
-            "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-            "resolved_spec_hash": "bf91964dedd11af753de9fa69a78c187810bc34a74cbb7eb7d896a372aa9452a"
-          },
-          "metrics": {
-            "ttft_ms": 8260.135450431417,
-            "tbt_ms": 105.09351418081553,
-            "throughput_tps": 199.6803911992217,
-            "output_throughput_tps": 199.6803911992217,
-            "error_rate": 0.005
-          },
-          "constraints": {
-            "single_chip_effective_utilization_pct": 35.7838,
-            "typical_throughput_ratio_vs_baseline": 1.0,
-            "typical_ttft_reduction_pct_vs_baseline": 0.0,
-            "typical_tpot_reduction_pct_vs_baseline": 0.0,
-            "long_context_length": 30720.0,
-            "long_context_throughput_stable": false,
-            "long_context_ttft_p95_ms": null,
-            "long_context_ttft_p99_ms": 26176.540252596616,
-            "long_context_tpot_p95_ms": null,
-            "long_context_tpot_p99_ms": 165.79910860879937,
-            "long_context_ttft_p95_stable": null,
-            "long_context_ttft_p99_stable": false,
-            "long_context_tpot_p95_stable": null,
-            "long_context_tpot_p99_stable": false,
-            "unit_token_cost_reduction_pct": 0.0,
-            "multi_tenant_high_utilization": false
-          }
-        },
-        "baseline_target": {
-          "id": "official-ascend-2026-v0.18.0",
-          "label": "Official vLLM 0.18.0 + vllm-ascend 0.18.0",
-          "engine": "vllm",
-          "engine_version": "0.18.0",
-          "github_repository": "vllm-project/vllm-ascend",
-          "vllm_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
-        },
-        "deltas": {
-          "throughput_pct_current_vs_baseline": -87.3482,
-          "ttft_pct_current_vs_baseline": -96.804,
-          "tbt_pct_current_vs_baseline": -25.5033
-        },
-        "remaining_gap_pct": {
-          "throughput": 87.3482,
-          "ttft": 0.0,
-          "tbt": 0.0
-        },
-        "meets_goal": false
-      },
-      {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|random-latency|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-latency|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -8706,7 +8593,7 @@
         "meets_goal": true
       },
       {
-        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|sonnet-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
         "category": "single",
         "scope": {
           "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -8822,7 +8709,7 @@
   },
   "hard_constraints": {
     "schema_version": "leaderboard-hard-constraints/v1",
-    "generated_at": "2026-07-03T03:18:16.086091+00:00",
+    "generated_at": "2026-07-03T10:07:33.335954+00:00",
     "scope_count": 20,
     "pass_count": 0,
     "fail_count": 20,
