@@ -4,6 +4,9 @@ This document defines the plan for moving performance gate spec selection from
 hard-coded workflow defaults to a shared registry and resolver owned by
 `vllm-hust-benchmark`.
 
+Companion overview document:
+`docs/perfgate-scenario-rollout.md`
+
 The goal is to make future scenario onboarding mostly data-driven. After the
 initial mechanism is in place, adding a new performance gate scenario should
 usually require adding a spec file and one registry entry in this repository,
@@ -330,13 +333,12 @@ For each new scenario:
 
 Candidate order:
 
-1. `sharegpt-online`
-2. `prefix-repetition-online`
-3. `random-latency`
-4. `sharegpt-throughput`
-5. `instructcoder-online`
-6. `agent-research-online`
-7. `visionarena-online`
+1. `prefix-repetition-online`
+2. `random-latency`
+3. `sharegpt-throughput`
+4. `instructcoder-online`
+5. `agent-research-online`
+6. `visionarena-online`
 
 The exact order can change based on data availability, runtime cost, and
 stakeholder priority.
