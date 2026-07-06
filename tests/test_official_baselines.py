@@ -5,6 +5,7 @@ from vllm_hust_benchmark.official_baselines import get_canonical_submission_dir
 from vllm_hust_benchmark.official_baselines import get_primary_metric_name_for_benchmark_type
 from vllm_hust_benchmark.official_baselines import has_canonical_run
 from vllm_hust_benchmark.official_baselines import select_canonical_candidate
+from vllm_hust_benchmark.same_spec import build_same_spec_payload
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -40,6 +41,33 @@ def test_perfgate_ascend_smoke_spec_is_available_for_ci() -> None:
     assert spec["server_parameters"]["max_model_len"] == 256
     assert spec["client_parameters"]["input_len"] == 64
     assert spec["client_parameters"]["output_len"] == 16
+
+
+def test_perfgate_sharegpt_online_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-sharegpt-online-qwen25-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    same_spec = build_same_spec_payload(spec)
+
+    assert spec["id"] == "perfgate-ascend-sharegpt-online-qwen25-3b-910b2"
+    assert spec["scenario"] == "sharegpt-online"
+    assert spec["model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert "max_model_len" not in spec["server_parameters"]
+    assert spec["client_parameters"]["dataset_name"] == "sharegpt"
+    assert (
+        spec["client_parameters"]["dataset_path"]
+        == "ShareGPT_V3_unfiltered_cleaned_split.json"
+    )
+    assert spec["client_parameters"]["num_prompts"] == 8
+    assert same_spec["scenario"] == "sharegpt-online"
+    assert same_spec["resolved_client_parameters"]["dataset_name"] == "sharegpt"
 
 
 def test_has_canonical_run_requires_matching_spec_id_and_submitter(tmp_path: Path) -> None:
