@@ -1,7 +1,7 @@
 {
-  "entry_id": "960d4bdd-df42-5b66-af98-a49451f8f3e3",
+  "entry_id": "daa2818d-d8b9-5236-abc6-35862f1daa31",
   "engine": "vllm-hust",
-  "engine_version": "v0.20.1rc0-535-gceec19abb0",
+  "engine_version": "v0.20.1rc0-521-g2fb7859dd0",
   "config_type": "single_gpu",
   "hardware": {
     "vendor": "Huawei",
@@ -22,17 +22,17 @@
     "quantization": null
   },
   "workload": {
-    "name": "prefix-repetition-online",
-    "input_length": 4096,
+    "name": "sharegpt-online",
+    "input_length": 1024,
     "output_length": 256,
     "batch_size": null,
     "concurrent_requests": null,
-    "dataset": "prefix_repetition"
+    "dataset": "sharegpt"
   },
   "metrics": {
-    "ttft_ms": 529.7070462023839,
-    "tbt_ms": 50.38015360091162,
-    "throughput_tps": 234.32775557150057,
+    "ttft_ms": 198.51446812739596,
+    "tbt_ms": 47.560515288736376,
+    "throughput_tps": 191.75260198702145,
     "peak_mem_mb": 0,
     "error_rate": 0.0
   },
@@ -41,7 +41,7 @@
     "accountable_scope": {
       "domestic_chip_class": "Ascend-class",
       "representative_model_band": "7B-13B",
-      "representative_business_scenario": "long-context-chat",
+      "representative_business_scenario": "online-chat",
       "baseline_engine": "",
       "declared_baseline_engine": "vllm",
       "baseline_status": "pending-baseline",
@@ -55,10 +55,10 @@
       "typical_tpot_reduction_pct_vs_baseline": null,
       "long_context_length": null,
       "long_context_throughput_stable": true,
-      "long_context_ttft_p95_ms": 2158.3288347348544,
-      "long_context_ttft_p99_ms": 3457.4321082886304,
+      "long_context_ttft_p95_ms": 224.33309166226536,
+      "long_context_ttft_p99_ms": 575.6660083122407,
       "long_context_tpot_p95_ms": null,
-      "long_context_tpot_p99_ms": 62.60270968614619,
+      "long_context_tpot_p99_ms": 55.555062029158,
       "long_context_ttft_p95_stable": true,
       "long_context_ttft_p99_stable": true,
       "long_context_tpot_p95_stable": null,
@@ -70,8 +70,8 @@
   "cluster": null,
   "versions": {
     "protocol": "N/A",
-    "backend": "0.19.1rc1-280-g312ca80a9",
-    "core": "0.20.1rc0-535-gceec19abb0",
+    "backend": "0.19.1rc1-292-g51e577b17",
+    "core": "0.20.1rc0-521-g2fb7859dd0",
     "benchmark": "0.1.0"
   },
   "environment": {
@@ -83,53 +83,53 @@
     "driver_version": null
   },
   "metadata": {
-    "submitted_at": "2026-07-05T11:58:41Z",
+    "submitted_at": "2026-07-05T14:27:26Z",
     "submitter": "codex",
     "data_source": "real-online-historical-pr-backfill",
     "engine": "vllm-hust",
-    "engine_version": "v0.20.1rc0-535-gceec19abb0",
+    "engine_version": "v0.20.1rc0-521-g2fb7859dd0",
     "reproducible_cmd": null,
-    "git_commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+    "git_commit": "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
     "github_user": "Shuhao Zhang (Tony)",
-    "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+    "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
     "github_repository": "vLLM-HUST/vllm-hust",
-    "github_ref": "ascend-pr70-simllm-baseline-validation",
+    "github_ref": "align-ascend-benchmark-perfgate-defaults",
     "github_event_name": null,
     "github_pr_number": null,
     "github_pr_url": null,
     "release_date": null,
     "changelog_url": null,
-    "notes": "Corrected NPU0 rerun for prefix-repetition-online with prefix caching enabled; replaces archived no-prefix-cache backfill historical-pr-ascend-pr70-simllm-baseline-validation-prefix-repetition-online-ceec19abb0-312ca80a90.",
+    "notes": "Corrected NPU0 same-spec rerun after single-card high-TTFT audit.",
     "verified": null,
-    "idempotency_key": "fab0dd4f165e462a609f67a406e1c6efe65964027551f7be6557eca324e6a536",
+    "idempotency_key": "180303167ceb264a4ded3fdd0ba595b7316dc69c1a39d87723e1d04e4f9256b1",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
       "python": "/home/shuhao/miniconda3/envs/vllm-hust-dev/bin/python",
       "engine": {
         "repository": "vLLM-HUST/vllm-hust",
-        "ref": "ascend-pr70-simllm-baseline-validation-prefix-cache-fix",
-        "commit": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad"
+        "ref": "align-ascend-benchmark-perfgate-defaults-ttft-fix",
+        "commit": "2fb7859dd024b51c7bd09b0c9b5cc701898090bb"
       },
       "plugin": {
         "engine": "vllm-ascend-hust",
         "repository": "vLLM-HUST/vllm-ascend-hust",
-        "ref": "312ca80a90",
-        "commit": "312ca80a90cbd28438bce3b59e3fbaad749451f3"
+        "ref": "51e577b17b",
+        "commit": "51e577b17b46babba210858686d577161296a420"
       }
     },
-    "run_id": "historical-pr-ascend-pr70-simllm-baseline-validation-prefix-cache-fix-prefix-repetition-online-ceec19abb0-312ca80a90",
-    "data_quality": "corrected-prefix-cache-enabled",
-    "supersedes": "historical-pr-ascend-pr70-simllm-baseline-validation-prefix-repetition-online-ceec19abb0-312ca80a90",
-    "supersedes_reason": "Previous single-card prefix-repetition-online backfill disabled prefix caching, inflating TTFT and underreporting throughput for repeated-prefix serving.",
-    "corrected_from_github_ref": "ascend-pr70-simllm-baseline-validation-prefix-cache-fix",
+    "run_id": "historical-pr-align-ascend-benchmark-perfgate-defaults-ttft-fix-sharegpt-online-2fb7859dd0-51e577b17b",
+    "data_quality": "corrected-high-ttft-rerun",
+    "supersedes": "historical-pr-align-ascend-benchmark-perfgate-defaults-sharegpt-online-2fb7859dd0-51e577b17b",
+    "supersedes_reason": "Previous single-card online backfill produced anomalous TTFT while an NPU0 same-spec rerun restored normal TTFT; archived as a high-TTFT outlier.",
+    "corrected_from_github_ref": "align-ascend-benchmark-perfgate-defaults-ttft-fix",
     "github_ref_correction_reason": "Corrected rerun replaces the archived row at the original x-axis version; the -fix suffix was an internal rerun label, not a new public version."
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
-    "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-    "spec_label": "Official Ascend Jan 2026 prefix repetition online baseline for vllm-hust goal tracking",
-    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
-    "scenario": "prefix-repetition-online",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+    "spec_label": "Official Ascend Jan 2026 ShareGPT online baseline for vllm-hust goal tracking",
+    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
+    "scenario": "sharegpt-online",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
     "model_precision": "FP16",
@@ -138,7 +138,7 @@
     "hardware_chip_model": "910B2",
     "chip_count": 1,
     "node_count": 1,
-    "resolved_spec_hash": "61631866a6b54f329d84fcc2a263b9e3401e632cea76fb6e45d417aec7bd15cc",
+    "resolved_spec_hash": "ba078928e4cd2b19a7b1dafc7bec52b62607fe777b7df346f458518095594d31",
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
       "enforce_eager": "",
@@ -148,26 +148,18 @@
       "host": "0.0.0.0",
       "port": 8030,
       "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
-      "dtype": "float16",
-      "enable_prefix_caching": "true",
-      "enable_chunked_prefill": "false",
-      "gpu_memory_utilization": "0.90",
-      "max_model_len": "32768",
-      "max_num_seqs": "16"
+      "dtype": "float16"
     },
     "resolved_client_parameters": {
       "backend": "vllm",
       "endpoint": "/v1/completions",
-      "dataset_name": "prefix_repetition",
+      "dataset_name": "sharegpt",
+      "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
       "num_prompts": 200,
       "request_rate": 1,
       "host": "127.0.0.1",
       "port": 8030,
-      "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
-      "prefix_repetition_output_len": 256,
-      "prefix_repetition_num_prefixes": 10,
-      "prefix_repetition_suffix_len": 256,
-      "prefix_repetition_prefix_len": 3840
+      "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct"
     }
   }
 }
