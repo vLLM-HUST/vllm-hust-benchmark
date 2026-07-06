@@ -7,6 +7,9 @@ scenarios.
 It is intended to be the durable handoff context for GitHub issues, PRs, and
 future development sessions.
 
+Detailed registry/resolver design:
+`docs/perfgate-spec-registry-rollout-plan.md`
+
 Tracking issue:
 https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/38
 
@@ -151,6 +154,8 @@ Expected changes per new scenario:
 - add perfgate definition
 - add constraints file if the scenario needs special tolerances
 - update tests or validation scripts for spec discoverability
+- add the scenario to the shared perfgate spec registry after the registry
+  exists
 
 ### vllm-hust
 
@@ -163,10 +168,12 @@ Responsibilities:
 
 Expected changes per new scenario:
 
-- workflow scenario selection
-- spec resolver or registry update
+- workflow scenario selection or enablement policy update
 - static tests for workflow wiring
 - optional report-mode rollout before blocking mode
+
+After the shared registry/resolver is wired once, new scenarios should not
+require adding per-scenario spec mappings in this repository.
 
 ### vllm-ascend-hust
 
@@ -178,10 +185,12 @@ Responsibilities:
 
 Expected changes per new scenario:
 
-- workflow scenario selection
-- spec resolver or registry update
+- workflow scenario selection or enablement policy update
 - static tests for workflow wiring
 - runner-specific defaults if required
+
+After the shared registry/resolver is wired once, new scenarios should not
+require adding per-scenario spec mappings in this repository.
 
 ### vllm-hust-website
 
@@ -252,7 +261,8 @@ Status: planned.
 
 Tasks:
 
-- Add resolver entries in `vllm-hust`.
+- Consume the shared `vllm-hust-benchmark` perfgate spec resolver.
+- Add workflow selection or report-mode enablement for `sharegpt-online`.
 - Run `sharegpt-online` in report mode first.
 - Observe runtime, stability, variance, and failure modes.
 
@@ -269,7 +279,8 @@ Status: planned.
 Tasks:
 
 - Align with the `vllm-hust` resolver mechanism.
-- Add resolver entries in `vllm-ascend-hust`.
+- Consume the shared `vllm-hust-benchmark` perfgate spec resolver.
+- Add workflow selection or report-mode enablement for `sharegpt-online`.
 - Confirm B2 hardware defaults and spec selection stay consistent.
 - Run `sharegpt-online` in report mode first.
 - Observe runtime, stability, variance, and failure modes.
@@ -490,6 +501,8 @@ When continuing this work in a new conversation, start with:
 ```text
 继续多场景性能门禁接入。
 进度 issue: https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/38
-开发文档: docs/perfgate-scenario-rollout.md
-请先读取 issue 和文档，然后继续下一步。
+开发文档:
+- docs/perfgate-scenario-rollout.md
+- docs/perfgate-spec-registry-rollout-plan.md
+请先读取 issue 和两个文档，然后继续下一步。
 ```
