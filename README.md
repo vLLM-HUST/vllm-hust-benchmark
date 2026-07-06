@@ -56,6 +56,7 @@ Within that boundary, the important design point is:
 - `docs/UPSTREAM_ANALYSIS.md`: analysis of upstream benchmark architecture and why this repo is structured this way
 - `docs/LEADERBOARD_ALIGNMENT.md`: scenario taxonomy and exact mapping to website leaderboard schema
 - `docs/LEADERBOARD_HANDOFF.md`: handoff guide for the leaderboard publication chain and official baseline operations
+- `docs/perfgate-scenario-rollout.md`: requirement and rollout plan for multi-scenario performance gates
 - `tests/`: focused tests for registry loading and command generation
 
 ## Quick Start
