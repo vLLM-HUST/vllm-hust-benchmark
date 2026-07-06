@@ -505,19 +505,26 @@ run_client_command() {
 
 json2args() {
   local json_string=$1
-  echo "$json_string" | jq -r '
-    to_entries |
-    map(
-      if (.value == null or .value == false or (.value | tostring) == "") then
-        empty
-      elif .value == true then
-        "--" + (.key | gsub("_"; "-"))
-      else
-        "--" + (.key | gsub("_"; "-")) + " " + (.value | tostring)
-      end
-    ) |
-    join(" ")
-  '
+  JSON2ARGS_PAYLOAD="$json_string" "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+import json
+import os
+
+payload = json.loads(os.environ["JSON2ARGS_PAYLOAD"])
+args: list[str] = []
+for key, value in payload.items():
+    if value is None or value is False or value == "":
+        continue
+    flag = "--" + key.replace("_", "-")
+    if value is True:
+        args.append(flag)
+        continue
+    if isinstance(value, (dict, list)):
+        rendered = json.dumps(value, separators=(",", ":"), ensure_ascii=True)
+    else:
+        rendered = str(value)
+    args.extend([flag, rendered])
+print(" ".join(args))
+PY
 }
 
 download_file() {
