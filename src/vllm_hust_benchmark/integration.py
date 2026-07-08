@@ -1228,6 +1228,70 @@ def _upload_existing_snapshots(
     return 0
 
 
+PR_PREVIEW_GITHUB_EVENTS = frozenset({"pull_request", "pull_request_target"})
+
+
+def _artifact_has_pr_preview_metadata(artifact: Mapping[str, Any]) -> bool:
+    metadata = artifact.get("metadata")
+    if not isinstance(metadata, Mapping):
+        return False
+
+    github_event_name = str(metadata.get("github_event_name") or "").strip()
+    if github_event_name in PR_PREVIEW_GITHUB_EVENTS:
+        return True
+
+    github_pr_number = metadata.get("github_pr_number")
+    if github_pr_number is not None and str(github_pr_number).strip():
+        return True
+
+    github_pr_url = str(metadata.get("github_pr_url") or "").strip()
+    return bool(github_pr_url)
+
+
+def _validate_formal_submission_sources(submission_dirs: Sequence[Path]) -> bool:
+    for submission_dir in submission_dirs:
+        try:
+            artifact_paths = iter_submission_artifact_paths(submission_dir)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(
+                f"invalid submission manifest in {submission_dir}: {exc}",
+                file=sys.stderr,
+            )
+            return False
+
+        known_artifact_paths = set(artifact_paths)
+        for artifact_path in sorted(submission_dir.rglob("run_leaderboard.json")):
+            if artifact_path not in known_artifact_paths:
+                artifact_paths.append(artifact_path)
+
+        for artifact_path in artifact_paths:
+            try:
+                payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as exc:
+                print(
+                    f"invalid submission artifact {artifact_path}: {exc}",
+                    file=sys.stderr,
+                )
+                return False
+            if not isinstance(payload, Mapping):
+                print(
+                    f"invalid submission artifact {artifact_path}: payload must be a JSON object",
+                    file=sys.stderr,
+                )
+                return False
+
+            if _artifact_has_pr_preview_metadata(payload):
+                print(
+                    "PR preview benchmark artifacts cannot be published through "
+                    "the formal leaderboard aggregation path: "
+                    f"{artifact_path}",
+                    file=sys.stderr,
+                )
+                return False
+
+    return True
+
+
 def sync_submission_to_huggingface(
     *,
     layout: RepoLayout,
@@ -1242,17 +1306,6 @@ def sync_submission_to_huggingface(
     allow_existing_only: bool = False,
     skip_aggregation: bool = False,
 ) -> int:
-    try:
-        from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
-        from vllm_hust_benchmark.hf_publisher import _create_commit_on_branch
-    except ImportError:
-        print(
-            "huggingface_hub is required for HF submission sync. Install with: "
-            "pip install 'vllm-hust-benchmark[publish]'",
-            file=sys.stderr,
-        )
-        return 2
-
     if submission_dirs is None:
         normalized_submission_dirs: list[Path] = []
     elif isinstance(submission_dirs, Path):
@@ -1271,6 +1324,20 @@ def sync_submission_to_huggingface(
         if not submission_dir.is_dir():
             print(f"submission directory not found: {submission_dir}", file=sys.stderr)
             return 2
+
+    if not _validate_formal_submission_sources(normalized_submission_dirs):
+        return 2
+
+    try:
+        from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
+        from vllm_hust_benchmark.hf_publisher import _create_commit_on_branch
+    except ImportError:
+        print(
+            "huggingface_hub is required for HF submission sync. Install with: "
+            "pip install 'vllm-hust-benchmark[publish]'",
+            file=sys.stderr,
+        )
+        return 2
 
     resolved_token = _resolve_hf_token(token)
     api = HfApi(token=resolved_token)
