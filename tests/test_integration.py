@@ -388,6 +388,47 @@ def test_aggregate_to_website_without_execute_prints_command(
     assert "--output-dir" in captured.out
 
 
+def test_aggregate_to_website_rejects_pr_preview_sources_when_requested(
+    capsys, tmp_path: Path
+) -> None:
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+    source_dir = tmp_path / "exports"
+    source_dir.mkdir()
+    (source_dir / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+                "metadata": {"github_event_name": "pull_request"},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    exit_code = aggregate_to_website(
+        layout=layout,
+        source_dir=source_dir,
+        execute=False,
+        reject_pr_preview_sources=True,
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert "PR preview benchmark artifacts cannot be published" in captured.err
+    assert "aggregate_results.py" not in captured.out
+
+
 def test_validate_aggregated_leaderboard_outputs_rejects_single_engine_distribution(
     tmp_path: Path,
 ) -> None:
@@ -1020,6 +1061,54 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
     assert merged_markers == {"existing": True, "current": True}
     assert "leaderboard_single.json" in uploaded_paths
     assert "submissions-auto/submission-a/run_leaderboard.json" in uploaded_paths
+
+
+def test_sync_submission_to_huggingface_rejects_local_pr_preview_submission(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+
+    submission_dir = tmp_path / "submission-pr-preview"
+    submission_dir.mkdir()
+    artifact = {
+        "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+        "metadata": {
+            "github_event_name": "pull_request",
+            "github_pr_number": 99,
+            "github_pr_url": "https://github.com/vLLM-HUST/vllm-hust/pull/99",
+        },
+    }
+    (submission_dir / "run_leaderboard.json").write_text(
+        json.dumps(artifact) + "\n", encoding="utf-8"
+    )
+
+    aggregate_called = False
+
+    def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
+        nonlocal aggregate_called
+        aggregate_called = True
+        return 0
+
+    monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=submission_dir,
+        aggregate_output_dir=tmp_path / "aggregated",
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert aggregate_called is False
+    assert "PR preview benchmark artifacts cannot be published" in captured.err
+    assert "submission-pr-preview/run_leaderboard.json" in captured.err
 
 
 def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
