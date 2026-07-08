@@ -70,6 +70,43 @@ def test_perfgate_sharegpt_online_spec_is_available_for_ci() -> None:
     assert same_spec["resolved_client_parameters"]["dataset_name"] == "sharegpt"
 
 
+def test_perfgate_prefix_repetition_online_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-prefix-repetition-online-qwen25-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    same_spec = build_same_spec_payload(spec)
+
+    assert spec["id"] == "perfgate-ascend-prefix-repetition-online-qwen25-3b-910b2"
+    assert spec["scenario"] == "prefix-repetition-online"
+    assert spec["model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert spec["server_parameters"]["enable_prefix_caching"] == ""
+    assert spec["server_parameters"]["max_model_len"] == 1280
+    assert spec["client_parameters"]["dataset_name"] == "prefix_repetition"
+    assert spec["client_parameters"]["num_prompts"] == 8
+    assert spec["client_parameters"]["input_len"] == 1024
+    assert spec["client_parameters"]["output_len"] == 64
+    assert same_spec["scenario"] == "prefix-repetition-online"
+    assert (
+        same_spec["resolved_client_parameters"]["prefix_repetition_prefix_len"]
+        == 768
+    )
+    assert (
+        same_spec["resolved_client_parameters"]["prefix_repetition_suffix_len"]
+        == 256
+    )
+    assert (
+        same_spec["resolved_client_parameters"]["prefix_repetition_output_len"]
+        == 64
+    )
+
+
 def test_has_canonical_run_requires_matching_spec_id_and_submitter(tmp_path: Path) -> None:
     canonical_dir = tmp_path / _spec()["id"]
     canonical_dir.mkdir(parents=True)
