@@ -510,7 +510,13 @@ def aggregate_to_website(
     source_dir: Path,
     output_dir: Path | None = None,
     execute: bool,
+    reject_pr_preview_sources: bool = False,
 ) -> int:
+    if reject_pr_preview_sources and not _validate_formal_submission_sources(
+        [source_dir]
+    ):
+        return 2
+
     destination = output_dir or layout.website_repo / "data"
     command = [
         sys.executable,

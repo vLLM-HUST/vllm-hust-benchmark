@@ -684,6 +684,64 @@ def test_publish_website_without_execute_prints_aggregate_command(
     assert f"--source-dir {source_dir}" in captured.out
 
 
+def test_publish_hf_aggregate_first_rejects_pr_preview_source(
+    capsys, monkeypatch, tmp_path: Path
+) -> None:
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+    (layout.website_repo / "scripts").mkdir(parents=True)
+    (layout.website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(cli_module, "resolve_repo_layout", lambda: layout)
+    monkeypatch.setattr(cli_module, "validate_repo_layout", lambda _layout: None)
+
+    source_dir = tmp_path / "exports"
+    source_dir.mkdir()
+    (source_dir / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "model": {"name": "Qwen/Qwen2.5-14B-Instruct"},
+                "metadata": {
+                    "github_event_name": "pull_request",
+                    "github_pr_number": 99,
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    upload_called = False
+
+    def fake_upload_to_huggingface(**kwargs):
+        nonlocal upload_called
+        upload_called = True
+        return 0
+
+    monkeypatch.setattr(cli_module, "upload_to_huggingface", fake_upload_to_huggingface)
+
+    exit_code = main(
+        [
+            "publish-hf",
+            "--aggregate-first",
+            "--source-dir",
+            str(source_dir),
+            "--repo-id",
+            "owner/repo",
+            "--execute",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert upload_called is False
+    assert "PR preview benchmark artifacts cannot be published" in captured.err
+
+
 def test_sync_submission_to_hf_accepts_multiple_submission_dirs(
     monkeypatch, tmp_path: Path
 ) -> None:
