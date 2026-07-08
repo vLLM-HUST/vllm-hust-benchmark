@@ -934,6 +934,7 @@ def main(argv: list[str] | None = None) -> int:
                 source_dir=Path(args.source_dir).resolve(),
                 output_dir=output_dir,
                 execute=args.execute,
+                reject_pr_preview_sources=getattr(args, "publish_hf", False),
             )
         except ValueError as error:
             print(str(error), file=sys.stderr)
@@ -974,6 +975,7 @@ def main(argv: list[str] | None = None) -> int:
                 source_dir=source_dir,
                 output_dir=None,
                 execute=args.execute,
+                reject_pr_preview_sources=True,
             )
             if rc != 0:
                 return rc
