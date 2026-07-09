@@ -107,6 +107,35 @@ def test_perfgate_prefix_repetition_online_spec_is_available_for_ci() -> None:
     )
 
 
+def test_perfgate_random_latency_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-random-latency-qwen25-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    same_spec = build_same_spec_payload(spec)
+
+    assert spec["id"] == "perfgate-ascend-random-latency-qwen25-3b-910b2"
+    assert spec["scenario"] == "random-latency"
+    assert spec["model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert spec["server_parameters"]["max_model_len"] == 1280
+    assert spec["server_parameters"]["max_num_seqs"] == 1
+    assert spec["client_parameters"]["input_len"] == 1024
+    assert spec["client_parameters"]["output_len"] == 128
+    assert spec["client_parameters"]["batch_size"] == 1
+    assert spec["client_parameters"]["num_iters_warmup"] == 1
+    assert spec["client_parameters"]["num_iters"] == 3
+    assert same_spec["scenario"] == "random-latency"
+    assert same_spec["resolved_client_parameters"]["input_len"] == 1024
+    assert same_spec["resolved_client_parameters"]["output_len"] == 128
+    assert same_spec["resolved_client_parameters"]["batch_size"] == 1
+
+
 def test_has_canonical_run_requires_matching_spec_id_and_submitter(tmp_path: Path) -> None:
     canonical_dir = tmp_path / _spec()["id"]
     canonical_dir.mkdir(parents=True)
