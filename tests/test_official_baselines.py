@@ -136,6 +136,36 @@ def test_perfgate_random_latency_spec_is_available_for_ci() -> None:
     assert same_spec["resolved_client_parameters"]["batch_size"] == 1
 
 
+def test_perfgate_sharegpt_throughput_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-sharegpt-throughput-qwen25-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    same_spec = build_same_spec_payload(spec)
+
+    assert spec["id"] == "perfgate-ascend-sharegpt-throughput-qwen25-3b-910b2"
+    assert spec["scenario"] == "sharegpt-throughput"
+    assert spec["model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert spec["server_parameters"]["dtype"] == "bfloat16"
+    assert spec["server_parameters"]["max_num_seqs"] == 1
+    assert spec["client_parameters"]["dataset_name"] == "sharegpt"
+    assert (
+        spec["client_parameters"]["dataset_path"]
+        == "ShareGPT_V3_unfiltered_cleaned_split.json"
+    )
+    assert spec["client_parameters"]["num_prompts"] == 8
+    assert spec["client_parameters"]["num_warmups"] == 0
+    assert same_spec["scenario"] == "sharegpt-throughput"
+    assert same_spec["resolved_client_parameters"]["dataset_name"] == "sharegpt"
+    assert same_spec["resolved_client_parameters"]["num_prompts"] == 8
+
+
 def test_perfgate_sonnet_throughput_spec_is_available_for_ci() -> None:
     spec_file = (
         REPO_ROOT
