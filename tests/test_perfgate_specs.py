@@ -73,6 +73,21 @@ def test_resolve_random_latency_perfgate_spec() -> None:
     ).resolve()
 
 
+def test_resolve_visionarena_online_perfgate_spec() -> None:
+    spec_path = perfgate_specs.resolve_perfgate_spec_file(
+        scenario="visionarena-online",
+        hardware_chip_model="910B2",
+        repo_root=REPO_ROOT,
+    )
+
+    assert spec_path == (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-visionarena-online-qwen25-vl-3b-910b2.json"
+    ).resolve()
+
+
 def test_resolve_without_repo_root_returns_repo_relative_path() -> None:
     spec_path = perfgate_specs.resolve_perfgate_spec_file(
         scenario="random-online",
@@ -87,7 +102,7 @@ def test_resolve_without_repo_root_returns_repo_relative_path() -> None:
 def test_resolve_rejects_unsupported_pair() -> None:
     try:
         perfgate_specs.resolve_perfgate_spec_file(
-            scenario="visionarena-online",
+            scenario="sonnet-throughput",
             hardware_chip_model="910B2",
             repo_root=REPO_ROOT,
         )
@@ -98,6 +113,7 @@ def test_resolve_rejects_unsupported_pair() -> None:
         assert "random-latency/910B2" in message
         assert "random-online/910B2" in message
         assert "sharegpt-online/910B2" in message
+        assert "visionarena-online/910B2" in message
     else:  # pragma: no cover - assertion guard
         raise AssertionError("expected unsupported pair to fail")
 
@@ -288,7 +304,7 @@ def test_cli_resolve_failure_uses_stderr(capsys) -> None:
         [
             "resolve",
             "--scenario",
-            "visionarena-online",
+            "sonnet-throughput",
             "--hardware-chip-model",
             "910B2",
             "--repo-root",
