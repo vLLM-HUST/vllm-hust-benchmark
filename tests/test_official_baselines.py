@@ -136,6 +136,85 @@ def test_perfgate_random_latency_spec_is_available_for_ci() -> None:
     assert same_spec["resolved_client_parameters"]["batch_size"] == 1
 
 
+def test_perfgate_sonnet_throughput_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-sonnet-throughput-qwen25-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    same_spec = build_same_spec_payload(spec)
+
+    assert spec["id"] == "perfgate-ascend-sonnet-throughput-qwen25-3b-910b2"
+    assert spec["scenario"] == "sonnet-throughput"
+    assert spec["model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert spec["server_parameters"]["dtype"] == "bfloat16"
+    assert spec["client_parameters"]["dataset_name"] == "sonnet"
+    assert spec["client_parameters"]["dataset_path"] == "benchmarks/sonnet.txt"
+    assert spec["client_parameters"]["num_prompts"] == 8
+    assert same_spec["scenario"] == "sonnet-throughput"
+    assert same_spec["resolved_client_parameters"]["dataset_name"] == "sonnet"
+
+
+def test_perfgate_instructcoder_online_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-instructcoder-online-qwen25-coder-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    same_spec = build_same_spec_payload(spec)
+
+    assert spec["id"] == "perfgate-ascend-instructcoder-online-qwen25-coder-3b-910b2"
+    assert spec["scenario"] == "instructcoder-online"
+    assert spec["model"] == "Qwen/Qwen2.5-Coder-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert spec["server_parameters"]["dtype"] == "bfloat16"
+    assert spec["client_parameters"]["dataset_name"] == "hf"
+    assert spec["client_parameters"]["dataset_path"] == "likaixin/InstructCoder"
+    assert spec["client_parameters"]["num_prompts"] == 8
+    assert spec["client_parameters"]["no_stream"] is True
+    assert same_spec["scenario"] == "instructcoder-online"
+    assert same_spec["resolved_client_parameters"]["dataset_name"] == "hf"
+    assert same_spec["resolved_client_parameters"]["num_prompts"] == 8
+
+
+def test_perfgate_agent_research_online_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-agent-research-online-qwen25-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    same_spec = build_same_spec_payload(spec)
+
+    assert spec["id"] == "perfgate-ascend-agent-research-online-qwen25-3b-910b2"
+    assert spec["scenario"] == "agent-research-online"
+    assert spec["model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert spec["server_parameters"]["dtype"] == "bfloat16"
+    assert spec["client_parameters"]["backend"] == "openai-chat"
+    assert spec["client_parameters"]["dataset_name"] == "custom"
+    assert (
+        spec["client_parameters"]["dataset_path"]
+        == "scripts/traces/evoscientist-workload-custom.jsonl"
+    )
+    assert spec["client_parameters"]["num_prompts"] == 8
+    assert same_spec["scenario"] == "agent-research-online"
+    assert same_spec["resolved_client_parameters"]["dataset_name"] == "custom"
+    assert same_spec["resolved_client_parameters"]["num_prompts"] == 8
+
+
 def test_has_canonical_run_requires_matching_spec_id_and_submitter(tmp_path: Path) -> None:
     canonical_dir = tmp_path / _spec()["id"]
     canonical_dir.mkdir(parents=True)
