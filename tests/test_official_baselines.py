@@ -136,6 +136,38 @@ def test_perfgate_random_latency_spec_is_available_for_ci() -> None:
     assert same_spec["resolved_client_parameters"]["batch_size"] == 1
 
 
+def test_perfgate_visionarena_online_spec_is_available_for_ci() -> None:
+    spec_file = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "perfgate-ascend-visionarena-online-qwen25-vl-3b-910b2.json"
+    )
+    spec = json.loads(spec_file.read_text(encoding="utf-8"))
+    same_spec = build_same_spec_payload(spec)
+
+    assert spec["id"] == "perfgate-ascend-visionarena-online-qwen25-vl-3b-910b2"
+    assert spec["scenario"] == "visionarena-online"
+    assert spec["model"] == "Qwen/Qwen2.5-VL-3B-Instruct"
+    assert spec["model_parameters"] == "3B"
+    assert spec["model_precision"] == "BF16"
+    assert spec["hardware_chip_model"] == "910B2"
+    assert spec["server_parameters"]["dtype"] == "bfloat16"
+    assert spec["server_parameters"]["limit_mm_per_prompt"] == {"image": 1}
+    assert spec["client_parameters"]["backend"] == "openai-chat"
+    assert spec["client_parameters"]["endpoint"] == "/v1/chat/completions"
+    assert spec["client_parameters"]["dataset_name"] == "hf"
+    assert spec["client_parameters"]["dataset_path"] == "lmarena-ai/VisionArena-Chat"
+    assert spec["client_parameters"]["hf_split"] == "train"
+    assert spec["client_parameters"]["num_prompts"] == 8
+    assert same_spec["scenario"] == "visionarena-online"
+    assert same_spec["resolved_server_parameters"]["limit_mm_per_prompt"] == {
+        "image": 1
+    }
+    assert same_spec["resolved_client_parameters"]["dataset_name"] == "hf"
+    assert same_spec["resolved_client_parameters"]["num_prompts"] == 8
+
+
 def test_has_canonical_run_requires_matching_spec_id_and_submitter(tmp_path: Path) -> None:
     canonical_dir = tmp_path / _spec()["id"]
     canonical_dir.mkdir(parents=True)
