@@ -494,6 +494,80 @@ For each selected scenario:
 - [ ] Decide whether to make it blocking based on stability.
 - [ ] Verify website aggregation and display.
 
+### Phase 6: Multi-scenario workflow orchestration
+
+After the scenario specs and shared resolver are in place, the remaining work is
+workflow orchestration. The current downstream benchmark workflows can resolve
+and run one scenario at a time. They should be extended so PR gates, main-branch
+publishing, and scheduled runs can cover multiple scenarios without repeatedly
+editing workflow YAML for each new case.
+
+Current limitation:
+
+- PR-triggered perfgate runs are still effectively single-scenario runs.
+- Main or merge-triggered benchmark publishing can still produce data for only
+  the configured scenario.
+- The benchmark/perfgate workflow has no dedicated scheduled full-scenario run.
+- Existing scheduled workflows in `vllm-ascend-hust`, such as Main2Main and E2E,
+  are not the same as the multi-scenario perfgate benchmark workflow.
+
+Remaining development tasks:
+
+- [ ] Add PR-time multi-scenario configuration.
+  - Support repository variables such as
+    `VLLM_HUST_PR_BENCHMARK_SCENARIOS` and
+    `VLLM_ASCEND_HUST_PR_BENCHMARK_SCENARIOS`.
+  - Keep the existing single-scenario variables as a compatibility fallback.
+  - Use the scenario list to run multiple lightweight or representative cases.
+- [ ] Add main or merge-time multi-scenario publishing.
+  - Support repository variables such as
+    `VLLM_HUST_MAIN_BENCHMARK_SCENARIOS` and
+    `VLLM_ASCEND_HUST_MAIN_BENCHMARK_SCENARIOS`.
+  - Ensure each scenario produces an independent benchmark artifact and
+    submission payload.
+  - Ensure published benchmark data is not limited to `random-online`.
+- [ ] Add scheduled multi-scenario benchmark runs.
+  - Add a schedule to the perfgate benchmark workflow, or create a dedicated
+    nightly perfgate workflow.
+  - Support repository variables such as
+    `VLLM_HUST_NIGHTLY_BENCHMARK_SCENARIOS` and
+    `VLLM_ASCEND_HUST_NIGHTLY_BENCHMARK_SCENARIOS`.
+  - Choose a schedule that does not conflict with existing Ascend Main2Main,
+    E2E, or nightly resource usage.
+  - Support manual dispatch for the same full-scenario list.
+- [ ] Add multi-scenario result isolation and aggregation.
+  - Keep result directories, artifacts, and submission files separated by
+    scenario.
+  - Produce a run summary table with scenario, status, primary metrics,
+    perfgate result, and artifact location.
+  - Publish or comment a combined summary for PR and issue-comment triggers.
+- [ ] Define failure and policy behavior.
+  - Decide whether PR multi-scenario runs are report-only or blocking.
+  - Decide whether one failed scenario should fail the whole workflow.
+  - Keep policy in downstream workflows, not in the benchmark spec registry.
+
+Suggested configuration precedence:
+
+1. Explicit spec override, such as `PERFGATE_SPEC_FILE` or
+   `SAME_SPEC_SPEC_FILE`.
+2. Multi-scenario list for the trigger type, such as
+   `*_PR_BENCHMARK_SCENARIOS`, `*_MAIN_BENCHMARK_SCENARIOS`, or
+   `*_NIGHTLY_BENCHMARK_SCENARIOS`.
+3. Existing single-scenario configuration, such as
+   `*_PR_BENCHMARK_SCENARIO` or `*_MAIN_BENCHMARK_SCENARIO`.
+4. Default fallback: `random-online`.
+
+Open questions to confirm before implementation:
+
+- Which scenarios should run on every PR?
+- Which scenarios should publish after merge to main?
+- Which scenarios should run only in nightly or scheduled jobs?
+- Should PR-time multi-scenario runs be serial or matrix-based?
+- Should heavy scenarios, such as multimodal cases, run in PR gates or only in
+  scheduled jobs?
+- Should multi-scenario failures be blocking immediately, or start as
+  report-only until enough data is collected?
+
 ## New Conversation Handoff
 
 When continuing this work in a new conversation, start with:
