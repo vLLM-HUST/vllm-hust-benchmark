@@ -802,7 +802,7 @@ server_log_indicates_node_env_failure() {
 
   [[ -f "$log_file" ]] || return 1
 
-  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception|Engine core initialization failed" "$log_file"
+  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception" "$log_file"
 }
 
 wait_for_server() {
@@ -970,13 +970,17 @@ if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
       SERVER_PID=$!
       persist_managed_server_state
 
-      if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then
+      set +e
+      wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"
+      server_wait_status=$?
+      set -e
+
+      if [[ "$server_wait_status" -eq 0 ]]; then
         persist_managed_server_state
         server_ready=1
         break
       fi
 
-      server_wait_status=$?
       if [[ "$server_wait_status" -eq 86 && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
         echo "[same-spec-current] detected transient Ascend runtime startup failure; retrying server start in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
         cleanup_managed_server || true
