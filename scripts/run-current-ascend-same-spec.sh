@@ -59,6 +59,8 @@ CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-$READY_
 SERVER_START_RETRIES=${SERVER_START_RETRIES:-3}
 SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
 SERVER_LOG_TAIL_LINES=${SERVER_LOG_TAIL_LINES:-200}
+SERVER_LOG_PROGRESS_INTERVAL_SECONDS=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS:-120}
+SERVER_LOG_PROGRESS_TAIL_LINES=${SERVER_LOG_PROGRESS_TAIL_LINES:-40}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -808,9 +810,10 @@ server_log_indicates_node_env_failure() {
 
 print_server_log_tail() {
   local log_file=$1
+  local lines=${2:-$SERVER_LOG_TAIL_LINES}
 
   [[ -f "$log_file" ]] || return 0
-  tail -n "$SERVER_LOG_TAIL_LINES" "$log_file" >&2
+  tail -n "$lines" "$log_file" >&2
 }
 
 wait_for_server() {
@@ -819,10 +822,15 @@ wait_for_server() {
   local waited=0
   local timeout_sec=${READY_TIMEOUT_SECONDS}
   local status_interval_sec=${READY_STATUS_INTERVAL_SECONDS}
+  local log_progress_interval_sec=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS}
   local next_status_at=0
+  local next_log_progress_at=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS}
 
   if (( status_interval_sec <= 0 )); then
     status_interval_sec=30
+  fi
+  if (( log_progress_interval_sec <= 0 )); then
+    next_log_progress_at=$((timeout_sec + 1))
   fi
 
   while (( waited < timeout_sec )); do
@@ -848,6 +856,14 @@ wait_for_server() {
     if (( waited >= next_status_at )); then
       echo "[same-spec-current] waiting for current same-spec server at ${host}:${port} (${waited}s/${timeout_sec}s)" >&2
       next_status_at=$((waited + status_interval_sec))
+    fi
+    if (( waited >= next_log_progress_at )); then
+      if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+        echo "---- same-spec server log progress at ${waited}s: ${SERVER_STDOUT_LOG} (last ${SERVER_LOG_PROGRESS_TAIL_LINES} lines) ----" >&2
+        print_server_log_tail "$SERVER_STDOUT_LOG" "$SERVER_LOG_PROGRESS_TAIL_LINES"
+        echo "---- end same-spec server log progress ----" >&2
+      fi
+      next_log_progress_at=$((waited + log_progress_interval_sec))
     fi
 
     sleep 1

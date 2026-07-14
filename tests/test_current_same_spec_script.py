@@ -36,6 +36,19 @@ def test_current_same_spec_runner_prints_enough_server_log_context() -> None:
     script = RUNNER.read_text(encoding="utf-8")
 
     assert "SERVER_LOG_TAIL_LINES=${SERVER_LOG_TAIL_LINES:-200}" in script
+    assert "SERVER_LOG_PROGRESS_INTERVAL_SECONDS=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS:-120}" in script
+    assert "SERVER_LOG_PROGRESS_TAIL_LINES=${SERVER_LOG_PROGRESS_TAIL_LINES:-40}" in script
     assert "print_server_log_tail()" in script
     assert 'print_server_log_tail "$SERVER_STDOUT_LOG"' in script
     assert "tail -n 40" not in script
+
+
+def test_current_same_spec_runner_prints_server_log_progress_while_waiting() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    wait_block = script[script.index("wait_for_server()") :]
+    wait_block = wait_block[: wait_block.index("  echo \"Timed out waiting")]
+
+    assert "next_log_progress_at" in wait_block
+    assert "same-spec server log progress at" in wait_block
+    assert 'print_server_log_tail "$SERVER_STDOUT_LOG" "$SERVER_LOG_PROGRESS_TAIL_LINES"' in wait_block
