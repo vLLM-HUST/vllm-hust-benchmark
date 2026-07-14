@@ -51,4 +51,18 @@ def test_current_same_spec_runner_prints_server_log_progress_while_waiting() -> 
 
     assert "next_log_progress_at" in wait_block
     assert "same-spec server log progress at" in wait_block
+    assert 'probe_server_ready "$host" "$port" 1 || true' in wait_block
     assert 'print_server_log_tail "$SERVER_STDOUT_LOG" "$SERVER_LOG_PROGRESS_TAIL_LINES"' in wait_block
+
+
+def test_current_same_spec_runner_probe_bypasses_proxy_and_checks_ping() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    probe_block = script[script.index("probe_server_ready()") :]
+    probe_block = probe_block[: probe_block.index("server_log_indicates_node_env_failure()")]
+
+    assert "READY_PROBE_TIMEOUT_SECONDS=${READY_PROBE_TIMEOUT_SECONDS:-5}" in script
+    assert '"/ping"' in probe_block
+    assert 'curl --noproxy "*"' in probe_block
+    assert "--connect-timeout 2 --max-time" in probe_block
+    assert "readiness probe failed:" in probe_block

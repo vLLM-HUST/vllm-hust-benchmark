@@ -61,6 +61,7 @@ SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
 SERVER_LOG_TAIL_LINES=${SERVER_LOG_TAIL_LINES:-200}
 SERVER_LOG_PROGRESS_INTERVAL_SECONDS=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS:-120}
 SERVER_LOG_PROGRESS_TAIL_LINES=${SERVER_LOG_PROGRESS_TAIL_LINES:-40}
+READY_PROBE_TIMEOUT_SECONDS=${READY_PROBE_TIMEOUT_SECONDS:-5}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -785,15 +786,24 @@ assert_target_port_available() {
 probe_server_ready() {
   local host=$1
   local port=$2
+  local verbose=${3:-0}
   local ready_path
+  local url
+  local curl_output
   local ready_paths=(
     "/health"
+    "/ping"
     "/v1/models"
   )
 
   for ready_path in "${ready_paths[@]}"; do
-    if curl -fsS "http://${host}:${port}${ready_path}" >/dev/null 2>&1; then
+    url="http://${host}:${port}${ready_path}"
+    if curl --noproxy "*" -fsS --connect-timeout 2 --max-time "$READY_PROBE_TIMEOUT_SECONDS" "$url" >/dev/null 2>&1; then
       return 0
+    fi
+    if [[ "$verbose" == "1" ]]; then
+      curl_output="$(curl --noproxy "*" -fsS --connect-timeout 2 --max-time "$READY_PROBE_TIMEOUT_SECONDS" "$url" 2>&1 >/dev/null || true)"
+      echo "[same-spec-current] readiness probe failed: ${url}${curl_output:+ (${curl_output})}" >&2
     fi
   done
 
@@ -858,6 +868,7 @@ wait_for_server() {
       next_status_at=$((waited + status_interval_sec))
     fi
     if (( waited >= next_log_progress_at )); then
+      probe_server_ready "$host" "$port" 1 || true
       if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
         echo "---- same-spec server log progress at ${waited}s: ${SERVER_STDOUT_LOG} (last ${SERVER_LOG_PROGRESS_TAIL_LINES} lines) ----" >&2
         print_server_log_tail "$SERVER_STDOUT_LOG" "$SERVER_LOG_PROGRESS_TAIL_LINES"
