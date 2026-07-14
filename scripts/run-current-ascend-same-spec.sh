@@ -58,6 +58,7 @@ READY_STATUS_INTERVAL_SECONDS=${READY_STATUS_INTERVAL_SECONDS:-30}
 CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-$READY_TIMEOUT_SECONDS}
 SERVER_START_RETRIES=${SERVER_START_RETRIES:-3}
 SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
+SERVER_LOG_TAIL_LINES=${SERVER_LOG_TAIL_LINES:-200}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -802,7 +803,14 @@ server_log_indicates_node_env_failure() {
 
   [[ -f "$log_file" ]] || return 1
 
-  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception" "$log_file"
+  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy" "$log_file"
+}
+
+print_server_log_tail() {
+  local log_file=$1
+
+  [[ -f "$log_file" ]] || return 0
+  tail -n "$SERVER_LOG_TAIL_LINES" "$log_file" >&2
 }
 
 wait_for_server() {
@@ -821,7 +829,7 @@ wait_for_server() {
     if [[ -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then
       echo "Current same-spec server exited before becoming ready" >&2
       if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
-        tail -n 40 "$SERVER_STDOUT_LOG" >&2
+        print_server_log_tail "$SERVER_STDOUT_LOG"
         if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG"; then
           echo "Detected Ascend node-level runtime failure during current same-spec startup" >&2
           return 86
@@ -848,7 +856,7 @@ wait_for_server() {
 
   echo "Timed out waiting for current same-spec server at ${host}:${port}" >&2
   if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
-    tail -n 40 "$SERVER_STDOUT_LOG" >&2
+    print_server_log_tail "$SERVER_STDOUT_LOG"
     if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG"; then
       echo "Detected Ascend node-level runtime failure while waiting for current same-spec startup" >&2
       return 86
