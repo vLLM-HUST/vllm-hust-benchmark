@@ -26,5 +26,16 @@ def test_current_same_spec_runner_does_not_retry_generic_engine_startup_wrapper(
     detector = detector[: detector.index("wait_for_server()")]
 
     assert "Engine core initialization failed" not in detector
+    assert "ERR99999 UNKNOWN applicaiton exception" not in detector
+    assert "ERR99999 UNKNOWN application exception" not in detector
     assert "rtGetDeviceCount" in detector
     assert "Resource_Busy" in detector
+
+
+def test_current_same_spec_runner_prints_enough_server_log_context() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    assert "SERVER_LOG_TAIL_LINES=${SERVER_LOG_TAIL_LINES:-200}" in script
+    assert "print_server_log_tail()" in script
+    assert 'print_server_log_tail "$SERVER_STDOUT_LOG"' in script
+    assert "tail -n 40" not in script
