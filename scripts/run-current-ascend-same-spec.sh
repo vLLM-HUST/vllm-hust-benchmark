@@ -789,7 +789,8 @@ probe_server_ready() {
   local verbose=${3:-0}
   local ready_path
   local url
-  local curl_output
+  local probe_output
+  local probe_status
   local ready_paths=(
     "/health"
     "/ping"
@@ -798,12 +799,48 @@ probe_server_ready() {
 
   for ready_path in "${ready_paths[@]}"; do
     url="http://${host}:${port}${ready_path}"
-    if curl --noproxy "*" -fsS --connect-timeout 2 --max-time "$READY_PROBE_TIMEOUT_SECONDS" "$url" >/dev/null 2>&1; then
+    set +e
+    probe_output="$("$CURRENT_RUNTIME_PYTHON" - "$host" "$port" "$ready_path" "$READY_PROBE_TIMEOUT_SECONDS" <<'PY' 2>&1
+import socket
+import sys
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+path = sys.argv[3]
+timeout = float(sys.argv[4])
+
+try:
+    with socket.create_connection((host, port), timeout=timeout) as sock:
+        sock.settimeout(timeout)
+        request = (
+            f"GET {path} HTTP/1.1\r\n"
+            f"Host: {host}:{port}\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+        )
+        sock.sendall(request.encode("ascii"))
+        response = sock.recv(256).decode("iso-8859-1", errors="replace")
+except Exception as exc:
+    print(f"{exc.__class__.__name__}: {exc}")
+    raise SystemExit(1)
+
+status_line = response.splitlines()[0] if response else ""
+parts = status_line.split()
+if len(parts) >= 2 and parts[1].isdigit() and 200 <= int(parts[1]) < 400:
+    print(status_line)
+    raise SystemExit(0)
+
+print(status_line or "empty response")
+raise SystemExit(1)
+PY
+)"
+    probe_status=$?
+    set -e
+    if [[ "$probe_status" -eq 0 ]]; then
       return 0
     fi
     if [[ "$verbose" == "1" ]]; then
-      curl_output="$(curl --noproxy "*" -fsS --connect-timeout 2 --max-time "$READY_PROBE_TIMEOUT_SECONDS" "$url" 2>&1 >/dev/null || true)"
-      echo "[same-spec-current] readiness probe failed: ${url}${curl_output:+ (${curl_output})}" >&2
+      echo "[same-spec-current] readiness probe failed: ${url}${probe_output:+ (${probe_output})}" >&2
     fi
   done
 
