@@ -63,6 +63,8 @@ def test_current_same_spec_runner_probe_bypasses_proxy_and_checks_ping() -> None
 
     assert "READY_PROBE_TIMEOUT_SECONDS=${READY_PROBE_TIMEOUT_SECONDS:-5}" in script
     assert '"/ping"' in probe_block
-    assert 'curl --noproxy "*"' in probe_block
-    assert "--connect-timeout 2 --max-time" in probe_block
+    assert "socket.create_connection" in probe_block
+    assert "set +e" in probe_block
+    assert "set -e" in probe_block
     assert "readiness probe failed:" in probe_block
+    assert "curl " not in probe_block
