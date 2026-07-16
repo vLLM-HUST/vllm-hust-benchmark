@@ -22,7 +22,7 @@ python3 scripts/backfill_single_gpu.py plan
 #       Online serving scenarios
 #       random-online，sharegpt-online，prefix-repetition-online，instructcoder-online
 # random-latency, sharegpt-throughput  83cf83f
-python3 scripts/backfill_single_gpu.py run --only sonnet-throughput --commit 83cf83f
+python3 scripts/backfill_single_gpu.py run --only sharegpt-throughput --commit 83cf83f
 
 # 重建 snapshot
 python3 scripts/backfill_single_gpu.py aggregate

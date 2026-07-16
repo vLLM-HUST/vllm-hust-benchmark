@@ -666,7 +666,7 @@ def submit_artifact(
         "--data-source", DATA_SOURCE,
         "--git-commit", hust_commit,
         "--github-repository", "vllm-hust/vllm-hust",
-        "--github-ref", hust_commit[:10],
+        "--github-ref", "main",
         "--engine-source-repository", "vllm-hust/vllm-hust",
         "--engine-source-ref", hust_commit[:10],
         "--engine-source-commit", hust_commit,
