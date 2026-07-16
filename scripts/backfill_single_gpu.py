@@ -918,6 +918,20 @@ def cmd_plan(args: argparse.Namespace) -> int:
     return 0
 
 
+def _resolve_full_commit(short_or_full: str) -> str:
+    """Resolve a (possibly short) git SHA to a full 40-char commit hash."""
+    out = subprocess.run(
+        ["git", "rev-parse", short_or_full],
+        cwd=HUST_REPO, capture_output=True, text=True, check=False,
+    )
+    if out.returncode == 0:
+        resolved = out.stdout.strip()
+        if len(resolved) == 40:
+            return resolved
+    # fallback: return as-is (may already be full, or the repo is on a different commit)
+    return short_or_full
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     state = load_state()
     save_state(state)  # Persist the captured HEADs up front.
@@ -926,7 +940,8 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     if args.commit:
         workloads = args.only or list(SCENARIO_PARAMS.keys())
-        target = {w: [args.commit] for w in workloads if w in SCENARIO_PARAMS}
+        full_commit = _resolve_full_commit(args.commit)
+        target = {w: [full_commit] for w in workloads if w in SCENARIO_PARAMS}
     elif args.only:
         target = {w: target.get(w, []) for w in args.only if w in target}
         target = {w: c for w, c in target.items() if c}
