@@ -8,6 +8,10 @@
 ## How to Run
 
 ```bash
+# setup
+cd /root/vllm/vllm-hust-benchmark
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+
 
 # 查看缺失的 cell
 python scripts/backfill_single_gpu.py plan
@@ -17,7 +21,8 @@ python scripts/backfill_single_gpu.py plan
 #       sharegpt-throughput， random-latency，sonnet-throughput，
 #       Online serving scenarios
 #       random-online，sharegpt-online，prefix-repetition-online，instructcoder-online
-python scripts/backfill_single_gpu.py run --only <workload> --commit <sha>
+# random-latency, sharegpt-throughput  83cf83f
+python3 scripts/backfill_single_gpu.py run --only random-latency --commit 83cf83f
 
 # 重建 snapshot
 python scripts/backfill_single_gpu.py aggregate
@@ -36,7 +41,7 @@ import json
 with open('leaderboard-data/snapshots/leaderboard_single.json') as f:
     data = json.load(f)
 print(f'Total entries: {len(data)}')
-commit = '2206f1f7b'
+commit = '83cf83f'
 count = 0
 for entry in data:
     meta = entry.get('metadata', {})
