@@ -25,10 +25,10 @@ python scripts/backfill_single_gpu.py plan
 python3 scripts/backfill_single_gpu.py run --only random-latency --commit 83cf83f
 
 # 重建 snapshot
-python scripts/backfill_single_gpu.py aggregate
+python3 scripts/backfill_single_gpu.py aggregate
 
 # 验证所有提交
-python scripts/backfill_single_gpu.py validate
+python3 scripts/backfill_single_gpu.py validate
 
 
 
