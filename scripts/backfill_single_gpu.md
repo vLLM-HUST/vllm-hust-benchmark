@@ -9,13 +9,14 @@
 
 ```bash
 
-cd /root/vllm/vllm-hust-benchmark
+# 查看缺失的 cell
+python scripts/backfill_single_gpu.py plan
 
-# 跑一个 commit 的 random-latency
-/root/miniconda3/envs/vllm-hust-dev/bin/python scripts/backfill_single_gpu.py run \
-  --commit 2206f1f7b7212801187bc001c5f6cb86b2289214 --only random-latency
+# 跑指定 workload 和 commit
+python scripts/backfill_single_gpu.py run --only random-latency --commit <sha>
 
-# 聚合 + 推送到 leaderboard
-/root/miniconda3/envs/vllm-hust-dev/bin/python scripts/backfill_single_gpu.py aggregate
-/root/miniconda3/envs/vllm-hust-dev/bin/python scripts/backfill_single_gpu.py push -m "feat: backfill data"
-```
+# 重建 snapshot
+python scripts/backfill_single_gpu.py aggregate
+
+# 验证所有提交
+python scripts/backfill_single_gpu.py validate
