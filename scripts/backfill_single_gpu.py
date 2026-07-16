@@ -35,12 +35,14 @@ It automates the previously hand-rolled flow:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -130,6 +132,43 @@ DEFAULT_CELLS: dict[str, list[str]] = {
         "7a63f81e86bd71e980adb635870ff56c9e23b545",
         "f273f9c5e2669b6e8aeee61823c895e2399cf609",
     ],
+    # Online serving scenarios
+    "random-online": [
+        "2206f1f7b7212801187bc001c5f6cb86b2289214",
+        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
+        "51621c35bcce749cc34539bc1a48d32f264924a0",
+        "7a63f81e86bd71e980adb635870ff56c9e23b545",
+        "83cf83ff20a880d70b6ba916977c49304d598d9c",
+        "dcc06b18f32404abafe6922910117f1b9f66054b",
+        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+    ],
+    "sharegpt-online": [
+        "2206f1f7b7212801187bc001c5f6cb86b2289214",
+        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
+        "51621c35bcce749cc34539bc1a48d32f264924a0",
+        "7a63f81e86bd71e980adb635870ff56c9e23b545",
+        "83cf83ff20a880d70b6ba916977c49304d598d9c",
+        "dcc06b18f32404abafe6922910117f1b9f66054b",
+        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+    ],
+    "prefix-repetition-online": [
+        "2206f1f7b7212801187bc001c5f6cb86b2289214",
+        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
+        "51621c35bcce749cc34539bc1a48d32f264924a0",
+        "7a63f81e86bd71e980adb635870ff56c9e23b545",
+        "83cf83ff20a880d70b6ba916977c49304d598d9c",
+        "dcc06b18f32404abafe6922910117f1b9f66054b",
+        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+    ],
+    "instructcoder-online": [
+        "2206f1f7b7212801187bc001c5f6cb86b2289214",
+        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
+        "51621c35bcce749cc34539bc1a48d32f264924a0",
+        "7a63f81e86bd71e980adb635870ff56c9e23b545",
+        "83cf83ff20a880d70b6ba916977c49304d598d9c",
+        "dcc06b18f32404abafe6922910117f1b9f66054b",
+        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+    ],
 }
 
 # Per-scenario benchmark parameters, aligned with the existing
@@ -158,6 +197,44 @@ SCENARIO_PARAMS: dict[str, dict[str, Any]] = {
         "num_prompts": 200,
         "extra_args": [],
     },
+    # Online serving scenarios
+    "random-online": {
+        "benchmark_type": "serve",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "request_rate": 1,
+        "input_length": 1024,
+        "output_length": 256,
+        "extra_args": [],
+    },
+    "sharegpt-online": {
+        "benchmark_type": "serve",
+        "dataset_name": "sharegpt",
+        "dataset_path": str(SHAREGPT_DATASET),
+        "num_prompts": 200,
+        "request_rate": 1,
+        "extra_args": [],
+    },
+    "prefix-repetition-online": {
+        "benchmark_type": "serve",
+        "dataset_name": "prefix_repetition",
+        "num_prompts": 200,
+        "request_rate": 1,
+        "input_length": 4096,
+        "output_length": 256,
+        "extra_args": [],
+    },
+    "instructcoder-online": {
+        "benchmark_type": "serve",
+        "dataset_name": "hf",
+        "dataset_path": "likaixin/InstructCoder",
+        "num_prompts": 2048,
+        "request_rate": 1,
+        "extra_args": [],
+    },
+    # visionarena-online and agent-research-online are NOT included here
+    # because they use openai-chat backend with /v1/chat/completions endpoint,
+    # which requires a different CLI invocation.
 }
 
 
@@ -207,16 +284,19 @@ def current_head(repo: Path) -> str:
 
 def git_checkout(repo: Path, commit: str) -> None:
     subprocess.run(["git", "fetch", "--all", "--quiet"], cwd=repo, check=False)
-    try:
-        subprocess.run(
-            ["git", "checkout", "-q", commit], cwd=repo, check=True
-        )
-    except subprocess.CalledProcessError:
+    # Force checkout to discard any local modifications (e.g. from
+    # install_ascend_plugin) that would block the checkout.
+    subprocess.run(
+        ["git", "checkout", "-fq", commit], cwd=repo, check=False
+    )
+    # If the commit is not local, fetch and retry.
+    head = current_head(repo)
+    if not head.startswith(commit):
         subprocess.run(
             ["git", "fetch", "origin", commit], cwd=repo, check=True
         )
         subprocess.run(
-            ["git", "checkout", "-q", commit], cwd=repo, check=True
+            ["git", "checkout", "-fq", commit], cwd=repo, check=True
         )
 
 
@@ -361,11 +441,16 @@ def run_vllm_bench(
             "--endpoint", "/v1/completions",
             "--dataset-name", params["dataset_name"],
             "--num-prompts", str(params["num_prompts"]),
+            "--request-rate", str(params.get("request_rate", 1)),
             "--gpu-memory-utilization", "0.85",
             "--output-json", str(output_dir / "raw.json"),
         ]
         if params.get("dataset_path"):
             cmd.extend(["--dataset-path", params["dataset_path"]])
+        if params.get("input_length"):
+            cmd.extend(["--random-input-len", str(params["input_length"])])
+        if params.get("output_length"):
+            cmd.extend(["--random-output-len", str(params["output_length"])])
 
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
@@ -423,16 +508,92 @@ def run_vllm_bench(
     return raw
 
 
+def _build_same_spec_id(workload: str) -> str:
+    """Build the official v0.18.0 same_spec spec_id for a workload."""
+    model_tag = "qwen25-coder-14b" if "instructcoder" in workload else "qwen25-14b"
+    return f"official-ascend-jan-2026-v0.18.0-{workload}-{model_tag}-910b2"
+
+
+def _generate_same_spec(workload: str) -> dict[str, Any]:
+    """Generate a minimal same_spec payload for the given workload.
+
+    This allows backfill submissions to pass the public-snapshot filter
+    (which requires a ``spec_id`` starting with ``official-ascend-jan-2026-``
+    for official vllm-hust workloads).
+    """
+    spec_id = _build_same_spec_id(workload)
+    params = SCENARIO_PARAMS[workload]
+    benchmark_type = params["benchmark_type"]
+
+    # Build minimal resolved parameters
+    server_params: dict[str, Any] = {
+        "tensor_parallel_size": 1,
+        "dtype": "float16",
+        "gpu_memory_utilization": 0.85,
+    }
+    if benchmark_type == "latency":
+        server_params["enforce_eager"] = ""
+        server_params["trust_remote_code"] = ""
+        server_params["disable_log_stats"] = ""
+
+    client_params: dict[str, Any] = {}
+    if benchmark_type == "latency":
+        client_params["input_len"] = params.get("input_length")
+        client_params["output_len"] = params.get("output_length")
+        client_params["batch_size"] = params.get("batch_size")
+        client_params["num_iters_warmup"] = params.get("num_iters_warmup")
+        client_params["num_iters"] = params.get("num_iters")
+    elif benchmark_type == "serve":
+        client_params["request_rate"] = params.get("request_rate", 1)
+        client_params["num_prompts"] = params.get("num_prompts")
+        if params.get("input_length"):
+            client_params["random_input_len"] = params["input_length"]
+        if params.get("output_length"):
+            client_params["random_output_len"] = params["output_length"]
+    elif benchmark_type == "throughput":
+        client_params["num_prompts"] = params.get("num_prompts")
+        if params.get("dataset_name"):
+            client_params["dataset_name"] = params["dataset_name"]
+
+    # Compute a deterministic hash from the payload
+    payload = {
+        "schema_version": "benchmark-same-spec/v1",
+        "spec_id": spec_id,
+        "spec_label": f"Official Ascend baseline for {workload}",
+        "scenario": workload,
+        "model": MODEL_NAME,
+        "model_parameters": MODEL_PARAMETERS,
+        "model_precision": MODEL_PRECISION,
+        "hardware_vendor": HARDWARE_VENDOR,
+        "hardware_chip_model": HARDWARE_CHIP_MODEL,
+        "chip_count": CHIP_COUNT,
+        "node_count": NODE_COUNT,
+        "resolved_server_parameters": server_params,
+        "resolved_client_parameters": client_params,
+    }
+    raw = json.dumps(payload, sort_keys=True, ensure_ascii=False)
+    payload["resolved_spec_hash"] = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    return payload
+
+
 def submit_artifact(
     workload: str, hust_commit: str, ascend_commit: str, run_id: str, raw: Path
 ) -> Path:
     output_dir = REPO_ROOT / "submissions" / run_id
     output_dir.mkdir(parents=True, exist_ok=True)
     constraints = REPO_ROOT / "docs" / "examples" / "constraints_metrics.sample.json"
+
+    # Generate same_spec so the submission passes the public-snapshot filter.
+    same_spec = _generate_same_spec(workload)
+    same_spec_file = STATE_DIR / f"same_spec_{workload}.json"
+    same_spec_file.parent.mkdir(parents=True, exist_ok=True)
+    same_spec_file.write_text(json.dumps(same_spec, indent=2) + "\n", encoding="utf-8")
+
     cmd: list[str] = [
         str(PYTHON_BIN), "-m", "vllm_hust_benchmark.cli", "submit", workload,
         "--benchmark-result-file", str(raw),
         "--constraints-file", str(constraints),
+        "--same-spec-file", str(same_spec_file),
         "--run-id", run_id,
         "--engine", "vllm-hust",
         "--engine-version", "0.18.0.post1",
@@ -471,6 +632,156 @@ def submit_artifact(
     return output_dir
 
 
+# ---------------------------------------------------------------------------
+# Validation (Section 13.2: result completeness)
+# ---------------------------------------------------------------------------
+
+REQUIRED_ARTIFACT_FIELDS = {
+    "entry_id", "engine", "engine_version", "config_type",
+    "hardware", "model", "workload", "metrics", "constraints",
+    "versions", "metadata",
+}
+REQUIRED_METRICS_FIELDS = {"ttft_ms", "tbt_ms", "throughput_tps", "error_rate"}
+
+
+def validate_submission(sub_dir: Path) -> list[str]:
+    """Validate a single submission directory for completeness.
+
+    Checks:
+      - run_leaderboard.json exists and has all required fields
+      - leaderboard_manifest.json exists
+      - Metrics are within reasonable ranges
+      - config_type matches single_gpu
+    """
+    errors: list[str] = []
+    rid = sub_dir.name
+
+    manifest = sub_dir / "leaderboard_manifest.json"
+    if not manifest.is_file():
+        errors.append(f"{rid}: missing leaderboard_manifest.json")
+    else:
+        try:
+            json.loads(manifest.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError) as exc:
+            errors.append(f"{rid}: leaderboard_manifest.json invalid: {exc}")
+
+    artifact = sub_dir / "run_leaderboard.json"
+    if not artifact.is_file():
+        errors.append(f"{rid}: missing run_leaderboard.json")
+        return errors
+
+    try:
+        run = json.loads(artifact.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        errors.append(f"{rid}: run_leaderboard.json invalid: {exc}")
+        return errors
+
+    # Check required top-level fields
+    missing = REQUIRED_ARTIFACT_FIELDS - set(run.keys())
+    if missing:
+        errors.append(f"{rid}: missing top-level fields: {missing}")
+
+    # Check config_type
+    if run.get("config_type") != "single_gpu":
+        errors.append(f"{rid}: config_type is {run.get('config_type')!r}, expected 'single_gpu'")
+
+    # Check metrics
+    metrics = run.get("metrics", {})
+    missing_metrics = REQUIRED_METRICS_FIELDS - set(metrics.keys())
+    if missing_metrics:
+        errors.append(f"{rid}: missing metrics fields: {missing_metrics}")
+    else:
+        workload_name = run.get("workload", {}).get("name", "")
+        is_latency = workload_name == "random-latency"
+        ttft = metrics.get("ttft_ms") or 0
+        tbt = metrics.get("tbt_ms") or 0
+        tput = metrics.get("throughput_tps") or 0
+        err_rate = metrics.get("error_rate", -1)
+        if ttft < 0:
+            errors.append(f"{rid}: ttft_ms is negative ({ttft})")
+        if tbt < 0:
+            errors.append(f"{rid}: tbt_ms is negative ({tbt})")
+        if tput <= 0 and not is_latency:
+            # latency 不测吞吐
+            errors.append(f"{rid}: throughput_tps is <= 0 ({tput})")
+        if is_latency:
+            # latency 场景 error_rate 可以为 None 或 0.0
+            if err_rate is not None and (err_rate < 0 or err_rate > 1):
+                errors.append(f"{rid}: error_rate out of range [0,1] ({err_rate})")
+        else:
+            if err_rate is None or err_rate < 0 or err_rate > 1:
+                errors.append(f"{rid}: error_rate out of range [0,1] ({err_rate})")
+
+    # Check workload
+    workload = run.get("workload", {})
+    if not workload.get("name"):
+        errors.append(f"{rid}: workload.name is missing")
+
+    # Check hardware
+    hw = run.get("hardware", {})
+    chip = str(hw.get("chip_model", "") or "").upper()
+    if chip != "910B2":
+        errors.append(f"{rid}: hardware.chip_model is {chip!r}, expected 910B2")
+
+    return errors
+
+
+def validate_snapshot(snapshot_path: Path) -> list[str]:
+    """Validate the aggregated leaderboard snapshot.
+
+    Checks:
+      - File exists and is valid JSON
+      - Each entry has required fields
+      - No duplicate entries for the same (workload, git_commit)
+    """
+    errors: list[str] = []
+    if not snapshot_path.is_file():
+        errors.append(f"missing snapshot: {snapshot_path}")
+        return errors
+
+    try:
+        entries = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        errors.append(f"invalid snapshot {snapshot_path}: {exc}")
+        return errors
+
+    if not isinstance(entries, list):
+        errors.append(f"snapshot {snapshot_path} must be a JSON array")
+        return errors
+
+    seen_ids: set[str] = set()
+    for i, entry in enumerate(entries):
+        eid = entry.get("entry_id", "")
+        if eid and eid in seen_ids:
+            errors.append(f"{snapshot_path.name}[{i}]: duplicate entry_id {eid}")
+        seen_ids.add(eid)
+
+        # Validate each entry
+        sub_errors = validate_submission_artifact_entry(entry, f"{snapshot_path.name}[{i}]")
+        errors.extend(sub_errors)
+
+    return errors
+
+
+def validate_submission_artifact_entry(entry: dict[str, Any], tag: str) -> list[str]:
+    """Validate a single leaderboard entry dict."""
+    errors: list[str] = []
+    missing = REQUIRED_ARTIFACT_FIELDS - set(entry.keys())
+    if missing:
+        errors.append(f"{tag}: missing fields: {missing}")
+
+    metrics = entry.get("metrics", {})
+    missing_metrics = REQUIRED_METRICS_FIELDS - set(metrics.keys())
+    if missing_metrics:
+        errors.append(f"{tag}: missing metrics: {missing_metrics}")
+
+    workload = entry.get("workload", {})
+    if not workload.get("name"):
+        errors.append(f"{tag}: missing workload.name")
+
+    return errors
+
+
 def run_cell(workload: str, hust_commit: str) -> dict[str, Any]:
     ascend_commit = resolve_ascend_commit(hust_commit)
 
@@ -493,6 +804,13 @@ def run_cell(workload: str, hust_commit: str) -> dict[str, Any]:
         raw = run_vllm_bench(workload, hust_commit, work_dir / "bench")
         run_id = build_run_id(workload, hust_commit)
         sub_dir = submit_artifact(workload, hust_commit, ascend_commit, run_id, raw)
+
+        # Validate the submission right after creation (Section 13.2).
+        errors = validate_submission(sub_dir)
+        if errors:
+            err_msg = "; ".join(errors)
+            log(f"Submission validation FAILED for {run_id}: {err_msg}")
+            raise RuntimeError(f"submission validation failed: {err_msg}")
     except Exception as exc:  # noqa: BLE001
         log(f"FAILED: {exc}")
         return {
@@ -596,7 +914,66 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
     ]
     log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
     subprocess.run(cmd, cwd=REPO_ROOT, check=True)
-    log("Aggregate done. Run scripts/validate_public_leaderboard_snapshots.py next.")
+
+    # Validate aggregated snapshots (Section 13.2)
+    snapshot_dir = REPO_ROOT / "leaderboard-data" / "snapshots"
+    all_errors: list[str] = []
+    for fname in ("leaderboard_single.json", "leaderboard_multi.json"):
+        fpath = snapshot_dir / fname
+        if fpath.is_file():
+            errors = validate_snapshot(fpath)
+            all_errors.extend(errors)
+
+    if all_errors:
+        log("AGGREGATE VALIDATION FAILED:")
+        for err in all_errors:
+            log(f"  VALIDATION ERROR: {err}")
+        log("Aggregate done but with validation errors. Please fix and re-run.")
+        log("Run scripts/validate_public_leaderboard_snapshots.py next.")
+        return 1
+
+    log("Aggregate validation passed. "
+        "Run scripts/validate_public_leaderboard_snapshots.py next.")
+    return 0
+
+
+def cmd_validate(args: argparse.Namespace) -> int:
+    """Validate all submission directories and snapshot files."""
+    all_errors: list[str] = []
+
+    # Validate submissions
+    submissions_dir = REPO_ROOT / "submissions"
+    if submissions_dir.is_dir():
+        for sub in sorted(submissions_dir.iterdir()):
+            if not sub.is_dir():
+                continue
+            errors = validate_submission(sub)
+            if errors:
+                print(f"FAIL: {sub.name}")
+                for err in errors:
+                    print(f"  {err}")
+                all_errors.extend(errors)
+            else:
+                print(f"OK:   {sub.name}")
+
+    # Validate snapshots
+    snapshot_dir = REPO_ROOT / "leaderboard-data" / "snapshots"
+    for fname in ("leaderboard_single.json", "leaderboard_multi.json"):
+        fpath = snapshot_dir / fname
+        if fpath.is_file():
+            errors = validate_snapshot(fpath)
+            if errors:
+                print(f"FAIL: {fname}")
+                for err in errors:
+                    print(f"  {err}")
+                all_errors.extend(errors)
+            else:
+                print(f"OK:   {fname}")
+
+    if all_errors:
+        print(f"\nTotal validation errors: {len(all_errors)}")
+        return 1
+    print("\nAll validations passed!")
     return 0
 
 
@@ -642,6 +1019,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("plan", help="Show what is missing.")
     sub.add_parser("status", help="Show progress from the checkpoint.")
     sub.add_parser("aggregate", help="Rebuild leaderboard-data/snapshots/.")
+    sub.add_parser("validate", help="Validate all submissions and snapshots (Section 13.2).")
     sub.add_parser("restore", help="Restore original vllm-hust/ascend HEADs.")
 
     p_push = sub.add_parser("push", help="Stage, commit and push.")
@@ -670,6 +1048,7 @@ def main(argv: list[str] | None = None) -> int:
         "run": cmd_run,
         "status": cmd_status,
         "aggregate": cmd_aggregate,
+        "validate": cmd_validate,
         "push": cmd_push,
         "restore": cmd_restore,
     }

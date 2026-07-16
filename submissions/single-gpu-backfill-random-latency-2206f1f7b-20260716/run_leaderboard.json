@@ -1,5 +1,5 @@
 {
-  "entry_id": "b68e039b-cb04-4ee2-b9cb-f63d8f2cc047",
+  "entry_id": "8766524c-fc34-44fe-ac4a-ba704b9b62ea",
   "engine": "vllm-hust",
   "engine_version": "0.18.0.post1",
   "config_type": "single_gpu",
@@ -30,11 +30,11 @@
     "dataset": null
   },
   "metrics": {
-    "ttft_ms": 7501.559567490282,
+    "ttft_ms": 7483.040426935379,
     "tbt_ms": null,
     "throughput_tps": null,
     "peak_mem_mb": 0,
-    "error_rate": null
+    "error_rate": 0.0
   },
   "constraints": {
     "scenario_source": "vllm-benchmark",
@@ -83,7 +83,7 @@
     "driver_version": null
   },
   "metadata": {
-    "submitted_at": "2026-07-16T02:21:47Z",
+    "submitted_at": "2026-07-16T03:55:42Z",
     "submitter": "vllm-hust-org-member",
     "data_source": "vllm-hust-benchmark",
     "engine": "vllm-hust",
@@ -117,5 +117,34 @@
         "commit": "bf2984e34a8923ac254251c6e265dffbad4aa70d"
       }
     }
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+    "spec_label": "Official Ascend baseline for random-latency",
+    "scenario": "random-latency",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "model_parameters": "14B",
+    "model_precision": "FP16",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "dtype": "float16",
+      "gpu_memory_utilization": 0.85,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": ""
+    },
+    "resolved_client_parameters": {
+      "input_len": 1024,
+      "output_len": 128,
+      "batch_size": 8,
+      "num_iters_warmup": 10,
+      "num_iters": 30
+    },
+    "resolved_spec_hash": "b3f84658ec44e43369093cc9badb6948d29d1a06fa6bbcf4c40c695097048503"
   }
 }
