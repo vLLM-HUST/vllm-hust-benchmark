@@ -14,7 +14,7 @@ source /usr/local/Ascend/ascend-toolkit/set_env.sh
 
 
 # 查看缺失的 cell
-python scripts/backfill_single_gpu.py plan
+python3 scripts/backfill_single_gpu.py plan
 
 # 跑指定 workload 和 commit
 # workload:
@@ -22,7 +22,7 @@ python scripts/backfill_single_gpu.py plan
 #       Online serving scenarios
 #       random-online，sharegpt-online，prefix-repetition-online，instructcoder-online
 # random-latency, sharegpt-throughput  83cf83f
-python3 scripts/backfill_single_gpu.py run --only random-latency --commit 83cf83f
+python3 scripts/backfill_single_gpu.py run --only sonnet-throughput --commit 83cf83f
 
 # 重建 snapshot
 python3 scripts/backfill_single_gpu.py aggregate
