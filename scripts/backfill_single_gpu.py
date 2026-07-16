@@ -110,6 +110,52 @@ def resolve_ascend_commit(hust_commit: str) -> str:
         )
     return sha
 
+
+# Known-good ascend plugin commit that is compatible with the vllm-hust fork.
+# The vllm-ascend-hust fork's origin/main has been updated with upstream commits
+# that reference vllm modules (e.g. expert_map_manager) not present in the
+# vllm-hust fork.  This commit is the last vllm-hust-fork-only commit known to
+# work with all backfill targets.
+_COMPATIBLE_ASCEND_COMMIT = "bf2984e34a8923ac254251c6e265dffbad4aa70d"
+
+
+def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
+    """Resolve an ascend plugin commit that is compatible with hust_commit.
+
+    The dynamic ``resolve_ascend_commit`` may return an upstream vllm-ascend
+    commit whose code references modules (e.g. ``expert_map_manager``) that
+    do **not** exist in the older vllm-hust codebase.  When that happens we
+    fall back to the last known-good vllm-hust-fork-only commit.
+    """
+    candidate = resolve_ascend_commit(hust_commit)
+
+    # Check whether the candidate ascend plugin references expert_map_manager,
+    # and whether the vllm-hust commit has that module.
+    try:
+        eplb_src = subprocess.run(
+            ["git", "show", f"{candidate}:vllm_ascend/eplb/core/eplb_utils.py"],
+            cwd=ASCEND_REPO, capture_output=True, text=True, check=True,
+        ).stdout
+        needs_expert_map = "expert_map_manager" in eplb_src
+    except subprocess.CalledProcessError:
+        needs_expert_map = False
+
+    if needs_expert_map:
+        # Check if the vllm-hust commit has the expert_map_manager module.
+        has_expert_map = subprocess.run(
+            ["git", "ls-tree", "-r", hust_commit, "--name-only"],
+            cwd=HUST_REPO, capture_output=True, text=True, check=True,
+        )
+        if "expert_map_manager" not in has_expert_map.stdout:
+            log(
+                f"Ascend plugin {candidate[:9]} needs expert_map_manager "
+                f"which is absent in vllm-hust {hust_commit[:9]}; "
+                f"falling back to compatible commit {_COMPATIBLE_ASCEND_COMMIT[:9]}"
+            )
+            return _COMPATIBLE_ASCEND_COMMIT
+
+    return candidate
+
 # Default missing cells (workload -> list of vllm-hust commits).
 DEFAULT_CELLS: dict[str, list[str]] = {
     "random-latency": [
@@ -429,7 +475,7 @@ def run_vllm_bench(
             "--batch-size", str(params["batch_size"]),
             "--num-iters-warmup", str(params["num_iters_warmup"]),
             "--num-iters", str(params["num_iters"]),
-            "--gpu-memory-utilization", "0.85",
+            "--gpu-memory-utilization", "0.6",
             "--output-json", str(output_dir / "raw.json"),
         ]
     elif benchmark_type == "throughput":
@@ -438,7 +484,7 @@ def run_vllm_bench(
             "--model", MODEL_NAME,
             "--dataset-name", params["dataset_name"],
             "--num-prompts", str(params["num_prompts"]),
-            "--gpu-memory-utilization", "0.85",
+            "--gpu-memory-utilization", "0.6",
             "--output-json", str(output_dir / "raw.json"),
         ]
         if params.get("dataset_path"):
@@ -452,7 +498,7 @@ def run_vllm_bench(
             "--dataset-name", params["dataset_name"],
             "--num-prompts", str(params["num_prompts"]),
             "--request-rate", str(params.get("request_rate", 1)),
-            "--gpu-memory-utilization", "0.85",
+            "--gpu-memory-utilization", "0.6",
             "--output-json", str(output_dir / "raw.json"),
         ]
         if params.get("dataset_path"):
@@ -465,9 +511,10 @@ def run_vllm_bench(
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
     env.setdefault("VLLM_USE_V1", "1")
-    # Force NPU 5 to avoid memory conflicts with other processes on NPU 0/1/2/3/4/6/7.
-    env["ASCEND_RT_VISIBLE_DEVICES"] = "5"
-    env["ASCEND_VISIBLE_DEVICES"] = "5"
+    # Use NPU 7 — it has the most free HBM (only ~32% used vs 91%+ on others).
+    # NPU 5 was previously used but is now heavily occupied by other processes.
+    env["ASCEND_RT_VISIBLE_DEVICES"] = "7"
+    env["ASCEND_VISIBLE_DEVICES"] = "7"
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
@@ -540,7 +587,7 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
     server_params: dict[str, Any] = {
         "tensor_parallel_size": 1,
         "dtype": "float16",
-        "gpu_memory_utilization": 0.85,
+        "gpu_memory_utilization": 0.6,
     }
     if benchmark_type == "latency":
         server_params["enforce_eager"] = ""
@@ -796,7 +843,7 @@ def validate_submission_artifact_entry(entry: dict[str, Any], tag: str) -> list[
 
 
 def run_cell(workload: str, hust_commit: str) -> dict[str, Any]:
-    ascend_commit = resolve_ascend_commit(hust_commit)
+    ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
 
     log(f"=== {workload} @ {hust_commit[:9]} (plugin {ascend_commit[:9]}) ===")
     work_dir = STATE_DIR / "runs" / f"{workload}-{hust_commit[:9]}"
