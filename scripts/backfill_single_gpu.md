@@ -13,7 +13,11 @@
 python scripts/backfill_single_gpu.py plan
 
 # 跑指定 workload 和 commit
-python scripts/backfill_single_gpu.py run --only random-latency --commit <sha>
+# workload:
+#       sharegpt-throughput， random-latency，sonnet-throughput，
+#       Online serving scenarios
+#       random-online，sharegpt-online，prefix-repetition-online，instructcoder-online
+python scripts/backfill_single_gpu.py run --only <workload> --commit <sha>
 
 # 重建 snapshot
 python scripts/backfill_single_gpu.py aggregate

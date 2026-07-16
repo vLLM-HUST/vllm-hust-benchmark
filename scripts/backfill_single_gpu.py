@@ -48,6 +48,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.submission_artifacts import normalize_submission_artifact_file
+
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -681,9 +683,11 @@ def validate_submission(sub_dir: Path) -> list[str]:
     if missing:
         errors.append(f"{rid}: missing top-level fields: {missing}")
 
-    # Check config_type
-    if run.get("config_type") != "single_gpu":
-        errors.append(f"{rid}: config_type is {run.get('config_type')!r}, expected 'single_gpu'")
+    # Check config_type is present and valid
+    valid_config_types = {"single_gpu", "multi_gpu"}
+    ct = run.get("config_type")
+    if ct not in valid_config_types:
+        errors.append(f"{rid}: config_type is {ct!r}, expected one of {valid_config_types}")
 
     # Check metrics
     metrics = run.get("metrics", {})
@@ -811,6 +815,12 @@ def run_cell(workload: str, hust_commit: str) -> dict[str, Any]:
             err_msg = "; ".join(errors)
             log(f"Submission validation FAILED for {run_id}: {err_msg}")
             raise RuntimeError(f"submission validation failed: {err_msg}")
+
+        # Normalize the submission artifact so it passes checked-in normalization tests.
+        artifact_path = sub_dir / "run_leaderboard.json"
+        if artifact_path.exists():
+            normalize_submission_artifact_file(artifact_path)
+            log(f"Normalized submission artifact: {artifact_path}")
     except Exception as exc:  # noqa: BLE001
         log(f"FAILED: {exc}")
         return {
