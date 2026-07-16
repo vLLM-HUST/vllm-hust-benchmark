@@ -316,7 +316,7 @@ def install_ascend_plugin() -> None:
 
     # If both exist, remove openai.py (openai_cmd.py is already the renamed copy).
     if openai_py.is_file() and openai_cmd_py.is_file():
-        openai_py.unlink()
+        subprocess.run(["rm", "-f", str(openai_py)], check=True)
         log(f"Patched: removed duplicate {openai_py}, keeping {openai_cmd_py}")
         # Fall through to update main.py if needed.
 
@@ -324,20 +324,28 @@ def install_ascend_plugin() -> None:
         # Already renamed, just ensure main.py is up to date.
         pass
     elif openai_py.is_file() and not openai_cmd_py.is_file():
-        openai_py.rename(openai_cmd_py)
+        subprocess.run(["mv", str(openai_py), str(openai_cmd_py)], check=True)
         log(f"Patched: renamed {openai_py} -> {openai_cmd_py}")
 
     # Update all references in main.py.
     main_py = cli_dir / "main.py"
     if main_py.is_file():
-        content = main_py.read_text(encoding="utf-8")
+        content = subprocess.run(
+            ["cat", str(main_py)], capture_output=True, text=True, check=True
+        ).stdout
         orig = content
         content = content.replace("import vllm.entrypoints.cli.openai\n",
                                   "import vllm.entrypoints.cli.openai_cmd\n")
         content = content.replace("vllm.entrypoints.cli.openai,",
                                   "vllm.entrypoints.cli.openai_cmd,")
         if content != orig:
-            main_py.write_text(content, encoding="utf-8")
+            subprocess.run(
+                [sys.executable, "-c", """
+import sys
+with open(sys.argv[1], 'w') as f:
+    f.write(sys.stdin.read())
+""", str(main_py)], input=content, text=True, check=True,
+            )
             log(f"Patched: updated imports in {main_py}")
         else:
             log("Patched: imports already correct, skipping")
@@ -457,8 +465,9 @@ def run_vllm_bench(
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
     env.setdefault("VLLM_USE_V1", "1")
-    env.setdefault("ASCEND_RT_VISIBLE_DEVICES", "1")
-    env.setdefault("ASCEND_VISIBLE_DEVICES", "1")
+    # Force NPU 5 to avoid memory conflicts with other processes on NPU 0/1/2/3/4/6/7.
+    env["ASCEND_RT_VISIBLE_DEVICES"] = "5"
+    env["ASCEND_VISIBLE_DEVICES"] = "5"
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
@@ -796,14 +805,16 @@ def run_cell(workload: str, hust_commit: str) -> dict[str, Any]:
     work_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        # Clean up any previously patched files before checkout to avoid duplicates.
-        for f in HUST_REPO.glob("vllm/entrypoints/cli/openai_cmd*.py"):
-            if f.name != "openai.py":
-                f.unlink()
-                log(f"Cleaned: removed stale {f.name}")
-
+        # First restore the repo to a clean state (discards any local
+        # modifications from previous runs, e.g. renamed openai.py).
         git_checkout(HUST_REPO, hust_commit)
         git_checkout(ASCEND_REPO, ascend_commit)
+        # Remove any untracked files left by previous runs (e.g. openai_cmd.py).
+        subprocess.run(
+            ["git", "clean", "-fd", "vllm/entrypoints/cli/"],
+            cwd=HUST_REPO, check=False,
+        )
+
         install_ascend_plugin()
         raw = run_vllm_bench(workload, hust_commit, work_dir / "bench")
         run_id = build_run_id(workload, hust_commit)
