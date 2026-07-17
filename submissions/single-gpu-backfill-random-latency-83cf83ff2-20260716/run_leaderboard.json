@@ -121,7 +121,8 @@
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
     "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
-    "spec_label": "Official Ascend baseline for random-latency",
+    "spec_label": "Official Ascend Jan 2026 random latency baseline for vllm-hust goal tracking",
+    "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
     "scenario": "random-latency",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
@@ -130,21 +131,24 @@
     "hardware_chip_model": "910B2",
     "chip_count": 1,
     "node_count": 1,
+    "resolved_spec_hash": "32413cf16410685d43610e6d5363b3ba38917c21f3a2bf421dd6052b0039d100",
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
-      "dtype": "float16",
-      "gpu_memory_utilization": 0.6,
       "enforce_eager": "",
       "trust_remote_code": "",
-      "disable_log_stats": ""
+      "disable_log_stats": "",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "dtype": "float16",
+      "gpu_memory_utilization": 0.6
     },
     "resolved_client_parameters": {
       "input_len": 1024,
       "output_len": 128,
       "batch_size": 8,
       "num_iters_warmup": 10,
-      "num_iters": 30
-    },
-    "resolved_spec_hash": "da3de1af49b2afa29c17ee706d560af29c0d7b088af8f1a2e521caa4a959083a"
+      "num_iters": 30,
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "gpu_memory_utilization": 0.6
+    }
   }
 }

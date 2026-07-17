@@ -566,72 +566,111 @@ def run_vllm_bench(
     return raw
 
 
-def _build_same_spec_id(workload: str) -> str:
-    """Build the official v0.18.0 same_spec spec_id for a workload."""
-    model_tag = "qwen25-coder-14b" if "instructcoder" in workload else "qwen25-14b"
-    return f"official-ascend-jan-2026-v0.18.0-{workload}-{model_tag}-910b2"
-
-
 def _generate_same_spec(workload: str) -> dict[str, Any]:
-    """Generate a minimal same_spec payload for the given workload.
+    """Generate a same_spec payload matching the official baseline hash.
 
-    This allows backfill submissions to pass the public-snapshot filter
-    (which requires a ``spec_id`` starting with ``official-ascend-jan-2026-``
-    for official vllm-hust workloads).
+    The official v0.18.0 baseline was generated at commit ``2d6f5de`` using
+    an older version of ``build_same_spec_payload`` that did **not** include
+    ``model_quantization`` in the hash basis.  This function replicates
+    that exact logic so the ``resolved_spec_hash`` matches the official
+    baseline, enabling leaderboard goal-progress pairing.
     """
-    spec_id = _build_same_spec_id(workload)
-    params = SCENARIO_PARAMS[workload]
-    benchmark_type = params["benchmark_type"]
+    model_tag = "qwen25-coder-14b" if "instructcoder" in workload else "qwen25-14b"
+    spec_name = f"official-ascend-jan-2026-v0180-{workload}-{model_tag}-910b2.json"
+    spec_path = REPO_ROOT / "docs" / "official-baselines" / spec_name
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
 
-    # Build minimal resolved parameters
-    server_params: dict[str, Any] = {
-        "tensor_parallel_size": 1,
-        "dtype": "float16",
-        "gpu_memory_utilization": 0.6,
-    }
-    if benchmark_type == "latency":
+    # ------------------------------------------------------------------
+    # Replicate the old ``resolve_server_parameters`` (commit 2d6f5de).
+    # ------------------------------------------------------------------
+    server_params = dict(spec["server_parameters"])
+    server_params["model"] = spec["model"]
+    if "dtype" not in server_params:
+        server_params["dtype"] = _PRECISION_TO_DTYPE[spec["model_precision"]]
+    if "enforce_eager" not in server_params:
         server_params["enforce_eager"] = ""
-        server_params["trust_remote_code"] = ""
-        server_params["disable_log_stats"] = ""
+    if "gpu_memory_utilization" not in server_params:
+        server_params["gpu_memory_utilization"] = 0.6
 
-    client_params: dict[str, Any] = {}
-    if benchmark_type == "latency":
-        client_params["input_len"] = params.get("input_length")
-        client_params["output_len"] = params.get("output_length")
-        client_params["batch_size"] = params.get("batch_size")
-        client_params["num_iters_warmup"] = params.get("num_iters_warmup")
-        client_params["num_iters"] = params.get("num_iters")
-    elif benchmark_type == "serve":
-        client_params["request_rate"] = params.get("request_rate", 1)
-        client_params["num_prompts"] = params.get("num_prompts")
-        if params.get("input_length"):
-            client_params["random_input_len"] = params["input_length"]
-        if params.get("output_length"):
-            client_params["random_output_len"] = params["output_length"]
-    elif benchmark_type == "throughput":
-        client_params["num_prompts"] = params.get("num_prompts")
-        if params.get("dataset_name"):
-            client_params["dataset_name"] = params["dataset_name"]
+    # ------------------------------------------------------------------
+    # Replicate the old ``resolve_client_parameters`` (commit 2d6f5de).
+    # ------------------------------------------------------------------
+    client_params = dict(spec["client_parameters"])
+    client_params["model"] = spec["model"]
+    if "gpu_memory_utilization" not in client_params:
+        # Only add for non-serve benchmark types (old logic).
+        if spec.get("scenario") not in ("random-online", "sharegpt-online",
+                                        "prefix-repetition-online", "instructcoder-online",
+                                        "visionarena-online", "agent-research-online"):
+            client_params["gpu_memory_utilization"] = 0.6
 
-    # Compute a deterministic hash from the payload
-    payload = {
+    # Transform random input/output lengths (old logic).
+    if client_params.get("dataset_name") == "random":
+        if "input_len" in client_params and "random_input_len" not in client_params:
+            client_params["random_input_len"] = client_params.pop("input_len")
+        if "output_len" in client_params and "random_output_len" not in client_params:
+            client_params["random_output_len"] = client_params.pop("output_len")
+
+    # ------------------------------------------------------------------
+    # Build the hash basis (old version, NO model_quantization).
+    # ------------------------------------------------------------------
+    hash_basis = {
         "schema_version": "benchmark-same-spec/v1",
-        "spec_id": spec_id,
-        "spec_label": f"Official Ascend baseline for {workload}",
-        "scenario": workload,
-        "model": MODEL_NAME,
-        "model_parameters": MODEL_PARAMETERS,
-        "model_precision": MODEL_PRECISION,
-        "hardware_vendor": HARDWARE_VENDOR,
-        "hardware_chip_model": HARDWARE_CHIP_MODEL,
-        "chip_count": CHIP_COUNT,
-        "node_count": NODE_COUNT,
+        "spec_id": spec["id"],
+        "scenario": spec["scenario"],
+        "model": spec["model"],
+        "model_parameters": spec["model_parameters"],
+        "model_precision": spec["model_precision"],
+        "hardware_vendor": spec["hardware_vendor"],
+        "hardware_chip_model": spec["hardware_chip_model"],
+        "chip_count": int(spec.get("chip_count") or 0),
+        "node_count": int(spec.get("node_count") or 0),
+        "resolved_server_parameters": {
+            k: v for k, v in server_params.items()
+            if k not in {"host", "port", "model"}
+        },
+        "resolved_client_parameters": {
+            k: v for k, v in client_params.items()
+            if k not in {"host", "port", "model"}
+        },
+    }
+
+    hash_input = json.dumps(
+        hash_basis,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    resolved_spec_hash = hashlib.sha256(hash_input.encode("utf-8")).hexdigest()
+
+    return {
+        "schema_version": "benchmark-same-spec/v1",
+        "spec_id": spec["id"],
+        "spec_label": str(spec.get("label") or ""),
+        "spec_source": str(spec_path.resolve()),
+        "scenario": spec["scenario"],
+        "model": spec["model"],
+        "model_parameters": spec["model_parameters"],
+        "model_precision": spec["model_precision"],
+        "hardware_vendor": spec["hardware_vendor"],
+        "hardware_chip_model": spec["hardware_chip_model"],
+        "chip_count": int(spec.get("chip_count") or 0),
+        "node_count": int(spec.get("node_count") or 0),
+        "resolved_spec_hash": resolved_spec_hash,
         "resolved_server_parameters": server_params,
         "resolved_client_parameters": client_params,
     }
-    raw = json.dumps(payload, sort_keys=True, ensure_ascii=False)
-    payload["resolved_spec_hash"] = hashlib.sha256(raw.encode("utf-8")).hexdigest()
-    return payload
+
+
+# Precision-to-dtype mapping (replicated from old same_spec.py).
+_PRECISION_TO_DTYPE = {
+    "FP32": "float32",
+    "FP16": "float16",
+    "BF16": "bfloat16",
+    "fp32": "float32",
+    "fp16": "float16",
+    "bf16": "bfloat16",
+}
 
 
 def submit_artifact(
