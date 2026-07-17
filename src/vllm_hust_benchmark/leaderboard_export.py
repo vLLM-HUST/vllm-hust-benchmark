@@ -363,9 +363,9 @@ def _derive_metrics_from_benchmark_result(
         metrics["ttft_ms"] = None
         # tbt_ms 已由上面的解析逻辑处理为 None，无需重复
     elif benchmark_type == "latency":
-        # latency 不测吞吐，错误率不适用
+        # latency 不测吞吐，错误率置为 0.0（保持字段完整性）
         metrics["throughput_tps"] = None
-        metrics["error_rate"] = None
+        metrics["error_rate"] = 0.0
 
     missing_metrics = [key for key in REQUIRED_METRIC_KEYS if key not in metrics]
     if missing_metrics:
