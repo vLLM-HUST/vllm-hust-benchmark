@@ -121,7 +121,8 @@
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
     "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
-    "spec_label": "Official Ascend baseline for sonnet-throughput",
+    "spec_label": "Official Ascend Jan 2026 sonnet throughput baseline for vllm-hust goal tracking",
+    "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-910b2.json",
     "scenario": "sonnet-throughput",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
@@ -130,15 +131,24 @@
     "hardware_chip_model": "910B2",
     "chip_count": 1,
     "node_count": 1,
+    "resolved_spec_hash": "b40e543c53135301cdad55b4c4e15609086dda1536fc2a1977f6fafa9a434d51",
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
       "dtype": "float16",
       "gpu_memory_utilization": 0.6
     },
     "resolved_client_parameters": {
+      "backend": "vllm",
+      "dataset_name": "sonnet",
+      "dataset_path": "benchmarks/sonnet.txt",
       "num_prompts": 200,
-      "dataset_name": "sonnet"
-    },
-    "resolved_spec_hash": "b68da56dfbccf207d439c0b09d7ef06841218ef1d87903fccbcde11c9a97d4af"
+      "num_warmups": 0,
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "gpu_memory_utilization": 0.6
+    }
   }
 }

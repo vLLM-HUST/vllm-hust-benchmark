@@ -121,7 +121,8 @@
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
     "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
-    "spec_label": "Official Ascend baseline for sharegpt-throughput",
+    "spec_label": "Official Ascend Jan 2026 ShareGPT throughput baseline for vllm-hust goal tracking",
+    "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
     "scenario": "sharegpt-throughput",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
@@ -130,15 +131,24 @@
     "hardware_chip_model": "910B2",
     "chip_count": 1,
     "node_count": 1,
+    "resolved_spec_hash": "08890fb3f8c5f876afbd603d07404d7cd56ac10f74de3b6480697d03ae38ca1c",
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
       "dtype": "float16",
       "gpu_memory_utilization": 0.6
     },
     "resolved_client_parameters": {
+      "backend": "vllm",
+      "dataset_name": "sharegpt",
+      "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
       "num_prompts": 200,
-      "dataset_name": "sharegpt"
-    },
-    "resolved_spec_hash": "75970dba3554cabec1e33598230c0a0e194209089fc0abbde54ae04fc657fb9b"
+      "num_warmups": 0,
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "gpu_memory_utilization": 0.6
+    }
   }
 }
