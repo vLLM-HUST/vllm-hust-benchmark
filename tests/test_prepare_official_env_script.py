@@ -6,6 +6,34 @@ import time
 from pathlib import Path
 
 
+def _spawn_process_tree(tmp_path: Path) -> tuple[subprocess.Popen[str], int]:
+    """Spawn a wrapper script that runs a background sleep process.
+
+    Avoid ``exec -a`` because it is fragile in sandboxed environments
+    (the argv[0] rename can interfere with process-group creation).
+    """
+    child_pid_file = tmp_path / "child.pid"
+    wrapper_script = tmp_path / "wrapper.sh"
+    wrapper_script.write_text(
+        "#!/bin/bash\n"
+        f"sleep 300 &\n"
+        f"echo $! > {shlex.quote(str(child_pid_file))}\n"
+        "wait\n",
+        encoding="utf-8",
+    )
+    wrapper_script.chmod(0o755)
+
+    process = subprocess.Popen(
+        ["bash", str(wrapper_script)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        preexec_fn=os.setpgrp,
+    )
+    child_pid = _wait_for_pid_file(child_pid_file)
+    return process, child_pid
+
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PREPARE_SCRIPT = REPO_ROOT / "scripts/prepare-official-ascend-baseline-env.sh"
 RUN_OFFICIAL_SCRIPT = REPO_ROOT / "scripts/run-official-ascend-goal-baseline.sh"
@@ -99,33 +127,6 @@ def _cleanup_process_tree(root_pid: int, child_pid: int | None) -> None:
             os.kill(child_pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
-
-
-def _spawn_process_tree(tmp_path: Path) -> tuple[subprocess.Popen[str], int]:
-    child_pid_file = tmp_path / "child.pid"
-    wrapper_script = tmp_path / "wrapper.sh"
-    wrapper_script.write_text(
-        "#!/bin/bash\n"
-        f"sleep 300 &\n"
-        f"echo $! > {shlex.quote(str(child_pid_file))}\n"
-        "wait\n",
-        encoding="utf-8",
-    )
-    wrapper_script.chmod(0o755)
-
-    process = subprocess.Popen(
-        [
-            "bash",
-            "-lc",
-            f'exec -a "vllm.entrypoints.cli.main bench serve" {shlex.quote(str(wrapper_script))}',
-        ],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        text=True,
-        start_new_session=True,
-    )
-    child_pid = _wait_for_pid_file(child_pid_file)
-    return process, child_pid
 
 
 def test_collect_process_tree_pids_includes_child_process(tmp_path: Path) -> None:
