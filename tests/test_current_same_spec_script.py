@@ -26,5 +26,6 @@ def test_current_same_spec_runner_does_not_retry_generic_engine_startup_wrapper(
     detector = detector[: detector.index("wait_for_server()")]
 
     assert "Engine core initialization failed" not in detector
+    assert "ERR99999 UNKNOWN" not in detector
     assert "rtGetDeviceCount" in detector
     assert "Resource_Busy" in detector
