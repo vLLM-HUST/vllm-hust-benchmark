@@ -128,12 +128,54 @@ def test_runtime_model_path_has_required_artifacts(tmp_path: Path) -> None:
     (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
     # _path_has_complete_indexed_weights requires index file + shard files referenced in weight_map
     index_file = model_dir / "model.safetensors.index.json"
-    shard_file = model_dir / "model-00001-of-00002.safetensors"
-    shard_file.touch()
+    first_shard = model_dir / "model-00001-of-00002.safetensors"
+    second_shard = model_dir / "model-00002-of-00002.safetensors"
+    first_shard.touch()
+    second_shard.touch()
     index_file.write_text(
-        json.dumps({"weight_map": {"model embedder": "model-00001-of-00002.safetensors"}}),
+        json.dumps(
+            {
+                "weight_map": {
+                    "model.embed_tokens.weight": first_shard.name,
+                    "model.norm.weight": second_shard.name,
+                }
+            }
+        ),
         encoding="utf-8",
     )
+
+    assert runtime_model_path_has_required_artifacts(model_dir)
+
+
+def test_runtime_model_path_rejects_incomplete_indexed_weights(tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "config.json").write_text("{}", encoding="utf-8")
+    (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
+    (model_dir / "model-00001-of-00002.safetensors").touch()
+    (model_dir / "model.safetensors.index.json").write_text(
+        json.dumps(
+            {
+                "weight_map": {
+                    "model.embed_tokens.weight": "model-00001-of-00002.safetensors",
+                    "model.norm.weight": "model-00002-of-00002.safetensors",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert not runtime_model_path_has_required_artifacts(model_dir)
+
+
+def test_runtime_model_path_accepts_unindexed_single_file_weights(
+    tmp_path: Path,
+) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "config.json").write_text("{}", encoding="utf-8")
+    (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
+    (model_dir / "model.safetensors").touch()
 
     assert runtime_model_path_has_required_artifacts(model_dir)
 
