@@ -169,13 +169,16 @@ jobs:
           backfill_existing_only = os.environ.get("BACKFILL_EXISTING_ONLY", "").lower() == "true"
           manual_submission_dirs = os.environ.get("MANUAL_SUBMISSION_DIRS", "")
           submissions_root = Path("submissions")
+          snapshot_root = Path("leaderboard-data/snapshots")
 
-          def collect_submission_dirs_from_diff(diff_args: list[str]) -> list[str]:
+          def collect_changed_paths(diff_args: list[str]) -> list[Path]:
               diff_output = subprocess.check_output(diff_args, text=True)
+              return [Path(raw_path.strip()) for raw_path in diff_output.splitlines() if raw_path.strip()]
+
+          def collect_submission_dirs(changed_paths: list[Path]) -> list[str]:
               resolved_dirs: list[str] = []
               seen: set[str] = set()
-              for raw_path in diff_output.splitlines():
-                  path = Path(raw_path.strip())
+              for path in changed_paths:
                   if len(path.parts) < 2 or path.parts[0] != "submissions":
                       continue
                   candidate = submissions_root / path.parts[1]
@@ -188,6 +191,7 @@ jobs:
               return resolved_dirs
 
           submission_dirs: list[str] = []
+          changed_paths: list[Path] = []
           if backfill_existing_only:
               print("Backfill existing-only mode enabled; skipping local submission directory resolution.")
           elif manual_submission_dirs.strip():
@@ -206,18 +210,41 @@ jobs:
                           seen.add(resolved)
                           submission_dirs.append(resolved)
           elif event_name == "push" and before_sha and current_sha and before_sha != "0000000000000000000000000000000000000000":
-              diff_args = ["git", "diff", "--name-only", before_sha, current_sha, "--", "submissions"]
+              diff_args = [
+                  "git",
+                  "diff",
+                  "--name-only",
+                  before_sha,
+                  current_sha,
+                  "--",
+                  "submissions",
+                  str(snapshot_root),
+              ]
               try:
-                  submission_dirs = collect_submission_dirs_from_diff(diff_args)
+                  changed_paths = collect_changed_paths(diff_args)
               except subprocess.CalledProcessError:
-                  fallback_args = ["git", "diff", "--name-only", "origin/main...HEAD", "--", "submissions"]
+                  fallback_args = [
+                      "git",
+                      "diff",
+                      "--name-only",
+                      "origin/main...HEAD",
+                      "--",
+                      "submissions",
+                      str(snapshot_root),
+                  ]
                   print(
                       f"Unable to diff push range {before_sha}..{current_sha}; "
                       "falling back to origin/main...HEAD."
                   )
-                  submission_dirs = collect_submission_dirs_from_diff(fallback_args)
+                  changed_paths = collect_changed_paths(fallback_args)
+              submission_dirs = collect_submission_dirs(changed_paths)
           else:
               submission_dirs = [str(path.parent.resolve()) for path in sorted(submissions_root.rglob("leaderboard_manifest.json"))]
+
+          snapshots_changed = any(
+              path == snapshot_root or snapshot_root in path.parents
+              for path in changed_paths
+          )
 
           print("Submission dirs to sync:")
           for item in submission_dirs:
@@ -225,6 +252,7 @@ jobs:
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
               fh.write(f"count={len(submission_dirs)}\n")
+              fh.write(f"snapshots_changed={'true' if snapshots_changed else 'false'}\n")
               fh.write("dirs<<EOF\n")
               for item in submission_dirs:
                   fh.write(item + "\n")
@@ -236,12 +264,13 @@ jobs:
           MANUAL_SUBMISSION_DIRS: ${{ github.event.inputs.submission_dirs }}
 
       - name: Sync submissions into HF leaderboard snapshots
-        if: ${{ steps.resolve-submissions.outputs.count != '0' || github.event.inputs.backfill_existing_only == 'true' || github.event.inputs.skip_aggregation == 'true' }}
+        id: sync-hf
+        if: ${{ steps.resolve-submissions.outputs.count != '0' || steps.resolve-submissions.outputs.snapshots_changed == 'true' || github.event.inputs.backfill_existing_only == 'true' || github.event.inputs.skip_aggregation == 'true' }}
         env:
           HF_TOKEN: ${{ secrets.DATASET_WRITE_TOKEN }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
           BACKFILL_EXISTING_ONLY: ${{ github.event.inputs.backfill_existing_only || 'false' }}
-          SKIP_AGGREGATION: ${{ github.event.inputs.skip_aggregation || 'false' }}
+          SKIP_AGGREGATION: ${{ github.event.inputs.skip_aggregation == 'true' || (steps.resolve-submissions.outputs.count == '0' && steps.resolve-submissions.outputs.snapshots_changed == 'true') }}
           VLLM_HUST_REPO: ${{ github.workspace }}/vllm-hust
           VLLM_HUST_WEBSITE_REPO: ${{ github.workspace }}/vllm-hust-website
         run: |
@@ -286,6 +315,70 @@ jobs:
             --execute \
             "${extra_args[@]}"
 
+      - name: Verify HF snapshots match GitHub canonical snapshots
+        if: ${{ steps.sync-hf.conclusion == 'success' && github.event.inputs.dry_run != 'true' }}
+        env:
+          HF_TOKEN: ${{ secrets.DATASET_WRITE_TOKEN }}
+        run: |
+          python - << 'PYEOF'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          from huggingface_hub import HfApi, hf_hub_download
+
+          repo_id = "intellistream/vllm-hust-benchmark-results"
+          snapshot_dir = Path("leaderboard-data/snapshots")
+          snapshot_files = (
+              "leaderboard_single.json",
+              "leaderboard_multi.json",
+              "leaderboard_compare.json",
+              "last_updated.json",
+          )
+
+          api = HfApi()
+          revision = api.dataset_info(repo_id=repo_id, revision="main").sha
+          failures = []
+
+          for file_name in snapshot_files:
+              local_path = snapshot_dir / file_name
+              remote_path = Path(
+                  hf_hub_download(
+                      repo_id=repo_id,
+                      repo_type="dataset",
+                      filename=file_name,
+                      revision=revision,
+                      force_download=True,
+                  )
+              )
+              local_bytes = local_path.read_bytes()
+              remote_bytes = remote_path.read_bytes()
+              local_sha = hashlib.sha256(local_bytes).hexdigest()
+              remote_sha = hashlib.sha256(remote_bytes).hexdigest()
+
+              payload = json.loads(remote_bytes)
+              if isinstance(payload, list):
+                  summary = f"entries={len(payload)}"
+              elif "group_count" in payload:
+                  summary = f"groups={payload['group_count']}"
+              else:
+                  summary = f"last_updated={payload.get('last_updated')}"
+
+              print(
+                  f"{file_name}: {summary}, github_sha256={local_sha}, "
+                  f"hf_sha256={remote_sha}, hf_revision={revision}"
+              )
+              if local_bytes != remote_bytes:
+                  failures.append(file_name)
+
+          if failures:
+              raise SystemExit(
+                  "HF snapshot verification failed for: " + ", ".join(failures)
+              )
+
+          print("HF snapshots match GitHub canonical snapshots byte-for-byte.")
+          PYEOF
+
       - name: Dry run summary
         if: ${{ github.event.inputs.dry_run == 'true' && (steps.resolve-submissions.outputs.count != '0' || github.event.inputs.backfill_existing_only == 'true') }}
         run: |
@@ -293,5 +386,5 @@ jobs:
           ls -lh /tmp/leaderboard-data/
 
       - name: No submissions to sync
-        if: ${{ steps.resolve-submissions.outputs.count == '0' && github.event.inputs.backfill_existing_only != 'true' }}
+        if: ${{ steps.resolve-submissions.outputs.count == '0' && steps.resolve-submissions.outputs.snapshots_changed != 'true' && github.event.inputs.backfill_existing_only != 'true' && github.event.inputs.skip_aggregation != 'true' }}
         run: echo "No submission directories matched this event; nothing to upload."
