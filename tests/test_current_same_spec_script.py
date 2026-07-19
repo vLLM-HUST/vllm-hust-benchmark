@@ -29,3 +29,12 @@ def test_current_same_spec_runner_does_not_retry_generic_engine_startup_wrapper(
     assert "ERR99999 UNKNOWN" not in detector
     assert "rtGetDeviceCount" in detector
     assert "Resource_Busy" in detector
+
+
+def test_current_same_spec_runner_bypasses_proxies_for_local_readiness() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    assert 'LOCAL_NO_PROXY_HOSTS="127.0.0.1,localhost,0.0.0.0"' in script
+    assert 'export NO_PROXY="${NO_PROXY:+${NO_PROXY},}${LOCAL_NO_PROXY_HOSTS}"' in script
+    assert 'export no_proxy="${no_proxy:+${no_proxy},}${LOCAL_NO_PROXY_HOSTS}"' in script
+    assert "curl --noproxy '*' -fsS" in script

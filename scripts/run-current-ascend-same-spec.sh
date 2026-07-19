@@ -20,6 +20,9 @@ HF_HOME=${HF_HOME:-"/data/shared_datasets/vllm-hust-benchmark/huggingface"}
 HF_HUB_CACHE=${HF_HUB_CACHE:-"$HF_HOME/hub"}
 TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-"$HF_HOME/transformers"}
 export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE
+LOCAL_NO_PROXY_HOSTS="127.0.0.1,localhost,0.0.0.0"
+export NO_PROXY="${NO_PROXY:+${NO_PROXY},}${LOCAL_NO_PROXY_HOSTS}"
+export no_proxy="${no_proxy:+${no_proxy},}${LOCAL_NO_PROXY_HOSTS}"
 CURRENT_MODEL_PATH=${CURRENT_MODEL_PATH:-}
 CURRENT_SERVER_HOST=${CURRENT_SERVER_HOST:-}
 CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-"8001"}
@@ -768,7 +771,7 @@ assert_target_port_available() {
   local host=$2
   local port=$3
 
-  if curl -fsS "http://${host}:${port}/health" >/dev/null 2>&1; then
+  if curl --noproxy '*' -fsS "http://${host}:${port}/health" >/dev/null 2>&1; then
     echo "${label} target ${host}:${port} is already serving /health; refusing to reuse a stale service." >&2
     return 1
   fi
@@ -789,7 +792,7 @@ probe_server_ready() {
   )
 
   for ready_path in "${ready_paths[@]}"; do
-    if curl -fsS "http://${host}:${port}${ready_path}" >/dev/null 2>&1; then
+    if curl --noproxy '*' -fsS "http://${host}:${port}${ready_path}" >/dev/null 2>&1; then
       return 0
     fi
   done
