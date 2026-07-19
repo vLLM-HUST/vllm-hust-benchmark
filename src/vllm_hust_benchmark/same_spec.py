@@ -57,7 +57,10 @@ def _path_has_complete_indexed_weights(path: Path) -> bool:
         if not index_path.is_file():
             continue
 
-        payload = json.loads(index_path.read_text(encoding="utf-8"))
+        try:
+            payload = json.loads(index_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
         weight_map = payload.get("weight_map") or {}
         if not isinstance(weight_map, dict) or not weight_map:
             continue
@@ -134,13 +137,17 @@ def runtime_model_path_has_required_artifacts(candidate: str | Path) -> bool:
     if not path.is_dir():
         return False
 
+    has_weight_index = any((path / name).is_file() for name in LOCAL_MODEL_INDEX_FILES)
+    has_weights = (
+        _path_has_complete_indexed_weights(path)
+        if has_weight_index
+        else _path_has_any_matching_file(path, LOCAL_MODEL_WEIGHT_PATTERNS)
+    )
+
     return (
         _path_has_any_matching_file(path, LOCAL_MODEL_CONFIG_FILES)
         and _path_has_any_matching_file(path, LOCAL_MODEL_TOKENIZER_PATTERNS)
-        and (
-            _path_has_any_matching_file(path, LOCAL_MODEL_WEIGHT_PATTERNS)
-            or _path_has_complete_indexed_weights(path)
-        )
+        and has_weights
     )
 
 
