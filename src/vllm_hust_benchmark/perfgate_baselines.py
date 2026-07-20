@@ -13,6 +13,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
+
 
 BASELINE_SCHEMA_VERSION = "perfgate-baseline/v1"
 SUPPORTED_SCENARIOS = frozenset({"random-online"})
@@ -22,7 +24,7 @@ SUPPORTED_TARGET_REPOSITORIES = {
 }
 SHA_PATTERN = re.compile(r"^[0-9a-fA-F]{40}$")
 SAFE_COMPONENT_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
-REQUIRED_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
+REQUIRED_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms", "error_rate")
 DEFAULT_BASELINE_BRANCH = "benchmark-baselines"
 DEFAULT_WRITER_NAME = "vLLM-HUST Baseline Writer"
 DEFAULT_WRITER_EMAIL = "baseline-writer@vllm-hust.local"
@@ -172,7 +174,11 @@ def _validate_metrics(payload: dict[str, Any], *, source: Path) -> None:
         except (TypeError, ValueError):
             invalid.append(name)
             continue
-        if not math.isfinite(number) or number < 0:
+        if (
+            not math.isfinite(number)
+            or number < 0
+            or (name == "error_rate" and number != 0)
+        ):
             invalid.append(name)
     if invalid:
         raise ValueError(f"{source}: invalid required metrics: {', '.join(invalid)}")
@@ -241,6 +247,17 @@ def validate_artifact(
     actual_scenario = str(same_spec.get("scenario") or "").strip()
     actual_spec_id = str(same_spec.get("spec_id") or "").strip()
     actual_spec_hash = str(same_spec.get("resolved_spec_hash") or "").strip().lower()
+    try:
+        computed_spec_hash = compute_resolved_spec_hash(same_spec)
+    except (TypeError, ValueError) as error:
+        raise ValueError(
+            f"{source}: invalid resolved same-spec payload: {error}"
+        ) from error
+    if actual_spec_hash != computed_spec_hash:
+        raise ValueError(
+            "baseline resolved spec hash mismatch: "
+            f"declared {actual_spec_hash or 'unset'}, computed {computed_spec_hash}"
+        )
     expected = (identity.scenario, identity.spec_id, identity.spec_hash)
     actual = (actual_scenario, actual_spec_id, actual_spec_hash)
     if actual != expected:
@@ -307,6 +324,20 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     )
 
 
+def _reject_symlink_components(
+    repository_root: Path, relative_path: PurePosixPath
+) -> None:
+    if repository_root.is_symlink():
+        raise ValueError(
+            f"central baseline repository root is a symlink: {repository_root}"
+        )
+    current = repository_root
+    for component in relative_path.parts:
+        current = current / component
+        if current.is_symlink():
+            raise ValueError(f"central baseline path contains a symlink: {current}")
+
+
 def store_baseline(
     repository_root: Path,
     source: Path,
@@ -319,9 +350,13 @@ def store_baseline(
     provenance = normalize_provenance(provenance)
     validate_artifact(source, identity, provenance)
 
-    destination_dir = repository_root / baseline_relative_dir(identity)
+    relative_dir = baseline_relative_dir(identity)
+    _reject_symlink_components(repository_root, relative_dir)
+    destination_dir = repository_root / relative_dir
     destination = destination_dir / "run_leaderboard.json"
     manifest = destination_dir / "baseline-metadata.json"
+    _reject_symlink_components(repository_root, relative_dir / "run_leaderboard.json")
+    _reject_symlink_components(repository_root, relative_dir / "baseline-metadata.json")
     artifact_sha256 = _sha256(source)
     expected_manifest = _manifest_payload(
         identity, provenance, artifact_sha256=artifact_sha256
@@ -346,7 +381,9 @@ def store_baseline(
         _write_json(manifest, expected_manifest)
 
     if update_latest_pointer:
-        pointer = repository_root / latest_pointer_relative_path(identity)
+        pointer_relative_path = latest_pointer_relative_path(identity)
+        _reject_symlink_components(repository_root, pointer_relative_path)
+        pointer = repository_root / pointer_relative_path
         _write_json(
             pointer,
             {
@@ -364,7 +401,10 @@ def load_manifest(
     repository_root: Path, identity: BaselineIdentity
 ) -> tuple[Path, BaselineProvenance]:
     identity = normalize_identity(identity)
-    baseline_dir = repository_root / baseline_relative_dir(identity)
+    relative_dir = baseline_relative_dir(identity)
+    _reject_symlink_components(repository_root, relative_dir / "run_leaderboard.json")
+    _reject_symlink_components(repository_root, relative_dir / "baseline-metadata.json")
+    baseline_dir = repository_root / relative_dir
     artifact = baseline_dir / "run_leaderboard.json"
     manifest_path = baseline_dir / "baseline-metadata.json"
     if not artifact.is_file() or not manifest_path.is_file():
