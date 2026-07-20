@@ -40,6 +40,7 @@ import json
 import os
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -123,38 +124,14 @@ def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
     """Resolve an ascend plugin commit that is compatible with hust_commit.
 
     The dynamic ``resolve_ascend_commit`` may return an upstream vllm-ascend
-    commit whose code references modules (e.g. ``expert_map_manager``) that
-    do **not** exist in the older vllm-hust codebase.  When that happens we
-    fall back to the last known-good vllm-hust-fork-only commit.
+    commit whose code references modules (e.g. ``expert_map_manager``) or
+    entry points (e.g. ``register_model``) that do **not** exist in the
+    older vllm-hust codebase.  Since the time-aligned commit is unreliable
+    (our vllm-ascend-hust repo has been synced with upstream which adds
+    features not present in vllm-hust), we always use the last known-good
+    vllm-hust-fork-only commit for vllm-hust PRs.
     """
-    candidate = resolve_ascend_commit(hust_commit)
-
-    # Check whether the candidate ascend plugin references expert_map_manager,
-    # and whether the vllm-hust commit has that module.
-    try:
-        eplb_src = subprocess.run(
-            ["git", "show", f"{candidate}:vllm_ascend/eplb/core/eplb_utils.py"],
-            cwd=ASCEND_REPO, capture_output=True, text=True, check=True,
-        ).stdout
-        needs_expert_map = "expert_map_manager" in eplb_src
-    except subprocess.CalledProcessError:
-        needs_expert_map = False
-
-    if needs_expert_map:
-        # Check if the vllm-hust commit has the expert_map_manager module.
-        has_expert_map = subprocess.run(
-            ["git", "ls-tree", "-r", hust_commit, "--name-only"],
-            cwd=HUST_REPO, capture_output=True, text=True, check=True,
-        )
-        if "expert_map_manager" not in has_expert_map.stdout:
-            log(
-                f"Ascend plugin {candidate[:9]} needs expert_map_manager "
-                f"which is absent in vllm-hust {hust_commit[:9]}; "
-                f"falling back to compatible commit {_COMPATIBLE_ASCEND_COMMIT[:9]}"
-            )
-            return _COMPATIBLE_ASCEND_COMMIT
-
-    return candidate
+    return _COMPATIBLE_ASCEND_COMMIT
 
 # Default missing cells (workload -> list of vllm-hust commits).
 DEFAULT_CELLS: dict[str, list[str]] = {
@@ -348,14 +325,72 @@ def git_checkout(repo: Path, commit: str) -> None:
         )
 
 
+def _update_ascend_entry_points() -> None:
+    """Regenerate the ascend plugin's entry_points metadata to match the
+    currently checked-out commit.
+
+    After ``git checkout``, the installed package's entry_points in dist-info
+    may be stale (e.g. referencing ``register_model`` that no longer exists
+    in the older code).  This function runs ``setup.py egg_info`` (fast, no
+    cmake build) and copies the regenerated entry_points to the installed
+    dist-info directory.
+    """
+    # Step A: regenerate egg-info in the ascend repo (fast, no cmake).
+    subprocess.run(
+        [str(PYTHON_BIN), "setup.py", "egg_info"],
+        cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
+    )
+
+    # Step B: find the egg-info entry_points.
+    egg_info_dir = None
+    for cand in ASCEND_REPO.glob("*.egg-info"):
+        egg_info_dir = cand
+        break
+    if egg_info_dir is None:
+        log("Warning: no egg-info found in ascend repo, skipping entry_points update")
+        return
+
+    egg_eps = egg_info_dir / "entry_points.txt"
+    if not egg_eps.is_file():
+        log("Warning: egg-info has no entry_points.txt, skipping")
+        return
+
+    new_eps = egg_eps.read_text(encoding="utf-8")
+
+    # Step C: find the installed dist-info and update its entry_points.txt.
+    import site
+    site_packages = Path(site.getsitepackages()[0])
+    updated = False
+    for dist_info in site_packages.glob("vllm_ascend_hust*.dist-info"):
+        dist_eps = dist_info / "entry_points.txt"
+        if not dist_eps.is_file():
+            continue
+        old_eps = dist_eps.read_text(encoding="utf-8")
+        if old_eps != new_eps:
+            dist_eps.write_text(new_eps, encoding="utf-8")
+            log(f"Updated ascend entry_points in {dist_info.name}")
+            updated = True
+        break  # only one dist-info expected
+
+    if not updated:
+        log("Ascend entry_points already up to date")
+
+
 def install_ascend_plugin() -> None:
-    """Fix naming conflict: rename openai.py -> openai_cmd.py.
+    """Fix naming conflict and update ascend plugin entry_points.
 
     vllm.entrypoints.cli.openai shadows the external 'openai' PyPI package,
     causing circular imports when other vllm modules (e.g. mcp/tool.py) do
     ``from openai import ...``.  Renaming the file to openai_cmd.py and
     updating the import in main.py breaks the conflict.
+
+    Also regenerates the ascend plugin's entry_points metadata to match
+    the currently checked-out commit, preventing stale entry_points
+    from causing import errors (e.g. ``register_model`` not found).
     """
+    # ------------------------------------------------------------------
+    # Step 1: Fix the openai naming conflict.
+    # ------------------------------------------------------------------
     cli_dir = HUST_REPO / "vllm" / "entrypoints" / "cli"
     openai_py = cli_dir / "openai.py"
     openai_cmd_py = cli_dir / "openai_cmd.py"
@@ -395,6 +430,321 @@ with open(sys.argv[1], 'w') as f:
             log(f"Patched: updated imports in {main_py}")
         else:
             log("Patched: imports already correct, skipping")
+
+    # ------------------------------------------------------------------
+    # Step 2: Update ascend plugin entry_points to match current checkout.
+    # ------------------------------------------------------------------
+    _update_ascend_entry_points()
+
+    # ------------------------------------------------------------------
+    # Step 3: Fix ascend plugin patches that reference missing vllm-hust
+    #         attributes (e.g. _parse_tool_calls_from_content).
+    # ------------------------------------------------------------------
+    _patch_tool_choice = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_tool_choice_none_content.py"
+    if _patch_tool_choice.is_file():
+        import re as _re
+        content = _patch_tool_choice.read_text(encoding="utf-8")
+        patched_tc = False
+
+        # Fix 1: Guard _parse_tool_calls_from_content (may not exist on older vllm-hust).
+        old_ref = (
+            "_original_parse_tool_calls_from_content = "
+            "OpenAIServing._parse_tool_calls_from_content"
+        )
+        if old_ref in content and "try:" not in content.split(old_ref)[0].rsplit("\n", 3)[-1]:
+            new_ref = (
+                "try:\n"
+                "    _original_parse_tool_calls_from_content = "
+                "OpenAIServing._parse_tool_calls_from_content\n"
+                "except AttributeError:\n"
+                "    _original_parse_tool_calls_from_content = None"
+            )
+            content = content.replace(old_ref, new_ref)
+            content = content.replace(
+                "OpenAIServing._parse_tool_calls_from_content = "
+                "staticmethod(_patched_parse_tool_calls_from_content)",
+                "if _original_parse_tool_calls_from_content is not None:\n"
+                "    OpenAIServing._parse_tool_calls_from_content = "
+                "staticmethod(_patched_parse_tool_calls_from_content)"
+            )
+            patched_tc = True
+
+        # Fix 2: Guard _parse_tool_calls on DelegatingParser (may not exist on older vllm-hust).
+        old_ref2 = "_original_delegating_parse_tool_calls = DelegatingParser._parse_tool_calls"
+        if old_ref2 in content and "try:" not in content.split(old_ref2)[0].rsplit("\n", 3)[-1]:
+            new_ref2 = (
+                "try:\n"
+                "    _original_delegating_parse_tool_calls = "
+                "DelegatingParser._parse_tool_calls\n"
+                "except AttributeError:\n"
+                "    _original_delegating_parse_tool_calls = None"
+            )
+            content = content.replace(old_ref2, new_ref2)
+            content = content.replace(
+                "DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls",
+                "if _original_delegating_parse_tool_calls is not None:\n"
+                "    DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls"
+            )
+            patched_tc = True
+
+        if patched_tc:
+            _patch_tool_choice.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin patch_tool_choice_none_content.py compatibility")
+
+    # Fix ascend plugin ops/__init__.py: make the fused_moe import block
+    # degrade gracefully on older vllm-hust commits (no UnquantizedFusedMoEMethod).
+    _ops_init = ASCEND_REPO / "vllm_ascend" / "ops" / "__init__.py"
+    if _ops_init.is_file():
+        content = _ops_init.read_text(encoding="utf-8")
+        if "except ModuleNotFoundError as exc:" in content:
+            # Replace the entire fragile try/except block with a robust one.
+            old_block = (
+                'try:\n'
+                '    import vllm_ascend.ops.fused_moe.fused_moe  # noqa\n'
+                'except ModuleNotFoundError as exc:\n'
+                '    if exc.name != "vllm.model_executor.layers.fused_moe.runner.default_moe_runner":\n'
+                '        raise'
+            )
+            new_block = (
+                'try:\n'
+                '    import vllm_ascend.ops.fused_moe.fused_moe  # noqa\n'
+                'except Exception:\n'
+                '    pass  # gracefully skip on older vllm-hust commits'
+            )
+            if old_block in content:
+                content = content.replace(old_block, new_block)
+                _ops_init.write_text(content, encoding="utf-8")
+                log("Patched: fixed ascend plugin ops/__init__.py compatibility")
+
+    # Fix ascend plugin patch_glm_tool_call_parser.py: wrap imports that
+    # reference modules not present in older vllm-hust commits.
+    _patch_glm = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_glm_tool_call_parser.py"
+    if _patch_glm.is_file():
+        content = _patch_glm.read_text(encoding="utf-8")
+        if "from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser" in content:
+            # Add a try/except guard around the top-level imports and module body.
+            old_glm_imports = (
+                "from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser\n"
+                "from vllm.tool_parsers.glm4_moe_tool_parser import Glm4MoeModelToolParser"
+            )
+            new_glm_guard = (
+                "try:\n"
+                "    from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser\n"
+                "    from vllm.tool_parsers.glm4_moe_tool_parser import Glm4MoeModelToolParser\n"
+                "    _GLM_PARSER_AVAILABLE = True\n"
+                "except ImportError:\n"
+                "    _GLM_PARSER_AVAILABLE = False\n"
+                "    Glm4MoeModelToolParser = None  # type: ignore"
+            )
+            if old_glm_imports in content:
+                content = content.replace(old_glm_imports, new_glm_guard)
+                # Wrap the remaining module-level code (logger = ...) to skip if not available.
+                content = content.replace(
+                    "logger = chat_serving.logger",
+                    "if _GLM_PARSER_AVAILABLE:\n"
+                    "    logger = chat_serving.logger"
+                )
+                # Wrap the class patching at the bottom: replace the whole final block
+                old_final_block = (
+                    'OpenAIServingChat.chat_completion_stream_generator = _wrapped_chat_completion_stream_generator\n'
+                    'Glm4MoeModelToolParser._ensure_tool_state = _ensure_tool_state\n'
+                    'Glm4MoeModelToolParser._begin_tool_call = _begin_tool_call\n'
+                    'Glm4MoeModelToolParser._finish_tool_call = _finish_tool_call\n'
+                    'Glm4MoeModelToolParser._revert_last_tool_call_state = _revert_last_tool_call_state\n'
+                    'Glm4MoeModelToolParser._emit_tool_name_delta = _emit_tool_name_delta\n'
+                    'Glm4MoeModelToolParser._emit_tool_args_delta = _emit_tool_args_delta\n'
+                    'Glm4MoeModelToolParser._append_arg_fragment = _append_arg_fragment\n'
+                    'Glm4MoeModelToolParser._close_args_if_needed = _close_args_if_needed\n'
+                    'Glm4MoeModelToolParser.extract_tool_calls_streaming = _patched_extract_tool_calls_streaming'
+                )
+                new_final_block = (
+                    'if _GLM_PARSER_AVAILABLE:\n'
+                    '    OpenAIServingChat.chat_completion_stream_generator = _wrapped_chat_completion_stream_generator\n'
+                    '    Glm4MoeModelToolParser._ensure_tool_state = _ensure_tool_state\n'
+                    '    Glm4MoeModelToolParser._begin_tool_call = _begin_tool_call\n'
+                    '    Glm4MoeModelToolParser._finish_tool_call = _finish_tool_call\n'
+                    '    Glm4MoeModelToolParser._revert_last_tool_call_state = _revert_last_tool_call_state\n'
+                    '    Glm4MoeModelToolParser._emit_tool_name_delta = _emit_tool_name_delta\n'
+                    '    Glm4MoeModelToolParser._emit_tool_args_delta = _emit_tool_args_delta\n'
+                    '    Glm4MoeModelToolParser._append_arg_fragment = _append_arg_fragment\n'
+                    '    Glm4MoeModelToolParser._close_args_if_needed = _close_args_if_needed\n'
+                    '    Glm4MoeModelToolParser.extract_tool_calls_streaming = _patched_extract_tool_calls_streaming'
+                )
+                if old_final_block in content:
+                    content = content.replace(old_final_block, new_final_block)
+                _patch_glm.write_text(content, encoding="utf-8")
+                log("Patched: fixed ascend plugin patch_glm_tool_call_parser.py compatibility")
+
+    # Fix ascend plugin common_cp.py: wrap imports that reference vllm.distributed
+    # functions not present in older vllm-hust commits.
+    _common_cp = ASCEND_REPO / "vllm_ascend" / "attention" / "context_parallel" / "common_cp.py"
+    if _common_cp.is_file():
+        content = _common_cp.read_text(encoding="utf-8")
+        old_import = (
+            "from vllm.distributed import get_dcp_group, "
+            "get_decode_context_model_parallel_world_size, get_pcp_group"
+        )
+        if old_import in content:
+            new_import = (
+                "from vllm.distributed import get_dcp_group, get_pcp_group\n"
+                "try:\n"
+                "    from vllm.distributed import get_decode_context_model_parallel_world_size\n"
+                "except ImportError:\n"
+                "    def get_decode_context_model_parallel_world_size() -> int:\n"
+                "        return 1"
+            )
+            content = content.replace(old_import, new_import)
+            _common_cp.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin common_cp.py compatibility")
+
+    # Fix ascend plugin patch_balance_schedule.py: handle throttle_prefills
+    # parameter not present in older vllm-hust Scheduler.schedule().
+    _balance = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_balance_schedule.py"
+    if _balance.is_file():
+        content = _balance.read_text(encoding="utf-8")
+        old_call = "            return super().schedule(throttle_prefills)"
+        if old_call in content:
+            new_call = (
+                "            try:\n"
+                "                return super().schedule(throttle_prefills)\n"
+                "            except TypeError:\n"
+                "                return super().schedule()"
+            )
+            content = content.replace(old_call, new_call)
+            _balance.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin patch_balance_schedule.py compatibility")
+
+    # Fix ascend plugin eplb_utils.py: handle determine_expert_map import
+    # from fused_moe.layer (not present in older vllm-hust commits).
+    _eplb_utils = ASCEND_REPO / "vllm_ascend" / "eplb" / "core" / "eplb_utils.py"
+    if _eplb_utils.is_file():
+        content = _eplb_utils.read_text(encoding="utf-8")
+        old_import = (
+            "from vllm.model_executor.layers.fused_moe.layer "
+            "import determine_expert_map"
+        )
+        if old_import in content:
+            new_import = (
+                "try:\n"
+                "    from vllm.model_executor.layers.fused_moe.layer"
+                " import determine_expert_map\n"
+                "except ImportError:\n"
+                "    try:\n"
+                "        from vllm.model_executor.layers.fused_moe"
+                ".expert_map_manager import determine_expert_map\n"
+                "    except ImportError:\n"
+                "        determine_expert_map = None  # type: ignore"
+            )
+            content = content.replace(old_import, new_import)
+            _eplb_utils.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin eplb_utils.py compatibility")
+
+    # Fix ascend plugin modelslim_config.py: handle MoERunner import
+    # from fused_moe (not present in older vllm-hust commits).
+    _modelslim = ASCEND_REPO / "vllm_ascend" / "quantization" / "modelslim_config.py"
+    if _modelslim.is_file():
+        content = _modelslim.read_text(encoding="utf-8")
+        # The import may be indented (inside else block), use regex to
+        # capture leading whitespace and preserve it.
+        import re as _msre
+        pattern = r'^(\s*)(from vllm\.model_executor\.layers\.fused_moe import MoERunner, RoutedExperts)$'
+        m = _msre.search(pattern, content, _msre.MULTILINE)
+        if m:
+            indent = m.group(1)
+            orig = m.group(0)
+            new_block = (
+                f"{indent}try:\n"
+                f"{indent}    {m.group(2)}\n"
+                f"{indent}except ImportError:\n"
+                f"{indent}    MoERunner = None  # type: ignore\n"
+                f"{indent}    RoutedExperts = None  # type: ignore"
+            )
+            content = content.replace(orig, new_block)
+            _modelslim.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin modelslim_config.py compatibility")
+
+    # ------------------------------------------------------------------
+    # Step 4: Fix missing imports in serving.py (PR #118 bugs).
+    # ------------------------------------------------------------------
+    serving_py = HUST_REPO / "vllm" / "entrypoints" / "openai" / "engine" / "serving.py"
+    if serving_py.is_file():
+        content = serving_py.read_text(encoding="utf-8")
+        import re
+        patched = False
+
+        # Fix 1: missing `Any` import
+        m = re.search(r'^from typing import (.+)$', content, re.MULTILINE)
+        if m and 'Any' not in m.group(1) and re.search(r'\bAny\b', content):
+            old_line = m.group(0)
+            new_line = old_line.replace('from typing import ', 'from typing import Any, ')
+            content = content.replace(old_line, new_line, 1)
+            patched = True
+
+        # Fix 2: missing `PromptType` and `extract_prompt_len` imports
+        needs_prompt_type = 'PromptType' in content and 'from vllm.inputs import PromptType' not in content
+        needs_extract_prompt_len = 'extract_prompt_len' in content and 'from vllm.renderers.inputs.preprocess import' not in content
+        if needs_prompt_type or needs_extract_prompt_len:
+            old_import = 'from vllm.inputs import EngineInput'
+            new_import = 'from vllm.inputs import EngineInput'
+            if needs_prompt_type:
+                new_import += ', PromptType'
+            if needs_extract_prompt_len:
+                new_import += '\nfrom vllm.renderers.inputs.preprocess import extract_prompt_len'
+            if new_import != old_import:
+                content = content.replace(old_import, new_import)
+                patched = True
+
+        # Fix 3: missing `SamplingParams` import
+        if 'SamplingParams' in content:
+            m_vllm = re.search(r'^from vllm import (.+)$', content, re.MULTILINE)
+            if m_vllm:
+                if 'SamplingParams' not in m_vllm.group(1):
+                    old_line = m_vllm.group(0)
+                    new_line = old_line.replace(
+                        'from vllm import ', 'from vllm import SamplingParams, '
+                    )
+                    content = content.replace(old_line, new_line, 1)
+                    patched = True
+            else:
+                # No `from vllm import` line — add one after the last `from vllm.` import.
+                lines = content.split('\n')
+                insert_at = 0
+                in_multiline = False
+                for i, line in enumerate(lines):
+                    if line.startswith('from vllm.'):
+                        insert_at = i + 1
+                        in_multiline = '(' in line and ')' not in line
+                    elif in_multiline:
+                        insert_at = i + 1
+                        if ')' in line:
+                            in_multiline = False
+                if insert_at > 0:
+                    lines.insert(insert_at, 'from vllm import SamplingParams')
+                    content = '\n'.join(lines)
+                    patched = True
+
+        # Fix 4: missing `BeamSearchParams` import
+        if 'BeamSearchParams' in content and 'from vllm.sampling_params import' not in content:
+            # Insert after the last `from vllm.` import line (or multiline block).
+            lines = content.split('\n')
+            insert_at = 0
+            in_multiline = False
+            for i, line in enumerate(lines):
+                if line.startswith('from vllm.'):
+                    insert_at = i + 1
+                    in_multiline = '(' in line and ')' not in line
+                elif in_multiline:
+                    insert_at = i + 1
+                    if ')' in line:
+                        in_multiline = False
+            if insert_at > 0:
+                lines.insert(insert_at, 'from vllm.sampling_params import BeamSearchParams')
+                content = '\n'.join(lines)
+                patched = True
+
+        if patched:
+            serving_py.write_text(content, encoding="utf-8")
+            log("Patched: fixed missing imports in serving.py")
 
 
 # ---------------------------------------------------------------------------
@@ -456,65 +806,71 @@ def build_run_id(workload: str, hust_commit: str) -> str:
     return f"single-gpu-backfill-{workload}-{hust_commit[:9]}-{today}"
 
 
-def run_vllm_bench(
-    workload: str, hust_commit: str, output_dir: Path
-) -> Path:
-    """Run the right vllm bench subcommand and return the raw result JSON path."""
-    params = SCENARIO_PARAMS[workload]
-    benchmark_type = params["benchmark_type"]
-    output_dir.mkdir(parents=True, exist_ok=True)
+def _run_bench_with_retry(
+    cmd: list[str], env: dict[str, str], output_dir: Path, bench_log: Path
+) -> tuple[subprocess.CompletedProcess, Path]:
+    """Run bench command, retrying with old CLI flags if new ones are unsupported."""
+    log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
+    with bench_log.open("w", encoding="utf-8") as log_file:
+        result = subprocess.run(cmd, cwd=HUST_REPO, env=env,
+                                stdout=log_file, stderr=subprocess.STDOUT,
+                                check=False)
 
-    bench_log = output_dir / "bench.log"
+    raw = output_dir / "raw.json"
+    if not raw.is_file():
+        for candidate in output_dir.glob("raw*.json"):
+            raw = candidate
+            break
 
-    if benchmark_type == "latency":
-        cmd: list[str] = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
-            "--model", MODEL_NAME,
-            "--input-len", str(params["input_length"]),
-            "--output-len", str(params["output_length"]),
-            "--batch-size", str(params["batch_size"]),
-            "--num-iters-warmup", str(params["num_iters_warmup"]),
-            "--num-iters", str(params["num_iters"]),
-            "--gpu-memory-utilization", "0.6",
-            "--output-json", str(output_dir / "raw.json"),
-        ]
-    elif benchmark_type == "throughput":
-        cmd = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
-            "--model", MODEL_NAME,
-            "--dataset-name", params["dataset_name"],
-            "--num-prompts", str(params["num_prompts"]),
-            "--gpu-memory-utilization", "0.6",
-            "--output-json", str(output_dir / "raw.json"),
-        ]
-        if params.get("dataset_path"):
-            cmd.extend(["--dataset-path", params["dataset_path"]])
-    else:  # serve
-        cmd = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "serve",
-            "--model", MODEL_NAME,
-            "--backend", "vllm",
-            "--endpoint", "/v1/completions",
-            "--dataset-name", params["dataset_name"],
-            "--num-prompts", str(params["num_prompts"]),
-            "--request-rate", str(params.get("request_rate", 1)),
-            "--gpu-memory-utilization", "0.6",
-            "--output-json", str(output_dir / "raw.json"),
-        ]
-        if params.get("dataset_path"):
-            cmd.extend(["--dataset-path", params["dataset_path"]])
-        if params.get("input_length"):
-            cmd.extend(["--random-input-len", str(params["input_length"])])
-        if params.get("output_length"):
-            cmd.extend(["--random-output-len", str(params["output_length"])])
+    # Check if the failure was due to unrecognized arguments (old CLI).
+    if result.returncode == 2 and not raw.is_file():
+        log_content = bench_log.read_text(encoding="utf-8") if bench_log.is_file() else ""
+        if "unrecognized arguments" in log_content:
+            log("Detected old CLI (unrecognized arguments), retrying with legacy flags...")
+            # Rebuild command with legacy flags.
+            new_cmd = _to_legacy_cmd(cmd, output_dir)
+            log(f"$ {' '.join(shlex.quote(c) for c in new_cmd)}")
+            with bench_log.open("w", encoding="utf-8") as log_file:
+                result = subprocess.run(new_cmd, cwd=HUST_REPO, env=env,
+                                        stdout=log_file, stderr=subprocess.STDOUT,
+                                        check=False)
+            raw = output_dir / "raw.json"
+            if not raw.is_file():
+                for candidate in output_dir.glob("raw*.json"):
+                    raw = candidate
+                    break
 
+    return result, raw
+
+
+def _to_legacy_cmd(cmd: list[str], output_dir: Path) -> list[str]:
+    """Convert new-style CLI flags to legacy (old vllm) flags."""
+    new_cmd = []
+    skip_next = False
+    for i, arg in enumerate(cmd):
+        if skip_next:
+            skip_next = False
+            continue
+        if arg == "--gpu-memory-utilization":
+            skip_next = True  # skip the value too
+            continue
+        if arg == "--output-json":
+            # Replace with --save-result --result-dir <dir> --result-filename raw.json
+            new_cmd.extend(["--save-result", "--result-dir", str(output_dir),
+                            "--result-filename", "raw.json"])
+            skip_next = True  # skip the value
+            continue
+        new_cmd.append(arg)
+    return new_cmd
+
+
+def _build_env() -> dict[str, str]:
+    """Build the environment for running vllm commands."""
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
     env.setdefault("VLLM_USE_V1", "1")
-    # Use NPU 7 — it has the most free HBM (only ~32% used vs 91%+ on others).
-    # NPU 5 was previously used but is now heavily occupied by other processes.
-    env["ASCEND_RT_VISIBLE_DEVICES"] = "7"
-    env["ASCEND_VISIBLE_DEVICES"] = "7"
+    env["ASCEND_RT_VISIBLE_DEVICES"] = "0"
+    env["ASCEND_VISIBLE_DEVICES"] = "0"
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
@@ -530,18 +886,168 @@ def run_vllm_bench(
     env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/ascend-toolkit/lib64:" + env["LD_LIBRARY_PATH"]
     env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/cann-9.0.0/lib64:" + env["LD_LIBRARY_PATH"]
     env["ATB_HOME_PATH"] = f"{atb_home}/{cxx_abi_dir}"
+    return env
 
-    log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
-    with bench_log.open("w", encoding="utf-8") as log_file:
-        result = subprocess.run(cmd, cwd=HUST_REPO, env=env,
-                                stdout=log_file, stderr=subprocess.STDOUT,
-                                check=False)
 
-    raw = output_dir / "raw.json"
-    if not raw.is_file():
-        for candidate in output_dir.glob("raw*.json"):
-            raw = candidate
+def _run_serve_bench(
+    params: dict[str, Any], output_dir: Path, bench_log: Path, env: dict[str, str]
+) -> tuple[subprocess.CompletedProcess, Path]:
+    """Run serve benchmark: start server, run bench client, stop server."""
+    host = "127.0.0.1"
+    port = 8000
+    server_log = output_dir / "server.log"
+
+    # Start the vllm server in the background.
+    serve_cmd = [
+        str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "serve",
+        MODEL_NAME,
+        "--host", host,
+        "--port", str(port),
+        "--gpu-memory-utilization", "0.6",
+    ]
+    # Wait for the port to be free (previous server may still be shutting down).
+    import socket as _socket
+    _port_wait_start = time.time()
+    while time.time() - _port_wait_start < 60:
+        try:
+            s = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM)
+            s.settimeout(2)
+            s.connect((host, port))
+            s.close()
+            time.sleep(2)
+        except (ConnectionRefusedError, OSError):
             break
+    else:
+        log("Warning: port 8000 still in use after 60s, proceeding anyway")
+
+    log(f"$ {' '.join(shlex.quote(c) for c in serve_cmd)} &")
+    with server_log.open("w", encoding="utf-8") as sf:
+        server_proc = subprocess.Popen(
+            serve_cmd, cwd=HUST_REPO, env=env,
+            stdout=sf, stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+
+    try:
+        # Wait for the server to be ready by polling /health.
+        import urllib.request
+        import urllib.error
+        max_wait = 600  # seconds
+        start = time.time()
+        ready = False
+        last_error = ""
+        while time.time() - start < max_wait:
+            if server_proc.poll() is not None:
+                raise RuntimeError(
+                    f"Server exited early with code {server_proc.returncode}. "
+                    f"Check {server_log}"
+                )
+            try:
+                req = urllib.request.Request(f"http://{host}:{port}/health")
+                urllib.request.urlopen(req, timeout=5)
+                ready = True
+                break
+            except (urllib.error.URLError, OSError) as e:
+                last_error = str(e)
+                time.sleep(5)
+        if not ready:
+            raise RuntimeError(
+                f"Server did not become ready within {max_wait}s. "
+                f"Last error: {last_error}"
+            )
+        log("Server is ready, starting benchmark client...")
+
+        # Build bench client command (old CLI style: --save-result).
+        bench_cmd = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "serve",
+            "--backend", "vllm",
+            "--endpoint", "/v1/completions",
+            "--host", host,
+            "--port", str(port),
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--request-rate", str(params.get("request_rate", 1)),
+            "--save-result",
+            "--result-dir", str(output_dir),
+            "--result-filename", "raw.json",
+        ]
+        if params.get("dataset_path"):
+            bench_cmd.extend(["--dataset-path", params["dataset_path"]])
+        if params.get("input_length"):
+            bench_cmd.extend(["--random-input-len", str(params["input_length"])])
+        if params.get("output_length"):
+            bench_cmd.extend(["--random-output-len", str(params["output_length"])])
+
+        log(f"$ {' '.join(shlex.quote(c) for c in bench_cmd)}")
+        with bench_log.open("w", encoding="utf-8") as lf:
+            bench_result = subprocess.run(
+                bench_cmd, cwd=HUST_REPO, env=env,
+                stdout=lf, stderr=subprocess.STDOUT,
+                check=False,
+            )
+
+        raw = output_dir / "raw.json"
+        if not raw.is_file():
+            for candidate in output_dir.glob("raw*.json"):
+                raw = candidate
+                break
+        return bench_result, raw
+    finally:
+        # Always stop the server (kill entire process group).
+        log("Stopping server...")
+        try:
+            os.killpg(os.getpgid(server_proc.pid), signal.SIGTERM)
+        except (ProcessLookupError, OSError):
+            pass
+        try:
+            server_proc.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(server_proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, OSError):
+                pass
+            server_proc.wait()
+
+
+def run_vllm_bench(
+    workload: str, hust_commit: str, output_dir: Path
+) -> Path:
+    """Run the right vllm bench subcommand and return the raw result JSON path."""
+    params = SCENARIO_PARAMS[workload]
+    benchmark_type = params["benchmark_type"]
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    bench_log = output_dir / "bench.log"
+    env = _build_env()
+
+    if benchmark_type == "latency":
+        cmd: list[str] = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
+            "--model", MODEL_NAME,
+            "--input-len", str(params["input_length"]),
+            "--output-len", str(params["output_length"]),
+            "--batch-size", str(params["batch_size"]),
+            "--num-iters-warmup", str(params["num_iters_warmup"]),
+            "--num-iters", str(params["num_iters"]),
+            "--gpu-memory-utilization", "0.6",
+            "--output-json", str(output_dir / "raw.json"),
+        ]
+        result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
+    elif benchmark_type == "throughput":
+        cmd = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--gpu-memory-utilization", "0.6",
+            "--output-json", str(output_dir / "raw.json"),
+        ]
+        if params.get("dataset_path"):
+            cmd.extend(["--dataset-path", params["dataset_path"]])
+        result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
+    else:  # serve
+        result, raw = _run_serve_bench(params, output_dir, bench_log, env)
 
     if result.returncode != 0:
         if raw.is_file() and raw.stat().st_size > 0:
@@ -559,7 +1065,10 @@ def run_vllm_bench(
                     lines = f.readlines()
                     for line in lines[-100:]:
                         log(f"  {line.rstrip()}", also_print=False)
-            raise subprocess.CalledProcessError(result.returncode, cmd)
+            raise RuntimeError(
+                f"benchmark failed with exit code {result.returncode} "
+                f"for workload={workload} commit={hust_commit[:9]}"
+            )
 
     if not raw.is_file():
         raise FileNotFoundError(f"raw result json not produced under {output_dir}")
@@ -881,8 +1390,9 @@ def validate_submission_artifact_entry(entry: dict[str, Any], tag: str) -> list[
     return errors
 
 
-def run_cell(workload: str, hust_commit: str) -> dict[str, Any]:
-    ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
+def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None) -> dict[str, Any]:
+    if ascend_commit is None:
+        ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
 
     log(f"=== {workload} @ {hust_commit[:9]} (plugin {ascend_commit[:9]}) ===")
     work_dir = STATE_DIR / "runs" / f"{workload}-{hust_commit[:9]}"
@@ -987,7 +1497,10 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     for workload, commits in target.items():
         for commit in commits:
-            key = f"{workload}:{commit[:9]}"
+            if args.ascend_commit:
+                key = f"{workload}:{commit[:9]}:ascend-{args.ascend_commit[:9]}"
+            else:
+                key = f"{workload}:{commit[:9]}"
             existing = state["cells"].get(key, {})
             if existing.get("status") == "done" and not args.force:
                 log(f"SKIP {key} (already done)")
@@ -997,7 +1510,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 state["cells"][key] = {"status": "done", "skipped": "already-present"}
                 continue
             log(f"BEGIN {key}")
-            result = run_cell(workload, commit)
+            result = run_cell(workload, commit, args.ascend_commit)
             state["cells"][key] = result
             save_state(state)
             if result["status"] == "failed":
@@ -1153,6 +1666,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--only", nargs="+", help="Restrict to these workloads (e.g. random-latency)."
     )
     p_run.add_argument("--commit", help="Run only this commit (overrides DEFAULT_CELLS).")
+    p_run.add_argument("--ascend-commit", help="Use this ascend plugin commit instead of resolving automatically.")
     p_run.add_argument("--force", action="store_true",
                        help="Re-run cells already marked done.")
     p_run.add_argument("--fail-fast", action="store_true",
