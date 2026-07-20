@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -22,6 +23,9 @@ SUPPORTED_TARGET_REPOSITORIES = {
 SHA_PATTERN = re.compile(r"^[0-9a-fA-F]{40}$")
 SAFE_COMPONENT_PATTERN = re.compile(r"^[A-Za-z0-9._-]+$")
 REQUIRED_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
+DEFAULT_BASELINE_BRANCH = "benchmark-baselines"
+DEFAULT_WRITER_NAME = "vLLM-HUST Baseline Writer"
+DEFAULT_WRITER_EMAIL = "baseline-writer@vllm-hust.local"
 
 
 @dataclass(frozen=True)
@@ -455,6 +459,133 @@ def verify_main_commit(
             )
 
 
+def _run_git(
+    arguments: list[str],
+    *,
+    cwd: Path | None = None,
+    check: bool = True,
+) -> subprocess.CompletedProcess[str]:
+    result = subprocess.run(
+        ["git", *arguments],
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if check and result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip()
+        raise ValueError(f"git {' '.join(arguments)} failed: {detail}")
+    return result
+
+
+def publish_baseline(
+    remote: str,
+    branch: str,
+    source: Path,
+    target_git_repository: Path,
+    main_ref: str,
+    identity: BaselineIdentity,
+    provenance: BaselineProvenance,
+    *,
+    update_latest_pointer: bool = False,
+    max_attempts: int = 5,
+    writer_name: str = DEFAULT_WRITER_NAME,
+    writer_email: str = DEFAULT_WRITER_EMAIL,
+) -> str:
+    identity = normalize_identity(identity)
+    provenance = normalize_provenance(provenance)
+    branch = _validate_component(branch, field="branch")
+    writer_name = _validate_metadata_value(writer_name, field="writer_name")
+    writer_email = _validate_metadata_value(writer_email, field="writer_email")
+    if not str(remote or "").strip():
+        raise ValueError("remote must be non-empty")
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+
+    verify_main_commit(
+        target_git_repository,
+        identity.target_sha,
+        main_ref,
+        require_tip=update_latest_pointer,
+    )
+    validate_artifact(source, identity, provenance)
+
+    last_error = ""
+    with tempfile.TemporaryDirectory(prefix="perfgate-baseline-writer-") as temp:
+        temp_root = Path(temp)
+        for attempt in range(1, max_attempts + 1):
+            checkout = temp_root / f"attempt-{attempt}"
+            _run_git(["clone", "--no-checkout", remote, str(checkout)])
+            remote_branch = _run_git(
+                [
+                    "ls-remote",
+                    "--exit-code",
+                    "--heads",
+                    "origin",
+                    branch,
+                ],
+                cwd=checkout,
+                check=False,
+            )
+            if remote_branch.returncode == 0:
+                _run_git(["fetch", "origin", branch], cwd=checkout)
+                _run_git(["checkout", "-B", branch, "FETCH_HEAD"], cwd=checkout)
+            elif remote_branch.returncode == 2:
+                _run_git(["checkout", "--orphan", branch], cwd=checkout)
+                _run_git(["rm", "-rf", "--ignore-unmatch", "."], cwd=checkout)
+            else:
+                detail = remote_branch.stderr.strip() or remote_branch.stdout.strip()
+                raise ValueError(
+                    f"unable to inspect central baseline branch {branch}: {detail}"
+                )
+
+            destination = store_baseline(
+                checkout,
+                source,
+                identity,
+                provenance,
+                update_latest_pointer=update_latest_pointer,
+            )
+            paths_to_add = ["baselines"]
+            if (checkout / "pointers").is_dir():
+                paths_to_add.append("pointers")
+            _run_git(["add", *paths_to_add], cwd=checkout)
+            staged = _run_git(
+                ["diff", "--cached", "--quiet"], cwd=checkout, check=False
+            )
+            if staged.returncode == 0:
+                return f"unchanged:{destination.relative_to(checkout).as_posix()}"
+            if staged.returncode != 1:
+                detail = staged.stderr.strip() or staged.stdout.strip()
+                raise ValueError(f"unable to inspect staged baseline changes: {detail}")
+
+            _run_git(
+                [
+                    "-c",
+                    f"user.name={writer_name}",
+                    "-c",
+                    f"user.email={writer_email}",
+                    "commit",
+                    "-m",
+                    "chore(perfgate): store central baseline for "
+                    f"{identity.target_repository}@{identity.target_sha[:12]}",
+                ],
+                cwd=checkout,
+            )
+            pushed = _run_git(
+                ["push", "origin", f"HEAD:refs/heads/{branch}"],
+                cwd=checkout,
+                check=False,
+            )
+            if pushed.returncode == 0:
+                return f"published:{destination.relative_to(checkout).as_posix()}"
+            last_error = pushed.stderr.strip() or pushed.stdout.strip()
+
+    raise ValueError(
+        f"failed to publish central baseline after {max_attempts} attempts: {last_error}"
+    )
+
+
 def _add_identity_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--target-repository", required=True)
     parser.add_argument("--target-sha", required=True)
@@ -518,6 +649,19 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     validate_parser.add_argument("--repository-root", type=Path, required=True)
     _add_identity_arguments(validate_parser)
     _add_provenance_arguments(validate_parser)
+
+    publish_parser = commands.add_parser("publish")
+    publish_parser.add_argument("--remote", required=True)
+    publish_parser.add_argument("--branch", default=DEFAULT_BASELINE_BRANCH)
+    publish_parser.add_argument("--source", type=Path, required=True)
+    publish_parser.add_argument("--target-git-repository", type=Path, required=True)
+    publish_parser.add_argument("--main-ref", default="origin/main")
+    publish_parser.add_argument("--update-latest-pointer", action="store_true")
+    publish_parser.add_argument("--max-attempts", type=int, default=5)
+    publish_parser.add_argument("--writer-name", default=DEFAULT_WRITER_NAME)
+    publish_parser.add_argument("--writer-email", default=DEFAULT_WRITER_EMAIL)
+    _add_identity_arguments(publish_parser)
+    _add_provenance_arguments(publish_parser)
     return parser.parse_args(argv)
 
 
@@ -557,6 +701,23 @@ def main(argv: list[str] | None = None) -> int:
             if actual_provenance != normalize_provenance(provenance):
                 raise ValueError("exact central baseline provenance mismatch")
             print("Central perfgate baseline is valid.")
+            return 0
+        if args.command == "publish":
+            print(
+                publish_baseline(
+                    args.remote,
+                    args.branch,
+                    args.source,
+                    args.target_git_repository,
+                    args.main_ref,
+                    identity,
+                    provenance,
+                    update_latest_pointer=args.update_latest_pointer,
+                    max_attempts=args.max_attempts,
+                    writer_name=args.writer_name,
+                    writer_email=args.writer_email,
+                )
+            )
             return 0
     except (OSError, ValueError) as error:
         print(str(error), file=sys.stderr)

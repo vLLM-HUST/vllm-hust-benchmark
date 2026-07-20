@@ -373,3 +373,107 @@ def test_bare_git_branch_can_be_bootstrapped_and_updated(tmp_path: Path) -> None
         f"benchmark-baselines:{perfgate_baselines.baseline_relative_dir(second_identity)}/baseline-metadata.json",
         cwd=checkout,
     )
+
+
+def test_publish_bootstraps_updates_and_is_idempotent(tmp_path: Path) -> None:
+    remote = tmp_path / "central.git"
+    seed = tmp_path / "seed"
+    target = tmp_path / "target"
+    target_sha = _commit_target_main(target)
+    identity = _identity(target_sha=target_sha)
+    provenance = _provenance(vllm_hust_sha=target_sha)
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact, identity=identity)
+
+    _git("init", "--bare", str(remote), cwd=tmp_path)
+    seed.mkdir()
+    _git("init", "-b", "main", cwd=seed)
+    _git("config", "user.name", "Test User", cwd=seed)
+    _git("config", "user.email", "test@example.com", cwd=seed)
+    (seed / "README.md").write_text("central\n", encoding="utf-8")
+    _git("add", "README.md", cwd=seed)
+    _git("commit", "-m", "seed", cwd=seed)
+    _git("remote", "add", "origin", str(remote), cwd=seed)
+    _git("push", "origin", "main", cwd=seed)
+
+    first = perfgate_baselines.publish_baseline(
+        str(remote),
+        "benchmark-baselines",
+        artifact,
+        target,
+        "main",
+        identity,
+        provenance,
+        update_latest_pointer=True,
+    )
+    second = perfgate_baselines.publish_baseline(
+        str(remote),
+        "benchmark-baselines",
+        artifact,
+        target,
+        "main",
+        identity,
+        provenance,
+        update_latest_pointer=True,
+    )
+
+    assert first.startswith("published:")
+    assert second.startswith("unchanged:")
+    assert _git(
+        "ls-remote", "--heads", str(remote), "benchmark-baselines", cwd=tmp_path
+    )
+
+
+def test_publish_retries_non_fast_forward_push(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    remote = tmp_path / "central.git"
+    seed = tmp_path / "seed"
+    target = tmp_path / "target"
+    target_sha = _commit_target_main(target)
+    identity = _identity(target_sha=target_sha)
+    provenance = _provenance(vllm_hust_sha=target_sha)
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact, identity=identity)
+    _git("init", "--bare", str(remote), cwd=tmp_path)
+    seed.mkdir()
+    _git("init", "-b", "main", cwd=seed)
+    _git("config", "user.name", "Test User", cwd=seed)
+    _git("config", "user.email", "test@example.com", cwd=seed)
+    (seed / "README.md").write_text("central\n", encoding="utf-8")
+    _git("add", "README.md", cwd=seed)
+    _git("commit", "-m", "seed", cwd=seed)
+    _git("remote", "add", "origin", str(remote), cwd=seed)
+    _git("push", "origin", "main", cwd=seed)
+
+    original_run_git = perfgate_baselines._run_git
+    failed_once = False
+
+    def fail_first_push(
+        arguments: list[str],
+        *,
+        cwd: Path | None = None,
+        check: bool = True,
+    ) -> subprocess.CompletedProcess[str]:
+        nonlocal failed_once
+        if arguments and arguments[0] == "push" and not failed_once:
+            failed_once = True
+            return subprocess.CompletedProcess(
+                ["git", *arguments], 1, "", "simulated non-fast-forward"
+            )
+        return original_run_git(arguments, cwd=cwd, check=check)
+
+    monkeypatch.setattr(perfgate_baselines, "_run_git", fail_first_push)
+    result = perfgate_baselines.publish_baseline(
+        str(remote),
+        "benchmark-baselines",
+        artifact,
+        target,
+        "main",
+        identity,
+        provenance,
+        max_attempts=2,
+    )
+
+    assert failed_once is True
+    assert result.startswith("published:")
