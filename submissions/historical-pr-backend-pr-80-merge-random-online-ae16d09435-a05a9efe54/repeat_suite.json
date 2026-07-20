@@ -1,0 +1,90 @@
+{
+  "benchmark_type": "serve",
+  "evidence_label": "real-online",
+  "execution": {
+    "benchmark_commit": "5c6a1d4e1e8654e8896f851ce372349efffb6d30",
+    "chunked_prefill": false,
+    "dev_hub_commit": "2afac6bcabb5efaf8cb20dda803d298c11f283a5",
+    "dev_hub_dir": "/home/shuhao/vllm-hust-dev-hub",
+    "gpu_memory_utilization": "0.90",
+    "graph_mode": true,
+    "local_model_path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "managed_container": "vllm-hust-single-npu6-backfill-20260720",
+    "managed_container_ssh_port": 2226,
+    "managed_recreate_container": false,
+    "managed_systemd_unit": "vllm-hust-single-npu6-backfill-20260720.service",
+    "max_model_len": 32768,
+    "max_num_seqs": 16,
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "prefix_caching": false,
+    "runtime_python": "/data/conda-envs/vllm-hust-single-npu-backfill/bin/python3.12",
+    "server_port": "8206"
+  },
+  "generated_at": "2026-07-20T01:03:39.450689+00:00",
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "devices": [
+      6
+    ],
+    "node_count": 1
+  },
+  "repeat_policy": {
+    "max_attempts": 5,
+    "minimum_successes": 3,
+    "target_successes": 3
+  },
+  "repeat_result_dirs": [
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/repeat-01",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/repeat-02",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/repeat-03"
+  ],
+  "resolved_refs": {
+    "core_commit": "ae16d09435abd978417a1b5ab7af352c8dcd180a",
+    "plugin_commit": "a05a9efe54c783cd4030d9aae8c8341b8c5e0d4b"
+  },
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "selection": {
+    "benchmark_type": "serve",
+    "candidates": [
+      {
+        "distance_to_median": 0.859095542691648,
+        "error_rate": 0.0,
+        "index": 0,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 253.58901503728703,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/repeat-01"
+      },
+      {
+        "distance_to_median": 1.1573511688038707,
+        "error_rate": 0.0,
+        "index": 1,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 251.5725683257915,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/repeat-02"
+      },
+      {
+        "distance_to_median": 0.0,
+        "error_rate": 0.0,
+        "index": 2,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 252.72991949459538,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/repeat-03"
+      }
+    ],
+    "median_value": 252.72991949459538,
+    "primary_metric_name": "ttft_ms",
+    "selected_result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/repeat-03"
+  },
+  "spec": "/home/shuhao/vllm-hust-benchmark-single-npu/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
+  "target": {
+    "core_ref": "ae16d09435abd978417a1b5ab7af352c8dcd180a",
+    "label": "backend-pr-80-merge",
+    "notes": "Final merged SimLLM optimization; core paired from default branch immediately before merge time.",
+    "plugin_ref": "a05a9efe54c783cd4030d9aae8c8341b8c5e0d4b",
+    "pr_number": 80,
+    "workloads": [
+      "random-online"
+    ]
+  }
+}
