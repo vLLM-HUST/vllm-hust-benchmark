@@ -1,0 +1,90 @@
+{
+  "benchmark_type": "serve",
+  "evidence_label": "real-online",
+  "execution": {
+    "benchmark_commit": "5c6a1d4e1e8654e8896f851ce372349efffb6d30",
+    "chunked_prefill": false,
+    "dev_hub_commit": "2afac6bcabb5efaf8cb20dda803d298c11f283a5",
+    "dev_hub_dir": "/home/shuhao/vllm-hust-dev-hub",
+    "gpu_memory_utilization": "0.90",
+    "graph_mode": true,
+    "local_model_path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "managed_container": "vllm-hust-single-npu6-backfill-20260720",
+    "managed_container_ssh_port": 2226,
+    "managed_recreate_container": false,
+    "managed_systemd_unit": "vllm-hust-single-npu6-backfill-20260720.service",
+    "max_model_len": 32768,
+    "max_num_seqs": 16,
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "prefix_caching": true,
+    "runtime_python": "/data/conda-envs/vllm-hust-single-npu-backfill/bin/python3.12",
+    "server_port": "8206"
+  },
+  "generated_at": "2026-07-20T00:25:52.395835+00:00",
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "devices": [
+      6
+    ],
+    "node_count": 1
+  },
+  "repeat_policy": {
+    "max_attempts": 5,
+    "minimum_successes": 3,
+    "target_successes": 3
+  },
+  "repeat_result_dirs": [
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-116-merge-prefix-repetition-online-ab0a8e87d5-9b40f1c4e3/repeat-01",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-116-merge-prefix-repetition-online-ab0a8e87d5-9b40f1c4e3/repeat-02",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-116-merge-prefix-repetition-online-ab0a8e87d5-9b40f1c4e3/repeat-03"
+  ],
+  "resolved_refs": {
+    "core_commit": "ab0a8e87d5b8a361e4c26d83c400d440b1c85f87",
+    "plugin_commit": "9b40f1c4e35b54a3ff1eb80272125c24a3eb5fe9"
+  },
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "selection": {
+    "benchmark_type": "serve",
+    "candidates": [
+      {
+        "distance_to_median": 5.148569641169161,
+        "error_rate": 0.0,
+        "index": 0,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 207.50110886758193,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-116-merge-prefix-repetition-online-ab0a8e87d5-9b40f1c4e3/repeat-01"
+      },
+      {
+        "distance_to_median": 0.0,
+        "error_rate": 0.0,
+        "index": 1,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 202.35253922641277,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-116-merge-prefix-repetition-online-ab0a8e87d5-9b40f1c4e3/repeat-02"
+      },
+      {
+        "distance_to_median": 2.5124906259588897,
+        "error_rate": 0.0,
+        "index": 2,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 199.84004860045388,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-116-merge-prefix-repetition-online-ab0a8e87d5-9b40f1c4e3/repeat-03"
+      }
+    ],
+    "median_value": 202.35253922641277,
+    "primary_metric_name": "ttft_ms",
+    "selected_result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-116-merge-prefix-repetition-online-ab0a8e87d5-9b40f1c4e3/repeat-02"
+  },
+  "spec": "/home/shuhao/vllm-hust-benchmark-single-npu/docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
+  "target": {
+    "core_ref": "ab0a8e87d5b8a361e4c26d83c400d440b1c85f87",
+    "label": "core-pr-116-merge",
+    "notes": "Text-only block-hash fast path; plugin paired from default branch immediately before merge time.",
+    "plugin_ref": "9b40f1c4e35b54a3ff1eb80272125c24a3eb5fe9",
+    "pr_number": 116,
+    "workloads": [
+      "prefix-repetition-online"
+    ]
+  }
+}

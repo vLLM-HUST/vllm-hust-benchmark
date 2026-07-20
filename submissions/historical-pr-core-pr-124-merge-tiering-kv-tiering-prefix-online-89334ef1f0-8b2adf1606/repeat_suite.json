@@ -1,0 +1,100 @@
+{
+  "benchmark_type": "serve",
+  "evidence_label": "real-online",
+  "execution": {
+    "benchmark_commit": "b469d44e4547fabf65b92939c24e58f169bce6b9",
+    "chunked_prefill": false,
+    "dev_hub_commit": "2afac6bcabb5efaf8cb20dda803d298c11f283a5",
+    "dev_hub_dir": "/home/shuhao/vllm-hust-dev-hub",
+    "gpu_memory_utilization": "0.90",
+    "graph_mode": true,
+    "local_model_path": "/data/shared_models/Qwen2.5-7B-Instruct",
+    "managed_container": "vllm-hust-single-npu6-backfill-20260720",
+    "managed_container_ssh_port": 2226,
+    "managed_recreate_container": false,
+    "managed_systemd_unit": "vllm-hust-single-npu6-backfill-20260720.service",
+    "max_model_len": 4608,
+    "max_num_seqs": 16,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "prefix_caching": false,
+    "runtime_python": "/data/conda-envs/vllm-hust-single-npu-backfill/bin/python3.12",
+    "server_port": "8206"
+  },
+  "generated_at": "2026-07-20T06:01:46.603556+00:00",
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "devices": [
+      6
+    ],
+    "node_count": 1
+  },
+  "repeat_policy": {
+    "max_attempts": 5,
+    "minimum_successes": 3,
+    "target_successes": 3
+  },
+  "repeat_result_dirs": [
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-124-merge-tiering-kv-tiering-prefix-online-89334ef1f0-8b2adf1606/repeat-01",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-124-merge-tiering-kv-tiering-prefix-online-89334ef1f0-8b2adf1606/repeat-02",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-124-merge-tiering-kv-tiering-prefix-online-89334ef1f0-8b2adf1606/repeat-03"
+  ],
+  "resolved_refs": {
+    "core_commit": "89334ef1f043c69f9b51b7ebb73ab755a34e2059",
+    "plugin_commit": "8b2adf16061c494dd1474faae90dc4d9e1ff0aad"
+  },
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "selection": {
+    "benchmark_type": "serve",
+    "candidates": [
+      {
+        "distance_to_median": 2595.7728898664936,
+        "error_rate": 0.0,
+        "index": 0,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 207813.1667944719,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-124-merge-tiering-kv-tiering-prefix-online-89334ef1f0-8b2adf1606/repeat-01"
+      },
+      {
+        "distance_to_median": 0.0,
+        "error_rate": 0.0,
+        "index": 1,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 210408.9396843384,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-124-merge-tiering-kv-tiering-prefix-online-89334ef1f0-8b2adf1606/repeat-02"
+      },
+      {
+        "distance_to_median": 4534.395307088271,
+        "error_rate": 0.0,
+        "index": 2,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 214943.33499142667,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-124-merge-tiering-kv-tiering-prefix-online-89334ef1f0-8b2adf1606/repeat-03"
+      }
+    ],
+    "median_value": 210408.9396843384,
+    "primary_metric_name": "ttft_ms",
+    "selected_result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-pr-124-merge-tiering-kv-tiering-prefix-online-89334ef1f0-8b2adf1606/repeat-02"
+  },
+  "spec": "/home/shuhao/vllm-hust-benchmark-single-npu/docs/official-baselines/official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json",
+  "target": {
+    "core_ref": "89334ef1f043c69f9b51b7ebb73ab755a34e2059",
+    "label": "core-pr-124-merge-tiering",
+    "notes": "Core PR 124 merge with its documented tiering connector and the same 256 MiB device KV budget.",
+    "plugin_ref": "8b2adf16061c494dd1474faae90dc4d9e1ff0aad",
+    "pr_number": 124,
+    "server_env": [],
+    "server_extra_args": [
+      "--kv-cache-memory-bytes",
+      "268435456",
+      "--enable-prefix-caching",
+      "--prefix-caching-hash-algo",
+      "sha256",
+      "--kv-transfer-config",
+      "{\"kv_connector\":\"OffloadingConnector\",\"kv_role\":\"kv_both\",\"kv_connector_extra_config\":{\"spec_name\":\"TieringOffloadingSpec\",\"cpu_bytes_to_use\":1073741824,\"block_size\":128,\"eviction_policy\":\"lru\",\"lifecycle_idle_ttl_sec\":10,\"lifecycle_cpu_demote_after_sec\":2,\"tiering_hbm_pressure_aware\":true,\"tiering_hbm_high_watermark\":0.7,\"tiering_hbm_low_watermark\":0.5,\"tiering_secondary_pressure_aware\":true,\"tiering_min_session_requests_for_offload\":2,\"tiering_min_reuse_probability\":0.5,\"tiering_store_during_decode_only\":true,\"tiering_max_device_store_blocks_per_step\":16,\"tiering_max_device_store_blocks_per_request\":64,\"tiering_max_device_store_blocks_per_pressure_episode\":128,\"tiering_max_device_store_blocks_per_session_episode\":64,\"tiering_max_inflight_device_store_jobs\":2,\"lifecycle_reclaim_batch_size\":64,\"residency_max_entries\":64000,\"residency_tracking_enabled\":true}}"
+    ],
+    "workloads": [
+      "kv-tiering-prefix-online"
+    ]
+  }
+}
