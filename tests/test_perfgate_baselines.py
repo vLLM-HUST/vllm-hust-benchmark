@@ -14,7 +14,29 @@ TARGET_SHA = "1" * 40
 PLUGIN_SHA = "2" * 40
 BENCHMARK_SHA = "3" * 40
 SPEC_ID = "perfgate-ascend-qwen25-3b-910b2"
-SPEC_HASH = "a" * 64
+SAME_SPEC_PAYLOAD = {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "perfgate-ascend-qwen25-3b-910b2",
+    "scenario": "random-online",
+    "model": "Qwen/Qwen2.5-3B-Instruct",
+    "model_parameters": "3B",
+    "model_precision": "BF16",
+    "model_quantization": "",
+    "hardware_vendor": "Ascend",
+    "hardware_chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_server_parameters": {
+        "dtype": "bfloat16",
+        "enforce_eager": "",
+        "max_model_len": 4096,
+    },
+    "resolved_client_parameters": {
+        "num_prompts": 8,
+        "request_rate": "inf",
+    },
+}
+SPEC_HASH = perfgate_baselines.compute_resolved_spec_hash(SAME_SPEC_PAYLOAD)
 
 
 def _identity(**overrides: str) -> perfgate_baselines.BaselineIdentity:
@@ -50,6 +72,7 @@ def _write_artifact(
     *,
     identity: perfgate_baselines.BaselineIdentity | None = None,
     throughput: float = 100.0,
+    error_rate: float | None = 0.0,
 ) -> None:
     identity = perfgate_baselines.normalize_identity(identity or _identity())
     engine_sha = (
@@ -62,17 +85,19 @@ def _write_artifact(
         if identity.target_repository == "vLLM-HUST/vllm-ascend-hust"
         else PLUGIN_SHA
     )
+    metrics = {
+        "throughput_tps": throughput,
+        "ttft_ms": 50.0,
+        "tbt_ms": 10.0,
+    }
+    if error_rate is not None:
+        metrics["error_rate"] = error_rate
     path.write_text(
         json.dumps(
             {
-                "metrics": {
-                    "throughput_tps": throughput,
-                    "ttft_ms": 50.0,
-                    "tbt_ms": 10.0,
-                },
+                "metrics": metrics,
                 "same_spec": {
-                    "scenario": identity.scenario,
-                    "spec_id": identity.spec_id,
+                    **SAME_SPEC_PAYLOAD,
                     "resolved_spec_hash": identity.spec_hash,
                 },
                 "metadata": {
@@ -218,6 +243,65 @@ def test_store_rejects_spec_and_companion_mismatch(tmp_path: Path) -> None:
             _identity(),
             _provenance(vllm_ascend_hust_sha="4" * 40),
         )
+
+
+@pytest.mark.parametrize("error_rate", [None, 0.01, 1.0])
+def test_validate_artifact_rejects_missing_or_nonzero_error_rate(
+    tmp_path: Path, error_rate: float | None
+) -> None:
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact, error_rate=error_rate)
+
+    with pytest.raises(ValueError, match="invalid required metrics: error_rate"):
+        perfgate_baselines.validate_artifact(artifact, _identity(), _provenance())
+
+
+def test_validate_artifact_recomputes_resolved_spec_hash(tmp_path: Path) -> None:
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    payload = json.loads(artifact.read_text(encoding="utf-8"))
+    payload["same_spec"]["resolved_server_parameters"]["max_num_seqs"] = 32
+    artifact.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="resolved spec hash mismatch"):
+        perfgate_baselines.validate_artifact(artifact, _identity(), _provenance())
+
+
+def test_store_rejects_symlinked_baselines_directory(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    victim = tmp_path / "victim"
+    victim.mkdir()
+    (central / "baselines").symlink_to(victim, target_is_directory=True)
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+
+    with pytest.raises(ValueError, match="contains a symlink"):
+        perfgate_baselines.store_baseline(central, artifact, _identity(), _provenance())
+    assert list(victim.iterdir()) == []
+
+
+def test_store_rejects_symlinked_latest_pointer(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    perfgate_baselines.store_baseline(central, artifact, _identity(), _provenance())
+    pointer = central / perfgate_baselines.latest_pointer_relative_path(_identity())
+    pointer.parent.mkdir(parents=True, exist_ok=True)
+    victim = tmp_path / "victim.json"
+    victim.write_text("preserve me\n", encoding="utf-8")
+    pointer.symlink_to(victim)
+
+    with pytest.raises(ValueError, match="contains a symlink"):
+        perfgate_baselines.store_baseline(
+            central,
+            artifact,
+            _identity(),
+            _provenance(),
+            update_latest_pointer=True,
+        )
+    assert victim.read_text(encoding="utf-8") == "preserve me\n"
 
 
 def test_fetch_rejects_missing_exact_baseline(tmp_path: Path) -> None:
