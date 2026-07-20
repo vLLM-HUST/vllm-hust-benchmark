@@ -1,13 +1,5 @@
 # SimLLM 官方 Warm-Cache 吞吐测试需求
 
-## 需求摘要
-
-在 `vllm-hust-benchmark` 中为 SimLLM 定制一套官方测试方案和执行脚本，用于衡量 上 SimLLM 在 warm-cache 命中场景下对在线推理吞吐的影响。
-
-现有本地吞吐脚本是本需求的参考实现依据，工程师应复用其已验证的测试语义、参数约束和错误门禁，但不得未经官方化改造就将其直接作为官方脚本提交。现有本地结果仅用于验证需求可行性，不得直接作为官方数据。工程师应基于仓库现有 official baseline、same-spec、artifact exporter 和 submission 机制完成正式实现，并通过代码评审后重新采集数据。
-
-本需求的核心变化是：正式测量阶段不能再使用 `request_rate=1`。该设置会把客户端到达率限制在 1 req/s，无法体现服务端的最大吞吐能力。正式测量必须使用饱和请求流，并设置明确的最大并发数。
-
 ## 背景与问题
 
 当前通用 `random-online` 官方规格使用：
@@ -39,7 +31,7 @@ scripts/run_simllm_random_online_warm_cache.sh
 
 工程师在编写官方脚本前应阅读并验证这两个脚本。官方实现应继承以下已经过 Ascend device 5 实机验证的逻辑：
 
-1. 从现有 official random-online baseline spec 派生 saturated same-spec，而不是维护一套与官方参数体系无关的命令行。
+1. 从现有 official random-online baseline spec 派生 saturated same-spec。
 2. Baseline 和 SimLLM measured pass 使用相同 seed、prompt、模型、server 参数和 client 参数。
 3. measured pass 设置 `request_rate=inf` 和有界 `max_concurrency`，解除 1 req/s 的客户端限速。
 4. SimLLM 组先执行低速 warmup，且 warmup 与 measured pass 使用相同 seed 和 prompt 数；两者之间不重启服务。
@@ -48,7 +40,6 @@ scripts/run_simllm_random_online_warm_cache.sh
 7. SimLLM KV cache 容量默认与 prompt 数量一致，避免为未使用的 cache entries 占用 HBM。
 8. 分别保存 Baseline 和 SimLLM 原始 benchmark JSON，并自动生成 JSON/Markdown 对比结果。
 9. 检查两组 `completed == num_prompts`；结果不完整时非零退出，不允许使用成功请求子集计算收益。
-10. 在退出和异常路径中清理服务进程树、监听端口与设备资源。
 
 参考脚本的默认实测入口为：
 
@@ -58,8 +49,6 @@ ASCEND_RT_VISIBLE_DEVICES=5 \
 CURRENT_MODEL_PATH=/data/shared_models/Qwen2.5-14B-Instruct \
 bash scripts/run_simllm_saturated_throughput_warm_cache.sh
 ```
-
-上述命令仅用于复现和理解参考实现。官方脚本不得硬编码 device 5 或本地模型绝对路径，而应接入官方 runner 的设备分配、模型解析和运行环境记录机制。
 
 参考脚本当前产生的主要文件包括：
 
@@ -72,11 +61,9 @@ bash scripts/run_simllm_saturated_throughput_warm_cache.sh
 └── throughput_comparison.md
 ```
 
-官方实现应保留这些核心原始信息，但应按第 10 节扩展为多 repetition、结构化 SimLLM metrics、manifest 和 canonical submission 兼容的正式 artifact 布局。
 
 ## 3. 测试目标
 
-### 3.1 主要目标
 
 在同一硬件、模型、代码版本和请求集合下，对比以下两组：
 
@@ -85,12 +72,7 @@ bash scripts/run_simllm_saturated_throughput_warm_cache.sh
 
 主要指标为成功请求吞吐量 `request_throughput`，辅助指标包括 total token throughput、TTFT 和 TPOT。
 
-### 3.2 非目标
 
-- 本测试不用于证明模型输出质量等价；质量评估应作为独立测试需求。
-- 不使用现有本地 `+240.78%` 结果作为验收阈值。
-- 不允许只运行 SimLLM 组而缺少 same-spec Baseline。
-- warmup 时间不得计入 measured benchmark duration。
 
 ## 4. 官方主测试规格
 
@@ -177,8 +159,6 @@ Baseline 与 SimLLM measured pass 之间，以下字段必须一致：
 
 ## 7. 指标和证据
 
-### 7.1 必须报告
-
 - successful requests / failed requests
 - benchmark duration
 - request throughput，req/s，主指标
@@ -194,115 +174,10 @@ Baseline 与 SimLLM measured pass 之间，以下字段必须一致：
 improvement_percent = (simllm_median - baseline_median) / baseline_median * 100
 ```
 
-### 7.2 必须新增或导出的 SimLLM 证据
 
-正式 artifact 必须能够证明 measured 请求确实命中并触发 KV 复用，至少包含：
+## 本地可行性结果，仅供参考
 
-- warmup cache entries committed
-- measured cache lookup count
-- measured cache hit count 和 hit ratio
-- scheduler rewrite request count
-- rewritten/skipped prefill token count
-- eviction count
-- SimLLM fallback/error count
-
-若当前 runtime 尚未公开这些统计，工程师需要增加结构化 metrics 或在 runner 中导出机器可读统计。仅凭吞吐变快不能认定为有效 SimLLM 官方数据。
-
-## 8. 稳定性与扩展性测试
-
-主测试之外必须增加一组非发布型稳定性检查，用来暴露当前实现的容量边界：
-
-- 256 prompts
-- 2048 input tokens
-- 32 output tokens
-- `request_rate=inf`
-- `max_concurrency=64`
-
-此检查用于验证无 OOM、无 EngineCore fatal、无异步调度 placeholder assertion，并不要求吞吐提升。若失败，应将结果标记为已知限制并保留日志，不能用部分成功请求计算吞吐提升。
-
-在扩展主规格前，工程师还应特别检查 SimLLM scheduler rewrite 与 vLLM async scheduling 的一致性。历史自测曾在大请求量下出现 `num_output_placeholders >= 0` 断言，因此官方脚本不能默默忽略 500 响应或仅统计成功子集。
-
-## 9. 有效性门禁
-
-满足以下全部条件，一轮测试才是有效 repetition：
-
-1. Baseline 和 SimLLM 都完成全部请求，`completed == num_prompts`。
-2. failed requests 为 0，HTTP 5xx 为 0。
-3. 服务端不存在 OOM、fatal error、AssertionError 或 EngineDeadError。
-4. SimLLM warmup 成功提交预期数量的缓存条目。
-5. SimLLM measured pass 的 cache hit/rewrite 统计非零，并与测试预期相符。
-6. A/B resolved same-spec 除 SimLLM 开关和 warmup 状态外完全一致。
-7. 未发生设备复用、其他进程占用或测试期间的 NPU reset。
-8. 原始结果和日志完整，能够从 artifact 复算汇总结果。
-
-任一条件不满足时，runner 必须非零退出，并禁止写入 canonical official submissions。
-
-## 10. 工程交付物
-
-工程师需要提交：
-
-1. 官方 same-spec JSON，例如：
-   `docs/official-baselines/official-ascend-simllm-warm-cache-throughput-qwen25-14b-910b2.json`
-2. 官方执行脚本，例如：
-   `scripts/run-official-ascend-simllm-warm-cache-throughput.sh`
-3. A/B orchestration、warmup 和进程清理实现。
-4. 机器可读的 SimLLM cache hit/rewrite metrics。
-5. 单元测试和 dry-run 测试，覆盖参数解析、same-spec 一致性、失败请求门禁和汇总计算。
-6. 一份 artifact schema 文档或 JSON Schema。
-7. 至少 3 次有效运行产生的原始 artifacts 和汇总报告。
-8. 合法的 leaderboard submission/manifest；在评审确认前先以 report-only 或 candidate 状态保存，不直接进入公开 canonical 数据。
-9. 一份“参考脚本到官方实现”的映射说明，逐项说明第 2.1 节的逻辑被复用、替换或调整的位置及理由。
-
-建议输出目录：
-
-```text
-<result-dir>/
-├── spec.json
-├── repetitions/
-│   ├── 01/
-│   │   ├── baseline/
-│   │   └── simllm-warm-cache/
-│   ├── 02/
-│   └── 03/
-├── summary.json
-├── summary.md
-├── run_leaderboard.json
-└── leaderboard_manifest.json
-```
-
-## 11. 已知陷阱
-
-- `request_rate=1` 只能用于 warmup，不能用于 measured throughput。
-- `max_num_batched_tokens < input_len` 会切分 prompt，使 warmup 与 measured 阶段的 hash/KV 覆盖不一致。
-- 不显式设置 `temperature=0` 时，模型 generation config 可能启用 Ascend TopK/TopP 路径并触发算子错误。
-- 过大的 SimLLM KV cache 会占满 HBM；缓存容量应与测试请求数匹配，并记录峰值 HBM。
-- KV extraction 不应重新构造超大 padded hidden-state tensor；应复用 scheduler 阶段 embedding。
-- benchmark client 的可选 Triton import warning 不等同于服务端失败，但必须在报告中区分 warning 与 fatal error。
-- 清理阶段发送 SIGTERM/SIGKILL 的日志不能被误判为运行期 EngineDeadError；runner 应按时间阶段分类。
-
-## 12. 验收标准
-
-### 12.1 脚本验收
-
-- 支持 dry-run，能够只解析并输出最终 A/B 参数。
-- 支持官方 runner 自动选择设备，不在脚本中硬编码 device 5。
-- 支持指定 repetitions、结果目录和模型本地路径。
-- 任何请求失败、same-spec 漂移或服务端 fatal 均非零退出。
-- 无论成功或失败，都能清理服务进程、端口和 NPU 资源。
-- 脚本和 spec 通过仓库现有 lint、单测和 official baseline validation。
-
-### 12.2 数据验收
-
-- 至少 3 个有效 repetitions。
-- 每轮 A/B 均为 100% 请求成功。
-- 主指标变异系数不超过 5%。
-- cache hit/rewrite 证据完整。
-- 可从 raw artifact 独立复算 summary。
-- 吞吐收益按实报告，不以复现本地 `+240.78%` 作为通过条件；若结果不增反降，也必须保留并解释。
-
-## 13. 本地可行性结果，仅供工程设计参考
-
-以下结果来自非官方本地脚本，只用于说明规格能够暴露 SimLLM 吞吐差异，不得进入 official submission：
+以下结果来自非官方本地脚本，说明能够体现 SimLLM 吞吐差异：
 
 | 指标 | Baseline | SimLLM warm cache | 差异 |
 | --- | ---: | ---: | ---: |
@@ -311,12 +186,5 @@ improvement_percent = (simllm_median - baseline_median) / baseline_median * 100
 | Mean TTFT | 3616.75 ms | 547.20 ms | -84.87% |
 | 成功请求 | 32/32 | 32/32 | 均无失败 |
 
-工程师应从官方实现重新采集数据，不应复制本地结果、结果目录或本地汇总文件。
 
-## 14. Issue/工单标题建议
 
-```text
-[Benchmark][SimLLM] Add official saturated warm-cache throughput benchmark on Ascend 910B2
-```
-
-完成定义：官方脚本、same-spec、结构化命中证据、测试和至少 3 次候选运行数据全部提交并通过评审，且候选结果满足第 9 节有效性门禁。
