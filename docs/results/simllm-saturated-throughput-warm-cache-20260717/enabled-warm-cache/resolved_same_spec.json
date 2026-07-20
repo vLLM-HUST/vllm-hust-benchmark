@@ -1,0 +1,42 @@
+{
+  "schema_version": "benchmark-same-spec/v1",
+  "spec_id": "simllm-random-online-saturated-throughput-warm-cache",
+  "spec_label": "SimLLM saturated throughput warm-cache",
+  "spec_source": "/workspace/vllm-hust-benchmark/.benchmarks/simllm-saturated-throughput-warm-cache/saturated-same-spec.json",
+  "scenario": "random-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "model_quantization": "",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 1,
+  "node_count": 1,
+  "resolved_spec_hash": "a20716a13eec3b801e428f123f74947eb1bb35a9162e5ff7148283ed5c2ce865",
+  "resolved_server_parameters": {
+    "tensor_parallel_size": 1,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 8021,
+    "max_num_batched_tokens": 4096,
+    "model": "/data/shared_models/Qwen2.5-14B-Instruct",
+    "dtype": "float16"
+  },
+  "resolved_client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "random",
+    "num_prompts": 32,
+    "request_rate": "inf",
+    "host": "127.0.0.1",
+    "port": 8021,
+    "temperature": 0,
+    "max_concurrency": 16,
+    "model": "/data/shared_models/Qwen2.5-14B-Instruct",
+    "random_input_len": 4096,
+    "random_output_len": 32
+  }
+}
