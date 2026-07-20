@@ -4,14 +4,27 @@ import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW_PATHS = [
-    ".github/workflows/ci.yml",
+PUBLISH_WORKFLOW_PATHS = [
     ".github/workflows/push-to-hf.yml",
     ".github/workflows/run-official-ascend-baselines.yml",
 ]
 
 
-@pytest.mark.parametrize("workflow_path", WORKFLOW_PATHS)
+def test_pull_request_ci_uses_public_checkout_without_ssh_secret() -> None:
+    workflow_text = (REPO_ROOT / ".github/workflows/ci.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "uses: actions/checkout@v4" in workflow_text
+    assert "persist-credentials: false" in workflow_text
+    assert "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY" not in workflow_text
+    assert "BENCHMARK_CHECKOUT_USE_SSH" not in workflow_text
+    assert "Require GitHub SSH checkout key" not in workflow_text
+    assert "Configure GitHub SSH" not in workflow_text
+    assert "ssh-key:" not in workflow_text
+
+
+@pytest.mark.parametrize("workflow_path", PUBLISH_WORKFLOW_PATHS)
 def test_workflows_use_standard_github_ssh_without_overwriting_config(
     workflow_path: str,
 ) -> None:
