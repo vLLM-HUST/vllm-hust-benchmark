@@ -62,6 +62,7 @@ SERVER_LOG_TAIL_LINES=${SERVER_LOG_TAIL_LINES:-200}
 SERVER_LOG_PROGRESS_INTERVAL_SECONDS=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS:-120}
 SERVER_LOG_PROGRESS_TAIL_LINES=${SERVER_LOG_PROGRESS_TAIL_LINES:-40}
 READY_PROBE_TIMEOUT_SECONDS=${READY_PROBE_TIMEOUT_SECONDS:-5}
+NPU_OOM_EXIT_CODE=87
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -855,6 +856,14 @@ server_log_indicates_node_env_failure() {
   grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy" "$log_file"
 }
 
+server_log_indicates_npu_oom() {
+  local log_file=$1
+
+  [[ -f "$log_file" ]] || return 1
+
+  grep -Eiq "torch\.OutOfMemoryError|NPU out of memory|ACL_ERROR_RT_MEMORY_ALLOCATION|aclrtMalloc[^[:cntrl:]]*(failed|failure|error)|(failed|failure|unable)[^[:cntrl:]]*(allocate|allocation)[^[:cntrl:]]*(NPU|device)[ -]?memory" "$log_file"
+}
+
 print_server_log_tail() {
   local log_file=$1
   local lines=${2:-$SERVER_LOG_TAIL_LINES}
@@ -885,6 +894,10 @@ wait_for_server() {
       echo "Current same-spec server exited before becoming ready" >&2
       if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
         print_server_log_tail "$SERVER_STDOUT_LOG"
+        if server_log_indicates_npu_oom "$SERVER_STDOUT_LOG"; then
+          echo "Detected Ascend NPU out of memory; refusing to retry server startup" >&2
+          return "$NPU_OOM_EXIT_CODE"
+        fi
         if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG"; then
           echo "Detected Ascend node-level runtime failure during current same-spec startup" >&2
           return 86
@@ -921,6 +934,10 @@ wait_for_server() {
   echo "Timed out waiting for current same-spec server at ${host}:${port}" >&2
   if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
     print_server_log_tail "$SERVER_STDOUT_LOG"
+    if server_log_indicates_npu_oom "$SERVER_STDOUT_LOG"; then
+      echo "Detected Ascend NPU out of memory; refusing to retry server startup" >&2
+      return "$NPU_OOM_EXIT_CODE"
+    fi
     if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG"; then
       echo "Detected Ascend node-level runtime failure while waiting for current same-spec startup" >&2
       return 86
