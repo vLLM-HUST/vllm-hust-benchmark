@@ -56,8 +56,17 @@ RUN_ID=${RUN_ID:-"current-ascend-same-spec-$(date -u +%Y%m%dT%H%M%SZ)"}
 READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-600}
 READY_STATUS_INTERVAL_SECONDS=${READY_STATUS_INTERVAL_SECONDS:-30}
 CLIENT_READY_CHECK_TIMEOUT_SECONDS=${CLIENT_READY_CHECK_TIMEOUT_SECONDS:-$READY_TIMEOUT_SECONDS}
-SERVER_START_RETRIES=${SERVER_START_RETRIES:-3}
+# Workflow callers own node-level retries. Keep this runner single-attempt by
+# default so nested orchestration cannot multiply retries.
+SERVER_START_RETRIES=${SERVER_START_RETRIES:-1}
 SERVER_START_RETRY_DELAY_SECONDS=${SERVER_START_RETRY_DELAY_SECONDS:-10}
+SERVER_LOG_TAIL_LINES=${SERVER_LOG_TAIL_LINES:-200}
+SERVER_LOG_PROGRESS_INTERVAL_SECONDS=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS:-120}
+SERVER_LOG_PROGRESS_TAIL_LINES=${SERVER_LOG_PROGRESS_TAIL_LINES:-40}
+SERVER_LOG_OOM_CHECK_INTERVAL_SECONDS=${SERVER_LOG_OOM_CHECK_INTERVAL_SECONDS:-2}
+CLIENT_SERVER_MONITOR_INTERVAL_SECONDS=${CLIENT_SERVER_MONITOR_INTERVAL_SECONDS:-1}
+READY_PROBE_TIMEOUT_SECONDS=${READY_PROBE_TIMEOUT_SECONDS:-5}
+NPU_OOM_EXIT_CODE=87
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
@@ -782,15 +791,61 @@ assert_target_port_available() {
 probe_server_ready() {
   local host=$1
   local port=$2
+  local verbose=${3:-0}
   local ready_path
+  local url
+  local probe_output
+  local probe_status
   local ready_paths=(
     "/health"
+    "/ping"
     "/v1/models"
   )
 
   for ready_path in "${ready_paths[@]}"; do
-    if curl -fsS "http://${host}:${port}${ready_path}" >/dev/null 2>&1; then
+    url="http://${host}:${port}${ready_path}"
+    set +e
+    probe_output="$("$CURRENT_RUNTIME_PYTHON" - "$host" "$port" "$ready_path" "$READY_PROBE_TIMEOUT_SECONDS" <<'PY' 2>&1
+import socket
+import sys
+
+host = sys.argv[1]
+port = int(sys.argv[2])
+path = sys.argv[3]
+timeout = float(sys.argv[4])
+
+try:
+    with socket.create_connection((host, port), timeout=timeout) as sock:
+        sock.settimeout(timeout)
+        request = (
+            f"GET {path} HTTP/1.1\r\n"
+            f"Host: {host}:{port}\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+        )
+        sock.sendall(request.encode("ascii"))
+        response = sock.recv(256).decode("iso-8859-1", errors="replace")
+except Exception as exc:
+    print(f"{exc.__class__.__name__}: {exc}")
+    raise SystemExit(1)
+
+status_line = response.splitlines()[0] if response else ""
+parts = status_line.split()
+if len(parts) >= 2 and parts[1].isdigit() and 200 <= int(parts[1]) < 400:
+    print(status_line)
+    raise SystemExit(0)
+
+print(status_line or "empty response")
+raise SystemExit(1)
+PY
+)"
+    probe_status=$?
+    set -e
+    if [[ "$probe_status" -eq 0 ]]; then
       return 0
+    fi
+    if [[ "$verbose" == "1" ]]; then
+      echo "[same-spec-current] readiness probe failed: ${url}${probe_output:+ (${probe_output})}" >&2
     fi
   done
 
@@ -802,7 +857,23 @@ server_log_indicates_node_env_failure() {
 
   [[ -f "$log_file" ]] || return 1
 
-  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception" "$log_file"
+  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy" "$log_file"
+}
+
+server_log_indicates_npu_oom() {
+  local log_file=$1
+
+  [[ -f "$log_file" ]] || return 1
+
+  grep -Eiq "torch\.OutOfMemoryError|NPU out of memory|ACL_ERROR_RT_MEMORY_ALLOCATION|aclrtMalloc[^[:cntrl:]]*(failed|failure|error)|(failed|failure|unable)[^[:cntrl:]]*(allocate|allocation)[^[:cntrl:]]*(NPU|device)[ -]?memory" "$log_file"
+}
+
+print_server_log_tail() {
+  local log_file=$1
+  local lines=${2:-$SERVER_LOG_TAIL_LINES}
+
+  [[ -f "$log_file" ]] || return 0
+  tail -n "$lines" "$log_file" >&2
 }
 
 wait_for_server() {
@@ -811,17 +882,36 @@ wait_for_server() {
   local waited=0
   local timeout_sec=${READY_TIMEOUT_SECONDS}
   local status_interval_sec=${READY_STATUS_INTERVAL_SECONDS}
+  local log_progress_interval_sec=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS}
   local next_status_at=0
+  local next_log_progress_at=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS}
+  local next_oom_check_at=0
 
   if (( status_interval_sec <= 0 )); then
     status_interval_sec=30
   fi
+  if (( log_progress_interval_sec <= 0 )); then
+    next_log_progress_at=$((timeout_sec + 1))
+  fi
 
   while (( waited < timeout_sec )); do
+    if (( waited >= next_oom_check_at )); then
+      if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]] \
+        && server_log_indicates_npu_oom "$SERVER_STDOUT_LOG"; then
+        echo "Detected Ascend NPU out of memory while waiting for current same-spec startup; refusing to retry" >&2
+        return "$NPU_OOM_EXIT_CODE"
+      fi
+      next_oom_check_at=$((waited + SERVER_LOG_OOM_CHECK_INTERVAL_SECONDS))
+    fi
+
     if [[ -n "${SERVER_PID:-}" ]] && ! kill -0 "$SERVER_PID" 2>/dev/null; then
       echo "Current same-spec server exited before becoming ready" >&2
       if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
-        tail -n 40 "$SERVER_STDOUT_LOG" >&2
+        print_server_log_tail "$SERVER_STDOUT_LOG"
+        if server_log_indicates_npu_oom "$SERVER_STDOUT_LOG"; then
+          echo "Detected Ascend NPU out of memory; refusing to retry server startup" >&2
+          return "$NPU_OOM_EXIT_CODE"
+        fi
         if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG"; then
           echo "Detected Ascend node-level runtime failure during current same-spec startup" >&2
           return 86
@@ -841,6 +931,15 @@ wait_for_server() {
       echo "[same-spec-current] waiting for current same-spec server at ${host}:${port} (${waited}s/${timeout_sec}s)" >&2
       next_status_at=$((waited + status_interval_sec))
     fi
+    if (( waited >= next_log_progress_at )); then
+      probe_server_ready "$host" "$port" 1 || true
+      if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
+        echo "---- same-spec server log progress at ${waited}s: ${SERVER_STDOUT_LOG} (last ${SERVER_LOG_PROGRESS_TAIL_LINES} lines) ----" >&2
+        print_server_log_tail "$SERVER_STDOUT_LOG" "$SERVER_LOG_PROGRESS_TAIL_LINES"
+        echo "---- end same-spec server log progress ----" >&2
+      fi
+      next_log_progress_at=$((waited + log_progress_interval_sec))
+    fi
 
     sleep 1
     ((waited += 1))
@@ -848,13 +947,54 @@ wait_for_server() {
 
   echo "Timed out waiting for current same-spec server at ${host}:${port}" >&2
   if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]]; then
-    tail -n 40 "$SERVER_STDOUT_LOG" >&2
+    print_server_log_tail "$SERVER_STDOUT_LOG"
+    if server_log_indicates_npu_oom "$SERVER_STDOUT_LOG"; then
+      echo "Detected Ascend NPU out of memory; refusing to retry server startup" >&2
+      return "$NPU_OOM_EXIT_CODE"
+    fi
     if server_log_indicates_node_env_failure "$SERVER_STDOUT_LOG"; then
       echo "Detected Ascend node-level runtime failure while waiting for current same-spec startup" >&2
       return 86
     fi
   fi
   return 1
+}
+
+run_client_command_with_server_monitor() {
+  local client_pid
+  local client_status
+
+  if [[ "${BENCHMARK_TYPE:-}" != "serve" ]]; then
+    run_client_command
+    return $?
+  fi
+
+  run_client_command &
+  client_pid=$!
+
+  while kill -0 "$client_pid" 2>/dev/null; do
+    if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]] \
+      && server_log_indicates_npu_oom "$SERVER_STDOUT_LOG"; then
+      echo "Detected Ascend NPU out of memory while running the same-spec benchmark client" >&2
+      cleanup_managed_server || true
+      if command -v pkill >/dev/null 2>&1; then
+        pkill -TERM -P "$client_pid" >/dev/null 2>&1 || true
+      fi
+      kill -TERM "$client_pid" >/dev/null 2>&1 || true
+      wait "$client_pid" >/dev/null 2>&1 || true
+      return "$NPU_OOM_EXIT_CODE"
+    fi
+    sleep "$CLIENT_SERVER_MONITOR_INTERVAL_SECONDS"
+  done
+
+  wait "$client_pid"
+  client_status=$?
+  if [[ -n "${SERVER_STDOUT_LOG:-}" && -f "$SERVER_STDOUT_LOG" ]] \
+    && server_log_indicates_npu_oom "$SERVER_STDOUT_LOG"; then
+    echo "Detected Ascend NPU out of memory during the same-spec benchmark client run" >&2
+    return "$NPU_OOM_EXIT_CODE"
+  fi
+  return "$client_status"
 }
 
 kill_server() {
@@ -1001,7 +1141,13 @@ elif [[ "${CURRENT_ALLOW_OFFLINE_EAGER_BENCHMARK:-0}" != "1" ]]; then
 	exit 86
 fi
 
-run_client_command
+set +e
+run_client_command_with_server_monitor
+client_status=$?
+set -e
+if [[ "$client_status" -ne 0 ]]; then
+  exit "$client_status"
+fi
 
 EXPORT_ARGS=(
   "$SCENARIO"
