@@ -638,6 +638,24 @@ def stop_managed_server(*, args: argparse.Namespace, execute: bool) -> None:
     run_command([str(manage), "stop"], cwd=Path(args.dev_hub_dir).resolve(), execute=execute, env=env, check=False)
 
 
+def managed_same_spec_server_parameters(
+    args: argparse.Namespace, spec: OfficialSpec
+) -> dict[str, str]:
+    """Describe the effective server arguments supplied by dev-hub."""
+    return {
+        "enable_prefix_caching": (
+            "true" if args.managed_enable_prefix_caching else "false"
+        ),
+        "enable_chunked_prefill": (
+            "true" if args.managed_enable_chunked_prefill else "false"
+        ),
+        "gpu_memory_utilization": str(args.managed_gpu_mem_util),
+        "max_model_len": str(args.managed_max_model_len),
+        "max_num_batched_tokens": str(args.managed_max_model_len),
+        "max_num_seqs": str(args.managed_max_num_seqs),
+    }
+
+
 def git_has_changes(repo: Path) -> bool:
     return bool(capture_command(["git", "status", "--short"], cwd=repo))
 
@@ -886,6 +904,10 @@ def run_target_spec(
         env["OPENAI_API_KEY"] = env["VLLM_HUST_API_KEY"]
     if args.managed_dev_hub and spec.benchmark_type == "serve":
         env["CURRENT_USE_MANAGED_SERVER"] = "1"
+        env["CURRENT_SAME_SPEC_SERVER_PARAMETERS_JSON"] = json.dumps(
+            managed_same_spec_server_parameters(args, spec),
+            separators=(",", ":"),
+        )
     if args.current_env_prefix:
         env["CURRENT_ENV_PREFIX"] = args.current_env_prefix
     if args.server_port:
