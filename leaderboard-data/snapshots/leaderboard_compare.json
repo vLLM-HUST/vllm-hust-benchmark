@@ -1,6 +1,6 @@
 {
   "schema_version": "leaderboard-compare-snapshot/v1",
-  "generated_at": "2026-07-20T07:15:14.807070+00:00",
+  "generated_at": "2026-07-20T08:29:56.818112+00:00",
   "group_count": 19,
   "preferred_pair_count": 19,
   "groups": [
@@ -8709,10 +8709,10 @@
   },
   "hard_constraints": {
     "schema_version": "leaderboard-hard-constraints/v1",
-    "generated_at": "2026-07-20T07:15:14.803499+00:00",
-    "scope_count": 22,
+    "generated_at": "2026-07-20T08:29:56.814482+00:00",
+    "scope_count": 23,
     "pass_count": 0,
-    "fail_count": 22,
+    "fail_count": 23,
     "best_scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|sharegpt-online-2chip|multi_gpu|online-chat|vllm",
     "scopes": [
       {
@@ -9612,6 +9612,92 @@
         "selection_rank": 8
       },
       {
+        "scope_key": "vllm-hust|Qwen/Qwen2.5-7B-Instruct|910B2|ngram-instructcoder-online|single_gpu|speculative-code-assistant|vllm",
+        "scope": {
+          "engine": "vllm-hust",
+          "model": "Qwen/Qwen2.5-7B-Instruct",
+          "model_canonical_id": "hf:Qwen/Qwen2.5-7B-Instruct",
+          "model_short_name": "Qwen2.5-7B-Instruct",
+          "model_display_name": "Qwen2.5-7B-Instruct",
+          "hardware": "910B2",
+          "workload": "ngram-instructcoder-online",
+          "config_type": "single_gpu",
+          "accountable_scope": {
+            "domestic_chip_class": "Ascend-class",
+            "representative_model_band": "7B-13B",
+            "representative_business_scenario": "speculative-code-assistant",
+            "baseline_engine": "",
+            "declared_baseline_engine": "vllm",
+            "baseline_status": "pending-baseline",
+            "owner_confirmed": null,
+            "notes": null
+          }
+        },
+        "latest": {
+          "entry_id": "bdbb468e-c079-4f7d-baa7-fd76c9340921",
+          "engine": "vllm-hust",
+          "engine_version": "v0.23.1rc0-1273-g63743c94c9",
+          "submitted_at": "2026-07-20T07:53:43Z",
+          "git_commit": "63743c94c94a69e2aa542be622d2359d1940f3b1",
+          "scenario_source": "vllm-benchmark",
+          "accountable_scope": {
+            "domestic_chip_class": "Ascend-class",
+            "representative_model_band": "7B-13B",
+            "representative_business_scenario": "speculative-code-assistant",
+            "baseline_engine": "",
+            "declared_baseline_engine": "vllm",
+            "baseline_status": "pending-baseline",
+            "owner_confirmed": null,
+            "notes": null
+          },
+          "evaluation": {
+            "checks": {
+              "effective_utilization_ge_90": false,
+              "typical_scene_ge_2x_and_ttft_tpot_reduction_gt_20": false,
+              "long_context_ge_32k_and_p95_p99_stable": false,
+              "single_business_cost_down_ge_30_and_multi_tenant_high_utilization": false
+            },
+            "overall_pass": false,
+            "metrics": {
+              "single_chip_effective_utilization_pct": null,
+              "typical_throughput_ratio_vs_baseline": null,
+              "typical_ttft_reduction_pct_vs_baseline": null,
+              "typical_tpot_reduction_pct_vs_baseline": null,
+              "long_context_length": null,
+              "long_context_throughput_stable": true,
+              "long_context_ttft_p95_ms": null,
+              "long_context_ttft_p99_ms": 111.82386470027267,
+              "long_context_tpot_p95_ms": null,
+              "long_context_tpot_p99_ms": 25.81800254408139,
+              "long_context_ttft_p95_stable": null,
+              "long_context_ttft_p99_stable": true,
+              "long_context_tpot_p95_stable": null,
+              "long_context_tpot_p99_stable": true,
+              "unit_token_cost_reduction_pct": null,
+              "multi_tenant_high_utilization": null
+            },
+            "thresholds": {
+              "single_chip_effective_utilization_pct": 90.0,
+              "typical_throughput_ratio_vs_baseline": 2.0,
+              "typical_ttft_reduction_pct_vs_baseline": 20.0,
+              "typical_tpot_reduction_pct_vs_baseline": 20.0,
+              "long_context_length": 32768,
+              "unit_token_cost_reduction_pct": 30.0
+            }
+          }
+        },
+        "previous": null,
+        "metric_deltas": {
+          "single_chip_effective_utilization_pct": null,
+          "typical_throughput_ratio_vs_baseline": null,
+          "typical_ttft_reduction_pct_vs_baseline": null,
+          "typical_tpot_reduction_pct_vs_baseline": null,
+          "unit_token_cost_reduction_pct": null
+        },
+        "overall_pass": false,
+        "selection_rank": 9
+      },
+      {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-7B-Instruct|910B2|attention-boundary-online|single_gpu|high-fanout-online-serving|vllm",
         "scope": {
           "engine": "vllm-hust",
@@ -9747,7 +9833,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 9
+        "selection_rank": 10
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|random-online|single_gpu|online-chat|vllm",
@@ -9885,7 +9971,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 10
+        "selection_rank": 11
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-7B-Instruct|910B2|kv-tiering-prefix-online|single_gpu|memory-constrained-long-context|vllm",
@@ -10023,7 +10109,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 11
+        "selection_rank": 12
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|logprobs-online|single_gpu|logprobs-serving|vllm",
@@ -10161,7 +10247,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 12
+        "selection_rank": 13
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|prefix-repetition-online|single_gpu|long-context-chat|vllm",
@@ -10299,7 +10385,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 13
+        "selection_rank": 14
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-VL-7B-Instruct|910B2|visionarena-online|single_gpu|multimodal-chat|vllm",
@@ -10437,7 +10523,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 14
+        "selection_rank": 15
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|sharegpt-online|single_gpu|online-chat|vllm",
@@ -10575,7 +10661,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 15
+        "selection_rank": 16
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-Coder-14B-Instruct|910B2|instructcoder-online|single_gpu|code-assistant|vllm",
@@ -10713,7 +10799,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 16
+        "selection_rank": 17
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|agent-research-online|single_gpu|agent-workload|vllm",
@@ -10851,7 +10937,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 17
+        "selection_rank": 18
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|sonnet-throughput|single_gpu|offline-batch-serving|vllm",
@@ -10989,7 +11075,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 18
+        "selection_rank": 19
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|sharegpt-throughput|single_gpu|offline-batch-serving|vllm",
@@ -11127,7 +11213,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 19
+        "selection_rank": 20
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|random-latency|single_gpu|latency-slo|vllm",
@@ -11265,7 +11351,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 20
+        "selection_rank": 21
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|sonnet-throughput-4chip|multi_gpu|offline-batch-serving|vllm",
@@ -11403,7 +11489,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 21
+        "selection_rank": 22
       },
       {
         "scope_key": "vllm-hust|Qwen/Qwen2.5-14B-Instruct|910B2|sonnet-throughput-2chip|multi_gpu|offline-batch-serving|vllm",
@@ -11541,7 +11627,7 @@
           "unit_token_cost_reduction_pct": null
         },
         "overall_pass": false,
-        "selection_rank": 22
+        "selection_rank": 23
       }
     ]
   }
