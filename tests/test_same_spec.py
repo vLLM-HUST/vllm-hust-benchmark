@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from vllm_hust_benchmark.same_spec import build_same_spec_payload
+from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
 from vllm_hust_benchmark.same_spec import runtime_model_path_has_required_artifacts
 from vllm_hust_benchmark.same_spec import write_same_spec_payload
 
@@ -104,6 +105,28 @@ def test_same_spec_hash_ignores_host_and_port_overrides() -> None:
     assert overridden["resolved_client_parameters"]["port"] == 8001
     assert overridden["resolved_client_parameters"]["host"] == "127.0.0.1"
     assert baseline["resolved_spec_hash"] == overridden["resolved_spec_hash"]
+
+
+def test_server_parameter_overrides_change_hash_and_are_self_consistent() -> None:
+    baseline = build_same_spec_payload(_prefix_repetition_spec())
+    overridden = build_same_spec_payload(
+        _prefix_repetition_spec(),
+        server_parameter_overrides={
+            "enable_prefix_caching": "true",
+            "max_model_len": "32768",
+        },
+    )
+
+    assert overridden["resolved_server_parameters"]["enable_prefix_caching"] == "true"
+    assert overridden["resolved_spec_hash"] != baseline["resolved_spec_hash"]
+    assert overridden["resolved_spec_hash"] == compute_resolved_spec_hash(overridden)
+
+
+def test_compute_resolved_spec_hash_detects_post_export_parameter_change() -> None:
+    payload = build_same_spec_payload(_prefix_repetition_spec())
+    payload["resolved_server_parameters"]["enable_prefix_caching"] = "true"
+
+    assert compute_resolved_spec_hash(payload) != payload["resolved_spec_hash"]
 
 
 def test_write_same_spec_payload(tmp_path: Path) -> None:
