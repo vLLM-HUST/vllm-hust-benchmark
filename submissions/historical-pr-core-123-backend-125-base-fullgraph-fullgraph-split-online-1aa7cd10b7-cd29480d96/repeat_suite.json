@@ -1,0 +1,97 @@
+{
+  "benchmark_type": "serve",
+  "evidence_label": "real-online",
+  "execution": {
+    "benchmark_commit": "b399b95eda56eb1baab1b730e3622e5d7c076458",
+    "chunked_prefill": false,
+    "dev_hub_commit": "2afac6bcabb5efaf8cb20dda803d298c11f283a5",
+    "dev_hub_dir": "/home/shuhao/vllm-hust-dev-hub",
+    "gpu_memory_utilization": "0.90",
+    "graph_mode": true,
+    "local_model_path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "managed_container": "vllm-hust-single-npu6-backfill-20260720",
+    "managed_container_ssh_port": 2226,
+    "managed_recreate_container": false,
+    "managed_systemd_unit": "vllm-hust-single-npu6-backfill-20260720.service",
+    "max_model_len": 32768,
+    "max_num_seqs": 80,
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "prefix_caching": false,
+    "runtime_python": "/data/conda-envs/vllm-hust-single-npu-backfill/bin/python3.12",
+    "server_port": "8206"
+  },
+  "generated_at": "2026-07-20T08:43:31.198094+00:00",
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "devices": [
+      6
+    ],
+    "node_count": 1
+  },
+  "repeat_policy": {
+    "max_attempts": 5,
+    "minimum_successes": 3,
+    "target_successes": 3
+  },
+  "repeat_result_dirs": [
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-123-backend-125-base-fullgraph-fullgraph-split-online-1aa7cd10b7-cd29480d96/repeat-01",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-123-backend-125-base-fullgraph-fullgraph-split-online-1aa7cd10b7-cd29480d96/repeat-02",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-123-backend-125-base-fullgraph-fullgraph-split-online-1aa7cd10b7-cd29480d96/repeat-03"
+  ],
+  "resolved_refs": {
+    "core_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "plugin_commit": "cd29480d9699616adf6808fb6ccc3107bc9f1384"
+  },
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "selection": {
+    "benchmark_type": "serve",
+    "candidates": [
+      {
+        "distance_to_median": 69.54233873208682,
+        "error_rate": 0.0,
+        "index": 0,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 1118.2559701284238,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-123-backend-125-base-fullgraph-fullgraph-split-online-1aa7cd10b7-cd29480d96/repeat-01"
+      },
+      {
+        "distance_to_median": 0.0,
+        "error_rate": 0.0,
+        "index": 1,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 1048.713631396337,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-123-backend-125-base-fullgraph-fullgraph-split-online-1aa7cd10b7-cd29480d96/repeat-02"
+      },
+      {
+        "distance_to_median": 3.1832813828559665,
+        "error_rate": 0.0,
+        "index": 2,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 1045.530350013481,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-123-backend-125-base-fullgraph-fullgraph-split-online-1aa7cd10b7-cd29480d96/repeat-03"
+      }
+    ],
+    "median_value": 1048.713631396337,
+    "primary_metric_name": "ttft_ms",
+    "selected_result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-core-123-backend-125-base-fullgraph-fullgraph-split-online-1aa7cd10b7-cd29480d96/repeat-02"
+  },
+  "spec": "/home/shuhao/vllm-hust-benchmark-single-npu/docs/official-baselines/official-ascend-jan-2026-v0180-fullgraph-split-online-qwen25-14b-910b2.json",
+  "target": {
+    "core_ref": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "label": "core-123-backend-125-base-fullgraph",
+    "notes": "Fixed base pair for core PR 123 and backend PR 125, using FULL graph without split replay.",
+    "plugin_ref": "cd29480d9699616adf6808fb6ccc3107bc9f1384",
+    "pr_number": null,
+    "server_env": [
+      [
+        "VLLM_ENGINE_COMPILATION_CONFIG",
+        "{\"cudagraph_mode\":\"FULL\"}"
+      ]
+    ],
+    "server_extra_args": [],
+    "workloads": [
+      "fullgraph-split-online"
+    ]
+  }
+}
