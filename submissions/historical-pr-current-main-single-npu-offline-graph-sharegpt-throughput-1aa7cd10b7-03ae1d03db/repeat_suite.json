@@ -1,0 +1,92 @@
+{
+  "benchmark_type": "throughput",
+  "evidence_label": "real-online",
+  "execution": {
+    "benchmark_commit": "37a339c86fc2c0e9e65b264b994c4faf1b7cb52c",
+    "chunked_prefill": false,
+    "dev_hub_commit": "2afac6bcabb5efaf8cb20dda803d298c11f283a5",
+    "dev_hub_dir": "/home/shuhao/vllm-hust-dev-hub",
+    "gpu_memory_utilization": "0.90",
+    "graph_mode": true,
+    "local_model_path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "managed_container": "vllm-hust-single-npu6-backfill-20260720",
+    "managed_container_ssh_port": 2226,
+    "managed_recreate_container": false,
+    "managed_systemd_unit": "vllm-hust-single-npu6-backfill-20260720.service",
+    "max_model_len": 32768,
+    "max_num_seqs": 16,
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "prefix_caching": false,
+    "runtime_python": "/data/conda-envs/vllm-hust-single-npu-backfill/bin/python3.12",
+    "server_port": "8206"
+  },
+  "generated_at": "2026-07-19T23:12:17.009433+00:00",
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "devices": [
+      6
+    ],
+    "node_count": 1
+  },
+  "repeat_policy": {
+    "max_attempts": 3,
+    "minimum_successes": 3,
+    "target_successes": 3
+  },
+  "repeat_result_dirs": [
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/repeat-01",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/repeat-02",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/repeat-03"
+  ],
+  "resolved_refs": {
+    "core_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "plugin_commit": "03ae1d03db8049cd2a5c3f824039814459542e25"
+  },
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "selection": {
+    "benchmark_type": "throughput",
+    "candidates": [
+      {
+        "distance_to_median": 6.942370922889495,
+        "error_rate": 0.0,
+        "index": 0,
+        "primary_metric_name": "throughput_tps",
+        "primary_metric_value": 2322.416900794987,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/repeat-01"
+      },
+      {
+        "distance_to_median": 0.0,
+        "error_rate": 0.0,
+        "index": 1,
+        "primary_metric_name": "throughput_tps",
+        "primary_metric_value": 2315.4745298720977,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/repeat-02"
+      },
+      {
+        "distance_to_median": 21.69588167274287,
+        "error_rate": 0.0,
+        "index": 2,
+        "primary_metric_name": "throughput_tps",
+        "primary_metric_value": 2293.778648199355,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/repeat-03"
+      }
+    ],
+    "median_value": 2315.4745298720977,
+    "primary_metric_name": "throughput_tps",
+    "selected_result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/repeat-02"
+  },
+  "spec": "/home/shuhao/vllm-hust-benchmark-single-npu/docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+  "target": {
+    "core_ref": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "label": "current-main-single-npu-offline-graph",
+    "notes": "Official offline single-NPU matrix with explicit graph-mode opt-in. The runner fails closed if --enforce-eager appears in the resolved CLI. Fixed NPU 6.",
+    "plugin_ref": "03ae1d03db8049cd2a5c3f824039814459542e25",
+    "pr_number": null,
+    "workloads": [
+      "random-latency",
+      "sharegpt-throughput",
+      "sonnet-throughput"
+    ]
+  }
+}
