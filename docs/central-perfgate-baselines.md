@@ -48,6 +48,12 @@ while different artifact bytes or provenance fail without overwriting data.
 The latest-main pointer can be updated only when the target SHA is the current
 main tip.
 
+`perfgate-baseline publish` applies the same validation before updating the
+central Git branch. It creates the branch on the first write, treats a repeated
+identical write as success, and retries from a fresh checkout after a concurrent
+non-fast-forward push. Credentials remain the caller's responsibility and are
+never accepted as command-line arguments.
+
 ## Trust Boundary
 
 This protocol does not grant or consume cross-repository credentials. A trusted
