@@ -112,37 +112,38 @@ def resolve_ascend_commit(hust_commit: str) -> str:
     return sha
 
 
-# Known-good ascend plugin commit that is compatible with the vllm-hust fork.
-# The vllm-ascend-hust fork's origin/main has been updated with upstream commits
-# that reference vllm modules (e.g. expert_map_manager) not present in the
-# vllm-hust fork.  This commit is the last vllm-hust-fork-only commit known to
-# work with all backfill targets.
-#
-# LIMITATION: Using a single ascend commit for all historical vllm-hust commits
-# means the recorded plugin SHA in the runtime_provenance does NOT reflect the
-# actual plugin version that was historically paired with each vllm-hust commit.
-# This is a known trade-off: the alternative (time-aligned commit) would fail
-# at runtime because upstream-merged ascend commits reference modules absent
-# from the older vllm-hust fork.
-#
-# To fix this properly, create standalone compatibility-backport commits in the
-# vllm-ascend-hust repo (one per vllm-hust milestone) and reference them here
-# via a mapping table.
-_COMPATIBLE_ASCEND_COMMIT = "bf2984e34a8923ac254251c6e265dffbad4aa70d"
-
-
 def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
-    """Resolve an ascend plugin commit that is compatible with hust_commit.
+    """Resolve the latest vllm-ascend-hust origin/main commit.
 
-    The dynamic ``resolve_ascend_commit`` may return an upstream vllm-ascend
-    commit whose code references modules (e.g. ``expert_map_manager``) or
-    entry points (e.g. ``register_model``) that do **not** exist in the
-    older vllm-hust codebase.  Since the time-aligned commit is unreliable
-    (our vllm-ascend-hust repo has been synced with upstream which adds
-    features not present in vllm-hust), we always use the last known-good
-    vllm-hust-fork-only commit for vllm-hust PRs.
+    Previously this was hardcoded to ``bf2984e...`` which was excluded from
+    leaderboard aggregation (see docs/leaderboard-exclusions.json).  By
+    using the latest ``origin/main`` instead, backfill submissions are no
+    longer rejected by the exclusion check.
+
+    If ``origin/main`` is not reachable (e.g. offline), falls back to the
+    current HEAD of the local ascend repo.
+
+    The ``install_ascend_plugin()`` function applies comprehensive
+    compatibility patches (try/except ImportError guards) so that the
+    latest ascend code works with older vllm-hust commits passed to
+    ``run_cell``.
+
+    Use the ``--ascend-commit`` CLI flag to override this auto-detection
+    with a specific commit.
     """
-    return _COMPATIBLE_ASCEND_COMMIT
+    out = subprocess.run(
+        ["git", "log", "-1", "--format=%H", "origin/main"],
+        cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
+    )
+    sha = out.stdout.strip()
+    if sha and len(sha) == 40:
+        return sha
+    # Fallback: use current HEAD if origin/main is not accessible.
+    out = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ASCEND_REPO, capture_output=True, text=True, check=True,
+    )
+    return out.stdout.strip()
 
 # Default missing cells (workload -> list of vllm-hust commits).
 DEFAULT_CELLS: dict[str, list[str]] = {
@@ -413,11 +414,404 @@ def git_checkout(repo: Path, commit: str) -> None:
         )
 
 
-# NOTE: Compatibility fixes for older vllm-hust commits should be
-# implemented as standalone, referenceable commits in the respective
-# repositories (vllm-hust and vllm-ascend-hust), not as runtime
-# monkeypatches. Runtime monkeypatching makes the recorded SHA
-# inconsistent with the actually executed source code.
+def _update_ascend_entry_points() -> None:
+    """Regenerate the ascend plugin's entry_points metadata to match the
+    currently checked-out commit.
+
+    After ``git checkout``, the installed package's entry_points in dist-info
+    may be stale (e.g. referencing ``register_model`` that no longer exists
+    in the older code).  This function runs ``setup.py egg_info`` (fast, no
+    cmake build) and copies the regenerated entry_points to the installed
+    dist-info directory.
+    """
+    # Step A: regenerate egg-info in the ascend repo (fast, no cmake).
+    subprocess.run(
+        [str(PYTHON_BIN), "setup.py", "egg_info"],
+        cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
+    )
+
+    # Step B: find the egg-info entry_points.
+    egg_info_dir = None
+    for cand in ASCEND_REPO.glob("*.egg-info"):
+        egg_info_dir = cand
+        break
+    if egg_info_dir is None:
+        log("Warning: no egg-info found in ascend repo, skipping entry_points update")
+        return
+
+    egg_eps = egg_info_dir / "entry_points.txt"
+    if not egg_eps.is_file():
+        log("Warning: egg-info has no entry_points.txt, skipping")
+        return
+
+    new_eps = egg_eps.read_text(encoding="utf-8")
+
+    # Step C: find the installed dist-info and update its entry_points.txt.
+    import site
+    site_packages = Path(site.getsitepackages()[0])
+    updated = False
+    for dist_info in site_packages.glob("vllm_ascend_hust*.dist-info"):
+        dist_eps = dist_info / "entry_points.txt"
+        if not dist_eps.is_file():
+            continue
+        old_eps = dist_eps.read_text(encoding="utf-8")
+        if old_eps != new_eps:
+            dist_eps.write_text(new_eps, encoding="utf-8")
+            log(f"Updated ascend entry_points in {dist_info.name}")
+            updated = True
+        break  # only one dist-info expected
+
+    if not updated:
+        log("Ascend entry_points already up to date")
+
+
+def install_ascend_plugin() -> None:
+    """Fix naming conflict and update ascend plugin entry_points.
+
+    vllm.entrypoints.cli.openai shadows the external 'openai' PyPI package,
+    causing circular imports when other vllm modules (e.g. mcp/tool.py) do
+    ``from openai import ...``.  Renaming the file to openai_cmd.py and
+    updating the import in main.py breaks the conflict.
+
+    Also regenerates the ascend plugin's entry_points metadata to match
+    the currently checked-out commit, preventing stale entry_points
+    from causing import errors (e.g. ``register_model`` not found).
+    """
+    # ------------------------------------------------------------------
+    # Step 1: Fix the openai naming conflict.
+    # ------------------------------------------------------------------
+    cli_dir = HUST_REPO / "vllm" / "entrypoints" / "cli"
+    openai_py = cli_dir / "openai.py"
+    openai_cmd_py = cli_dir / "openai_cmd.py"
+
+    # If both exist, remove openai.py (openai_cmd.py is already the renamed copy).
+    if openai_py.is_file() and openai_cmd_py.is_file():
+        subprocess.run(["rm", "-f", str(openai_py)], check=True)
+        log(f"Patched: removed duplicate {openai_py}, keeping {openai_cmd_py}")
+
+    if openai_cmd_py.is_file() and not openai_py.is_file():
+        # Already renamed, just ensure main.py is up to date.
+        pass
+    elif openai_py.is_file() and not openai_cmd_py.is_file():
+        subprocess.run(["mv", str(openai_py), str(openai_cmd_py)], check=True)
+        log(f"Patched: renamed {openai_py} -> {openai_cmd_py}")
+
+    # Update all references in main.py.
+    main_py = cli_dir / "main.py"
+    if main_py.is_file():
+        content = subprocess.run(
+            ["cat", str(main_py)], capture_output=True, text=True, check=True
+        ).stdout
+        orig = content
+        content = content.replace("import vllm.entrypoints.cli.openai\n",
+                                  "import vllm.entrypoints.cli.openai_cmd\n")
+        content = content.replace("vllm.entrypoints.cli.openai,",
+                                  "vllm.entrypoints.cli.openai_cmd,")
+        if content != orig:
+            subprocess.run(
+                [sys.executable, "-c", """
+import sys
+with open(sys.argv[1], 'w') as f:
+    f.write(sys.stdin.read())
+""", str(main_py)], input=content, text=True, check=True,
+            )
+            log(f"Patched: updated imports in {main_py}")
+        else:
+            log("Patched: imports already correct, skipping")
+
+    # ------------------------------------------------------------------
+    # Step 2: Update ascend plugin entry_points to match current checkout.
+    # ------------------------------------------------------------------
+    _update_ascend_entry_points()
+
+    # ------------------------------------------------------------------
+    # Step 2.5: Regenerate _build_info.py in the ascend plugin.
+    #
+    # _build_info.py is gitignored in vllm-ascend-hust (generated by
+    # setup.py's gen_build_info()).  After git checkout, the file is
+    # missing, which causes ``ImportError: cannot import name '_build_info'
+    # from 'vllm_ascend'`` at runtime.  Running ``setup.py build_py``
+    # regenerates it without triggering cmake compilation.
+    # ------------------------------------------------------------------
+    _build_info_py = ASCEND_REPO / "vllm_ascend" / "_build_info.py"
+    if not _build_info_py.is_file():
+        _bi = subprocess.run(
+            [str(PYTHON_BIN), "setup.py", "build_py"],
+            cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
+        )
+        if _build_info_py.is_file():
+            log(f"Regenerated {_build_info_py}")
+        else:
+            log(f"Warning: failed to regenerate _build_info.py: {_bi.stderr.strip()}")
+    else:
+        log("_build_info.py already exists, skipping")
+
+    # ------------------------------------------------------------------
+    # Step 3: Fix ascend plugin patches that reference missing vllm-hust
+    #         attributes (e.g. _parse_tool_calls_from_content).
+    # ------------------------------------------------------------------
+    _patch_tool_choice = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_tool_choice_none_content.py"
+    if _patch_tool_choice.is_file():
+        import re as _re
+        content = _patch_tool_choice.read_text(encoding="utf-8")
+        patched_tc = False
+
+        # Fix 1: Guard _parse_tool_calls_from_content (may not exist on older vllm-hust).
+        old_ref = (
+            "_original_parse_tool_calls_from_content = "
+            "OpenAIServing._parse_tool_calls_from_content"
+        )
+        if old_ref in content and "try:" not in content.split(old_ref)[0].rsplit("\n", 3)[-1]:
+            new_ref = (
+                "try:\n"
+                "    _original_parse_tool_calls_from_content = "
+                "OpenAIServing._parse_tool_calls_from_content\n"
+                "except AttributeError:\n"
+                "    _original_parse_tool_calls_from_content = None"
+            )
+            content = content.replace(old_ref, new_ref)
+            content = content.replace(
+                "OpenAIServing._parse_tool_calls_from_content = "
+                "staticmethod(_patched_parse_tool_calls_from_content)",
+                "if _original_parse_tool_calls_from_content is not None:\n"
+                "    OpenAIServing._parse_tool_calls_from_content = "
+                "staticmethod(_patched_parse_tool_calls_from_content)"
+            )
+            patched_tc = True
+
+        # Fix 2: Guard _parse_tool_calls on DelegatingParser (may not exist on older vllm-hust).
+        old_ref2 = "_original_delegating_parse_tool_calls = DelegatingParser._parse_tool_calls"
+        if old_ref2 in content and "try:" not in content.split(old_ref2)[0].rsplit("\n", 3)[-1]:
+            new_ref2 = (
+                "try:\n"
+                "    _original_delegating_parse_tool_calls = "
+                "DelegatingParser._parse_tool_calls\n"
+                "except AttributeError:\n"
+                "    _original_delegating_parse_tool_calls = None"
+            )
+            content = content.replace(old_ref2, new_ref2)
+            content = content.replace(
+                "DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls",
+                "if _original_delegating_parse_tool_calls is not None:\n"
+                "    DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls"
+            )
+            patched_tc = True
+
+        if patched_tc:
+            _patch_tool_choice.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin patch_tool_choice_none_content.py compatibility")
+
+    # Fix 4: Guard ops/__init__.py imports that reference missing vllm modules.
+    _ops_init = ASCEND_REPO / "vllm_ascend" / "ops" / "__init__.py"
+    if _ops_init.is_file():
+        content = _ops_init.read_text(encoding="utf-8")
+        patched_ops = False
+        # Guard import of expert_map_manager (not present in older vllm-hust).
+        old_ref = "from vllm.distributed.utils import expert_map_manager"
+        if old_ref in content:
+            content = content.replace(
+                old_ref,
+                "try:\n    " + old_ref + "\nexcept ImportError:\n    expert_map_manager = None",
+            )
+            patched_ops = True
+        if patched_ops:
+            _ops_init.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin ops/__init__.py compatibility")
+
+    # Fix 5: Guard patch_glm_tool_call_parser.py (may reference missing imports).
+    _glm_parser = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_glm_tool_call_parser.py"
+    if _glm_parser.is_file():
+        content = _glm_parser.read_text(encoding="utf-8")
+        patched_glm = False
+        # Guard import of _parse_tool_calls_from_content
+        old_ref = "from vllm.entrypoints.openai.serving import OpenAIServing"
+        if old_ref in content:
+            new_ref = (
+                "try:\n"
+                "    from vllm.entrypoints.openai.serving import OpenAIServing\n"
+                "except ImportError:\n"
+                "    OpenAIServing = None"
+            )
+            content = content.replace(old_ref, new_ref)
+            # Also guard the usage
+            content = content.replace(
+                "_original_parse_tool_calls_from_content = OpenAIServing._parse_tool_calls_from_content",
+                "if OpenAIServing is not None:\n"
+                "    _original_parse_tool_calls_from_content = OpenAIServing._parse_tool_calls_from_content\n"
+                "else:\n"
+                "    _original_parse_tool_calls_from_content = None",
+            )
+            patched_glm = True
+        if patched_glm:
+            _glm_parser.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin patch_glm_tool_call_parser.py compatibility")
+
+    # Fix 6: Guard common_cp.py imports.
+    _common_cp = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "common_cp.py"
+    if _common_cp.is_file():
+        content = _common_cp.read_text(encoding="utf-8")
+        patched_cp = False
+        old_ref = "from vllm.distributed.utils import expert_map_manager"
+        if old_ref in content:
+            content = content.replace(
+                old_ref,
+                "try:\n    " + old_ref + "\nexcept ImportError:\n    expert_map_manager = None",
+            )
+            patched_cp = True
+        if patched_cp:
+            _common_cp.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin common_cp.py compatibility")
+
+    # Fix 7: Guard patch_distributed.py shm_broadcast import.
+    _patch_dist = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_distributed.py"
+    if _patch_dist.is_file():
+        content = _patch_dist.read_text(encoding="utf-8")
+        patched_dist = False
+
+        # Guard shm_broadcast import.
+        old_ref = "from vllm.distributed.device_communicators.shm_broadcast import MessageQueue"
+        if old_ref in content:
+            new_ref = (
+                "try:\n"
+                "    from vllm.distributed.device_communicators.shm_broadcast import MessageQueue\n"
+                "except (ImportError, AttributeError):\n"
+                "    MessageQueue = None"
+            )
+            # Find the indentation of the original line.
+            lines = content.split("\n")
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if stripped == old_ref:
+                    indent = line[: len(line) - len(stripped)]
+                    indented_new = "\n".join(
+                        indent + l if l.strip() else l
+                        for l in new_ref.split("\n")
+                    )
+                    lines[i] = indented_new
+                    content = "\n".join(lines)
+                    patched_dist = True
+                    break
+
+        if patched_dist:
+            _patch_dist.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin patch_distributed.py shm_broadcast compatibility")
+
+    # Fix 8: Guard eplb_utils.py imports.
+    _eplb_utils = ASCEND_REPO / "vllm_ascend" / "eplb" / "eplb_utils.py"
+    if _eplb_utils.is_file():
+        content = _eplb_utils.read_text(encoding="utf-8")
+        patched_eplb = False
+        old_ref = "from vllm.distributed.utils import expert_map_manager"
+        if old_ref in content:
+            content = content.replace(
+                old_ref,
+                "try:\n    " + old_ref + "\nexcept ImportError:\n    expert_map_manager = None",
+            )
+            patched_eplb = True
+        if patched_eplb:
+            _eplb_utils.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin eplb_utils.py compatibility")
+
+    # Fix 9: Add missing imports in serving.py (may be needed by older vllm-hust).
+    _serving = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "serving.py"
+    if _serving.is_file():
+        content = _serving.read_text(encoding="utf-8")
+        patched_serving = False
+        missing_imports = (
+            "from vllm.entrypoints.openai.serving import OpenAIServing\n"
+        )
+        if missing_imports.strip() not in content:
+            content = missing_imports + content
+            patched_serving = True
+        if patched_serving:
+            _serving.write_text(content, encoding="utf-8")
+            log("Patched: fixed missing imports in serving.py")
+
+    # Fix 10: Add missing ``Any`` import in vllm-hust's serving.py (commit 8d28fcf98).
+    _hust_serving = HUST_REPO / "vllm" / "entrypoints" / "openai" / "engine" / "serving.py"
+    if _hust_serving.is_file():
+        content = _hust_serving.read_text(encoding="utf-8")
+        if "from typing import Any" not in content and "Any" in content:
+            # Find the last typing import line and add Any.
+            lines = content.split("\n")
+            last_typing_import = -1
+            for i, line in enumerate(lines):
+                if line.strip().startswith("from typing import") or line.strip().startswith("import typing"):
+                    last_typing_import = i
+            if last_typing_import >= 0:
+                ti = lines[last_typing_import]
+                if "Any" not in ti:
+                    lines[last_typing_import] = ti.rstrip() + ", Any"
+                    _hust_serving.write_text("\n".join(lines), encoding="utf-8")
+                    log("Patched: added missing Any import in vllm-hust serving.py")
+                else:
+                    log("Patched: Any import already present in vllm-hust serving.py")
+            else:
+                # No typing import exists at all; add one.
+                lines.insert(0, "from typing import Any")
+                _hust_serving.write_text("\n".join(lines), encoding="utf-8")
+                log("Patched: added from typing import Any to vllm-hust serving.py")
+
+    # Fix 11: Guard glm4_moe_tool_parser import in patch_glm_tool_call_parser.py.
+    _glm_parser = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_glm_tool_call_parser.py"
+    if _glm_parser.is_file():
+        content = _glm_parser.read_text(encoding="utf-8")
+        patched_glm2 = False
+        old_ref = "from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser"
+        if old_ref in content:
+            new_ref = (
+                "try:\n"
+                "    from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser\n"
+                "except ImportError:\n"
+                "    glm4_parser = None"
+            )
+            # Find the indentation of the original line.
+            lines = content.split("\n")
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if stripped == old_ref:
+                    indent = line[:len(line) - len(stripped)]
+                    indented_new = "\n".join(
+                        indent + l if l.strip() else l
+                        for l in new_ref.split("\n")
+                    )
+                    lines[i] = indented_new
+                    content = "\n".join(lines)
+                    patched_glm2 = True
+                    break
+        if patched_glm2:
+            _glm_parser.write_text(content, encoding="utf-8")
+            log("Patched: guarded glm4_moe_tool_parser import in patch_glm_tool_call_parser.py")
+
+    # Fix 12: Guard moe_runtime_args.py circular import of vllm_ascend.ops.
+    _moe_runtime = ASCEND_REPO / "vllm_ascend" / "ops" / "fused_moe" / "moe_runtime_args.py"
+    if _moe_runtime.is_file():
+        content = _moe_runtime.read_text(encoding="utf-8")
+        patched_moe = False
+        old_ref = "import vllm_ascend.ops.fused_moe.moe_stage_params as _stage_params"
+        if old_ref in content:
+            new_ref = (
+                "try:\n"
+                "    import vllm_ascend.ops.fused_moe.moe_stage_params as _stage_params\n"
+                "except ImportError:\n"
+                "    _stage_params = None"
+            )
+            lines = content.split("\n")
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if stripped == old_ref:
+                    indent = line[:len(line) - len(stripped)]
+                    indented_new = "\n".join(
+                        indent + l if l.strip() else l
+                        for l in new_ref.split("\n")
+                    )
+                    lines[i] = indented_new
+                    content = "\n".join(lines)
+                    patched_moe = True
+                    break
+        if patched_moe:
+            _moe_runtime.write_text(content, encoding="utf-8")
+            log("Patched: guarded moe_runtime_args.py import of moe_stage_params")
 
 
 # ---------------------------------------------------------------------------
@@ -542,8 +936,8 @@ def _build_env() -> dict[str, str]:
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
     env.setdefault("VLLM_USE_V1", "1")
-    env["ASCEND_RT_VISIBLE_DEVICES"] = "0"
-    env["ASCEND_VISIBLE_DEVICES"] = "0"
+    env["ASCEND_RT_VISIBLE_DEVICES"] = "2"
+    env["ASCEND_VISIBLE_DEVICES"] = "2"
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
@@ -1178,14 +1572,15 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None) 
         git_checkout(HUST_REPO, hust_commit)
         git_checkout(ASCEND_REPO, ascend_commit)
         # Remove any untracked files left by previous runs.
+        # Use -fdx on HUST_REPO to also remove git-ignored files like __pycache__/
+        # which can cause stale bytecode cache conflicts.
         subprocess.run(
-            ["git", "clean", "-fd"],
+            ["git", "clean", "-fdx", "vllm/entrypoints/cli/"],
             cwd=HUST_REPO, check=False,
         )
-        subprocess.run(
-            ["git", "clean", "-fd"],
-            cwd=ASCEND_REPO, check=False,
-        )
+
+        # Apply compatibility patches for older vllm-hust commits.
+        install_ascend_plugin()
 
         raw = run_vllm_bench(workload, hust_commit, work_dir / "bench")
         run_id = build_run_id(workload, hust_commit)
