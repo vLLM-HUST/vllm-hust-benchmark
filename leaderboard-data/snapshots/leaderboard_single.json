@@ -354,9 +354,9 @@
     "metrics": {
       "ttft_ms": 12450.160067128794,
       "tbt_ms": null,
-      "throughput_tps": null,
+      "throughput_tps": 0,
       "peak_mem_mb": 0.0,
-      "error_rate": null
+      "error_rate": 0
     },
     "constraints": {
       "scenario_source": "vllm-benchmark",
@@ -825,7 +825,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1040.430211813821,
       "peak_mem_mb": 0.0,
@@ -979,7 +979,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1891.61634060225,
       "peak_mem_mb": 0.0,
@@ -7426,9 +7426,9 @@
     "metrics": {
       "ttft_ms": 6903.954959474504,
       "tbt_ms": null,
-      "throughput_tps": null,
+      "throughput_tps": 0,
       "peak_mem_mb": 0,
-      "error_rate": null
+      "error_rate": 0
     },
     "constraints": {
       "scenario_source": "vllm-benchmark",
@@ -7579,9 +7579,9 @@
     "metrics": {
       "ttft_ms": 7014.38210135481,
       "tbt_ms": null,
-      "throughput_tps": null,
+      "throughput_tps": 0,
       "peak_mem_mb": 0,
-      "error_rate": null
+      "error_rate": 0
     },
     "constraints": {
       "scenario_source": "vllm-benchmark",
@@ -7732,9 +7732,9 @@
     "metrics": {
       "ttft_ms": 7025.4118066901965,
       "tbt_ms": null,
-      "throughput_tps": null,
+      "throughput_tps": 0,
       "peak_mem_mb": 0,
-      "error_rate": null
+      "error_rate": 0
     },
     "constraints": {
       "scenario_source": "vllm-benchmark",
@@ -7885,9 +7885,9 @@
     "metrics": {
       "ttft_ms": 6874.877021748884,
       "tbt_ms": null,
-      "throughput_tps": null,
+      "throughput_tps": 0,
       "peak_mem_mb": 0,
-      "error_rate": null
+      "error_rate": 0
     },
     "constraints": {
       "scenario_source": "vllm-benchmark",
@@ -8038,7 +8038,7 @@
     "metrics": {
       "ttft_ms": 7483.040426935379,
       "tbt_ms": null,
-      "throughput_tps": null,
+      "throughput_tps": 0,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -8192,7 +8192,7 @@
     "metrics": {
       "ttft_ms": 12201.701328934481,
       "tbt_ms": null,
-      "throughput_tps": null,
+      "throughput_tps": 0,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -8346,9 +8346,9 @@
     "metrics": {
       "ttft_ms": 5091.725806193426,
       "tbt_ms": null,
-      "throughput_tps": null,
+      "throughput_tps": 0,
       "peak_mem_mb": 0,
-      "error_rate": null
+      "error_rate": 0
     },
     "constraints": {
       "scenario_source": "vllm-benchmark",
@@ -8462,6 +8462,160 @@
         "num_iters_warmup": 10,
         "num_iters": 30,
         "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct"
+      }
+    }
+  },
+  {
+    "entry_id": "13e0c174-976d-4644-94b9-a54573183f3c",
+    "engine": "vllm-hust",
+    "engine_version": "0.18.0.post1",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct",
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-latency",
+      "input_length": 6144,
+      "output_length": 512,
+      "batch_size": 32,
+      "concurrent_requests": null,
+      "dataset": null
+    },
+    "metrics": {
+      "ttft_ms": 67996.44533600658,
+      "tbt_ms": null,
+      "throughput_tps": 0,
+      "peak_mem_mb": 0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "latency-slo",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": 92.0,
+        "typical_throughput_ratio_vs_baseline": 2.2,
+        "typical_ttft_reduction_pct_vs_baseline": 23.0,
+        "typical_tpot_reduction_pct_vs_baseline": 25.0,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": true,
+        "long_context_ttft_p95_ms": 80.0,
+        "long_context_ttft_p99_ms": 95.0,
+        "long_context_tpot_p95_ms": 9.0,
+        "long_context_tpot_p99_ms": 10.0,
+        "long_context_ttft_p95_stable": true,
+        "long_context_ttft_p99_stable": true,
+        "long_context_tpot_p95_stable": true,
+        "long_context_tpot_p99_stable": true,
+        "unit_token_cost_reduction_pct": 35.0,
+        "multi_tenant_high_utilization": true
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "N/A",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-07-21T08:16:09Z",
+      "submitter": "vllm-hust-org-member",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "0.18.0.post1",
+      "reproducible_cmd": null,
+      "git_commit": "b09ec4aa2189ce7ad4a81a5a860ff67bbe5b3804",
+      "github_user": "hustcui",
+      "github_commit_url": "https://github.com/vllm-hust/vllm-hust/commit/b09ec4aa2189ce7ad4a81a5a860ff67bbe5b3804",
+      "github_repository": "vllm-hust/vllm-hust",
+      "github_ref": "main",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "57b32d999a7ab864beab1b913136a7f4ff3c734c22f8b11b720b32093c376965",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": null,
+        "engine": {
+          "repository": "vllm-hust/vllm-hust",
+          "ref": "b09ec4aa21",
+          "commit": "b09ec4aa2189ce7ad4a81a5a860ff67bbe5b3804"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vllm-hust/vllm-ascend-hust",
+          "ref": "a06ab88642",
+          "commit": "a06ab886425da4055258415f9bccfe9889dbaef3"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "spec_label": "Official Ascend Jan 2026 random latency baseline for vllm-hust goal tracking",
+      "spec_source": "/root/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
+      "scenario": "random-latency",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B2",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "32413cf16410685d43610e6d5363b3ba38917c21f3a2bf421dd6052b0039d100",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "dtype": "float16",
+        "gpu_memory_utilization": 0.6
+      },
+      "resolved_client_parameters": {
+        "input_len": 1024,
+        "output_len": 128,
+        "batch_size": 8,
+        "num_iters_warmup": 10,
+        "num_iters": 30,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "gpu_memory_utilization": 0.6
       }
     }
   },
@@ -13638,7 +13792,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1633.725416632491,
       "peak_mem_mb": 0,
@@ -13791,7 +13945,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1662.404272815416,
       "peak_mem_mb": 0,
@@ -13944,7 +14098,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1641.5248050530088,
       "peak_mem_mb": 0,
@@ -14097,7 +14251,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1618.1210206258704,
       "peak_mem_mb": 0,
@@ -14250,7 +14404,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1633.630633058899,
       "peak_mem_mb": 0,
@@ -14403,7 +14557,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1567.6813763333623,
       "peak_mem_mb": 0,
@@ -14556,7 +14710,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1214.9346490648368,
       "peak_mem_mb": 0,
@@ -14710,7 +14864,7 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 2315.4745298720977,
       "peak_mem_mb": 0,
@@ -14863,7 +15017,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 4666.788783115784,
       "peak_mem_mb": 0,
@@ -15016,7 +15170,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 4659.471134270856,
       "peak_mem_mb": 0,
@@ -15169,7 +15323,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 4619.148279629556,
       "peak_mem_mb": 0,
@@ -15322,7 +15476,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 4648.810846428967,
       "peak_mem_mb": 0,
@@ -15475,7 +15629,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 4166.074231040203,
       "peak_mem_mb": 0,
@@ -15628,7 +15782,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 4286.607657346831,
       "peak_mem_mb": 0,
@@ -15781,7 +15935,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 4210.773080925754,
       "peak_mem_mb": 0,
@@ -15934,7 +16088,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 4239.415489588993,
       "peak_mem_mb": 0,
@@ -16087,7 +16241,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1926.6337556999092,
       "peak_mem_mb": 0,
@@ -16241,7 +16395,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 1589.9304339018993,
       "peak_mem_mb": 0,
@@ -16395,7 +16549,7 @@
       "dataset": "sonnet"
     },
     "metrics": {
-      "ttft_ms": null,
+      "ttft_ms": 0,
       "tbt_ms": null,
       "throughput_tps": 5615.513700852571,
       "peak_mem_mb": 0,
