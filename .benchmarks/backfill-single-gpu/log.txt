@@ -1,0 +1,979 @@
+[2026-07-20T10:56:23Z] PLAN: listing missing cells
+[2026-07-20T14:12:24Z] RUN: starting backfill
+[2026-07-20T14:12:24Z] BEGIN random-latency:6779a4d
+[2026-07-20T14:17:42Z] RUN: starting backfill
+[2026-07-20T14:17:42Z] BEGIN random-latency:b9e402aa8
+[2026-07-20T14:17:42Z] === random-latency @ b9e402aa8 (plugin fc989afca) ===
+[2026-07-20T14:17:55Z] Patched: renamed /root/vllm-hust/vllm/entrypoints/cli/openai.py -> /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-20T14:17:55Z] Patched: updated imports in /root/vllm-hust/vllm/entrypoints/cli/main.py
+[2026-07-20T14:18:05Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model Qwen/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b9e402aa8/bench/raw.json --kv-cache-dtype int8
+[2026-07-20T14:18:23Z] benchmark failed with exit code 1
+[2026-07-20T14:18:23Z] benchmark output (last 100 lines):
+[2026-07-20T14:18:23Z]   INFO 07-20 14:18:13 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+[2026-07-20T14:18:23Z]   INFO 07-20 14:18:13 [__init__.py:46] - ascend -> vllm_ascend:register
+[2026-07-20T14:18:23Z]   INFO 07-20 14:18:13 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+[2026-07-20T14:18:23Z]   INFO 07-20 14:18:13 [__init__.py:246] Platform plugin ascend is activated
+[2026-07-20T14:18:23Z]   Traceback (most recent call last):
+[2026-07-20T14:18:23Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-20T14:18:23Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-20T14:18:23Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-20T14:18:23Z]       main()
+[2026-07-20T14:18:23Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 24, in main
+[2026-07-20T14:18:23Z]       import vllm.entrypoints.cli.launch
+[2026-07-20T14:18:23Z]     File "/root/vllm-hust/vllm/entrypoints/cli/launch.py", line 13, in <module>
+[2026-07-20T14:18:23Z]       from vllm.entrypoints.openai.api_server import (
+[2026-07-20T14:18:23Z]     File "/root/vllm-hust/vllm/entrypoints/openai/api_server.py", line 35, in <module>
+[2026-07-20T14:18:23Z]       from vllm.entrypoints.serve.sagemaker.api_router import sagemaker_standards_bootstrap
+[2026-07-20T14:18:23Z]     File "/root/vllm-hust/vllm/entrypoints/serve/sagemaker/api_router.py", line 16, in <module>
+[2026-07-20T14:18:23Z]       from vllm.entrypoints.openai.engine.serving import OpenAIServing
+[2026-07-20T14:18:23Z]     File "/root/vllm-hust/vllm/entrypoints/openai/engine/serving.py", line 56, in <module>
+[2026-07-20T14:18:23Z]       class OpenAIServing(BaseServing, BeamSearchOnlineMixin):
+[2026-07-20T14:18:23Z]     File "/root/vllm-hust/vllm/entrypoints/openai/engine/serving.py", line 257, in OpenAIServing
+[2026-07-20T14:18:23Z]       chat_template_kwargs: dict[str, Any] | None,
+[2026-07-20T14:18:23Z]                                       ^^^
+[2026-07-20T14:18:23Z]   NameError: name 'Any' is not defined. Did you mean: 'any'?
+[2026-07-20T14:18:23Z]   [ERROR] 2026-07-20-14:18:21 (PID:1446836, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-20T14:18:23Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', 'Qwen/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b9e402aa8/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-20T14:18:23Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-20T14:27:02Z] RUN: starting backfill
+[2026-07-20T14:27:02Z] BEGIN random-latency:b9e402aa8
+[2026-07-20T14:27:02Z] === random-latency @ b9e402aa8 (plugin 1f1ef3a08) ===
+[2026-07-20T14:27:10Z] Patched: added Any import to /root/vllm-hust/vllm/entrypoints/openai/engine/serving.py
+[2026-07-20T14:27:10Z] Patched: renamed /root/vllm-hust/vllm/entrypoints/cli/openai.py -> /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-20T14:27:10Z] Patched: updated imports in /root/vllm-hust/vllm/entrypoints/cli/main.py
+[2026-07-20T14:27:20Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model Qwen/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b9e402aa8/bench/raw.json --kv-cache-dtype int8
+[2026-07-20T14:27:39Z] benchmark failed with exit code 1
+[2026-07-20T14:27:39Z] benchmark output (last 100 lines):
+[2026-07-20T14:27:39Z]   INFO 07-20 14:27:29 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+[2026-07-20T14:27:39Z]   INFO 07-20 14:27:29 [__init__.py:46] - ascend -> vllm_ascend:register
+[2026-07-20T14:27:39Z]   INFO 07-20 14:27:29 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+[2026-07-20T14:27:39Z]   INFO 07-20 14:27:29 [__init__.py:246] Platform plugin ascend is activated
+[2026-07-20T14:27:39Z]   Traceback (most recent call last):
+[2026-07-20T14:27:39Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-20T14:27:39Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-20T14:27:39Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-20T14:27:39Z]       main()
+[2026-07-20T14:27:39Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 24, in main
+[2026-07-20T14:27:39Z]       import vllm.entrypoints.cli.launch
+[2026-07-20T14:27:39Z]     File "/root/vllm-hust/vllm/entrypoints/cli/launch.py", line 13, in <module>
+[2026-07-20T14:27:39Z]       from vllm.entrypoints.openai.api_server import (
+[2026-07-20T14:27:39Z]     File "/root/vllm-hust/vllm/entrypoints/openai/api_server.py", line 35, in <module>
+[2026-07-20T14:27:39Z]       from vllm.entrypoints.serve.sagemaker.api_router import sagemaker_standards_bootstrap
+[2026-07-20T14:27:39Z]     File "/root/vllm-hust/vllm/entrypoints/serve/sagemaker/api_router.py", line 16, in <module>
+[2026-07-20T14:27:39Z]       from vllm.entrypoints.openai.engine.serving import OpenAIServing
+[2026-07-20T14:27:39Z]     File "/root/vllm-hust/vllm/entrypoints/openai/engine/serving.py", line 56, in <module>
+[2026-07-20T14:27:39Z]       class OpenAIServing(BaseServing, BeamSearchOnlineMixin):
+[2026-07-20T14:27:39Z]     File "/root/vllm-hust/vllm/entrypoints/openai/engine/serving.py", line 286, in OpenAIServing
+[2026-07-20T14:27:39Z]       def _extract_prompt_components(self, prompt: PromptType | EngineInput):
+[2026-07-20T14:27:39Z]                                                    ^^^^^^^^^^
+[2026-07-20T14:27:39Z]   NameError: name 'PromptType' is not defined
+[2026-07-20T14:27:39Z]   [ERROR] 2026-07-20-14:27:37 (PID:1452195, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-20T14:27:39Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', 'Qwen/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b9e402aa8/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-20T14:27:39Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-20T14:35:25Z] RUN: starting backfill
+[2026-07-20T14:35:25Z] BEGIN random-latency:6779a4dea
+[2026-07-20T14:35:25Z] === random-latency @ 6779a4dea (plugin 1f1ef3a08) ===
+[2026-07-20T14:35:40Z] Patched: renamed /root/vllm-hust/vllm/entrypoints/cli/openai.py -> /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-20T14:35:41Z] Patched: updated imports in /root/vllm-hust/vllm/entrypoints/cli/main.py
+[2026-07-20T14:35:50Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model Qwen/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-6779a4dea/bench/raw.json --kv-cache-dtype int8
+[2026-07-20T14:36:10Z] benchmark failed with exit code 1
+[2026-07-20T14:36:10Z] benchmark output (last 100 lines):
+[2026-07-20T14:36:10Z]   INFO 07-20 14:35:59 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+[2026-07-20T14:36:10Z]   INFO 07-20 14:35:59 [__init__.py:46] - ascend -> vllm_ascend:register
+[2026-07-20T14:36:10Z]   INFO 07-20 14:35:59 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+[2026-07-20T14:36:10Z]   INFO 07-20 14:35:59 [__init__.py:246] Platform plugin ascend is activated
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64] Failed to load plugin ascend_model
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64] Traceback (most recent call last):
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64]   File "/root/vllm-hust/vllm/plugins/__init__.py", line 61, in load_plugins_by_group
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64]     func = plugin.load()
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64]            ^^^^^^^^^^^^^
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64]   File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/importlib/metadata/__init__.py", line 204, in load
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64]     return functools.reduce(getattr, attrs, module)
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T14:36:10Z]   ERROR 07-20 14:36:07 [__init__.py:64] AttributeError: module 'vllm_ascend' has no attribute 'register_model'
+[2026-07-20T14:36:10Z]   INFO 07-20 14:36:08 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+[2026-07-20T14:36:10Z]   INFO 07-20 14:36:08 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+[2026-07-20T14:36:10Z]   Traceback (most recent call last):
+[2026-07-20T14:36:10Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-20T14:36:10Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-20T14:36:10Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-20T14:36:10Z]       main()
+[2026-07-20T14:36:10Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 92, in main
+[2026-07-20T14:36:10Z]       cmd.subparser_init(subparsers).set_defaults(dispatch_function=cmd.cmd)
+[2026-07-20T14:36:10Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T14:36:10Z]     File "/root/vllm-hust/vllm/entrypoints/cli/serve.py", line 164, in subparser_init
+[2026-07-20T14:36:10Z]       serve_parser = make_arg_parser(serve_parser)
+[2026-07-20T14:36:10Z]                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T14:36:10Z]     File "/root/vllm-hust/vllm/entrypoints/openai/cli_args.py", line 382, in make_arg_parser
+[2026-07-20T14:36:10Z]       parser = AsyncEngineArgs.add_cli_args(parser)
+[2026-07-20T14:36:10Z]                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T14:36:10Z]     File "/root/vllm-hust/vllm/engine/arg_utils.py", line 2689, in add_cli_args
+[2026-07-20T14:36:10Z]       current_platform.pre_register_and_update(parser)
+[2026-07-20T14:36:10Z]     File "/root/vllm-ascend-hust/vllm_ascend/platform.py", line 137, in pre_register_and_update
+[2026-07-20T14:36:10Z]       adapt_patch(is_global_patch=True)
+[2026-07-20T14:36:10Z]     File "/root/vllm-ascend-hust/vllm_ascend/utils.py", line 404, in adapt_patch
+[2026-07-20T14:36:10Z]       from vllm_ascend.patch import platform  # noqa: F401
+[2026-07-20T14:36:10Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T14:36:10Z]     File "/root/vllm-ascend-hust/vllm_ascend/patch/platform/__init__.py", line 30, in <module>
+[2026-07-20T14:36:10Z]       import vllm_ascend.patch.platform.patch_glm_tool_call_parser  # noqa
+[2026-07-20T14:36:10Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T14:36:10Z]     File "/root/vllm-ascend-hust/vllm_ascend/patch/platform/patch_glm_tool_call_parser.py", line 36, in <module>
+[2026-07-20T14:36:10Z]       from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser
+[2026-07-20T14:36:10Z]   ImportError: cannot import name 'glm4_moe_tool_parser' from 'vllm.tool_parsers' (/root/vllm-hust/vllm/tool_parsers/__init__.py)
+[2026-07-20T14:36:10Z]   [ERROR] 2026-07-20-14:36:08 (PID:1458363, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-20T14:36:10Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', 'Qwen/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-6779a4dea/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-20T14:36:10Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-20T15:05:52Z] RUN: starting backfill
+[2026-07-20T15:05:52Z] BEGIN random-latency:6779a4dea
+[2026-07-20T15:05:52Z] === random-latency @ 6779a4dea (plugin 1f1ef3a08) ===
+[2026-07-20T15:06:09Z] Patched: disabled obsolete GLM parser patch in /root/vllm-ascend-hust/vllm_ascend/patch/platform/__init__.py
+[2026-07-20T15:06:09Z] Patched: renamed /root/vllm-hust/vllm/entrypoints/cli/openai.py -> /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-20T15:06:09Z] Patched: updated imports in /root/vllm-hust/vllm/entrypoints/cli/main.py
+[2026-07-20T15:06:18Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model Qwen/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-6779a4dea/bench/raw.json --kv-cache-dtype int8
+[2026-07-20T15:06:38Z] benchmark failed with exit code 1
+[2026-07-20T15:06:38Z] benchmark output (last 100 lines):
+[2026-07-20T15:06:38Z]   INFO 07-20 15:06:27 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+[2026-07-20T15:06:38Z]   INFO 07-20 15:06:27 [__init__.py:46] - ascend -> vllm_ascend:register
+[2026-07-20T15:06:38Z]   INFO 07-20 15:06:27 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+[2026-07-20T15:06:38Z]   INFO 07-20 15:06:27 [__init__.py:246] Platform plugin ascend is activated
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64] Failed to load plugin ascend_model
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64] Traceback (most recent call last):
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64]   File "/root/vllm-hust/vllm/plugins/__init__.py", line 61, in load_plugins_by_group
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64]     func = plugin.load()
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64]            ^^^^^^^^^^^^^
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64]   File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/importlib/metadata/__init__.py", line 204, in load
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64]     return functools.reduce(getattr, attrs, module)
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:06:38Z]   ERROR 07-20 15:06:35 [__init__.py:64] AttributeError: module 'vllm_ascend' has no attribute 'register_model'
+[2026-07-20T15:06:38Z]   INFO 07-20 15:06:36 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+[2026-07-20T15:06:38Z]   INFO 07-20 15:06:36 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+[2026-07-20T15:06:38Z]   Traceback (most recent call last):
+[2026-07-20T15:06:38Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-20T15:06:38Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-20T15:06:38Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-20T15:06:38Z]       main()
+[2026-07-20T15:06:38Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 92, in main
+[2026-07-20T15:06:38Z]       cmd.subparser_init(subparsers).set_defaults(dispatch_function=cmd.cmd)
+[2026-07-20T15:06:38Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:06:38Z]     File "/root/vllm-hust/vllm/entrypoints/cli/serve.py", line 164, in subparser_init
+[2026-07-20T15:06:38Z]       serve_parser = make_arg_parser(serve_parser)
+[2026-07-20T15:06:38Z]                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:06:38Z]     File "/root/vllm-hust/vllm/entrypoints/openai/cli_args.py", line 382, in make_arg_parser
+[2026-07-20T15:06:38Z]       parser = AsyncEngineArgs.add_cli_args(parser)
+[2026-07-20T15:06:38Z]                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:06:38Z]     File "/root/vllm-hust/vllm/engine/arg_utils.py", line 2689, in add_cli_args
+[2026-07-20T15:06:38Z]       current_platform.pre_register_and_update(parser)
+[2026-07-20T15:06:38Z]     File "/root/vllm-ascend-hust/vllm_ascend/platform.py", line 137, in pre_register_and_update
+[2026-07-20T15:06:38Z]       adapt_patch(is_global_patch=True)
+[2026-07-20T15:06:38Z]     File "/root/vllm-ascend-hust/vllm_ascend/utils.py", line 404, in adapt_patch
+[2026-07-20T15:06:38Z]       from vllm_ascend.patch import platform  # noqa: F401
+[2026-07-20T15:06:38Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:06:38Z]     File "/root/vllm-ascend-hust/vllm_ascend/patch/platform/__init__.py", line 32, in <module>
+[2026-07-20T15:06:38Z]       import vllm_ascend.patch.platform.patch_tool_choice_none_content  # noqa
+[2026-07-20T15:06:38Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:06:38Z]     File "/root/vllm-ascend-hust/vllm_ascend/patch/platform/patch_tool_choice_none_content.py", line 66, in <module>
+[2026-07-20T15:06:38Z]       _original_parse_tool_calls_from_content = OpenAIServing._parse_tool_calls_from_content
+[2026-07-20T15:06:38Z]                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:06:38Z]   AttributeError: type object 'OpenAIServing' has no attribute '_parse_tool_calls_from_content'
+[2026-07-20T15:06:38Z]   [ERROR] 2026-07-20-15:06:36 (PID:1479377, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-20T15:06:38Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', 'Qwen/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-6779a4dea/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-20T15:06:38Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-20T15:13:56Z] RUN: starting backfill
+[2026-07-20T15:13:56Z] BEGIN random-latency:6779a4dea
+[2026-07-20T15:13:56Z] === random-latency @ 6779a4dea (plugin 1f1ef3a08) ===
+[2026-07-20T15:17:02Z] Patched: disabled obsolete GLM parser patch in /root/vllm-ascend-hust/vllm_ascend/patch/platform/__init__.py
+[2026-07-20T15:17:02Z] Patched: renamed /root/vllm-hust/vllm/entrypoints/cli/openai.py -> /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-20T15:17:02Z] Patched: updated imports in /root/vllm-hust/vllm/entrypoints/cli/main.py
+[2026-07-20T15:17:12Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model Qwen/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-6779a4dea/bench/raw.json --kv-cache-dtype int8
+[2026-07-20T15:17:31Z] benchmark failed with exit code 1
+[2026-07-20T15:17:31Z] benchmark output (last 100 lines):
+[2026-07-20T15:17:31Z]   INFO 07-20 15:17:20 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+[2026-07-20T15:17:31Z]   INFO 07-20 15:17:20 [__init__.py:46] - ascend -> vllm_ascend:register
+[2026-07-20T15:17:31Z]   INFO 07-20 15:17:20 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+[2026-07-20T15:17:31Z]   INFO 07-20 15:17:20 [__init__.py:246] Platform plugin ascend is activated
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64] Failed to load plugin ascend_model
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64] Traceback (most recent call last):
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64]   File "/root/vllm-hust/vllm/plugins/__init__.py", line 61, in load_plugins_by_group
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64]     func = plugin.load()
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64]            ^^^^^^^^^^^^^
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64]   File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/importlib/metadata/__init__.py", line 204, in load
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64]     return functools.reduce(getattr, attrs, module)
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64]            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:17:31Z]   ERROR 07-20 15:17:28 [__init__.py:64] AttributeError: module 'vllm_ascend' has no attribute 'register_model'
+[2026-07-20T15:17:31Z]   INFO 07-20 15:17:29 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+[2026-07-20T15:17:31Z]   INFO 07-20 15:17:29 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+[2026-07-20T15:17:31Z]   Traceback (most recent call last):
+[2026-07-20T15:17:31Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-20T15:17:31Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-20T15:17:31Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-20T15:17:31Z]       main()
+[2026-07-20T15:17:31Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 92, in main
+[2026-07-20T15:17:31Z]       cmd.subparser_init(subparsers).set_defaults(dispatch_function=cmd.cmd)
+[2026-07-20T15:17:31Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:17:31Z]     File "/root/vllm-hust/vllm/entrypoints/cli/serve.py", line 164, in subparser_init
+[2026-07-20T15:17:31Z]       serve_parser = make_arg_parser(serve_parser)
+[2026-07-20T15:17:31Z]                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:17:31Z]     File "/root/vllm-hust/vllm/entrypoints/openai/cli_args.py", line 382, in make_arg_parser
+[2026-07-20T15:17:31Z]       parser = AsyncEngineArgs.add_cli_args(parser)
+[2026-07-20T15:17:31Z]                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:17:31Z]     File "/root/vllm-hust/vllm/engine/arg_utils.py", line 2689, in add_cli_args
+[2026-07-20T15:17:31Z]       current_platform.pre_register_and_update(parser)
+[2026-07-20T15:17:31Z]     File "/root/vllm-ascend-hust/vllm_ascend/platform.py", line 137, in pre_register_and_update
+[2026-07-20T15:17:31Z]       adapt_patch(is_global_patch=True)
+[2026-07-20T15:17:31Z]     File "/root/vllm-ascend-hust/vllm_ascend/utils.py", line 404, in adapt_patch
+[2026-07-20T15:17:31Z]       from vllm_ascend.patch import platform  # noqa: F401
+[2026-07-20T15:17:31Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:17:31Z]     File "/root/vllm-ascend-hust/vllm_ascend/patch/platform/__init__.py", line 32, in <module>
+[2026-07-20T15:17:31Z]       import vllm_ascend.patch.platform.patch_tool_choice_none_content  # noqa
+[2026-07-20T15:17:31Z]       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:17:31Z]     File "/root/vllm-ascend-hust/vllm_ascend/patch/platform/patch_tool_choice_none_content.py", line 66, in <module>
+[2026-07-20T15:17:31Z]       _original_parse_tool_calls_from_content = OpenAIServing._parse_tool_calls_from_content
+[2026-07-20T15:17:31Z]                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:17:31Z]   AttributeError: type object 'OpenAIServing' has no attribute '_parse_tool_calls_from_content'
+[2026-07-20T15:17:31Z]   [ERROR] 2026-07-20-15:17:29 (PID:1487247, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-20T15:17:31Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', 'Qwen/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-6779a4dea/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-20T15:17:31Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-20T15:27:26Z] RUN: starting backfill
+[2026-07-20T15:27:26Z] BEGIN random-latency:6779a4dea
+[2026-07-20T15:27:26Z] === random-latency @ 6779a4dea (plugin 1f1ef3a08) ===
+[2026-07-20T15:27:45Z] Patched: disabled obsolete platform patches in /root/vllm-ascend-hust/vllm_ascend/patch/platform/__init__.py
+[2026-07-20T15:27:45Z] Patched: added legacy model entry point in /root/vllm-ascend-hust/vllm_ascend/__init__.py
+[2026-07-20T15:27:45Z] Patched: renamed /root/vllm-hust/vllm/entrypoints/cli/openai.py -> /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-20T15:27:45Z] Patched: updated imports in /root/vllm-hust/vllm/entrypoints/cli/main.py
+[2026-07-20T15:27:54Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model Qwen/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-6779a4dea/bench/raw.json --kv-cache-dtype int8
+[2026-07-20T15:28:19Z] benchmark failed with exit code 1
+[2026-07-20T15:28:19Z] benchmark output (last 100 lines):
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:02 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:02 [__init__.py:46] - ascend -> vllm_ascend:register
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:02 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:02 [__init__.py:246] Platform plugin ascend is activated
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:11 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:11 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+[2026-07-20T15:28:19Z]   WARNING 07-20 15:28:12 [platform.py:157] Skipping Ascend quantization config registration because optional import failed: cannot import name 'UnquantizedFusedMoEMethod' from 'vllm.model_executor.layers.fused_moe.layer' (/root/vllm-hust/vllm/model_executor/layers/fused_moe/layer.py)
+[2026-07-20T15:28:19Z]   WARNING 07-20 15:28:12 [platform.py:157] Skipping Ascend quantization config registration because optional import failed: cannot import name 'ops' from 'vllm_ascend' (/root/vllm-ascend-hust/vllm_ascend/__init__.py)
+[2026-07-20T15:28:19Z]   WARNING 07-20 15:28:12 [platform.py:157] Skipping Ascend quantization config registration because optional import failed: cannot import name 'ops' from 'vllm_ascend' (/root/vllm-ascend-hust/vllm_ascend/__init__.py)
+[2026-07-20T15:28:19Z]   WARNING 07-20 15:28:12 [platform.py:157] Skipping Ascend quantization config registration because optional import failed: cannot import name 'ops' from 'vllm_ascend' (/root/vllm-ascend-hust/vllm_ascend/__init__.py)
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:12 [api_utils.py:392] non-default args: {'kv_cache_dtype': 'int8', 'enable_prefix_caching': False, 'gpu_memory_utilization': 0.6, 'enable_lora': None, 'reasoning_parser_plugin': '', 'model': 'Qwen/Qwen2.5-14B-Instruct'}
+[2026-07-20T15:28:19Z]   WARNING 07-20 15:28:12 [platform.py:157] Skipping Ascend quantization config registration because optional import failed: cannot import name 'ops' from 'vllm_ascend' (/root/vllm-ascend-hust/vllm_ascend/__init__.py)
+[2026-07-20T15:28:19Z]   WARNING 07-20 15:28:12 [envs.py:2064] Unknown vLLM environment variable detected: VLLM_USE_V1
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:17 [model.py:606] Resolved architecture: Qwen2ForCausalLM
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:17 [model.py:1736] Using max model len 32768
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:17 [scheduler.py:252] Chunked prefill is enabled with max_num_batched_tokens=8192.
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:17 [vllm.py:1040] Asynchronous scheduling is enabled.
+[2026-07-20T15:28:19Z]   INFO 07-20 15:28:17 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+[2026-07-20T15:28:19Z]   Traceback (most recent call last):
+[2026-07-20T15:28:19Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-20T15:28:19Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-20T15:28:19Z]       main()
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-20T15:28:19Z]       args.dispatch_function(args)
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-20T15:28:19Z]       main(args)
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-20T15:28:19Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-20T15:28:19Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-20T15:28:19Z]       return cls(**vars(engine_args))
+[2026-07-20T15:28:19Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-20T15:28:19Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-20T15:28:19Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 173, in from_engine_args
+[2026-07-20T15:28:19Z]       vllm_config = engine_args.create_engine_config(usage_context)
+[2026-07-20T15:28:19Z]                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/engine/arg_utils.py", line 2343, in create_engine_config
+[2026-07-20T15:28:19Z]       config = VllmConfig(
+[2026-07-20T15:28:19Z]                ^^^^^^^^^^^
+[2026-07-20T15:28:19Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/site-packages/pydantic/_internal/_dataclasses.py", line 121, in __init__
+[2026-07-20T15:28:19Z]       s.__pydantic_validator__.validate_python(ArgsKwargs(args, kwargs), self_instance=s)
+[2026-07-20T15:28:19Z]     File "/root/vllm-hust/vllm/config/vllm.py", line 1382, in __post_init__
+[2026-07-20T15:28:19Z]       current_platform.check_and_update_config(self)
+[2026-07-20T15:28:19Z]     File "/root/vllm-ascend-hust/vllm_ascend/platform.py", line 263, in check_and_update_config
+[2026-07-20T15:28:19Z]       maybe_auto_detect_quantization(vllm_config)
+[2026-07-20T15:28:19Z]     File "/root/vllm-ascend-hust/vllm_ascend/quantization/utils.py", line 161, in maybe_auto_detect_quantization
+[2026-07-20T15:28:19Z]       detected = detect_quantization_method(model, revision=revision)
+[2026-07-20T15:28:19Z]                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-20T15:28:19Z]     File "/root/vllm-ascend-hust/vllm_ascend/quantization/utils.py", line 106, in detect_quantization_method
+[2026-07-20T15:28:19Z]       from vllm_ascend.quantization.modelslim_config import MODELSLIM_CONFIG_FILENAME
+[2026-07-20T15:28:19Z]     File "/root/vllm-ascend-hust/vllm_ascend/quantization/modelslim_config.py", line 46, in <module>
+[2026-07-20T15:28:19Z]       from .methods import get_scheme_class
+[2026-07-20T15:28:19Z]     File "/root/vllm-ascend-hust/vllm_ascend/quantization/methods/__init__.py", line 42, in <module>
+[2026-07-20T15:28:19Z]       from .w4a4_mxfp4 import AscendW4A4MXFP4DynamicFusedMoEMethod, AscendW4A4MXFP4DynamicLinearMethod
+[2026-07-20T15:28:19Z]     File "/root/vllm-ascend-hust/vllm_ascend/quantization/methods/w4a4_mxfp4.py", line 34, in <module>
+[2026-07-20T15:28:19Z]       from vllm_ascend.ops.fused_moe.moe_runtime_args import build_fused_experts_input
+[2026-07-20T15:28:19Z]     File "/root/vllm-ascend-hust/vllm_ascend/ops/fused_moe/moe_runtime_args.py", line 62, in <module>
+[2026-07-20T15:28:19Z]       import vllm_ascend.ops.fused_moe.moe_stage_params as _stage_params
+[2026-07-20T15:28:19Z]   ImportError: cannot import name 'ops' from 'vllm_ascend' (/root/vllm-ascend-hust/vllm_ascend/__init__.py)
+[2026-07-20T15:28:19Z]   [ERROR] 2026-07-20-15:28:17 (PID:1505181, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-20T15:28:19Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', 'Qwen/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-6779a4dea/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-20T15:28:19Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-21T04:30:18Z] RUN: starting backfill
+[2026-07-21T04:30:18Z] BEGIN random-latency:b09ec4aa2
+[2026-07-21T04:30:18Z] === random-latency @ b09ec4aa2 (plugin 1f1ef3a08) ===
+[2026-07-21T04:30:34Z] Patched: disabled obsolete platform patches in /root/vllm-ascend-hust/vllm_ascend/patch/platform/__init__.py
+[2026-07-21T04:30:34Z] Patched: added legacy model entry point in /root/vllm-ascend-hust/vllm_ascend/__init__.py
+[2026-07-21T04:30:34Z] Patched: fixed circular MoE import in /root/vllm-ascend-hust/vllm_ascend/ops/fused_moe/moe_runtime_args.py
+[2026-07-21T04:30:34Z] Patched: removed duplicate /root/vllm-hust/vllm/entrypoints/cli/openai.py, keeping /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-21T04:30:34Z] Patched: imports already correct, skipping
+[2026-07-21T04:30:44Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model /data/shared_models/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json --kv-cache-dtype int8
+[2026-07-21T04:31:52Z] benchmark failed with exit code 1
+[2026-07-21T04:31:52Z] benchmark output (last 100 lines):
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)     return _bootstrap._gcd_import(name[level:], package, level)
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 60, in <module>
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)     from vllm_ascend.batch_invariant import init_batch_invariance
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "/root/vllm-ascend-hust/vllm_ascend/batch_invariant.py", line 32, in <module>
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)     from vllm_ascend.ops.triton.batch_invariant.matmul import (
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "/root/vllm-ascend-hust/vllm_ascend/ops/__init__.py", line 22, in <module>
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)     import vllm_ascend.ops.fused_moe.fused_moe  # noqa
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)   File "/root/vllm-ascend-hust/vllm_ascend/ops/fused_moe/fused_moe.py", line 30, in <module>
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863)     from vllm.model_executor.layers.fused_moe.layer import FusedMoE, UnquantizedFusedMoEMethod, get_compressed_expert_map
+[2026-07-21T04:31:52Z]   (EngineCore pid=1587863) ImportError: cannot import name 'UnquantizedFusedMoEMethod' from 'vllm.model_executor.layers.fused_moe.layer' (/root/vllm-hust/vllm/model_executor/layers/fused_moe/layer.py)
+[2026-07-21T04:31:52Z]   Traceback (most recent call last):
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T04:31:52Z]       main()
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T04:31:52Z]       args.dispatch_function(args)
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T04:31:52Z]       main(args)
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T04:31:52Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T04:31:52Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T04:31:52Z]       return cls(**vars(engine_args))
+[2026-07-21T04:31:52Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T04:31:52Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T04:31:52Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T04:31:52Z]       return cls(
+[2026-07-21T04:31:52Z]              ^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T04:31:52Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T04:31:52Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T04:31:52Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T04:31:52Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T04:31:52Z]       return func(*args, **kwargs)
+[2026-07-21T04:31:52Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T04:31:52Z]       super().__init__(
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T04:31:52Z]       with launch_core_engines(
+[2026-07-21T04:31:52Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T04:31:52Z]       next(self.gen)
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T04:31:52Z]       wait_for_engine_startup(
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T04:31:52Z]       raise RuntimeError(
+[2026-07-21T04:31:52Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T04:31:52Z]   [ERROR] 2026-07-21-04:31:47 (PID:1587705, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T04:31:52Z]   Traceback (most recent call last):
+[2026-07-21T04:31:52Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-21T04:31:52Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T04:31:52Z]       main()
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T04:31:52Z]       args.dispatch_function(args)
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T04:31:52Z]       main(args)
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T04:31:52Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T04:31:52Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T04:31:52Z]       return cls(**vars(engine_args))
+[2026-07-21T04:31:52Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T04:31:52Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T04:31:52Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T04:31:52Z]       return cls(
+[2026-07-21T04:31:52Z]              ^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T04:31:52Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T04:31:52Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T04:31:52Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T04:31:52Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T04:31:52Z]       return func(*args, **kwargs)
+[2026-07-21T04:31:52Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T04:31:52Z]       super().__init__(
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T04:31:52Z]       with launch_core_engines(
+[2026-07-21T04:31:52Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T04:31:52Z]       next(self.gen)
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T04:31:52Z]       wait_for_engine_startup(
+[2026-07-21T04:31:52Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T04:31:52Z]       raise RuntimeError(
+[2026-07-21T04:31:52Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T04:31:52Z]   [ERROR] 2026-07-21-04:31:49 (PID:1587524, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T04:31:52Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', '/data/shared_models/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-21T04:31:52Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-21T04:57:40Z] RUN: starting backfill
+[2026-07-21T04:57:40Z] Using explicit vllm-ascend-hust commit override: a06ab886425d
+[2026-07-21T04:57:40Z] BEGIN random-latency:b09ec4aa2
+[2026-07-21T04:57:40Z] === random-latency @ b09ec4aa2 (plugin a06ab8864) ===
+[2026-07-21T04:57:51Z] Patched: removed duplicate /root/vllm-hust/vllm/entrypoints/cli/openai.py, keeping /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-21T04:57:51Z] Patched: imports already correct, skipping
+[2026-07-21T04:58:00Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model /data/shared_models/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json --kv-cache-dtype int8
+[2026-07-21T04:59:24Z] benchmark failed with exit code 1
+[2026-07-21T04:59:24Z] benchmark output (last 100 lines):
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)     self.model_executor = executor_class(vllm_config)
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)   File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)     return func(*args, **kwargs)
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)            ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)   File "/root/vllm-hust/vllm/v1/executor/abstract.py", line 109, in __init__
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)     self._init_executor()
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)   File "/root/vllm-hust/vllm/v1/executor/uniproc_executor.py", line 63, in _init_executor
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)     self.driver_worker.init_device()
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)   File "/root/vllm-hust/vllm/v1/worker/worker_base.py", line 331, in init_device
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)     self.worker.init_device()  # type: ignore
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)     ^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 700, in init_device
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)     self.device = self._init_device()
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)                   ^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 663, in _init_device
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754)     raise ValueError(
+[2026-07-21T04:59:24Z]   (EngineCore pid=1591754) ValueError: Free memory on device (23.22/60.96 GiB) on startup is less than desired GPU memory utilization (0.6, 36.57 GiB). Decrease GPU memory utilization or reduce GPU memory used by other processes.
+[2026-07-21T04:59:24Z]   Traceback (most recent call last):
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T04:59:24Z]       main()
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T04:59:24Z]       args.dispatch_function(args)
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T04:59:24Z]       main(args)
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T04:59:24Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T04:59:24Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T04:59:24Z]       return cls(**vars(engine_args))
+[2026-07-21T04:59:24Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T04:59:24Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T04:59:24Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T04:59:24Z]       return cls(
+[2026-07-21T04:59:24Z]              ^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T04:59:24Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T04:59:24Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T04:59:24Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T04:59:24Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T04:59:24Z]       return func(*args, **kwargs)
+[2026-07-21T04:59:24Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T04:59:24Z]       super().__init__(
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T04:59:24Z]       with launch_core_engines(
+[2026-07-21T04:59:24Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T04:59:24Z]       next(self.gen)
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T04:59:24Z]       wait_for_engine_startup(
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T04:59:24Z]       raise RuntimeError(
+[2026-07-21T04:59:24Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T04:59:24Z]   [ERROR] 2026-07-21-04:59:19 (PID:1591592, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T04:59:24Z]   Traceback (most recent call last):
+[2026-07-21T04:59:24Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-21T04:59:24Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T04:59:24Z]       main()
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T04:59:24Z]       args.dispatch_function(args)
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T04:59:24Z]       main(args)
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T04:59:24Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T04:59:24Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T04:59:24Z]       return cls(**vars(engine_args))
+[2026-07-21T04:59:24Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T04:59:24Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T04:59:24Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T04:59:24Z]       return cls(
+[2026-07-21T04:59:24Z]              ^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T04:59:24Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T04:59:24Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T04:59:24Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T04:59:24Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T04:59:24Z]       return func(*args, **kwargs)
+[2026-07-21T04:59:24Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T04:59:24Z]       super().__init__(
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T04:59:24Z]       with launch_core_engines(
+[2026-07-21T04:59:24Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T04:59:24Z]       next(self.gen)
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T04:59:24Z]       wait_for_engine_startup(
+[2026-07-21T04:59:24Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T04:59:24Z]       raise RuntimeError(
+[2026-07-21T04:59:24Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T04:59:24Z]   [ERROR] 2026-07-21-04:59:21 (PID:1591409, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T04:59:24Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', '/data/shared_models/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-21T04:59:24Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-21T05:00:25Z] RUN: starting backfill
+[2026-07-21T05:00:25Z] Using explicit vllm-ascend-hust commit override: a06ab886425d
+[2026-07-21T05:00:25Z] BEGIN random-latency:b09ec4aa2
+[2026-07-21T05:00:25Z] === random-latency @ b09ec4aa2 (plugin a06ab8864) ===
+[2026-07-21T05:00:37Z] Patched: removed duplicate /root/vllm-hust/vllm/entrypoints/cli/openai.py, keeping /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-21T05:00:37Z] Patched: imports already correct, skipping
+[2026-07-21T05:00:47Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model /data/shared_models/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json --kv-cache-dtype int8
+[2026-07-21T05:02:09Z] benchmark failed with exit code 1
+[2026-07-21T05:02:09Z] benchmark output (last 100 lines):
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)     self.model_executor = executor_class(vllm_config)
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)   File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)     return func(*args, **kwargs)
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)            ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)   File "/root/vllm-hust/vllm/v1/executor/abstract.py", line 109, in __init__
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)     self._init_executor()
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)   File "/root/vllm-hust/vllm/v1/executor/uniproc_executor.py", line 63, in _init_executor
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)     self.driver_worker.init_device()
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)   File "/root/vllm-hust/vllm/v1/worker/worker_base.py", line 331, in init_device
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)     self.worker.init_device()  # type: ignore
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)     ^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 700, in init_device
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)     self.device = self._init_device()
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)                   ^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 663, in _init_device
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749)     raise ValueError(
+[2026-07-21T05:02:09Z]   (EngineCore pid=1592749) ValueError: Free memory on device (23.3/60.96 GiB) on startup is less than desired GPU memory utilization (0.6, 36.57 GiB). Decrease GPU memory utilization or reduce GPU memory used by other processes.
+[2026-07-21T05:02:09Z]   Traceback (most recent call last):
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T05:02:09Z]       main()
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T05:02:09Z]       args.dispatch_function(args)
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T05:02:09Z]       main(args)
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T05:02:09Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T05:02:09Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T05:02:09Z]       return cls(**vars(engine_args))
+[2026-07-21T05:02:09Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T05:02:09Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T05:02:09Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T05:02:09Z]       return cls(
+[2026-07-21T05:02:09Z]              ^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T05:02:09Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T05:02:09Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T05:02:09Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T05:02:09Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:02:09Z]       return func(*args, **kwargs)
+[2026-07-21T05:02:09Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T05:02:09Z]       super().__init__(
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T05:02:09Z]       with launch_core_engines(
+[2026-07-21T05:02:09Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T05:02:09Z]       next(self.gen)
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T05:02:09Z]       wait_for_engine_startup(
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T05:02:09Z]       raise RuntimeError(
+[2026-07-21T05:02:09Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T05:02:09Z]   [ERROR] 2026-07-21-05:02:05 (PID:1592585, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T05:02:09Z]   Traceback (most recent call last):
+[2026-07-21T05:02:09Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-21T05:02:09Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T05:02:09Z]       main()
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T05:02:09Z]       args.dispatch_function(args)
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T05:02:09Z]       main(args)
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T05:02:09Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T05:02:09Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T05:02:09Z]       return cls(**vars(engine_args))
+[2026-07-21T05:02:09Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T05:02:09Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T05:02:09Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T05:02:09Z]       return cls(
+[2026-07-21T05:02:09Z]              ^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T05:02:09Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T05:02:09Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T05:02:09Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T05:02:09Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:02:09Z]       return func(*args, **kwargs)
+[2026-07-21T05:02:09Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T05:02:09Z]       super().__init__(
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T05:02:09Z]       with launch_core_engines(
+[2026-07-21T05:02:09Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T05:02:09Z]       next(self.gen)
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T05:02:09Z]       wait_for_engine_startup(
+[2026-07-21T05:02:09Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T05:02:09Z]       raise RuntimeError(
+[2026-07-21T05:02:09Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T05:02:09Z]   [ERROR] 2026-07-21-05:02:07 (PID:1592404, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T05:02:09Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', '/data/shared_models/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-21T05:02:09Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-21T05:07:21Z] RUN: starting backfill
+[2026-07-21T05:07:21Z] Using explicit vllm-ascend-hust commit override: a06ab886425d
+[2026-07-21T05:07:21Z] BEGIN random-latency:b09ec4aa2
+[2026-07-21T05:07:21Z] === random-latency @ b09ec4aa2 (plugin a06ab8864) ===
+[2026-07-21T05:07:32Z] Patched: removed duplicate /root/vllm-hust/vllm/entrypoints/cli/openai.py, keeping /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-21T05:07:32Z] Patched: imports already correct, skipping
+[2026-07-21T05:07:42Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model /data/shared_models/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json --kv-cache-dtype int8
+[2026-07-21T05:09:06Z] benchmark failed with exit code 1
+[2026-07-21T05:09:06Z] benchmark output (last 100 lines):
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)     self.model_executor = executor_class(vllm_config)
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)   File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)     return func(*args, **kwargs)
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)            ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)   File "/root/vllm-hust/vllm/v1/executor/abstract.py", line 109, in __init__
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)     self._init_executor()
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)   File "/root/vllm-hust/vllm/v1/executor/uniproc_executor.py", line 63, in _init_executor
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)     self.driver_worker.init_device()
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)   File "/root/vllm-hust/vllm/v1/worker/worker_base.py", line 331, in init_device
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)     self.worker.init_device()  # type: ignore
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)     ^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 700, in init_device
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)     self.device = self._init_device()
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)                   ^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 663, in _init_device
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750)     raise ValueError(
+[2026-07-21T05:09:06Z]   (EngineCore pid=1593750) ValueError: Free memory on device (5.08/60.96 GiB) on startup is less than desired GPU memory utilization (0.6, 36.57 GiB). Decrease GPU memory utilization or reduce GPU memory used by other processes.
+[2026-07-21T05:09:06Z]   Traceback (most recent call last):
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T05:09:06Z]       main()
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T05:09:06Z]       args.dispatch_function(args)
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T05:09:06Z]       main(args)
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T05:09:06Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T05:09:06Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T05:09:06Z]       return cls(**vars(engine_args))
+[2026-07-21T05:09:06Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T05:09:06Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T05:09:06Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T05:09:06Z]       return cls(
+[2026-07-21T05:09:06Z]              ^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T05:09:06Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T05:09:06Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T05:09:06Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T05:09:06Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:09:06Z]       return func(*args, **kwargs)
+[2026-07-21T05:09:06Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T05:09:06Z]       super().__init__(
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T05:09:06Z]       with launch_core_engines(
+[2026-07-21T05:09:06Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T05:09:06Z]       next(self.gen)
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T05:09:06Z]       wait_for_engine_startup(
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T05:09:06Z]       raise RuntimeError(
+[2026-07-21T05:09:06Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T05:09:06Z]   [ERROR] 2026-07-21-05:09:01 (PID:1593534, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T05:09:06Z]   Traceback (most recent call last):
+[2026-07-21T05:09:06Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-21T05:09:06Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T05:09:06Z]       main()
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T05:09:06Z]       args.dispatch_function(args)
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T05:09:06Z]       main(args)
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T05:09:06Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T05:09:06Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T05:09:06Z]       return cls(**vars(engine_args))
+[2026-07-21T05:09:06Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T05:09:06Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T05:09:06Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T05:09:06Z]       return cls(
+[2026-07-21T05:09:06Z]              ^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T05:09:06Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T05:09:06Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T05:09:06Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T05:09:06Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:09:06Z]       return func(*args, **kwargs)
+[2026-07-21T05:09:06Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T05:09:06Z]       super().__init__(
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T05:09:06Z]       with launch_core_engines(
+[2026-07-21T05:09:06Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T05:09:06Z]       next(self.gen)
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T05:09:06Z]       wait_for_engine_startup(
+[2026-07-21T05:09:06Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T05:09:06Z]       raise RuntimeError(
+[2026-07-21T05:09:06Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T05:09:06Z]   [ERROR] 2026-07-21-05:09:04 (PID:1593337, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T05:09:06Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', '/data/shared_models/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-21T05:09:06Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-21T05:12:32Z] RUN: starting backfill
+[2026-07-21T05:12:32Z] Using explicit vllm-ascend-hust commit override: a06ab886425d
+[2026-07-21T05:12:32Z] BEGIN random-latency:b09ec4aa2
+[2026-07-21T05:12:32Z] === random-latency @ b09ec4aa2 (plugin a06ab8864) ===
+[2026-07-21T05:12:43Z] Patched: removed duplicate /root/vllm-hust/vllm/entrypoints/cli/openai.py, keeping /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-21T05:12:43Z] Patched: imports already correct, skipping
+[2026-07-21T05:12:53Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model /data/shared_models/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json --kv-cache-dtype int8
+[2026-07-21T05:14:11Z] benchmark failed with exit code 1
+[2026-07-21T05:14:11Z] benchmark output (last 100 lines):
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)     self.model_executor = executor_class(vllm_config)
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)   File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)     return func(*args, **kwargs)
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)            ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)   File "/root/vllm-hust/vllm/v1/executor/abstract.py", line 109, in __init__
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)     self._init_executor()
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)   File "/root/vllm-hust/vllm/v1/executor/uniproc_executor.py", line 63, in _init_executor
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)     self.driver_worker.init_device()
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)   File "/root/vllm-hust/vllm/v1/worker/worker_base.py", line 331, in init_device
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)     self.worker.init_device()  # type: ignore
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)     ^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 700, in init_device
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)     self.device = self._init_device()
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)                   ^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 663, in _init_device
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777)     raise ValueError(
+[2026-07-21T05:14:11Z]   (EngineCore pid=1594777) ValueError: Free memory on device (25.31/60.96 GiB) on startup is less than desired GPU memory utilization (0.6, 36.57 GiB). Decrease GPU memory utilization or reduce GPU memory used by other processes.
+[2026-07-21T05:14:11Z]   Traceback (most recent call last):
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T05:14:11Z]       main()
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T05:14:11Z]       args.dispatch_function(args)
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T05:14:11Z]       main(args)
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T05:14:11Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T05:14:11Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T05:14:11Z]       return cls(**vars(engine_args))
+[2026-07-21T05:14:11Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T05:14:11Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T05:14:11Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T05:14:11Z]       return cls(
+[2026-07-21T05:14:11Z]              ^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T05:14:11Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T05:14:11Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T05:14:11Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T05:14:11Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:14:11Z]       return func(*args, **kwargs)
+[2026-07-21T05:14:11Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T05:14:11Z]       super().__init__(
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T05:14:11Z]       with launch_core_engines(
+[2026-07-21T05:14:11Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T05:14:11Z]       next(self.gen)
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T05:14:11Z]       wait_for_engine_startup(
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T05:14:11Z]       raise RuntimeError(
+[2026-07-21T05:14:11Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T05:14:11Z]   [ERROR] 2026-07-21-05:14:06 (PID:1594625, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T05:14:11Z]   Traceback (most recent call last):
+[2026-07-21T05:14:11Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-21T05:14:11Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T05:14:11Z]       main()
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T05:14:11Z]       args.dispatch_function(args)
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T05:14:11Z]       main(args)
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T05:14:11Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T05:14:11Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T05:14:11Z]       return cls(**vars(engine_args))
+[2026-07-21T05:14:11Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T05:14:11Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T05:14:11Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T05:14:11Z]       return cls(
+[2026-07-21T05:14:11Z]              ^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T05:14:11Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T05:14:11Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T05:14:11Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T05:14:11Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:14:11Z]       return func(*args, **kwargs)
+[2026-07-21T05:14:11Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T05:14:11Z]       super().__init__(
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T05:14:11Z]       with launch_core_engines(
+[2026-07-21T05:14:11Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T05:14:11Z]       next(self.gen)
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T05:14:11Z]       wait_for_engine_startup(
+[2026-07-21T05:14:11Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T05:14:11Z]       raise RuntimeError(
+[2026-07-21T05:14:11Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T05:14:11Z]   [ERROR] 2026-07-21-05:14:09 (PID:1594448, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T05:14:11Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', '/data/shared_models/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-21T05:14:11Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-21T05:15:20Z] RUN: starting backfill
+[2026-07-21T05:15:20Z] Using explicit vllm-ascend-hust commit override: a06ab886425d
+[2026-07-21T05:15:20Z] BEGIN random-latency:b09ec4aa2
+[2026-07-21T05:15:20Z] === random-latency @ b09ec4aa2 (plugin a06ab8864) ===
+[2026-07-21T05:15:31Z] Patched: removed duplicate /root/vllm-hust/vllm/entrypoints/cli/openai.py, keeping /root/vllm-hust/vllm/entrypoints/cli/openai_cmd.py
+[2026-07-21T05:15:31Z] Patched: imports already correct, skipping
+[2026-07-21T05:15:41Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model /data/shared_models/Qwen2.5-14B-Instruct --input-len 6144 --output-len 512 --batch-size 32 --num-iters-warmup 10 --num-iters 10 --gpu-memory-utilization 0.6 --output-json /root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json --kv-cache-dtype int8
+[2026-07-21T05:17:04Z] benchmark failed with exit code 1
+[2026-07-21T05:17:04Z] benchmark output (last 100 lines):
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)     self.model_executor = executor_class(vllm_config)
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)   File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)     return func(*args, **kwargs)
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)            ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)   File "/root/vllm-hust/vllm/v1/executor/abstract.py", line 109, in __init__
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)     self._init_executor()
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)   File "/root/vllm-hust/vllm/v1/executor/uniproc_executor.py", line 63, in _init_executor
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)     self.driver_worker.init_device()
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)   File "/root/vllm-hust/vllm/v1/worker/worker_base.py", line 331, in init_device
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)     self.worker.init_device()  # type: ignore
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)     ^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 700, in init_device
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)     self.device = self._init_device()
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)                   ^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)   File "/root/vllm-ascend-hust/vllm_ascend/worker/worker.py", line 663, in _init_device
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878)     raise ValueError(
+[2026-07-21T05:17:04Z]   (EngineCore pid=1595878) ValueError: Free memory on device (23.23/60.96 GiB) on startup is less than desired GPU memory utilization (0.6, 36.57 GiB). Decrease GPU memory utilization or reduce GPU memory used by other processes.
+[2026-07-21T05:17:04Z]   Traceback (most recent call last):
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T05:17:04Z]       main()
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T05:17:04Z]       args.dispatch_function(args)
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T05:17:04Z]       main(args)
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T05:17:04Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T05:17:04Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T05:17:04Z]       return cls(**vars(engine_args))
+[2026-07-21T05:17:04Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T05:17:04Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T05:17:04Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T05:17:04Z]       return cls(
+[2026-07-21T05:17:04Z]              ^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T05:17:04Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T05:17:04Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T05:17:04Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T05:17:04Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:17:04Z]       return func(*args, **kwargs)
+[2026-07-21T05:17:04Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T05:17:04Z]       super().__init__(
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T05:17:04Z]       with launch_core_engines(
+[2026-07-21T05:17:04Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T05:17:04Z]       next(self.gen)
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T05:17:04Z]       wait_for_engine_startup(
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T05:17:04Z]       raise RuntimeError(
+[2026-07-21T05:17:04Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T05:17:04Z]   [ERROR] 2026-07-21-05:16:59 (PID:1595669, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T05:17:04Z]   Traceback (most recent call last):
+[2026-07-21T05:17:04Z]     File "<frozen runpy>", line 198, in _run_module_as_main
+[2026-07-21T05:17:04Z]     File "<frozen runpy>", line 88, in _run_code
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+[2026-07-21T05:17:04Z]       main()
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+[2026-07-21T05:17:04Z]       args.dispatch_function(args)
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/cli/benchmark/latency.py", line 22, in cmd
+[2026-07-21T05:17:04Z]       main(args)
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/benchmarks/latency.py", line 88, in main
+[2026-07-21T05:17:04Z]       llm = LLM.from_engine_args(engine_args)
+[2026-07-21T05:17:04Z]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 400, in from_engine_args
+[2026-07-21T05:17:04Z]       return cls(**vars(engine_args))
+[2026-07-21T05:17:04Z]              ^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/entrypoints/llm.py", line 368, in __init__
+[2026-07-21T05:17:04Z]       self.llm_engine = LLMEngine.from_engine_args(
+[2026-07-21T05:17:04Z]                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+[2026-07-21T05:17:04Z]       return cls(
+[2026-07-21T05:17:04Z]              ^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+[2026-07-21T05:17:04Z]       self.engine_core = EngineCoreClient.make_client(
+[2026-07-21T05:17:04Z]                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+[2026-07-21T05:17:04Z]       return SyncMPClient(vllm_config, executor_class, log_stats)
+[2026-07-21T05:17:04Z]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+[2026-07-21T05:17:04Z]       return func(*args, **kwargs)
+[2026-07-21T05:17:04Z]              ^^^^^^^^^^^^^^^^^^^^^
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+[2026-07-21T05:17:04Z]       super().__init__(
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+[2026-07-21T05:17:04Z]       with launch_core_engines(
+[2026-07-21T05:17:04Z]     File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+[2026-07-21T05:17:04Z]       next(self.gen)
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+[2026-07-21T05:17:04Z]       wait_for_engine_startup(
+[2026-07-21T05:17:04Z]     File "/root/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+[2026-07-21T05:17:04Z]       raise RuntimeError(
+[2026-07-21T05:17:04Z]   RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[2026-07-21T05:17:04Z]   [ERROR] 2026-07-21-05:17:02 (PID:1595453, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+[2026-07-21T05:17:04Z] FAILED: Command '['/root/miniconda3/envs/vllm-hust-dev/bin/python', '-m', 'vllm.entrypoints.cli.main', 'bench', 'latency', '--model', '/data/shared_models/Qwen2.5-14B-Instruct', '--input-len', '6144', '--output-len', '512', '--batch-size', '32', '--num-iters-warmup', '10', '--num-iters', '10', '--gpu-memory-utilization', '0.6', '--output-json', '/root/vllm-hust-benchmark/.benchmarks/backfill-single-gpu/runs/random-latency-b09ec4aa2/bench/raw.json', '--kv-cache-dtype', 'int8']' returned non-zero exit status 1.
+[2026-07-21T05:17:04Z] RUN: done; remember to run `aggregate` and `push`.
+[2026-07-21T06:21:11Z] $ /root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm_hust_benchmark.cli publish-website --source-dir submissions --output-dir leaderboard-data/snapshots --execute
