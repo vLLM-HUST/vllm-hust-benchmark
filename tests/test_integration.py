@@ -1111,6 +1111,166 @@ def test_sync_submission_to_huggingface_rejects_local_pr_preview_submission(
     assert "submission-pr-preview/run_leaderboard.json" in captured.err
 
 
+def test_sync_submission_to_huggingface_deletes_excluded_remote_submission(
+    monkeypatch, tmp_path: Path
+) -> None:
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+    benchmark_repo = tmp_path / "vllm-hust-benchmark"
+    (benchmark_repo / "docs").mkdir(parents=True)
+    excluded_commit = "a" * 40
+    (benchmark_repo / "docs" / "leaderboard-exclusions.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "vllm-hust-leaderboard-exclusions/v1",
+                "exclusions": [
+                    {
+                        "id": "bad-plugin",
+                        "status": "excluded",
+                        "match": {"runtime_provenance.plugin.commit": excluded_commit},
+                        "reason": "known incorrect output path",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=benchmark_repo,
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+    excluded_run = tmp_path / "excluded-run.json"
+    excluded_run.write_text(
+        json.dumps(
+            {
+                "metadata": {
+                    "runtime_provenance": {"plugin": {"commit": excluded_commit}}
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    included_run = tmp_path / "included-run.json"
+    included_run.write_text(_minimal_artifact(), encoding="utf-8")
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(_minimal_manifest(), encoding="utf-8")
+    seeded_snapshot = tmp_path / "leaderboard_single.json"
+    seeded_snapshot.write_text(
+        json.dumps(
+            [
+                {
+                    "entry_id": "excluded",
+                    "metadata": {
+                        "runtime_provenance": {"plugin": {"commit": excluded_commit}}
+                    },
+                },
+                {"entry_id": "retained"},
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    deleted_paths: list[str] = []
+    uploaded_paths: list[str] = []
+    source_markers: dict[str, bool] = {}
+
+    def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
+        source_markers["excluded"] = (source_dir / "excluded-run").exists()
+        source_markers["included"] = (source_dir / "included-run").exists()
+        seeded_rows = json.loads(
+            (output_dir / "leaderboard_single.json").read_text(encoding="utf-8")
+        )
+        source_markers["seed_filtered"] = seeded_rows == [{"entry_id": "retained"}]
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for file_name in (
+            "leaderboard_single.json",
+            "leaderboard_multi.json",
+            "leaderboard_compare.json",
+            "last_updated.json",
+        ):
+            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        return 0
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            uploaded_paths.append(path_in_repo)
+
+    class FakeCommitOperationDelete:
+        def __init__(self, *, path_in_repo):
+            deleted_paths.append(path_in_repo)
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            return [
+                "leaderboard_single.json",
+                "submissions-auto/excluded-run/leaderboard_manifest.json",
+                "submissions-auto/excluded-run/run_leaderboard.json",
+                "submissions-auto/included-run/leaderboard_manifest.json",
+                "submissions-auto/included-run/run_leaderboard.json",
+            ]
+
+        def repo_info(self, repo_id, repo_type):
+            return {"repo_id": repo_id, "repo_type": repo_type}
+
+        def create_commit(self, **kwargs):
+            return kwargs
+
+    def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
+        if filename == "leaderboard_single.json":
+            return str(seeded_snapshot)
+        if filename.endswith("leaderboard_manifest.json"):
+            return str(manifest)
+        if "/excluded-run/" in filename:
+            return str(excluded_run)
+        return str(included_run)
+
+    monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        CommitOperationDelete=FakeCommitOperationDelete,
+        HfApi=FakeHfApi,
+        hf_hub_download=fake_hf_hub_download,
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=None,
+        aggregate_output_dir=tmp_path / "aggregated",
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+        allow_existing_only=True,
+    )
+
+    assert exit_code == 0
+    assert source_markers == {
+        "excluded": False,
+        "included": True,
+        "seed_filtered": True,
+    }
+    assert deleted_paths == [
+        "submissions-auto/excluded-run/leaderboard_manifest.json",
+        "submissions-auto/excluded-run/run_leaderboard.json",
+    ]
+    assert "submissions-auto/included-run/run_leaderboard.json" in uploaded_paths
+
+
 def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
     monkeypatch, tmp_path: Path
 ) -> None:

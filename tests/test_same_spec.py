@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from vllm_hust_benchmark.same_spec import build_same_spec_payload
+from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
 from vllm_hust_benchmark.same_spec import runtime_model_path_has_required_artifacts
 from vllm_hust_benchmark.same_spec import write_same_spec_payload
 
@@ -106,6 +107,28 @@ def test_same_spec_hash_ignores_host_and_port_overrides() -> None:
     assert baseline["resolved_spec_hash"] == overridden["resolved_spec_hash"]
 
 
+def test_server_parameter_overrides_change_hash_and_are_self_consistent() -> None:
+    baseline = build_same_spec_payload(_prefix_repetition_spec())
+    overridden = build_same_spec_payload(
+        _prefix_repetition_spec(),
+        server_parameter_overrides={
+            "enable_prefix_caching": "true",
+            "max_model_len": "32768",
+        },
+    )
+
+    assert overridden["resolved_server_parameters"]["enable_prefix_caching"] == "true"
+    assert overridden["resolved_spec_hash"] != baseline["resolved_spec_hash"]
+    assert overridden["resolved_spec_hash"] == compute_resolved_spec_hash(overridden)
+
+
+def test_compute_resolved_spec_hash_detects_post_export_parameter_change() -> None:
+    payload = build_same_spec_payload(_prefix_repetition_spec())
+    payload["resolved_server_parameters"]["enable_prefix_caching"] = "true"
+
+    assert compute_resolved_spec_hash(payload) != payload["resolved_spec_hash"]
+
+
 def test_write_same_spec_payload(tmp_path: Path) -> None:
     spec_file = tmp_path / "spec.json"
     spec_file.write_text(json.dumps(_spec()), encoding="utf-8")
@@ -128,12 +151,54 @@ def test_runtime_model_path_has_required_artifacts(tmp_path: Path) -> None:
     (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
     # _path_has_complete_indexed_weights requires index file + shard files referenced in weight_map
     index_file = model_dir / "model.safetensors.index.json"
-    shard_file = model_dir / "model-00001-of-00002.safetensors"
-    shard_file.touch()
+    first_shard = model_dir / "model-00001-of-00002.safetensors"
+    second_shard = model_dir / "model-00002-of-00002.safetensors"
+    first_shard.touch()
+    second_shard.touch()
     index_file.write_text(
-        json.dumps({"weight_map": {"model embedder": "model-00001-of-00002.safetensors"}}),
+        json.dumps(
+            {
+                "weight_map": {
+                    "model.embed_tokens.weight": first_shard.name,
+                    "model.norm.weight": second_shard.name,
+                }
+            }
+        ),
         encoding="utf-8",
     )
+
+    assert runtime_model_path_has_required_artifacts(model_dir)
+
+
+def test_runtime_model_path_rejects_incomplete_indexed_weights(tmp_path: Path) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "config.json").write_text("{}", encoding="utf-8")
+    (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
+    (model_dir / "model-00001-of-00002.safetensors").touch()
+    (model_dir / "model.safetensors.index.json").write_text(
+        json.dumps(
+            {
+                "weight_map": {
+                    "model.embed_tokens.weight": "model-00001-of-00002.safetensors",
+                    "model.norm.weight": "model-00002-of-00002.safetensors",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert not runtime_model_path_has_required_artifacts(model_dir)
+
+
+def test_runtime_model_path_accepts_unindexed_single_file_weights(
+    tmp_path: Path,
+) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "config.json").write_text("{}", encoding="utf-8")
+    (model_dir / "tokenizer.json").write_text("{}", encoding="utf-8")
+    (model_dir / "model.safetensors").touch()
 
     assert runtime_model_path_has_required_artifacts(model_dir)
 

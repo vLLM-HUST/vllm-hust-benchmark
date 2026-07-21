@@ -183,6 +183,107 @@ The default official `910B2` single-chip workload set currently resolves to:
 Multi-chip sonnet specs are excluded by default. Use `--include-multi-chip` only
 when the corresponding leaderboard view and hardware reservation are intended.
 
+## X-axis Gapfill Status, 2026-07-21
+
+This section records the active manual gapfill runbook state as of
+2026-07-21 13:35 CST. It is intended to keep concurrent operators from
+duplicating cells or publishing stale snapshots.
+
+Operational rule for shared-data safety:
+
+- Before starting a workload, re-check the HF dataset
+  `intellistream/vllm-hust-benchmark-results` and the GitHub issue ledger.
+- Run only on a truly idle full NPU. Do not share a card that still has another
+  user's process, even if HBM usage looks partially available.
+- After each successful workload, immediately upload that one submission plus
+  regenerated snapshots to HF, then update the GitHub issue ledger before
+  starting any next workload.
+- Failed startups or failed client runs must be recorded in the ledger but must
+  not be uploaded as public leaderboard submissions.
+- Before publication, apply `docs/leaderboard-exclusions.json`. A submission
+  matching an excluded full runtime/plugin commit must fail closed, and an HF
+  rebuild must delete already-hosted raw submissions plus regenerate snapshots
+  without those rows. Never bypass an exclusion with a renamed run directory.
+- The human audit trail is `docs/HISTORICAL_PR_BENCHMARK_BLACKLIST.md`. Operators
+  must read it before selecting a historical gap. Blacklisted commits are not
+  missing coverage: they are intentionally forbidden from backfill and retest.
+
+Container recorded by the originating server at handoff:
+
+- `vllm-hust-zsh-21rc`
+- Image: `quay.io/ascend/vllm-ascend:v0.21.0rc1-openeuler`
+- Current state at handoff: container is idle; `docker top` shows only
+  `sleep infinity`.
+
+Receiving-server disposition:
+
+- The similarly named container above belongs to the originating server and was
+  not reused here.
+- This server created isolated container
+  `vllm-hust-xaxis-gapfill-v019-npu2-20260721` only to audit the exact historical
+  runtime. The graph-mode launch failed before a benchmark result at
+  `AddRmsNormBias`; no submission was created or uploaded.
+- After the commit was blacklisted and public cleanup completed, the isolated
+  receiving-server container was removed. There is no active backfill container
+  or pending result for `bf2984e34a`.
+
+Latest completed and published cell in this session:
+
+- Core/plugin: `ae16d09435abd978417a1b5ab7af352c8dcd180a` /
+  `a05a9efe54c783cd4030d9aae8c8341b8c5e0d4b`
+- Workload: `instructcoder-online`
+- HF dataset commit:
+  `https://huggingface.co/datasets/intellistream/vllm-hust-benchmark-results/commit/17c8fe4d01a96b2ec13c81a21a70244f1d923b98`
+- Ledger comments:
+  `vLLM-HUST/vllm-ascend-hust#146` comment
+  `https://github.com/vLLM-HUST/vllm-ascend-hust/issues/146#issuecomment-5030247371`
+  and `vLLM-HUST/vllm-hust#147` comment
+  `https://github.com/vLLM-HUST/vllm-hust/issues/147#issuecomment-5030247563`
+
+Current highest-priority missing cells, from the latest successful HF check:
+
+| Coverage | Core commit | Plugin commit | Missing workload | Plan file |
+| --- | --- | --- | --- | --- |
+| 8/9 | `2206f1f7b7` | `bf2984e34a` | `sharegpt-throughput` | `.benchmarks/xaxis-gapfill-2206-bf298-throughput-plan.json` |
+| 8/9 | `2fb7859dd0` | `51e577b17b` | `random-latency` | `.benchmarks/xaxis-gapfill-random-latency-plan.json` |
+| 8/9 | `dcc06b18f3` | `51e577b17b` | `random-latency` | `.benchmarks/xaxis-gapfill-random-latency-plan.json` |
+
+The former `2206f1f7b7` / `bf2984e34a` gap is canceled. Plugin merge
+`bf2984e34a8923ac254251c6e265dffbad4aa70d` is excluded by
+`docs/leaderboard-exclusions.json`: vllm-ascend-hust PR #53 made the source-
+documented unsafe Qwen2 ACL graph path default-on without correctness evidence.
+Do not run the missing cell, and do not publish or restore any row whose runtime
+plugin provenance resolves to that commit.
+
+Next run when a full card becomes idle:
+
+```bash
+cd /workspace/shuhao/vllm-hust-benchmark
+PYTHONPATH=src python scripts/backfill_historical_pr_benchmarks.py \
+  --plan-file .benchmarks/xaxis-gapfill-2206-bf298-throughput-plan.json \
+  --workload sharegpt-throughput \
+  --managed-npu-devices <idle-npu-id> \
+  --server-port <free-port> \
+  --execute
+```
+
+The exact execution command may need the same container/runtime flags used by
+the current isolated container setup. Before running, verify:
+
+- `npu-smi info` shows no process on `<idle-npu-id>`.
+- `.benchmarks/historical-pr-backfill/state.json` is absent or does not mark
+  the target cell completed/failed from a stale interrupted run.
+- HF still shows `2206f1f7b7` / `bf2984e34a` missing only
+  `sharegpt-throughput`.
+- Local model cache includes `/data/shared_models/Qwen2.5-14B-Instruct`.
+
+Status at handoff:
+
+- No new benchmark is running.
+- No new result is pending upload.
+- All NPUs were occupied by other users' processes at the final check, so the
+  next workload was not started.
+
 ## Incident Notes
 
 Recent local optimization experiments left service-manager state that could have

@@ -4,14 +4,50 @@ import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW_PATHS = [
-    ".github/workflows/ci.yml",
-    ".github/workflows/push-to-hf.yml",
+PUBLISH_WORKFLOW_PATHS = [
     ".github/workflows/run-official-ascend-baselines.yml",
 ]
 
 
-@pytest.mark.parametrize("workflow_path", WORKFLOW_PATHS)
+def test_pull_request_ci_uses_public_checkout_without_ssh_secret() -> None:
+    workflow_text = (REPO_ROOT / ".github/workflows/ci.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "pull_request:" in workflow_text
+    assert "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY" not in workflow_text
+    assert "BENCHMARK_CHECKOUT_USE_SSH" not in workflow_text
+    assert "ssh-key:" not in workflow_text
+    assert "ssh-strict:" not in workflow_text
+    assert "Require GitHub SSH checkout key" not in workflow_text
+    assert "Configure GitHub SSH" not in workflow_text
+
+    checkout_step = "      - name: Checkout"
+    assert workflow_text.count("uses: actions/checkout@v4") == 1
+    assert "          persist-credentials: false" in workflow_text
+    assert workflow_text.index(checkout_step) < workflow_text.index(
+        "      - name: Setup Python"
+    )
+    steps_text = workflow_text.split("    steps:\n", maxsplit=1)[1]
+    first_step = next(line for line in steps_text.splitlines() if line.strip())
+    assert first_step == checkout_step
+
+
+def test_hf_upload_uses_public_checkout_without_ssh_secret() -> None:
+    workflow_text = (REPO_ROOT / ".github/workflows/push-to-hf.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert workflow_text.count("uses: actions/checkout@v4") == 3
+    assert workflow_text.count("persist-credentials: false") == 3
+    assert "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY" not in workflow_text
+    assert "BENCHMARK_CHECKOUT_USE_SSH" not in workflow_text
+    assert "Require GitHub SSH checkout key" not in workflow_text
+    assert "Configure GitHub SSH" not in workflow_text
+    assert "ssh-key:" not in workflow_text
+
+
+@pytest.mark.parametrize("workflow_path", PUBLISH_WORKFLOW_PATHS)
 def test_workflows_use_standard_github_ssh_without_overwriting_config(
     workflow_path: str,
 ) -> None:
