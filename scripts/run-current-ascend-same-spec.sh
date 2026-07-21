@@ -501,6 +501,8 @@ run_client_command() {
         $CLIENT_ARGS
       ;;
     throughput|latency)
+      VLLM_HUST_REQUIRE_OFFLINE_GRAPH=1 \
+      VLLM_HUST_OFFLINE_GRAPH_PROOF_FILE="$OFFLINE_GRAPH_PROOF_FILE" \
       run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
         "$CURRENT_RUNTIME_PYTHON" "$VLLM_CLI_COMPAT" bench "$BENCHMARK_TYPE" \
         --output-json "$RAW_RESULT_FILE" \
@@ -1083,6 +1085,7 @@ CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
 SERVER_STDOUT_LOG="$RESULT_DIR/server.stdout.log"
+OFFLINE_GRAPH_PROOF_FILE="$RESULT_DIR/offline_graph_proof.json"
 
 if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
   SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
@@ -1140,9 +1143,8 @@ if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
       exit 1
     fi
 	fi
-elif [[ "${CURRENT_ALLOW_OFFLINE_EAGER_BENCHMARK:-0}" != "1" ]]; then
-	echo "Offline throughput/latency benchmark paths are blocked for formal leaderboard runs because the current vLLM bench engine can fall back to enforce_eager=True on Ascend. Use the managed serve path or fix the offline runner to preserve graph mode before publishing this workload." >&2
-	exit 86
+else
+  rm -f "$OFFLINE_GRAPH_PROOF_FILE"
 fi
 
 set +e
@@ -1151,6 +1153,19 @@ client_status=$?
 set -e
 if [[ "$client_status" -ne 0 ]]; then
   exit "$client_status"
+fi
+
+if [[ "$BENCHMARK_TYPE" != "serve" ]]; then
+  if [[ ! -f "$OFFLINE_GRAPH_PROOF_FILE" ]] || ! jq -e '
+    .schema_version == "vllm-hust-offline-graph-proof/v1" and
+    .graph_mode_verified == true and
+    .enforce_eager == false and
+    .compilation_mode != "NONE" and
+    .cudagraph_mode != "NONE"
+  ' "$OFFLINE_GRAPH_PROOF_FILE" >/dev/null; then
+    echo "Offline benchmark did not produce a valid graph-mode proof; refusing formal export" >&2
+    exit 86
+  fi
 fi
 
 EXPORT_ARGS=(

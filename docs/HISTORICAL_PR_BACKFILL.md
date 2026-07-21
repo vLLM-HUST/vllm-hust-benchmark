@@ -200,13 +200,32 @@ Operational rule for shared-data safety:
   starting any next workload.
 - Failed startups or failed client runs must be recorded in the ledger but must
   not be uploaded as public leaderboard submissions.
+- Before publication, apply `docs/leaderboard-exclusions.json`. A submission
+  matching an excluded full runtime/plugin commit must fail closed, and an HF
+  rebuild must delete already-hosted raw submissions plus regenerate snapshots
+  without those rows. Never bypass an exclusion with a renamed run directory.
+- The human audit trail is `docs/HISTORICAL_PR_BENCHMARK_BLACKLIST.md`. Operators
+  must read it before selecting a historical gap. Blacklisted commits are not
+  missing coverage: they are intentionally forbidden from backfill and retest.
 
-Current execution container:
+Container recorded by the originating server at handoff:
 
 - `vllm-hust-zsh-21rc`
 - Image: `quay.io/ascend/vllm-ascend:v0.21.0rc1-openeuler`
 - Current state at handoff: container is idle; `docker top` shows only
   `sleep infinity`.
+
+Receiving-server disposition:
+
+- The similarly named container above belongs to the originating server and was
+  not reused here.
+- This server created isolated container
+  `vllm-hust-xaxis-gapfill-v019-npu2-20260721` only to audit the exact historical
+  runtime. The graph-mode launch failed before a benchmark result at
+  `AddRmsNormBias`; no submission was created or uploaded.
+- After the commit was blacklisted and public cleanup completed, the isolated
+  receiving-server container was removed. There is no active backfill container
+  or pending result for `bf2984e34a`.
 
 Latest completed and published cell in this session:
 
@@ -228,6 +247,13 @@ Current highest-priority missing cells, from the latest successful HF check:
 | 8/9 | `2206f1f7b7` | `bf2984e34a` | `sharegpt-throughput` | `.benchmarks/xaxis-gapfill-2206-bf298-throughput-plan.json` |
 | 8/9 | `2fb7859dd0` | `51e577b17b` | `random-latency` | `.benchmarks/xaxis-gapfill-random-latency-plan.json` |
 | 8/9 | `dcc06b18f3` | `51e577b17b` | `random-latency` | `.benchmarks/xaxis-gapfill-random-latency-plan.json` |
+
+The former `2206f1f7b7` / `bf2984e34a` gap is canceled. Plugin merge
+`bf2984e34a8923ac254251c6e265dffbad4aa70d` is excluded by
+`docs/leaderboard-exclusions.json`: vllm-ascend-hust PR #53 made the source-
+documented unsafe Qwen2 ACL graph path default-on without correctness evidence.
+Do not run the missing cell, and do not publish or restore any row whose runtime
+plugin provenance resolves to that commit.
 
 Next run when a full card becomes idle:
 
