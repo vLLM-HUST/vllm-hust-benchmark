@@ -415,10 +415,18 @@ def require_container_workspace_path(path: Path, *, purpose: str) -> str:
 def find_local_model_path(model_id: str) -> str | None:
     known = {
         "Qwen/Qwen2.5-14B-Instruct": [
+            Path("/data/shared_models/Qwen2.5-14B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-14B-Instruct"),
             Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct"),
         ],
+        "Qwen/Qwen2.5-7B-Instruct": [
+            Path("/data/shared_models/Qwen2.5-7B-Instruct"),
+            Path("/data/shared_models/Qwen--Qwen2.5-7B-Instruct"),
+            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct"),
+        ],
         "Qwen/Qwen2.5-Coder-14B-Instruct": [
+            Path("/root/.cache/modelscope/hub/Qwen/Qwen2___5-Coder-14B-Instruct"),
+            Path("/root/.cache/modelscope/hub/models/Qwen/Qwen2___5-Coder-14B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct"),
             Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-Coder-14B-Instruct"),
         ],
@@ -835,6 +843,7 @@ def run_target_spec(
     core_version = describe_git_ref(core_worktree, core_commit)
     plugin_version = describe_git_ref(plugin_worktree, plugin_commit)
     local_model_path = find_local_model_path(spec.model) or ""
+    client_model_name = served_model_name(spec.model) if args.managed_dev_hub else local_model_path
     run_id = "-".join(
         [
             "historical-pr",
@@ -867,7 +876,7 @@ def run_target_spec(
         "CURRENT_PLUGIN_GIT_COMMIT": plugin_commit,
         "CURRENT_PLUGIN_GITHUB_REF": target.plugin_ref,
         "CURRENT_PLUGIN_GITHUB_REPOSITORY": args.plugin_github_repository,
-        "CURRENT_CLIENT_MODEL_NAME": served_model_name(spec.model),
+        "CURRENT_CLIENT_MODEL_NAME": client_model_name,
         "CURRENT_CLIENT_TOKENIZER": local_model_path,
         "CURRENT_MODEL_PATH": local_model_path,
         "CURRENT_HARDWARE_CHIP_MODEL": actual_chip_model,

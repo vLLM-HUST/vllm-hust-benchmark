@@ -4,6 +4,17 @@ from __future__ import annotations
 import sys
 
 
+def restore_huggingface_hub_downloads() -> None:
+    try:
+        from modelscope.utils.hf_util import unpatch_hub
+    except Exception:
+        return
+    try:
+        unpatch_hub()
+    except Exception:
+        return
+
+
 def run_single_benchmark(argv: list[str]) -> int | None:
     if len(argv) < 2 or argv[0] != "bench":
         return None
@@ -26,6 +37,7 @@ def run_single_benchmark(argv: list[str]) -> int | None:
     parser = FlexibleArgumentParser(prog=f"vllm bench {benchmark}")
     add_cli_args(parser)
     args = parser.parse_args(argv[2:])
+    restore_huggingface_hub_downloads()
     main(args)
     return 0
 
