@@ -1,0 +1,24 @@
+INFO 07-20 14:27:29 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 07-20 14:27:29 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 07-20 14:27:29 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 07-20 14:27:29 [__init__.py:246] Platform plugin ascend is activated
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+    main()
+  File "/root/vllm-hust/vllm/entrypoints/cli/main.py", line 24, in main
+    import vllm.entrypoints.cli.launch
+  File "/root/vllm-hust/vllm/entrypoints/cli/launch.py", line 13, in <module>
+    from vllm.entrypoints.openai.api_server import (
+  File "/root/vllm-hust/vllm/entrypoints/openai/api_server.py", line 35, in <module>
+    from vllm.entrypoints.serve.sagemaker.api_router import sagemaker_standards_bootstrap
+  File "/root/vllm-hust/vllm/entrypoints/serve/sagemaker/api_router.py", line 16, in <module>
+    from vllm.entrypoints.openai.engine.serving import OpenAIServing
+  File "/root/vllm-hust/vllm/entrypoints/openai/engine/serving.py", line 56, in <module>
+    class OpenAIServing(BaseServing, BeamSearchOnlineMixin):
+  File "/root/vllm-hust/vllm/entrypoints/openai/engine/serving.py", line 286, in OpenAIServing
+    def _extract_prompt_components(self, prompt: PromptType | EngineInput):
+                                                 ^^^^^^^^^^
+NameError: name 'PromptType' is not defined
+[ERROR] 2026-07-20-14:27:37 (PID:1452195, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
