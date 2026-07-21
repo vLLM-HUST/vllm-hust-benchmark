@@ -49,6 +49,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.leaderboard_exclusions import (
+    load_leaderboard_exclusions,
+    match_leaderboard_exclusion,
+)
 from vllm_hust_benchmark.submission_artifacts import normalize_submission_artifact_file
 
 
@@ -1719,7 +1723,45 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def _remove_excluded_submissions() -> list[Path]:
+    """Remove submission directories that are in the public exclusion list.
+
+    Returns the list of removed directory paths.
+    """
+    exclusions_path = REPO_ROOT / "docs" / "leaderboard-exclusions.json"
+    if not exclusions_path.is_file():
+        return []
+
+    exclusions = load_leaderboard_exclusions(exclusions_path)
+    if not exclusions:
+        return []
+
+    submissions_dir = REPO_ROOT / "submissions"
+    removed: list[Path] = []
+    for sub_dir in sorted(submissions_dir.iterdir()):
+        if not sub_dir.is_dir():
+            continue
+        artifact_path = sub_dir / "run_leaderboard.json"
+        if not artifact_path.is_file():
+            continue
+        try:
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        if match_leaderboard_exclusion(payload, exclusions) is not None:
+            shutil.rmtree(sub_dir)
+            removed.append(sub_dir)
+            log(f"removed excluded submission: {sub_dir.name}")
+    return removed
+
+
 def cmd_aggregate(args: argparse.Namespace) -> int:
+    # Remove permanently excluded submissions before aggregation.
+    removed = _remove_excluded_submissions()
+    if removed:
+        log(f"Removed {len(removed)} permanently excluded submission(s) "
+            "from the aggregation source.")
+
     cmd = [
         str(PYTHON_BIN), "-m", "vllm_hust_benchmark.cli", "publish-website",
         "--source-dir", "submissions",
