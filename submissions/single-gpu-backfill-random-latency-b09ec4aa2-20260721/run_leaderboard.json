@@ -1,5 +1,5 @@
 {
-  "entry_id": "8766524c-fc34-44fe-ac4a-ba704b9b62ea",
+  "entry_id": "13e0c174-976d-4644-94b9-a54573183f3c",
   "engine": "vllm-hust",
   "engine_version": "0.18.0.post1",
   "config_type": "single_gpu",
@@ -23,14 +23,14 @@
   },
   "workload": {
     "name": "random-latency",
-    "input_length": 1024,
-    "output_length": 128,
-    "batch_size": 8,
+    "input_length": 6144,
+    "output_length": 512,
+    "batch_size": 32,
     "concurrent_requests": null,
     "dataset": null
   },
   "metrics": {
-    "ttft_ms": 7483.040426935379,
+    "ttft_ms": 67996.44533600658,
     "tbt_ms": null,
     "throughput_tps": null,
     "peak_mem_mb": 0,
@@ -83,15 +83,15 @@
     "driver_version": null
   },
   "metadata": {
-    "submitted_at": "2026-07-16T03:55:42Z",
+    "submitted_at": "2026-07-21T08:16:09Z",
     "submitter": "vllm-hust-org-member",
     "data_source": "vllm-hust-benchmark",
     "engine": "vllm-hust",
     "engine_version": "0.18.0.post1",
     "reproducible_cmd": null,
-    "git_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",
-    "github_user": "Paul Cheng",
-    "github_commit_url": "https://github.com/vllm-hust/vllm-hust/commit/2206f1f7b7212801187bc001c5f6cb86b2289214",
+    "git_commit": "b09ec4aa2189ce7ad4a81a5a860ff67bbe5b3804",
+    "github_user": "hustcui",
+    "github_commit_url": "https://github.com/vllm-hust/vllm-hust/commit/b09ec4aa2189ce7ad4a81a5a860ff67bbe5b3804",
     "github_repository": "vllm-hust/vllm-hust",
     "github_ref": "main",
     "github_event_name": null,
@@ -101,20 +101,20 @@
     "changelog_url": null,
     "notes": null,
     "verified": null,
-    "idempotency_key": "757175655865506832c972e051195300b8e326a2624cb14e05caf4cb25839a1d",
+    "idempotency_key": "57b32d999a7ab864beab1b913136a7f4ff3c734c22f8b11b720b32093c376965",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
       "python": null,
       "engine": {
         "repository": "vllm-hust/vllm-hust",
-        "ref": "2206f1f7b7",
-        "commit": "2206f1f7b7212801187bc001c5f6cb86b2289214"
+        "ref": "b09ec4aa21",
+        "commit": "b09ec4aa2189ce7ad4a81a5a860ff67bbe5b3804"
       },
       "plugin": {
         "engine": "vllm-ascend-hust",
         "repository": "vllm-hust/vllm-ascend-hust",
-        "ref": "bf2984e34a",
-        "commit": "bf2984e34a8923ac254251c6e265dffbad4aa70d"
+        "ref": "a06ab88642",
+        "commit": "a06ab886425da4055258415f9bccfe9889dbaef3"
       }
     }
   },
@@ -122,7 +122,7 @@
     "schema_version": "benchmark-same-spec/v1",
     "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
     "spec_label": "Official Ascend Jan 2026 random latency baseline for vllm-hust goal tracking",
-    "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
+    "spec_source": "/root/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
     "scenario": "random-latency",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
