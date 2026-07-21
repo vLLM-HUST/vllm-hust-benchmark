@@ -143,6 +143,17 @@ DEFAULT_CELLS: dict[str, list[str]] = {
         "83cf83ff20a880d70b6ba916977c49304d598d9c",
         "dcc06b18f32404abafe6922910117f1b9f66054b",
         "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        # PR-specific commits from benchmark_plan.md
+        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
+        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
+        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
+        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
+        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
+        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
+        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
+        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
+        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
+        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
     ],
     "sharegpt-throughput": [
         "2206f1f7b7212801187bc001c5f6cb86b2289214",
@@ -150,12 +161,34 @@ DEFAULT_CELLS: dict[str, list[str]] = {
         "7a63f81e86bd71e980adb635870ff56c9e23b545",
         "83cf83ff20a880d70b6ba916977c49304d598d9c",
         "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        # PR-specific commits from benchmark_plan.md
+        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
+        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
+        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
+        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
+        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
+        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
+        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
+        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
+        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
+        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
     ],
     "sonnet-throughput": [
         "2206f1f7b7212801187bc001c5f6cb86b2289214",
         "51621c35bcce749cc34539bc1a48d32f264924a0",
         "7a63f81e86bd71e980adb635870ff56c9e23b545",
         "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        # PR-specific commits from benchmark_plan.md
+        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
+        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
+        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
+        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
+        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
+        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
+        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
+        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
+        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
+        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
     ],
     # Online serving scenarios
     "random-online": [
@@ -166,6 +199,17 @@ DEFAULT_CELLS: dict[str, list[str]] = {
         "83cf83ff20a880d70b6ba916977c49304d598d9c",
         "dcc06b18f32404abafe6922910117f1b9f66054b",
         "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        # PR-specific commits from benchmark_plan.md
+        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
+        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
+        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
+        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
+        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
+        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
+        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
+        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
+        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
+        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
     ],
     "sharegpt-online": [
         "2206f1f7b7212801187bc001c5f6cb86b2289214",
@@ -175,6 +219,17 @@ DEFAULT_CELLS: dict[str, list[str]] = {
         "83cf83ff20a880d70b6ba916977c49304d598d9c",
         "dcc06b18f32404abafe6922910117f1b9f66054b",
         "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        # PR-specific commits from benchmark_plan.md
+        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
+        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
+        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
+        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
+        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
+        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
+        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
+        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
+        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
+        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
     ],
     "prefix-repetition-online": [
         "2206f1f7b7212801187bc001c5f6cb86b2289214",
@@ -184,6 +239,17 @@ DEFAULT_CELLS: dict[str, list[str]] = {
         "83cf83ff20a880d70b6ba916977c49304d598d9c",
         "dcc06b18f32404abafe6922910117f1b9f66054b",
         "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        # PR-specific commits from benchmark_plan.md
+        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
+        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
+        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
+        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
+        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
+        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
+        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
+        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
+        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
+        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
     ],
     "instructcoder-online": [
         "2206f1f7b7212801187bc001c5f6cb86b2289214",
@@ -193,6 +259,17 @@ DEFAULT_CELLS: dict[str, list[str]] = {
         "83cf83ff20a880d70b6ba916977c49304d598d9c",
         "dcc06b18f32404abafe6922910117f1b9f66054b",
         "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        # PR-specific commits from benchmark_plan.md
+        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
+        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
+        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
+        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
+        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
+        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
+        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
+        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
+        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
+        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
     ],
 }
 
@@ -614,6 +691,34 @@ with open(sys.argv[1], 'w') as f:
             _balance.write_text(content, encoding="utf-8")
             log("Patched: fixed ascend plugin patch_balance_schedule.py compatibility")
 
+    # Fix ascend plugin patch_distributed.py: handle shm_broadcast import
+    # that references VLLM_USE_SPINLOOP_EXT not present in older vllm-hust.
+    _patch_dist = ASCEND_REPO / "vllm_ascend" / "patch" / "worker" / "patch_distributed.py"
+    if _patch_dist.is_file():
+        content = _patch_dist.read_text(encoding="utf-8")
+        old_import = (
+            "from vllm.distributed.device_communicators.shm_broadcast import MessageQueue"
+        )
+        if old_import in content:
+            # Preserve the original indentation of the import line
+            import re as _re
+            _match = _re.search(r"^(\s*)" + _re.escape(old_import), content, _re.MULTILINE)
+            _indent = _match.group(1) if _match else ""
+            new_import = (
+                f"{_indent}try:\n"
+                f"{_indent}    from vllm.distributed.device_communicators.shm_broadcast import MessageQueue\n"
+                f"{_indent}except (AttributeError, ImportError):\n"
+                f"{_indent}    MessageQueue = None  # type: ignore"
+            )
+            content = content.replace(old_import, new_import)
+            # Guard the usage of MessageQueue too
+            content = content.replace(
+                "if use_message_queue_broadcaster and self.world_size > 1:",
+                "if use_message_queue_broadcaster and self.world_size > 1 and MessageQueue is not None:",
+            )
+            _patch_dist.write_text(content, encoding="utf-8")
+            log("Patched: fixed ascend plugin patch_distributed.py shm_broadcast compatibility")
+
     # Fix ascend plugin eplb_utils.py: handle determine_expert_map import
     # from fused_moe.layer (not present in older vllm-hust commits).
     _eplb_utils = ASCEND_REPO / "vllm_ascend" / "eplb" / "core" / "eplb_utils.py"
@@ -869,8 +974,8 @@ def _build_env() -> dict[str, str]:
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
     env.setdefault("VLLM_USE_V1", "1")
-    env["ASCEND_RT_VISIBLE_DEVICES"] = "0"
-    env["ASCEND_VISIBLE_DEVICES"] = "0"
+    env["ASCEND_RT_VISIBLE_DEVICES"] = "6"
+    env["ASCEND_VISIBLE_DEVICES"] = "6"
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
@@ -1406,8 +1511,10 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None) 
         git_checkout(HUST_REPO, hust_commit)
         git_checkout(ASCEND_REPO, ascend_commit)
         # Remove any untracked files left by previous runs (e.g. openai_cmd.py).
+        # Use -fdx to also remove git-ignored files like __pycache__/
+        # which can cause stale bytecode cache conflicts.
         subprocess.run(
-            ["git", "clean", "-fd", "vllm/entrypoints/cli/"],
+            ["git", "clean", "-fdx", "vllm/entrypoints/cli/"],
             cwd=HUST_REPO, check=False,
         )
 
