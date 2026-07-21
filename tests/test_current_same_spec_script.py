@@ -100,6 +100,16 @@ def test_current_same_spec_runner_defaults_to_one_start_attempt() -> None:
     assert "SERVER_START_RETRIES=${SERVER_START_RETRIES:-1}" in script
 
 
+def test_current_same_spec_runner_requires_offline_graph_proof() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    assert "VLLM_HUST_REQUIRE_OFFLINE_GRAPH=1" in script
+    assert "VLLM_HUST_OFFLINE_GRAPH_PROOF_FILE" in script
+    assert "graph_mode_verified == true" in script
+    assert "enforce_eager == false" in script
+    assert "CURRENT_ALLOW_OFFLINE_EAGER_BENCHMARK" not in script
+
+
 def test_wait_for_server_fails_while_live_server_logs_npu_oom(
     tmp_path: Path,
 ) -> None:
