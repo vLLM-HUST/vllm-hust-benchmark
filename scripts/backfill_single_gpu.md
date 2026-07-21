@@ -50,6 +50,7 @@ python3 scripts/backfill_single_gpu.py run --only sharegpt-throughput --commit 8
 # 运行所有的missing的workload 和 commit(vllm-hust)
 python3 scripts/backfill_single_gpu.py run
 nohup python3 scripts/backfill_single_gpu.py run > backfill.log 2>&1 &
+# Commit 过滤 ： --commit 指定时不过滤，自动发现时过滤非 main 分支
 
 # 重建 snapshot
 python3 scripts/backfill_single_gpu.py aggregate
