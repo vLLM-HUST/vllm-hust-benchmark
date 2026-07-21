@@ -208,12 +208,24 @@ Operational rule for shared-data safety:
   must read it before selecting a historical gap. Blacklisted commits are not
   missing coverage: they are intentionally forbidden from backfill and retest.
 
-Current execution container:
+Container recorded by the originating server at handoff:
 
 - `vllm-hust-zsh-21rc`
 - Image: `quay.io/ascend/vllm-ascend:v0.21.0rc1-openeuler`
 - Current state at handoff: container is idle; `docker top` shows only
   `sleep infinity`.
+
+Receiving-server disposition:
+
+- The similarly named container above belongs to the originating server and was
+  not reused here.
+- This server created isolated container
+  `vllm-hust-xaxis-gapfill-v019-npu2-20260721` only to audit the exact historical
+  runtime. The graph-mode launch failed before a benchmark result at
+  `AddRmsNormBias`; no submission was created or uploaded.
+- After the commit was blacklisted and public cleanup completed, the isolated
+  receiving-server container was removed. There is no active backfill container
+  or pending result for `bf2984e34a`.
 
 Latest completed and published cell in this session:
 
