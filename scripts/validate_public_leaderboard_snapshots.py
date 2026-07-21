@@ -5,8 +5,16 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "src"))
+
+from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash  # noqa: E402
 
 
 PUBLIC_BASELINE_ENGINE = "vllm"
@@ -141,6 +149,7 @@ def main() -> int:
     snapshot_dir = Path(args.snapshot_dir)
     errors: list[str] = []
 
+    hash_fingerprints: dict[str, tuple[str, str]] = {}
     for file_name in SNAPSHOT_FILES:
         path = snapshot_dir / file_name
         if not path.is_file():
@@ -148,6 +157,31 @@ def main() -> int:
             continue
         for entry in load_entries(path):
             errors.extend(validate_entry(entry, source=path))
+            same_spec = (
+                entry.get("same_spec")
+                if isinstance(entry.get("same_spec"), dict)
+                else {}
+            )
+            spec_hash = str(same_spec.get("resolved_spec_hash") or "")
+            if not spec_hash:
+                continue
+            entry_id = str(entry.get("entry_id") or "<missing-entry-id>")
+            try:
+                fingerprint = compute_resolved_spec_hash(same_spec)
+            except (TypeError, ValueError) as error:
+                errors.append(
+                    f"{path.name}:{entry_id}: invalid same_spec parameters: {error}"
+                )
+                continue
+            source_label = f"{path.name}:{entry_id}"
+            prior = hash_fingerprints.get(spec_hash)
+            if prior is not None and prior[0] != fingerprint:
+                errors.append(
+                    f"{source_label}: same_spec hash {spec_hash!r} maps to different "
+                    f"effective parameters than {prior[1]}"
+                )
+            else:
+                hash_fingerprints[spec_hash] = (fingerprint, source_label)
 
     if errors:
         print("public leaderboard snapshot validation failed:")

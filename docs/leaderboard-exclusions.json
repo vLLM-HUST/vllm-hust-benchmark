@@ -1,0 +1,19 @@
+{
+  "schema_version": "vllm-hust-leaderboard-exclusions/v1",
+  "exclusions": [
+    {
+      "id": "vllm-ascend-hust-pr53-unsafe-qwen2-aclgraph-default",
+      "status": "excluded",
+      "match": {
+        "runtime_provenance.plugin.commit": "bf2984e34a8923ac254251c6e265dffbad4aa70d"
+      },
+      "decision_date": "2026-07-21",
+      "human_ledger": "docs/HISTORICAL_PR_BENCHMARK_BLACKLIST.md",
+      "reason": "The merge changes the Qwen2 ACL graph path from an explicit unsafe opt-in to the default while disabling the native safe RoPE fallback by default. The parent code warns that this graph path can produce incorrect outputs, and PR #53 supplied no correctness validation.",
+      "evidence_urls": [
+        "https://github.com/vLLM-HUST/vllm-ascend-hust/pull/53",
+        "https://github.com/vLLM-HUST/vllm-ascend-hust/commit/bf2984e34a8923ac254251c6e265dffbad4aa70d"
+      ]
+    }
+  ]
+}

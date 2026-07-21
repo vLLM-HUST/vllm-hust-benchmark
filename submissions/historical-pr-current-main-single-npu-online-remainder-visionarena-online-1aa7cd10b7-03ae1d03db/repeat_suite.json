@@ -1,0 +1,91 @@
+{
+  "benchmark_type": "serve",
+  "evidence_label": "real-online",
+  "execution": {
+    "benchmark_commit": "ac45027be14b8af798c282102f6d68b9bb72cabe",
+    "chunked_prefill": false,
+    "dev_hub_commit": "2afac6bcabb5efaf8cb20dda803d298c11f283a5",
+    "dev_hub_dir": "/home/shuhao/vllm-hust-dev-hub",
+    "gpu_memory_utilization": "0.90",
+    "graph_mode": true,
+    "local_model_path": "/data/shared_models/Qwen--Qwen2.5-VL-7B-Instruct",
+    "managed_container": "vllm-hust-single-npu6-backfill-20260720",
+    "managed_container_ssh_port": 2226,
+    "managed_recreate_container": false,
+    "managed_systemd_unit": "vllm-hust-single-npu6-backfill-20260720.service",
+    "max_model_len": 32768,
+    "max_num_seqs": 16,
+    "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "prefix_caching": false,
+    "runtime_python": "/data/conda-envs/vllm-hust-single-npu-backfill/bin/python3.12",
+    "server_port": "8206"
+  },
+  "generated_at": "2026-07-19T22:43:20.257264+00:00",
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "devices": [
+      6
+    ],
+    "node_count": 1
+  },
+  "repeat_policy": {
+    "max_attempts": 6,
+    "minimum_successes": 3,
+    "target_successes": 3
+  },
+  "repeat_result_dirs": [
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/repeat-01",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/repeat-02",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/repeat-03"
+  ],
+  "resolved_refs": {
+    "core_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "plugin_commit": "03ae1d03db8049cd2a5c3f824039814459542e25"
+  },
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "selection": {
+    "benchmark_type": "serve",
+    "candidates": [
+      {
+        "distance_to_median": 6.978813597932458,
+        "error_rate": 0.0,
+        "index": 0,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 330.2121417047456,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/repeat-01"
+      },
+      {
+        "distance_to_median": 4.833175017964095,
+        "error_rate": 0.0,
+        "index": 1,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 318.40015308884904,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/repeat-02"
+      },
+      {
+        "distance_to_median": 0.0,
+        "error_rate": 0.0,
+        "index": 2,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 323.23332810681313,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/repeat-03"
+      }
+    ],
+    "median_value": 323.23332810681313,
+    "primary_metric_name": "ttft_ms",
+    "selected_result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/repeat-03"
+  },
+  "spec": "/home/shuhao/vllm-hust-benchmark-single-npu/docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json",
+  "target": {
+    "core_ref": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "label": "current-main-single-npu-online-remainder",
+    "notes": "Complete the remaining official online single-NPU cells after isolating offline graph-mode workloads. Require three zero-failure repeats on fixed NPU 6.",
+    "plugin_ref": "03ae1d03db8049cd2a5c3f824039814459542e25",
+    "pr_number": null,
+    "workloads": [
+      "sharegpt-online",
+      "visionarena-online"
+    ]
+  }
+}

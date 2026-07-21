@@ -18,9 +18,16 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from vllm_hust_benchmark.models import render_parameter_flags
+from vllm_hust_benchmark.leaderboard_exclusions import (
+    LeaderboardExclusion,
+    load_leaderboard_exclusions,
+    match_leaderboard_exclusion,
+)
 from vllm_hust_benchmark.registry import get_scenario
 from vllm_hust_benchmark.submission_artifacts import iter_submission_artifact_paths
-from vllm_hust_benchmark.submission_artifacts import normalize_submission_artifacts_in_tree
+from vllm_hust_benchmark.submission_artifacts import (
+    normalize_submission_artifacts_in_tree,
+)
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
 DEFAULT_RUNTIME_ENGINE = "vllm-hust"
@@ -512,6 +519,16 @@ def aggregate_to_website(
     execute: bool,
     reject_pr_preview_sources: bool = False,
 ) -> int:
+    exclusions = _load_public_leaderboard_exclusions(layout)
+    excluded_dirs = _find_excluded_submission_dirs(source_dir, exclusions)
+    if excluded_dirs:
+        print(
+            "excluded leaderboard submissions are present in the aggregation source: "
+            + ", ".join(path.name for path in excluded_dirs),
+            file=sys.stderr,
+        )
+        return 2
+
     if reject_pr_preview_sources and not _validate_formal_submission_sources(
         [source_dir]
     ):
@@ -1084,19 +1101,6 @@ def validate_aggregated_leaderboard_outputs(
         if isinstance(hard_constraints.get("scopes"), list)
         else []
     )
-    groups = (
-        compare.get("groups")
-        if isinstance(compare, Mapping) and isinstance(compare.get("groups"), list)
-        else []
-    )
-    goal_progress = compare.get("goal_progress") if isinstance(compare, Mapping) else {}
-    goal_progress = goal_progress if isinstance(goal_progress, Mapping) else {}
-    goal_pairs = (
-        goal_progress.get("pairs")
-        if isinstance(goal_progress.get("pairs"), list)
-        else []
-    )
-
     scope_keys = {
         _build_hard_constraint_scope_key(entry)
         for entry in [
@@ -1254,7 +1258,69 @@ def _artifact_has_pr_preview_metadata(artifact: Mapping[str, Any]) -> bool:
     return bool(github_pr_url)
 
 
-def _validate_formal_submission_sources(submission_dirs: Sequence[Path]) -> bool:
+def _load_public_leaderboard_exclusions(
+    layout: RepoLayout,
+) -> tuple[LeaderboardExclusion, ...]:
+    return load_leaderboard_exclusions(
+        layout.benchmark_repo / "docs" / "leaderboard-exclusions.json"
+    )
+
+
+def _find_excluded_submission_dirs(
+    source_dir: Path,
+    exclusions: tuple[LeaderboardExclusion, ...],
+) -> list[Path]:
+    excluded_dirs: set[Path] = set()
+    if not exclusions:
+        return []
+    for artifact_path in sorted(source_dir.rglob("run_leaderboard.json")):
+        try:
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(payload, Mapping) and match_leaderboard_exclusion(
+            payload, exclusions
+        ):
+            relative = artifact_path.relative_to(source_dir)
+            excluded_dirs.add(source_dir / relative.parts[0])
+    return sorted(excluded_dirs)
+
+
+def _filter_excluded_snapshot_entries(
+    snapshot_path: Path,
+    exclusions: tuple[LeaderboardExclusion, ...],
+) -> int:
+    if not snapshot_path.is_file() or not exclusions:
+        return 0
+    try:
+        payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"invalid leaderboard snapshot {snapshot_path}: {exc}"
+        ) from exc
+    if not isinstance(payload, list):
+        return 0
+    retained = [
+        entry
+        for entry in payload
+        if not (
+            isinstance(entry, Mapping)
+            and match_leaderboard_exclusion(entry, exclusions)
+        )
+    ]
+    removed_count = len(payload) - len(retained)
+    if removed_count:
+        snapshot_path.write_text(
+            json.dumps(retained, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+    return removed_count
+
+
+def _validate_formal_submission_sources(
+    submission_dirs: Sequence[Path],
+    exclusions: tuple[LeaderboardExclusion, ...] = (),
+) -> bool:
     for submission_dir in submission_dirs:
         try:
             artifact_paths = iter_submission_artifact_paths(submission_dir)
@@ -1295,6 +1361,16 @@ def _validate_formal_submission_sources(submission_dirs: Sequence[Path]) -> bool
                 )
                 return False
 
+            exclusion = match_leaderboard_exclusion(payload, exclusions)
+            if exclusion is not None:
+                print(
+                    "leaderboard submission is permanently excluded "
+                    f"({exclusion.exclusion_id}): {artifact_path}; "
+                    f"reason: {exclusion.reason}",
+                    file=sys.stderr,
+                )
+                return False
+
     return True
 
 
@@ -1331,7 +1407,13 @@ def sync_submission_to_huggingface(
             print(f"submission directory not found: {submission_dir}", file=sys.stderr)
             return 2
 
-    if not _validate_formal_submission_sources(normalized_submission_dirs):
+    try:
+        exclusions = _load_public_leaderboard_exclusions(layout)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    if not _validate_formal_submission_sources(normalized_submission_dirs, exclusions):
         return 2
 
     try:
@@ -1369,6 +1451,12 @@ def sync_submission_to_huggingface(
             merged_root / normalized_prefix if normalized_prefix else merged_root
         )
         merged_source_dir.mkdir(parents=True, exist_ok=True)
+        aggregate_files = [
+            "leaderboard_single.json",
+            "leaderboard_multi.json",
+            "leaderboard_compare.json",
+            "last_updated.json",
+        ]
 
         try:
             repo_files = api.list_repo_files(
@@ -1408,11 +1496,52 @@ def sync_submission_to_huggingface(
             )
             shutil.copy2(downloaded_path, local_path)
 
+        rebuilt_output_dir = temp_root / "rebuilt_snapshots"
+        rebuilt_output_dir.mkdir(parents=True, exist_ok=True)
+        for file_name in aggregate_files:
+            if file_name not in repo_files:
+                continue
+            downloaded_path = hf_hub_download(
+                repo_id=repo_id,
+                repo_type="dataset",
+                filename=file_name,
+                revision=branch,
+                token=resolved_token,
+            )
+            shutil.copy2(downloaded_path, rebuilt_output_dir / file_name)
+        try:
+            removed_snapshot_rows = sum(
+                _filter_excluded_snapshot_entries(
+                    rebuilt_output_dir / file_name, exclusions
+                )
+                for file_name in ("leaderboard_single.json", "leaderboard_multi.json")
+            )
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        if removed_snapshot_rows:
+            print(
+                f"Removed {removed_snapshot_rows} excluded row(s) from seeded HF snapshots."
+            )
+
         for submission_dir in normalized_submission_dirs:
             current_submission_target = merged_source_dir / submission_dir.name
             shutil.copytree(
                 submission_dir, current_submission_target, dirs_exist_ok=True
             )
+
+        excluded_repo_paths: list[str] = []
+        for excluded_dir in _find_excluded_submission_dirs(
+            merged_source_dir, exclusions
+        ):
+            relative_dir = excluded_dir.relative_to(merged_source_dir).as_posix()
+            excluded_repo_paths.extend(
+                repo_path
+                for repo_path in prefixed_repo_files
+                if repo_path == f"{repo_prefix}{relative_dir}"
+                or repo_path.startswith(f"{repo_prefix}{relative_dir}/")
+            )
+            shutil.rmtree(excluded_dir)
 
         official_coverage_keys = _load_official_baseline_coverage_keys(layout)
 
@@ -1425,7 +1554,7 @@ def sync_submission_to_huggingface(
         aggregate_rc = aggregate_to_website(
             layout=layout,
             source_dir=merged_source_dir,
-            output_dir=aggregate_output_dir,
+            output_dir=rebuilt_output_dir,
             execute=True,
         )
         if aggregate_rc != 0:
@@ -1433,25 +1562,32 @@ def sync_submission_to_huggingface(
 
         try:
             validate_aggregated_leaderboard_outputs(
-                aggregate_output_dir,
+                rebuilt_output_dir,
                 official_coverage_keys=official_coverage_keys,
             )
         except ValueError as exc:
-            _print_aggregated_compare_diagnostics(aggregate_output_dir)
+            _print_aggregated_compare_diagnostics(rebuilt_output_dir)
             print(str(exc), file=sys.stderr)
             return 2
 
-        aggregate_files = [
-            "leaderboard_single.json",
-            "leaderboard_multi.json",
-            "leaderboard_compare.json",
-            "last_updated.json",
-        ]
         operations: list[CommitOperationAdd] = []
         planned_paths: list[str] = []
 
+        if excluded_repo_paths:
+            from huggingface_hub import CommitOperationDelete
+
+            for repo_path in sorted(set(excluded_repo_paths)):
+                operations.append(CommitOperationDelete(path_in_repo=repo_path))
+                planned_paths.append(f"DELETE {repo_path}")
+
         for file_name in aggregate_files:
+            rebuilt_file = rebuilt_output_dir / file_name
+            if not rebuilt_file.is_file():
+                print(f"missing aggregated output: {rebuilt_file}", file=sys.stderr)
+                return 2
+            aggregate_output_dir.mkdir(parents=True, exist_ok=True)
             local_file = aggregate_output_dir / file_name
+            shutil.copy2(rebuilt_file, local_file)
             if not local_file.is_file():
                 print(f"missing aggregated output: {local_file}", file=sys.stderr)
                 return 2
