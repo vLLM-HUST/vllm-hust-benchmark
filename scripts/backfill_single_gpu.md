@@ -31,6 +31,9 @@ python3 scripts/backfill_single_gpu.py run --only sharegpt-throughput --commit 8
 # 使用指定的 ascend 插件 commit（默认使用 vllm-ascend-hust 最新 origin/main）
 python3 scripts/backfill_single_gpu.py run --only random-latency --commit 83cf83f --ascend-commit 03a12f9
 
+# 运行所有的missing的workload 和 commit(vllm-hust)
+python3 scripts/backfill_single_gpu.py run
+
 # 重建 snapshot
 python3 scripts/backfill_single_gpu.py aggregate
 
