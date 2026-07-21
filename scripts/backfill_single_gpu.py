@@ -40,6 +40,7 @@ import json
 import os
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -116,6 +117,17 @@ def resolve_ascend_commit(hust_commit: str) -> str:
 # that reference vllm modules (e.g. expert_map_manager) not present in the
 # vllm-hust fork.  This commit is the last vllm-hust-fork-only commit known to
 # work with all backfill targets.
+#
+# LIMITATION: Using a single ascend commit for all historical vllm-hust commits
+# means the recorded plugin SHA in the runtime_provenance does NOT reflect the
+# actual plugin version that was historically paired with each vllm-hust commit.
+# This is a known trade-off: the alternative (time-aligned commit) would fail
+# at runtime because upstream-merged ascend commits reference modules absent
+# from the older vllm-hust fork.
+#
+# To fix this properly, create standalone compatibility-backport commits in the
+# vllm-ascend-hust repo (one per vllm-hust milestone) and reference them here
+# via a mapping table.
 _COMPATIBLE_ASCEND_COMMIT = "bf2984e34a8923ac254251c6e265dffbad4aa70d"
 
 
@@ -123,38 +135,14 @@ def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
     """Resolve an ascend plugin commit that is compatible with hust_commit.
 
     The dynamic ``resolve_ascend_commit`` may return an upstream vllm-ascend
-    commit whose code references modules (e.g. ``expert_map_manager``) that
-    do **not** exist in the older vllm-hust codebase.  When that happens we
-    fall back to the last known-good vllm-hust-fork-only commit.
+    commit whose code references modules (e.g. ``expert_map_manager``) or
+    entry points (e.g. ``register_model``) that do **not** exist in the
+    older vllm-hust codebase.  Since the time-aligned commit is unreliable
+    (our vllm-ascend-hust repo has been synced with upstream which adds
+    features not present in vllm-hust), we always use the last known-good
+    vllm-hust-fork-only commit for vllm-hust PRs.
     """
-    candidate = resolve_ascend_commit(hust_commit)
-
-    # Check whether the candidate ascend plugin references expert_map_manager,
-    # and whether the vllm-hust commit has that module.
-    try:
-        eplb_src = subprocess.run(
-            ["git", "show", f"{candidate}:vllm_ascend/eplb/core/eplb_utils.py"],
-            cwd=ASCEND_REPO, capture_output=True, text=True, check=True,
-        ).stdout
-        needs_expert_map = "expert_map_manager" in eplb_src
-    except subprocess.CalledProcessError:
-        needs_expert_map = False
-
-    if needs_expert_map:
-        # Check if the vllm-hust commit has the expert_map_manager module.
-        has_expert_map = subprocess.run(
-            ["git", "ls-tree", "-r", hust_commit, "--name-only"],
-            cwd=HUST_REPO, capture_output=True, text=True, check=True,
-        )
-        if "expert_map_manager" not in has_expert_map.stdout:
-            log(
-                f"Ascend plugin {candidate[:9]} needs expert_map_manager "
-                f"which is absent in vllm-hust {hust_commit[:9]}; "
-                f"falling back to compatible commit {_COMPATIBLE_ASCEND_COMMIT[:9]}"
-            )
-            return _COMPATIBLE_ASCEND_COMMIT
-
-    return candidate
+    return _COMPATIBLE_ASCEND_COMMIT
 
 # Default missing cells (workload -> list of vllm-hust commits).
 DEFAULT_CELLS: dict[str, list[str]] = {
@@ -348,53 +336,11 @@ def git_checkout(repo: Path, commit: str) -> None:
         )
 
 
-def install_ascend_plugin() -> None:
-    """Fix naming conflict: rename openai.py -> openai_cmd.py.
-
-    vllm.entrypoints.cli.openai shadows the external 'openai' PyPI package,
-    causing circular imports when other vllm modules (e.g. mcp/tool.py) do
-    ``from openai import ...``.  Renaming the file to openai_cmd.py and
-    updating the import in main.py breaks the conflict.
-    """
-    cli_dir = HUST_REPO / "vllm" / "entrypoints" / "cli"
-    openai_py = cli_dir / "openai.py"
-    openai_cmd_py = cli_dir / "openai_cmd.py"
-
-    # If both exist, remove openai.py (openai_cmd.py is already the renamed copy).
-    if openai_py.is_file() and openai_cmd_py.is_file():
-        subprocess.run(["rm", "-f", str(openai_py)], check=True)
-        log(f"Patched: removed duplicate {openai_py}, keeping {openai_cmd_py}")
-        # Fall through to update main.py if needed.
-
-    if openai_cmd_py.is_file() and not openai_py.is_file():
-        # Already renamed, just ensure main.py is up to date.
-        pass
-    elif openai_py.is_file() and not openai_cmd_py.is_file():
-        subprocess.run(["mv", str(openai_py), str(openai_cmd_py)], check=True)
-        log(f"Patched: renamed {openai_py} -> {openai_cmd_py}")
-
-    # Update all references in main.py.
-    main_py = cli_dir / "main.py"
-    if main_py.is_file():
-        content = subprocess.run(
-            ["cat", str(main_py)], capture_output=True, text=True, check=True
-        ).stdout
-        orig = content
-        content = content.replace("import vllm.entrypoints.cli.openai\n",
-                                  "import vllm.entrypoints.cli.openai_cmd\n")
-        content = content.replace("vllm.entrypoints.cli.openai,",
-                                  "vllm.entrypoints.cli.openai_cmd,")
-        if content != orig:
-            subprocess.run(
-                [sys.executable, "-c", """
-import sys
-with open(sys.argv[1], 'w') as f:
-    f.write(sys.stdin.read())
-""", str(main_py)], input=content, text=True, check=True,
-            )
-            log(f"Patched: updated imports in {main_py}")
-        else:
-            log("Patched: imports already correct, skipping")
+# NOTE: Compatibility fixes for older vllm-hust commits should be
+# implemented as standalone, referenceable commits in the respective
+# repositories (vllm-hust and vllm-ascend-hust), not as runtime
+# monkeypatches. Runtime monkeypatching makes the recorded SHA
+# inconsistent with the actually executed source code.
 
 
 # ---------------------------------------------------------------------------
@@ -456,65 +402,71 @@ def build_run_id(workload: str, hust_commit: str) -> str:
     return f"single-gpu-backfill-{workload}-{hust_commit[:9]}-{today}"
 
 
-def run_vllm_bench(
-    workload: str, hust_commit: str, output_dir: Path
-) -> Path:
-    """Run the right vllm bench subcommand and return the raw result JSON path."""
-    params = SCENARIO_PARAMS[workload]
-    benchmark_type = params["benchmark_type"]
-    output_dir.mkdir(parents=True, exist_ok=True)
+def _run_bench_with_retry(
+    cmd: list[str], env: dict[str, str], output_dir: Path, bench_log: Path
+) -> tuple[subprocess.CompletedProcess, Path]:
+    """Run bench command, retrying with old CLI flags if new ones are unsupported."""
+    log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
+    with bench_log.open("w", encoding="utf-8") as log_file:
+        result = subprocess.run(cmd, cwd=HUST_REPO, env=env,
+                                stdout=log_file, stderr=subprocess.STDOUT,
+                                check=False)
 
-    bench_log = output_dir / "bench.log"
+    raw = output_dir / "raw.json"
+    if not raw.is_file():
+        for candidate in output_dir.glob("raw*.json"):
+            raw = candidate
+            break
 
-    if benchmark_type == "latency":
-        cmd: list[str] = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
-            "--model", MODEL_NAME,
-            "--input-len", str(params["input_length"]),
-            "--output-len", str(params["output_length"]),
-            "--batch-size", str(params["batch_size"]),
-            "--num-iters-warmup", str(params["num_iters_warmup"]),
-            "--num-iters", str(params["num_iters"]),
-            "--gpu-memory-utilization", "0.6",
-            "--output-json", str(output_dir / "raw.json"),
-        ]
-    elif benchmark_type == "throughput":
-        cmd = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
-            "--model", MODEL_NAME,
-            "--dataset-name", params["dataset_name"],
-            "--num-prompts", str(params["num_prompts"]),
-            "--gpu-memory-utilization", "0.6",
-            "--output-json", str(output_dir / "raw.json"),
-        ]
-        if params.get("dataset_path"):
-            cmd.extend(["--dataset-path", params["dataset_path"]])
-    else:  # serve
-        cmd = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "serve",
-            "--model", MODEL_NAME,
-            "--backend", "vllm",
-            "--endpoint", "/v1/completions",
-            "--dataset-name", params["dataset_name"],
-            "--num-prompts", str(params["num_prompts"]),
-            "--request-rate", str(params.get("request_rate", 1)),
-            "--gpu-memory-utilization", "0.6",
-            "--output-json", str(output_dir / "raw.json"),
-        ]
-        if params.get("dataset_path"):
-            cmd.extend(["--dataset-path", params["dataset_path"]])
-        if params.get("input_length"):
-            cmd.extend(["--random-input-len", str(params["input_length"])])
-        if params.get("output_length"):
-            cmd.extend(["--random-output-len", str(params["output_length"])])
+    # Check if the failure was due to unrecognized arguments (old CLI).
+    if result.returncode == 2 and not raw.is_file():
+        log_content = bench_log.read_text(encoding="utf-8") if bench_log.is_file() else ""
+        if "unrecognized arguments" in log_content:
+            log("Detected old CLI (unrecognized arguments), retrying with legacy flags...")
+            # Rebuild command with legacy flags.
+            new_cmd = _to_legacy_cmd(cmd, output_dir)
+            log(f"$ {' '.join(shlex.quote(c) for c in new_cmd)}")
+            with bench_log.open("w", encoding="utf-8") as log_file:
+                result = subprocess.run(new_cmd, cwd=HUST_REPO, env=env,
+                                        stdout=log_file, stderr=subprocess.STDOUT,
+                                        check=False)
+            raw = output_dir / "raw.json"
+            if not raw.is_file():
+                for candidate in output_dir.glob("raw*.json"):
+                    raw = candidate
+                    break
 
+    return result, raw
+
+
+def _to_legacy_cmd(cmd: list[str], output_dir: Path) -> list[str]:
+    """Convert new-style CLI flags to legacy (old vllm) flags."""
+    new_cmd = []
+    skip_next = False
+    for i, arg in enumerate(cmd):
+        if skip_next:
+            skip_next = False
+            continue
+        if arg == "--gpu-memory-utilization":
+            skip_next = True  # skip the value too
+            continue
+        if arg == "--output-json":
+            # Replace with --save-result --result-dir <dir> --result-filename raw.json
+            new_cmd.extend(["--save-result", "--result-dir", str(output_dir),
+                            "--result-filename", "raw.json"])
+            skip_next = True  # skip the value
+            continue
+        new_cmd.append(arg)
+    return new_cmd
+
+
+def _build_env() -> dict[str, str]:
+    """Build the environment for running vllm commands."""
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
     env.setdefault("VLLM_USE_V1", "1")
-    # Use NPU 7 — it has the most free HBM (only ~32% used vs 91%+ on others).
-    # NPU 5 was previously used but is now heavily occupied by other processes.
-    env["ASCEND_RT_VISIBLE_DEVICES"] = "7"
-    env["ASCEND_VISIBLE_DEVICES"] = "7"
+    env["ASCEND_RT_VISIBLE_DEVICES"] = "0"
+    env["ASCEND_VISIBLE_DEVICES"] = "0"
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
@@ -530,18 +482,168 @@ def run_vllm_bench(
     env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/ascend-toolkit/lib64:" + env["LD_LIBRARY_PATH"]
     env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/cann-9.0.0/lib64:" + env["LD_LIBRARY_PATH"]
     env["ATB_HOME_PATH"] = f"{atb_home}/{cxx_abi_dir}"
+    return env
 
-    log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
-    with bench_log.open("w", encoding="utf-8") as log_file:
-        result = subprocess.run(cmd, cwd=HUST_REPO, env=env,
-                                stdout=log_file, stderr=subprocess.STDOUT,
-                                check=False)
 
-    raw = output_dir / "raw.json"
-    if not raw.is_file():
-        for candidate in output_dir.glob("raw*.json"):
-            raw = candidate
+def _run_serve_bench(
+    params: dict[str, Any], output_dir: Path, bench_log: Path, env: dict[str, str]
+) -> tuple[subprocess.CompletedProcess, Path]:
+    """Run serve benchmark: start server, run bench client, stop server."""
+    host = "127.0.0.1"
+    port = 8000
+    server_log = output_dir / "server.log"
+
+    # Start the vllm server in the background.
+    serve_cmd = [
+        str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "serve",
+        MODEL_NAME,
+        "--host", host,
+        "--port", str(port),
+        "--gpu-memory-utilization", "0.6",
+    ]
+    # Wait for the port to be free (previous server may still be shutting down).
+    import socket as _socket
+    _port_wait_start = time.time()
+    while time.time() - _port_wait_start < 60:
+        try:
+            s = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM)
+            s.settimeout(2)
+            s.connect((host, port))
+            s.close()
+            time.sleep(2)
+        except (ConnectionRefusedError, OSError):
             break
+    else:
+        log("Warning: port 8000 still in use after 60s, proceeding anyway")
+
+    log(f"$ {' '.join(shlex.quote(c) for c in serve_cmd)} &")
+    with server_log.open("w", encoding="utf-8") as sf:
+        server_proc = subprocess.Popen(
+            serve_cmd, cwd=HUST_REPO, env=env,
+            stdout=sf, stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+
+    try:
+        # Wait for the server to be ready by polling /health.
+        import urllib.request
+        import urllib.error
+        max_wait = 600  # seconds
+        start = time.time()
+        ready = False
+        last_error = ""
+        while time.time() - start < max_wait:
+            if server_proc.poll() is not None:
+                raise RuntimeError(
+                    f"Server exited early with code {server_proc.returncode}. "
+                    f"Check {server_log}"
+                )
+            try:
+                req = urllib.request.Request(f"http://{host}:{port}/health")
+                urllib.request.urlopen(req, timeout=5)
+                ready = True
+                break
+            except (urllib.error.URLError, OSError) as e:
+                last_error = str(e)
+                time.sleep(5)
+        if not ready:
+            raise RuntimeError(
+                f"Server did not become ready within {max_wait}s. "
+                f"Last error: {last_error}"
+            )
+        log("Server is ready, starting benchmark client...")
+
+        # Build bench client command (old CLI style: --save-result).
+        bench_cmd = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "serve",
+            "--backend", "vllm",
+            "--endpoint", "/v1/completions",
+            "--host", host,
+            "--port", str(port),
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--request-rate", str(params.get("request_rate", 1)),
+            "--save-result",
+            "--result-dir", str(output_dir),
+            "--result-filename", "raw.json",
+        ]
+        if params.get("dataset_path"):
+            bench_cmd.extend(["--dataset-path", params["dataset_path"]])
+        if params.get("input_length"):
+            bench_cmd.extend(["--random-input-len", str(params["input_length"])])
+        if params.get("output_length"):
+            bench_cmd.extend(["--random-output-len", str(params["output_length"])])
+
+        log(f"$ {' '.join(shlex.quote(c) for c in bench_cmd)}")
+        with bench_log.open("w", encoding="utf-8") as lf:
+            bench_result = subprocess.run(
+                bench_cmd, cwd=HUST_REPO, env=env,
+                stdout=lf, stderr=subprocess.STDOUT,
+                check=False,
+            )
+
+        raw = output_dir / "raw.json"
+        if not raw.is_file():
+            for candidate in output_dir.glob("raw*.json"):
+                raw = candidate
+                break
+        return bench_result, raw
+    finally:
+        # Always stop the server (kill entire process group).
+        log("Stopping server...")
+        try:
+            os.killpg(os.getpgid(server_proc.pid), signal.SIGTERM)
+        except (ProcessLookupError, OSError):
+            pass
+        try:
+            server_proc.wait(timeout=30)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(server_proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, OSError):
+                pass
+            server_proc.wait()
+
+
+def run_vllm_bench(
+    workload: str, hust_commit: str, output_dir: Path
+) -> Path:
+    """Run the right vllm bench subcommand and return the raw result JSON path."""
+    params = SCENARIO_PARAMS[workload]
+    benchmark_type = params["benchmark_type"]
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    bench_log = output_dir / "bench.log"
+    env = _build_env()
+
+    if benchmark_type == "latency":
+        cmd: list[str] = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
+            "--model", MODEL_NAME,
+            "--input-len", str(params["input_length"]),
+            "--output-len", str(params["output_length"]),
+            "--batch-size", str(params["batch_size"]),
+            "--num-iters-warmup", str(params["num_iters_warmup"]),
+            "--num-iters", str(params["num_iters"]),
+            "--gpu-memory-utilization", "0.6",
+            "--output-json", str(output_dir / "raw.json"),
+        ]
+        result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
+    elif benchmark_type == "throughput":
+        cmd = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--gpu-memory-utilization", "0.6",
+            "--output-json", str(output_dir / "raw.json"),
+        ]
+        if params.get("dataset_path"):
+            cmd.extend(["--dataset-path", params["dataset_path"]])
+        result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
+    else:  # serve
+        result, raw = _run_serve_bench(params, output_dir, bench_log, env)
 
     if result.returncode != 0:
         if raw.is_file() and raw.stat().st_size > 0:
@@ -559,7 +661,10 @@ def run_vllm_bench(
                     lines = f.readlines()
                     for line in lines[-100:]:
                         log(f"  {line.rstrip()}", also_print=False)
-            raise subprocess.CalledProcessError(result.returncode, cmd)
+            raise RuntimeError(
+                f"benchmark failed with exit code {result.returncode} "
+                f"for workload={workload} commit={hust_commit[:9]}"
+            )
 
     if not raw.is_file():
         raise FileNotFoundError(f"raw result json not produced under {output_dir}")
@@ -673,6 +778,64 @@ _PRECISION_TO_DTYPE = {
 }
 
 
+def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
+    """Build the exact vllm bench command used for this workload.
+
+    This is the command that, when re-run, should reproduce the benchmark
+    results.  It is stored in the artifact metadata as ``reproducible_cmd``.
+    """
+    params = SCENARIO_PARAMS[workload]
+    benchmark_type = params["benchmark_type"]
+    raw_path = output_dir / "raw.json"
+
+    if benchmark_type == "latency":
+        parts = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
+            "--model", MODEL_NAME,
+            "--input-len", str(params["input_length"]),
+            "--output-len", str(params["output_length"]),
+            "--batch-size", str(params["batch_size"]),
+            "--num-iters-warmup", str(params["num_iters_warmup"]),
+            "--num-iters", str(params["num_iters"]),
+            "--gpu-memory-utilization", "0.6",
+            "--output-json", str(raw_path),
+        ]
+    elif benchmark_type == "throughput":
+        parts = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--gpu-memory-utilization", "0.6",
+            "--output-json", str(raw_path),
+        ]
+        if params.get("dataset_path"):
+            parts.extend(["--dataset-path", str(params["dataset_path"])])
+    else:  # serve
+        parts = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "serve",
+            "--backend", "vllm",
+            "--endpoint", "/v1/completions",
+            "--host", "127.0.0.1",
+            "--port", "8000",
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--request-rate", str(params.get("request_rate", 1)),
+            "--save-result",
+            "--result-dir", str(output_dir),
+            "--result-filename", "raw.json",
+        ]
+        if params.get("dataset_path"):
+            parts.extend(["--dataset-path", str(params["dataset_path"])])
+        if params.get("input_length"):
+            parts.extend(["--random-input-len", str(params["input_length"])])
+        if params.get("output_length"):
+            parts.extend(["--random-output-len", str(params["output_length"])])
+
+    return " ".join(shlex.quote(p) for p in parts)
+
+
 def submit_artifact(
     workload: str, hust_commit: str, ascend_commit: str, run_id: str, raw: Path
 ) -> Path:
@@ -706,6 +869,7 @@ def submit_artifact(
         "--git-commit", hust_commit,
         "--github-repository", "vllm-hust/vllm-hust",
         "--github-ref", "main",
+        "--runtime-python", str(PYTHON_BIN),
         "--engine-source-repository", "vllm-hust/vllm-hust",
         "--engine-source-ref", hust_commit[:10],
         "--engine-source-commit", hust_commit,
@@ -726,6 +890,21 @@ def submit_artifact(
 
     log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
     subprocess.run(cmd, cwd=REPO_ROOT, check=True)
+
+    # Post-process the artifact to fill in provenance fields that are not
+    # available as CLI flags (reproducible_cmd, verified).
+    reproducible_cmd = _build_reproducible_cmd(workload, output_dir)
+    artifact_path = output_dir / "run_leaderboard.json"
+    if artifact_path.is_file():
+        artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+        artifact["metadata"]["reproducible_cmd"] = reproducible_cmd
+        artifact["metadata"]["verified"] = False
+        artifact_path.write_text(
+            json.dumps(artifact, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        log(f"Set reproducible_cmd and verified=false in {artifact_path}")
+
     return output_dir
 
 
@@ -810,6 +989,9 @@ def validate_submission(sub_dir: Path) -> list[str]:
         else:
             if err_rate is None or err_rate < 0 or err_rate > 1:
                 errors.append(f"{rid}: error_rate out of range [0,1] ({err_rate})")
+            elif err_rate >= 1.0:
+                # error_rate == 1.0 means all requests failed — not reproducible.
+                errors.append(f"{rid}: error_rate={err_rate} (all requests failed, result not reproducible)")
 
     # Check workload
     workload = run.get("workload", {})
@@ -881,8 +1063,32 @@ def validate_submission_artifact_entry(entry: dict[str, Any], tag: str) -> list[
     return errors
 
 
-def run_cell(workload: str, hust_commit: str) -> dict[str, Any]:
-    ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
+def _check_error_rate(sub_dir: Path) -> str | None:
+    """Check if the submission has error_rate == 1.0 (all requests failed).
+
+    Returns an error message if the submission should be rejected, None otherwise.
+    """
+    artifact_path = sub_dir / "run_leaderboard.json"
+    if not artifact_path.is_file():
+        return None
+    try:
+        run = json.loads(artifact_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    metrics = run.get("metrics", {})
+    error_rate = metrics.get("error_rate")
+    if error_rate is not None and error_rate >= 1.0:
+        workload_name = run.get("workload", {}).get("name", "unknown")
+        return (
+            f"submission rejected: error_rate={error_rate} for {workload_name} "
+            f"(all requests failed, not reproducible)"
+        )
+    return None
+
+
+def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None) -> dict[str, Any]:
+    if ascend_commit is None:
+        ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
 
     log(f"=== {workload} @ {hust_commit[:9]} (plugin {ascend_commit[:9]}) ===")
     work_dir = STATE_DIR / "runs" / f"{workload}-{hust_commit[:9]}"
@@ -891,20 +1097,31 @@ def run_cell(workload: str, hust_commit: str) -> dict[str, Any]:
     work_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        # First restore the repo to a clean state (discards any local
-        # modifications from previous runs, e.g. renamed openai.py).
+        # Restore repos to the target commits and clean any leftover files.
         git_checkout(HUST_REPO, hust_commit)
         git_checkout(ASCEND_REPO, ascend_commit)
-        # Remove any untracked files left by previous runs (e.g. openai_cmd.py).
+        # Remove any untracked files left by previous runs.
         subprocess.run(
-            ["git", "clean", "-fd", "vllm/entrypoints/cli/"],
+            ["git", "clean", "-fd"],
             cwd=HUST_REPO, check=False,
         )
+        subprocess.run(
+            ["git", "clean", "-fd"],
+            cwd=ASCEND_REPO, check=False,
+        )
 
-        install_ascend_plugin()
         raw = run_vllm_bench(workload, hust_commit, work_dir / "bench")
         run_id = build_run_id(workload, hust_commit)
         sub_dir = submit_artifact(workload, hust_commit, ascend_commit, run_id, raw)
+
+        # Reject results where all requests failed (error_rate == 1.0).
+        err_rate_msg = _check_error_rate(sub_dir)
+        if err_rate_msg is not None:
+            log(f"REJECTED: {err_rate_msg}")
+            # Clean up the failed submission directory.
+            if sub_dir.exists():
+                shutil.rmtree(sub_dir)
+            raise RuntimeError(err_rate_msg)
 
         # Validate the submission right after creation (Section 13.2).
         errors = validate_submission(sub_dir)
@@ -987,7 +1204,10 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     for workload, commits in target.items():
         for commit in commits:
-            key = f"{workload}:{commit[:9]}"
+            if args.ascend_commit:
+                key = f"{workload}:{commit[:9]}:ascend-{args.ascend_commit[:9]}"
+            else:
+                key = f"{workload}:{commit[:9]}"
             existing = state["cells"].get(key, {})
             if existing.get("status") == "done" and not args.force:
                 log(f"SKIP {key} (already done)")
@@ -997,7 +1217,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 state["cells"][key] = {"status": "done", "skipped": "already-present"}
                 continue
             log(f"BEGIN {key}")
-            result = run_cell(workload, commit)
+            result = run_cell(workload, commit, args.ascend_commit)
             state["cells"][key] = result
             save_state(state)
             if result["status"] == "failed":
@@ -1054,7 +1274,17 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
         log("Run scripts/validate_public_leaderboard_snapshots.py next.")
         return 1
 
-    log("Aggregate validation passed. "
+    # Count entries in the aggregated snapshot.
+    single_path = snapshot_dir / "leaderboard_single.json"
+    single_count = 0
+    if single_path.is_file():
+        try:
+            single_count = len(json.loads(single_path.read_text(encoding="utf-8")))
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    log(f"Aggregate validation passed. "
+        f"Snapshot contains {single_count} single-GPU entries. "
         "Run scripts/validate_public_leaderboard_snapshots.py next.")
     return 0
 
@@ -1103,7 +1333,15 @@ def cmd_push(args: argparse.Namespace) -> int:
     """Stage, commit and push the new submissions and refreshed snapshots."""
     subprocess.run(["git", "add", "submissions/", "leaderboard-data/snapshots/"],
                    cwd=REPO_ROOT, check=True)
-    msg = args.message or "feat(leaderboard): backfill single-GPU vllm-hust cells"
+    # Count the actual number of backfill submissions being pushed.
+    pending_dirs = [
+        d for d in (REPO_ROOT / "submissions").iterdir()
+        if d.is_dir() and d.name.startswith("single-gpu-backfill-")
+    ] if (REPO_ROOT / "submissions").is_dir() else []
+    msg = args.message or (
+        f"feat(leaderboard): backfill single-GPU vllm-hust cells "
+        f"({len(pending_dirs)} submissions)"
+    )
     cmd_commit = ["git", "commit", "-m", msg]
     log(f"$ {' '.join(shlex.quote(c) for c in cmd_commit)}")
     rc = subprocess.run(cmd_commit, cwd=REPO_ROOT).returncode
@@ -1153,6 +1391,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--only", nargs="+", help="Restrict to these workloads (e.g. random-latency)."
     )
     p_run.add_argument("--commit", help="Run only this commit (overrides DEFAULT_CELLS).")
+    p_run.add_argument("--ascend-commit", help="Use this ascend plugin commit instead of resolving automatically.")
     p_run.add_argument("--force", action="store_true",
                        help="Re-run cells already marked done.")
     p_run.add_argument("--fail-fast", action="store_true",
