@@ -117,6 +117,17 @@ def resolve_ascend_commit(hust_commit: str) -> str:
 # that reference vllm modules (e.g. expert_map_manager) not present in the
 # vllm-hust fork.  This commit is the last vllm-hust-fork-only commit known to
 # work with all backfill targets.
+#
+# LIMITATION: Using a single ascend commit for all historical vllm-hust commits
+# means the recorded plugin SHA in the runtime_provenance does NOT reflect the
+# actual plugin version that was historically paired with each vllm-hust commit.
+# This is a known trade-off: the alternative (time-aligned commit) would fail
+# at runtime because upstream-merged ascend commits reference modules absent
+# from the older vllm-hust fork.
+#
+# To fix this properly, create standalone compatibility-backport commits in the
+# vllm-ascend-hust repo (one per vllm-hust milestone) and reference them here
+# via a mapping table.
 _COMPATIBLE_ASCEND_COMMIT = "bf2984e34a8923ac254251c6e265dffbad4aa70d"
 
 
@@ -325,426 +336,11 @@ def git_checkout(repo: Path, commit: str) -> None:
         )
 
 
-def _update_ascend_entry_points() -> None:
-    """Regenerate the ascend plugin's entry_points metadata to match the
-    currently checked-out commit.
-
-    After ``git checkout``, the installed package's entry_points in dist-info
-    may be stale (e.g. referencing ``register_model`` that no longer exists
-    in the older code).  This function runs ``setup.py egg_info`` (fast, no
-    cmake build) and copies the regenerated entry_points to the installed
-    dist-info directory.
-    """
-    # Step A: regenerate egg-info in the ascend repo (fast, no cmake).
-    subprocess.run(
-        [str(PYTHON_BIN), "setup.py", "egg_info"],
-        cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
-    )
-
-    # Step B: find the egg-info entry_points.
-    egg_info_dir = None
-    for cand in ASCEND_REPO.glob("*.egg-info"):
-        egg_info_dir = cand
-        break
-    if egg_info_dir is None:
-        log("Warning: no egg-info found in ascend repo, skipping entry_points update")
-        return
-
-    egg_eps = egg_info_dir / "entry_points.txt"
-    if not egg_eps.is_file():
-        log("Warning: egg-info has no entry_points.txt, skipping")
-        return
-
-    new_eps = egg_eps.read_text(encoding="utf-8")
-
-    # Step C: find the installed dist-info and update its entry_points.txt.
-    import site
-    site_packages = Path(site.getsitepackages()[0])
-    updated = False
-    for dist_info in site_packages.glob("vllm_ascend_hust*.dist-info"):
-        dist_eps = dist_info / "entry_points.txt"
-        if not dist_eps.is_file():
-            continue
-        old_eps = dist_eps.read_text(encoding="utf-8")
-        if old_eps != new_eps:
-            dist_eps.write_text(new_eps, encoding="utf-8")
-            log(f"Updated ascend entry_points in {dist_info.name}")
-            updated = True
-        break  # only one dist-info expected
-
-    if not updated:
-        log("Ascend entry_points already up to date")
-
-
-def install_ascend_plugin() -> None:
-    """Fix naming conflict and update ascend plugin entry_points.
-
-    vllm.entrypoints.cli.openai shadows the external 'openai' PyPI package,
-    causing circular imports when other vllm modules (e.g. mcp/tool.py) do
-    ``from openai import ...``.  Renaming the file to openai_cmd.py and
-    updating the import in main.py breaks the conflict.
-
-    Also regenerates the ascend plugin's entry_points metadata to match
-    the currently checked-out commit, preventing stale entry_points
-    from causing import errors (e.g. ``register_model`` not found).
-    """
-    # ------------------------------------------------------------------
-    # Step 1: Fix the openai naming conflict.
-    # ------------------------------------------------------------------
-    cli_dir = HUST_REPO / "vllm" / "entrypoints" / "cli"
-    openai_py = cli_dir / "openai.py"
-    openai_cmd_py = cli_dir / "openai_cmd.py"
-
-    # If both exist, remove openai.py (openai_cmd.py is already the renamed copy).
-    if openai_py.is_file() and openai_cmd_py.is_file():
-        subprocess.run(["rm", "-f", str(openai_py)], check=True)
-        log(f"Patched: removed duplicate {openai_py}, keeping {openai_cmd_py}")
-        # Fall through to update main.py if needed.
-
-    if openai_cmd_py.is_file() and not openai_py.is_file():
-        # Already renamed, just ensure main.py is up to date.
-        pass
-    elif openai_py.is_file() and not openai_cmd_py.is_file():
-        subprocess.run(["mv", str(openai_py), str(openai_cmd_py)], check=True)
-        log(f"Patched: renamed {openai_py} -> {openai_cmd_py}")
-
-    # Update all references in main.py.
-    main_py = cli_dir / "main.py"
-    if main_py.is_file():
-        content = subprocess.run(
-            ["cat", str(main_py)], capture_output=True, text=True, check=True
-        ).stdout
-        orig = content
-        content = content.replace("import vllm.entrypoints.cli.openai\n",
-                                  "import vllm.entrypoints.cli.openai_cmd\n")
-        content = content.replace("vllm.entrypoints.cli.openai,",
-                                  "vllm.entrypoints.cli.openai_cmd,")
-        if content != orig:
-            subprocess.run(
-                [sys.executable, "-c", """
-import sys
-with open(sys.argv[1], 'w') as f:
-    f.write(sys.stdin.read())
-""", str(main_py)], input=content, text=True, check=True,
-            )
-            log(f"Patched: updated imports in {main_py}")
-        else:
-            log("Patched: imports already correct, skipping")
-
-    # ------------------------------------------------------------------
-    # Step 2: Update ascend plugin entry_points to match current checkout.
-    # ------------------------------------------------------------------
-    _update_ascend_entry_points()
-
-    # ------------------------------------------------------------------
-    # Step 3: Fix ascend plugin patches that reference missing vllm-hust
-    #         attributes (e.g. _parse_tool_calls_from_content).
-    # ------------------------------------------------------------------
-    _patch_tool_choice = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_tool_choice_none_content.py"
-    if _patch_tool_choice.is_file():
-        import re as _re
-        content = _patch_tool_choice.read_text(encoding="utf-8")
-        patched_tc = False
-
-        # Fix 1: Guard _parse_tool_calls_from_content (may not exist on older vllm-hust).
-        old_ref = (
-            "_original_parse_tool_calls_from_content = "
-            "OpenAIServing._parse_tool_calls_from_content"
-        )
-        if old_ref in content and "try:" not in content.split(old_ref)[0].rsplit("\n", 3)[-1]:
-            new_ref = (
-                "try:\n"
-                "    _original_parse_tool_calls_from_content = "
-                "OpenAIServing._parse_tool_calls_from_content\n"
-                "except AttributeError:\n"
-                "    _original_parse_tool_calls_from_content = None"
-            )
-            content = content.replace(old_ref, new_ref)
-            content = content.replace(
-                "OpenAIServing._parse_tool_calls_from_content = "
-                "staticmethod(_patched_parse_tool_calls_from_content)",
-                "if _original_parse_tool_calls_from_content is not None:\n"
-                "    OpenAIServing._parse_tool_calls_from_content = "
-                "staticmethod(_patched_parse_tool_calls_from_content)"
-            )
-            patched_tc = True
-
-        # Fix 2: Guard _parse_tool_calls on DelegatingParser (may not exist on older vllm-hust).
-        old_ref2 = "_original_delegating_parse_tool_calls = DelegatingParser._parse_tool_calls"
-        if old_ref2 in content and "try:" not in content.split(old_ref2)[0].rsplit("\n", 3)[-1]:
-            new_ref2 = (
-                "try:\n"
-                "    _original_delegating_parse_tool_calls = "
-                "DelegatingParser._parse_tool_calls\n"
-                "except AttributeError:\n"
-                "    _original_delegating_parse_tool_calls = None"
-            )
-            content = content.replace(old_ref2, new_ref2)
-            content = content.replace(
-                "DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls",
-                "if _original_delegating_parse_tool_calls is not None:\n"
-                "    DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls"
-            )
-            patched_tc = True
-
-        if patched_tc:
-            _patch_tool_choice.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin patch_tool_choice_none_content.py compatibility")
-
-    # Fix ascend plugin ops/__init__.py: make the fused_moe import block
-    # degrade gracefully on older vllm-hust commits (no UnquantizedFusedMoEMethod).
-    _ops_init = ASCEND_REPO / "vllm_ascend" / "ops" / "__init__.py"
-    if _ops_init.is_file():
-        content = _ops_init.read_text(encoding="utf-8")
-        if "except ModuleNotFoundError as exc:" in content:
-            # Replace the entire fragile try/except block with a robust one.
-            old_block = (
-                'try:\n'
-                '    import vllm_ascend.ops.fused_moe.fused_moe  # noqa\n'
-                'except ModuleNotFoundError as exc:\n'
-                '    if exc.name != "vllm.model_executor.layers.fused_moe.runner.default_moe_runner":\n'
-                '        raise'
-            )
-            new_block = (
-                'try:\n'
-                '    import vllm_ascend.ops.fused_moe.fused_moe  # noqa\n'
-                'except Exception:\n'
-                '    pass  # gracefully skip on older vllm-hust commits'
-            )
-            if old_block in content:
-                content = content.replace(old_block, new_block)
-                _ops_init.write_text(content, encoding="utf-8")
-                log("Patched: fixed ascend plugin ops/__init__.py compatibility")
-
-    # Fix ascend plugin patch_glm_tool_call_parser.py: wrap imports that
-    # reference modules not present in older vllm-hust commits.
-    _patch_glm = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_glm_tool_call_parser.py"
-    if _patch_glm.is_file():
-        content = _patch_glm.read_text(encoding="utf-8")
-        if "from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser" in content:
-            # Add a try/except guard around the top-level imports and module body.
-            old_glm_imports = (
-                "from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser\n"
-                "from vllm.tool_parsers.glm4_moe_tool_parser import Glm4MoeModelToolParser"
-            )
-            new_glm_guard = (
-                "try:\n"
-                "    from vllm.tool_parsers import glm4_moe_tool_parser as glm4_parser\n"
-                "    from vllm.tool_parsers.glm4_moe_tool_parser import Glm4MoeModelToolParser\n"
-                "    _GLM_PARSER_AVAILABLE = True\n"
-                "except ImportError:\n"
-                "    _GLM_PARSER_AVAILABLE = False\n"
-                "    Glm4MoeModelToolParser = None  # type: ignore"
-            )
-            if old_glm_imports in content:
-                content = content.replace(old_glm_imports, new_glm_guard)
-                # Wrap the remaining module-level code (logger = ...) to skip if not available.
-                content = content.replace(
-                    "logger = chat_serving.logger",
-                    "if _GLM_PARSER_AVAILABLE:\n"
-                    "    logger = chat_serving.logger"
-                )
-                # Wrap the class patching at the bottom: replace the whole final block
-                old_final_block = (
-                    'OpenAIServingChat.chat_completion_stream_generator = _wrapped_chat_completion_stream_generator\n'
-                    'Glm4MoeModelToolParser._ensure_tool_state = _ensure_tool_state\n'
-                    'Glm4MoeModelToolParser._begin_tool_call = _begin_tool_call\n'
-                    'Glm4MoeModelToolParser._finish_tool_call = _finish_tool_call\n'
-                    'Glm4MoeModelToolParser._revert_last_tool_call_state = _revert_last_tool_call_state\n'
-                    'Glm4MoeModelToolParser._emit_tool_name_delta = _emit_tool_name_delta\n'
-                    'Glm4MoeModelToolParser._emit_tool_args_delta = _emit_tool_args_delta\n'
-                    'Glm4MoeModelToolParser._append_arg_fragment = _append_arg_fragment\n'
-                    'Glm4MoeModelToolParser._close_args_if_needed = _close_args_if_needed\n'
-                    'Glm4MoeModelToolParser.extract_tool_calls_streaming = _patched_extract_tool_calls_streaming'
-                )
-                new_final_block = (
-                    'if _GLM_PARSER_AVAILABLE:\n'
-                    '    OpenAIServingChat.chat_completion_stream_generator = _wrapped_chat_completion_stream_generator\n'
-                    '    Glm4MoeModelToolParser._ensure_tool_state = _ensure_tool_state\n'
-                    '    Glm4MoeModelToolParser._begin_tool_call = _begin_tool_call\n'
-                    '    Glm4MoeModelToolParser._finish_tool_call = _finish_tool_call\n'
-                    '    Glm4MoeModelToolParser._revert_last_tool_call_state = _revert_last_tool_call_state\n'
-                    '    Glm4MoeModelToolParser._emit_tool_name_delta = _emit_tool_name_delta\n'
-                    '    Glm4MoeModelToolParser._emit_tool_args_delta = _emit_tool_args_delta\n'
-                    '    Glm4MoeModelToolParser._append_arg_fragment = _append_arg_fragment\n'
-                    '    Glm4MoeModelToolParser._close_args_if_needed = _close_args_if_needed\n'
-                    '    Glm4MoeModelToolParser.extract_tool_calls_streaming = _patched_extract_tool_calls_streaming'
-                )
-                if old_final_block in content:
-                    content = content.replace(old_final_block, new_final_block)
-                _patch_glm.write_text(content, encoding="utf-8")
-                log("Patched: fixed ascend plugin patch_glm_tool_call_parser.py compatibility")
-
-    # Fix ascend plugin common_cp.py: wrap imports that reference vllm.distributed
-    # functions not present in older vllm-hust commits.
-    _common_cp = ASCEND_REPO / "vllm_ascend" / "attention" / "context_parallel" / "common_cp.py"
-    if _common_cp.is_file():
-        content = _common_cp.read_text(encoding="utf-8")
-        old_import = (
-            "from vllm.distributed import get_dcp_group, "
-            "get_decode_context_model_parallel_world_size, get_pcp_group"
-        )
-        if old_import in content:
-            new_import = (
-                "from vllm.distributed import get_dcp_group, get_pcp_group\n"
-                "try:\n"
-                "    from vllm.distributed import get_decode_context_model_parallel_world_size\n"
-                "except ImportError:\n"
-                "    def get_decode_context_model_parallel_world_size() -> int:\n"
-                "        return 1"
-            )
-            content = content.replace(old_import, new_import)
-            _common_cp.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin common_cp.py compatibility")
-
-    # Fix ascend plugin patch_balance_schedule.py: handle throttle_prefills
-    # parameter not present in older vllm-hust Scheduler.schedule().
-    _balance = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_balance_schedule.py"
-    if _balance.is_file():
-        content = _balance.read_text(encoding="utf-8")
-        old_call = "            return super().schedule(throttle_prefills)"
-        if old_call in content:
-            new_call = (
-                "            try:\n"
-                "                return super().schedule(throttle_prefills)\n"
-                "            except TypeError:\n"
-                "                return super().schedule()"
-            )
-            content = content.replace(old_call, new_call)
-            _balance.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin patch_balance_schedule.py compatibility")
-
-    # Fix ascend plugin eplb_utils.py: handle determine_expert_map import
-    # from fused_moe.layer (not present in older vllm-hust commits).
-    _eplb_utils = ASCEND_REPO / "vllm_ascend" / "eplb" / "core" / "eplb_utils.py"
-    if _eplb_utils.is_file():
-        content = _eplb_utils.read_text(encoding="utf-8")
-        old_import = (
-            "from vllm.model_executor.layers.fused_moe.layer "
-            "import determine_expert_map"
-        )
-        if old_import in content:
-            new_import = (
-                "try:\n"
-                "    from vllm.model_executor.layers.fused_moe.layer"
-                " import determine_expert_map\n"
-                "except ImportError:\n"
-                "    try:\n"
-                "        from vllm.model_executor.layers.fused_moe"
-                ".expert_map_manager import determine_expert_map\n"
-                "    except ImportError:\n"
-                "        determine_expert_map = None  # type: ignore"
-            )
-            content = content.replace(old_import, new_import)
-            _eplb_utils.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin eplb_utils.py compatibility")
-
-    # Fix ascend plugin modelslim_config.py: handle MoERunner import
-    # from fused_moe (not present in older vllm-hust commits).
-    _modelslim = ASCEND_REPO / "vllm_ascend" / "quantization" / "modelslim_config.py"
-    if _modelslim.is_file():
-        content = _modelslim.read_text(encoding="utf-8")
-        # The import may be indented (inside else block), use regex to
-        # capture leading whitespace and preserve it.
-        import re as _msre
-        pattern = r'^(\s*)(from vllm\.model_executor\.layers\.fused_moe import MoERunner, RoutedExperts)$'
-        m = _msre.search(pattern, content, _msre.MULTILINE)
-        if m:
-            indent = m.group(1)
-            orig = m.group(0)
-            new_block = (
-                f"{indent}try:\n"
-                f"{indent}    {m.group(2)}\n"
-                f"{indent}except ImportError:\n"
-                f"{indent}    MoERunner = None  # type: ignore\n"
-                f"{indent}    RoutedExperts = None  # type: ignore"
-            )
-            content = content.replace(orig, new_block)
-            _modelslim.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin modelslim_config.py compatibility")
-
-    # ------------------------------------------------------------------
-    # Step 4: Fix missing imports in serving.py (PR #118 bugs).
-    # ------------------------------------------------------------------
-    serving_py = HUST_REPO / "vllm" / "entrypoints" / "openai" / "engine" / "serving.py"
-    if serving_py.is_file():
-        content = serving_py.read_text(encoding="utf-8")
-        import re
-        patched = False
-
-        # Fix 1: missing `Any` import
-        m = re.search(r'^from typing import (.+)$', content, re.MULTILINE)
-        if m and 'Any' not in m.group(1) and re.search(r'\bAny\b', content):
-            old_line = m.group(0)
-            new_line = old_line.replace('from typing import ', 'from typing import Any, ')
-            content = content.replace(old_line, new_line, 1)
-            patched = True
-
-        # Fix 2: missing `PromptType` and `extract_prompt_len` imports
-        needs_prompt_type = 'PromptType' in content and 'from vllm.inputs import PromptType' not in content
-        needs_extract_prompt_len = 'extract_prompt_len' in content and 'from vllm.renderers.inputs.preprocess import' not in content
-        if needs_prompt_type or needs_extract_prompt_len:
-            old_import = 'from vllm.inputs import EngineInput'
-            new_import = 'from vllm.inputs import EngineInput'
-            if needs_prompt_type:
-                new_import += ', PromptType'
-            if needs_extract_prompt_len:
-                new_import += '\nfrom vllm.renderers.inputs.preprocess import extract_prompt_len'
-            if new_import != old_import:
-                content = content.replace(old_import, new_import)
-                patched = True
-
-        # Fix 3: missing `SamplingParams` import
-        if 'SamplingParams' in content:
-            m_vllm = re.search(r'^from vllm import (.+)$', content, re.MULTILINE)
-            if m_vllm:
-                if 'SamplingParams' not in m_vllm.group(1):
-                    old_line = m_vllm.group(0)
-                    new_line = old_line.replace(
-                        'from vllm import ', 'from vllm import SamplingParams, '
-                    )
-                    content = content.replace(old_line, new_line, 1)
-                    patched = True
-            else:
-                # No `from vllm import` line — add one after the last `from vllm.` import.
-                lines = content.split('\n')
-                insert_at = 0
-                in_multiline = False
-                for i, line in enumerate(lines):
-                    if line.startswith('from vllm.'):
-                        insert_at = i + 1
-                        in_multiline = '(' in line and ')' not in line
-                    elif in_multiline:
-                        insert_at = i + 1
-                        if ')' in line:
-                            in_multiline = False
-                if insert_at > 0:
-                    lines.insert(insert_at, 'from vllm import SamplingParams')
-                    content = '\n'.join(lines)
-                    patched = True
-
-        # Fix 4: missing `BeamSearchParams` import
-        if 'BeamSearchParams' in content and 'from vllm.sampling_params import' not in content:
-            # Insert after the last `from vllm.` import line (or multiline block).
-            lines = content.split('\n')
-            insert_at = 0
-            in_multiline = False
-            for i, line in enumerate(lines):
-                if line.startswith('from vllm.'):
-                    insert_at = i + 1
-                    in_multiline = '(' in line and ')' not in line
-                elif in_multiline:
-                    insert_at = i + 1
-                    if ')' in line:
-                        in_multiline = False
-            if insert_at > 0:
-                lines.insert(insert_at, 'from vllm.sampling_params import BeamSearchParams')
-                content = '\n'.join(lines)
-                patched = True
-
-        if patched:
-            serving_py.write_text(content, encoding="utf-8")
-            log("Patched: fixed missing imports in serving.py")
+# NOTE: Compatibility fixes for older vllm-hust commits should be
+# implemented as standalone, referenceable commits in the respective
+# repositories (vllm-hust and vllm-ascend-hust), not as runtime
+# monkeypatches. Runtime monkeypatching makes the recorded SHA
+# inconsistent with the actually executed source code.
 
 
 # ---------------------------------------------------------------------------
@@ -1182,6 +778,64 @@ _PRECISION_TO_DTYPE = {
 }
 
 
+def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
+    """Build the exact vllm bench command used for this workload.
+
+    This is the command that, when re-run, should reproduce the benchmark
+    results.  It is stored in the artifact metadata as ``reproducible_cmd``.
+    """
+    params = SCENARIO_PARAMS[workload]
+    benchmark_type = params["benchmark_type"]
+    raw_path = output_dir / "raw.json"
+
+    if benchmark_type == "latency":
+        parts = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
+            "--model", MODEL_NAME,
+            "--input-len", str(params["input_length"]),
+            "--output-len", str(params["output_length"]),
+            "--batch-size", str(params["batch_size"]),
+            "--num-iters-warmup", str(params["num_iters_warmup"]),
+            "--num-iters", str(params["num_iters"]),
+            "--gpu-memory-utilization", "0.6",
+            "--output-json", str(raw_path),
+        ]
+    elif benchmark_type == "throughput":
+        parts = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--gpu-memory-utilization", "0.6",
+            "--output-json", str(raw_path),
+        ]
+        if params.get("dataset_path"):
+            parts.extend(["--dataset-path", str(params["dataset_path"])])
+    else:  # serve
+        parts = [
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "serve",
+            "--backend", "vllm",
+            "--endpoint", "/v1/completions",
+            "--host", "127.0.0.1",
+            "--port", "8000",
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--request-rate", str(params.get("request_rate", 1)),
+            "--save-result",
+            "--result-dir", str(output_dir),
+            "--result-filename", "raw.json",
+        ]
+        if params.get("dataset_path"):
+            parts.extend(["--dataset-path", str(params["dataset_path"])])
+        if params.get("input_length"):
+            parts.extend(["--random-input-len", str(params["input_length"])])
+        if params.get("output_length"):
+            parts.extend(["--random-output-len", str(params["output_length"])])
+
+    return " ".join(shlex.quote(p) for p in parts)
+
+
 def submit_artifact(
     workload: str, hust_commit: str, ascend_commit: str, run_id: str, raw: Path
 ) -> Path:
@@ -1215,6 +869,7 @@ def submit_artifact(
         "--git-commit", hust_commit,
         "--github-repository", "vllm-hust/vllm-hust",
         "--github-ref", "main",
+        "--runtime-python", str(PYTHON_BIN),
         "--engine-source-repository", "vllm-hust/vllm-hust",
         "--engine-source-ref", hust_commit[:10],
         "--engine-source-commit", hust_commit,
@@ -1235,6 +890,21 @@ def submit_artifact(
 
     log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
     subprocess.run(cmd, cwd=REPO_ROOT, check=True)
+
+    # Post-process the artifact to fill in provenance fields that are not
+    # available as CLI flags (reproducible_cmd, verified).
+    reproducible_cmd = _build_reproducible_cmd(workload, output_dir)
+    artifact_path = output_dir / "run_leaderboard.json"
+    if artifact_path.is_file():
+        artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+        artifact["metadata"]["reproducible_cmd"] = reproducible_cmd
+        artifact["metadata"]["verified"] = False
+        artifact_path.write_text(
+            json.dumps(artifact, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        log(f"Set reproducible_cmd and verified=false in {artifact_path}")
+
     return output_dir
 
 
@@ -1319,6 +989,9 @@ def validate_submission(sub_dir: Path) -> list[str]:
         else:
             if err_rate is None or err_rate < 0 or err_rate > 1:
                 errors.append(f"{rid}: error_rate out of range [0,1] ({err_rate})")
+            elif err_rate >= 1.0:
+                # error_rate == 1.0 means all requests failed — not reproducible.
+                errors.append(f"{rid}: error_rate={err_rate} (all requests failed, result not reproducible)")
 
     # Check workload
     workload = run.get("workload", {})
@@ -1390,6 +1063,29 @@ def validate_submission_artifact_entry(entry: dict[str, Any], tag: str) -> list[
     return errors
 
 
+def _check_error_rate(sub_dir: Path) -> str | None:
+    """Check if the submission has error_rate == 1.0 (all requests failed).
+
+    Returns an error message if the submission should be rejected, None otherwise.
+    """
+    artifact_path = sub_dir / "run_leaderboard.json"
+    if not artifact_path.is_file():
+        return None
+    try:
+        run = json.loads(artifact_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    metrics = run.get("metrics", {})
+    error_rate = metrics.get("error_rate")
+    if error_rate is not None and error_rate >= 1.0:
+        workload_name = run.get("workload", {}).get("name", "unknown")
+        return (
+            f"submission rejected: error_rate={error_rate} for {workload_name} "
+            f"(all requests failed, not reproducible)"
+        )
+    return None
+
+
 def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None) -> dict[str, Any]:
     if ascend_commit is None:
         ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
@@ -1401,20 +1097,31 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None) 
     work_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        # First restore the repo to a clean state (discards any local
-        # modifications from previous runs, e.g. renamed openai.py).
+        # Restore repos to the target commits and clean any leftover files.
         git_checkout(HUST_REPO, hust_commit)
         git_checkout(ASCEND_REPO, ascend_commit)
-        # Remove any untracked files left by previous runs (e.g. openai_cmd.py).
+        # Remove any untracked files left by previous runs.
         subprocess.run(
-            ["git", "clean", "-fd", "vllm/entrypoints/cli/"],
+            ["git", "clean", "-fd"],
             cwd=HUST_REPO, check=False,
         )
+        subprocess.run(
+            ["git", "clean", "-fd"],
+            cwd=ASCEND_REPO, check=False,
+        )
 
-        install_ascend_plugin()
         raw = run_vllm_bench(workload, hust_commit, work_dir / "bench")
         run_id = build_run_id(workload, hust_commit)
         sub_dir = submit_artifact(workload, hust_commit, ascend_commit, run_id, raw)
+
+        # Reject results where all requests failed (error_rate == 1.0).
+        err_rate_msg = _check_error_rate(sub_dir)
+        if err_rate_msg is not None:
+            log(f"REJECTED: {err_rate_msg}")
+            # Clean up the failed submission directory.
+            if sub_dir.exists():
+                shutil.rmtree(sub_dir)
+            raise RuntimeError(err_rate_msg)
 
         # Validate the submission right after creation (Section 13.2).
         errors = validate_submission(sub_dir)
@@ -1567,7 +1274,17 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
         log("Run scripts/validate_public_leaderboard_snapshots.py next.")
         return 1
 
-    log("Aggregate validation passed. "
+    # Count entries in the aggregated snapshot.
+    single_path = snapshot_dir / "leaderboard_single.json"
+    single_count = 0
+    if single_path.is_file():
+        try:
+            single_count = len(json.loads(single_path.read_text(encoding="utf-8")))
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    log(f"Aggregate validation passed. "
+        f"Snapshot contains {single_count} single-GPU entries. "
         "Run scripts/validate_public_leaderboard_snapshots.py next.")
     return 0
 
@@ -1616,7 +1333,15 @@ def cmd_push(args: argparse.Namespace) -> int:
     """Stage, commit and push the new submissions and refreshed snapshots."""
     subprocess.run(["git", "add", "submissions/", "leaderboard-data/snapshots/"],
                    cwd=REPO_ROOT, check=True)
-    msg = args.message or "feat(leaderboard): backfill single-GPU vllm-hust cells"
+    # Count the actual number of backfill submissions being pushed.
+    pending_dirs = [
+        d for d in (REPO_ROOT / "submissions").iterdir()
+        if d.is_dir() and d.name.startswith("single-gpu-backfill-")
+    ] if (REPO_ROOT / "submissions").is_dir() else []
+    msg = args.message or (
+        f"feat(leaderboard): backfill single-GPU vllm-hust cells "
+        f"({len(pending_dirs)} submissions)"
+    )
     cmd_commit = ["git", "commit", "-m", msg]
     log(f"$ {' '.join(shlex.quote(c) for c in cmd_commit)}")
     rc = subprocess.run(cmd_commit, cwd=REPO_ROOT).returncode
