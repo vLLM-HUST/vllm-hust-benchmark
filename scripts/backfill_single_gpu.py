@@ -149,6 +149,29 @@ def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
     )
     return out.stdout.strip()
 
+
+def _derive_engine_version(hust_repo: Path, hust_commit: str) -> str:
+    """Derive the vllm-hust engine version from the given commit.
+
+    Uses ``git describe --tags --always <commit>`` to produce a version
+    string like ``0.17.2.post1-1357-g83cf83ff2`` without dirty suffix.
+
+    Falls back to ``g{short_commit}`` (e.g. ``g83cf83ff2``) if the
+    ``git describe`` output is empty.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "describe", "--tags", "--always", hust_commit],
+            cwd=hust_repo, capture_output=True, text=True, check=False,
+        )
+        version = out.stdout.strip()
+        if version:
+            return version
+    except OSError:
+        pass
+    return f"g{hust_commit[:8]}"
+
+
 # Default missing cells (workload -> list of vllm-hust commits).
 DEFAULT_CELLS: dict[str, list[str]] = {
     "random-latency": [
@@ -1312,8 +1335,13 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
 
 
 def submit_artifact(
-    workload: str, hust_commit: str, ascend_commit: str, run_id: str, raw: Path
+    workload: str, hust_commit: str, ascend_commit: str, run_id: str, raw: Path,
+    *,
+    engine_version: str | None = None,
 ) -> Path:
+    if engine_version is None:
+        engine_version = _derive_engine_version(HUST_REPO, hust_commit)
+
     output_dir = REPO_ROOT / "submissions" / run_id
     output_dir.mkdir(parents=True, exist_ok=True)
     constraints = REPO_ROOT / "docs" / "examples" / "constraints_metrics.sample.json"
@@ -1331,7 +1359,8 @@ def submit_artifact(
         "--same-spec-file", str(same_spec_file),
         "--run-id", run_id,
         "--engine", "vllm-hust",
-        "--engine-version", "0.18.0.post1",
+        "--engine-version", engine_version,
+        "--core-version", engine_version,
         "--model-name", MODEL_NAME,
         "--model-parameters", MODEL_PARAMETERS,
         "--model-precision", MODEL_PRECISION,
@@ -1664,6 +1693,27 @@ def _resolve_full_commit(short_or_full: str) -> str:
     return short_or_full
 
 
+def _resolve_latest_hust_commit() -> str:
+    """Resolve the latest vllm-hust origin/main commit.
+
+    Returns the full 40-char SHA of the latest commit on the main branch.
+    Falls back to the current HEAD if ``origin/main`` is not reachable.
+    """
+    out = subprocess.run(
+        ["git", "log", "-1", "--format=%H", "origin/main"],
+        cwd=HUST_REPO, capture_output=True, text=True, check=False,
+    )
+    sha = out.stdout.strip()
+    if sha and len(sha) == 40:
+        return sha
+    # Fallback: use current HEAD if origin/main is not accessible.
+    out = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=HUST_REPO, capture_output=True, text=True, check=True,
+    )
+    return out.stdout.strip()
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     state = load_state()
     save_state(state)  # Persist the captured HEADs up front.
@@ -1674,6 +1724,12 @@ def cmd_run(args: argparse.Namespace) -> int:
         workloads = args.only or list(SCENARIO_PARAMS.keys())
         full_commit = _resolve_full_commit(args.commit)
         target = {w: [full_commit] for w in workloads if w in SCENARIO_PARAMS}
+    elif args.ascend_commit:
+        # Custom ascend commit specified but no vllm-hust commit:
+        # use the latest main branch commit for vllm-hust.
+        workloads = args.only or list(SCENARIO_PARAMS.keys())
+        latest_commit = _resolve_latest_hust_commit()
+        target = {w: [latest_commit] for w in workloads if w in SCENARIO_PARAMS}
     elif args.only:
         target = {w: target.get(w, []) for w in args.only if w in target}
         target = {w: c for w, c in target.items() if c}
