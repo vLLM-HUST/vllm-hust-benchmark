@@ -415,10 +415,18 @@ def require_container_workspace_path(path: Path, *, purpose: str) -> str:
 def find_local_model_path(model_id: str) -> str | None:
     known = {
         "Qwen/Qwen2.5-14B-Instruct": [
+            Path("/data/shared_models/Qwen2.5-14B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-14B-Instruct"),
             Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct"),
         ],
+        "Qwen/Qwen2.5-7B-Instruct": [
+            Path("/data/shared_models/Qwen2.5-7B-Instruct"),
+            Path("/data/shared_models/Qwen--Qwen2.5-7B-Instruct"),
+            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct"),
+        ],
         "Qwen/Qwen2.5-Coder-14B-Instruct": [
+            Path("/root/.cache/modelscope/hub/Qwen/Qwen2___5-Coder-14B-Instruct"),
+            Path("/root/.cache/modelscope/hub/models/Qwen/Qwen2___5-Coder-14B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct"),
             Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-Coder-14B-Instruct"),
         ],
@@ -638,6 +646,24 @@ def stop_managed_server(*, args: argparse.Namespace, execute: bool) -> None:
     run_command([str(manage), "stop"], cwd=Path(args.dev_hub_dir).resolve(), execute=execute, env=env, check=False)
 
 
+def managed_same_spec_server_parameters(
+    args: argparse.Namespace, spec: OfficialSpec
+) -> dict[str, str]:
+    """Describe the effective server arguments supplied by dev-hub."""
+    return {
+        "enable_prefix_caching": (
+            "true" if args.managed_enable_prefix_caching else "false"
+        ),
+        "enable_chunked_prefill": (
+            "true" if args.managed_enable_chunked_prefill else "false"
+        ),
+        "gpu_memory_utilization": str(args.managed_gpu_mem_util),
+        "max_model_len": str(args.managed_max_model_len),
+        "max_num_batched_tokens": str(args.managed_max_model_len),
+        "max_num_seqs": str(args.managed_max_num_seqs),
+    }
+
+
 def git_has_changes(repo: Path) -> bool:
     return bool(capture_command(["git", "status", "--short"], cwd=repo))
 
@@ -817,6 +843,7 @@ def run_target_spec(
     core_version = describe_git_ref(core_worktree, core_commit)
     plugin_version = describe_git_ref(plugin_worktree, plugin_commit)
     local_model_path = find_local_model_path(spec.model) or ""
+    client_model_name = served_model_name(spec.model) if args.managed_dev_hub else local_model_path
     run_id = "-".join(
         [
             "historical-pr",
@@ -849,7 +876,7 @@ def run_target_spec(
         "CURRENT_PLUGIN_GIT_COMMIT": plugin_commit,
         "CURRENT_PLUGIN_GITHUB_REF": target.plugin_ref,
         "CURRENT_PLUGIN_GITHUB_REPOSITORY": args.plugin_github_repository,
-        "CURRENT_CLIENT_MODEL_NAME": served_model_name(spec.model),
+        "CURRENT_CLIENT_MODEL_NAME": client_model_name,
         "CURRENT_CLIENT_TOKENIZER": local_model_path,
         "CURRENT_MODEL_PATH": local_model_path,
         "CURRENT_HARDWARE_CHIP_MODEL": actual_chip_model,
@@ -886,6 +913,10 @@ def run_target_spec(
         env["OPENAI_API_KEY"] = env["VLLM_HUST_API_KEY"]
     if args.managed_dev_hub and spec.benchmark_type == "serve":
         env["CURRENT_USE_MANAGED_SERVER"] = "1"
+        env["CURRENT_SAME_SPEC_SERVER_PARAMETERS_JSON"] = json.dumps(
+            managed_same_spec_server_parameters(args, spec),
+            separators=(",", ":"),
+        )
     if args.current_env_prefix:
         env["CURRENT_ENV_PREFIX"] = args.current_env_prefix
     if args.server_port:

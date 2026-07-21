@@ -491,6 +491,85 @@
         "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
         "num_prompts": 32
       }
+    },
+    {
+      "name": "kv-tiering-prefix-online",
+      "title": "Official KV tiering prefix online serving benchmark",
+      "benchmark_type": "serve",
+      "description": "Prefix repetition workload for KV tiering pressure on a single Ascend 910B2 chip.",
+      "tags": [
+        "official",
+        "online",
+        "prefix-cache",
+        "kv-tiering",
+        "long-context"
+      ],
+      "leaderboard": {
+        "workload_name": "kv-tiering-prefix-online",
+        "representative_business_scenario": "long-context-chat",
+        "default_config_type": "single_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "prefix_repetition",
+        "num_prompts": 200,
+        "output_len": 256,
+        "prefix_repetition_num_prefixes": 10,
+        "prefix_repetition_suffix_len": 256,
+        "prefix_repetition_prefix_len": 3840
+      }
+    },
+    {
+      "name": "logprobs-online",
+      "title": "Official logprobs online serving benchmark",
+      "benchmark_type": "serve",
+      "description": "Synthetic online serving workload with logprobs enabled.",
+      "tags": [
+        "official",
+        "online",
+        "synthetic",
+        "logprobs"
+      ],
+      "leaderboard": {
+        "workload_name": "logprobs-online",
+        "representative_business_scenario": "online-chat",
+        "default_config_type": "single_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "input_len": 1024,
+        "output_len": 256,
+        "logprobs": 20
+      }
+    },
+    {
+      "name": "ngram-instructcoder-online",
+      "title": "Official ngram InstructCoder online serving benchmark",
+      "benchmark_type": "serve",
+      "description": "InstructCoder online workload for ngram speculative decoding evaluation.",
+      "tags": [
+        "official",
+        "online",
+        "coding",
+        "hf",
+        "ngram"
+      ],
+      "leaderboard": {
+        "workload_name": "ngram-instructcoder-online",
+        "representative_business_scenario": "code-assistant",
+        "default_config_type": "single_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "hf",
+        "dataset_path": "likaixin/InstructCoder",
+        "num_prompts": 256
+      }
     }
   ]
 }

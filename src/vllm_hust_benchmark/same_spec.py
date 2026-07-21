@@ -57,7 +57,10 @@ def _path_has_complete_indexed_weights(path: Path) -> bool:
         if not index_path.is_file():
             continue
 
-        payload = json.loads(index_path.read_text(encoding="utf-8"))
+        try:
+            payload = json.loads(index_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
         weight_map = payload.get("weight_map") or {}
         if not isinstance(weight_map, dict) or not weight_map:
             continue
@@ -134,13 +137,17 @@ def runtime_model_path_has_required_artifacts(candidate: str | Path) -> bool:
     if not path.is_dir():
         return False
 
+    has_weight_index = any((path / name).is_file() for name in LOCAL_MODEL_INDEX_FILES)
+    has_weights = (
+        _path_has_complete_indexed_weights(path)
+        if has_weight_index
+        else _path_has_any_matching_file(path, LOCAL_MODEL_WEIGHT_PATTERNS)
+    )
+
     return (
         _path_has_any_matching_file(path, LOCAL_MODEL_CONFIG_FILES)
         and _path_has_any_matching_file(path, LOCAL_MODEL_TOKENIZER_PATTERNS)
-        and (
-            _path_has_any_matching_file(path, LOCAL_MODEL_WEIGHT_PATTERNS)
-            or _path_has_complete_indexed_weights(path)
-        )
+        and has_weights
     )
 
 
@@ -260,6 +267,48 @@ def _normalize_for_hash(
     return {key: value for key, value in parameters.items() if key not in drop_keys}
 
 
+def _same_spec_hash_basis(payload: dict[str, Any]) -> dict[str, Any]:
+    server = payload.get("resolved_server_parameters")
+    client = payload.get("resolved_client_parameters")
+    if not isinstance(server, dict):
+        raise ValueError("same spec resolved_server_parameters must be an object")
+    if not isinstance(client, dict):
+        raise ValueError("same spec resolved_client_parameters must be an object")
+
+    return {
+        "schema_version": str(payload.get("schema_version") or ""),
+        "spec_id": str(payload.get("spec_id") or ""),
+        "scenario": str(payload.get("scenario") or ""),
+        "model": str(payload.get("model") or ""),
+        "model_parameters": str(payload.get("model_parameters") or ""),
+        "model_precision": str(payload.get("model_precision") or ""),
+        "model_quantization": str(payload.get("model_quantization") or ""),
+        "hardware_vendor": str(payload.get("hardware_vendor") or ""),
+        "hardware_chip_model": str(payload.get("hardware_chip_model") or ""),
+        "chip_count": int(payload.get("chip_count") or 0),
+        "node_count": int(payload.get("node_count") or 0),
+        "resolved_server_parameters": _normalize_for_hash(
+            server,
+            drop_keys=NON_SEMANTIC_SERVER_KEYS,
+        ),
+        "resolved_client_parameters": _normalize_for_hash(
+            client,
+            drop_keys=NON_SEMANTIC_CLIENT_KEYS,
+        ),
+    }
+
+
+def compute_resolved_spec_hash(payload: dict[str, Any]) -> str:
+    """Compute the identity of the final effective same-spec parameters."""
+    hash_input = json.dumps(
+        _same_spec_hash_basis(payload),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+    return hashlib.sha256(hash_input.encode("utf-8")).hexdigest()
+
+
 def build_same_spec_payload(
     spec: dict[str, Any],
     *,
@@ -275,6 +324,7 @@ def build_same_spec_payload(
     model_precision_override: str | None = None,
     model_quantization_override: str | None = None,
     hardware_chip_model_override: str | None = None,
+    server_parameter_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     spec_id = _require_string(spec, "id")
     canonical_model = model_override or _require_string(spec, "model")
@@ -297,48 +347,19 @@ def build_same_spec_payload(
         host=client_host,
         port=client_port,
     )
-    hash_basis = {
-        "schema_version": "benchmark-same-spec/v1",
-        "spec_id": spec_id,
-        "scenario": _require_string(spec, "scenario"),
-        "model": canonical_model,
-        "model_parameters": model_parameters,
-        "model_precision": model_precision,
-        "model_quantization": model_quantization,
-        "hardware_vendor": hardware_vendor,
-        "hardware_chip_model": hardware_chip_model,
-        "chip_count": int(spec.get("chip_count") or 0),
-        "node_count": int(spec.get("node_count") or 0),
-        "resolved_server_parameters": _normalize_for_hash(
-            resolve_server_parameters(
-                spec,
-                runtime_model=canonical_model,
-                host=server_host,
-                port=server_port,
-                dtype_override=dtype_override,
-                model_precision_override=model_precision,
-            ),
-            drop_keys=NON_SEMANTIC_SERVER_KEYS,
-        ),
-        "resolved_client_parameters": _normalize_for_hash(
-            resolve_client_parameters(
-                spec,
-                runtime_model=canonical_model,
-                host=client_host,
-                port=client_port,
-            ),
-            drop_keys=NON_SEMANTIC_CLIENT_KEYS,
-        ),
-    }
-    hash_input = json.dumps(
-        hash_basis,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
+    canonical_server_parameters = resolve_server_parameters(
+        spec,
+        runtime_model=canonical_model,
+        host=server_host,
+        port=server_port,
+        dtype_override=dtype_override,
+        model_precision_override=model_precision,
     )
-    resolved_spec_hash = hashlib.sha256(hash_input.encode("utf-8")).hexdigest()
+    if server_parameter_overrides:
+        resolved_server_parameters.update(server_parameter_overrides)
+        canonical_server_parameters.update(server_parameter_overrides)
 
-    return {
+    payload = {
         "schema_version": "benchmark-same-spec/v1",
         "spec_id": spec_id,
         "spec_label": str(spec.get("label") or ""),
@@ -352,10 +373,15 @@ def build_same_spec_payload(
         "hardware_chip_model": hardware_chip_model,
         "chip_count": int(spec.get("chip_count") or 0),
         "node_count": int(spec.get("node_count") or 0),
-        "resolved_spec_hash": resolved_spec_hash,
         "resolved_server_parameters": resolved_server_parameters,
         "resolved_client_parameters": resolved_client_parameters,
     }
+    hash_payload = {
+        **payload,
+        "resolved_server_parameters": canonical_server_parameters,
+    }
+    payload["resolved_spec_hash"] = compute_resolved_spec_hash(hash_payload)
+    return payload
 
 
 def write_same_spec_payload(
@@ -373,6 +399,7 @@ def write_same_spec_payload(
     model_precision_override: str | None = None,
     model_quantization_override: str | None = None,
     hardware_chip_model_override: str | None = None,
+    server_parameter_overrides: dict[str, Any] | None = None,
 ) -> Path:
     payload = build_same_spec_payload(
         load_benchmark_spec(spec_file),
@@ -388,6 +415,7 @@ def write_same_spec_payload(
         model_precision_override=model_precision_override,
         model_quantization_override=model_quantization_override,
         hardware_chip_model_override=hardware_chip_model_override,
+        server_parameter_overrides=server_parameter_overrides,
     )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(
@@ -426,9 +454,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model-precision")
     parser.add_argument("--model-quantization")
     parser.add_argument("--hardware-chip-model")
+    parser.add_argument(
+        "--server-parameters-json",
+        help="JSON object of effective server parameters applied by an external launcher.",
+    )
     args = parser.parse_args(argv)
 
     try:
+        server_parameter_overrides = None
+        if args.server_parameters_json:
+            server_parameter_overrides = json.loads(args.server_parameters_json)
+            if not isinstance(server_parameter_overrides, dict):
+                raise ValueError("--server-parameters-json must contain a JSON object")
         output_file = write_same_spec_payload(
             spec_file=args.spec_file.resolve(),
             output_file=args.output_file.resolve(),
@@ -443,8 +480,9 @@ def main(argv: list[str] | None = None) -> int:
             model_precision_override=args.model_precision,
             model_quantization_override=args.model_quantization,
             hardware_chip_model_override=args.hardware_chip_model,
+            server_parameter_overrides=server_parameter_overrides,
         )
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, json.JSONDecodeError) as error:
         print(str(error))
         return 2
 

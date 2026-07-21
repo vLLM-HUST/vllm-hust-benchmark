@@ -1,0 +1,92 @@
+{
+  "benchmark_type": "serve",
+  "evidence_label": "real-online",
+  "execution": {
+    "benchmark_commit": "f29794c53e7fc1de6e66b3f5bf0d3ca1e521caa1",
+    "chunked_prefill": false,
+    "dev_hub_commit": "2afac6bcabb5efaf8cb20dda803d298c11f283a5",
+    "dev_hub_dir": "/home/shuhao/vllm-hust-dev-hub",
+    "gpu_memory_utilization": "0.90",
+    "graph_mode": true,
+    "local_model_path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "managed_container": "vllm-hust-prefix-bisect-npu1-20260720",
+    "managed_container_ssh_port": 2231,
+    "managed_recreate_container": false,
+    "managed_systemd_unit": "vllm-hust-prefix-bisect-npu1-20260720.service",
+    "max_model_len": 32768,
+    "max_num_seqs": 16,
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "prefix_caching": true,
+    "runtime_python": "/home/shuhao/miniconda3/envs/vllm-hust-dev/bin/python3.12",
+    "server_port": "8031"
+  },
+  "generated_at": "2026-07-20T15:35:35.016794+00:00",
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "devices": [
+      1
+    ],
+    "node_count": 1
+  },
+  "repeat_policy": {
+    "max_attempts": 3,
+    "minimum_successes": 3,
+    "target_successes": 3
+  },
+  "repeat_result_dirs": [
+    "/data/shared_datasets/vllm-hust-benchmark/prefix-regression-bisect-npu1/runs/historical-pr-prefix-bisect-20260706-runtime-compat-prefix-repetition-online-103d3aa344-bae528a400/repeat-01",
+    "/data/shared_datasets/vllm-hust-benchmark/prefix-regression-bisect-npu1/runs/historical-pr-prefix-bisect-20260706-runtime-compat-prefix-repetition-online-103d3aa344-bae528a400/repeat-02",
+    "/data/shared_datasets/vllm-hust-benchmark/prefix-regression-bisect-npu1/runs/historical-pr-prefix-bisect-20260706-runtime-compat-prefix-repetition-online-103d3aa344-bae528a400/repeat-03"
+  ],
+  "resolved_refs": {
+    "core_commit": "103d3aa34483933ae55245b2bdfa8bed43f149c1",
+    "plugin_commit": "bae528a4004e14c954601f5faa209f28fe6e1e19"
+  },
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "selection": {
+    "benchmark_type": "serve",
+    "candidates": [
+      {
+        "distance_to_median": 5.199799251277,
+        "error_rate": 0.0,
+        "index": 0,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 208.95303595578298,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/prefix-regression-bisect-npu1/runs/historical-pr-prefix-bisect-20260706-runtime-compat-prefix-repetition-online-103d3aa344-bae528a400/repeat-01"
+      },
+      {
+        "distance_to_median": 0.36436167312785983,
+        "error_rate": 0.0,
+        "index": 1,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 214.51719688018784,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/prefix-regression-bisect-npu1/runs/historical-pr-prefix-bisect-20260706-runtime-compat-prefix-repetition-online-103d3aa344-bae528a400/repeat-02"
+      },
+      {
+        "distance_to_median": 0.0,
+        "error_rate": 0.0,
+        "index": 2,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 214.15283520705998,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/prefix-regression-bisect-npu1/runs/historical-pr-prefix-bisect-20260706-runtime-compat-prefix-repetition-online-103d3aa344-bae528a400/repeat-03"
+      }
+    ],
+    "median_value": 214.15283520705998,
+    "primary_metric_name": "ttft_ms",
+    "selected_result_dir": "/data/shared_datasets/vllm-hust-benchmark/prefix-regression-bisect-npu1/runs/historical-pr-prefix-bisect-20260706-runtime-compat-prefix-repetition-online-103d3aa344-bae528a400/repeat-03"
+  },
+  "spec": "/home/shuhao/vllm-hust-benchmark-single-npu/docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
+  "target": {
+    "core_ref": "103d3aa34483933ae55245b2bdfa8bed43f149c1",
+    "label": "prefix-bisect-20260706-runtime-compat",
+    "notes": "Matched core/backend pair after the synchronized 2026-07-06 scheduler, KV-cache and upstream runtime compatibility fixes. Use after the July 3 midpoint to narrow vllm-hust #163.",
+    "plugin_ref": "bae528a4004e14c954601f5faa209f28fe6e1e19",
+    "pr_number": null,
+    "server_env": [],
+    "server_extra_args": [],
+    "workloads": [
+      "prefix-repetition-online"
+    ]
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "benchmark_type": "serve",
+  "evidence_label": "real-online",
+  "execution": {
+    "benchmark_commit": "b469d44e4547fabf65b92939c24e58f169bce6b9",
+    "chunked_prefill": false,
+    "dev_hub_commit": "2afac6bcabb5efaf8cb20dda803d298c11f283a5",
+    "dev_hub_dir": "/home/shuhao/vllm-hust-dev-hub",
+    "gpu_memory_utilization": "0.90",
+    "graph_mode": true,
+    "local_model_path": "/data/shared_models/Qwen2.5-7B-Instruct",
+    "managed_container": "vllm-hust-single-npu6-backfill-20260720",
+    "managed_container_ssh_port": 2226,
+    "managed_recreate_container": false,
+    "managed_systemd_unit": "vllm-hust-single-npu6-backfill-20260720.service",
+    "max_model_len": 32768,
+    "max_num_seqs": 256,
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "prefix_caching": false,
+    "runtime_python": "/data/conda-envs/vllm-hust-single-npu-backfill/bin/python3.12",
+    "server_port": "8206"
+  },
+  "generated_at": "2026-07-20T07:03:16.717092+00:00",
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "devices": [
+      6
+    ],
+    "node_count": 1
+  },
+  "repeat_policy": {
+    "max_attempts": 5,
+    "minimum_successes": 3,
+    "target_successes": 3
+  },
+  "repeat_result_dirs": [
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-133-base-attention-boundary-online-1aa7cd10b7-cd29480d96/repeat-01",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-133-base-attention-boundary-online-1aa7cd10b7-cd29480d96/repeat-02",
+    "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-133-base-attention-boundary-online-1aa7cd10b7-cd29480d96/repeat-03"
+  ],
+  "resolved_refs": {
+    "core_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "plugin_commit": "cd29480d9699616adf6808fb6ccc3107bc9f1384"
+  },
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "selection": {
+    "benchmark_type": "serve",
+    "candidates": [
+      {
+        "distance_to_median": 194.79198275348608,
+        "error_rate": 0.0,
+        "index": 0,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 2038.139067344673,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-133-base-attention-boundary-online-1aa7cd10b7-cd29480d96/repeat-01"
+      },
+      {
+        "distance_to_median": 0.0,
+        "error_rate": 0.0,
+        "index": 1,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 1843.347084591187,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-133-base-attention-boundary-online-1aa7cd10b7-cd29480d96/repeat-02"
+      },
+      {
+        "distance_to_median": 142.1917807592763,
+        "error_rate": 0.0,
+        "index": 2,
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 1701.1553038319107,
+        "result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-133-base-attention-boundary-online-1aa7cd10b7-cd29480d96/repeat-03"
+      }
+    ],
+    "median_value": 1843.347084591187,
+    "primary_metric_name": "ttft_ms",
+    "selected_result_dir": "/data/shared_datasets/vllm-hust-benchmark/single-npu-backfill/runs/historical-pr-backend-pr-133-base-attention-boundary-online-1aa7cd10b7-cd29480d96/repeat-02"
+  },
+  "spec": "/home/shuhao/vllm-hust-benchmark-single-npu/docs/official-baselines/official-ascend-jan-2026-v0180-attention-boundary-online-qwen25-7b-910b2.json",
+  "target": {
+    "core_ref": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "label": "backend-pr-133-base",
+    "notes": "Merged base named by backend PR 133, using a burst that traverses the 1/32/128/256 request boundaries.",
+    "plugin_ref": "cd29480d9699616adf6808fb6ccc3107bc9f1384",
+    "pr_number": 133,
+    "server_env": [],
+    "server_extra_args": [],
+    "workloads": [
+      "attention-boundary-online"
+    ]
+  }
+}

@@ -116,6 +116,32 @@ def test_managed_dev_hub_defaults_use_isolated_backfill_service(monkeypatch) -> 
     assert args.managed_systemd_unit == "vllm-hust-backfill.service"
 
 
+def test_managed_same_spec_parameters_match_effective_server_args(monkeypatch) -> None:
+    module = load_module()
+    monkeypatch.setattr(sys, "argv", ["backfill_historical_pr_benchmarks.py"])
+    args = module.parse_args()
+    args.managed_enable_prefix_caching = True
+    spec = module.OfficialSpec(
+        path=Path("prefix.json"),
+        scenario="prefix-repetition-online",
+        workload="prefix-repetition-online",
+        benchmark_type="serve",
+        model="Qwen/Qwen2.5-14B-Instruct",
+        precision="FP16",
+        chip_model="910B2",
+        chip_count=1,
+        node_count=1,
+    )
+
+    parameters = module.managed_same_spec_server_parameters(args, spec)
+
+    assert parameters["enable_prefix_caching"] == "true"
+    assert parameters["enable_chunked_prefill"] == "false"
+    assert parameters["max_model_len"] == str(args.managed_max_model_len)
+    assert parameters["max_num_batched_tokens"] == str(args.managed_max_model_len)
+    assert parameters["max_num_seqs"] == str(args.managed_max_num_seqs)
+
+
 def test_ensure_plugin_build_info_materializes_source_worktree_file(tmp_path: Path) -> None:
     module = load_module()
     plugin_worktree = tmp_path / "plugin"
