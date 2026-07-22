@@ -38,6 +38,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shlex
 import shutil
 import signal
@@ -417,6 +418,62 @@ def current_head(repo: Path) -> str:
         ["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True, check=True
     )
     return out.stdout.strip()
+
+
+def commit_exists(repo: Path, commit: str) -> bool:
+    """Check whether a commit (full or short SHA) exists in the repo."""
+    r = subprocess.run(
+        ["git", "cat-file", "-t", commit],
+        cwd=repo, capture_output=True, text=True, check=False,
+    )
+    return r.returncode == 0
+
+
+def commit_on_main_branch(repo: Path, commit: str) -> bool:
+    """Check whether a commit is an ancestor of origin/main."""
+    if not commit_exists(repo, commit):
+        return False
+    r = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", commit, "origin/main"],
+        cwd=repo, capture_output=True, text=True, check=False,
+    )
+    return r.returncode == 0
+
+
+def select_idle_npu() -> int | None:
+    """Query ``npu-smi info`` and return the first idle NPU device index.
+
+    An NPU is considered idle when its HBM usage is below a threshold
+    (default 1000 MB).  Returns ``None`` if no idle NPU is found or if
+    ``npu-smi`` is not available.
+    """
+    try:
+        output = subprocess.check_output(
+            ["npu-smi", "info"], text=True, stderr=subprocess.DEVNULL,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        log("Warning: npu-smi not available, cannot detect idle NPU")
+        return None
+
+    idle_threshold_mb = 5000
+    lines = output.splitlines()
+    # Format: each NPU has 2 data lines:
+    #   | N  Name     | Health | Power  Temp  Hugepages |
+    #   | N  Bus-Id   | AICore | Mem-Usage  HBM-Usage  |
+    # HBM-Usage is on the chip-info line (2nd line) as "used/total"
+    for i, line in enumerate(lines):
+        m = re.match(r"^\|\s*(\d+)\s+\S+\s+\|", line)
+        if not m:
+            continue
+        # This is an NPU header line; next line has HBM-Usage
+        if i + 1 < len(lines):
+            chip_line = lines[i + 1]
+            hbm_m = re.search(r"(\d+)\s*/\s*(\d+)\s*\|\s*$", chip_line)
+            if hbm_m:
+                used = int(hbm_m.group(1))
+                if used < idle_threshold_mb:
+                    return int(m.group(1))
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -840,6 +897,182 @@ with open(sys.argv[1], 'w') as f:
             _moe_runtime.write_text(content, encoding="utf-8")
             log("Patched: guarded moe_runtime_args.py import of moe_stage_params")
 
+    # Fix 13: Add missing imports in vllm-hust's serving.py for old commits.
+    # Old commits (e.g. 8d28fcf98, 73187bc8b) are missing several imports:
+    #
+    #   - ``PromptType`` from ``vllm.inputs`` (used in ``_extract_prompt_components``)
+    #   - ``SamplingParams``, ``BeamSearchParams`` from ``vllm.sampling_params``
+    #     (used in ``_extract_prompt_components``)
+    #
+    # The old ``main.py`` eagerly imports all CLI modules (including ``bench``
+    # subcommands), so these missing imports block ALL subcommands.
+    _hust_serving = HUST_REPO / "vllm" / "entrypoints" / "openai" / "engine" / "serving.py"
+    if _hust_serving.is_file():
+        content = _hust_serving.read_text(encoding="utf-8")
+        patched_serving = False
+        lines = content.split("\n")
+
+        # 1) Fix existing import lines that are missing names.
+        #    e.g. ``from vllm.inputs import EngineInput`` -> add ``PromptType``.
+        import_map = {
+            "from vllm.inputs import": {"PromptType"},
+        }
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            for prefix, needed_names in import_map.items():
+                if stripped.startswith(prefix):
+                    missing = needed_names - set(stripped.split())
+                    if missing:
+                        lines[i] = line.rstrip() + ", " + ", ".join(sorted(missing))
+                        patched_serving = True
+                    break
+
+        # 2) Add entirely new import lines that are missing.
+        #    The old commit doesn't have ``from vllm.sampling_params import ...``.
+        #    Only consider root-level imports (no indentation) to avoid inserting
+        #    inside a method body.  Also handle multi-line imports correctly.
+        new_imports = [
+            "from vllm.sampling_params import BeamSearchParams, SamplingParams",
+        ]
+        for new_import in new_imports:
+            prefix = new_import.split(" import ")[0] + " import "
+            if any(prefix in line for line in lines):
+                continue
+            # Find the last line of the root-level import block by scanning for
+            # root-level ``from vllm.`` imports and all their continuation lines
+            # (including the closing ``)`` of multi-line imports, even when the
+            # ``)`` is not indented).
+            #
+            # The import block ends when we hit a non-``from``, non-``)``,
+            # non-indented line that is not a blank line.
+            insert_after = -1
+            seen_root_import = False
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if stripped.startswith("from vllm.") and not line.startswith((" ", "\t")):
+                    seen_root_import = True
+                    insert_after = i
+                elif seen_root_import and (line.startswith((" ", "\t")) or stripped == ")"):
+                    # Continuation of multi-line import (indented items or closing paren).
+                    insert_after = i
+                elif seen_root_import:
+                    # Non-import, non-continuation line → import block ended.
+                    break
+            lines.insert(insert_after + 1, new_import)
+            patched_serving = True
+
+        if patched_serving:
+            content = "\n".join(lines)
+            _hust_serving.write_text(content, encoding="utf-8")
+            log("Patched: added missing imports in vllm-hust serving.py")
+
+    # Fix 14: Create missing ``vllm/beam_search/`` package.
+    #
+    # ``vllm/entrypoints/llm.py`` imports from ``vllm.beam_search``:
+    #
+    #   from vllm.beam_search import (
+    #       BeamSearchInstance,
+    #       BeamSearchOutput,
+    #       BeamSearchSequence,
+    #       create_sort_beams_key_function,
+    #   )
+    #
+    # But the ``vllm/beam_search/`` directory doesn't exist in the old
+    # commit.  The actual beam_search code is at
+    # ``vllm/entrypoints/generate/beam_search/``.  We create the missing
+    # package that re-exports the needed symbols.
+    _beam_search_dir = HUST_REPO / "vllm" / "beam_search"
+    if not _beam_search_dir.is_dir():
+        _beam_search_dir.mkdir(parents=True, exist_ok=True)
+        _init_py = _beam_search_dir / "__init__.py"
+        _init_py.write_text(
+            "# Auto-generated by backfill_single_gpu.py for compatibility\n"
+            "# with older vllm-hust commits that reference vllm.beam_search\n"
+            "# but do not have the package.\n"
+            "from vllm.entrypoints.generate.beam_search.utils import (\n"
+            "    BeamSearchInstance,\n"
+            "    BeamSearchOutput,\n"
+            "    BeamSearchSequence,\n"
+            "    create_sort_beams_key_function,\n"
+            ")\n"
+            "\n"
+            "__all__ = [\n"
+            '    "BeamSearchInstance",\n'
+            '    "BeamSearchOutput",\n'
+            '    "BeamSearchSequence",\n'
+            '    "create_sort_beams_key_function",\n'
+            "]\n",
+            encoding="utf-8",
+        )
+        log("Patched: created missing vllm/beam_search/ package for old commit compatibility")
+
+    # Fix 15: Guard ``OnlineQuantizationConfigArgs`` import in llm.py.
+    #
+    # The old commit (8d28fcf98) has ``vllm/entrypoints/llm.py`` importing
+    # ``OnlineQuantizationConfigArgs`` from ``vllm.config.quantization``,
+    # but the class doesn't exist in the old commit's quantization.py
+    # (only ``QuantizationConfigArgs`` and ``QuantSpec`` exist).
+    #
+    # This causes:
+    #   ImportError: cannot import name 'OnlineQuantizationConfigArgs'
+    #   from 'vllm.config.quantization'
+    #
+    # We guard the import with try/except and replace the type annotation
+    # with ``Any`` when the class is missing.
+    _llm_py = HUST_REPO / "vllm" / "entrypoints" / "llm.py"
+    if _llm_py.is_file():
+        content = _llm_py.read_text(encoding="utf-8")
+        patched_llm = False
+
+        # Guard the import.
+        old_import = "from vllm.config.quantization import (\n    OnlineQuantizationConfigArgs,\n)"
+        new_import = (
+            "try:\n"
+            "    from vllm.config.quantization import (\n"
+            "        OnlineQuantizationConfigArgs,\n"
+            "    )\n"
+            "except ImportError:\n"
+            "    OnlineQuantizationConfigArgs = None  # type: ignore[assignment]"
+        )
+        if old_import in content:
+            content = content.replace(old_import, new_import)
+            patched_llm = True
+
+        # Replace the type annotation ``| OnlineQuantizationConfigArgs | None``
+        # with ``| Any | None`` when the class may be None.
+        # The annotation is on the ``quantization_config`` parameter.
+        old_usage = "        | OnlineQuantizationConfigArgs\n        | None = None,"
+        new_usage = "        | Any\n        | None = None,"
+        if old_usage in content:
+            content = content.replace(old_usage, new_usage)
+            patched_llm = True
+
+        if patched_llm:
+            _llm_py.write_text(content, encoding="utf-8")
+            log("Patched: guarded OnlineQuantizationConfigArgs import in llm.py")
+
+    # Fix 16: Create missing ``vllm/entrypoints/utils.py`` module.
+    #
+    # ``vllm/entrypoints/llm.py`` imports from ``vllm.entrypoints.utils``:
+    #
+    #   from vllm.entrypoints.utils import log_non_default_args
+    #
+    # But the ``vllm/entrypoints/utils.py`` file doesn't exist in the old
+    # commit.  The actual function is in
+    # ``vllm/entrypoints/serve/utils/api_utils.py``.  We create the missing
+    # module that re-exports the needed function.
+    _entrypoints_utils = HUST_REPO / "vllm" / "entrypoints" / "utils.py"
+    if not _entrypoints_utils.is_file():
+        _entrypoints_utils.write_text(
+            "# Auto-generated by backfill_single_gpu.py for compatibility\n"
+            "# with older vllm-hust commits that reference this module.\n"
+            "from vllm.entrypoints.serve.utils.api_utils import log_non_default_args\n"
+            "\n"
+            "__all__ = [\"log_non_default_args\"]\n",
+            encoding="utf-8",
+        )
+        log("Patched: created missing vllm/entrypoints/utils.py module")
+
 
 # ---------------------------------------------------------------------------
 # Existing-cell discovery
@@ -958,13 +1191,16 @@ def _to_legacy_cmd(cmd: list[str], output_dir: Path) -> list[str]:
     return new_cmd
 
 
-def _build_env() -> dict[str, str]:
-    """Build the environment for running vllm commands."""
+def _build_env(npu_id: int = 0) -> dict[str, str]:
+    """Build the environment for running vllm commands.
+
+    *npu_id* – the NPU device index to use (default 0).
+    """
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
     env.setdefault("VLLM_USE_V1", "1")
-    env["ASCEND_RT_VISIBLE_DEVICES"] = "2"
-    env["ASCEND_VISIBLE_DEVICES"] = "2"
+    env["ASCEND_RT_VISIBLE_DEVICES"] = str(npu_id)
+    env["ASCEND_VISIBLE_DEVICES"] = str(npu_id)
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
@@ -980,6 +1216,12 @@ def _build_env() -> dict[str, str]:
     env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/ascend-toolkit/lib64:" + env["LD_LIBRARY_PATH"]
     env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/cann-9.0.0/lib64:" + env["LD_LIBRARY_PATH"]
     env["ATB_HOME_PATH"] = f"{atb_home}/{cxx_abi_dir}"
+
+    # Set VLLM_VERSION so the ascend plugin can parse the vllm version.
+    # Old commits (pre-v0.23) may have __version__ == "dev" when _version.py
+    # is missing after git checkout, causing get_vllm_upstream_version() to
+    # raise ValueError("Invalid vllm version dev").
+    env.setdefault("VLLM_VERSION", "0.17.0")
     return env
 
 
@@ -1105,7 +1347,7 @@ def _run_serve_bench(
 
 
 def run_vllm_bench(
-    workload: str, hust_commit: str, output_dir: Path
+    workload: str, hust_commit: str, output_dir: Path, npu_id: int = 0,
 ) -> Path:
     """Run the right vllm bench subcommand and return the raw result JSON path."""
     params = SCENARIO_PARAMS[workload]
@@ -1113,7 +1355,7 @@ def run_vllm_bench(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     bench_log = output_dir / "bench.log"
-    env = _build_env()
+    env = _build_env(npu_id=npu_id)
 
     if benchmark_type == "latency":
         cmd: list[str] = [
@@ -1590,7 +1832,8 @@ def _check_error_rate(sub_dir: Path) -> str | None:
     return None
 
 
-def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None) -> dict[str, Any]:
+def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
+             npu_id: int = 0) -> dict[str, Any]:
     if ascend_commit is None:
         ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
 
@@ -1615,7 +1858,7 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None) 
         # Apply compatibility patches for older vllm-hust commits.
         install_ascend_plugin()
 
-        raw = run_vllm_bench(workload, hust_commit, work_dir / "bench")
+        raw = run_vllm_bench(workload, hust_commit, work_dir / "bench", npu_id=npu_id)
         run_id = build_run_id(workload, hust_commit)
         sub_dir = submit_artifact(workload, hust_commit, ascend_commit, run_id, raw)
 
@@ -1670,10 +1913,18 @@ def cmd_plan(args: argparse.Namespace) -> int:
     for workload, commits in cells.items():
         print(f"\n[{workload}]")
         for commit in commits:
+            exists = commit_exists(HUST_REPO, commit)
+            on_main = commit_on_main_branch(HUST_REPO, commit) if exists else False
             already = cell_already_present(workload, commit)
-            mark = "skip" if already else "MISSING"
-            print(f"  {mark:7s}  {workload}  {commit[:9]}")
-            if not already:
+            if not exists:
+                status = "NOT-FOUND"
+            elif already:
+                status = "skip"
+            else:
+                status = "MISSING"
+            branch_mark = "" if on_main else " [non-main]"
+            print(f"  {status:10s}  {workload}  {commit[:9]}{branch_mark}")
+            if not already and exists:
                 total_missing += 1
     print(f"\nTotal missing: {total_missing}")
     return 0
@@ -1720,6 +1971,20 @@ def cmd_run(args: argparse.Namespace) -> int:
     log("RUN: starting backfill")
     target: dict[str, list[str]] = DEFAULT_CELLS
 
+    # Determine NPU device.
+    if args.npu_device is not None:
+        npu_id = args.npu_device
+        log(f"Using user-specified NPU device: {npu_id}")
+    else:
+        idle = select_idle_npu()
+        if idle is None:
+            log("ERROR: no idle NPU device found. "
+                "All NPUs have HBM usage above 5000 MB. "
+                "Use --npu-device to force a specific device.")
+            return 1
+        npu_id = idle
+        log(f"Auto-selected idle NPU device: {npu_id}")
+
     if args.commit:
         workloads = args.only or list(SCENARIO_PARAMS.keys())
         full_commit = _resolve_full_commit(args.commit)
@@ -1734,28 +1999,88 @@ def cmd_run(args: argparse.Namespace) -> int:
         target = {w: target.get(w, []) for w in args.only if w in target}
         target = {w: c for w, c in target.items() if c}
 
+    # Pre-validate all commits exist in the repo.
+    #
+    # When ``--commit`` is explicitly specified, skip the branch check so
+    # the user can run any commit they want.  When auto-discovering
+    # missing cells (no ``--commit``), filter out non-main-branch commits.
+    missing_commits = []
+    non_main_commits = []
     for workload, commits in target.items():
         for commit in commits:
-            if args.ascend_commit:
-                key = f"{workload}:{commit[:9]}:ascend-{args.ascend_commit[:9]}"
-            else:
-                key = f"{workload}:{commit[:9]}"
-            existing = state["cells"].get(key, {})
-            if existing.get("status") == "done" and not args.force:
-                log(f"SKIP {key} (already done)")
-                continue
-            if cell_already_present(workload, commit) and not args.force:
-                log(f"SKIP {key} (already in leaderboard)")
-                state["cells"][key] = {"status": "done", "skipped": "already-present"}
-                continue
-            log(f"BEGIN {key}")
-            result = run_cell(workload, commit, args.ascend_commit)
-            state["cells"][key] = result
-            save_state(state)
-            if result["status"] == "failed":
-                if args.fail_fast:
-                    log("FAIL-FAST: stopping after first failure")
-                    return 1
+            if not commit_exists(HUST_REPO, commit):
+                missing_commits.append((workload, commit))
+            elif not args.commit and not commit_on_main_branch(HUST_REPO, commit):
+                non_main_commits.append((workload, commit))
+
+    if missing_commits:
+        for w, c in missing_commits:
+            log(f"WARNING: commit {c[:9]} (workload={w}) not found in vllm-hust repo, skipping")
+        for w, c in missing_commits:
+            key = f"{w}:{c[:9]}"
+            state["cells"][key] = {"status": "done", "skipped": "commit-not-found"}
+        save_state(state)
+
+    if non_main_commits:
+        for w, c in non_main_commits:
+            log(f"INFO: commit {c[:9]} (workload={w}) is not on origin/main branch, skipping")
+            key = f"{w}:{c[:9]}"
+            state["cells"][key] = {"status": "done", "skipped": "not-on-main"}
+        save_state(state)
+
+    # Register a signal handler to restore repos on interrupt.
+    _original_hust = state.get("hust_head")
+    _original_ascend = state.get("ascend_head")
+
+    def _restore_on_exit() -> None:
+        if _original_hust and current_head(HUST_REPO) != _original_hust:
+            log(f"Restoring vllm-hust to {_original_hust[:12]}")
+            subprocess.run(["git", "checkout", "-fq", _original_hust], cwd=HUST_REPO, check=False)
+        if _original_ascend and current_head(ASCEND_REPO) != _original_ascend:
+            log(f"Restoring vllm-ascend-hust to {_original_ascend[:12]}")
+            subprocess.run(["git", "checkout", "-fq", _original_ascend], cwd=ASCEND_REPO, check=False)
+
+    # Clean up NPU processes before exit.
+    def _cleanup_npu() -> None:
+        """Kill any remaining vllm server processes on the selected NPU."""
+        # Use pkill to find and kill python processes running vllm entrypoints.
+        subprocess.run(
+            ["pkill", "-f", "vllm.entrypoints.cli"],
+            check=False, stderr=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            ["pkill", "-f", "api_server"],
+            check=False, stderr=subprocess.DEVNULL,
+        )
+
+    try:
+        for workload, commits in target.items():
+            for commit in commits:
+                if commit in [m[1] for m in missing_commits]:
+                    continue  # already skipped
+                if args.ascend_commit:
+                    key = f"{workload}:{commit[:9]}:ascend-{args.ascend_commit[:9]}"
+                else:
+                    key = f"{workload}:{commit[:9]}"
+                existing = state["cells"].get(key, {})
+                if existing.get("status") == "done" and not args.force:
+                    log(f"SKIP {key} (already done)")
+                    continue
+                if cell_already_present(workload, commit) and not args.force:
+                    log(f"SKIP {key} (already in leaderboard)")
+                    state["cells"][key] = {"status": "done", "skipped": "already-present"}
+                    continue
+                log(f"BEGIN {key}")
+                result = run_cell(workload, commit, args.ascend_commit, npu_id=npu_id)
+                state["cells"][key] = result
+                save_state(state)
+                if result["status"] == "failed":
+                    if args.fail_fast:
+                        log("FAIL-FAST: stopping after first failure")
+                        return 1
+    finally:
+        _cleanup_npu()
+        _restore_on_exit()
 
     log("RUN: done; remember to run `aggregate` and `push`.")
     return 0
@@ -1966,6 +2291,8 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Re-run cells already marked done.")
     p_run.add_argument("--fail-fast", action="store_true",
                        help="Stop after the first failed cell.")
+    p_run.add_argument("--npu-device", type=int, default=None,
+                       help="NPU device index to use (default: auto-select idle NPU via npu-smi).")
 
     return parser
 
