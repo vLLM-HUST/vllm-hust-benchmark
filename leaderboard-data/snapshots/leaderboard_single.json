@@ -10702,6 +10702,314 @@
     }
   },
   {
+    "entry_id": "fc890e63-8485-47f3-b843-b0a673ea4e58",
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct",
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-latency",
+      "input_length": 1024,
+      "output_length": 128,
+      "batch_size": 8,
+      "concurrent_requests": null,
+      "dataset": null
+    },
+    "metrics": {
+      "ttft_ms": 5384.002279428144,
+      "tbt_ms": null,
+      "throughput_tps": null,
+      "peak_mem_mb": 0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "latency-slo",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": 92.0,
+        "typical_throughput_ratio_vs_baseline": 2.2,
+        "typical_ttft_reduction_pct_vs_baseline": 23.0,
+        "typical_tpot_reduction_pct_vs_baseline": 25.0,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": true,
+        "long_context_ttft_p95_ms": 80.0,
+        "long_context_ttft_p99_ms": 95.0,
+        "long_context_tpot_p95_ms": 9.0,
+        "long_context_tpot_p99_ms": 10.0,
+        "long_context_ttft_p95_stable": true,
+        "long_context_ttft_p99_stable": true,
+        "long_context_tpot_p95_stable": true,
+        "long_context_tpot_p99_stable": true,
+        "unit_token_cost_reduction_pct": 35.0,
+        "multi_tenant_high_utilization": true
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "0.17.2rc0-2810-ga46abb7ae",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-07-22T01:36:10Z",
+      "submitter": "vllm-hust-org-member",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+      "reproducible_cmd": "/root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model Qwen/Qwen2.5-14B-Instruct --input-len 1024 --output-len 128 --batch-size 8 --num-iters-warmup 10 --num-iters 30 --gpu-memory-utilization 0.6 --output-json /root/vllm/vllm-hust-benchmark/submissions/single-gpu-backfill-random-latency-a46abb7ae-20260722/raw.json",
+      "git_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
+      "github_user": "Paul Cheng",
+      "github_commit_url": "https://github.com/vllm-hust/vllm-hust/commit/a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
+      "github_repository": "vllm-hust/vllm-hust",
+      "github_ref": "main",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": false,
+      "idempotency_key": "50dbf4246319804c6f00bd559f55627cb1ddfacf5828c2b5259b2fbf323961eb",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+        "engine": {
+          "repository": "vllm-hust/vllm-hust",
+          "ref": "a46abb7ae6",
+          "commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vllm-hust/vllm-ascend-hust",
+          "ref": "03a12f9bdd",
+          "commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "spec_label": "Official Ascend Jan 2026 random latency baseline for vllm-hust goal tracking",
+      "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
+      "scenario": "random-latency",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B2",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "32413cf16410685d43610e6d5363b3ba38917c21f3a2bf421dd6052b0039d100",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "dtype": "float16",
+        "gpu_memory_utilization": 0.6
+      },
+      "resolved_client_parameters": {
+        "input_len": 1024,
+        "output_len": 128,
+        "batch_size": 8,
+        "num_iters_warmup": 10,
+        "num_iters": 30,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "gpu_memory_utilization": 0.6
+      }
+    }
+  },
+  {
+    "entry_id": "6f2cc20f-bfd0-4c51-9009-818d39229bf1",
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2.post1-3523-g73187bc8b",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct",
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-latency",
+      "input_length": 1024,
+      "output_length": 128,
+      "batch_size": 8,
+      "concurrent_requests": null,
+      "dataset": null
+    },
+    "metrics": {
+      "ttft_ms": 5342.83178926756,
+      "tbt_ms": null,
+      "throughput_tps": null,
+      "peak_mem_mb": 0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "latency-slo",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": 92.0,
+        "typical_throughput_ratio_vs_baseline": 2.2,
+        "typical_ttft_reduction_pct_vs_baseline": 23.0,
+        "typical_tpot_reduction_pct_vs_baseline": 25.0,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": true,
+        "long_context_ttft_p95_ms": 80.0,
+        "long_context_ttft_p99_ms": 95.0,
+        "long_context_tpot_p95_ms": 9.0,
+        "long_context_tpot_p99_ms": 10.0,
+        "long_context_ttft_p95_stable": true,
+        "long_context_ttft_p99_stable": true,
+        "long_context_tpot_p95_stable": true,
+        "long_context_tpot_p99_stable": true,
+        "unit_token_cost_reduction_pct": 35.0,
+        "multi_tenant_high_utilization": true
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "0.17.2.post1-3523-g73187bc8b",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-07-22T01:36:11Z",
+      "submitter": "vllm-hust-org-member",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "v0.17.2.post1-3523-g73187bc8b",
+      "reproducible_cmd": "/root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench latency --model Qwen/Qwen2.5-14B-Instruct --input-len 1024 --output-len 128 --batch-size 8 --num-iters-warmup 10 --num-iters 30 --gpu-memory-utilization 0.6 --output-json /root/vllm/vllm-hust-benchmark/submissions/single-gpu-backfill-random-latency-73187bc8b-20260722/raw.json",
+      "git_commit": "73187bc8ba89b8f83652cbc24042433fb7032add",
+      "github_user": "Paul Cheng",
+      "github_commit_url": "https://github.com/vllm-hust/vllm-hust/commit/73187bc8ba89b8f83652cbc24042433fb7032add",
+      "github_repository": "vllm-hust/vllm-hust",
+      "github_ref": "main",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": false,
+      "idempotency_key": "122cb72d3e3618e8d50d6f098a1944a49ba11aea6824359213b3b88c4c2f7e03",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+        "engine": {
+          "repository": "vllm-hust/vllm-hust",
+          "ref": "73187bc8ba",
+          "commit": "73187bc8ba89b8f83652cbc24042433fb7032add"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vllm-hust/vllm-ascend-hust",
+          "ref": "03a12f9bdd",
+          "commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "spec_label": "Official Ascend Jan 2026 random latency baseline for vllm-hust goal tracking",
+      "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
+      "scenario": "random-latency",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B2",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "32413cf16410685d43610e6d5363b3ba38917c21f3a2bf421dd6052b0039d100",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "dtype": "float16",
+        "gpu_memory_utilization": 0.6
+      },
+      "resolved_client_parameters": {
+        "input_len": 1024,
+        "output_len": 128,
+        "batch_size": 8,
+        "num_iters_warmup": 10,
+        "num_iters": 30,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "gpu_memory_utilization": 0.6
+      }
+    }
+  },
+  {
     "entry_id": "b02eecd1-71a0-4448-a7a8-aa376abc2184",
     "engine": "vllm-hust",
     "engine_version": "0.20.1.post1.dev893+gb0ca117f",
@@ -21739,6 +22047,314 @@
         "num_prompts": 200,
         "num_warmups": 0,
         "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct"
+      }
+    }
+  },
+  {
+    "entry_id": "a95252c8-0d32-47f1-aa68-3b240ad8996c",
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2.post1-3523-g73187bc8b",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct",
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "sharegpt-throughput",
+      "input_length": 1024,
+      "output_length": 256,
+      "batch_size": null,
+      "concurrent_requests": 200,
+      "dataset": "sharegpt"
+    },
+    "metrics": {
+      "ttft_ms": null,
+      "tbt_ms": null,
+      "throughput_tps": 2145.099431656027,
+      "peak_mem_mb": 0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "offline-batch-serving",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": 92.0,
+        "typical_throughput_ratio_vs_baseline": 2.2,
+        "typical_ttft_reduction_pct_vs_baseline": 23.0,
+        "typical_tpot_reduction_pct_vs_baseline": 25.0,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": true,
+        "long_context_ttft_p95_ms": 80.0,
+        "long_context_ttft_p99_ms": 95.0,
+        "long_context_tpot_p95_ms": 9.0,
+        "long_context_tpot_p99_ms": 10.0,
+        "long_context_ttft_p95_stable": true,
+        "long_context_ttft_p99_stable": true,
+        "long_context_tpot_p95_stable": true,
+        "long_context_tpot_p99_stable": true,
+        "unit_token_cost_reduction_pct": 35.0,
+        "multi_tenant_high_utilization": true
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "0.17.2.post1-3523-g73187bc8b",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-07-22T02:31:21Z",
+      "submitter": "vllm-hust-org-member",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "v0.17.2.post1-3523-g73187bc8b",
+      "reproducible_cmd": "/root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench throughput --model Qwen/Qwen2.5-14B-Instruct --dataset-name sharegpt --num-prompts 200 --gpu-memory-utilization 0.6 --output-json /root/vllm/vllm-hust-benchmark/submissions/single-gpu-backfill-sharegpt-throughput-73187bc8b-20260722/raw.json --dataset-path /data/shared_datasets/vllm-hust-benchmark/current-benchmark-datasets/ShareGPT_V3_unfiltered_cleaned_split.json",
+      "git_commit": "73187bc8ba89b8f83652cbc24042433fb7032add",
+      "github_user": "Paul Cheng",
+      "github_commit_url": "https://github.com/vllm-hust/vllm-hust/commit/73187bc8ba89b8f83652cbc24042433fb7032add",
+      "github_repository": "vllm-hust/vllm-hust",
+      "github_ref": "main",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": false,
+      "idempotency_key": "4891262444aea29734bdf2bf53fc3c491877266b4ce8ee148cbf5b2906c6c92a",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+        "engine": {
+          "repository": "vllm-hust/vllm-hust",
+          "ref": "73187bc8ba",
+          "commit": "73187bc8ba89b8f83652cbc24042433fb7032add"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vllm-hust/vllm-ascend-hust",
+          "ref": "03a12f9bdd",
+          "commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "spec_label": "Official Ascend Jan 2026 ShareGPT throughput baseline for vllm-hust goal tracking",
+      "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+      "scenario": "sharegpt-throughput",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B2",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "08890fb3f8c5f876afbd603d07404d7cd56ac10f74de3b6480697d03ae38ca1c",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "dtype": "float16",
+        "gpu_memory_utilization": 0.6
+      },
+      "resolved_client_parameters": {
+        "backend": "vllm",
+        "dataset_name": "sharegpt",
+        "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+        "num_prompts": 200,
+        "num_warmups": 0,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "gpu_memory_utilization": 0.6
+      }
+    }
+  },
+  {
+    "entry_id": "d4202789-8879-4575-a43e-de9478cfe5d6",
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct",
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "sharegpt-throughput",
+      "input_length": 1024,
+      "output_length": 256,
+      "batch_size": null,
+      "concurrent_requests": 200,
+      "dataset": "sharegpt"
+    },
+    "metrics": {
+      "ttft_ms": null,
+      "tbt_ms": null,
+      "throughput_tps": 2136.218076279718,
+      "peak_mem_mb": 0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "offline-batch-serving",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": 92.0,
+        "typical_throughput_ratio_vs_baseline": 2.2,
+        "typical_ttft_reduction_pct_vs_baseline": 23.0,
+        "typical_tpot_reduction_pct_vs_baseline": 25.0,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": true,
+        "long_context_ttft_p95_ms": 80.0,
+        "long_context_ttft_p99_ms": 95.0,
+        "long_context_tpot_p95_ms": 9.0,
+        "long_context_tpot_p99_ms": 10.0,
+        "long_context_ttft_p95_stable": true,
+        "long_context_ttft_p99_stable": true,
+        "long_context_tpot_p95_stable": true,
+        "long_context_tpot_p99_stable": true,
+        "unit_token_cost_reduction_pct": 35.0,
+        "multi_tenant_high_utilization": true
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "0.17.2rc0-2810-ga46abb7ae",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+      "python_version": "3.11.15",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-07-22T03:32:54Z",
+      "submitter": "vllm-hust-org-member",
+      "data_source": "vllm-hust-benchmark",
+      "engine": "vllm-hust",
+      "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+      "reproducible_cmd": "/root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench throughput --model Qwen/Qwen2.5-14B-Instruct --dataset-name sharegpt --num-prompts 200 --gpu-memory-utilization 0.6 --output-json /root/vllm/vllm-hust-benchmark/submissions/single-gpu-backfill-sharegpt-throughput-a46abb7ae-20260722/raw.json --dataset-path /data/shared_datasets/vllm-hust-benchmark/current-benchmark-datasets/ShareGPT_V3_unfiltered_cleaned_split.json",
+      "git_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
+      "github_user": "Paul Cheng",
+      "github_commit_url": "https://github.com/vllm-hust/vllm-hust/commit/a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
+      "github_repository": "vllm-hust/vllm-hust",
+      "github_ref": "main",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": false,
+      "idempotency_key": "c2bef7ae01a41d09562c3fe9477efde48a0ab50a075bbe178ffa6911f50b9987",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+        "engine": {
+          "repository": "vllm-hust/vllm-hust",
+          "ref": "a46abb7ae6",
+          "commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vllm-hust/vllm-ascend-hust",
+          "ref": "03a12f9bdd",
+          "commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e"
+        }
+      }
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "spec_label": "Official Ascend Jan 2026 ShareGPT throughput baseline for vllm-hust goal tracking",
+      "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+      "scenario": "sharegpt-throughput",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B2",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_spec_hash": "08890fb3f8c5f876afbd603d07404d7cd56ac10f74de3b6480697d03ae38ca1c",
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "dtype": "float16",
+        "gpu_memory_utilization": 0.6
+      },
+      "resolved_client_parameters": {
+        "backend": "vllm",
+        "dataset_name": "sharegpt",
+        "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+        "num_prompts": 200,
+        "num_warmups": 0,
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "gpu_memory_utilization": 0.6
       }
     }
   },
