@@ -2130,9 +2130,17 @@ def _build_env(npu_id: int = 0) -> dict[str, str]:
 
 
 def _run_serve_bench(
-    params: dict[str, Any], output_dir: Path, bench_log: Path, env: dict[str, str]
+    params: dict[str, Any],
+    output_dir: Path,
+    bench_log: Path,
+    env: dict[str, str],
+    model: str | None = None,
+    additional_config: str | None = None,
+    compilation_config: str | None = None,
+    temperature: float | None = None,
 ) -> tuple[subprocess.CompletedProcess, Path]:
     """Run serve benchmark: start server, run bench client, stop server."""
+    model_to_use = model if model is not None else MODEL_NAME
     host = "127.0.0.1"
     port = 8000
     server_log = output_dir / "server.log"
@@ -2148,7 +2156,7 @@ def _run_serve_bench(
         "-m",
         "vllm.entrypoints.cli.main",
         "serve",
-        MODEL_NAME,
+        model_to_use,
         "--host",
         host,
         "--port",
@@ -2161,6 +2169,12 @@ def _run_serve_bench(
         DEFAULT_MAX_MODEL_LEN,
         "--enable-prefix-caching",
     ]
+    if additional_config:
+        serve_cmd.extend(["--additional-config", additional_config])
+        log("Added --additional-config to serve command")
+    if compilation_config:
+        serve_cmd.extend(["--compilation-config", compilation_config])
+        log("Added --compilation-config to serve command")
     # Wait for the port to be free (previous server may still be shutting down).
     import socket as _socket
 
@@ -2234,7 +2248,7 @@ def _run_serve_bench(
             "--port",
             str(port),
             "--model",
-            MODEL_NAME,
+            model_to_use,
             "--dataset-name",
             params["dataset_name"],
             "--num-prompts",
@@ -2253,6 +2267,8 @@ def _run_serve_bench(
             bench_cmd.extend(["--random-input-len", str(params["input_length"])])
         if params.get("output_length"):
             bench_cmd.extend(["--random-output-len", str(params["output_length"])])
+        if temperature is not None:
+            bench_cmd.extend(["--temperature", str(temperature)])
 
         log(f"$ {' '.join(shlex.quote(c) for c in bench_cmd)}")
         with bench_log.open("w", encoding="utf-8") as lf:
@@ -2293,11 +2309,17 @@ def run_vllm_bench(
     hust_commit: str,
     output_dir: Path,
     npu_id: int = 0,
+    model: str | None = None,
+    additional_config: str | None = None,
+    compilation_config: str | None = None,
+    temperature: float | None = None,
 ) -> Path:
     """Run the right vllm bench subcommand and return the raw result JSON path."""
     params = SCENARIO_PARAMS[workload]
     benchmark_type = params["benchmark_type"]
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    model_to_use = model if model is not None else MODEL_NAME
 
     bench_log = output_dir / "bench.log"
     env = _build_env(npu_id=npu_id)
@@ -2310,7 +2332,7 @@ def run_vllm_bench(
             "bench",
             "latency",
             "--model",
-            MODEL_NAME,
+            model_to_use,
             "--input-len",
             str(params["input_length"]),
             "--output-len",
@@ -2328,6 +2350,18 @@ def run_vllm_bench(
             "--output-json",
             str(output_dir / "raw.json"),
         ]
+        if temperature is not None:
+            cmd.extend(
+                [
+                    "--override-generation-config",
+                    json.dumps({"temperature": temperature}),
+                ]
+            )
+        if additional_config:
+            cmd.extend(["--additional-config", additional_config])
+        if compilation_config:
+            cmd.extend(["--compilation-config", compilation_config])
+
         result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
     elif benchmark_type == "throughput":
         cmd = [
@@ -2337,7 +2371,7 @@ def run_vllm_bench(
             "bench",
             "throughput",
             "--model",
-            MODEL_NAME,
+            model_to_use,
             "--dataset-name",
             params["dataset_name"],
             "--num-prompts",
@@ -2351,9 +2385,31 @@ def run_vllm_bench(
         ]
         if params.get("dataset_path"):
             cmd.extend(["--dataset-path", params["dataset_path"]])
+        if temperature is not None:
+            cmd.extend(
+                [
+                    "--override-generation-config",
+                    json.dumps({"temperature": temperature}),
+                ]
+            )
+        if additional_config:
+            cmd.extend(["--additional-config", additional_config])
+        if compilation_config:
+            cmd.extend(["--compilation-config", compilation_config])
+
         result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
+
     else:  # serve
-        result, raw = _run_serve_bench(params, output_dir, bench_log, env)
+        result, raw = _run_serve_bench(
+            params,
+            output_dir,
+            bench_log,
+            env,
+            model=model,
+            additional_config=additional_config,
+            compilation_config=compilation_config,
+            temperature=temperature,
+        )
 
     if result.returncode != 0:
         if raw.is_file() and raw.stat().st_size > 0:
@@ -2501,7 +2557,13 @@ _PRECISION_TO_DTYPE = {
 }
 
 
-def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
+def _build_reproducible_cmd(
+    workload: str,
+    output_dir: Path,
+    temperature: float | None = None,
+    additional_config: str | None = None,
+    compilation_config: str | None = None,
+) -> str:
     """Build the exact vllm bench command used for this workload.
 
     This is the command that, when re-run, should reproduce the benchmark
@@ -2537,6 +2599,17 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
             "--output-json",
             str(raw_path),
         ]
+        if temperature is not None:
+            parts.extend(
+                [
+                    "--override-generation-config",
+                    json.dumps({"temperature": temperature}),
+                ]
+            )
+        if additional_config:
+            parts.extend(["--additional-config", additional_config])
+        if compilation_config:
+            parts.extend(["--compilation-config", compilation_config])
     elif benchmark_type == "throughput":
         parts = [
             str(PYTHON_BIN),
@@ -2559,6 +2632,17 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
         ]
         if params.get("dataset_path"):
             parts.extend(["--dataset-path", str(params["dataset_path"])])
+        if temperature is not None:
+            parts.extend(
+                [
+                    "--override-generation-config",
+                    json.dumps({"temperature": temperature}),
+                ]
+            )
+        if additional_config:
+            parts.extend(["--additional-config", additional_config])
+        if compilation_config:
+            parts.extend(["--compilation-config", compilation_config])
     else:  # serve
         parts = [
             str(PYTHON_BIN),
@@ -2594,6 +2678,12 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
             parts.extend(["--random-input-len", str(params["input_length"])])
         if params.get("output_length"):
             parts.extend(["--random-output-len", str(params["output_length"])])
+        if temperature is not None:
+            parts.extend(["--temperature", str(temperature)])
+        if additional_config:
+            parts.extend(["--additional-config", additional_config])
+        if compilation_config:
+            parts.extend(["--compilation-config", compilation_config])
 
     return " ".join(shlex.quote(p) for p in parts)
 
@@ -2606,7 +2696,23 @@ def submit_artifact(
     raw: Path,
     *,
     engine_version: str | None = None,
+    model: str | None = None,
+    temperature: float | None = None,
+    additional_config: str | None = None,
+    compilation_config: str | None = None,
 ) -> Path:
+    # 对提交元数据使用规范的模型名（非本地文件系统路径）
+    if model is not None and model.startswith("/"):
+        basename = model.rstrip("/").rsplit("/", maxsplit=1)[-1]
+        try:
+            from vllm_hust_benchmark.model_registry import resolve_model_identity
+
+            resolve_model_identity(basename)
+            model_to_use = basename
+        except Exception:
+            model_to_use = MODEL_NAME.rsplit("/", maxsplit=1)[-1]
+    else:
+        model_to_use = model if model is not None else MODEL_NAME
     if engine_version is None:
         engine_version = _derive_engine_version(HUST_REPO, hust_commit)
 
@@ -2641,7 +2747,7 @@ def submit_artifact(
         "--core-version",
         engine_version,
         "--model-name",
-        MODEL_NAME,
+        model_to_use,
         "--model-parameters",
         MODEL_PARAMETERS,
         "--model-precision",
@@ -2693,7 +2799,13 @@ def submit_artifact(
 
     # Post-process the artifact to fill in provenance fields that are not
     # available as CLI flags (reproducible_cmd, verified).
-    reproducible_cmd = _build_reproducible_cmd(workload, output_dir)
+    reproducible_cmd = _build_reproducible_cmd(
+        workload,
+        output_dir,
+        temperature=temperature,
+        additional_config=additional_config,
+        compilation_config=compilation_config,
+    )
     artifact_path = output_dir / "run_leaderboard.json"
     if artifact_path.is_file():
         artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
@@ -2906,6 +3018,10 @@ def run_cell(
     ascend_commit: str | None = None,
     npu_id: int = 0,
     *,
+    model: str | None = None,
+    additional_config: str | None = None,
+    compilation_config: str | None = None,
+    temperature: float | None = None,
     allow_plugin_override: bool = False,
     run_id_override: str | None = None,
 ) -> dict[str, Any]:
@@ -3033,9 +3149,28 @@ def run_cell(
                     "Patched: guarded throttle_prefills arg in patch_balance_schedule.py (run_cell)"
                 )
 
-        raw = run_vllm_bench(workload, hust_commit, work_dir / "bench", npu_id=npu_id)
+        raw = run_vllm_bench(
+            workload,
+            hust_commit,
+            work_dir / "bench",
+            npu_id=npu_id,
+            model=model,
+            additional_config=additional_config,
+            compilation_config=compilation_config,
+            temperature=temperature,
+        )
         run_id = run_id_override or build_run_id(workload, hust_commit)
-        sub_dir = submit_artifact(workload, hust_commit, ascend_commit, run_id, raw)
+        sub_dir = submit_artifact(
+            workload,
+            hust_commit,
+            ascend_commit,
+            run_id,
+            raw,
+            model=model,
+            temperature=temperature,
+            additional_config=additional_config,
+            compilation_config=compilation_config,
+        )
 
         # Reject results where all requests failed (error_rate == 1.0).
         err_rate_msg = _check_error_rate(sub_dir)
@@ -3503,6 +3638,10 @@ def cmd_run(args: argparse.Namespace) -> int:
                     commit,
                     ascend_commit,
                     npu_id=npu_id,
+                    model=args.model,
+                    additional_config=args.additional_config,
+                    compilation_config=args.compilation_config,
+                    temperature=args.temperature,
                     allow_plugin_override=bool(args.force_mismatched_plugin_commit),
                 )
                 state["cells"][key] = result
@@ -3882,6 +4021,28 @@ def build_parser() -> argparse.ArgumentParser:
         "--ascend-commit",
         help="vllm-ascend-hust plugin commit (optional; if omitted, "
         "auto-resolves to latest origin/main).",
+    )
+    p_run.add_argument(
+        "--model",
+        default=MODEL_NAME,
+        help="Model name or path (default: %(default)s).",
+    )
+    p_run.add_argument(
+        "--additional-config",
+        type=str,
+        help="JSON string with additional configuration for vLLM.",
+    )
+    p_run.add_argument(
+        "--compilation-config",
+        type=str,
+        help="JSON string with compilation config for vLLM "
+        '(e.g. \'{"cudagraph_mode":"FULL",...}\').',
+    )
+    p_run.add_argument(
+        "--temperature",
+        type=float,
+        default=None,
+        help="Sampling temperature (e.g. 0.0). Only has effect on serve workloads.",
     )
     p_run.add_argument(
         "--workload",
