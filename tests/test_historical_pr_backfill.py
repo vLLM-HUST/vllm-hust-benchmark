@@ -195,3 +195,18 @@ def test_dev_hub_secret_env_does_not_override_process_env(
     env = module.dev_hub_secret_env(dev_hub)
 
     assert env == {"VLLM_HUST_API_KEY": "local-secret"}
+
+
+def test_single_gpu_backfill_does_not_treat_prompt_count_as_concurrency() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    backfill_script = (
+        repo_root / "scripts" / "backfill_single_gpu.py"
+    ).read_text(encoding="utf-8")
+    latest_script = (
+        repo_root / "scripts" / "run_latest_benchmark.sh"
+    ).read_text(encoding="utf-8")
+
+    assert 'cmd += ["--concurrent-requests", str(params["num_prompts"])]' not in (
+        backfill_script
+    )
+    assert '--concurrent-requests "$num_prompts"' not in latest_script

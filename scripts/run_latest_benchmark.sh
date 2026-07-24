@@ -30,13 +30,12 @@ mkdir -p "$BENCH_REPO/.benchmarks/runs"
 # ── 辅助函数 ──────────────────────────────────────────────────────────────
 submit_artifact() {
   local scenario=$1 result_file=$2 run_id=$3
-  local input_len=${4:-} output_len=${5:-} batch_size=${6:-} num_prompts=${7:-}
+  local input_len=${4:-} output_len=${5:-} batch_size=${6:-}
 
   local cmd_args=()
   [[ -n "$input_len"   ]] && cmd_args+=(--input-length "$input_len")
   [[ -n "$output_len"  ]] && cmd_args+=(--output-length "$output_len")
   [[ -n "$batch_size"  ]] && cmd_args+=(--batch-size "$batch_size")
-  [[ -n "$num_prompts" ]] && cmd_args+=(--concurrent-requests "$num_prompts")
 
   echo ">>> Submitting $scenario → submissions/$run_id/"
   cd "$BENCH_REPO"
@@ -102,7 +101,7 @@ $PY -m vllm.entrypoints.cli.main bench throughput \
   --num-prompts 200 \
   --output-json "$RESULT_DIR/throughput.json" 2>&1 | tee "$RESULT_DIR/bench.log"
 
-submit_artifact sharegpt-throughput "$RESULT_DIR/throughput.json" "$RUN_ID" "" "" "" 200
+submit_artifact sharegpt-throughput "$RESULT_DIR/throughput.json" "$RUN_ID"
 
 # ── 3. sonnet-throughput ────────────────────────────────────────────────
 echo ""
@@ -120,7 +119,7 @@ $PY -m vllm.entrypoints.cli.main bench throughput \
   --num-prompts 200 \
   --output-json "$RESULT_DIR/throughput.json" 2>&1 | tee "$RESULT_DIR/bench.log"
 
-submit_artifact sonnet-throughput "$RESULT_DIR/throughput.json" "$RUN_ID" "" "" "" 200
+submit_artifact sonnet-throughput "$RESULT_DIR/throughput.json" "$RUN_ID"
 
 # ── 4. 聚合 ──────────────────────────────────────────────────────────────
 echo ""
