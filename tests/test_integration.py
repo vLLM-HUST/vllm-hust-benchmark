@@ -36,6 +36,97 @@ def _minimal_artifact(model_name: str = "Qwen/Qwen2.5-14B-Instruct") -> str:
     return json.dumps({"model": {"name": model_name}})
 
 
+def _future_official_artifact() -> dict:
+    return {
+        "workload": {
+            "name": "random-online",
+            "input_length": 1024,
+            "output_length": 256,
+            "batch_size": None,
+            "concurrent_requests": None,
+            "dataset": "random",
+        },
+        "metadata": {"submitted_at": "2026-07-25T00:00:00Z"},
+        "same_spec": {
+            "spec_id": (
+                "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
+            ),
+            "scenario": "random-online",
+            "resolved_server_parameters": {"gpu_memory_utilization": 0.6},
+            "resolved_client_parameters": {
+                "dataset_name": "random",
+                "random_input_len": 1024,
+                "random_output_len": 256,
+                "num_prompts": 200,
+                "request_rate": 1,
+                "no_stream": False,
+            },
+        },
+    }
+
+
+def test_formal_submission_rejects_future_official_artifact_without_contract(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    submission_dir = tmp_path / "submission"
+    submission_dir.mkdir()
+    (submission_dir / "run_leaderboard.json").write_text(
+        json.dumps(_future_official_artifact()),
+        encoding="utf-8",
+    )
+
+    assert not integration._validate_formal_submission_sources([submission_dir])
+    assert "metadata.workload_config_contract" in capsys.readouterr().err
+
+
+def test_formal_submission_rejects_official_artifact_without_timestamp_or_contract(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    artifact = _future_official_artifact()
+    artifact["metadata"] = {}
+    submission_dir = tmp_path / "submission"
+    submission_dir.mkdir()
+    (submission_dir / "run_leaderboard.json").write_text(
+        json.dumps(artifact),
+        encoding="utf-8",
+    )
+
+    assert not integration._validate_formal_submission_sources([submission_dir])
+    error_output = capsys.readouterr().err
+    assert "metadata.workload_config_contract" in error_output
+    assert "metadata.submitted_at" in error_output
+
+
+def test_snapshot_guard_grandfathers_prepublished_legacy_official_artifact(
+    tmp_path: Path,
+) -> None:
+    artifact = _future_official_artifact()
+    artifact["metadata"]["submitted_at"] = "2026-07-23T23:59:59Z"
+    (tmp_path / "leaderboard_single.json").write_text(
+        json.dumps([artifact]),
+        encoding="utf-8",
+    )
+    (tmp_path / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+
+    assert integration._validate_snapshot_workload_contracts(tmp_path)
+
+
+def test_snapshot_upload_guard_rejects_future_official_artifact_without_contract(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    (tmp_path / "leaderboard_single.json").write_text(
+        json.dumps([_future_official_artifact()]),
+        encoding="utf-8",
+    )
+    (tmp_path / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+
+    assert not integration._validate_snapshot_workload_contracts(tmp_path)
+    assert "metadata.workload_config_contract" in capsys.readouterr().err
+
+
 def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> None:
     monkeypatch.delenv("VLLM_HUST_WORKSPACE_ROOT", raising=False)
     monkeypatch.delenv("VLLM_HUST_REPO", raising=False)
@@ -761,7 +852,8 @@ def test_load_official_baseline_coverage_keys_requires_published_submission(
         )
 
     official_submission_dir = (
-        submissions_root / "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+        submissions_root
+        / "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
     )
     official_submission_dir.mkdir()
     (official_submission_dir / "run_leaderboard.json").write_text(
@@ -1632,9 +1724,7 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
         }
         seen_baselines["current"] = {
             "baseline_engine": current_accountable["baseline_engine"],
-            "declared_baseline_engine": current_accountable[
-                "declared_baseline_engine"
-            ],
+            "declared_baseline_engine": current_accountable["declared_baseline_engine"],
             "baseline_status": current_accountable["baseline_status"],
         }
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -1907,7 +1997,10 @@ def test_sync_submission_to_huggingface_reports_hf_listing_failure(
 
     captured = capsys.readouterr()
     assert exit_code == 2
-    assert "failed to list dataset files from owner/repo@main: network is unreachable" in captured.err
+    assert (
+        "failed to list dataset files from owner/repo@main: network is unreachable"
+        in captured.err
+    )
 
 
 def test_upload_to_huggingface_rejects_invalid_aggregated_snapshots(

@@ -198,6 +198,7 @@ Operational rule for shared-data safety:
 - After each successful workload, immediately upload that one submission plus
   regenerated snapshots to HF, then update the GitHub issue ledger before
   starting any next workload.
+
 - Failed startups or failed client runs must be recorded in the ledger but must
   not be uploaded as public leaderboard submissions.
 - Before publication, apply `docs/leaderboard-exclusions.json`. A submission
@@ -207,6 +208,42 @@ Operational rule for shared-data safety:
 - The human audit trail is `docs/HISTORICAL_PR_BENCHMARK_BLACKLIST.md`. Operators
   must read it before selecting a historical gap. Blacklisted commits are not
   missing coverage: they are intentionally forbidden from backfill and retest.
+
+## Required effective-configuration metadata
+
+Every CI/CD run and every manually repaired/backfilled point must publish the
+effective values used by the process, not merely the flags that happened to be
+typed. The exporter stamps compliant official artifacts with
+`metadata.workload_config_contract = "explicit-effective/v1"`, and public
+snapshot validation rejects new official records that omit or contradict the
+contract.
+
+Before committing a submission, verify:
+
+- `workload.input_length`, `workload.output_length`, `workload.batch_size`,
+  `workload.concurrent_requests`, and `workload.dataset` all exist. Use JSON
+  `null` only when the setting is genuinely not applicable.
+- `metadata.submitted_at` is present and is the actual artifact-generation
+  timestamp; do not remove or backdate it to obtain legacy treatment.
+- `same_spec.resolved_server_parameters` records effective server defaults such
+  as `gpu_memory_utilization` and workload-specific `max_model_len`.
+- `same_spec.resolved_client_parameters` records effective client defaults,
+  including `no_stream`, offline GPU memory settings, batch size, and the
+  dataset-specific length fields.
+- `num_prompts` is the total sample count. It must never be copied into
+  `workload.concurrent_requests`; only an actual `max_concurrency` /
+  `concurrent_requests` client setting may populate that field.
+- Workload lengths and batch/concurrency metadata agree with the resolved
+  client parameters.
+
+Do not hand-edit the contract marker to bypass validation. Regenerate the
+artifact through `vllm_hust_benchmark.cli submit` or
+`export-leaderboard-artifact`, then run:
+
+```bash
+PYTHONPATH=src:. python scripts/validate_public_leaderboard_snapshots.py \
+  --snapshot-dir leaderboard-data/snapshots
+```
 
 Container recorded by the originating server at handoff:
 

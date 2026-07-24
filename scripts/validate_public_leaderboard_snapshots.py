@@ -15,6 +15,11 @@ if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash  # noqa: E402
+from vllm_hust_benchmark.workload_config_contract import (  # noqa: E402
+    WORKLOAD_CONFIG_CONTRACT_VERSION,
+    requires_workload_config_contract,
+    validate_explicit_workload_config,
+)
 
 
 PUBLIC_BASELINE_ENGINE = "vllm"
@@ -72,8 +77,11 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     workload = str((entry.get("workload") or {}).get("name") or "").strip()
     model = entry.get("model") if isinstance(entry.get("model"), dict) else {}
     hardware = entry.get("hardware") if isinstance(entry.get("hardware"), dict) else {}
-    same_spec = entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
+    same_spec = (
+        entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
+    )
     spec_id = str(same_spec.get("spec_id") or "")
+    metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
 
     if engine == PUBLIC_BASELINE_ENGINE and engine_version != PUBLIC_BASELINE_VERSION:
         errors.append(
@@ -88,9 +96,7 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         )
 
     if contains_retired_baseline_token(spec_id):
-        errors.append(
-            f"{source.name}:{entry_id}: retired baseline spec_id {spec_id!r}"
-        )
+        errors.append(f"{source.name}:{entry_id}: retired baseline spec_id {spec_id!r}")
 
     entry_model_name = str(model.get("name") or model.get("repo_id") or "")
     entry_precision_value = str(model.get("precision") or "")
@@ -134,11 +140,21 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
                 f"precision must match same_spec; entry={entry_precision!r} "
                 f"same_spec={spec_precision!r}"
             )
-        if expected_chip and (entry_chip != expected_chip or spec_chip != expected_chip):
+        if expected_chip and (
+            entry_chip != expected_chip or spec_chip != expected_chip
+        ):
             errors.append(
                 f"{source.name}:{entry_id}: official v0.18.0 public spec "
                 f"{spec_id!r} must be {expected_chip}; entry={entry_chip!r} "
                 f"same_spec={spec_chip!r}"
+            )
+
+    contract_version = str(metadata.get("workload_config_contract") or "")
+    if requires_workload_config_contract(entry) or contract_version:
+        for message in validate_explicit_workload_config(entry):
+            errors.append(
+                f"{source.name}:{entry_id}: workload config contract "
+                f"{WORKLOAD_CONFIG_CONTRACT_VERSION}: {message}"
             )
 
     return errors
