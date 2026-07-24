@@ -1046,6 +1046,12 @@ NODE_COUNT=$(jq -r '.node_count' "$SPEC_FILE")
 SCENARIO=$(jq -r '.scenario' "$SPEC_FILE")
 INPUT_LEN=$(jq -r '.client_parameters.input_len' "$SPEC_FILE")
 OUTPUT_LEN=$(jq -r '.client_parameters.output_len' "$SPEC_FILE")
+BATCH_SIZE=$(jq -r '.client_parameters.batch_size' "$SPEC_FILE")
+CONCURRENT_REQUESTS=$(jq -r '
+  .client_parameters.max_concurrency
+  // .client_parameters.concurrent_requests
+  // empty
+' "$SPEC_FILE")
 BENCHMARK_TYPE=$(resolve_scenario_benchmark_type)
 
 if [[ -z "$CURRENT_ENGINE_VERSION" ]]; then
@@ -1205,6 +1211,8 @@ EXPORT_ARGS=(
 
 append_export_arg_if_present --input-length "$INPUT_LEN"
 append_export_arg_if_present --output-length "$OUTPUT_LEN"
+append_export_arg_if_present --batch-size "$BATCH_SIZE"
+append_export_arg_if_present --concurrent-requests "$CONCURRENT_REQUESTS"
 
 run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" \
 "$CURRENT_RUNTIME_PYTHON" -m vllm_hust_benchmark.cli export-leaderboard-artifact \

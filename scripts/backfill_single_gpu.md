@@ -83,3 +83,15 @@ for entry in data:
 print(f'Total: {count}')
 "
 ```
+
+## 手工补点的配置字段检查
+
+手工补点与 CI/CD 使用同一份 `explicit-effective/v1` 配置契约。提交前必须检查
+`workload` 的 input/output/batch/concurrency/dataset 字段，以及 `same_spec` 中
+解析后的 server/client 参数均已写全；不适用的字段写 JSON `null`，不能直接省略。
+`metadata.submitted_at` 必须保留真实生成时间，不能删除或倒填来绕过新记录校验。
+
+特别注意：`num_prompts` 是总请求数，不是并发数，禁止将其写入
+`workload.concurrent_requests`。只有真实使用了 `max_concurrency` 或
+`concurrent_requests` 时才能填写并发字段。完整清单和校验命令见
+`docs/HISTORICAL_PR_BACKFILL.md` 的 “Required effective-configuration metadata”。

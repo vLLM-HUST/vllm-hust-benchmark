@@ -14,6 +14,11 @@ from vllm_hust_benchmark.model_registry import normalize_model_identity_payload
 from vllm_hust_benchmark.model_registry import resolve_model_identity
 from vllm_hust_benchmark.model_registry import validate_model_identity_payload
 from vllm_hust_benchmark.models import ScenarioDefinition
+from vllm_hust_benchmark.workload_config_contract import (
+    WORKLOAD_CONFIG_CONTRACT_VERSION,
+    is_official_workload_contract_entry,
+    validate_explicit_workload_config,
+)
 
 REQUIRED_METRIC_KEYS = (
     "ttft_ms",
@@ -64,9 +69,7 @@ REQUIRED_SAME_SPEC_KEYS = (
 
 BASELINE_STATUS_PENDING = "pending-baseline"
 BASELINE_STATUS_NONE = "no-baseline-declared"
-DIRTY_ENGINE_VERSION_MARKERS = (
-    "path string is null",
-)
+DIRTY_ENGINE_VERSION_MARKERS = ("path string is null",)
 ENGINE_VERSION_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
 LEADERBOARD_COMPONENT_VERSION_PATTERN = re.compile(r"^\d+\.\d+[\w.+-]*$")
 
@@ -92,7 +95,9 @@ def _short_commit(value: Any) -> str:
 def _sanitize_engine_version(value: Any, *, git_commit: str | None = None) -> str:
     raw = str(value or "")
     saw_multiline = "\n" in raw or "\r" in raw
-    saw_dirty_marker = any(marker in raw.lower() for marker in DIRTY_ENGINE_VERSION_MARKERS)
+    saw_dirty_marker = any(
+        marker in raw.lower() for marker in DIRTY_ENGINE_VERSION_MARKERS
+    )
 
     candidates: list[str] = []
     for line in raw.splitlines() or [raw]:
@@ -105,12 +110,16 @@ def _sanitize_engine_version(value: Any, *, git_commit: str | None = None) -> st
         candidates.append(normalized)
 
     for candidate in candidates:
-        if any(ch.isdigit() for ch in candidate) and ENGINE_VERSION_PATTERN.match(candidate):
+        if any(ch.isdigit() for ch in candidate) and ENGINE_VERSION_PATTERN.match(
+            candidate
+        ):
             return candidate
 
     if candidates:
         primary = candidates[0]
-        if ENGINE_VERSION_PATTERN.match(primary) and not (saw_multiline or saw_dirty_marker):
+        if ENGINE_VERSION_PATTERN.match(primary) and not (
+            saw_multiline or saw_dirty_marker
+        ):
             return primary
 
     short_commit = _short_commit(git_commit)
@@ -138,7 +147,9 @@ def _sanitize_component_version(value: Any) -> str:
     return "N/A"
 
 
-def _validate_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[str, Any]:
+def _validate_constraints_metrics(
+    constraints_metrics: dict[str, Any],
+) -> dict[str, Any]:
     long_context_length = constraints_metrics.get("long_context_length")
     if long_context_length is None:
         return constraints_metrics
@@ -164,7 +175,9 @@ def _default_constraints_metrics() -> dict[str, Any]:
     return {key: None for key in REQUIRED_CONSTRAINT_METRIC_KEYS}
 
 
-def _normalize_constraints_metrics(constraints_metrics: dict[str, Any]) -> dict[str, Any]:
+def _normalize_constraints_metrics(
+    constraints_metrics: dict[str, Any],
+) -> dict[str, Any]:
     merged = _default_constraints_metrics()
     merged.update(constraints_metrics)
     return _validate_constraints_metrics(merged)
@@ -216,16 +229,24 @@ def _derive_long_context_constraints(
             benchmark_result_payload.get("p99_tpot_ms")
         ),
         "long_context_ttft_p95_stable": (
-            is_stable if benchmark_result_payload.get("p95_ttft_ms") is not None else None
+            is_stable
+            if benchmark_result_payload.get("p95_ttft_ms") is not None
+            else None
         ),
         "long_context_ttft_p99_stable": (
-            is_stable if benchmark_result_payload.get("p99_ttft_ms") is not None else None
+            is_stable
+            if benchmark_result_payload.get("p99_ttft_ms") is not None
+            else None
         ),
         "long_context_tpot_p95_stable": (
-            is_stable if benchmark_result_payload.get("p95_tpot_ms") is not None else None
+            is_stable
+            if benchmark_result_payload.get("p95_tpot_ms") is not None
+            else None
         ),
         "long_context_tpot_p99_stable": (
-            is_stable if benchmark_result_payload.get("p99_tpot_ms") is not None else None
+            is_stable
+            if benchmark_result_payload.get("p99_tpot_ms") is not None
+            else None
         ),
     }
 
@@ -275,7 +296,9 @@ def _load_constraints_metrics(constraints_file: Path) -> dict[str, Any]:
     payload = json.loads(constraints_file.read_text(encoding="utf-8"))
     constraints_metrics = payload.get("constraints_metrics", payload)
     if not isinstance(constraints_metrics, dict):
-        raise ValueError("constraints file must be a JSON object or include constraints_metrics")
+        raise ValueError(
+            "constraints file must be a JSON object or include constraints_metrics"
+        )
     return _normalize_constraints_metrics(dict(constraints_metrics))
 
 
@@ -353,7 +376,10 @@ def _derive_metrics_from_benchmark_result(
         "throughput_tps": float(throughput_tps),
         "peak_mem_mb": int(
             peak_mem_mb or benchmark_result_payload.get("peak_mem_mb") or 0.0
-        ) if (peak_mem_mb or benchmark_result_payload.get("peak_mem_mb") or 0.0) is not None else None,
+        )
+        if (peak_mem_mb or benchmark_result_payload.get("peak_mem_mb") or 0.0)
+        is not None
+        else None,
         "error_rate": float(error_rate),
     }
 
@@ -369,7 +395,9 @@ def _derive_metrics_from_benchmark_result(
 
     missing_metrics = [key for key in REQUIRED_METRIC_KEYS if key not in metrics]
     if missing_metrics:
-        raise ValueError(f"derived metrics missing required keys: {', '.join(missing_metrics)}")
+        raise ValueError(
+            f"derived metrics missing required keys: {', '.join(missing_metrics)}"
+        )
     return metrics
 
 
@@ -573,7 +601,8 @@ def export_leaderboard_artifacts(
     )
     workload_name = str(scenario.leaderboard.get("workload_name") or scenario.name)
     representative_business_scenario = str(
-        scenario.leaderboard.get("representative_business_scenario") or "general-serving"
+        scenario.leaderboard.get("representative_business_scenario")
+        or "general-serving"
     )
     idempotency_key = _build_idempotency_key(
         scenario_name=scenario.name,
@@ -706,6 +735,16 @@ def export_leaderboard_artifacts(
     validate_model_identity_payload(artifact["model"])
     if same_spec_payload is not None:
         artifact["same_spec"] = same_spec_payload
+    if is_official_workload_contract_entry(artifact):
+        artifact["metadata"]["workload_config_contract"] = (
+            WORKLOAD_CONFIG_CONTRACT_VERSION
+        )
+        workload_config_errors = validate_explicit_workload_config(artifact)
+        if workload_config_errors:
+            raise ValueError(
+                "official workload configuration contract failed: "
+                + "; ".join(workload_config_errors)
+            )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     artifact_path = output_dir / artifact_name
