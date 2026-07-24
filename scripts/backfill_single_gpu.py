@@ -153,24 +153,39 @@ def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
 
 def _derive_engine_version(hust_repo: Path, hust_commit: str) -> str:
     """Derive the vllm-hust engine version from the given commit.
+ppe
+    Uses ``git describe --tags --always --long --abbrev=9 <commit>`` to
+    produce a consistent version string like::
 
-    Uses ``git describe --tags --always <commit>`` to produce a version
-    string like ``0.17.2.post1-1357-g83cf83ff2`` without dirty suffix.
+        0.17.2.post1-1357-g83cf83ff2
 
-    Falls back to ``g{short_commit}`` (e.g. ``g83cf83ff2``) if the
-    ``git describe`` output is empty.
+    The output is normalised:
+
+    * ``--long`` guarantees the commit count is always present, so every
+      version carries the same granularity.
+    * ``.dirty`` / ``-dirty`` suffixes are stripped because the benchmark
+      results were produced by a *clean* checkout of that commit, and the
+      dirty marker only reflects the state of the repo at backfill time,
+      which is irrelevant to the result.
+
+    Falls back to ``0.0.0.dev0+g{short_commit}`` (PEP 440 compatible) if
+    ``git describe`` returns an empty string.
     """
     try:
         out = subprocess.run(
-            ["git", "describe", "--tags", "--always", hust_commit],
+            ["git", "describe", "--tags", "--always", "--long", "--abbrev=9", hust_commit],
             cwd=hust_repo, capture_output=True, text=True, check=False,
         )
         version = out.stdout.strip()
         if version:
+            # Strip .dirty / -dirty suffix — the result was produced by a
+            # clean checkout of this commit, and the dirty flag only
+            # reflects the state of the backfill repo, not the result.
+            version = re.sub(r'[.-]dirty$', '', version, flags=re.IGNORECASE)
             return version
     except OSError:
         pass
-    return f"g{hust_commit[:8]}"
+    return f"0.0.0.dev0+g{hust_commit[:9]}"
 
 
 # Default missing cells (workload -> list of vllm-hust commits).
@@ -1435,7 +1450,25 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
     if "enforce_eager" not in server_params:
         server_params["enforce_eager"] = ""
     if "gpu_memory_utilization" not in server_params:
-        server_params["gpu_memory_utilization"] = 0.6
+        # Check the SAME_SPEC_GPU_MEMORY_UTILIZATION env var first, then
+        # fall back to the hardcoded 0.6 used by the v0.18.0 baseline.
+        gpu_mem_override = os.environ.get("SAME_SPEC_GPU_MEMORY_UTILIZATION", "").strip()
+        if gpu_mem_override:
+            try:
+                server_params["gpu_memory_utilization"] = float(gpu_mem_override)
+            except ValueError:
+                server_params["gpu_memory_utilization"] = 0.6
+        else:
+            server_params["gpu_memory_utilization"] = 0.6
+    if "max_model_len" not in server_params:
+        # Check the SAME_SPEC_MAX_MODEL_LEN env var, which the official
+        # build_same_spec_payload reads via _maybe_apply_max_model_len_override.
+        max_model_len_override = os.environ.get("SAME_SPEC_MAX_MODEL_LEN", "").strip()
+        if max_model_len_override:
+            try:
+                server_params["max_model_len"] = int(max_model_len_override)
+            except ValueError:
+                pass
 
     # ------------------------------------------------------------------
     # Replicate the old ``resolve_client_parameters`` (commit 2d6f5de).
