@@ -17,6 +17,7 @@
 | 子命令 | 用途 | 需要 NPU |
 |--------|------|----------|
 | `plan` | 列出缺失 cell，commit 列表来自 `leaderboard_single.json` | 否 |
+| `fill` | **一键补全**所有 commit 的缺失 workload（plan + run 组合） | **是** |
 | `status` | 查看 checkpoint 进度 | 否 |
 | `validate` | 验证 submissions 和 snapshots | 否 |
 | `aggregate` | 从 submissions/ 重建 snapshots | 否 |
@@ -39,6 +40,9 @@ python3 scripts/backfill_single_gpu.py status
 
 # 验证 submissions 和 snapshots
 python3 scripts/backfill_single_gpu.py validate
+
+# 一键补全所有缺失的 benchmark 数据（需要 NPU）
+# python3 scripts/backfill_single_gpu.py fill
 ```
 
 ## 参数处理规范
@@ -112,6 +116,32 @@ python3 scripts/backfill_single_gpu.py plan --group
 ### commit sha 获取机制
 
 执行 `plan` 时，两个仓库的 commit sha 值均从 `leaderboard_single.json` 中包含的 commit sha 列表中获取，确保与基准数据保持一致。`latest` 则解析为对应仓库 `origin/main` 分支的最新 commit。
+
+## fill — 一键补全所有缺失数据
+
+遍历 `leaderboard_single.json` 中所有 commit，为每个 commit 自动解析 ascend 插件 commit 并运行所有缺失的 workload。相当于 `plan` 的发现能力 + `run` 的执行能力。
+
+### 选项
+
+| 选项 | 说明 |
+|------|------|
+| `--workload NAME` | 指定 workload（可选，省略则补全所有缺失 workload） |
+| `--force` | 重新运行已完成的 cell |
+| `--fail-fast` | 遇到第一个失败停止 |
+| `--npu-device N` | 指定 NPU 设备索引 |
+
+### 示例
+
+```bash
+# 一键补全所有 commit 的缺失 workload
+python3 scripts/backfill_single_gpu.py fill
+
+# 只补全 random-latency 在所有 commit 中的缺失
+python3 scripts/backfill_single_gpu.py fill --workload random-latency
+
+# 强制重新运行所有已完成的 cell
+python3 scripts/backfill_single_gpu.py fill --force
+```
 
 ## 其他子命令
 

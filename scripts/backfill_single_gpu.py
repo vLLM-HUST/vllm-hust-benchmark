@@ -2061,6 +2061,108 @@ def cmd_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_fill(args: argparse.Namespace) -> int:
+    """Fill all missing benchmark cells across all commits from the data file.
+
+    Iterates over every commit in ``leaderboard_single.json``, finds missing
+    workloads, and runs them sequentially.  This is a one-click full backfill
+    that combines the discovery of ``plan`` with the execution of ``run``.
+    """
+    state = load_state()
+    save_state(state)
+    log("FILL: starting full backfill across all commits")
+
+    # Determine NPU device.
+    if args.npu_device is not None:
+        npu_id = args.npu_device
+        log(f"Using user-specified NPU device: {npu_id}")
+    else:
+        idle = select_idle_npu()
+        if idle is None:
+            log("ERROR: no idle NPU device found. "
+                "All NPUs have HBM usage above 5000 MB. "
+                "Use --npu-device to force a specific device.")
+            return 1
+        npu_id = idle
+        log(f"Auto-selected idle NPU device: {npu_id}")
+
+    commits = sorted(_data_file_commits())
+    if not commits:
+        log("No commits found in leaderboard_single.json — is the snapshot empty?")
+        return 0
+
+    # Optionally filter to a single workload.
+    filter_workload = args.workload
+
+    _original_hust = state.get("hust_head")
+    _original_ascend = state.get("ascend_head")
+
+    def _restore_on_exit() -> None:
+        if _original_hust and current_head(HUST_REPO) != _original_hust:
+            log(f"Restoring vllm-hust to {_original_hust[:12]}")
+            subprocess.run(["git", "checkout", "-fq", _original_hust], cwd=HUST_REPO, check=False)
+        if _original_ascend and current_head(ASCEND_REPO) != _original_ascend:
+            log(f"Restoring vllm-ascend-hust to {_original_ascend[:12]}")
+            subprocess.run(["git", "checkout", "-fq", _original_ascend], cwd=ASCEND_REPO, check=False)
+
+    def _cleanup_npu() -> None:
+        subprocess.run(["pkill", "-f", "vllm.entrypoints.cli"], check=False, stderr=subprocess.DEVNULL)
+        subprocess.run(["pkill", "-f", "api_server"], check=False, stderr=subprocess.DEVNULL)
+
+    total_run = 0
+    total_failed = 0
+    total_skipped = 0
+
+    try:
+        for hust_commit in commits:
+            if not commit_exists(HUST_REPO, hust_commit):
+                log(f"SKIP commit {hust_commit[:9]}: not found in vllm-hust repo")
+                continue
+
+            # Determine which workloads to consider for this commit.
+            candidates = [filter_workload] if filter_workload else list(SCENARIO_PARAMS)
+            missing = [w for w in candidates if not cell_already_present(w, hust_commit)]
+            if not missing:
+                log(f"SKIP commit {hust_commit[:9]}: all workloads present")
+                continue
+
+            ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
+            log(f"=== Commit {hust_commit[:9]}: {len(missing)} missing workload(s) ===")
+
+            for workload in missing:
+                key = f"{workload}:{hust_commit[:9]}:ascend-{ascend_commit[:9]}"
+                existing = state["cells"].get(key, {})
+                if existing.get("status") == "done" and not args.force:
+                    log(f"SKIP {key} (already done)")
+                    total_skipped += 1
+                    continue
+                if cell_already_present(workload, hust_commit) and not args.force:
+                    log(f"SKIP {key} (already in leaderboard)")
+                    state["cells"][key] = {"status": "done", "skipped": "already-present"}
+                    total_skipped += 1
+                    continue
+
+                log(f"BEGIN {key}")
+                result = run_cell(workload, hust_commit, ascend_commit, npu_id=npu_id)
+                state["cells"][key] = result
+                save_state(state)
+
+                if result["status"] == "failed":
+                    total_failed += 1
+                    if args.fail_fast:
+                        log("FAIL-FAST: stopping after first failure")
+                        return 1
+                else:
+                    total_run += 1
+    finally:
+        _cleanup_npu()
+        _restore_on_exit()
+
+    log(f"FILL: done. {total_run} run, {total_failed} failed, {total_skipped} skipped.")
+    log("Remember to run `aggregate` and `push`.")
+    return 0 if total_failed == 0 else 1
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     state = load_state()
     print("Original HEADs:")
@@ -2275,6 +2377,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument("--npu-device", type=int, default=None,
                        help="NPU device index to use (default: auto-select idle NPU via npu-smi).")
 
+    p_fill = sub.add_parser("fill", help="Fill all missing cells across all commits "
+                            "(one-click full backfill).")
+    p_fill.add_argument("--workload", choices=list(SCENARIO_PARAMS.keys()),
+                        help="Specific workload to fill (optional; if omitted, fill all "
+                             "missing workloads across all commits).")
+    p_fill.add_argument("--force", action="store_true",
+                        help="Re-run cells already marked done.")
+    p_fill.add_argument("--fail-fast", action="store_true",
+                        help="Stop after the first failed cell.")
+    p_fill.add_argument("--npu-device", type=int, default=None,
+                        help="NPU device index to use (default: auto-select idle NPU via npu-smi).")
+
     return parser
 
 
@@ -2285,6 +2399,7 @@ def main(argv: list[str] | None = None) -> int:
     dispatch = {
         "plan": cmd_plan,
         "run": cmd_run,
+        "fill": cmd_fill,
         "status": cmd_status,
         "aggregate": cmd_aggregate,
         "validate": cmd_validate,
