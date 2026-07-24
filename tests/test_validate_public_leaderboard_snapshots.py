@@ -16,7 +16,9 @@ SCRIPT_PATH = (
 
 
 def load_module():
-    spec = importlib.util.spec_from_file_location("validate_public_snapshots", SCRIPT_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "validate_public_snapshots", SCRIPT_PATH
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -80,3 +82,32 @@ def test_rejects_one_recorded_hash_for_different_effective_parameters(
 
     assert module.main() == 1
     assert "maps to different effective parameters" in capsys.readouterr().out
+
+
+def test_future_official_entry_requires_effective_config_contract() -> None:
+    module = load_module()
+    payload = same_spec()
+    payload["spec_id"] = (
+        "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
+    )
+    payload["scenario"] = "random-online"
+    candidate = entry("future", payload)
+    candidate["engine"] = "vllm-hust"
+    candidate["workload"] = {
+        "name": "random-online",
+        "input_length": 1024,
+        "output_length": 256,
+        "batch_size": None,
+        "concurrent_requests": None,
+        "dataset": "random",
+    }
+    candidate["model"]["name"] = "Qwen/Qwen2.5-14B-Instruct"
+    candidate["metadata"] = {"submitted_at": "2026-07-25T00:00:00Z"}
+
+    errors = module.validate_entry(
+        candidate,
+        source=Path("leaderboard_single.json"),
+    )
+
+    assert any("workload config contract" in error for error in errors)
+    assert any("workload_config_contract" in error for error in errors)
