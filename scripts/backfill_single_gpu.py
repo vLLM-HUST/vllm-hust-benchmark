@@ -16,6 +16,13 @@ State is stored under .benchmarks/backfill-single-gpu/:
   state.json   Per-cell status, current commit pair, last error.
   log.txt      Append-only log of every step the runner takes.
 
+Python interpreter discovery
+----------------------------
+If the script is invoked with a bare ``python3`` that does not have the
+``vllm_hust_benchmark`` package available, it will re-execute itself
+using the interpreter discovered below (``BACKFILL_PYTHON`` env var,
+``~/miniconda3/envs/vllm-hust-dev/bin/python``, or ``sys.executable``).
+
 Why this script
 ---------------
 It automates the previously hand-rolled flow:
@@ -34,20 +41,44 @@ It automates the previously hand-rolled flow:
 
 from __future__ import annotations
 
+import os
+import sys
+from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# Auto-re-execute with the correct Python interpreter.
+# User runs e.g. ``python3 scripts/backfill_single_gpu.py plan``, but the
+# ``vllm_hust_benchmark`` package lives in the ``vllm-hust-dev`` conda env.
+# If the current interpreter cannot import the package, re-exec with the
+# ``BACKFILL_PYTHON`` (or discovered) interpreter.
+# ---------------------------------------------------------------------------
+_EXPECTED_PYTHON = Path(
+    os.environ.get("BACKFILL_PYTHON")
+    or Path.home() / "miniconda3/envs/vllm-hust-dev/bin/python"
+)
+if not _EXPECTED_PYTHON.is_file():
+    _EXPECTED_PYTHON = Path(sys.executable)
+
+try:
+    # Quick check: can we import the package?
+    import vllm_hust_benchmark  # noqa: F401
+except ImportError:
+    if sys.executable != str(_EXPECTED_PYTHON) and _EXPECTED_PYTHON.is_file():
+        # Re-execute this script with the correct Python interpreter.
+        os.execv(str(_EXPECTED_PYTHON), [str(_EXPECTED_PYTHON)] + sys.argv)
+    # No fallback available — let the normal import error surface below.
+
 import argparse
 import hashlib
 import json
-import os
 import re
 import shlex
 import shutil
 import signal
 import subprocess
-import sys
 import tempfile
 import time
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from vllm_hust_benchmark.leaderboard_exclusions import (
@@ -153,7 +184,7 @@ def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
 
 def _derive_engine_version(hust_repo: Path, hust_commit: str) -> str:
     """Derive the vllm-hust engine version from the given commit.
-ppe
+
     Uses ``git describe --tags --always --long --abbrev=9 <commit>`` to
     produce a consistent version string like::
 
@@ -187,146 +218,6 @@ ppe
         pass
     return f"0.0.0.dev0+g{hust_commit[:9]}"
 
-
-# Default missing cells (workload -> list of vllm-hust commits).
-DEFAULT_CELLS: dict[str, list[str]] = {
-    "random-latency": [
-        "2206f1f7b7212801187bc001c5f6cb86b2289214",
-        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
-        "51621c35bcce749cc34539bc1a48d32f264924a0",
-        "7a63f81e86bd71e980adb635870ff56c9e23b545",
-        "83cf83ff20a880d70b6ba916977c49304d598d9c",
-        "dcc06b18f32404abafe6922910117f1b9f66054b",
-        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-        # PR-specific commits from benchmark_plan.md
-        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
-        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
-        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
-        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
-        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
-        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
-        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
-        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
-        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
-        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
-    ],
-    "sharegpt-throughput": [
-        "2206f1f7b7212801187bc001c5f6cb86b2289214",
-        "51621c35bcce749cc34539bc1a48d32f264924a0",
-        "7a63f81e86bd71e980adb635870ff56c9e23b545",
-        "83cf83ff20a880d70b6ba916977c49304d598d9c",
-        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-        # PR-specific commits from benchmark_plan.md
-        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
-        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
-        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
-        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
-        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
-        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
-        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
-        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
-        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
-        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
-    ],
-    "sonnet-throughput": [
-        "2206f1f7b7212801187bc001c5f6cb86b2289214",
-        "51621c35bcce749cc34539bc1a48d32f264924a0",
-        "7a63f81e86bd71e980adb635870ff56c9e23b545",
-        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-        # PR-specific commits from benchmark_plan.md
-        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
-        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
-        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
-        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
-        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
-        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
-        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
-        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
-        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
-        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
-    ],
-    # Online serving scenarios
-    "random-online": [
-        "2206f1f7b7212801187bc001c5f6cb86b2289214",
-        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
-        "51621c35bcce749cc34539bc1a48d32f264924a0",
-        "7a63f81e86bd71e980adb635870ff56c9e23b545",
-        "83cf83ff20a880d70b6ba916977c49304d598d9c",
-        "dcc06b18f32404abafe6922910117f1b9f66054b",
-        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-        # PR-specific commits from benchmark_plan.md
-        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
-        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
-        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
-        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
-        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
-        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
-        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
-        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
-        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
-        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
-    ],
-    "sharegpt-online": [
-        "2206f1f7b7212801187bc001c5f6cb86b2289214",
-        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
-        "51621c35bcce749cc34539bc1a48d32f264924a0",
-        "7a63f81e86bd71e980adb635870ff56c9e23b545",
-        "83cf83ff20a880d70b6ba916977c49304d598d9c",
-        "dcc06b18f32404abafe6922910117f1b9f66054b",
-        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-        # PR-specific commits from benchmark_plan.md
-        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
-        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
-        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
-        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
-        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
-        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
-        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
-        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
-        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
-        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
-    ],
-    "prefix-repetition-online": [
-        "2206f1f7b7212801187bc001c5f6cb86b2289214",
-        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
-        "51621c35bcce749cc34539bc1a48d32f264924a0",
-        "7a63f81e86bd71e980adb635870ff56c9e23b545",
-        "83cf83ff20a880d70b6ba916977c49304d598d9c",
-        "dcc06b18f32404abafe6922910117f1b9f66054b",
-        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-        # PR-specific commits from benchmark_plan.md
-        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
-        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
-        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
-        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
-        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
-        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
-        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
-        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
-        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
-        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
-    ],
-    "instructcoder-online": [
-        "2206f1f7b7212801187bc001c5f6cb86b2289214",
-        "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
-        "51621c35bcce749cc34539bc1a48d32f264924a0",
-        "7a63f81e86bd71e980adb635870ff56c9e23b545",
-        "83cf83ff20a880d70b6ba916977c49304d598d9c",
-        "dcc06b18f32404abafe6922910117f1b9f66054b",
-        "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-        # PR-specific commits from benchmark_plan.md
-        "52b44710cdf3c797f4046698378fef3ecf6670b3",  # vllm-hust#49
-        "c421a1f38f5c4dbff235aa11464d90085cf7b1c0",  # vllm-hust#41
-        "98ca7fe3ba4d89a670072751dc642629f2a218f5",  # vllm-hust#81
-        "9f906ff2bf1c361d02bff973c10e735aea951bdf",  # vllm-hust#76
-        "8d28fcf984fd5d17a05c414e7f8f5695acc7cbc3",  # vllm-hust#118
-        "73187bc8ba89b8f83652cbc24042433fb7032add",  # vllm-hust#124
-        "6f612fbedff718af2dabb93692f00044e66a9b4b",  # ascend-hust#67
-        "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",  # ascend-hust#66
-        "702214146c1f0f2c2120b87e6a460d5a39cef418",  # ascend-hust#70
-        "ae16d09435abd978417a1b5ab7af352c8dcd180a",  # ascend-hust#80
-    ],
-}
 
 # Per-scenario benchmark parameters, aligned with the existing
 # submissions/*/run_leaderboard.json so the new cells are comparable.
@@ -1100,6 +991,19 @@ def load_leaderboard() -> list[dict[str, Any]]:
     return json.loads(snapshot.read_text(encoding="utf-8"))
 
 
+def _data_file_commits() -> set[str]:
+    """Return the set of unique full 40-char git_commit SHAs from the
+    leaderboard_single.json data file.  Used by ``plan`` to determine
+    the authoritative list of commits to check for missing cells."""
+    leaderboard = load_leaderboard()
+    commits: set[str] = set()
+    for entry in leaderboard:
+        gc = entry.get("metadata", {}).get("git_commit", "") or ""
+        if len(gc) == 40:
+            commits.add(gc)
+    return commits
+
+
 def cell_already_present(
     workload: str, commit: str, submissions_dir: Path = REPO_ROOT / "submissions"
 ) -> bool:
@@ -1196,6 +1100,9 @@ def _to_legacy_cmd(cmd: list[str], output_dir: Path) -> list[str]:
         if arg == "--gpu-memory-utilization":
             skip_next = True  # skip the value too
             continue
+        if arg == "--max-model-len":
+            skip_next = True  # skip the value too
+            continue
         if arg == "--output-json":
             # Replace with --save-result --result-dir <dir> --result-filename raw.json
             new_cmd.extend(["--save-result", "--result-dir", str(output_dir),
@@ -1255,6 +1162,7 @@ def _run_serve_bench(
         "--host", host,
         "--port", str(port),
         "--gpu-memory-utilization", "0.6",
+        "--max-model-len", "30720",
     ]
     # Wait for the port to be free (previous server may still be shutting down).
     import socket as _socket
@@ -1382,6 +1290,7 @@ def run_vllm_bench(
             "--num-iters-warmup", str(params["num_iters_warmup"]),
             "--num-iters", str(params["num_iters"]),
             "--gpu-memory-utilization", "0.6",
+            "--max-model-len", "30720",
             "--output-json", str(output_dir / "raw.json"),
         ]
         result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
@@ -1392,6 +1301,7 @@ def run_vllm_bench(
             "--dataset-name", params["dataset_name"],
             "--num-prompts", str(params["num_prompts"]),
             "--gpu-memory-utilization", "0.6",
+            "--max-model-len", "30720",
             "--output-json", str(output_dir / "raw.json"),
         ]
         if params.get("dataset_path"):
@@ -1463,12 +1373,16 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
     if "max_model_len" not in server_params:
         # Check the SAME_SPEC_MAX_MODEL_LEN env var, which the official
         # build_same_spec_payload reads via _maybe_apply_max_model_len_override.
+        # Always include max_model_len so that the hash is consistent — the
+        # benchmark run commands also pass --max-model-len explicitly.
         max_model_len_override = os.environ.get("SAME_SPEC_MAX_MODEL_LEN", "").strip()
         if max_model_len_override:
             try:
                 server_params["max_model_len"] = int(max_model_len_override)
             except ValueError:
-                pass
+                server_params["max_model_len"] = 30720
+        else:
+            server_params["max_model_len"] = 30720
 
     # ------------------------------------------------------------------
     # Replicate the old ``resolve_client_parameters`` (commit 2d6f5de).
@@ -1571,6 +1485,7 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
             "--num-iters-warmup", str(params["num_iters_warmup"]),
             "--num-iters", str(params["num_iters"]),
             "--gpu-memory-utilization", "0.6",
+            "--max-model-len", "30720",
             "--output-json", str(raw_path),
         ]
     elif benchmark_type == "throughput":
@@ -1580,6 +1495,7 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
             "--dataset-name", params["dataset_name"],
             "--num-prompts", str(params["num_prompts"]),
             "--gpu-memory-utilization", "0.6",
+            "--max-model-len", "30720",
             "--output-json", str(raw_path),
         ]
         if params.get("dataset_path"):
@@ -1942,23 +1858,48 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
 def cmd_plan(args: argparse.Namespace) -> int:
     log("PLAN: listing missing cells")
     total_missing = 0
-    cells: dict[str, list[str]] = DEFAULT_CELLS
-    for workload, commits in cells.items():
-        print(f"\n[{workload}]")
+    commits = sorted(_data_file_commits())
+    if not commits:
+        log("No commits found in leaderboard_single.json — is the snapshot empty?")
+        return 0
+
+    if args.group:
+        # Group by commit.
         for commit in commits:
+            present = [w for w in SCENARIO_PARAMS if cell_already_present(w, commit)]
+            missing = [w for w in SCENARIO_PARAMS if not cell_already_present(w, commit)]
             exists = commit_exists(HUST_REPO, commit)
             on_main = commit_on_main_branch(HUST_REPO, commit) if exists else False
-            already = cell_already_present(workload, commit)
-            if not exists:
-                status = "NOT-FOUND"
-            elif already:
-                status = "skip"
-            else:
-                status = "MISSING"
             branch_mark = "" if on_main else " [non-main]"
-            print(f"  {status:10s}  {workload}  {commit[:9]}{branch_mark}")
-            if not already and exists:
-                total_missing += 1
+            total_missing += len(missing)
+            print(f"\n[{commit[:9]}]{branch_mark} ({len(present)}/{len(SCENARIO_PARAMS)} present)")
+            for workload in sorted(SCENARIO_PARAMS):
+                if not exists:
+                    status = "NOT-FOUND"
+                elif workload in present:
+                    status = "skip"
+                else:
+                    status = "MISSING"
+                print(f"  {status:10s}  {workload}")
+    else:
+        # Group by workload.
+        for workload in sorted(SCENARIO_PARAMS):
+            present = [c for c in commits if cell_already_present(workload, c)]
+            missing = [c for c in commits if not cell_already_present(workload, c)]
+            total_missing += len(missing)
+            print(f"\n[{workload}] ({len(present)}/{len(commits)} present)")
+            for commit in commits:
+                already = cell_already_present(workload, commit)
+                exists = commit_exists(HUST_REPO, commit)
+                on_main = commit_on_main_branch(HUST_REPO, commit) if exists else False
+                branch_mark = "" if on_main else " [non-main]"
+                if not exists:
+                    status = "NOT-FOUND"
+                elif already:
+                    status = "skip"
+                else:
+                    status = "MISSING"
+                print(f"  {status:10s}  {workload}  {commit[:9]}{branch_mark}")
     print(f"\nTotal missing: {total_missing}")
     return 0
 
@@ -2001,8 +1942,7 @@ def _resolve_latest_hust_commit() -> str:
 def cmd_run(args: argparse.Namespace) -> int:
     state = load_state()
     save_state(state)  # Persist the captured HEADs up front.
-    log("RUN: starting backfill")
-    target: dict[str, list[str]] = DEFAULT_CELLS
+    log("RUN: starting benchmark")
 
     # Determine NPU device.
     if args.npu_device is not None:
@@ -2018,33 +1958,45 @@ def cmd_run(args: argparse.Namespace) -> int:
         npu_id = idle
         log(f"Auto-selected idle NPU device: {npu_id}")
 
-    if args.commit:
-        workloads = args.only or list(SCENARIO_PARAMS.keys())
-        full_commit = _resolve_full_commit(args.commit)
-        target = {w: [full_commit] for w in workloads if w in SCENARIO_PARAMS}
-    elif args.ascend_commit:
-        # Custom ascend commit specified but no vllm-hust commit:
-        # use the latest main branch commit for vllm-hust.
-        workloads = args.only or list(SCENARIO_PARAMS.keys())
-        latest_commit = _resolve_latest_hust_commit()
-        target = {w: [latest_commit] for w in workloads if w in SCENARIO_PARAMS}
-    elif args.only:
-        target = {w: target.get(w, []) for w in args.only if w in target}
-        target = {w: c for w, c in target.items() if c}
+    # Resolve commit, ascend_commit, and workload targets.
+    # --commit and --ascend-commit are optional; if omitted, the value
+    # "latest" is used, which resolves to origin/main.  --workload is
+    # optional: if given, run only that benchmark; if omitted, run all
+    # missing workloads for the commit.
+    hust_commit_str = args.commit or "latest"
+    ascend_commit_str = args.ascend_commit or "latest"
+
+    if hust_commit_str == "latest":
+        hust_commit = _resolve_latest_hust_commit()
+        log(f"Using latest vllm-hust origin/main commit: {hust_commit[:12]}")
+    else:
+        hust_commit = _resolve_full_commit(hust_commit_str)
+        log(f"Using vllm-hust commit: {hust_commit[:12]}")
+
+    if ascend_commit_str == "latest":
+        ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
+        log(f"Auto-resolved ascend commit: {ascend_commit[:12]}")
+    else:
+        ascend_commit = ascend_commit_str
+        log(f"Using ascend commit: {ascend_commit[:12]}")
+
+    if args.workload:
+        target = {args.workload: [hust_commit]}
+    else:
+        # Find missing workloads for this commit.
+        missing = [w for w in SCENARIO_PARAMS if not cell_already_present(w, hust_commit)]
+        if not missing:
+            log(f"All workloads already present for commit {hust_commit[:9]}")
+            return 0
+        log(f"Missing workloads ({len(missing)}): {', '.join(missing)}")
+        target = {w: [hust_commit] for w in missing}
 
     # Pre-validate all commits exist in the repo.
-    #
-    # When ``--commit`` is explicitly specified, skip the branch check so
-    # the user can run any commit they want.  When auto-discovering
-    # missing cells (no ``--commit``), filter out non-main-branch commits.
     missing_commits = []
-    non_main_commits = []
     for workload, commits in target.items():
         for commit in commits:
             if not commit_exists(HUST_REPO, commit):
                 missing_commits.append((workload, commit))
-            elif not args.commit and not commit_on_main_branch(HUST_REPO, commit):
-                non_main_commits.append((workload, commit))
 
     if missing_commits:
         for w, c in missing_commits:
@@ -2052,13 +2004,6 @@ def cmd_run(args: argparse.Namespace) -> int:
         for w, c in missing_commits:
             key = f"{w}:{c[:9]}"
             state["cells"][key] = {"status": "done", "skipped": "commit-not-found"}
-        save_state(state)
-
-    if non_main_commits:
-        for w, c in non_main_commits:
-            log(f"INFO: commit {c[:9]} (workload={w}) is not on origin/main branch, skipping")
-            key = f"{w}:{c[:9]}"
-            state["cells"][key] = {"status": "done", "skipped": "not-on-main"}
         save_state(state)
 
     # Register a signal handler to restore repos on interrupt.
@@ -2091,10 +2036,7 @@ def cmd_run(args: argparse.Namespace) -> int:
             for commit in commits:
                 if commit in [m[1] for m in missing_commits]:
                     continue  # already skipped
-                if args.ascend_commit:
-                    key = f"{workload}:{commit[:9]}:ascend-{args.ascend_commit[:9]}"
-                else:
-                    key = f"{workload}:{commit[:9]}"
+                key = f"{workload}:{commit[:9]}:ascend-{ascend_commit[:9]}"
                 existing = state["cells"].get(key, {})
                 if existing.get("status") == "done" and not args.force:
                     log(f"SKIP {key} (already done)")
@@ -2104,7 +2046,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                     state["cells"][key] = {"status": "done", "skipped": "already-present"}
                     continue
                 log(f"BEGIN {key}")
-                result = run_cell(workload, commit, args.ascend_commit, npu_id=npu_id)
+                result = run_cell(workload, commit, ascend_commit, npu_id=npu_id)
                 state["cells"][key] = result
                 save_state(state)
                 if result["status"] == "failed":
@@ -2304,7 +2246,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("plan", help="Show what is missing.")
+    p_plan = sub.add_parser("plan", help="Show what is missing.")
+    p_plan.add_argument("--group", action="store_true",
+                        help="Group output by commit instead of by workload.")
     sub.add_parser("status", help="Show progress from the checkpoint.")
     sub.add_parser("aggregate", help="Rebuild leaderboard-data/snapshots/.")
     sub.add_parser("validate", help="Validate all submissions and snapshots (Section 13.2).")
@@ -2314,12 +2258,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_push.add_argument("-m", "--message", help="Commit message.")
     p_push.add_argument("--dry-run", action="store_true")
 
-    p_run = sub.add_parser("run", help="Run the missing cells.")
-    p_run.add_argument(
-        "--only", nargs="+", help="Restrict to these workloads (e.g. random-latency)."
-    )
-    p_run.add_argument("--commit", help="Run only this commit (overrides DEFAULT_CELLS).")
-    p_run.add_argument("--ascend-commit", help="Use this ascend plugin commit instead of resolving automatically.")
+    p_run = sub.add_parser("run", help="Run benchmark(s) for a commit.")
+    p_run.add_argument("--commit",
+                       help="vllm-hust commit to benchmark (optional; if omitted, "
+                            "uses latest origin/main).")
+    p_run.add_argument("--ascend-commit",
+                       help="vllm-ascend-hust plugin commit (optional; if omitted, "
+                            "auto-resolves to latest origin/main).")
+    p_run.add_argument("--workload", choices=list(SCENARIO_PARAMS.keys()),
+                       help="Specific workload to run (optional; if omitted, run all "
+                            "missing workloads for the commit).")
     p_run.add_argument("--force", action="store_true",
                        help="Re-run cells already marked done.")
     p_run.add_argument("--fail-fast", action="store_true",
