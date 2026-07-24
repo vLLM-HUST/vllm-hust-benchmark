@@ -2119,6 +2119,10 @@ def cmd_fill(args: argparse.Namespace) -> int:
                 log(f"SKIP commit {hust_commit[:9]}: not found in vllm-hust repo")
                 continue
 
+            if not commit_on_main_branch(HUST_REPO, hust_commit):
+                log(f"SKIP commit {hust_commit[:9]}: not on origin/main branch")
+                continue
+
             # Determine which workloads to consider for this commit.
             candidates = [filter_workload] if filter_workload else list(SCENARIO_PARAMS)
             missing = [w for w in candidates if not cell_already_present(w, hust_commit)]

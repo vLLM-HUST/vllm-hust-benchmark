@@ -121,6 +121,14 @@ python3 scripts/backfill_single_gpu.py plan --group
 
 遍历 `leaderboard_single.json` 中所有 commit，为每个 commit 自动解析 ascend 插件 commit 并运行所有缺失的 workload。相当于 `plan` 的发现能力 + `run` 的执行能力。
 
+### 自动跳过策略
+
+`fill` 会自动跳过以下三种情况，无需手动干预：
+
+1. **已存在（skip）** — 该 commit 在该 workload 下已有数据，无需重复运行
+2. **NOT-FOUND** — 该 commit 在本地 vllm-hust 仓库中不存在，无法 checkout
+3. **non-main** — 该 commit 不在 `origin/main` 分支上，属于非主线分支提交
+
 ### 选项
 
 | 选项 | 说明 |
@@ -133,8 +141,9 @@ python3 scripts/backfill_single_gpu.py plan --group
 ### 示例
 
 ```bash
-# 一键补全所有 commit 的缺失 workload
+# 一键补全所有 commit 的缺失 workload（自动跳过已存在、NOT-FOUND、non-main）
 python3 scripts/backfill_single_gpu.py fill
+nohup python3 scripts/backfill_single_gpu.py fill > backfill.log 2>&1 &
 
 # 只补全 random-latency 在所有 commit 中的缺失
 python3 scripts/backfill_single_gpu.py fill --workload random-latency
