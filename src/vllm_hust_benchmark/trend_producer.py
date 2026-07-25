@@ -83,6 +83,12 @@ def _validate_trend_params(
             f"got {trend_status!r}"
         )
 
+    if point_role is not None and point_role not in VALID_POINT_ROLES:
+        raise ValueError(
+            f"point_role must be one of {sorted(VALID_POINT_ROLES - {None})} or None, "
+            f"got {point_role!r}"
+        )
+
     # -- full-matrix ---------------------------------------------------------
     if coverage_class == "full-matrix":
         if not campaign_id:

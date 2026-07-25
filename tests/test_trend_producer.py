@@ -468,6 +468,19 @@ class TestAddTrendFieldsToExistingEntry:
         assert updated["coverage_class"] == "full-matrix"
         assert updated["trend_reason"] == "Known invalid metric"
 
+    def test_non_dict_json_raises_value_error(self, tmp_path: Path) -> None:
+        """A JSON array (non-dict) should raise ValueError."""
+        artifact = tmp_path / "non_dict_entry.json"
+        artifact.write_text(json.dumps(["not", "a", "dict"]))
+        with pytest.raises(ValueError, match="expected a JSON object"):
+            add_trend_fields_to_existing_entry(
+                artifact,
+                coverage_class="full-matrix",
+                campaign_id="c/v1",
+                point_role="checkpoint",
+                trend_status="default",
+            )
+
 
 # ---------------------------------------------------------------------------
 # Integration: end-to-end trend field presence
