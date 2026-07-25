@@ -41,6 +41,9 @@ jobs:
           XDG_CONFIG_HOME: ${{ github.workspace }}/.ci-home/.config
         run: python -m pytest -q tests --junitxml=pytest-results.xml
 
+      - name: Validate trend admission fixtures
+        run: python scripts/validate_trend_entries.py --input tests/fixtures/trend_coverage/valid
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
