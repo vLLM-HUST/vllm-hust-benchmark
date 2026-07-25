@@ -102,6 +102,59 @@ jobs:
           sys.exit(1 if errors_found else 0)
           PYEOF
 
+      - name: Validate trend admission on submission artifacts before aggregation
+        id: validate-trend-submissions
+        run: |
+          python - << 'PYEOF'
+          import json, sys
+          from pathlib import Path
+          from vllm_hust_benchmark.trend_validator import load_json_entries, validate_entries
+
+          submissions_root = Path("submissions")
+          manifests = sorted(submissions_root.rglob("leaderboard_manifest.json"))
+          if not manifests:
+              print("No submission manifests found — skipping trend validation")
+              sys.exit(0)
+
+          all_entries = []
+          for manifest_path in manifests:
+              try:
+                  payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+              except (ValueError, OSError) as exc:
+                  print(f"WARNING: cannot load {manifest_path}: {exc}")
+                  continue
+              for record in payload.get("entries", []):
+                  artifact_rel = record.get("leaderboard_artifact")
+                  if not artifact_rel:
+                      continue
+                  artifact_path = manifest_path.parent / artifact_rel
+                  if not artifact_path.is_file():
+                      print(f"WARNING: {artifact_path} not found")
+                      continue
+                  try:
+                      all_entries.extend(load_json_entries(artifact_path))
+                  except (ValueError, OSError) as exc:
+                      print(f"WARNING: {artifact_path}: {exc}")
+                      continue
+
+          if not all_entries:
+              print("No submission entries to validate")
+              sys.exit(0)
+
+          report = validate_entries(all_entries)
+          for decision in report.decisions:
+              print(f"  {decision.status:12} {decision.entry_id}: {decision.reason}")
+          for issue in report.issues:
+              print(f"  {issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}")
+
+          if not report.passed:
+              print("\nFAIL: Trend admission validation blocked — submission contains invalid entries",
+                    file=sys.stderr)
+              sys.exit(1)
+
+          print(f"\nOK: {len(report.decisions)} submission entry(s) passed trend validation")
+          PYEOF
+
       - name: Resolve submission directories to sync
         id: resolve-submissions
         run: |
@@ -261,6 +314,13 @@ jobs:
             --commit-message "chore: sync benchmark submission and leaderboard data from ${GITHUB_REF} @ ${GITHUB_SHA::8}" \
             --execute \
             "${extra_args[@]}"
+
+      - name: Validate trend admission on aggregated snapshots (post-sync gate)
+        id: validate-trend-snapshots
+        if: ${{ steps.sync-hf.conclusion == 'success' && github.event.inputs.dry_run != 'true' }}
+        run: |
+          PYTHONPATH=src python -m vllm_hust_benchmark.cli validate-trend \
+            --input leaderboard-data/snapshots/
 
       - name: Verify HF snapshots match GitHub canonical snapshots
         if: ${{ steps.sync-hf.conclusion == 'success' && github.event.inputs.dry_run != 'true' }}
