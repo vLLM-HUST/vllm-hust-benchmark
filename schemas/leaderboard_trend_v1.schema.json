@@ -1,0 +1,229 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.sage.org.ai/schemas/leaderboard_trend_v1.schema.json",
+  "title": "vLLM-HUST leaderboard trend coverage schema v1",
+  "description": "Trend coverage extension for leaderboard entries. Legacy entries are accepted for migration and must be classified by the validator.",
+  "oneOf": [
+    { "$ref": "#/$defs/entry" },
+    {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  ],
+  "$defs": {
+    "baseEntry": {
+      "type": "object",
+      "required": [
+        "entry_id", "engine", "engine_version", "config_type", "hardware",
+        "model", "workload", "metrics", "constraints", "versions",
+        "environment", "metadata"
+      ],
+      "properties": {
+        "entry_id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+        },
+        "engine": { "type": "string", "minLength": 1 },
+        "engine_version": { "type": "string", "minLength": 1 },
+        "config_type": {
+          "type": "string",
+          "enum": ["single_gpu", "multi_gpu", "multi_node"]
+        },
+        "hardware": {
+          "type": "object",
+          "required": ["vendor", "chip_model", "chip_count"],
+          "properties": {
+            "vendor": { "type": "string" },
+            "chip_model": { "type": "string", "minLength": 1 },
+            "chip_count": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": true
+        },
+        "model": {
+          "type": "object",
+          "required": [
+            "canonical_id", "repo_id", "short_name", "display_name", "name",
+            "parameters", "precision"
+          ],
+          "properties": {
+            "canonical_id": { "type": "string", "minLength": 1 },
+            "repo_id": { "type": "string", "minLength": 1 },
+            "short_name": { "type": "string", "minLength": 1 },
+            "display_name": { "type": "string", "minLength": 1 },
+            "name": { "type": "string", "minLength": 1 },
+            "parameters": { "type": "string", "minLength": 1 },
+            "precision": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": true
+        },
+        "workload": {
+          "type": "object",
+          "required": ["name", "input_length", "output_length"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "input_length": { "type": "integer", "minimum": 1 },
+            "output_length": { "type": "integer", "minimum": 1 }
+          },
+          "additionalProperties": true
+        },
+        "metrics": {
+          "type": "object",
+          "required": ["ttft_ms", "throughput_tps", "peak_mem_mb", "error_rate"],
+          "properties": {
+            "ttft_ms": { "type": ["number", "null"], "minimum": 0 },
+            "throughput_tps": { "type": ["number", "null"], "minimum": 0 },
+            "peak_mem_mb": { "type": ["integer", "null"], "minimum": 0 },
+            "error_rate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+          },
+          "additionalProperties": true
+        },
+        "constraints": { "type": "object" },
+        "versions": { "type": "object" },
+        "environment": { "type": "object" },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "legacyEntry": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEntry" },
+        {
+          "not": {
+            "anyOf": [
+              { "required": ["trend_schema_version"] },
+              { "required": ["coverage_class"] },
+              { "required": ["trend_status"] }
+            ]
+          }
+        }
+      ]
+    },
+    "aggregateMetric": {
+      "type": "object",
+      "required": ["value"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "min": { "type": "number", "minimum": 0 },
+        "max": { "type": "number", "minimum": 0 },
+        "std": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "canonicalAggregate": {
+      "type": "object",
+      "required": ["method", "count", "metrics", "outlier_handling"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["mean", "median", "trimmed_mean", "min", "max"]
+        },
+        "count": { "type": "integer", "minimum": 1 },
+        "trim_percent": { "type": "number", "minimum": 0, "maximum": 0.5 },
+        "metrics": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/aggregateMetric" }
+        },
+        "outlier_handling": {
+          "type": "string",
+          "enum": ["none", "removed", "capped"]
+        },
+        "outlier_details": { "type": ["string", "null"] },
+        "note": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "method": { "const": "trimmed_mean" } } },
+          "then": { "required": ["trim_percent"] }
+        },
+        {
+          "if": { "properties": { "method": { "enum": ["mean", "median", "trimmed_mean"] } } },
+          "then": { "properties": { "count": { "minimum": 2 } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "trendEntry": {
+      "allOf": [
+        { "$ref": "#/$defs/baseEntry" },
+        {
+          "type": "object",
+          "required": ["trend_schema_version", "coverage_class", "trend_status"],
+          "properties": {
+            "trend_schema_version": {
+              "type": "string",
+              "const": "trend-coverage/v1"
+            },
+            "coverage_class": {
+              "type": "string",
+              "enum": ["full-matrix", "targeted-pair", "experimental"]
+            },
+            "campaign_id": { "type": "string", "minLength": 1 },
+            "comparison_id": { "type": "string", "minLength": 1 },
+            "point_role": {
+              "type": ["string", "null"],
+              "enum": ["baseline", "head", "checkpoint", null]
+            },
+            "repeat_group": { "type": "string", "minLength": 1 },
+            "repeat_index": { "type": "integer", "minimum": 0 },
+            "canonical_aggregate": { "$ref": "#/$defs/canonicalAggregate" },
+            "trend_status": {
+              "type": "string",
+              "enum": ["default", "experimental", "blocked", "invalid", "excluded"]
+            },
+            "trend_reason": { "type": "string", "minLength": 1 }
+          }
+        },
+        {
+          "if": { "properties": { "coverage_class": { "const": "full-matrix" } } },
+          "then": {
+            "required": ["campaign_id", "point_role"],
+            "properties": { "point_role": { "const": "checkpoint" } }
+          }
+        },
+        {
+          "if": { "properties": { "coverage_class": { "const": "targeted-pair" } } },
+          "then": {
+            "required": ["campaign_id", "comparison_id", "point_role"],
+            "properties": { "point_role": { "enum": ["baseline", "head"] } }
+          }
+        },
+        {
+          "if": { "properties": { "coverage_class": { "const": "experimental" } } },
+          "then": {
+            "properties": {
+              "point_role": { "enum": [null] },
+              "trend_status": { "enum": ["experimental", "invalid", "excluded"] }
+            },
+            "not": { "required": ["comparison_id"] }
+          }
+        },
+        {
+          "if": { "required": ["repeat_group"] },
+          "then": {
+            "required": ["repeat_index"],
+            "allOf": [
+              {
+                "if": { "properties": { "coverage_class": { "not": { "const": "experimental" } } } },
+                "then": { "required": ["canonical_aggregate"] }
+              }
+            ]
+          }
+        },
+        {
+          "if": { "properties": { "trend_status": { "enum": ["default", "blocked", "invalid", "excluded"] } } },
+          "then": {
+            "if": { "properties": { "trend_status": { "enum": ["blocked", "invalid", "excluded"] } } },
+            "then": { "required": ["trend_reason"] }
+          }
+        }
+      ]
+    },
+    "entry": {
+      "oneOf": [
+        { "$ref": "#/$defs/trendEntry" },
+        { "$ref": "#/$defs/legacyEntry" }
+      ]
+    }
+  }
+}
