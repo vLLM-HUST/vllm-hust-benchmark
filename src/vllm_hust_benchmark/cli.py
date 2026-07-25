@@ -651,6 +651,21 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Root submissions directory (default: <benchmark_repo>/submissions).",
     )
 
+    validate_parser = subparsers.add_parser(
+        "validate-trend",
+        help="Validate entries against the trend coverage contract (T08 schema + T09 admission). "
+        "Accepts individual entry JSON files or directories of JSON files. "
+        "Returns non-zero on validation failure.",
+    )
+    validate_parser.add_argument(
+        "--input", type=Path, required=True,
+        help="Entry JSON file or directory of JSON files.",
+    )
+    validate_parser.add_argument(
+        "--schema", type=Path, default=None,
+        help="Path to trend schema JSON (default: schemas/leaderboard_trend_v1.schema.json).",
+    )
+
     return parser
 
 
@@ -1188,6 +1203,50 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  git commit -m \"feat: add benchmark result {args.run_id}\"")
         print(f"  git push")
         print(f"  → GitHub Actions will aggregate and upload to HuggingFace automatically.")
+        return 0
+
+    if args.command == "validate-trend":
+        from vllm_hust_benchmark.trend_validator import (
+            load_json_entries,
+            validate_entries,
+        )
+
+        if not args.input.exists():
+            print(f"ERROR: input path does not exist: {args.input}", file=sys.stderr)
+            return 2
+
+        paths = [args.input] if args.input.is_file() else sorted(args.input.glob("*.json"))
+        entries = []
+        for path in paths:
+            try:
+                entries.extend(load_json_entries(path))
+            except (ValueError, OSError) as error:
+                print(f"ERROR loading {path}: {error}", file=sys.stderr)
+                return 2
+
+        if not entries:
+            print("No entries found to validate.", file=sys.stderr)
+            return 0
+
+        report = validate_entries(entries, schema_path=args.schema)
+        for decision in report.decisions:
+            print(f"  {decision.status:12} {decision.entry_id}: {decision.reason}")
+        for issue in report.issues:
+            print(f"  {issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}")
+
+        if not report.passed:
+            print(f"\nFAIL: {len(report.issues)} issue(s) found — release gate blocked", file=sys.stderr)
+            return 1
+
+        passed = sum(1 for d in report.decisions if d.status == "default")
+        pending = sum(1 for d in report.decisions if d.status == "pending")
+        if pending:
+            print(
+                f"WARNING: {pending} entry(s) have unknown coverage_class — "
+                f"skipped cross-entry checks",
+                file=sys.stderr,
+            )
+        print(f"\nOK: {len(report.decisions)} entry(s) validated, {passed} admitted")
         return 0
 
     if args.command == "bench":
