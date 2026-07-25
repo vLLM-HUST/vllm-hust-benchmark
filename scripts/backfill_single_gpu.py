@@ -182,6 +182,40 @@ def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
     return out.stdout.strip()
 
 
+def _lookup_ascend_commit_from_snapshot(hust_commit: str) -> str | None:
+    """Look up the vllm-ascend-hust commit from leaderboard_single.json.
+
+    Searches all entries in the snapshot for one whose ``metadata.git_commit``
+    matches *hust_commit* (by full SHA or 9-char prefix) and returns the
+    corresponding ``runtime_provenance.plugin.commit``.
+
+    Returns ``None`` when the commit is not found in the snapshot, or when
+    the snapshot file does not exist.
+    """
+    snapshot = REPO_ROOT / "leaderboard-data" / "snapshots" / "leaderboard_single.json"
+    if not snapshot.is_file():
+        return None
+    try:
+        entries = json.loads(snapshot.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    short = hust_commit[:9]
+    for entry in entries:
+        meta_commit = (
+            entry.get("metadata", {}).get("git_commit", "") or ""
+        )
+        if meta_commit.startswith(short):
+            plugin_commit = (
+                entry.get("metadata", {})
+                .get("runtime_provenance", {})
+                .get("plugin", {})
+                .get("commit", "")
+            )
+            if plugin_commit and len(plugin_commit) == 40:
+                return plugin_commit
+    return None
+
+
 def _derive_engine_version(hust_repo: Path, hust_commit: str) -> str:
     """Derive the vllm-hust engine version from the given commit.
 
@@ -344,6 +378,29 @@ def commit_on_main_branch(repo: Path, commit: str) -> bool:
         cwd=repo, capture_output=True, text=True, check=False,
     )
     return r.returncode == 0
+
+
+def _kill_port_process(port: int) -> None:
+    """Kill any process holding the given TCP port using /proc/net/tcp."""
+    try:
+        with open("/proc/net/tcp") as f:
+            for line in f:
+                parts = line.strip().split()
+                if len(parts) < 10:
+                    continue
+                local_addr = parts[1]  # e.g. 00000000:1F40
+                if ":" not in local_addr:
+                    continue
+                hex_port = local_addr.split(":")[1]
+                if int(hex_port, 16) == port:
+                    pid = int(parts[9], 16)
+                    if pid > 0:
+                        try:
+                            os.kill(pid, signal.SIGKILL)
+                        except OSError:
+                            pass
+    except OSError:
+        pass
 
 
 def select_idle_npu() -> int | None:
@@ -2375,6 +2432,13 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
         ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
 
     log(f"=== {workload} @ {hust_commit[:9]} (plugin {ascend_commit[:9]}) ===")
+
+    # Clean up any stale vllm processes and port 8000 before starting.
+    subprocess.run(["pkill", "-f", "vllm.entrypoints.cli"], check=False, stderr=subprocess.DEVNULL)
+    subprocess.run(["pkill", "-f", "api_server"], check=False, stderr=subprocess.DEVNULL)
+    _kill_port_process(8000)
+    time.sleep(2)  # Give processes time to terminate.
+
     work_dir = STATE_DIR / "runs" / f"{workload}-{hust_commit[:9]}"
     if work_dir.exists():
         shutil.rmtree(work_dir)
@@ -2610,8 +2674,16 @@ def cmd_run(args: argparse.Namespace) -> int:
         log(f"Using vllm-hust commit: {hust_commit[:12]}")
 
     if ascend_commit_str == "latest":
-        ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
-        log(f"Auto-resolved ascend commit: {ascend_commit[:12]}")
+        # First try to look up from the snapshot for version consistency.
+        snapshot_ascend = _lookup_ascend_commit_from_snapshot(hust_commit)
+        if snapshot_ascend:
+            ascend_commit = snapshot_ascend
+            log(f"Resolved ascend commit from snapshot: {ascend_commit[:12]}")
+        else:
+            # Fall back to time-aligned resolution (find the ascend commit
+            # on origin/main at the time of the hust commit).
+            ascend_commit = resolve_ascend_commit(hust_commit)
+            log(f"Auto-resolved time-aligned ascend commit: {ascend_commit[:12]}")
     else:
         ascend_commit = ascend_commit_str
         log(f"Using ascend commit: {ascend_commit[:12]}")
@@ -2666,6 +2738,8 @@ def cmd_run(args: argparse.Namespace) -> int:
             ["pkill", "-f", "api_server"],
             check=False, stderr=subprocess.DEVNULL,
         )
+        # Also kill any process holding port 8000.
+        _kill_port_process(8000)
 
     try:
         for workload, commits in target.items():
@@ -2744,6 +2818,10 @@ def cmd_fill(args: argparse.Namespace) -> int:
     def _cleanup_npu() -> None:
         subprocess.run(["pkill", "-f", "vllm.entrypoints.cli"], check=False, stderr=subprocess.DEVNULL)
         subprocess.run(["pkill", "-f", "api_server"], check=False, stderr=subprocess.DEVNULL)
+        _kill_port_process(8000)
+
+    # Run initial cleanup to ensure no stale processes are running.
+    _cleanup_npu()
 
     total_run = 0
     total_failed = 0
@@ -2766,7 +2844,15 @@ def cmd_fill(args: argparse.Namespace) -> int:
                 log(f"SKIP commit {hust_commit[:9]}: all workloads present")
                 continue
 
-            ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
+            # First try to look up from the snapshot for version consistency.
+            snapshot_ascend = _lookup_ascend_commit_from_snapshot(hust_commit)
+            if snapshot_ascend:
+                ascend_commit = snapshot_ascend
+                log(f"Resolved ascend commit from snapshot: {ascend_commit[:12]}")
+            else:
+                # Fall back to time-aligned resolution.
+                ascend_commit = resolve_ascend_commit(hust_commit)
+                log(f"Auto-resolved time-aligned ascend commit: {ascend_commit[:12]}")
             log(f"=== Commit {hust_commit[:9]}: {len(missing)} missing workload(s) ===")
 
             for workload in missing:

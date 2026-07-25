@@ -172,6 +172,40 @@ python3 scripts/backfill_single_gpu.py restore
 | `VLLM_USE_V1` | `1` | 启用 V1 引擎 |
 
 
+## 已知问题与修复
+
+| 问题 | 修复 | 说明 |
+|------|------|------|
+| `fuser` 命令不存在 | `_kill_port_process()` 函数 | 此环境缺少 `psmisc` 包（`fuser` 命令），使用纯 Python 读取 `/proc/net/tcp` 替代。已在 `run_cell()`、`cmd_run()`、`cmd_fill()` 三处替换。 |
+
+### `_kill_port_process()` 实现
+
+通过读取 `/proc/net/tcp` 查找指定端口上的进程并发送 SIGKILL。
+
+```python
+def _kill_port_process(port: int) -> None:
+    """Kill any process holding the given TCP port using /proc/net/tcp."""
+    try:
+        with open("/proc/net/tcp") as f:
+            for line in f:
+                parts = line.strip().split()
+                if len(parts) < 10:
+                    continue
+                local_addr = parts[1]  # e.g. 00000000:1F40
+                if ":" not in local_addr:
+                    continue
+                hex_port = local_addr.split(":")[1]
+                if int(hex_port, 16) == port:
+                    pid = int(parts[9], 16)
+                    if pid > 0:
+                        try:
+                            os.kill(pid, signal.SIGKILL)
+                        except OSError:
+                            pass
+    except OSError:
+        pass
+```
+
 ## 手工补点的配置字段检查
 
 手工补点与 CI/CD 使用同一份 `explicit-effective/v1` 配置契约。提交前必须检查
