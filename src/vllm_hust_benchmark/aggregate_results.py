@@ -32,9 +32,12 @@ Conventions
 
 from __future__ import annotations
 
+import json
 import math
 import statistics
+import warnings
 from collections import OrderedDict
+from pathlib import Path
 from typing import Any
 
 # ---------------------------------------------------------------------------
@@ -80,18 +83,18 @@ def build_series_signature(entry: dict[str, Any]) -> str:
         fields.
     """
     try:
-        model = entry.get("model", {}) or {}
-        hardware = entry.get("hardware", {}) or {}
-        workload = entry.get("workload", {}) or {}
+        model = entry.get("model") or {}
+        hardware = entry.get("hardware") or {}
+        workload = entry.get("workload") or {}
         parts = [
-            str(model.get("canonical_id", "") or ""),
-            str(hardware.get("chip_model", "") or ""),
-            str(model.get("precision", "") or ""),
-            str(workload.get("name", "") or ""),
-            str(hardware.get("chip_count", "") or ""),
-            str(entry.get("config_type", "") or ""),
-            str(entry.get("engine", "") or ""),
-            str(entry.get("engine_version", "") or ""),
+            str(model.get("canonical_id") or ""),
+            str(hardware.get("chip_model") or ""),
+            str(model.get("precision") or ""),
+            str(workload.get("name") or ""),
+            str(hardware.get("chip_count") or ""),
+            str(entry.get("config_type") or ""),
+            str(entry.get("engine") or ""),
+            str(entry.get("engine_version") or ""),
         ]
         sig = "|".join(parts)
         return sig if sig.strip("|") else ""
@@ -160,7 +163,7 @@ def _entry_sort_key(entry: dict[str, Any]) -> tuple[int, int]:
 # ---------------------------------------------------------------------------
 
 
-def detect_outliers_iqr(values: list[float]) -> tuple[list[int], list[float, float]]:
+def detect_outliers_iqr(values: list[float]) -> tuple[list[int], tuple[float, float]]:
     """IQR-based outlier detection (Tukey's fences).
 
     Returns
@@ -302,8 +305,16 @@ def _handle_outliers(
     values: list[float],
     outlier_handling: str,
     outlier_indices: list[int],
+    *,
+    detection_method: str = "iqr",
 ) -> tuple[list[float], str | None]:
-    """Apply outlier handling strategy and return (cleaned_values, detail_note)."""
+    """Apply outlier handling strategy and return (cleaned_values, detail_note).
+
+    Parameters
+    ----------
+    detection_method:
+        Used only in the detail string for audit traceability.
+    """
     if outlier_handling == "none" or not outlier_indices:
         return values, None
 
@@ -314,8 +325,9 @@ def _handle_outliers(
         if len(kept) < max(1, int(len(values) * OUTLIER_REMOVAL_MIN_FRACTION)):
             # If removal drops too many, fall back to capping
             return _cap_outliers(values, outlier_indices)
+        label = "3σ" if detection_method == "3sigma" else "IQR"
         detail = (
-            f"IQR method: removed {len(outlier_indices)} outlier(s) "
+            f"{label} method: removed {len(outlier_indices)} outlier(s) "
             f"indices {outlier_indices} from {len(values)} entries. "
             f"Recalculated with n={len(kept)}."
         )
@@ -437,15 +449,27 @@ def _collect_metric_values(
         return {}
 
     metric_names: set[str] | None = None
+    all_names: set[str] = set()
     for entry in entries:
         m = entry.get("metrics")
         if not isinstance(m, dict):
             return {}
-        keys = {k for k, v in m.items() if isinstance(v, (int, float)) and v is not None}
+        keys = {k for k, v in m.items() if isinstance(v, (int, float)) and not isinstance(v, bool) and v is not None}
+        all_names.update(m.keys())
         if metric_names is None:
             metric_names = keys
         else:
             metric_names &= keys
+
+    if metric_names is not None:
+        dropped = all_names - metric_names
+        if dropped:
+            warnings.warn(
+                f"Dropped {len(dropped)} metric(s) not present as numeric in all entries: "
+                f"{sorted(dropped)}. "
+                f"Only metrics common to every entry are included in the aggregate.",
+                stacklevel=2,
+            )
 
     if not metric_names:
         return {}
@@ -534,7 +558,8 @@ def compute_canonical_aggregate(
     for metric_name, raw_values in metric_values.items():
         if outlier_handling != "none" and all_outlier_indices:
             cleaned, detail = _handle_outliers(
-                raw_values, outlier_handling, outlier_indices_sorted
+                raw_values, outlier_handling, outlier_indices_sorted,
+                detection_method=outlier_detection,
             )
             if detail and outlier_detail is None:
                 outlier_detail = detail
@@ -678,9 +703,6 @@ def load_entries_from_paths(paths: list[str]) -> list[dict[str, Any]]:
 
     Each file must contain a single JSON object (one entry).
     """
-    import json
-    from pathlib import Path
-
     entries: list[dict[str, Any]] = []
     for path in paths:
         p = Path(path)
@@ -702,21 +724,34 @@ def write_aggregated_entries(
     """Write aggregated entries to *output_dir*.
 
     Each entry is written as a separate JSON file named
-    ``<original_name>{suffix}.json``.  The original ``entry_id`` is
-    preserved.  Original files are never touched.
+    ``<entry_id>{suffix}.json``.  The original ``entry_id`` is preserved.
+    Original files are never touched.
+
+    If an entry lacks an ``entry_id``, a counter-based filename is used
+    to avoid collisions.
 
     Returns a list of written paths.
     """
-    import json
-    from pathlib import Path
-
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
 
     written: list[str] = []
+    seen_ids: set[str] = set()
+    nameless_counter = 0
     for entry in entries:
-        entry_id = str(entry.get("entry_id", "unknown"))
-        filename = f"{entry_id}{suffix}.json"
+        entry_id = entry.get("entry_id")
+        if entry_id and isinstance(entry_id, str) and entry_id.strip():
+            base = entry_id.strip()
+        else:
+            base = f"entry_no_id_{nameless_counter}"
+            nameless_counter += 1
+
+        # Avoid accidental collision if two entries share the same entry_id
+        if base in seen_ids:
+            base = f"{base}_dup"
+        seen_ids.add(base)
+
+        filename = f"{base}{suffix}.json"
         path = out / filename
         path.write_text(
             json.dumps(entry, indent=2, ensure_ascii=False) + "\n",
