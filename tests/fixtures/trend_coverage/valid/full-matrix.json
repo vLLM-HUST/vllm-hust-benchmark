@@ -1,0 +1,23 @@
+{
+  "entry_id": "11111111-1111-4111-8111-111111111111",
+  "engine": "vllm-hust",
+  "engine_version": "v0.20.1rc0-535-gceec19abb0",
+  "config_type": "multi_gpu",
+  "hardware": {"vendor": "Huawei", "chip_model": "910B2", "chip_count": 2},
+  "model": {"canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct", "repo_id": "Qwen/Qwen2.5-14B-Instruct", "short_name": "Qwen2.5-14B-Instruct", "display_name": "Qwen2.5-14B-Instruct", "name": "Qwen/Qwen2.5-14B-Instruct", "parameters": "14B", "precision": "BF16"},
+  "workload": {"name": "random-online", "input_length": 1024, "output_length": 256},
+  "metrics": {"ttft_ms": 42.0, "throughput_tps": 321.0, "peak_mem_mb": 10240, "error_rate": 0.0},
+  "constraints": {}, "versions": {}, "environment": {}, "metadata": {},
+  "trend_schema_version": "trend-coverage/v1",
+  "coverage_class": "full-matrix",
+  "campaign_id": "full-stack-jul-2026/v1",
+  "point_role": "checkpoint",
+  "repeat_group": "full-stack-jul-2026/v1::qwen25-14b::910B2::BF16::random-online::2chip::multi_gpu::vllm-hust",
+  "repeat_index": 0,
+  "canonical_aggregate": {
+    "method": "mean", "count": 3,
+    "metrics": {"ttft_ms": {"value": 42.0}, "throughput_tps": {"value": 321.0}},
+    "outlier_handling": "none"
+  },
+  "trend_status": "default"
+}
