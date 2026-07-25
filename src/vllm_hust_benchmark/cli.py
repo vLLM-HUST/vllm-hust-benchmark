@@ -28,6 +28,13 @@ from vllm_hust_benchmark.integration import (
     validate_runtime_repo,
 )
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
+from vllm_hust_benchmark.aggregate_results import (
+    VALID_AGG_METHODS,
+    VALID_OUTLIER_HANDLING,
+    aggregate_entries,
+    load_entries_from_paths,
+    write_aggregated_entries,
+)
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import filter_scenarios, get_scenario
 from vllm_hust_benchmark.upstream_tests import (
@@ -468,6 +475,46 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--publish-website", action="store_true")
     export_parser.add_argument("--website-output-dir")
     export_parser.add_argument("--execute", action="store_true")
+
+    aggregate_parser = subparsers.add_parser(
+        "aggregate",
+        help="Aggregate repeated-run leaderboard entries by repeat_group "
+        "and output canonical_aggregate entries.",
+    )
+    aggregate_parser.add_argument(
+        "entry_paths",
+        nargs="+",
+        help="One or more leaderboard entry JSON files to aggregate.",
+    )
+    aggregate_parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="Directory to write aggregated entries (default: cwd).",
+    )
+    aggregate_parser.add_argument(
+        "--method",
+        default="mean",
+        choices=sorted(VALID_AGG_METHODS),
+        help="Aggregation method (default: mean).",
+    )
+    aggregate_parser.add_argument(
+        "--trim-percent",
+        type=float,
+        default=0.0,
+        help="Per-side trim fraction for trimmed_mean (default: 0.0).",
+    )
+    aggregate_parser.add_argument(
+        "--outlier-handling",
+        default="none",
+        choices=sorted(VALID_OUTLIER_HANDLING),
+        help="Outlier handling strategy (default: none).",
+    )
+    aggregate_parser.add_argument(
+        "--outlier-detection",
+        default="iqr",
+        choices=["iqr", "3sigma"],
+        help="Outlier detection method (default: iqr).",
+    )
 
     publish_parser = subparsers.add_parser(
         "publish-website",
@@ -922,6 +969,30 @@ def main(argv: list[str] | None = None) -> int:
                 print(str(error), file=sys.stderr)
                 return 2
             return aggregate_exit_code
+        return 0
+
+    if args.command == "aggregate":
+        try:
+            entries = load_entries_from_paths(args.entry_paths)
+        except (FileNotFoundError, ValueError) as error:
+            print(str(error), file=sys.stderr)
+            return 2
+
+        try:
+            result = aggregate_entries(
+                entries,
+                method=args.method,
+                trim_percent=args.trim_percent,
+                outlier_handling=args.outlier_handling,
+                outlier_detection=args.outlier_detection,
+            )
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
+
+        written = write_aggregated_entries(result, args.output_dir)
+        for w in written:
+            print(w)
         return 0
 
     if args.command == "publish-website":
