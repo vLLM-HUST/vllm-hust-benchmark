@@ -129,6 +129,28 @@ class TestCliValidateTrend:
         result = _run_cli(["--input", str(INVALID_DIR)])
         assert "release gate blocked" in result.stderr or "release gate blocked" in result.stdout
 
+    def test_schema_flag_accepts_explicit_schema_path(self) -> None:
+        """--schema with a valid path must still pass valid entries."""
+        schema_path = ROOT / "schemas" / "leaderboard_trend_v1.schema.json"
+        assert schema_path.is_file(), f"Schema not found: {schema_path}"
+        result = _run_cli([
+            "--input", str(VALID_DIR / "experimental.json"),
+            "--schema", str(schema_path),
+        ])
+        assert result.returncode == 0, (
+            f"CLI with --schema returned {result.returncode}\n"
+            f"stderr: {result.stderr}\nstdout: {result.stdout}"
+        )
+
+    def test_schema_flag_still_rejects_invalid(self) -> None:
+        """--schema with a valid path must still reject invalid entries."""
+        schema_path = ROOT / "schemas" / "leaderboard_trend_v1.schema.json"
+        result = _run_cli([
+            "--input", str(INVALID_DIR / "bad-version.json"),
+            "--schema", str(schema_path),
+        ])
+        assert result.returncode != 0, "--schema should still reject invalid entries"
+
 
 # ---------------------------------------------------------------------------
 # Script parity tests — scripts/validate_trend_entries.py must behave identically
@@ -159,28 +181,47 @@ class TestScriptParity:
         # Both non-zero
         assert (cli.returncode != 0) == (script.returncode != 0)
 
+    @staticmethod
+    def _parse_decisions(output: str) -> dict[str, str]:
+        """Parse '  status  entry_id: reason' lines into {entry_id: status}."""
+        KNOWN_STATUSES = frozenset({
+            "default", "blocked", "experimental", "excluded", "invalid", "pending",
+        })
+        result: dict[str, str] = {}
+        unknown: list[str] = []
+        for line in output.splitlines():
+            stripped = line.strip()
+            # Match status lines (start with a status word, contain entry_id)
+            # Skip WARNING/ERROR lines from issues
+            status_end = stripped.find(" ")
+            if status_end == -1:
+                continue
+            candidate = stripped[:status_end]
+            if candidate not in KNOWN_STATUSES:
+                if "-" in candidate or candidate.upper() == candidate:
+                    # Skip ERROR / WARNING lines (all-caps with codes)
+                    continue
+                unknown.append(candidate)
+            parts = stripped.split(None, 2)
+            if len(parts) >= 2:
+                entry_id = parts[1]
+                if "-" in entry_id:
+                    result[entry_id] = candidate
+
+        if unknown:
+            raise AssertionError(
+                f"Decision parser found unknown status(es): {sorted(set(unknown))}. "
+                "Update KNOWN_STATUSES or check if a new admission status was added."
+            )
+        return result
+
     def test_script_and_cli_consistent_decisions(self) -> None:
         """Both entry points must produce the same admission decisions per entry."""
         cli = _run_cli(["--input", str(VALID_DIR)])
         script = _run_script(["--input", str(VALID_DIR)])
 
-        def _parse_decisions(output: str) -> dict[str, str]:
-            """Parse '  status  entry_id: reason' lines into {entry_id: status}."""
-            result = {}
-            for line in output.splitlines():
-                stripped = line.strip()
-                # Match status lines (start with a status word, contain entry_id)
-                # Skip WARNING/ERROR lines from issues
-                if stripped.startswith(("default", "blocked", "experimental", "excluded", "invalid", "pending")):
-                    parts = stripped.split(None, 2)
-                    if len(parts) >= 2:
-                        entry_id = parts[1]
-                        if "-" in entry_id:
-                            result[entry_id] = parts[0]
-            return result
-
-        cli_decisions = _parse_decisions(cli.stdout)
-        script_decisions = _parse_decisions(script.stdout)
+        cli_decisions = self._parse_decisions(cli.stdout)
+        script_decisions = self._parse_decisions(script.stdout)
 
         assert cli_decisions == script_decisions, (
             f"CLI and script gave different entry-level decisions\n"

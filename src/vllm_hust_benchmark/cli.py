@@ -1238,7 +1238,14 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\nFAIL: {len(report.issues)} issue(s) found — release gate blocked", file=sys.stderr)
             return 1
 
-        passed = sum(1 for d in report.decisions if d.status in ("default", "pending"))
+        passed = sum(1 for d in report.decisions if d.status == "default")
+        pending = sum(1 for d in report.decisions if d.status == "pending")
+        if pending:
+            print(
+                f"WARNING: {pending} entry(s) have unknown coverage_class — "
+                f"skipped cross-entry checks",
+                file=sys.stderr,
+            )
         print(f"\nOK: {len(report.decisions)} entry(s) validated, {passed} admitted")
         return 0
 

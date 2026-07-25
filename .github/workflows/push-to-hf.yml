@@ -319,55 +319,8 @@ jobs:
         id: validate-trend-snapshots
         if: ${{ steps.sync-hf.conclusion == 'success' && github.event.inputs.dry_run != 'true' }}
         run: |
-          python - << 'PYEOF'
-          import json, sys
-          from pathlib import Path
-          from vllm_hust_benchmark.trend_validator import load_json_entries, validate_entries
-
-          snapshot_dir = Path("leaderboard-data/snapshots")
-          snapshot_files = [
-              "leaderboard_single.json",
-              "leaderboard_multi.json",
-              "leaderboard_compare.json",
-          ]
-
-          all_entries = []
-          for file_name in snapshot_files:
-              path = snapshot_dir / file_name
-              if not path.is_file():
-                  print(f"WARNING: {file_name} not found")
-                  continue
-              try:
-                  entries = load_json_entries(path)
-                  all_entries.extend(entries)
-                  print(f"Loaded {len(entries)} entries from {file_name}")
-              except (ValueError, OSError) as exc:
-                  print(f"WARNING: {path}: {exc}")
-                  continue
-
-          if not all_entries:
-              print("No snapshot entries to validate")
-              sys.exit(0)
-
-          report = validate_entries(all_entries)
-          summary = {}
-          for decision in report.decisions:
-              status = decision.status
-              summary[status] = summary.get(status, 0) + 1
-              print(f"  {decision.status:12} {decision.entry_id}: {decision.reason}")
-          for issue in report.issues:
-              print(f"  {issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}")
-
-          print(f"\nSnapshot summary: {json.dumps(summary)}")
-          print(f"Entries: {len(report.decisions)}, Issues: {len(report.issues)}")
-
-          if not report.passed:
-              print("\nFAIL: Aggregated snapshot contains entries that fail trend admission.",
-                    file=sys.stderr)
-              sys.exit(1)
-
-          print("\nOK: Aggregated snapshots passed trend admission validation")
-          PYEOF
+          PYTHONPATH=src python -m vllm_hust_benchmark.cli validate-trend \
+            --input leaderboard-data/snapshots/
 
       - name: Verify HF snapshots match GitHub canonical snapshots
         if: ${{ steps.sync-hf.conclusion == 'success' && github.event.inputs.dry_run != 'true' }}
