@@ -149,24 +149,27 @@ def resolve_ascend_commit(hust_commit: str) -> str:
 
 
 def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
-    """Resolve the latest vllm-ascend-hust origin/main commit.
+    """Last-resort fallback: return the current HEAD of the local ascend repo.
 
-    Previously this was hardcoded to ``bf2984e...`` which was excluded from
-    leaderboard aggregation (see docs/leaderboard-exclusions.json).  By
-    using the latest ``origin/main`` instead, backfill submissions are no
-    longer rejected by the exclusion check.
+    This function is intentionally a *blind* fallback that does not look at
+    ``hust_commit`` at all.  It is only safe to call when every other
+    resolution strategy (snapshot lookup, time-aligned ``resolve_ascend_commit``,
+    and an explicit ``--ascend-commit`` override) has failed.
 
-    If ``origin/main`` is not reachable (e.g. offline), falls back to the
-    current HEAD of the local ascend repo.
+    Historically this function returned ``origin/main`` tip, but that caused
+    backfill batches for a given vllm-hust commit to silently pair with
+    whatever ascend commit happened to be on ``origin/main`` *at backfill
+    time* — producing ``runtime_provenance.plugin.commit`` values that did
+    not match the plugin actually used when the same vllm-hust commit was
+    first benchmarked.  That mismatch split a single runtime revision across
+    multiple x-axis points on the leaderboard trend chart.
 
-    The ``install_ascend_plugin()`` function applies comprehensive
-    compatibility patches (try/except ImportError guards) so that the
-    latest ascend code works with older vllm-hust commits passed to
-    ``run_cell``.
-
-    Use the ``--ascend-commit`` CLI flag to override this auto-detection
-    with a specific commit.
+    Callers SHOULD pass through ``resolve_ascend_commit(hust_commit)`` (which
+    time-aligns) before reaching this fallback.  Use the ``--ascend-commit``
+    CLI flag to override auto-detection with an explicit commit.
     """
+    # Prefer origin/main tip when reachable, since it is at least a published
+    # commit; fall back to whatever HEAD currently points at when offline.
     out = subprocess.run(
         ["git", "log", "-1", "--format=%H", "origin/main"],
         cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
@@ -174,12 +177,48 @@ def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
     sha = out.stdout.strip()
     if sha and len(sha) == 40:
         return sha
-    # Fallback: use current HEAD if origin/main is not accessible.
     out = subprocess.run(
         ["git", "rev-parse", "HEAD"],
         cwd=ASCEND_REPO, capture_output=True, text=True, check=True,
     )
     return out.stdout.strip()
+
+
+def resolve_ascend_commit_chain(hust_commit: str) -> tuple[str, str]:
+    """Resolve the vllm-ascend-hust commit for *hust_commit*.
+
+    Returns a ``(ascend_commit, source)`` tuple where *source* is one of:
+
+    - ``"snapshot"``  — found in an existing leaderboard snapshot entry
+      whose ``metadata.git_commit`` matches *hust_commit*; this is the
+      preferred source because it guarantees the plugin commit matches the
+      one already published for this vllm-hust commit.
+    - ``"time-align"`` — no snapshot hit, so the newest ascend ``origin/main``
+      commit made before *hust_commit*'s timestamp is used
+      (``resolve_ascend_commit``).
+    - ``"fallback-head"`` — neither snapshot nor time-align worked; falls
+      back to ``_resolve_compatible_ascend_commit`` (current HEAD).
+
+    Callers should log *source* alongside the resolved commit so that a
+    backfill batch whose plugin commit was not the canonical one is visible.
+
+    Raises ``RuntimeError`` if *hust_commit* cannot be resolved to a
+    timestamp (which would block time-alignment) and the snapshot lookup
+    also misses.
+    """
+    snapshot_ascend = _lookup_ascend_commit_from_snapshot(hust_commit)
+    if snapshot_ascend:
+        return snapshot_ascend, "snapshot"
+    try:
+        return resolve_ascend_commit(hust_commit), "time-align"
+    except Exception as exc:
+        fallback = _resolve_compatible_ascend_commit(hust_commit)
+        if not fallback:
+            raise RuntimeError(
+                f"could not resolve ascend commit for {hust_commit}: "
+                f"time-align failed ({exc!r}) and HEAD fallback is empty"
+            ) from exc
+        return fallback, "fallback-head"
 
 
 def _lookup_ascend_commit_from_snapshot(hust_commit: str) -> str | None:
@@ -2426,7 +2465,20 @@ def _check_error_rate(sub_dir: Path) -> str | None:
 def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
              npu_id: int = 0) -> dict[str, Any]:
     if ascend_commit is None:
-        ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
+        # Prefer snapshot -> time-align before the blind HEAD fallback so a
+        # backfill batch pairs with the canonical plugin commit already used
+        # for this vllm-hust commit (snapshot), or at least a time-aligned
+        # one.  Previously this called _resolve_compatible_ascend_commit
+        # directly, which returns origin/main tip and ignores hust_commit,
+        # splitting a single runtime revision across multiple x-axis points.
+        ascend_commit, source = resolve_ascend_commit_chain(hust_commit)
+        log(f"Resolved ascend commit via {source}: {ascend_commit[:12]}")
+
+    if not ascend_commit or len(ascend_commit) != 40:
+        raise RuntimeError(
+            f"refusing to run cell {workload}@{hust_commit[:9]}: resolved "
+            f"ascend_commit is not a 40-char SHA ({ascend_commit!r})"
+        )
 
     log(f"=== {workload} @ {hust_commit[:9]} (plugin {ascend_commit[:9]}) ===")
 
@@ -2570,6 +2622,13 @@ def cmd_plan(args: argparse.Namespace) -> int:
             branch_mark = "" if on_main else " [non-main]"
             total_missing += len(missing)
             print(f"\n[{commit[:9]}]{branch_mark} ({len(present)}/{len(SCENARIO_PARAMS)} present)")
+            # Show which plugin commit would be used so a reviewer can spot a
+            # non-canonical pairing (e.g. fallback-head) before running.
+            try:
+                plugin_commit, source = resolve_ascend_commit_chain(commit)
+                print(f"  → plugin {plugin_commit[:9]} (via {source})")
+            except Exception as exc:  # noqa: BLE001 - surface, do not crash plan
+                print(f"  → plugin unresolved: {exc}")
             for workload in sorted(SCENARIO_PARAMS):
                 if not exists:
                     status = "NOT-FOUND"
@@ -2671,16 +2730,13 @@ def cmd_run(args: argparse.Namespace) -> int:
         log(f"Using vllm-hust commit: {hust_commit[:12]}")
 
     if ascend_commit_str == "latest":
-        # First try to look up from the snapshot for version consistency.
-        snapshot_ascend = _lookup_ascend_commit_from_snapshot(hust_commit)
-        if snapshot_ascend:
-            ascend_commit = snapshot_ascend
-            log(f"Resolved ascend commit from snapshot: {ascend_commit[:12]}")
-        else:
-            # Fall back to time-aligned resolution (find the ascend commit
-            # on origin/main at the time of the hust commit).
-            ascend_commit = resolve_ascend_commit(hust_commit)
-            log(f"Auto-resolved time-aligned ascend commit: {ascend_commit[:12]}")
+        # Snapshot -> time-align -> blind HEAD fallback, in that order.
+        # Logging the *source* here makes it obvious when a backfill batch
+        # is about to pair with a non-canonical plugin commit (e.g. a
+        # fallback-head resolution instead of a snapshot hit), which would
+        # split a single runtime revision across multiple trend points.
+        ascend_commit, source = resolve_ascend_commit_chain(hust_commit)
+        log(f"Resolved ascend commit via {source}: {ascend_commit[:12]}")
     else:
         ascend_commit = ascend_commit_str
         log(f"Using ascend commit: {ascend_commit[:12]}")
@@ -2841,15 +2897,11 @@ def cmd_fill(args: argparse.Namespace) -> int:
                 log(f"SKIP commit {hust_commit[:9]}: all workloads present")
                 continue
 
-            # First try to look up from the snapshot for version consistency.
-            snapshot_ascend = _lookup_ascend_commit_from_snapshot(hust_commit)
-            if snapshot_ascend:
-                ascend_commit = snapshot_ascend
-                log(f"Resolved ascend commit from snapshot: {ascend_commit[:12]}")
-            else:
-                # Fall back to time-aligned resolution.
-                ascend_commit = resolve_ascend_commit(hust_commit)
-                log(f"Auto-resolved time-aligned ascend commit: {ascend_commit[:12]}")
+            # Snapshot -> time-align -> blind HEAD fallback, so a given
+            # vllm-hust commit always pairs with the same plugin commit
+            # across workloads and across backfill runs.
+            ascend_commit, source = resolve_ascend_commit_chain(hust_commit)
+            log(f"Resolved ascend commit via {source}: {ascend_commit[:12]}")
             log(f"=== Commit {hust_commit[:9]}: {len(missing)} missing workload(s) ===")
 
             for workload in missing:
