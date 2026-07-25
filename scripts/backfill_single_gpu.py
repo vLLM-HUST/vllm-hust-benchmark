@@ -221,6 +221,108 @@ def resolve_ascend_commit_chain(hust_commit: str) -> tuple[str, str]:
         return fallback, "fallback-head"
 
 
+# ---------------------------------------------------------------------------
+# Plugin commit consistency guard
+# ---------------------------------------------------------------------------
+
+
+class PluginCommitMismatch(RuntimeError):
+    """Raised when an explicit plugin commit disagrees with the snapshot.
+
+    The canonical plugin commit for a given vllm-hust commit is the one
+    carried by the earliest-submitted leaderboard entry of that commit
+    group (see ``_lookup_ascend_commit_from_snapshot``).  Pairing the same
+    vllm-hust commit with two different plugin commits would render as two
+    separate x-axis positions on the leaderboard trend chart even though
+    ``metadata.git_commit`` is identical — i.e. the same binary shown twice.
+    That is exactly the failure mode we saw on the ``a46abb7ae`` backfill
+    batch (see docs/HISTORICAL_PR_BACKFILL.md) and this guard refuses to
+    write the resulting submission.
+
+    Callers SHOULD pass through ``resolve_ascend_commit_chain`` first; the
+    explicit ``--ascend-commit`` path is the only flow that can normally
+    trip this guard.  Pass ``allow_override=True`` to bypass — overriding an
+    audit note is recorded in ``state.json`` via
+    :func:`record_plugin_override`.
+    """
+
+    def __init__(
+        self, hust_commit: str, canonical: str, requested: str
+    ) -> None:
+        self.hust_commit = hust_commit
+        self.canonical = canonical
+        self.requested = requested
+        super().__init__(
+            f"plugin commit mismatch on hust_commit {hust_commit[:9]}: "
+            f"snapshot canonical={canonical[:9]} requested={requested[:9]}; "
+            f"refuse to write submission that would split a single runtime "
+            f"revision into two trend-chart x-axis points. Use "
+            f"--force-mismatched-plugin-commit to override (rare, "
+            f"audit-worthy)."
+        )
+
+
+def assert_plugin_commit_consistent(
+    hust_commit: str,
+    ascend_commit: str,
+    *,
+    allow_override: bool = False,
+) -> None:
+    """Refuse to proceed if *ascend_commit* diverges from the snapshot.
+
+    The canonical plugin commit is read from
+    ``_lookup_ascend_commit_from_snapshot(hust_commit)``: any existing
+    leaderboard entry whose ``metadata.git_commit`` matches *hust_commit*
+    contributes its ``runtime_provenance.plugin.commit``. When that
+    canonical is already pinned and *ascend_commit* disagrees, raise
+    :class:`PluginCommitMismatch` unless *allow_override* is set.
+
+    A *snapshot miss* (no existing entry for this vllm-hust commit) is a
+    pass — the first run against a given commit is always unconstrained
+    because there is nothing to be inconsistent with.
+    """
+    canonical = _lookup_ascend_commit_from_snapshot(hust_commit)
+    if not canonical:
+        return
+    if ascend_commit.lower().strip() == canonical.lower().strip():
+        return
+    if allow_override:
+        log(
+            f"WARNING: overriding plugin commit consistency guard: "
+            f"hust_commit {hust_commit[:9]} canonical={canonical[:9]} "
+            f"requested={ascend_commit[:9]}"
+        )
+        return
+    raise PluginCommitMismatch(hust_commit, canonical, ascend_commit)
+
+
+def record_plugin_override(
+    state: dict[str, Any],
+    hust_commit: str,
+    canonical: str,
+    override_value: str,
+    *,
+    workload: str | None = None,
+) -> None:
+    """Append a (timestamp, commit, canonical, override) audit tuple to state.
+
+    Stored under ``state["audit"]["plugin_override"]`` so a backfill batch
+    that bypassed the consistency guard leaves an auditable trail in
+    ``.benchmarks/backfill-single-gpu/state.json``.
+    """
+    audit = state.setdefault("audit", {}).setdefault("plugin_override", [])
+    audit.append(
+        {
+            "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "hust_commit": hust_commit,
+            "canonical_plugin_commit": canonical,
+            "override_plugin_commit": override_value,
+            "workload": workload,
+        }
+    )
+    save_state(state)
+
+
 def _lookup_ascend_commit_from_snapshot(hust_commit: str) -> str | None:
     """Look up the vllm-ascend-hust commit from leaderboard_single.json.
 
@@ -2462,8 +2564,14 @@ def _check_error_rate(sub_dir: Path) -> str | None:
     return None
 
 
-def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
-             npu_id: int = 0) -> dict[str, Any]:
+def run_cell(
+    workload: str,
+    hust_commit: str,
+    ascend_commit: str | None = None,
+    npu_id: int = 0,
+    *,
+    allow_plugin_override: bool = False,
+) -> dict[str, Any]:
     if ascend_commit is None:
         # Prefer snapshot -> time-align before the blind HEAD fallback so a
         # backfill batch pairs with the canonical plugin commit already used
@@ -2479,6 +2587,17 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
             f"refusing to run cell {workload}@{hust_commit[:9]}: resolved "
             f"ascend_commit is not a 40-char SHA ({ascend_commit!r})"
         )
+
+    # Final self-check just before the cell runs (callers such as cmd_run
+    # already validate, but this guard catches direct invocations of
+    # run_cell — e.g. via an IDE or a future orchestrator — that bypass
+    # the CLI path).  ``allow_plugin_override`` mirrors the
+    # --force-mismatched-plugin-commit CLI flag.
+    assert_plugin_commit_consistent(
+        hust_commit,
+        ascend_commit,
+        allow_override=allow_plugin_override,
+    )
 
     log(f"=== {workload} @ {hust_commit[:9]} (plugin {ascend_commit[:9]}) ===")
 
@@ -2740,6 +2859,29 @@ def cmd_run(args: argparse.Namespace) -> int:
     else:
         ascend_commit = ascend_commit_str
         log(f"Using ascend commit: {ascend_commit[:12]}")
+
+    # Consistency guard: refuse to pair *hust_commit* with a plugin commit
+    # that diverges from the canonical one already recorded in the snapshot
+    # (see docs/HISTORICAL_PR_BACKFILL.md → “Plugin commit alignment rule”).
+    # ``--force-mismatched-plugin-commit`` overrides and writes an audit
+    # note into state.json.  The latest path also passes through this guard
+    # so a snapshot downgrade / corruption can't quietly produce a
+    # mismatched pair even when the chain chose time-align or fallback-head.
+    try:
+        assert_plugin_commit_consistent(
+            hust_commit,
+            ascend_commit,
+            allow_override=bool(args.force_mismatched_plugin_commit),
+        )
+    except PluginCommitMismatch as exc:
+        log(f"ERROR: {exc}")
+        return 1
+    if args.force_mismatched_plugin_commit:
+        canonical = _lookup_ascend_commit_from_snapshot(hust_commit) or ""
+        record_plugin_override(
+            state, hust_commit, canonical, ascend_commit,
+            workload=args.workload,
+        )
 
     if args.workload:
         target = {args.workload: [hust_commit]}
