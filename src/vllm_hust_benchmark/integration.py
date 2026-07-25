@@ -28,6 +28,11 @@ from vllm_hust_benchmark.submission_artifacts import iter_submission_artifact_pa
 from vllm_hust_benchmark.submission_artifacts import (
     normalize_submission_artifacts_in_tree,
 )
+from vllm_hust_benchmark.workload_config_contract import (
+    is_official_workload_contract_entry,
+    requires_workload_config_contract,
+    validate_explicit_workload_config,
+)
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
 DEFAULT_RUNTIME_ENGINE = "vllm-hust"
@@ -381,11 +386,7 @@ def build_ascend_benchmark_ci_command(layout: RepoLayout) -> list[str]:
     #   "vllm-hust Ascend benchmark CI script not found: .../worktrees/vllm-hust--<sha>/..."
     repo = _resolve_stable_repo(layout.vllm_hust_repo)
     ci_script = (
-        repo
-        / ".github"
-        / "workflows"
-        / "scripts"
-        / "run_ascend_benchmark_ci.sh"
+        repo / ".github" / "workflows" / "scripts" / "run_ascend_benchmark_ci.sh"
     )
     if not ci_script.is_file():
         raise ValueError(f"vllm-hust Ascend benchmark CI script not found: {ci_script}")
@@ -579,9 +580,7 @@ def _normalize_baseline_engine(value: Any) -> str:
     return str(value or "").strip().lower()
 
 
-def _build_entry_baseline_coverage_key(
-    entry: Mapping[str, Any], *, engine: str
-) -> str:
+def _build_entry_baseline_coverage_key(entry: Mapping[str, Any], *, engine: str) -> str:
     model = entry.get("model") if isinstance(entry.get("model"), Mapping) else {}
     hardware = (
         entry.get("hardware") if isinstance(entry.get("hardware"), Mapping) else {}
@@ -644,7 +643,9 @@ def _derive_accountable_scope_baseline_metadata(
         "baseline_engine": official_engine,
         "declared_baseline_engine": declared_engine,
         "baseline_status": baseline_status,
-        "scope_baseline_engine": declared_engine or official_engine or "unknown-baseline",
+        "scope_baseline_engine": declared_engine
+        or official_engine
+        or "unknown-baseline",
     }
 
 
@@ -659,7 +660,9 @@ def _normalize_accountable_scope_baseline_metadata(
         return None
 
     accountable_scope = constraints.get("accountable_scope")
-    accountable_scope = accountable_scope if isinstance(accountable_scope, dict) else None
+    accountable_scope = (
+        accountable_scope if isinstance(accountable_scope, dict) else None
+    )
     if accountable_scope is None:
         return None
 
@@ -740,7 +743,9 @@ def _load_official_baseline_coverage_keys(layout: RepoLayout) -> set[str]:
 
         export_payload = payload.get("export")
         export_payload = export_payload if isinstance(export_payload, Mapping) else {}
-        baseline_engine = str(export_payload.get("baseline_engine") or "").strip().lower()
+        baseline_engine = (
+            str(export_payload.get("baseline_engine") or "").strip().lower()
+        )
         if not baseline_engine:
             continue
 
@@ -846,7 +851,9 @@ def _build_compare_setting_signature(entry: Mapping[str, Any]) -> str:
     if same_spec_hash:
         return same_spec_hash
 
-    workload = entry.get("workload") if isinstance(entry.get("workload"), Mapping) else {}
+    workload = (
+        entry.get("workload") if isinstance(entry.get("workload"), Mapping) else {}
+    )
     same_spec = _get_same_spec_payload(entry)
     server = same_spec.get("resolved_server_parameters")
     server = server if isinstance(server, Mapping) else {}
@@ -931,8 +938,12 @@ def _build_goal_scope_key_debug(entry: Mapping[str, Any]) -> str:
 
 
 def _is_goal_baseline_entry_debug(entry: Mapping[str, Any]) -> bool:
-    metadata = entry.get("metadata") if isinstance(entry.get("metadata"), Mapping) else {}
-    engine = str(entry.get("engine") or metadata.get("engine") or "unknown").strip().lower()
+    metadata = (
+        entry.get("metadata") if isinstance(entry.get("metadata"), Mapping) else {}
+    )
+    engine = (
+        str(entry.get("engine") or metadata.get("engine") or "unknown").strip().lower()
+    )
     engine_version = str(
         entry.get("engine_version") or metadata.get("engine_version") or ""
     ).strip()
@@ -967,7 +978,9 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
             str((item.get("metadata") or {}).get("submitted_at") or ""),
         ),
     ):
-        metadata = entry.get("metadata") if isinstance(entry.get("metadata"), Mapping) else {}
+        metadata = (
+            entry.get("metadata") if isinstance(entry.get("metadata"), Mapping) else {}
+        )
         accountable = {}
         constraints = entry.get("constraints")
         if isinstance(constraints, Mapping) and isinstance(
@@ -997,7 +1010,9 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
     compare_grouped: dict[str, list[Mapping[str, Any]]] = {}
     goal_grouped: dict[str, list[Mapping[str, Any]]] = {}
     for entry in entries:
-        compare_grouped.setdefault(_build_compare_scope_key_debug(entry), []).append(entry)
+        compare_grouped.setdefault(_build_compare_scope_key_debug(entry), []).append(
+            entry
+        )
         goal_grouped.setdefault(_build_goal_scope_key_debug(entry), []).append(entry)
 
     print("aggregated compare debug: compare-scope candidates", file=sys.stderr)
@@ -1022,8 +1037,12 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
 
     print("aggregated compare debug: goal-scope candidates", file=sys.stderr)
     for scope_key, scope_entries in sorted(goal_grouped.items()):
-        current_entries = [entry for entry in scope_entries if _normalize_engine(entry) == "vllm-hust"]
-        baseline_entries = [entry for entry in scope_entries if _is_goal_baseline_entry_debug(entry)]
+        current_entries = [
+            entry for entry in scope_entries if _normalize_engine(entry) == "vllm-hust"
+        ]
+        baseline_entries = [
+            entry for entry in scope_entries if _is_goal_baseline_entry_debug(entry)
+        ]
         if not current_entries and not baseline_entries:
             continue
         print(
@@ -1044,9 +1063,15 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
                 file=sys.stderr,
             )
 
-    hard_constraints = compare.get("hard_constraints") if isinstance(compare, Mapping) else {}
+    hard_constraints = (
+        compare.get("hard_constraints") if isinstance(compare, Mapping) else {}
+    )
     hard_constraints = hard_constraints if isinstance(hard_constraints, Mapping) else {}
-    scopes = hard_constraints.get("scopes") if isinstance(hard_constraints.get("scopes"), list) else []
+    scopes = (
+        hard_constraints.get("scopes")
+        if isinstance(hard_constraints.get("scopes"), list)
+        else []
+    )
     goal_progress = compare.get("goal_progress") if isinstance(compare, Mapping) else {}
     goal_progress = goal_progress if isinstance(goal_progress, Mapping) else {}
     print(
@@ -1195,6 +1220,9 @@ def _upload_existing_snapshots(
         "leaderboard_compare.json",
         "last_updated.json",
     ]
+
+    if not _validate_snapshot_workload_contracts(aggregate_output_dir):
+        return 2
 
     operations: list[CommitOperationAdd] = []
     planned_paths: list[str] = []
@@ -1371,7 +1399,69 @@ def _validate_formal_submission_sources(
                 )
                 return False
 
+            if not _validate_entry_workload_contract(
+                payload,
+                source=str(artifact_path),
+                require_official=True,
+            ):
+                return False
+
     return True
+
+
+def _validate_entry_workload_contract(
+    payload: Mapping[str, Any],
+    *,
+    source: str,
+    require_official: bool = False,
+) -> bool:
+    metadata = payload.get("metadata")
+    has_contract_marker = isinstance(metadata, Mapping) and bool(
+        metadata.get("workload_config_contract")
+    )
+    must_validate = (
+        (require_official and is_official_workload_contract_entry(payload))
+        or requires_workload_config_contract(payload)
+        or has_contract_marker
+    )
+    if not must_validate:
+        return True
+
+    errors = validate_explicit_workload_config(payload)
+    for error in errors:
+        print(
+            f"invalid explicit workload configuration in {source}: {error}",
+            file=sys.stderr,
+        )
+    return not errors
+
+
+def _validate_snapshot_workload_contracts(snapshot_dir: Path) -> bool:
+    valid = True
+    for file_name in ("leaderboard_single.json", "leaderboard_multi.json"):
+        snapshot_path = snapshot_dir / file_name
+        if not snapshot_path.is_file():
+            continue
+        try:
+            payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(
+                f"invalid leaderboard snapshot {snapshot_path}: {exc}", file=sys.stderr
+            )
+            return False
+        if not isinstance(payload, list):
+            # Snapshot structure is validated by the existing aggregation checks.
+            # This guard is intentionally limited to the workload contract.
+            continue
+        for index, entry in enumerate(payload):
+            if not isinstance(entry, Mapping):
+                continue
+            if not _validate_entry_workload_contract(
+                entry,
+                source=f"{snapshot_path}[{index}]",
+            ):
+                valid = False
+    return valid
 
 
 def sync_submission_to_huggingface(
@@ -1395,7 +1485,11 @@ def sync_submission_to_huggingface(
     else:
         normalized_submission_dirs = list(submission_dirs)
 
-    if not normalized_submission_dirs and not allow_existing_only and not skip_aggregation:
+    if (
+        not normalized_submission_dirs
+        and not allow_existing_only
+        and not skip_aggregation
+    ):
         print(
             "at least one submission directory is required unless --existing-only or --skip-aggregation is set",
             file=sys.stderr,
@@ -1568,6 +1662,8 @@ def sync_submission_to_huggingface(
         except ValueError as exc:
             _print_aggregated_compare_diagnostics(rebuilt_output_dir)
             print(str(exc), file=sys.stderr)
+            return 2
+        if not _validate_snapshot_workload_contracts(rebuilt_output_dir):
             return 2
 
         operations: list[CommitOperationAdd] = []

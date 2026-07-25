@@ -6,7 +6,11 @@ import sys
 from pathlib import Path
 
 
-SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "backfill_historical_pr_benchmarks.py"
+SCRIPT_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "scripts"
+    / "backfill_historical_pr_benchmarks.py"
+)
 
 
 def load_module():
@@ -19,7 +23,9 @@ def load_module():
     return module
 
 
-def write_spec(path: Path, *, scenario: str, chip_model: str = "910B2", chip_count: int = 1) -> None:
+def write_spec(
+    path: Path, *, scenario: str, chip_model: str = "910B2", chip_count: int = 1
+) -> None:
     path.write_text(
         json.dumps(
             {
@@ -38,11 +44,13 @@ def write_spec(path: Path, *, scenario: str, chip_model: str = "910B2", chip_cou
 def test_collect_official_specs_filters_to_910b2_single_chip(tmp_path: Path) -> None:
     module = load_module()
     write_spec(
-        tmp_path / "official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
+        tmp_path
+        / "official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
         scenario="sharegpt-online",
     )
     write_spec(
-        tmp_path / "official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-4chip-910b2.json",
+        tmp_path
+        / "official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-4chip-910b2.json",
         scenario="sonnet-throughput",
         chip_count=4,
     )
@@ -142,7 +150,9 @@ def test_managed_same_spec_parameters_match_effective_server_args(monkeypatch) -
     assert parameters["max_num_seqs"] == str(args.managed_max_num_seqs)
 
 
-def test_ensure_plugin_build_info_materializes_source_worktree_file(tmp_path: Path) -> None:
+def test_ensure_plugin_build_info_materializes_source_worktree_file(
+    tmp_path: Path,
+) -> None:
     module = load_module()
     plugin_worktree = tmp_path / "plugin"
     package_dir = plugin_worktree / "vllm_ascend"
@@ -151,8 +161,7 @@ def test_ensure_plugin_build_info_materializes_source_worktree_file(tmp_path: Pa
     module.ensure_plugin_build_info(plugin_worktree, chip_model="910B2")
 
     assert (package_dir / "_build_info.py").read_text(encoding="utf-8") == (
-        "# Auto-generated file for benchmark source worktree\n"
-        "__device_type__ = 'A2'\n"
+        "# Auto-generated file for benchmark source worktree\n__device_type__ = 'A2'\n"
     )
 
 
@@ -195,3 +204,34 @@ def test_dev_hub_secret_env_does_not_override_process_env(
     env = module.dev_hub_secret_env(dev_hub)
 
     assert env == {"VLLM_HUST_API_KEY": "local-secret"}
+
+
+def test_single_gpu_backfill_does_not_treat_prompt_count_as_concurrency() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    backfill_script = (repo_root / "scripts" / "backfill_single_gpu.py").read_text(
+        encoding="utf-8"
+    )
+    latest_script = (repo_root / "scripts" / "run_latest_benchmark.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert 'cmd += ["--concurrent-requests", str(params["num_prompts"])]' not in (
+        backfill_script
+    )
+    assert '--concurrent-requests "$num_prompts"' not in latest_script
+
+
+def test_current_same_spec_runner_exports_effective_batch_and_concurrency() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    runner = (repo_root / "scripts" / "run-current-ascend-same-spec.sh").read_text(
+        encoding="utf-8"
+    )
+
+    assert ".client_parameters.batch_size" in runner
+    assert "append_export_arg_if_present --batch-size" in runner
+    assert ".client_parameters.max_concurrency" in runner
+    assert "append_export_arg_if_present --concurrent-requests" in runner
+    assert (
+        ".client_parameters.num_prompts"
+        not in runner.split("CONCURRENT_REQUESTS=", 1)[1].split("BENCHMARK_TYPE=", 1)[0]
+    )
