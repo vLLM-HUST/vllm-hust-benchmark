@@ -16,21 +16,26 @@ def fixture(name: str) -> dict:
     return json.loads((FIXTURES / "valid" / name).read_text(encoding="utf-8"))
 
 
-def make_repeated_pair() -> list[dict]:
+def make_repeated_pair(side_count: int = 3) -> list[dict]:
     baseline = fixture("targeted-pair.json")
-    baseline["entry_id"] = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
     baseline["point_role"] = "baseline"
     baseline["repeat_group"] = "pair/v1::baseline"
-    baseline["repeat_index"] = 0
     baseline["canonical_aggregate"] = {
         "method": "mean", "count": 3, "metrics": {"ttft_ms": {"value": 40}}, "outlier_handling": "none"
     }
-    head = copy.deepcopy(baseline)
-    head["entry_id"] = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
-    head["point_role"] = "head"
-    head["repeat_group"] = "pair/v1::head"
-    head["repeat_index"] = 0
-    return [baseline, head]
+    entries = []
+    for role, prefix, group in (
+        ("baseline", "a", "pair/v1::baseline"),
+        ("head", "b", "pair/v1::head"),
+    ):
+        for index in range(side_count):
+            candidate = copy.deepcopy(baseline)
+            candidate["entry_id"] = f"{prefix * 8}-{prefix * 4}-4{prefix * 3}-8{prefix * 3}-{prefix * 12}"
+            candidate["point_role"] = role
+            candidate["repeat_group"] = group
+            candidate["repeat_index"] = index
+            entries.append(candidate)
+    return entries
 
 
 @pytest.mark.parametrize("throughput", [None, 0])
@@ -56,26 +61,48 @@ def test_w8a8_is_experimental() -> None:
 
 
 def test_blocked_half_pair_has_actionable_reason() -> None:
-    entry = fixture("blocked.json")
-    entry["repeat_group"] = "blocked/v1::head"
-    entry["canonical_aggregate"] = {
-        "method": "mean", "count": 3, "metrics": {"throughput_tps": {"value": 350}}, "outlier_handling": "none"
-    }
-    entry["repeat_index"] = 0
-    report = validate_entries([entry])
-    assert report.decisions[0].status == "blocked"
+    entries = [entry for entry in make_repeated_pair() if entry["point_role"] == "head"]
+    for entry in entries:
+        entry["comparison_id"] = fixture("blocked.json")["comparison_id"]
+        entry["repeat_group"] = "blocked/v1::head"
+    report = validate_entries(entries)
+    assert all(decision.status == "blocked" for decision in report.decisions)
     assert "PAIR_HALF_MISSING" in {issue.code for issue in report.issues}
     assert "comparison_id" in report.decisions[0].reason
 
 
+def test_full_matrix_requires_raw_entries_for_declared_aggregate() -> None:
+    report = validate_entries([fixture("full-matrix.json")])
+    assert report.decisions[0].status == "blocked"
+    assert "MATRIX_REPEAT_INCOMPLETE" in {issue.code for issue in report.issues}
+
+
+def test_pair_is_blocked_when_counterpart_has_insufficient_raw_repeats() -> None:
+    entries = make_repeated_pair(side_count=3)
+    entries = [entry for entry in entries if entry["point_role"] == "baseline"] + [
+        entry for entry in entries if entry["point_role"] == "head" and entry["repeat_index"] == 0
+    ]
+    report = validate_entries(entries)
+    baseline_decisions = [decision for decision in report.decisions if decision.entry_id.startswith("a")]
+    assert baseline_decisions
+    assert all(decision.status == "blocked" for decision in baseline_decisions)
+    assert "PAIR_COUNTERPART_REPEAT_INCOMPLETE" in {issue.code for issue in report.issues}
+
+
 def test_complete_pair_and_full_matrix_are_admitted() -> None:
     pair = make_repeated_pair()
-    matrix = fixture("full-matrix.json")
-    report = validate_entries([*pair, matrix])
+    matrix_template = fixture("full-matrix.json")
+    matrix = []
+    for index in range(3):
+        candidate = copy.deepcopy(matrix_template)
+        candidate["entry_id"] = f"c{index + 1:07d}-c00{index + 1}-4c0{index + 1}-8c0{index + 1}-{'c' * 12}"
+        candidate["repeat_index"] = index
+        matrix.append(candidate)
+    report = validate_entries([*pair, *matrix])
     statuses = {decision.entry_id: decision.status for decision in report.decisions}
     assert statuses["aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"] == "default"
     assert statuses["bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"] == "default"
-    assert statuses[matrix["entry_id"]] == "default"
+    assert all(statuses[entry["entry_id"]] == "default" for entry in matrix)
     assert report.passed
 
 

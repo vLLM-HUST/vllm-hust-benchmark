@@ -179,6 +179,29 @@ def _pair_key(entry: Mapping[str, Any]) -> tuple[Any, ...]:
     )
 
 
+def _repeat_completeness(
+    entry: Mapping[str, Any], entries: list[dict[str, Any]]
+) -> tuple[bool, str]:
+    """Check that a declared aggregate is backed by the raw repeat entries."""
+    group = entry.get("repeat_group")
+    aggregate = entry.get("canonical_aggregate")
+    if not group or not isinstance(aggregate, Mapping):
+        return False, "repeat_group and canonical_aggregate are required"
+
+    series = [candidate for candidate in entries if candidate.get("repeat_group") == group]
+    expected = aggregate.get("count")
+    if expected != len(series):
+        return False, (
+            f"canonical_aggregate.count={expected!r} but repeat_group={group!r} "
+            f"contains {len(series)} raw entries"
+        )
+
+    indices = [candidate.get("repeat_index") for candidate in series]
+    if len(indices) != len(set(indices)) or sorted(indices) != list(range(len(indices))):
+        return False, "repeat_index values must be unique and contiguous from 0"
+    return True, ""
+
+
 def _cross_entry_decision(entry: dict[str, Any], decision: AdmissionDecision, entries: list[dict[str, Any]], local: dict[str, AdmissionDecision]) -> AdmissionDecision:
     if decision.status != "pending":
         return decision
@@ -191,15 +214,11 @@ def _cross_entry_decision(entry: dict[str, Any], decision: AdmissionDecision, en
         group = entry.get("repeat_group")
         if not group:
             return AdmissionDecision(entry_id, "experimental", "Single full-matrix run has no repeat_group")
-        series = [candidate for candidate in entries if candidate.get("repeat_group") == group]
-        indices = [candidate.get("repeat_index") for candidate in series]
-        if len(indices) != len(set(indices)) or sorted(indices) != list(range(len(indices))):
-            issue = ValidationIssue("MATRIX_REPEAT_INDEX_INVALID", "repeat_index values must be unique and contiguous from 0", entry_id, "warning")
+        complete, reason = _repeat_completeness(entry, entries)
+        if not complete:
+            issue = ValidationIssue("MATRIX_REPEAT_INCOMPLETE", reason, entry_id, "warning")
             return AdmissionDecision(entry_id, "blocked", issue.message, (issue,))
         aggregate = entry.get("canonical_aggregate") or {}
-        if len(series) > 1 and aggregate.get("count") != len(series):
-            issue = ValidationIssue("MATRIX_AGGREGATE_MISMATCH", f"canonical_aggregate.count={aggregate.get('count')!r} does not match {len(series)} raw repetitions", entry_id, "warning")
-            return AdmissionDecision(entry_id, "blocked", issue.message, (issue,))
         if aggregate.get("count", 0) < 3:
             return AdmissionDecision(entry_id, "experimental", f"Insufficient repetitions: got {aggregate.get('count')}, need at least 3")
         return AdmissionDecision(entry_id, "default", "Formal full-matrix series passed admission")
@@ -207,6 +226,10 @@ def _cross_entry_decision(entry: dict[str, Any], decision: AdmissionDecision, en
     if coverage == "targeted-pair":
         if not entry.get("repeat_group") or not entry.get("canonical_aggregate"):
             issue = ValidationIssue("PAIR_AGGREGATE_MISSING", "targeted-pair requires repeat_group and canonical_aggregate before formal admission", entry_id, "warning")
+            return AdmissionDecision(entry_id, "blocked", issue.message, (issue,))
+        complete, reason = _repeat_completeness(entry, entries)
+        if not complete:
+            issue = ValidationIssue("PAIR_REPEAT_INCOMPLETE", reason, entry_id, "warning")
             return AdmissionDecision(entry_id, "blocked", issue.message, (issue,))
         if (entry.get("canonical_aggregate") or {}).get("count", 0) < 3:
             return AdmissionDecision(entry_id, "experimental", "Insufficient repetitions: targeted-pair needs at least 3 samples per side")
@@ -218,6 +241,23 @@ def _cross_entry_decision(entry: dict[str, Any], decision: AdmissionDecision, en
             return AdmissionDecision(entry_id, "blocked", issue.message, (issue,))
         if _pair_key(entry) != _pair_key(counterpart):
             issue = ValidationIssue("PAIR_NOT_COMPARABLE", "Pair dimensions differ; align model, hardware, precision, workload, and topology", entry_id, "warning")
+            return AdmissionDecision(entry_id, "blocked", issue.message, (issue,))
+        counterpart_complete, counterpart_reason = _repeat_completeness(counterpart, entries)
+        if not counterpart_complete:
+            issue = ValidationIssue(
+                "PAIR_COUNTERPART_REPEAT_INCOMPLETE",
+                f"Counterpart repeat series is incomplete: {counterpart_reason}",
+                entry_id,
+                "warning",
+            )
+            return AdmissionDecision(entry_id, "blocked", issue.message, (issue,))
+        if (counterpart.get("canonical_aggregate") or {}).get("count", 0) < 3:
+            issue = ValidationIssue(
+                "PAIR_COUNTERPART_REPETITIONS_INSUFFICIENT",
+                "Counterpart has fewer than 3 repetitions; both sides must meet the minimum",
+                entry_id,
+                "warning",
+            )
             return AdmissionDecision(entry_id, "blocked", issue.message, (issue,))
         counterpart_decision = local.get(_entry_id(counterpart))
         if counterpart_decision is None or counterpart_decision.status != "pending":
