@@ -14,6 +14,7 @@ import pytest
 from vllm_hust_benchmark.aggregate_results import (
     VALID_AGG_METHODS,
     VALID_OUTLIER_HANDLING,
+    aggregate_entries,
     apply_aggregate_to_entry,
     build_series_signature,
     compute_canonical_aggregate,
@@ -607,7 +608,6 @@ class TestDeterminism:
 
     def test_different_batch_order_aggregate_entries(self, base_entry_dict):
         """The high-level aggregate_entries must also be deterministic."""
-        from vllm_hust_benchmark.aggregate_results import aggregate_entries
 
         rg = "group/v1::series"
         entries = []
@@ -637,7 +637,6 @@ class TestDeterminism:
 
 class TestAggregateEntries:
     def test_basic(self, mixed_entries):
-        from vllm_hust_benchmark.aggregate_results import aggregate_entries
 
         result = aggregate_entries(mixed_entries, method="mean")
         # 1 aggregated group + 1 solo entry = 2 output entries
@@ -651,7 +650,6 @@ class TestAggregateEntries:
         assert solo_entries[0]["entry_id"] == "solo-entry-0000-0000-000000000000"
 
     def test_aggregated_entry_has_correct_metrics(self, repeat_group_entries):
-        from vllm_hust_benchmark.aggregate_results import aggregate_entries
 
         result = aggregate_entries(repeat_group_entries, method="mean")
         assert len(result) == 1
@@ -664,7 +662,6 @@ class TestAggregateEntries:
         assert e["metrics"]["ttft_ms"] == agg["metrics"]["ttft_ms"]["value"]
 
     def test_no_repeat_group(self, base_entry_dict):
-        from vllm_hust_benchmark.aggregate_results import aggregate_entries
 
         entry = copy.deepcopy(base_entry_dict)
         result = aggregate_entries([entry], method="mean")
@@ -695,7 +692,6 @@ class TestFileIO:
             load_entries_from_paths(["/tmp/nonexistent-file.json"])
 
     def test_write_aggregated_entries(self, repeat_group_entries):
-        from vllm_hust_benchmark.aggregate_results import aggregate_entries
 
         result = aggregate_entries(repeat_group_entries, method="mean")
 
