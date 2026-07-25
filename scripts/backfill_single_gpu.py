@@ -2225,9 +2225,6 @@ def submit_artifact(
         cmd += ["--output-length", str(params["output_length"])]
     if params.get("batch_size") is not None:
         cmd += ["--batch-size", str(params["batch_size"])]
-    if params.get("num_prompts") is not None:
-        cmd += ["--concurrent-requests", str(params["num_prompts"])]
-
     log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
     subprocess.run(cmd, cwd=REPO_ROOT, check=True)
 

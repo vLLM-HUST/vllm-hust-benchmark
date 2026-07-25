@@ -42,7 +42,7 @@ python3 scripts/backfill_single_gpu.py status
 python3 scripts/backfill_single_gpu.py validate
 
 # 一键补全所有缺失的 benchmark 数据（需要 NPU）
-# python3 scripts/backfill_single_gpu.py fill
+python3 scripts/backfill_single_gpu.py fill
 ```
 
 ## 参数处理规范
