@@ -2748,6 +2748,20 @@ def cmd_plan(args: argparse.Namespace) -> int:
                 print(f"  → plugin {plugin_commit[:9]} (via {source})")
             except Exception as exc:  # noqa: BLE001 - surface, do not crash plan
                 print(f"  → plugin unresolved: {exc}")
+                plugin_commit = None
+            # Consistency preview: warn when the existing snapshot's canonical
+            # plugin commit for this hust_commit disagrees with what the
+            # chain just produced. Plan is read-only — it never returns
+            # non-zero — but the ⚠ line tells the operator ``run`` would
+            # fail unless --force-mismatched-plugin-commit is supplied.
+            if plugin_commit:
+                canonical = _lookup_ascend_commit_from_snapshot(commit)
+                if canonical and canonical.lower() != plugin_commit.lower():
+                    print(
+                        f"  ⚠ plugin mismatch: snapshot canonical={canonical[:9]} "
+                        f"resolved={plugin_commit[:9]}; run would abort unless "
+                        f"--force-mismatched-plugin-commit is set"
+                    )
             for workload in sorted(SCENARIO_PARAMS):
                 if not exists:
                     status = "NOT-FOUND"
@@ -2951,7 +2965,10 @@ def cmd_run(args: argparse.Namespace) -> int:
                     state["cells"][key] = {"status": "done", "skipped": "already-present"}
                     continue
                 log(f"BEGIN {key}")
-                result = run_cell(workload, commit, ascend_commit, npu_id=npu_id)
+                result = run_cell(
+                    workload, commit, ascend_commit, npu_id=npu_id,
+                    allow_plugin_override=bool(args.force_mismatched_plugin_commit),
+                )
                 state["cells"][key] = result
                 save_state(state)
                 if result["status"] == "failed":
@@ -3293,6 +3310,18 @@ def build_parser() -> argparse.ArgumentParser:
                        help="Stop after the first failed cell.")
     p_run.add_argument("--npu-device", type=int, default=None,
                        help="NPU device index to use (default: auto-select idle NPU via npu-smi).")
+    p_run.add_argument(
+        "--force-mismatched-plugin-commit",
+        action="store_true",
+        help=(
+            "Override the plugin commit consistency guard. Use only when a "
+            "vllm-hust commit genuinely must be benchmarked against a plugin "
+            "commit that differs from the snapshot canonical (e.g. snapshot "
+            "corruption, or a deliberate plugin revert experiment). The "
+            "override is recorded in state.json under "
+            "audit.plugin_override for later review."
+        ),
+    )
 
     p_fill = sub.add_parser("fill", help="Fill all missing cells across all commits "
                             "(one-click full backfill).")
