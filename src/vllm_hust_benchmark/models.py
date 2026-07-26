@@ -43,7 +43,6 @@ def normalize_scenario_parameters(
     return normalized
 
 
-
 def render_parameter_flags(parameters: dict[str, Any]) -> list[str]:
     flags: list[str] = []
     for key, value in parameters.items():
@@ -74,7 +73,9 @@ class ScenarioDefinition:
     ) -> dict[str, Any]:
         merged = dict(self.defaults)
         if overrides:
-            merged.update({key: value for key, value in overrides.items() if value is not None})
+            merged.update(
+                {key: value for key, value in overrides.items() if value is not None}
+            )
         return normalize_scenario_parameters(self.benchmark_type, merged)
 
     def render_command(

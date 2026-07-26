@@ -11,7 +11,9 @@ from vllm_hust_benchmark.trend_validator import load_json_entries, validate_entr
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True, help="JSON file or directory of JSON files")
+    parser.add_argument(
+        "--input", type=Path, required=True, help="JSON file or directory of JSON files"
+    )
     args = parser.parse_args()
     paths = [args.input] if args.input.is_file() else sorted(args.input.glob("*.json"))
     entries = []
@@ -21,7 +23,9 @@ def main() -> int:
     for decision in report.decisions:
         print(f"{decision.status:12} {decision.entry_id}: {decision.reason}")
     for issue in report.issues:
-        print(f"{issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}")
+        print(
+            f"{issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}"
+        )
     return 1 if not report.passed else 0
 
 

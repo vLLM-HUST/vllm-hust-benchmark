@@ -29,17 +29,21 @@ def test_current_same_spec_runner_preserves_wait_for_server_exit_code() -> None:
     script = RUNNER.read_text(encoding="utf-8")
 
     serve_block = script[script.index('if [[ "$BENCHMARK_TYPE" == "serve" ]]; then') :]
-    wait_block = serve_block[serve_block.index('wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"') :]
+    wait_block = serve_block[
+        serve_block.index('wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"') :
+    ]
     wait_block = wait_block[: wait_block.index('if [[ "$server_wait_status" -eq 86')]
 
-    assert 'set +e' in wait_block
+    assert "set +e" in wait_block
     assert 'wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"' in wait_block
-    assert 'server_wait_status=$?' in wait_block
-    assert 'set -e' in wait_block
+    assert "server_wait_status=$?" in wait_block
+    assert "set -e" in wait_block
     assert 'if [[ "$server_wait_status" -eq 0 ]]; then' in wait_block
 
 
-def test_current_same_spec_runner_does_not_retry_generic_engine_startup_wrapper() -> None:
+def test_current_same_spec_runner_does_not_retry_generic_engine_startup_wrapper() -> (
+    None
+):
     script = RUNNER.read_text(encoding="utf-8")
 
     detector = script[script.index("server_log_indicates_node_env_failure()") :]
@@ -52,7 +56,9 @@ def test_current_same_spec_runner_does_not_retry_generic_engine_startup_wrapper(
     assert "Resource_Busy" in detector
 
 
-def test_current_same_spec_runner_detects_explicit_npu_oom_patterns(tmp_path: Path) -> None:
+def test_current_same_spec_runner_detects_explicit_npu_oom_patterns(
+    tmp_path: Path,
+) -> None:
     messages = (
         "torch.OutOfMemoryError: NPU exhausted",
         "RuntimeError: NPU out of memory. Tried to allocate 2 GiB",
@@ -65,17 +71,27 @@ def test_current_same_spec_runner_detects_explicit_npu_oom_patterns(tmp_path: Pa
         assert _run_log_detector("server_log_indicates_npu_oom", tmp_path, message) == 0
 
 
-def test_current_same_spec_runner_does_not_classify_generic_error_as_oom(tmp_path: Path) -> None:
-    message = "ERR99999 UNKNOWN applicaiton exception: Engine core initialization failed"
+def test_current_same_spec_runner_does_not_classify_generic_error_as_oom(
+    tmp_path: Path,
+) -> None:
+    message = (
+        "ERR99999 UNKNOWN applicaiton exception: Engine core initialization failed"
+    )
 
     assert _run_log_detector("server_log_indicates_npu_oom", tmp_path, message) != 0
-    assert _run_log_detector("server_log_indicates_node_env_failure", tmp_path, message) != 0
+    assert (
+        _run_log_detector("server_log_indicates_node_env_failure", tmp_path, message)
+        != 0
+    )
 
 
 def test_current_same_spec_runner_keeps_resource_busy_retryable(tmp_path: Path) -> None:
     message = "RuntimeError: Resource_Busy(EL0005): The resources are busy"
 
-    assert _run_log_detector("server_log_indicates_node_env_failure", tmp_path, message) == 0
+    assert (
+        _run_log_detector("server_log_indicates_node_env_failure", tmp_path, message)
+        == 0
+    )
     assert _run_log_detector("server_log_indicates_npu_oom", tmp_path, message) != 0
 
 
@@ -185,8 +201,13 @@ def test_current_same_spec_runner_prints_enough_server_log_context() -> None:
     script = RUNNER.read_text(encoding="utf-8")
 
     assert "SERVER_LOG_TAIL_LINES=${SERVER_LOG_TAIL_LINES:-200}" in script
-    assert "SERVER_LOG_PROGRESS_INTERVAL_SECONDS=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS:-120}" in script
-    assert "SERVER_LOG_PROGRESS_TAIL_LINES=${SERVER_LOG_PROGRESS_TAIL_LINES:-40}" in script
+    assert (
+        "SERVER_LOG_PROGRESS_INTERVAL_SECONDS=${SERVER_LOG_PROGRESS_INTERVAL_SECONDS:-120}"
+        in script
+    )
+    assert (
+        "SERVER_LOG_PROGRESS_TAIL_LINES=${SERVER_LOG_PROGRESS_TAIL_LINES:-40}" in script
+    )
     assert "print_server_log_tail()" in script
     assert 'print_server_log_tail "$SERVER_STDOUT_LOG"' in script
     assert "tail -n 40" not in script
@@ -196,19 +217,24 @@ def test_current_same_spec_runner_prints_server_log_progress_while_waiting() -> 
     script = RUNNER.read_text(encoding="utf-8")
 
     wait_block = script[script.index("wait_for_server()") :]
-    wait_block = wait_block[: wait_block.index("  echo \"Timed out waiting")]
+    wait_block = wait_block[: wait_block.index('  echo "Timed out waiting')]
 
     assert "next_log_progress_at" in wait_block
     assert "same-spec server log progress at" in wait_block
     assert 'probe_server_ready "$host" "$port" 1 || true' in wait_block
-    assert 'print_server_log_tail "$SERVER_STDOUT_LOG" "$SERVER_LOG_PROGRESS_TAIL_LINES"' in wait_block
+    assert (
+        'print_server_log_tail "$SERVER_STDOUT_LOG" "$SERVER_LOG_PROGRESS_TAIL_LINES"'
+        in wait_block
+    )
 
 
 def test_current_same_spec_runner_probe_bypasses_proxy_and_checks_ping() -> None:
     script = RUNNER.read_text(encoding="utf-8")
 
     probe_block = script[script.index("probe_server_ready()") :]
-    probe_block = probe_block[: probe_block.index("server_log_indicates_node_env_failure()")]
+    probe_block = probe_block[
+        : probe_block.index("server_log_indicates_node_env_failure()")
+    ]
 
     assert "READY_PROBE_TIMEOUT_SECONDS=${READY_PROBE_TIMEOUT_SECONDS:-5}" in script
     assert '"/ping"' in probe_block

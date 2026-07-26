@@ -95,7 +95,10 @@ def normalize_client_parameters(
     normalized = dict(parameters)
 
     if benchmark_type == "serve":
-        if ready_check_timeout_sec and int(normalized.get("ready_check_timeout_sec") or 0) <= 0:
+        if (
+            ready_check_timeout_sec
+            and int(normalized.get("ready_check_timeout_sec") or 0) <= 0
+        ):
             normalized["ready_check_timeout_sec"] = ready_check_timeout_sec
     else:
         normalized.pop("ready_check_timeout_sec", None)

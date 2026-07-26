@@ -36,14 +36,15 @@ def _serialize_messages(messages: list[list[BaseMessage]]) -> list[list[dict]]:
         for msg in batch:
             entry: dict[str, Any] = {
                 "role": msg.type,  # "human", "ai", "system", "tool"
-                "content": msg.content if isinstance(msg.content, str) else str(msg.content),
+                "content": msg.content
+                if isinstance(msg.content, str)
+                else str(msg.content),
             }
             if hasattr(msg, "name") and msg.name:
                 entry["name"] = msg.name
             if hasattr(msg, "tool_calls") and msg.tool_calls:
                 entry["tool_calls"] = [
-                    {"name": tc["name"], "args": tc["args"]}
-                    for tc in msg.tool_calls
+                    {"name": tc["name"], "args": tc["args"]} for tc in msg.tool_calls
                 ]
             batch_serialized.append(entry)
         result.append(batch_serialized)
@@ -80,10 +81,14 @@ def _extract_token_usage(result: LLMResult) -> tuple[int, int]:
 
     # Try llm_output first
     if result.llm_output:
-        usage = result.llm_output.get("token_usage") or result.llm_output.get("usage", {})
+        usage = result.llm_output.get("token_usage") or result.llm_output.get(
+            "usage", {}
+        )
         if usage:
             input_tokens = usage.get("prompt_tokens", 0) or usage.get("input_tokens", 0)
-            output_tokens = usage.get("completion_tokens", 0) or usage.get("output_tokens", 0)
+            output_tokens = usage.get("completion_tokens", 0) or usage.get(
+                "output_tokens", 0
+            )
 
     # Fallback: check generation metadata
     if input_tokens == 0 and output_tokens == 0 and result.generations:
@@ -92,8 +97,12 @@ def _extract_token_usage(result: LLMResult) -> tuple[int, int]:
                 info = getattr(gen, "generation_info", None) or {}
                 usage = info.get("usage", {})
                 if usage:
-                    input_tokens += usage.get("prompt_tokens", 0) or usage.get("input_tokens", 0)
-                    output_tokens += usage.get("completion_tokens", 0) or usage.get("output_tokens", 0)
+                    input_tokens += usage.get("prompt_tokens", 0) or usage.get(
+                        "input_tokens", 0
+                    )
+                    output_tokens += usage.get("completion_tokens", 0) or usage.get(
+                        "output_tokens", 0
+                    )
 
     return input_tokens, output_tokens
 

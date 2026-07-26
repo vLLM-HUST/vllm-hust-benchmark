@@ -21,7 +21,10 @@ def make_repeated_pair(side_count: int = 3) -> list[dict]:
     baseline["point_role"] = "baseline"
     baseline["repeat_group"] = "pair/v1::baseline"
     baseline["canonical_aggregate"] = {
-        "method": "mean", "count": 3, "metrics": {"ttft_ms": {"value": 40}}, "outlier_handling": "none"
+        "method": "mean",
+        "count": 3,
+        "metrics": {"ttft_ms": {"value": 40}},
+        "outlier_handling": "none",
     }
     entries = []
     for role, prefix, group in (
@@ -30,7 +33,9 @@ def make_repeated_pair(side_count: int = 3) -> list[dict]:
     ):
         for index in range(side_count):
             candidate = copy.deepcopy(baseline)
-            candidate["entry_id"] = f"{prefix * 8}-{prefix * 4}-4{prefix * 3}-8{prefix * 3}-{prefix * 12}"
+            candidate["entry_id"] = (
+                f"{prefix * 8}-{prefix * 4}-4{prefix * 3}-8{prefix * 3}-{prefix * 12}"
+            )
             candidate["point_role"] = role
             candidate["repeat_group"] = group
             candidate["repeat_index"] = index
@@ -39,17 +44,28 @@ def make_repeated_pair(side_count: int = 3) -> list[dict]:
 
 
 @pytest.mark.parametrize("throughput", [None, 0])
-def test_random_latency_missing_or_zero_throughput_is_blocked_not_invalid(throughput) -> None:
+def test_random_latency_missing_or_zero_throughput_is_blocked_not_invalid(
+    throughput,
+) -> None:
     entry = fixture("invalid.json")
     entry["metrics"]["throughput_tps"] = throughput
     report = validate_entries([entry])
     assert report.decisions[0].status == "blocked"
-    assert "LATENCY_THROUGHPUT_NOT_APPLICABLE" in {issue.code for issue in report.issues}
+    assert "LATENCY_THROUGHPUT_NOT_APPLICABLE" in {
+        issue.code for issue in report.issues
+    }
 
 
 def test_retired_qwen3_bf16_is_excluded() -> None:
     entry = fixture("experimental.json")
-    entry["model"].update({"name": "Qwen/Qwen3-8B", "repo_id": "Qwen/Qwen3-8B", "short_name": "Qwen3-8B", "precision": "BF16"})
+    entry["model"].update(
+        {
+            "name": "Qwen/Qwen3-8B",
+            "repo_id": "Qwen/Qwen3-8B",
+            "short_name": "Qwen3-8B",
+            "precision": "BF16",
+        }
+    )
     report = validate_entries([entry])
     assert report.decisions[0].status == "excluded"
 
@@ -80,13 +96,19 @@ def test_full_matrix_requires_raw_entries_for_declared_aggregate() -> None:
 def test_pair_is_blocked_when_counterpart_has_insufficient_raw_repeats() -> None:
     entries = make_repeated_pair(side_count=3)
     entries = [entry for entry in entries if entry["point_role"] == "baseline"] + [
-        entry for entry in entries if entry["point_role"] == "head" and entry["repeat_index"] == 0
+        entry
+        for entry in entries
+        if entry["point_role"] == "head" and entry["repeat_index"] == 0
     ]
     report = validate_entries(entries)
-    baseline_decisions = [decision for decision in report.decisions if decision.entry_id.startswith("a")]
+    baseline_decisions = [
+        decision for decision in report.decisions if decision.entry_id.startswith("a")
+    ]
     assert baseline_decisions
     assert all(decision.status == "blocked" for decision in baseline_decisions)
-    assert "PAIR_COUNTERPART_REPEAT_INCOMPLETE" in {issue.code for issue in report.issues}
+    assert "PAIR_COUNTERPART_REPEAT_INCOMPLETE" in {
+        issue.code for issue in report.issues
+    }
 
 
 def test_complete_pair_and_full_matrix_are_admitted() -> None:
@@ -95,7 +117,9 @@ def test_complete_pair_and_full_matrix_are_admitted() -> None:
     matrix = []
     for index in range(3):
         candidate = copy.deepcopy(matrix_template)
-        candidate["entry_id"] = f"c{index + 1:07d}-c00{index + 1}-4c0{index + 1}-8c0{index + 1}-{'c' * 12}"
+        candidate["entry_id"] = (
+            f"c{index + 1:07d}-c00{index + 1}-4c0{index + 1}-8c0{index + 1}-{'c' * 12}"
+        )
         candidate["repeat_index"] = index
         matrix.append(candidate)
     report = validate_entries([*pair, *matrix])

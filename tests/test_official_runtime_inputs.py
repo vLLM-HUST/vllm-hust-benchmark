@@ -4,12 +4,16 @@ from pathlib import Path
 
 from vllm_hust_benchmark.official_runtime_inputs import SHAREGPT_DATASET_FILENAME
 from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
-from vllm_hust_benchmark.official_runtime_inputs import normalize_offline_benchmark_parameters
+from vllm_hust_benchmark.official_runtime_inputs import (
+    normalize_offline_benchmark_parameters,
+)
 from vllm_hust_benchmark.official_runtime_inputs import normalize_server_parameters
 from vllm_hust_benchmark.official_runtime_inputs import resolve_runtime_dataset_path
 
 
-def test_normalize_client_parameters_strips_unsupported_offline_flags(tmp_path: Path) -> None:
+def test_normalize_client_parameters_strips_unsupported_offline_flags(
+    tmp_path: Path,
+) -> None:
     worktree = tmp_path / "vllm"
     (worktree / "benchmarks").mkdir(parents=True)
     (worktree / "benchmarks" / "sonnet.txt").write_text("sonnet\n", encoding="utf-8")
@@ -36,7 +40,9 @@ def test_normalize_client_parameters_strips_unsupported_offline_flags(tmp_path: 
     assert normalized["dataset_path"] == str(worktree / "benchmarks" / "sonnet.txt")
 
 
-def test_normalize_client_parameters_injects_ready_timeout_for_serve(tmp_path: Path) -> None:
+def test_normalize_client_parameters_injects_ready_timeout_for_serve(
+    tmp_path: Path,
+) -> None:
     cache_root = tmp_path / "datasets"
     cache_root.mkdir()
     (cache_root / SHAREGPT_DATASET_FILENAME).write_text("[]\n", encoding="utf-8")
@@ -139,7 +145,9 @@ def test_normalize_server_parameters_parses_limit_mm_per_prompt() -> None:
     assert normalized["limit_mm_per_prompt"] == {"image": 1, "video": 0}
 
 
-def test_resolve_runtime_dataset_path_leaves_hf_dataset_id_unchanged(tmp_path: Path) -> None:
+def test_resolve_runtime_dataset_path_leaves_hf_dataset_id_unchanged(
+    tmp_path: Path,
+) -> None:
     resolved = resolve_runtime_dataset_path(
         "lmarena-ai/VisionArena-Chat",
         vllm_worktree=str(tmp_path / "vllm"),

@@ -20,12 +20,15 @@ def test_resolve_random_online_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-qwen25-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-qwen25-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_sharegpt_online_perfgate_spec() -> None:
@@ -35,12 +38,15 @@ def test_resolve_sharegpt_online_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-sharegpt-online-qwen25-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-sharegpt-online-qwen25-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_prefix_repetition_online_perfgate_spec() -> None:
@@ -50,12 +56,15 @@ def test_resolve_prefix_repetition_online_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-prefix-repetition-online-qwen25-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-prefix-repetition-online-qwen25-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_random_latency_perfgate_spec() -> None:
@@ -65,12 +74,15 @@ def test_resolve_random_latency_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-random-latency-qwen25-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-random-latency-qwen25-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_sharegpt_throughput_perfgate_spec() -> None:
@@ -80,12 +92,15 @@ def test_resolve_sharegpt_throughput_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-sharegpt-throughput-qwen25-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-sharegpt-throughput-qwen25-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_sonnet_throughput_perfgate_spec() -> None:
@@ -95,12 +110,15 @@ def test_resolve_sonnet_throughput_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-sonnet-throughput-qwen25-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-sonnet-throughput-qwen25-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_instructcoder_online_perfgate_spec() -> None:
@@ -110,12 +128,15 @@ def test_resolve_instructcoder_online_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-instructcoder-online-qwen25-coder-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-instructcoder-online-qwen25-coder-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_agent_research_online_perfgate_spec() -> None:
@@ -125,12 +146,15 @@ def test_resolve_agent_research_online_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-agent-research-online-qwen25-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-agent-research-online-qwen25-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_visionarena_online_perfgate_spec() -> None:
@@ -140,12 +164,15 @@ def test_resolve_visionarena_online_perfgate_spec() -> None:
         repo_root=REPO_ROOT,
     )
 
-    assert spec_path == (
-        REPO_ROOT
-        / "docs"
-        / "official-baselines"
-        / "perfgate-ascend-visionarena-online-qwen25-vl-3b-910b2.json"
-    ).resolve()
+    assert (
+        spec_path
+        == (
+            REPO_ROOT
+            / "docs"
+            / "official-baselines"
+            / "perfgate-ascend-visionarena-online-qwen25-vl-3b-910b2.json"
+        ).resolve()
+    )
 
 
 def test_resolve_without_repo_root_returns_repo_relative_path() -> None:
