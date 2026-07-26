@@ -995,7 +995,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--managed-systemd-unit", default="vllm-hust-backfill.service")
     parser.add_argument("--managed-max-model-len", type=int, default=32768)
     parser.add_argument("--managed-max-num-seqs", type=int, default=16)
-    parser.add_argument("--managed-gpu-mem-util", default="0.90")
+    parser.add_argument("--managed-gpu-mem-util", default="0.60")
     parser.add_argument(
         "--managed-enforce-eager",
         action=argparse.BooleanOptionalAction,
