@@ -344,3 +344,87 @@ The old `perfgate-ascend-qwen25-3b-910b3.json` spec was removed from
 `docs/official-baselines/` because it described a BF16 3B run on 910B3 and was
 not comparable with the public v0.18.0 / 910B2 / FP16 leaderboard. Keep any
 future non-public performance gates outside the official-baseline directory.
+
+## Plugin commit alignment rule
+
+### Background: the `a46abb7ae` split incident
+
+During the 2026-07 single-GPU backfill campaign, commit
+`a46abb7ae68acc13a4fc5870db98619b3f97c6e0` was benchmarked twice against two
+different plugin commits:
+
+- 2026-07-20 live run of `sharegpt-online` used plugin `f430530ad…` via
+  `run-current-ascend-same-spec.sh`, and recorded `engine_version="0.18.0.post1"`
+  (the installed wheel version) instead of a `git describe` dev-build string.
+- 2026-07-22 backfill batch via `backfill_single_gpu.py` for the other five
+  workloads (`prefix-repetition-online`, `random-latency`, `random-online`,
+  `sharegpt-throughput`, `sonnet-throughput`) used plugin `03a12f9bd…`
+  because `_resolve_compatible_ascend_commit()` defined at the time returned
+  the simple `origin/main` tip, ignoring the vllm-hust commit timestamp.
+
+The result became 6 entries pinned to the same `metadata.git_commit` but
+split across **two** `(engine_version, runtime_provenance.plugin.commit)`
+pairs. The website's trend chart x-axis key is
+`<core_commit>+<backend_commit>` (see
+`assets/leaderboard.js::getTrendVersionKey`), so the 6 entries rendered as
+**two** x-axis points instead of one — the same binary shown twice — and
+`sharegpt-online` alone did not line up with the other five workloads.
+
+### Repair
+
+The a46abb7 batch was corrected on 2026-07-25 by:
+
+1. rewriting the 5 backfill submissions' `runtime_provenance.plugin.commit`
+   from `03a12f9bd…` to the canonical `f430530ad…`;
+2. rewriting the `sharegpt-online` submission's `engine_version` from
+   `0.18.0.post1` to the `git describe` form `v0.17.2rc0-2810-ga46abb7ae`;
+3. re-aggregating snapshots, which dropped 64 later-discovered
+   non-canonical pairs into the reject log.
+
+### New rule
+
+From 2026-07-25 on, every backfill submission MUST satisfy the
+**plugin commit alignment rule**:
+
+> For any `metadata.git_commit` already present in
+> `leaderboard-data/snapshots/leaderboard_single.json`, the
+> `runtime_provenance.plugin.commit` on a new submission MUST equal the
+> canonical plugin commit, defined as the plugin commit of the
+> **earliest-submitted** existing entry of that commit group.
+
+The rule is enforced in three places:
+
+1. `scripts/backfill_single_gpu.py::assert_plugin_commit_consistent` —
+   called by `cmd_run` after plugin resolution (both the `--ascend-commit`
+   explicit path and the `latest` chain path) and again by `run_cell`
+   right before `submit_artifact` writes the JSON. A mismatch raises
+   `PluginCommitMismatch`, which `cmd_run` turns into a nonzero exit.
+2. `scripts/backfill_single_gpu.py::cmd_plan` — produces a `⚠ plugin
+   mismatch: …` preview line when the resolved plugin diverges from the
+   snapshot canonical, but never returns non-zero (plan is informational
+   only). `run` is the fail gate.
+3. `vllm-hust-website/scripts/aggregate_results.py::plugin_commit_mismatch_rejection_reason`
+   — the website-side publish filter that drops any submission whose
+   plugin commit disagrees with the canonical computed from the merged
+   entry set (also earliest-submitted-wins). Rejection log includes the
+   entry_id of the canonical-side row for traceability.
+
+### Override
+
+Hold `--force-mismatched-plugin-commit` for genuinely rare cases (snapshot
+corruption, plugin deliberate revert experiment). The override appends a
+`{timestamp, hust_commit, canonical_plugin_commit, override_plugin_commit,
+workload}` audit record to `.benchmarks/backfill-single-gpu/state.json` under
+`audit.plugin_override`.
+
+`fill` does not expose the override: it is the strict-by-default path. If
+`fill` would have produced a mismatched pair, fix the snapshot or the
+environment first.
+
+### Canonical-source rule
+
+The canonical plugin commit is **earliest-submitted entry's plugin commit**,
+not "the most common" or "the one embedded in `engine_version`". The
+earliest-submitted rule mirrors "what plugin was actually installed the
+first time this vllm-hust commit was benchmarked" — that is the ground
+truth, and later backfills should adapt to it, not the other way around.
