@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 import json
-import math
 import statistics
 import tempfile
 from pathlib import Path
@@ -13,7 +12,6 @@ import pytest
 
 from vllm_hust_benchmark.aggregate_results import (
     VALID_AGG_METHODS,
-    VALID_OUTLIER_HANDLING,
     aggregate_entries,
     apply_aggregate_to_entry,
     build_series_signature,
@@ -265,12 +263,16 @@ class TestComputeMetricStats:
         # [280, 290, 310, 285, 295] sorted: [280, 285, 290, 295, 310]
         # trim 10% => remove 0 from each end (5*0.1=0.5, floor=0)
         # So trimmed_mean(0.1) ≈ mean of all 5 = 292.0
-        result = compute_metric_stats(sample_ttft_values, method="trimmed_mean", trim_percent=0.1)
+        result = compute_metric_stats(
+            sample_ttft_values, method="trimmed_mean", trim_percent=0.1
+        )
         assert result["value"] == pytest.approx(292.0)
 
     def test_trimmed_mean_20pct(self):
         # [1, 2, 3, 4, 5] trim 0.2 => remove 1 from each end => [2, 3, 4] => mean=3.0
-        result = compute_metric_stats([1, 2, 3, 4, 5], method="trimmed_mean", trim_percent=0.2)
+        result = compute_metric_stats(
+            [1, 2, 3, 4, 5], method="trimmed_mean", trim_percent=0.2
+        )
         assert result["value"] == 3.0
 
     def test_single_value(self):
@@ -295,7 +297,9 @@ class TestValidation:
         for m in sorted(VALID_AGG_METHODS):
             count = 3 if m != "trimmed_mean" else 4
             errors = validate_aggregate_method(m, count)
-            assert errors == [], f"method={m} should be valid with count={count}, got {errors}"
+            assert errors == [], (
+                f"method={m} should be valid with count={count}, got {errors}"
+            )
 
     def test_invalid_aggregate_method(self):
         errors = validate_aggregate_method("invalid_method", 3)
@@ -471,7 +475,9 @@ class TestCanonicalAggregate:
             e["repeat_index"] = idx
             e["metrics"]["ttft_ms"] = 290.0 + idx * 10  # [290, 300, 310, 320]
             entries.append(e)
-        agg = compute_canonical_aggregate(entries, method="trimmed_mean", trim_percent=0.25)
+        agg = compute_canonical_aggregate(
+            entries, method="trimmed_mean", trim_percent=0.25
+        )
         # Sorted: [290, 300, 310, 320], trim 25% each side → remove 1 each → [300, 310] → mean 305
         assert agg["metrics"]["ttft_ms"]["value"] == pytest.approx(305.0)
 
@@ -545,7 +551,12 @@ class TestApplyAggregate:
             "count": 3,
             "metrics": {
                 "ttft_ms": {"value": 295.0, "min": 280.0, "max": 310.0, "std": 15.0},
-                "throughput_tps": {"value": 187.0, "min": 182.0, "max": 194.0, "std": 6.0},
+                "throughput_tps": {
+                    "value": 187.0,
+                    "min": 182.0,
+                    "max": 194.0,
+                    "std": 6.0,
+                },
             },
             "outlier_handling": "none",
         }
@@ -625,7 +636,9 @@ class TestDeterminism:
         assert len(result1) == 1
         assert len(result2) == 1
         for metric in result1[0]["canonical_aggregate"]["metrics"]:
-            assert result1[0]["canonical_aggregate"]["metrics"][metric]["value"] == pytest.approx(
+            assert result1[0]["canonical_aggregate"]["metrics"][metric][
+                "value"
+            ] == pytest.approx(
                 result2[0]["canonical_aggregate"]["metrics"][metric]["value"]
             )
 

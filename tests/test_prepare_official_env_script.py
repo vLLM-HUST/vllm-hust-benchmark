@@ -137,9 +137,7 @@ def test_collect_process_tree_pids_includes_child_process(tmp_path: Path) -> Non
             _source_prepare_functions(f"collect_process_tree_pids {process.pid}")
         )
         collected_pids = {
-            int(line)
-            for line in result.stdout.splitlines()
-            if line.strip()
+            int(line) for line in result.stdout.splitlines() if line.strip()
         }
 
         assert process.pid in collected_pids
@@ -168,9 +166,9 @@ def test_terminate_pid_tree_kills_root_and_child(tmp_path: Path) -> None:
 
 
 def test_is_process_in_cleanup_scope_requires_same_user_and_namespaces() -> None:
-        result = _run_bash(
-                _source_prepare_functions(
-                        """
+    result = _run_bash(
+        _source_prepare_functions(
+            """
                         CURRENT_PREPARE_USER_ID=1000
                         CURRENT_PREPARE_PID_NAMESPACE='pid:[11]'
                         CURRENT_PREPARE_MOUNT_NAMESPACE='mnt:[22]'
@@ -203,21 +201,21 @@ def test_is_process_in_cleanup_scope_requires_same_user_and_namespaces() -> None
                             fi
                         done
                         """
-                )
         )
+    )
 
-        assert result.stdout.splitlines() == [
-                "allow:101",
-                "deny:102",
-                "deny:103",
-                "deny:104",
-        ]
+    assert result.stdout.splitlines() == [
+        "allow:101",
+        "deny:102",
+        "deny:103",
+        "deny:104",
+    ]
 
 
 def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
-        result = _run_bash(
-                _source_prepare_functions(
-                        """
+    result = _run_bash(
+        _source_prepare_functions(
+            """
                         # Mock all helper functions to ensure test isolation
                         process_user_id() {
                             echo "$CURRENT_PREPARE_USER_ID"
@@ -269,14 +267,14 @@ def test_residual_pid_lists_keep_only_in_scope_targets() -> None:
                         echo 'out-of-scope:'
                         list_out_of_scope_benchmark_pids
                         """
-                )
         )
+    )
 
-        assert result.stdout.splitlines() == [
-                "residual:",
-                "501",
-                "out-of-scope:",
-        ]
+    assert result.stdout.splitlines() == [
+        "residual:",
+        "501",
+        "out-of-scope:",
+    ]
 
 
 def test_list_matching_benchmark_pids_matches_cli_compat_process() -> None:
@@ -369,7 +367,10 @@ PY
     )
 
     assert result.returncode == 0
-    assert captured_pythonpath.read_text(encoding="utf-8").strip() == "/tmp/runtime-a:/tmp/runtime-b"
+    assert (
+        captured_pythonpath.read_text(encoding="utf-8").strip()
+        == "/tmp/runtime-a:/tmp/runtime-b"
+    )
     args = captured_args.read_text(encoding="utf-8").splitlines()
     assert args[:2] == ["env", "SAMPLE_VAR=1"]
     assert args[-2] == "python"
@@ -379,7 +380,6 @@ PY
 def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
     captured_args = tmp_path / "runtime-env-conda-args.txt"
     captured_version = tmp_path / "runtime-vllm-version.txt"
-
 
     result = _run_bash(
         _source_run_official_functions(
@@ -439,7 +439,10 @@ def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> No
     )
 
     assert result.returncode == 0
-    assert captured_pythonpath.read_text(encoding="utf-8").strip() == "/tmp/runtime-a:/tmp/runtime-b"
+    assert (
+        captured_pythonpath.read_text(encoding="utf-8").strip()
+        == "/tmp/runtime-a:/tmp/runtime-b"
+    )
     assert captured_args.read_text(encoding="utf-8").splitlines()[:5] == [
         "python",
         "/tmp/run_vllm_cli_compat.py",
@@ -559,7 +562,9 @@ EOF
     assert "retrying with --enforce-eager" in result.stderr
 
 
-def test_configure_single_card_ascend_device_derives_from_generic_visible_devices() -> None:
+def test_configure_single_card_ascend_device_derives_from_generic_visible_devices() -> (
+    None
+):
     result = _run_bash(
         _source_run_official_functions(
             """
@@ -664,9 +669,7 @@ def test_configure_single_card_ascend_device_reuses_preferred_device_from_state_
             printf 'stored=%s\n' "$(cat "$GOAL_BASELINE_DEVICE_PREFERENCE_FILE")"
             """.replace("__PREFERENCE_FILE__", shlex.quote(str(preference_file)))
 
-    result = _run_bash(
-        _source_run_official_functions(snippet)
-    )
+    result = _run_bash(_source_run_official_functions(snippet))
 
     tracked_lines = [
         line
@@ -681,7 +684,9 @@ def test_configure_single_card_ascend_device_reuses_preferred_device_from_state_
     ]
 
 
-def test_configure_single_card_ascend_device_returns_busy_status_when_all_devices_busy() -> None:
+def test_configure_single_card_ascend_device_returns_busy_status_when_all_devices_busy() -> (
+    None
+):
     result = _run_bash(
         _source_run_official_functions(
             """
@@ -747,12 +752,13 @@ def test_configure_single_card_ascend_device_logs_npu_smi_fallback_reason() -> N
 
     assert "devices=3" in result.stdout.splitlines()
     assert (
-        "npu-smi could not inspect busy devices for the current user"
-        in result.stderr
+        "npu-smi could not inspect busy devices for the current user" in result.stderr
     )
 
 
-def test_select_ascend_device_reports_all_busy_with_fake_npu_smi(tmp_path: Path) -> None:
+def test_select_ascend_device_reports_all_busy_with_fake_npu_smi(
+    tmp_path: Path,
+) -> None:
     fake_npu_smi = tmp_path / "npu-smi"
     fake_npu_smi.write_text(
         """#!/usr/bin/env bash
@@ -905,7 +911,9 @@ def test_wait_for_server_exits_when_server_process_is_gone(tmp_path: Path) -> No
     assert result.returncode == 0
 
 
-def test_wait_for_server_returns_resource_busy_status_when_log_matches(tmp_path: Path) -> None:
+def test_wait_for_server_returns_resource_busy_status_when_log_matches(
+    tmp_path: Path,
+) -> None:
     stderr_file = tmp_path / "wait-for-server-resource-busy.stderr"
     server_log = tmp_path / "server.stdout.log"
     server_log.write_text(
@@ -939,7 +947,9 @@ def test_wait_for_server_returns_resource_busy_status_when_log_matches(tmp_path:
     assert result.returncode == 0
 
 
-def test_wait_for_ascend_runtime_ready_returns_resource_busy_status(tmp_path: Path) -> None:
+def test_wait_for_ascend_runtime_ready_returns_resource_busy_status(
+    tmp_path: Path,
+) -> None:
     runtime_log = tmp_path / "runtime-ready.log"
 
     result = _run_bash(
@@ -971,7 +981,9 @@ EOF
     assert result.returncode == 0
 
 
-def test_should_force_eager_for_offline_benchmark_when_aclgraph_weak_ref_is_missing() -> None:
+def test_should_force_eager_for_offline_benchmark_when_aclgraph_weak_ref_is_missing() -> (
+    None
+):
     result = _run_bash(
         _source_run_official_version_functions(
             """
@@ -995,7 +1007,9 @@ def test_should_force_eager_for_offline_benchmark_when_aclgraph_weak_ref_is_miss
     assert "forcing --enforce-eager" in combined_output
 
 
-def test_official_runtime_supports_aclgraph_weak_ref_tensor_preserves_probe_status() -> None:
+def test_official_runtime_supports_aclgraph_weak_ref_tensor_preserves_probe_status() -> (
+    None
+):
     result = _run_bash(
         _source_run_official_version_functions(
             """
@@ -1017,7 +1031,9 @@ def test_official_runtime_supports_aclgraph_weak_ref_tensor_preserves_probe_stat
     assert result.stdout.splitlines() == ["status=1"]
 
 
-def test_should_force_eager_for_server_benchmark_when_aclgraph_weak_ref_is_missing() -> None:
+def test_should_force_eager_for_server_benchmark_when_aclgraph_weak_ref_is_missing() -> (
+    None
+):
     result = _run_bash(
         _source_run_official_version_functions(
             """
@@ -1072,7 +1088,9 @@ def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested
     assert result.returncode == 0
 
 
-def test_resolve_runtime_model_prefers_complete_snapshot_sibling(tmp_path: Path) -> None:
+def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
+    tmp_path: Path,
+) -> None:
     snapshots_dir = tmp_path / "hub" / "models--foo--bar" / "snapshots"
     incomplete_snapshot = snapshots_dir / "000-incomplete"
     complete_snapshot = snapshots_dir / "111-complete"
@@ -1083,7 +1101,9 @@ def test_resolve_runtime_model_prefers_complete_snapshot_sibling(tmp_path: Path)
 
     (complete_snapshot / "config.json").write_text("{}\n", encoding="utf-8")
     (complete_snapshot / "tokenizer.json").write_text("{}\n", encoding="utf-8")
-    (complete_snapshot / "model-00001-of-00001.safetensors").write_text("weights\n", encoding="utf-8")
+    (complete_snapshot / "model-00001-of-00001.safetensors").write_text(
+        "weights\n", encoding="utf-8"
+    )
 
     result = _run_bash(
         _source_run_official_runtime_model_functions(
@@ -1111,12 +1131,12 @@ def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) 
     (worktree_dir / "vllm_ascend").mkdir()
     (worktree_dir / "setup.py").write_text(
         "entry_points={\n"
-        "    \"vllm.platform_plugins\": [\n"
-        "        \"ascend = vllm_ascend:register\",\n"
+        '    "vllm.platform_plugins": [\n'
+        '        "ascend = vllm_ascend:register",\n'
         "    ],\n"
-        "    \"vllm.general_plugins\": [\n"
-        "        \"ascend_enhanced_model = vllm_ascend:register_model\",\n"
-        "        \"ascend_kv_connector = vllm_ascend:register_connector\",\n"
+        '    "vllm.general_plugins": [\n'
+        '        "ascend_enhanced_model = vllm_ascend:register_model",\n'
+        '        "ascend_kv_connector = vllm_ascend:register_connector",\n'
         "    ],\n"
         "}\n",
         encoding="utf-8",

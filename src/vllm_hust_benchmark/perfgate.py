@@ -75,11 +75,15 @@ def _extract_metrics(path: Path) -> dict[str, float]:
             raise ValueError(f"{path} metrics.{name} must be non-negative")
         metrics[name] = value
     if missing:
-        raise ValueError(f"{path} metrics missing required non-null keys: {', '.join(missing)}")
+        raise ValueError(
+            f"{path} metrics missing required non-null keys: {', '.join(missing)}"
+        )
     return metrics
 
 
-def _same_spec_identity(path: Path, *, expected_spec_id: str | None = None) -> tuple[str, str]:
+def _same_spec_identity(
+    path: Path, *, expected_spec_id: str | None = None
+) -> tuple[str, str]:
     payload = _load_json(path)
     same_spec = payload.get("same_spec")
     if not isinstance(same_spec, dict):
@@ -91,13 +95,21 @@ def _same_spec_identity(path: Path, *, expected_spec_id: str | None = None) -> t
     if not spec_hash:
         raise ValueError(f"{path} same_spec.resolved_spec_hash must be non-empty")
     if expected_spec_id and spec_id != expected_spec_id:
-        raise ValueError(f"{path} same_spec.spec_id must be {expected_spec_id!r}, got {spec_id!r}")
+        raise ValueError(
+            f"{path} same_spec.spec_id must be {expected_spec_id!r}, got {spec_id!r}"
+        )
     return spec_id, spec_hash
 
 
-def _validate_same_spec(current_path: Path, baseline_path: Path, *, expected_spec_id: str | None = None) -> None:
-    current_spec_id, current_hash = _same_spec_identity(current_path, expected_spec_id=expected_spec_id)
-    baseline_spec_id, baseline_hash = _same_spec_identity(baseline_path, expected_spec_id=expected_spec_id)
+def _validate_same_spec(
+    current_path: Path, baseline_path: Path, *, expected_spec_id: str | None = None
+) -> None:
+    current_spec_id, current_hash = _same_spec_identity(
+        current_path, expected_spec_id=expected_spec_id
+    )
+    baseline_spec_id, baseline_hash = _same_spec_identity(
+        baseline_path, expected_spec_id=expected_spec_id
+    )
     if current_spec_id != baseline_spec_id:
         raise ValueError(
             "same_spec.spec_id mismatch: "
@@ -110,7 +122,9 @@ def _validate_same_spec(current_path: Path, baseline_path: Path, *, expected_spe
         )
 
 
-def _compare_metric(name: str, current: float, baseline: float, direction: str) -> MetricComparison:
+def _compare_metric(
+    name: str, current: float, baseline: float, direction: str
+) -> MetricComparison:
     if direction == "higher_is_better":
         passed = current >= baseline
     elif direction == "lower_is_better":
@@ -192,20 +206,30 @@ def _validate_two_stage_inputs(
     stage2_skipped: bool,
     stage2_not_run: bool = False,
 ) -> None:
-    active_states = sum(1 for value in (stage2_rebase_conflict, stage2_skipped, stage2_not_run) if value)
+    active_states = sum(
+        1 for value in (stage2_rebase_conflict, stage2_skipped, stage2_not_run) if value
+    )
     if active_states > 1:
         raise ValueError("stage2 states are mutually exclusive")
     if stage2_skipped:
         if not fork_point or not m2_commit:
             raise ValueError("stage2 skipped requires both fork-point and m2-commit")
         if fork_point != m2_commit:
-            raise ValueError("stage2 can be skipped only when fork-point equals m2-commit")
+            raise ValueError(
+                "stage2 can be skipped only when fork-point equals m2-commit"
+            )
         if stage2_current_file or stage2_baseline_file:
-            raise ValueError("stage2 current/baseline files must not be provided when stage2 is skipped")
+            raise ValueError(
+                "stage2 current/baseline files must not be provided when stage2 is skipped"
+            )
     if stage2_rebase_conflict and (stage2_current_file or stage2_baseline_file):
-        raise ValueError("stage2 current/baseline files must not be provided when stage2 has rebase conflict")
+        raise ValueError(
+            "stage2 current/baseline files must not be provided when stage2 has rebase conflict"
+        )
     if stage2_not_run and (stage2_current_file or stage2_baseline_file):
-        raise ValueError("stage2 current/baseline files must not be provided when stage2 was not run")
+        raise ValueError(
+            "stage2 current/baseline files must not be provided when stage2 was not run"
+        )
 
 
 def generate_two_stage_report(
@@ -240,7 +264,14 @@ def generate_two_stage_report(
         expected_spec_id=expected_spec_id,
     )
     stage2: StageComparison | None = None
-    lines = ["## Performance Gate Result", "", "### Stage 1: B1 vs M1 (fork-point)", "", _format_metric_table(stage1), ""]
+    lines = [
+        "## Performance Gate Result",
+        "",
+        "### Stage 1: B1 vs M1 (fork-point)",
+        "",
+        _format_metric_table(stage1),
+        "",
+    ]
     lines.append(f"**Stage 1: {_stage_status(stage1)}**")
     if fork_point:
         lines.append(f"- Fork point (M1): `{fork_point}`")
@@ -248,29 +279,37 @@ def generate_two_stage_report(
 
     if stage2_rebase_conflict:
         overall_passed = False
-        lines.extend([
-            "**Stage 2: FAIL — rebase conflict**",
-            "",
-            "PR cannot be cleanly rebased onto latest main.",
-            "Please rebase manually and resolve conflicts.",
-        ])
+        lines.extend(
+            [
+                "**Stage 2: FAIL — rebase conflict**",
+                "",
+                "PR cannot be cleanly rebased onto latest main.",
+                "Please rebase manually and resolve conflicts.",
+            ]
+        )
         if stage2_rebase_conflict_file:
             conflict_path = Path(stage2_rebase_conflict_file)
-            details = conflict_path.read_text(encoding="utf-8") if conflict_path.exists() else ""
+            details = (
+                conflict_path.read_text(encoding="utf-8")
+                if conflict_path.exists()
+                else ""
+            )
             if len(details) > 12000:
                 details = details[:12000] + "\n... truncated ...\n"
             if details:
-                lines.extend([
-                    "",
-                    "<details>",
-                    "<summary>Conflict details</summary>",
-                    "",
-                    "```text",
-                    details.rstrip(),
-                    "```",
-                    "",
-                    "</details>",
-                ])
+                lines.extend(
+                    [
+                        "",
+                        "<details>",
+                        "<summary>Conflict details</summary>",
+                        "",
+                        "```text",
+                        details.rstrip(),
+                        "```",
+                        "",
+                        "</details>",
+                    ]
+                )
     elif stage2_skipped:
         overall_passed = stage1.passed
         reason = stage2_skip_reason or "fork-point is already latest main"
@@ -281,19 +320,37 @@ def generate_two_stage_report(
         lines.append(f"**Stage 2: NOT RUN** — {reason}")
     else:
         if not stage2_current_file or not stage2_baseline_file:
-            raise ValueError("stage2 current/baseline files are required unless stage2 is skipped or conflicted")
+            raise ValueError(
+                "stage2 current/baseline files are required unless stage2 is skipped or conflicted"
+            )
         stage2 = compare_benchmark_results(
             Path(stage2_current_file),
             Path(stage2_baseline_file),
             expected_spec_id=expected_spec_id,
         )
         overall_passed = stage1.passed and stage2.passed
-        lines.extend([_format_metric_table(stage2), "", f"**Stage 2: {_stage_status(stage2)}**"])
+        lines.extend(
+            [_format_metric_table(stage2), "", f"**Stage 2: {_stage_status(stage2)}**"]
+        )
         if m2_commit:
             lines.append(f"- Latest main (M2): `{m2_commit}`")
 
-    lines.extend(["", "---", "", f"**Overall: {'PASS' if overall_passed else 'FAIL'}**", f"- Mode: `{mode}`", ""])
-    return TwoStageReport(overall_passed=overall_passed, markdown="\n".join(lines), stage1=stage1, stage2=stage2)
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            f"**Overall: {'PASS' if overall_passed else 'FAIL'}**",
+            f"- Mode: `{mode}`",
+            "",
+        ]
+    )
+    return TwoStageReport(
+        overall_passed=overall_passed,
+        markdown="\n".join(lines),
+        stage1=stage1,
+        stage2=stage2,
+    )
 
 
 def _write_report(path: Path | None, markdown: str) -> None:
@@ -305,10 +362,15 @@ def _write_report(path: Path | None, markdown: str) -> None:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="perfgate", description="Compare vLLM-HUST leaderboard artifacts for performance gate checks.")
+    parser = argparse.ArgumentParser(
+        prog="perfgate",
+        description="Compare vLLM-HUST leaderboard artifacts for performance gate checks.",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    compare = subparsers.add_parser("compare", help="Run one-stage B1 vs M1 comparison.")
+    compare = subparsers.add_parser(
+        "compare", help="Run one-stage B1 vs M1 comparison."
+    )
     compare.add_argument("--current", required=True)
     compare.add_argument("--baseline", required=True)
     compare.add_argument("--fork-point")
@@ -316,7 +378,9 @@ def _build_parser() -> argparse.ArgumentParser:
     compare.add_argument("--expected-spec-id")
     compare.add_argument("--mode", choices=["report", "enforce"], default="report")
 
-    compare2 = subparsers.add_parser("compare2", help="Run two-stage performance gate comparison.")
+    compare2 = subparsers.add_parser(
+        "compare2", help="Run two-stage performance gate comparison."
+    )
     compare2.add_argument("--stage1-current", required=True)
     compare2.add_argument("--stage1-baseline", required=True)
     compare2.add_argument("--stage2-current")
@@ -367,7 +431,9 @@ def main(argv: list[str] | None = None) -> int:
                 expected_spec_id=args.expected_spec_id,
                 mode=args.mode,
             )
-        _write_report(Path(args.report_file) if args.report_file else None, report.markdown)
+        _write_report(
+            Path(args.report_file) if args.report_file else None, report.markdown
+        )
     except (OSError, ValueError, json.JSONDecodeError) as error:
         print(str(error), file=sys.stderr)
         return 2

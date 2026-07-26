@@ -43,7 +43,9 @@ from vllm_hust_benchmark.workload_config_contract import (
 TREND_SCHEMA_VERSION = "trend-coverage/v1"
 VALID_COVERAGE_CLASSES = frozenset({"full-matrix", "targeted-pair", "experimental"})
 VALID_POINT_ROLES: frozenset = frozenset({"baseline", "head", "checkpoint", None})
-VALID_TREND_STATUSES = frozenset({"default", "experimental", "blocked", "invalid", "excluded"})
+VALID_TREND_STATUSES = frozenset(
+    {"default", "experimental", "blocked", "invalid", "excluded"}
+)
 
 
 # ---------------------------------------------------------------------------
@@ -118,9 +120,7 @@ def _validate_trend_params(
                 f"got {point_role!r}"
             )
         if comparison_id is not None:
-            raise ValueError(
-                "experimental entries must not have a comparison_id"
-            )
+            raise ValueError("experimental entries must not have a comparison_id")
         if trend_status not in ("experimental", "invalid", "excluded"):
             raise ValueError(
                 f"experimental coverage requires trend_status in "
@@ -129,13 +129,9 @@ def _validate_trend_params(
 
     # -- repeat fields -------------------------------------------------------
     if repeat_group is not None and repeat_index is None:
-        raise ValueError(
-            "repeat_index is required when repeat_group is provided"
-        )
+        raise ValueError("repeat_index is required when repeat_group is provided")
     if repeat_index is not None and repeat_group is None:
-        raise ValueError(
-            "repeat_group is required when repeat_index is provided"
-        )
+        raise ValueError("repeat_group is required when repeat_index is provided")
 
     # -- canonical_aggregate required for non-experimental with repeats ------
     if (
@@ -419,7 +415,9 @@ def add_trend_fields_to_existing_entry(
 
     entry = json.loads(artifact_path.read_text(encoding="utf-8"))
     if not isinstance(entry, dict):
-        raise ValueError(f"{artifact_path}: expected a JSON object, got {type(entry).__name__}")
+        raise ValueError(
+            f"{artifact_path}: expected a JSON object, got {type(entry).__name__}"
+        )
 
     if coverage_class is not None:
         entry["trend_schema_version"] = TREND_SCHEMA_VERSION

@@ -18,7 +18,6 @@ Test paths:
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 
@@ -115,7 +114,9 @@ def test_full_matrix_fixture_status(reports) -> None:
 
 def test_complete_targeted_pair_status(reports) -> None:
     """A complete targeted pair (baseline + head with raw repeats) is admitted as default."""
-    assert all(d.status == "default" for d in reports["complete-targeted-pair"].decisions)
+    assert all(
+        d.status == "default" for d in reports["complete-targeted-pair"].decisions
+    )
     assert reports["complete-targeted-pair"].passed
 
 
@@ -134,7 +135,9 @@ def test_experimental_fixture_status(reports) -> None:
 def test_invalid_metric_fixture_status(reports) -> None:
     """An entry with invalid metrics is blocked, never default."""
     assert reports["invalid-metric"].decisions[0].status == "blocked"
-    assert "LATENCY_THROUGHPUT_NOT_APPLICABLE" in {i.code for i in reports["invalid-metric"].issues}
+    assert "LATENCY_THROUGHPUT_NOT_APPLICABLE" in {
+        i.code for i in reports["invalid-metric"].issues
+    }
 
 
 def test_repeat_aggregate_fixture_status(reports) -> None:
@@ -196,7 +199,9 @@ def test_blocked_entries_have_actionable_trend_reason(reports) -> None:
     for name in ("full-matrix", "blocked-half-pair", "invalid-metric"):
         for d in reports[name].decisions:
             if d.status == "blocked":
-                assert d.reason, f"Blocked entry {d.entry_id[:8]} in {name} has no reason"
+                assert d.reason, (
+                    f"Blocked entry {d.entry_id[:8]} in {name} has no reason"
+                )
 
 
 # ── Helpers for website consumers ─────────────────────────────────────

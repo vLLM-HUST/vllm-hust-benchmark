@@ -27,15 +27,17 @@ def _write_prepare_stub(script_path: Path) -> None:
     script_path.chmod(0o755)
 
 
-def _write_runner_stub(script_path: Path, *, call_log: Path, fail_repeat_names: tuple[str, ...]) -> None:
+def _write_runner_stub(
+    script_path: Path, *, call_log: Path, fail_repeat_names: tuple[str, ...]
+) -> None:
     python_bin = sys.executable
     script_path.write_text(
         "#!/bin/bash\n"
         "set -euo pipefail\n"
         "spec_file=$1\n"
-        "repeat_name=$(basename \"$RESULT_DIR\")\n"
+        'repeat_name=$(basename "$RESULT_DIR")\n'
         f"printf '%s\\n' \"$repeat_name\" >> {call_log!s}\n"
-        "case \"$repeat_name\" in\n"
+        'case "$repeat_name" in\n'
         + "".join(
             f"  {repeat_name}) echo 'ValueError: Initial test run failed - simulated transient engine crash' >&2; exit 1 ;;&\n"
             for repeat_name in fail_repeat_names
@@ -46,8 +48,8 @@ def _write_runner_stub(script_path: Path, *, call_log: Path, fail_repeat_names: 
         "  repeat-04) ttft_ms=105 ;;&\n"
         "  *) ttft_ms=130 ;;&\n"
         "esac\n"
-        "mkdir -p \"$RESULT_DIR/submission\"\n"
-        f"{python_bin} - <<'PY' \"$spec_file\" \"$RESULT_DIR\" \"$ttft_ms\"\n"
+        'mkdir -p "$RESULT_DIR/submission"\n'
+        f'{python_bin} - <<\'PY\' "$spec_file" "$RESULT_DIR" "$ttft_ms"\n'
         "from pathlib import Path\n"
         "import json\n"
         "import sys\n"
@@ -73,20 +75,22 @@ def _write_publish_stub(script_path: Path, *, publish_log: Path) -> None:
         "#!/bin/bash\n"
         "set -euo pipefail\n"
         f"printf '%s\\n' \"${{SNAPSHOT_SOURCE_PATTERN:-}}\" >> {publish_log!s}\n"
-        "mkdir -p \"$TARGET_BENCHMARK_REPO_DIR/submissions\"\n"
+        'mkdir -p "$TARGET_BENCHMARK_REPO_DIR/submissions"\n'
         "shopt -s nullglob\n"
-        "matches=(\"$SOURCE_BENCHMARK_REPO_DIR\"/submissions/$SNAPSHOT_SOURCE_PATTERN)\n"
-        "for source_dir in \"${matches[@]}\"; do\n"
-        "  target_dir=\"$TARGET_BENCHMARK_REPO_DIR/submissions/$(basename \"$source_dir\")\"\n"
-        "  rm -rf \"$target_dir\"\n"
-        "  cp -a \"$source_dir\" \"$target_dir\"\n"
+        'matches=("$SOURCE_BENCHMARK_REPO_DIR"/submissions/$SNAPSHOT_SOURCE_PATTERN)\n'
+        'for source_dir in "${matches[@]}"; do\n'
+        '  target_dir="$TARGET_BENCHMARK_REPO_DIR/submissions/$(basename "$source_dir")"\n'
+        '  rm -rf "$target_dir"\n'
+        '  cp -a "$source_dir" "$target_dir"\n'
         "done\n",
         encoding="utf-8",
     )
     script_path.chmod(0o755)
 
 
-def _run_matrix(spec_file: Path, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+def _run_matrix(
+    spec_file: Path, env: dict[str, str]
+) -> subprocess.CompletedProcess[str]:
     merged_env = {**os.environ, **env}
     return subprocess.run(
         ["bash", str(MATRIX_SCRIPT), str(spec_file)],
@@ -187,7 +191,9 @@ def test_matrix_script_uses_published_canonical_root_for_resume(tmp_path: Path) 
     _write_runner_stub(runner_stub, call_log=runner_call_log, fail_repeat_names=())
     _write_publish_stub(publish_stub, publish_log=publish_log)
     (website_repo_dir / "scripts").mkdir(parents=True)
-    (website_repo_dir / "scripts" / "aggregate_results.py").write_text("print('ok')\n", encoding="utf-8")
+    (website_repo_dir / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
     remote_repo_dir.mkdir(parents=True)
 
     env = {

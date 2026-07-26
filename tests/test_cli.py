@@ -105,10 +105,15 @@ def test_run_both_execute_runs_runtimes_in_order(monkeypatch, tmp_path: Path) ->
         calls.append((command, cwd, execute))
         return 0
 
-    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.run_external_command", fake_run_external_command
+    )
     monkeypatch.setattr(
         "vllm_hust_benchmark.cli.build_vllm_bench_command",
-        lambda bench_args, runtime_engine=DEFAULT_RUNTIME_ENGINE: [runtime_engine, *bench_args],
+        lambda bench_args, runtime_engine=DEFAULT_RUNTIME_ENGINE: [
+            runtime_engine,
+            *bench_args,
+        ],
     )
 
     exit_code = main(
@@ -156,17 +161,21 @@ def test_run_both_forwards_env_to_nested_runs(monkeypatch) -> None:
 
     assert exit_code == 0
     assert len(captured_argv) == 2
-    assert all("--env" in argv and "HF_HOME=/tmp/hf-home" in argv for argv in captured_argv)
+    assert all(
+        "--env" in argv and "HF_HOME=/tmp/hf-home" in argv for argv in captured_argv
+    )
 
 
 def test_parse_set_arguments_normalizes_hyphenated_keys() -> None:
-    parsed = _parse_set_arguments([
-        "input-len=8",
-        "output_len=4",
-        "enforce-eager=true",
-        "no-enable-prefix-caching=true",
-        "gpu-memory-utilization=0.6",
-    ])
+    parsed = _parse_set_arguments(
+        [
+            "input-len=8",
+            "output_len=4",
+            "enforce-eager=true",
+            "no-enable-prefix-caching=true",
+            "gpu-memory-utilization=0.6",
+        ]
+    )
 
     assert parsed == {
         "input_len": 8,
@@ -228,11 +237,15 @@ def test_list_tests_prints_upstream_tests(capsys, monkeypatch, tmp_path: Path) -
     vllm_repo = tmp_path / "vllm-hust"
     tests_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "tests"
     tests_dir.mkdir(parents=True)
-    (vllm_repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+    (vllm_repo / "pyproject.toml").write_text(
+        "[project]\nname='vllm-hust'\n", encoding="utf-8"
+    )
     (vllm_repo / "benchmarks").mkdir()
     suite_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "scripts"
     suite_dir.mkdir(parents=True)
-    (suite_dir / "run-performance-benchmarks.sh").write_text("#!/bin/bash\n", encoding="utf-8")
+    (suite_dir / "run-performance-benchmarks.sh").write_text(
+        "#!/bin/bash\n", encoding="utf-8"
+    )
     (tests_dir / "serving-tests.json").write_text(
         '[{"test_name":"serving_llama8B_tp1_sharegpt","qps_list":["inf"],"server_parameters":{"model":"foo/bar"},"client_parameters":{"model":"foo/bar"}}]\n',
         encoding="utf-8",
@@ -241,7 +254,9 @@ def test_list_tests_prints_upstream_tests(capsys, monkeypatch, tmp_path: Path) -
     (tests_dir / "throughput-tests.json").write_text("[]\n", encoding="utf-8")
     website_repo = tmp_path / "vllm-hust-website"
     (website_repo / "scripts").mkdir(parents=True)
-    (website_repo / "scripts" / "aggregate_results.py").write_text("print('ok')\n", encoding="utf-8")
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -262,11 +277,15 @@ def test_show_test_prints_wrapped_commands(capsys, monkeypatch, tmp_path: Path) 
     vllm_repo = tmp_path / "vllm-hust"
     tests_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "tests"
     tests_dir.mkdir(parents=True)
-    (vllm_repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+    (vllm_repo / "pyproject.toml").write_text(
+        "[project]\nname='vllm-hust'\n", encoding="utf-8"
+    )
     (vllm_repo / "benchmarks").mkdir()
     suite_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "scripts"
     suite_dir.mkdir(parents=True)
-    (suite_dir / "run-performance-benchmarks.sh").write_text("#!/bin/bash\n", encoding="utf-8")
+    (suite_dir / "run-performance-benchmarks.sh").write_text(
+        "#!/bin/bash\n", encoding="utf-8"
+    )
     (tests_dir / "serving-tests.json").write_text(
         '[{"test_name":"serving_llama8B_tp1_sharegpt","qps_list":["inf"],"server_parameters":{"model":"foo/bar","tensor_parallel_size":1},"client_parameters":{"model":"foo/bar","backend":"vllm"}}]\n',
         encoding="utf-8",
@@ -275,7 +294,9 @@ def test_show_test_prints_wrapped_commands(capsys, monkeypatch, tmp_path: Path) 
     (tests_dir / "throughput-tests.json").write_text("[]\n", encoding="utf-8")
     website_repo = tmp_path / "vllm-hust-website"
     (website_repo / "scripts").mkdir(parents=True)
-    (website_repo / "scripts" / "aggregate_results.py").write_text("print('ok')\n", encoding="utf-8")
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -290,7 +311,10 @@ def test_show_test_prints_wrapped_commands(capsys, monkeypatch, tmp_path: Path) 
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "server_command: vllm serve foo/bar --tensor-parallel-size 1" in captured.out
-    assert "client_command: vllm bench serve --request-rate inf --model foo/bar --backend vllm" in captured.out
+    assert (
+        "client_command: vllm bench serve --request-rate inf --model foo/bar --backend vllm"
+        in captured.out
+    )
 
 
 def test_run_test_without_execute_prints_suite_wrapper(
@@ -299,11 +323,15 @@ def test_run_test_without_execute_prints_suite_wrapper(
     vllm_repo = tmp_path / "vllm-hust"
     tests_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "tests"
     tests_dir.mkdir(parents=True)
-    (vllm_repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+    (vllm_repo / "pyproject.toml").write_text(
+        "[project]\nname='vllm-hust'\n", encoding="utf-8"
+    )
     (vllm_repo / "benchmarks").mkdir()
     suite_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "scripts"
     suite_dir.mkdir(parents=True)
-    (suite_dir / "run-performance-benchmarks.sh").write_text("#!/bin/bash\n", encoding="utf-8")
+    (suite_dir / "run-performance-benchmarks.sh").write_text(
+        "#!/bin/bash\n", encoding="utf-8"
+    )
     (tests_dir / "serving-tests.json").write_text("[]\n", encoding="utf-8")
     (tests_dir / "latency-tests.json").write_text(
         '[{"test_name":"latency_llama8B_tp1","parameters":{"model":"foo/bar"}}]\n',
@@ -312,7 +340,9 @@ def test_run_test_without_execute_prints_suite_wrapper(
     (tests_dir / "throughput-tests.json").write_text("[]\n", encoding="utf-8")
     website_repo = tmp_path / "vllm-hust-website"
     (website_repo / "scripts").mkdir(parents=True)
-    (website_repo / "scripts" / "aggregate_results.py").write_text("print('ok')\n", encoding="utf-8")
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -334,19 +364,27 @@ def test_run_ascend_ci_without_execute_prints_wrapped_command(
 ) -> None:
     vllm_repo = tmp_path / "vllm-hust"
     vllm_repo.mkdir()
-    (vllm_repo / "pyproject.toml").write_text("[project]\nname='vllm-hust'\n", encoding="utf-8")
+    (vllm_repo / "pyproject.toml").write_text(
+        "[project]\nname='vllm-hust'\n", encoding="utf-8"
+    )
     (vllm_repo / "benchmarks").mkdir()
     tests_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "tests"
     tests_dir.mkdir(parents=True)
     suite_dir = vllm_repo / ".buildkite" / "performance-benchmarks" / "scripts"
     suite_dir.mkdir(parents=True)
-    (suite_dir / "run-performance-benchmarks.sh").write_text("#!/bin/bash\n", encoding="utf-8")
+    (suite_dir / "run-performance-benchmarks.sh").write_text(
+        "#!/bin/bash\n", encoding="utf-8"
+    )
     ci_dir = vllm_repo / ".github" / "workflows" / "scripts"
     ci_dir.mkdir(parents=True)
-    (ci_dir / "run_ascend_benchmark_ci.sh").write_text("#!/bin/bash\n", encoding="utf-8")
+    (ci_dir / "run_ascend_benchmark_ci.sh").write_text(
+        "#!/bin/bash\n", encoding="utf-8"
+    )
     website_repo = tmp_path / "vllm-hust-website"
     (website_repo / "scripts").mkdir(parents=True)
-    (website_repo / "scripts" / "aggregate_results.py").write_text("print('ok')\n", encoding="utf-8")
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
 
     layout = RepoLayout(
         workspace_root=tmp_path,
@@ -356,15 +394,17 @@ def test_run_ascend_ci_without_execute_prints_wrapped_command(
     )
     monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
 
-    exit_code = main([
-        "run-ascend-ci",
-        "--scenario",
-        "random-online",
-        "--model",
-        "foo/bar",
-        "--num-prompts",
-        "4",
-    ])
+    exit_code = main(
+        [
+            "run-ascend-ci",
+            "--scenario",
+            "random-online",
+            "--model",
+            "foo/bar",
+            "--num-prompts",
+            "4",
+        ]
+    )
 
     captured = capsys.readouterr()
     assert exit_code == 0
@@ -375,7 +415,9 @@ def test_run_ascend_ci_without_execute_prints_wrapped_command(
     assert "run_ascend_benchmark_ci.sh" in captured.out
 
 
-def test_run_ascend_ci_execute_forwards_environment(monkeypatch, tmp_path: Path) -> None:
+def test_run_ascend_ci_execute_forwards_environment(
+    monkeypatch, tmp_path: Path
+) -> None:
     layout = RepoLayout(
         workspace_root=tmp_path,
         benchmark_repo=tmp_path / "vllm-hust-benchmark",
@@ -383,7 +425,9 @@ def test_run_ascend_ci_execute_forwards_environment(monkeypatch, tmp_path: Path)
         website_repo=tmp_path / "vllm-hust-website",
     )
     monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
-    monkeypatch.setattr("vllm_hust_benchmark.cli.validate_repo_layout", lambda _layout: None)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_repo_layout", lambda _layout: None
+    )
     monkeypatch.setattr(
         "vllm_hust_benchmark.cli.build_ascend_benchmark_ci_command",
         lambda _layout: ["bash", "run_ascend_benchmark_ci.sh"],
@@ -398,7 +442,9 @@ def test_run_ascend_ci_execute_forwards_environment(monkeypatch, tmp_path: Path)
         captured["env"] = env
         return 0
 
-    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.run_external_command", fake_run_external_command
+    )
 
     exit_code = main(
         [
@@ -481,7 +527,9 @@ def test_bench_execute_forwards_env(monkeypatch, tmp_path: Path) -> None:
         captured["env"] = env
         return 0
 
-    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.run_external_command", fake_run_external_command
+    )
 
     exit_code = main(
         [
@@ -515,7 +563,10 @@ def test_run_script_execute_forwards_env(monkeypatch, tmp_path: Path) -> None:
     )
     monkeypatch.setattr(
         "vllm_hust_benchmark.cli.build_benchmark_script_command",
-        lambda _layout, _name, _args, runtime_engine=DEFAULT_RUNTIME_ENGINE: ["bash", "benchmark.sh"],
+        lambda _layout, _name, _args, runtime_engine=DEFAULT_RUNTIME_ENGINE: [
+            "bash",
+            "benchmark.sh",
+        ],
     )
 
     captured: dict[str, object] = {}
@@ -527,7 +578,9 @@ def test_run_script_execute_forwards_env(monkeypatch, tmp_path: Path) -> None:
         captured["env"] = env
         return 0
 
-    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.run_external_command", fake_run_external_command
+    )
 
     exit_code = main(
         [
@@ -544,7 +597,9 @@ def test_run_script_execute_forwards_env(monkeypatch, tmp_path: Path) -> None:
     assert captured["env"] == {"FOO": "bar"}
 
 
-def test_run_execute_serve_forwards_env_to_local_runner(monkeypatch, tmp_path: Path) -> None:
+def test_run_execute_serve_forwards_env_to_local_runner(
+    monkeypatch, tmp_path: Path
+) -> None:
     layout = RepoLayout(
         workspace_root=tmp_path,
         benchmark_repo=tmp_path / "vllm-hust-benchmark",
@@ -552,7 +607,10 @@ def test_run_execute_serve_forwards_env_to_local_runner(monkeypatch, tmp_path: P
         website_repo=tmp_path / "vllm-hust-website",
     )
     monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
-    monkeypatch.setattr("vllm_hust_benchmark.cli.validate_runtime_repo", lambda _layout, _runtime: layout.vllm_hust_repo)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_runtime_repo",
+        lambda _layout, _runtime: layout.vllm_hust_repo,
+    )
     monkeypatch.setattr(
         "vllm_hust_benchmark.cli.split_vllm_serve_scenario_parameters",
         lambda *_args, **_kwargs: (
@@ -567,7 +625,10 @@ def test_run_execute_serve_forwards_env_to_local_runner(monkeypatch, tmp_path: P
         captured.update(kwargs)
         return 0
 
-    monkeypatch.setattr("vllm_hust_benchmark.cli.run_local_serve_benchmark", fake_run_local_serve_benchmark)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.run_local_serve_benchmark",
+        fake_run_local_serve_benchmark,
+    )
 
     exit_code = main(
         [
@@ -585,7 +646,9 @@ def test_run_execute_serve_forwards_env_to_local_runner(monkeypatch, tmp_path: P
     assert captured["env"] == {"HF_HOME": "/tmp/hf-home"}
 
 
-def test_bench_runtime_vllm_uses_reference_repo(capsys, monkeypatch, tmp_path: Path) -> None:
+def test_bench_runtime_vllm_uses_reference_repo(
+    capsys, monkeypatch, tmp_path: Path
+) -> None:
     layout = RepoLayout(
         workspace_root=tmp_path,
         benchmark_repo=tmp_path / "vllm-hust-benchmark",
@@ -609,20 +672,29 @@ def test_bench_runtime_vllm_uses_reference_repo(capsys, monkeypatch, tmp_path: P
         captured["execute"] = execute
         return 0
 
-    monkeypatch.setattr("vllm_hust_benchmark.cli.run_external_command", fake_run_external_command)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.run_external_command", fake_run_external_command
+    )
     monkeypatch.setattr(
         "vllm_hust_benchmark.cli.build_vllm_bench_command",
-        lambda bench_args, runtime_engine=DEFAULT_RUNTIME_ENGINE: [runtime_engine, *bench_args],
+        lambda bench_args, runtime_engine=DEFAULT_RUNTIME_ENGINE: [
+            runtime_engine,
+            *bench_args,
+        ],
     )
 
-    exit_code = main(["bench", "--runtime", "vllm", "--", "serve", "--model", "foo/bar"])
+    exit_code = main(
+        ["bench", "--runtime", "vllm", "--", "serve", "--model", "foo/bar"]
+    )
 
     assert exit_code == 0
     assert captured["cwd"] == layout.reference_vllm_repo
     assert captured["command"] == ["vllm", "serve", "--model", "foo/bar"]
 
 
-def test_build_command_runtime_vllm_passes_runtime_to_split(capsys, monkeypatch, tmp_path: Path) -> None:
+def test_build_command_runtime_vllm_passes_runtime_to_split(
+    capsys, monkeypatch, tmp_path: Path
+) -> None:
     layout = RepoLayout(
         workspace_root=tmp_path,
         benchmark_repo=tmp_path / "vllm-hust-benchmark",
@@ -643,20 +715,27 @@ def test_build_command_runtime_vllm_passes_runtime_to_split(capsys, monkeypatch,
     def fake_split(merged, *, runtime_engine=DEFAULT_RUNTIME_ENGINE, runtime_repo=None):
         captured["runtime_engine"] = runtime_engine
         captured["runtime_repo"] = runtime_repo
-        return ({"backend": "vllm", "dataset_name": "random", "input_len": 8}, {"enforce_eager": True})
+        return (
+            {"backend": "vllm", "dataset_name": "random", "input_len": 8},
+            {"enforce_eager": True},
+        )
 
-    monkeypatch.setattr("vllm_hust_benchmark.cli.split_vllm_serve_scenario_parameters", fake_split)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.split_vllm_serve_scenario_parameters", fake_split
+    )
 
-    exit_code = main([
-        "build-command",
-        "random-online",
-        "--runtime",
-        "vllm",
-        "--model",
-        "foo/bar",
-        "--set",
-        "input-len=8",
-    ])
+    exit_code = main(
+        [
+            "build-command",
+            "random-online",
+            "--runtime",
+            "vllm",
+            "--model",
+            "foo/bar",
+            "--set",
+            "input-len=8",
+        ]
+    )
 
     assert exit_code == 0
     assert captured["runtime_engine"] == "vllm"
@@ -673,7 +752,9 @@ def test_publish_website_without_execute_prints_aggregate_command(
         website_repo=tmp_path / "vllm-hust-website",
     )
     monkeypatch.setattr("vllm_hust_benchmark.cli.resolve_repo_layout", lambda: layout)
-    monkeypatch.setattr("vllm_hust_benchmark.cli.validate_repo_layout", lambda _layout: None)
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.cli.validate_repo_layout", lambda _layout: None
+    )
 
     source_dir = tmp_path / "exports"
     exit_code = main(["publish-website", "--source-dir", str(source_dir)])
@@ -897,7 +978,9 @@ def test_export_leaderboard_artifact(tmp_path) -> None:
     assert exit_code == 0
     assert (output_dir / "run_leaderboard.json").is_file()
     assert (output_dir / "leaderboard_manifest.json").is_file()
-    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    artifact = json.loads(
+        (output_dir / "run_leaderboard.json").read_text(encoding="utf-8")
+    )
     assert artifact["model"]["canonical_id"] == "hf:meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["model"]["repo_id"] == "meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["model"]["short_name"] == "Llama-3.1-8B-Instruct"
@@ -905,7 +988,10 @@ def test_export_leaderboard_artifact(tmp_path) -> None:
     assert artifact["model"]["name"] == "meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["metadata"]["git_commit"] == "abc123def456"
     assert artifact["metadata"]["github_user"] == "octocat"
-    assert artifact["metadata"]["github_commit_url"] == "https://github.com/vLLM-HUST/vllm-hust/commit/abc123def456"
+    assert (
+        artifact["metadata"]["github_commit_url"]
+        == "https://github.com/vLLM-HUST/vllm-hust/commit/abc123def456"
+    )
 
 
 def test_export_leaderboard_artifact_infers_910b3_memory(tmp_path) -> None:
@@ -968,7 +1054,9 @@ def test_export_leaderboard_artifact_infers_910b3_memory(tmp_path) -> None:
     )
 
     assert exit_code == 0
-    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    artifact = json.loads(
+        (output_dir / "run_leaderboard.json").read_text(encoding="utf-8")
+    )
     assert artifact["hardware"]["memory_per_chip_gb"] == 64.0
     assert artifact["hardware"]["total_memory_gb"] == 64.0
 
@@ -1048,7 +1136,9 @@ def test_export_leaderboard_artifact_from_raw_benchmark_result(tmp_path) -> None
     assert exit_code == 0
     assert (output_dir / "run_leaderboard.json").is_file()
     assert (output_dir / "leaderboard_manifest.json").is_file()
-    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    artifact = json.loads(
+        (output_dir / "run_leaderboard.json").read_text(encoding="utf-8")
+    )
     assert artifact["model"]["canonical_id"] == "hf:meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["model"]["repo_id"] == "meta-llama/Llama-3.1-8B-Instruct"
     assert artifact["metadata"]["github_user"] == "benchmark-bot"
@@ -1130,7 +1220,9 @@ def test_export_leaderboard_artifact_derives_long_context_constraints_from_raw_r
     )
 
     assert exit_code == 0
-    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    artifact = json.loads(
+        (output_dir / "run_leaderboard.json").read_text(encoding="utf-8")
+    )
     constraints_metrics = artifact["constraints"]["metrics"]
     assert constraints_metrics["single_chip_effective_utilization_pct"] == 49.6
     assert constraints_metrics["multi_tenant_high_utilization"] is True
@@ -1146,7 +1238,9 @@ def test_export_leaderboard_artifact_derives_long_context_constraints_from_raw_r
     assert constraints_metrics["long_context_tpot_p99_stable"] is True
 
 
-def test_export_leaderboard_artifact_normalizes_seeded_short_model_alias(tmp_path) -> None:
+def test_export_leaderboard_artifact_normalizes_seeded_short_model_alias(
+    tmp_path,
+) -> None:
     metrics_file = tmp_path / "metrics.json"
     metrics_file.write_text(
         """
@@ -1206,7 +1300,9 @@ def test_export_leaderboard_artifact_normalizes_seeded_short_model_alias(tmp_pat
     )
 
     assert exit_code == 0
-    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    artifact = json.loads(
+        (output_dir / "run_leaderboard.json").read_text(encoding="utf-8")
+    )
     assert artifact["model"]["canonical_id"] == "hf:Qwen/Qwen2.5-14B-Instruct"
     assert artifact["model"]["repo_id"] == "Qwen/Qwen2.5-14B-Instruct"
     assert artifact["model"]["short_name"] == "Qwen2.5-14B-Instruct"
@@ -1306,7 +1402,9 @@ def test_export_leaderboard_artifact_embeds_same_spec_payload(tmp_path: Path) ->
     )
 
     assert exit_code == 0
-    artifact = json.loads((output_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+    artifact = json.loads(
+        (output_dir / "run_leaderboard.json").read_text(encoding="utf-8")
+    )
     assert artifact["same_spec"]["spec_id"] == "spec-1"
     assert artifact["same_spec"]["resolved_spec_hash"] == "abc123"
     assert artifact["metadata"]["runtime_provenance"]["python"] == (
@@ -1389,8 +1487,9 @@ def test_export_leaderboard_artifact_rejects_zero_long_context_length(
 
     captured = capsys.readouterr()
     assert exit_code == 2
-    assert "constraints_metrics.long_context_length must be null or >= 1" in captured.err
-
+    assert (
+        "constraints_metrics.long_context_length must be null or >= 1" in captured.err
+    )
 
 
 def test_export_leaderboard_artifacts_sanitizes_dirty_engine_version(
@@ -1726,15 +1825,18 @@ def test_build_vllm_bench_command_prefers_console_script(tmp_path: Path):
     )
     executable.chmod(0o755)
 
-    with patch("vllm_hust_benchmark.integration.shutil.which", return_value=str(executable)):
+    with patch(
+        "vllm_hust_benchmark.integration.shutil.which", return_value=str(executable)
+    ):
         command = build_vllm_bench_command(["latency", "--model", "tiny-model"])
 
     assert command == [str(executable), "bench", "latency", "--model", "tiny-model"]
 
 
 def test_build_vllm_bench_command_falls_back_to_python_module():
-    with patch("vllm_hust_benchmark.integration.shutil.which", return_value=None), patch(
-        "vllm_hust_benchmark.integration.sys.executable", "/usr/bin/python3"
+    with (
+        patch("vllm_hust_benchmark.integration.shutil.which", return_value=None),
+        patch("vllm_hust_benchmark.integration.sys.executable", "/usr/bin/python3"),
     ):
         command = build_vllm_bench_command(["latency", "--model", "tiny-model"])
 
