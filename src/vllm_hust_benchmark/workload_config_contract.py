@@ -9,37 +9,68 @@ WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER = "2026-07-24T00:00:00Z"
 OFFICIAL_SPEC_PREFIX = "official-ascend-jan-2026-v0.18.0-"
 
 REQUIRED_EFFECTIVE_PARAMETERS: dict[str, dict[str, tuple[str, ...]]] = {
+    "agent-research-online": {
+        "server": ("gpu_memory_utilization", "max_model_len"),
+        "client": (),
+    },
     "instructcoder-online": {
-        "server": ("gpu_memory_utilization",),
+        "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("no_stream",),
     },
     "prefix-repetition-online": {
-        "server": ("gpu_memory_utilization",),
+        "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("no_stream",),
     },
     "random-latency": {
-        "server": ("gpu_memory_utilization",),
+        "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("gpu_memory_utilization",),
     },
     "random-online": {
-        "server": ("gpu_memory_utilization",),
+        "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("no_stream",),
     },
     "sharegpt-online": {
-        "server": ("gpu_memory_utilization",),
+        "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("no_stream",),
     },
     "sharegpt-throughput": {
-        "server": ("gpu_memory_utilization",),
+        "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("gpu_memory_utilization",),
     },
     "sonnet-throughput": {
-        "server": ("gpu_memory_utilization",),
+        "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("gpu_memory_utilization",),
     },
     "visionarena-online": {
         "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("no_stream",),
+    },
+}
+
+OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
+    "agent-research-online": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
+    "instructcoder-online": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
+    "prefix-repetition-online": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
+    "random-latency": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
+    "random-online": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
+    "sharegpt-online": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
+    "sharegpt-throughput": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
+    "sonnet-throughput": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
     },
 }
 
@@ -69,6 +100,13 @@ def _positive_int(value: Any) -> int | None:
     except (TypeError, ValueError):
         return None
     return parsed if parsed > 0 else None
+
+
+def _numeric_equal(left: Any, right: Any) -> bool:
+    try:
+        return float(left) == float(right)
+    except (TypeError, ValueError):
+        return left == right
 
 
 def _expected_workload_lengths(
@@ -149,6 +187,16 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
         if key not in client:
             errors.append(
                 f"same_spec.resolved_client_parameters.{key} must be explicitly recorded"
+            )
+
+    official_defaults = OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS.get(scenario, {})
+    for key, expected in official_defaults.get("server", {}).items():
+        actual = server.get(key)
+        if not _numeric_equal(actual, expected):
+            errors.append(
+                f"same_spec.resolved_server_parameters.{key} must be "
+                f"{expected!r} for the official single-chip text default, "
+                f"got {actual!r}"
             )
 
     expected_input, expected_output = _expected_workload_lengths(client)

@@ -34,6 +34,7 @@ def official_random_online_entry() -> dict:
             "scenario": "random-online",
             "resolved_server_parameters": {
                 "gpu_memory_utilization": 0.6,
+                "max_model_len": 32768,
             },
             "resolved_client_parameters": {
                 "dataset_name": "random",
@@ -58,13 +59,26 @@ def test_contract_rejects_missing_defaults_and_workload_fields() -> None:
     entry = official_random_online_entry()
     del entry["workload"]["batch_size"]
     del entry["same_spec"]["resolved_server_parameters"]["gpu_memory_utilization"]
+    del entry["same_spec"]["resolved_server_parameters"]["max_model_len"]
     del entry["same_spec"]["resolved_client_parameters"]["no_stream"]
 
     errors = validate_explicit_workload_config(entry)
 
     assert "workload.batch_size must be explicitly recorded" in errors
     assert any("gpu_memory_utilization" in error for error in errors)
+    assert any("max_model_len" in error for error in errors)
     assert any("no_stream" in error for error in errors)
+
+
+def test_contract_rejects_wrong_official_single_chip_defaults() -> None:
+    entry = official_random_online_entry()
+    entry["same_spec"]["resolved_server_parameters"]["gpu_memory_utilization"] = "0.90"
+    entry["same_spec"]["resolved_server_parameters"]["max_model_len"] = 65536
+
+    errors = validate_explicit_workload_config(entry)
+
+    assert any("gpu_memory_utilization must be 0.6" in error for error in errors)
+    assert any("max_model_len must be 32768" in error for error in errors)
 
 
 def test_contract_rejects_prompt_count_conflated_with_concurrency() -> None:

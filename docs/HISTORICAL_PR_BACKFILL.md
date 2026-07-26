@@ -208,14 +208,18 @@ snapshot validation rejects new official records that omit or contradict the con
 Before committing a submission, verify:
 
 - `workload.input_length`, `workload.output_length`, `workload.batch_size`,
-  `workload.concurrent_requests`, and `workload.dataset` all exist. Use JSON `null` only when the
-  setting is genuinely not applicable.
-- `metadata.submitted_at` is present and is the actual artifact-generation timestamp; do not remove
-  or backdate it to obtain legacy treatment.
-- `same_spec.resolved_server_parameters` records effective server defaults such as
-  `gpu_memory_utilization` and workload-specific `max_model_len`.
-- `same_spec.resolved_client_parameters` records effective client defaults, including `no_stream`,
-  offline GPU memory settings, batch size, and the dataset-specific length fields.
+  `workload.concurrent_requests`, and `workload.dataset` all exist. Use JSON
+  `null` only when the setting is genuinely not applicable.
+- `metadata.submitted_at` is present and is the actual artifact-generation
+  timestamp; do not remove or backdate it to obtain legacy treatment.
+- `same_spec.resolved_server_parameters` records effective server defaults. For
+  the official single-chip text leaderboard, the default is
+  `gpu_memory_utilization=0.6` and `max_model_len=32768`; CI/CD and manual
+  backfill artifacts must record both values explicitly, or publication
+  validation will reject them.
+- `same_spec.resolved_client_parameters` records effective client defaults,
+  including `no_stream`, offline GPU memory settings, batch size, and the
+  dataset-specific length fields.
 - `num_prompts` is the total sample count. It must never be copied into
   `workload.concurrent_requests`; only an actual `max_concurrency` / `concurrent_requests` client
   setting may populate that field.

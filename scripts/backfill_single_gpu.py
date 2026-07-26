@@ -117,6 +117,8 @@ MODEL_PARAMETERS = "14B"
 MODEL_PRECISION = "FP16"
 HARDWARE_VENDOR = "Huawei"
 HARDWARE_CHIP_MODEL = "910B2"
+DEFAULT_GPU_MEMORY_UTILIZATION = "0.6"
+DEFAULT_MAX_MODEL_LEN = "32768"
 CHIP_COUNT = 1
 NODE_COUNT = 1
 SUBMITTER = "vllm-hust-org-member"
@@ -2116,14 +2118,10 @@ def _run_serve_bench(
         "vllm.entrypoints.cli.main",
         "serve",
         MODEL_NAME,
-        "--host",
-        host,
-        "--port",
-        str(port),
-        "--gpu-memory-utilization",
-        "0.6",
-        "--max-model-len",
-        "30720",
+        "--host", host,
+        "--port", str(port),
+        "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
+        "--max-model-len", DEFAULT_MAX_MODEL_LEN,
     ]
     # Wait for the port to be free (previous server may still be shutting down).
     import socket as _socket
@@ -2268,50 +2266,27 @@ def run_vllm_bench(
 
     if benchmark_type == "latency":
         cmd: list[str] = [
-            str(PYTHON_BIN),
-            "-m",
-            "vllm.entrypoints.cli.main",
-            "bench",
-            "latency",
-            "--model",
-            MODEL_NAME,
-            "--input-len",
-            str(params["input_length"]),
-            "--output-len",
-            str(params["output_length"]),
-            "--batch-size",
-            str(params["batch_size"]),
-            "--num-iters-warmup",
-            str(params["num_iters_warmup"]),
-            "--num-iters",
-            str(params["num_iters"]),
-            "--gpu-memory-utilization",
-            "0.6",
-            "--max-model-len",
-            "30720",
-            "--output-json",
-            str(output_dir / "raw.json"),
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
+            "--model", MODEL_NAME,
+            "--input-len", str(params["input_length"]),
+            "--output-len", str(params["output_length"]),
+            "--batch-size", str(params["batch_size"]),
+            "--num-iters-warmup", str(params["num_iters_warmup"]),
+            "--num-iters", str(params["num_iters"]),
+            "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
+            "--max-model-len", DEFAULT_MAX_MODEL_LEN,
+            "--output-json", str(output_dir / "raw.json"),
         ]
         result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
     elif benchmark_type == "throughput":
         cmd = [
-            str(PYTHON_BIN),
-            "-m",
-            "vllm.entrypoints.cli.main",
-            "bench",
-            "throughput",
-            "--model",
-            MODEL_NAME,
-            "--dataset-name",
-            params["dataset_name"],
-            "--num-prompts",
-            str(params["num_prompts"]),
-            "--gpu-memory-utilization",
-            "0.6",
-            "--max-model-len",
-            "30720",
-            "--output-json",
-            str(output_dir / "raw.json"),
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
+            "--max-model-len", DEFAULT_MAX_MODEL_LEN,
+            "--output-json", str(output_dir / "raw.json"),
         ]
         if params.get("dataset_path"):
             cmd.extend(["--dataset-path", params["dataset_path"]])
@@ -2371,31 +2346,9 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
     if "enforce_eager" not in server_params:
         server_params["enforce_eager"] = ""
     if "gpu_memory_utilization" not in server_params:
-        # Check the SAME_SPEC_GPU_MEMORY_UTILIZATION env var first, then
-        # fall back to the hardcoded 0.6 used by the v0.18.0 baseline.
-        gpu_mem_override = os.environ.get(
-            "SAME_SPEC_GPU_MEMORY_UTILIZATION", ""
-        ).strip()
-        if gpu_mem_override:
-            try:
-                server_params["gpu_memory_utilization"] = float(gpu_mem_override)
-            except ValueError:
-                server_params["gpu_memory_utilization"] = 0.6
-        else:
-            server_params["gpu_memory_utilization"] = 0.6
+        server_params["gpu_memory_utilization"] = float(DEFAULT_GPU_MEMORY_UTILIZATION)
     if "max_model_len" not in server_params:
-        # Check the SAME_SPEC_MAX_MODEL_LEN env var, which the official
-        # build_same_spec_payload reads via _maybe_apply_max_model_len_override.
-        # Always include max_model_len so that the hash is consistent — the
-        # benchmark run commands also pass --max-model-len explicitly.
-        max_model_len_override = os.environ.get("SAME_SPEC_MAX_MODEL_LEN", "").strip()
-        if max_model_len_override:
-            try:
-                server_params["max_model_len"] = int(max_model_len_override)
-            except ValueError:
-                server_params["max_model_len"] = 30720
-        else:
-            server_params["max_model_len"] = 30720
+        server_params["max_model_len"] = int(DEFAULT_MAX_MODEL_LEN)
 
     # ------------------------------------------------------------------
     # Replicate the old ``resolve_client_parameters`` (commit 2d6f5de).
@@ -2493,49 +2446,26 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
 
     if benchmark_type == "latency":
         parts = [
-            str(PYTHON_BIN),
-            "-m",
-            "vllm.entrypoints.cli.main",
-            "bench",
-            "latency",
-            "--model",
-            MODEL_NAME,
-            "--input-len",
-            str(params["input_length"]),
-            "--output-len",
-            str(params["output_length"]),
-            "--batch-size",
-            str(params["batch_size"]),
-            "--num-iters-warmup",
-            str(params["num_iters_warmup"]),
-            "--num-iters",
-            str(params["num_iters"]),
-            "--gpu-memory-utilization",
-            "0.6",
-            "--max-model-len",
-            "30720",
-            "--output-json",
-            str(raw_path),
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
+            "--model", MODEL_NAME,
+            "--input-len", str(params["input_length"]),
+            "--output-len", str(params["output_length"]),
+            "--batch-size", str(params["batch_size"]),
+            "--num-iters-warmup", str(params["num_iters_warmup"]),
+            "--num-iters", str(params["num_iters"]),
+            "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
+            "--max-model-len", DEFAULT_MAX_MODEL_LEN,
+            "--output-json", str(raw_path),
         ]
     elif benchmark_type == "throughput":
         parts = [
-            str(PYTHON_BIN),
-            "-m",
-            "vllm.entrypoints.cli.main",
-            "bench",
-            "throughput",
-            "--model",
-            MODEL_NAME,
-            "--dataset-name",
-            params["dataset_name"],
-            "--num-prompts",
-            str(params["num_prompts"]),
-            "--gpu-memory-utilization",
-            "0.6",
-            "--max-model-len",
-            "30720",
-            "--output-json",
-            str(raw_path),
+            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
+            "--model", MODEL_NAME,
+            "--dataset-name", params["dataset_name"],
+            "--num-prompts", str(params["num_prompts"]),
+            "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
+            "--max-model-len", DEFAULT_MAX_MODEL_LEN,
+            "--output-json", str(raw_path),
         ]
         if params.get("dataset_path"):
             parts.extend(["--dataset-path", str(params["dataset_path"])])
