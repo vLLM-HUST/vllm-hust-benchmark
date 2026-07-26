@@ -1,12 +1,15 @@
 # Benchmark Scenario Alignment With Website Leaderboard
 
-This document defines the contract between benchmark scenarios in this repository and the website leaderboard ingestion pipeline.
+This document defines the contract between benchmark scenarios in this repository and the website
+leaderboard ingestion pipeline.
 
-See also: `docs/LEADERBOARD_MODEL_IDENTITY_NORMALIZATION.md` for the proposed refactor plan that separates canonical model identity from UI display naming.
+See also: `docs/LEADERBOARD_MODEL_IDENTITY_NORMALIZATION.md` for the proposed refactor plan that
+separates canonical model identity from UI display naming.
 
 ## Goal
 
-Keep benchmark outputs merge-safe and directly consumable by `vllm-hust-website/scripts/aggregate_results.py` without ad-hoc conversion code.
+Keep benchmark outputs merge-safe and directly consumable by
+`vllm-hust-website/scripts/aggregate_results.py` without ad-hoc conversion code.
 
 ## Required Website Inputs
 
@@ -19,8 +22,8 @@ Each artifact must satisfy `vllm-hust-website/data/schemas/leaderboard_v1.schema
 
 ## Scenario Taxonomy
 
-Scenario source of truth is `src/vllm_hust_benchmark/data/official_scenarios.json`.
-Each scenario includes a `leaderboard` block for schema alignment:
+Scenario source of truth is `src/vllm_hust_benchmark/data/official_scenarios.json`. Each scenario
+includes a `leaderboard` block for schema alignment:
 
 - `workload_name`
 - `representative_business_scenario`
@@ -42,9 +45,11 @@ Current mapping:
 `export-leaderboard-artifact` applies this mapping:
 
 - scenario `leaderboard.workload_name` -> artifact `workload.name`
-- scenario `leaderboard.representative_business_scenario` -> `constraints.accountable_scope.representative_business_scenario`
+- scenario `leaderboard.representative_business_scenario` ->
+  `constraints.accountable_scope.representative_business_scenario`
 - scenario source -> `constraints.scenario_source = vllm-benchmark`
-- exporter model input -> normalized `model.canonical_id`, `model.repo_id`, `model.short_name`, and `model.display_name`
+- exporter model input -> normalized `model.canonical_id`, `model.repo_id`, `model.short_name`, and
+  `model.display_name`
 - exporter compatibility field -> `model.name = model.repo_id` for normalized writes
 - benchmark metrics payload `metrics` -> artifact `metrics`
 - benchmark metrics payload `constraints_metrics` -> `constraints.metrics`
@@ -83,12 +88,11 @@ Exporter input is a JSON file with both blocks:
 }
 ```
 
-When exporting from `--benchmark-result-file`, the exporter will also backfill any
-missing long-context constraint fields from the raw benchmark payload when they are
-available there, and it will use `same_spec.resolved_server_parameters.max_model_len`
-as `long_context_length` when a same-spec payload is provided. Fields that cannot be
-reliably derived, such as utilization or baseline-relative cost deltas, should still
-be supplied in the constraints file or left as `null`.
+When exporting from `--benchmark-result-file`, the exporter will also backfill any missing
+long-context constraint fields from the raw benchmark payload when they are available there, and it
+will use `same_spec.resolved_server_parameters.max_model_len` as `long_context_length` when a
+same-spec payload is provided. Fields that cannot be reliably derived, such as utilization or
+baseline-relative cost deltas, should still be supplied in the constraints file or left as `null`.
 
 ## HF Delivery Convention
 
@@ -100,5 +104,5 @@ Recommended HF dataset layout:
 Website CI flow:
 
 1. Download HF snapshot directory.
-2. Run `aggregate_results.py --source-dir <snapshot_root> --output-dir vllm-hust-website/data`.
-3. Commit updated website data snapshots.
+1. Run `aggregate_results.py --source-dir <snapshot_root> --output-dir vllm-hust-website/data`.
+1. Commit updated website data snapshots.

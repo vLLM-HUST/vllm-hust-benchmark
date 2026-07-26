@@ -42,8 +42,8 @@ DEV_HUB_SECRET_ENV_KEYS = (
 )
 SUSPECT_TARGET_REFS = (
     {
-        "core_ref": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
-        "plugin_ref": "c56ccf1e778b59bb7f29bba2152c453ab162811f",
+        "core_ref": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",  # pragma: allowlist secret
+        "plugin_ref": "c56ccf1e778b59bb7f29bba2152c453ab162811f",  # pragma: allowlist secret
         "reason": (
             "archived 2026-07-03: prefix-repetition metadata/same-spec mismatch; "
             "clean graph-mode rerun fails during vllm_ascend.ops import"
@@ -125,11 +125,7 @@ def parse_dotenv(path: Path) -> dict[str, str]:
         value = value.strip()
         if not key or key.startswith("export "):
             key = key.removeprefix("export ").strip()
-        if (
-            len(value) >= 2
-            and value[0] == value[-1]
-            and value[0] in {"'", '"'}
-        ):
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
             value = value[1:-1]
         values[key] = value
     return values
@@ -222,7 +218,9 @@ def collect_official_specs(
                 path=path,
                 scenario=scenario,
                 workload=workload,
-                benchmark_type=str(payload.get("benchmark_type") or infer_benchmark_type(scenario)),
+                benchmark_type=str(
+                    payload.get("benchmark_type") or infer_benchmark_type(scenario)
+                ),
                 model=str(payload.get("model") or ""),
                 precision=str(payload.get("model_precision") or ""),
                 chip_model=chip_model,
@@ -378,7 +376,10 @@ def ensure_plugin_build_info(plugin_worktree: Path, *, chip_model: str) -> None:
         return
     build_info = package_dir / "_build_info.py"
     device_type = device_type_for_chip_model(chip_model)
-    desired = "# Auto-generated file for benchmark source worktree\n" f"__device_type__ = '{device_type}'\n"
+    desired = (
+        "# Auto-generated file for benchmark source worktree\n"
+        f"__device_type__ = '{device_type}'\n"
+    )
     if build_info.is_file() and build_info.read_text(encoding="utf-8") == desired:
         return
     build_info.write_text(desired, encoding="utf-8")
@@ -417,22 +418,32 @@ def find_local_model_path(model_id: str) -> str | None:
         "Qwen/Qwen2.5-14B-Instruct": [
             Path("/data/shared_models/Qwen2.5-14B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-14B-Instruct"),
-            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct"),
+            Path(
+                "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct"
+            ),
         ],
         "Qwen/Qwen2.5-7B-Instruct": [
             Path("/data/shared_models/Qwen2.5-7B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-7B-Instruct"),
-            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct"),
+            Path(
+                "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct"
+            ),
         ],
         "Qwen/Qwen2.5-Coder-14B-Instruct": [
             Path("/root/.cache/modelscope/hub/Qwen/Qwen2___5-Coder-14B-Instruct"),
-            Path("/root/.cache/modelscope/hub/models/Qwen/Qwen2___5-Coder-14B-Instruct"),
+            Path(
+                "/root/.cache/modelscope/hub/models/Qwen/Qwen2___5-Coder-14B-Instruct"
+            ),
             Path("/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct"),
-            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-Coder-14B-Instruct"),
+            Path(
+                "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-Coder-14B-Instruct"
+            ),
         ],
         "Qwen/Qwen2.5-VL-7B-Instruct": [
             Path("/data/shared_models/Qwen--Qwen2.5-VL-7B-Instruct"),
-            Path("/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-VL-7B-Instruct"),
+            Path(
+                "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-VL-7B-Instruct"
+            ),
         ],
     }
     for candidate in known.get(model_id, []):
@@ -470,7 +481,9 @@ def managed_device_ids(devices: str) -> list[int]:
         try:
             parsed.append(int(item))
         except ValueError as exc:
-            raise ValueError(f"managed NPU device must be numeric, got {item!r}") from exc
+            raise ValueError(
+                f"managed NPU device must be numeric, got {item!r}"
+            ) from exc
     return parsed
 
 
@@ -521,7 +534,9 @@ def actual_chip_model_for_run(args: argparse.Namespace, spec: OfficialSpec) -> s
 
 
 def describe_git_ref(repo: Path, ref: str) -> str:
-    described = capture_command(["git", "describe", "--tags", "--always", ref], cwd=repo)
+    described = capture_command(
+        ["git", "describe", "--tags", "--always", ref], cwd=repo
+    )
     return described or ref[:12]
 
 
@@ -587,8 +602,12 @@ def start_managed_server(
         "VLLM_ENGINE_MAX_NUM_BATCHED_TOKENS": str(args.managed_max_model_len),
         "VLLM_ENGINE_MAX_NUM_SEQS": str(args.managed_max_num_seqs),
         "VLLM_ENGINE_GPU_MEM_UTIL": str(args.managed_gpu_mem_util),
-        "VLLM_ENGINE_ENABLE_PREFIX_CACHING": "1" if args.managed_enable_prefix_caching else "0",
-        "VLLM_ENGINE_ENABLE_CHUNKED_PREFILL": "1" if args.managed_enable_chunked_prefill else "0",
+        "VLLM_ENGINE_ENABLE_PREFIX_CACHING": "1"
+        if args.managed_enable_prefix_caching
+        else "0",
+        "VLLM_ENGINE_ENABLE_CHUNKED_PREFILL": "1"
+        if args.managed_enable_chunked_prefill
+        else "0",
         "VLLM_ENGINE_ENFORCE_EAGER": "1" if args.managed_enforce_eager else "0",
         "VLLM_ENGINE_COMPILATION_CONFIG": "{}",
         "VLLM_ENGINE_EXTRA_ARGS_JSON": json.dumps(extra_args),
@@ -614,7 +633,12 @@ def start_managed_server(
         env["VLLM_ENGINE_SYSTEMD_UNIT"] = args.managed_systemd_unit
 
     manage = Path(args.dev_hub_dir).resolve() / "manage.sh"
-    run_command([str(manage), "restart"], cwd=Path(args.dev_hub_dir).resolve(), execute=execute, env=env)
+    run_command(
+        [str(manage), "restart"],
+        cwd=Path(args.dev_hub_dir).resolve(),
+        execute=execute,
+        env=env,
+    )
     deadline = time.monotonic() + args.managed_ready_timeout_seconds
     while True:
         health = run_command(
@@ -643,7 +667,13 @@ def stop_managed_server(*, args: argparse.Namespace, execute: bool) -> None:
     if args.managed_systemd_unit:
         env["VLLM_ENGINE_SYSTEMD_UNIT"] = args.managed_systemd_unit
     manage = Path(args.dev_hub_dir).resolve() / "manage.sh"
-    run_command([str(manage), "stop"], cwd=Path(args.dev_hub_dir).resolve(), execute=execute, env=env, check=False)
+    run_command(
+        [str(manage), "stop"],
+        cwd=Path(args.dev_hub_dir).resolve(),
+        execute=execute,
+        env=env,
+        check=False,
+    )
 
 
 def managed_same_spec_server_parameters(
@@ -721,7 +751,9 @@ def publish_result_locked(
     execute: bool,
 ) -> None:
     publish_submission = submission_dir
-    python = args.runtime_python if Path(args.runtime_python).is_file() else sys.executable
+    python = (
+        args.runtime_python if Path(args.runtime_python).is_file() else sys.executable
+    )
     publish_env = {
         **os.environ,
         "PYTHONPATH": str(REPO_ROOT / "src"),
@@ -830,7 +862,9 @@ def run_target_spec(
     core_commit = (
         capture_command(["git", "rev-parse", "HEAD"], cwd=core_worktree)
         if core_worktree.is_dir()
-        else capture_command(["git", "rev-parse", target.core_ref], cwd=Path(args.core_repo))
+        else capture_command(
+            ["git", "rev-parse", target.core_ref], cwd=Path(args.core_repo)
+        )
     )
     plugin_commit = (
         capture_command(["git", "rev-parse", "HEAD"], cwd=plugin_worktree)
@@ -843,7 +877,9 @@ def run_target_spec(
     core_version = describe_git_ref(core_worktree, core_commit)
     plugin_version = describe_git_ref(plugin_worktree, plugin_commit)
     local_model_path = find_local_model_path(spec.model) or ""
-    client_model_name = served_model_name(spec.model) if args.managed_dev_hub else local_model_path
+    client_model_name = (
+        served_model_name(spec.model) if args.managed_dev_hub else local_model_path
+    )
     run_id = "-".join(
         [
             "historical-pr",
@@ -924,7 +960,11 @@ def run_target_spec(
         env["CURRENT_CLIENT_PORT"] = str(args.server_port)
 
     run_command(
-        ["bash", str(REPO_ROOT / "scripts" / "run-current-ascend-same-spec.sh"), str(spec.path)],
+        [
+            "bash",
+            str(REPO_ROOT / "scripts" / "run-current-ascend-same-spec.sh"),
+            str(spec.path),
+        ],
         cwd=REPO_ROOT,
         execute=execute,
         env=env,
@@ -945,7 +985,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-discovered-refs", type=int, default=12)
     parser.add_argument("--discover-grep", default=IMPORTANT_REF_GREP)
     parser.add_argument("--core-repo", default=str(REPO_ROOT.parent / "vllm-hust"))
-    parser.add_argument("--plugin-repo", default=str(REPO_ROOT.parent / "vllm-ascend-hust"))
+    parser.add_argument(
+        "--plugin-repo", default=str(REPO_ROOT.parent / "vllm-ascend-hust")
+    )
     parser.add_argument("--default-plugin-ref", default="main")
     parser.add_argument("--spec-dir", type=Path, default=DEFAULT_OFFICIAL_SPEC_DIR)
     parser.add_argument("--workload", action="append", default=[])
@@ -975,7 +1017,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--hf-repo", default=DEFAULT_HF_REPO)
     parser.add_argument("--hf-branch", default="main")
     parser.add_argument("--hf-submissions-prefix", default="submissions-auto")
-    parser.add_argument("--website-repo", default=str(REPO_ROOT.parent / "vllm-hust-website"))
+    parser.add_argument(
+        "--website-repo", default=str(REPO_ROOT.parent / "vllm-hust-website")
+    )
     parser.add_argument("--runtime-python", default=DEFAULT_CURRENT_PYTHON)
     parser.add_argument("--current-env-prefix", default="")
     parser.add_argument(
@@ -1033,7 +1077,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--allow-model-downloads", action="store_true")
     parser.add_argument("--submitter", default="historical-pr-backfill")
     parser.add_argument("--core-github-repository", default="vLLM-HUST/vllm-hust")
-    parser.add_argument("--plugin-github-repository", default="vLLM-HUST/vllm-ascend-hust")
+    parser.add_argument(
+        "--plugin-github-repository", default="vLLM-HUST/vllm-ascend-hust"
+    )
     return parser.parse_args()
 
 
@@ -1041,8 +1087,16 @@ def main() -> int:
     args = parse_args()
     execute = bool(args.execute)
     result_root = Path(args.result_root).resolve()
-    state_file = Path(args.state_file).resolve() if args.state_file else result_root / "state.json"
-    worktree_root = Path(args.worktree_root).resolve() if args.worktree_root else result_root / "worktrees"
+    state_file = (
+        Path(args.state_file).resolve()
+        if args.state_file
+        else result_root / "state.json"
+    )
+    worktree_root = (
+        Path(args.worktree_root).resolve()
+        if args.worktree_root
+        else result_root / "worktrees"
+    )
     state = read_state(state_file)
 
     core_repo = Path(args.core_repo).resolve()
@@ -1137,7 +1191,9 @@ def main() -> int:
             if execute:
                 write_state(state_file, state)
             try:
-                uses_managed_server = args.managed_dev_hub and spec.benchmark_type == "serve"
+                uses_managed_server = (
+                    args.managed_dev_hub and spec.benchmark_type == "serve"
+                )
                 if uses_managed_server:
                     start_managed_server(
                         args=args,
@@ -1181,7 +1237,10 @@ def main() -> int:
                 }
                 if execute:
                     write_state(state_file, state)
-                print(f"[backfill] failed: {target.label} / {spec.workload}: {exc}", file=sys.stderr)
+                print(
+                    f"[backfill] failed: {target.label} / {spec.workload}: {exc}",
+                    file=sys.stderr,
+                )
                 if execute:
                     return 1
             finally:

@@ -1,7 +1,11 @@
 import json
 from pathlib import Path
 
-from vllm_hust_benchmark.registry import filter_scenarios, get_scenario, load_official_scenarios
+from vllm_hust_benchmark.registry import (
+    filter_scenarios,
+    get_scenario,
+    load_official_scenarios,
+)
 from vllm_hust_benchmark.same_spec import build_same_spec_payload
 
 

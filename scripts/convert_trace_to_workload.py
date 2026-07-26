@@ -28,13 +28,15 @@ def parse_args() -> argparse.Namespace:
         description="Convert EvoScientist trace to benchmark workload formats"
     )
     parser.add_argument(
-        "--input", "-i",
+        "--input",
+        "-i",
         type=Path,
         default=DEFAULT_INPUT,
         help="Input JSONL trace file",
     )
     parser.add_argument(
-        "--output-dir", "-o",
+        "--output-dir",
+        "-o",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
         help="Output directory for converted workload files",
@@ -155,10 +157,12 @@ def convert_to_custom_jsonl(
         if not prompt:
             continue
 
-        results.append({
-            "prompt": prompt,
-            "output_tokens": output_tokens,
-        })
+        results.append(
+            {
+                "prompt": prompt,
+                "output_tokens": output_tokens,
+            }
+        )
 
     return results
 
@@ -191,12 +195,14 @@ def convert_to_sharegpt(
         if not user_msg or not completion:
             continue
 
-        conversations.append({
-            "conversations": [
-                {"from": "human", "value": user_msg},
-                {"from": "gpt", "value": completion},
-            ]
-        })
+        conversations.append(
+            {
+                "conversations": [
+                    {"from": "human", "value": user_msg},
+                    {"from": "gpt", "value": completion},
+                ]
+            }
+        )
 
     return conversations
 
@@ -214,26 +220,28 @@ def print_stats(entries: list[dict], custom: list[dict], sharegpt: list[dict]) -
     if custom:
         output_tokens = [e["output_tokens"] for e in custom]
         prompt_lens = [len(e["prompt"]) for e in custom]
-        print(f"\nOutput tokens:")
+        print("\nOutput tokens:")
         print(f"  min:    {min(output_tokens)}")
         print(f"  max:    {max(output_tokens)}")
         print(f"  mean:   {statistics.mean(output_tokens):.0f}")
         print(f"  median: {statistics.median(output_tokens):.0f}")
-        print(f"\nPrompt length (chars):")
+        print("\nPrompt length (chars):")
         print(f"  min:    {min(prompt_lens)}")
         print(f"  max:    {max(prompt_lens)}")
         print(f"  mean:   {statistics.mean(prompt_lens):.0f}")
         print(f"  median: {statistics.median(prompt_lens):.0f}")
 
     if entries:
-        latencies = [e.get("latency_ms", 0) for e in entries if e.get("latency_ms", 0) > 0]
+        latencies = [
+            e.get("latency_ms", 0) for e in entries if e.get("latency_ms", 0) > 0
+        ]
         if latencies:
-            print(f"\nLatency (ms):")
+            print("\nLatency (ms):")
             print(f"  min:    {min(latencies):.0f}")
             print(f"  max:    {max(latencies):.0f}")
             print(f"  mean:   {statistics.mean(latencies):.0f}")
             print(f"  median: {statistics.median(latencies):.0f}")
-            print(f"  total:  {sum(latencies)/1000:.1f}s")
+            print(f"  total:  {sum(latencies) / 1000:.1f}s")
 
 
 def main() -> None:
@@ -241,7 +249,9 @@ def main() -> None:
 
     if not args.input.exists():
         print(f"[ERROR] Input trace file not found: {args.input}")
-        print("Run 'python scripts/run_evoscientist_trace.py' first to generate a trace.")
+        print(
+            "Run 'python scripts/run_evoscientist_trace.py' first to generate a trace."
+        )
         sys.exit(1)
 
     # Load trace
@@ -274,15 +284,17 @@ def main() -> None:
     sharegpt_path = args.output_dir / "evoscientist-workload-sharegpt.json"
     with open(sharegpt_path, "w", encoding="utf-8") as f:
         json.dump(sharegpt_entries, f, ensure_ascii=False, indent=2)
-    print(f"[OK] ShareGPT JSON written: {sharegpt_path} ({len(sharegpt_entries)} entries)")
+    print(
+        f"[OK] ShareGPT JSON written: {sharegpt_path} ({len(sharegpt_entries)} entries)"
+    )
 
     # Print stats
     print_stats(entries, custom_entries, sharegpt_entries)
 
-    print(f"\n[SUCCESS] Conversion complete.")
+    print("\n[SUCCESS] Conversion complete.")
     print(f"  Custom:   {custom_path}")
     print(f"  ShareGPT: {sharegpt_path}")
-    print(f"\nTo benchmark with vllm-hust:")
+    print("\nTo benchmark with vllm-hust:")
     print(f"  vllm bench serve --dataset-name custom --dataset-path {custom_path} \\")
     print(f"    --model <model> --num-prompts {len(custom_entries)}")
 

@@ -55,10 +55,7 @@ def main() -> int:
     payload_count = 0
     new_hashes: set[str] = set()
     paths = sorted(
-        path
-        for root in args.root
-        for path in root.rglob("*.json")
-        if path.is_file()
+        path for root in args.root for path in root.rglob("*.json") if path.is_file()
     )
     for path in paths:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -68,7 +65,9 @@ def main() -> int:
         for payload in matches:
             server = payload.get("resolved_server_parameters")
             if not isinstance(server, dict):
-                raise SystemExit(f"{path}: resolved_server_parameters must be an object")
+                raise SystemExit(
+                    f"{path}: resolved_server_parameters must be an object"
+                )
             server.update(overrides)
             payload["resolved_spec_hash"] = compute_resolved_spec_hash(payload)
             new_hashes.add(payload["resolved_spec_hash"])
@@ -81,7 +80,8 @@ def main() -> int:
         )
     if len(new_hashes) != 1:
         raise SystemExit(
-            "repair would still produce multiple hashes: " + ", ".join(sorted(new_hashes))
+            "repair would still produce multiple hashes: "
+            + ", ".join(sorted(new_hashes))
         )
 
     new_hash = next(iter(new_hashes))
@@ -92,7 +92,9 @@ def main() -> int:
                 encoding="utf-8",
             )
     action = "updated" if args.execute else "would update"
-    print(f"{action} {payload_count} payloads in {len(changed)} files; new hash={new_hash}")
+    print(
+        f"{action} {payload_count} payloads in {len(changed)} files; new hash={new_hash}"
+    )
     return 0
 
 
