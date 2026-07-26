@@ -519,3 +519,33 @@ Notes:
 - The matrix wrapper does not replace the single-spec runner; it only orchestrates repeated calls to it.
 - Every spec gets an isolated `RESULT_DIR` under `.benchmarks/<matrix-run-id>/`, so raw results, resolved same-spec payloads, and exported submissions do not overwrite each other.
 - Set `PUBLISH_WEBSITE=1` only after you are ready to regenerate `vllm-hust-website/data` from the full batch output.
+
+## Contributing
+
+The benchmark repo uses the same pre-commit toolchain as `vllm-hust-website`
+so commits land on `main` with consistent formatting. Once-per-clone setup:
+
+```bash
+./quickstart.sh        # installs dev deps + editable package + git hooks
+```
+
+After that, every `git commit` runs the local fallback hook
+(`hooks/pre-commit`) automatically: trailing whitespace, conflict markers,
+large files, ruff format + check, API keys, debug statements. When
+`pre-commit` framework + Python 3.11 are both available locally, the same
+hook transparently switches to running the full `.pre-commit-config.yaml`
+hooks set.
+
+For CI-parity local validation before opening a PR:
+
+```bash
+./scripts/validate-local.sh
+```
+
+This mirrors what `.github/workflows/ci.yml` runs: `pre-commit run --all-files`
+followed by `python -m pytest -q tests`. Pass `--skip-pre-commit` or
+`--skip-tests` to skip a phase.
+
+The `no-commit-to-branch` hook blocks direct commits to `main`; create a
+feature branch first. The pre-push hook additionally re-checks whitespace /
+conflict markers on main-bound pushes only.
