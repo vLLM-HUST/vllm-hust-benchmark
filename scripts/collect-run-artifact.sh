@@ -43,6 +43,8 @@ if [[ ! -d "$ARTIFACT_DIR" ]]; then
 fi
 
 cd "$ARTIFACT_DIR"
+BENCHMARK_REPO_ROOT=$(cd "$(dirname "$ARTIFACT_DIR")/.." && pwd)
+export BENCHMARK_REPO_ROOT
 
 # ─── 1. Environment Manifest ────────────────────────────────────────────────
 
@@ -88,8 +90,7 @@ manifest = {
     "git_info": {
         "vllm_hust": _git_commit(os.environ.get("CURRENT_VLLM_HUST_REPO")),
         "vllm_ascend_hust": _git_commit(os.environ.get("CURRENT_VLLM_ASCEND_HUST_REPO")),
-        "benchmark": _run(["git", "-C", os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                          "rev-parse", "HEAD"]),
+        "benchmark": _run(["git", "-C", os.environ.get("BENCHMARK_REPO_ROOT", ""), "rev-parse", "HEAD"]),
     },
 }
 
@@ -102,7 +103,8 @@ echo "[collect] env-manifest.json written"
 
 # ─── 1b. Pip packages (separate file for parsing convenience) ──────────────
 
-python3 -m pip list --format=json 2>/dev/null > pip-packages.json || echo '[]' > pip-packages.json
+PIP_PYTHON="${CURRENT_RUNTIME_PYTHON:-python3}"
+"$PIP_PYTHON" -m pip list --format=json 2>/dev/null > pip-packages.json || echo '[]' > pip-packages.json
 echo "[collect] pip-packages.json written"
 
 # ─── 2. Checksums ──────────────────────────────────────────────────────────
