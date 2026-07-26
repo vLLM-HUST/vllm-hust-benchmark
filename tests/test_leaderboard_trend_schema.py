@@ -35,7 +35,10 @@ def test_schema_rejects_missing_or_inconsistent_conditional_fields() -> None:
 
 def test_schema_accepts_a_payload_array() -> None:
     validator = _validator()
-    payloads = [_payload(FIXTURE_ROOT / "valid" / name) for name in ("full-matrix.json", "experimental.json")]
+    payloads = [
+        _payload(FIXTURE_ROOT / "valid" / name)
+        for name in ("full-matrix.json", "experimental.json")
+    ]
     assert list(validator.iter_errors(payloads)) == []
 
 
@@ -44,4 +47,3 @@ def test_schema_requires_aggregate_for_non_experimental_repeated_entry() -> None
     payload = _payload(FIXTURE_ROOT / "valid" / "full-matrix.json")
     del payload["canonical_aggregate"]
     assert list(validator.iter_errors(payload))
-

@@ -8,7 +8,9 @@ from vllm_hust_benchmark import perfgate
 PERFGATE_SPEC_ID = "perfgate-ascend-qwen25-3b-910b3"
 
 
-def _write_run_leaderboard(path: Path, *, throughput: float, ttft: float, tbt: float) -> None:
+def _write_run_leaderboard(
+    path: Path, *, throughput: float, ttft: float, tbt: float
+) -> None:
     path.write_text(
         json.dumps(
             {
@@ -29,7 +31,9 @@ def _write_run_leaderboard(path: Path, *, throughput: float, ttft: float, tbt: f
     )
 
 
-def test_compare_benchmark_results_passes_when_throughput_improves_and_latency_drops(tmp_path: Path) -> None:
+def test_compare_benchmark_results_passes_when_throughput_improves_and_latency_drops(
+    tmp_path: Path,
+) -> None:
     baseline = tmp_path / "baseline.json"
     current = tmp_path / "current.json"
     _write_run_leaderboard(baseline, throughput=100.0, ttft=50.0, tbt=10.0)
@@ -57,13 +61,17 @@ def test_compare_benchmark_results_fails_on_regression(tmp_path: Path) -> None:
     assert result.metrics["tbt_ms"].passed is False
 
 
-def test_generate_two_stage_report_marks_rebase_conflict_as_overall_fail(tmp_path: Path) -> None:
+def test_generate_two_stage_report_marks_rebase_conflict_as_overall_fail(
+    tmp_path: Path,
+) -> None:
     stage1_baseline = tmp_path / "m1.json"
     stage1_current = tmp_path / "b1.json"
     conflict_file = tmp_path / "conflict.txt"
     _write_run_leaderboard(stage1_baseline, throughput=100.0, ttft=50.0, tbt=10.0)
     _write_run_leaderboard(stage1_current, throughput=101.0, ttft=49.0, tbt=9.0)
-    conflict_file.write_text("CONFLICT (content): Merge conflict in vllm/engine.py\n", encoding="utf-8")
+    conflict_file.write_text(
+        "CONFLICT (content): Merge conflict in vllm/engine.py\n", encoding="utf-8"
+    )
 
     report = perfgate.generate_two_stage_report(
         stage1_current_file=stage1_current,
@@ -81,7 +89,9 @@ def test_generate_two_stage_report_marks_rebase_conflict_as_overall_fail(tmp_pat
     assert "**Overall: FAIL**" in report.markdown
 
 
-def test_generate_two_stage_report_uses_stage1_when_stage2_skipped(tmp_path: Path) -> None:
+def test_generate_two_stage_report_uses_stage1_when_stage2_skipped(
+    tmp_path: Path,
+) -> None:
     stage1_baseline = tmp_path / "m1.json"
     stage1_current = tmp_path / "b1.json"
     _write_run_leaderboard(stage1_baseline, throughput=100.0, ttft=50.0, tbt=10.0)
@@ -103,7 +113,9 @@ def test_generate_two_stage_report_uses_stage1_when_stage2_skipped(tmp_path: Pat
     assert "**Overall: PASS**" in report.markdown
 
 
-def test_compare2_cli_writes_report_and_returns_failure_for_stage2_regression(tmp_path: Path) -> None:
+def test_compare2_cli_writes_report_and_returns_failure_for_stage2_regression(
+    tmp_path: Path,
+) -> None:
     stage1_baseline = tmp_path / "m1.json"
     stage1_current = tmp_path / "b1.json"
     stage2_baseline = tmp_path / "m2.json"
@@ -117,14 +129,22 @@ def test_compare2_cli_writes_report_and_returns_failure_for_stage2_regression(tm
     exit_code = perfgate.main(
         [
             "compare2",
-            "--stage1-current", str(stage1_current),
-            "--stage1-baseline", str(stage1_baseline),
-            "--stage2-current", str(stage2_current),
-            "--stage2-baseline", str(stage2_baseline),
-            "--fork-point", "aaa11111",
-            "--m2-commit", "bbb22222",
-            "--report-file", str(report_file),
-            "--mode", "enforce",
+            "--stage1-current",
+            str(stage1_current),
+            "--stage1-baseline",
+            str(stage1_baseline),
+            "--stage2-current",
+            str(stage2_current),
+            "--stage2-baseline",
+            str(stage2_baseline),
+            "--fork-point",
+            "aaa11111",
+            "--m2-commit",
+            "bbb22222",
+            "--report-file",
+            str(report_file),
+            "--mode",
+            "enforce",
         ]
     )
 
@@ -197,7 +217,9 @@ def test_compare_benchmark_results_rejects_wrong_spec_id(tmp_path: Path) -> None
     current.write_text(json.dumps(payload), encoding="utf-8")
 
     try:
-        perfgate.compare_benchmark_results(current, baseline, expected_spec_id=PERFGATE_SPEC_ID)
+        perfgate.compare_benchmark_results(
+            current, baseline, expected_spec_id=PERFGATE_SPEC_ID
+        )
     except ValueError as error:
         assert PERFGATE_SPEC_ID in str(error)
     else:  # pragma: no cover - assertion guard
@@ -223,7 +245,9 @@ def test_format_metric_table_renders_infinite_delta_readably(tmp_path: Path) -> 
     assert "inf%" not in report.markdown
 
 
-def test_compare2_rejects_stage2_skip_when_fork_point_differs_from_m2(tmp_path: Path) -> None:
+def test_compare2_rejects_stage2_skip_when_fork_point_differs_from_m2(
+    tmp_path: Path,
+) -> None:
     stage1_baseline = tmp_path / "m1.json"
     stage1_current = tmp_path / "b1.json"
     _write_run_leaderboard(stage1_baseline, throughput=100.0, ttft=50.0, tbt=10.0)
@@ -232,12 +256,17 @@ def test_compare2_rejects_stage2_skip_when_fork_point_differs_from_m2(tmp_path: 
     exit_code = perfgate.main(
         [
             "compare2",
-            "--stage1-current", str(stage1_current),
-            "--stage1-baseline", str(stage1_baseline),
+            "--stage1-current",
+            str(stage1_current),
+            "--stage1-baseline",
+            str(stage1_baseline),
             "--stage2-skipped",
-            "--fork-point", "aaa11111",
-            "--m2-commit", "bbb22222",
-            "--mode", "enforce",
+            "--fork-point",
+            "aaa11111",
+            "--m2-commit",
+            "bbb22222",
+            "--mode",
+            "enforce",
         ]
     )
 
@@ -253,13 +282,18 @@ def test_compare2_rejects_conflict_and_skipped_together(tmp_path: Path) -> None:
     exit_code = perfgate.main(
         [
             "compare2",
-            "--stage1-current", str(stage1_current),
-            "--stage1-baseline", str(stage1_baseline),
+            "--stage1-current",
+            str(stage1_current),
+            "--stage1-baseline",
+            str(stage1_baseline),
             "--stage2-skipped",
             "--stage2-rebase-conflict",
-            "--fork-point", "aaa11111",
-            "--m2-commit", "aaa11111",
-            "--mode", "enforce",
+            "--fork-point",
+            "aaa11111",
+            "--m2-commit",
+            "aaa11111",
+            "--mode",
+            "enforce",
         ]
     )
 
@@ -276,14 +310,21 @@ def test_compare2_marks_stage2_not_run_as_overall_fail(tmp_path: Path) -> None:
     exit_code = perfgate.main(
         [
             "compare2",
-            "--stage1-current", str(stage1_current),
-            "--stage1-baseline", str(stage1_baseline),
+            "--stage1-current",
+            str(stage1_current),
+            "--stage1-baseline",
+            str(stage1_baseline),
             "--stage2-not-run",
-            "--stage2-not-run-reason", "Stage 1 did not pass; Stage 2 was not run",
-            "--fork-point", "aaa11111",
-            "--m2-commit", "bbb22222",
-            "--report-file", str(report_file),
-            "--mode", "enforce",
+            "--stage2-not-run-reason",
+            "Stage 1 did not pass; Stage 2 was not run",
+            "--fork-point",
+            "aaa11111",
+            "--m2-commit",
+            "bbb22222",
+            "--report-file",
+            str(report_file),
+            "--mode",
+            "enforce",
         ]
     )
 
@@ -304,13 +345,19 @@ def test_compare2_cli_report_mode_does_not_block_on_failure(tmp_path: Path) -> N
     exit_code = perfgate.main(
         [
             "compare2",
-            "--stage1-current", str(stage1_current),
-            "--stage1-baseline", str(stage1_baseline),
+            "--stage1-current",
+            str(stage1_current),
+            "--stage1-baseline",
+            str(stage1_baseline),
             "--stage2-skipped",
-            "--fork-point", "aaa11111",
-            "--m2-commit", "aaa11111",
-            "--report-file", str(report_file),
-            "--mode", "report",
+            "--fork-point",
+            "aaa11111",
+            "--m2-commit",
+            "aaa11111",
+            "--report-file",
+            str(report_file),
+            "--mode",
+            "report",
         ]
     )
 

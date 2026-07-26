@@ -43,7 +43,9 @@ def _load_registry_payload(registry_file: Path | None = None) -> dict[str, Any]:
         return _load_default_registry_payload()
     payload = json.loads(registry_file.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        raise ValueError(f"{registry_file}: perfgate spec registry must be a JSON object")
+        raise ValueError(
+            f"{registry_file}: perfgate spec registry must be a JSON object"
+        )
     return payload
 
 
@@ -149,9 +151,7 @@ def _validate_resolved_spec(
 
 
 def format_supported_pairs(entries: tuple[PerfgateSpecEntry, ...]) -> str:
-    pairs = sorted(
-        f"{entry.scenario}/{entry.hardware_chip_model}" for entry in entries
-    )
+    pairs = sorted(f"{entry.scenario}/{entry.hardware_chip_model}" for entry in entries)
     return ", ".join(pairs)
 
 

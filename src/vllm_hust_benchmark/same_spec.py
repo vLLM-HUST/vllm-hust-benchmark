@@ -48,7 +48,9 @@ MAX_MODEL_LEN_ENV = "SAME_SPEC_MAX_MODEL_LEN"
 
 
 def _path_has_any_matching_file(path: Path, patterns: tuple[str, ...]) -> bool:
-    return any(candidate.is_file() for pattern in patterns for candidate in path.glob(pattern))
+    return any(
+        candidate.is_file() for pattern in patterns for candidate in path.glob(pattern)
+    )
 
 
 def _path_has_complete_indexed_weights(path: Path) -> bool:
@@ -66,7 +68,9 @@ def _path_has_complete_indexed_weights(path: Path) -> bool:
             continue
 
         shard_names = {str(filename) for filename in weight_map.values() if filename}
-        if shard_names and all((path / shard_name).is_file() for shard_name in shard_names):
+        if shard_names and all(
+            (path / shard_name).is_file() for shard_name in shard_names
+        ):
             return True
 
     return False
@@ -241,7 +245,9 @@ def resolve_client_parameters(
             resolved.pop("output_len", None)
 
         if "prefix_repetition_num_prefixes" not in resolved:
-            resolved["prefix_repetition_num_prefixes"] = PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
+            resolved["prefix_repetition_num_prefixes"] = (
+                PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
+            )
 
         if total_input_len is not None:
             total_input_len = int(total_input_len)
@@ -328,11 +334,19 @@ def build_same_spec_payload(
 ) -> dict[str, Any]:
     spec_id = _require_string(spec, "id")
     canonical_model = model_override or _require_string(spec, "model")
-    model_parameters = model_parameters_override or _require_string(spec, "model_parameters")
-    model_precision = model_precision_override or _require_string(spec, "model_precision")
-    model_quantization = model_quantization_override or str(spec.get("model_quantization") or "")
+    model_parameters = model_parameters_override or _require_string(
+        spec, "model_parameters"
+    )
+    model_precision = model_precision_override or _require_string(
+        spec, "model_precision"
+    )
+    model_quantization = model_quantization_override or str(
+        spec.get("model_quantization") or ""
+    )
     hardware_vendor = _require_string(spec, "hardware_vendor")
-    hardware_chip_model = hardware_chip_model_override or _require_string(spec, "hardware_chip_model")
+    hardware_chip_model = hardware_chip_model_override or _require_string(
+        spec, "hardware_chip_model"
+    )
     resolved_server_parameters = resolve_server_parameters(
         spec,
         runtime_model=runtime_model or canonical_model,

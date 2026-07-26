@@ -184,7 +184,9 @@ def detect_outliers_iqr(values: list[float]) -> tuple[list[int], tuple[float, fl
     return outlier_indices, (lower, upper)
 
 
-def detect_outliers_3sigma(values: list[float]) -> tuple[list[int], tuple[float, float]]:
+def detect_outliers_3sigma(
+    values: list[float],
+) -> tuple[list[int], tuple[float, float]]:
     """3σ-based outlier detection.
 
     Returns
@@ -351,7 +353,11 @@ def _cap_outliers(
     lower = min(kept)
     upper = max(kept)
     capped = [
-        lower if i in outlier_set and v < lower else upper if i in outlier_set and v > upper else v
+        lower
+        if i in outlier_set and v < lower
+        else upper
+        if i in outlier_set and v > upper
+        else v
         for i, v in enumerate(values)
     ]
     detail = (
@@ -454,7 +460,11 @@ def _collect_metric_values(
         m = entry.get("metrics")
         if not isinstance(m, dict):
             return {}
-        keys = {k for k, v in m.items() if isinstance(v, (int, float)) and not isinstance(v, bool) and v is not None}
+        keys = {
+            k
+            for k, v in m.items()
+            if isinstance(v, (int, float)) and not isinstance(v, bool) and v is not None
+        }
         all_names.update(m.keys())
         if metric_names is None:
             metric_names = keys
@@ -558,7 +568,9 @@ def compute_canonical_aggregate(
     for metric_name, raw_values in metric_values.items():
         if outlier_handling != "none" and all_outlier_indices:
             cleaned, detail = _handle_outliers(
-                raw_values, outlier_handling, outlier_indices_sorted,
+                raw_values,
+                outlier_handling,
+                outlier_indices_sorted,
                 detection_method=outlier_detection,
             )
             if detail and outlier_detail is None:

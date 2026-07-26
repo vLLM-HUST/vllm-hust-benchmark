@@ -7,9 +7,11 @@ from vllm_hust_benchmark.models import ScenarioDefinition
 
 
 def load_official_scenarios() -> list[ScenarioDefinition]:
-    with resources.files("vllm_hust_benchmark.data").joinpath(
-        "official_scenarios.json"
-    ).open("r", encoding="utf-8") as handle:
+    with (
+        resources.files("vllm_hust_benchmark.data")
+        .joinpath("official_scenarios.json")
+        .open("r", encoding="utf-8") as handle
+    ):
         payload = json.load(handle)
 
     scenarios: list[ScenarioDefinition] = []
@@ -40,7 +42,9 @@ def filter_scenarios(
 ) -> list[ScenarioDefinition]:
     scenarios = load_official_scenarios()
     if benchmark_type:
-        scenarios = [item for item in scenarios if item.benchmark_type == benchmark_type]
+        scenarios = [
+            item for item in scenarios if item.benchmark_type == benchmark_type
+        ]
     if tag:
         scenarios = [item for item in scenarios if tag in item.tags]
     return scenarios

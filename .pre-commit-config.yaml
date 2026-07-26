@@ -52,16 +52,17 @@ repos:
   rev: v1.5.0
   hooks:
   - id: detect-secrets
-    # Benchmark repo has many fixture / submission JSON files containing
-    # commit SHAs and entry UUIDs that look like high-entropy strings.
-    # Exclude them so the lint stays usable on real source paths.
-    exclude: >-
-      ^(
-        submissions/.*\.json|
-        leaderboard-data/.*\.json|
-        schemas/.*\.json|
-        tests/fixtures/.*|
-        archive/.*|
-        agent\.md|
-        CHANGELOG\.md
-      )$
+    # Benchmark repo has many known false positives: 40-char git SHAs in
+    # tests, fixture JSON containing commit IDs, and dummy API keys used
+    # for env-var validation tests. We commit a generated baseline
+    # (`.secrets.baseline`) listing them, and the hook blocks only net-new
+    # secrets. Regenerate the baseline via:
+    #
+    #   detect-secrets scan --all-files \
+    #     --exclude-files '^(submissions|leaderboard-data|schemas|docs/official-baselines)/.*\.json$|^tests/fixtures/.*|^archive/.*|^agent\.md$|^CHANGELOG\.md$|^\.(git|pytest_cache|ruff_cache|venv|benchmarks)/' \
+    #     --exclude-lines 'pragma: allowlist secret' \
+    #     > .secrets.baseline
+    #
+    # Then audit any new entries with `detect-secrets audit .secrets.baseline`.
+    args: [--baseline, .secrets.baseline]
+    exclude: ^(submissions/.*\.json|leaderboard-data/.*\.json|schemas/.*\.json|docs/.*\.json|tests/fixtures/.*|archive/.*|agent\.md|CHANGELOG\.md)$
