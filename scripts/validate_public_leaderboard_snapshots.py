@@ -39,6 +39,8 @@ OFFICIAL_PUBLIC_WORKLOADS = {
     "visionarena-online",
 }
 OFFICIAL_V0180_SPEC_PREFIX = "official-ascend-jan-2026-v0.18.0-"
+DEFAULT_PUBLIC_GPU_MEMORY_UTILIZATION = 0.6
+RETIRED_PUBLIC_MAX_MODEL_LEN = 30720
 SNAPSHOT_FILES = (
     "leaderboard_single.json",
     "leaderboard_multi.json",
@@ -69,6 +71,24 @@ def contains_retired_baseline_token(value: Any) -> bool:
     return any(token in normalized for token in RETIRED_BASELINE_TOKENS)
 
 
+def parse_optional_float(value: Any) -> float | None:
+    if value in (None, ""):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def parse_optional_int(value: Any) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     errors: list[str] = []
     entry_id = str(entry.get("entry_id") or "<missing-entry-id>")
@@ -79,6 +99,11 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     hardware = entry.get("hardware") if isinstance(entry.get("hardware"), dict) else {}
     same_spec = (
         entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
+    )
+    resolved_server_parameters = (
+        same_spec.get("resolved_server_parameters")
+        if isinstance(same_spec.get("resolved_server_parameters"), dict)
+        else {}
     )
     spec_id = str(same_spec.get("spec_id") or "")
     metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
@@ -128,6 +153,32 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         )
 
     if spec_id.startswith(OFFICIAL_V0180_SPEC_PREFIX):
+        gpu_memory_utilization = parse_optional_float(
+            resolved_server_parameters.get("gpu_memory_utilization")
+        )
+        if (
+            gpu_memory_utilization is not None
+            and gpu_memory_utilization != DEFAULT_PUBLIC_GPU_MEMORY_UTILIZATION
+        ):
+            errors.append(
+                f"{source.name}:{entry_id}: official public snapshot must not "
+                f"publish non-default gpu_memory_utilization="
+                f"{resolved_server_parameters.get('gpu_memory_utilization')!r}; "
+                f"rerun with {DEFAULT_PUBLIC_GPU_MEMORY_UTILIZATION} or mark the "
+                "record outside the default public snapshot"
+            )
+
+        max_model_len = parse_optional_int(
+            resolved_server_parameters.get("max_model_len")
+        )
+        if max_model_len == RETIRED_PUBLIC_MAX_MODEL_LEN:
+            errors.append(
+                f"{source.name}:{entry_id}: official public snapshot must not "
+                f"publish retired max_model_len={RETIRED_PUBLIC_MAX_MODEL_LEN}; "
+                "rerun with max_model_len=32768 or mark the record outside the "
+                "default public snapshot"
+            )
+
         expected_chip = PUBLIC_BASELINE_CHIP if spec_id.endswith("-910b2") else None
         entry_precision = str(model.get("precision") or "")
         spec_precision = str(same_spec.get("model_precision") or "")
