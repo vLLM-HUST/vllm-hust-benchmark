@@ -34,6 +34,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
 
+      - name: Clean benchmark state dir (simulate CI fresh env)
+        run: rm -rf .benchmarks/backfill-single-gpu
+
       - name: Run pytest
         env:
           HOME: ${{ github.workspace }}/.ci-home
