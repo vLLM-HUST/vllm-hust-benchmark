@@ -17,6 +17,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
 
+from vllm_hust_benchmark.aggregate_results import build_series_signature
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.leaderboard_exclusions import (
     LeaderboardExclusion,
@@ -544,6 +545,22 @@ def aggregate_to_website(
         for f in admission_failures:
             print(
                 f"  {f['dir']}: {f['reason']} ({f['detail']})",
+                file=sys.stderr,
+            )
+        return 2
+
+    coexistence_conflicts = _find_superseded_coexistence_conflicts(source_dir)
+    if coexistence_conflicts:
+        print("ERROR: superseded coexistence conflicts found:", file=sys.stderr)
+        for c in coexistence_conflicts:
+            print(
+                f"  signature={c['signature']}: old={c['old_entry_id']} vs new={c['new_entry_id']}",
+                file=sys.stderr,
+            )
+            print(f"    old_dir={c['old_dir']}", file=sys.stderr)
+            print(f"    new_dir={c['new_dir']}", file=sys.stderr)
+            print(
+                "    Fix: move old entry to archive/suspect/ and set metadata.supersedes on the new entry.",
                 file=sys.stderr,
             )
         return 2
@@ -1419,6 +1436,116 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
             continue
 
     return failures
+
+
+def _find_superseded_coexistence_conflicts(source_dir: Path) -> list[dict]:
+    """Detect old low-value points coexisting with new same-config OK points
+    without an explicit ``supersedes`` annotation.
+
+    For each signature group with more than one entry, the most recent entry
+    (by ``metadata.submitted_at``) is treated as the "new" point. Each older
+    entry that does NOT share a ``repeat_group`` with the new entry must be
+    referenced by the new entry's ``metadata.supersedes`` (string or list);
+    otherwise it is recorded as a conflict.
+
+    Returns a list of conflict dicts with keys ``signature``,
+    ``old_entry_id``, ``new_entry_id``, ``old_dir``, ``new_dir``.
+    """
+    conflicts: list[dict] = []
+    if not source_dir.is_dir():
+        return conflicts
+
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for child in sorted(source_dir.iterdir()):
+        if not child.is_dir():
+            continue
+        try:
+            artifact_path = child / "run_leaderboard.json"
+            if not artifact_path.is_file():
+                continue
+            try:
+                payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                # Malformed dirs are handled by the admission gate.
+                continue
+            if not isinstance(payload, dict):
+                continue
+
+            signature = build_series_signature(payload)
+            if not signature:
+                continue
+
+            metadata = payload.get("metadata")
+            metadata = metadata if isinstance(metadata, dict) else {}
+
+            entry_id = payload.get("entry_id")
+            entry_id = str(entry_id) if entry_id else child.name
+
+            repeat_group = metadata.get("repeat_group")
+            if not (isinstance(repeat_group, str) and repeat_group.strip()):
+                # Fall back to top-level repeat_group (matches the
+                # get_repeat_group helper in aggregate_results).
+                top_rg = payload.get("repeat_group")
+                if isinstance(top_rg, str) and top_rg.strip():
+                    repeat_group = top_rg.strip()
+                else:
+                    repeat_group = None
+            else:
+                repeat_group = repeat_group.strip()
+
+            submitted_at = metadata.get("submitted_at")
+            submitted_at = submitted_at if isinstance(submitted_at, str) else ""
+
+            grouped.setdefault(signature, []).append(
+                {
+                    "dir": child,
+                    "entry_id": entry_id,
+                    "repeat_group": repeat_group,
+                    "submitted_at": submitted_at,
+                    "supersedes": metadata.get("supersedes"),
+                }
+            )
+        except Exception:  # noqa: BLE001
+            # Defensive: one bad dir must not crash the whole scan.
+            continue
+
+    for signature, entries in grouped.items():
+        if len(entries) < 2:
+            continue
+
+        sorted_entries = sorted(entries, key=lambda e: e["submitted_at"])
+        new_entry = sorted_entries[-1]
+
+        new_supersedes = new_entry["supersedes"]
+        if isinstance(new_supersedes, str):
+            new_supersedes_set: set[str] = {new_supersedes}
+        elif isinstance(new_supersedes, list):
+            new_supersedes_set = {
+                str(item) for item in new_supersedes if item is not None
+            }
+        else:
+            new_supersedes_set = set()
+
+        for older in sorted_entries[:-1]:
+            # Entries sharing a repeat_group are legitimate repeat runs.
+            if (
+                older["repeat_group"]
+                and older["repeat_group"] == new_entry["repeat_group"]
+            ):
+                continue
+            if older["entry_id"] in new_supersedes_set:
+                continue
+            conflicts.append(
+                {
+                    "signature": signature,
+                    "old_entry_id": older["entry_id"],
+                    "new_entry_id": new_entry["entry_id"],
+                    "old_dir": str(older["dir"]),
+                    "new_dir": str(new_entry["dir"]),
+                }
+            )
+
+    return conflicts
 
 
 def _filter_excluded_snapshot_entries(

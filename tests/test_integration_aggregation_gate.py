@@ -8,13 +8,61 @@ enter the formal aggregation pipeline.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from vllm_hust_benchmark.integration import (
     RepoLayout,
+    _find_superseded_coexistence_conflicts,
     _scan_submission_admission_failures,
     aggregate_to_website,
 )
+
+
+def _write_mock_submission(
+    target_dir: Path,
+    *,
+    entry_id: str,
+    submitted_at: str,
+    repeat_group: str | None = None,
+    repeat_index: int | None = None,
+    supersedes: str | list[str] | None = None,
+    canonical_id: str = "hf:Qwen/Qwen2.5-14B-Instruct",
+    chip_model: str = "910B2",
+    precision: str = "FP16",
+    workload_name: str = "random-online",
+    chip_count: int = 1,
+    config_type: str = "single_gpu",
+    engine: str = "vllm-hust",
+    engine_version: str = "0.18.0.post1",
+) -> None:
+    """Write a minimal ``run_leaderboard.json`` with the given fields.
+
+    The fields are chosen to match what ``build_series_signature`` reads:
+    ``model.canonical_id``, ``hardware.chip_model``, ``model.precision``,
+    ``workload.name``, ``hardware.chip_count``, ``config_type``, ``engine``,
+    ``engine_version``.
+    """
+    target_dir.mkdir(parents=True, exist_ok=True)
+    payload: dict = {
+        "entry_id": entry_id,
+        "engine": engine,
+        "engine_version": engine_version,
+        "config_type": config_type,
+        "hardware": {"chip_model": chip_model, "chip_count": chip_count},
+        "model": {"canonical_id": canonical_id, "precision": precision},
+        "workload": {"name": workload_name},
+        "metadata": {"submitted_at": submitted_at},
+    }
+    if repeat_group is not None:
+        payload["metadata"]["repeat_group"] = repeat_group
+    if repeat_index is not None:
+        payload["metadata"]["repeat_index"] = repeat_index
+    if supersedes is not None:
+        payload["metadata"]["supersedes"] = supersedes
+    (target_dir / "run_leaderboard.json").write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def test_failed_status_rejected(tmp_path: Path) -> None:
@@ -137,3 +185,96 @@ def test_aggregate_to_website_returns_2_on_admission_failure(
     assert "admission gate rejected" in captured.err
     assert "FAILED" in captured.err
     assert "aggregate_results.py" not in captured.out
+
+
+def test_signature_conflict_rejected(tmp_path: Path) -> None:
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "old-run",
+        entry_id="old-entry-1",
+        submitted_at="2026-07-20T00:00:00Z",
+    )
+    _write_mock_submission(
+        source_dir / "new-run",
+        entry_id="new-entry-2",
+        submitted_at="2026-07-22T00:00:00Z",
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert len(conflicts) == 1
+    conflict = conflicts[0]
+    assert conflict["old_entry_id"] == "old-entry-1"
+    assert conflict["new_entry_id"] == "new-entry-2"
+    assert conflict["old_dir"].endswith("old-run")
+    assert conflict["new_dir"].endswith("new-run")
+    assert conflict["signature"]
+
+
+def test_signature_conflict_resolved_by_supersedes(tmp_path: Path) -> None:
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "old-run",
+        entry_id="old-entry-1",
+        submitted_at="2026-07-20T00:00:00Z",
+    )
+    _write_mock_submission(
+        source_dir / "new-run",
+        entry_id="new-entry-2",
+        submitted_at="2026-07-22T00:00:00Z",
+        supersedes="old-entry-1",
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert conflicts == []
+
+
+def test_repeat_group_not_conflict(tmp_path: Path) -> None:
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "repeat-run-0",
+        entry_id="repeat-entry-1",
+        submitted_at="2026-07-20T00:00:00Z",
+        repeat_group="campaign-alpha",
+        repeat_index=0,
+    )
+    _write_mock_submission(
+        source_dir / "repeat-run-1",
+        entry_id="repeat-entry-2",
+        submitted_at="2026-07-22T00:00:00Z",
+        repeat_group="campaign-alpha",
+        repeat_index=1,
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert conflicts == []
+
+
+def test_different_signatures_not_conflict(tmp_path: Path) -> None:
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "run-a",
+        entry_id="entry-a",
+        submitted_at="2026-07-20T00:00:00Z",
+        workload_name="random-online",
+    )
+    _write_mock_submission(
+        source_dir / "run-b",
+        entry_id="entry-b",
+        submitted_at="2026-07-22T00:00:00Z",
+        workload_name="sharegpt-online",
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert conflicts == []
