@@ -35,13 +35,35 @@ def test_failed_status_rejected(tmp_path: Path) -> None:
 def test_no_status_rejected(tmp_path: Path) -> None:
     source_dir = tmp_path / "submissions"
     source_dir.mkdir()
-    (source_dir / "missing-status-run").mkdir()
+    missing_dir = source_dir / "missing-status-run"
+    missing_dir.mkdir()
+    # Neither a STATUS file nor a run_leaderboard.json → truly incomplete.
+    assert not (missing_dir / "run_leaderboard.json").is_file()
 
     failures = _scan_submission_admission_failures(source_dir)
 
     assert len(failures) == 1
     assert failures[0]["reason"] == "NO_STATUS"
     assert "missing-status-run" in failures[0]["dir"]
+
+
+def test_backfill_dir_without_status_passes(tmp_path: Path) -> None:
+    """Backfill/baseline pipelines don't write a STATUS file by design.
+
+    A directory without a STATUS file but WITH a valid ``run_leaderboard.json``
+    must NOT be flagged as NO_STATUS — it's a valid backfill/baseline submission.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    backfill_dir = source_dir / "historical-pr-some-run"
+    backfill_dir.mkdir()
+    (backfill_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert failures == []
 
 
 def test_empty_status_rejected(tmp_path: Path) -> None:
