@@ -4,7 +4,6 @@ from copy import deepcopy
 import json
 from pathlib import Path
 
-import pytest
 
 from vllm_hust_benchmark.aggregate_results import VALID_AGG_METHODS
 from vllm_hust_benchmark.workload_config_contract import (
@@ -201,12 +200,10 @@ def test_snapshot_entries_never_conflate_num_prompts_with_concurrency() -> None:
     )
 
 
-@pytest.mark.xfail(reason="Task 7 will remove max from VALID_AGG_METHODS")
 def test_contract_rejects_max_as_aggregate_method() -> None:
-    """Forward-looking: ``max`` must not be a valid aggregate method.
+    """``max`` must not be a valid aggregate method.
 
-    Task 7 is expected to remove ``max`` from ``VALID_AGG_METHODS``. Until then
-    this assertion is expected to fail (xfail) and should be un-xfailed once
-    Task 7 lands.
+    Task 7 removed ``max`` from ``VALID_AGG_METHODS`` to prevent cherry-picking
+    the highest values.
     """
     assert "max" not in VALID_AGG_METHODS
