@@ -59,10 +59,10 @@ repos:
     # secrets. Regenerate the baseline via:
     #
     #   detect-secrets scan --all-files \
-    #     --exclude-files '^(submissions|leaderboard-data|schemas|docs/official-baselines)/.*\.json$|^tests/fixtures/.*|^archive/.*|^agent\.md$|^CHANGELOG\.md$|^\.(git|pytest_cache|ruff_cache|venv|benchmarks)/' \
+    #     --exclude-files '^(submissions|leaderboard-data|schemas|reports|docs/official-baselines)/.*\.json$|^tests/fixtures/.*|^archive/.*|^agent\.md$|^CHANGELOG\.md$|^\.(git|pytest_cache|ruff_cache|venv|benchmarks)/' \
     #     --exclude-lines 'pragma: allowlist secret' \
     #     > .secrets.baseline
     #
     # Then audit any new entries with `detect-secrets audit .secrets.baseline`.
     args: [--baseline, .secrets.baseline]
-    exclude: ^(submissions/.*\.json|leaderboard-data/.*\.json|schemas/.*\.json|docs/.*\.json|tests/fixtures/.*|archive/.*|agent\.md|CHANGELOG\.md)$
+    exclude: ^(submissions/.*\.json|leaderboard-data/.*\.json|schemas/.*\.json|reports/.*\.json|docs/.*\.json|tests/fixtures/.*|archive/.*|agent\.md|CHANGELOG\.md)$

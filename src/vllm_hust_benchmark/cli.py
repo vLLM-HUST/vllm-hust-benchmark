@@ -714,11 +714,15 @@ def _build_parser() -> argparse.ArgumentParser:
         "Returns non-zero on validation failure.",
     )
     validate_parser.add_argument(
-        "--input", type=Path, required=True,
+        "--input",
+        type=Path,
+        required=True,
         help="Entry JSON file or directory of JSON files.",
     )
     validate_parser.add_argument(
-        "--schema", type=Path, default=None,
+        "--schema",
+        type=Path,
+        default=None,
         help="Path to trend schema JSON (default: schemas/leaderboard_trend_v1.schema.json).",
     )
 
@@ -1288,7 +1292,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"ERROR: input path does not exist: {args.input}", file=sys.stderr)
             return 2
 
-        paths = [args.input] if args.input.is_file() else sorted(args.input.glob("*.json"))
+        paths = (
+            [args.input] if args.input.is_file() else sorted(args.input.glob("*.json"))
+        )
         entries = []
         for path in paths:
             try:
@@ -1305,10 +1311,15 @@ def main(argv: list[str] | None = None) -> int:
         for decision in report.decisions:
             print(f"  {decision.status:12} {decision.entry_id}: {decision.reason}")
         for issue in report.issues:
-            print(f"  {issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}")
+            print(
+                f"  {issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}"
+            )
 
         if not report.passed:
-            print(f"\nFAIL: {len(report.issues)} issue(s) found — release gate blocked", file=sys.stderr)
+            print(
+                f"\nFAIL: {len(report.issues)} issue(s) found — release gate blocked",
+                file=sys.stderr,
+            )
             return 1
 
         passed = sum(1 for d in report.decisions if d.status == "default")
