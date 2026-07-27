@@ -1,0 +1,53 @@
+{
+  "id": "pr-154-prefix-routing-benefit-qwen25-7b-2chip-910b2",
+  "label": "PR 154 two-replica prefix-routing benefit benchmark",
+  "scenario": "prefix-repetition-online-2chip",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "model_parameters": "7B",
+  "model_precision": "BF16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 2,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 1,
+    "replica_count": 2,
+    "process_topology": "two-independent-vllm-replicas",
+    "enable_prefix_caching": true,
+    "enable_prefix_routing": true,
+    "prefix_routing_policy": "longest-cached-prefix",
+    "prefix_routing_event_transport": "zmq-snapshot-replay",
+    "gpu_memory_utilization": 0.6,
+    "max_model_len": 4096,
+    "enable_chunked_prefill": true,
+    "enforce_eager": "",
+    "host": "127.0.0.1",
+    "port": 0
+  },
+  "client_parameters": {
+    "backend": "openai",
+    "endpoint": "/v1/completions",
+    "dataset_name": "prefix_repetition",
+    "num_prompts": 400,
+    "request_rate": 4.0,
+    "max_concurrency": 16,
+    "prefix_repetition_prefix_len": 1536,
+    "prefix_repetition_suffix_len": 64,
+    "prefix_repetition_num_prefixes": 200,
+    "prefix_repetition_output_len": 64,
+    "seed": 0,
+    "ignore_eos": true,
+    "artificial_warmup": false,
+    "host": "127.0.0.1",
+    "port": 0
+  },
+  "export": {
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2.post1-3547-g68cf893a4a",
+    "submitter": "Amber1qq",
+    "github_repository": "vLLM-HUST/vllm-hust",
+    "github_ref": "Amber1qq/feat-prefix-routing-merge-gates-20260720",
+    "git_commit": "68cf893a4abb95a72f9378634410077df51c1dcc",
+    "data_source": "fixed-sha-prefix-routing-benefit"
+  }
+}
