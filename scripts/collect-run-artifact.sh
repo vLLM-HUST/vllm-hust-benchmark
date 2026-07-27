@@ -88,7 +88,7 @@ manifest = {
     "git_info": {
         "vllm_hust": _git_commit(os.environ.get("CURRENT_VLLM_HUST_REPO")),
         "vllm_ascend_hust": _git_commit(os.environ.get("CURRENT_VLLM_ASCEND_HUST_REPO")),
-        "benchmark": _run(["git", "-C", os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "benchmark": _run(["git", "-C", os.environ.get("BENCHMARK_REPO_ROOT", ""),
                           "rev-parse", "HEAD"]),
     },
 }

@@ -44,6 +44,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+export BENCHMARK_REPO_ROOT="$REPO_ROOT"
 
 SPEC_FILE="${1:?Usage: run-single-repetition.sh <spec-file> <campaign-prefix> <run-index>}"
 CAMPAIGN_PREFIX="${2:?Usage: run-single-repetition.sh <spec-file> <campaign-prefix> <run-index>}"
