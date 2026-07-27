@@ -40,7 +40,9 @@ def _run(
     )
 
 
-def _git(repo_dir: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
+def _git(
+    repo_dir: Path, *args: str, check: bool = True
+) -> subprocess.CompletedProcess[str]:
     return _run(["git", "-C", str(repo_dir), *args], check=check)
 
 
@@ -146,21 +148,26 @@ def test_sync_official_baseline_snapshots_to_github_pushes_and_is_idempotent(
     assert "Pushed official baseline publication" in first_run.stdout
 
     pushed_head = _git(target_repo, "rev-parse", "HEAD").stdout.strip()
-    assert pushed_head == _run(
-        ["git", f"--git-dir={remote_repo}", "rev-parse", "refs/heads/main"]
-    ).stdout.strip()
+    assert (
+        pushed_head
+        == _run(
+            ["git", f"--git-dir={remote_repo}", "rev-parse", "refs/heads/main"]
+        ).stdout.strip()
+    )
 
     for run_id in (
         "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3",
         "official-ascend-jan-2026-v0.11.0-prefix-repetition-online-qwen25-14b-910b3",
     ):
-        assert (target_repo / "submissions" / run_id / "leaderboard_manifest.json").is_file()
+        assert (
+            target_repo / "submissions" / run_id / "leaderboard_manifest.json"
+        ).is_file()
         assert (target_repo / "submissions" / run_id / "run_leaderboard.json").is_file()
 
     snapshot_payload = json.loads(
-        (target_repo / "leaderboard-data" / "snapshots" / "leaderboard_single.json").read_text(
-            encoding="utf-8"
-        )
+        (
+            target_repo / "leaderboard-data" / "snapshots" / "leaderboard_single.json"
+        ).read_text(encoding="utf-8")
     )
     assert snapshot_payload["runs"] == [
         "official-ascend-jan-2026-v0.11.0-prefix-repetition-online-qwen25-14b-910b3",

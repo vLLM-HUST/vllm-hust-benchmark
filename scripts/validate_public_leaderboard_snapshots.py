@@ -45,6 +45,18 @@ SNAPSHOT_FILES = (
     "leaderboard_single.json",
     "leaderboard_multi.json",
 )
+REJECTED_SUPERSEDED_REPORT_FILE = "rejected_superseded_report.json"
+REJECTED_SUPERSEDED_REPORT_SCHEMA = (
+    REPO_ROOT / "schemas" / "rejected_superseded_report_v1.schema.json"
+)
+REJECTED_SUPERSEDED_REPORT_REQUIRED_FIELDS = (
+    "schema_version",
+    "generated_at",
+    "rejected_submissions",
+    "superseded_entries",
+    "excluded_plugin_commits",
+)
+REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION = "rejected-superseded-report/v1"
 
 
 def parse_args() -> argparse.Namespace:
@@ -211,6 +223,77 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     return errors
 
 
+def validate_rejected_superseded_report(snapshot_dir: Path) -> list[str]:
+    """Validate ``rejected_superseded_report.json`` against its schema.
+
+    Falls back to a structural check when ``jsonschema`` is unavailable or
+    the schema file is missing.
+    """
+    errors: list[str] = []
+    report_path = snapshot_dir / REJECTED_SUPERSEDED_REPORT_FILE
+    if not report_path.is_file():
+        errors.append(f"missing rejected/superseded report: {report_path}")
+        return errors
+
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        errors.append(f"invalid JSON in {report_path}: {exc}")
+        return errors
+
+    if not isinstance(payload, dict):
+        errors.append(f"{report_path}: report payload must be a JSON object")
+        return errors
+
+    schema_payload: dict[str, Any] | None = None
+    if REJECTED_SUPERSEDED_REPORT_SCHEMA.is_file():
+        try:
+            schema_payload = json.loads(
+                REJECTED_SUPERSEDED_REPORT_SCHEMA.read_text(encoding="utf-8")
+            )
+        except json.JSONDecodeError:
+            schema_payload = None
+
+    if schema_payload is not None:
+        try:
+            import jsonschema
+
+            jsonschema.validate(instance=payload, schema=schema_payload)
+        except ImportError:
+            for field in REJECTED_SUPERSEDED_REPORT_REQUIRED_FIELDS:
+                if field not in payload:
+                    errors.append(
+                        f"{report_path.name}: missing required field {field!r}"
+                    )
+            if (
+                isinstance(payload.get("schema_version"), str)
+                and payload["schema_version"]
+                != REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION
+            ):
+                errors.append(
+                    f"{report_path.name}: schema_version must be "
+                    f"{REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION!r}, got "
+                    f"{payload['schema_version']!r}"
+                )
+        except jsonschema.ValidationError as exc:
+            errors.append(f"{report_path.name}: schema validation error: {exc.message}")
+    else:
+        for field in REJECTED_SUPERSEDED_REPORT_REQUIRED_FIELDS:
+            if field not in payload:
+                errors.append(f"{report_path.name}: missing required field {field!r}")
+        if (
+            isinstance(payload.get("schema_version"), str)
+            and payload["schema_version"] != REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION
+        ):
+            errors.append(
+                f"{report_path.name}: schema_version must be "
+                f"{REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION!r}, got "
+                f"{payload['schema_version']!r}"
+            )
+
+    return errors
+
+
 def main() -> int:
     args = parse_args()
     snapshot_dir = Path(args.snapshot_dir)
@@ -249,6 +332,8 @@ def main() -> int:
                 )
             else:
                 hash_fingerprints[spec_hash] = (fingerprint, source_label)
+
+    errors.extend(validate_rejected_superseded_report(snapshot_dir))
 
     if errors:
         print("public leaderboard snapshot validation failed:")

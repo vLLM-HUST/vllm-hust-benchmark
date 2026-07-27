@@ -76,7 +76,6 @@ import shlex
 import shutil
 import signal
 import subprocess
-import tempfile
 import time
 from datetime import datetime, timezone
 from typing import Any
@@ -109,8 +108,7 @@ STATE_FILE = STATE_DIR / "state.json"
 LOG_FILE = STATE_DIR / "log.txt"
 
 SHAREGPT_DATASET = Path(
-    "/data/shared_datasets/"
-    "ShareGPT_V3_unfiltered_cleaned_split.json"
+    "/data/shared_datasets/ShareGPT_V3_unfiltered_cleaned_split.json"
 )
 SONNET_DATASET = HUST_REPO / "benchmarks" / "sonnet.txt"
 
@@ -135,12 +133,18 @@ def resolve_ascend_commit(hust_commit: str) -> str:
     """Find the vllm-ascend-hust HEAD on origin/main at the time of hust_commit."""
     out = subprocess.run(
         ["git", "log", "-1", "--format=%cI", hust_commit],
-        cwd=HUST_REPO, capture_output=True, text=True, check=True,
+        cwd=HUST_REPO,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     timestamp = out.stdout.strip()
     out = subprocess.run(
         ["git", "log", "-1", "--format=%H", "--before", timestamp, "origin/main"],
-        cwd=ASCEND_REPO, capture_output=True, text=True, check=True,
+        cwd=ASCEND_REPO,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     sha = out.stdout.strip()
     if not sha:
@@ -151,37 +155,182 @@ def resolve_ascend_commit(hust_commit: str) -> str:
 
 
 def _resolve_compatible_ascend_commit(hust_commit: str) -> str:
-    """Resolve the latest vllm-ascend-hust origin/main commit.
+    """Last-resort fallback: return the current HEAD of the local ascend repo.
 
-    Previously this was hardcoded to ``bf2984e...`` which was excluded from
-    leaderboard aggregation (see docs/leaderboard-exclusions.json).  By
-    using the latest ``origin/main`` instead, backfill submissions are no
-    longer rejected by the exclusion check.
+    This function is intentionally a *blind* fallback that does not look at
+    ``hust_commit`` at all.  It is only safe to call when every other
+    resolution strategy (snapshot lookup, time-aligned ``resolve_ascend_commit``,
+    and an explicit ``--ascend-commit`` override) has failed.
 
-    If ``origin/main`` is not reachable (e.g. offline), falls back to the
-    current HEAD of the local ascend repo.
+    Historically this function returned ``origin/main`` tip, but that caused
+    backfill batches for a given vllm-hust commit to silently pair with
+    whatever ascend commit happened to be on ``origin/main`` *at backfill
+    time* — producing ``runtime_provenance.plugin.commit`` values that did
+    not match the plugin actually used when the same vllm-hust commit was
+    first benchmarked.  That mismatch split a single runtime revision across
+    multiple x-axis points on the leaderboard trend chart.
 
-    The ``install_ascend_plugin()`` function applies comprehensive
-    compatibility patches (try/except ImportError guards) so that the
-    latest ascend code works with older vllm-hust commits passed to
-    ``run_cell``.
-
-    Use the ``--ascend-commit`` CLI flag to override this auto-detection
-    with a specific commit.
+    Callers SHOULD pass through ``resolve_ascend_commit(hust_commit)`` (which
+    time-aligns) before reaching this fallback.  Use the ``--ascend-commit``
+    CLI flag to override auto-detection with an explicit commit.
     """
+    # Prefer origin/main tip when reachable, since it is at least a published
+    # commit; fall back to whatever HEAD currently points at when offline.
     out = subprocess.run(
         ["git", "log", "-1", "--format=%H", "origin/main"],
-        cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
+        cwd=ASCEND_REPO,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     sha = out.stdout.strip()
     if sha and len(sha) == 40:
         return sha
-    # Fallback: use current HEAD if origin/main is not accessible.
     out = subprocess.run(
         ["git", "rev-parse", "HEAD"],
-        cwd=ASCEND_REPO, capture_output=True, text=True, check=True,
+        cwd=ASCEND_REPO,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     return out.stdout.strip()
+
+
+def resolve_ascend_commit_chain(hust_commit: str) -> tuple[str, str]:
+    """Resolve the vllm-ascend-hust commit for *hust_commit*.
+
+    Returns a ``(ascend_commit, source)`` tuple where *source* is one of:
+
+    - ``"snapshot"``  — found in an existing leaderboard snapshot entry
+      whose ``metadata.git_commit`` matches *hust_commit*; this is the
+      preferred source because it guarantees the plugin commit matches the
+      one already published for this vllm-hust commit.
+    - ``"time-align"`` — no snapshot hit, so the newest ascend ``origin/main``
+      commit made before *hust_commit*'s timestamp is used
+      (``resolve_ascend_commit``).
+    - ``"fallback-head"`` — neither snapshot nor time-align worked; falls
+      back to ``_resolve_compatible_ascend_commit`` (current HEAD).
+
+    Callers should log *source* alongside the resolved commit so that a
+    backfill batch whose plugin commit was not the canonical one is visible.
+
+    Raises ``RuntimeError`` if *hust_commit* cannot be resolved to a
+    timestamp (which would block time-alignment) and the snapshot lookup
+    also misses.
+    """
+    snapshot_ascend = _lookup_ascend_commit_from_snapshot(hust_commit)
+    if snapshot_ascend:
+        return snapshot_ascend, "snapshot"
+    try:
+        return resolve_ascend_commit(hust_commit), "time-align"
+    except Exception as exc:
+        fallback = _resolve_compatible_ascend_commit(hust_commit)
+        if not fallback:
+            raise RuntimeError(
+                f"could not resolve ascend commit for {hust_commit}: "
+                f"time-align failed ({exc!r}) and HEAD fallback is empty"
+            ) from exc
+        return fallback, "fallback-head"
+
+
+# ---------------------------------------------------------------------------
+# Plugin commit consistency guard
+# ---------------------------------------------------------------------------
+
+
+class PluginCommitMismatch(RuntimeError):
+    """Raised when an explicit plugin commit disagrees with the snapshot.
+
+    The canonical plugin commit for a given vllm-hust commit is the one
+    carried by the earliest-submitted leaderboard entry of that commit
+    group (see ``_lookup_ascend_commit_from_snapshot``).  Pairing the same
+    vllm-hust commit with two different plugin commits would render as two
+    separate x-axis positions on the leaderboard trend chart even though
+    ``metadata.git_commit`` is identical — i.e. the same binary shown twice.
+    That is exactly the failure mode we saw on the ``a46abb7ae`` backfill
+    batch (see docs/HISTORICAL_PR_BACKFILL.md) and this guard refuses to
+    write the resulting submission.
+
+    Callers SHOULD pass through ``resolve_ascend_commit_chain`` first; the
+    explicit ``--ascend-commit`` path is the only flow that can normally
+    trip this guard.  Pass ``allow_override=True`` to bypass — overriding an
+    audit note is recorded in ``state.json`` via
+    :func:`record_plugin_override`.
+    """
+
+    def __init__(self, hust_commit: str, canonical: str, requested: str) -> None:
+        self.hust_commit = hust_commit
+        self.canonical = canonical
+        self.requested = requested
+        super().__init__(
+            f"plugin commit mismatch on hust_commit {hust_commit[:9]}: "
+            f"snapshot canonical={canonical[:9]} requested={requested[:9]}; "
+            f"refuse to write submission that would split a single runtime "
+            f"revision into two trend-chart x-axis points. Use "
+            f"--force-mismatched-plugin-commit to override (rare, "
+            f"audit-worthy)."
+        )
+
+
+def assert_plugin_commit_consistent(
+    hust_commit: str,
+    ascend_commit: str,
+    *,
+    allow_override: bool = False,
+) -> None:
+    """Refuse to proceed if *ascend_commit* diverges from the snapshot.
+
+    The canonical plugin commit is read from
+    ``_lookup_ascend_commit_from_snapshot(hust_commit)``: any existing
+    leaderboard entry whose ``metadata.git_commit`` matches *hust_commit*
+    contributes its ``runtime_provenance.plugin.commit``. When that
+    canonical is already pinned and *ascend_commit* disagrees, raise
+    :class:`PluginCommitMismatch` unless *allow_override* is set.
+
+    A *snapshot miss* (no existing entry for this vllm-hust commit) is a
+    pass — the first run against a given commit is always unconstrained
+    because there is nothing to be inconsistent with.
+    """
+    canonical = _lookup_ascend_commit_from_snapshot(hust_commit)
+    if not canonical:
+        return
+    if ascend_commit.lower().strip() == canonical.lower().strip():
+        return
+    if allow_override:
+        log(
+            f"WARNING: overriding plugin commit consistency guard: "
+            f"hust_commit {hust_commit[:9]} canonical={canonical[:9]} "
+            f"requested={ascend_commit[:9]}"
+        )
+        return
+    raise PluginCommitMismatch(hust_commit, canonical, ascend_commit)
+
+
+def record_plugin_override(
+    state: dict[str, Any],
+    hust_commit: str,
+    canonical: str,
+    override_value: str,
+    *,
+    workload: str | None = None,
+) -> None:
+    """Append a (timestamp, commit, canonical, override) audit tuple to state.
+
+    Stored under ``state["audit"]["plugin_override"]`` so a backfill batch
+    that bypassed the consistency guard leaves an auditable trail in
+    ``.benchmarks/backfill-single-gpu/state.json``.
+    """
+    audit = state.setdefault("audit", {}).setdefault("plugin_override", [])
+    audit.append(
+        {
+            "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "hust_commit": hust_commit,
+            "canonical_plugin_commit": canonical,
+            "override_plugin_commit": override_value,
+            "workload": workload,
+        }
+    )
+    save_state(state)
 
 
 def _lookup_ascend_commit_from_snapshot(hust_commit: str) -> str | None:
@@ -203,9 +352,7 @@ def _lookup_ascend_commit_from_snapshot(hust_commit: str) -> str | None:
         return None
     short = hust_commit[:9]
     for entry in entries:
-        meta_commit = (
-            entry.get("metadata", {}).get("git_commit", "") or ""
-        )
+        meta_commit = entry.get("metadata", {}).get("git_commit", "") or ""
         if meta_commit.startswith(short):
             plugin_commit = (
                 entry.get("metadata", {})
@@ -240,15 +387,26 @@ def _derive_engine_version(hust_repo: Path, hust_commit: str) -> str:
     """
     try:
         out = subprocess.run(
-            ["git", "describe", "--tags", "--always", "--long", "--abbrev=9", hust_commit],
-            cwd=hust_repo, capture_output=True, text=True, check=False,
+            [
+                "git",
+                "describe",
+                "--tags",
+                "--always",
+                "--long",
+                "--abbrev=9",
+                hust_commit,
+            ],
+            cwd=hust_repo,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         version = out.stdout.strip()
         if version:
             # Strip .dirty / -dirty suffix — the result was produced by a
             # clean checkout of this commit, and the dirty flag only
             # reflects the state of the backfill repo, not the result.
-            version = re.sub(r'[.-]dirty$', '', version, flags=re.IGNORECASE)
+            version = re.sub(r"[.-]dirty$", "", version, flags=re.IGNORECASE)
             return version
     except OSError:
         pass
@@ -326,11 +484,12 @@ SCENARIO_PARAMS: dict[str, dict[str, Any]] = {
 # Logging
 # ---------------------------------------------------------------------------
 
+
 def log(msg: str, *, also_print: bool = True) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     line = f"[{ts}] {msg}"
-    with LOG_FILE.open("a", encoding="utf-8") as f:
+    with (STATE_DIR / "log.txt").open("a", encoding="utf-8") as f:
         f.write(line + "\n")
     if also_print:
         print(line, flush=True)
@@ -339,6 +498,7 @@ def log(msg: str, *, also_print: bool = True) -> None:
 # ---------------------------------------------------------------------------
 # State
 # ---------------------------------------------------------------------------
+
 
 def load_state() -> dict[str, Any]:
     if STATE_FILE.is_file():
@@ -357,7 +517,11 @@ def save_state(state: dict[str, Any]) -> None:
 
 def current_head(repo: Path) -> str:
     out = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True, check=True
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     return out.stdout.strip()
 
@@ -366,7 +530,10 @@ def commit_exists(repo: Path, commit: str) -> bool:
     """Check whether a commit (full or short SHA) exists in the repo."""
     r = subprocess.run(
         ["git", "cat-file", "-t", commit],
-        cwd=repo, capture_output=True, text=True, check=False,
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     return r.returncode == 0
 
@@ -377,7 +544,10 @@ def commit_on_main_branch(repo: Path, commit: str) -> bool:
         return False
     r = subprocess.run(
         ["git", "merge-base", "--is-ancestor", commit, "origin/main"],
-        cwd=repo, capture_output=True, text=True, check=False,
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     return r.returncode == 0
 
@@ -414,7 +584,9 @@ def select_idle_npu() -> int | None:
     """
     try:
         output = subprocess.check_output(
-            ["npu-smi", "info"], text=True, stderr=subprocess.DEVNULL,
+            ["npu-smi", "info"],
+            text=True,
+            stderr=subprocess.DEVNULL,
         )
     except (OSError, subprocess.CalledProcessError):
         log("Warning: npu-smi not available, cannot detect idle NPU")
@@ -445,30 +617,28 @@ def select_idle_npu() -> int | None:
 # Git + env
 # ---------------------------------------------------------------------------
 
+
 def git_checkout(repo: Path, commit: str) -> None:
     # Only fetch from remote if the commit is not already available locally.
     # This avoids blocking on slow/unreachable GitHub connections when the
     # commit is already present in the local clone.
     r = subprocess.run(
         ["git", "cat-file", "-t", commit],
-        cwd=repo, capture_output=True, text=True, check=False,
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if r.returncode != 0:
         subprocess.run(["git", "fetch", "--all", "--quiet"], cwd=repo, check=False)
     # Force checkout to discard any local modifications (e.g. from
     # install_ascend_plugin) that would block the checkout.
-    subprocess.run(
-        ["git", "checkout", "-fq", commit], cwd=repo, check=False
-    )
+    subprocess.run(["git", "checkout", "-fq", commit], cwd=repo, check=False)
     # If the commit is still not local, fetch and retry.
     head = current_head(repo)
     if not head.startswith(commit):
-        subprocess.run(
-            ["git", "fetch", "origin", commit], cwd=repo, check=True
-        )
-        subprocess.run(
-            ["git", "checkout", "-fq", commit], cwd=repo, check=True
-        )
+        subprocess.run(["git", "fetch", "origin", commit], cwd=repo, check=True)
+        subprocess.run(["git", "checkout", "-fq", commit], cwd=repo, check=True)
 
 
 def _update_ascend_entry_points() -> None:
@@ -484,7 +654,10 @@ def _update_ascend_entry_points() -> None:
     # Step A: regenerate egg-info in the ascend repo (fast, no cmake).
     subprocess.run(
         [str(PYTHON_BIN), "setup.py", "egg_info"],
-        cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
+        cwd=ASCEND_REPO,
+        capture_output=True,
+        text=True,
+        check=False,
     )
 
     # Step B: find the egg-info entry_points.
@@ -505,6 +678,7 @@ def _update_ascend_entry_points() -> None:
 
     # Step C: find the installed dist-info and update its entry_points.txt.
     import site
+
     site_packages = Path(site.getsitepackages()[0])
     updated = False
     for dist_info in site_packages.glob("vllm_ascend_hust*.dist-info"):
@@ -560,17 +734,28 @@ def install_ascend_plugin() -> None:
             ["cat", str(main_py)], capture_output=True, text=True, check=True
         ).stdout
         orig = content
-        content = content.replace("import vllm.entrypoints.cli.openai\n",
-                                  "import vllm.entrypoints.cli.openai_cmd\n")
-        content = content.replace("vllm.entrypoints.cli.openai,",
-                                  "vllm.entrypoints.cli.openai_cmd,")
+        content = content.replace(
+            "import vllm.entrypoints.cli.openai\n",
+            "import vllm.entrypoints.cli.openai_cmd\n",
+        )
+        content = content.replace(
+            "vllm.entrypoints.cli.openai,", "vllm.entrypoints.cli.openai_cmd,"
+        )
         if content != orig:
             subprocess.run(
-                [sys.executable, "-c", """
+                [
+                    sys.executable,
+                    "-c",
+                    """
 import sys
 with open(sys.argv[1], 'w') as f:
     f.write(sys.stdin.read())
-""", str(main_py)], input=content, text=True, check=True,
+""",
+                    str(main_py),
+                ],
+                input=content,
+                text=True,
+                check=True,
             )
             log(f"Patched: updated imports in {main_py}")
         else:
@@ -594,7 +779,10 @@ with open(sys.argv[1], 'w') as f:
     if not _build_info_py.is_file():
         _bi = subprocess.run(
             [str(PYTHON_BIN), "setup.py", "build_py"],
-            cwd=ASCEND_REPO, capture_output=True, text=True, check=False,
+            cwd=ASCEND_REPO,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         if _build_info_py.is_file():
             log(f"Regenerated {_build_info_py}")
@@ -607,9 +795,14 @@ with open(sys.argv[1], 'w') as f:
     # Step 3: Fix ascend plugin patches that reference missing vllm-hust
     #         attributes (e.g. _parse_tool_calls_from_content).
     # ------------------------------------------------------------------
-    _patch_tool_choice = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_tool_choice_none_content.py"
+    _patch_tool_choice = (
+        ASCEND_REPO
+        / "vllm_ascend"
+        / "patch"
+        / "platform"
+        / "patch_tool_choice_none_content.py"
+    )
     if _patch_tool_choice.is_file():
-        import re as _re
         content = _patch_tool_choice.read_text(encoding="utf-8")
         patched_tc = False
 
@@ -618,7 +811,10 @@ with open(sys.argv[1], 'w') as f:
             "_original_parse_tool_calls_from_content = "
             "OpenAIServing._parse_tool_calls_from_content"
         )
-        if old_ref in content and "try:" not in content.split(old_ref)[0].rsplit("\n", 3)[-1]:
+        if (
+            old_ref in content
+            and "try:" not in content.split(old_ref)[0].rsplit("\n", 3)[-1]
+        ):
             new_ref = (
                 "try:\n"
                 "    _original_parse_tool_calls_from_content = "
@@ -632,13 +828,18 @@ with open(sys.argv[1], 'w') as f:
                 "staticmethod(_patched_parse_tool_calls_from_content)",
                 "if _original_parse_tool_calls_from_content is not None:\n"
                 "    OpenAIServing._parse_tool_calls_from_content = "
-                "staticmethod(_patched_parse_tool_calls_from_content)"
+                "staticmethod(_patched_parse_tool_calls_from_content)",
             )
             patched_tc = True
 
         # Fix 2: Guard _parse_tool_calls on DelegatingParser (may not exist on older vllm-hust).
-        old_ref2 = "_original_delegating_parse_tool_calls = DelegatingParser._parse_tool_calls"
-        if old_ref2 in content and "try:" not in content.split(old_ref2)[0].rsplit("\n", 3)[-1]:
+        old_ref2 = (
+            "_original_delegating_parse_tool_calls = DelegatingParser._parse_tool_calls"
+        )
+        if (
+            old_ref2 in content
+            and "try:" not in content.split(old_ref2)[0].rsplit("\n", 3)[-1]
+        ):
             new_ref2 = (
                 "try:\n"
                 "    _original_delegating_parse_tool_calls = "
@@ -650,13 +851,15 @@ with open(sys.argv[1], 'w') as f:
             content = content.replace(
                 "DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls",
                 "if _original_delegating_parse_tool_calls is not None:\n"
-                "    DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls"
+                "    DelegatingParser._parse_tool_calls = _patched_delegating_parse_tool_calls",
             )
             patched_tc = True
 
         if patched_tc:
             _patch_tool_choice.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin patch_tool_choice_none_content.py compatibility")
+            log(
+                "Patched: fixed ascend plugin patch_tool_choice_none_content.py compatibility"
+            )
 
     # Fix 4: Guard ops/__init__.py imports that reference missing vllm modules.
     _ops_init = ASCEND_REPO / "vllm_ascend" / "ops" / "__init__.py"
@@ -668,7 +871,9 @@ with open(sys.argv[1], 'w') as f:
         if old_ref in content:
             content = content.replace(
                 old_ref,
-                "try:\n    " + old_ref + "\nexcept ImportError:\n    expert_map_manager = None",
+                "try:\n    "
+                + old_ref
+                + "\nexcept ImportError:\n    expert_map_manager = None",
             )
             patched_ops = True
         if patched_ops:
@@ -676,7 +881,13 @@ with open(sys.argv[1], 'w') as f:
             log("Patched: fixed ascend plugin ops/__init__.py compatibility")
 
     # Fix 5: Guard patch_glm_tool_call_parser.py (may reference missing imports).
-    _glm_parser = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_glm_tool_call_parser.py"
+    _glm_parser = (
+        ASCEND_REPO
+        / "vllm_ascend"
+        / "patch"
+        / "platform"
+        / "patch_glm_tool_call_parser.py"
+    )
     if _glm_parser.is_file():
         content = _glm_parser.read_text(encoding="utf-8")
         patched_glm = False
@@ -701,7 +912,9 @@ with open(sys.argv[1], 'w') as f:
             patched_glm = True
         if patched_glm:
             _glm_parser.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin patch_glm_tool_call_parser.py compatibility")
+            log(
+                "Patched: fixed ascend plugin patch_glm_tool_call_parser.py compatibility"
+            )
 
     # Fix 6: Guard common_cp.py imports.
     _common_cp = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "common_cp.py"
@@ -712,7 +925,9 @@ with open(sys.argv[1], 'w') as f:
         if old_ref in content:
             content = content.replace(
                 old_ref,
-                "try:\n    " + old_ref + "\nexcept ImportError:\n    expert_map_manager = None",
+                "try:\n    "
+                + old_ref
+                + "\nexcept ImportError:\n    expert_map_manager = None",
             )
             patched_cp = True
         if patched_cp:
@@ -720,7 +935,9 @@ with open(sys.argv[1], 'w') as f:
             log("Patched: fixed ascend plugin common_cp.py compatibility")
 
     # Fix 7: Guard patch_distributed.py shm_broadcast import.
-    _patch_dist = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_distributed.py"
+    _patch_dist = (
+        ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_distributed.py"
+    )
     if _patch_dist.is_file():
         content = _patch_dist.read_text(encoding="utf-8")
         patched_dist = False
@@ -741,8 +958,7 @@ with open(sys.argv[1], 'w') as f:
                 if stripped == old_ref:
                     indent = line[: len(line) - len(stripped)]
                     indented_new = "\n".join(
-                        indent + l if l.strip() else l
-                        for l in new_ref.split("\n")
+                        indent + l if l.strip() else l for l in new_ref.split("\n")
                     )
                     lines[i] = indented_new
                     content = "\n".join(lines)
@@ -751,7 +967,9 @@ with open(sys.argv[1], 'w') as f:
 
         if patched_dist:
             _patch_dist.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin patch_distributed.py shm_broadcast compatibility")
+            log(
+                "Patched: fixed ascend plugin patch_distributed.py shm_broadcast compatibility"
+            )
 
     # Fix 8: Guard eplb_utils.py imports.
     # The actual eplb_utils.py may import `determine_expert_map` from either
@@ -767,7 +985,9 @@ with open(sys.argv[1], 'w') as f:
         if old_ref in content:
             content = content.replace(
                 old_ref,
-                "try:\n    " + old_ref + "\nexcept ImportError:\n    expert_map_manager = None",
+                "try:\n    "
+                + old_ref
+                + "\nexcept ImportError:\n    expert_map_manager = None",
             )
             patched_eplb = True
 
@@ -776,7 +996,9 @@ with open(sys.argv[1], 'w') as f:
         if cur_ref in content:
             content = content.replace(
                 cur_ref,
-                "try:\n    " + cur_ref + "\nexcept ImportError:\n    from vllm.model_executor.layers.fused_moe.layer import determine_expert_map",
+                "try:\n    "
+                + cur_ref
+                + "\nexcept ImportError:\n    from vllm.model_executor.layers.fused_moe.layer import determine_expert_map",
             )
             patched_eplb = True
 
@@ -789,9 +1011,7 @@ with open(sys.argv[1], 'w') as f:
     if _serving.is_file():
         content = _serving.read_text(encoding="utf-8")
         patched_serving = False
-        missing_imports = (
-            "from vllm.entrypoints.openai.serving import OpenAIServing\n"
-        )
+        missing_imports = "from vllm.entrypoints.openai.serving import OpenAIServing\n"
         if missing_imports.strip() not in content:
             content = missing_imports + content
             patched_serving = True
@@ -800,7 +1020,9 @@ with open(sys.argv[1], 'w') as f:
             log("Patched: fixed missing imports in serving.py")
 
     # Fix 10: Add missing ``Any`` import in vllm-hust's serving.py (commit 8d28fcf98).
-    _hust_serving = HUST_REPO / "vllm" / "entrypoints" / "openai" / "engine" / "serving.py"
+    _hust_serving = (
+        HUST_REPO / "vllm" / "entrypoints" / "openai" / "engine" / "serving.py"
+    )
     if _hust_serving.is_file():
         content = _hust_serving.read_text(encoding="utf-8")
         if "from typing import Any" not in content and "Any" in content:
@@ -808,7 +1030,9 @@ with open(sys.argv[1], 'w') as f:
             lines = content.split("\n")
             last_typing_import = -1
             for i, line in enumerate(lines):
-                if line.strip().startswith("from typing import") or line.strip().startswith("import typing"):
+                if line.strip().startswith(
+                    "from typing import"
+                ) or line.strip().startswith("import typing"):
                     last_typing_import = i
             if last_typing_import >= 0:
                 ti = lines[last_typing_import]
@@ -825,7 +1049,13 @@ with open(sys.argv[1], 'w') as f:
                 log("Patched: added from typing import Any to vllm-hust serving.py")
 
     # Fix 11: Guard glm4_moe_tool_parser import in patch_glm_tool_call_parser.py.
-    _glm_parser = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_glm_tool_call_parser.py"
+    _glm_parser = (
+        ASCEND_REPO
+        / "vllm_ascend"
+        / "patch"
+        / "platform"
+        / "patch_glm_tool_call_parser.py"
+    )
     if _glm_parser.is_file():
         content = _glm_parser.read_text(encoding="utf-8")
         patched_glm2 = False
@@ -842,10 +1072,9 @@ with open(sys.argv[1], 'w') as f:
             for i, line in enumerate(lines):
                 stripped = line.strip()
                 if stripped == old_ref:
-                    indent = line[:len(line) - len(stripped)]
+                    indent = line[: len(line) - len(stripped)]
                     indented_new = "\n".join(
-                        indent + l if l.strip() else l
-                        for l in new_ref.split("\n")
+                        indent + l if l.strip() else l for l in new_ref.split("\n")
                     )
                     lines[i] = indented_new
                     content = "\n".join(lines)
@@ -853,10 +1082,14 @@ with open(sys.argv[1], 'w') as f:
                     break
         if patched_glm2:
             _glm_parser.write_text(content, encoding="utf-8")
-            log("Patched: guarded glm4_moe_tool_parser import in patch_glm_tool_call_parser.py")
+            log(
+                "Patched: guarded glm4_moe_tool_parser import in patch_glm_tool_call_parser.py"
+            )
 
     # Fix 12: Guard moe_runtime_args.py circular import of vllm_ascend.ops.
-    _moe_runtime = ASCEND_REPO / "vllm_ascend" / "ops" / "fused_moe" / "moe_runtime_args.py"
+    _moe_runtime = (
+        ASCEND_REPO / "vllm_ascend" / "ops" / "fused_moe" / "moe_runtime_args.py"
+    )
     if _moe_runtime.is_file():
         content = _moe_runtime.read_text(encoding="utf-8")
         patched_moe = False
@@ -872,10 +1105,9 @@ with open(sys.argv[1], 'w') as f:
             for i, line in enumerate(lines):
                 stripped = line.strip()
                 if stripped == old_ref:
-                    indent = line[:len(line) - len(stripped)]
+                    indent = line[: len(line) - len(stripped)]
                     indented_new = "\n".join(
-                        indent + l if l.strip() else l
-                        for l in new_ref.split("\n")
+                        indent + l if l.strip() else l for l in new_ref.split("\n")
                     )
                     lines[i] = indented_new
                     content = "\n".join(lines)
@@ -894,7 +1126,9 @@ with open(sys.argv[1], 'w') as f:
     #
     # The old ``main.py`` eagerly imports all CLI modules (including ``bench``
     # subcommands), so these missing imports block ALL subcommands.
-    _hust_serving = HUST_REPO / "vllm" / "entrypoints" / "openai" / "engine" / "serving.py"
+    _hust_serving = (
+        HUST_REPO / "vllm" / "entrypoints" / "openai" / "engine" / "serving.py"
+    )
     if _hust_serving.is_file():
         content = _hust_serving.read_text(encoding="utf-8")
         patched_serving = False
@@ -937,10 +1171,14 @@ with open(sys.argv[1], 'w') as f:
             seen_root_import = False
             for i, line in enumerate(lines):
                 stripped = line.strip()
-                if stripped.startswith("from vllm.") and not line.startswith((" ", "\t")):
+                if stripped.startswith("from vllm.") and not line.startswith(
+                    (" ", "\t")
+                ):
                     seen_root_import = True
                     insert_after = i
-                elif seen_root_import and (line.startswith((" ", "\t")) or stripped == ")"):
+                elif seen_root_import and (
+                    line.startswith((" ", "\t")) or stripped == ")"
+                ):
                     # Continuation of multi-line import (indented items or closing paren).
                     insert_after = i
                 elif seen_root_import:
@@ -1025,7 +1263,7 @@ with open(sys.argv[1], 'w') as f:
             "# with older vllm-hust commits that reference this module.\n"
             "from vllm.entrypoints.serve.utils.api_utils import log_non_default_args\n"
             "\n"
-            "__all__ = [\"log_non_default_args\"]\n",
+            '__all__ = ["log_non_default_args"]\n',
             encoding="utf-8",
         )
         log("Patched: created missing vllm/entrypoints/utils.py module")
@@ -1040,10 +1278,14 @@ with open(sys.argv[1], 'w') as f:
     # only has ``FusedMoE``.  Falling back to ``FusedMoE`` works because
     # vllm-hust uses ``FusedMoE`` as its MoE layer class, which makes
     # ``_is_fused_moe_layer`` behave correctly.
-    _modelslim_config = ASCEND_REPO / "vllm_ascend" / "quantization" / "modelslim_config.py"
+    _modelslim_config = (
+        ASCEND_REPO / "vllm_ascend" / "quantization" / "modelslim_config.py"
+    )
     if _modelslim_config.is_file():
         content = _modelslim_config.read_text(encoding="utf-8")
-        old_ref = "from vllm.model_executor.layers.fused_moe import MoERunner, RoutedExperts"
+        old_ref = (
+            "from vllm.model_executor.layers.fused_moe import MoERunner, RoutedExperts"
+        )
         if old_ref in content:
             new_ref = (
                 "try:\n"
@@ -1055,7 +1297,9 @@ with open(sys.argv[1], 'w') as f:
             )
             content = content.replace(old_ref, new_ref)
             _modelslim_config.write_text(content, encoding="utf-8")
-            log("Patched: fixed ascend plugin modelslim_config.py MoERunner/RoutedExperts compatibility")
+            log(
+                "Patched: fixed ascend plugin modelslim_config.py MoERunner/RoutedExperts compatibility"
+            )
 
     # Fix 18: Add ``HiddenStateCacheSpec`` to ``vllm/v1/kv_cache_interface.py``.
     #
@@ -1082,7 +1326,7 @@ with open(sys.argv[1], 'w') as f:
                 "\n"
                 "@dataclass(frozen=True, kw_only=True)\n"
                 "class HiddenStateCacheSpec(MLAAttentionSpec):\n"
-                "    \"\"\"Marker for hidden-state cache layers used by extract_hidden_states.\"\"\"\n"
+                '    """Marker for hidden-state cache layers used by extract_hidden_states."""\n'
                 "    pass\n"
                 "\n"
                 "\n"
@@ -1092,9 +1336,13 @@ with open(sys.argv[1], 'w') as f:
             if old_ref in content:
                 content = content.replace(old_ref, new_ref)
                 _kv_cache_iface.write_text(content, encoding="utf-8")
-                log("Patched: added HiddenStateCacheSpec to vllm/v1/kv_cache_interface.py")
+                log(
+                    "Patched: added HiddenStateCacheSpec to vllm/v1/kv_cache_interface.py"
+                )
             else:
-                log("Warning: could not find MLAAttentionSpec end in kv_cache_interface.py to add HiddenStateCacheSpec")
+                log(
+                    "Warning: could not find MLAAttentionSpec end in kv_cache_interface.py to add HiddenStateCacheSpec"
+                )
 
     # Fix 19: Add ``RoutedExpertsTensors``, ``RoutedExpertsLists``, and
     # ``routed_experts`` field to ``vllm/v1/outputs.py``.
@@ -1123,22 +1371,22 @@ with open(sys.argv[1], 'w') as f:
                 "\n"
                 "\n"
                 "class RoutedExpertsTensors(NamedTuple):\n"
-                "    \"\"\"Device-side snapshot of routed experts data, pending async D2H.\"\"\"\n"
+                '    """Device-side snapshot of routed experts data, pending async D2H."""\n'
                 "\n"
                 "    # (num_scheduled_tokens, num_layers, num_experts_per_tok)\n"
                 "    routing_data: torch.Tensor\n"
                 "    # (num_scheduled_tokens,)\n"
                 "    slot_mapping: torch.Tensor\n"
                 "\n"
-                "    def to_cpu_nonblocking(self) -> \"RoutedExpertsTensors\":\n"
-                "        if self.routing_data.device.type == \"cpu\":\n"
+                '    def to_cpu_nonblocking(self) -> "RoutedExpertsTensors":\n'
+                '        if self.routing_data.device.type == "cpu":\n'
                 "            return self\n"
                 "        return RoutedExpertsTensors(\n"
-                "            self.routing_data.to(\"cpu\", non_blocking=True),\n"
-                "            self.slot_mapping.to(\"cpu\", non_blocking=True),\n"
+                '            self.routing_data.to("cpu", non_blocking=True),\n'
+                '            self.slot_mapping.to("cpu", non_blocking=True),\n'
                 "        )\n"
                 "\n"
-                "    def tolists(self) -> \"RoutedExpertsLists\":\n"
+                '    def tolists(self) -> "RoutedExpertsLists":\n'
                 "        return RoutedExpertsLists(\n"
                 "            self.routing_data.cpu().numpy(),\n"
                 "            self.slot_mapping.cpu().numpy(),\n"
@@ -1146,7 +1394,7 @@ with open(sys.argv[1], 'w') as f:
                 "\n"
                 "\n"
                 "class RoutedExpertsLists(NamedTuple):\n"
-                "    \"\"\"CPU-side routed experts, consumed by the scheduler.\"\"\"\n"
+                '    """CPU-side routed experts, consumed by the scheduler."""\n'
                 "\n"
                 "    # (num_scheduled_tokens, num_layers, num_experts_per_tok)\n"
                 "    routing_data: np.ndarray\n"
@@ -1177,7 +1425,9 @@ with open(sys.argv[1], 'w') as f:
 
         if patched_outputs:
             _v1_outputs.write_text(content, encoding="utf-8")
-            log("Patched: added RoutedExpertsTensors/RoutedExpertsLists/routed_experts to vllm/v1/outputs.py")
+            log(
+                "Patched: added RoutedExpertsTensors/RoutedExpertsLists/routed_experts to vllm/v1/outputs.py"
+            )
 
     # Fix 20: Create ``vllm/v1/kv_cache_spec_registry.py`` module.
     #
@@ -1187,123 +1437,123 @@ with open(sys.argv[1], 'w') as f:
     _spec_registry = HUST_REPO / "vllm" / "v1" / "kv_cache_spec_registry.py"
     if not _spec_registry.is_file():
         _spec_registry.write_text(
-            '# SPDX-License-Identifier: Apache-2.0\n'
-            '# SPDX-FileCopyrightText: Copyright contributors to the vLLM project\n'
-            '\n'
+            "# SPDX-License-Identifier: Apache-2.0\n"
+            "# SPDX-FileCopyrightText: Copyright contributors to the vLLM project\n"
+            "\n"
             '"""\n'
-            'Registry for KVCacheSpec types and their associated managers.\n'
+            "Registry for KVCacheSpec types and their associated managers.\n"
             '"""\n'
-            '\n'
-            'from dataclasses import dataclass\n'
-            'from typing import TYPE_CHECKING\n'
-            '\n'
-            'from vllm.logger import init_logger\n'
-            '\n'
-            'logger = init_logger(__name__)\n'
-            '\n'
-            'if TYPE_CHECKING:\n'
-            '    from vllm.v1.core.single_type_kv_cache_manager import SingleTypeKVCacheManager\n'
-            '    from vllm.v1.kv_cache_interface import KVCacheSpec\n'
-            '\n'
-            '\n'
-            '@dataclass(frozen=True)\n'
-            'class KVCacheSpecMetadata:\n'
+            "\n"
+            "from dataclasses import dataclass\n"
+            "from typing import TYPE_CHECKING\n"
+            "\n"
+            "from vllm.logger import init_logger\n"
+            "\n"
+            "logger = init_logger(__name__)\n"
+            "\n"
+            "if TYPE_CHECKING:\n"
+            "    from vllm.v1.core.single_type_kv_cache_manager import SingleTypeKVCacheManager\n"
+            "    from vllm.v1.kv_cache_interface import KVCacheSpec\n"
+            "\n"
+            "\n"
+            "@dataclass(frozen=True)\n"
+            "class KVCacheSpecMetadata:\n"
             '    """Metadata for a registered KVCacheSpec."""\n'
             '    kvcache_spec_cls: type["KVCacheSpec"]\n'
             '    manager_class: type["SingleTypeKVCacheManager"]\n'
             '    uniform_type_base_spec: type["KVCacheSpec"]\n'
-            '\n'
-            '\n'
+            "\n"
+            "\n"
             '_REGISTRY_KVCACHESPEC_LIST: dict[type["KVCacheSpec"], KVCacheSpecMetadata] = {}\n'
-            '\n'
-            '\n'
-            'class KVCacheSpecRegistry:\n'
+            "\n"
+            "\n"
+            "class KVCacheSpecRegistry:\n"
             '    """Global registry for KVCacheSpec types."""\n'
-            '\n'
-            '    @classmethod\n'
-            '    def _ensure_registered(cls, vllm_config=None) -> None:\n'
-            '        if _REGISTRY_KVCACHESPEC_LIST:\n'
-            '            return\n'
-            '        if vllm_config is None:\n'
-            '            from vllm.config import get_current_vllm_config_or_none\n'
-            '            vllm_config = get_current_vllm_config_or_none()\n'
-            '        try:\n'
-            '            from vllm.v1.core.single_type_kv_cache_manager import (\n'
-            '                register_all_kvcache_specs,\n'
-            '            )\n'
-            '            register_all_kvcache_specs(vllm_config)\n'
-            '        except ImportError:\n'
-            '            pass\n'
-            '\n'
-            '    @classmethod\n'
-            '    def register(\n'
-            '        cls,\n'
+            "\n"
+            "    @classmethod\n"
+            "    def _ensure_registered(cls, vllm_config=None) -> None:\n"
+            "        if _REGISTRY_KVCACHESPEC_LIST:\n"
+            "            return\n"
+            "        if vllm_config is None:\n"
+            "            from vllm.config import get_current_vllm_config_or_none\n"
+            "            vllm_config = get_current_vllm_config_or_none()\n"
+            "        try:\n"
+            "            from vllm.v1.core.single_type_kv_cache_manager import (\n"
+            "                register_all_kvcache_specs,\n"
+            "            )\n"
+            "            register_all_kvcache_specs(vllm_config)\n"
+            "        except ImportError:\n"
+            "            pass\n"
+            "\n"
+            "    @classmethod\n"
+            "    def register(\n"
+            "        cls,\n"
             '        kvcache_spec_cls: type["KVCacheSpec"],\n'
             '        manager_class: type["SingleTypeKVCacheManager"] | None = None,\n'
             '        uniform_type_base_spec: type["KVCacheSpec"] | None = None,\n'
-            '    ) -> None:\n'
+            "    ) -> None:\n"
             '        assert manager_class is not None, "manager_class is required"\n'
-            '        if uniform_type_base_spec is None:\n'
-            '            uniform_type_base_spec = kvcache_spec_cls\n'
-            '        assert issubclass(kvcache_spec_cls, uniform_type_base_spec)\n'
-            '        _REGISTRY_KVCACHESPEC_LIST[kvcache_spec_cls] = KVCacheSpecMetadata(\n'
-            '            kvcache_spec_cls=kvcache_spec_cls,\n'
-            '            manager_class=manager_class,\n'
-            '            uniform_type_base_spec=uniform_type_base_spec,\n'
-            '        )\n'
-            '\n'
-            '    @classmethod\n'
-            '    def get_manager_class(\n'
+            "        if uniform_type_base_spec is None:\n"
+            "            uniform_type_base_spec = kvcache_spec_cls\n"
+            "        assert issubclass(kvcache_spec_cls, uniform_type_base_spec)\n"
+            "        _REGISTRY_KVCACHESPEC_LIST[kvcache_spec_cls] = KVCacheSpecMetadata(\n"
+            "            kvcache_spec_cls=kvcache_spec_cls,\n"
+            "            manager_class=manager_class,\n"
+            "            uniform_type_base_spec=uniform_type_base_spec,\n"
+            "        )\n"
+            "\n"
+            "    @classmethod\n"
+            "    def get_manager_class(\n"
             '        cls, kvcache_spec: "KVCacheSpec"\n'
             '    ) -> type["SingleTypeKVCacheManager"] | None:\n'
-            '        cls._ensure_registered()\n'
-            '        kvcache_spec_cls = type(kvcache_spec)\n'
-            '        for base in kvcache_spec_cls.__mro__:\n'
-            '            if base in _REGISTRY_KVCACHESPEC_LIST:\n'
-            '                return _REGISTRY_KVCACHESPEC_LIST[base].manager_class\n'
-            '        return None\n'
-            '\n'
-            '    @classmethod\n'
-            '    def get_uniform_type_base_spec(\n'
+            "        cls._ensure_registered()\n"
+            "        kvcache_spec_cls = type(kvcache_spec)\n"
+            "        for base in kvcache_spec_cls.__mro__:\n"
+            "            if base in _REGISTRY_KVCACHESPEC_LIST:\n"
+            "                return _REGISTRY_KVCACHESPEC_LIST[base].manager_class\n"
+            "        return None\n"
+            "\n"
+            "    @classmethod\n"
+            "    def get_uniform_type_base_spec(\n"
             '        cls, kvcache_spec: "KVCacheSpec"\n'
             '    ) -> type["KVCacheSpec"] | None:\n'
-            '        cls._ensure_registered()\n'
-            '        kvcache_spec_cls = type(kvcache_spec)\n'
-            '        for base in kvcache_spec_cls.__mro__:\n'
-            '            if base in _REGISTRY_KVCACHESPEC_LIST:\n'
-            '                return _REGISTRY_KVCACHESPEC_LIST[base].uniform_type_base_spec\n'
-            '        return None\n'
-            '\n'
-            '    @classmethod\n'
-            '    def check_kv_cache_spec_registry(\n'
+            "        cls._ensure_registered()\n"
+            "        kvcache_spec_cls = type(kvcache_spec)\n"
+            "        for base in kvcache_spec_cls.__mro__:\n"
+            "            if base in _REGISTRY_KVCACHESPEC_LIST:\n"
+            "                return _REGISTRY_KVCACHESPEC_LIST[base].uniform_type_base_spec\n"
+            "        return None\n"
+            "\n"
+            "    @classmethod\n"
+            "    def check_kv_cache_spec_registry(\n"
             '        cls, kv_cache_spec: dict[str, "KVCacheSpec"]\n'
-            '    ) -> None:\n'
-            '        cls._ensure_registered()\n'
-            '        for layer_name, spec in kv_cache_spec.items():\n'
-            '            if cls.get_uniform_type_base_spec(spec) is None:\n'
-            '                raise ValueError(\n'
+            "    ) -> None:\n"
+            "        cls._ensure_registered()\n"
+            "        for layer_name, spec in kv_cache_spec.items():\n"
+            "            if cls.get_uniform_type_base_spec(spec) is None:\n"
+            "                raise ValueError(\n"
             '                    f"Unsupported KV cache spec type for layer {layer_name}: "\n'
             '                    f"{type(spec)}."\n'
-            '                )\n'
-            '            if cls.get_manager_class(spec) is None:\n'
-            '                raise ValueError(\n'
+            "                )\n"
+            "            if cls.get_manager_class(spec) is None:\n"
+            "                raise ValueError(\n"
             '                    f"No manager found for KV cache spec type for layer "\n'
             '                    f"{layer_name}: {type(spec)}."\n'
-            '                )\n'
-            '\n'
-            '\n'
-            'def register_kv_cache_spec(\n'
+            "                )\n"
+            "\n"
+            "\n"
+            "def register_kv_cache_spec(\n"
             '    manager_class: type["SingleTypeKVCacheManager"] | None = None,\n'
             '    uniform_type_base_spec: type["KVCacheSpec"] | None = None,\n'
-            '):\n'
-            '    def decorator(kvcache_spec_cls):\n'
-            '        KVCacheSpecRegistry.register(\n'
-            '            kvcache_spec_cls=kvcache_spec_cls,\n'
-            '            manager_class=manager_class,\n'
-            '            uniform_type_base_spec=uniform_type_base_spec,\n'
-            '        )\n'
-            '        return kvcache_spec_cls\n'
-            '    return decorator\n',
+            "):\n"
+            "    def decorator(kvcache_spec_cls):\n"
+            "        KVCacheSpecRegistry.register(\n"
+            "            kvcache_spec_cls=kvcache_spec_cls,\n"
+            "            manager_class=manager_class,\n"
+            "            uniform_type_base_spec=uniform_type_base_spec,\n"
+            "        )\n"
+            "        return kvcache_spec_cls\n"
+            "    return decorator\n",
             encoding="utf-8",
         )
         log("Patched: created vllm/v1/kv_cache_spec_registry.py module")
@@ -1314,7 +1564,13 @@ with open(sys.argv[1], 'w') as f:
     # ``MiniMaxText01RMSNormTP`` from ``vllm.model_executor.layers.minimax_rms_norm``.
     # Older vllm-hust commits (e.g. ``39fef6206``) do not have this module.
     # We guard the import and define a compatible dummy class when missing.
-    _minimax_patch = ASCEND_REPO / "vllm_ascend" / "patch" / "worker" / "patch_minimax_m2_linear_attn.py"
+    _minimax_patch = (
+        ASCEND_REPO
+        / "vllm_ascend"
+        / "patch"
+        / "worker"
+        / "patch_minimax_m2_linear_attn.py"
+    )
     if _minimax_patch.is_file():
         content = _minimax_patch.read_text(encoding="utf-8")
         old_import = (
@@ -1331,8 +1587,8 @@ with open(sys.argv[1], 'w') as f:
             "    import logging as _logging\n"
             "    _logger = _logging.getLogger(__name__)\n"
             "    _logger.warning(\n"
-            "        \"minimax_rms_norm module not available; \"\n"
-            "        \"MiniMaxText01RMSNormTP patches will be a no-op\"\n"
+            '        "minimax_rms_norm module not available; "\n'
+            '        "MiniMaxText01RMSNormTP patches will be a no-op"\n'
             "    )\n"
             "    from vllm.model_executor.custom_op import CustomOp\n"
             "    import torch\n"
@@ -1356,7 +1612,9 @@ with open(sys.argv[1], 'w') as f:
         if old_import in content:
             content = content.replace(old_import, new_import)
             _minimax_patch.write_text(content, encoding="utf-8")
-            log("Patched: guarded minimax_rms_norm import in patch_minimax_m2_linear_attn.py")
+            log(
+                "Patched: guarded minimax_rms_norm import in patch_minimax_m2_linear_attn.py"
+            )
         else:
             log("Patched: minimax_rms_norm import already guarded, skipping")
 
@@ -1367,7 +1625,9 @@ with open(sys.argv[1], 'w') as f:
     # Older vllm-hust commits (e.g. ``2206f1f7b``, ``39fef6206``) do not have the
     # ``mamba.gdn`` module, causing ``ModuleNotFoundError`` at engine startup.
     # We guard the import and define a compatible dummy class when missing.
-    _qwen35_patch = ASCEND_REPO / "vllm_ascend" / "patch" / "worker" / "patch_qwen3_5.py"
+    _qwen35_patch = (
+        ASCEND_REPO / "vllm_ascend" / "patch" / "worker" / "patch_qwen3_5.py"
+    )
     if _qwen35_patch.is_file():
         content = _qwen35_patch.read_text(encoding="utf-8")
         old_import = (
@@ -1383,7 +1643,7 @@ with open(sys.argv[1], 'w') as f:
             "    _logger = _logging.getLogger(__name__)\n"
             "    _logger.warning(\n"
             '        "mamba.gdn module not available; '
-            "Qwen3.5 GDN patches will be a no-op\"\n"
+            'Qwen3.5 GDN patches will be a no-op"\n'
             "    )\n"
             "    class _GDNBaseCls:  # type: ignore[no-redef]\n"
             '        """Compatible dummy class when mamba.gdn is not available."""\n'
@@ -1396,7 +1656,9 @@ with open(sys.argv[1], 'w') as f:
             _qwen35_patch.write_text(content, encoding="utf-8")
             log("Patched: guarded mamba.gdn import in patch_qwen3_5.py")
         else:
-            log("Patched: mamba.gdn import already guarded in patch_qwen3_5.py, skipping")
+            log(
+                "Patched: mamba.gdn import already guarded in patch_qwen3_5.py, skipping"
+            )
 
     # Fix 23: Guard ``ModelSpecificAttnMetadata`` import in ``vllm_ascend/worker/v2/attn_utils.py``.
     #
@@ -1409,9 +1671,7 @@ with open(sys.argv[1], 'w') as f:
     _attn_utils = ASCEND_REPO / "vllm_ascend" / "worker" / "v2" / "attn_utils.py"
     if _attn_utils.is_file():
         content = _attn_utils.read_text(encoding="utf-8")
-        old_import = (
-            "from vllm.v1.worker.gpu.model_states.interface import ModelSpecificAttnMetadata"
-        )
+        old_import = "from vllm.v1.worker.gpu.model_states.interface import ModelSpecificAttnMetadata"
         new_import = (
             "try:\n"
             "    from vllm.v1.worker.gpu.model_states.interface import ModelSpecificAttnMetadata\n"
@@ -1423,9 +1683,13 @@ with open(sys.argv[1], 'w') as f:
             # Preserve the original indentation level (should be 0, top-level import).
             content = content.replace(old_import, new_import)
             _attn_utils.write_text(content, encoding="utf-8")
-            log("Patched: guarded ModelSpecificAttnMetadata import in vllm_ascend/worker/v2/attn_utils.py")
+            log(
+                "Patched: guarded ModelSpecificAttnMetadata import in vllm_ascend/worker/v2/attn_utils.py"
+            )
         else:
-            log("Patched: ModelSpecificAttnMetadata import already guarded in attn_utils.py, skipping")
+            log(
+                "Patched: ModelSpecificAttnMetadata import already guarded in attn_utils.py, skipping"
+            )
 
     # Fix 24: Guard ``mamba.linear`` import in ``bailing_moe_linear_attn.py``.
     #
@@ -1457,22 +1721,24 @@ with open(sys.argv[1], 'w') as f:
             "    import logging as _logging\n"
             "    _logger = _logging.getLogger(__name__)\n"
             "    _logger.warning(\n"
-            "        \"mamba.linear module not available; \"\n"
-            "        \"BailingMoE linear attention patches will be a no-op\"\n"
+            '        "mamba.linear module not available; "\n'
+            '        "BailingMoE linear attention patches will be a no-op"\n'
             "    )\n"
             "    def clear_linear_attention_cache_for_new_sequences(*args, **kwargs):\n"
             "        pass\n"
             "    def linear_attention_decode(*args, **kwargs):\n"
-            "        raise NotImplementedError(\"mamba.linear not available\")\n"
+            '        raise NotImplementedError("mamba.linear not available")\n'
             "    def linear_attention_prefill_and_mix(*args, **kwargs):\n"
-            "        raise NotImplementedError(\"mamba.linear not available\")"
+            '        raise NotImplementedError("mamba.linear not available")'
         )
         if _old_import in _content:
             _content = _content.replace(_old_import, _new_import)
             _bailing_moe.write_text(_content, encoding="utf-8")
             log("Patched: guarded mamba.linear import in bailing_moe_linear_attn.py")
         else:
-            log("Patched: mamba.linear import already guarded in bailing_moe_linear_attn.py, skipping")
+            log(
+                "Patched: mamba.linear import already guarded in bailing_moe_linear_attn.py, skipping"
+            )
 
     # Fix 25: Guard ``mamba.gdn`` and ``mamba.mamba_utils`` imports in
     # ``vllm_ascend/ops/gdn.py``.
@@ -1491,9 +1757,7 @@ with open(sys.argv[1], 'w') as f:
         _modified = False
 
         # Guard 1: GatedDeltaNetAttention import (used as base class)
-        _old_gdn_import = (
-            "from vllm.model_executor.layers.mamba.gdn.base import GatedDeltaNetAttention"
-        )
+        _old_gdn_import = "from vllm.model_executor.layers.mamba.gdn.base import GatedDeltaNetAttention"
         _new_gdn_import = (
             "try:\n"
             "    from vllm.model_executor.layers.mamba.gdn.base import GatedDeltaNetAttention\n"
@@ -1501,8 +1765,8 @@ with open(sys.argv[1], 'w') as f:
             "    import logging as _logging\n"
             "    _logger = _logging.getLogger(__name__)\n"
             "    _logger.warning(\n"
-            "        \"mamba.gdn.base module not available; \"\n"
-            "        \"AscendGatedDeltaNetAttention patches will be a no-op\"\n"
+            '        "mamba.gdn.base module not available; "\n'
+            '        "AscendGatedDeltaNetAttention patches will be a no-op"\n'
             "    )\n"
             "    class GatedDeltaNetAttention:  # type: ignore[no-redef]\n"
             '        """Compatible dummy base class when mamba.gdn is not available."""\n'
@@ -1513,9 +1777,7 @@ with open(sys.argv[1], 'w') as f:
             _modified = True
 
         # Guard 2: MambaStateShapeCalculator import (used for static method call)
-        _old_mamba_utils_import = (
-            "from vllm.model_executor.layers.mamba.mamba_utils import MambaStateShapeCalculator"
-        )
+        _old_mamba_utils_import = "from vllm.model_executor.layers.mamba.mamba_utils import MambaStateShapeCalculator"
         _new_mamba_utils_import = (
             "try:\n"
             "    from vllm.model_executor.layers.mamba.mamba_utils import MambaStateShapeCalculator\n"
@@ -1523,24 +1785,28 @@ with open(sys.argv[1], 'w') as f:
             "    import logging as _logging\n"
             "    _logger = _logging.getLogger(__name__)\n"
             "    _logger.warning(\n"
-            "        \"mamba.mamba_utils module not available; \"\n"
-            "        \"state shape calculation will return empty tuple\"\n"
+            '        "mamba.mamba_utils module not available; "\n'
+            '        "state shape calculation will return empty tuple"\n'
             "    )\n"
             "    class MambaStateShapeCalculator:  # type: ignore[no-redef]\n"
             '        """Compatible dummy class when mamba.mamba_utils is not available."""\n'
             "        @staticmethod\n"
             "        def gated_delta_net_state_shape(*args, **kwargs):\n"
-            '            return tuple()'
+            "            return tuple()"
         )
         if _old_mamba_utils_import in _content:
-            _content = _content.replace(_old_mamba_utils_import, _new_mamba_utils_import)
+            _content = _content.replace(
+                _old_mamba_utils_import, _new_mamba_utils_import
+            )
             _modified = True
 
         if _modified:
             _gdn_py.write_text(_content, encoding="utf-8")
             log("Patched: guarded mamba.gdn and mamba.mamba_utils imports in gdn.py")
         else:
-            log("Patched: mamba.gdn/mamba_utils imports already guarded in gdn.py, skipping")
+            log(
+                "Patched: mamba.gdn/mamba_utils imports already guarded in gdn.py, skipping"
+            )
 
     # Fix 26: Guard ``scheduler_block_size`` keyword argument in
     # ``patch_kv_cache_coordinator.py``.
@@ -1557,7 +1823,13 @@ with open(sys.argv[1], 'w') as f:
     #
     # We guard the call by removing ``scheduler_block_size`` from
     # ``orig_kwargs`` when the original function rejects it.
-    _patch_kv_coord = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_kv_cache_coordinator.py"
+    _patch_kv_coord = (
+        ASCEND_REPO
+        / "vllm_ascend"
+        / "patch"
+        / "platform"
+        / "patch_kv_cache_coordinator.py"
+    )
     if _patch_kv_coord.is_file():
         _content = _patch_kv_coord.read_text(encoding="utf-8")
         _old_call = (
@@ -1570,15 +1842,19 @@ with open(sys.argv[1], 'w') as f:
             "            return _orig_get_kv_cache_coordinator(**orig_kwargs)\n"
             "        except TypeError:\n"
             "            # Older vllm-hust commits do not accept scheduler_block_size.\n"
-            "            orig_kwargs.pop(\"scheduler_block_size\", None)\n"
+            '            orig_kwargs.pop("scheduler_block_size", None)\n'
             "            return _orig_get_kv_cache_coordinator(**orig_kwargs)"
         )
         if _old_call in _content:
             _content = _content.replace(_old_call, _new_call)
             _patch_kv_coord.write_text(_content, encoding="utf-8")
-            log("Patched: guarded scheduler_block_size kwarg in patch_kv_cache_coordinator.py")
+            log(
+                "Patched: guarded scheduler_block_size kwarg in patch_kv_cache_coordinator.py"
+            )
         else:
-            log("Patched: scheduler_block_size kwarg already guarded in patch_kv_cache_coordinator.py, skipping")
+            log(
+                "Patched: scheduler_block_size kwarg already guarded in patch_kv_cache_coordinator.py, skipping"
+            )
 
     # Fix 27: Guard ``throttle_prefills`` keyword argument in
     # ``patch_balance_schedule.py``.
@@ -1590,7 +1866,9 @@ with open(sys.argv[1], 'w') as f:
     #   TypeError: Scheduler.schedule() takes 1 positional argument but 2 were given
     #
     # We guard the call and fall back to ``schedule()`` without arguments.
-    _patch_balance = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_balance_schedule.py"
+    _patch_balance = (
+        ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_balance_schedule.py"
+    )
     if _patch_balance.is_file():
         _content = _patch_balance.read_text(encoding="utf-8")
         _old_schedule = (
@@ -1612,12 +1890,15 @@ with open(sys.argv[1], 'w') as f:
             _patch_balance.write_text(_content, encoding="utf-8")
             log("Patched: guarded throttle_prefills arg in patch_balance_schedule.py")
         else:
-            log("Patched: throttle_prefills arg already guarded in patch_balance_schedule.py, skipping")
+            log(
+                "Patched: throttle_prefills arg already guarded in patch_balance_schedule.py, skipping"
+            )
 
 
 # ---------------------------------------------------------------------------
 # Existing-cell discovery
 # ---------------------------------------------------------------------------
+
 
 def load_leaderboard() -> list[dict[str, Any]]:
     snapshot = REPO_ROOT / "leaderboard-data" / "snapshots" / "leaderboard_single.json"
@@ -1682,6 +1963,7 @@ def cell_already_present(
 # Per-cell execution
 # ---------------------------------------------------------------------------
 
+
 def build_run_id(workload: str, hust_commit: str) -> str:
     today = datetime.now(timezone.utc).strftime("%Y%m%d")
     return f"single-gpu-backfill-{workload}-{hust_commit[:9]}-{today}"
@@ -1693,9 +1975,14 @@ def _run_bench_with_retry(
     """Run bench command, retrying with old CLI flags if new ones are unsupported."""
     log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
     with bench_log.open("w", encoding="utf-8") as log_file:
-        result = subprocess.run(cmd, cwd=HUST_REPO, env=env,
-                                stdout=log_file, stderr=subprocess.STDOUT,
-                                check=False)
+        result = subprocess.run(
+            cmd,
+            cwd=HUST_REPO,
+            env=env,
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
+            check=False,
+        )
 
     raw = output_dir / "raw.json"
     if not raw.is_file():
@@ -1705,16 +1992,25 @@ def _run_bench_with_retry(
 
     # Check if the failure was due to unrecognized arguments (old CLI).
     if result.returncode == 2 and not raw.is_file():
-        log_content = bench_log.read_text(encoding="utf-8") if bench_log.is_file() else ""
+        log_content = (
+            bench_log.read_text(encoding="utf-8") if bench_log.is_file() else ""
+        )
         if "unrecognized arguments" in log_content:
-            log("Detected old CLI (unrecognized arguments), retrying with legacy flags...")
+            log(
+                "Detected old CLI (unrecognized arguments), retrying with legacy flags..."
+            )
             # Rebuild command with legacy flags.
             new_cmd = _to_legacy_cmd(cmd, output_dir)
             log(f"$ {' '.join(shlex.quote(c) for c in new_cmd)}")
             with bench_log.open("w", encoding="utf-8") as log_file:
-                result = subprocess.run(new_cmd, cwd=HUST_REPO, env=env,
-                                        stdout=log_file, stderr=subprocess.STDOUT,
-                                        check=False)
+                result = subprocess.run(
+                    new_cmd,
+                    cwd=HUST_REPO,
+                    env=env,
+                    stdout=log_file,
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                )
             raw = output_dir / "raw.json"
             if not raw.is_file():
                 for candidate in output_dir.glob("raw*.json"):
@@ -1740,8 +2036,15 @@ def _to_legacy_cmd(cmd: list[str], output_dir: Path) -> list[str]:
             continue
         if arg == "--output-json":
             # Replace with --save-result --result-dir <dir> --result-filename raw.json
-            new_cmd.extend(["--save-result", "--result-dir", str(output_dir),
-                            "--result-filename", "raw.json"])
+            new_cmd.extend(
+                [
+                    "--save-result",
+                    "--result-dir",
+                    str(output_dir),
+                    "--result-filename",
+                    "raw.json",
+                ]
+            )
             skip_next = True  # skip the value
             continue
         new_cmd.append(arg)
@@ -1765,7 +2068,9 @@ def _build_env(npu_id: int = 0) -> dict[str, str]:
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
     torch_cxx_abi = subprocess.run(
         [str(PYTHON_BIN), "-c", "import torch; print(torch.compiled_with_cxx11_abi())"],
-        capture_output=True, text=True, check=False
+        capture_output=True,
+        text=True,
+        check=False,
     ).stdout.strip()
     cxx_abi_dir = "cxx_abi_1" if torch_cxx_abi == "True" else "cxx_abi_0"
     atb_lib_path = f"{atb_home}/{cxx_abi_dir}/lib"
@@ -1775,8 +2080,12 @@ def _build_env(npu_id: int = 0) -> dict[str, str]:
     # is resolved before the system one.
     _conda_lib = str(Path(PYTHON_BIN).resolve().parent.parent / "lib")
     env["LD_LIBRARY_PATH"] = f"{_conda_lib}:{atb_lib_path}:{env['LD_LIBRARY_PATH']}"
-    env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/ascend-toolkit/lib64:" + env["LD_LIBRARY_PATH"]
-    env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/cann-9.0.0/lib64:" + env["LD_LIBRARY_PATH"]
+    env["LD_LIBRARY_PATH"] = (
+        "/usr/local/Ascend/ascend-toolkit/lib64:" + env["LD_LIBRARY_PATH"]
+    )
+    env["LD_LIBRARY_PATH"] = (
+        "/usr/local/Ascend/cann-9.0.0/lib64:" + env["LD_LIBRARY_PATH"]
+    )
     env["ATB_HOME_PATH"] = f"{atb_home}/{cxx_abi_dir}"
 
     # Set VLLM_VERSION so the ascend plugin can parse the vllm version.
@@ -1804,15 +2113,23 @@ def _run_serve_bench(
 
     # Start the vllm server in the background.
     serve_cmd = [
-        str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "serve",
+        str(PYTHON_BIN),
+        "-m",
+        "vllm.entrypoints.cli.main",
+        "serve",
         MODEL_NAME,
-        "--host", host,
-        "--port", str(port),
-        "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
-        "--max-model-len", DEFAULT_MAX_MODEL_LEN,
+        "--host",
+        host,
+        "--port",
+        str(port),
+        "--gpu-memory-utilization",
+        DEFAULT_GPU_MEMORY_UTILIZATION,
+        "--max-model-len",
+        DEFAULT_MAX_MODEL_LEN,
     ]
     # Wait for the port to be free (previous server may still be shutting down).
     import socket as _socket
+
     _port_wait_start = time.time()
     while time.time() - _port_wait_start < 60:
         try:
@@ -1829,8 +2146,11 @@ def _run_serve_bench(
     log(f"$ {' '.join(shlex.quote(c) for c in serve_cmd)} &")
     with server_log.open("w", encoding="utf-8") as sf:
         server_proc = subprocess.Popen(
-            serve_cmd, cwd=HUST_REPO, env=env,
-            stdout=sf, stderr=subprocess.STDOUT,
+            serve_cmd,
+            cwd=HUST_REPO,
+            env=env,
+            stdout=sf,
+            stderr=subprocess.STDOUT,
             start_new_session=True,
         )
 
@@ -1838,6 +2158,7 @@ def _run_serve_bench(
         # Wait for the server to be ready by polling /health.
         import urllib.request
         import urllib.error
+
         max_wait = 600  # seconds
         start = time.time()
         ready = False
@@ -1865,18 +2186,32 @@ def _run_serve_bench(
 
         # Build bench client command (old CLI style: --save-result).
         bench_cmd = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "serve",
-            "--backend", "vllm",
-            "--endpoint", "/v1/completions",
-            "--host", host,
-            "--port", str(port),
-            "--model", MODEL_NAME,
-            "--dataset-name", params["dataset_name"],
-            "--num-prompts", str(params["num_prompts"]),
-            "--request-rate", str(params.get("request_rate", 1)),
+            str(PYTHON_BIN),
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "bench",
+            "serve",
+            "--backend",
+            "vllm",
+            "--endpoint",
+            "/v1/completions",
+            "--host",
+            host,
+            "--port",
+            str(port),
+            "--model",
+            MODEL_NAME,
+            "--dataset-name",
+            params["dataset_name"],
+            "--num-prompts",
+            str(params["num_prompts"]),
+            "--request-rate",
+            str(params.get("request_rate", 1)),
             "--save-result",
-            "--result-dir", str(output_dir),
-            "--result-filename", "raw.json",
+            "--result-dir",
+            str(output_dir),
+            "--result-filename",
+            "raw.json",
         ]
         if params.get("dataset_path"):
             bench_cmd.extend(["--dataset-path", params["dataset_path"]])
@@ -1888,8 +2223,11 @@ def _run_serve_bench(
         log(f"$ {' '.join(shlex.quote(c) for c in bench_cmd)}")
         with bench_log.open("w", encoding="utf-8") as lf:
             bench_result = subprocess.run(
-                bench_cmd, cwd=HUST_REPO, env=env,
-                stdout=lf, stderr=subprocess.STDOUT,
+                bench_cmd,
+                cwd=HUST_REPO,
+                env=env,
+                stdout=lf,
+                stderr=subprocess.STDOUT,
                 check=False,
             )
 
@@ -1917,7 +2255,10 @@ def _run_serve_bench(
 
 
 def run_vllm_bench(
-    workload: str, hust_commit: str, output_dir: Path, npu_id: int = 0,
+    workload: str,
+    hust_commit: str,
+    output_dir: Path,
+    npu_id: int = 0,
 ) -> Path:
     """Run the right vllm bench subcommand and return the raw result JSON path."""
     params = SCENARIO_PARAMS[workload]
@@ -1929,27 +2270,50 @@ def run_vllm_bench(
 
     if benchmark_type == "latency":
         cmd: list[str] = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
-            "--model", MODEL_NAME,
-            "--input-len", str(params["input_length"]),
-            "--output-len", str(params["output_length"]),
-            "--batch-size", str(params["batch_size"]),
-            "--num-iters-warmup", str(params["num_iters_warmup"]),
-            "--num-iters", str(params["num_iters"]),
-            "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
-            "--max-model-len", DEFAULT_MAX_MODEL_LEN,
-            "--output-json", str(output_dir / "raw.json"),
+            str(PYTHON_BIN),
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "bench",
+            "latency",
+            "--model",
+            MODEL_NAME,
+            "--input-len",
+            str(params["input_length"]),
+            "--output-len",
+            str(params["output_length"]),
+            "--batch-size",
+            str(params["batch_size"]),
+            "--num-iters-warmup",
+            str(params["num_iters_warmup"]),
+            "--num-iters",
+            str(params["num_iters"]),
+            "--gpu-memory-utilization",
+            DEFAULT_GPU_MEMORY_UTILIZATION,
+            "--max-model-len",
+            DEFAULT_MAX_MODEL_LEN,
+            "--output-json",
+            str(output_dir / "raw.json"),
         ]
         result, raw = _run_bench_with_retry(cmd, env, output_dir, bench_log)
     elif benchmark_type == "throughput":
         cmd = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
-            "--model", MODEL_NAME,
-            "--dataset-name", params["dataset_name"],
-            "--num-prompts", str(params["num_prompts"]),
-            "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
-            "--max-model-len", DEFAULT_MAX_MODEL_LEN,
-            "--output-json", str(output_dir / "raw.json"),
+            str(PYTHON_BIN),
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "bench",
+            "throughput",
+            "--model",
+            MODEL_NAME,
+            "--dataset-name",
+            params["dataset_name"],
+            "--num-prompts",
+            str(params["num_prompts"]),
+            "--gpu-memory-utilization",
+            DEFAULT_GPU_MEMORY_UTILIZATION,
+            "--max-model-len",
+            DEFAULT_MAX_MODEL_LEN,
+            "--output-json",
+            str(output_dir / "raw.json"),
         ]
         if params.get("dataset_path"):
             cmd.extend(["--dataset-path", params["dataset_path"]])
@@ -1963,12 +2327,14 @@ def run_vllm_bench(
             # tries to re-initialize the engine (which fails because the NPU
             # is already in use), causing exit code 1.  The raw result is
             # valid, so we accept it.
-            log(f"benchmark subprocess exited with code {result.returncode} "
-                f"but {raw.name} was produced — accepting result")
+            log(
+                f"benchmark subprocess exited with code {result.returncode} "
+                f"but {raw.name} was produced — accepting result"
+            )
         else:
             log(f"benchmark failed with exit code {result.returncode}")
             if bench_log.is_file():
-                log(f"benchmark output (last 100 lines):")
+                log("benchmark output (last 100 lines):")
                 with bench_log.open("r", encoding="utf-8") as f:
                     lines = f.readlines()
                     for line in lines[-100:]:
@@ -2018,9 +2384,14 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
     client_params["model"] = spec["model"]
     if "gpu_memory_utilization" not in client_params:
         # Only add for non-serve benchmark types (old logic).
-        if spec.get("scenario") not in ("random-online", "sharegpt-online",
-                                        "prefix-repetition-online", "instructcoder-online",
-                                        "visionarena-online", "agent-research-online"):
+        if spec.get("scenario") not in (
+            "random-online",
+            "sharegpt-online",
+            "prefix-repetition-online",
+            "instructcoder-online",
+            "visionarena-online",
+            "agent-research-online",
+        ):
             client_params["gpu_memory_utilization"] = 0.6
 
     # Transform random input/output lengths (old logic).
@@ -2045,12 +2416,10 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
         "chip_count": int(spec.get("chip_count") or 0),
         "node_count": int(spec.get("node_count") or 0),
         "resolved_server_parameters": {
-            k: v for k, v in server_params.items()
-            if k not in {"host", "port", "model"}
+            k: v for k, v in server_params.items() if k not in {"host", "port", "model"}
         },
         "resolved_client_parameters": {
-            k: v for k, v in client_params.items()
-            if k not in {"host", "port", "model"}
+            k: v for k, v in client_params.items() if k not in {"host", "port", "model"}
         },
     }
 
@@ -2104,43 +2473,80 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
 
     if benchmark_type == "latency":
         parts = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "latency",
-            "--model", MODEL_NAME,
-            "--input-len", str(params["input_length"]),
-            "--output-len", str(params["output_length"]),
-            "--batch-size", str(params["batch_size"]),
-            "--num-iters-warmup", str(params["num_iters_warmup"]),
-            "--num-iters", str(params["num_iters"]),
-            "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
-            "--max-model-len", DEFAULT_MAX_MODEL_LEN,
-            "--output-json", str(raw_path),
+            str(PYTHON_BIN),
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "bench",
+            "latency",
+            "--model",
+            MODEL_NAME,
+            "--input-len",
+            str(params["input_length"]),
+            "--output-len",
+            str(params["output_length"]),
+            "--batch-size",
+            str(params["batch_size"]),
+            "--num-iters-warmup",
+            str(params["num_iters_warmup"]),
+            "--num-iters",
+            str(params["num_iters"]),
+            "--gpu-memory-utilization",
+            DEFAULT_GPU_MEMORY_UTILIZATION,
+            "--max-model-len",
+            DEFAULT_MAX_MODEL_LEN,
+            "--output-json",
+            str(raw_path),
         ]
     elif benchmark_type == "throughput":
         parts = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "throughput",
-            "--model", MODEL_NAME,
-            "--dataset-name", params["dataset_name"],
-            "--num-prompts", str(params["num_prompts"]),
-            "--gpu-memory-utilization", DEFAULT_GPU_MEMORY_UTILIZATION,
-            "--max-model-len", DEFAULT_MAX_MODEL_LEN,
-            "--output-json", str(raw_path),
+            str(PYTHON_BIN),
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "bench",
+            "throughput",
+            "--model",
+            MODEL_NAME,
+            "--dataset-name",
+            params["dataset_name"],
+            "--num-prompts",
+            str(params["num_prompts"]),
+            "--gpu-memory-utilization",
+            DEFAULT_GPU_MEMORY_UTILIZATION,
+            "--max-model-len",
+            DEFAULT_MAX_MODEL_LEN,
+            "--output-json",
+            str(raw_path),
         ]
         if params.get("dataset_path"):
             parts.extend(["--dataset-path", str(params["dataset_path"])])
     else:  # serve
         parts = [
-            str(PYTHON_BIN), "-m", "vllm.entrypoints.cli.main", "bench", "serve",
-            "--backend", "vllm",
-            "--endpoint", "/v1/completions",
-            "--host", "127.0.0.1",
-            "--port", "8000",
-            "--model", MODEL_NAME,
-            "--dataset-name", params["dataset_name"],
-            "--num-prompts", str(params["num_prompts"]),
-            "--request-rate", str(params.get("request_rate", 1)),
+            str(PYTHON_BIN),
+            "-m",
+            "vllm.entrypoints.cli.main",
+            "bench",
+            "serve",
+            "--backend",
+            "vllm",
+            "--endpoint",
+            "/v1/completions",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8000",
+            "--model",
+            MODEL_NAME,
+            "--dataset-name",
+            params["dataset_name"],
+            "--num-prompts",
+            str(params["num_prompts"]),
+            "--request-rate",
+            str(params.get("request_rate", 1)),
             "--save-result",
-            "--result-dir", str(output_dir),
-            "--result-filename", "raw.json",
+            "--result-dir",
+            str(output_dir),
+            "--result-filename",
+            "raw.json",
         ]
         if params.get("dataset_path"):
             parts.extend(["--dataset-path", str(params["dataset_path"])])
@@ -2153,7 +2559,11 @@ def _build_reproducible_cmd(workload: str, output_dir: Path) -> str:
 
 
 def submit_artifact(
-    workload: str, hust_commit: str, ascend_commit: str, run_id: str, raw: Path,
+    workload: str,
+    hust_commit: str,
+    ascend_commit: str,
+    run_id: str,
+    raw: Path,
     *,
     engine_version: str | None = None,
 ) -> Path:
@@ -2171,34 +2581,65 @@ def submit_artifact(
     same_spec_file.write_text(json.dumps(same_spec, indent=2) + "\n", encoding="utf-8")
 
     cmd: list[str] = [
-        str(PYTHON_BIN), "-m", "vllm_hust_benchmark.cli", "submit", workload,
-        "--benchmark-result-file", str(raw),
-        "--constraints-file", str(constraints),
-        "--same-spec-file", str(same_spec_file),
-        "--run-id", run_id,
-        "--engine", "vllm-hust",
-        "--engine-version", engine_version,
-        "--core-version", engine_version,
-        "--model-name", MODEL_NAME,
-        "--model-parameters", MODEL_PARAMETERS,
-        "--model-precision", MODEL_PRECISION,
-        "--hardware-vendor", HARDWARE_VENDOR,
-        "--hardware-chip-model", HARDWARE_CHIP_MODEL,
-        "--chip-count", str(CHIP_COUNT),
-        "--node-count", str(NODE_COUNT),
-        "--submitter", SUBMITTER,
-        "--data-source", DATA_SOURCE,
-        "--git-commit", hust_commit,
-        "--github-repository", "vllm-hust/vllm-hust",
-        "--github-ref", "main",
-        "--runtime-python", str(PYTHON_BIN),
-        "--engine-source-repository", "vllm-hust/vllm-hust",
-        "--engine-source-ref", hust_commit[:10],
-        "--engine-source-commit", hust_commit,
-        "--plugin-source-engine", "vllm-ascend-hust",
-        "--plugin-source-repository", "vllm-hust/vllm-ascend-hust",
-        "--plugin-source-ref", ascend_commit[:10],
-        "--plugin-source-commit", ascend_commit,
+        str(PYTHON_BIN),
+        "-m",
+        "vllm_hust_benchmark.cli",
+        "submit",
+        workload,
+        "--benchmark-result-file",
+        str(raw),
+        "--constraints-file",
+        str(constraints),
+        "--same-spec-file",
+        str(same_spec_file),
+        "--run-id",
+        run_id,
+        "--engine",
+        "vllm-hust",
+        "--engine-version",
+        engine_version,
+        "--core-version",
+        engine_version,
+        "--model-name",
+        MODEL_NAME,
+        "--model-parameters",
+        MODEL_PARAMETERS,
+        "--model-precision",
+        MODEL_PRECISION,
+        "--hardware-vendor",
+        HARDWARE_VENDOR,
+        "--hardware-chip-model",
+        HARDWARE_CHIP_MODEL,
+        "--chip-count",
+        str(CHIP_COUNT),
+        "--node-count",
+        str(NODE_COUNT),
+        "--submitter",
+        SUBMITTER,
+        "--data-source",
+        DATA_SOURCE,
+        "--git-commit",
+        hust_commit,
+        "--github-repository",
+        "vllm-hust/vllm-hust",
+        "--github-ref",
+        "main",
+        "--runtime-python",
+        str(PYTHON_BIN),
+        "--engine-source-repository",
+        "vllm-hust/vllm-hust",
+        "--engine-source-ref",
+        hust_commit[:10],
+        "--engine-source-commit",
+        hust_commit,
+        "--plugin-source-engine",
+        "vllm-ascend-hust",
+        "--plugin-source-repository",
+        "vllm-hust/vllm-ascend-hust",
+        "--plugin-source-ref",
+        ascend_commit[:10],
+        "--plugin-source-commit",
+        ascend_commit,
     ]
     params = SCENARIO_PARAMS[workload]
     if params.get("input_length") is not None:
@@ -2232,9 +2673,17 @@ def submit_artifact(
 # ---------------------------------------------------------------------------
 
 REQUIRED_ARTIFACT_FIELDS = {
-    "entry_id", "engine", "engine_version", "config_type",
-    "hardware", "model", "workload", "metrics", "constraints",
-    "versions", "metadata",
+    "entry_id",
+    "engine",
+    "engine_version",
+    "config_type",
+    "hardware",
+    "model",
+    "workload",
+    "metrics",
+    "constraints",
+    "versions",
+    "metadata",
 }
 REQUIRED_METRICS_FIELDS = {"ttft_ms", "tbt_ms", "throughput_tps", "error_rate"}
 
@@ -2280,7 +2729,9 @@ def validate_submission(sub_dir: Path) -> list[str]:
     valid_config_types = {"single_gpu", "multi_gpu"}
     ct = run.get("config_type")
     if ct not in valid_config_types:
-        errors.append(f"{rid}: config_type is {ct!r}, expected one of {valid_config_types}")
+        errors.append(
+            f"{rid}: config_type is {ct!r}, expected one of {valid_config_types}"
+        )
 
     # Check metrics
     metrics = run.get("metrics", {})
@@ -2310,7 +2761,9 @@ def validate_submission(sub_dir: Path) -> list[str]:
                 errors.append(f"{rid}: error_rate out of range [0,1] ({err_rate})")
             elif err_rate >= 1.0:
                 # error_rate == 1.0 means all requests failed — not reproducible.
-                errors.append(f"{rid}: error_rate={err_rate} (all requests failed, result not reproducible)")
+                errors.append(
+                    f"{rid}: error_rate={err_rate} (all requests failed, result not reproducible)"
+                )
 
     # Check workload
     workload = run.get("workload", {})
@@ -2357,7 +2810,9 @@ def validate_snapshot(snapshot_path: Path) -> list[str]:
         seen_ids.add(eid)
 
         # Validate each entry
-        sub_errors = validate_submission_artifact_entry(entry, f"{snapshot_path.name}[{i}]")
+        sub_errors = validate_submission_artifact_entry(
+            entry, f"{snapshot_path.name}[{i}]"
+        )
         errors.extend(sub_errors)
 
     return errors
@@ -2405,16 +2860,50 @@ def _check_error_rate(sub_dir: Path) -> str | None:
     return None
 
 
-def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
-             npu_id: int = 0) -> dict[str, Any]:
+def run_cell(
+    workload: str,
+    hust_commit: str,
+    ascend_commit: str | None = None,
+    npu_id: int = 0,
+    *,
+    allow_plugin_override: bool = False,
+) -> dict[str, Any]:
     if ascend_commit is None:
-        ascend_commit = _resolve_compatible_ascend_commit(hust_commit)
+        # Prefer snapshot -> time-align before the blind HEAD fallback so a
+        # backfill batch pairs with the canonical plugin commit already used
+        # for this vllm-hust commit (snapshot), or at least a time-aligned
+        # one.  Previously this called _resolve_compatible_ascend_commit
+        # directly, which returns origin/main tip and ignores hust_commit,
+        # splitting a single runtime revision across multiple x-axis points.
+        ascend_commit, source = resolve_ascend_commit_chain(hust_commit)
+        log(f"Resolved ascend commit via {source}: {ascend_commit[:12]}")
+
+    if not ascend_commit or len(ascend_commit) != 40:
+        raise RuntimeError(
+            f"refusing to run cell {workload}@{hust_commit[:9]}: resolved "
+            f"ascend_commit is not a 40-char SHA ({ascend_commit!r})"
+        )
+
+    # Final self-check just before the cell runs (callers such as cmd_run
+    # already validate, but this guard catches direct invocations of
+    # run_cell — e.g. via an IDE or a future orchestrator — that bypass
+    # the CLI path).  ``allow_plugin_override`` mirrors the
+    # --force-mismatched-plugin-commit CLI flag.
+    assert_plugin_commit_consistent(
+        hust_commit,
+        ascend_commit,
+        allow_override=allow_plugin_override,
+    )
 
     log(f"=== {workload} @ {hust_commit[:9]} (plugin {ascend_commit[:9]}) ===")
 
     # Clean up any stale vllm processes and port 8000 before starting.
-    subprocess.run(["pkill", "-f", "vllm.entrypoints.cli"], check=False, stderr=subprocess.DEVNULL)
-    subprocess.run(["pkill", "-f", "api_server"], check=False, stderr=subprocess.DEVNULL)
+    subprocess.run(
+        ["pkill", "-f", "vllm.entrypoints.cli"], check=False, stderr=subprocess.DEVNULL
+    )
+    subprocess.run(
+        ["pkill", "-f", "api_server"], check=False, stderr=subprocess.DEVNULL
+    )
     _kill_port_process(8000)
     time.sleep(2)  # Give processes time to terminate.
 
@@ -2432,7 +2921,8 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
         # which can cause stale bytecode cache conflicts.
         subprocess.run(
             ["git", "clean", "-fdx", "vllm/entrypoints/cli/"],
-            cwd=HUST_REPO, check=False,
+            cwd=HUST_REPO,
+            check=False,
         )
 
         # Apply compatibility patches for older vllm-hust commits.
@@ -2442,7 +2932,13 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
         # This is a backup approach - the primary fix is inside install_ascend_plugin()
         # (Fix 26), but we apply it here as well to ensure it's always applied after
         # the git checkout.
-        _patch_kv_coord = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_kv_cache_coordinator.py"
+        _patch_kv_coord = (
+            ASCEND_REPO
+            / "vllm_ascend"
+            / "patch"
+            / "platform"
+            / "patch_kv_cache_coordinator.py"
+        )
         if _patch_kv_coord.is_file():
             _content = _patch_kv_coord.read_text(encoding="utf-8")
             _old_call = (
@@ -2455,16 +2951,24 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
                 "            return _orig_get_kv_cache_coordinator(**orig_kwargs)\n"
                 "        except TypeError:\n"
                 "            # Older vllm-hust commits do not accept scheduler_block_size.\n"
-                "            orig_kwargs.pop(\"scheduler_block_size\", None)\n"
+                '            orig_kwargs.pop("scheduler_block_size", None)\n'
                 "            return _orig_get_kv_cache_coordinator(**orig_kwargs)"
             )
             if _old_call in _content:
                 _content = _content.replace(_old_call, _new_call)
                 _patch_kv_coord.write_text(_content, encoding="utf-8")
-                log("Patched: guarded scheduler_block_size kwarg in patch_kv_cache_coordinator.py (run_cell)")
+                log(
+                    "Patched: guarded scheduler_block_size kwarg in patch_kv_cache_coordinator.py (run_cell)"
+                )
 
         # Fix 27b: Guard throttle_prefills in patch_balance_schedule.py (backup).
-        _patch_balance = ASCEND_REPO / "vllm_ascend" / "patch" / "platform" / "patch_balance_schedule.py"
+        _patch_balance = (
+            ASCEND_REPO
+            / "vllm_ascend"
+            / "patch"
+            / "platform"
+            / "patch_balance_schedule.py"
+        )
         if _patch_balance.is_file():
             _content = _patch_balance.read_text(encoding="utf-8")
             _old_schedule = (
@@ -2484,7 +2988,9 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
             if _old_schedule in _content:
                 _content = _content.replace(_old_schedule, _new_schedule)
                 _patch_balance.write_text(_content, encoding="utf-8")
-                log("Patched: guarded throttle_prefills arg in patch_balance_schedule.py (run_cell)")
+                log(
+                    "Patched: guarded throttle_prefills arg in patch_balance_schedule.py (run_cell)"
+                )
 
         raw = run_vllm_bench(workload, hust_commit, work_dir / "bench", npu_id=npu_id)
         run_id = build_run_id(workload, hust_commit)
@@ -2534,6 +3040,7 @@ def run_cell(workload: str, hust_commit: str, ascend_commit: str | None = None,
 # Subcommands
 # ---------------------------------------------------------------------------
 
+
 def cmd_plan(args: argparse.Namespace) -> int:
     log("PLAN: listing missing cells")
     total_missing = 0
@@ -2546,12 +3053,37 @@ def cmd_plan(args: argparse.Namespace) -> int:
         # Group by commit.
         for commit in commits:
             present = [w for w in SCENARIO_PARAMS if cell_already_present(w, commit)]
-            missing = [w for w in SCENARIO_PARAMS if not cell_already_present(w, commit)]
+            missing = [
+                w for w in SCENARIO_PARAMS if not cell_already_present(w, commit)
+            ]
             exists = commit_exists(HUST_REPO, commit)
             on_main = commit_on_main_branch(HUST_REPO, commit) if exists else False
             branch_mark = "" if on_main else " [non-main]"
             total_missing += len(missing)
-            print(f"\n[{commit[:9]}]{branch_mark} ({len(present)}/{len(SCENARIO_PARAMS)} present)")
+            print(
+                f"\n[{commit[:9]}]{branch_mark} ({len(present)}/{len(SCENARIO_PARAMS)} present)"
+            )
+            # Show which plugin commit would be used so a reviewer can spot a
+            # non-canonical pairing (e.g. fallback-head) before running.
+            try:
+                plugin_commit, source = resolve_ascend_commit_chain(commit)
+                print(f"  → plugin {plugin_commit[:9]} (via {source})")
+            except Exception as exc:  # noqa: BLE001 - surface, do not crash plan
+                print(f"  → plugin unresolved: {exc}")
+                plugin_commit = None
+            # Consistency preview: warn when the existing snapshot's canonical
+            # plugin commit for this hust_commit disagrees with what the
+            # chain just produced. Plan is read-only — it never returns
+            # non-zero — but the ⚠ line tells the operator ``run`` would
+            # fail unless --force-mismatched-plugin-commit is supplied.
+            if plugin_commit:
+                canonical = _lookup_ascend_commit_from_snapshot(commit)
+                if canonical and canonical.lower() != plugin_commit.lower():
+                    print(
+                        f"  ⚠ plugin mismatch: snapshot canonical={canonical[:9]} "
+                        f"resolved={plugin_commit[:9]}; run would abort unless "
+                        f"--force-mismatched-plugin-commit is set"
+                    )
             for workload in sorted(SCENARIO_PARAMS):
                 if not exists:
                     status = "NOT-FOUND"
@@ -2587,7 +3119,10 @@ def _resolve_full_commit(short_or_full: str) -> str:
     """Resolve a (possibly short) git SHA to a full 40-char commit hash."""
     out = subprocess.run(
         ["git", "rev-parse", short_or_full],
-        cwd=HUST_REPO, capture_output=True, text=True, check=False,
+        cwd=HUST_REPO,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if out.returncode == 0:
         resolved = out.stdout.strip()
@@ -2605,7 +3140,10 @@ def _resolve_latest_hust_commit() -> str:
     """
     out = subprocess.run(
         ["git", "log", "-1", "--format=%H", "origin/main"],
-        cwd=HUST_REPO, capture_output=True, text=True, check=False,
+        cwd=HUST_REPO,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     sha = out.stdout.strip()
     if sha and len(sha) == 40:
@@ -2613,7 +3151,10 @@ def _resolve_latest_hust_commit() -> str:
     # Fallback: use current HEAD if origin/main is not accessible.
     out = subprocess.run(
         ["git", "rev-parse", "HEAD"],
-        cwd=HUST_REPO, capture_output=True, text=True, check=True,
+        cwd=HUST_REPO,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     return out.stdout.strip()
 
@@ -2630,9 +3171,11 @@ def cmd_run(args: argparse.Namespace) -> int:
     else:
         idle = select_idle_npu()
         if idle is None:
-            log("ERROR: no idle NPU device found. "
+            log(
+                "ERROR: no idle NPU device found. "
                 "All NPUs have HBM usage above 5000 MB. "
-                "Use --npu-device to force a specific device.")
+                "Use --npu-device to force a specific device."
+            )
             return 1
         npu_id = idle
         log(f"Auto-selected idle NPU device: {npu_id}")
@@ -2653,25 +3196,50 @@ def cmd_run(args: argparse.Namespace) -> int:
         log(f"Using vllm-hust commit: {hust_commit[:12]}")
 
     if ascend_commit_str == "latest":
-        # First try to look up from the snapshot for version consistency.
-        snapshot_ascend = _lookup_ascend_commit_from_snapshot(hust_commit)
-        if snapshot_ascend:
-            ascend_commit = snapshot_ascend
-            log(f"Resolved ascend commit from snapshot: {ascend_commit[:12]}")
-        else:
-            # Fall back to time-aligned resolution (find the ascend commit
-            # on origin/main at the time of the hust commit).
-            ascend_commit = resolve_ascend_commit(hust_commit)
-            log(f"Auto-resolved time-aligned ascend commit: {ascend_commit[:12]}")
+        # Snapshot -> time-align -> blind HEAD fallback, in that order.
+        # Logging the *source* here makes it obvious when a backfill batch
+        # is about to pair with a non-canonical plugin commit (e.g. a
+        # fallback-head resolution instead of a snapshot hit), which would
+        # split a single runtime revision across multiple trend points.
+        ascend_commit, source = resolve_ascend_commit_chain(hust_commit)
+        log(f"Resolved ascend commit via {source}: {ascend_commit[:12]}")
     else:
         ascend_commit = ascend_commit_str
         log(f"Using ascend commit: {ascend_commit[:12]}")
+
+    # Consistency guard: refuse to pair *hust_commit* with a plugin commit
+    # that diverges from the canonical one already recorded in the snapshot
+    # (see docs/HISTORICAL_PR_BACKFILL.md → “Plugin commit alignment rule”).
+    # ``--force-mismatched-plugin-commit`` overrides and writes an audit
+    # note into state.json.  The latest path also passes through this guard
+    # so a snapshot downgrade / corruption can't quietly produce a
+    # mismatched pair even when the chain chose time-align or fallback-head.
+    try:
+        assert_plugin_commit_consistent(
+            hust_commit,
+            ascend_commit,
+            allow_override=bool(args.force_mismatched_plugin_commit),
+        )
+    except PluginCommitMismatch as exc:
+        log(f"ERROR: {exc}")
+        return 1
+    if args.force_mismatched_plugin_commit:
+        canonical = _lookup_ascend_commit_from_snapshot(hust_commit) or ""
+        record_plugin_override(
+            state,
+            hust_commit,
+            canonical,
+            ascend_commit,
+            workload=args.workload,
+        )
 
     if args.workload:
         target = {args.workload: [hust_commit]}
     else:
         # Find missing workloads for this commit.
-        missing = [w for w in SCENARIO_PARAMS if not cell_already_present(w, hust_commit)]
+        missing = [
+            w for w in SCENARIO_PARAMS if not cell_already_present(w, hust_commit)
+        ]
         if not missing:
             log(f"All workloads already present for commit {hust_commit[:9]}")
             return 0
@@ -2687,7 +3255,9 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     if missing_commits:
         for w, c in missing_commits:
-            log(f"WARNING: commit {c[:9]} (workload={w}) not found in vllm-hust repo, skipping")
+            log(
+                f"WARNING: commit {c[:9]} (workload={w}) not found in vllm-hust repo, skipping"
+            )
         for w, c in missing_commits:
             key = f"{w}:{c[:9]}"
             state["cells"][key] = {"status": "done", "skipped": "commit-not-found"}
@@ -2700,10 +3270,16 @@ def cmd_run(args: argparse.Namespace) -> int:
     def _restore_on_exit() -> None:
         if _original_hust and current_head(HUST_REPO) != _original_hust:
             log(f"Restoring vllm-hust to {_original_hust[:12]}")
-            subprocess.run(["git", "checkout", "-fq", _original_hust], cwd=HUST_REPO, check=False)
+            subprocess.run(
+                ["git", "checkout", "-fq", _original_hust], cwd=HUST_REPO, check=False
+            )
         if _original_ascend and current_head(ASCEND_REPO) != _original_ascend:
             log(f"Restoring vllm-ascend-hust to {_original_ascend[:12]}")
-            subprocess.run(["git", "checkout", "-fq", _original_ascend], cwd=ASCEND_REPO, check=False)
+            subprocess.run(
+                ["git", "checkout", "-fq", _original_ascend],
+                cwd=ASCEND_REPO,
+                check=False,
+            )
 
     # Clean up NPU processes before exit.
     def _cleanup_npu() -> None:
@@ -2711,11 +3287,13 @@ def cmd_run(args: argparse.Namespace) -> int:
         # Use pkill to find and kill python processes running vllm entrypoints.
         subprocess.run(
             ["pkill", "-f", "vllm.entrypoints.cli"],
-            check=False, stderr=subprocess.DEVNULL,
+            check=False,
+            stderr=subprocess.DEVNULL,
         )
         subprocess.run(
             ["pkill", "-f", "api_server"],
-            check=False, stderr=subprocess.DEVNULL,
+            check=False,
+            stderr=subprocess.DEVNULL,
         )
         # Also kill any process holding port 8000.
         _kill_port_process(8000)
@@ -2732,10 +3310,19 @@ def cmd_run(args: argparse.Namespace) -> int:
                     continue
                 if cell_already_present(workload, commit) and not args.force:
                     log(f"SKIP {key} (already in leaderboard)")
-                    state["cells"][key] = {"status": "done", "skipped": "already-present"}
+                    state["cells"][key] = {
+                        "status": "done",
+                        "skipped": "already-present",
+                    }
                     continue
                 log(f"BEGIN {key}")
-                result = run_cell(workload, commit, ascend_commit, npu_id=npu_id)
+                result = run_cell(
+                    workload,
+                    commit,
+                    ascend_commit,
+                    npu_id=npu_id,
+                    allow_plugin_override=bool(args.force_mismatched_plugin_commit),
+                )
                 state["cells"][key] = result
                 save_state(state)
                 if result["status"] == "failed":
@@ -2768,9 +3355,11 @@ def cmd_fill(args: argparse.Namespace) -> int:
     else:
         idle = select_idle_npu()
         if idle is None:
-            log("ERROR: no idle NPU device found. "
+            log(
+                "ERROR: no idle NPU device found. "
                 "All NPUs have HBM usage above 5000 MB. "
-                "Use --npu-device to force a specific device.")
+                "Use --npu-device to force a specific device."
+            )
             return 1
         npu_id = idle
         log(f"Auto-selected idle NPU device: {npu_id}")
@@ -2789,14 +3378,26 @@ def cmd_fill(args: argparse.Namespace) -> int:
     def _restore_on_exit() -> None:
         if _original_hust and current_head(HUST_REPO) != _original_hust:
             log(f"Restoring vllm-hust to {_original_hust[:12]}")
-            subprocess.run(["git", "checkout", "-fq", _original_hust], cwd=HUST_REPO, check=False)
+            subprocess.run(
+                ["git", "checkout", "-fq", _original_hust], cwd=HUST_REPO, check=False
+            )
         if _original_ascend and current_head(ASCEND_REPO) != _original_ascend:
             log(f"Restoring vllm-ascend-hust to {_original_ascend[:12]}")
-            subprocess.run(["git", "checkout", "-fq", _original_ascend], cwd=ASCEND_REPO, check=False)
+            subprocess.run(
+                ["git", "checkout", "-fq", _original_ascend],
+                cwd=ASCEND_REPO,
+                check=False,
+            )
 
     def _cleanup_npu() -> None:
-        subprocess.run(["pkill", "-f", "vllm.entrypoints.cli"], check=False, stderr=subprocess.DEVNULL)
-        subprocess.run(["pkill", "-f", "api_server"], check=False, stderr=subprocess.DEVNULL)
+        subprocess.run(
+            ["pkill", "-f", "vllm.entrypoints.cli"],
+            check=False,
+            stderr=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            ["pkill", "-f", "api_server"], check=False, stderr=subprocess.DEVNULL
+        )
         _kill_port_process(8000)
 
     # Run initial cleanup to ensure no stale processes are running.
@@ -2818,20 +3419,18 @@ def cmd_fill(args: argparse.Namespace) -> int:
 
             # Determine which workloads to consider for this commit.
             candidates = [filter_workload] if filter_workload else list(SCENARIO_PARAMS)
-            missing = [w for w in candidates if not cell_already_present(w, hust_commit)]
+            missing = [
+                w for w in candidates if not cell_already_present(w, hust_commit)
+            ]
             if not missing:
                 log(f"SKIP commit {hust_commit[:9]}: all workloads present")
                 continue
 
-            # First try to look up from the snapshot for version consistency.
-            snapshot_ascend = _lookup_ascend_commit_from_snapshot(hust_commit)
-            if snapshot_ascend:
-                ascend_commit = snapshot_ascend
-                log(f"Resolved ascend commit from snapshot: {ascend_commit[:12]}")
-            else:
-                # Fall back to time-aligned resolution.
-                ascend_commit = resolve_ascend_commit(hust_commit)
-                log(f"Auto-resolved time-aligned ascend commit: {ascend_commit[:12]}")
+            # Snapshot -> time-align -> blind HEAD fallback, so a given
+            # vllm-hust commit always pairs with the same plugin commit
+            # across workloads and across backfill runs.
+            ascend_commit, source = resolve_ascend_commit_chain(hust_commit)
+            log(f"Resolved ascend commit via {source}: {ascend_commit[:12]}")
             log(f"=== Commit {hust_commit[:9]}: {len(missing)} missing workload(s) ===")
 
             for workload in missing:
@@ -2843,7 +3442,10 @@ def cmd_fill(args: argparse.Namespace) -> int:
                     continue
                 if cell_already_present(workload, hust_commit) and not args.force:
                     log(f"SKIP {key} (already in leaderboard)")
-                    state["cells"][key] = {"status": "done", "skipped": "already-present"}
+                    state["cells"][key] = {
+                        "status": "done",
+                        "skipped": "already-present",
+                    }
                     total_skipped += 1
                     continue
 
@@ -2922,13 +3524,20 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
     # Remove permanently excluded submissions before aggregation.
     removed = _remove_excluded_submissions()
     if removed:
-        log(f"Removed {len(removed)} permanently excluded submission(s) "
-            "from the aggregation source.")
+        log(
+            f"Removed {len(removed)} permanently excluded submission(s) "
+            "from the aggregation source."
+        )
 
     cmd = [
-        str(PYTHON_BIN), "-m", "vllm_hust_benchmark.cli", "publish-website",
-        "--source-dir", "submissions",
-        "--output-dir", "leaderboard-data/snapshots",
+        str(PYTHON_BIN),
+        "-m",
+        "vllm_hust_benchmark.cli",
+        "publish-website",
+        "--source-dir",
+        "submissions",
+        "--output-dir",
+        "leaderboard-data/snapshots",
         "--execute",
     ]
     log(f"$ {' '.join(shlex.quote(c) for c in cmd)}")
@@ -2960,9 +3569,11 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
         except (json.JSONDecodeError, OSError):
             pass
 
-    log(f"Aggregate validation passed. "
+    log(
+        f"Aggregate validation passed. "
         f"Snapshot contains {single_count} single-GPU entries. "
-        "Run scripts/validate_public_leaderboard_snapshots.py next.")
+        "Run scripts/validate_public_leaderboard_snapshots.py next."
+    )
     return 0
 
 
@@ -3008,13 +3619,21 @@ def cmd_validate(args: argparse.Namespace) -> int:
 
 def cmd_push(args: argparse.Namespace) -> int:
     """Stage, commit and push the new submissions and refreshed snapshots."""
-    subprocess.run(["git", "add", "submissions/", "leaderboard-data/snapshots/"],
-                   cwd=REPO_ROOT, check=True)
+    subprocess.run(
+        ["git", "add", "submissions/", "leaderboard-data/snapshots/"],
+        cwd=REPO_ROOT,
+        check=True,
+    )
     # Count the actual number of backfill submissions being pushed.
-    pending_dirs = [
-        d for d in (REPO_ROOT / "submissions").iterdir()
-        if d.is_dir() and d.name.startswith("single-gpu-backfill-")
-    ] if (REPO_ROOT / "submissions").is_dir() else []
+    pending_dirs = (
+        [
+            d
+            for d in (REPO_ROOT / "submissions").iterdir()
+            if d.is_dir() and d.name.startswith("single-gpu-backfill-")
+        ]
+        if (REPO_ROOT / "submissions").is_dir()
+        else []
+    )
     msg = args.message or (
         f"feat(leaderboard): backfill single-GPU vllm-hust cells "
         f"({len(pending_dirs)} submissions)"
@@ -3049,16 +3668,22 @@ def cmd_restore(args: argparse.Namespace) -> int:
 # Argparse plumbing
 # ---------------------------------------------------------------------------
 
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_plan = sub.add_parser("plan", help="Show what is missing.")
-    p_plan.add_argument("--group", action="store_true",
-                        help="Group output by commit instead of by workload.")
+    p_plan.add_argument(
+        "--group",
+        action="store_true",
+        help="Group output by commit instead of by workload.",
+    )
     sub.add_parser("status", help="Show progress from the checkpoint.")
     sub.add_parser("aggregate", help="Rebuild leaderboard-data/snapshots/.")
-    sub.add_parser("validate", help="Validate all submissions and snapshots (Section 13.2).")
+    sub.add_parser(
+        "validate", help="Validate all submissions and snapshots (Section 13.2)."
+    )
     sub.add_parser("restore", help="Restore original vllm-hust/ascend HEADs.")
 
     p_push = sub.add_parser("push", help="Stage, commit and push.")
@@ -3066,33 +3691,69 @@ def build_parser() -> argparse.ArgumentParser:
     p_push.add_argument("--dry-run", action="store_true")
 
     p_run = sub.add_parser("run", help="Run benchmark(s) for a commit.")
-    p_run.add_argument("--commit",
-                       help="vllm-hust commit to benchmark (optional; if omitted, "
-                            "uses latest origin/main).")
-    p_run.add_argument("--ascend-commit",
-                       help="vllm-ascend-hust plugin commit (optional; if omitted, "
-                            "auto-resolves to latest origin/main).")
-    p_run.add_argument("--workload", choices=list(SCENARIO_PARAMS.keys()),
-                       help="Specific workload to run (optional; if omitted, run all "
-                            "missing workloads for the commit).")
-    p_run.add_argument("--force", action="store_true",
-                       help="Re-run cells already marked done.")
-    p_run.add_argument("--fail-fast", action="store_true",
-                       help="Stop after the first failed cell.")
-    p_run.add_argument("--npu-device", type=int, default=None,
-                       help="NPU device index to use (default: auto-select idle NPU via npu-smi).")
+    p_run.add_argument(
+        "--commit",
+        help="vllm-hust commit to benchmark (optional; if omitted, "
+        "uses latest origin/main).",
+    )
+    p_run.add_argument(
+        "--ascend-commit",
+        help="vllm-ascend-hust plugin commit (optional; if omitted, "
+        "auto-resolves to latest origin/main).",
+    )
+    p_run.add_argument(
+        "--workload",
+        choices=list(SCENARIO_PARAMS.keys()),
+        help="Specific workload to run (optional; if omitted, run all "
+        "missing workloads for the commit).",
+    )
+    p_run.add_argument(
+        "--force", action="store_true", help="Re-run cells already marked done."
+    )
+    p_run.add_argument(
+        "--fail-fast", action="store_true", help="Stop after the first failed cell."
+    )
+    p_run.add_argument(
+        "--npu-device",
+        type=int,
+        default=None,
+        help="NPU device index to use (default: auto-select idle NPU via npu-smi).",
+    )
+    p_run.add_argument(
+        "--force-mismatched-plugin-commit",
+        action="store_true",
+        help=(
+            "Override the plugin commit consistency guard. Use only when a "
+            "vllm-hust commit genuinely must be benchmarked against a plugin "
+            "commit that differs from the snapshot canonical (e.g. snapshot "
+            "corruption, or a deliberate plugin revert experiment). The "
+            "override is recorded in state.json under "
+            "audit.plugin_override for later review."
+        ),
+    )
 
-    p_fill = sub.add_parser("fill", help="Fill all missing cells across all commits "
-                            "(one-click full backfill).")
-    p_fill.add_argument("--workload", choices=list(SCENARIO_PARAMS.keys()),
-                        help="Specific workload to fill (optional; if omitted, fill all "
-                             "missing workloads across all commits).")
-    p_fill.add_argument("--force", action="store_true",
-                        help="Re-run cells already marked done.")
-    p_fill.add_argument("--fail-fast", action="store_true",
-                        help="Stop after the first failed cell.")
-    p_fill.add_argument("--npu-device", type=int, default=None,
-                        help="NPU device index to use (default: auto-select idle NPU via npu-smi).")
+    p_fill = sub.add_parser(
+        "fill",
+        help="Fill all missing cells across all commits (one-click full backfill).",
+    )
+    p_fill.add_argument(
+        "--workload",
+        choices=list(SCENARIO_PARAMS.keys()),
+        help="Specific workload to fill (optional; if omitted, fill all "
+        "missing workloads across all commits).",
+    )
+    p_fill.add_argument(
+        "--force", action="store_true", help="Re-run cells already marked done."
+    )
+    p_fill.add_argument(
+        "--fail-fast", action="store_true", help="Stop after the first failed cell."
+    )
+    p_fill.add_argument(
+        "--npu-device",
+        type=int,
+        default=None,
+        help="NPU device index to use (default: auto-select idle NPU via npu-smi).",
+    )
 
     return parser
 

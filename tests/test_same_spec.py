@@ -43,8 +43,12 @@ def _spec() -> dict:
 
 def _prefix_repetition_spec() -> dict:
     spec = _spec()
-    spec["id"] = "official-ascend-jan-2026-v0.11.0-prefix-repetition-online-qwen25-14b-910b3"
-    spec["label"] = "Official Ascend Jan 2026 prefix repetition online baseline for vllm-hust goal tracking"
+    spec["id"] = (
+        "official-ascend-jan-2026-v0.11.0-prefix-repetition-online-qwen25-14b-910b3"
+    )
+    spec["label"] = (
+        "Official Ascend Jan 2026 prefix repetition online baseline for vllm-hust goal tracking"
+    )
     spec["scenario"] = "prefix-repetition-online"
     spec["client_parameters"] = {
         "backend": "vllm",
@@ -88,7 +92,10 @@ def test_same_spec_hash_ignores_runtime_model_path() -> None:
         runtime_model="/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/abc",
     )
 
-    assert left["resolved_server_parameters"]["model"] != right["resolved_server_parameters"]["model"]
+    assert (
+        left["resolved_server_parameters"]["model"]
+        != right["resolved_server_parameters"]["model"]
+    )
     assert left["resolved_spec_hash"] == right["resolved_spec_hash"]
 
 

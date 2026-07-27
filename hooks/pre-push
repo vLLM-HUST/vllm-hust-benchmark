@@ -1,0 +1,77 @@
+#!/bin/bash
+# Pre-push hook — lightweight safety net for benchmark repo pushes.
+#
+# The vllm-hust-website repo carries a heavier pre-push hook that manages
+# PyPI publish and version bumping. The benchmark repo has no PyPI flow,
+# so this hook only runs basic sanity checks (whitespace, conflict markers)
+# on main-branch pushes; feature-branch pushes exit early so day-to-day
+# work is never blocked.
+
+set -eo pipefail
+
+# Recursion guard
+if [ "${_VLLM_HUST_BENCH_PP_RUNNING:-0}" = "1" ]; then exit 0; fi
+
+# Colors
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# Only run checks when the push touches main.
+PUSHING_MAIN=false
+while read -r local_ref local_sha remote_ref remote_sha; do
+    if [ "$local_ref" = "refs/heads/main" ] || [ "$remote_ref" = "refs/heads/main" ]; then
+        PUSHING_MAIN=true
+    fi
+done
+
+if [ "$PUSHING_MAIN" != true ]; then
+    exit 0
+fi
+
+echo -e "${CYAN}🔍 Running pre-push safety checks on main-bound push...${NC}"
+
+# Trailing whitespace check on commits being pushed.
+# `git diff --cached --check` only inspects the index; for a pre-push we
+# inspect the diff between the local main tip and its first ancestor that
+# is already on the remote (when available), else the previous local tip.
+range="HEAD~1..HEAD"
+if git rev-parse --verify -q "@{upstream}" >/dev/null 2>&1; then
+    range="@{upstream}..HEAD"
+fi
+
+if ! git diff --check "$range" 2>/dev/null; then
+    echo -e "${RED}✗ Trailing whitespace found in $range. Fix before pushing.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ No trailing whitespace${NC}"
+
+# Merge conflict markers.
+conflict_marker_pattern='^\+(<{7}|={7}|>{7})'
+if git diff "$range" 2>/dev/null | grep -qE "$conflict_marker_pattern"; then
+    echo -e "${RED}✗ Merge conflict markers found in $range${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ No conflict markers${NC}"
+
+# Large files (>5 MB) accidentally pushed.
+max_size=5242880
+large=""
+for f in $(git diff --name-only "$range" 2>/dev/null); do
+    [ -f "$f" ] || continue
+    sz=$(stat -c%s "$f" 2>/dev/null || stat -f%z "$f" 2>/dev/null || echo 0)
+    if [ "$sz" -gt "$max_size" ]; then
+        large="${large}  $f ($((sz / 1024 / 1024))MB)\n"
+    fi
+done
+if [ -n "$large" ]; then
+    echo -e "${RED}✗ Large files (>5MB) staged in $range:${NC}"
+    printf "%b" "$large"
+    exit 1
+fi
+echo -e "${GREEN}✓ No large files${NC}"
+
+echo -e "${GREEN}✓ Pre-push checks passed.${NC}"
+exit 0

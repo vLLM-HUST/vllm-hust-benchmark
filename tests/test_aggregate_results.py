@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 import json
-import math
 import statistics
 import tempfile
 from pathlib import Path
@@ -13,7 +12,6 @@ import pytest
 
 from vllm_hust_benchmark.aggregate_results import (
     VALID_AGG_METHODS,
-    VALID_OUTLIER_HANDLING,
     aggregate_entries,
     apply_aggregate_to_entry,
     build_series_signature,
@@ -257,20 +255,25 @@ class TestComputeMetricStats:
         result = compute_metric_stats(sample_ttft_values, method="min")
         assert result["value"] == 280.0
 
-    def test_max(self, sample_ttft_values):
-        result = compute_metric_stats(sample_ttft_values, method="max")
-        assert result["value"] == 310.0
+    def test_latest(self, sample_ttft_values):
+        # "latest" takes the last value in the (repeat_index-sorted) list
+        result = compute_metric_stats(sample_ttft_values, method="latest")
+        assert result["value"] == 295.0  # last value in [280, 290, 310, 285, 295]
 
     def test_trimmed_mean(self, sample_ttft_values):
         # [280, 290, 310, 285, 295] sorted: [280, 285, 290, 295, 310]
         # trim 10% => remove 0 from each end (5*0.1=0.5, floor=0)
         # So trimmed_mean(0.1) ≈ mean of all 5 = 292.0
-        result = compute_metric_stats(sample_ttft_values, method="trimmed_mean", trim_percent=0.1)
+        result = compute_metric_stats(
+            sample_ttft_values, method="trimmed_mean", trim_percent=0.1
+        )
         assert result["value"] == pytest.approx(292.0)
 
     def test_trimmed_mean_20pct(self):
         # [1, 2, 3, 4, 5] trim 0.2 => remove 1 from each end => [2, 3, 4] => mean=3.0
-        result = compute_metric_stats([1, 2, 3, 4, 5], method="trimmed_mean", trim_percent=0.2)
+        result = compute_metric_stats(
+            [1, 2, 3, 4, 5], method="trimmed_mean", trim_percent=0.2
+        )
         assert result["value"] == 3.0
 
     def test_single_value(self):
@@ -295,7 +298,9 @@ class TestValidation:
         for m in sorted(VALID_AGG_METHODS):
             count = 3 if m != "trimmed_mean" else 4
             errors = validate_aggregate_method(m, count)
-            assert errors == [], f"method={m} should be valid with count={count}, got {errors}"
+            assert errors == [], (
+                f"method={m} should be valid with count={count}, got {errors}"
+            )
 
     def test_invalid_aggregate_method(self):
         errors = validate_aggregate_method("invalid_method", 3)
@@ -435,10 +440,16 @@ class TestCanonicalAggregate:
         assert agg["metrics"]["ttft_ms"]["value"] == 280.0
         assert agg["metrics"]["throughput_tps"]["value"] == 182.0
 
-    def test_max(self, repeat_group_entries):
-        agg = compute_canonical_aggregate(repeat_group_entries, method="max")
+    def test_latest(self, repeat_group_entries):
+        # repeat_group_entries are sorted by repeat_index ascending, so the
+        # highest-repeat_index entry is the last one (ttft=310, tp=194).
+        agg = compute_canonical_aggregate(repeat_group_entries, method="latest")
+        assert agg["method"] == "latest"
         assert agg["metrics"]["ttft_ms"]["value"] == 310.0
         assert agg["metrics"]["throughput_tps"]["value"] == 194.0
+        # min/max/std still describe the full distribution
+        assert agg["metrics"]["ttft_ms"]["min"] == 280.0
+        assert agg["metrics"]["ttft_ms"]["max"] == 310.0
 
     def test_single_entry(self, base_entry_dict):
         e = copy.deepcopy(base_entry_dict)
@@ -471,7 +482,9 @@ class TestCanonicalAggregate:
             e["repeat_index"] = idx
             e["metrics"]["ttft_ms"] = 290.0 + idx * 10  # [290, 300, 310, 320]
             entries.append(e)
-        agg = compute_canonical_aggregate(entries, method="trimmed_mean", trim_percent=0.25)
+        agg = compute_canonical_aggregate(
+            entries, method="trimmed_mean", trim_percent=0.25
+        )
         # Sorted: [290, 300, 310, 320], trim 25% each side → remove 1 each → [300, 310] → mean 305
         assert agg["metrics"]["ttft_ms"]["value"] == pytest.approx(305.0)
 
@@ -545,7 +558,12 @@ class TestApplyAggregate:
             "count": 3,
             "metrics": {
                 "ttft_ms": {"value": 295.0, "min": 280.0, "max": 310.0, "std": 15.0},
-                "throughput_tps": {"value": 187.0, "min": 182.0, "max": 194.0, "std": 6.0},
+                "throughput_tps": {
+                    "value": 187.0,
+                    "min": 182.0,
+                    "max": 194.0,
+                    "std": 6.0,
+                },
             },
             "outlier_handling": "none",
         }
@@ -625,7 +643,9 @@ class TestDeterminism:
         assert len(result1) == 1
         assert len(result2) == 1
         for metric in result1[0]["canonical_aggregate"]["metrics"]:
-            assert result1[0]["canonical_aggregate"]["metrics"][metric]["value"] == pytest.approx(
+            assert result1[0]["canonical_aggregate"]["metrics"][metric][
+                "value"
+            ] == pytest.approx(
                 result2[0]["canonical_aggregate"]["metrics"][metric]["value"]
             )
 
@@ -730,3 +750,55 @@ class TestTrimmedMean:
     def test_trim_percent_too_high_raises(self):
         with pytest.raises(ValueError, match="trim_percent must be"):
             _trimmed_mean([1, 2, 3], 0.6)
+
+
+# ---------------------------------------------------------------------------
+# Test: max removed & latest audit trail (Task 7)
+# ---------------------------------------------------------------------------
+
+
+def test_max_no_longer_valid_method():
+    """``max`` must no longer be a valid aggregation method (removed in Task 7)."""
+    assert "max" not in VALID_AGG_METHODS
+
+    # The CLI ``--method`` argument derives its choices from VALID_AGG_METHODS,
+    # so passing ``max`` must be rejected by argparse with SystemExit.
+    from vllm_hust_benchmark.cli import _build_parser
+
+    parser = _build_parser()
+    with pytest.raises(SystemExit):
+        parser.parse_args(["aggregate", "--method", "max", "entry.json"])
+
+
+def test_latest_method_records_discarded_indices(base_entry_dict):
+    """``latest`` takes the highest-repeat_index entry's raw metrics and
+    records ``discarded_repeat_indices`` in ``metadata.aggregate_audit``."""
+    rg = "group/v1::series"
+    entries = []
+    for idx, (ttft, tp) in enumerate(
+        [(280.0, 182.0), (290.0, 185.0), (310.0, 194.0)], start=1
+    ):
+        e = copy.deepcopy(base_entry_dict)
+        e["repeat_group"] = rg
+        e["repeat_index"] = idx
+        e["metrics"]["ttft_ms"] = ttft
+        e["metrics"]["throughput_tps"] = tp
+        entries.append(e)
+
+    result = aggregate_entries(entries, method="latest")
+    assert len(result) == 1
+    entry = result[0]
+
+    # Resulting metrics must equal repeat-03's raw values (not an average).
+    assert entry["metrics"]["ttft_ms"] == 310.0
+    assert entry["metrics"]["throughput_tps"] == 194.0
+
+    # The canonical_aggregate value must also be the latest raw value.
+    agg = entry["canonical_aggregate"]
+    assert agg["method"] == "latest"
+    assert agg["metrics"]["ttft_ms"]["value"] == 310.0
+
+    # Audit trail records the discarded repeat indices.
+    audit = entry["metadata"]["aggregate_audit"]
+    assert audit["method"] == "latest"
+    assert audit["discarded_repeat_indices"] == [1, 2]

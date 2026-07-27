@@ -304,6 +304,20 @@ def test_store_rejects_symlinked_latest_pointer(tmp_path: Path) -> None:
     assert victim.read_text(encoding="utf-8") == "preserve me\n"
 
 
+def test_baseline_rejected_when_symlink_in_path(tmp_path: Path) -> None:
+    repository_root = tmp_path / "central"
+    repository_root.mkdir()
+    victim = tmp_path / "victim"
+    victim.mkdir()
+    (repository_root / "baselines").symlink_to(victim, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="contains a symlink"):
+        perfgate_baselines._reject_symlink_components(
+            repository_root,
+            perfgate_baselines.baseline_relative_dir(_identity()),
+        )
+
+
 def test_fetch_rejects_missing_exact_baseline(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="exact central baseline is unavailable"):
         perfgate_baselines.fetch_baseline(
@@ -401,6 +415,22 @@ def test_latest_pointer_requires_current_main_tip(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="current main tip"):
         perfgate_baselines.verify_main_commit(target, old_sha, "main", require_tip=True)
     perfgate_baselines.verify_main_commit(target, new_sha, "main", require_tip=True)
+
+
+def test_latest_main_rejected_when_sha_not_ancestor(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    main_sha = _commit_target_main(target)
+    _git("checkout", "--orphan", "divergent", cwd=target)
+    _git("rm", "-rf", "--ignore-unmatch", ".", cwd=target)
+    (target / "DIVERGENT.md").write_text("divergent\n", encoding="utf-8")
+    _git("add", "DIVERGENT.md", cwd=target)
+    _git("commit", "-m", "divergent orphan", cwd=target)
+    divergent_sha = _git("rev-parse", "HEAD", cwd=target)
+    _git("checkout", "main", cwd=target)
+
+    with pytest.raises(ValueError, match="is not an ancestor of main"):
+        perfgate_baselines.verify_main_commit(target, divergent_sha, "main")
+    perfgate_baselines.verify_main_commit(target, main_sha, "main")
 
 
 def test_bare_git_branch_can_be_bootstrapped_and_updated(tmp_path: Path) -> None:

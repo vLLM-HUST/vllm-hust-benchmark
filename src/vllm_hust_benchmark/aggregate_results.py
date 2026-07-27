@@ -10,8 +10,8 @@ Design
   the campaign + series signature).
 - Within each group the entries are sorted by ``repeat_index`` for
   deterministic processing.
-- Per-metric statistics are computed (mean, median, trimmed mean, min, max)
-  as well as range (min/max) and dispersion (std).
+- Per-metric statistics are computed (mean, median, trimmed mean, min,
+  latest) as well as range (min/max) and dispersion (std).
 - Outliers can be detected via IQR or 3σ rules and either removed or capped.
 - The result is a ``canonical_aggregate`` object (per T06 §3.6) that is
   atomically paired with the entry's top-level metrics.
@@ -44,7 +44,7 @@ from typing import Any
 # Constants
 # ---------------------------------------------------------------------------
 
-VALID_AGG_METHODS = frozenset({"mean", "median", "trimmed_mean", "min", "max"})
+VALID_AGG_METHODS = frozenset({"mean", "median", "trimmed_mean", "min", "latest"})
 """Accepted values for ``canonical_aggregate.method``."""
 
 VALID_OUTLIER_HANDLING = frozenset({"none", "removed", "capped"})
@@ -184,7 +184,9 @@ def detect_outliers_iqr(values: list[float]) -> tuple[list[int], tuple[float, fl
     return outlier_indices, (lower, upper)
 
 
-def detect_outliers_3sigma(values: list[float]) -> tuple[list[int], tuple[float, float]]:
+def detect_outliers_3sigma(
+    values: list[float],
+) -> tuple[list[int], tuple[float, float]]:
     """3σ-based outlier detection.
 
     Returns
@@ -273,8 +275,11 @@ def compute_metric_stats(
         result["value"] = _trimmed_mean(clean, trim_percent)
     elif method == "min":
         result["value"] = min(clean)
-    elif method == "max":
-        result["value"] = max(clean)
+    elif method == "latest":
+        # Takes the value from the highest repeat_index entry.  The caller
+        # must pass values already sorted by repeat_index ascending so that
+        # ``clean[-1]`` is the latest entry's raw value.
+        result["value"] = clean[-1]
     else:
         raise ValueError(f"Unknown aggregation method: {method!r}")
 
@@ -351,7 +356,11 @@ def _cap_outliers(
     lower = min(kept)
     upper = max(kept)
     capped = [
-        lower if i in outlier_set and v < lower else upper if i in outlier_set and v > upper else v
+        lower
+        if i in outlier_set and v < lower
+        else upper
+        if i in outlier_set and v > upper
+        else v
         for i, v in enumerate(values)
     ]
     detail = (
@@ -381,7 +390,7 @@ def validate_aggregate_method(method: str, count: int) -> list[str]:
         errors.append(
             f"trimmed_mean requires count >= {TRIM_MEAN_MIN_COUNT}, got {count}"
         )
-    if method in ("min", "max") and count < 1:
+    if method in ("min", "latest") and count < 1:
         errors.append(f"count must be >= 1 for {method}, got {count}")
     if method == "mean" and count < 1:
         errors.append(f"count must be >= 1 for mean, got {count}")
@@ -454,7 +463,11 @@ def _collect_metric_values(
         m = entry.get("metrics")
         if not isinstance(m, dict):
             return {}
-        keys = {k for k, v in m.items() if isinstance(v, (int, float)) and not isinstance(v, bool) and v is not None}
+        keys = {
+            k
+            for k, v in m.items()
+            if isinstance(v, (int, float)) and not isinstance(v, bool) and v is not None
+        }
         all_names.update(m.keys())
         if metric_names is None:
             metric_names = keys
@@ -556,9 +569,15 @@ def compute_canonical_aggregate(
     outlier_detail: str | None = None
 
     for metric_name, raw_values in metric_values.items():
-        if outlier_handling != "none" and all_outlier_indices:
+        if method == "latest":
+            # "latest" takes the raw metrics from the highest-repeat_index
+            # entry; outlier handling does not apply.
+            cleaned = raw_values
+        elif outlier_handling != "none" and all_outlier_indices:
             cleaned, detail = _handle_outliers(
-                raw_values, outlier_handling, outlier_indices_sorted,
+                raw_values,
+                outlier_handling,
+                outlier_indices_sorted,
                 detection_method=outlier_detection,
             )
             if detail and outlier_detail is None:
@@ -688,6 +707,20 @@ def aggregate_entries(
         # Apply to the last entry (highest repeat_index) to preserve the
         # entry with the most recent metadata.
         target_entry = apply_aggregate_to_entry(group_entries[-1], aggregate)
+
+        if method == "latest":
+            selected_index = get_repeat_index(group_entries[-1])
+            all_indices = [get_repeat_index(e) for e in group_entries]
+            discarded = sorted(
+                idx for idx in all_indices if idx is not None and idx != selected_index
+            )
+            metadata = dict(target_entry.get("metadata") or {})
+            metadata["aggregate_audit"] = {
+                "method": "latest",
+                "discarded_repeat_indices": discarded,
+            }
+            target_entry["metadata"] = metadata
+
         result.append(target_entry)
 
     return result

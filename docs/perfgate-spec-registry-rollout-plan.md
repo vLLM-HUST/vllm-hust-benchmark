@@ -1,54 +1,47 @@
 # Performance Gate Spec Registry Rollout Plan
 
-This document defines the plan for moving performance gate spec selection from
-hard-coded workflow defaults to a shared registry and resolver owned by
-`vllm-hust-benchmark`.
+This document defines the plan for moving performance gate spec selection from hard-coded workflow
+defaults to a shared registry and resolver owned by `vllm-hust-benchmark`.
 
-Companion overview document:
-`docs/perfgate-scenario-rollout.md`
+Companion overview document: `docs/perfgate-scenario-rollout.md`
 
-The goal is to make future scenario onboarding mostly data-driven. After the
-initial mechanism is in place, adding a new performance gate scenario should
-usually require adding a spec file and one registry entry in this repository,
-instead of repeatedly editing workflows in `vllm-hust` and `vllm-ascend-hust`.
+The goal is to make future scenario onboarding mostly data-driven. After the initial mechanism is in
+place, adding a new performance gate scenario should usually require adding a spec file and one
+registry entry in this repository, instead of repeatedly editing workflows in `vllm-hust` and
+`vllm-ascend-hust`.
 
-Tracking issue:
-https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/38
+Tracking issue: https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/38
 
 ## Background
 
-The current performance gate flow still relies on a single default perfgate spec
-path in downstream workflows:
+The current performance gate flow still relies on a single default perfgate spec path in downstream
+workflows:
 
 ```text
 docs/official-baselines/perfgate-ascend-qwen25-3b-910b2.json
 ```
 
-This works for the existing `random-online` smoke gate, but it does not scale
-well when multiple scenarios need to be enabled. Each new case would otherwise
-require repeated edits in:
+This works for the existing `random-online` smoke gate, but it does not scale well when multiple
+scenarios need to be enabled. Each new case would otherwise require repeated edits in:
 
 - `vllm-hust-benchmark`, to add the spec.
 - `vllm-hust`, to choose the spec in the benchmark workflow.
 - `vllm-ascend-hust`, to mirror the same workflow wiring.
 - optionally `vllm-hust-website`, if aggregation or display needs adjustment.
 
-That repeated workflow editing increases the chance of B2/B3 mismatches,
-missing files, cross-branch dependencies, and inconsistent behavior between
-`vllm-hust` and `vllm-ascend-hust`.
+That repeated workflow editing increases the chance of B2/B3 mismatches, missing files, cross-branch
+dependencies, and inconsistent behavior between `vllm-hust` and `vllm-ascend-hust`.
 
 ## Goals
 
-- Centralize the mapping from `(scenario, hardware_chip_model)` to perfgate spec
-  files in `vllm-hust-benchmark`.
-- Keep perfgate spec selection consistent across `vllm-hust` and
-  `vllm-ascend-hust`.
-- Preserve explicit workflow override support for emergency fixes and manual
-  experiments.
-- Fail early with a clear error when a scenario/chip pair is unsupported or the
-  selected spec file is missing.
-- Keep policy decisions, such as report-only versus blocking mode, in the
-  downstream workflow repositories.
+- Centralize the mapping from `(scenario, hardware_chip_model)` to perfgate spec files in
+  `vllm-hust-benchmark`.
+- Keep perfgate spec selection consistent across `vllm-hust` and `vllm-ascend-hust`.
+- Preserve explicit workflow override support for emergency fixes and manual experiments.
+- Fail early with a clear error when a scenario/chip pair is unsupported or the selected spec file
+  is missing.
+- Keep policy decisions, such as report-only versus blocking mode, in the downstream workflow
+  repositories.
 - Make future scenario rollout incremental and reviewable.
 
 ## Non-Goals
@@ -56,8 +49,8 @@ missing files, cross-branch dependencies, and inconsistent behavior between
 - Do not enable every benchmark scenario as a blocking gate in one change.
 - Do not move workflow policy into `vllm-hust-benchmark`.
 - Do not make PR preview data eligible for formal website aggregation.
-- Do not replace official baseline specs. This registry only selects perfgate
-  specs used by PR gate or report-mode comparison jobs.
+- Do not replace official baseline specs. This registry only selects perfgate specs used by PR gate
+  or report-mode comparison jobs.
 - Do not remove manual `PERFGATE_SPEC_FILE` overrides in the first migration.
 
 ## Proposed Mechanism
@@ -68,8 +61,7 @@ Add a source-of-truth registry file to `vllm-hust-benchmark`, for example:
 src/vllm_hust_benchmark/data/perfgate_spec_registry.json
 ```
 
-The registry maps a scenario and hardware chip model to a repo-relative spec
-file path:
+The registry maps a scenario and hardware chip model to a repo-relative spec file path:
 
 ```json
 {
@@ -103,25 +95,22 @@ PYTHONPATH="$BENCHMARK_REPO/src" python -m vllm_hust_benchmark.perfgate_specs re
   --repo-root "$BENCHMARK_REPO"
 ```
 
-The CLI should print the resolved spec path. By default it should print an
-absolute path when `--repo-root` is provided, because workflows ultimately need a
-file path that can be passed to same-spec runners.
+The CLI should print the resolved spec path. By default it should print an absolute path when
+`--repo-root` is provided, because workflows ultimately need a file path that can be passed to
+same-spec runners.
 
 ## Selection Precedence
 
 Downstream workflows should resolve the spec with this precedence:
 
-1. If `PERFGATE_SPEC_FILE` or the existing repo variable override is explicitly
-   set, use it.
-2. Otherwise resolve by `(BENCH_SCENARIO, HARDWARE_CHIP_MODEL)` through the
-   registry.
-3. If no scenario is configured, default to `random-online`.
-4. If no hardware chip model is configured, default to `910B2` for the current
-   self-hosted runner.
+1. If `PERFGATE_SPEC_FILE` or the existing repo variable override is explicitly set, use it.
+1. Otherwise resolve by `(BENCH_SCENARIO, HARDWARE_CHIP_MODEL)` through the registry.
+1. If no scenario is configured, default to `random-online`.
+1. If no hardware chip model is configured, default to `910B2` for the current self-hosted runner.
 
-The resolver itself should not silently fall back from an unsupported scenario
-to `random-online`. Unsupported pairs should fail early with a readable message.
-Fallbacks belong in workflow configuration, not inside the registry lookup.
+The resolver itself should not silently fall back from an unsupported scenario to `random-online`.
+Unsupported pairs should fail early with a readable message. Fallbacks belong in workflow
+configuration, not inside the registry lookup.
 
 ## Resolver Output Contract
 
@@ -159,8 +148,8 @@ resolved_spec_file="$(
 )"
 ```
 
-A future `--format json` option can be added later if workflows need richer
-outputs such as spec id, model, or benchmark type.
+A future `--format json` option can be added later if workflows need richer outputs such as spec id,
+model, or benchmark type.
 
 ## Registry Contract
 
@@ -188,8 +177,8 @@ Recommended future optional fields:
 - `status`: `experimental`, `report-only`, or `candidate`
 - `notes`
 
-These optional fields are metadata only. Workflow enforcement should not depend
-on them until there is an explicit policy decision.
+These optional fields are metadata only. Workflow enforcement should not depend on them until there
+is an explicit policy decision.
 
 ## Repository Responsibilities
 
@@ -222,8 +211,8 @@ Consumes the contract:
 - keep explicit spec override behavior
 - keep scenario selection policy in workflow logic
 
-Initial behavior should keep `random-online` as the default. `sharegpt-online`
-can be enabled through manual dispatch or label/report-mode first.
+Initial behavior should keep `random-online` as the default. `sharegpt-online` can be enabled
+through manual dispatch or label/report-mode first.
 
 ### vllm-ascend-hust
 
@@ -240,9 +229,8 @@ This should be a separate PR after the benchmark registry lands.
 
 No immediate change is required for the resolver itself.
 
-Website changes are only needed if new formal benchmark data changes
-aggregation or display behavior. PR preview perfgate data must remain excluded
-from formal leaderboard aggregation.
+Website changes are only needed if new formal benchmark data changes aggregation or display
+behavior. PR preview perfgate data must remain excluded from formal leaderboard aggregation.
 
 ## Rollout Phases
 
@@ -281,8 +269,7 @@ Scope:
 - Keep `VLLM_HUST_PERFGATE_SPEC_FILE` override support.
 - Keep default scenario as `random-online`.
 - Add static workflow tests.
-- Enable `sharegpt-online` only through report-mode or explicit manual trigger
-  first.
+- Enable `sharegpt-online` only through report-mode or explicit manual trigger first.
 
 Exit criteria:
 
@@ -293,12 +280,12 @@ Exit criteria:
 Implementation sketch:
 
 1. checkout `vllm-hust-benchmark`
-2. determine `BENCH_SCENARIO`
-3. determine `HARDWARE_CHIP_MODEL`
-4. if an explicit perfgate spec override is set, use it
-5. otherwise call the resolver
-6. export the resolved value as `SAME_SPEC_SPEC_FILE`
-7. reuse the existing same-spec benchmark and compare steps
+1. determine `BENCH_SCENARIO`
+1. determine `HARDWARE_CHIP_MODEL`
+1. if an explicit perfgate spec override is set, use it
+1. otherwise call the resolver
+1. export the resolved value as `SAME_SPEC_SPEC_FILE`
+1. reuse the existing same-spec benchmark and compare steps
 
 This phase should not change main benchmark publication rules.
 
@@ -317,49 +304,45 @@ Exit criteria:
 - B2 default and scenario-aware resolution are both covered by tests.
 - `sharegpt-online` can be selected without changing workflow YAML again.
 
-This PR should intentionally mirror the `vllm-hust` implementation instead of
-inventing a second resolver or a second mapping table.
+This PR should intentionally mirror the `vllm-hust` implementation instead of inventing a second
+resolver or a second mapping table.
 
 ### Phase 4: Add More Scenarios One by One
 
 For each new scenario:
 
 1. Add a perfgate spec in `vllm-hust-benchmark`.
-2. Add one registry entry.
-3. Add or extend tests.
-4. Run in report-only mode first.
-5. Review runtime, variance, dataset availability, and failure modes.
-6. Decide whether to keep report-only or promote to blocking.
+1. Add one registry entry.
+1. Add or extend tests.
+1. Run in report-only mode first.
+1. Review runtime, variance, dataset availability, and failure modes.
+1. Decide whether to keep report-only or promote to blocking.
 
 Candidate order:
 
 1. `prefix-repetition-online`
-2. `random-latency`
-3. `sharegpt-throughput`
-4. `instructcoder-online`
-5. `agent-research-online`
-6. `visionarena-online`
+1. `random-latency`
+1. `sharegpt-throughput`
+1. `instructcoder-online`
+1. `agent-research-online`
+1. `visionarena-online`
 
-The exact order can change based on data availability, runtime cost, and
-stakeholder priority.
+The exact order can change based on data availability, runtime cost, and stakeholder priority.
 
 ## PR Breakdown
 
 Recommended PR sequence:
 
-1. `vllm-hust-benchmark`: add registry, resolver, `random-online` entry, and
-   `sharegpt-online` entry.
-2. `vllm-hust`: consume resolver while keeping default behavior as
-   `random-online`.
-3. `vllm-ascend-hust`: consume resolver with the same default behavior.
-4. `vllm-hust`: enable `sharegpt-online` as report-only through manual dispatch
-   or PR label.
-5. `vllm-ascend-hust`: enable `sharegpt-online` as report-only through the same
-   selection model.
-6. `vllm-hust-benchmark`: add the next scenario spec and registry entry.
+1. `vllm-hust-benchmark`: add registry, resolver, `random-online` entry, and `sharegpt-online`
+   entry.
+1. `vllm-hust`: consume resolver while keeping default behavior as `random-online`.
+1. `vllm-ascend-hust`: consume resolver with the same default behavior.
+1. `vllm-hust`: enable `sharegpt-online` as report-only through manual dispatch or PR label.
+1. `vllm-ascend-hust`: enable `sharegpt-online` as report-only through the same selection model.
+1. `vllm-hust-benchmark`: add the next scenario spec and registry entry.
 
-Do not combine steps 1, 2, and 3 into one PR. The benchmark registry must be
-available on `vllm-hust-benchmark@main` before downstream workflows rely on it.
+Do not combine steps 1, 2, and 3 into one PR. The benchmark registry must be available on
+`vllm-hust-benchmark@main` before downstream workflows rely on it.
 
 ## Validation Plan
 
@@ -396,31 +379,29 @@ Hardware validation:
 - confirm the runner chip model is still 910B2
 - confirm ShareGPT dataset availability or downloader behavior
 - confirm benchmark runtime is acceptable for PR preview
-- confirm results are not published as formal main benchmark data unless the
-  run is explicitly a formal main benchmark
+- confirm results are not published as formal main benchmark data unless the run is explicitly a
+  formal main benchmark
 
 ## Risks and Mitigations
 
-| Risk | Impact | Mitigation |
-| --- | --- | --- |
-| Downstream workflow references registry before it is on benchmark `main` | CI fails before benchmark | merge benchmark registry PR first |
-| Wrong chip default reintroduces B2/B3 mismatch | wrong spec or missing file | resolver tests and downstream static tests assert B2 default |
-| Manual override behavior is removed too early | harder emergency rollback | keep explicit `PERFGATE_SPEC_FILE` overrides |
-| Registry silently falls back to random-online | false confidence | resolver should fail unsupported pairs |
-| New scenario is too slow or unstable | noisy PR gate | start report-only, then promote later |
-| PR preview data enters formal aggregation | misleading website data | keep publication/aggregation policy outside resolver |
-| Dataset path is unavailable on runner | benchmark fails after startup | validate dataset availability during report-mode rollout |
+| Risk                                                                     | Impact                        | Mitigation                                                   |
+| ------------------------------------------------------------------------ | ----------------------------- | ------------------------------------------------------------ |
+| Downstream workflow references registry before it is on benchmark `main` | CI fails before benchmark     | merge benchmark registry PR first                            |
+| Wrong chip default reintroduces B2/B3 mismatch                           | wrong spec or missing file    | resolver tests and downstream static tests assert B2 default |
+| Manual override behavior is removed too early                            | harder emergency rollback     | keep explicit `PERFGATE_SPEC_FILE` overrides                 |
+| Registry silently falls back to random-online                            | false confidence              | resolver should fail unsupported pairs                       |
+| New scenario is too slow or unstable                                     | noisy PR gate                 | start report-only, then promote later                        |
+| PR preview data enters formal aggregation                                | misleading website data       | keep publication/aggregation policy outside resolver         |
+| Dataset path is unavailable on runner                                    | benchmark fails after startup | validate dataset availability during report-mode rollout     |
 
 ## Open Questions
 
-- Should registry metadata include `status`, or should status live only in the
-  tracking issue and downstream workflows?
-- Should `hardware_chip_model` matching be strict, or should aliases such as
-  `ascend910b2` normalize to `910B2`?
-- Should the resolver print only the path, or support `--format json` for
-  richer workflow outputs?
-- Should `sharegpt-online` start as manual dispatch only, PR label report-only,
-  or both?
+- Should registry metadata include `status`, or should status live only in the tracking issue and
+  downstream workflows?
+- Should `hardware_chip_model` matching be strict, or should aliases such as `ascend910b2` normalize
+  to `910B2`?
+- Should the resolver print only the path, or support `--format json` for richer workflow outputs?
+- Should `sharegpt-online` start as manual dispatch only, PR label report-only, or both?
 
 ## Self Review
 
@@ -431,16 +412,14 @@ This plan is feasible because it fits the current repository boundaries:
 - the resolver can be introduced without changing benchmark execution logic.
 - manual spec overrides provide a rollback path.
 
-The main sequencing constraint is cross-repository ordering. The benchmark
-registry must land before downstream workflows depend on it. For that reason,
-the first PR should be limited to `vllm-hust-benchmark`.
+The main sequencing constraint is cross-repository ordering. The benchmark registry must land before
+downstream workflows depend on it. For that reason, the first PR should be limited to
+`vllm-hust-benchmark`.
 
-The plan intentionally does not put enforcement policy in the registry. This is
-important because the same scenario may be report-only in one repository while
-still experimental or disabled in another. Keeping policy in workflows avoids
-turning the registry into a hidden gate controller.
+The plan intentionally does not put enforcement policy in the registry. This is important because
+the same scenario may be report-only in one repository while still experimental or disabled in
+another. Keeping policy in workflows avoids turning the registry into a hidden gate controller.
 
-The largest remaining risk is operational rather than architectural:
-`sharegpt-online` depends on dataset availability and may have higher runtime or
-variance than `random-online`. It should therefore be observed in report-only
-mode before becoming a blocking gate.
+The largest remaining risk is operational rather than architectural: `sharegpt-online` depends on
+dataset availability and may have higher runtime or variance than `random-online`. It should
+therefore be observed in report-only mode before becoming a blocking gate.

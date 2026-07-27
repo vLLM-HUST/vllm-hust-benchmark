@@ -9,14 +9,21 @@ def test_snapshot_only_push_uploads_canonical_snapshots_to_hf() -> None:
     workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
 
     assert 'snapshot_root = Path("leaderboard-data/snapshots")' in workflow_text
-    assert "fh.write(f\"snapshots_changed={'true' if snapshots_changed else 'false'}\\n\")" in workflow_text
-    assert "steps.resolve-submissions.outputs.snapshots_changed == 'true'" in workflow_text
+    assert (
+        "fh.write(f\"snapshots_changed={'true' if snapshots_changed else 'false'}\\n\")"
+        in workflow_text
+    )
+    assert (
+        "steps.resolve-submissions.outputs.snapshots_changed == 'true'" in workflow_text
+    )
     assert (
         "steps.resolve-submissions.outputs.count == '0' && "
         "steps.resolve-submissions.outputs.snapshots_changed == 'true'"
     ) in workflow_text
     assert "Verify HF snapshots match GitHub canonical snapshots" in workflow_text
-    assert "HF snapshots match GitHub canonical snapshots byte-for-byte." in workflow_text
+    assert (
+        "HF snapshots match GitHub canonical snapshots byte-for-byte." in workflow_text
+    )
 
 
 def test_submission_push_keeps_the_aggregation_path() -> None:

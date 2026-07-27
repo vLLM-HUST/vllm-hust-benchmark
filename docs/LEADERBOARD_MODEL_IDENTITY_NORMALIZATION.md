@@ -2,13 +2,16 @@
 
 Status: Implemented and enforced on checked-in benchmark submissions and website snapshots.
 
-This document records the approved Phase 0 decisions for model identity normalization in the vllm-hust leaderboard pipeline.
+This document records the approved Phase 0 decisions for model identity normalization in the
+vllm-hust leaderboard pipeline.
 
 Current status:
 
 - checked-in benchmark submissions are backfilled to the normalized identity contract
-- website aggregation no longer uses heuristic fallback to infer repo ids from short names or cache paths
-- website schema/examples require `model.canonical_id`, `model.repo_id`, `model.short_name`, and `model.display_name`
+- website aggregation no longer uses heuristic fallback to infer repo ids from short names or cache
+  paths
+- website schema/examples require `model.canonical_id`, `model.repo_id`, `model.short_name`, and
+  `model.display_name`
 
 The problem statement below describes the pre-migration state that motivated this RFC.
 
@@ -25,7 +28,9 @@ The current leaderboard pipeline uses `model.name` for multiple meanings at once
 - short model alias, for example `Qwen2.5-14B-Instruct`
 - UI display label in some downstream discussions
 
-Because the exporter writes `--model-name` into the artifact unchanged, different submission sources can publish different strings for the same model. The website filter then de-duplicates on the raw `model.name` value and exposes multiple entries for one logical model.
+Because the exporter writes `--model-name` into the artifact unchanged, different submission sources
+can publish different strings for the same model. The website filter then de-duplicates on the raw
+`model.name` value and exposes multiple entries for one logical model.
 
 ## Observed Current State
 
@@ -40,18 +45,22 @@ The current behavior is internally inconsistent:
 - compare goal grouping already strips the namespace for some matching paths
 - official same-spec and baseline specs use the full upstream coordinate
 
-This means the system already treats these values as partially equivalent, but that equivalence is not expressed in the data contract.
+This means the system already treats these values as partially equivalent, but that equivalence is
+not expressed in the data contract.
 
 ## Industry Convention
 
-For machine-readable model identity, the industry-standard format is a registry coordinate or repository coordinate, not a short alias.
+For machine-readable model identity, the industry-standard format is a registry coordinate or
+repository coordinate, not a short alias.
 
 Examples:
 
 - Hugging Face: `Qwen/Qwen2.5-14B-Instruct`
 - ModelScope or internal registries: typically `registry + namespace/model`
 
-Short names such as `Qwen2.5-14B-Instruct` are useful as aliases or display values, but they are not a strong canonical identifier because they lose the namespace and can collide across forks, mirrors, or vendor-specific repacks.
+Short names such as `Qwen2.5-14B-Instruct` are useful as aliases or display values, but they are not
+a strong canonical identifier because they lose the namespace and can collide across forks, mirrors,
+or vendor-specific repacks.
 
 ## Design Goal
 
@@ -62,11 +71,13 @@ Split model identity into separate fields so each field has one meaning only:
 - short alias for convenience
 - display label for UI rendering
 
-The design should preserve merge safety for benchmark artifacts and avoid ad-hoc website-side normalization.
+The design should preserve merge safety for benchmark artifacts and avoid ad-hoc website-side
+normalization.
 
 ## Frozen Decisions
 
-This section completes Phase 0. The following decisions are fixed unless a later RFC explicitly supersedes them.
+This section completes Phase 0. The following decisions are fixed unless a later RFC explicitly
+supersedes them.
 
 ### Decision 1: Canonical Identifier Format
 
@@ -81,7 +92,8 @@ Rules:
 
 - `registry` is a short lowercase token such as `hf`
 - `repo_id` is the upstream namespace-qualified coordinate without registry prefix
-- `canonical_id` is the only field allowed to act as the machine identity for deduplication, compare grouping, filtering, and validation
+- `canonical_id` is the only field allowed to act as the machine identity for deduplication, compare
+  grouping, filtering, and validation
 - when the source model comes from Hugging Face, `canonical_id` must be `hf:<repo_id>`
 - local cache paths, snapshot paths, and bare short aliases are never valid canonical ids
 
@@ -135,17 +147,20 @@ Operational rules:
 
 ### Decision 3: Compatibility Policy For `model.name`
 
-`model.name` remains in schema v1 during the migration window, but its semantics are frozen as a compatibility mirror of `model.repo_id`.
+`model.name` remains in schema v1 during the migration window, but its semantics are frozen as a
+compatibility mirror of `model.repo_id`.
 
 Rules:
 
 - new writers must populate `model.name` with the same value as `model.repo_id`
 - new writers must not emit a short alias in `model.name`
 - readers must treat `model.name` as legacy compatibility input only
-- new matching, grouping, and filtering logic must not use `model.name` when `canonical_id` is available
+- new matching, grouping, and filtering logic must not use `model.name` when `canonical_id` is
+  available
 - schema v1 compatibility ends only after all active writers and checked-in snapshots have migrated
 
-This freezes the transition policy and avoids a mixed state where some new submissions keep using short aliases in `model.name`.
+This freezes the transition policy and avoids a mixed state where some new submissions keep using
+short aliases in `model.name`.
 
 ### Decision 4: Minimal Field Set For Phase 1 Writers
 
@@ -182,27 +197,37 @@ Recommended model payload:
 
 Field semantics:
 
-- `model.canonical_id`: authoritative machine identifier used by aggregation, compare grouping, and filters
-- `model.repo_id`: upstream repository coordinate when the model comes from a registry such as Hugging Face
+- `model.canonical_id`: authoritative machine identifier used by aggregation, compare grouping, and
+  filters
+- `model.repo_id`: upstream repository coordinate when the model comes from a registry such as
+  Hugging Face
 - `model.short_name`: stable human-typed alias without namespace
-- `model.display_name`: final UI label shown in dropdowns and tables; for the current contract it mirrors the industry-standard public model release string and must not be used as a machine identifier
+- `model.display_name`: final UI label shown in dropdowns and tables; for the current contract it
+  mirrors the industry-standard public model release string and must not be used as a machine
+  identifier
 - `model.name`: compatibility field kept during migration only; it must mirror `model.repo_id`
 
-The Phase 0 decision is to use prefixed canonical ids from day one, for example `hf:Qwen/Qwen2.5-14B-Instruct`.
+The Phase 0 decision is to use prefixed canonical ids from day one, for example
+`hf:Qwen/Qwen2.5-14B-Instruct`.
 
 ## Normalization Rules
 
-Normalization should happen at the benchmark export or aggregation boundary, not in the website render layer.
+Normalization should happen at the benchmark export or aggregation boundary, not in the website
+render layer.
 
 Required rules:
 
 1. Raw input may arrive as a repo coordinate, a short alias, or a local snapshot path.
 1. The exporter or aggregator resolves the raw input into one canonical model identity record.
 1. Local cache paths must never become published canonical identifiers.
-1. Unknown aliases must fail fast or be surfaced as validation errors instead of silently creating new logical models.
-1. `display_name` is derived from `short_name`, not from `canonical_id`, and never includes the registry prefix or namespace.
-1. The default `display_name` is the industry-standard release string carried by `short_name`, for example `Qwen2.5-14B-Instruct`.
-1. Writers may curate `display_name` only through the central registry; code matches on `canonical_id`, not on `display_name`.
+1. Unknown aliases must fail fast or be surfaced as validation errors instead of silently creating
+   new logical models.
+1. `display_name` is derived from `short_name`, not from `canonical_id`, and never includes the
+   registry prefix or namespace.
+1. The default `display_name` is the industry-standard release string carried by `short_name`, for
+   example `Qwen2.5-14B-Instruct`.
+1. Writers may curate `display_name` only through the central registry; code matches on
+   `canonical_id`, not on `display_name`.
 
 Required resolution order:
 
@@ -228,7 +253,8 @@ Example:
 }
 ```
 
-This registry should be versioned with the benchmark repository, reviewed like a contract file, and reused by:
+This registry should be versioned with the benchmark repository, reviewed like a contract file, and
+reused by:
 
 - exporter validation
 - snapshot aggregation
@@ -261,7 +287,8 @@ This keeps the user-facing UI clean while preserving source traceability.
 ### Phase 1: Writer Normalization
 
 - update benchmark export paths to resolve raw model inputs into canonical identity fields
-- update same-spec-related exports so their canonical model remains stable even if runtime paths differ
+- update same-spec-related exports so their canonical model remains stable even if runtime paths
+  differ
 - reject unresolved aliases during publish
 
 ### Phase 2: Reader Compatibility
@@ -284,12 +311,14 @@ This keeps the user-facing UI clean while preserving source traceability.
 ### Phase 5: Contract Tightening
 
 - deprecate new writes to `model.name` as an identity field
-- keep `model.name` as a mirror of `repo_id` for one compatibility release after all active writers migrate
+- keep `model.name` as a mirror of `repo_id` for one compatibility release after all active writers
+  migrate
 - remove legacy fallback logic after all active producers are migrated
 
 ## Why Frontend-Only Normalization Is Not Enough
 
-A website-only fix can hide duplicate filter entries, but it does not solve the underlying contract problem.
+A website-only fix can hide duplicate filter entries, but it does not solve the underlying contract
+problem.
 
 It leaves the following issues in place:
 
@@ -298,7 +327,8 @@ It leaves the following issues in place:
 - new submissions can continue to publish ambiguous names
 - downstream analytics cannot rely on one stable model key
 
-Therefore the recommended fix point is the benchmark data boundary, with the website consuming normalized fields.
+Therefore the recommended fix point is the benchmark data boundary, with the website consuming
+normalized fields.
 
 ## Compatibility And Risk Notes
 
@@ -321,7 +351,8 @@ The normalization is complete when all of the following hold:
 
 - one logical model produces one filter option in the website
 - aggregation and compare logic use a stable canonical model identifier
-- official baselines, same-spec exports, and ad-hoc benchmark submissions converge on the same identity record
+- official baselines, same-spec exports, and ad-hoc benchmark submissions converge on the same
+  identity record
 - legacy snapshots can still be read during the migration window
 - new submissions cannot introduce unregistered ambiguous short names
 
@@ -330,7 +361,9 @@ The normalization is complete when all of the following hold:
 Phase 0 is complete when future implementation work treats the following as already decided:
 
 - canonical ids use `<registry>:<repo_id>` and Hugging Face models use the `hf:` prefix
-- the source-of-truth identity registry lives at `src/vllm_hust_benchmark/data/model_identity_registry.json`
+- the source-of-truth identity registry lives at
+  `src/vllm_hust_benchmark/data/model_identity_registry.json`
 - `model.name` remains in schema v1 only as a compatibility mirror of `model.repo_id`
 
-The next implementation step is to update schema and writer paths to emit the frozen field set without changing website behavior yet.
+The next implementation step is to update schema and writer paths to emit the frozen field set
+without changing website behavior yet.
