@@ -13,8 +13,10 @@ from pathlib import Path
 
 from vllm_hust_benchmark.integration import (
     RepoLayout,
+    _build_rejected_superseded_report,
     _find_superseded_coexistence_conflicts,
     _scan_submission_admission_failures,
+    _write_rejected_superseded_report,
     aggregate_to_website,
 )
 
@@ -27,6 +29,7 @@ def _write_mock_submission(
     repeat_group: str | None = None,
     repeat_index: int | None = None,
     supersedes: str | list[str] | None = None,
+    supersedes_reason: str | None = None,
     canonical_id: str = "hf:Qwen/Qwen2.5-14B-Instruct",
     chip_model: str = "910B2",
     precision: str = "FP16",
@@ -60,6 +63,8 @@ def _write_mock_submission(
         payload["metadata"]["repeat_index"] = repeat_index
     if supersedes is not None:
         payload["metadata"]["supersedes"] = supersedes
+    if supersedes_reason is not None:
+        payload["metadata"]["supersedes_reason"] = supersedes_reason
     (target_dir / "run_leaderboard.json").write_text(
         json.dumps(payload, indent=2) + "\n", encoding="utf-8"
     )
@@ -278,3 +283,187 @@ def test_different_signatures_not_conflict(tmp_path: Path) -> None:
     conflicts = _find_superseded_coexistence_conflicts(source_dir)
 
     assert conflicts == []
+
+
+def _make_minimal_layout(tmp_path: Path) -> RepoLayout:
+    """Build a minimal ``RepoLayout`` with a fake website aggregation script."""
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "import sys, pathlib\n"
+        "out = pathlib.Path(sys.argv[sys.argv.index('--output-dir') + 1])\n"
+        "out.mkdir(parents=True, exist_ok=True)\n"
+        "for name in ['leaderboard_single.json', 'leaderboard_multi.json',\n"
+        "             'leaderboard_compare.json', 'last_updated.json']:\n"
+        "    (out / name).write_text('[]' if name.startswith('leaderboard') else '{}')\n",
+        encoding="utf-8",
+    )
+    benchmark_repo = tmp_path / "vllm-hust-benchmark"
+    benchmark_repo.mkdir()
+    return RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=benchmark_repo,
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+
+def test_report_empty_when_clean() -> None:
+    report = _build_rejected_superseded_report([], [], [])
+
+    assert report["schema_version"] == "rejected-superseded-report/v1"
+    assert report["rejected_submissions"] == []
+    assert report["superseded_entries"] == []
+    assert report["excluded_plugin_commits"] == []
+    assert "generated_at" in report
+
+
+def test_report_generated_on_rejection(tmp_path: Path) -> None:
+    layout = _make_minimal_layout(tmp_path)
+
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    failed_dir = source_dir / "failed-run"
+    failed_dir.mkdir()
+    (failed_dir / "STATUS").write_text("FAILED: server crashed\n", encoding="utf-8")
+
+    output_dir = tmp_path / "out"
+
+    exit_code = aggregate_to_website(
+        layout=layout,
+        source_dir=source_dir,
+        output_dir=output_dir,
+        execute=False,
+    )
+
+    assert exit_code == 2
+    report_path = output_dir / "rejected_superseded_report.json"
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["schema_version"] == "rejected-superseded-report/v1"
+    assert len(report["rejected_submissions"]) == 1
+    assert report["rejected_submissions"][0]["reason"] == "FAILED"
+    assert "failed-run" in report["rejected_submissions"][0]["dir"]
+
+
+def test_report_generated_on_success(tmp_path: Path) -> None:
+    layout = _make_minimal_layout(tmp_path)
+
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    clean_dir = source_dir / "clean-run"
+    clean_dir.mkdir()
+    (clean_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+
+    output_dir = tmp_path / "out"
+
+    exit_code = aggregate_to_website(
+        layout=layout,
+        source_dir=source_dir,
+        output_dir=output_dir,
+        execute=True,
+    )
+
+    assert exit_code == 0
+    report_path = output_dir / "rejected_superseded_report.json"
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["schema_version"] == "rejected-superseded-report/v1"
+    assert report["rejected_submissions"] == []
+    assert isinstance(report["superseded_entries"], list)
+    assert isinstance(report["excluded_plugin_commits"], list)
+
+
+def test_report_signature_conflict_rejection(tmp_path: Path) -> None:
+    layout = _make_minimal_layout(tmp_path)
+
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_mock_submission(
+        source_dir / "old-run",
+        entry_id="old-entry-1",
+        submitted_at="2026-07-20T00:00:00Z",
+    )
+    _write_mock_submission(
+        source_dir / "new-run",
+        entry_id="new-entry-2",
+        submitted_at="2026-07-22T00:00:00Z",
+    )
+
+    output_dir = tmp_path / "out"
+
+    exit_code = aggregate_to_website(
+        layout=layout,
+        source_dir=source_dir,
+        output_dir=output_dir,
+        execute=False,
+    )
+
+    assert exit_code == 2
+    report_path = output_dir / "rejected_superseded_report.json"
+    assert report_path.is_file()
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert len(report["rejected_submissions"]) == 1
+    assert report["rejected_submissions"][0]["reason"] == "signature_conflict"
+    assert "old-run" in report["rejected_submissions"][0]["dir"]
+
+
+def test_write_rejected_superseded_report_creates_destination(
+    tmp_path: Path,
+) -> None:
+    destination = tmp_path / "nested" / "out"
+    report = _build_rejected_superseded_report([], [], [])
+
+    _write_rejected_superseded_report(destination, report)
+
+    report_path = destination / "rejected_superseded_report.json"
+    assert report_path.is_file()
+    loaded = json.loads(report_path.read_text(encoding="utf-8"))
+    assert loaded["schema_version"] == "rejected-superseded-report/v1"
+
+
+def test_report_superseded_entries_from_metadata(tmp_path: Path) -> None:
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_mock_submission(
+        source_dir / "new-run",
+        entry_id="new-entry-1",
+        submitted_at="2026-07-22T00:00:00Z",
+        supersedes="old-run-dir-name",
+        supersedes_reason="previous run had wrong config",
+    )
+
+    report = _build_rejected_superseded_report(
+        [],
+        [],
+        [],
+        source_dir=source_dir,
+    )
+
+    assert len(report["superseded_entries"]) == 1
+    entry = report["superseded_entries"][0]
+    assert entry["old_entry_id"] == "old-run-dir-name"
+    assert entry["new_entry_id"] == "new-entry-1"
+    assert entry["supersedes_reason"] == "previous run had wrong config"
+    assert entry["archive_path"] is None
+
+
+def test_report_superseded_archive_path_found(tmp_path: Path) -> None:
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_mock_submission(
+        source_dir / "new-run",
+        entry_id="new-entry-1",
+        submitted_at="2026-07-22T00:00:00Z",
+        supersedes="old-run-dir-name",
+    )
+
+    archive_root = tmp_path / "archive" / "suspect"
+    (archive_root / "topic-a" / "old-run-dir-name").mkdir(parents=True)
+
+    from vllm_hust_benchmark.integration import _scan_superseded_entries
+
+    entries = _scan_superseded_entries(source_dir, archive_suspect_root=archive_root)
+    assert len(entries) == 1
+    assert entries[0]["archive_path"] is not None
+    assert "old-run-dir-name" in entries[0]["archive_path"]
