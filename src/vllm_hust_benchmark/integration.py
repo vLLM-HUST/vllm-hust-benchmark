@@ -535,6 +535,19 @@ def aggregate_to_website(
     ):
         return 2
 
+    admission_failures = _scan_submission_admission_failures(source_dir)
+    if admission_failures:
+        print(
+            "ERROR: submission admission gate rejected the following directories:",
+            file=sys.stderr,
+        )
+        for f in admission_failures:
+            print(
+                f"  {f['dir']}: {f['reason']} ({f['detail']})",
+                file=sys.stderr,
+            )
+        return 2
+
     destination = output_dir or layout.website_repo / "data"
     command = [
         sys.executable,
@@ -1312,6 +1325,92 @@ def _find_excluded_submission_dirs(
             relative = artifact_path.relative_to(source_dir)
             excluded_dirs.add(source_dir / relative.parts[0])
     return sorted(excluded_dirs)
+
+
+_TEMPORARY_DIR_PREFIX_PATTERN = re.compile(r"^(tmp|temp|wip|scratch|adhoc)")
+_TEMPORARY_DIR_SUFFIX_PATTERN = re.compile(r"/(tmp|temp|wip|scratch|adhoc)$")
+
+
+def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
+    """Scan immediate subdirectories of ``source_dir`` for admission failures.
+
+    Returns a list of failure dicts, each with keys ``dir``, ``reason``, and
+    ``detail``. A directory is a failure if it matches ANY of:
+    - ``temporary``: directory name matches a temporary naming pattern, or the
+      directory lives under ``tests/fixtures/`` or ``.benchmarks/``.
+    - ``FAILED``: the ``STATUS`` file content starts with ``FAILED``.
+    - ``NO_STATUS``: no ``STATUS`` file, or the file is empty after stripping.
+    """
+    failures: list[dict] = []
+    if not source_dir.is_dir():
+        return failures
+
+    for child in sorted(source_dir.iterdir()):
+        if not child.is_dir():
+            continue
+
+        path_str = str(child)
+        parts = child.parts
+        is_temporary_name = bool(
+            _TEMPORARY_DIR_PREFIX_PATTERN.match(child.name)
+            or _TEMPORARY_DIR_SUFFIX_PATTERN.search(path_str)
+        )
+        is_fixture_path = "tests" in parts and "fixtures" in parts
+        is_benchmark_cache = ".benchmarks" in parts
+        if is_temporary_name or is_fixture_path or is_benchmark_cache:
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "temporary",
+                    "detail": "directory name matches temporary pattern",
+                }
+            )
+            continue
+
+        status_path = child / "STATUS"
+        if not status_path.is_file():
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "NO_STATUS",
+                    "detail": "STATUS file missing",
+                }
+            )
+            continue
+
+        try:
+            status_content = status_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "NO_STATUS",
+                    "detail": f"STATUS file unreadable: {exc}",
+                }
+            )
+            continue
+
+        if status_content.startswith("FAILED"):
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "FAILED",
+                    "detail": f"STATUS file contains: {status_content.strip()}",
+                }
+            )
+            continue
+
+        if not status_content.strip():
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "NO_STATUS",
+                    "detail": "STATUS file empty",
+                }
+            )
+            continue
+
+    return failures
 
 
 def _filter_excluded_snapshot_entries(
