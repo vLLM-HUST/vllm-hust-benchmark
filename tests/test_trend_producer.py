@@ -442,7 +442,10 @@ class TestWorkloadConfigContract:
         entry["metadata"]["workload_config_contract"] = WORKLOAD_CONFIG_CONTRACT_VERSION
         entry["same_spec"] = {
             "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
-            "resolved_server_parameters": {"gpu_memory_utilization": 0.6},
+            "resolved_server_parameters": {
+                "gpu_memory_utilization": 0.6,
+                "max_model_len": 32768,
+            },
             "resolved_client_parameters": {
                 "dataset_name": "random",
                 "random_input_len": 1024,
