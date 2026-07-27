@@ -76,7 +76,9 @@ def _parse_set_arguments(values: list[str] | None) -> dict[str, object]:
 def _format_env_prefix(env: dict[str, object]) -> str:
     if not env:
         return ""
-    return " ".join(f"{key}={shlex.quote(str(value))}" for key, value in env.items()) + " "
+    return (
+        " ".join(f"{key}={shlex.quote(str(value))}" for key, value in env.items()) + " "
+    )
 
 
 def _set_env_if_not_none(env: dict[str, object], key: str, value: object) -> None:
@@ -230,7 +232,10 @@ def _resolve_github_metadata(args: argparse.Namespace) -> dict[str, object | Non
     github_pr_number = _coerce_optional_int(getattr(args, "github_pr_number", None))
     if github_pr_number is None:
         github_pr_number = _coerce_optional_int(pull_request.get("number"))
-    if github_pr_number is None and github_event_name in {"pull_request", "pull_request_target"}:
+    if github_pr_number is None and github_event_name in {
+        "pull_request",
+        "pull_request_target",
+    }:
         github_pr_number = _coerce_optional_int(event_payload.get("number"))
 
     github_commit_url = getattr(args, "github_commit_url", None)
@@ -290,7 +295,9 @@ def _build_parser() -> argparse.ArgumentParser:
         "list-tests",
         help="List official upstream benchmark tests from the sibling vllm-hust repo.",
     )
-    tests_parser.add_argument("--benchmark-type", choices=["serve", "throughput", "latency"])
+    tests_parser.add_argument(
+        "--benchmark-type", choices=["serve", "throughput", "latency"]
+    )
 
     show_test_parser = subparsers.add_parser(
         "show-test",
@@ -361,24 +368,36 @@ def _build_parser() -> argparse.ArgumentParser:
     ascend_ci_parser.add_argument("--hf-repo-id")
     ascend_ci_parser.add_argument("--allow-random-hf-publish", action="store_true")
 
-    list_parser = subparsers.add_parser("list-scenarios", help="List official mirrored scenarios.")
-    list_parser.add_argument("--benchmark-type", choices=["serve", "throughput", "latency"])
+    list_parser = subparsers.add_parser(
+        "list-scenarios", help="List official mirrored scenarios."
+    )
+    list_parser.add_argument(
+        "--benchmark-type", choices=["serve", "throughput", "latency"]
+    )
     list_parser.add_argument("--tag")
 
     map_parser = subparsers.add_parser(
         "list-leaderboard-map",
         help="List scenario to leaderboard workload/accountable-scope mapping.",
     )
-    map_parser.add_argument("--benchmark-type", choices=["serve", "throughput", "latency"])
+    map_parser.add_argument(
+        "--benchmark-type", choices=["serve", "throughput", "latency"]
+    )
     map_parser.add_argument("--tag")
 
-    build_parser = subparsers.add_parser("build-command", help="Build the upstream-equivalent vllm bench command for a scenario.")
+    build_parser = subparsers.add_parser(
+        "build-command",
+        help="Build the upstream-equivalent vllm bench command for a scenario.",
+    )
     build_parser.add_argument("scenario")
     build_parser.add_argument("--model", required=True)
     build_parser.add_argument("--set", action="append", default=[])
     add_runtime_argument(build_parser)
 
-    run_parser = subparsers.add_parser("run", help="Run or print the upstream-equivalent vllm bench command for a scenario.")
+    run_parser = subparsers.add_parser(
+        "run",
+        help="Run or print the upstream-equivalent vllm bench command for a scenario.",
+    )
     run_parser.add_argument("scenario")
     run_parser.add_argument("--model", required=True)
     run_parser.add_argument("--set", action="append", default=[])
@@ -415,7 +434,10 @@ def _build_parser() -> argparse.ArgumentParser:
     add_runtime_argument(script_parser)
     add_env_argument(script_parser)
 
-    analyze_parser = subparsers.add_parser("analyze-upstream", help="Print the upstream benchmark boundary and mirrored design points.")
+    analyze_parser = subparsers.add_parser(
+        "analyze-upstream",
+        help="Print the upstream benchmark boundary and mirrored design points.",
+    )
     analyze_parser.add_argument("--format", choices=["text"], default="text")
 
     export_parser = subparsers.add_parser(
@@ -435,8 +457,11 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--model-name", required=True)
     export_parser.add_argument("--model-parameters", default="7B")
     export_parser.add_argument("--model-precision", default="BF16")
-    export_parser.add_argument("--quantization", default=None,
-        help="Quantization scheme (e.g. W8A8, W4A4, GPTQ, AWQ). Leave unset for unquantized models.")
+    export_parser.add_argument(
+        "--quantization",
+        default=None,
+        help="Quantization scheme (e.g. W8A8, W4A4, GPTQ, AWQ). Leave unset for unquantized models.",
+    )
     export_parser.add_argument("--hardware-vendor", default="Huawei")
     export_parser.add_argument("--hardware-chip-model", required=True)
     export_parser.add_argument("--chip-count", type=int, default=1)
@@ -522,15 +547,27 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     publish_parser.add_argument("--source-dir", required=True)
     publish_parser.add_argument("--output-dir")
-    publish_parser.add_argument("--publish-hf", action="store_true",
-        help="After aggregation, also upload data files to HuggingFace dataset repo.")
-    publish_parser.add_argument("--hf-repo",
-        help="HuggingFace dataset repo in 'owner/name' format (required with --publish-hf).")
-    publish_parser.add_argument("--hf-token", help="HF write token (falls back to cached login).")
+    publish_parser.add_argument(
+        "--publish-hf",
+        action="store_true",
+        help="After aggregation, also upload data files to HuggingFace dataset repo.",
+    )
+    publish_parser.add_argument(
+        "--hf-repo",
+        help="HuggingFace dataset repo in 'owner/name' format (required with --publish-hf).",
+    )
+    publish_parser.add_argument(
+        "--hf-token", help="HF write token (falls back to cached login)."
+    )
     publish_parser.add_argument("--hf-branch", default="main", help="Target HF branch.")
-    publish_parser.add_argument("--hf-commit-message", default="chore: update leaderboard data")
-    publish_parser.add_argument("--hf-dry-run", action="store_true",
-        help="Print what would be uploaded without actually calling the HF API.")
+    publish_parser.add_argument(
+        "--hf-commit-message", default="chore: update leaderboard data"
+    )
+    publish_parser.add_argument(
+        "--hf-dry-run",
+        action="store_true",
+        help="Print what would be uploaded without actually calling the HF API.",
+    )
     publish_parser.add_argument("--execute", action="store_true")
 
     publish_hf_parser = subparsers.add_parser(
@@ -542,20 +579,26 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Directory with aggregated JSON files (default: <website_repo>/data).",
     )
     publish_hf_parser.add_argument(
-        "--repo-id", required=True,
+        "--repo-id",
+        required=True,
         help="HuggingFace dataset repo in 'owner/name' format.",
     )
-    publish_hf_parser.add_argument("--token", help="HF write token (falls back to cached login).")
+    publish_hf_parser.add_argument(
+        "--token", help="HF write token (falls back to cached login)."
+    )
     publish_hf_parser.add_argument("--branch", default="main", help="Target HF branch.")
     publish_hf_parser.add_argument(
-        "--commit-message", default="chore: update leaderboard data",
+        "--commit-message",
+        default="chore: update leaderboard data",
     )
     publish_hf_parser.add_argument(
-        "--dry-run", action="store_true",
+        "--dry-run",
+        action="store_true",
         help="Print what would be uploaded without calling the HF API.",
     )
     publish_hf_parser.add_argument(
-        "--aggregate-first", action="store_true",
+        "--aggregate-first",
+        action="store_true",
         help="Run publish-website aggregation from --source-dir before uploading.",
     )
     publish_hf_parser.add_argument(
@@ -582,7 +625,9 @@ def _build_parser() -> argparse.ArgumentParser:
     sync_submission_parser.add_argument("--repo-id", required=True)
     sync_submission_parser.add_argument("--token")
     sync_submission_parser.add_argument("--branch", default="main")
-    sync_submission_parser.add_argument("--submissions-prefix", default="submissions-auto")
+    sync_submission_parser.add_argument(
+        "--submissions-prefix", default="submissions-auto"
+    )
     sync_submission_parser.add_argument(
         "--commit-message",
         default="chore: sync benchmark submission and leaderboard data",
@@ -604,14 +649,21 @@ def _build_parser() -> argparse.ArgumentParser:
     submit_parser.add_argument("--metrics-file", help="Path to metrics payload JSON.")
     submit_parser.add_argument("--benchmark-result-file")
     submit_parser.add_argument("--constraints-file")
-    submit_parser.add_argument("--run-id", required=True, help="Unique run identifier (used as sub-directory name).")
+    submit_parser.add_argument(
+        "--run-id",
+        required=True,
+        help="Unique run identifier (used as sub-directory name).",
+    )
     submit_parser.add_argument("--engine", required=True)
     submit_parser.add_argument("--engine-version", required=True)
     submit_parser.add_argument("--model-name", required=True)
     submit_parser.add_argument("--model-parameters", default="7B")
     submit_parser.add_argument("--model-precision", default="BF16")
-    submit_parser.add_argument("--quantization", default=None,
-        help="Quantization scheme (e.g. W8A8, W4A4, GPTQ, AWQ). Leave unset for unquantized models.")
+    submit_parser.add_argument(
+        "--quantization",
+        default=None,
+        help="Quantization scheme (e.g. W8A8, W4A4, GPTQ, AWQ). Leave unset for unquantized models.",
+    )
     submit_parser.add_argument("--hardware-vendor", default="Huawei")
     submit_parser.add_argument("--hardware-chip-model", required=True)
     submit_parser.add_argument("--chip-count", type=int, default=1)
@@ -637,8 +689,12 @@ def _build_parser() -> argparse.ArgumentParser:
     submit_parser.add_argument("--github-event-name")
     submit_parser.add_argument("--github-pr-number", type=int)
     submit_parser.add_argument("--github-pr-url")
-    submit_parser.add_argument("--same-spec-file", help="Path to same-spec benchmark spec file.")
-    submit_parser.add_argument("--runtime-python", help="Python interpreter used to run the engine.")
+    submit_parser.add_argument(
+        "--same-spec-file", help="Path to same-spec benchmark spec file."
+    )
+    submit_parser.add_argument(
+        "--runtime-python", help="Python interpreter used to run the engine."
+    )
     submit_parser.add_argument("--engine-source-repository")
     submit_parser.add_argument("--engine-source-ref")
     submit_parser.add_argument("--engine-source-commit")
@@ -658,11 +714,15 @@ def _build_parser() -> argparse.ArgumentParser:
         "Returns non-zero on validation failure.",
     )
     validate_parser.add_argument(
-        "--input", type=Path, required=True,
+        "--input",
+        type=Path,
+        required=True,
         help="Entry JSON file or directory of JSON files.",
     )
     validate_parser.add_argument(
-        "--schema", type=Path, default=None,
+        "--schema",
+        type=Path,
+        default=None,
         help="Path to trend schema JSON (default: schemas/leaderboard_trend_v1.schema.json).",
     )
 
@@ -700,9 +760,7 @@ def _format_analysis() -> str:
 def _format_upstream_tests(layout, benchmark_type: str | None) -> str:
     lines = ["name\tbenchmark\tsource"]
     for test in load_upstream_tests(layout, benchmark_type=benchmark_type):
-        lines.append(
-            f"{test.name}\t{test.benchmark_type}\t{test.source_file.name}"
-        )
+        lines.append(f"{test.name}\t{test.benchmark_type}\t{test.source_file.name}")
     return "\n".join(lines)
 
 
@@ -713,7 +771,9 @@ def _format_test_details(test, commands: dict[str, list[str]]) -> str:
         f"source_file: {test.source_file}",
     ]
     if test.server_environment_variables:
-        lines.append(f"server_environment_variables: {test.server_environment_variables}")
+        lines.append(
+            f"server_environment_variables: {test.server_environment_variables}"
+        )
     if test.server_parameters:
         lines.append(f"server_parameters: {test.server_parameters}")
     if test.client_parameters:
@@ -741,7 +801,10 @@ def _format_leaderboard_map(benchmark_type: str | None, tag: str | None) -> str:
                     scenario.name,
                     scenario.benchmark_type,
                     str(mapping.get("workload_name") or scenario.name),
-                    str(mapping.get("representative_business_scenario") or "general-serving"),
+                    str(
+                        mapping.get("representative_business_scenario")
+                        or "general-serving"
+                    ),
                     str(mapping.get("default_config_type") or "single_gpu"),
                 ]
             )
@@ -1037,7 +1100,9 @@ def main(argv: list[str] | None = None) -> int:
                 repo_id=args.hf_repo,
                 token=getattr(args, "hf_token", None),
                 branch=getattr(args, "hf_branch", "main"),
-                commit_message=getattr(args, "hf_commit_message", "chore: update leaderboard data"),
+                commit_message=getattr(
+                    args, "hf_commit_message", "chore: update leaderboard data"
+                ),
                 dry_run=getattr(args, "hf_dry_run", False),
             )
         return rc
@@ -1075,7 +1140,9 @@ def main(argv: list[str] | None = None) -> int:
             repo_id=args.repo_id,
             token=getattr(args, "token", None),
             branch=getattr(args, "branch", "main"),
-            commit_message=getattr(args, "commit_message", "chore: update leaderboard data"),
+            commit_message=getattr(
+                args, "commit_message", "chore: update leaderboard data"
+            ),
             dry_run=getattr(args, "dry_run", False),
         )
 
@@ -1130,13 +1197,17 @@ def main(argv: list[str] | None = None) -> int:
 
         metrics_file = Path(args.metrics_file).resolve() if args.metrics_file else None
         benchmark_result_file = (
-            Path(args.benchmark_result_file).resolve() if args.benchmark_result_file else None
+            Path(args.benchmark_result_file).resolve()
+            if args.benchmark_result_file
+            else None
         )
         constraints_file = (
             Path(args.constraints_file).resolve() if args.constraints_file else None
         )
         same_spec_file = (
-            Path(args.same_spec_file).resolve() if getattr(args, "same_spec_file", None) else None
+            Path(args.same_spec_file).resolve()
+            if getattr(args, "same_spec_file", None)
+            else None
         )
         try:
             artifact_path, manifest_path = export_leaderboard_artifacts(
@@ -1180,11 +1251,15 @@ def main(argv: list[str] | None = None) -> int:
                 github_pr_number=github_metadata["github_pr_number"],
                 github_pr_url=github_metadata["github_pr_url"],
                 runtime_python=getattr(args, "runtime_python", None),
-                engine_source_repository=getattr(args, "engine_source_repository", None),
+                engine_source_repository=getattr(
+                    args, "engine_source_repository", None
+                ),
                 engine_source_ref=getattr(args, "engine_source_ref", None),
                 engine_source_commit=getattr(args, "engine_source_commit", None),
                 plugin_source_engine=getattr(args, "plugin_source_engine", None),
-                plugin_source_repository=getattr(args, "plugin_source_repository", None),
+                plugin_source_repository=getattr(
+                    args, "plugin_source_repository", None
+                ),
                 plugin_source_ref=getattr(args, "plugin_source_ref", None),
                 plugin_source_commit=getattr(args, "plugin_source_commit", None),
             )
@@ -1193,16 +1268,18 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         print(f"artifact : {artifact_path}")
         print(f"manifest : {manifest_path}")
-        print(f"")
-        print(f"Next steps:")
+        print("")
+        print("Next steps:")
         try:
             output_dir_hint = output_dir.relative_to(layout.benchmark_repo)
         except ValueError:
             output_dir_hint = Path(os.path.relpath(output_dir, layout.benchmark_repo))
         print(f"  git add {output_dir_hint}/")
-        print(f"  git commit -m \"feat: add benchmark result {args.run_id}\"")
-        print(f"  git push")
-        print(f"  → GitHub Actions will aggregate and upload to HuggingFace automatically.")
+        print(f'  git commit -m "feat: add benchmark result {args.run_id}"')
+        print("  git push")
+        print(
+            "  → GitHub Actions will aggregate and upload to HuggingFace automatically."
+        )
         return 0
 
     if args.command == "validate-trend":
@@ -1215,7 +1292,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"ERROR: input path does not exist: {args.input}", file=sys.stderr)
             return 2
 
-        paths = [args.input] if args.input.is_file() else sorted(args.input.glob("*.json"))
+        paths = (
+            [args.input] if args.input.is_file() else sorted(args.input.glob("*.json"))
+        )
         entries = []
         for path in paths:
             try:
@@ -1232,10 +1311,15 @@ def main(argv: list[str] | None = None) -> int:
         for decision in report.decisions:
             print(f"  {decision.status:12} {decision.entry_id}: {decision.reason}")
         for issue in report.issues:
-            print(f"  {issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}")
+            print(
+                f"  {issue.severity.upper():5} {issue.code}: {issue.entry_id}: {issue.message}"
+            )
 
         if not report.passed:
-            print(f"\nFAIL: {len(report.issues)} issue(s) found — release gate blocked", file=sys.stderr)
+            print(
+                f"\nFAIL: {len(report.issues)} issue(s) found — release gate blocked",
+                file=sys.stderr,
+            )
             return 1
 
         passed = sum(1 for d in report.decisions if d.status == "default")
@@ -1261,12 +1345,16 @@ def main(argv: list[str] | None = None) -> int:
         if bench_args and bench_args[0] == "--":
             bench_args = bench_args[1:]
         command = build_vllm_bench_command(bench_args, runtime_engine=args.runtime)
-        return run_external_command(command, cwd=runtime_repo, execute=args.execute, env=env)
+        return run_external_command(
+            command, cwd=runtime_repo, execute=args.execute, env=env
+        )
 
     if args.command == "run-script":
         layout = resolve_repo_layout()
         try:
-            runtime_repo = validate_runtime_repo(layout, args.runtime, require_benchmarks=True)
+            runtime_repo = validate_runtime_repo(
+                layout, args.runtime, require_benchmarks=True
+            )
             env = _parse_set_arguments(args.env)
             script_args = list(args.script_args)
             if script_args and script_args[0] == "--":
@@ -1280,7 +1368,9 @@ def main(argv: list[str] | None = None) -> int:
         except ValueError as error:
             print(str(error), file=sys.stderr)
             return 2
-        return run_external_command(command, cwd=runtime_repo, execute=args.execute, env=env)
+        return run_external_command(
+            command, cwd=runtime_repo, execute=args.execute, env=env
+        )
 
     try:
         overrides = _parse_set_arguments(args.set)

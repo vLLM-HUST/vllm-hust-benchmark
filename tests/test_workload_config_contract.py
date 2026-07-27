@@ -4,6 +4,8 @@ from copy import deepcopy
 import json
 from pathlib import Path
 
+
+from vllm_hust_benchmark.aggregate_results import VALID_AGG_METHODS
 from vllm_hust_benchmark.workload_config_contract import (
     REQUIRED_EFFECTIVE_PARAMETERS,
     WORKLOAD_CONFIG_CONTRACT_VERSION,
@@ -134,3 +136,74 @@ def test_official_single_chip_specs_define_required_effective_defaults() -> None
             assert key in spec["server_parameters"], f"{scenario}: missing server {key}"
         for key in scopes.get("client", ()):
             assert key in spec["client_parameters"], f"{scenario}: missing client {key}"
+
+
+def test_snapshot_entries_never_conflate_num_prompts_with_concurrency() -> None:
+    """PR#70 regression: snapshot entries must keep prompt count and concurrency apart.
+
+    For every published snapshot entry:
+      * ``workload.concurrent_requests`` must be ``null`` OR equal to
+        ``same_spec.resolved_client_parameters.max_concurrency`` when that
+        field exists and is non-null.
+      * ``num_prompts`` must never appear in the ``workload`` object (it only
+        belongs in ``same_spec.resolved_client_parameters``).
+    """
+    snapshots_dir = (
+        Path(__file__).resolve().parents[1] / "leaderboard-data" / "snapshots"
+    )
+    snapshot_paths = [
+        snapshots_dir / "leaderboard_single.json",
+        snapshots_dir / "leaderboard_multi.json",
+    ]
+
+    violations: list[str] = []
+    for snapshot_path in snapshot_paths:
+        entries = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        for entry in entries:
+            entry_id = str(entry.get("entry_id") or "<unknown>")
+            workload = entry.get("workload")
+            if not isinstance(workload, dict):
+                violations.append(f"{entry_id}: workload is not an object")
+                continue
+
+            if "num_prompts" in workload:
+                violations.append(
+                    f"{entry_id}: 'num_prompts' must not appear in workload "
+                    "(only in same_spec.resolved_client_parameters)"
+                )
+
+            actual_concurrency = workload.get("concurrent_requests")
+            if actual_concurrency is None:
+                continue
+
+            same_spec = entry.get("same_spec")
+            if not isinstance(same_spec, dict):
+                continue
+            client = same_spec.get("resolved_client_parameters")
+            if not isinstance(client, dict):
+                continue
+
+            expected_concurrency = client.get("max_concurrency")
+            if expected_concurrency is None:
+                continue
+
+            if actual_concurrency != expected_concurrency:
+                violations.append(
+                    f"{entry_id}: workload.concurrent_requests={actual_concurrency!r} "
+                    f"!= resolved_client_parameters.max_concurrency="
+                    f"{expected_concurrency!r}"
+                )
+
+    assert not violations, (
+        "snapshot entries conflate prompt count with concurrency:\n  - "
+        + "\n  - ".join(violations)
+    )
+
+
+def test_contract_rejects_max_as_aggregate_method() -> None:
+    """``max`` must not be a valid aggregate method.
+
+    Task 7 removed ``max`` from ``VALID_AGG_METHODS`` to prevent cherry-picking
+    the highest values.
+    """
+    assert "max" not in VALID_AGG_METHODS

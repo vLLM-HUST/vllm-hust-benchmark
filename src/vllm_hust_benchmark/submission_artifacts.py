@@ -19,12 +19,14 @@ SUPPORTED_MANIFEST_SCHEMA_VERSIONS = {
 
 # Canonical version keys defined by the leaderboard export schema.
 # Any extraneous keys in artifact.versions will be stripped during normalization.
-CANONICAL_VERSION_KEYS = frozenset({
-    "protocol",
-    "backend",
-    "core",
-    "benchmark",
-})
+CANONICAL_VERSION_KEYS = frozenset(
+    {
+        "protocol",
+        "backend",
+        "core",
+        "benchmark",
+    }
+)
 
 RELEASE_LIKE_ENGINE_VERSION_PATTERN = re.compile(
     r"^v?\d+(?:\.\d+)+(?:[A-Za-z0-9._+-]*)?$"
@@ -86,7 +88,9 @@ def _backfill_versions_from_repository(artifact: dict[str, Any]) -> dict[str, An
     if versions is None:
         return artifact
 
-    metadata = artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+    metadata = (
+        artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+    )
     engine_version = str(
         artifact.get("engine_version") or metadata.get("engine_version") or ""
     ).strip()
@@ -95,9 +99,13 @@ def _backfill_versions_from_repository(artifact: dict[str, Any]) -> dict[str, An
         return artifact
 
     repository = _repository_name(metadata.get("github_repository"))
-    if repository == "vllm-hust" and _is_missing_component_version(versions.get("core")):
+    if repository == "vllm-hust" and _is_missing_component_version(
+        versions.get("core")
+    ):
         versions["core"] = sanitized_engine_version
-    if repository == "vllm-ascend-hust" and _is_missing_component_version(versions.get("backend")):
+    if repository == "vllm-ascend-hust" and _is_missing_component_version(
+        versions.get("backend")
+    ):
         versions["backend"] = sanitized_engine_version
     artifact["versions"] = versions
     return artifact
@@ -110,7 +118,9 @@ def _backfill_versions_from_historical_source(
     if versions is None:
         return artifact
 
-    metadata = artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+    metadata = (
+        artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+    )
     data_source = str(metadata.get("data_source") or "").strip().lower()
     overrides = HISTORICAL_SAME_SPEC_COMPONENT_OVERRIDES.get(data_source)
     if not overrides:
@@ -127,11 +137,19 @@ def _backfill_versions_from_historical_source(
 
 
 def _artifact_pairing_key(artifact: dict[str, Any]) -> tuple[str, ...]:
-    metadata = artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+    metadata = (
+        artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+    )
     model = artifact.get("model") if isinstance(artifact.get("model"), dict) else {}
-    workload = artifact.get("workload") if isinstance(artifact.get("workload"), dict) else {}
-    hardware = artifact.get("hardware") if isinstance(artifact.get("hardware"), dict) else {}
-    cluster = artifact.get("cluster") if isinstance(artifact.get("cluster"), dict) else {}
+    workload = (
+        artifact.get("workload") if isinstance(artifact.get("workload"), dict) else {}
+    )
+    hardware = (
+        artifact.get("hardware") if isinstance(artifact.get("hardware"), dict) else {}
+    )
+    cluster = (
+        artifact.get("cluster") if isinstance(artifact.get("cluster"), dict) else {}
+    )
     submitted_at = str(metadata.get("submitted_at") or "").strip()
     return (
         str(model.get("name") or "").strip(),
@@ -146,7 +164,9 @@ def _artifact_pairing_key(artifact: dict[str, Any]) -> tuple[str, ...]:
 
 def _artifact_metric_matches(left: dict[str, Any], right: dict[str, Any]) -> bool:
     left_metrics = left.get("metrics") if isinstance(left.get("metrics"), dict) else {}
-    right_metrics = right.get("metrics") if isinstance(right.get("metrics"), dict) else {}
+    right_metrics = (
+        right.get("metrics") if isinstance(right.get("metrics"), dict) else {}
+    )
     for key in ("throughput_tps", "ttft_ms"):
         left_value = left_metrics.get(key)
         right_value = right_metrics.get(key)
@@ -168,7 +188,11 @@ def _resolved_component_version(artifact: dict[str, Any], key: str) -> str:
     if not _is_missing_component_version(value):
         return value
     if key == "core":
-        metadata = artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+        metadata = (
+            artifact.get("metadata")
+            if isinstance(artifact.get("metadata"), dict)
+            else {}
+        )
         engine_version = str(
             artifact.get("engine_version") or metadata.get("engine_version") or ""
         ).strip()
@@ -187,9 +211,15 @@ def _backfill_versions_from_matching_artifacts(
         if versions is None:
             continue
 
-        metadata = artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+        metadata = (
+            artifact.get("metadata")
+            if isinstance(artifact.get("metadata"), dict)
+            else {}
+        )
         repository = _repository_name(metadata.get("github_repository"))
-        if repository != "vllm-ascend-hust" or not _is_missing_component_version(versions.get("core")):
+        if repository != "vllm-ascend-hust" or not _is_missing_component_version(
+            versions.get("core")
+        ):
             continue
 
         backend_version = _resolved_component_version(artifact, "backend")
@@ -201,9 +231,11 @@ def _backfill_versions_from_matching_artifacts(
             for other in artifacts
             if other is not artifact
             and _repository_name(
-                (other.get("metadata") if isinstance(other.get("metadata"), dict) else {}).get(
-                    "github_repository"
-                )
+                (
+                    other.get("metadata")
+                    if isinstance(other.get("metadata"), dict)
+                    else {}
+                ).get("github_repository")
             )
             == "vllm-hust"
             and _artifact_pairing_key(other) == _artifact_pairing_key(artifact)
@@ -215,7 +247,9 @@ def _backfill_versions_from_matching_artifacts(
         if len(matching_core_artifacts) != 1:
             continue
 
-        versions["core"] = _resolved_component_version(matching_core_artifacts[0], "core")
+        versions["core"] = _resolved_component_version(
+            matching_core_artifacts[0], "core"
+        )
         artifact["versions"] = versions
 
 
@@ -270,7 +304,11 @@ def ensure_submission_manifests_in_tree(source_dir: Path) -> list[Path]:
         if manifest_path.exists():
             continue
         artifact = load_submission_artifact(artifact_path)
-        metadata = artifact.get("metadata") if isinstance(artifact.get("metadata"), dict) else {}
+        metadata = (
+            artifact.get("metadata")
+            if isinstance(artifact.get("metadata"), dict)
+            else {}
+        )
         entry: dict[str, str] = {
             "leaderboard_artifact": artifact_path.name,
         }
@@ -319,7 +357,9 @@ def normalize_submission_artifact_contract(artifact: dict[str, Any]) -> dict[str
 
 
 def normalize_submission_artifact_file(artifact_path: Path) -> bool:
-    artifact = normalize_submission_artifact_contract(load_submission_artifact(artifact_path))
+    artifact = normalize_submission_artifact_contract(
+        load_submission_artifact(artifact_path)
+    )
     serialized = json.dumps(artifact, ensure_ascii=False, indent=2) + "\n"
     current = artifact_path.read_text(encoding="utf-8")
     if current == serialized:
@@ -370,9 +410,7 @@ def validate_submission_artifacts(
         )
         if schema_errors:
             first = schema_errors[0]
-            errors.append(
-                f"{artifact_path}: {first.message} @ {list(first.path)}"
-            )
+            errors.append(f"{artifact_path}: {first.message} @ {list(first.path)}")
     return errors
 
 
@@ -401,7 +439,5 @@ def validate_manifest_artifacts(
             )
             if schema_errors:
                 first = schema_errors[0]
-                errors.append(
-                    f"{artifact_path}: {first.message} @ {list(first.path)}"
-                )
+                errors.append(f"{artifact_path}: {first.message} @ {list(first.path)}")
     return errors

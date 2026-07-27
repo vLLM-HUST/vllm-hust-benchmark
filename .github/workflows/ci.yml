@@ -34,6 +34,9 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e .[test]
 
+      - name: Clean benchmark state dir (simulate CI fresh env)
+        run: rm -rf .benchmarks/backfill-single-gpu
+
       - name: Run pytest
         env:
           HOME: ${{ github.workspace }}/.ci-home
@@ -80,3 +83,26 @@ jobs:
           path: pytest-results.xml
           if-no-files-found: warn
           retention-days: 14
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pre-commit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pre-commit
+
+      - name: Run pre-commit
+        run: pre-commit run --all-files
+        env:
+          SKIP: ${{ github.ref == 'refs/heads/main' && 'no-commit-to-branch' || '' }}

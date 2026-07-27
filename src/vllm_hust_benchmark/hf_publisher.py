@@ -26,6 +26,7 @@ _OPTIONAL_FILES = ["hard_constraints.json"]
 def _require_huggingface_hub() -> object:
     try:
         import huggingface_hub
+
         return huggingface_hub
     except ImportError as exc:
         raise ImportError(
@@ -99,7 +100,9 @@ def upload_leaderboard_to_hf(
                 f"Required leaderboard file not found: {local_path}\n"
                 "Run 'publish-website' first to generate aggregated outputs."
             )
-        repo_path = f"{path_in_repo_prefix}{filename}" if path_in_repo_prefix else filename
+        repo_path = (
+            f"{path_in_repo_prefix}{filename}" if path_in_repo_prefix else filename
+        )
         uploads.append((local_path, repo_path))
 
     if not uploads:
@@ -110,7 +113,9 @@ def upload_leaderboard_to_hf(
         print(f"[dry-run] Would upload {len(uploads)} file(s) to {repo_id}@{branch}:")
         for local_path, repo_path in uploads:
             size_kb = local_path.stat().st_size / 1024
-            print(f"  {local_path.name} → hf://datasets/{repo_id}/{repo_path}  ({size_kb:.1f} KB)")
+            print(
+                f"  {local_path.name} → hf://datasets/{repo_id}/{repo_path}  ({size_kb:.1f} KB)"
+            )
             uploaded.append(repo_path)
         return uploaded
 
@@ -118,7 +123,9 @@ def upload_leaderboard_to_hf(
         api.repo_info(repo_id=repo_id, repo_type="dataset")
     except Exception:
         logger.info("Repo %s not found; creating as private…", repo_id)
-        api.create_repo(repo_id=repo_id, repo_type="dataset", private=True, exist_ok=True)
+        api.create_repo(
+            repo_id=repo_id, repo_type="dataset", private=True, exist_ok=True
+        )
 
     CommitOperationAdd = hf.CommitOperationAdd
     operations = [

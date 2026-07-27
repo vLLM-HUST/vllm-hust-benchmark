@@ -19,7 +19,6 @@ from vllm_hust_benchmark.trend_producer import (
     TREND_SCHEMA_VERSION,
     _validate_trend_params,
     add_trend_fields_to_existing_entry,
-    produce_trend_entry,
 )
 from vllm_hust_benchmark.trend_validator import validate_entries
 from vllm_hust_benchmark.workload_config_contract import (
@@ -30,6 +29,7 @@ from vllm_hust_benchmark.workload_config_contract import (
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def minimal_entry_dict(**overrides: str | int | None) -> dict:
     """Return a minimal but schema-valid entry dict (without trend fields)."""
@@ -144,9 +144,13 @@ class TestValidateTrendParams:
         with pytest.raises(ValueError, match="coverage_class"):
             _validate_trend_params(
                 coverage_class="invalid-class",
-                campaign_id=None, comparison_id=None,
-                point_role=None, repeat_group=None, repeat_index=None,
-                canonical_aggregate=None, trend_status="default",
+                campaign_id=None,
+                comparison_id=None,
+                point_role=None,
+                repeat_group=None,
+                repeat_index=None,
+                canonical_aggregate=None,
+                trend_status="default",
                 trend_reason=None,
             )
 
@@ -154,9 +158,13 @@ class TestValidateTrendParams:
         with pytest.raises(ValueError, match="campaign_id"):
             _validate_trend_params(
                 coverage_class="full-matrix",
-                campaign_id="", comparison_id=None,
-                point_role="checkpoint", repeat_group=None, repeat_index=None,
-                canonical_aggregate=None, trend_status="default",
+                campaign_id="",
+                comparison_id=None,
+                point_role="checkpoint",
+                repeat_group=None,
+                repeat_index=None,
+                canonical_aggregate=None,
+                trend_status="default",
                 trend_reason=None,
             )
 
@@ -164,9 +172,13 @@ class TestValidateTrendParams:
         with pytest.raises(ValueError, match="point_role"):
             _validate_trend_params(
                 coverage_class="full-matrix",
-                campaign_id="campaign/v1", comparison_id=None,
-                point_role="baseline", repeat_group=None, repeat_index=None,
-                canonical_aggregate=None, trend_status="default",
+                campaign_id="campaign/v1",
+                comparison_id=None,
+                point_role="baseline",
+                repeat_group=None,
+                repeat_index=None,
+                canonical_aggregate=None,
+                trend_status="default",
                 trend_reason=None,
             )
 
@@ -174,9 +186,13 @@ class TestValidateTrendParams:
         with pytest.raises(ValueError, match="comparison_id"):
             _validate_trend_params(
                 coverage_class="targeted-pair",
-                campaign_id="campaign/v1", comparison_id=None,
-                point_role="head", repeat_group=None, repeat_index=None,
-                canonical_aggregate=None, trend_status="default",
+                campaign_id="campaign/v1",
+                comparison_id=None,
+                point_role="head",
+                repeat_group=None,
+                repeat_index=None,
+                canonical_aggregate=None,
+                trend_status="default",
                 trend_reason=None,
             )
 
@@ -184,9 +200,13 @@ class TestValidateTrendParams:
         with pytest.raises(ValueError, match="point_role"):
             _validate_trend_params(
                 coverage_class="targeted-pair",
-                campaign_id="campaign/v1", comparison_id="cmp-1",
-                point_role="checkpoint", repeat_group=None, repeat_index=None,
-                canonical_aggregate=None, trend_status="default",
+                campaign_id="campaign/v1",
+                comparison_id="cmp-1",
+                point_role="checkpoint",
+                repeat_group=None,
+                repeat_index=None,
+                canonical_aggregate=None,
+                trend_status="default",
                 trend_reason=None,
             )
 
@@ -194,9 +214,13 @@ class TestValidateTrendParams:
         with pytest.raises(ValueError, match="comparison_id"):
             _validate_trend_params(
                 coverage_class="experimental",
-                campaign_id=None, comparison_id="cmp-1",
-                point_role=None, repeat_group=None, repeat_index=None,
-                canonical_aggregate=None, trend_status="experimental",
+                campaign_id=None,
+                comparison_id="cmp-1",
+                point_role=None,
+                repeat_group=None,
+                repeat_index=None,
+                canonical_aggregate=None,
+                trend_status="experimental",
                 trend_reason=None,
             )
 
@@ -204,9 +228,13 @@ class TestValidateTrendParams:
         with pytest.raises(ValueError, match="trend_status"):
             _validate_trend_params(
                 coverage_class="experimental",
-                campaign_id=None, comparison_id=None,
-                point_role=None, repeat_group=None, repeat_index=None,
-                canonical_aggregate=None, trend_status="default",
+                campaign_id=None,
+                comparison_id=None,
+                point_role=None,
+                repeat_group=None,
+                repeat_index=None,
+                canonical_aggregate=None,
+                trend_status="default",
                 trend_reason=None,
             )
 
@@ -214,60 +242,105 @@ class TestValidateTrendParams:
         with pytest.raises(ValueError, match="repeat_index"):
             _validate_trend_params(
                 coverage_class="full-matrix",
-                campaign_id="c/v1", comparison_id=None,
+                campaign_id="c/v1",
+                comparison_id=None,
                 point_role="checkpoint",
-                repeat_group="r", repeat_index=None,
-                canonical_aggregate={"method": "mean", "count": 3, "metrics": {}, "outlier_handling": "none"},
-                trend_status="default", trend_reason=None,
+                repeat_group="r",
+                repeat_index=None,
+                canonical_aggregate={
+                    "method": "mean",
+                    "count": 3,
+                    "metrics": {},
+                    "outlier_handling": "none",
+                },
+                trend_status="default",
+                trend_reason=None,
             )
 
     def test_repeat_index_requires_repeat_group(self) -> None:
         with pytest.raises(ValueError, match="repeat_group"):
             _validate_trend_params(
                 coverage_class="full-matrix",
-                campaign_id="c/v1", comparison_id=None,
+                campaign_id="c/v1",
+                comparison_id=None,
                 point_role="checkpoint",
-                repeat_group=None, repeat_index=0,
-                canonical_aggregate={"method": "mean", "count": 3, "metrics": {}, "outlier_handling": "none"},
-                trend_status="default", trend_reason=None,
+                repeat_group=None,
+                repeat_index=0,
+                canonical_aggregate={
+                    "method": "mean",
+                    "count": 3,
+                    "metrics": {},
+                    "outlier_handling": "none",
+                },
+                trend_status="default",
+                trend_reason=None,
             )
 
     def test_blocked_status_requires_reason(self) -> None:
         with pytest.raises(ValueError, match="trend_reason"):
             _validate_trend_params(
                 coverage_class="targeted-pair",
-                campaign_id="c/v1", comparison_id="cmp-1",
-                point_role="head", repeat_group="g", repeat_index=0,
-                canonical_aggregate={"method": "mean", "count": 3, "metrics": {}, "outlier_handling": "none"},
-                trend_status="blocked", trend_reason=None,
+                campaign_id="c/v1",
+                comparison_id="cmp-1",
+                point_role="head",
+                repeat_group="g",
+                repeat_index=0,
+                canonical_aggregate={
+                    "method": "mean",
+                    "count": 3,
+                    "metrics": {},
+                    "outlier_handling": "none",
+                },
+                trend_status="blocked",
+                trend_reason=None,
             )
 
     def test_valid_full_matrix_passes(self) -> None:
         _validate_trend_params(
             coverage_class="full-matrix",
-            campaign_id="c/v1", comparison_id=None,
+            campaign_id="c/v1",
+            comparison_id=None,
             point_role="checkpoint",
-            repeat_group="g", repeat_index=0,
-            canonical_aggregate={"method": "mean", "count": 3, "metrics": {"ttft_ms": {"value": 10}}, "outlier_handling": "none"},
-            trend_status="default", trend_reason=None,
+            repeat_group="g",
+            repeat_index=0,
+            canonical_aggregate={
+                "method": "mean",
+                "count": 3,
+                "metrics": {"ttft_ms": {"value": 10}},
+                "outlier_handling": "none",
+            },
+            trend_status="default",
+            trend_reason=None,
         )
 
     def test_valid_targeted_pair_passes(self) -> None:
         _validate_trend_params(
             coverage_class="targeted-pair",
-            campaign_id="c/v1", comparison_id="cmp-1",
+            campaign_id="c/v1",
+            comparison_id="cmp-1",
             point_role="baseline",
-            repeat_group="g", repeat_index=0,
-            canonical_aggregate={"method": "mean", "count": 3, "metrics": {"ttft_ms": {"value": 40}}, "outlier_handling": "none"},
-            trend_status="default", trend_reason=None,
+            repeat_group="g",
+            repeat_index=0,
+            canonical_aggregate={
+                "method": "mean",
+                "count": 3,
+                "metrics": {"ttft_ms": {"value": 40}},
+                "outlier_handling": "none",
+            },
+            trend_status="default",
+            trend_reason=None,
         )
 
     def test_valid_experimental_passes(self) -> None:
         _validate_trend_params(
             coverage_class="experimental",
-            campaign_id=None, comparison_id=None,
-            point_role=None, repeat_group=None, repeat_index=None,
-            canonical_aggregate=None, trend_status="experimental",
+            campaign_id=None,
+            comparison_id=None,
+            point_role=None,
+            repeat_group=None,
+            repeat_index=None,
+            canonical_aggregate=None,
+            trend_status="experimental",
             trend_reason="Single W8A8 run outside formal matrix",
         )
 
@@ -281,29 +354,38 @@ class TestEntryPassesT09Validation:
     """Produced entries (faked via minimal dicts) must pass T09 admission."""
 
     def test_full_matrix_default_status(self) -> None:
-        entries = [
-            minimal_full_matrix_entry(repeat_index=i)
-            for i in range(3)
-        ]
+        entries = [minimal_full_matrix_entry(repeat_index=i) for i in range(3)]
         report = validate_entries(entries)
         assert report.passed, f"Unexpected issues: {report.issues}"
         for decision in report.decisions:
             assert decision.status in ("default", "pending")
 
     def test_targeted_pair_both_sides(self) -> None:
-        baseline = minimal_targeted_pair_entry(point_role="baseline", repeat_group="test::pair::baseline")
-        head = minimal_targeted_pair_entry(point_role="head", repeat_group="test::pair::head")
+        baseline = minimal_targeted_pair_entry(
+            point_role="baseline", repeat_group="test::pair::baseline"
+        )
+        head = minimal_targeted_pair_entry(
+            point_role="head", repeat_group="test::pair::head"
+        )
         entries = []
-        for i, eid in enumerate(["a0000000-0000-4000-8000-000000000001",
-                                  "a0000000-0000-4000-8000-000000000002",
-                                  "a0000000-0000-4000-8000-000000000003"]):
+        for i, eid in enumerate(
+            [
+                "a0000000-0000-4000-8000-000000000001",
+                "a0000000-0000-4000-8000-000000000002",
+                "a0000000-0000-4000-8000-000000000003",
+            ]
+        ):
             b = dict(baseline)
             b["repeat_index"] = i
             b["entry_id"] = eid
             entries.append(b)
-        for i, eid in enumerate(["b0000000-0000-4000-8000-000000000001",
-                                  "b0000000-0000-4000-8000-000000000002",
-                                  "b0000000-0000-4000-8000-000000000003"]):
+        for i, eid in enumerate(
+            [
+                "b0000000-0000-4000-8000-000000000001",
+                "b0000000-0000-4000-8000-000000000002",
+                "b0000000-0000-4000-8000-000000000003",
+            ]
+        ):
             h = dict(head)
             h["repeat_index"] = i
             h["entry_id"] = eid
@@ -360,7 +442,10 @@ class TestWorkloadConfigContract:
         entry["metadata"]["workload_config_contract"] = WORKLOAD_CONFIG_CONTRACT_VERSION
         entry["same_spec"] = {
             "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
-            "resolved_server_parameters": {"gpu_memory_utilization": 0.6},
+            "resolved_server_parameters": {
+                "gpu_memory_utilization": 0.6,
+                "max_model_len": 32768,
+            },
             "resolved_client_parameters": {
                 "dataset_name": "random",
                 "random_input_len": 1024,
@@ -370,7 +455,10 @@ class TestWorkloadConfigContract:
                 "no_stream": False,
             },
         }
-        from vllm_hust_benchmark.workload_config_contract import validate_explicit_workload_config
+        from vllm_hust_benchmark.workload_config_contract import (
+            validate_explicit_workload_config,
+        )
+
         errors = validate_explicit_workload_config(entry)
         assert not errors, f"Contract errors: {errors}"
 
@@ -381,7 +469,10 @@ class TestWorkloadConfigContract:
             "resolved_server_parameters": {},
             "resolved_client_parameters": {},
         }
-        from vllm_hust_benchmark.workload_config_contract import validate_explicit_workload_config
+        from vllm_hust_benchmark.workload_config_contract import (
+            validate_explicit_workload_config,
+        )
+
         errors = validate_explicit_workload_config(entry)
         assert errors  # Should have contract validation errors
 
@@ -392,8 +483,13 @@ class TestWorkloadConfigContract:
             "resolved_server_parameters": {},
             "resolved_client_parameters": {},
         }
-        from vllm_hust_benchmark.workload_config_contract import validate_explicit_workload_config
-        errors = validate_explicit_workload_config(entry)  # non-official should return []
+        from vllm_hust_benchmark.workload_config_contract import (
+            validate_explicit_workload_config,
+        )
+
+        errors = validate_explicit_workload_config(
+            entry
+        )  # non-official should return []
         assert not errors
 
 
@@ -403,7 +499,6 @@ class TestWorkloadConfigContract:
 
 
 class TestAddTrendFieldsToExistingEntry:
-
     def test_adds_fields_and_passes_validation(self, tmp_path: Path) -> None:
         artifact = tmp_path / "run_leaderboard.json"
         artifact.write_text(json.dumps(minimal_entry_dict(), indent=2))
@@ -415,7 +510,8 @@ class TestAddTrendFieldsToExistingEntry:
             repeat_group="mig::group",
             repeat_index=0,
             canonical_aggregate={
-                "method": "mean", "count": 3,
+                "method": "mean",
+                "count": 3,
                 "metrics": {"ttft_ms": {"value": 42.0}},
                 "outlier_handling": "none",
             },
@@ -455,7 +551,8 @@ class TestAddTrendFieldsToExistingEntry:
             repeat_group="g",
             repeat_index=0,
             canonical_aggregate={
-                "method": "mean", "count": 3,
+                "method": "mean",
+                "count": 3,
                 "metrics": {"ttft_ms": {"value": 42.0}},
                 "outlier_handling": "none",
             },
@@ -541,9 +638,17 @@ class TestProduceTrendEntryEndToEnd:
 
     def test_legacy_entry_has_no_trend_fields(self) -> None:
         entry = minimal_entry_dict()
-        for field in ("trend_schema_version", "coverage_class", "trend_status",
-                      "campaign_id", "comparison_id", "point_role",
-                      "repeat_group", "repeat_index", "canonical_aggregate"):
+        for field in (
+            "trend_schema_version",
+            "coverage_class",
+            "trend_status",
+            "campaign_id",
+            "comparison_id",
+            "point_role",
+            "repeat_group",
+            "repeat_index",
+            "canonical_aggregate",
+        ):
             assert field not in entry, f"{field} should not be in legacy entry"
 
     def test_canonical_aggregate_required_for_repeated_non_experimental(self) -> None:
@@ -551,9 +656,12 @@ class TestProduceTrendEntryEndToEnd:
         with pytest.raises(ValueError, match="canonical_aggregate"):
             _validate_trend_params(
                 coverage_class="full-matrix",
-                campaign_id="c/v1", comparison_id=None,
+                campaign_id="c/v1",
+                comparison_id=None,
                 point_role="checkpoint",
-                repeat_group="g", repeat_index=0,
+                repeat_group="g",
+                repeat_index=0,
                 canonical_aggregate=None,
-                trend_status="default", trend_reason=None,
+                trend_status="default",
+                trend_reason=None,
             )

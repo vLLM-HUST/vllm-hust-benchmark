@@ -47,7 +47,9 @@ def _load_json_object(path: Path) -> dict[str, Any] | None:
 
 
 def has_canonical_run(spec: Mapping[str, Any], *, submissions_root: Path) -> bool:
-    canonical_dir = get_canonical_submission_dir(spec, submissions_root=submissions_root)
+    canonical_dir = get_canonical_submission_dir(
+        spec, submissions_root=submissions_root
+    )
     run_file = canonical_dir / "run_leaderboard.json"
     manifest_file = canonical_dir / "leaderboard_manifest.json"
 
@@ -70,7 +72,8 @@ def has_canonical_run(spec: Mapping[str, Any], *, submissions_root: Path) -> boo
         return False
     if not any(
         isinstance(entry, Mapping)
-        and str(entry.get("leaderboard_artifact") or "").strip() == "run_leaderboard.json"
+        and str(entry.get("leaderboard_artifact") or "").strip()
+        == "run_leaderboard.json"
         for entry in entries
     ):
         return False
@@ -135,7 +138,9 @@ def select_canonical_candidate(
         )
 
     if not candidates:
-        raise ValueError("no valid repeated runs available for canonical candidate selection")
+        raise ValueError(
+            "no valid repeated runs available for canonical candidate selection"
+        )
 
     metric_median = median(item["primary_metric_value"] for item in candidates)
     for candidate in candidates:

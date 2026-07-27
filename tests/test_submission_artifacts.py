@@ -204,9 +204,13 @@ def test_normalize_submission_artifacts_in_tree_pairs_plugin_with_core_submissio
         (plugin_dir / "run_leaderboard.json").read_text(encoding="utf-8")
     )
 
-    assert normalized_core["versions"]["core"] == "0.17.2rc1.dev450+g289b51ab2.d20260417"
+    assert (
+        normalized_core["versions"]["core"] == "0.17.2rc1.dev450+g289b51ab2.d20260417"
+    )
     assert normalized_plugin["versions"]["backend"] == "0.1.dev2743+g7f888566e"
-    assert normalized_plugin["versions"]["core"] == "0.17.2rc1.dev450+g289b51ab2.d20260417"
+    assert (
+        normalized_plugin["versions"]["core"] == "0.17.2rc1.dev450+g289b51ab2.d20260417"
+    )
 
 
 def test_normalize_submission_artifacts_in_tree_pairs_same_spec_plugin_submission(

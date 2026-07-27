@@ -2,7 +2,9 @@ import json
 from pathlib import Path
 
 from vllm_hust_benchmark.official_baselines import get_canonical_submission_dir
-from vllm_hust_benchmark.official_baselines import get_primary_metric_name_for_benchmark_type
+from vllm_hust_benchmark.official_baselines import (
+    get_primary_metric_name_for_benchmark_type,
+)
 from vllm_hust_benchmark.official_baselines import has_canonical_run
 from vllm_hust_benchmark.official_baselines import select_canonical_candidate
 from vllm_hust_benchmark.same_spec import build_same_spec_payload
@@ -94,17 +96,12 @@ def test_perfgate_prefix_repetition_online_spec_is_available_for_ci() -> None:
     assert spec["client_parameters"]["output_len"] == 64
     assert same_spec["scenario"] == "prefix-repetition-online"
     assert (
-        same_spec["resolved_client_parameters"]["prefix_repetition_prefix_len"]
-        == 768
+        same_spec["resolved_client_parameters"]["prefix_repetition_prefix_len"] == 768
     )
     assert (
-        same_spec["resolved_client_parameters"]["prefix_repetition_suffix_len"]
-        == 256
+        same_spec["resolved_client_parameters"]["prefix_repetition_suffix_len"] == 256
     )
-    assert (
-        same_spec["resolved_client_parameters"]["prefix_repetition_output_len"]
-        == 64
-    )
+    assert same_spec["resolved_client_parameters"]["prefix_repetition_output_len"] == 64
 
 
 def test_perfgate_random_latency_spec_is_available_for_ci() -> None:
@@ -277,7 +274,9 @@ def test_perfgate_visionarena_online_spec_is_available_for_ci() -> None:
     assert same_spec["resolved_client_parameters"]["num_prompts"] == 8
 
 
-def test_has_canonical_run_requires_matching_spec_id_and_submitter(tmp_path: Path) -> None:
+def test_has_canonical_run_requires_matching_spec_id_and_submitter(
+    tmp_path: Path,
+) -> None:
     canonical_dir = tmp_path / _spec()["id"]
     canonical_dir.mkdir(parents=True)
     (canonical_dir / "run_leaderboard.json").write_text(
@@ -395,12 +394,14 @@ def test_select_canonical_candidate_uses_throughput_metric(tmp_path: Path) -> No
 def test_select_canonical_candidate_prefers_lower_error_rate(tmp_path: Path) -> None:
     repeat_a = tmp_path / "repeat-a"
     repeat_b = tmp_path / "repeat-b"
-    _write_result_artifact(repeat_a, ttft_ms=100.0, throughput_tps=220.0, error_rate=0.1)
-    _write_result_artifact(repeat_b, ttft_ms=110.0, throughput_tps=215.0, error_rate=0.0)
-
-    payload = select_canonical_candidate(
-        [repeat_a, repeat_b], benchmark_type="serve"
+    _write_result_artifact(
+        repeat_a, ttft_ms=100.0, throughput_tps=220.0, error_rate=0.1
     )
+    _write_result_artifact(
+        repeat_b, ttft_ms=110.0, throughput_tps=215.0, error_rate=0.0
+    )
+
+    payload = select_canonical_candidate([repeat_a, repeat_b], benchmark_type="serve")
 
     assert Path(payload["selected_result_dir"]) == repeat_b.resolve()
 

@@ -39,7 +39,9 @@ def test_create_commit_on_branch_falls_back_to_branch_for_older_hf_api() -> None
         def create_commit(self, **kwargs):
             self.calls.append(kwargs)
             if "revision" in kwargs:
-                raise TypeError("create_commit() got an unexpected keyword argument 'revision'")
+                raise TypeError(
+                    "create_commit() got an unexpected keyword argument 'revision'"
+                )
             return kwargs
 
     api = BranchApi()

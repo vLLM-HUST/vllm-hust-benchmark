@@ -85,7 +85,9 @@ def _iter_serving_tests(source_file: Path) -> list[UpstreamBenchmarkTest]:
     return tests
 
 
-def _iter_simple_tests(source_file: Path, benchmark_type: str) -> list[UpstreamBenchmarkTest]:
+def _iter_simple_tests(
+    source_file: Path, benchmark_type: str
+) -> list[UpstreamBenchmarkTest]:
     payload = _load_json(source_file)
     if not isinstance(payload, list):
         raise ValueError(f"Unsupported {benchmark_type} tests format in {source_file}.")
@@ -108,7 +110,9 @@ def load_upstream_tests(
     *,
     benchmark_type: str | None = None,
 ) -> list[UpstreamBenchmarkTest]:
-    tests_root = layout.vllm_hust_repo / ".buildkite" / "performance-benchmarks" / "tests"
+    tests_root = (
+        layout.vllm_hust_repo / ".buildkite" / "performance-benchmarks" / "tests"
+    )
     selected_types = [benchmark_type] if benchmark_type else list(DEFAULT_TEST_FILES)
     tests: list[UpstreamBenchmarkTest] = []
     for current_type in selected_types:
@@ -157,13 +161,26 @@ def build_inspection_commands(
         server_parameters = dict(test.server_parameters)
         server_model = str(server_parameters.pop("model"))
         commands: dict[str, list[str]] = {
-            "server": ["vllm", "serve", server_model, *_render_flag_args(server_parameters)],
+            "server": [
+                "vllm",
+                "serve",
+                server_model,
+                *_render_flag_args(server_parameters),
+            ],
         }
 
         client_parameters = dict(test.client_parameters)
         client_command = ["vllm", "bench", "serve"]
         if result_json is not None:
-            client_command.extend(["--save-result", "--result-dir", str(result_json.parent), "--result-filename", result_json.name])
+            client_command.extend(
+                [
+                    "--save-result",
+                    "--result-dir",
+                    str(result_json.parent),
+                    "--result-filename",
+                    result_json.name,
+                ]
+            )
         if qps is not None:
             client_command.extend(["--request-rate", qps])
         elif test.qps_list:
@@ -171,7 +188,9 @@ def build_inspection_commands(
         if max_concurrency is not None:
             client_command.extend(["--max-concurrency", str(max_concurrency)])
         elif test.max_concurrency_list:
-            client_command.extend(["--max-concurrency", str(test.max_concurrency_list[0])])
+            client_command.extend(
+                ["--max-concurrency", str(test.max_concurrency_list[0])]
+            )
         client_command.extend(_render_flag_args(client_parameters))
         commands["client"] = client_command
         return commands

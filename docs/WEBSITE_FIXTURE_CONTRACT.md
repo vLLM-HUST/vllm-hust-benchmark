@@ -1,49 +1,46 @@
 # Website fixture contract
 
-> **For**: Website consumers that render leaderboard trend data  
-> **Contract version**: `trend-coverage/v1`  
+> **For**: Website consumers that render leaderboard trend data\
+> **Contract version**: `trend-coverage/v1`\
 > **Related**: `docs/TREND_COVERAGE_SCHEMA.md`, `tests/test_website_contract.py`
 
-This document defines the consumer-facing contract between the benchmark data
-pipeline and the website. It describes how the website should interpret each
-trend status, which entries to show as formal trends, and how to use the
-provided fixtures for testing.
+This document defines the consumer-facing contract between the benchmark data pipeline and the
+website. It describes how the website should interpret each trend status, which entries to show as
+formal trends, and how to use the provided fixtures for testing.
 
----
+______________________________________________________________________
 
 ## 1. Six fixture categories
 
-The following six fixtures in `tests/fixtures/trend_coverage/valid/` cover
-every data scenario the website must handle. Each fixture file is loadable as
-a single JSON object or array and passes JSON Schema validation under
-`trend-coverage/v1`.
+The following six fixtures in `tests/fixtures/trend_coverage/valid/` cover every data scenario the
+website must handle. Each fixture file is loadable as a single JSON object or array and passes JSON
+Schema validation under `trend-coverage/v1`.
 
-| # | Category | Fixture file | Produced `trend_status` | Website rendering |
-|---|----------|-------------|------------------------|-------------------|
-| 1 | **full-matrix** | `full-matrix.json` | `blocked` (without raw repeats) | Hide from trend lines; show diagnostic |
-| 2 | **complete targeted pair** | `complete-pair.json` | `default` (all entries) | Plot as paired trend lines |
-| 3 | **blocked half-pair** | `blocked-half-pair.json` | `blocked` (all entries) | Hide from trend lines; show diagnostic |
-| 4 | **experimental** | `experimental.json` | `experimental` | Show in experimental section only; never in default trend |
-| 5 | **invalid metric** | `invalid.json` | `blocked` | Hide from trend lines; show diagnostic |
-| 6 | **repeat aggregate** | `repeat-aggregate.json` | `default` (all entries) | Plot as formal trend line with aggregate markers |
+| #   | Category                   | Fixture file             | Produced `trend_status`         | Website rendering                                         |
+| --- | -------------------------- | ------------------------ | ------------------------------- | --------------------------------------------------------- |
+| 1   | **full-matrix**            | `full-matrix.json`       | `blocked` (without raw repeats) | Hide from trend lines; show diagnostic                    |
+| 2   | **complete targeted pair** | `complete-pair.json`     | `default` (all entries)         | Plot as paired trend lines                                |
+| 3   | **blocked half-pair**      | `blocked-half-pair.json` | `blocked` (all entries)         | Hide from trend lines; show diagnostic                    |
+| 4   | **experimental**           | `experimental.json`      | `experimental`                  | Show in experimental section only; never in default trend |
+| 5   | **invalid metric**         | `invalid.json`           | `blocked`                       | Hide from trend lines; show diagnostic                    |
+| 6   | **repeat aggregate**       | `repeat-aggregate.json`  | `default` (all entries)         | Plot as formal trend line with aggregate markers          |
 
 ### 1.1 Status → rendering matrix
 
 | `trend_status` | Show as default trend? | Show in experimental section? | Show in blocked diagnostics? | Show in excluded list? |
-|---------------|----------------------|------------------------------|----------------------------|----------------------|
-| `default`     | ✅ Yes               | ❌ No                        | ❌ No                       | ❌ No                |
-| `experimental`| ❌ No                | ✅ Yes (separate)             | ❌ No                       | ❌ No                |
-| `blocked`     | ❌ No                | ❌ No                        | ✅ Yes (with reason)         | ❌ No                |
-| `invalid`     | ❌ No                | ❌ No                        | ✅ Yes (with reason)         | ❌ No                |
-| `excluded`    | ❌ No                | ❌ No                        | ❌ No                       | ✅ Yes (provenance) |
+| -------------- | ---------------------- | ----------------------------- | ---------------------------- | ---------------------- |
+| `default`      | ✅ Yes                 | ❌ No                         | ❌ No                        | ❌ No                  |
+| `experimental` | ❌ No                  | ✅ Yes (separate)             | ❌ No                        | ❌ No                  |
+| `blocked`      | ❌ No                  | ❌ No                         | ✅ Yes (with reason)         | ❌ No                  |
+| `invalid`      | ❌ No                  | ❌ No                         | ✅ Yes (with reason)         | ❌ No                  |
+| `excluded`     | ❌ No                  | ❌ No                         | ❌ No                        | ✅ Yes (provenance)    |
 
----
+______________________________________________________________________
 
 ## 2. Filtering contract
 
-The website MUST NOT show `experimental`, `blocked`, `invalid`, or `excluded`
-entries as default formal trend lines. The ONLY allowed filter for the primary
-trend chart is:
+The website MUST NOT show `experimental`, `blocked`, `invalid`, or `excluded` entries as default
+formal trend lines. The ONLY allowed filter for the primary trend chart is:
 
 ```python
 entries_by_status(entries, "default")
@@ -57,16 +54,15 @@ trend_entries = [e for e in all_entries if e.get("trend_status") == "default"]
 
 ### 2.1 Experimental section
 
-Experimental entries (`trend_status == "experimental"`) should be displayed in a
-separate section below the main trend chart, clearly labeled as "Experimental"
-or "Preview". They must not be mixed into the same axes as formal `default`
-trends.
+Experimental entries (`trend_status == "experimental"`) should be displayed in a separate section
+below the main trend chart, clearly labeled as "Experimental" or "Preview". They must not be mixed
+into the same axes as formal `default` trends.
 
 ### 2.2 Blocked diagnostics
 
-Blocked entries (`trend_status == "blocked"`) carry a `trend_reason` field with
-actionable diagnostic information. The website should expose this in a
-diagnostics panel or tooltip. Example reasons:
+Blocked entries (`trend_status == "blocked"`) carry a `trend_reason` field with actionable
+diagnostic information. The website should expose this in a diagnostics panel or tooltip. Example
+reasons:
 
 ```
 "No comparable baseline entry for comparison_id=..."
@@ -76,16 +72,15 @@ diagnostics panel or tooltip. Example reasons:
 
 ### 2.3 Invalid entries
 
-Invalid entries (`trend_status == "invalid"`) have critical metric failures
-and should be hidden from all trend views. They may be shown in a data-quality
-dashboard with their `trend_reason`.
+Invalid entries (`trend_status == "invalid"`) have critical metric failures and should be hidden
+from all trend views. They may be shown in a data-quality dashboard with their `trend_reason`.
 
 ### 2.4 Excluded entries
 
-Excluded entries (`trend_status == "excluded"`) are legacy records retained
-for provenance only. They must not appear in any published view.
+Excluded entries (`trend_status == "excluded"`) are legacy records retained for provenance only.
+They must not appear in any published view.
 
----
+______________________________________________________________________
 
 ## 3. Using fixtures in website tests
 
@@ -142,25 +137,25 @@ PYTHONPATH=src python3 -m pytest tests/test_website_contract.py -v
 
 This outputs the status for each category and verifies the filtering contract.
 
----
+______________________________________________________________________
 
 ## 4. data contract invariants
 
-| Invariant | Enforcement | Category |
-|-----------|-----------|----------|
-| Only `default` entries are formal trends | Website filter | All |
-| `experimental` includes a reason | Validator | Experimental |
-| `blocked` entries have actionable `trend_reason` | Validator schema | Blocked |
-| `invalid` entries are hidden | Website filter | Invalid |
-| `excluded` entries are provenance-only | Website filter | Legacy |
-| Each entry carries `trend_status` | Schema required | All |
+| Invariant                                             | Enforcement              | Category         |
+| ----------------------------------------------------- | ------------------------ | ---------------- |
+| Only `default` entries are formal trends              | Website filter           | All              |
+| `experimental` includes a reason                      | Validator                | Experimental     |
+| `blocked` entries have actionable `trend_reason`      | Validator schema         | Blocked          |
+| `invalid` entries are hidden                          | Website filter           | Invalid          |
+| `excluded` entries are provenance-only                | Website filter           | Legacy           |
+| Each entry carries `trend_status`                     | Schema required          | All              |
 | Aggregate entries declare `canonical_aggregate.count` | Schema conditional check | Repeat aggregate |
 
----
+______________________________________________________________________
 
 ## 5. Workflow: Adding a new fixture category
 
 1. Create the fixture JSON in `tests/fixtures/trend_coverage/valid/`
-2. Add a `CATEGORIES` entry in `tests/test_website_contract.py`
-3. Add individual status assertion and website filtering tests
-4. Run `pytest tests/test_website_contract.py` to verify
+1. Add a `CATEGORIES` entry in `tests/test_website_contract.py`
+1. Add individual status assertion and website filtering tests
+1. Run `pytest tests/test_website_contract.py` to verify

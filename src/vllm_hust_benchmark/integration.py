@@ -17,6 +17,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Mapping
 
+from vllm_hust_benchmark.aggregate_results import build_series_signature
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.leaderboard_exclusions import (
     LeaderboardExclusion,
@@ -520,6 +521,8 @@ def aggregate_to_website(
     execute: bool,
     reject_pr_preview_sources: bool = False,
 ) -> int:
+    destination = output_dir or layout.website_repo / "data"
+
     exclusions = _load_public_leaderboard_exclusions(layout)
     excluded_dirs = _find_excluded_submission_dirs(source_dir, exclusions)
     if excluded_dirs:
@@ -528,6 +531,14 @@ def aggregate_to_website(
             + ", ".join(path.name for path in excluded_dirs),
             file=sys.stderr,
         )
+        report = _build_rejected_superseded_report(
+            [],
+            [],
+            excluded_dirs,
+            source_dir=source_dir,
+            layout=layout,
+        )
+        _write_rejected_superseded_report(destination, report)
         return 2
 
     if reject_pr_preview_sources and not _validate_formal_submission_sources(
@@ -535,7 +546,51 @@ def aggregate_to_website(
     ):
         return 2
 
-    destination = output_dir or layout.website_repo / "data"
+    admission_failures = _scan_submission_admission_failures(source_dir)
+    if admission_failures:
+        print(
+            "ERROR: submission admission gate rejected the following directories:",
+            file=sys.stderr,
+        )
+        for f in admission_failures:
+            print(
+                f"  {f['dir']}: {f['reason']} ({f['detail']})",
+                file=sys.stderr,
+            )
+        report = _build_rejected_superseded_report(
+            admission_failures,
+            [],
+            [],
+            source_dir=source_dir,
+            layout=layout,
+        )
+        _write_rejected_superseded_report(destination, report)
+        return 2
+
+    coexistence_conflicts = _find_superseded_coexistence_conflicts(source_dir)
+    if coexistence_conflicts:
+        print("ERROR: superseded coexistence conflicts found:", file=sys.stderr)
+        for c in coexistence_conflicts:
+            print(
+                f"  signature={c['signature']}: old={c['old_entry_id']} vs new={c['new_entry_id']}",
+                file=sys.stderr,
+            )
+            print(f"    old_dir={c['old_dir']}", file=sys.stderr)
+            print(f"    new_dir={c['new_dir']}", file=sys.stderr)
+            print(
+                "    Fix: move old entry to archive/suspect/ and set metadata.supersedes on the new entry.",
+                file=sys.stderr,
+            )
+        report = _build_rejected_superseded_report(
+            [],
+            coexistence_conflicts,
+            [],
+            source_dir=source_dir,
+            layout=layout,
+        )
+        _write_rejected_superseded_report(destination, report)
+        return 2
+
     command = [
         sys.executable,
         str(layout.website_repo / "scripts" / "aggregate_results.py"),
@@ -544,7 +599,17 @@ def aggregate_to_website(
         "--output-dir",
         str(destination),
     ]
-    return run_external_command(command, cwd=layout.website_repo, execute=execute)
+    rc = run_external_command(command, cwd=layout.website_repo, execute=execute)
+
+    report = _build_rejected_superseded_report(
+        [],
+        [],
+        [],
+        source_dir=source_dir,
+        layout=layout,
+    )
+    _write_rejected_superseded_report(destination, report)
+    return rc
 
 
 def _load_snapshot_json(path: Path) -> Any:
@@ -1312,6 +1377,395 @@ def _find_excluded_submission_dirs(
             relative = artifact_path.relative_to(source_dir)
             excluded_dirs.add(source_dir / relative.parts[0])
     return sorted(excluded_dirs)
+
+
+_TEMPORARY_DIR_PREFIX_PATTERN = re.compile(r"^(tmp|temp|wip|scratch|adhoc)")
+_TEMPORARY_DIR_SUFFIX_PATTERN = re.compile(r"/(tmp|temp|wip|scratch|adhoc)$")
+
+
+def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
+    """Scan immediate subdirectories of ``source_dir`` for admission failures.
+
+    Returns a list of failure dicts, each with keys ``dir``, ``reason``, and
+    ``detail``. A directory is a failure if it matches ANY of:
+    - ``temporary``: directory name matches a temporary naming pattern, or the
+      directory lives under ``tests/fixtures/`` or ``.benchmarks/``.
+    - ``FAILED``: the ``STATUS`` file content starts with ``FAILED``.
+    - ``NO_STATUS``: a ``STATUS`` file exists but is empty after stripping,
+      or neither a ``STATUS`` file nor a ``run_leaderboard.json`` file is
+      present. Backfill/baseline pipelines don't write a ``STATUS`` file by
+      design (only ``codex-latest-*`` CI runs do); they always produce a
+      ``run_leaderboard.json``, which counts as a valid submission artifact.
+    """
+    failures: list[dict] = []
+    if not source_dir.is_dir():
+        return failures
+
+    for child in sorted(source_dir.iterdir()):
+        if not child.is_dir():
+            continue
+
+        path_str = str(child)
+        parts = child.parts
+        is_temporary_name = bool(
+            _TEMPORARY_DIR_PREFIX_PATTERN.match(child.name)
+            or _TEMPORARY_DIR_SUFFIX_PATTERN.search(path_str)
+        )
+        is_fixture_path = "tests" in parts and "fixtures" in parts
+        is_benchmark_cache = ".benchmarks" in parts
+        if is_temporary_name or is_fixture_path or is_benchmark_cache:
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "temporary",
+                    "detail": "directory name matches temporary pattern",
+                }
+            )
+            continue
+
+        status_path = child / "STATUS"
+        if not status_path.is_file():
+            # Backfill/baseline pipelines don't write a STATUS file by design;
+            # they do produce run_leaderboard.json. Treat such a directory as a
+            # NO_STATUS failure only if it also lacks run_leaderboard.json.
+            if not (child / "run_leaderboard.json").is_file():
+                failures.append(
+                    {
+                        "dir": path_str,
+                        "reason": "NO_STATUS",
+                        "detail": "STATUS file missing and no run_leaderboard.json",
+                    }
+                )
+            continue
+
+        try:
+            status_content = status_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "NO_STATUS",
+                    "detail": f"STATUS file unreadable: {exc}",
+                }
+            )
+            continue
+
+        if status_content.startswith("FAILED"):
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "FAILED",
+                    "detail": f"STATUS file contains: {status_content.strip()}",
+                }
+            )
+            continue
+
+        if not status_content.strip():
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "NO_STATUS",
+                    "detail": "STATUS file empty",
+                }
+            )
+            continue
+
+    return failures
+
+
+def _find_superseded_coexistence_conflicts(source_dir: Path) -> list[dict]:
+    """Detect old low-value points coexisting with new same-config OK points
+    without an explicit ``supersedes`` annotation.
+
+    For each signature group with more than one entry, the most recent entry
+    (by ``metadata.submitted_at``) is treated as the "new" point. Each older
+    entry that does NOT share a ``repeat_group`` with the new entry must be
+    referenced by the new entry's ``metadata.supersedes`` (string or list);
+    otherwise it is recorded as a conflict.
+
+    Returns a list of conflict dicts with keys ``signature``,
+    ``old_entry_id``, ``new_entry_id``, ``old_dir``, ``new_dir``.
+    """
+    conflicts: list[dict] = []
+    if not source_dir.is_dir():
+        return conflicts
+
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for child in sorted(source_dir.iterdir()):
+        if not child.is_dir():
+            continue
+        try:
+            artifact_path = child / "run_leaderboard.json"
+            if not artifact_path.is_file():
+                continue
+            try:
+                payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                # Malformed dirs are handled by the admission gate.
+                continue
+            if not isinstance(payload, dict):
+                continue
+
+            signature = build_series_signature(payload)
+            if not signature:
+                continue
+
+            metadata = payload.get("metadata")
+            metadata = metadata if isinstance(metadata, dict) else {}
+
+            entry_id = payload.get("entry_id")
+            entry_id = str(entry_id) if entry_id else child.name
+
+            repeat_group = metadata.get("repeat_group")
+            if not (isinstance(repeat_group, str) and repeat_group.strip()):
+                # Fall back to top-level repeat_group (matches the
+                # get_repeat_group helper in aggregate_results).
+                top_rg = payload.get("repeat_group")
+                if isinstance(top_rg, str) and top_rg.strip():
+                    repeat_group = top_rg.strip()
+                else:
+                    repeat_group = None
+            else:
+                repeat_group = repeat_group.strip()
+
+            submitted_at = metadata.get("submitted_at")
+            submitted_at = submitted_at if isinstance(submitted_at, str) else ""
+
+            grouped.setdefault(signature, []).append(
+                {
+                    "dir": child,
+                    "entry_id": entry_id,
+                    "repeat_group": repeat_group,
+                    "submitted_at": submitted_at,
+                    "supersedes": metadata.get("supersedes"),
+                }
+            )
+        except Exception:  # noqa: BLE001
+            # Defensive: one bad dir must not crash the whole scan.
+            continue
+
+    for signature, entries in grouped.items():
+        if len(entries) < 2:
+            continue
+
+        sorted_entries = sorted(entries, key=lambda e: e["submitted_at"])
+        new_entry = sorted_entries[-1]
+
+        new_supersedes = new_entry["supersedes"]
+        if isinstance(new_supersedes, str):
+            new_supersedes_set: set[str] = {new_supersedes}
+        elif isinstance(new_supersedes, list):
+            new_supersedes_set = {
+                str(item) for item in new_supersedes if item is not None
+            }
+        else:
+            new_supersedes_set = set()
+
+        for older in sorted_entries[:-1]:
+            # Entries sharing a repeat_group are legitimate repeat runs.
+            if (
+                older["repeat_group"]
+                and older["repeat_group"] == new_entry["repeat_group"]
+            ):
+                continue
+            if older["entry_id"] in new_supersedes_set:
+                continue
+            conflicts.append(
+                {
+                    "signature": signature,
+                    "old_entry_id": older["entry_id"],
+                    "new_entry_id": new_entry["entry_id"],
+                    "old_dir": str(older["dir"]),
+                    "new_dir": str(new_entry["dir"]),
+                }
+            )
+
+    return conflicts
+
+
+def _scan_superseded_entries(
+    source_dir: Path,
+    *,
+    archive_suspect_root: Path | None = None,
+) -> list[dict]:
+    """Scan ``source_dir`` for entries whose ``metadata.supersedes`` is set.
+
+    For each such entry, return a dict with ``old_entry_id`` (the value of
+    ``metadata.supersedes``), ``new_entry_id`` (the entry's ``entry_id``),
+    ``supersedes_reason`` (``metadata.supersedes_reason`` or ``""``), and
+    ``archive_path`` (the path under ``archive/suspect/`` matching the old
+    entry id, or ``None`` if no such directory exists).
+    """
+    results: list[dict] = []
+    if not source_dir.is_dir():
+        return results
+
+    archive_dirs: list[Path] = []
+    if archive_suspect_root is not None and archive_suspect_root.is_dir():
+        archive_dirs = sorted(archive_suspect_root.iterdir())
+
+    for child in sorted(source_dir.iterdir()):
+        if not child.is_dir():
+            continue
+        artifact_path = child / "run_leaderboard.json"
+        if not artifact_path.is_file():
+            continue
+        try:
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, dict):
+            continue
+
+        metadata = payload.get("metadata")
+        if not isinstance(metadata, dict):
+            continue
+
+        supersedes = metadata.get("supersedes")
+        if isinstance(supersedes, list):
+            supersedes_values = [str(item) for item in supersedes if item]
+        elif isinstance(supersedes, str) and supersedes.strip():
+            supersedes_values = [supersedes.strip()]
+        else:
+            continue
+
+        if not supersedes_values:
+            continue
+
+        entry_id = payload.get("entry_id")
+        entry_id_str = str(entry_id) if entry_id else child.name
+        supersedes_reason = str(metadata.get("supersedes_reason") or "")
+
+        for old_entry_id in supersedes_values:
+            archive_path: str | None = None
+            for archive_dir in archive_dirs:
+                candidate = archive_dir / old_entry_id
+                if candidate.is_dir():
+                    archive_path = str(candidate)
+                    break
+            results.append(
+                {
+                    "old_entry_id": old_entry_id,
+                    "new_entry_id": entry_id_str,
+                    "supersedes_reason": supersedes_reason,
+                    "archive_path": archive_path,
+                }
+            )
+
+    return results
+
+
+def _build_excluded_plugin_commits(
+    source_dir: Path,
+    exclusions: tuple[LeaderboardExclusion, ...],
+) -> list[dict]:
+    """For each exclusion with matching submissions, record the affected entries.
+
+    Returns a list of dicts with ``plugin_commit`` and ``affected_entries``
+    (a list of ``entry_id`` strings). Exclusions with no matching submissions
+    are omitted.
+    """
+    if not exclusions or not source_dir.is_dir():
+        return []
+
+    affected: dict[str, list[str]] = {}
+    for artifact_path in sorted(source_dir.rglob("run_leaderboard.json")):
+        try:
+            payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, Mapping):
+            continue
+        match = match_leaderboard_exclusion(payload, exclusions)
+        if match is None:
+            continue
+        entry_id = str(payload.get("entry_id") or "")
+        affected.setdefault(match.plugin_commit, []).append(entry_id)
+
+    return [
+        {"plugin_commit": commit, "affected_entries": entries}
+        for commit, entries in sorted(affected.items())
+    ]
+
+
+def _build_rejected_superseded_report(
+    admission_failures: list[dict],
+    coexistence_conflicts: list[dict],
+    excluded_dirs: list[Path],
+    *,
+    source_dir: Path | None = None,
+    layout: RepoLayout | None = None,
+) -> dict:
+    """Build the rejected/superseded report dict from gate scan results."""
+    from datetime import datetime, timezone
+
+    rejected_submissions: list[dict] = []
+    for failure in admission_failures:
+        rejected_submissions.append(
+            {
+                "dir": failure["dir"],
+                "reason": failure["reason"],
+                "detail": failure["detail"],
+            }
+        )
+
+    for conflict in coexistence_conflicts:
+        rejected_submissions.append(
+            {
+                "dir": conflict["old_dir"],
+                "reason": "signature_conflict",
+                "detail": (
+                    f"coexists with newer entry {conflict['new_entry_id']} "
+                    f"without supersedes annotation "
+                    f"(signature={conflict['signature']})"
+                ),
+            }
+        )
+
+    for excluded_dir in excluded_dirs:
+        rejected_submissions.append(
+            {
+                "dir": str(excluded_dir),
+                "reason": "exclusion_match",
+                "detail": "directory matches a leaderboard exclusion rule",
+            }
+        )
+
+    superseded_entries: list[dict] = []
+    if source_dir is not None and source_dir.is_dir():
+        archive_suspect_root: Path | None = None
+        if layout is not None:
+            archive_suspect_root = layout.benchmark_repo / "archive" / "suspect"
+        superseded_entries = _scan_superseded_entries(
+            source_dir,
+            archive_suspect_root=archive_suspect_root,
+        )
+
+    excluded_plugin_commits: list[dict] = []
+    if layout is not None and source_dir is not None and source_dir.is_dir():
+        try:
+            exclusions = _load_public_leaderboard_exclusions(layout)
+        except (OSError, ValueError, json.JSONDecodeError):
+            exclusions = ()
+        if exclusions:
+            excluded_plugin_commits = _build_excluded_plugin_commits(
+                source_dir, exclusions
+            )
+
+    return {
+        "schema_version": "rejected-superseded-report/v1",
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "rejected_submissions": rejected_submissions,
+        "superseded_entries": superseded_entries,
+        "excluded_plugin_commits": excluded_plugin_commits,
+    }
+
+
+def _write_rejected_superseded_report(destination: Path, report: dict) -> None:
+    """Write the rejected/superseded report JSON to ``destination`` directory."""
+    destination.mkdir(parents=True, exist_ok=True)
+    report_path = destination / "rejected_superseded_report.json"
+    report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 
 
 def _filter_excluded_snapshot_entries(
