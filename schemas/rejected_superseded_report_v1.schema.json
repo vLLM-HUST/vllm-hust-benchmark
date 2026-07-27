@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust/vllm-hust-benchmark/schemas/rejected_superseded_report_v1.schema.json",
+  "title": "Rejected/Superseded Report v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "rejected_submissions",
+    "superseded_entries",
+    "excluded_plugin_commits"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "rejected-superseded-report/v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rejected_submissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "dir",
+          "reason",
+          "detail"
+        ],
+        "properties": {
+          "dir": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "FAILED",
+              "NO_STATUS",
+              "temporary",
+              "exclusion_match",
+              "signature_conflict"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "superseded_entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "old_entry_id",
+          "new_entry_id",
+          "supersedes_reason",
+          "archive_path"
+        ],
+        "properties": {
+          "old_entry_id": {
+            "type": "string"
+          },
+          "new_entry_id": {
+            "type": "string"
+          },
+          "supersedes_reason": {
+            "type": "string"
+          },
+          "archive_path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "excluded_plugin_commits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "plugin_commit",
+          "affected_entries"
+        ],
+        "properties": {
+          "plugin_commit": {
+            "type": "string"
+          },
+          "affected_entries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  }
+}
