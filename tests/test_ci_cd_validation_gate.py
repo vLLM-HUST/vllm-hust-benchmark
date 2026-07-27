@@ -14,7 +14,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = ROOT / "scripts" / "validate_trend_entries.py"
@@ -27,6 +26,7 @@ INVALID_DIR = FIXTURE_ROOT / "invalid"
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _run_cli(args: list[str]) -> subprocess.CompletedProcess:
     """Run the validate-trend CLI subcommand and return the result."""
@@ -53,6 +53,7 @@ def _entry_ids_from_output(output: str) -> set[str]:
 # ---------------------------------------------------------------------------
 # CLI tests — validate-trend command
 # ---------------------------------------------------------------------------
+
 
 class TestCliValidateTrend:
     """Tests for the ``validate-trend`` CLI subcommand (manual patching entry point)."""
@@ -108,6 +109,7 @@ class TestCliValidateTrend:
     def test_empty_directory_produces_no_errors(self) -> None:
         """An empty directory with no JSON files should exit 0."""
         from tempfile import TemporaryDirectory
+
         with TemporaryDirectory() as tmpdir:
             result = _run_cli(["--input", tmpdir])
         assert result.returncode == 0
@@ -127,16 +129,23 @@ class TestCliValidateTrend:
     def test_print_diagnostics_release_gate_message(self) -> None:
         """On failure, output must clearly indicate the release gate is blocked."""
         result = _run_cli(["--input", str(INVALID_DIR)])
-        assert "release gate blocked" in result.stderr or "release gate blocked" in result.stdout
+        assert (
+            "release gate blocked" in result.stderr
+            or "release gate blocked" in result.stdout
+        )
 
     def test_schema_flag_accepts_explicit_schema_path(self) -> None:
         """--schema with a valid path must still pass valid entries."""
         schema_path = ROOT / "schemas" / "leaderboard_trend_v1.schema.json"
         assert schema_path.is_file(), f"Schema not found: {schema_path}"
-        result = _run_cli([
-            "--input", str(VALID_DIR / "experimental.json"),
-            "--schema", str(schema_path),
-        ])
+        result = _run_cli(
+            [
+                "--input",
+                str(VALID_DIR / "experimental.json"),
+                "--schema",
+                str(schema_path),
+            ]
+        )
         assert result.returncode == 0, (
             f"CLI with --schema returned {result.returncode}\n"
             f"stderr: {result.stderr}\nstdout: {result.stdout}"
@@ -145,16 +154,21 @@ class TestCliValidateTrend:
     def test_schema_flag_still_rejects_invalid(self) -> None:
         """--schema with a valid path must still reject invalid entries."""
         schema_path = ROOT / "schemas" / "leaderboard_trend_v1.schema.json"
-        result = _run_cli([
-            "--input", str(INVALID_DIR / "bad-version.json"),
-            "--schema", str(schema_path),
-        ])
+        result = _run_cli(
+            [
+                "--input",
+                str(INVALID_DIR / "bad-version.json"),
+                "--schema",
+                str(schema_path),
+            ]
+        )
         assert result.returncode != 0, "--schema should still reject invalid entries"
 
 
 # ---------------------------------------------------------------------------
 # Script parity tests — scripts/validate_trend_entries.py must behave identically
 # ---------------------------------------------------------------------------
+
 
 class TestScriptParity:
     """The legacy script entry point must produce the same results as the CLI."""
@@ -184,9 +198,16 @@ class TestScriptParity:
     @staticmethod
     def _parse_decisions(output: str) -> dict[str, str]:
         """Parse '  status  entry_id: reason' lines into {entry_id: status}."""
-        KNOWN_STATUSES = frozenset({
-            "default", "blocked", "experimental", "excluded", "invalid", "pending",
-        })
+        KNOWN_STATUSES = frozenset(
+            {
+                "default",
+                "blocked",
+                "experimental",
+                "excluded",
+                "invalid",
+                "pending",
+            }
+        )
         result: dict[str, str] = {}
         unknown: list[str] = []
         for line in output.splitlines():
@@ -227,12 +248,15 @@ class TestScriptParity:
             f"CLI and script gave different entry-level decisions\n"
             f"CLI: {cli_decisions}\nScript: {script_decisions}"
         )
-        assert len(cli_decisions) == 18, f"Expected 18 entries, got {len(cli_decisions)}"
+        assert len(cli_decisions) == 18, (
+            f"Expected 18 entries, got {len(cli_decisions)}"
+        )
 
 
 # ---------------------------------------------------------------------------
 # CI/CD gate simulation tests
 # ---------------------------------------------------------------------------
+
 
 class TestCiCdGate:
     """Simulate the exact CI/CD gate logic to prove acceptance criteria."""
@@ -256,11 +280,16 @@ class TestCiCdGate:
     def test_hf_publish_gate_rejects_invalid_snapshot(self) -> None:
         """Emulate the HF publish gate's post-sync snapshot validation."""
         # Build a synthetic "snapshot" with one valid + one invalid entry
-        valid_data = json.loads((VALID_DIR / "experimental.json").read_text(encoding="utf-8"))
-        invalid_data = json.loads((INVALID_DIR / "bad-version.json").read_text(encoding="utf-8"))
+        valid_data = json.loads(
+            (VALID_DIR / "experimental.json").read_text(encoding="utf-8")
+        )
+        invalid_data = json.loads(
+            (INVALID_DIR / "bad-version.json").read_text(encoding="utf-8")
+        )
         payload = [valid_data, invalid_data]
 
         from tempfile import TemporaryDirectory
+
         with TemporaryDirectory() as tmpdir:
             snapshot = Path(tmpdir) / "leaderboard_single.json"
             snapshot.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -280,6 +309,7 @@ class TestCiCdGate:
                 payload.append(data)
 
         from tempfile import TemporaryDirectory
+
         with TemporaryDirectory() as tmpdir:
             snapshot = Path(tmpdir) / "leaderboard_single.json"
             snapshot.write_text(json.dumps(payload, indent=2), encoding="utf-8")
