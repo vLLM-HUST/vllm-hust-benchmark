@@ -1,6 +1,6 @@
 {
   "schema_version": "leaderboard-compare-snapshot/v1",
-  "generated_at": "2026-07-27T00:45:18.956552+00:00",
+  "generated_at": "2026-07-28T11:18:28.035614+00:00",
   "group_count": 19,
   "preferred_pair_count": 19,
   "groups": [
@@ -7008,9 +7008,9 @@
       "github_repository": "vllm-project/vllm-ascend",
       "vllm_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
     },
-    "pair_count": 15,
+    "pair_count": 16,
     "headline_pair": {
-      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
       "category": "single",
       "scope": {
         "model": "Qwen/Qwen2.5-14B-Instruct",
@@ -7019,30 +7019,30 @@
         "model_display_name": "Qwen2.5-14B-Instruct",
         "hardware": "910B2",
         "precision": "FP16",
-        "workload": "sonnet-throughput",
+        "workload": "random-online",
         "config_type": "single_gpu",
         "chip_count": 1,
         "node_count": 1,
-        "setting_signature": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
-        "setting_summary": "IO 1024/256 • TP1 • FP16 • Mem 0.6 • official spec"
+        "setting_signature": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+        "setting_summary": "IO 1024/256 • TP1 • FP16 • Mem 0.6 • RPS 1 • official spec"
       },
       "current": {
         "engine": "vllm-hust",
-        "engine_version": "v0.17.2.post1-3501-gae16d0943",
-        "entry_id": "46c408c1-1bf8-4757-9b98-44cb586e7b7b",
-        "submitted_at": "2026-07-22T05:20:30Z",
+        "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+        "entry_id": "9a0f231e-966f-4adb-bb0e-d938643c9510",
+        "submitted_at": "2026-07-22T05:34:53Z",
         "canonical_path": null,
         "github_repository": "vllm-hust/vllm-hust",
-        "git_commit": "ae16d09435abd978417a1b5ab7af352c8dcd180a",
+        "git_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
         "same_spec": {
-          "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
-          "resolved_spec_hash": "b40e543c53135301cdad55b4c4e15609086dda1536fc2a1977f6fafa9a434d51"
+          "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+          "resolved_spec_hash": "245580fc65876969225df96070c89551590bcd0a2b39228fab9384520dcbbdcf"
         },
         "metrics": {
-          "ttft_ms": 0.0,
-          "tbt_ms": 0.0,
-          "throughput_tps": 3799.055457426935,
-          "output_throughput_tps": 3799.055457426935,
+          "ttft_ms": 261.5879435930401,
+          "tbt_ms": 42.1556906308431,
+          "throughput_tps": 244.62152398546596,
+          "output_throughput_tps": 244.62152398546596,
           "error_rate": 0.0
         },
         "constraints": {
@@ -7067,20 +7067,20 @@
       "baseline": {
         "engine": "vllm",
         "engine_version": "0.18.0",
-        "entry_id": "c2765a8d-60bf-49f0-b384-48d899b6bd5e",
-        "submitted_at": "2026-06-03T18:48:58Z",
+        "entry_id": "bbd407e5-00b1-4f8a-9a3d-e0592efcba22",
+        "submitted_at": "2026-06-03T18:33:53Z",
         "canonical_path": null,
         "github_repository": "vllm-project/vllm-ascend",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "same_spec": {
-          "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
-          "resolved_spec_hash": "b40e543c53135301cdad55b4c4e15609086dda1536fc2a1977f6fafa9a434d51"
+          "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+          "resolved_spec_hash": "245580fc65876969225df96070c89551590bcd0a2b39228fab9384520dcbbdcf"
         },
         "metrics": {
-          "ttft_ms": 0.0,
-          "tbt_ms": 0.0,
-          "throughput_tps": 1891.61634060225,
-          "output_throughput_tps": 1891.61634060225,
+          "ttft_ms": 268.78517493081745,
+          "tbt_ms": 95.26832097792979,
+          "throughput_tps": 228.1495394644097,
+          "output_throughput_tps": 228.1495394644097,
           "error_rate": 0.0
         },
         "constraints": {
@@ -7111,18 +7111,131 @@
         "vllm_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
       },
       "deltas": {
-        "throughput_pct_current_vs_baseline": 100.8365,
-        "ttft_pct_current_vs_baseline": null,
-        "tbt_pct_current_vs_baseline": null
+        "throughput_pct_current_vs_baseline": 7.2198,
+        "ttft_pct_current_vs_baseline": -2.6777,
+        "tbt_pct_current_vs_baseline": -55.7506
       },
       "remaining_gap_pct": {
         "throughput": 0.0,
-        "ttft": null,
-        "tbt": null
+        "ttft": 0.0,
+        "tbt": 0.0
       },
       "meets_goal": true
     },
     "pairs": [
+      {
+        "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|random-online|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+        "category": "single",
+        "scope": {
+          "model": "Qwen/Qwen2.5-14B-Instruct",
+          "model_canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+          "model_short_name": "Qwen2.5-14B-Instruct",
+          "model_display_name": "Qwen2.5-14B-Instruct",
+          "hardware": "910B2",
+          "precision": "FP16",
+          "workload": "random-online",
+          "config_type": "single_gpu",
+          "chip_count": 1,
+          "node_count": 1,
+          "setting_signature": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+          "setting_summary": "IO 1024/256 • TP1 • FP16 • Mem 0.6 • RPS 1 • official spec"
+        },
+        "current": {
+          "engine": "vllm-hust",
+          "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+          "entry_id": "9a0f231e-966f-4adb-bb0e-d938643c9510",
+          "submitted_at": "2026-07-22T05:34:53Z",
+          "canonical_path": null,
+          "github_repository": "vllm-hust/vllm-hust",
+          "git_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+            "resolved_spec_hash": "245580fc65876969225df96070c89551590bcd0a2b39228fab9384520dcbbdcf"
+          },
+          "metrics": {
+            "ttft_ms": 261.5879435930401,
+            "tbt_ms": 42.1556906308431,
+            "throughput_tps": 244.62152398546596,
+            "output_throughput_tps": 244.62152398546596,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": 92.0,
+            "typical_throughput_ratio_vs_baseline": 2.2,
+            "typical_ttft_reduction_pct_vs_baseline": 23.0,
+            "typical_tpot_reduction_pct_vs_baseline": 25.0,
+            "long_context_length": 32768.0,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 80.0,
+            "long_context_ttft_p99_ms": 95.0,
+            "long_context_tpot_p95_ms": 9.0,
+            "long_context_tpot_p99_ms": 10.0,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": true,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": 35.0,
+            "multi_tenant_high_utilization": true
+          }
+        },
+        "baseline": {
+          "engine": "vllm",
+          "engine_version": "0.18.0",
+          "entry_id": "bbd407e5-00b1-4f8a-9a3d-e0592efcba22",
+          "submitted_at": "2026-06-03T18:33:53Z",
+          "canonical_path": null,
+          "github_repository": "vllm-project/vllm-ascend",
+          "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+          "same_spec": {
+            "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+            "resolved_spec_hash": "245580fc65876969225df96070c89551590bcd0a2b39228fab9384520dcbbdcf"
+          },
+          "metrics": {
+            "ttft_ms": 268.78517493081745,
+            "tbt_ms": 95.26832097792979,
+            "throughput_tps": 228.1495394644097,
+            "output_throughput_tps": 228.1495394644097,
+            "error_rate": 0.0
+          },
+          "constraints": {
+            "single_chip_effective_utilization_pct": 35.7838,
+            "typical_throughput_ratio_vs_baseline": 1.0,
+            "typical_ttft_reduction_pct_vs_baseline": 0.0,
+            "typical_tpot_reduction_pct_vs_baseline": 0.0,
+            "long_context_length": 30720.0,
+            "long_context_throughput_stable": false,
+            "long_context_ttft_p95_ms": null,
+            "long_context_ttft_p99_ms": 26176.540252596616,
+            "long_context_tpot_p95_ms": null,
+            "long_context_tpot_p99_ms": 165.79910860879937,
+            "long_context_ttft_p95_stable": null,
+            "long_context_ttft_p99_stable": false,
+            "long_context_tpot_p95_stable": null,
+            "long_context_tpot_p99_stable": false,
+            "unit_token_cost_reduction_pct": 0.0,
+            "multi_tenant_high_utilization": false
+          }
+        },
+        "baseline_target": {
+          "id": "official-ascend-2026-v0.18.0",
+          "label": "Official vLLM 0.18.0 + vllm-ascend 0.18.0",
+          "engine": "vllm",
+          "engine_version": "0.18.0",
+          "github_repository": "vllm-project/vllm-ascend",
+          "vllm_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
+        },
+        "deltas": {
+          "throughput_pct_current_vs_baseline": 7.2198,
+          "ttft_pct_current_vs_baseline": -2.6777,
+          "tbt_pct_current_vs_baseline": -55.7506
+        },
+        "remaining_gap_pct": {
+          "throughput": 0.0,
+          "ttft": 0.0,
+          "tbt": 0.0
+        },
+        "meets_goal": true
+      },
       {
         "scope_key": "hf:Qwen/Qwen2.5-14B-Instruct|910B2|FP16|none|sonnet-throughput|single_gpu|1|1|official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
         "category": "single",
@@ -7142,12 +7255,12 @@
         },
         "current": {
           "engine": "vllm-hust",
-          "engine_version": "v0.17.2.post1-3501-gae16d0943",
-          "entry_id": "46c408c1-1bf8-4757-9b98-44cb586e7b7b",
-          "submitted_at": "2026-07-22T05:20:30Z",
+          "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+          "entry_id": "aeb6e4f7-a2be-4805-98ef-0cf0f3172dc5",
+          "submitted_at": "2026-07-22T05:12:42Z",
           "canonical_path": null,
           "github_repository": "vllm-hust/vllm-hust",
-          "git_commit": "ae16d09435abd978417a1b5ab7af352c8dcd180a",
+          "git_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
             "resolved_spec_hash": "b40e543c53135301cdad55b4c4e15609086dda1536fc2a1977f6fafa9a434d51"
@@ -7155,8 +7268,8 @@
           "metrics": {
             "ttft_ms": 0.0,
             "tbt_ms": 0.0,
-            "throughput_tps": 3799.055457426935,
-            "output_throughput_tps": 3799.055457426935,
+            "throughput_tps": 3258.631245236842,
+            "output_throughput_tps": 3258.631245236842,
             "error_rate": 0.0
           },
           "constraints": {
@@ -7225,7 +7338,7 @@
           "vllm_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
         },
         "deltas": {
-          "throughput_pct_current_vs_baseline": 100.8365,
+          "throughput_pct_current_vs_baseline": 72.267,
           "ttft_pct_current_vs_baseline": null,
           "tbt_pct_current_vs_baseline": null
         },
@@ -7368,12 +7481,12 @@
         },
         "current": {
           "engine": "vllm-hust",
-          "engine_version": "v0.17.2rc0-2861-g702214146",
-          "entry_id": "62a3e91f-ee06-426a-ac43-070e314fdfbf",
-          "submitted_at": "2026-07-22T04:08:20Z",
+          "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+          "entry_id": "d4202789-8879-4575-a43e-de9478cfe5d6",
+          "submitted_at": "2026-07-22T03:32:54Z",
           "canonical_path": null,
           "github_repository": "vllm-hust/vllm-hust",
-          "git_commit": "702214146c1f0f2c2120b87e6a460d5a39cef418",
+          "git_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
             "resolved_spec_hash": "08890fb3f8c5f876afbd603d07404d7cd56ac10f74de3b6480697d03ae38ca1c"
@@ -7381,8 +7494,8 @@
           "metrics": {
             "ttft_ms": 0.0,
             "tbt_ms": 0.0,
-            "throughput_tps": 2092.773847536189,
-            "output_throughput_tps": 2092.773847536189,
+            "throughput_tps": 2136.218076279718,
+            "output_throughput_tps": 2136.218076279718,
             "error_rate": 0.0
           },
           "constraints": {
@@ -7451,7 +7564,7 @@
           "vllm_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
         },
         "deltas": {
-          "throughput_pct_current_vs_baseline": 101.145,
+          "throughput_pct_current_vs_baseline": 105.3207,
           "ttft_pct_current_vs_baseline": null,
           "tbt_pct_current_vs_baseline": null
         },
@@ -7595,20 +7708,20 @@
         "current": {
           "engine": "vllm-hust",
           "engine_version": "0.18.0.post1",
-          "entry_id": "fbd8b506-1f50-401f-ae9b-d88dff8aa295",
-          "submitted_at": "2026-07-20T03:00:46Z",
+          "entry_id": "0757a357-0f6c-4b54-8cdc-75903c6b24bb",
+          "submitted_at": "2026-07-20T02:52:04Z",
           "canonical_path": null,
           "github_repository": "vllm-hust/vllm-hust",
-          "git_commit": "ae16d09435abd978417a1b5ab7af352c8dcd180a",
+          "git_commit": "702214146c1f0f2c2120b87e6a460d5a39cef418",
           "same_spec": {
             "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
             "resolved_spec_hash": "c0e8dba9570dd27e69a61439fd0ba75cc837677cfcec48dd39ff505cf41478e9"
           },
           "metrics": {
-            "ttft_ms": 125.75125564821066,
-            "tbt_ms": 34.0758572085456,
-            "throughput_tps": 205.00560073032892,
-            "output_throughput_tps": 205.00560073032892,
+            "ttft_ms": 124.82268907595426,
+            "tbt_ms": 34.389598963157326,
+            "throughput_tps": 207.43052088006579,
+            "output_throughput_tps": 207.43052088006579,
             "error_rate": 0.0
           },
           "constraints": {
@@ -7677,9 +7790,9 @@
           "vllm_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
         },
         "deltas": {
-          "throughput_pct_current_vs_baseline": 18.0765,
-          "ttft_pct_current_vs_baseline": -49.3264,
-          "tbt_pct_current_vs_baseline": -64.667
+          "throughput_pct_current_vs_baseline": 19.4732,
+          "ttft_pct_current_vs_baseline": -49.7006,
+          "tbt_pct_current_vs_baseline": -64.3417
         },
         "remaining_gap_pct": {
           "throughput": 0.0,
@@ -8822,7 +8935,7 @@
   },
   "hard_constraints": {
     "schema_version": "leaderboard-hard-constraints/v1",
-    "generated_at": "2026-07-27T00:45:18.948405+00:00",
+    "generated_at": "2026-07-28T11:18:28.034796+00:00",
     "scope_count": 26,
     "pass_count": 7,
     "fail_count": 19,
@@ -9541,11 +9654,11 @@
           }
         },
         "latest": {
-          "entry_id": "ff43afb8-44bd-4775-b1d0-8e28938c195b",
+          "entry_id": "b6bfc226-4d0c-4305-a840-9d2724d78c09",
           "engine": "vllm-hust",
-          "engine_version": "v0.17.2rc0-2861-g702214146",
-          "submitted_at": "2026-07-26T18:06:21Z",
-          "git_commit": "702214146c1f0f2c2120b87e6a460d5a39cef418",
+          "engine_version": "v0.17.2rc0-2780-g6f612fbed",
+          "submitted_at": "2026-07-26T16:01:55Z",
+          "git_commit": "6f612fbedff718af2dabb93692f00044e66a9b4b",
           "scenario_source": "vllm-benchmark",
           "accountable_scope": {
             "domestic_chip_class": "Ascend-class",
@@ -9594,11 +9707,11 @@
           }
         },
         "previous": {
-          "entry_id": "b6bfc226-4d0c-4305-a840-9d2724d78c09",
+          "entry_id": "9f45a344-4592-4afc-8c1a-fee0bcd839f2",
           "engine": "vllm-hust",
-          "engine_version": "v0.17.2rc0-2780-g6f612fbed",
-          "submitted_at": "2026-07-26T16:01:55Z",
-          "git_commit": "6f612fbedff718af2dabb93692f00044e66a9b4b",
+          "engine_version": "v0.17.2rc0-2810-ga46abb7ae",
+          "submitted_at": "2026-07-25T15:40:47Z",
+          "git_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
           "scenario_source": "vllm-benchmark",
           "accountable_scope": {
             "domestic_chip_class": "Ascend-class",

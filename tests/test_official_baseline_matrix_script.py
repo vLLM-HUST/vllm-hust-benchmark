@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from tests._bash_utils import bash_executable
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MATRIX_SCRIPT = REPO_ROOT / "scripts" / "run-official-ascend-goal-baseline-matrix.sh"
@@ -23,7 +25,8 @@ def _write_spec(spec_file: Path, spec_id: str) -> None:
 
 
 def _write_prepare_stub(script_path: Path) -> None:
-    script_path.write_text("#!/bin/bash\nset -euo pipefail\n", encoding="utf-8")
+    bash_bin = bash_executable()
+    script_path.write_text(f"#!{bash_bin}\nset -euo pipefail\n", encoding="utf-8")
     script_path.chmod(0o755)
 
 
@@ -31,8 +34,9 @@ def _write_runner_stub(
     script_path: Path, *, call_log: Path, fail_repeat_names: tuple[str, ...]
 ) -> None:
     python_bin = sys.executable
+    bash_bin = bash_executable()
     script_path.write_text(
-        "#!/bin/bash\n"
+        f"#!{bash_bin}\n"
         "set -euo pipefail\n"
         "spec_file=$1\n"
         'repeat_name=$(basename "$RESULT_DIR")\n'
@@ -71,8 +75,9 @@ def _write_runner_stub(
 
 
 def _write_publish_stub(script_path: Path, *, publish_log: Path) -> None:
+    bash_bin = bash_executable()
     script_path.write_text(
-        "#!/bin/bash\n"
+        f"#!{bash_bin}\n"
         "set -euo pipefail\n"
         f"printf '%s\\n' \"${{SNAPSHOT_SOURCE_PATTERN:-}}\" >> {publish_log!s}\n"
         'mkdir -p "$TARGET_BENCHMARK_REPO_DIR/submissions"\n'
@@ -92,8 +97,12 @@ def _run_matrix(
     spec_file: Path, env: dict[str, str]
 ) -> subprocess.CompletedProcess[str]:
     merged_env = {**os.environ, **env}
+    # Forward the modern bash to the matrix script so its child ``$SINGLE_RUNNER``
+    # invocation also uses bash 4+ (macOS system bash is 3.2 and chokes on
+    # ``;;&`` fall-through and ``mapfile``).
+    merged_env.setdefault("MATRIX_RUNNER_BASH", bash_executable())
     return subprocess.run(
-        ["bash", str(MATRIX_SCRIPT), str(spec_file)],
+        [bash_executable(), str(MATRIX_SCRIPT), str(spec_file)],
         cwd=REPO_ROOT,
         env=merged_env,
         capture_output=True,
@@ -104,7 +113,7 @@ def _run_matrix(
 
 def test_one_click_official_v0180_wrapper_has_help_and_valid_syntax() -> None:
     syntax = subprocess.run(
-        ["bash", "-n", str(ONE_CLICK_SCRIPT)],
+        [bash_executable(), "-n", str(ONE_CLICK_SCRIPT)],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
@@ -113,7 +122,7 @@ def test_one_click_official_v0180_wrapper_has_help_and_valid_syntax() -> None:
     assert syntax.returncode == 0, syntax.stderr
 
     help_result = subprocess.run(
-        ["bash", str(ONE_CLICK_SCRIPT), "--help"],
+        [bash_executable(), str(ONE_CLICK_SCRIPT), "--help"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

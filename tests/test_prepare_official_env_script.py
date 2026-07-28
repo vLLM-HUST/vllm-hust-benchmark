@@ -2,8 +2,11 @@ import os
 import shlex
 import signal
 import subprocess
+import sys
 import time
 from pathlib import Path
+
+from tests._bash_utils import bash_executable
 
 
 def _spawn_process_tree(tmp_path: Path) -> tuple[subprocess.Popen[str], int]:
@@ -24,7 +27,7 @@ def _spawn_process_tree(tmp_path: Path) -> tuple[subprocess.Popen[str], int]:
     wrapper_script.chmod(0o755)
 
     process = subprocess.Popen(
-        ["bash", str(wrapper_script)],
+        [bash_executable(), str(wrapper_script)],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         text=True,
@@ -81,7 +84,7 @@ def _source_run_official_runtime_model_functions(snippet: str) -> str:
 
 def _run_bash(command: str, *, check: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        ["bash", "-lc", command],
+        [bash_executable(), "-lc", command],
         check=check,
         capture_output=True,
         text=True,
@@ -802,7 +805,7 @@ fi
     result = _run_bash(
         _source_run_official_functions(
             f"""
-            HOST_PYTHON_BIN=$(command -v python3)
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
             output=$(select_ascend_device 1 {shlex.quote(str(fake_npu_smi))})
             printf 'output=%s\n' "$output"
             """
@@ -854,7 +857,7 @@ fi
     result = _run_bash(
         _source_run_official_functions(
             f"""
-            HOST_PYTHON_BIN=$(command -v python3)
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
             output=$(select_ascend_device 1 {shlex.quote(str(fake_npu_smi))} 1)
             printf 'output=%s\n' "$output"
             """
@@ -1070,7 +1073,7 @@ def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested
         _source_run_official_runtime_model_functions(
             f"""
             REPO_ROOT={shlex.quote(str(REPO_ROOT))}
-            HOST_PYTHON_BIN=$(command -v python3)
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
             BENCHMARK_TYPE=serve
             SAME_SPEC_FILE={shlex.quote(str(same_spec_file))}
 
