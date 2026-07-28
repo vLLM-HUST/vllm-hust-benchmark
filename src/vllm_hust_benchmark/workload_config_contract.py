@@ -74,6 +74,14 @@ OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
     },
 }
 
+OFFICIAL_VISION_DEFAULTS: dict[str, dict[str, Any]] = {
+    "visionarena-online": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 30720},
+    },
+}
+
+TARGET_ID_REQUIRED_AFTER = "2026-07-29T00:00:00Z"
+
 
 def is_official_workload_contract_entry(entry: Mapping[str, Any]) -> bool:
     same_spec = entry.get("same_spec")
@@ -132,6 +140,68 @@ def _expected_workload_lengths(
     )
 
 
+def _official_defaults_for_scenario(scenario: str) -> dict[str, Any]:
+    """Return the official defaults for a scenario.
+
+    Vision scenarios use ``OFFICIAL_VISION_DEFAULTS``; text scenarios fall back
+    to ``OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS``.
+    """
+    if scenario in OFFICIAL_VISION_DEFAULTS:
+        return OFFICIAL_VISION_DEFAULTS[scenario]
+    return OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS.get(scenario, {})
+
+
+def _validate_target_metadata(metadata: Mapping[str, Any]) -> list[str]:
+    """Validate ``metadata.target_id`` / ``metadata.target_version``.
+
+    Only invoked when the entry is official and ``submitted_at`` is at or after
+    ``TARGET_ID_REQUIRED_AFTER``. The registry is loaded lazily to avoid a
+    circular import.
+    """
+    errors: list[str] = []
+    target_id = str(metadata.get("target_id") or "").strip()
+    target_version = str(metadata.get("target_version") or "").strip()
+
+    if not target_id:
+        errors.append("metadata.target_id must be explicitly recorded")
+        return errors
+
+    from vllm_hust_benchmark.fixed_target_registry import (  # noqa: E402
+        get_active_profiles,
+        load_fixed_target_registry,
+    )
+
+    try:
+        registry = load_fixed_target_registry()
+    except ValueError as exc:
+        errors.append(
+            f"metadata.target_id validation failed to load registry: {exc}"
+        )
+        return errors
+
+    active = get_active_profiles(registry)
+    matching = [profile for profile in active if profile.target_id == target_id]
+    if not matching:
+        errors.append(
+            f"metadata.target_id {target_id!r} does not match any active "
+            f"profile in the fixed-target registry"
+        )
+        return errors
+
+    if not target_version:
+        errors.append("metadata.target_version must be explicitly recorded")
+        return errors
+
+    valid_versions = {profile.target_version for profile in matching}
+    if target_version not in valid_versions:
+        errors.append(
+            f"metadata.target_version {target_version!r} does not match the "
+            f"registry target_version for target_id {target_id!r} "
+            f"(expected one of {sorted(valid_versions)})"
+        )
+    return errors
+
+
 def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
     if not is_official_workload_contract_entry(entry):
         return []
@@ -145,8 +215,11 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
             "metadata.workload_config_contract must be "
             f"{WORKLOAD_CONFIG_CONTRACT_VERSION!r}"
         )
-    if not str(metadata.get("submitted_at") or "").strip():
+    submitted_at = str(metadata.get("submitted_at") or "").strip()
+    if not submitted_at:
         errors.append("metadata.submitted_at must be explicitly recorded")
+    elif submitted_at >= TARGET_ID_REQUIRED_AFTER:
+        errors.extend(_validate_target_metadata(metadata))
 
     workload = entry.get("workload")
     if not isinstance(workload, Mapping):
@@ -189,13 +262,18 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
                 f"same_spec.resolved_client_parameters.{key} must be explicitly recorded"
             )
 
-    official_defaults = OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS.get(scenario, {})
+    official_defaults = _official_defaults_for_scenario(scenario)
+    default_label = (
+        "official vision default"
+        if scenario in OFFICIAL_VISION_DEFAULTS
+        else "official single-chip text default"
+    )
     for key, expected in official_defaults.get("server", {}).items():
         actual = server.get(key)
         if not _numeric_equal(actual, expected):
             errors.append(
                 f"same_spec.resolved_server_parameters.{key} must be "
-                f"{expected!r} for the official single-chip text default, "
+                f"{expected!r} for the {default_label}, "
                 f"got {actual!r}"
             )
 
