@@ -7,6 +7,11 @@ WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
 PREPARE_SCRIPT=${PREPARE_SCRIPT:-"$SCRIPT_DIR/prepare-official-ascend-baseline-env.sh"}
 SINGLE_RUNNER=${SINGLE_RUNNER:-"$SCRIPT_DIR/run-official-ascend-goal-baseline.sh"}
 MATRIX_RUN_ID=${MATRIX_RUN_ID:-"official-ascend-goal-baseline-matrix-$(date -u +%Y%m%dT%H%M%SZ)"}
+# Bash executable used to invoke SINGLE_RUNNER. Defaults to ``bash`` from
+# ``$PATH`` (CI Linux is bash 5+). On macOS (system bash 3.2) set
+# ``MATRIX_RUNNER_BASH=/opt/homebrew/bin/bash`` so the runner sees bash 4+
+# features (``;;&`` fall-through, ``mapfile``, etc.).
+MATRIX_RUNNER_BASH=${MATRIX_RUNNER_BASH:-bash}
 MATRIX_RESULT_ROOT=${MATRIX_RESULT_ROOT:-"$REPO_ROOT/.benchmarks/$MATRIX_RUN_ID"}
 CANONICAL_SUBMISSIONS_ROOT=${CANONICAL_SUBMISSIONS_ROOT:-"$REPO_ROOT/submissions"}
 EXISTING_CANONICAL_SUBMISSIONS_ROOT=${EXISTING_CANONICAL_SUBMISSIONS_ROOT:-"$CANONICAL_SUBMISSIONS_ROOT"}
@@ -494,7 +499,7 @@ for spec_file in "${SPEC_FILES[@]}"; do
     GOAL_BASELINE_ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
     GOAL_BASELINE_DEVICE_PREFERENCE_FILE="$MATRIX_DEVICE_PREFERENCE_FILE" \
     VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
-    bash "$SINGLE_RUNNER" "$spec_file" 2>&1 | tee "$runner_log"
+    "$MATRIX_RUNNER_BASH" "$SINGLE_RUNNER" "$spec_file" 2>&1 | tee "$runner_log"
     runner_status=${PIPESTATUS[0]}
     set -e
 
