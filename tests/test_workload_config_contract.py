@@ -8,6 +8,7 @@ from pathlib import Path
 from vllm_hust_benchmark.aggregate_results import VALID_AGG_METHODS
 from vllm_hust_benchmark.workload_config_contract import (
     REQUIRED_EFFECTIVE_PARAMETERS,
+    TARGET_ID_REQUIRED_AFTER,
     WORKLOAD_CONFIG_CONTRACT_VERSION,
     requires_workload_config_contract,
     validate_explicit_workload_config,
@@ -42,6 +43,42 @@ def official_random_online_entry() -> dict:
                 "dataset_name": "random",
                 "random_input_len": 1024,
                 "random_output_len": 256,
+                "num_prompts": 200,
+                "request_rate": 1,
+                "no_stream": False,
+            },
+        },
+    }
+
+
+def official_visionarena_online_entry() -> dict:
+    return {
+        "engine": "vllm-hust",
+        "workload": {
+            "name": "visionarena-online",
+            "input_length": 1024,
+            "output_length": 256,
+            "batch_size": None,
+            "concurrent_requests": None,
+            "dataset": "visionarena",
+        },
+        "metadata": {
+            "submitted_at": "2026-07-25T00:00:00Z",
+            "workload_config_contract": WORKLOAD_CONFIG_CONTRACT_VERSION,
+        },
+        "same_spec": {
+            "spec_id": (
+                "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2"
+            ),
+            "scenario": "visionarena-online",
+            "resolved_server_parameters": {
+                "gpu_memory_utilization": 0.6,
+                "max_model_len": 30720,
+            },
+            "resolved_client_parameters": {
+                "dataset_name": "visionarena",
+                "input_len": 1024,
+                "output_len": 256,
                 "num_prompts": 200,
                 "request_rate": 1,
                 "no_stream": False,
@@ -119,17 +156,10 @@ def test_legacy_official_entry_is_grandfathered_by_activation_time() -> None:
     assert not requires_workload_config_contract(entry)
 
 
-def test_legacy_official_entry_passes_require_official_validation() -> None:
-    """``_validate_entry_workload_contract(require_official=True)`` must NOT
-    reject historical-PR-backfill entries whose ``submitted_at`` predates the
-    ``WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER`` activation date — even though
-    their ``same_spec.spec_id`` carries the official prefix.
-
-    This is the regression that broke CI: the ``require_official=True`` path
-    used ``is_official_workload_contract_entry`` (spec_id prefix only) instead
-    of ``requires_workload_config_contract`` (spec_id prefix AND submitted_at),
-    so historical-pr-backfill data from 2026-07-02 was forced through a
-    contract that only activated on 2026-07-24.
+def test_legacy_official_entry_now_requires_contract_under_require_official() -> None:
+    """After BREAKING change: require_official=True no longer grandfathers
+    historical entries by submitted_at. Entries with official spec_id must
+    pass the contract regardless of submission time.
     """
     from vllm_hust_benchmark.integration import _validate_entry_workload_contract
 
@@ -142,7 +172,8 @@ def test_legacy_official_entry_passes_require_official_validation() -> None:
     del entry["same_spec"]["resolved_server_parameters"]["max_model_len"]
 
     assert not requires_workload_config_contract(entry)
-    assert _validate_entry_workload_contract(
+    # BREAKING: require_official=True now validates regardless of submitted_at
+    assert not _validate_entry_workload_contract(
         entry, source="historical-pr-backfill", require_official=True
     )
 
@@ -235,3 +266,71 @@ def test_contract_rejects_max_as_aggregate_method() -> None:
     the highest values.
     """
     assert "max" not in VALID_AGG_METHODS
+
+
+def test_visionarena_rejects_text_default_max_model_len() -> None:
+    """visionarena-online must use the vision default (30720), not the text
+    default (32768)."""
+    entry = official_visionarena_online_entry()
+    entry["same_spec"]["resolved_server_parameters"]["max_model_len"] = 32768
+
+    errors = validate_explicit_workload_config(entry)
+
+    assert any("max_model_len must be 30720" in error for error in errors)
+    assert not any("must be 32768" in error for error in errors)
+
+
+def test_visionarena_accepts_correct_vision_defaults() -> None:
+    entry = official_visionarena_online_entry()
+
+    assert requires_workload_config_contract(entry)
+    assert validate_explicit_workload_config(entry) == []
+
+
+def test_contract_requires_target_id_after_activation() -> None:
+    """Official entries submitted on/after TARGET_ID_REQUIRED_AFTER must record
+    a non-empty ``metadata.target_id``."""
+    entry = official_random_online_entry()
+    entry["metadata"]["submitted_at"] = TARGET_ID_REQUIRED_AFTER
+
+    errors = validate_explicit_workload_config(entry)
+
+    assert any("metadata.target_id must be explicitly recorded" in error for error in errors)
+
+
+def test_contract_rejects_target_id_not_in_registry() -> None:
+    entry = official_random_online_entry()
+    entry["metadata"]["submitted_at"] = TARGET_ID_REQUIRED_AFTER
+    entry["metadata"]["target_id"] = "nonexistent-target-id"
+    entry["metadata"]["target_version"] = "v1"
+
+    errors = validate_explicit_workload_config(entry)
+
+    assert any(
+        "does not match any active profile" in error for error in errors
+    )
+
+
+def test_contract_rejects_mismatched_target_version() -> None:
+    entry = official_random_online_entry()
+    entry["metadata"]["submitted_at"] = TARGET_ID_REQUIRED_AFTER
+    entry["metadata"]["target_id"] = "official-ascend-jan-2026-v0.18.0"
+    entry["metadata"]["target_version"] = "v2"
+
+    errors = validate_explicit_workload_config(entry)
+
+    assert any(
+        "metadata.target_version 'v2' does not match" in error for error in errors
+    )
+
+
+def test_contract_skips_target_id_requirement_before_activation() -> None:
+    """Official entries submitted before TARGET_ID_REQUIRED_AFTER are not
+    required to record ``metadata.target_id``."""
+    entry = official_random_online_entry()
+    entry["metadata"]["submitted_at"] = "2026-07-28T23:59:59Z"
+
+    errors = validate_explicit_workload_config(entry)
+
+    assert errors == []
+    assert not any("target_id" in error for error in errors)
