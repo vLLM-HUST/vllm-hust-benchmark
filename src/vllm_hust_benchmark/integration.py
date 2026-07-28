@@ -30,6 +30,7 @@ from vllm_hust_benchmark.submission_artifacts import (
     normalize_submission_artifacts_in_tree,
 )
 from vllm_hust_benchmark.workload_config_contract import (
+    WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER,
     is_official_workload_contract_entry,
     requires_workload_config_contract,
     validate_explicit_workload_config,
@@ -1923,11 +1924,26 @@ def _validate_entry_workload_contract(
     has_contract_marker = isinstance(metadata, Mapping) and bool(
         metadata.get("workload_config_contract")
     )
-    must_validate = (
-        (require_official and is_official_workload_contract_entry(payload))
-        or requires_workload_config_contract(payload)
-        or has_contract_marker
-    )
+    must_validate = requires_workload_config_contract(payload) or has_contract_marker
+
+    # ``require_official`` additionally validates official-spec entries that
+    # don't carry the contract marker yet — but exempts entries whose
+    # ``submitted_at`` predates ``WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER``
+    # (grandfathered historical-pr-backfill data).  Entries with NO
+    # ``submitted_at`` are NOT exempt: omitting the timestamp must not bypass
+    # the contract.
+    if not must_validate and require_official:
+        if is_official_workload_contract_entry(payload):
+            submitted_at = ""
+            if isinstance(metadata, Mapping):
+                submitted_at = str(metadata.get("submitted_at") or "").strip()
+            if not submitted_at:
+                must_validate = True
+            elif submitted_at < WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER:
+                pass  # grandfathered — pre-activation official entry
+            else:
+                must_validate = True
+
     if not must_validate:
         return True
 

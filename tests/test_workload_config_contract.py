@@ -119,6 +119,34 @@ def test_legacy_official_entry_is_grandfathered_by_activation_time() -> None:
     assert not requires_workload_config_contract(entry)
 
 
+def test_legacy_official_entry_passes_require_official_validation() -> None:
+    """``_validate_entry_workload_contract(require_official=True)`` must NOT
+    reject historical-PR-backfill entries whose ``submitted_at`` predates the
+    ``WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER`` activation date — even though
+    their ``same_spec.spec_id`` carries the official prefix.
+
+    This is the regression that broke CI: the ``require_official=True`` path
+    used ``is_official_workload_contract_entry`` (spec_id prefix only) instead
+    of ``requires_workload_config_contract`` (spec_id prefix AND submitted_at),
+    so historical-pr-backfill data from 2026-07-02 was forced through a
+    contract that only activated on 2026-07-24.
+    """
+    from vllm_hust_benchmark.integration import _validate_entry_workload_contract
+
+    entry = official_random_online_entry()
+    entry["metadata"]["submitted_at"] = "2026-07-02T10:06:46Z"
+    del entry["metadata"]["workload_config_contract"]
+    # Simulate a historical-pr-backfill entry: official spec_id but missing
+    # the server parameters the contract requires.
+    del entry["same_spec"]["resolved_server_parameters"]["gpu_memory_utilization"]
+    del entry["same_spec"]["resolved_server_parameters"]["max_model_len"]
+
+    assert not requires_workload_config_contract(entry)
+    assert _validate_entry_workload_contract(
+        entry, source="historical-pr-backfill", require_official=True
+    )
+
+
 def test_official_single_chip_specs_define_required_effective_defaults() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     specs = []
