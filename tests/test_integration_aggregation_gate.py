@@ -38,13 +38,17 @@ def _write_mock_submission(
     config_type: str = "single_gpu",
     engine: str = "vllm-hust",
     engine_version: str = "0.18.0.post1",
+    engine_commit: str | None = None,
+    plugin_commit: str | None = None,
 ) -> None:
     """Write a minimal ``run_leaderboard.json`` with the given fields.
 
     The fields are chosen to match what ``build_series_signature`` reads:
     ``model.canonical_id``, ``hardware.chip_model``, ``model.precision``,
     ``workload.name``, ``hardware.chip_count``, ``config_type``, ``engine``,
-    ``engine_version``.
+    ``engine_version``. ``engine_commit`` / ``plugin_commit`` populate
+    ``metadata.runtime_provenance`` so the secondary code-combo grouping in
+    ``_find_superseded_coexistence_conflicts`` can be exercised.
     """
     target_dir.mkdir(parents=True, exist_ok=True)
     payload: dict = {
@@ -65,6 +69,11 @@ def _write_mock_submission(
         payload["metadata"]["supersedes"] = supersedes
     if supersedes_reason is not None:
         payload["metadata"]["supersedes_reason"] = supersedes_reason
+    if engine_commit is not None or plugin_commit is not None:
+        payload["metadata"]["runtime_provenance"] = {
+            "engine": {"commit": engine_commit or ""},
+            "plugin": {"commit": plugin_commit or ""},
+        }
     (target_dir / "run_leaderboard.json").write_text(
         json.dumps(payload, indent=2) + "\n", encoding="utf-8"
     )
@@ -283,6 +292,181 @@ def test_different_signatures_not_conflict(tmp_path: Path) -> None:
     conflicts = _find_superseded_coexistence_conflicts(source_dir)
 
     assert conflicts == []
+
+
+def test_different_plugin_commit_not_conflict(tmp_path: Path) -> None:
+    """Same signature + same engine commit but DIFFERENT plugin commits are
+    independent PR comparison runs (e.g. PR#66 vs PR#70 vs PR#77 each
+    testing a different plugin commit) and may coexist without supersedes.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "historical-pr-pr77",
+        entry_id="entry-pr77",
+        submitted_at="2026-07-02T10:06:46Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="51e577b17b",
+    )
+    _write_mock_submission(
+        source_dir / "historical-pr-pr66",
+        entry_id="entry-pr66",
+        submitted_at="2026-07-01T14:51:46Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="e0686f12d1",
+    )
+    _write_mock_submission(
+        source_dir / "historical-pr-pr70",
+        entry_id="entry-pr70",
+        submitted_at="2026-07-01T14:54:33Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="312ca80a90",
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert conflicts == []
+
+
+def test_different_engine_commit_not_conflict(tmp_path: Path) -> None:
+    """Same signature + same plugin commit but DIFFERENT engine commits are
+    independent comparison runs (different vLLM-HUST engine commits) and
+    may coexist without supersedes.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "engine-a",
+        entry_id="entry-engine-a",
+        submitted_at="2026-07-02T10:06:46Z",
+        engine_commit="aaaaaaaaaa",
+        plugin_commit="51e577b17b",
+    )
+    _write_mock_submission(
+        source_dir / "engine-b",
+        entry_id="entry-engine-b",
+        submitted_at="2026-07-01T14:51:46Z",
+        engine_commit="bbbbbbbbbb",
+        plugin_commit="51e577b17b",
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert conflicts == []
+
+
+def test_same_code_combo_still_conflicts(tmp_path: Path) -> None:
+    """Same signature AND same (engine_commit, plugin_commit) without
+    supersedes annotation still triggers a conflict — the secondary
+    grouping must not weaken the original coexistence rule for genuinely
+    duplicate runs of the same code combination.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "old-run",
+        entry_id="old-entry-1",
+        submitted_at="2026-07-01T12:55:12Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="51e577b17b",
+    )
+    _write_mock_submission(
+        source_dir / "new-run",
+        entry_id="new-entry-2",
+        submitted_at="2026-07-02T10:06:46Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="51e577b17b",
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert len(conflicts) == 1
+    conflict = conflicts[0]
+    assert conflict["old_entry_id"] == "old-entry-1"
+    assert conflict["new_entry_id"] == "new-entry-2"
+
+
+def test_same_code_combo_resolved_by_supersedes(tmp_path: Path) -> None:
+    """Same signature + same code combo + explicit ``supersedes`` annotation
+    resolves the conflict (verifies the secondary grouping logic still
+    honours the supersedes check within a code-combo subgroup).
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "old-run",
+        entry_id="old-entry-1",
+        submitted_at="2026-07-01T12:55:12Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="51e577b17b",
+    )
+    _write_mock_submission(
+        source_dir / "new-run",
+        entry_id="new-entry-2",
+        submitted_at="2026-07-02T10:06:46Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="51e577b17b",
+        supersedes="old-entry-1",
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert conflicts == []
+
+
+def test_mixed_code_combos_only_flag_same_combo(tmp_path: Path) -> None:
+    """Mixing 4 entries with the real-world historical-pr layout:
+
+    - entry-pr77 (ceec19abb0, 51e577b17b)  — new
+    - entry-pr77-perfgate (ceec19abb0, 51e577b17b) — old, same code combo
+    - entry-pr66 (ceec19abb0, e0686f12d1) — different plugin commit
+    - entry-pr70 (ceec19abb0, 312ca80a90) — different plugin commit
+
+    Only entry-pr77-perfgate conflicts with entry-pr77 (same code combo,
+    no supersedes); entry-pr66 and entry-pr70 are independent comparison
+    runs and must NOT be flagged.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+
+    _write_mock_submission(
+        source_dir / "historical-pr-pr77",
+        entry_id="entry-pr77",
+        submitted_at="2026-07-02T10:06:46Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="51e577b17b",
+    )
+    _write_mock_submission(
+        source_dir / "historical-pr-pr77-perfgate",
+        entry_id="entry-pr77-perfgate",
+        submitted_at="2026-07-01T12:55:12Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="51e577b17b",
+    )
+    _write_mock_submission(
+        source_dir / "historical-pr-pr66",
+        entry_id="entry-pr66",
+        submitted_at="2026-07-01T14:51:46Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="e0686f12d1",
+    )
+    _write_mock_submission(
+        source_dir / "historical-pr-pr70",
+        entry_id="entry-pr70",
+        submitted_at="2026-07-01T14:54:33Z",
+        engine_commit="ceec19abb0",
+        plugin_commit="312ca80a90",
+    )
+
+    conflicts = _find_superseded_coexistence_conflicts(source_dir)
+
+    assert len(conflicts) == 1
+    assert conflicts[0]["old_entry_id"] == "entry-pr77-perfgate"
+    assert conflicts[0]["new_entry_id"] == "entry-pr77"
 
 
 def _make_minimal_layout(tmp_path: Path) -> RepoLayout:

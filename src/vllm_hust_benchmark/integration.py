@@ -1473,15 +1473,51 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
     return failures
 
 
+def _extract_code_combo(payload: dict[str, Any]) -> tuple[str, str]:
+    """Return ``(engine_commit, plugin_commit)`` from a leaderboard entry.
+
+    Both fields are read from ``metadata.runtime_provenance.{engine,plugin}.commit``.
+    Missing values normalize to ``""``. This tuple identifies the *exact code
+    combination* under test, independent of branch/ref naming — two runs that
+    share the same engine+plugin commit are the same code under test and thus
+    subject to the superseded coexistence rule; runs with different plugin
+    commits are independent PR comparison points and may coexist.
+    """
+    metadata = payload.get("metadata")
+    if not isinstance(metadata, dict):
+        return ("", "")
+    provenance = metadata.get("runtime_provenance")
+    if not isinstance(provenance, dict):
+        return ("", "")
+    engine_prov = provenance.get("engine")
+    engine_prov = engine_prov if isinstance(engine_prov, dict) else {}
+    plugin_prov = provenance.get("plugin")
+    plugin_prov = plugin_prov if isinstance(plugin_prov, dict) else {}
+    engine_commit = str(engine_prov.get("commit") or "").strip()
+    plugin_commit = str(plugin_prov.get("commit") or "").strip()
+    return (engine_commit, plugin_commit)
+
+
 def _find_superseded_coexistence_conflicts(source_dir: Path) -> list[dict]:
     """Detect old low-value points coexisting with new same-config OK points
     without an explicit ``supersedes`` annotation.
 
-    For each signature group with more than one entry, the most recent entry
-    (by ``metadata.submitted_at``) is treated as the "new" point. Each older
-    entry that does NOT share a ``repeat_group`` with the new entry must be
-    referenced by the new entry's ``metadata.supersedes`` (string or list);
-    otherwise it is recorded as a conflict.
+    Entries are first grouped by ``build_series_signature`` (model|hardware|
+    precision|workload|chip_count|config_type|engine|engine_version), then
+    *secondarily* by ``(engine_commit, plugin_commit)`` from
+    ``metadata.runtime_provenance``. Only entries that share **both** the
+    same signature AND the same code combination are subject to the
+    coexistence rule — entries with different plugin commits are independent
+    PR comparison runs (e.g. PR#66 / PR#70 / PR#77 each testing a different
+    plugin commit against the same engine commit) and may legitimately
+    coexist without a ``supersedes`` annotation.
+
+    Within each (signature, code_combo) subgroup with more than one entry,
+    the most recent entry (by ``metadata.submitted_at``) is treated as the
+    "new" point. Each older entry that does NOT share a ``repeat_group``
+    with the new entry must be referenced by the new entry's
+    ``metadata.supersedes`` (string or list); otherwise it is recorded as
+    a conflict.
 
     Returns a list of conflict dicts with keys ``signature``,
     ``old_entry_id``, ``new_entry_id``, ``old_dir``, ``new_dir``.
@@ -1531,6 +1567,8 @@ def _find_superseded_coexistence_conflicts(source_dir: Path) -> list[dict]:
             submitted_at = metadata.get("submitted_at")
             submitted_at = submitted_at if isinstance(submitted_at, str) else ""
 
+            code_combo = _extract_code_combo(payload)
+
             grouped.setdefault(signature, []).append(
                 {
                     "dir": child,
@@ -1538,6 +1576,7 @@ def _find_superseded_coexistence_conflicts(source_dir: Path) -> list[dict]:
                     "repeat_group": repeat_group,
                     "submitted_at": submitted_at,
                     "supersedes": metadata.get("supersedes"),
+                    "code_combo": code_combo,
                 }
             )
         except Exception:  # noqa: BLE001
@@ -1548,37 +1587,48 @@ def _find_superseded_coexistence_conflicts(source_dir: Path) -> list[dict]:
         if len(entries) < 2:
             continue
 
-        sorted_entries = sorted(entries, key=lambda e: e["submitted_at"])
-        new_entry = sorted_entries[-1]
+        # Secondary grouping by (engine_commit, plugin_commit): entries with
+        # different code combinations are independent PR comparison runs and
+        # do NOT conflict with each other.
+        by_code_combo: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        for entry in entries:
+            by_code_combo.setdefault(entry["code_combo"], []).append(entry)
 
-        new_supersedes = new_entry["supersedes"]
-        if isinstance(new_supersedes, str):
-            new_supersedes_set: set[str] = {new_supersedes}
-        elif isinstance(new_supersedes, list):
-            new_supersedes_set = {
-                str(item) for item in new_supersedes if item is not None
-            }
-        else:
-            new_supersedes_set = set()
+        for combo_entries in by_code_combo.values():
+            if len(combo_entries) < 2:
+                continue
 
-        for older in sorted_entries[:-1]:
-            # Entries sharing a repeat_group are legitimate repeat runs.
-            if (
-                older["repeat_group"]
-                and older["repeat_group"] == new_entry["repeat_group"]
-            ):
-                continue
-            if older["entry_id"] in new_supersedes_set:
-                continue
-            conflicts.append(
-                {
-                    "signature": signature,
-                    "old_entry_id": older["entry_id"],
-                    "new_entry_id": new_entry["entry_id"],
-                    "old_dir": str(older["dir"]),
-                    "new_dir": str(new_entry["dir"]),
+            sorted_entries = sorted(combo_entries, key=lambda e: e["submitted_at"])
+            new_entry = sorted_entries[-1]
+
+            new_supersedes = new_entry["supersedes"]
+            if isinstance(new_supersedes, str):
+                new_supersedes_set: set[str] = {new_supersedes}
+            elif isinstance(new_supersedes, list):
+                new_supersedes_set = {
+                    str(item) for item in new_supersedes if item is not None
                 }
-            )
+            else:
+                new_supersedes_set = set()
+
+            for older in sorted_entries[:-1]:
+                # Entries sharing a repeat_group are legitimate repeat runs.
+                if (
+                    older["repeat_group"]
+                    and older["repeat_group"] == new_entry["repeat_group"]
+                ):
+                    continue
+                if older["entry_id"] in new_supersedes_set:
+                    continue
+                conflicts.append(
+                    {
+                        "signature": signature,
+                        "old_entry_id": older["entry_id"],
+                        "new_entry_id": new_entry["entry_id"],
+                        "old_dir": str(older["dir"]),
+                        "new_dir": str(new_entry["dir"]),
+                    }
+                )
 
     return conflicts
 
