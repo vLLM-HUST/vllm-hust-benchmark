@@ -1,6 +1,6 @@
-# issue #95 Layer 1 判定逻辑 — 验证方案
+# issue #95 Layer 1 + Layer 2 (mock) — 验证方案
 
-> 本文档记录 `feat/pr_95` 已交付的 Layer 1（判定逻辑 + CLI）验证方法，供后续 Layer 2/3 接入时回归复用。
+> 本文档记录 `feat/pr_95` 已交付的 Layer 1（判定逻辑 + CLI）和 Layer 2 mock 模式（CI 接线骨架）的验证方法，供后续 #103 就绪接入 real 模式时回归复用。
 
 ## 已交付物
 
@@ -10,6 +10,11 @@
 | CLI 子命令 | `src/vllm_hust_benchmark/cli.py` 的 `merge-gate-check` | pass→exit 0 / fail→exit 1 / skip→exit 0 |
 | TDD 测试 | `tests/test_merge_gate.py` | 30 个测试覆盖 issue §7.1 全部矩阵 |
 | 结构化持久化 | `write_decision_json()` | merge-gate-decision.json |
+| mock artifact 生成器 | `scripts/generate_mock_merge_gate_artifacts.py` | 10 场景 mock artifact，脱离 NPU 验证 CI 接线 |
+| CI workflow（mock） | `.github/workflows/merge-gate.yml` | `mock-merge-gate-check` job：生成→判定→校验 exit code |
+| CI workflow（real 骨架） | `.github/workflows/merge-gate.yml` | `real-merge-gate-check` job：阻塞于 #103，骨架就绪 |
+| 本地模拟脚本 | `scripts/simulate_merge_gate_workflow.sh` | 不需 GitHub Actions 跑全套场景 |
+| mock 生成器 TDD | `tests/test_mock_merge_gate_artifacts.py` | 22 个测试覆盖 10 场景 |
 
 ## 判定管线（10 步，fail-closed）
 
@@ -75,33 +80,63 @@ ruff format --check src/vllm_hust_benchmark/merge_gate.py src/vllm_hust_benchmar
 # 期望: All checks passed! + 3 files already formatted
 ```
 
-## B. CI 集成验证（Layer 2，待 #103 就绪后执行）
+## B. CI 集成验证（Layer 2）
 
-> #103 自托管 Ascend runner 未就绪，无法端到端跑 paired benchmark。以下是 runner 就绪后的接入步骤：
+### B.1 mock 模式（已交付，不依赖 #103）
 
-### B.1 在自托管 runner 上跑 paired benchmark
-- base commit（PR fork point）+ head commit（PR 最新 push）各跑一次
-- 产出两个 `run_leaderboard.json`
+用 `generate_mock_merge_gate_artifacts.py` 产出 10 个场景的 mock artifact，验证
+merge-gate-check 的 CI 接线正确性，不依赖真实 NPU。
 
-### B.2 GitHub Actions workflow 调用判定工具
-```yaml
-- name: Merge gate check
-  run: |
-    .venv/bin/python -m vllm_hust_benchmark.cli merge-gate-check \
-      --base-artifact ${{ steps.base.outputs.artifact }} \
-      --head-artifact ${{ steps.head.outputs.artifact }} \
-      --repo ${{ github.repository }} \
-      --pr-number ${{ github.event.pull_request.number }} \
-      --head-sha ${{ github.event.pull_request.head.sha }} \
-      --base-sha ${{ github.event.pull_request.base.sha }} \
-      --decision-output merge-gate-decision.json
-  # exit 1 让 GitHub Actions job 失败 → required check = fail → 阻塞合并
+**workflow**：`.github/workflows/merge-gate.yml`
+- 触发：`workflow_dispatch` with `mode=mock` + `scenario=<场景|all>`
+- job `mock-merge-gate-check`：生成 mock artifact → 调 merge-gate-check → 校验
+  expected vs actual disposition + exit code → 上传 decision.json
+
+**本地模拟（不需 GitHub Actions）**：
+```bash
+# 跑全部 10 个场景
+bash scripts/simulate_merge_gate_workflow.sh
+# 期望: All scenarios passed, exit=0
+
+# 跑单个场景
+bash scripts/simulate_merge_gate_workflow.sh pass
 ```
 
-### B.3 注册 required check
-在 GitHub branch protection 把 `merge-gate / performance-evidence` 注册为 required check（job 名对应 workflow 的 job name）。
+**mock 场景清单**（全部 TDD 覆盖，22 个测试）：
 
-### B.4 端到端演练（issue §7.2 6 个场景）
+| 场景 | 期望 disposition | 验证点 |
+|------|------------------|--------|
+| `pass` | pass | 合规 14B paired evidence |
+| `fail_config_drift` | fail | gpu_memory_utilization=0.9 |
+| `fail_data_source` | fail | data_source=smoke-test |
+| `fail_unpaired_spec` | fail | base/head spec_id 不一致 |
+| `fail_3b_not_14b` | fail | 3B perfgate ≠ 14B |
+| `fail_missing_artifact` | fail | head 缺失（CI missing） |
+| `skip_docs_only` | skip | docs-only label |
+| `specialty_valid` | pass | 2-chip + spec + reason |
+| `specialty_no_reason` | fail | specialty 缺 reason |
+| `fail_registry_hash_mismatch` | fail | 声明 target_id 不在 registry |
+
+**GitHub Actions 上跑 mock 模式**：
+1. 进入仓库 Actions 页 → 选 `Merge Gate` workflow → Run workflow
+2. `mode=mock`, `scenario=all`, Run
+3. 检查 job `mock-merge-gate-check` 全绿 + artifact `merge-gate-mock-*` 含各场景 decision.json
+
+### B.2 real 模式（待 #103 就绪）
+
+real-mode job 骨架已在 workflow 中（`real-merge-gate-check`），阻塞于 #103。
+#103 就绪后：
+1. 在 step `Block on #103 readiness` 之前填入真实 benchmark 命令
+2. checkout PR base + head commit
+3. 在自托管 Ascend runner 上跑 paired benchmark
+4. 产出 base/head run_leaderboard.json
+5. 调用 `merge-gate-check` 判定
+
+### B.3 注册 required check
+在 GitHub branch protection 把 `merge-gate / mock-merge-gate-check`（mock 模式）
+或 `merge-gate / real-merge-gate-check`（real 模式）注册为 required check。
+
+### B.4 端到端演练（issue §7.2 6 个场景，#103 就绪后）
 在 core 和 Ascend 仓库各用一个真实 PR 演练：
 1. 无证据 PR 被挡
 2. 配置漂移 artifact 被拒
@@ -122,6 +157,8 @@ core/Ascend 仓库的 PR 模板 + required check 注册涉及跨仓库改动，�
 ## 验证回归清单（每次 Layer 2/3 改动后重跑）
 
 - [ ] `pytest tests/test_merge_gate.py -v` → 30 passed
-- [ ] `pytest tests/` → 全套绿
+- [ ] `pytest tests/test_mock_merge_gate_artifacts.py -v` → 22 passed
+- [ ] `pytest tests/` → 全套绿（当前 534 passed）
+- [ ] `bash scripts/simulate_merge_gate_workflow.sh` → All scenarios passed
 - [ ] CLI PASS/FAIL/SKIP 三场景 exit code 正确
 - [ ] ruff lint + format 绿
