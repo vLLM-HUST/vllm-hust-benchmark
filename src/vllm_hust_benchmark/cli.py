@@ -778,6 +778,12 @@ def _build_parser() -> argparse.ArgumentParser:
     mg_parser.add_argument("--specialty-spec", default=None)
     mg_parser.add_argument("--specialty-reason", default=None)
     mg_parser.add_argument(
+        "--skip-approver",
+        default=None,
+        help="GitHub username of the approver for a perf-skip label (issue §5.2.4). "
+        "Required when a skip label is present, otherwise the gate fails closed.",
+    )
+    mg_parser.add_argument(
         "--registry",
         type=Path,
         default=None,
@@ -1422,6 +1428,7 @@ def main(argv: list[str] | None = None) -> int:
             declared_profile_id=args.declared_profile_id,
             specialty_spec=args.specialty_spec,
             specialty_reason=args.specialty_reason,
+            skip_approver=args.skip_approver,
         )
         base = ArtifactRef(
             path=args.base_artifact, ci_status=status_map[args.base_status]

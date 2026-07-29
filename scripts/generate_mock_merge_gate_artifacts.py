@@ -88,26 +88,49 @@ def _make_run_leaderboard(
 _SCENARIOS: dict[str, dict] = {
     "pass": {
         "expected_disposition": "pass",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(),
         "head": lambda: _make_run_leaderboard(),
     },
     "fail_config_drift": {
         "expected_disposition": "fail",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(gpu_memory_utilization=0.9),
+        "head": lambda: _make_run_leaderboard(gpu_memory_utilization=0.9),
+    },
+    "fail_config_drift_head_only": {
+        "expected_disposition": "fail",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
+        "base": lambda: _make_run_leaderboard(),
         "head": lambda: _make_run_leaderboard(gpu_memory_utilization=0.9),
     },
     "fail_data_source": {
         "expected_disposition": "fail",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(data_source="smoke-test"),
         "head": lambda: _make_run_leaderboard(data_source="smoke-test"),
     },
     "fail_unpaired_spec": {
         "expected_disposition": "fail",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(spec_id=VALID_SPEC_ID),
         "head": lambda: _make_run_leaderboard(spec_id=SHAREGPT_SPEC_ID),
     },
     "fail_3b_not_14b": {
         "expected_disposition": "fail",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(
             model_repo_id="Qwen/Qwen2.5-3B-Instruct",
             model_parameters="3B",
@@ -123,14 +146,31 @@ _SCENARIOS: dict[str, dict] = {
         "base": lambda: _make_run_leaderboard(),
         "head": None,  # 不生成 head
     },
+    "fail_missing_target_declaration": {
+        "expected_disposition": "fail",
+        # 不声明 target_id/version/profile_id → C3 fix 应 fail
+        "base": lambda: _make_run_leaderboard(),
+        "head": lambda: _make_run_leaderboard(),
+    },
     "skip_docs_only": {
         "expected_disposition": "skip",
         "pr_labels": ["perf-skip:docs-only"],
+        "skip_approver": "reviewer-bot",
+        "base": None,
+        "head": None,
+    },
+    "skip_docs_only_no_approver": {
+        "expected_disposition": "fail",
+        "pr_labels": ["perf-skip:docs-only"],
+        # 不提供 skip_approver → M5 fix 应 fail
         "base": None,
         "head": None,
     },
     "specialty_valid": {
         "expected_disposition": "pass",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "multi-chip-2chip-text-14b",
         "specialty_spec": "multi-chip-2chip-text-14b",
         "specialty_reason": "验证 2-chip TP 并行扩展收益",
         "base": lambda: _make_run_leaderboard(
@@ -144,6 +184,9 @@ _SCENARIOS: dict[str, dict] = {
     },
     "specialty_no_reason": {
         "expected_disposition": "fail",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "multi-chip-2chip-text-14b",
         "specialty_spec": "multi-chip-2chip-text-14b",
         # specialty_reason 不传
         "base": lambda: _make_run_leaderboard(
@@ -158,6 +201,8 @@ _SCENARIOS: dict[str, dict] = {
     "fail_registry_hash_mismatch": {
         "expected_disposition": "fail",
         "declared_target_id": "nonexistent-target",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(),
         "head": lambda: _make_run_leaderboard(),
     },
@@ -204,6 +249,12 @@ def generate(scenario: str, output_dir: Path) -> dict:
         manifest["specialty_reason"] = config["specialty_reason"]
     if "declared_target_id" in config:
         manifest["declared_target_id"] = config["declared_target_id"]
+    if "declared_target_version" in config:
+        manifest["declared_target_version"] = config["declared_target_version"]
+    if "declared_profile_id" in config:
+        manifest["declared_profile_id"] = config["declared_profile_id"]
+    if "skip_approver" in config:
+        manifest["skip_approver"] = config["skip_approver"]
 
     manifest_path = output_dir / "scenario_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
