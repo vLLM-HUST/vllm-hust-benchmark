@@ -7,7 +7,7 @@
 #   scenario 可选，默认 all（跑全部场景）
 #
 # 退出码：全部场景期望匹配 → 0；任一场景不匹配 → 1
-set -uo pipefail
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -20,7 +20,7 @@ cd "$REPO_ROOT"
 mkdir -p "$ARTIFACTS_DIR"
 
 if [[ "$SCENARIO" == "all" ]]; then
-  SCENARIOS="pass fail_config_drift fail_data_source fail_unpaired_spec fail_3b_not_14b fail_missing_artifact skip_docs_only specialty_valid specialty_no_reason fail_registry_hash_mismatch"
+  SCENARIOS="pass fail_config_drift fail_config_drift_head_only fail_data_source fail_unpaired_spec fail_3b_not_14b fail_missing_artifact fail_missing_target_declaration skip_docs_only skip_docs_only_no_approver specialty_valid specialty_no_reason fail_registry_hash_mismatch"
 else
   SCENARIOS="$SCENARIO"
 fi
@@ -46,6 +46,9 @@ for scenario in $SCENARIOS; do
   specialty_spec=$("$PYTHON" -c "import json; m=json.load(open('$manifest')); print(m.get('specialty_spec','') or '')" 2>/dev/null || echo "")
   specialty_reason=$("$PYTHON" -c "import json; m=json.load(open('$manifest')); print(m.get('specialty_reason','') or '')" 2>/dev/null || echo "")
   declared_target=$("$PYTHON" -c "import json; m=json.load(open('$manifest')); print(m.get('declared_target_id','') or '')" 2>/dev/null || echo "")
+  declared_target_version=$("$PYTHON" -c "import json; m=json.load(open('$manifest')); print(m.get('declared_target_version','') or '')" 2>/dev/null || echo "")
+  declared_profile_id=$("$PYTHON" -c "import json; m=json.load(open('$manifest')); print(m.get('declared_profile_id','') or '')" 2>/dev/null || echo "")
+  skip_approver=$("$PYTHON" -c "import json; m=json.load(open('$manifest')); print(m.get('skip_approver','') or '')" 2>/dev/null || echo "")
 
   base_artifact=""
   if [[ -f "$mock_dir/base/run_leaderboard.json" ]]; then
@@ -78,6 +81,9 @@ for scenario in $SCENARIOS; do
   [[ -n "$specialty_spec" ]] && cli_args+=(--specialty-spec "$specialty_spec")
   [[ -n "$specialty_reason" ]] && cli_args+=(--specialty-reason "$specialty_reason")
   [[ -n "$declared_target" ]] && cli_args+=(--declared-target-id "$declared_target")
+  [[ -n "$declared_target_version" ]] && cli_args+=(--declared-target-version "$declared_target_version")
+  [[ -n "$declared_profile_id" ]] && cli_args+=(--declared-profile-id "$declared_profile_id")
+  [[ -n "$skip_approver" ]] && cli_args+=(--skip-approver "$skip_approver")
 
   set +e
   "$PYTHON" -m vllm_hust_benchmark.cli "${cli_args[@]}" >/dev/null 2>&1

@@ -68,9 +68,36 @@ def _default_pr_context(**overrides) -> PRContext:
         number=193,
         head_sha="abc1234",
         base_sha="def5678",
+        declared_target_id="official-ascend-jan-2026-v0.18.0",
+        declared_target_version="v0.18.0",
+        declared_profile_id="core-text-14b",
     )
     defaults.update(overrides)
     return PRContext(**defaults)
+
+
+def _pr_context_from_manifest(output_dir: Path, **overrides) -> PRContext:
+    """从 scenario_manifest.json 构建 PRContext（读取声明的 target/profile/skip）。"""
+    manifest = json.loads((output_dir / "scenario_manifest.json").read_text())
+    kwargs = dict(
+        repo="vllm-hust",
+        number=193,
+        head_sha="abc1234",
+        base_sha="def5678",
+        declared_target_id=manifest.get("declared_target_id"),
+        declared_target_version=manifest.get("declared_target_version"),
+        declared_profile_id=manifest.get("declared_profile_id"),
+    )
+    if "pr_labels" in manifest:
+        kwargs["labels"] = tuple(manifest["pr_labels"])
+    if manifest.get("specialty_spec"):
+        kwargs["specialty_spec"] = manifest["specialty_spec"]
+    if manifest.get("specialty_reason"):
+        kwargs["specialty_reason"] = manifest["specialty_reason"]
+    if manifest.get("skip_approver"):
+        kwargs["skip_approver"] = manifest["skip_approver"]
+    kwargs.update(overrides)
+    return PRContext(**kwargs)
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +113,7 @@ class TestMockPassScenario:
         base = _accepted(_load_artifact(out, "base"))
         head = _accepted(_load_artifact(out, "head"))
         decision = evaluate_merge_gate(
-            base=base, head=head, pr_context=_default_pr_context()
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
         )
         assert decision.disposition == "pass"
         assert decision.target_id == "official-ascend-jan-2026-v0.18.0"
@@ -108,7 +135,7 @@ class TestMockConfigDriftScenario:
         base = _accepted(_load_artifact(out, "base"))
         head = _accepted(_load_artifact(out, "head"))
         decision = evaluate_merge_gate(
-            base=base, head=head, pr_context=_default_pr_context()
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
         )
         assert decision.disposition == "fail"
         assert (
@@ -125,7 +152,7 @@ class TestMockDataSourceRejectScenario:
         base = _accepted(_load_artifact(out, "base"))
         head = _accepted(_load_artifact(out, "head"))
         decision = evaluate_merge_gate(
-            base=base, head=head, pr_context=_default_pr_context()
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
         )
         assert decision.disposition == "fail"
         assert "data_source" in decision.reason.lower()
@@ -139,7 +166,7 @@ class TestMockUnpairedSpecScenario:
         base = _accepted(_load_artifact(out, "base"))
         head = _accepted(_load_artifact(out, "head"))
         decision = evaluate_merge_gate(
-            base=base, head=head, pr_context=_default_pr_context()
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
         )
         assert decision.disposition == "fail"
         assert "spec_id" in decision.reason.lower() or "spec" in decision.reason.lower()
@@ -153,7 +180,7 @@ class TestMock3BNot14BScenario:
         base = _accepted(_load_artifact(out, "base"))
         head = _accepted(_load_artifact(out, "head"))
         decision = evaluate_merge_gate(
-            base=base, head=head, pr_context=_default_pr_context()
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
         )
         assert decision.disposition == "fail"
 
@@ -167,7 +194,7 @@ class TestMockMissingArtifactScenario:
         # head 目录不存在
         head = _missing()
         decision = evaluate_merge_gate(
-            base=base, head=head, pr_context=_default_pr_context()
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
         )
         assert decision.disposition == "fail"
         assert decision.head_status == "missing"
@@ -183,12 +210,10 @@ class TestMockSkipDocsOnlyScenario:
 
     def test_docs_only_skip(self, tmp_path):
         out = _run_generator(tmp_path, "skip_docs_only")
-        manifest = json.loads((out / "scenario_manifest.json").read_text())
-        labels = tuple(manifest.get("pr_labels", []))
         decision = evaluate_merge_gate(
             base=_missing(),
             head=_missing(),
-            pr_context=_default_pr_context(labels=labels),
+            pr_context=_pr_context_from_manifest(out),
         )
         assert decision.disposition == "skip"
 
@@ -200,34 +225,26 @@ class TestMockSpecialtyValidScenario:
         out = _run_generator(tmp_path, "specialty_valid")
         base = _accepted(_load_artifact(out, "base"))
         head = _accepted(_load_artifact(out, "head"))
-        manifest = json.loads((out / "scenario_manifest.json").read_text())
         decision = evaluate_merge_gate(
             base=base,
             head=head,
-            pr_context=_default_pr_context(
-                specialty_spec=manifest.get("specialty_spec"),
-                specialty_reason=manifest.get("specialty_reason"),
-            ),
+            pr_context=_pr_context_from_manifest(out),
         )
         assert decision.disposition == "pass"
         assert decision.details.get("specialty") is True
 
 
 class TestMockSpecialtyNoReasonScenario:
-    """fail 场景：specialty 缺 reason。"""
+    """fail 场景：specialty 缺 reason（manifest 不含 specialty_reason）。"""
 
     def test_specialty_no_reason_blocked(self, tmp_path):
         out = _run_generator(tmp_path, "specialty_no_reason")
         base = _accepted(_load_artifact(out, "base"))
         head = _accepted(_load_artifact(out, "head"))
-        manifest = json.loads((out / "scenario_manifest.json").read_text())
         decision = evaluate_merge_gate(
             base=base,
             head=head,
-            pr_context=_default_pr_context(
-                specialty_spec=manifest.get("specialty_spec"),
-                # specialty_reason 不传
-            ),
+            pr_context=_pr_context_from_manifest(out),
         )
         assert decision.disposition == "fail"
         assert (
@@ -237,7 +254,7 @@ class TestMockSpecialtyNoReasonScenario:
 
 
 class TestMockRegistryHashMismatchScenario:
-    """fail 场景：声明的 target_id 不在 registry。"""
+    """fail 场景：声明的 target_id 不在 registry（manifest 已声明 nonexistent-target）。"""
 
     def test_registry_hash_mismatch_blocked(self, tmp_path):
         out = _run_generator(tmp_path, "fail_registry_hash_mismatch")
@@ -246,9 +263,59 @@ class TestMockRegistryHashMismatchScenario:
         decision = evaluate_merge_gate(
             base=base,
             head=head,
-            pr_context=_default_pr_context(declared_target_id="nonexistent-target"),
+            pr_context=_pr_context_from_manifest(out),
         )
         assert decision.disposition == "fail"
+
+
+class TestMockConfigDriftHeadOnlyScenario:
+    """fail 场景：仅 head 配置漂移（C1 fix 回归）。"""
+
+    def test_head_only_drift_blocked(self, tmp_path):
+        out = _run_generator(tmp_path, "fail_config_drift_head_only")
+        base = _accepted(_load_artifact(out, "base"))
+        head = _accepted(_load_artifact(out, "head"))
+        decision = evaluate_merge_gate(
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
+        )
+        assert decision.disposition == "fail"
+        assert "head" in decision.reason
+        assert (
+            "config_drift" in decision.reason
+            or "gpu_memory_utilization" in decision.reason
+        )
+
+
+class TestMockMissingTargetDeclarationScenario:
+    """fail 场景：未声明 target_id/target_version/profile_id（C3 fix）。"""
+
+    def test_missing_target_declaration_blocked(self, tmp_path):
+        out = _run_generator(tmp_path, "fail_missing_target_declaration")
+        base = _accepted(_load_artifact(out, "base"))
+        head = _accepted(_load_artifact(out, "head"))
+        decision = evaluate_merge_gate(
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
+        )
+        assert decision.disposition == "fail"
+        assert (
+            "target" in decision.reason.lower() or "declared" in decision.reason.lower()
+        )
+
+
+class TestMockSkipDocsOnlyNoApproverScenario:
+    """fail 场景：docs-only label 但无 skip_approver（M5 fix）。"""
+
+    def test_skip_without_approver_blocked(self, tmp_path):
+        out = _run_generator(tmp_path, "skip_docs_only_no_approver")
+        decision = evaluate_merge_gate(
+            base=_missing(),
+            head=_missing(),
+            pr_context=_pr_context_from_manifest(out),
+        )
+        assert decision.disposition == "fail"
+        assert (
+            "skip" in decision.reason.lower() or "approver" in decision.reason.lower()
+        )
 
 
 class TestMockScenarioList:
@@ -259,11 +326,14 @@ class TestMockScenarioList:
         [
             "pass",
             "fail_config_drift",
+            "fail_config_drift_head_only",
             "fail_data_source",
             "fail_unpaired_spec",
             "fail_3b_not_14b",
             "fail_missing_artifact",
+            "fail_missing_target_declaration",
             "skip_docs_only",
+            "skip_docs_only_no_approver",
             "specialty_valid",
             "specialty_no_reason",
             "fail_registry_hash_mismatch",

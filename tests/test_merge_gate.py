@@ -115,6 +115,9 @@ def _default_pr_context(**overrides) -> PRContext:
         number=193,
         head_sha="abc1234",
         base_sha="def5678",
+        declared_target_id="official-ascend-jan-2026-v0.18.0",
+        declared_target_version="v0.18.0",
+        declared_profile_id="core-text-14b",
     )
     defaults.update(overrides)
     return PRContext(**defaults)
@@ -355,7 +358,10 @@ class TestSpecialty:
         decision = evaluate_merge_gate(
             base=_accepted(base_path),
             head=_accepted(head_path),
-            pr_context=_default_pr_context(specialty_reason="multi-chip test"),
+            pr_context=_default_pr_context(
+                declared_profile_id="multi-chip-2chip-text-14b",
+                specialty_reason="multi-chip test",
+            ),
             # specialty_spec 为 None
         )
         assert decision.disposition == "fail"
@@ -369,7 +375,10 @@ class TestSpecialty:
         decision = evaluate_merge_gate(
             base=_accepted(base_path),
             head=_accepted(head_path),
-            pr_context=_default_pr_context(specialty_spec="multi-chip-spec"),
+            pr_context=_default_pr_context(
+                declared_profile_id="multi-chip-2chip-text-14b",
+                specialty_spec="multi-chip-spec",
+            ),
             # specialty_reason 为 None
         )
         assert decision.disposition == "fail"
@@ -430,6 +439,7 @@ class TestValidPasses:
             base=_accepted(base_path),
             head=_accepted(head_path),
             pr_context=_default_pr_context(
+                declared_profile_id="multi-chip-2chip-text-14b",
                 specialty_spec="multi-chip-2chip-text-14b",
                 specialty_reason="验证 2-chip TP 并行扩展收益",
             ),
@@ -451,7 +461,7 @@ class TestValidPasses:
         decision = evaluate_merge_gate(
             base=_accepted(base_path),
             head=_accepted(head_path),
-            pr_context=_default_pr_context(),
+            pr_context=_default_pr_context(declared_profile_id="vision-7b"),
         )
         assert decision.disposition == "pass"
         assert decision.max_model_len == 30720
@@ -465,7 +475,10 @@ class TestDocsOnlyException:
         decision = evaluate_merge_gate(
             base=ArtifactRef(path=None, ci_status=ArtifactStatus.MISSING),
             head=ArtifactRef(path=None, ci_status=ArtifactStatus.MISSING),
-            pr_context=_default_pr_context(labels=("perf-skip:docs-only",)),
+            pr_context=_default_pr_context(
+                labels=("perf-skip:docs-only",),
+                skip_approver="reviewer-alice",
+            ),
         )
         assert decision.disposition == "skip"
         assert (
@@ -476,9 +489,22 @@ class TestDocsOnlyException:
         decision = evaluate_merge_gate(
             base=ArtifactRef(path=None, ci_status=ArtifactStatus.MISSING),
             head=ArtifactRef(path=None, ci_status=ArtifactStatus.MISSING),
-            pr_context=_default_pr_context(labels=("perf-skip:test-only",)),
+            pr_context=_default_pr_context(
+                labels=("perf-skip:test-only",),
+                skip_approver="reviewer-bob",
+            ),
         )
         assert decision.disposition == "skip"
+
+    def test_skip_label_without_approver_blocked(self, tmp_path):
+        """M5 fix: skip label 但无审批人 → fail（fail closed）。"""
+        decision = evaluate_merge_gate(
+            base=ArtifactRef(path=None, ci_status=ArtifactStatus.MISSING),
+            head=ArtifactRef(path=None, ci_status=ArtifactStatus.MISSING),
+            pr_context=_default_pr_context(labels=("perf-skip:docs-only",)),
+        )
+        assert decision.disposition == "fail"
+        assert "approver" in decision.reason.lower()
 
     def test_docs_only_without_label_blocked(self, tmp_path):
         """docs-only 但没 label → fail（fail closed）。"""
@@ -542,3 +568,207 @@ class TestDecisionLogAndJson:
         log = format_decision_log(decision, _default_pr_context())
         assert "fail" in log
         assert "missing" in log.lower() or "evidence" in log.lower()
+
+
+# ---------------------------------------------------------------------------
+# Review fix 回归测试：C1-C4 + M1-M3/M5
+# ---------------------------------------------------------------------------
+
+
+class TestHeadOnlyConfigDrift:
+    """C1 fix: head artifact 的配置漂移也必须被挡（PR 自身 commit 引入漂移）。"""
+
+    def test_head_only_gpu_memory_drift_blocked(self, tmp_path):
+        """base 合规、head gmu=0.9 → fail（C1 回归）。"""
+        base_payload = _make_run_leaderboard()
+        head_payload = _make_run_leaderboard(gpu_memory_utilization=0.9)
+        base_path = _write_artifact(tmp_path, "base", base_payload)
+        head_path = _write_artifact(tmp_path, "head", head_payload)
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+        )
+        assert decision.disposition == "fail"
+        assert "config_drift" in decision.reason
+        assert "head" in decision.reason
+
+    def test_head_only_max_model_len_drift_blocked(self, tmp_path):
+        """base 合规、head mml=30720 → fail（C1 回归）。"""
+        base_payload = _make_run_leaderboard()
+        head_payload = _make_run_leaderboard(max_model_len=30720)
+        base_path = _write_artifact(tmp_path, "base", base_payload)
+        head_path = _write_artifact(tmp_path, "head", head_payload)
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+        )
+        assert decision.disposition == "fail"
+        assert "config_drift" in decision.reason
+        assert "head" in decision.reason
+
+
+class TestMissingTargetDeclaration:
+    """C3 fix: target_id/target_version/profile_id 强制声明。"""
+
+    def test_missing_target_id_blocked(self, tmp_path):
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(declared_target_id=None),
+        )
+        assert decision.disposition == "fail"
+        assert "target_id" in decision.reason
+
+    def test_missing_target_version_blocked(self, tmp_path):
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(declared_target_version=None),
+        )
+        assert decision.disposition == "fail"
+        assert "target_version" in decision.reason
+
+    def test_missing_profile_id_blocked(self, tmp_path):
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(declared_profile_id=None),
+        )
+        assert decision.disposition == "fail"
+        assert "profile_id" in decision.reason
+
+
+class TestDeclaredTargetMismatch:
+    """M6 fix: 声明的 target_id/profile_id 必须与 artifact 实际匹配的 profile 一致。
+
+    防止 PR 声明一个有效但与实际 artifact 不匹配的 target 来 bypass。
+    注意：target_version 是版本号与 registry 描述性名称不同概念，不做一致性比较。
+    """
+
+    def test_declared_target_id_matches_profile_passes(self, tmp_path):
+        """默认声明的 target_id 与 profile 一致 → pass（回归保护）。"""
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+            registry_path=DEFAULT_REGISTRY_PATH,
+        )
+        assert decision.disposition == "pass"
+
+    def test_declared_profile_id_mismatch_blocked(self, tmp_path):
+        """declared_profile_id 与 profile.profile_name 不一致 → fail。"""
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(declared_profile_id="wrong-profile"),
+        )
+        assert decision.disposition == "fail"
+        assert (
+            "profile_id" in decision.reason.lower()
+            or "profile_name" in decision.reason.lower()
+        )
+
+
+class TestSpecIdNoneMatch:
+    """C4 fix: spec_id 为 None/空时 fail（不允许 None==None 通过）。"""
+
+    def test_both_spec_id_missing_blocked(self, tmp_path):
+        """base/head 都没有 same_spec 块 → fail（不是 None==None 通过）。"""
+        payload = _make_run_leaderboard(same_spec_present=False)
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+        )
+        assert decision.disposition == "fail"
+        assert "spec_id" in decision.reason
+
+    def test_empty_spec_id_blocked(self, tmp_path):
+        """spec_id 为空字符串 → fail。"""
+        payload = _make_run_leaderboard(spec_id="")
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+        )
+        assert decision.disposition == "fail"
+        assert "spec_id" in decision.reason
+
+
+class TestSpecHashMismatch:
+    """M1 fix: resolved_spec_hash 不一致 → fail。"""
+
+    def test_spec_hash_mismatch_blocked(self, tmp_path):
+        base_payload = _make_run_leaderboard(
+            spec_hash="a" * 64,
+        )
+        head_payload = _make_run_leaderboard(
+            spec_hash="b" * 64,
+        )
+        base_path = _write_artifact(tmp_path, "base", base_payload)
+        head_path = _write_artifact(tmp_path, "head", head_payload)
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+        )
+        assert decision.disposition == "fail"
+        assert "spec_hash" in decision.reason
+        assert decision.spec_hash_match is False
+
+
+class TestProfileMismatch:
+    """M2 fix: base/head 匹配不同 profile → fail。"""
+
+    def test_base_head_different_profile_blocked(self, tmp_path):
+        """base 匹配 core-text-14b，head 匹配 coder-14b → fail。"""
+        base_payload = _make_run_leaderboard()
+        head_payload = _make_run_leaderboard(workload_name="instructcoder-online")
+        head_path = _write_artifact(tmp_path, "head", head_payload)
+        base_path = _write_artifact(tmp_path, "base", base_payload)
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+        )
+        assert decision.disposition == "fail"
+        assert "profile" in decision.reason.lower()
+
+
+class TestRegistryLoadFailure:
+    """M3 fix: registry 加载失败 → fail closed（返回 decision 而非 raise）。"""
+
+    def test_registry_missing_fail_closed(self, tmp_path):
+        """registry 文件不存在 → fail（不 raise）。"""
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+            registry_path=tmp_path / "nonexistent_registry.json",
+        )
+        assert decision.disposition == "fail"
+        assert "registry" in decision.reason.lower()
