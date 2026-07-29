@@ -858,13 +858,18 @@ run_offline_client_command_with_aclgraph_fallback() {
   failure_log=$(mktemp "${TMPDIR:-/tmp}/official-baseline-offline-client-XXXXXX.log")
   : > "$failure_log"
 
-  if run_offline_client_command "$CLIENT_ARGS" \
-    > >(tee -a "$failure_log") \
-    2> >(tee -a "$failure_log" >&2); then
+  # Use a pipe + ``PIPESTATUS`` instead of process substitution
+  # ``> >(tee ...)`` so the function works under macOS sandbox (where
+  # ``/dev/fd/*`` writes are blocked with "Operation not permitted").
+  set +e
+  run_offline_client_command "$CLIENT_ARGS" 2>&1 | tee -a "$failure_log"
+  runner_status=${PIPESTATUS[0]}
+  set -e
+
+  if [[ "$runner_status" -eq 0 ]]; then
     rm -f "$failure_log"
     return 0
   fi
-  runner_status=$?
 
   if ! grep -Fq "weak_ref_tensor" "$failure_log"; then
     rm -f "$failure_log"
