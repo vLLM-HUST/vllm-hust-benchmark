@@ -14,6 +14,9 @@ name: Merge Gate
 # 等 Layer 3 跨仓库 PR 模板 + required check 注册时接入。
 
 'on':
+  # 跨仓库触发：core/Ascend 仓库的 PR 通过 repository_dispatch 触发本 workflow
+  repository_dispatch:
+    types: [merge-gate-check]
   workflow_dispatch:
     inputs:
       mode:
