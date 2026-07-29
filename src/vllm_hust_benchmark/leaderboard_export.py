@@ -560,6 +560,7 @@ def export_leaderboard_artifacts(
     plugin_source_repository: str | None,
     plugin_source_ref: str | None,
     plugin_source_commit: str | None,
+    spec_path: Path | None = None,
 ) -> tuple[Path, Path]:
     engine_version = _sanitize_engine_version(engine_version, git_commit=git_commit)
     model_identity = resolve_model_identity(model_name)
@@ -736,6 +737,22 @@ def export_leaderboard_artifacts(
     if same_spec_payload is not None:
         artifact["same_spec"] = same_spec_payload
     if is_official_workload_contract_entry(artifact):
+        if spec_path is None:
+            raise ValueError(
+                "spec_path is required for official workload contract entries "
+                "so that target_id/target_version can be recorded in metadata."
+            )
+        spec_payload = json.loads(spec_path.read_text(encoding="utf-8"))
+        baseline_target = spec_payload.get("baseline_target") or {}
+        target_id = baseline_target.get("id")
+        target_version = baseline_target.get("label")
+        if not target_id or not target_version:
+            raise ValueError(
+                f"spec_path {spec_path} is missing baseline_target.id or "
+                f"baseline_target.label; cannot record target_id/target_version."
+            )
+        artifact["metadata"]["target_id"] = target_id
+        artifact["metadata"]["target_version"] = target_version
         artifact["metadata"]["workload_config_contract"] = (
             WORKLOAD_CONFIG_CONTRACT_VERSION
         )
