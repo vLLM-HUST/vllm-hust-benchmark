@@ -726,6 +726,70 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Path to trend schema JSON (default: schemas/leaderboard_trend_v1.schema.json).",
     )
 
+    # issue #95 merge gate: PR 合并前强制 paired real-online 性能证据判定
+    mg_parser = subparsers.add_parser(
+        "merge-gate-check",
+        help="Evaluate PR paired real-online performance evidence against the "
+        "fixed-target registry (issue #95 merge gate). Returns 0 on pass/skip, "
+        "1 on fail.",
+    )
+    mg_parser.add_argument(
+        "--base-artifact",
+        type=Path,
+        default=None,
+        help="Path to base run_leaderboard.json (PR fork point). "
+        "Omit when base CI status is not accepted.",
+    )
+    mg_parser.add_argument(
+        "--head-artifact",
+        type=Path,
+        default=None,
+        help="Path to head run_leaderboard.json (PR head commit). "
+        "Omit when head CI status is not accepted.",
+    )
+    mg_parser.add_argument(
+        "--base-status",
+        choices=["accepted", "missing", "cancelled", "skipped", "resource_busy"],
+        default="accepted",
+        help="Base artifact CI status (default: accepted). Non-accepted fails closed.",
+    )
+    mg_parser.add_argument(
+        "--head-status",
+        choices=["accepted", "missing", "cancelled", "skipped", "resource_busy"],
+        default="accepted",
+        help="Head artifact CI status (default: accepted). Non-accepted fails closed.",
+    )
+    mg_parser.add_argument(
+        "--repo", required=True, help="PR repository (e.g. vllm-hust)."
+    )
+    mg_parser.add_argument("--pr-number", type=int, required=True, help="PR number.")
+    mg_parser.add_argument("--head-sha", required=True, help="PR head commit SHA.")
+    mg_parser.add_argument(
+        "--base-sha", required=True, help="PR base (fork point) SHA."
+    )
+    mg_parser.add_argument(
+        "--labels",
+        default="",
+        help="Comma-separated PR labels (e.g. perf-skip:docs-only).",
+    )
+    mg_parser.add_argument("--declared-target-id", default=None)
+    mg_parser.add_argument("--declared-target-version", default=None)
+    mg_parser.add_argument("--declared-profile-id", default=None)
+    mg_parser.add_argument("--specialty-spec", default=None)
+    mg_parser.add_argument("--specialty-reason", default=None)
+    mg_parser.add_argument(
+        "--registry",
+        type=Path,
+        default=None,
+        help="Path to fixed_target_registry.json (default: built-in registry).",
+    )
+    mg_parser.add_argument(
+        "--decision-output",
+        type=Path,
+        default=None,
+        help="Write merge-gate-decision.json to this path (issue #95 enhancement #4).",
+    )
+
     return parser
 
 
@@ -1332,6 +1396,51 @@ def main(argv: list[str] | None = None) -> int:
             )
         print(f"\nOK: {len(report.decisions)} entry(s) validated, {passed} admitted")
         return 0
+
+    if args.command == "merge-gate-check":
+        from vllm_hust_benchmark.merge_gate import (
+            ArtifactRef,
+            ArtifactStatus,
+            PRContext,
+            evaluate_merge_gate,
+            format_decision_log,
+            write_decision_json,
+        )
+
+        status_map = {s.value: s for s in ArtifactStatus}
+        labels = tuple(
+            label.strip() for label in (args.labels or "").split(",") if label.strip()
+        )
+        pr_context = PRContext(
+            repo=args.repo,
+            number=args.pr_number,
+            head_sha=args.head_sha,
+            base_sha=args.base_sha,
+            labels=labels,
+            declared_target_id=args.declared_target_id,
+            declared_target_version=args.declared_target_version,
+            declared_profile_id=args.declared_profile_id,
+            specialty_spec=args.specialty_spec,
+            specialty_reason=args.specialty_reason,
+        )
+        base = ArtifactRef(
+            path=args.base_artifact, ci_status=status_map[args.base_status]
+        )
+        head = ArtifactRef(
+            path=args.head_artifact, ci_status=status_map[args.head_status]
+        )
+        decision = evaluate_merge_gate(
+            base=base,
+            head=head,
+            pr_context=pr_context,
+            registry_path=args.registry,
+        )
+        print(format_decision_log(decision, pr_context))
+        if args.decision_output is not None:
+            write_decision_json(decision, args.decision_output)
+            print(f"  decision written to: {args.decision_output}", file=sys.stderr)
+        # pass / skip → 0 (不阻塞合并); fail → 1
+        return 0 if decision.disposition in ("pass", "skip") else 1
 
     if args.command == "bench":
         layout = resolve_repo_layout()
