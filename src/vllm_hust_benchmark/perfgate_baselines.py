@@ -14,9 +14,12 @@ from pathlib import Path, PurePosixPath
 from typing import Any
 
 from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
+from vllm_hust_benchmark.perfgate_measurement import validate_measurement_block
 
 
 BASELINE_SCHEMA_VERSION = "perfgate-baseline/v1"
+REVOCATION_SCHEMA_VERSION = "perfgate-baseline-revocation/v1"
+REVOCATION_STATUSES = frozenset({"quarantined", "withdrawn"})
 SUPPORTED_SCENARIOS = frozenset({"random-online"})
 SUPPORTED_TARGET_REPOSITORIES = {
     "vllm-hust/vllm-hust": "vLLM-HUST/vllm-hust",
@@ -79,6 +82,13 @@ def _validate_metadata_value(value: str, *, field: str) -> str:
     normalized = str(value or "").strip()
     if not normalized or any(character in normalized for character in "\0\r\n"):
         raise ValueError(f"{field} must be a non-empty single-line value")
+    return normalized
+
+
+def _validate_evidence_url(value: str, *, field: str) -> str:
+    normalized = _validate_metadata_value(value, field=field)
+    if not normalized.startswith("https://"):
+        raise ValueError(f"{field} must be an HTTPS URL")
     return normalized
 
 
@@ -150,6 +160,27 @@ def latest_pointer_relative_path(identity: BaselineIdentity) -> PurePosixPath:
         identity.spec_id,
         "latest-main.json",
     )
+
+
+def revocation_relative_path(
+    identity: BaselineIdentity, status: str | None = None
+) -> PurePosixPath:
+    identity = normalize_identity(identity)
+    owner, repository = identity.target_repository.split("/", maxsplit=1)
+    root = PurePosixPath(
+        "revoked",
+        owner,
+        repository,
+        identity.target_sha,
+        identity.scenario,
+        identity.spec_id,
+        identity.spec_hash,
+    )
+    if status is None:
+        return root
+    if status not in REVOCATION_STATUSES:
+        raise ValueError(f"invalid revocation status: {status!r}")
+    return root / f"{status}.json"
 
 
 def _load_json_object(path: Path) -> dict[str, Any]:
@@ -304,8 +335,9 @@ def _manifest_payload(
     provenance: BaselineProvenance,
     *,
     artifact_sha256: str,
+    measurement: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
+    payload: dict[str, Any] = {
         "schema_version": BASELINE_SCHEMA_VERSION,
         "identity": asdict(identity),
         "provenance": asdict(provenance),
@@ -314,6 +346,9 @@ def _manifest_payload(
             "sha256": artifact_sha256,
         },
     }
+    if measurement is not None:
+        payload["measurement"] = measurement
+    return payload
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -322,6 +357,164 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _load_revocation_file(
+    repository_root: Path, identity: BaselineIdentity, status: str
+) -> dict[str, Any] | None:
+    relative_path = revocation_relative_path(identity, status)
+    _reject_symlink_components(repository_root, relative_path)
+    path = repository_root / relative_path
+    if not path.exists():
+        return None
+    if not path.is_file():
+        raise ValueError(f"baseline revocation record is not a file: {path}")
+    payload = _load_json_object(path)
+    if payload.get("schema_version") != REVOCATION_SCHEMA_VERSION:
+        raise ValueError(f"unsupported baseline revocation schema in {path}")
+    if payload.get("identity") != asdict(identity):
+        raise ValueError(f"baseline revocation identity mismatch: {path}")
+    actual_status = payload.get("release_visibility_status")
+    if actual_status != status:
+        raise ValueError(
+            f"baseline revocation status mismatch in {path}: {actual_status!r}"
+        )
+    expected_artifact_path = (
+        baseline_relative_dir(identity).as_posix() + "/run_leaderboard.json"
+    )
+    if payload.get("artifact_path") != expected_artifact_path:
+        raise ValueError(f"baseline revocation artifact path mismatch: {path}")
+    for field in ("reason", "detected_at", "actor"):
+        _validate_metadata_value(payload.get(field), field=field)
+    for field in ("detection_run_url", "workflow_url"):
+        _validate_evidence_url(payload.get(field), field=field)
+    for field in ("publication_commit", "artifact_sha256"):
+        value = _validate_metadata_value(payload.get(field), field=field)
+        if field == "publication_commit":
+            _validate_sha(value, field=field)
+        elif field == "artifact_sha256" and not re.fullmatch(r"[0-9a-f]{64}", value):
+            raise ValueError(f"artifact_sha256 is invalid in {path}")
+    return payload
+
+
+def _load_revocation(
+    repository_root: Path, identity: BaselineIdentity
+) -> dict[str, Any] | None:
+    # A later withdrawn event supersedes quarantine while both immutable records
+    # remain in Git history and in the current tree for audit.
+    for status in ("withdrawn", "quarantined"):
+        payload = _load_revocation_file(repository_root, identity, status)
+        if payload is not None:
+            return payload
+    return None
+
+
+def record_revocation(
+    repository_root: Path,
+    identity: BaselineIdentity,
+    *,
+    status: str,
+    reason: str,
+    detected_at: str,
+    detection_run_url: str,
+    actor: str,
+    workflow_url: str,
+    publication_commit: str,
+) -> Path:
+    """Write an immutable revocation record for one exact central baseline."""
+
+    identity = normalize_identity(identity)
+    if status not in REVOCATION_STATUSES:
+        raise ValueError(
+            f"status must be one of {sorted(REVOCATION_STATUSES)}, got {status!r}"
+        )
+    values = {
+        "reason": _validate_metadata_value(reason, field="reason"),
+        "detected_at": _validate_metadata_value(detected_at, field="detected_at"),
+        "detection_run_url": _validate_evidence_url(
+            detection_run_url, field="detection_run_url"
+        ),
+        "actor": _validate_metadata_value(actor, field="actor"),
+        "workflow_url": _validate_evidence_url(workflow_url, field="workflow_url"),
+        "publication_commit": _validate_sha(
+            publication_commit, field="publication_commit"
+        ),
+    }
+    relative_path = revocation_relative_path(identity, status)
+    existing = _load_revocation_file(repository_root, identity, status)
+    withdrawn = _load_revocation_file(repository_root, identity, "withdrawn")
+    if status == "quarantined" and withdrawn is not None:
+        raise ValueError(
+            "cannot quarantine an exact baseline after it has been withdrawn: "
+            f"{repository_root / revocation_relative_path(identity, 'withdrawn')}"
+        )
+    if _load_revocation(repository_root, identity) is None:
+        # Validate the complete active baseline before recording its withdrawal.
+        load_manifest(repository_root, identity, require_measurement=True)
+    baseline_dir = repository_root / baseline_relative_dir(identity)
+    manifest_path = baseline_dir / "baseline-metadata.json"
+    artifact_path = baseline_dir / "run_leaderboard.json"
+    if not manifest_path.is_file() or not artifact_path.is_file():
+        raise ValueError(f"cannot revoke unavailable exact baseline: {baseline_dir}")
+    manifest = _load_json_object(manifest_path)
+    artifact = manifest.get("artifact")
+    if not isinstance(artifact, dict):
+        raise ValueError(f"baseline artifact metadata is missing: {manifest_path}")
+    artifact_sha256 = str(artifact.get("sha256") or "").strip()
+    if not re.fullmatch(r"[0-9a-f]{64}", artifact_sha256):
+        raise ValueError(f"baseline artifact checksum is invalid: {manifest_path}")
+    if _sha256(artifact_path) != artifact_sha256:
+        raise ValueError(f"baseline artifact checksum mismatch: {artifact_path}")
+    if (repository_root / ".git").exists():
+        artifact_relative_path = (
+            baseline_relative_dir(identity).as_posix() + "/run_leaderboard.json"
+        )
+        publication = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repository_root),
+                "rev-list",
+                "-1",
+                "HEAD",
+                "--",
+                artifact_relative_path,
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        actual_publication_commit = publication.stdout.strip().lower()
+        if (
+            publication.returncode != 0
+            or actual_publication_commit != values["publication_commit"]
+        ):
+            raise ValueError(
+                "publication_commit does not match the commit that introduced "
+                f"{artifact_relative_path}: expected "
+                f"{actual_publication_commit or 'unavailable'}, got "
+                f"{values['publication_commit']}"
+            )
+    payload = {
+        "schema_version": REVOCATION_SCHEMA_VERSION,
+        "release_visibility_status": status,
+        "identity": asdict(identity),
+        "artifact_path": (
+            baseline_relative_dir(identity).as_posix() + "/run_leaderboard.json"
+        ),
+        "artifact_sha256": artifact_sha256,
+        **values,
+    }
+    path = repository_root / relative_path
+    if existing is not None:
+        if existing != payload:
+            raise ValueError(
+                f"revocation record already exists with different content: {path}"
+            )
+        return path
+    _reject_symlink_components(repository_root, relative_path)
+    _write_json(path, payload)
+    return path
 
 
 def _reject_symlink_components(
@@ -345,10 +538,24 @@ def store_baseline(
     provenance: BaselineProvenance,
     *,
     update_latest_pointer: bool = False,
+    measurement: dict[str, Any] | None = None,
 ) -> Path:
     identity = normalize_identity(identity)
     provenance = normalize_provenance(provenance)
-    validate_artifact(source, identity, provenance)
+    revocation = _load_revocation(repository_root, identity)
+    if revocation is not None:
+        raise ValueError(
+            "cannot store a revoked exact baseline: "
+            f"{repository_root / revocation_relative_path(identity)}"
+        )
+    artifact_payload = validate_artifact(source, identity, provenance)
+    if measurement is not None:
+        validate_measurement_block(
+            measurement,
+            artifact_metrics=artifact_payload.get("metrics"),
+            context=f"{source}: measurement",
+            require_publication_policy=True,
+        )
 
     relative_dir = baseline_relative_dir(identity)
     _reject_symlink_components(repository_root, relative_dir)
@@ -359,7 +566,7 @@ def store_baseline(
     _reject_symlink_components(repository_root, relative_dir / "baseline-metadata.json")
     artifact_sha256 = _sha256(source)
     expected_manifest = _manifest_payload(
-        identity, provenance, artifact_sha256=artifact_sha256
+        identity, provenance, artifact_sha256=artifact_sha256, measurement=measurement
     )
 
     if destination_dir.exists():
@@ -398,9 +605,19 @@ def store_baseline(
 
 
 def load_manifest(
-    repository_root: Path, identity: BaselineIdentity
+    repository_root: Path,
+    identity: BaselineIdentity,
+    *,
+    require_measurement: bool = False,
 ) -> tuple[Path, BaselineProvenance]:
     identity = normalize_identity(identity)
+    revocation = _load_revocation(repository_root, identity)
+    if revocation is not None:
+        status = revocation["release_visibility_status"]
+        raise ValueError(
+            f"exact central baseline is {status}: "
+            f"{repository_root / revocation_relative_path(identity, status)}"
+        )
     relative_dir = baseline_relative_dir(identity)
     _reject_symlink_components(repository_root, relative_dir / "run_leaderboard.json")
     _reject_symlink_components(repository_root, relative_dir / "baseline-metadata.json")
@@ -429,7 +646,16 @@ def load_manifest(
     expected_digest = str(artifact_metadata.get("sha256") or "").strip()
     if _sha256(artifact) != expected_digest:
         raise ValueError(f"baseline artifact checksum mismatch: {artifact}")
-    validate_artifact(artifact, identity, provenance)
+    artifact_payload = validate_artifact(artifact, identity, provenance)
+    if "measurement" in manifest:
+        validate_measurement_block(
+            manifest["measurement"],
+            artifact_metrics=artifact_payload.get("metrics"),
+            context=f"{manifest_path}: measurement",
+            require_publication_policy=True,
+        )
+    elif require_measurement:
+        raise ValueError(f"baseline measurement metadata is missing: {manifest_path}")
     return artifact, provenance
 
 
@@ -439,8 +665,11 @@ def fetch_baseline(
     identity: BaselineIdentity,
     *,
     expected_provenance: BaselineProvenance | None = None,
+    require_measurement: bool = False,
 ) -> Path:
-    artifact, provenance = load_manifest(repository_root, identity)
+    artifact, provenance = load_manifest(
+        repository_root, identity, require_measurement=require_measurement
+    )
     if expected_provenance is not None:
         expected = normalize_provenance(expected_provenance)
         if provenance != expected:
@@ -531,6 +760,7 @@ def publish_baseline(
     max_attempts: int = 5,
     writer_name: str = DEFAULT_WRITER_NAME,
     writer_email: str = DEFAULT_WRITER_EMAIL,
+    measurement: dict[str, Any] | None = None,
 ) -> str:
     identity = normalize_identity(identity)
     provenance = normalize_provenance(provenance)
@@ -541,6 +771,8 @@ def publish_baseline(
         raise ValueError("remote must be non-empty")
     if max_attempts < 1:
         raise ValueError("max_attempts must be at least 1")
+    if measurement is None:
+        raise ValueError("measurement metadata is required for central publication")
 
     verify_main_commit(
         target_git_repository,
@@ -585,6 +817,7 @@ def publish_baseline(
                 identity,
                 provenance,
                 update_latest_pointer=update_latest_pointer,
+                measurement=measurement,
             )
             paths_to_add = ["baselines"]
             if (checkout / "pointers").is_dir():
@@ -676,6 +909,13 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     store_parser.add_argument("--target-git-repository", type=Path, required=True)
     store_parser.add_argument("--main-ref", default="origin/main")
     store_parser.add_argument("--update-latest-pointer", action="store_true")
+    store_parser.add_argument(
+        "--measurement-file",
+        type=Path,
+        required=True,
+        help="measurement.json produced by perfgate-aggregate-runs; embedded into "
+        "the baseline manifest and cross-checked against the artifact metrics.",
+    )
     _add_identity_arguments(store_parser)
     _add_provenance_arguments(store_parser)
 
@@ -690,6 +930,19 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     _add_identity_arguments(validate_parser)
     _add_provenance_arguments(validate_parser)
 
+    revoke_parser = commands.add_parser("revoke")
+    revoke_parser.add_argument("--repository-root", type=Path, required=True)
+    revoke_parser.add_argument(
+        "--status", choices=sorted(REVOCATION_STATUSES), required=True
+    )
+    revoke_parser.add_argument("--reason", required=True)
+    revoke_parser.add_argument("--detected-at", required=True)
+    revoke_parser.add_argument("--detection-run-url", required=True)
+    revoke_parser.add_argument("--actor", required=True)
+    revoke_parser.add_argument("--workflow-url", required=True)
+    revoke_parser.add_argument("--publication-commit", required=True)
+    _add_identity_arguments(revoke_parser)
+
     publish_parser = commands.add_parser("publish")
     publish_parser.add_argument("--remote", required=True)
     publish_parser.add_argument("--branch", default=DEFAULT_BASELINE_BRANCH)
@@ -700,6 +953,13 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     publish_parser.add_argument("--max-attempts", type=int, default=5)
     publish_parser.add_argument("--writer-name", default=DEFAULT_WRITER_NAME)
     publish_parser.add_argument("--writer-email", default=DEFAULT_WRITER_EMAIL)
+    publish_parser.add_argument(
+        "--measurement-file",
+        type=Path,
+        required=True,
+        help="measurement.json produced by perfgate-aggregate-runs; embedded into "
+        "the baseline manifest and cross-checked against the artifact metrics.",
+    )
     _add_identity_arguments(publish_parser)
     _add_provenance_arguments(publish_parser)
     return parser.parse_args(argv)
@@ -709,7 +969,25 @@ def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     try:
         identity = _identity_from_args(args)
+        if args.command == "revoke":
+            print(
+                record_revocation(
+                    args.repository_root,
+                    identity,
+                    status=args.status,
+                    reason=args.reason,
+                    detected_at=args.detected_at,
+                    detection_run_url=args.detection_run_url,
+                    actor=args.actor,
+                    workflow_url=args.workflow_url,
+                    publication_commit=args.publication_commit,
+                )
+            )
+            return 0
         provenance = _provenance_from_args(args)
+        measurement: dict[str, Any] | None = None
+        if getattr(args, "measurement_file", None) is not None:
+            measurement = _load_json_object(args.measurement_file)
         if args.command == "store":
             verify_main_commit(
                 args.target_git_repository,
@@ -723,6 +1001,7 @@ def main(argv: list[str] | None = None) -> int:
                 identity,
                 provenance,
                 update_latest_pointer=args.update_latest_pointer,
+                measurement=measurement,
             )
             print(destination)
             return 0
@@ -733,11 +1012,14 @@ def main(argv: list[str] | None = None) -> int:
                     args.output,
                     identity,
                     expected_provenance=provenance,
+                    require_measurement=True,
                 )
             )
             return 0
         if args.command == "validate":
-            _artifact, actual_provenance = load_manifest(args.repository_root, identity)
+            _artifact, actual_provenance = load_manifest(
+                args.repository_root, identity, require_measurement=True
+            )
             if actual_provenance != normalize_provenance(provenance):
                 raise ValueError("exact central baseline provenance mismatch")
             print("Central perfgate baseline is valid.")
@@ -756,6 +1038,7 @@ def main(argv: list[str] | None = None) -> int:
                     max_attempts=args.max_attempts,
                     writer_name=args.writer_name,
                     writer_email=args.writer_email,
+                    measurement=measurement,
                 )
             )
             return 0
