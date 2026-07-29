@@ -1,6 +1,11 @@
-# issue #95 Layer 1 + Layer 2 (mock) — 验证方案
+# issue #95 Layer 1 + Layer 2 (mock) + Layer 3 (跨仓库) — 验证方案
 
-> 本文档记录 `feat/pr_95` 已交付的 Layer 1（判定逻辑 + CLI）和 Layer 2 mock 模式（CI 接线骨架）的验证方法，供后续 #103 就绪接入 real 模式时回归复用。
+> 本文档记录 `feat/pr_95` 已交付的三层验证方法：
+> - Layer 1（判定逻辑 + CLI）
+> - Layer 2 mock 模式（CI 接线骨架）
+> - Layer 3（跨仓库 PR 模板 + label + repository_dispatch 触发）
+>
+> 供后续 #103 就绪接入 real 模式时回归复用。
 
 ## 已交付物
 
@@ -15,6 +20,10 @@
 | CI workflow（real 骨架） | `.github/workflows/merge-gate.yml` | `real-merge-gate-check` job：阻塞于 #103，骨架就绪 |
 | 本地模拟脚本 | `scripts/simulate_merge_gate_workflow.sh` | 不需 GitHub Actions 跑全套场景 |
 | mock 生成器 TDD | `tests/test_mock_merge_gate_artifacts.py` | 22 个测试覆盖 10 场景 |
+| 跨仓库触发（benchmark） | `merge-gate.yml` 加 `repository_dispatch` | 接收 core/Ascend 的 PR 事件触发判定 |
+| 共享 PR 模板 partial | `.github/perf-evidence-checklist.md` | 增强建议 #8：单点维护避免 core/Ascend 模板漂移 |
+| core PR 模板 + label + workflow | vllm-hust `feat/pr_95` (d099008a0) | PR 模板加 perf-evidence section + 6 个受控 label + repository_dispatch 触发 |
+| Ascend PR 模板 + label + workflow | vllm-ascend-hust `feat/pr_95` (513c15ef) | 同 core |
 
 ## 判定管线（10 步，fail-closed）
 
@@ -145,9 +154,104 @@ real-mode job 骨架已在 workflow 中（`real-merge-gate-check`），阻塞于
 5. docs-only label 跳过
 6. CI 日志打印判定详情
 
-## C. 跨仓库验证（Layer 3，待用户确认后执行）
+## C. 跨仓库验证（Layer 3，已交付）
 
-core/Ascend 仓库的 PR 模板 + required check 注册涉及跨仓库改动，按用户要求需先确认。
+### C.1 已交付物（3 个仓库）
+
+| 仓库 | 分支 | commit | 文件 |
+|------|------|--------|------|
+| vllm-hust-benchmark | feat/pr_95 | (本仓库) | `.github/perf-evidence-checklist.md`（共享 partial）+ `merge-gate.yml` 加 `repository_dispatch` |
+| vllm-hust（core） | feat/pr_95 | d099008a0 | `.github/PULL_REQUEST_TEMPLATE.md` + `scripts/setup_perf_labels.sh` + `.github/workflows/merge-gate-check.yml` |
+| vllm-ascend-hust | feat/pr_95 | 513c15ef | 同 core |
+
+### C.2 跨仓库触发流程
+
+```
+core/Ascend PR (opened/synchronize/reopened/labeled)
+    │
+    ▼
+core/Ascend workflow: merge-gate-check.yml
+    │  用 BENCHMARK_REPO_TOKEN 向 benchmark 仓库发 repository_dispatch
+    │  payload: pr_repo, pr_number, pr_head_sha, pr_base_sha, pr_labels
+    ▼
+benchmark workflow: merge-gate.yml (repository_dispatch 触发)
+    │  mock 模式: 生成 mock artifact + 判定
+    │  real 模式: #103 就绪后跑真实 paired benchmark + 判定
+    │  输出 merge-gate-decision.json
+    ▼
+回写 check status 到 core/Ascend PR（待 #103 后接入 GitHub Checks API）
+```
+
+### C.3 手动部署步骤（手把手）
+
+#### 步骤 1：创建 PAT 并配置 secret
+
+1. 在 GitHub 创建 PAT（fine-grained），权限：
+   - `vLLM-HUST/vllm-hust-benchmark`：Actions (write)
+   - `vLLM-HUST/vllm-hust`：Contents (read), Pull requests (write)
+   - `vLLM-HUST/vllm-ascend-hust`：Contents (read), Pull requests (write)
+
+2. 在 core 和 Ascend 仓库分别添加 secret：
+   ```
+   仓库 Settings → Secrets and variables → Actions → New repository secret
+   Name: BENCHMARK_REPO_TOKEN
+   Value: <上面创建的 PAT>
+   ```
+
+#### 步骤 2：创建受控 label
+
+```bash
+# 在 core 仓库
+cd /path/to/vllm-hust
+gh auth login  # 确保已登录
+bash scripts/setup_perf_labels.sh
+
+# 在 Ascend 仓库
+cd /path/to/vllm-ascend-hust
+bash scripts/setup_perf_labels.sh
+```
+
+验证：`gh label list | grep perf-skip` 应看到 3 个 perf-skip label + 3 个状态 label。
+
+#### 步骤 3：注册 required check
+
+在 core 和 Ascend 仓库的 branch protection：
+```
+Settings → Branches → main → Edit → Require status checks to pass before merging
+  Required status checks: Merge Gate Check / trigger-benchmark-merge-gate
+```
+
+#### 步骤 4：推送分支 + 开 PR
+
+```bash
+# core
+cd /path/to/vllm-hust && git push -u origin feat/pr_95
+
+# Ascend
+cd /path/to/vllm-ascend-hust && git push -u origin feat/pr_95
+
+# benchmark
+cd /path/to/vllm-hust-benchmark && git push -u origin feat/pr_95
+```
+
+### C.4 端到端演练（issue §7.2，需 #103 就绪后做）
+
+| 演练 | 仓库 | 操作 | 预期 |
+|------|------|------|------|
+| 1 | core | 开无证据 PR | check fail，不能合并 |
+| 2 | core | 开 PR 带配置漂移 artifact | check fail |
+| 3 | core | 开 PR 带合规 14B evidence | check pass，可合并 |
+| 4 | Ascend | 同上三组 | 同上 |
+| 5 | 任一 | 开 PR 带 perf-skip:docs-only label | check skip，可合并 |
+| 6 | 任一 | 查看 CI 日志 | 含 artifact/workload/model/hardware/server params |
+
+### C.5 已知限制
+
+- **check status 回写**：当前 repository_dispatch 触发后，benchmark 仓库的判定结果
+  还不能自动回写到 core/Ascend 的 PR check status。需要接入 GitHub Checks API
+  （`POST /repos/{owner}/{repo}/check-runs`）。这是 Layer 3 的后续增强，不阻塞
+  判定逻辑本身。
+- **real 模式**：阻塞于 #103（自托管 Ascend runner）。mock 模式可先验证接线。
 
 ## 已知阻塞
 
