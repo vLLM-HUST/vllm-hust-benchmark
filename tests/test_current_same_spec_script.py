@@ -243,3 +243,73 @@ def test_current_same_spec_runner_probe_bypasses_proxy_and_checks_ping() -> None
     assert "set -e" in probe_block
     assert "readiness probe failed:" in probe_block
     assert "curl " not in probe_block
+
+
+def test_current_same_spec_runner_declares_perfgate_measurement_knobs() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    assert "PERFGATE_WARMUP_RUNS=${PERFGATE_WARMUP_RUNS:-0}" in script
+    assert "PERFGATE_MEASURED_RUNS=${PERFGATE_MEASURED_RUNS:-1}" in script
+    assert "PERFGATE_AGGREGATION=${PERFGATE_AGGREGATION:-primary-median-run}" in script
+    # Fail-closed validation of the knobs.
+    assert 'if ! [[ "$PERFGATE_WARMUP_RUNS" =~ ^[0-9]+$ ]]' in script
+    assert 'if ! [[ "$PERFGATE_MEASURED_RUNS" =~ ^[1-9][0-9]*$ ]]' in script
+    assert "if ((PERFGATE_MEASURED_RUNS % 2 == 0))" in script
+    assert 'if [[ "$PERFGATE_AGGREGATION" != "primary-median-run" ]]' in script
+
+
+def test_current_same_spec_runner_perfgate_loop_reuses_live_server() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    loop_block = script[
+        script.index(
+            'if [[ "$PERFGATE_WARMUP_RUNS" -eq 0 && "$PERFGATE_MEASURED_RUNS" -eq 1 ]]'
+        ) :
+    ]
+    loop_block = loop_block[: loop_block.index("EXPORT_ARGS=(")]
+
+    # Warmup runs are executed, kept for audit, and excluded from aggregation.
+    assert "warmup-$warmup_index/raw_benchmark_result.json" in loop_block
+    assert "discarded from aggregation" in loop_block
+    assert 'WARMUP_RAW_RESULT_FILES+=("$RAW_RESULT_FILE")' in loop_block
+    # Measured runs land in per-run directories and are collected in order.
+    assert '"$PERFGATE_RUNS_DIR/$run_index/raw_benchmark_result.json"' in loop_block
+    assert 'MEASURED_RAW_RESULT_FILES+=("$RAW_RESULT_FILE")' in loop_block
+    # All runs reuse the already-started server: no server start inside the loop.
+    assert "run_server_command" not in loop_block
+    assert "wait_for_server" not in loop_block
+    # Any failed run aborts with its original exit code (86 passthrough).
+    assert 'exit "$client_status"' in loop_block
+    # Legacy raw-result path keeps pointing at measured run 1.
+    assert (
+        'cp -f "$RAW_RESULT_FILE" "$RESULT_DIR/raw_benchmark_result.json"' in loop_block
+    )
+
+
+def test_current_same_spec_runner_aggregates_measured_runs_after_export() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    export_index = script.index("export-leaderboard-artifact \\")
+    aggregate_index = script.index("perfgate-aggregate-runs \\")
+    assert aggregate_index > export_index
+
+    aggregate_block = script[
+        script.index(
+            'if [[ "$PERFGATE_WARMUP_RUNS" -gt 0 || "$PERFGATE_MEASURED_RUNS" -gt 1 ]]'
+        ) :
+    ]
+    aggregate_block = aggregate_block[
+        : aggregate_block.index("exported leaderboard artifact")
+    ]
+
+    assert '--template "$ARTIFACT_DIR/run_leaderboard.json"' in aggregate_block
+    assert '--warmup-runs "$PERFGATE_WARMUP_RUNS"' in aggregate_block
+    assert '--aggregation "$PERFGATE_AGGREGATION"' in aggregate_block
+    assert '--output "$ARTIFACT_DIR/run_leaderboard.json"' in aggregate_block
+    assert '--measurement-out "$ARTIFACT_DIR/measurement.json"' in aggregate_block
+    assert (
+        'AGGREGATE_ARGS+=(--warmup-raw-result "$warmup_raw_result")' in aggregate_block
+    )
+    assert (
+        'AGGREGATE_ARGS+=(--run-raw-result "$measured_raw_result")' in aggregate_block
+    )

@@ -510,13 +510,10 @@ def test_run_client_command_prepares_single_card_runtime_for_offline_benchmarks(
     ]
 
 
-def test_run_client_command_retries_with_enforce_eager_on_weak_ref_failure(
+def test_run_client_command_fails_closed_on_weak_ref_failure(
     tmp_path: Path,
 ) -> None:
     first_args = tmp_path / "offline-first-args.txt"
-    retry_args = tmp_path / "offline-retry-args.txt"
-    first_attempt = tmp_path / "offline-first-attempt.txt"
-
     result = _run_bash(
         _source_run_client_functions(
             f"""
@@ -542,27 +539,22 @@ def test_run_client_command_retries_with_enforce_eager_on_weak_ref_failure(
             run_in_official_runtime() {{
                 local pythonpath_prefix=$1
                 shift
-                if [[ ! -f {shlex.quote(str(first_attempt))} ]]; then
-                    printf '%s\n' "$@" > {shlex.quote(str(first_args))}
-                    printf '1\n' > {shlex.quote(str(first_attempt))}
-                    cat <<'EOF' >&2
+                printf '%s\n' "$@" > {shlex.quote(str(first_args))}
+                cat <<'EOF' >&2
 AttributeError: '_OpNamespace' '_C_ascend' object has no attribute 'weak_ref_tensor'
 EOF
-                    return 1
-                fi
-
-                printf '%s\n' "$@" > {shlex.quote(str(retry_args))}
+                return 1
             }}
 
             run_client_command
             """
-        )
+        ),
+        check=False,
     )
 
-    assert result.returncode == 0
+    assert result.returncode != 0
     assert "--enforce-eager" not in first_args.read_text(encoding="utf-8").splitlines()
-    assert "--enforce-eager" in retry_args.read_text(encoding="utf-8").splitlines()
-    assert "retrying with --enforce-eager" in result.stderr
+    assert "weak_ref_tensor" in result.stderr
 
 
 def test_configure_single_card_ascend_device_derives_from_generic_visible_devices() -> (
@@ -984,88 +976,13 @@ EOF
     assert result.returncode == 0
 
 
-def test_should_force_eager_for_offline_benchmark_when_aclgraph_weak_ref_is_missing() -> (
-    None
-):
-    result = _run_bash(
-        _source_run_official_version_functions(
-            """
-            BENCHMARK_TYPE=throughput
-
-            official_runtime_supports_aclgraph_weak_ref_tensor() {
-                return 1
-            }
-
-            should_force_eager_for_offline_benchmark
-            status=$?
-            printf 'status=%s\n' "$status"
-            [[ "$status" == '0' ]]
-            """
-        ),
-        check=False,
-    )
-
-    assert result.returncode == 0
-    combined_output = result.stdout + result.stderr
-    assert "forcing --enforce-eager" in combined_output
-
-
-def test_official_runtime_supports_aclgraph_weak_ref_tensor_preserves_probe_status() -> (
-    None
-):
-    result = _run_bash(
-        _source_run_official_version_functions(
-            """
-            run_in_official_runtime_python() {
-                return 3
-            }
-
-            if official_runtime_supports_aclgraph_weak_ref_tensor; then
-                echo 'status=unexpected-success'
-            else
-                echo "status=$?"
-            fi
-            """
-        ),
-        check=False,
-    )
-
-    assert result.returncode == 0
-    assert result.stdout.splitlines() == ["status=1"]
-
-
-def test_should_force_eager_for_server_benchmark_when_aclgraph_weak_ref_is_missing() -> (
-    None
-):
-    result = _run_bash(
-        _source_run_official_version_functions(
-            """
-            BENCHMARK_TYPE=serve
-
-            official_runtime_supports_aclgraph_weak_ref_tensor() {
-                return 1
-            }
-
-            should_force_eager_for_server_benchmark
-            status=$?
-            printf 'status=%s\n' "$status"
-            [[ "$status" == '0' ]]
-            """
-        ),
-        check=False,
-    )
-
-    assert result.returncode == 0
-    combined_output = result.stdout + result.stderr
-    assert "forcing --enforce-eager" in combined_output
-
-
-def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested(
+def test_normalized_server_parameters_json_preserves_graph_mode(
     tmp_path: Path,
 ) -> None:
     same_spec_file = tmp_path / "resolved_same_spec.json"
     same_spec_file.write_text(
-        '{"resolved_server_parameters":{"model":"foo/bar","port":8000}}',
+        '{"resolved_server_parameters":{"model":"foo/bar","port":8000,'
+        '"enforce_eager":""}}',
         encoding="utf-8",
     )
 
@@ -1076,10 +993,6 @@ def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested
             HOST_PYTHON_BIN={shlex.quote(sys.executable)}
             BENCHMARK_TYPE=serve
             SAME_SPEC_FILE={shlex.quote(str(same_spec_file))}
-
-            official_runtime_supports_aclgraph_weak_ref_tensor() {{
-                return 1
-            }}
 
             server_json=$(normalized_server_parameters_json)
             printf '%s\n' "$server_json"

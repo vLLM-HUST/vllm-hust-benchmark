@@ -223,6 +223,402 @@ def test_store_is_idempotent_but_refuses_overwrite(tmp_path: Path) -> None:
         perfgate_baselines.store_baseline(central, artifact, _identity(), _provenance())
 
 
+def _measurement(
+    *,
+    throughputs: tuple[float, float, float] = (90.0, 100.0, 110.0),
+    ttft: float = 50.0,
+    tbt: float = 10.0,
+) -> dict:
+    ordered_run_indices = sorted(
+        range(1, len(throughputs) + 1),
+        key=lambda index: (throughputs[index - 1], index),
+    )
+    selected_position = len(ordered_run_indices) // 2 + 1
+    selected_run_index = ordered_run_indices[selected_position - 1]
+    return {
+        "schema_version": "perfgate-measurement/v2",
+        "strategy": "warmup+primary-median-run",
+        "warmup_runs": 1,
+        "measured_runs": 3,
+        "aggregation": "primary-median-run",
+        "selection": {
+            "primary_metric": "throughput_tps",
+            "sort_direction": "ascending",
+            "secondary_sort_key": "run_index",
+            "ordered_run_indices": ordered_run_indices,
+            "selected_position": selected_position,
+            "selected_run_index": selected_run_index,
+            "selected_raw_result_sha256": f"{selected_run_index:064x}",
+        },
+        "warmup": [
+            {
+                "run_index": 1,
+                "raw_result_sha256": "b" * 64,
+            }
+        ],
+        "per_run": [
+            {
+                "run_index": index,
+                "raw_result_sha256": f"{index:064x}",
+                "metrics": {
+                    "throughput_tps": value,
+                    "ttft_ms": ttft,
+                    "tbt_ms": tbt,
+                    "error_rate": 0.0,
+                    "peak_mem_mb": None,
+                },
+            }
+            for index, value in enumerate(throughputs, start=1)
+        ],
+    }
+
+
+def test_store_embeds_measurement_and_round_trips_manifest(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    # Artifact metrics match the complete middle run after throughput sorting.
+    _write_artifact(artifact)
+
+    destination = perfgate_baselines.store_baseline(
+        central,
+        artifact,
+        _identity(),
+        _provenance(),
+        measurement=_measurement(),
+    )
+    manifest = json.loads(
+        (destination.parent / "baseline-metadata.json").read_text(encoding="utf-8")
+    )
+    assert manifest["measurement"]["strategy"] == "warmup+primary-median-run"
+    assert manifest["measurement"]["selection"]["selected_run_index"] == 2
+    assert manifest["measurement"]["measured_runs"] == 3
+
+    # load_manifest validates the measurement block against the artifact.
+    loaded, _provenance_out = perfgate_baselines.load_manifest(central, _identity())
+    assert loaded == destination
+
+
+def test_store_rejects_selected_run_metric_mismatch(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+
+    with pytest.raises(ValueError, match="does not match selected run"):
+        perfgate_baselines.store_baseline(
+            central,
+            artifact,
+            _identity(),
+            _provenance(),
+            measurement=_measurement(throughputs=(80.0, 90.0, 95.0)),
+        )
+
+
+def test_store_rejects_legacy_per_metric_median_measurement(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    measurement = _measurement()
+    measurement.pop("schema_version")
+    measurement.pop("selection")
+    measurement["strategy"] = "warmup+median"
+    measurement["aggregation"] = "median"
+
+    with pytest.raises(ValueError, match="schema_version"):
+        perfgate_baselines.store_baseline(
+            central,
+            artifact,
+            _identity(),
+            _provenance(),
+            measurement=measurement,
+        )
+
+
+def test_store_rejects_measurement_below_publication_policy(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    measurement = _measurement()
+    measurement["warmup_runs"] = 0
+    measurement["warmup"] = []
+
+    with pytest.raises(ValueError, match="publication requires at least"):
+        perfgate_baselines.store_baseline(
+            central,
+            artifact,
+            _identity(),
+            _provenance(),
+            measurement=measurement,
+        )
+
+
+def test_store_with_measurement_is_idempotent_but_refuses_changes(
+    tmp_path: Path,
+) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+
+    first = perfgate_baselines.store_baseline(
+        central, artifact, _identity(), _provenance(), measurement=_measurement()
+    )
+    second = perfgate_baselines.store_baseline(
+        central, artifact, _identity(), _provenance(), measurement=_measurement()
+    )
+    assert first == second
+
+    changed = _measurement()
+    changed["warmup_runs"] = 2
+    changed["warmup"].append(
+        {
+            "run_index": 2,
+            "raw_result_sha256": "c" * 64,
+        }
+    )
+    with pytest.raises(ValueError, match="different content"):
+        perfgate_baselines.store_baseline(
+            central, artifact, _identity(), _provenance(), measurement=changed
+        )
+
+
+def test_manifest_without_measurement_remains_valid(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+
+    destination = perfgate_baselines.store_baseline(
+        central, artifact, _identity(), _provenance()
+    )
+    manifest = json.loads(
+        (destination.parent / "baseline-metadata.json").read_text(encoding="utf-8")
+    )
+    assert "measurement" not in manifest
+    loaded, _provenance_out = perfgate_baselines.load_manifest(central, _identity())
+    assert loaded == destination
+    with pytest.raises(ValueError, match="measurement metadata is missing"):
+        perfgate_baselines.load_manifest(central, _identity(), require_measurement=True)
+
+
+def test_load_manifest_rejects_corrupt_measurement_block(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+
+    destination = perfgate_baselines.store_baseline(
+        central, artifact, _identity(), _provenance(), measurement=_measurement()
+    )
+    manifest_path = destination.parent / "baseline-metadata.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["measurement"]["per_run"][0]["metrics"]["throughput_tps"] = 500.0
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    with pytest.raises(ValueError, match="measurement"):
+        perfgate_baselines.load_manifest(central, _identity())
+
+
+@pytest.mark.parametrize("status", ["quarantined", "withdrawn"])
+def test_revoked_baseline_is_retained_but_consumer_rejects_it(
+    tmp_path: Path, status: str
+) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    destination = perfgate_baselines.store_baseline(
+        central,
+        artifact,
+        _identity(),
+        _provenance(),
+        measurement=_measurement(),
+    )
+
+    revocation = perfgate_baselines.record_revocation(
+        central,
+        _identity(),
+        status=status,
+        reason="post-publication quality failure",
+        detected_at="2026-07-29T12:00:00Z",
+        detection_run_url="https://github.example/runs/detection",
+        actor="baseline-owner",
+        workflow_url="https://github.example/runs/revocation",
+        publication_commit="9" * 40,
+    )
+    payload = json.loads(revocation.read_text(encoding="utf-8"))
+    assert payload["release_visibility_status"] == status
+    assert payload["artifact_sha256"]
+    assert payload["actor"] == "baseline-owner"
+    assert destination.is_file()
+
+    with pytest.raises(ValueError, match=f"exact central baseline is {status}"):
+        perfgate_baselines.load_manifest(central, _identity(), require_measurement=True)
+    with pytest.raises(ValueError, match="cannot store a revoked exact baseline"):
+        perfgate_baselines.store_baseline(
+            central,
+            artifact,
+            _identity(),
+            _provenance(),
+            measurement=_measurement(),
+        )
+
+
+def test_revocation_record_is_immutable_and_idempotent(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    perfgate_baselines.store_baseline(
+        central,
+        artifact,
+        _identity(),
+        _provenance(),
+        measurement=_measurement(),
+    )
+    arguments = {
+        "status": "quarantined",
+        "reason": "quality failure",
+        "detected_at": "2026-07-29T12:00:00Z",
+        "detection_run_url": "https://github.example/runs/detection",
+        "actor": "baseline-owner",
+        "workflow_url": "https://github.example/runs/revocation",
+        "publication_commit": "9" * 40,
+    }
+
+    first = perfgate_baselines.record_revocation(central, _identity(), **arguments)
+    second = perfgate_baselines.record_revocation(central, _identity(), **arguments)
+    assert first == second
+
+    with pytest.raises(ValueError, match="different content"):
+        perfgate_baselines.record_revocation(
+            central, _identity(), **dict(arguments, actor="different-actor")
+        )
+
+    withdrawn = perfgate_baselines.record_revocation(
+        central,
+        _identity(),
+        **dict(
+            arguments,
+            status="withdrawn",
+            reason="formal withdrawal completed",
+            workflow_url="https://github.example/runs/withdrawal",
+        ),
+    )
+    assert withdrawn != first
+    with pytest.raises(ValueError, match="exact central baseline is withdrawn"):
+        perfgate_baselines.load_manifest(central, _identity())
+    with pytest.raises(ValueError, match="after it has been withdrawn"):
+        perfgate_baselines.record_revocation(
+            central,
+            _identity(),
+            **dict(
+                arguments,
+                status="quarantined",
+                reason="late quarantine must be rejected",
+            ),
+        )
+
+
+def test_revoke_cli_writes_a_consumer_blocking_record(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    perfgate_baselines.store_baseline(
+        central,
+        artifact,
+        _identity(),
+        _provenance(),
+        measurement=_measurement(),
+    )
+
+    result = perfgate_baselines.main(
+        [
+            "revoke",
+            "--repository-root",
+            str(central),
+            "--status",
+            "quarantined",
+            "--reason",
+            "quality failure",
+            "--detected-at",
+            "2026-07-29T12:00:00Z",
+            "--detection-run-url",
+            "https://github.example/runs/detection",
+            "--actor",
+            "baseline-owner",
+            "--workflow-url",
+            "https://github.example/runs/revocation",
+            "--publication-commit",
+            "9" * 40,
+            "--target-repository",
+            _identity().target_repository,
+            "--target-sha",
+            _identity().target_sha,
+            "--scenario",
+            _identity().scenario,
+            "--spec-id",
+            _identity().spec_id,
+            "--spec-hash",
+            _identity().spec_hash,
+        ]
+    )
+
+    assert result == 0
+    with pytest.raises(ValueError, match="exact central baseline is quarantined"):
+        perfgate_baselines.load_manifest(central, _identity())
+
+
+def test_revocation_verifies_publication_commit_in_git_checkout(
+    tmp_path: Path,
+) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    _git("init", "-b", "benchmark-baselines", cwd=central)
+    _git("config", "user.name", "Test User", cwd=central)
+    _git("config", "user.email", "test@example.com", cwd=central)
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    perfgate_baselines.store_baseline(
+        central,
+        artifact,
+        _identity(),
+        _provenance(),
+        measurement=_measurement(),
+    )
+    _git("add", "baselines", cwd=central)
+    _git("commit", "-m", "publish baseline", cwd=central)
+    publication_commit = _git("rev-parse", "HEAD", cwd=central)
+    arguments = {
+        "status": "quarantined",
+        "reason": "quality failure",
+        "detected_at": "2026-07-29T12:00:00Z",
+        "detection_run_url": "https://github.example/runs/detection",
+        "actor": "baseline-owner",
+        "workflow_url": "https://github.example/runs/revocation",
+    }
+
+    with pytest.raises(ValueError, match="publication_commit does not match"):
+        perfgate_baselines.record_revocation(
+            central,
+            _identity(),
+            publication_commit="8" * 40,
+            **arguments,
+        )
+    perfgate_baselines.record_revocation(
+        central,
+        _identity(),
+        publication_commit=publication_commit,
+        **arguments,
+    )
+
+
 def test_store_rejects_spec_and_companion_mismatch(tmp_path: Path) -> None:
     central = tmp_path / "central"
     central.mkdir()
@@ -353,6 +749,11 @@ def test_store_cli_requires_target_sha_on_main(tmp_path: Path) -> None:
     _write_artifact(artifact, identity=identity)
     central = tmp_path / "central"
     central.mkdir()
+    measurement = tmp_path / "measurement.json"
+    measurement.write_text(
+        json.dumps(_measurement(), indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
     common = [
         "store",
@@ -360,6 +761,8 @@ def test_store_cli_requires_target_sha_on_main(tmp_path: Path) -> None:
         str(central),
         "--source",
         str(artifact),
+        "--measurement-file",
+        str(measurement),
         "--target-git-repository",
         str(target),
         "--main-ref",
@@ -519,6 +922,7 @@ def test_publish_bootstraps_updates_and_is_idempotent(tmp_path: Path) -> None:
         identity,
         provenance,
         update_latest_pointer=True,
+        measurement=_measurement(),
     )
     second = perfgate_baselines.publish_baseline(
         str(remote),
@@ -529,6 +933,7 @@ def test_publish_bootstraps_updates_and_is_idempotent(tmp_path: Path) -> None:
         identity,
         provenance,
         update_latest_pointer=True,
+        measurement=_measurement(),
     )
 
     assert first.startswith("published:")
@@ -536,6 +941,26 @@ def test_publish_bootstraps_updates_and_is_idempotent(tmp_path: Path) -> None:
     assert _git(
         "ls-remote", "--heads", str(remote), "benchmark-baselines", cwd=tmp_path
     )
+
+
+def test_publish_requires_measurement_metadata(tmp_path: Path) -> None:
+    target = tmp_path / "target"
+    target_sha = _commit_target_main(target)
+    identity = _identity(target_sha=target_sha)
+    provenance = _provenance(vllm_hust_sha=target_sha)
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact, identity=identity)
+
+    with pytest.raises(ValueError, match="measurement metadata is required"):
+        perfgate_baselines.publish_baseline(
+            "unused-remote",
+            "benchmark-baselines",
+            artifact,
+            target,
+            "main",
+            identity,
+            provenance,
+        )
 
 
 def test_publish_retries_non_fast_forward_push(
@@ -587,6 +1012,7 @@ def test_publish_retries_non_fast_forward_push(
         identity,
         provenance,
         max_attempts=2,
+        measurement=_measurement(),
     )
 
     assert failed_once is True
