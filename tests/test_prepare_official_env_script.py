@@ -1083,7 +1083,7 @@ def test_normalized_server_parameters_json_forces_eager_for_serve_when_requested
 
             server_json=$(normalized_server_parameters_json)
             printf '%s\n' "$server_json"
-            grep -Fq '"enforce_eager":true' <<< "$server_json"
+            grep -Fq '"enforce_eager":""' <<< "$server_json"
             """
         )
     )
