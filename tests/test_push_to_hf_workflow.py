@@ -32,3 +32,15 @@ def test_submission_push_keeps_the_aggregation_path() -> None:
     assert "steps.resolve-submissions.outputs.count != '0'" in workflow_text
     assert 'if [[ "$SKIP_AGGREGATION" != "true" ]]; then' in workflow_text
     assert 'submission_args+=(--submission-dir "$submission_dir")' in workflow_text
+
+
+def test_workflow_does_not_use_post_upload_trend_gate() -> None:
+    workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
+
+    assert "validate_public_snapshot_trend_admission" in (
+        REPO_ROOT / "src/vllm_hust_benchmark/integration.py"
+    ).read_text(encoding="utf-8")
+    assert "post-sync gate" not in workflow_text
+    assert workflow_text.index(
+        "Sync submissions into HF leaderboard snapshots"
+    ) < workflow_text.index("Verify HF snapshots match GitHub canonical snapshots")
