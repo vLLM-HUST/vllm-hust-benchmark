@@ -1233,6 +1233,9 @@ def validate_public_snapshot_trend_admission(data_dir: Path) -> None:
         except (FileNotFoundError, OSError, ValueError) as exc:
             raise ValueError(f"invalid public snapshot {path}: {exc}") from exc
 
+    if not entries:
+        raise ValueError("public leaderboard snapshots contain no entries")
+
     report = validate_entries(entries)
     for decision in report.decisions:
         print(f"  {decision.status:12} {decision.entry_id}: {decision.reason}")
@@ -1264,6 +1267,7 @@ def upload_to_huggingface(
 
     try:
         validate_aggregated_leaderboard_outputs(data_dir)
+        validate_public_snapshot_trend_admission(data_dir)
         upload_leaderboard_to_hf(
             data_dir=data_dir,
             repo_id=repo_id,
