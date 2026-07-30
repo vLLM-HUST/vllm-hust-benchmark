@@ -250,11 +250,12 @@ def test_current_same_spec_runner_declares_perfgate_measurement_knobs() -> None:
 
     assert "PERFGATE_WARMUP_RUNS=${PERFGATE_WARMUP_RUNS:-0}" in script
     assert "PERFGATE_MEASURED_RUNS=${PERFGATE_MEASURED_RUNS:-1}" in script
-    assert "PERFGATE_AGGREGATION=${PERFGATE_AGGREGATION:-median}" in script
+    assert "PERFGATE_AGGREGATION=${PERFGATE_AGGREGATION:-primary-median-run}" in script
     # Fail-closed validation of the knobs.
     assert 'if ! [[ "$PERFGATE_WARMUP_RUNS" =~ ^[0-9]+$ ]]' in script
     assert 'if ! [[ "$PERFGATE_MEASURED_RUNS" =~ ^[1-9][0-9]*$ ]]' in script
-    assert 'if [[ "$PERFGATE_AGGREGATION" != "median" ]]' in script
+    assert "if ((PERFGATE_MEASURED_RUNS % 2 == 0))" in script
+    assert 'if [[ "$PERFGATE_AGGREGATION" != "primary-median-run" ]]' in script
 
 
 def test_current_same_spec_runner_perfgate_loop_reuses_live_server() -> None:

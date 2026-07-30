@@ -544,8 +544,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
     perfgate_aggregate_parser = subparsers.add_parser(
         "perfgate-aggregate-runs",
-        help="Aggregate repeated perfgate measured runs (per-metric median) into "
-        "one run_leaderboard.json and emit a measurement.json strategy record.",
+        help="Sort measured runs by throughput and select the middle run for one "
+        "run_leaderboard.json and emit a measurement.json strategy record.",
     )
     perfgate_measurement.add_aggregate_runs_arguments(perfgate_aggregate_parser)
 

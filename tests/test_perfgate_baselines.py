@@ -229,11 +229,27 @@ def _measurement(
     ttft: float = 50.0,
     tbt: float = 10.0,
 ) -> dict:
+    ordered_run_indices = sorted(
+        range(1, len(throughputs) + 1),
+        key=lambda index: (throughputs[index - 1], index),
+    )
+    selected_position = len(ordered_run_indices) // 2 + 1
+    selected_run_index = ordered_run_indices[selected_position - 1]
     return {
-        "strategy": "warmup+median",
+        "schema_version": "perfgate-measurement/v2",
+        "strategy": "warmup+primary-median-run",
         "warmup_runs": 1,
         "measured_runs": 3,
-        "aggregation": "median",
+        "aggregation": "primary-median-run",
+        "selection": {
+            "primary_metric": "throughput_tps",
+            "sort_direction": "ascending",
+            "secondary_sort_key": "run_index",
+            "ordered_run_indices": ordered_run_indices,
+            "selected_position": selected_position,
+            "selected_run_index": selected_run_index,
+            "selected_raw_result_sha256": f"{selected_run_index:064x}",
+        },
         "warmup": [
             {
                 "run_index": 1,
@@ -243,7 +259,7 @@ def _measurement(
         "per_run": [
             {
                 "run_index": index,
-                "raw_result_sha256": "a" * 64,
+                "raw_result_sha256": f"{index:064x}",
                 "metrics": {
                     "throughput_tps": value,
                     "ttft_ms": ttft,
@@ -261,7 +277,7 @@ def test_store_embeds_measurement_and_round_trips_manifest(tmp_path: Path) -> No
     central = tmp_path / "central"
     central.mkdir()
     artifact = tmp_path / "run_leaderboard.json"
-    # Artifact metrics: throughput=100, ttft=50, tbt=10 (matches medians).
+    # Artifact metrics match the complete middle run after throughput sorting.
     _write_artifact(artifact)
 
     destination = perfgate_baselines.store_baseline(
@@ -274,7 +290,8 @@ def test_store_embeds_measurement_and_round_trips_manifest(tmp_path: Path) -> No
     manifest = json.loads(
         (destination.parent / "baseline-metadata.json").read_text(encoding="utf-8")
     )
-    assert manifest["measurement"]["strategy"] == "warmup+median"
+    assert manifest["measurement"]["strategy"] == "warmup+primary-median-run"
+    assert manifest["measurement"]["selection"]["selected_run_index"] == 2
     assert manifest["measurement"]["measured_runs"] == 3
 
     # load_manifest validates the measurement block against the artifact.
@@ -282,19 +299,40 @@ def test_store_embeds_measurement_and_round_trips_manifest(tmp_path: Path) -> No
     assert loaded == destination
 
 
-def test_store_rejects_measurement_median_mismatch(tmp_path: Path) -> None:
+def test_store_rejects_selected_run_metric_mismatch(tmp_path: Path) -> None:
     central = tmp_path / "central"
     central.mkdir()
     artifact = tmp_path / "run_leaderboard.json"
     _write_artifact(artifact)
 
-    with pytest.raises(ValueError, match="does not match median"):
+    with pytest.raises(ValueError, match="does not match selected run"):
         perfgate_baselines.store_baseline(
             central,
             artifact,
             _identity(),
             _provenance(),
             measurement=_measurement(throughputs=(80.0, 90.0, 95.0)),
+        )
+
+
+def test_store_rejects_legacy_per_metric_median_measurement(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    measurement = _measurement()
+    measurement.pop("schema_version")
+    measurement.pop("selection")
+    measurement["strategy"] = "warmup+median"
+    measurement["aggregation"] = "median"
+
+    with pytest.raises(ValueError, match="schema_version"):
+        perfgate_baselines.store_baseline(
+            central,
+            artifact,
+            _identity(),
+            _provenance(),
+            measurement=measurement,
         )
 
 
