@@ -478,6 +478,11 @@ def find_local_model_path(model_id: str) -> str | None:
     for candidate in known.get(model_id, []):
         if candidate.exists():
             return str(candidate)
+    override = os.environ.get("VLLM_HUST_LOCAL_MODEL_PATH")
+    if override:
+        override_path = Path(override)
+        if override_path.exists():
+            return str(override_path)
     return None
 
 

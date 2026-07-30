@@ -499,3 +499,23 @@ def test_manage_script_flag_defaults_to_manage_sh(module, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["backfill_historical_pr_benchmarks.py"])
     args = module.parse_args()
     assert args.manage_script == "manage.sh"
+
+
+# === find_local_model_path env var override (issue #97) ===
+
+
+def test_find_local_model_path_uses_env_var_override(module, monkeypatch, tmp_path):
+    monkeypatch.delenv("VLLM_HUST_LOCAL_MODEL_PATH", raising=False)
+    custom = tmp_path / "my-model"
+    custom.mkdir()
+    monkeypatch.setenv("VLLM_HUST_LOCAL_MODEL_PATH", str(custom))
+    result = module.find_local_model_path("Qwen/Qwen2.5-14B-Instruct")
+    assert result == str(custom)
+
+
+def test_find_local_model_path_env_var_returns_none_when_path_missing(
+    module, monkeypatch
+):
+    monkeypatch.setenv("VLLM_HUST_LOCAL_MODEL_PATH", "/nonexistent/path/12345")
+    result = module.find_local_model_path("Qwen/Qwen2.5-14B-Instruct")
+    assert result is None
