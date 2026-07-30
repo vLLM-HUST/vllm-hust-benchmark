@@ -462,3 +462,40 @@ def test_require_container_workspace_path_raises_when_outside_root(
         module.require_container_workspace_path(
             Path("/opt/other/repo"), purpose="core worktree"
         )
+
+
+# === resolve_manage_script (issue #97: in-container launcher support) ===
+
+
+def test_resolve_manage_script_defaults_to_manage_sh(module, monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["backfill_historical_pr_benchmarks.py"])
+    args = module.parse_args()
+    args.dev_hub_dir = "/home/shuhao/vllm-hust-dev-hub"
+    result = module.resolve_manage_script(args)
+    assert result.name == "manage.sh"
+    assert result.parent == Path("/home/shuhao/vllm-hust-dev-hub").resolve()
+
+
+def test_resolve_manage_script_supports_container_launcher(module, monkeypatch):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "backfill_historical_pr_benchmarks.py",
+            "--manage-script",
+            "scripts/manage-container.sh",
+            "--dev-hub-dir",
+            "/root/vllm/vllm-hust-dev-hub",
+        ],
+    )
+    args = module.parse_args()
+    result = module.resolve_manage_script(args)
+    assert result.name == "manage-container.sh"
+    assert result.parent.name == "scripts"
+    assert result.parent.parent.name == "vllm-hust-dev-hub"
+
+
+def test_manage_script_flag_defaults_to_manage_sh(module, monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["backfill_historical_pr_benchmarks.py"])
+    args = module.parse_args()
+    assert args.manage_script == "manage.sh"

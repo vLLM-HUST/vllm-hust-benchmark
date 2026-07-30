@@ -406,6 +406,17 @@ def copy_submission_to_repo(submission_dir: Path, submissions_root: Path) -> Pat
     return target
 
 
+def resolve_manage_script(args: argparse.Namespace) -> Path:
+    """Resolve the launcher script path relative to --dev-hub-dir.
+
+    Defaults to ``manage.sh`` (docker/systemd-based). Use
+    ``--manage-script scripts/manage-container.sh`` when the host is already
+    inside a container and docker/systemd are unavailable.
+    """
+    dev_hub = Path(getattr(args, "dev_hub_dir", ".")).resolve()
+    return dev_hub / getattr(args, "manage_script", "manage.sh")
+
+
 def to_container_workspace_path(path: Path) -> str:
     resolved = path.resolve()
     host_workspace = Path(
@@ -690,7 +701,7 @@ def capture_failure_diagnostics(
         output_file=blocked_dir / "npu-smi.txt",
         execute=execute,
     )
-    manage = dev_hub_dir / "manage.sh"
+    manage = resolve_manage_script(args)
     if manage.exists():
         _capture_subprocess(
             [str(manage), "status"],
@@ -1065,10 +1076,20 @@ def start_managed_server(
     if args.managed_systemd_unit:
         env["VLLM_ENGINE_SYSTEMD_UNIT"] = args.managed_systemd_unit
 
-    manage = Path(args.dev_hub_dir).resolve() / "manage.sh"
+    # manage-container.sh (in-container mode) needs the python binary and
+    # conda env name to activate the runtime before launching vllm serve.
+    if getattr(args, "manage_script", "manage.sh") != "manage.sh":
+        if args.runtime_python:
+            env["VLLM_ENGINE_PYTHON"] = args.runtime_python
+        env_prefix = getattr(args, "current_env_prefix", "")
+        if env_prefix:
+            env["VLLM_MANAGER_CONDA_ENV"] = Path(env_prefix).name
+
+    manage = resolve_manage_script(args)
+    manage_cwd = Path(args.dev_hub_dir).resolve()
     run_command(
         [str(manage), "restart"],
-        cwd=Path(args.dev_hub_dir).resolve(),
+        cwd=manage_cwd,
         execute=execute,
         env=env,
     )
@@ -1076,7 +1097,7 @@ def start_managed_server(
     while True:
         health = run_command(
             [str(manage), "health"],
-            cwd=Path(args.dev_hub_dir).resolve(),
+            cwd=manage_cwd,
             execute=execute,
             env=env,
             check=False,
@@ -1115,10 +1136,11 @@ def stop_managed_server(*, args: argparse.Namespace, execute: bool) -> None:
         env["VLLM_ENGINE_CONTAINER"] = args.managed_container
     if args.managed_systemd_unit:
         env["VLLM_ENGINE_SYSTEMD_UNIT"] = args.managed_systemd_unit
-    manage = Path(args.dev_hub_dir).resolve() / "manage.sh"
+    manage = resolve_manage_script(args)
+    manage_cwd = Path(args.dev_hub_dir).resolve()
     run_command(
         [str(manage), "stop"],
-        cwd=Path(args.dev_hub_dir).resolve(),
+        cwd=manage_cwd,
         execute=execute,
         env=env,
         check=False,
@@ -1483,6 +1505,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--server-port", default="")
     parser.add_argument("--managed-dev-hub", action="store_true")
     parser.add_argument("--dev-hub-dir", default=str(DEFAULT_DEV_HUB_DIR))
+    parser.add_argument(
+        "--manage-script",
+        default="manage.sh",
+        help=(
+            "Launcher script relative to --dev-hub-dir. Use 'scripts/manage-container.sh' "
+            "when running inside a container (no docker/systemd)."
+        ),
+    )
     parser.add_argument("--managed-npu-devices", default="0")
     parser.add_argument("--managed-container", default="vllm-hust-backfill")
     parser.add_argument("--managed-systemd-unit", default="vllm-hust-backfill.service")
