@@ -397,10 +397,9 @@ and later backfills should adapt to it, not the other way around.
 
 ## Failure-Path Contract (Issue #97)
 
-When a managed dev-hub run fails to become healthy within
-`--managed-ready-timeout-seconds` (default 600s), the backfill orchestrator
-**must** retain a diagnostics bundle and release all resources before
-exiting. The contract has three parts:
+When a managed dev-hub run fails to become healthy within `--managed-ready-timeout-seconds` (default
+600s), the backfill orchestrator **must** retain a diagnostics bundle and release all resources
+before exiting. The contract has three parts:
 
 ### BLOCKED.txt diagnostics bundle
 
@@ -420,44 +419,40 @@ On failure, `capture_failure_diagnostics` writes a bundle to:
 └── cleanup.log              # defensive cleanup actions taken
 ```
 
-The `BLOCKED.txt` file includes: `blocked_at`, `run_key`, `target_label`,
-`spec_path`, `core_ref`, `plugin_ref`, `pr_number`, `container`,
-`systemd_unit`, `npu_devices`, `server_port`, `blocker_reason`, and
-`next_steps` guidance.
+The `BLOCKED.txt` file includes: `blocked_at`, `run_key`, `target_label`, `spec_path`, `core_ref`,
+`plugin_ref`, `pr_number`, `container`, `systemd_unit`, `npu_devices`, `server_port`,
+`blocker_reason`, and `next_steps` guidance.
 
-**The bundle lives under `.benchmarks/` (gitignored) and is NEVER uploaded
-to `submissions/`**. Failed runs must not produce half-finished or empty
-artifacts that could leak into the public leaderboard.
+**The bundle lives under `.benchmarks/` (gitignored) and is NEVER uploaded to `submissions/`**.
+Failed runs must not produce half-finished or empty artifacts that could leak into the public
+leaderboard.
 
-The `state.json` entry for a failed run now carries a `blocked_dir` field
-pointing to the diagnostics bundle path, so operators can find the
-diagnostics from the state file.
+The `state.json` entry for a failed run now carries a `blocked_dir` field pointing to the
+diagnostics bundle path, so operators can find the diagnostics from the state file.
 
 ### Defensive cleanup sequence
 
-After `manage.sh stop`, the orchestrator runs `force_cleanup_managed_server`
-which executes a defense-in-depth cleanup (all with `check=False`):
+After `manage.sh stop`, the orchestrator runs `force_cleanup_managed_server` which executes a
+defense-in-depth cleanup (all with `check=False`):
 
 1. Kill processes on managed NPU devices (via `npu-smi info` + `os.kill`)
-2. Kill stale `VLLMEngineCore` / `vllm.entrypoints` processes (via `pgrep`)
-3. `systemctl --user stop <unit>` + `systemctl --user reset-failed <unit>`
-4. Free the managed port (via `lsof -ti :<port>` + `os.kill`)
-5. `docker rm -f <container>` (if docker is installed)
+1. Kill stale `VLLMEngineCore` / `vllm.entrypoints` processes (via `pgrep`)
+1. `systemctl --user stop <unit>` + `systemctl --user reset-failed <unit>`
+1. Free the managed port (via `lsof -ti :<port>` + `os.kill`)
+1. `docker rm -f <container>` (if docker is installed)
 
-After cleanup, `verify_cleanup_success` checks for residuals and logs
-warnings to stderr for any resources that could not be released.
+After cleanup, `verify_cleanup_success` checks for residuals and logs warnings to stderr for any
+resources that could not be released.
 
-Use `--skip-defensive-cleanup` to skip this step when debugging (leaves
-residuals for manual inspection).
+Use `--skip-defensive-cleanup` to skip this step when debugging (leaves residuals for manual
+inspection).
 
 ### Pre-flight NPU idle check
 
-Before calling `manage.sh restart`, `verify_npu_idle` checks that the
-managed NPU devices have no running processes. If NPU0 (or any managed
-device) is occupied, the run fails fast with a `RuntimeError` — this
-prevents the residual-process scenario where a prior failed run left
-processes on the NPU.
+Before calling `manage.sh restart`, `verify_npu_idle` checks that the managed NPU devices have no
+running processes. If NPU0 (or any managed device) is occupied, the run fails fast with a
+`RuntimeError` — this prevents the residual-process scenario where a prior failed run left processes
+on the NPU.
 
-Use `--allow-busy-npu` to bypass this check when intentionally starting on
-an occupied NPU (debugging only).
-
+Use `--allow-busy-npu` to bypass this check when intentionally starting on an occupied NPU
+(debugging only).

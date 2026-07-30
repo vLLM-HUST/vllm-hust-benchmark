@@ -37,7 +37,7 @@ def module():
 def target(module):
     return module.TargetRef(
         label="pr80-test",
-        core_ref="ae16d09435",
+        core_ref="ae16d09435",  # pragma: allowlist secret
         plugin_ref="a05a9efe54",
         pr_number=80,
     )
@@ -133,23 +133,31 @@ def test_parse_npu_smi_processes_filters_to_managed_devices(module):
 
 
 def test_verify_npu_idle_raises_when_occupied(module, monkeypatch):
-    monkeypatch.setattr(module.subprocess, "check_output", lambda *a, **kw: NPU_SMI_WITH_PROCESS)
+    monkeypatch.setattr(
+        module.subprocess, "check_output", lambda *a, **kw: NPU_SMI_WITH_PROCESS
+    )
     with pytest.raises(RuntimeError, match="NPU devices 0 not idle"):
         module.verify_npu_idle(devices="0", allow_busy=False, execute=True)
 
 
 def test_verify_npu_idle_passes_when_idle(module, monkeypatch):
-    monkeypatch.setattr(module.subprocess, "check_output", lambda *a, **kw: NPU_SMI_IDLE)
+    monkeypatch.setattr(
+        module.subprocess, "check_output", lambda *a, **kw: NPU_SMI_IDLE
+    )
     module.verify_npu_idle(devices="0", allow_busy=False, execute=True)
 
 
 def test_verify_npu_idle_bypassed_with_allow_busy(module, monkeypatch):
-    monkeypatch.setattr(module.subprocess, "check_output", lambda *a, **kw: NPU_SMI_WITH_PROCESS)
+    monkeypatch.setattr(
+        module.subprocess, "check_output", lambda *a, **kw: NPU_SMI_WITH_PROCESS
+    )
     module.verify_npu_idle(devices="0", allow_busy=True, execute=True)
 
 
 def test_verify_npu_idle_skipped_in_dry_run(module, monkeypatch):
-    monkeypatch.setattr(module.subprocess, "check_output", lambda *a, **kw: NPU_SMI_WITH_PROCESS)
+    monkeypatch.setattr(
+        module.subprocess, "check_output", lambda *a, **kw: NPU_SMI_WITH_PROCESS
+    )
     module.verify_npu_idle(devices="0", allow_busy=False, execute=False)
 
 
@@ -171,10 +179,17 @@ def test_health_timeout_error_blocked_dir_defaults_none(module):
 # === capture_failure_diagnostics ===
 
 
-def test_capture_failure_diagnostics_writes_blocked_txt(module, target, spec, args, tmp_path):
+def test_capture_failure_diagnostics_writes_blocked_txt(
+    module, target, spec, args, tmp_path
+):
     blocked_dir = module.capture_failure_diagnostics(
-        target=target, spec=spec, args=args, error="test failure",
-        result_root=tmp_path, run_key="test-key", execute=False,
+        target=target,
+        spec=spec,
+        args=args,
+        error="test failure",
+        result_root=tmp_path,
+        run_key="test-key",
+        execute=False,
     )
     blocked_txt = blocked_dir / module.BLOCKED_MARKER_FILE
     assert blocked_txt.exists()
@@ -192,31 +207,52 @@ def test_capture_failure_diagnostics_blocked_dir_under_benchmarks_not_submission
 ):
     """Issue #97 item 4: BLOCKED.txt must NEVER live under submissions/."""
     blocked_dir = module.capture_failure_diagnostics(
-        target=target, spec=spec, args=args, error="err",
-        result_root=tmp_path, run_key="k", execute=False,
+        target=target,
+        spec=spec,
+        args=args,
+        error="err",
+        result_root=tmp_path,
+        run_key="k",
+        execute=False,
     )
     blocked_str = str(blocked_dir)
     assert "submissions" not in blocked_str
     assert "blocked" in blocked_str
 
 
-def test_capture_failure_diagnostics_is_idempotent(module, target, spec, args, tmp_path):
+def test_capture_failure_diagnostics_is_idempotent(
+    module, target, spec, args, tmp_path
+):
     """Calling twice for the same run_key doesn't fail."""
     for _ in range(2):
         module.capture_failure_diagnostics(
-            target=target, spec=spec, args=args, error="err",
-            result_root=tmp_path, run_key="dup", execute=False,
+            target=target,
+            spec=spec,
+            args=args,
+            error="err",
+            result_root=tmp_path,
+            run_key="dup",
+            execute=False,
         )
-    blocked_txt = (tmp_path / module.BLOCKED_DIR_NAME / "dup" / module.BLOCKED_MARKER_FILE)
+    blocked_txt = (
+        tmp_path / module.BLOCKED_DIR_NAME / "dup" / module.BLOCKED_MARKER_FILE
+    )
     assert blocked_txt.exists()
 
 
-def test_capture_failure_diagnostics_copies_state_file(module, target, spec, args, tmp_path):
+def test_capture_failure_diagnostics_copies_state_file(
+    module, target, spec, args, tmp_path
+):
     state_file = tmp_path / "state.json"
     state_file.write_text('{"runs": {}}', encoding="utf-8")
     blocked_dir = module.capture_failure_diagnostics(
-        target=target, spec=spec, args=args, error="err",
-        result_root=tmp_path, run_key="k", execute=False,
+        target=target,
+        spec=spec,
+        args=args,
+        error="err",
+        result_root=tmp_path,
+        run_key="k",
+        execute=False,
         state_file=state_file,
     )
     assert (blocked_dir / "state.json").exists()
@@ -227,16 +263,26 @@ def test_capture_failure_diagnostics_does_not_raise_on_subprocess_failure(
     module, target, spec, args, tmp_path, monkeypatch
 ):
     """Issue #97: diagnostics capture must never mask the original error."""
+
     def failing_run(*a, **kw):
         raise OSError("simulated failure")
 
     monkeypatch.setattr(module.subprocess, "run", failing_run)
     blocked_dir = module.capture_failure_diagnostics(
-        target=target, spec=spec, args=args, error="original error",
-        result_root=tmp_path, run_key="k", execute=True,
+        target=target,
+        spec=spec,
+        args=args,
+        error="original error",
+        result_root=tmp_path,
+        run_key="k",
+        execute=True,
     )
     assert (blocked_dir / module.BLOCKED_MARKER_FILE).exists()
-    assert (blocked_dir / "npu-smi.txt").read_text(encoding="utf-8").startswith("capture failed:")
+    assert (
+        (blocked_dir / "npu-smi.txt")
+        .read_text(encoding="utf-8")
+        .startswith("capture failed:")
+    )
 
 
 def test_capture_failure_diagnostics_captures_npu_smi_snapshot(
@@ -250,8 +296,13 @@ def test_capture_failure_diagnostics_captures_npu_smi_snapshot(
 
     monkeypatch.setattr(module.subprocess, "run", fake_run)
     blocked_dir = module.capture_failure_diagnostics(
-        target=target, spec=spec, args=args, error="err",
-        result_root=tmp_path, run_key="k", execute=True,
+        target=target,
+        spec=spec,
+        args=args,
+        error="err",
+        result_root=tmp_path,
+        run_key="k",
+        execute=True,
     )
     npu_snapshot = (blocked_dir / "npu-smi.txt").read_text(encoding="utf-8")
     assert "910B2" in npu_snapshot
@@ -327,9 +378,13 @@ def test_force_cleanup_removes_docker_container(module, args, monkeypatch):
 def test_force_cleanup_kills_stale_vllm_processes(module, args, monkeypatch):
     def fake_run(cmd, **kw):
         if isinstance(cmd, list) and "pgrep" in " ".join(cmd):
-            return type("R", (), {"stdout": "111\n222\n", "stderr": "", "returncode": 0})()
+            return type(
+                "R", (), {"stdout": "111\n222\n", "stderr": "", "returncode": 0}
+            )()
         if isinstance(cmd, str) and "pgrep" in cmd:
-            return type("R", (), {"stdout": "111\n222\n", "stderr": "", "returncode": 0})()
+            return type(
+                "R", (), {"stdout": "111\n222\n", "stderr": "", "returncode": 0}
+            )()
         return type("R", (), {"stdout": "", "stderr": "", "returncode": 0})()
 
     killed: list[int] = []
@@ -354,13 +409,17 @@ def test_force_cleanup_returns_empty_report_in_dry_run(module, args):
     assert report["vllm_procs_killed"] == []
 
 
-def test_force_cleanup_writes_cleanup_log_to_blocked_dir(module, args, tmp_path, monkeypatch):
+def test_force_cleanup_writes_cleanup_log_to_blocked_dir(
+    module, args, tmp_path, monkeypatch
+):
     blocked_dir = tmp_path / "blocked" / "k"
     blocked_dir.mkdir(parents=True)
     monkeypatch.setattr(module, "detect_npu_processes", lambda devices: [(0, 99999)])
     monkeypatch.setattr(module.os, "kill", lambda pid, sig: None)
 
-    module.force_cleanup_managed_server(args=args, execute=True, blocked_dir=blocked_dir)
+    module.force_cleanup_managed_server(
+        args=args, execute=True, blocked_dir=blocked_dir
+    )
 
     log = (blocked_dir / "cleanup.log").read_text(encoding="utf-8")
     assert "killed NPU process 99999" in log
@@ -369,7 +428,9 @@ def test_force_cleanup_writes_cleanup_log_to_blocked_dir(module, args, tmp_path,
 # === verify_cleanup_success ===
 
 
-def test_verify_cleanup_success_returns_warnings_for_npu_residuals(module, args, monkeypatch):
+def test_verify_cleanup_success_returns_warnings_for_npu_residuals(
+    module, args, monkeypatch
+):
     monkeypatch.setattr(module, "detect_npu_processes", lambda devices: [(0, 88888)])
     warnings = module.verify_cleanup_success(args=args, execute=True)
     assert any("residual NPU processes" in w for w in warnings)
@@ -395,7 +456,9 @@ def test_verify_cleanup_success_returns_empty_in_dry_run(module, args):
 def test_verify_cleanup_success_warns_on_active_systemd(module, args, monkeypatch):
     def fake_run(cmd, **kw):
         if "is-active" in cmd:
-            return type("R", (), {"stdout": "active\n", "stderr": "", "returncode": 0})()
+            return type(
+                "R", (), {"stdout": "active\n", "stderr": "", "returncode": 0}
+            )()
         return type("R", (), {"stdout": "", "stderr": "", "returncode": 0})()
 
     monkeypatch.setattr(module, "detect_npu_processes", lambda devices: [])
@@ -454,9 +517,7 @@ def test_to_container_workspace_path_returns_raw_path_when_outside_root(
     assert result == "/opt/other/repo"
 
 
-def test_require_container_workspace_path_raises_when_outside_root(
-    module, monkeypatch
-):
+def test_require_container_workspace_path_raises_when_outside_root(module, monkeypatch):
     monkeypatch.setenv("VLLM_HUST_HOST_WORKSPACE_ROOT", "/root/vllm")
     with pytest.raises(RuntimeError, match="does not map into the dev-hub"):
         module.require_container_workspace_path(
