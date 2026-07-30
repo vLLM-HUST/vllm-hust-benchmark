@@ -279,7 +279,7 @@ patch_vllm_ascend_cann_stdlib_includes() {
     return 0
   fi
 
-  python - <<'PY' "$cmake_file" "$marker"
+  python3 - <<'PY' "$cmake_file" "$marker"
 from pathlib import Path
 import sys
 
