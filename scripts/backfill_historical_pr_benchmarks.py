@@ -349,6 +349,13 @@ def ensure_worktree(
     path = worktree_root / f"{prefix}-{resolved[:12]}"
     if path.exists():
         return path
+    # Prune stale worktree registrations left by prior crashed runs
+    run_command(
+        ["git", "worktree", "prune"],
+        cwd=source_repo,
+        execute=execute,
+        check=False,
+    )
     run_command(
         ["git", "worktree", "add", "--detach", str(path), resolved],
         cwd=source_repo,
