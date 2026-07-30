@@ -63,15 +63,15 @@ def _missing() -> ArtifactRef:
 
 
 def _default_pr_context(**overrides) -> PRContext:
-    defaults = dict(
-        repo="vllm-hust",
-        number=193,
-        head_sha="abc1234",
-        base_sha="def5678",
-        declared_target_id="official-ascend-jan-2026-v0.18.0",
-        declared_target_version="v0.18.0",
-        declared_profile_id="core-text-14b",
-    )
+    defaults = {
+        "repo": "vllm-hust",
+        "number": 193,
+        "head_sha": "abc1234",
+        "base_sha": "def5678",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
+    }
     defaults.update(overrides)
     return PRContext(**defaults)
 
@@ -79,15 +79,15 @@ def _default_pr_context(**overrides) -> PRContext:
 def _pr_context_from_manifest(output_dir: Path, **overrides) -> PRContext:
     """从 scenario_manifest.json 构建 PRContext（读取声明的 target/profile/skip）。"""
     manifest = json.loads((output_dir / "scenario_manifest.json").read_text())
-    kwargs = dict(
-        repo="vllm-hust",
-        number=193,
-        head_sha="abc1234",
-        base_sha="def5678",
-        declared_target_id=manifest.get("declared_target_id"),
-        declared_target_version=manifest.get("declared_target_version"),
-        declared_profile_id=manifest.get("declared_profile_id"),
-    )
+    kwargs = {
+        "repo": "vllm-hust",
+        "number": 193,
+        "head_sha": "abc1234",
+        "base_sha": "def5678",
+        "declared_target_id": manifest.get("declared_target_id"),
+        "declared_target_version": manifest.get("declared_target_version"),
+        "declared_profile_id": manifest.get("declared_profile_id"),
+    }
     if "pr_labels" in manifest:
         kwargs["labels"] = tuple(manifest["pr_labels"])
     if manifest.get("specialty_spec"):

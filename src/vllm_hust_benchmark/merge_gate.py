@@ -19,7 +19,6 @@ from vllm_hust_benchmark.fixed_target_registry import (
     load_fixed_target_registry,
 )
 
-
 # 受认可的 data_source 前缀（issue §4.2）。必须以 real-online 开头。
 _REAL_ONLINE_PREFIXES: tuple[str, ...] = ("real-online",)
 
@@ -183,12 +182,12 @@ def evaluate_merge_gate(
       8. paired base/head spec_id 一致 + spec_hash 一致（M1）+ spec_id 非空（C4）
       9. specialty 必须携带 spec + reason → 否则 fail
     """
-    common = dict(
-        repo=pr_context.repo,
-        pr_number=pr_context.number,
-        head_sha=pr_context.head_sha,
-        base_sha=pr_context.base_sha,
-    )
+    common = {
+        "repo": pr_context.repo,
+        "pr_number": pr_context.number,
+        "head_sha": pr_context.head_sha,
+        "base_sha": pr_context.base_sha,
+    }
 
     # 1. docs-only / test-only / website-only 受控 label（issue §5.2.4）
     #    M5 fix: skip 必须有审批人记录，否则 fail（防止未审批跳过）
@@ -649,8 +648,10 @@ def format_decision_log(decision: MergeGateDecision, pr_context: PRContext) -> s
     """输出 issue §7.3 要求的结构化判定日志。"""
     lines = [
         "[merge-gate-check]",
-        f"  PR: {decision.repo}#{decision.pr_number} "
-        f"head={decision.head_sha} base={decision.base_sha}",
+        (
+            f"  PR: {decision.repo}#{decision.pr_number} "
+            f"head={decision.head_sha} base={decision.base_sha}"
+        ),
         f"  target_id: {decision.target_id}",
         f"  target_version: {decision.target_version}",
         f"  profile_id: {decision.profile_id}",
@@ -663,8 +664,10 @@ def format_decision_log(decision: MergeGateDecision, pr_context: PRContext) -> s
         f"  hardware: {decision.hardware_chip_model} chip_count={decision.chip_count}",
         f"  gpu_memory_utilization: {decision.gpu_memory_utilization}",
         f"  max_model_len: {decision.max_model_len}",
-        f"  same_spec.spec_id: base={decision.base_spec_id} "
-        f"head={decision.head_spec_id} match={decision.spec_id_match}",
+        (
+            f"  same_spec.spec_id: base={decision.base_spec_id} "
+            f"head={decision.head_spec_id} match={decision.spec_id_match}"
+        ),
         f"  same_spec.spec_hash_match: {decision.spec_hash_match}",
         f"  skip_approver: {decision.skip_approver}",
         f"  disposition: {decision.disposition}",
