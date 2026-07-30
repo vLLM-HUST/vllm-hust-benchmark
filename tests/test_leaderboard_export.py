@@ -115,7 +115,7 @@ def _common_export_kwargs(
         backend_version="0.1.0",
         core_version="0.1.0",
         peak_mem_mb=1024.0,
-        git_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        git_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",  # pragma: allowlist secret
         github_user="official",
         github_commit_url=None,
         github_repository="vllm-project/vllm-ascend",
@@ -126,11 +126,11 @@ def _common_export_kwargs(
         runtime_python="python",
         engine_source_repository="vllm-project/vllm",
         engine_source_ref="v0.18.0",
-        engine_source_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        engine_source_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",  # pragma: allowlist secret
         plugin_source_engine="vllm-ascend",
         plugin_source_repository="vllm-project/vllm-ascend",
         plugin_source_ref="v0.18.0",
-        plugin_source_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        plugin_source_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",  # pragma: allowlist secret
         spec_path=spec_path,
     )
 
@@ -208,7 +208,7 @@ def test_non_official_entry_omits_target_id(tmp_path: Path) -> None:
         backend_version="0.1.0",
         core_version="0.1.0",
         peak_mem_mb=1024.0,
-        git_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        git_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",  # pragma: allowlist secret
         github_user="developer",
         github_commit_url=None,
         github_repository="vLLM-HUST/vllm-hust",
@@ -219,11 +219,11 @@ def test_non_official_entry_omits_target_id(tmp_path: Path) -> None:
         runtime_python="python",
         engine_source_repository="vLLM-HUST/vllm-hust",
         engine_source_ref="main",
-        engine_source_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        engine_source_commit="e18643f8a4d5bd9990727654318ad069ea0b56e2",  # pragma: allowlist secret
         plugin_source_engine="vllm-ascend-hust",
         plugin_source_repository="vLLM-HUST/vllm-ascend-hust",
         plugin_source_ref="main",
-        plugin_source_commit="abcdef1234567890",
+        plugin_source_commit="abcdef1234567890",  # pragma: allowlist secret
         spec_path=None,
     )
 

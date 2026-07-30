@@ -76,7 +76,7 @@ def _write_archive_readme(
         f"(now at `submissions/{new_dir_name}/`)\n"
         f"- Reason: same `(engine_commit, plugin_commit)` code combination as the\n"
         f"  new entry. historical-pr-backfill data requires explicit `supersedes`\n"
-        f"  annotation per `spec.md` § \"superseded 不得与新 OK 点共存\".\n"
+        f'  annotation per `spec.md` § "superseded 不得与新 OK 点共存".\n'
         f"- Conflict signature: `{signature}`\n",
         encoding="utf-8",
     )
@@ -153,9 +153,7 @@ def _resolve_conflict(
         # Already archived; ensure the new entry annotation is in place too.
         annotated = False
         if apply:
-            annotated = _update_new_entry_supersedes(
-                new_dir, old_entry_id=old_entry_id
-            )
+            annotated = _update_new_entry_supersedes(new_dir, old_entry_id=old_entry_id)
         return {
             "status": "already_archived",
             "conflict": conflict,
