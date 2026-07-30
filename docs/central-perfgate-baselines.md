@@ -23,10 +23,13 @@ baselines/
               run_leaderboard.json
 ```
 
-`baseline-metadata.json` embeds a `measurement` record. Publication requires at least one discarded
-warmup run and three measured runs aggregated with the per-metric median. The record contains
-ordered SHA-256 checksums for every warmup and measured raw result. The trusted writer must
-recompute those checksums from the producer artifact before publication.
+`baseline-metadata.json` embeds a `perfgate-measurement/v2` record. Publication requires at least
+one discarded warmup run and an odd measured-run count of at least three; the current producers use
+exactly three. The measured run whose `throughput_tps` is in the middle after sorting by
+`(throughput_tps, run_index)` is selected. The selected run's complete throughput, TTFT, TBT, and
+error-rate tuple is published. The record contains ordered SHA-256 checksums for every warmup and
+measured raw result. The trusted writer must recompute those checksums from the producer artifact
+before publication.
 
 The latest-main pointer is namespaced by target, scenario, and spec:
 
@@ -46,7 +49,8 @@ latest-main pointer.
 - matching scenario, spec ID, and resolved spec hash;
 - finite throughput, TTFT, and TBT metrics;
 - at least one warmup and three measured runs with ordered raw-result checksums;
-- per-metric medians that exactly match the published artifact;
+- selection metadata recomputed from all measured runs;
+- a published client-metric tuple that exactly matches the selected real run;
 - exact core, plugin, and benchmark runner revisions;
 - hardware, CANN, PyTorch, and torch-npu provenance.
 
