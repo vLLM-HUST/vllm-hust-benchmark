@@ -416,6 +416,7 @@ def require_container_workspace_path(path: Path, *, purpose: str) -> str:
 def find_local_model_path(model_id: str) -> str | None:
     known = {
         "Qwen/Qwen2.5-14B-Instruct": [
+            Path("/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct"),
             Path("/data/shared_models/Qwen2.5-14B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-14B-Instruct"),
             Path(

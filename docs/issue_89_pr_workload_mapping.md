@@ -191,3 +191,41 @@ Specialty profiles 已在 registry 但 workload 仍占位 `random-online`（需�
 - [ ] 主线只连接 same-spec 有序版本点；targeted pair 独立卡片
 - [ ] 独立优化仓库均有结果入口
 - [ ] #95 merge gate 能阻止未来无合规 evidence 的性能 PR 合并（已实现，待 #95 合并）
+
+
+## 8. Server validation record (2026-07-31, vllm-hust-cyj-21rc-cloud)
+
+### 8.1 Validated pipeline stages (feat/issue-89-evidence branch)
+
+| Stage | Status | Evidence |
+|---|---|---|
+| 12 specialty spec registration | PASS | official_scenarios.json has 35 scenarios, 12/12 target specs present |
+| contract tests | PASS | 45 passed (test_workload_config_contract + test_perfgate_baselines) |
+| plan-file parsing | PASS | 3 targets (pr130 base/head/latest) loaded, dry-run emits worktree commands |
+| worktree creation | PASS | vllm-hust@e4ce33646 + vllm-ascend-hust@52f923884b worktrees created |
+| vllm server startup | PASS | APIServer pid=279336, listening on 0.0.0.0:8001, model loaded |
+| 14B model load | PASS | server became ready after 140s, GET /health 200 OK, POST /tokenize 200 OK |
+| benchmark client connect | BLOCKED | Initial test run failed - Bad Gateway (host-mode managed wrapper port issue) |
+
+### 8.2 Fixes applied on server
+
+1. **Model weight repair**: shard-1 was corrupt (safetensors header incomplete). Copied good blob from HF cache, verified 58 keys match index.
+2. **find_local_model_path patch**: added local 14B model path to backfill_historical_pr_benchmarks.py.
+3. **Env overrides**: server has no docker, used host mode (no --managed-dev-hub). Set VLLM_HUST_HOST_WORKSPACE_ROOT / HF_HUB_OFFLINE=1 to override read-only /data/shared_datasets defaults.
+
+### 8.3 Open blockers (block full benchmark pipeline)
+
+- **host-mode benchmark client connect**: after server ready, benchmark client gets Bad Gateway. Root cause is run-current-ascend-same-spec.sh managed server wrapper port forwarding in host mode. Needs script host-mode port fix, tracked under #97.
+- **NPU0 residual**: NPU0 has 50481MB HBM zombie (PID 2403497 gone). Needs driver-level reset. Used NPU1 to avoid.
+
+### 8.4 Executable plan-file template
+
+P0 plan-file verified parseable. Each target has label/core_ref/plugin_ref/pr_number/notes. Once NPU ready:
+
+    python3 scripts/backfill_historical_pr_benchmarks.py --execute --plan-file <plan> --workload <wl>       --managed-npu-devices 1 --managed-gpu-mem-util 0.6 --managed-max-model-len 32768
+
+### 8.5 PR#130 commit triplet (located)
+
+- base = 611bcabeb (PR fork point)
+- head = a2ff5cd98 (PR branch tip, padded logprobs materialization)
+- latest = e4ce33646 (current main, third point)
