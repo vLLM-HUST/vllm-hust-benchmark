@@ -132,7 +132,7 @@ $PY -m vllm_hust_benchmark.cli publish-website \
 
 echo ""
 echo "=== Validating snapshots ==="
-$PY scripts/validate_public_leaderboard_snapshots.py || true
+$PY scripts/validate_public_leaderboard_snapshots.py
 
 echo ""
 echo "========================================================"
