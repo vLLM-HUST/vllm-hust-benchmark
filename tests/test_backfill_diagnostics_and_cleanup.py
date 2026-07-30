@@ -464,6 +464,27 @@ def test_require_container_workspace_path_raises_when_outside_root(
         )
 
 
+def test_require_container_workspace_path_in_container_returns_real_path(module):
+    """Issue #97: in-container mode must use the real filesystem path."""
+    real = Path("/root/vllm/vllm-hust-benchmark/.benchmarks/worktrees/core")
+    result = module.require_container_workspace_path(
+        real, purpose="core worktree", in_container=True
+    )
+    assert result == str(real.resolve())
+    assert not result.startswith("/workspace/")
+
+
+def test_require_container_workspace_path_in_container_skips_workspace_check(
+    module, monkeypatch
+):
+    """in_container=True bypasses the /workspace/ prefix requirement."""
+    monkeypatch.setenv("VLLM_HUST_HOST_WORKSPACE_ROOT", "/home/shuhao")
+    result = module.require_container_workspace_path(
+        Path("/opt/arbitrary/path"), purpose="plugin worktree", in_container=True
+    )
+    assert result == "/opt/arbitrary/path"
+
+
 # === resolve_manage_script (issue #97: in-container launcher support) ===
 
 

@@ -432,7 +432,14 @@ def to_container_workspace_path(path: Path) -> str:
     return f"{container_workspace}/" + relative.as_posix()
 
 
-def require_container_workspace_path(path: Path, *, purpose: str) -> str:
+def require_container_workspace_path(
+    path: Path, *, purpose: str, in_container: bool = False
+) -> str:
+    if in_container:
+        # manage-container.sh runs vllm serve directly inside the host
+        # container; PYTHONPATH must be the real filesystem path, not a
+        # remapped /workspace mount. Skip the /workspace prefix check.
+        return str(path.resolve())
     container_path = to_container_workspace_path(path)
     if not container_path.startswith("/workspace/"):
         raise RuntimeError(
@@ -1007,13 +1014,16 @@ def start_managed_server(
             )
         model_path = spec.model
 
+    in_container = getattr(args, "manage_script", "manage.sh") != "manage.sh"
     core_container_path = require_container_workspace_path(
         core_worktree,
         purpose="core worktree",
+        in_container=in_container,
     )
     plugin_container_path = require_container_workspace_path(
         plugin_worktree,
         purpose="plugin worktree",
+        in_container=in_container,
     )
     extra_args = ["--generation-config", "vllm"]
     if args.managed_disable_ascend_fusion:
