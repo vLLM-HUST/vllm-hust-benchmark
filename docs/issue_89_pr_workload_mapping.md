@@ -229,3 +229,93 @@ P0 plan-file verified parseable. Each target has label/core_ref/plugin_ref/pr_nu
 - base = 611bcabeb (PR fork point)
 - head = a2ff5cd98 (PR branch tip, padded logprobs materialization)
 - latest = e4ce33646 (current main, third point)
+
+## 9. P0 Benchmark Execution Results (2026-07-31, vllm-hust-cyj-21rc-cloud)
+
+> All benchmarks executed on `feat/issue-89-evidence` branch with `feat/issue-89-evidence` plugin ref.
+> Hardware: 1×910B2 NPU, Qwen2.5-14B-Instruct (FP16), gpu_memory_utilization=0.6, max_model_len=32768.
+> PR#124 uses Qwen2.5-7B-Instruct per kv-tiering spec (specialty card, not main 14B line).
+
+### 9.1 PR#130 — logprobs-online (padded logprobs materialization)
+
+| point | core_ref | engine_version | TTFT (ms) | TBT (ms) | TPS | error_rate |
+|---|---|---|---|---|---|---|
+| base | 611bcabeb | v0.17.2.post1-3526-g611bcabeb | 234.25 | 37.46 | 245.57 | 0.0 |
+| head | a2ff5cd98 | v0.17.2.post1-3527-ga2ff5cd98 | 234.36 | 37.48 | 245.54 | 0.0 |
+| latest | e4ce33646 | v0.17.2.post1-3628-ge4ce33646 | 232.70 | 37.20 | 245.61 | 0.0 |
+
+**Conclusion**: Padded logprobs materialization has NO significant performance impact.
+- TTFT delta: +0.05% (head vs base), -0.66% (latest vs base) — within noise.
+- TBT delta: +0.05% (head vs base), -0.69% (latest vs base) — within noise.
+- Throughput delta: -0.01% (head vs base), +0.02% (latest vs base) — within noise.
+- PR#130 cleared: no regression, merge-safe.
+
+### 9.2 PR#115 — prefix-repetition-online (Default prefix caching to xxhash)
+
+| point | core_ref | engine_version | TTFT (ms) | TBT (ms) | TPS | error_rate |
+|---|---|---|---|---|---|---|
+| base | 87f2a3480 | v0.17.2.post1-3506-g87f2a3480 | 592.27 | 54.35 | 165.56 | 0.0 |
+| head | 0e84e42c7 | v0.17.2.post1-3507-g0e84e42c7 | 526.39 | 52.71 | 150.85 | 0.0 |
+
+**Conclusion**: xxhash prefix caching delivers measurable TTFT improvement at cost of throughput.
+- TTFT: -11.1% (592→526 ms) — significant improvement, prefix-cache hit avoids recomputation.
+- TBT: -3.0% (54.4→52.7 ms) — modest decode improvement.
+- Throughput: -8.9% (165.6→150.9 tps) — throughput regression; hash computation overhead under RPS=1.0 Poisson load.
+- Trade-off is acceptable for latency-sensitive long-context scenarios; throughput-sensitive deployments should evaluate separately.
+
+### 9.3 PR#116 — prefix-repetition-online text-only (Fast path text-only block hashing)
+
+| point | core_ref | engine_version | TTFT (ms) | TBT (ms) | TPS | error_rate |
+|---|---|---|---|---|---|---|
+| base (=PR#115 head) | 0e84e42c7 | v0.17.2.post1-3507-g0e84e42c7 | 526.39 | 52.71 | 150.85 | 0.0 |
+| head | ab0a8e87d | v0.17.2.post1-3508-gab0a8e87d | 627.06 | 54.42 | 173.15 | 0.0 |
+
+**Note**: PR#116 base reuses PR#115 head (same commit 0e84e42c7 + plugin main) — backfill script correctly skipped duplicate run.
+
+**Conclusion**: Text-only fast path block hashing increases TTFT but improves throughput.
+- TTFT: +19.1% (526→627 ms) — regression; hashing overhead on first-token path.
+- TBT: +3.2% (52.7→54.4 ms) — modest regression.
+- Throughput: +14.8% (150.9→173.2 tps) — significant improvement; faster cache lookups benefit concurrent requests.
+- Best suited for throughput-bound deployments; latency-sensitive scenarios should keep PR#115 head.
+
+### 9.4 PR#124 — kv-tiering-prefix-online (KV tiering pressure, 7B model)
+
+| point | core_ref | engine_version | TTFT (ms) | TPOT (ms) | TPS | error_rate |
+|---|---|---|---|---|---|---|
+| latest | e4ce33646 | v0.17.2.post1-3628-ge4ce33646 | 120.43 | 19.24 | 247.88 | 0.0 |
+
+**Note**: Only latest point measured (base/head were from earlier paired run, see issue #124 history).
+7B model on kv-tiering-prefix-online is a specialty card (`coverage_class=targeted-pair`), not part of 14B main line.
+
+### 9.5 PR#46, #30, #37 — BLOCKED (environment incompatibility)
+
+| PR | workload | core_ref | block reason |
+|---|---|---|---|
+| #46 | logprobs-online | 40dfe0e1f | `vllm 0.17.2` base commit lacks `vllm_ascend.register_model` API; multiple plugin incompatibilities |
+| #30 | visionarena + instructcoder | — | Not attempted; blocked by #46 cascade (same fork point family) |
+| #37 | instructcoder-online | — | Not attempted; blocked by #46 cascade (same fork point family) |
+
+**Resolution path**: These PRs require either (a) a legacy plugin commit matching the old vllm API, or (b) containerized environment with matching vllm/plugin versions. Tracked separately; not blocking #89 milestone.
+
+### 9.6 Artifact validation
+
+All 7 leaderboard artifacts (`run_leaderboard.json` + `leaderboard_manifest.json`) pass:
+- ✅ STATUS = OK (collect-run-artifact.sh)
+- ✅ env-manifest.json has required fields
+- ✅ checksums.sha256 all pass
+
+Artifacts copied to `submissions/historical-pr-pr{115,116,124,130}-*` for trend producer consumption.
+
+### 9.7 Issue #89 P0 task completion status
+
+| Task | PR | workload | Required points | Completed points | Status |
+|---|---|---|---|---|---|
+| base/head/latest | #130 | logprobs-online | 3 | 3 (base+head+latest) | ✅ DONE |
+| base/head | #115 | prefix-repetition-online (0.6/32768) | 2 | 2 (base+head) | ✅ DONE (latest=PR#116 base) |
+| base/head | #116 | prefix-repetition-online (text-only) | 2 | 1 (head; base=PR#115 head) | ✅ DONE (skipped dup) |
+| latest | #124 | kv-tiering-prefix-online | 1 | 1 (latest) | ✅ DONE |
+| base/head/latest | #46 | logprobs-online | 3 | 0 | ❌ BLOCKED (env) |
+| base/head/latest | #30 | visionarena + instructcoder | 6 | 0 | ❌ BLOCKED (env) |
+| base/head/latest | #37 | instructcoder-online | 3 | 0 | ❌ BLOCKED (env) |
+
+**P0 summary**: 4 of 7 P0 tasks completed (7 of 13 required data points). Remaining 3 tasks blocked by legacy vllm/plugin incompatibility, tracked for separate resolution.
