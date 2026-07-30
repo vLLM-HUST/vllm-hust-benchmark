@@ -9,11 +9,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+from vllm_hust_benchmark.aggregate_results import (
+    VALID_AGG_METHODS,
+    VALID_OUTLIER_HANDLING,
+    aggregate_entries,
+    load_entries_from_paths,
+    write_aggregated_entries,
+)
 from vllm_hust_benchmark.integration import (
     DEFAULT_RUNTIME_ENGINE,
     aggregate_to_website,
-    upload_to_huggingface,
-    sync_submission_to_huggingface,
     build_ascend_benchmark_ci_command,
     build_benchmark_script_command,
     build_performance_suite_command,
@@ -24,17 +29,12 @@ from vllm_hust_benchmark.integration import (
     run_external_command,
     run_local_serve_benchmark,
     split_vllm_serve_scenario_parameters,
+    sync_submission_to_huggingface,
+    upload_to_huggingface,
     validate_repo_layout,
     validate_runtime_repo,
 )
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
-from vllm_hust_benchmark.aggregate_results import (
-    VALID_AGG_METHODS,
-    VALID_OUTLIER_HANDLING,
-    aggregate_entries,
-    load_entries_from_paths,
-    write_aggregated_entries,
-)
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import filter_scenarios, get_scenario
 from vllm_hust_benchmark.upstream_tests import (
@@ -809,7 +809,7 @@ def _format_scenarios() -> str:
 
 
 def _format_analysis() -> str:
-    return "\n".join(
+    return "\n".join(  # noqa: FLY002
         [
             "Official vLLM benchmark boundary:",
             "- CLI entrypoints: vllm/entrypoints/cli/benchmark/*",
@@ -985,7 +985,7 @@ def main(argv: list[str] | None = None) -> int:
         runtimes = ("vllm-hust", "vllm")
         for index, runtime in enumerate(runtimes):
             if index:
-                print("")
+                print()
             print(f"runtime: {runtime}")
             runtime_argv = [
                 "run",
@@ -1338,7 +1338,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         print(f"artifact : {artifact_path}")
         print(f"manifest : {manifest_path}")
-        print("")
+        print()
         print("Next steps:")
         try:
             output_dir_hint = output_dir.relative_to(layout.benchmark_repo)

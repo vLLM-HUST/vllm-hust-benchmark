@@ -20,7 +20,6 @@ from vllm_hust_benchmark.merge_gate import (
     write_decision_json,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixture 构造辅助
 # ---------------------------------------------------------------------------
@@ -110,15 +109,15 @@ def _accepted(path: Path) -> ArtifactRef:
 
 
 def _default_pr_context(**overrides) -> PRContext:
-    defaults = dict(
-        repo="vllm-hust",
-        number=193,
-        head_sha="abc1234",
-        base_sha="def5678",
-        declared_target_id="official-ascend-jan-2026-v0.18.0",
-        declared_target_version="v0.18.0",
-        declared_profile_id="core-text-14b",
-    )
+    defaults = {
+        "repo": "vllm-hust",
+        "number": 193,
+        "head_sha": "abc1234",
+        "base_sha": "def5678",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": "v0.18.0",
+        "declared_profile_id": "core-text-14b",
+    }
     defaults.update(overrides)
     return PRContext(**defaults)
 
