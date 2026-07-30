@@ -1,18 +1,18 @@
-"""Perfgate measurement strategy: warmup + repeated runs with median aggregation.
+"""Perfgate measurement strategy: warmup + representative measured run.
 
 This module implements the P0-7 fix: instead of producing a perfgate baseline
 from a single cold run, the producer executes ``warmup_runs`` discarded warmup
-runs followed by ``measured_runs`` measured runs against the same live server,
-then aggregates the required metrics per-metric with the median.
+runs followed by ``measured_runs`` measured runs against the same live server.
+The measured runs are sorted by throughput and then run index; the run in the
+middle position is the representative result. An odd measured-run count is
+required so that the middle position is unambiguous.
 
-The aggregated artifact is a patched copy of the template ``run_leaderboard.json``
-(exported from measured run 1): only ``metrics.throughput_tps``, ``metrics.ttft_ms``
-and ``metrics.tbt_ms`` are replaced by medians. ``error_rate`` must be exactly 0
-in every measured run. ``peak_mem_mb`` is a server-lifetime property measured
-across the whole session, so the template value is kept as-is.
+The published client metrics all come from that one real run. ``error_rate``
+must be exactly 0 in every measured run. ``peak_mem_mb`` is a server-lifetime
+property measured across the whole session, so the template value is kept.
 
 The full strategy and every measured run's raw metrics are recorded in a
-``measurement`` block so consumers and auditors can verify the aggregation.
+``measurement`` block so consumers and auditors can verify the selection.
 """
 
 from __future__ import annotations
@@ -22,13 +22,17 @@ import hashlib
 import json
 import math
 import re
-import statistics
 from pathlib import Path
 from typing import Any
 
-MEASUREMENT_STRATEGY = "warmup+median"
-SUPPORTED_AGGREGATIONS = frozenset({"median"})
-MEDIAN_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
+MEASUREMENT_SCHEMA_VERSION = "perfgate-measurement/v2"
+MEASUREMENT_STRATEGY = "warmup+primary-median-run"
+PRIMARY_METRIC = "throughput_tps"
+SORT_DIRECTION = "ascending"
+SECONDARY_SORT_KEY = "run_index"
+SUPPORTED_AGGREGATIONS = frozenset({"primary-median-run"})
+SELECTED_RUN_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms", "error_rate")
+PERFORMANCE_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
 PER_RUN_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms", "error_rate", "peak_mem_mb")
 MIN_PUBLICATION_WARMUP_RUNS = 1
 MIN_PUBLICATION_MEASURED_RUNS = 3
@@ -73,7 +77,7 @@ def run_metrics_from_raw_result(path: Path) -> dict[str, Any]:
     derived = _derive_metrics_from_benchmark_result(payload, peak_mem_mb=None)
     context = str(path)
     metrics: dict[str, Any] = {}
-    for name in MEDIAN_METRICS:
+    for name in PERFORMANCE_METRICS:
         metrics[name] = _require_finite_non_negative(
             name, derived.get(name), context=context
         )
@@ -99,9 +103,9 @@ def aggregate_measured_runs(
     *,
     warmup_runs: int,
     warmup: list[dict[str, Any]] | None = None,
-    aggregation: str = "median",
+    aggregation: str = "primary-median-run",
 ) -> tuple[dict[str, float], dict[str, Any]]:
-    """Aggregate measured-run metrics; return (median metrics, measurement block).
+    """Select a representative measured run and return its client metrics.
 
     ``per_run`` entries must contain ``run_index``, ``raw_result_sha256`` and a
     ``metrics`` dict with the PER_RUN_METRICS keys.
@@ -137,6 +141,11 @@ def aggregate_measured_runs(
             )
     if not per_run:
         raise ValueError("at least one measured run is required")
+    if len(per_run) % 2 == 0:
+        raise ValueError(
+            "primary-median-run requires an odd number of measured runs, "
+            f"got {len(per_run)}"
+        )
 
     for index, entry in enumerate(per_run, start=1):
         context = f"measured run {index}"
@@ -157,7 +166,7 @@ def aggregate_measured_runs(
         metrics = entry.get("metrics")
         if not isinstance(metrics, dict):
             raise ValueError(f"{context}: missing metrics object")
-        for name in MEDIAN_METRICS:
+        for name in PERFORMANCE_METRICS:
             _require_finite_non_negative(name, metrics.get(name), context=context)
         error_rate = _require_finite_non_negative(
             "error_rate", metrics.get("error_rate"), context=context
@@ -168,19 +177,49 @@ def aggregate_measured_runs(
         if peak_mem_mb is not None:
             _require_finite_non_negative("peak_mem_mb", peak_mem_mb, context=context)
 
-    aggregated = {
-        name: float(
-            statistics.median(float(entry["metrics"][name]) for entry in per_run)
-        )
-        for name in MEDIAN_METRICS
+    recorded_per_run = [
+        {
+            "run_index": int(entry["run_index"]),
+            "raw_result_sha256": str(entry["raw_result_sha256"]),
+            "metrics": {
+                name: (
+                    float(entry["metrics"][name])
+                    if entry["metrics"].get(name) is not None
+                    else None
+                )
+                for name in PER_RUN_METRICS
+            },
+        }
+        for entry in per_run
+    ]
+    ordered_runs = sorted(
+        recorded_per_run,
+        key=lambda entry: (
+            float(entry["metrics"][PRIMARY_METRIC]),
+            int(entry["run_index"]),
+        ),
+    )
+    selected_position = len(ordered_runs) // 2 + 1
+    selected = ordered_runs[selected_position - 1]
+    selected_metrics = {
+        name: float(selected["metrics"][name]) for name in SELECTED_RUN_METRICS
     }
-    aggregated["error_rate"] = 0.0
 
     measurement = {
+        "schema_version": MEASUREMENT_SCHEMA_VERSION,
         "strategy": MEASUREMENT_STRATEGY,
         "warmup_runs": int(warmup_runs),
         "measured_runs": len(per_run),
         "aggregation": aggregation,
+        "selection": {
+            "primary_metric": PRIMARY_METRIC,
+            "sort_direction": SORT_DIRECTION,
+            "secondary_sort_key": SECONDARY_SORT_KEY,
+            "ordered_run_indices": [int(entry["run_index"]) for entry in ordered_runs],
+            "selected_position": selected_position,
+            "selected_run_index": int(selected["run_index"]),
+            "selected_raw_result_sha256": str(selected["raw_result_sha256"]),
+        },
         "warmup": [
             {
                 "run_index": int(entry["run_index"]),
@@ -188,23 +227,9 @@ def aggregate_measured_runs(
             }
             for entry in warmup
         ],
-        "per_run": [
-            {
-                "run_index": int(entry["run_index"]),
-                "raw_result_sha256": str(entry["raw_result_sha256"]),
-                "metrics": {
-                    name: (
-                        float(entry["metrics"][name])
-                        if entry["metrics"].get(name) is not None
-                        else None
-                    )
-                    for name in PER_RUN_METRICS
-                },
-            }
-            for entry in per_run
-        ],
+        "per_run": recorded_per_run,
     }
-    return aggregated, measurement
+    return selected_metrics, measurement
 
 
 def validate_measurement_block(
@@ -216,13 +241,17 @@ def validate_measurement_block(
 ) -> dict[str, Any]:
     """Validate the shape of a measurement block.
 
-    When ``artifact_metrics`` is provided, additionally cross-check that the
-    per-metric median of the recorded runs equals the artifact metrics
-    (fail-closed audit of the aggregation).
+    When ``artifact_metrics`` is provided, additionally cross-check that all
+    published client metrics equal the selected real run.
     """
 
     if not isinstance(measurement, dict):
         raise ValueError(f"{context}: must be an object")
+    if measurement.get("schema_version") != MEASUREMENT_SCHEMA_VERSION:
+        raise ValueError(
+            f"{context}: unsupported schema_version: "
+            f"{measurement.get('schema_version')!r}"
+        )
     if measurement.get("strategy") != MEASUREMENT_STRATEGY:
         raise ValueError(
             f"{context}: unsupported strategy: {measurement.get('strategy')!r}"
@@ -261,34 +290,41 @@ def validate_measurement_block(
             f"{context}: per_run must be a list of length measured_runs "
             f"({measured_runs}), got {per_run!r}"
         )
-    aggregated, _ = aggregate_measured_runs(
+    selected_metrics, expected_measurement = aggregate_measured_runs(
         per_run,
         warmup_runs=warmup_runs,
         warmup=warmup,
         aggregation=aggregation,
     )
+    selection = measurement.get("selection")
+    if not isinstance(selection, dict):
+        raise ValueError(f"{context}: selection must be an object")
+    if selection != expected_measurement["selection"]:
+        raise ValueError(
+            f"{context}: selection metadata does not match the recorded runs"
+        )
     if artifact_metrics is not None:
-        for name in MEDIAN_METRICS:
-            expected = aggregated[name]
+        for name in SELECTED_RUN_METRICS:
+            expected = selected_metrics[name]
             actual = _require_finite_non_negative(
                 name, artifact_metrics.get(name), context=f"{context}: artifact"
             )
             if not math.isclose(expected, actual, rel_tol=1e-9, abs_tol=1e-9):
                 raise ValueError(
                     f"{context}: artifact metric {name}={actual!r} does not match "
-                    f"median of recorded runs {expected!r}"
+                    f"selected run metric {expected!r}"
                 )
     return measurement
 
 
-def apply_median_metrics(
+def apply_selected_run_metrics(
     template_artifact: Path,
-    aggregated_metrics: dict[str, float],
+    selected_metrics: dict[str, float],
     output: Path,
 ) -> dict[str, Any]:
-    """Patch the template artifact's median metrics and write it to ``output``.
+    """Patch the template artifact with one selected run's client metrics.
 
-    Only MEDIAN_METRICS values are replaced; same_spec, metadata, provenance and
+    Only client metrics are replaced; same_spec, metadata, provenance and
     peak_mem_mb are preserved from the template.
     """
 
@@ -296,9 +332,8 @@ def apply_median_metrics(
     metrics = payload.get("metrics")
     if not isinstance(metrics, dict):
         raise ValueError(f"{template_artifact}: missing object key metrics")
-    for name in MEDIAN_METRICS:
-        metrics[name] = float(aggregated_metrics[name])
-    metrics["error_rate"] = 0.0
+    for name in SELECTED_RUN_METRICS:
+        metrics[name] = float(selected_metrics[name])
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -327,11 +362,11 @@ def add_aggregate_runs_arguments(parser: argparse.ArgumentParser) -> None:
         help="Raw benchmark result file of one measured run, in run order.",
     )
     parser.add_argument("--warmup-runs", type=int, required=True)
-    parser.add_argument("--aggregation", default="median")
+    parser.add_argument("--aggregation", default="primary-median-run")
     parser.add_argument(
         "--output",
         required=True,
-        help="Path of the aggregated run_leaderboard.json.",
+        help="Path of the selected-run run_leaderboard.json.",
     )
     parser.add_argument(
         "--measurement-out",
@@ -358,13 +393,15 @@ def run_aggregate_runs_cli(args: argparse.Namespace) -> int:
                 "metrics": run_metrics_from_raw_result(raw_path),
             }
         )
-    aggregated, measurement = aggregate_measured_runs(
+    selected_metrics, measurement = aggregate_measured_runs(
         per_run,
         warmup_runs=args.warmup_runs,
         warmup=warmup,
         aggregation=args.aggregation,
     )
-    payload = apply_median_metrics(Path(args.template), aggregated, Path(args.output))
+    payload = apply_selected_run_metrics(
+        Path(args.template), selected_metrics, Path(args.output)
+    )
     validate_measurement_block(
         measurement, artifact_metrics=payload.get("metrics"), context=str(args.output)
     )
@@ -374,8 +411,12 @@ def run_aggregate_runs_cli(args: argparse.Namespace) -> int:
         json.dumps(measurement, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     print(
-        "aggregated {count} measured run(s) with {aggregation}: {output}".format(
-            count=len(per_run), aggregation=args.aggregation, output=args.output
+        "selected measured run {selected} of {count} with {aggregation}: "
+        "{output}".format(
+            selected=measurement["selection"]["selected_run_index"],
+            count=len(per_run),
+            aggregation=args.aggregation,
+            output=args.output,
         )
     )
     return 0

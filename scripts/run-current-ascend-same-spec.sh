@@ -7,11 +7,11 @@ VLLM_CLI_COMPAT=${VLLM_CLI_COMPAT:-"$REPO_ROOT/scripts/run_vllm_cli_compat.py"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 # Perfgate measurement strategy (P0-7): warmup runs are executed against the
-# same live server and discarded; measured runs are aggregated per-metric with
-# the median. Defaults preserve the historical single-run behavior.
+# same live server and discarded; measured runs are sorted by throughput and
+# run index, then the middle run is selected. Defaults preserve single-run behavior.
 PERFGATE_WARMUP_RUNS=${PERFGATE_WARMUP_RUNS:-0}
 PERFGATE_MEASURED_RUNS=${PERFGATE_MEASURED_RUNS:-1}
-PERFGATE_AGGREGATION=${PERFGATE_AGGREGATION:-median}
+PERFGATE_AGGREGATION=${PERFGATE_AGGREGATION:-primary-median-run}
 if ! [[ "$PERFGATE_WARMUP_RUNS" =~ ^[0-9]+$ ]]; then
   echo "PERFGATE_WARMUP_RUNS must be a non-negative integer: $PERFGATE_WARMUP_RUNS" >&2
   exit 2
@@ -20,8 +20,12 @@ if ! [[ "$PERFGATE_MEASURED_RUNS" =~ ^[1-9][0-9]*$ ]]; then
   echo "PERFGATE_MEASURED_RUNS must be a positive integer: $PERFGATE_MEASURED_RUNS" >&2
   exit 2
 fi
-if [[ "$PERFGATE_AGGREGATION" != "median" ]]; then
-  echo "PERFGATE_AGGREGATION only supports median: $PERFGATE_AGGREGATION" >&2
+if ((PERFGATE_MEASURED_RUNS % 2 == 0)); then
+  echo "PERFGATE_MEASURED_RUNS must be odd for primary-median-run: $PERFGATE_MEASURED_RUNS" >&2
+  exit 2
+fi
+if [[ "$PERFGATE_AGGREGATION" != "primary-median-run" ]]; then
+  echo "PERFGATE_AGGREGATION only supports primary-median-run: $PERFGATE_AGGREGATION" >&2
   exit 2
 fi
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
@@ -1299,7 +1303,7 @@ if [[ "$PERFGATE_WARMUP_RUNS" -gt 0 || "$PERFGATE_MEASURED_RUNS" -gt 1 ]]; then
   run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" \
   "$CURRENT_RUNTIME_PYTHON" -m vllm_hust_benchmark.cli perfgate-aggregate-runs \
     "${AGGREGATE_ARGS[@]}"
-  echo "[same-spec-current] aggregated $PERFGATE_MEASURED_RUNS measured runs ($PERFGATE_AGGREGATION) into $ARTIFACT_DIR/run_leaderboard.json"
+  echo "[same-spec-current] selected one complete measured run from $PERFGATE_MEASURED_RUNS candidates ($PERFGATE_AGGREGATION) into $ARTIFACT_DIR/run_leaderboard.json"
 fi
 
 echo "[same-spec-current] exported leaderboard artifact to $ARTIFACT_DIR"

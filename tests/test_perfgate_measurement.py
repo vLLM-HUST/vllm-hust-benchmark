@@ -34,9 +34,9 @@ def _per_run_entry(
 
 def _three_runs() -> list[dict]:
     return [
-        _per_run_entry(1, throughput=90.0, ttft=55.0, tbt=12.0),
-        _per_run_entry(2, throughput=110.0, ttft=45.0, tbt=9.0),
-        _per_run_entry(3, throughput=100.0, ttft=50.0, tbt=10.0),
+        _per_run_entry(1, throughput=90.0, ttft=40.0, tbt=8.0),
+        _per_run_entry(2, throughput=110.0, ttft=50.0, tbt=10.0),
+        _per_run_entry(3, throughput=100.0, ttft=80.0, tbt=20.0),
     ]
 
 
@@ -50,30 +50,90 @@ def _warmup_runs(count: int = 1) -> list[dict]:
     ]
 
 
-def test_median_is_computed_per_metric_independently() -> None:
-    aggregated, measurement = perfgate_measurement.aggregate_measured_runs(
+def test_selects_complete_run_at_median_throughput() -> None:
+    selected, measurement = perfgate_measurement.aggregate_measured_runs(
         _three_runs(), warmup_runs=1, warmup=_warmup_runs()
     )
-    assert aggregated == {
+    assert selected == {
         "throughput_tps": 100.0,
-        "ttft_ms": 50.0,
-        "tbt_ms": 10.0,
+        "ttft_ms": 80.0,
+        "tbt_ms": 20.0,
         "error_rate": 0.0,
     }
-    assert measurement["strategy"] == "warmup+median"
+    assert measurement["schema_version"] == "perfgate-measurement/v2"
+    assert measurement["strategy"] == "warmup+primary-median-run"
     assert measurement["warmup_runs"] == 1
     assert measurement["measured_runs"] == 3
-    assert measurement["aggregation"] == "median"
+    assert measurement["aggregation"] == "primary-median-run"
+    assert measurement["selection"] == {
+        "primary_metric": "throughput_tps",
+        "sort_direction": "ascending",
+        "secondary_sort_key": "run_index",
+        "ordered_run_indices": [1, 3, 2],
+        "selected_position": 2,
+        "selected_run_index": 3,
+        "selected_raw_result_sha256": _three_runs()[2]["raw_result_sha256"],
+    }
     assert [entry["run_index"] for entry in measurement["warmup"]] == [1]
     assert [entry["run_index"] for entry in measurement["per_run"]] == [1, 2, 3]
 
 
-def test_single_measured_run_median_is_identity() -> None:
-    aggregated, measurement = perfgate_measurement.aggregate_measured_runs(
+def test_single_measured_run_selection_is_identity() -> None:
+    selected, measurement = perfgate_measurement.aggregate_measured_runs(
         [_per_run_entry(1)], warmup_runs=0
     )
-    assert aggregated["throughput_tps"] == 100.0
+    assert selected["throughput_tps"] == 100.0
+    assert measurement["selection"]["selected_run_index"] == 1
     assert measurement["measured_runs"] == 1
+
+
+def test_duplicate_primary_metric_uses_run_index_as_secondary_sort_key() -> None:
+    runs = [
+        _per_run_entry(1, throughput=100.0, ttft=40.0),
+        _per_run_entry(2, throughput=100.0, ttft=80.0),
+        _per_run_entry(3, throughput=120.0, ttft=60.0),
+    ]
+
+    selected, measurement = perfgate_measurement.aggregate_measured_runs(
+        runs, warmup_runs=1, warmup=_warmup_runs()
+    )
+
+    assert selected["ttft_ms"] == 80.0
+    assert measurement["selection"]["ordered_run_indices"] == [1, 2, 3]
+    assert measurement["selection"]["selected_run_index"] == 2
+
+
+def test_rejects_even_measured_run_count() -> None:
+    runs = [
+        _per_run_entry(1, throughput=90.0, ttft=40.0),
+        _per_run_entry(2, throughput=100.0, ttft=50.0),
+        _per_run_entry(3, throughput=110.0, ttft=60.0),
+        _per_run_entry(4, throughput=130.0, ttft=70.0),
+    ]
+
+    with pytest.raises(ValueError, match="odd number of measured runs"):
+        perfgate_measurement.aggregate_measured_runs(
+            runs, warmup_runs=1, warmup=_warmup_runs()
+        )
+
+
+def test_five_measured_runs_selects_third_sorted_run() -> None:
+    runs = [
+        _per_run_entry(1, throughput=130.0, ttft=10.0),
+        _per_run_entry(2, throughput=90.0, ttft=20.0),
+        _per_run_entry(3, throughput=120.0, ttft=30.0),
+        _per_run_entry(4, throughput=100.0, ttft=40.0),
+        _per_run_entry(5, throughput=110.0, ttft=50.0),
+    ]
+
+    selected, measurement = perfgate_measurement.aggregate_measured_runs(
+        runs, warmup_runs=1, warmup=_warmup_runs()
+    )
+
+    assert measurement["selection"]["ordered_run_indices"] == [2, 4, 5, 3, 1]
+    assert measurement["selection"]["selected_position"] == 3
+    assert measurement["selection"]["selected_run_index"] == 5
+    assert selected["ttft_ms"] == 50.0
 
 
 def test_rejects_non_zero_error_rate() -> None:
@@ -178,22 +238,27 @@ def test_validate_measurement_block_shape_and_cross_check() -> None:
         measurement,
         artifact_metrics={
             "throughput_tps": 100.0,
-            "ttft_ms": 50.0,
-            "tbt_ms": 10.0,
+            "ttft_ms": 80.0,
+            "tbt_ms": 20.0,
             "error_rate": 0.0,
         },
     )
 
-    with pytest.raises(ValueError, match="does not match median"):
+    with pytest.raises(ValueError, match="does not match selected run"):
         perfgate_measurement.validate_measurement_block(
             measurement,
             artifact_metrics={
                 "throughput_tps": 101.0,
-                "ttft_ms": 50.0,
-                "tbt_ms": 10.0,
+                "ttft_ms": 80.0,
+                "tbt_ms": 20.0,
                 "error_rate": 0.0,
             },
         )
+
+    tampered_selection = json.loads(json.dumps(measurement))
+    tampered_selection["selection"]["selected_run_index"] = 1
+    with pytest.raises(ValueError, match="selection metadata"):
+        perfgate_measurement.validate_measurement_block(tampered_selection)
 
     broken = dict(measurement, measured_runs=2)
     with pytest.raises(ValueError, match="per_run"):
@@ -202,6 +267,11 @@ def test_validate_measurement_block_shape_and_cross_check() -> None:
     with pytest.raises(ValueError, match="strategy"):
         perfgate_measurement.validate_measurement_block(
             dict(measurement, strategy="single")
+        )
+
+    with pytest.raises(ValueError, match="schema_version"):
+        perfgate_measurement.validate_measurement_block(
+            dict(measurement, schema_version="perfgate-measurement/v1")
         )
 
     with pytest.raises(ValueError, match="must be an object"):
@@ -220,7 +290,7 @@ def test_publication_policy_rejects_single_cold_measurement() -> None:
         )
 
 
-def test_apply_median_metrics_preserves_template_except_median_metrics(
+def test_apply_selected_run_metrics_preserves_template_and_session_metrics(
     tmp_path: Path,
 ) -> None:
     template = tmp_path / "run_leaderboard.json"
@@ -240,17 +310,19 @@ def test_apply_median_metrics_preserves_template_except_median_metrics(
         ),
         encoding="utf-8",
     )
-    aggregated, _ = perfgate_measurement.aggregate_measured_runs(
+    selected, _ = perfgate_measurement.aggregate_measured_runs(
         _three_runs(), warmup_runs=1, warmup=_warmup_runs()
     )
-    output = tmp_path / "aggregated.json"
-    payload = perfgate_measurement.apply_median_metrics(template, aggregated, output)
+    output = tmp_path / "selected.json"
+    payload = perfgate_measurement.apply_selected_run_metrics(
+        template, selected, output
+    )
 
     written = json.loads(output.read_text(encoding="utf-8"))
     assert written == payload
     assert written["metrics"]["throughput_tps"] == 100.0
-    assert written["metrics"]["ttft_ms"] == 50.0
-    assert written["metrics"]["tbt_ms"] == 10.0
+    assert written["metrics"]["ttft_ms"] == 80.0
+    assert written["metrics"]["tbt_ms"] == 20.0
     assert written["metrics"]["error_rate"] == 0.0
     # Server-lifetime and identity fields keep the template values.
     assert written["metrics"]["peak_mem_mb"] == 2048
@@ -332,7 +404,7 @@ def test_aggregate_cli_records_warmup_checksum_for_one_measured_run(
             warmup_raw_results=[str(warmup)],
             run_raw_results=[str(measured)],
             warmup_runs=1,
-            aggregation="median",
+            aggregation="primary-median-run",
             template=str(template),
             output=str(output),
             measurement_out=str(measurement_out),
@@ -343,6 +415,7 @@ def test_aggregate_cli_records_warmup_checksum_for_one_measured_run(
     measurement = json.loads(measurement_out.read_text(encoding="utf-8"))
     assert measurement["warmup_runs"] == 1
     assert measurement["measured_runs"] == 1
+    assert measurement["selection"]["selected_run_index"] == 1
     assert (
         measurement["warmup"][0]["raw_result_sha256"]
         == hashlib.sha256(warmup.read_bytes()).hexdigest()
