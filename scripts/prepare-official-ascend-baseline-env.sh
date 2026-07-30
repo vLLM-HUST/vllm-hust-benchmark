@@ -310,7 +310,7 @@ patch_vllm_ascend_sampler_top_k_top_p_fallback() {
 
   [[ -f "$sampler_file" ]] || return 0
 
-  "$ENV_PREFIX/bin/python" - "$sampler_file" <<'PY'
+  python3 - "$sampler_file" <<'PY'
 from pathlib import Path
 import sys
 
