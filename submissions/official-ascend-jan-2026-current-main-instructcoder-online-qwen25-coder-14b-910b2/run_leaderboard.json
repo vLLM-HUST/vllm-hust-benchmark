@@ -30,10 +30,9 @@
     "dataset": "hf"
   },
   "metrics": {
+    "throughput_tps": 125.25636251468146,
     "ttft_ms": 342.95042794894925,
     "tbt_ms": 119.72396563393703,
-    "throughput_tps": 125.25636251468146,
-    "peak_mem_mb": 0,
     "error_rate": 0.0
   },
   "constraints": {
@@ -161,5 +160,61 @@
       "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-Coder-14B-Instruct/snapshots/aedcc2d42b622764e023cf882b6652e646b95671"
     },
     "resolved_spec_hash": "8b0eda0c27055ec8449469dde022d9b37bd7efb201622c811e1add76dd9ffc10"
+  },
+  "measurement": {
+    "schema_version": "perfgate-measurement/v2",
+    "strategy": "warmup+primary-median-run",
+    "warmup_runs": 0,
+    "measured_runs": 3,
+    "aggregation": "primary-median-run",
+    "selection": {
+      "primary_metric": "throughput_tps",
+      "sort_direction": "ascending",
+      "secondary_sort_key": "run_index",
+      "ordered_run_indices": [
+        3,
+        1,
+        2
+      ],
+      "selected_position": 2,
+      "selected_run_index": 1,
+      "selected_raw_result_sha256": "d01a96702ebfa165fa825a575394abce2dd53bcc34dcee9905da3efe672fe837"
+    },
+    "warmup": [],
+    "per_run": [
+      {
+        "run_index": 1,
+        "raw_result_sha256": "d01a96702ebfa165fa825a575394abce2dd53bcc34dcee9905da3efe672fe837",
+        "metrics": {
+          "throughput_tps": 125.25636251468146,
+          "ttft_ms": 342.95042794894925,
+          "tbt_ms": 119.72396563393703,
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0
+        }
+      },
+      {
+        "run_index": 2,
+        "raw_result_sha256": "ce51c34e4a0fed13725199fecf02a27af8ae3b5e7e5c99adbfe951dd308cfad5",
+        "metrics": {
+          "throughput_tps": 125.50478680981558,
+          "ttft_ms": 349.21753125570376,
+          "tbt_ms": 121.13848936912036,
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0
+        }
+      },
+      {
+        "run_index": 3,
+        "raw_result_sha256": "de4b14e19ee63b9a6176dbd1866f95611c7e60e21af6d58b802784d4ecc72d3d",
+        "metrics": {
+          "throughput_tps": 124.16051421819866,
+          "ttft_ms": 435.5616966060157,
+          "tbt_ms": 156.25777151407704,
+          "error_rate": 0.001953125,
+          "peak_mem_mb": 0.0
+        }
+      }
+    ]
   }
 }

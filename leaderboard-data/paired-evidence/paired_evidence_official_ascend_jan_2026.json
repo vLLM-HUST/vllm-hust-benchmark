@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
-  "generated_at": "2026-07-30",
+  "schema_version": "1.1",
+  "generated_at": "2026-07-30T19:00:00Z",
   "target_id": "official-ascend-jan-2026-v0.18.0",
+  "measurement_strategy": "primary-median-run (3 repetitions)",
   "specs": [
     {
       "profile": "core-text-14b",
       "scenario": "random-online",
-      "model": "Qwen/Qwen2.5-14B-Instruct",
       "baseline": {
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5",
@@ -14,28 +14,32 @@
         "tbt_ms": 95.27,
         "throughput_tps": 228.15,
         "error_rate": 0.0,
-        "target_id": "official-ascend-jan-2026-v0.18.0"
+        "target_id": "official-ascend-jan-2026-v0.18.0",
+        "repetitions": 1
       },
       "current_main": {
         "engine_version": "0.23.1.post1.dev630+gababa41d6",
         "git_commit": "e4ce33646f2e",
-        "ttft_ms": 1204.06,
-        "tbt_ms": 128.39,
-        "throughput_tps": 221.58,
+        "ttft_ms": 5174.08,
+        "tbt_ms": 150.32,
+        "throughput_tps": 207.63,
         "error_rate": 0.0,
-        "target_id": "official-ascend-jan-2026-v0.18.0"
+        "target_id": "official-ascend-jan-2026-v0.18.0",
+        "repetitions": 3,
+        "has_measurement_block": true,
+        "measurement_strategy": "warmup+primary-median-run",
+        "selected_run_index": 3
       },
       "delta_percent": {
-        "ttft": 347.97,
-        "tbt": 34.77,
-        "throughput": -2.88
+        "ttft": 1824.99,
+        "tbt": 57.79,
+        "throughput": -8.99
       },
       "paired_evidence_valid": true
     },
     {
       "profile": "coder-14b",
       "scenario": "instructcoder-online",
-      "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
       "baseline": {
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5",
@@ -43,7 +47,8 @@
         "tbt_ms": 95.12,
         "throughput_tps": 125.78,
         "error_rate": 0.00048828125,
-        "target_id": "official-ascend-jan-2026-v0.18.0"
+        "target_id": "official-ascend-jan-2026-v0.18.0",
+        "repetitions": 1
       },
       "current_main": {
         "engine_version": "0.23.1.post1.dev630+gababa41d6",
@@ -52,7 +57,11 @@
         "tbt_ms": 119.72,
         "throughput_tps": 125.26,
         "error_rate": 0.0,
-        "target_id": "official-ascend-jan-2026-v0.18.0"
+        "target_id": "official-ascend-jan-2026-v0.18.0",
+        "repetitions": 3,
+        "has_measurement_block": true,
+        "measurement_strategy": "warmup+primary-median-run",
+        "selected_run_index": 1
       },
       "delta_percent": {
         "ttft": 38.16,
@@ -64,7 +73,6 @@
     {
       "profile": "vision-7b",
       "scenario": "visionarena-online",
-      "model": "Qwen/Qwen2.5-VL-7B-Instruct",
       "baseline": {
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5",
@@ -72,21 +80,26 @@
         "tbt_ms": 66.7,
         "throughput_tps": 113.74,
         "error_rate": 0.001,
-        "target_id": "official-ascend-jan-2026-v0.18.0"
+        "target_id": "official-ascend-jan-2026-v0.18.0",
+        "repetitions": 1
       },
       "current_main": {
         "engine_version": "0.23.1.post1.dev630+gababa41d6",
         "git_commit": "e4ce33646f2e",
-        "ttft_ms": 688.8,
-        "tbt_ms": 104.76,
-        "throughput_tps": 111.24,
+        "ttft_ms": 812.33,
+        "tbt_ms": 137.22,
+        "throughput_tps": 111.11,
         "error_rate": 0.001,
-        "target_id": "official-ascend-jan-2026-v0.18.0"
+        "target_id": "official-ascend-jan-2026-v0.18.0",
+        "repetitions": 3,
+        "has_measurement_block": true,
+        "measurement_strategy": "warmup+primary-median-run",
+        "selected_run_index": 2
       },
       "delta_percent": {
-        "ttft": -48.66,
-        "tbt": 57.06,
-        "throughput": -2.2
+        "ttft": -39.46,
+        "tbt": 105.74,
+        "throughput": -2.31
       },
       "paired_evidence_valid": true
     }

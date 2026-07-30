@@ -1,5 +1,5 @@
 {
-  "entry_id": "03832648-c251-4db8-aa33-d08bc055fe45",
+  "entry_id": "fbce2a3a-11c1-491f-98e1-8172bbdbfce9",
   "engine": "vllm-hust",
   "engine_version": "0.23.1.post1.dev630+gababa41d6",
   "config_type": "single_gpu",
@@ -30,10 +30,9 @@
     "dataset": "hf"
   },
   "metrics": {
-    "ttft_ms": 688.7975453077028,
-    "tbt_ms": 104.75571314605178,
-    "throughput_tps": 111.2382412731867,
-    "peak_mem_mb": 0,
+    "throughput_tps": 111.10959076473492,
+    "ttft_ms": 812.330929674087,
+    "tbt_ms": 137.22330813313377,
     "error_rate": 0.001
   },
   "constraints": {
@@ -56,9 +55,9 @@
       "long_context_length": 30720,
       "long_context_throughput_stable": false,
       "long_context_ttft_p95_ms": null,
-      "long_context_ttft_p99_ms": 1167.7373189153145,
+      "long_context_ttft_p99_ms": 1454.635895420797,
       "long_context_tpot_p95_ms": null,
-      "long_context_tpot_p99_ms": 148.32055501683843,
+      "long_context_tpot_p99_ms": 213.4182648548085,
       "long_context_ttft_p95_stable": null,
       "long_context_ttft_p99_stable": false,
       "long_context_tpot_p95_stable": null,
@@ -83,7 +82,7 @@
     "driver_version": null
   },
   "metadata": {
-    "submitted_at": "2026-07-30T18:06:05Z",
+    "submitted_at": "2026-07-30T18:53:02Z",
     "submitter": "same-spec-current",
     "data_source": "vllm-hust-benchmark",
     "engine": "vllm-hust",
@@ -101,7 +100,7 @@
     "changelog_url": null,
     "notes": null,
     "verified": null,
-    "idempotency_key": "e69af1780ef4bf9e608229ab47a4853d4cc8449b21f4d7ad4a9784936a8d9665",
+    "idempotency_key": "9eb41fa01fd94cf0e1a732f050d97f868091438d88086c8061219eee9b66b04b",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
       "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
@@ -147,7 +146,7 @@
         "image": 1
       },
       "host": "0.0.0.0",
-      "port": 8003,
+      "port": 8012,
       "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-VL-7B-Instruct/snapshots/cc594898137f460bfe9f0759e9844b3ce807cfb5",
       "dtype": "float16"
     },
@@ -161,9 +160,65 @@
       "num_prompts": 1000,
       "request_rate": 1,
       "host": "127.0.0.1",
-      "port": 8003,
+      "port": 8012,
       "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-VL-7B-Instruct/snapshots/cc594898137f460bfe9f0759e9844b3ce807cfb5"
     },
     "resolved_spec_hash": "c0af3e3d9a01794ffdac6b091bf193f56132bce24bf89188956f2c24fd5d2bfd"
+  },
+  "measurement": {
+    "schema_version": "perfgate-measurement/v2",
+    "strategy": "warmup+primary-median-run",
+    "warmup_runs": 0,
+    "measured_runs": 3,
+    "aggregation": "primary-median-run",
+    "selection": {
+      "primary_metric": "throughput_tps",
+      "sort_direction": "ascending",
+      "secondary_sort_key": "run_index",
+      "ordered_run_indices": [
+        3,
+        2,
+        1
+      ],
+      "selected_position": 2,
+      "selected_run_index": 2,
+      "selected_raw_result_sha256": "06ba85917f89ed1ddb85a2da52153f78c2193541f1e349f5e6184182e9576912"
+    },
+    "warmup": [],
+    "per_run": [
+      {
+        "run_index": 1,
+        "raw_result_sha256": "0ef8e2b23ea5ce1013db4266a260ccf12f99394277b1833c0c6ccb9c9bbe7abb",
+        "metrics": {
+          "throughput_tps": 111.2382412731867,
+          "ttft_ms": 688.7975453077028,
+          "tbt_ms": 104.75571314605178,
+          "error_rate": 0.001,
+          "peak_mem_mb": 0.0
+        }
+      },
+      {
+        "run_index": 2,
+        "raw_result_sha256": "06ba85917f89ed1ddb85a2da52153f78c2193541f1e349f5e6184182e9576912",
+        "metrics": {
+          "throughput_tps": 111.10959076473492,
+          "ttft_ms": 812.330929674087,
+          "tbt_ms": 137.22330813313377,
+          "error_rate": 0.001,
+          "peak_mem_mb": 0.0
+        }
+      },
+      {
+        "run_index": 3,
+        "raw_result_sha256": "b9fd1705d71aeb3571a56b4f61b300672492f6c31bee26eedfe47668b5a2afb9",
+        "metrics": {
+          "throughput_tps": 110.96747355585977,
+          "ttft_ms": 1092.9567225046922,
+          "tbt_ms": 163.9091740333971,
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0
+        }
+      }
+    ]
   }
 }
