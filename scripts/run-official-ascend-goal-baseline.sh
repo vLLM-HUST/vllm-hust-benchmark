@@ -1119,7 +1119,7 @@ from vllm_hust_benchmark.official_runtime_inputs import normalize_server_paramet
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 normalized = normalize_server_parameters(payload["resolved_server_parameters"])
 if os.environ.get("OFFICIAL_FORCE_EAGER_SERVER") == "1":
-    normalized["enforce_eager"] = ""
+    normalized["enforce_eager"] = True
 print(
     json.dumps(
     normalized,
@@ -1509,7 +1509,8 @@ should_force_eager_for_server_benchmark() {
     return 0
   fi
 
-  return 1
+  echo "[goal-baseline] ACL graph weak_ref_tensor probe failed (status=$probe_status); forcing --enforce-eager as safe default" >&2
+  return 0
 }
 
 server_log_indicates_resource_busy() {
@@ -1889,6 +1890,7 @@ EXPORT_ARGS=(
   --benchmark-result-file "$RAW_RESULT_FILE"
   --constraints-file "$CONSTRAINTS_FILE"
   --same-spec-file "$SAME_SPEC_FILE"
+  --spec-path "$SPEC_FILE"
   --output-dir "$ARTIFACT_DIR"
   --run-id "$RUN_ID"
   --engine "$ENGINE"

@@ -1103,6 +1103,8 @@ if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
     assert_target_port_available "Current same-spec benchmark" "$CLIENT_HOST" "$CLIENT_PORT"
   fi
   SERVER_ARGS=$(json2args "$(jq -c '.resolved_server_parameters | del(.disable_log_requests)' "$SAME_SPEC_FILE")")
+  SERVER_ARGS="$SERVER_ARGS --enforce-eager"
+  echo "[same-spec-current] forcing --enforce-eager (vllm_ascend_C unavailable)" >&2
 fi
 
 echo "[same-spec-current] neutral cwd: $CURRENT_RUNTIME_CWD"
@@ -1179,6 +1181,7 @@ EXPORT_ARGS=(
   --benchmark-result-file "$RAW_RESULT_FILE"
   --constraints-file "$CONSTRAINTS_FILE"
   --same-spec-file "$SAME_SPEC_FILE"
+  --spec-path "$SPEC_FILE"
   --output-dir "$ARTIFACT_DIR"
   --run-id "$RUN_ID"
   --engine "$CURRENT_ENGINE"

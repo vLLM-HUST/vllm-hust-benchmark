@@ -9,11 +9,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+from vllm_hust_benchmark.aggregate_results import (
+    VALID_AGG_METHODS,
+    VALID_OUTLIER_HANDLING,
+    aggregate_entries,
+    load_entries_from_paths,
+    write_aggregated_entries,
+)
 from vllm_hust_benchmark.integration import (
     DEFAULT_RUNTIME_ENGINE,
     aggregate_to_website,
-    upload_to_huggingface,
-    sync_submission_to_huggingface,
     build_ascend_benchmark_ci_command,
     build_benchmark_script_command,
     build_performance_suite_command,
@@ -24,17 +29,13 @@ from vllm_hust_benchmark.integration import (
     run_external_command,
     run_local_serve_benchmark,
     split_vllm_serve_scenario_parameters,
+    sync_submission_to_huggingface,
+    upload_to_huggingface,
     validate_repo_layout,
     validate_runtime_repo,
 )
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
-from vllm_hust_benchmark.aggregate_results import (
-    VALID_AGG_METHODS,
-    VALID_OUTLIER_HANDLING,
-    aggregate_entries,
-    load_entries_from_paths,
-    write_aggregated_entries,
-)
+from vllm_hust_benchmark import perfgate_measurement
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import filter_scenarios, get_scenario
 from vllm_hust_benchmark.upstream_tests import (
@@ -449,6 +450,7 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--benchmark-result-file")
     export_parser.add_argument("--constraints-file")
     export_parser.add_argument("--same-spec-file")
+    export_parser.add_argument("--spec-path")
     export_parser.add_argument("--output-dir", required=True)
     export_parser.add_argument("--artifact-name", default="run_leaderboard.json")
     export_parser.add_argument("--run-id", required=True)
@@ -540,6 +542,13 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=["iqr", "3sigma"],
         help="Outlier detection method (default: iqr).",
     )
+
+    perfgate_aggregate_parser = subparsers.add_parser(
+        "perfgate-aggregate-runs",
+        help="Sort measured runs by throughput and select the middle run for one "
+        "run_leaderboard.json and emit a measurement.json strategy record.",
+    )
+    perfgate_measurement.add_aggregate_runs_arguments(perfgate_aggregate_parser)
 
     publish_parser = subparsers.add_parser(
         "publish-website",
@@ -693,6 +702,9 @@ def _build_parser() -> argparse.ArgumentParser:
         "--same-spec-file", help="Path to same-spec benchmark spec file."
     )
     submit_parser.add_argument(
+        "--spec-path", help="Path to the original benchmark spec file."
+    )
+    submit_parser.add_argument(
         "--runtime-python", help="Python interpreter used to run the engine."
     )
     submit_parser.add_argument("--engine-source-repository")
@@ -726,6 +738,84 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Path to trend schema JSON (default: schemas/leaderboard_trend_v1.schema.json).",
     )
 
+    # issue #95 merge gate: PR 合并前强制 paired real-online 性能证据判定
+    mg_parser = subparsers.add_parser(
+        "merge-gate-check",
+        help="Evaluate PR paired real-online performance evidence against the "
+        "fixed-target registry (issue #95 merge gate). Returns 0 on pass/skip, "
+        "1 on fail.",
+    )
+    mg_parser.add_argument(
+        "--base-artifact",
+        type=Path,
+        default=None,
+        help="Path to base run_leaderboard.json (PR fork point). "
+        "Omit when base CI status is not accepted.",
+    )
+    mg_parser.add_argument(
+        "--head-artifact",
+        type=Path,
+        default=None,
+        help="Path to head run_leaderboard.json (PR head commit). "
+        "Omit when head CI status is not accepted.",
+    )
+    mg_parser.add_argument(
+        "--base-status",
+        choices=["accepted", "missing", "cancelled", "skipped", "resource_busy"],
+        default="accepted",
+        help="Base artifact CI status (default: accepted). Non-accepted fails closed.",
+    )
+    mg_parser.add_argument(
+        "--head-status",
+        choices=["accepted", "missing", "cancelled", "skipped", "resource_busy"],
+        default="accepted",
+        help="Head artifact CI status (default: accepted). Non-accepted fails closed.",
+    )
+    mg_parser.add_argument(
+        "--repo", required=True, help="PR repository (e.g. vllm-hust)."
+    )
+    mg_parser.add_argument("--pr-number", type=int, required=True, help="PR number.")
+    mg_parser.add_argument("--head-sha", required=True, help="PR head commit SHA.")
+    mg_parser.add_argument(
+        "--base-sha", required=True, help="PR base (fork point) SHA."
+    )
+    mg_parser.add_argument(
+        "--labels",
+        default="",
+        help="Comma-separated PR labels (e.g. perf-skip:docs-only).",
+    )
+    mg_parser.add_argument("--declared-target-id", default=None)
+    mg_parser.add_argument("--declared-target-version", default=None)
+    mg_parser.add_argument("--declared-profile-id", default=None)
+    mg_parser.add_argument("--specialty-spec", default=None)
+    mg_parser.add_argument("--specialty-reason", default=None)
+    mg_parser.add_argument(
+        "--skip-approver",
+        default=None,
+        help="GitHub username of the approver for a perf-skip label (issue §5.2.4). "
+        "Required when a skip label is present, otherwise the gate fails closed.",
+    )
+    mg_parser.add_argument(
+        "--registry",
+        type=Path,
+        default=None,
+        help="Path to fixed_target_registry.json (default: built-in registry).",
+    )
+    mg_parser.add_argument(
+        "--decision-output",
+        type=Path,
+        default=None,
+        help="Write merge-gate-decision.json to this path (issue #95 enhancement #4).",
+    )
+    mg_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Pre-check mode (issue #95 enhancement #9): evaluate and print the "
+        "decision but always exit 0, even on fail. Used by #105 phase 4 PR "
+        "backfill pre-validation to avoid blocking on evidence that is not "
+        "expected to pass the merge gate yet.",
+    )
+
     return parser
 
 
@@ -739,7 +829,7 @@ def _format_scenarios() -> str:
 
 
 def _format_analysis() -> str:
-    return "\n".join(
+    return "\n".join(  # noqa: FLY002
         [
             "Official vLLM benchmark boundary:",
             "- CLI entrypoints: vllm/entrypoints/cli/benchmark/*",
@@ -915,7 +1005,7 @@ def main(argv: list[str] | None = None) -> int:
         runtimes = ("vllm-hust", "vllm")
         for index, runtime in enumerate(runtimes):
             if index:
-                print("")
+                print()
             print(f"runtime: {runtime}")
             runtime_argv = [
                 "run",
@@ -978,6 +1068,7 @@ def main(argv: list[str] | None = None) -> int:
                 benchmark_result_file=benchmark_result_file,
                 constraints_file=constraints_file,
                 same_spec_file=same_spec_file,
+                spec_path=Path(args.spec_path).resolve() if args.spec_path else None,
                 output_dir=Path(args.output_dir),
                 artifact_name=args.artifact_name,
                 run_id=args.run_id,
@@ -1048,6 +1139,13 @@ def main(argv: list[str] | None = None) -> int:
                 return 2
             return aggregate_exit_code
         return 0
+
+    if args.command == "perfgate-aggregate-runs":
+        try:
+            return perfgate_measurement.run_aggregate_runs_cli(args)
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
 
     if args.command == "aggregate":
         try:
@@ -1216,6 +1314,7 @@ def main(argv: list[str] | None = None) -> int:
                 benchmark_result_file=benchmark_result_file,
                 constraints_file=constraints_file,
                 same_spec_file=same_spec_file,
+                spec_path=Path(args.spec_path).resolve() if getattr(args, "spec_path", None) else None,
                 output_dir=output_dir,
                 artifact_name="run_leaderboard.json",
                 run_id=args.run_id,
@@ -1268,7 +1367,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         print(f"artifact : {artifact_path}")
         print(f"manifest : {manifest_path}")
-        print("")
+        print()
         print("Next steps:")
         try:
             output_dir_hint = output_dir.relative_to(layout.benchmark_repo)
@@ -1332,6 +1431,60 @@ def main(argv: list[str] | None = None) -> int:
             )
         print(f"\nOK: {len(report.decisions)} entry(s) validated, {passed} admitted")
         return 0
+
+    if args.command == "merge-gate-check":
+        from vllm_hust_benchmark.merge_gate import (
+            ArtifactRef,
+            ArtifactStatus,
+            PRContext,
+            evaluate_merge_gate,
+            format_decision_log,
+            write_decision_json,
+        )
+
+        status_map = {s.value: s for s in ArtifactStatus}
+        labels = tuple(
+            label.strip() for label in (args.labels or "").split(",") if label.strip()
+        )
+        pr_context = PRContext(
+            repo=args.repo,
+            number=args.pr_number,
+            head_sha=args.head_sha,
+            base_sha=args.base_sha,
+            labels=labels,
+            declared_target_id=args.declared_target_id,
+            declared_target_version=args.declared_target_version,
+            declared_profile_id=args.declared_profile_id,
+            specialty_spec=args.specialty_spec,
+            specialty_reason=args.specialty_reason,
+            skip_approver=args.skip_approver,
+        )
+        base = ArtifactRef(
+            path=args.base_artifact, ci_status=status_map[args.base_status]
+        )
+        head = ArtifactRef(
+            path=args.head_artifact, ci_status=status_map[args.head_status]
+        )
+        decision = evaluate_merge_gate(
+            base=base,
+            head=head,
+            pr_context=pr_context,
+            registry_path=args.registry,
+        )
+        log_line = format_decision_log(decision, pr_context)
+        if getattr(args, "dry_run", False):
+            log_line = (
+                f"[DRY-RUN] pre-check mode — disposition not enforced\n{log_line}"
+            )
+        print(log_line)
+        if args.decision_output is not None:
+            write_decision_json(decision, args.decision_output)
+            print(f"  decision written to: {args.decision_output}", file=sys.stderr)
+        # --dry-run: always exit 0 (pre-check, do not block)
+        if getattr(args, "dry_run", False):
+            return 0
+        # pass / skip → 0 (不阻塞合并); fail → 1
+        return 0 if decision.disposition in ("pass", "skip") else 1
 
     if args.command == "bench":
         layout = resolve_repo_layout()
