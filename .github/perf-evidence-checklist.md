@@ -4,8 +4,7 @@
 
 ## Performance Evidence (issue #95 merge gate)
 
-> 性能相关 PR 合并前必须提供一组可比的 real-online paired 性能证据。
-> 纯文档/测试/网站 PR 可用受控 label 跳过（见下方例外）。
+> 性能相关 PR 合并前必须提供一组可比的 real-online paired 性能证据。 纯文档/测试/网站 PR 可用受控 label 跳过（见下方例外）。
 
 ### Target Declaration（必填）
 
