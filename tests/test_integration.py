@@ -127,6 +127,23 @@ def test_snapshot_upload_guard_rejects_future_official_artifact_without_contract
     assert "metadata.workload_config_contract" in capsys.readouterr().err
 
 
+def test_public_snapshot_trend_gate_ignores_aggregate_metadata(tmp_path: Path) -> None:
+    (tmp_path / "leaderboard_single.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "leaderboard_compare.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "last_updated.json").write_text("{}", encoding="utf-8")
+
+    integration.validate_public_snapshot_trend_admission(tmp_path)
+
+
+def test_public_snapshot_trend_gate_rejects_invalid_entry(tmp_path: Path) -> None:
+    (tmp_path / "leaderboard_single.json").write_text("[{}]", encoding="utf-8")
+    (tmp_path / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="trend admission failed"):
+        integration.validate_public_snapshot_trend_admission(tmp_path)
+
+
 def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> None:
     monkeypatch.delenv("VLLM_HUST_WORKSPACE_ROOT", raising=False)
     monkeypatch.delenv("VLLM_HUST_REPO", raising=False)
@@ -1083,7 +1100,10 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
             "leaderboard_compare.json",
             "last_updated.json",
         ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+            payload = (
+                "[]\n" if file_name.endswith(("single.json", "multi.json")) else "{}\n"
+            )
+            (output_dir / file_name).write_text(payload, encoding="utf-8")
         return 0
 
     class FakeCommitOperationAdd:
@@ -1286,7 +1306,10 @@ def test_sync_submission_to_huggingface_deletes_excluded_remote_submission(
             "leaderboard_compare.json",
             "last_updated.json",
         ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+            payload = (
+                "[]\n" if file_name.endswith(("single.json", "multi.json")) else "{}\n"
+            )
+            (output_dir / file_name).write_text(payload, encoding="utf-8")
         return 0
 
     class FakeCommitOperationAdd:
@@ -1420,7 +1443,10 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
             "leaderboard_compare.json",
             "last_updated.json",
         ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+            payload = (
+                "[]\n" if file_name.endswith(("single.json", "multi.json")) else "{}\n"
+            )
+            (output_dir / file_name).write_text(payload, encoding="utf-8")
         return 0
 
     class FakeCommitOperationAdd:
@@ -1734,7 +1760,10 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
             "leaderboard_compare.json",
             "last_updated.json",
         ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+            payload = (
+                "[]\n" if file_name.endswith(("single.json", "multi.json")) else "{}\n"
+            )
+            (output_dir / file_name).write_text(payload, encoding="utf-8")
         return 0
 
     class FakeCommitOperationAdd:
@@ -1862,7 +1891,10 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
             "leaderboard_compare.json",
             "last_updated.json",
         ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+            payload = (
+                "[]\n" if file_name.endswith(("single.json", "multi.json")) else "{}\n"
+            )
+            (output_dir / file_name).write_text(payload, encoding="utf-8")
         return 0
 
     class FakeCommitOperationAdd:
