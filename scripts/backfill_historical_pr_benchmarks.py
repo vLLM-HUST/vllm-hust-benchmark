@@ -1025,6 +1025,11 @@ def start_managed_server(
         purpose="plugin worktree",
         in_container=in_container,
     )
+    pythonpath_value = f"{core_container_path}:{plugin_container_path}"
+    if in_container:
+        existing_pythonpath = os.environ.get("PYTHONPATH", "")
+        if existing_pythonpath:
+            pythonpath_value = f"{pythonpath_value}:{existing_pythonpath}"
     extra_args = ["--generation-config", "vllm"]
     if args.managed_disable_ascend_fusion:
         additional_config = {
@@ -1070,8 +1075,16 @@ def start_managed_server(
         "VLLM_ENGINE_ENFORCE_EAGER": "1" if args.managed_enforce_eager else "0",
         "VLLM_ENGINE_COMPILATION_CONFIG": "{}",
         "VLLM_ENGINE_EXTRA_ARGS_JSON": json.dumps(extra_args),
-        "VLLM_ENGINE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
-        "VLLM_ENGINE_BASE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
+        "VLLM_ENGINE_PYTHONPATH": pythonpath_value,
+        "VLLM_ENGINE_BASE_PYTHONPATH": pythonpath_value,
+        # In-container mode (manage-container.sh) does not translate
+        # VLLM_ENGINE_PYTHONPATH into PYTHONPATH the way the docker
+        # entrypoint does for manage.sh. Set PYTHONPATH directly so vllm
+        # serve imports the historical PR commit's code, not the installed
+        # site-packages version.
+        "PYTHONPATH": pythonpath_value
+        if in_container
+        else os.environ.get("PYTHONPATH", ""),
         "VLLM_PLUGINS": "ascend",
         # dev-hub intentionally filters environment variable names containing
         # KEY/TOKEN/SECRET, so prefix forwarding is required for HF cache vars.
