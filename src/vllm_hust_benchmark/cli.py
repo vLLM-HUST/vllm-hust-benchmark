@@ -35,6 +35,7 @@ from vllm_hust_benchmark.integration import (
     validate_runtime_repo,
 )
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
+from vllm_hust_benchmark import perfgate_measurement
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import filter_scenarios, get_scenario
 from vllm_hust_benchmark.upstream_tests import (
@@ -540,6 +541,13 @@ def _build_parser() -> argparse.ArgumentParser:
         choices=["iqr", "3sigma"],
         help="Outlier detection method (default: iqr).",
     )
+
+    perfgate_aggregate_parser = subparsers.add_parser(
+        "perfgate-aggregate-runs",
+        help="Sort measured runs by throughput and select the middle run for one "
+        "run_leaderboard.json and emit a measurement.json strategy record.",
+    )
+    perfgate_measurement.add_aggregate_runs_arguments(perfgate_aggregate_parser)
 
     publish_parser = subparsers.add_parser(
         "publish-website",
@@ -1126,6 +1134,13 @@ def main(argv: list[str] | None = None) -> int:
                 return 2
             return aggregate_exit_code
         return 0
+
+    if args.command == "perfgate-aggregate-runs":
+        try:
+            return perfgate_measurement.run_aggregate_runs_cli(args)
+        except ValueError as error:
+            print(str(error), file=sys.stderr)
+            return 2
 
     if args.command == "aggregate":
         try:

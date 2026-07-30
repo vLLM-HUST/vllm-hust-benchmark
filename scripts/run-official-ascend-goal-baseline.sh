@@ -817,7 +817,7 @@ run_client_command() {
     throughput|latency)
       prepare_offline_benchmark_runtime || return $?
 
-      run_offline_client_command_with_aclgraph_fallback
+      run_offline_client_command "$CLIENT_ARGS"
       ;;
     *)
       echo "Unsupported benchmark type for official baseline runner: $BENCHMARK_TYPE" >&2
@@ -1100,15 +1100,8 @@ ensure_runtime_dataset_available() {
 }
 
 normalized_server_parameters_json() {
-  local force_eager_server=0
-
-  if should_force_eager_for_server_benchmark; then
-    force_eager_server=1
-  fi
-
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
     SAME_SPEC_FILE="$SAME_SPEC_FILE" \
-    OFFICIAL_FORCE_EAGER_SERVER="$force_eager_server" \
     "$HOST_PYTHON_BIN" - <<'PY'
 import json
 import os
@@ -1131,12 +1124,6 @@ PY
 }
 
 normalized_client_parameters_json() {
-  local force_eager_offline=0
-
-  if should_force_eager_for_offline_benchmark; then
-    force_eager_offline=1
-  fi
-
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
     SAME_SPEC_FILE="$SAME_SPEC_FILE" \
     BENCHMARK_TYPE="$BENCHMARK_TYPE" \
@@ -1144,7 +1131,6 @@ normalized_client_parameters_json() {
     OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
     BENCHMARK_REPO="$REPO_ROOT" \
     OFFICIAL_BENCHMARK_DATASET_ROOT="$OFFICIAL_BENCHMARK_DATASET_ROOT" \
-    OFFICIAL_FORCE_EAGER_OFFLINE="$force_eager_offline" \
     "$HOST_PYTHON_BIN" - <<'PY'
 import json
 import os
@@ -1163,7 +1149,6 @@ print(
             vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
             benchmark_repo=os.environ.get("BENCHMARK_REPO"),
             dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
-            force_eager=os.environ.get("OFFICIAL_FORCE_EAGER_OFFLINE") == "1",
         ),
         separators=(",", ":"),
         ensure_ascii=True,
@@ -1431,85 +1416,6 @@ PY
   fi
 
   printf '%s' "unknown"
-}
-
-official_runtime_supports_aclgraph_weak_ref_tensor() {
-  local probe_status=0
-
-  set +e
-  run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY' >/dev/null 2>&1
-import torch
-
-has_namespace = hasattr(torch.ops, "_C_ascend")
-has_weak_ref = has_namespace and hasattr(torch.ops._C_ascend, "weak_ref_tensor")
-
-raise SystemExit(0 if has_weak_ref else 3)
-PY
-  probe_status=$?
-  set -e
-
-  if [[ "$probe_status" -eq 0 ]]; then
-    return 0
-  fi
-
-  if [[ "$probe_status" -eq 3 ]]; then
-    return 1
-  fi
-
-  echo "[goal-baseline] failed to probe official ACL graph weak_ref_tensor support (status=${probe_status}); leaving graph mode unchanged" >&2
-  return 2
-}
-
-should_force_eager_for_offline_benchmark() {
-  local probe_status=0
-
-  case "${BENCHMARK_TYPE:-}" in
-    throughput|latency)
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-
-  official_runtime_supports_aclgraph_weak_ref_tensor
-  probe_status=$?
-
-  if [[ "$probe_status" -eq 0 ]]; then
-    return 1
-  fi
-
-  if [[ "$probe_status" -eq 1 ]]; then
-    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark" >&2
-    return 0
-  fi
-
-  return 1
-}
-
-should_force_eager_for_server_benchmark() {
-  local probe_status=0
-
-  case "${BENCHMARK_TYPE:-}" in
-    serve)
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-
-  official_runtime_supports_aclgraph_weak_ref_tensor
-  probe_status=$?
-
-  if [[ "$probe_status" -eq 0 ]]; then
-    return 1
-  fi
-
-  if [[ "$probe_status" -eq 1 ]]; then
-    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for serve benchmark server" >&2
-    return 0
-  fi
-
-  return 1
 }
 
 server_log_indicates_resource_busy() {

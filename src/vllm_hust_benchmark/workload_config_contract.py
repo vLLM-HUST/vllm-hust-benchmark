@@ -72,6 +72,9 @@ OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
     "sonnet-throughput": {
         "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
     },
+    "visionarena-online": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
 }
 
 OFFICIAL_VISION_DEFAULTS: dict[str, dict[str, Any]] = {
@@ -174,9 +177,7 @@ def _validate_target_metadata(metadata: Mapping[str, Any]) -> list[str]:
     try:
         registry = load_fixed_target_registry()
     except ValueError as exc:
-        errors.append(
-            f"metadata.target_id validation failed to load registry: {exc}"
-        )
+        errors.append(f"metadata.target_id validation failed to load registry: {exc}")
         return errors
 
     active = get_active_profiles(registry)

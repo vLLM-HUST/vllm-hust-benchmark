@@ -65,6 +65,36 @@ def _future_official_artifact() -> dict:
     }
 
 
+def _valid_public_trend_entry() -> dict:
+    return json.loads(
+        (
+            Path(__file__).parent
+            / "fixtures"
+            / "trend_coverage"
+            / "valid"
+            / "experimental.json"
+        ).read_text(encoding="utf-8")
+    )
+
+
+def _write_valid_aggregate_outputs(output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    current_entry = _valid_public_trend_entry()
+    baseline_entry = _valid_public_trend_entry()
+    baseline_entry["entry_id"] = "44444444-4444-4444-8444-444444444444"
+    baseline_entry["engine"] = "vllm"
+    payloads = {
+        "leaderboard_single.json": [current_entry, baseline_entry],
+        "leaderboard_multi.json": [],
+        "leaderboard_compare.json": {},
+        "last_updated.json": {},
+    }
+    for file_name, payload in payloads.items():
+        (output_dir / file_name).write_text(
+            json.dumps(payload) + "\n", encoding="utf-8"
+        )
+
+
 def test_formal_submission_rejects_future_official_artifact_without_contract(
     tmp_path: Path,
     capsys,
@@ -125,6 +155,33 @@ def test_snapshot_upload_guard_rejects_future_official_artifact_without_contract
 
     assert not integration._validate_snapshot_workload_contracts(tmp_path)
     assert "metadata.workload_config_contract" in capsys.readouterr().err
+
+
+def test_public_snapshot_trend_gate_ignores_aggregate_metadata(tmp_path: Path) -> None:
+    (tmp_path / "leaderboard_single.json").write_text(
+        json.dumps([_valid_public_trend_entry()]), encoding="utf-8"
+    )
+    (tmp_path / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "leaderboard_compare.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "last_updated.json").write_text("{}", encoding="utf-8")
+
+    integration.validate_public_snapshot_trend_admission(tmp_path)
+
+
+def test_public_snapshot_trend_gate_rejects_empty_snapshots(tmp_path: Path) -> None:
+    (tmp_path / "leaderboard_single.json").write_text("[]", encoding="utf-8")
+    (tmp_path / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="contain no entries"):
+        integration.validate_public_snapshot_trend_admission(tmp_path)
+
+
+def test_public_snapshot_trend_gate_rejects_invalid_entry(tmp_path: Path) -> None:
+    (tmp_path / "leaderboard_single.json").write_text("[{}]", encoding="utf-8")
+    (tmp_path / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="trend admission failed"):
+        integration.validate_public_snapshot_trend_admission(tmp_path)
 
 
 def test_resolve_repo_layout_defaults_to_repo_sibling_workspace(monkeypatch) -> None:
@@ -1076,14 +1133,7 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
         merged_markers["current"] = source_dir.joinpath(
             "submission-a", "run_leaderboard.json"
         ).exists()
-        output_dir.mkdir(parents=True, exist_ok=True)
-        for file_name in (
-            "leaderboard_single.json",
-            "leaderboard_multi.json",
-            "leaderboard_compare.json",
-            "last_updated.json",
-        ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        _write_valid_aggregate_outputs(output_dir)
         return 0
 
     class FakeCommitOperationAdd:
@@ -1279,14 +1329,7 @@ def test_sync_submission_to_huggingface_deletes_excluded_remote_submission(
             (output_dir / "leaderboard_single.json").read_text(encoding="utf-8")
         )
         source_markers["seed_filtered"] = seeded_rows == [{"entry_id": "retained"}]
-        output_dir.mkdir(parents=True, exist_ok=True)
-        for file_name in (
-            "leaderboard_single.json",
-            "leaderboard_multi.json",
-            "leaderboard_compare.json",
-            "last_updated.json",
-        ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        _write_valid_aggregate_outputs(output_dir)
         return 0
 
     class FakeCommitOperationAdd:
@@ -1413,14 +1456,7 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
         merged_markers["submission_b"] = source_dir.joinpath(
             "submission-b", "run_leaderboard.json"
         ).exists()
-        output_dir.mkdir(parents=True, exist_ok=True)
-        for file_name in (
-            "leaderboard_single.json",
-            "leaderboard_multi.json",
-            "leaderboard_compare.json",
-            "last_updated.json",
-        ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        _write_valid_aggregate_outputs(output_dir)
         return 0
 
     class FakeCommitOperationAdd:
@@ -1727,14 +1763,7 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
             "declared_baseline_engine": current_accountable["declared_baseline_engine"],
             "baseline_status": current_accountable["baseline_status"],
         }
-        output_dir.mkdir(parents=True, exist_ok=True)
-        for file_name in (
-            "leaderboard_single.json",
-            "leaderboard_multi.json",
-            "leaderboard_compare.json",
-            "last_updated.json",
-        ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        _write_valid_aggregate_outputs(output_dir)
         return 0
 
     class FakeCommitOperationAdd:
@@ -1855,14 +1884,7 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
             )
         )
         seen_model.update(historical["model"])
-        output_dir.mkdir(parents=True, exist_ok=True)
-        for file_name in (
-            "leaderboard_single.json",
-            "leaderboard_multi.json",
-            "leaderboard_compare.json",
-            "last_updated.json",
-        ):
-            (output_dir / file_name).write_text("{}\n", encoding="utf-8")
+        _write_valid_aggregate_outputs(output_dir)
         return 0
 
     class FakeCommitOperationAdd:
@@ -2026,6 +2048,34 @@ def test_upload_to_huggingface_rejects_invalid_aggregated_snapshots(
         ),
         encoding="utf-8",
     )
+
+    called = {"upload": False}
+
+    def fake_upload_leaderboard_to_hf(**kwargs):
+        called["upload"] = True
+
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.hf_publisher.upload_leaderboard_to_hf",
+        fake_upload_leaderboard_to_hf,
+    )
+
+    exit_code = upload_to_huggingface(
+        data_dir=data_dir,
+        repo_id="owner/repo",
+    )
+
+    assert exit_code == 2
+    assert called["upload"] is False
+
+
+def test_upload_to_huggingface_rejects_invalid_trend_entry_before_upload(
+    monkeypatch, tmp_path: Path
+) -> None:
+    data_dir = tmp_path / "aggregated"
+    data_dir.mkdir()
+    (data_dir / "leaderboard_single.json").write_text("[{}]", encoding="utf-8")
+    (data_dir / "leaderboard_multi.json").write_text("[]", encoding="utf-8")
+    (data_dir / "leaderboard_compare.json").write_text("{}", encoding="utf-8")
 
     called = {"upload": False}
 
