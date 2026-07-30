@@ -657,7 +657,6 @@ class TestDeterminism:
 
 class TestAggregateEntries:
     def test_basic(self, mixed_entries):
-
         result = aggregate_entries(mixed_entries, method="mean")
         # 1 aggregated group + 1 solo entry = 2 output entries
         assert len(result) == 2
@@ -670,7 +669,6 @@ class TestAggregateEntries:
         assert solo_entries[0]["entry_id"] == "solo-entry-0000-0000-000000000000"
 
     def test_aggregated_entry_has_correct_metrics(self, repeat_group_entries):
-
         result = aggregate_entries(repeat_group_entries, method="mean")
         assert len(result) == 1
         e = result[0]
@@ -682,7 +680,6 @@ class TestAggregateEntries:
         assert e["metrics"]["ttft_ms"] == agg["metrics"]["ttft_ms"]["value"]
 
     def test_no_repeat_group(self, base_entry_dict):
-
         entry = copy.deepcopy(base_entry_dict)
         result = aggregate_entries([entry], method="mean")
         assert len(result) == 1
@@ -712,7 +709,6 @@ class TestFileIO:
             load_entries_from_paths(["/tmp/nonexistent-file.json"])
 
     def test_write_aggregated_entries(self, repeat_group_entries):
-
         result = aggregate_entries(repeat_group_entries, method="mean")
 
         with tempfile.TemporaryDirectory() as tmpdir:
