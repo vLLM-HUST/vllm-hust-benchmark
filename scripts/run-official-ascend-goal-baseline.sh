@@ -1119,7 +1119,7 @@ from vllm_hust_benchmark.official_runtime_inputs import normalize_server_paramet
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 normalized = normalize_server_parameters(payload["resolved_server_parameters"])
 if os.environ.get("OFFICIAL_FORCE_EAGER_SERVER") == "1":
-    normalized["enforce_eager"] = ""
+    normalized["enforce_eager"] = True
 print(
     json.dumps(
     normalized,
