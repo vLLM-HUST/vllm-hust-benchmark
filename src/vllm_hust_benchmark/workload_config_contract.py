@@ -72,6 +72,9 @@ OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
     "sonnet-throughput": {
         "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
     },
+    "visionarena-online": {
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
 }
 
 
