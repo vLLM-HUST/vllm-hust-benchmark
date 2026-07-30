@@ -173,7 +173,7 @@ python3 scripts/backfill_single_gpu.py restore
 | ---------------------------------- | -------------------------------------------- | ---------------------------------------- |
 | `BACKFILL_PYTHON`                  | `~/miniconda3/envs/vllm-hust-dev/bin/python` | Python 解释器路径                        |
 | `SAME_SPEC_GPU_MEMORY_UTILIZATION` | `0.6`                                        | same-spec hash 的 gpu_memory_utilization |
-| `SAME_SPEC_MAX_MODEL_LEN`          | `30720`                                      | same-spec hash 的 max_model_len          |
+| `SAME_SPEC_MAX_MODEL_LEN`          | `32768`                                      | same-spec hash 的 max_model_len          |
 | `HF_ENDPOINT`                      | `https://hf-mirror.com`                      | HuggingFace 镜像                         |
 | `VLLM_USE_V1`                      | `1`                                          | 启用 V1 引擎                             |
 

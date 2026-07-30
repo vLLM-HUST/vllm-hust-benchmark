@@ -166,6 +166,20 @@ def test_official_single_chip_specs_define_required_effective_defaults() -> None
             assert key in spec["client_parameters"], f"{scenario}: missing client {key}"
 
 
+def test_visionarena_official_target_uses_public_defaults() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    spec_path = (
+        repo_root
+        / "docs"
+        / "official-baselines"
+        / "official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
+    )
+    payload = json.loads(spec_path.read_text(encoding="utf-8"))
+
+    assert payload["server_parameters"]["gpu_memory_utilization"] == 0.6
+    assert payload["server_parameters"]["max_model_len"] == 32768
+
+
 def test_snapshot_entries_never_conflate_num_prompts_with_concurrency() -> None:
     """PR#70 regression: snapshot entries must keep prompt count and concurrency apart.
 
