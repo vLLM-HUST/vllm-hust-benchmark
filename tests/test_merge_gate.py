@@ -771,3 +771,125 @@ class TestRegistryLoadFailure:
         )
         assert decision.disposition == "fail"
         assert "registry" in decision.reason.lower()
+
+
+# ---------------------------------------------------------------------------
+# --dry-run CLI 层测试（issue #95 增强建议 9）
+# 用于 #105 phase 4 PR 补跑预检：判定 fail 时不阻塞，只输出结果。
+# ---------------------------------------------------------------------------
+
+
+class TestDryRunMode:
+    """--dry-run 模式：fail 也返回 0，用于 PR 补跑预检。"""
+
+    def test_dry_run_fail_returns_zero(self, tmp_path, capsys):
+        """dry-run + fail → 退出码 0（不阻塞预检流程）。"""
+        from vllm_hust_benchmark.cli import main
+
+        exit_code = main(
+            [
+                "merge-gate-check",
+                "--repo",
+                "vllm-hust",
+                "--pr-number",
+                "999",
+                "--head-sha",
+                "aaa111",
+                "--base-sha",
+                "bbb222",
+                "--base-status",
+                "missing",
+                "--head-status",
+                "missing",
+                "--dry-run",
+            ]
+        )
+        captured = capsys.readouterr()
+        assert exit_code == 0
+        assert "fail" in captured.out.lower()
+        assert "dry-run" in captured.out.lower() or "dry_run" in captured.out.lower()
+
+    def test_dry_run_pass_returns_zero(self, tmp_path, capsys):
+        """dry-run + pass → 退出码 0。"""
+        from vllm_hust_benchmark.cli import main
+
+        base_path = _write_artifact(tmp_path, "base")
+        head_path = _write_artifact(tmp_path, "head", _make_run_leaderboard())
+        exit_code = main(
+            [
+                "merge-gate-check",
+                "--repo",
+                "vllm-hust",
+                "--pr-number",
+                "193",
+                "--head-sha",
+                "abc1234",
+                "--base-sha",
+                "def5678",
+                "--base-artifact",
+                str(base_path),
+                "--head-artifact",
+                str(head_path),
+                "--declared-target-id",
+                "official-ascend-jan-2026-v0.18.0",
+                "--declared-target-version",
+                "v0.18.0",
+                "--declared-profile-id",
+                "core-text-14b",
+                "--dry-run",
+            ]
+        )
+        assert exit_code == 0
+
+    def test_no_dry_run_fail_returns_one(self, tmp_path, capsys):
+        """无 --dry-run + fail → 退出码 1（原有行为不变）。"""
+        from vllm_hust_benchmark.cli import main
+
+        exit_code = main(
+            [
+                "merge-gate-check",
+                "--repo",
+                "vllm-hust",
+                "--pr-number",
+                "999",
+                "--head-sha",
+                "aaa111",
+                "--base-sha",
+                "bbb222",
+                "--base-status",
+                "missing",
+                "--head-status",
+                "missing",
+            ]
+        )
+        assert exit_code == 1
+
+    def test_dry_run_writes_decision_json(self, tmp_path, capsys):
+        """dry-run 模式仍然写 decision.json（用于预检留档）。"""
+        from vllm_hust_benchmark.cli import main
+
+        decision_path = tmp_path / "merge-gate-decision.json"
+        exit_code = main(
+            [
+                "merge-gate-check",
+                "--repo",
+                "vllm-hust",
+                "--pr-number",
+                "999",
+                "--head-sha",
+                "aaa111",
+                "--base-sha",
+                "bbb222",
+                "--base-status",
+                "missing",
+                "--head-status",
+                "missing",
+                "--dry-run",
+                "--decision-output",
+                str(decision_path),
+            ]
+        )
+        assert exit_code == 0
+        assert decision_path.exists()
+        saved = json.loads(decision_path.read_text(encoding="utf-8"))
+        assert saved["disposition"] == "fail"

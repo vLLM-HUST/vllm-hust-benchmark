@@ -795,6 +795,14 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Write merge-gate-decision.json to this path (issue #95 enhancement #4).",
     )
+    mg_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Pre-check mode (issue #95 enhancement #9): evaluate and print the "
+        "decision but always exit 0, even on fail. Used by #105 phase 4 PR "
+        "backfill pre-validation to avoid blocking on evidence that is not "
+        "expected to pass the merge gate yet.",
+    )
 
     return parser
 
@@ -1442,10 +1450,18 @@ def main(argv: list[str] | None = None) -> int:
             pr_context=pr_context,
             registry_path=args.registry,
         )
-        print(format_decision_log(decision, pr_context))
+        log_line = format_decision_log(decision, pr_context)
+        if getattr(args, "dry_run", False):
+            log_line = (
+                f"[DRY-RUN] pre-check mode — disposition not enforced\n{log_line}"
+            )
+        print(log_line)
         if args.decision_output is not None:
             write_decision_json(decision, args.decision_output)
             print(f"  decision written to: {args.decision_output}", file=sys.stderr)
+        # --dry-run: always exit 0 (pre-check, do not block)
+        if getattr(args, "dry_run", False):
+            return 0
         # pass / skip → 0 (不阻塞合并); fail → 1
         return 0 if decision.disposition in ("pass", "skip") else 1
 
