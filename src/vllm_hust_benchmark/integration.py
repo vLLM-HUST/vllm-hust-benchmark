@@ -1212,6 +1212,43 @@ def validate_aggregated_leaderboard_outputs(
         )
 
 
+def validate_public_snapshot_trend_admission(data_dir: Path) -> None:
+    """Validate the entry snapshots before any publication commit is made.
+
+    The compare and timestamp files are aggregate metadata, not trend-entry
+    documents.  Only the single- and multi-chip entry snapshots belong in this
+    gate; passing the whole directory to ``validate-trend`` would incorrectly
+    reject those metadata files after the upload had already happened.
+    """
+    from vllm_hust_benchmark.trend_validator import (
+        load_json_entries,
+        validate_entries,
+    )
+
+    entries: list[dict[str, Any]] = []
+    for file_name in ("leaderboard_single.json", "leaderboard_multi.json"):
+        path = data_dir / file_name
+        try:
+            entries.extend(load_json_entries(path))
+        except (FileNotFoundError, OSError, ValueError) as exc:
+            raise ValueError(f"invalid public snapshot {path}: {exc}") from exc
+
+    if not entries:
+        raise ValueError("public leaderboard snapshots contain no entries")
+
+    report = validate_entries(entries)
+    for decision in report.decisions:
+        print(f"  {decision.status:12} {decision.entry_id}: {decision.reason}")
+    for issue in report.issues:
+        print(
+            f"  {issue.severity.upper():5} {issue.code}: "
+            f"{issue.entry_id}: {issue.message}",
+            file=sys.stderr,
+        )
+    if not report.passed:
+        raise ValueError("public leaderboard trend admission failed")
+
+
 def upload_to_huggingface(
     *,
     data_dir: Path,
@@ -1230,6 +1267,7 @@ def upload_to_huggingface(
 
     try:
         validate_aggregated_leaderboard_outputs(data_dir)
+        validate_public_snapshot_trend_admission(data_dir)
         upload_leaderboard_to_hf(
             data_dir=data_dir,
             repo_id=repo_id,
@@ -1288,6 +1326,12 @@ def _upload_existing_snapshots(
     ]
 
     if not _validate_snapshot_workload_contracts(aggregate_output_dir):
+        return 2
+
+    try:
+        validate_public_snapshot_trend_admission(aggregate_output_dir)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
         return 2
 
     operations: list[CommitOperationAdd] = []
@@ -2184,6 +2228,11 @@ def sync_submission_to_huggingface(
             print(str(exc), file=sys.stderr)
             return 2
         if not _validate_snapshot_workload_contracts(rebuilt_output_dir):
+            return 2
+        try:
+            validate_public_snapshot_trend_admission(rebuilt_output_dir)
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
             return 2
 
         operations: list[CommitOperationAdd] = []
