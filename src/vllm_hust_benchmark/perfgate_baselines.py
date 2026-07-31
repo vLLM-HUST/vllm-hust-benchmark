@@ -51,7 +51,7 @@ class BaselineProvenance:
     cann_version: str
     torch_version: str
     torch_npu_version: str
-    runtime_manager_sha: str | None = None
+    runtime_manager_sha: str
 
 
 def _canonical_repository(value: str) -> str:
@@ -70,13 +70,6 @@ def _validate_sha(value: str, *, field: str) -> str:
     if not SHA_PATTERN.fullmatch(normalized):
         raise ValueError(f"{field} must be a full 40-character Git SHA")
     return normalized
-
-
-def _validate_optional_sha(value: str | None, *, field: str) -> str | None:
-    normalized = str(value or "").strip()
-    if not normalized:
-        return None
-    return _validate_sha(normalized, field=field)
 
 
 def _validate_component(value: str, *, field: str) -> str:
@@ -140,7 +133,7 @@ def normalize_provenance(provenance: BaselineProvenance) -> BaselineProvenance:
         torch_npu_version=_validate_metadata_value(
             provenance.torch_npu_version, field="torch_npu_version"
         ),
-        runtime_manager_sha=_validate_optional_sha(
+        runtime_manager_sha=_validate_sha(
             provenance.runtime_manager_sha, field="runtime_manager_sha"
         ),
     )
@@ -882,7 +875,7 @@ def _add_provenance_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--vllm-hust-sha", required=True)
     parser.add_argument("--vllm-ascend-hust-sha", required=True)
     parser.add_argument("--benchmark-runner-sha", required=True)
-    parser.add_argument("--runtime-manager-sha", default="")
+    parser.add_argument("--runtime-manager-sha", required=True)
     parser.add_argument("--hardware-chip-model", required=True)
     parser.add_argument("--cann-version", required=True)
     parser.add_argument("--torch-version", required=True)

@@ -62,6 +62,7 @@ def _provenance(
         "cann_version": "9.0.0",
         "torch_version": "2.10.0",
         "torch_npu_version": "2.10.0",
+        "runtime_manager_sha": "d" * 40,
         **overrides,
     }
     return perfgate_baselines.BaselineProvenance(**values)
@@ -178,7 +179,7 @@ def test_store_and_exact_fetch_validate_provenance(tmp_path: Path) -> None:
     manifest = json.loads(
         (destination.parent / "baseline-metadata.json").read_text(encoding="utf-8")
     )
-    assert manifest["provenance"]["runtime_manager_sha"] is None
+    assert manifest["provenance"]["runtime_manager_sha"] == "d" * 40
     pointer = central / perfgate_baselines.latest_pointer_relative_path(_identity())
     assert json.loads(pointer.read_text(encoding="utf-8"))["identity"] == {
         "scenario": "random-online",
@@ -817,6 +818,8 @@ def test_store_cli_requires_target_sha_on_main(tmp_path: Path) -> None:
         PLUGIN_SHA,
         "--benchmark-runner-sha",
         BENCHMARK_SHA,
+        "--runtime-manager-sha",
+        "d" * 40,
         "--hardware-chip-model",
         "910B2",
         "--cann-version",
