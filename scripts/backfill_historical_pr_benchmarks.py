@@ -818,7 +818,6 @@ def force_cleanup_managed_server(
         "systemd_stopped": False,
         "npu_procs_killed": [],
         "port_freed": False,
-        "vllm_procs_killed": [],
     }
     if not execute:
         return report
@@ -842,26 +841,7 @@ def force_cleanup_managed_server(
             except (OSError, ProcessLookupError) as exc:
                 _log(f"could not kill NPU process {pid}: {exc}")
 
-    # 2. Pattern-based cleanup for stale VLLMEngineCore processes.
-    try:
-        result = subprocess.run(
-            ["bash", "-c", "pgrep -f 'VLLMEngineCore|vllm.entrypoints' || true"],
-            text=True,
-            check=False,
-            capture_output=True,
-        )
-        stale_pids = [int(p) for p in result.stdout.split() if p.strip().isdigit()]
-        for pid in stale_pids:
-            try:
-                os.kill(pid, 9)
-                report["vllm_procs_killed"].append(pid)
-                _log(f"killed stale vLLM process {pid}")
-            except (OSError, ProcessLookupError) as exc:
-                _log(f"could not kill stale vLLM process {pid}: {exc}")
-    except (OSError, subprocess.SubprocessError) as exc:
-        _log(f"pgrep for stale vLLM processes failed: {exc}")
-
-    # 3. Stop/reset-failed the systemd user unit.
+    # 2. Stop/reset-failed the systemd user unit.
     systemd_unit = getattr(args, "managed_systemd_unit", "") or ""
     if systemd_unit and systemd_unit.endswith(".service"):
         try:
@@ -1014,7 +994,8 @@ def start_managed_server(
             )
         model_path = spec.model
 
-    in_container = getattr(args, "manage_script", "manage.sh") != "manage.sh"
+    manage_basename = Path(getattr(args, "manage_script", "manage.sh")).name
+    in_container = manage_basename != "manage.sh"
     core_container_path = require_container_workspace_path(
         core_worktree,
         purpose="core worktree",
@@ -1106,7 +1087,7 @@ def start_managed_server(
 
     # manage-container.sh (in-container mode) needs the python binary and
     # conda env name to activate the runtime before launching vllm serve.
-    if getattr(args, "manage_script", "manage.sh") != "manage.sh":
+    if in_container:
         if args.runtime_python:
             env["VLLM_ENGINE_PYTHON"] = args.runtime_python
         env_prefix = getattr(args, "current_env_prefix", "")

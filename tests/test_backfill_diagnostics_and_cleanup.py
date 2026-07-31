@@ -375,38 +375,12 @@ def test_force_cleanup_removes_docker_container(module, args, monkeypatch):
     assert report["container_removed"] is True
 
 
-def test_force_cleanup_kills_stale_vllm_processes(module, args, monkeypatch):
-    def fake_run(cmd, **kw):
-        if isinstance(cmd, list) and "pgrep" in " ".join(cmd):
-            return type(
-                "R", (), {"stdout": "111\n222\n", "stderr": "", "returncode": 0}
-            )()
-        if isinstance(cmd, str) and "pgrep" in cmd:
-            return type(
-                "R", (), {"stdout": "111\n222\n", "stderr": "", "returncode": 0}
-            )()
-        return type("R", (), {"stdout": "", "stderr": "", "returncode": 0})()
-
-    killed: list[int] = []
-    monkeypatch.setattr(module, "detect_npu_processes", lambda devices: [])
-    monkeypatch.setattr(module.subprocess, "run", fake_run)
-    monkeypatch.setattr(module.os, "kill", lambda pid, sig: killed.append(pid))
-
-    report = module.force_cleanup_managed_server(args=args, execute=True)
-
-    assert 111 in killed
-    assert 222 in killed
-    assert 111 in report["vllm_procs_killed"]
-    assert 222 in report["vllm_procs_killed"]
-
-
 def test_force_cleanup_returns_empty_report_in_dry_run(module, args):
     report = module.force_cleanup_managed_server(args=args, execute=False)
     assert report["container_removed"] is False
     assert report["systemd_stopped"] is False
     assert report["npu_procs_killed"] == []
     assert report["port_freed"] is False
-    assert report["vllm_procs_killed"] == []
 
 
 def test_force_cleanup_writes_cleanup_log_to_blocked_dir(
