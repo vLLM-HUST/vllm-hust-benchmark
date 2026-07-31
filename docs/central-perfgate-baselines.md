@@ -23,6 +23,14 @@ baselines/
               run_leaderboard.json
 ```
 
+`baseline-metadata.json` embeds a `perfgate-measurement/v2` record. Publication requires at least
+one discarded warmup run and an odd measured-run count of at least three; the current producers use
+exactly three. The measured run whose `throughput_tps` is in the middle after sorting by
+`(throughput_tps, run_index)` is selected. The selected run's complete throughput, TTFT, TBT, and
+error-rate tuple is published. The record contains ordered SHA-256 checksums for every warmup and
+measured raw result. The trusted writer must recompute those checksums from the producer artifact
+before publication.
+
 The latest-main pointer is namespaced by target, scenario, and spec:
 
 ```text
@@ -40,6 +48,9 @@ latest-main pointer.
 - matching target repository and commit metadata in the artifact;
 - matching scenario, spec ID, and resolved spec hash;
 - finite throughput, TTFT, and TBT metrics;
+- at least one warmup and three measured runs with ordered raw-result checksums;
+- selection metadata recomputed from all measured runs;
+- a published client-metric tuple that exactly matches the selected real run;
 - exact core, plugin, and benchmark runner revisions;
 - hardware, CANN, PyTorch, and torch-npu provenance.
 
@@ -58,3 +69,20 @@ This protocol does not grant or consume cross-repository credentials. A trusted 
 writer supplies the checked-out target main history and the central baseline worktree. Pull-request
 workflows remain read-only consumers. Credential management, serialized cross-repository pushes, and
 hardware backfill orchestration are separate rollout steps.
+
+## Quarantine And Withdrawal
+
+An invalid published baseline is retained for audit and blocked by an immutable record under the
+same complete identity:
+
+```text
+revoked/<target-owner>/<target-repository>/<target-sha>/<scenario>/<spec-id>/<spec-hash>/
+  quarantined.json
+  withdrawn.json
+```
+
+Use `python -m vllm_hust_benchmark.perfgate_baselines revoke` in a clean `benchmark-baselines`
+checkout, then commit and push the new `revoked/` record with the scoped central writer. Both states
+make exact fetch and validation fail closed. Valid transitions are
+`active -> quarantined -> withdrawn` or `active -> withdrawn`; `withdrawn` is terminal. Baseline
+files are never deleted or overwritten, and consumers must not fall back to pointers or legacy data.
