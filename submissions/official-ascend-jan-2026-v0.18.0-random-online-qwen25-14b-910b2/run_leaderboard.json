@@ -118,7 +118,9 @@
       }
     },
     "target_id": "official-ascend-jan-2026-v0.18.0",
-    "target_version": "Official Ascend Jan 2026"
+    "target_version": "Official Ascend Jan 2026",
+    "repetitions": 1,
+    "measurement_strategy": "single-run"
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
@@ -158,5 +160,37 @@
       "random_input_len": 1024,
       "random_output_len": 256
     }
+  },
+  "measurement": {
+    "schema_version": "perfgate-measurement/v2",
+    "strategy": "single-run",
+    "warmup_runs": 0,
+    "measured_runs": 1,
+    "aggregation": "single-run",
+    "selection": {
+      "primary_metric": "throughput_tps",
+      "sort_direction": "ascending",
+      "secondary_sort_key": "run_index",
+      "ordered_run_indices": [
+        1
+      ],
+      "selected_position": 1,
+      "selected_run_index": 1,
+      "selected_raw_result_sha256": "original-official-baseline-single-run"
+    },
+    "warmup": [],
+    "per_run": [
+      {
+        "run_index": 1,
+        "raw_result_sha256": "original-official-baseline-single-run",
+        "metrics": {
+          "throughput_tps": 228.1495394644097,
+          "ttft_ms": 268.78517493081745,
+          "tbt_ms": 95.26832097792979,
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0
+        }
+      }
+    ]
   }
 }
