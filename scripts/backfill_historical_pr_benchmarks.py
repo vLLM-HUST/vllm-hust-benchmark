@@ -18,7 +18,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_HF_REPO = "intellistream/vllm-hust-benchmark-results"
 DEFAULT_OFFICIAL_SPEC_DIR = REPO_ROOT / "docs" / "official-baselines"
@@ -50,6 +49,20 @@ SUSPECT_TARGET_REFS = (
         ),
     },
 )
+BLOCKED_DIR_NAME = "blocked"
+BLOCKED_MARKER_FILE = "BLOCKED.txt"
+
+
+class _HealthTimeoutError(RuntimeError):
+    """Raised when managed dev-hub server fails to become healthy within timeout.
+
+    Carries the path to the captured diagnostics bundle (``blocked_dir``) so the
+    outer exception handler can record it in the state file without re-capturing.
+    """
+
+    def __init__(self, message: str, blocked_dir: Path | None = None) -> None:
+        super().__init__(message)
+        self.blocked_dir = blocked_dir
 
 
 @dataclass(frozen=True)
@@ -400,17 +413,40 @@ def copy_submission_to_repo(submission_dir: Path, submissions_root: Path) -> Pat
     return target
 
 
+def resolve_manage_script(args: argparse.Namespace) -> Path:
+    """Resolve the launcher script path relative to --dev-hub-dir.
+
+    Defaults to ``manage.sh`` (docker/systemd-based). Use
+    ``--manage-script scripts/manage-container.sh`` when the host is already
+    inside a container and docker/systemd are unavailable.
+    """
+    dev_hub = Path(getattr(args, "dev_hub_dir", ".")).resolve()
+    return dev_hub / getattr(args, "manage_script", "manage.sh")
+
+
 def to_container_workspace_path(path: Path) -> str:
     resolved = path.resolve()
-    home = Path("/home/shuhao")
+    host_workspace = Path(
+        os.environ.get("VLLM_HUST_HOST_WORKSPACE_ROOT", "/home/shuhao")
+    ).resolve()
     try:
-        relative = resolved.relative_to(home)
+        relative = resolved.relative_to(host_workspace)
     except ValueError:
         return str(resolved)
-    return "/workspace/" + relative.as_posix()
+    container_workspace = os.environ.get(
+        "VLLM_HUST_CONTAINER_WORKSPACE_ROOT", "/workspace"
+    )
+    return f"{container_workspace}/" + relative.as_posix()
 
 
-def require_container_workspace_path(path: Path, *, purpose: str) -> str:
+def require_container_workspace_path(
+    path: Path, *, purpose: str, in_container: bool = False
+) -> str:
+    if in_container:
+        # manage-container.sh runs vllm serve directly inside the host
+        # container; PYTHONPATH must be the real filesystem path, not a
+        # remapped /workspace mount. Skip the /workspace prefix check.
+        return str(path.resolve())
     container_path = to_container_workspace_path(path)
     if not container_path.startswith("/workspace/"):
         raise RuntimeError(
@@ -421,6 +457,12 @@ def require_container_workspace_path(path: Path, *, purpose: str) -> str:
 
 
 def find_local_model_path(model_id: str) -> str | None:
+    override = os.environ.get("VLLM_HUST_LOCAL_MODEL_PATH")
+    if override:
+        override_path = Path(override)
+        if override_path.exists():
+            return str(override_path)
+        return None
     known = {
         "Qwen/Qwen2.5-14B-Instruct": [
             Path("/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct"),
@@ -544,6 +586,392 @@ def actual_chip_model_for_run(args: argparse.Namespace, spec: OfficialSpec) -> s
     return actual
 
 
+def parse_npu_smi_processes(output: str, devices: str) -> list[tuple[int, int]]:
+    """Parse ``npu-smi info`` process table for ``(device_id, pid)`` pairs.
+
+    The process section starts after a separator line containing
+    ``Process id``. Each process row looks like::
+
+        | 0       0                 | 1504884       |                    | 35358                 | 412309                  |
+    """
+    ids = set(managed_device_ids(devices))
+    if not ids:
+        return []
+    in_process_section = False
+    pairs: list[tuple[int, int]] = []
+    for line in output.splitlines():
+        if "Process id" in line:
+            in_process_section = True
+            continue
+        if not in_process_section:
+            continue
+        if "No running processes" in line:
+            continue
+        match = re.match(r"^\|\s*(\d+)\s+\d+\s+\|\s*(\d+)", line)
+        if not match:
+            continue
+        device_id = int(match.group(1))
+        pid = int(match.group(2))
+        if device_id in ids and pid > 0:
+            pairs.append((device_id, pid))
+    return pairs
+
+
+def detect_npu_processes(devices: str) -> list[tuple[int, int]]:
+    """Return ``(device_id, pid)`` pairs for processes on the managed NPU devices."""
+    try:
+        output = subprocess.check_output(["npu-smi", "info"], text=True)
+    except (OSError, subprocess.CalledProcessError):
+        return []
+    return parse_npu_smi_processes(output, devices)
+
+
+def verify_npu_idle(
+    *, devices: str, allow_busy: bool = False, execute: bool = True
+) -> None:
+    """Pre-flight check: refuse to start if managed NPU devices are occupied.
+
+    Issue #97: prevents the residual-process scenario by failing fast when NPU0
+    (or any managed device) still has processes from a prior failed run.
+    """
+    if not execute or allow_busy:
+        return
+    procs = detect_npu_processes(devices)
+    if procs:
+        pids = [pid for _, pid in procs]
+        raise RuntimeError(
+            f"NPU devices {devices} not idle: found PIDs {pids}. "
+            "Run cleanup first or pass --allow-busy-npu to bypass."
+        )
+
+
+def _capture_subprocess(
+    command: list[str], *, cwd: Path, output_file: Path, execute: bool
+) -> None:
+    """Run ``command`` and redirect stdout+stderr to ``output_file``.
+
+    Always uses ``check=False`` — diagnostics failures must never mask the
+    original error that triggered the diagnostics capture.
+    """
+    if not execute:
+        print(f"[dry-run] {cwd}$ {' '.join(command)} > {output_file}")
+        return
+    try:
+        result = subprocess.run(
+            command,
+            cwd=cwd,
+            text=True,
+            check=False,
+            capture_output=True,
+        )
+        output_file.write_text(result.stdout + result.stderr, encoding="utf-8")
+    except (OSError, subprocess.SubprocessError) as exc:
+        output_file.write_text(f"capture failed: {exc}", encoding="utf-8")
+
+
+def capture_failure_diagnostics(
+    *,
+    target: TargetRef,
+    spec: OfficialSpec,
+    args: argparse.Namespace,
+    error: str,
+    result_root: Path,
+    run_key: str,
+    execute: bool,
+    state_file: Path | None = None,
+) -> Path:
+    """Write BLOCKED.txt + log bundle to ``<result_root>/blocked/<run_key>/``.
+
+    Issue #97 item 4: failed runs must retain BLOCKED.txt/logs/state files.
+    The bundle lives under ``.benchmarks/`` (gitignored) and is NEVER uploaded
+    to ``submissions/`` — the operator inspects it locally to root-cause the
+    failure. All sub-commands run with ``check=False`` so that one failed
+    capture does not mask the original error.
+    """
+    blocked_root = result_root / BLOCKED_DIR_NAME
+    blocked_dir = blocked_root / slugify(run_key)
+    blocked_dir.mkdir(parents=True, exist_ok=True)
+    container = getattr(args, "managed_container", "") or ""
+    systemd_unit = getattr(args, "managed_systemd_unit", "") or ""
+    npu_devices = getattr(args, "managed_npu_devices", "") or ""
+    server_port = getattr(args, "server_port", "") or ""
+    dev_hub_dir = Path(getattr(args, "dev_hub_dir", ".")).resolve()
+
+    # Snapshot container/systemd/NPU/port state into the bundle.
+    if container:
+        _capture_subprocess(
+            ["docker", "logs", container],
+            cwd=Path.cwd(),
+            output_file=blocked_dir / "container.stdout.log",
+            execute=execute,
+        )
+        _capture_subprocess(
+            [
+                "docker",
+                "ps",
+                "-a",
+                "--filter",
+                f"name={container}",
+                "--format",
+                "table {{.Names}}\t{{.Status}}\t{{.Ports}}",
+            ],
+            cwd=Path.cwd(),
+            output_file=blocked_dir / "docker-ps.txt",
+            execute=execute,
+        )
+    _capture_subprocess(
+        ["npu-smi", "info"],
+        cwd=Path.cwd(),
+        output_file=blocked_dir / "npu-smi.txt",
+        execute=execute,
+    )
+    manage = resolve_manage_script(args)
+    if manage.exists():
+        _capture_subprocess(
+            [str(manage), "status"],
+            cwd=dev_hub_dir,
+            output_file=blocked_dir / "manage-status.txt",
+            execute=execute,
+        )
+    if systemd_unit:
+        _capture_subprocess(
+            ["systemctl", "--user", "is-active", systemd_unit],
+            cwd=Path.cwd(),
+            output_file=blocked_dir / "systemd-status.txt",
+            execute=execute,
+        )
+    if server_port:
+        _capture_subprocess(
+            ["bash", "-c", f"lsof -i :{server_port} 2>&1 || true"],
+            cwd=Path.cwd(),
+            output_file=blocked_dir / "port-probe.txt",
+            execute=execute,
+        )
+    # Stale vLLM engine core processes (the "VLLMEngineCor" residual from #97).
+    _capture_subprocess(
+        [
+            "bash",
+            "-c",
+            "ps -ef | grep -iE 'VLLMEngine|vllm.entrypoints' | grep -v grep || true",
+        ],
+        cwd=Path.cwd(),
+        output_file=blocked_dir / "vllm-processes.txt",
+        execute=execute,
+    )
+    # Copy the container log file if manage.sh set VLLM_ENGINE_CONTAINER_LOG_FILE.
+    container_log = Path(
+        f"/tmp/vllm-hust-backfill-{slugify(target.label)}-{slugify(spec.workload)}.log"
+    )
+    if container_log.exists():
+        shutil.copy2(container_log, blocked_dir / "container.stdout.log")
+    # Copy state file into the bundle for post-mortem inspection.
+    if state_file and state_file.exists():
+        shutil.copy2(state_file, blocked_dir / "state.json")
+
+    blocked_txt = blocked_dir / BLOCKED_MARKER_FILE
+    blocked_txt.write_text(
+        "\n".join(
+            [
+                f"blocked_at: {datetime.now(timezone.utc).isoformat()}",
+                f"run_key: {run_key}",
+                f"target_label: {target.label}",
+                f"spec_path: {spec.path}",
+                f"core_ref: {target.core_ref}",
+                f"plugin_ref: {target.plugin_ref}",
+                f"pr_number: {target.pr_number}",
+                f"container: {container}",
+                f"systemd_unit: {systemd_unit}",
+                f"npu_devices: {npu_devices}",
+                f"server_port: {server_port or 'from-manage.sh'}",
+                f"blocker_reason: {error}",
+                "",
+                "diagnostics_files:",
+                "  - container.stdout.log",
+                "  - npu-smi.txt",
+                "  - docker-ps.txt (if docker present)",
+                "  - manage-status.txt",
+                "  - systemd-status.txt",
+                "  - port-probe.txt (if port configured)",
+                "  - vllm-processes.txt",
+                "  - state.json",
+                "",
+                "next_steps:",
+                "  - Inspect container.stdout.log for vllm serve startup errors",
+                "  - Inspect npu-smi.txt for residual NPU processes",
+                "  - Inspect vllm-processes.txt for stale VLLMEngineCore processes",
+                "  - If runtime regression: bisect vllm-hust between this core_ref",
+                "    and a known-good prior commit",
+                "  - Do NOT upload this directory as a submission artifact",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    print(f"[backfill] BLOCKED diagnostics: {blocked_txt}", file=sys.stderr)
+    return blocked_dir
+
+
+def force_cleanup_managed_server(
+    *,
+    args: argparse.Namespace,
+    execute: bool,
+    blocked_dir: Path | None = None,
+) -> dict[str, Any]:
+    """Defensive cleanup after ``manage.sh stop`` — kills residuals.
+
+    Issue #97 item 5: ``manage.sh stop`` is not always reliable (residual
+    ``VLLMEngineCor`` container/process observed). This helper runs a
+    defense-in-depth cleanup sequence: remove the systemd unit's processes,
+    kill stale vLLM engine processes on managed NPU devices, free the
+    managed port. All commands use ``check=False``.
+    """
+    report: dict[str, Any] = {
+        "container_removed": False,
+        "systemd_stopped": False,
+        "npu_procs_killed": [],
+        "port_freed": False,
+    }
+    if not execute:
+        return report
+
+    cleanup_log = blocked_dir / "cleanup.log" if blocked_dir else None
+    log_lines: list[str] = []
+
+    def _log(msg: str) -> None:
+        log_lines.append(msg)
+        print(f"[cleanup] {msg}", file=sys.stderr)
+
+    # 1. Kill stale VLLMEngineCore / vllm.entrypoints processes on managed NPU devices.
+    npu_devices = getattr(args, "managed_npu_devices", "") or ""
+    if npu_devices:
+        procs = detect_npu_processes(npu_devices)
+        for device_id, pid in procs:
+            try:
+                os.kill(pid, 9)  # SIGKILL
+                report["npu_procs_killed"].append(pid)
+                _log(f"killed NPU process {pid} on device {device_id}")
+            except (OSError, ProcessLookupError) as exc:
+                _log(f"could not kill NPU process {pid}: {exc}")
+
+    # 2. Stop/reset-failed the systemd user unit.
+    systemd_unit = getattr(args, "managed_systemd_unit", "") or ""
+    if systemd_unit and systemd_unit.endswith(".service"):
+        try:
+            subprocess.run(
+                ["systemctl", "--user", "stop", systemd_unit],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                ["systemctl", "--user", "reset-failed", systemd_unit],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            report["systemd_stopped"] = True
+            _log(f"stopped and reset-failed systemd unit {systemd_unit}")
+        except (OSError, subprocess.SubprocessError) as exc:
+            _log(f"systemctl stop/reset-failed failed: {exc}")
+
+    # 4. Free the managed port if configured.
+    server_port = getattr(args, "server_port", "") or ""
+    if server_port:
+        try:
+            result = subprocess.run(
+                ["bash", "-c", f"lsof -ti :{server_port} 2>/dev/null || true"],
+                text=True,
+                check=False,
+                capture_output=True,
+            )
+            port_pids = [int(p) for p in result.stdout.split() if p.strip().isdigit()]
+            for pid in port_pids:
+                try:
+                    os.kill(pid, 9)
+                    report["port_freed"] = True
+                    _log(f"killed process {pid} holding port {server_port}")
+                except (OSError, ProcessLookupError) as exc:
+                    _log(f"could not kill port holder {pid}: {exc}")
+        except (OSError, subprocess.SubprocessError) as exc:
+            _log(f"port cleanup for :{server_port} failed: {exc}")
+
+    # 5. Remove docker container if docker is present.
+    container = getattr(args, "managed_container", "") or ""
+    if container:
+        try:
+            result = subprocess.run(
+                ["docker", "rm", "-f", container],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            if result.returncode == 0:
+                report["container_removed"] = True
+                _log(f"removed docker container {container}")
+        except (OSError, FileNotFoundError):
+            # docker not installed — manage.sh uses systemd, not docker.
+            pass
+        except subprocess.SubprocessError as exc:
+            _log(f"docker rm -f {container} failed: {exc}")
+
+    if cleanup_log:
+        cleanup_log.write_text("\n".join(log_lines), encoding="utf-8")
+    return report
+
+
+def verify_cleanup_success(*, args: argparse.Namespace, execute: bool) -> list[str]:
+    """Return a list of warning strings for residuals after cleanup.
+
+    Issue #97 item 5: surfaces silent cleanup failures so the operator knows
+    which resources still need manual intervention.
+    """
+    warnings: list[str] = []
+    if not execute:
+        return warnings
+
+    npu_devices = getattr(args, "managed_npu_devices", "") or ""
+    if npu_devices:
+        procs = detect_npu_processes(npu_devices)
+        if procs:
+            pids = [pid for _, pid in procs]
+            warnings.append(
+                f"residual NPU processes on devices {npu_devices}: PIDs {pids}"
+            )
+
+    systemd_unit = getattr(args, "managed_systemd_unit", "") or ""
+    if systemd_unit:
+        try:
+            result = subprocess.run(
+                ["systemctl", "--user", "is-active", systemd_unit],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            state = result.stdout.strip()
+            if state in ("active", "activating"):
+                warnings.append(f"systemd unit {systemd_unit} is still {state}")
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+    server_port = getattr(args, "server_port", "") or ""
+    if server_port:
+        try:
+            result = subprocess.run(
+                ["bash", "-c", f"lsof -ti :{server_port} 2>/dev/null || true"],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            if result.stdout.strip():
+                warnings.append(
+                    f"port {server_port} still in use by PIDs: {result.stdout.strip()}"
+                )
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+    return warnings
+
+
 def describe_git_ref(repo: Path, ref: str) -> str:
     described = capture_command(
         ["git", "describe", "--tags", "--always", ref], cwd=repo
@@ -559,7 +987,16 @@ def start_managed_server(
     core_worktree: Path,
     plugin_worktree: Path,
     execute: bool,
+    result_root: Path,
+    run_key: str,
+    state_file: Path | None = None,
 ) -> None:
+    # Pre-flight: refuse to start if NPU is occupied by a prior failed run.
+    verify_npu_idle(
+        devices=args.managed_npu_devices,
+        allow_busy=getattr(args, "allow_busy_npu", False),
+        execute=execute,
+    )
     model_path = find_local_model_path(spec.model)
     if model_path is None:
         if not args.allow_model_downloads:
@@ -569,14 +1006,23 @@ def start_managed_server(
             )
         model_path = spec.model
 
+    manage_basename = Path(getattr(args, "manage_script", "manage.sh")).name
+    in_container = manage_basename != "manage.sh"
     core_container_path = require_container_workspace_path(
         core_worktree,
         purpose="core worktree",
+        in_container=in_container,
     )
     plugin_container_path = require_container_workspace_path(
         plugin_worktree,
         purpose="plugin worktree",
+        in_container=in_container,
     )
+    pythonpath_value = f"{core_container_path}:{plugin_container_path}"
+    if in_container:
+        existing_pythonpath = os.environ.get("PYTHONPATH", "")
+        if existing_pythonpath:
+            pythonpath_value = f"{pythonpath_value}:{existing_pythonpath}"
     extra_args = ["--generation-config", "vllm"]
     if args.managed_disable_ascend_fusion:
         additional_config = {
@@ -622,8 +1068,16 @@ def start_managed_server(
         "VLLM_ENGINE_ENFORCE_EAGER": "1" if args.managed_enforce_eager else "0",
         "VLLM_ENGINE_COMPILATION_CONFIG": "{}",
         "VLLM_ENGINE_EXTRA_ARGS_JSON": json.dumps(extra_args),
-        "VLLM_ENGINE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
-        "VLLM_ENGINE_BASE_PYTHONPATH": f"{core_container_path}:{plugin_container_path}",
+        "VLLM_ENGINE_PYTHONPATH": pythonpath_value,
+        "VLLM_ENGINE_BASE_PYTHONPATH": pythonpath_value,
+        # In-container mode (manage-container.sh) does not translate
+        # VLLM_ENGINE_PYTHONPATH into PYTHONPATH the way the docker
+        # entrypoint does for manage.sh. Set PYTHONPATH directly so vllm
+        # serve imports the historical PR commit's code, not the installed
+        # site-packages version.
+        "PYTHONPATH": pythonpath_value
+        if in_container
+        else os.environ.get("PYTHONPATH", ""),
         "VLLM_PLUGINS": "ascend",
         # dev-hub intentionally filters environment variable names containing
         # KEY/TOKEN/SECRET, so prefix forwarding is required for HF cache vars.
@@ -643,10 +1097,20 @@ def start_managed_server(
     if args.managed_systemd_unit:
         env["VLLM_ENGINE_SYSTEMD_UNIT"] = args.managed_systemd_unit
 
-    manage = Path(args.dev_hub_dir).resolve() / "manage.sh"
+    # manage-container.sh (in-container mode) needs the python binary and
+    # conda env name to activate the runtime before launching vllm serve.
+    if in_container:
+        if args.runtime_python:
+            env["VLLM_ENGINE_PYTHON"] = args.runtime_python
+        env_prefix = getattr(args, "current_env_prefix", "")
+        if env_prefix:
+            env["VLLM_MANAGER_CONDA_ENV"] = Path(env_prefix).name
+
+    manage = resolve_manage_script(args)
+    manage_cwd = Path(args.dev_hub_dir).resolve()
     run_command(
         [str(manage), "restart"],
-        cwd=Path(args.dev_hub_dir).resolve(),
+        cwd=manage_cwd,
         execute=execute,
         env=env,
     )
@@ -654,7 +1118,7 @@ def start_managed_server(
     while True:
         health = run_command(
             [str(manage), "health"],
-            cwd=Path(args.dev_hub_dir).resolve(),
+            cwd=manage_cwd,
             execute=execute,
             env=env,
             check=False,
@@ -664,9 +1128,25 @@ def start_managed_server(
         if not execute:
             return
         if time.monotonic() >= deadline:
-            raise RuntimeError(
+            # Issue #97 item 4: capture diagnostics before raising so the
+            # operator can root-cause the 600s health-timeout failure.
+            blocked_dir = capture_failure_diagnostics(
+                target=target,
+                spec=spec,
+                args=args,
+                error=(
+                    f"managed dev-hub server did not become healthy within "
+                    f"{args.managed_ready_timeout_seconds}s"
+                ),
+                result_root=result_root,
+                run_key=run_key,
+                execute=execute,
+                state_file=state_file,
+            )
+            raise _HealthTimeoutError(
                 f"managed dev-hub server did not become healthy within "
-                f"{args.managed_ready_timeout_seconds}s"
+                f"{args.managed_ready_timeout_seconds}s",
+                blocked_dir=blocked_dir,
             )
         time.sleep(args.managed_health_interval_seconds)
 
@@ -677,10 +1157,11 @@ def stop_managed_server(*, args: argparse.Namespace, execute: bool) -> None:
         env["VLLM_ENGINE_CONTAINER"] = args.managed_container
     if args.managed_systemd_unit:
         env["VLLM_ENGINE_SYSTEMD_UNIT"] = args.managed_systemd_unit
-    manage = Path(args.dev_hub_dir).resolve() / "manage.sh"
+    manage = resolve_manage_script(args)
+    manage_cwd = Path(args.dev_hub_dir).resolve()
     run_command(
         [str(manage), "stop"],
-        cwd=Path(args.dev_hub_dir).resolve(),
+        cwd=manage_cwd,
         execute=execute,
         env=env,
         check=False,
@@ -1045,6 +1526,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--server-port", default="")
     parser.add_argument("--managed-dev-hub", action="store_true")
     parser.add_argument("--dev-hub-dir", default=str(DEFAULT_DEV_HUB_DIR))
+    parser.add_argument(
+        "--manage-script",
+        default="manage.sh",
+        help=(
+            "Launcher script relative to --dev-hub-dir. Use 'scripts/manage-container.sh' "
+            "when running inside a container (no docker/systemd)."
+        ),
+    )
     parser.add_argument("--managed-npu-devices", default="0")
     parser.add_argument("--managed-container", default="vllm-hust-backfill")
     parser.add_argument("--managed-systemd-unit", default="vllm-hust-backfill.service")
@@ -1085,6 +1574,22 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--managed-ready-timeout-seconds", type=int, default=600)
     parser.add_argument("--managed-health-interval-seconds", type=int, default=10)
+    parser.add_argument(
+        "--allow-busy-npu",
+        action="store_true",
+        help=(
+            "Bypass the pre-flight NPU idle check. Use only for debugging "
+            "when you intentionally want to start on an occupied NPU."
+        ),
+    )
+    parser.add_argument(
+        "--skip-defensive-cleanup",
+        action="store_true",
+        help=(
+            "Skip force_cleanup_managed_server after manage.sh stop. "
+            "Use only for debugging to inspect residual state."
+        ),
+    )
     parser.add_argument("--allow-model-downloads", action="store_true")
     parser.add_argument("--submitter", default="historical-pr-backfill")
     parser.add_argument("--core-github-repository", default="vLLM-HUST/vllm-hust")
@@ -1201,6 +1706,7 @@ def main() -> int:
             }
             if execute:
                 write_state(state_file, state)
+            blocked_dir: Path | None = None
             try:
                 uses_managed_server = (
                     args.managed_dev_hub and spec.benchmark_type == "serve"
@@ -1213,6 +1719,9 @@ def main() -> int:
                         core_worktree=core_worktree,
                         plugin_worktree=plugin_worktree,
                         execute=execute,
+                        result_root=result_root,
+                        run_key=key,
+                        state_file=state_file,
                     )
                 submission_dir = run_target_spec(
                     args=args,
@@ -1240,11 +1749,29 @@ def main() -> int:
                 if execute:
                     write_state(state_file, state)
             except Exception as exc:
+                # Issue #97 item 4: capture diagnostics for failed runs.
+                # _HealthTimeoutError already captured during start_managed_server;
+                # for other exceptions, capture here.
+                blocked_dir: Path | None = None
+                if isinstance(exc, _HealthTimeoutError):
+                    blocked_dir = exc.blocked_dir
+                elif uses_managed_server and execute:
+                    blocked_dir = capture_failure_diagnostics(
+                        target=target,
+                        spec=spec,
+                        args=args,
+                        error=str(exc),
+                        result_root=result_root,
+                        run_key=key,
+                        execute=execute,
+                        state_file=state_file,
+                    )
                 state["runs"][key] = {
                     **state["runs"].get(key, {}),
                     "status": "failed",
                     "error": str(exc),
                     "failed_at": datetime.now(timezone.utc).isoformat(),
+                    "blocked_dir": str(blocked_dir) if blocked_dir else None,
                 }
                 if execute:
                     write_state(state_file, state)
@@ -1252,11 +1779,36 @@ def main() -> int:
                     f"[backfill] failed: {target.label} / {spec.workload}: {exc}",
                     file=sys.stderr,
                 )
+                if blocked_dir:
+                    print(
+                        f"[backfill] BLOCKED diagnostics: {blocked_dir / BLOCKED_MARKER_FILE}",
+                        file=sys.stderr,
+                    )
                 if execute:
                     return 1
             finally:
                 if args.managed_dev_hub and spec.benchmark_type == "serve":
-                    stop_managed_server(args=args, execute=execute)
+                    try:
+                        stop_managed_server(args=args, execute=execute)
+                    except Exception as stop_exc:  # noqa: BLE001
+                        print(
+                            f"[backfill] WARNING: manage.sh stop raised: {stop_exc}",
+                            file=sys.stderr,
+                        )
+                    # Issue #97 item 5: defensive cleanup — manage.sh stop is
+                    # not always reliable (residual VLLMEngineCore observed).
+                    if not getattr(args, "skip_defensive_cleanup", False):
+                        force_cleanup_managed_server(
+                            args=args,
+                            execute=execute,
+                            blocked_dir=blocked_dir,
+                        )
+                        warnings = verify_cleanup_success(args=args, execute=execute)
+                        for w in warnings:
+                            print(
+                                f"[backfill] WARNING: residual after cleanup: {w}",
+                                file=sys.stderr,
+                            )
 
     print("[backfill] done")
     return 0
