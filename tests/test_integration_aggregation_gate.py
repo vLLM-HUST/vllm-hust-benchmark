@@ -128,6 +128,23 @@ def test_backfill_dir_without_status_passes(tmp_path: Path) -> None:
     assert failures == []
 
 
+def test_ci_dir_without_status_rejected_even_with_artifact(tmp_path: Path) -> None:
+    """CI output is incomplete until the runner records a successful status."""
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    ci_dir = source_dir / "ci-30554037879-1-7363d82b"
+    ci_dir.mkdir()
+    (ci_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "NO_STATUS"
+    assert "CI publication" in failures[0]["detail"]
+
+
 def test_empty_status_rejected(tmp_path: Path) -> None:
     source_dir = tmp_path / "submissions"
     source_dir.mkdir()
