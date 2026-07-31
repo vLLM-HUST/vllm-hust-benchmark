@@ -2112,6 +2112,11 @@ def _run_serve_bench(
     server_log = output_dir / "server.log"
 
     # Start the vllm server in the background.
+    # Build serve command with scenario-specific flags.
+    # --enable-prefix-caching is passed explicitly to avoid relying on the
+    # engine default, which has changed across vllm-hust versions and caused
+    # the issue #163 throughput regression (prefix-repetition-online dropped
+    # from ~234 tok/s to ~51 tok/s when prefix caching was effectively off).
     serve_cmd = [
         str(PYTHON_BIN),
         "-m",
@@ -2122,10 +2127,13 @@ def _run_serve_bench(
         host,
         "--port",
         str(port),
+        "--dtype",
+        "float16",
         "--gpu-memory-utilization",
         DEFAULT_GPU_MEMORY_UTILIZATION,
         "--max-model-len",
         DEFAULT_MAX_MODEL_LEN,
+        "--enable-prefix-caching",
     ]
     # Wait for the port to be free (previous server may still be shutting down).
     import socket as _socket
@@ -2376,6 +2384,12 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
         server_params["gpu_memory_utilization"] = float(DEFAULT_GPU_MEMORY_UTILIZATION)
     if "max_model_len" not in server_params:
         server_params["max_model_len"] = int(DEFAULT_MAX_MODEL_LEN)
+    # Record the effective prefix-caching setting so the same_spec payload
+    # reflects what the launcher actually passed to the server.  This does
+    # not alter the hash (the field is added after the hash basis is built
+    # in the official baseline flow), but makes the artifact self-describing.
+    if "enable_prefix_caching" not in server_params:
+        server_params["enable_prefix_caching"] = True
 
     # ------------------------------------------------------------------
     # Replicate the old ``resolve_client_parameters`` (commit 2d6f5de).
