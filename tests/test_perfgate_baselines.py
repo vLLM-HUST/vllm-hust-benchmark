@@ -175,6 +175,10 @@ def test_store_and_exact_fetch_validate_provenance(tmp_path: Path) -> None:
 
     assert destination.read_bytes() == artifact.read_bytes()
     assert fetched.read_bytes() == artifact.read_bytes()
+    manifest = json.loads(
+        (destination.parent / "baseline-metadata.json").read_text(encoding="utf-8")
+    )
+    assert manifest["provenance"]["runtime_manager_sha"] is None
     pointer = central / perfgate_baselines.latest_pointer_relative_path(_identity())
     assert json.loads(pointer.read_text(encoding="utf-8"))["identity"] == {
         "scenario": "random-online",
@@ -183,6 +187,36 @@ def test_store_and_exact_fetch_validate_provenance(tmp_path: Path) -> None:
         "target_repository": TARGET_REPOSITORY,
         "target_sha": TARGET_SHA,
     }
+
+
+def test_runtime_manager_sha_is_persisted_and_compared(tmp_path: Path) -> None:
+    central = tmp_path / "central"
+    central.mkdir()
+    artifact = tmp_path / "run_leaderboard.json"
+    _write_artifact(artifact)
+    provenance = _provenance(runtime_manager_sha="d" * 40)
+
+    destination = perfgate_baselines.store_baseline(
+        central, artifact, _identity(), provenance
+    )
+    manifest = json.loads(
+        (destination.parent / "baseline-metadata.json").read_text(encoding="utf-8")
+    )
+    assert manifest["provenance"]["runtime_manager_sha"] == "d" * 40
+    perfgate_baselines.fetch_baseline(
+        central,
+        tmp_path / "fetched.json",
+        _identity(),
+        expected_provenance=provenance,
+    )
+
+    with pytest.raises(ValueError, match="exact central baseline provenance mismatch"):
+        perfgate_baselines.fetch_baseline(
+            central,
+            tmp_path / "mismatched.json",
+            _identity(),
+            expected_provenance=_provenance(runtime_manager_sha="e" * 40),
+        )
 
 
 def test_runtime_versions_accept_local_version_identifiers(tmp_path: Path) -> None:

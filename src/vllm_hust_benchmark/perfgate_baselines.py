@@ -51,6 +51,7 @@ class BaselineProvenance:
     cann_version: str
     torch_version: str
     torch_npu_version: str
+    runtime_manager_sha: str | None = None
 
 
 def _canonical_repository(value: str) -> str:
@@ -69,6 +70,13 @@ def _validate_sha(value: str, *, field: str) -> str:
     if not SHA_PATTERN.fullmatch(normalized):
         raise ValueError(f"{field} must be a full 40-character Git SHA")
     return normalized
+
+
+def _validate_optional_sha(value: str | None, *, field: str) -> str | None:
+    normalized = str(value or "").strip()
+    if not normalized:
+        return None
+    return _validate_sha(normalized, field=field)
 
 
 def _validate_component(value: str, *, field: str) -> str:
@@ -131,6 +139,9 @@ def normalize_provenance(provenance: BaselineProvenance) -> BaselineProvenance:
         ),
         torch_npu_version=_validate_metadata_value(
             provenance.torch_npu_version, field="torch_npu_version"
+        ),
+        runtime_manager_sha=_validate_optional_sha(
+            provenance.runtime_manager_sha, field="runtime_manager_sha"
         ),
     )
 
@@ -871,6 +882,7 @@ def _add_provenance_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--vllm-hust-sha", required=True)
     parser.add_argument("--vllm-ascend-hust-sha", required=True)
     parser.add_argument("--benchmark-runner-sha", required=True)
+    parser.add_argument("--runtime-manager-sha", default="")
     parser.add_argument("--hardware-chip-model", required=True)
     parser.add_argument("--cann-version", required=True)
     parser.add_argument("--torch-version", required=True)
@@ -892,6 +904,7 @@ def _provenance_from_args(args: argparse.Namespace) -> BaselineProvenance:
         vllm_hust_sha=args.vllm_hust_sha,
         vllm_ascend_hust_sha=args.vllm_ascend_hust_sha,
         benchmark_runner_sha=args.benchmark_runner_sha,
+        runtime_manager_sha=args.runtime_manager_sha,
         hardware_chip_model=args.hardware_chip_model,
         cann_version=args.cann_version,
         torch_version=args.torch_version,
