@@ -431,7 +431,9 @@ def find_local_model_path(model_id: str) -> str | None:
             ),
         ],
         "Qwen/Qwen2.5-7B-Instruct": [
-            Path("/data/vllm-hust-benchmark-issue97/models/models/Qwen--Qwen2.5-7B-Instruct/snapshots/master"),
+            Path(
+                "/data/vllm-hust-benchmark-issue97/models/models/Qwen--Qwen2.5-7B-Instruct/snapshots/master"
+            ),
             Path("/data/shared_models/Qwen2.5-7B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-7B-Instruct"),
             Path(
