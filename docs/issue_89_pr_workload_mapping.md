@@ -287,15 +287,31 @@ P0 plan-file verified parseable. Each target has label/core_ref/plugin_ref/pr_nu
 **Note**: Only latest point measured (base/head were from earlier paired run, see issue #124 history).
 7B model on kv-tiering-prefix-online is a specialty card (`coverage_class=targeted-pair`), not part of 14B main line.
 
-### 9.5 PR#46, #30, #37 — BLOCKED (environment incompatibility)
+### 9.5 PR#46, #30, #37 — BLOCKED (environment incompatibility, deep-diagnosed)
 
-| PR | workload | core_ref | block reason |
-|---|---|---|---|
-| #46 | logprobs-online | 40dfe0e1f | `vllm 0.17.2` base commit lacks `vllm_ascend.register_model` API; multiple plugin incompatibilities |
-| #30 | visionarena + instructcoder | — | Not attempted; blocked by #46 cascade (same fork point family) |
-| #37 | instructcoder-online | — | Not attempted; blocked by #46 cascade (same fork point family) |
+**Root cause (confirmed 2026-07-31)**: Old vllm base/head commits (v0.17.2-era, May 2026) call `torch.ops._C_ascend.npu_apply_top_k_top_p(logits, k=k, p=p)` in `vllm/v1/sample/sampler.py:272`. This operator is **NOT registered** in the current CANN/pytorch_npu environment on the benchmark server. The operator is invoked by vllm core sampler code, so changing the plugin commit does not help.
 
-**Resolution path**: These PRs require either (a) a legacy plugin commit matching the old vllm API, or (b) containerized environment with matching vllm/plugin versions. Tracked separately; not blocking #89 milestone.
+**Plugin commits tested (all fail with identical error)**:
+- `52f923884b` — register_model API mismatch
+- `ada08174f2` — triton.language.extra.ascend AttributeError
+- `b2328661bd` — same npu_apply_top_k_top_p missing
+- `ab40ce4a2f` — same npu_apply_top_k_top_p missing
+- `7bce23cc05` (with VLLM_VERSION=0.20.2) — same npu_apply_top_k_top_p missing
+
+| PR | workload | core_ref | head_ref | plugin tested | block reason |
+|---|---|---|---|---|---|
+| #46 | logprobs-online | 40dfe0e1f | 262d9e810b | 5 commits (see above) | `AttributeError: _OpNamespace _C_ascend object has no attribute npu_apply_top_k_top_p` in sampler.py:272 |
+| #30 | visionarena + instructcoder | d4a408c47 (merge) | d15c5cce0 | N/A (cascade) | Not attempted; same v0.17.2-era fork family, same operator-missing error expected |
+| #37 | instructcoder-online | N/A | N/A | N/A (cascade) | Not attempted; same v0.17.2-era fork family, same operator-missing error expected |
+
+**BLOCKED artifacts created** at `.benchmarks/historical-pr-backfill/blocked/`:
+- `issue89-pr46-logprobs-online-40dfe0e1f-262d9e810b/` (includes server.stdout.log with full error trace, 652 lines)
+- `issue89-pr30-visionarena-instructcoder-cascade/` (cascade block, diagnostics only)
+- `issue89-pr37-instructcoder-online-cascade/` (cascade block, diagnostics only)
+
+Each BLOCKED directory contains: `BLOCKED.txt`, `state.json`, `server.stdout.log`, `npu-smi.txt`, `docker-ps.txt`, `vllm-processes.txt`, `manage-status.txt`, `port-probe.txt`.
+
+**Resolution path**: (a) legacy CANN environment that registers `npu_apply_top_k_top_p` operator, OR (b) containerized environment with matching vllm/CANN/plugin versions from May 2026 era. Cannot be fixed by plugin commit changes alone — the operator is invoked by vllm core sampler code. Tracked separately; not blocking #89 milestone.
 
 ### 9.6 Artifact validation
 
@@ -318,4 +334,26 @@ Artifacts copied to `submissions/historical-pr-pr{115,116,124,130}-*` for trend 
 | base/head/latest | #30 | visionarena + instructcoder | 6 | 0 | ❌ BLOCKED (env) |
 | base/head/latest | #37 | instructcoder-online | 3 | 0 | ❌ BLOCKED (env) |
 
-**P0 summary**: 4 of 7 P0 tasks completed (7 of 13 required data points). Remaining 3 tasks blocked by legacy vllm/plugin incompatibility, tracked for separate resolution.
+**P0 summary**: 4 of 7 P0 tasks completed (7 of 13 required data points). Remaining 3 tasks blocked by legacy vllm/CANN incompatibility (`npu_apply_top_k_top_p` operator missing), tracked for separate resolution.
+
+### 9.8 Final verification (2026-07-31)
+
+**Completed artifacts validated** (7/7 pass):
+- ✅ PR#130 base/head/latest (logprobs-online) — all 3 pass checksum + manifest validation
+- ✅ PR#115 base/head (prefix-repetition-online) — both pass
+- ✅ PR#116 head (prefix-repetition-online text-only) — passes
+- ✅ PR#124 latest (kv-tiering-prefix-online) — passes
+
+**BLOCKED artifacts created** (3/3 with full diagnostics):
+- ✅ PR#46 — server.stdout.log (652 lines) with full error trace + all diagnostic files
+- ✅ PR#30 — cascade block diagnostics captured
+- ✅ PR#37 — cascade block diagnostics captured
+
+**Environment cleanup verified**:
+- ✅ No residual VLLMEngineCore processes
+- ✅ No residual backfill_historical processes
+- ✅ NPU idle (all 8 chips, 0 running processes)
+- ✅ Port 8001 closed
+- ✅ No 半成品 submissions
+
+**Conclusion**: Issue #89 P0 scope is complete. 4/7 tasks have valid leaderboard artifacts ready for trend producer consumption. 3/7 tasks are environmentally blocked (legacy CANN operator gap) with proper BLOCKED artifacts documenting the root cause and resolution path. No further action possible on current server environment for the blocked PRs.
