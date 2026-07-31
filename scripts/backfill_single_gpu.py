@@ -2058,12 +2058,18 @@ def _build_env(npu_id: int = 0) -> dict[str, str]:
     """
     env = os.environ.copy()
     env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+    env.setdefault("TRANSFORMERS_OFFLINE", "1")
+    env.setdefault("HF_HUB_OFFLINE", "1")
     env.setdefault("VLLM_USE_V1", "1")
     env.setdefault("VLLM_TARGET_DEVICE", "npu")
     env.setdefault("VLLM_PLUGINS", "ascend")
     env["ASCEND_RT_VISIBLE_DEVICES"] = str(npu_id)
     env["ASCEND_VISIBLE_DEVICES"] = str(npu_id)
     env.setdefault("PYTHONDONTWRITEBYTECODE", "1")
+    # Bypass HTTP proxy for localhost so /health checks reach the
+    # vllm server directly instead of being routed through http_proxy.
+    env.setdefault("NO_PROXY", "127.0.0.1,localhost")
+    env.setdefault("no_proxy", "127.0.0.1,localhost")
 
     atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
     torch_cxx_abi = subprocess.run(
