@@ -13,9 +13,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
 
-from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
 from vllm_hust_benchmark.perfgate_measurement import validate_measurement_block
-
+from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
 
 BASELINE_SCHEMA_VERSION = "perfgate-baseline/v1"
 REVOCATION_SCHEMA_VERSION = "perfgate-baseline-revocation/v1"

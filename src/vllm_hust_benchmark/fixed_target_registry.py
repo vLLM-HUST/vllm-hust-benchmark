@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
-
+from typing import Any
 
 REGISTRY_SCHEMA_VERSION = "fixed-target-registry/v1"
 REGISTRY_PATH = Path(__file__).parent / "data" / "fixed_target_registry.json"

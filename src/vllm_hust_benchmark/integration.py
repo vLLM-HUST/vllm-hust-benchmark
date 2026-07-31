@@ -10,26 +10,26 @@ import sys
 import tempfile
 import time
 import urllib.error
-from collections.abc import Sequence
 import urllib.request
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from vllm_hust_benchmark.fixed_target_registry import FixedTargetProfile
 
 from vllm_hust_benchmark.aggregate_results import build_series_signature
-from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.leaderboard_exclusions import (
     LeaderboardExclusion,
     load_leaderboard_exclusions,
     match_leaderboard_exclusion,
 )
+from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import get_scenario
-from vllm_hust_benchmark.submission_artifacts import iter_submission_artifact_paths
 from vllm_hust_benchmark.submission_artifacts import (
+    iter_submission_artifact_paths,
     normalize_submission_artifacts_in_tree,
 )
 from vllm_hust_benchmark.workload_config_contract import (
@@ -1089,16 +1089,16 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
             + " | ".join(
                 [
                     f"engine={_normalize_engine(entry)}",
-                    f"engine_version={str(entry.get('engine_version') or metadata.get('engine_version') or '')}",
-                    f"model={str((entry.get('model') or {}).get('name') or '')}",
+                    f"engine_version={entry.get('engine_version') or metadata.get('engine_version') or ''!s}",
+                    f"model={(entry.get('model') or {}).get('name') or ''!s}",
                     f"workload={_extract_workload_name(entry)}",
-                    f"config_type={str(entry.get('config_type') or '')}",
+                    f"config_type={entry.get('config_type') or ''!s}",
                     f"chip_count={int((entry.get('hardware') or {}).get('chip_count') or 0)}",
                     f"node_count={int((entry.get('cluster') or {}).get('node_count') or 1)}",
-                    f"baseline_engine={str(accountable.get('baseline_engine') or '')}",
+                    f"baseline_engine={accountable.get('baseline_engine') or ''!s}",
                     f"spec_id={_get_same_spec_id(entry) or ''}",
                     f"spec_hash={_get_same_spec_hash(entry) or ''}",
-                    f"github_repository={str(metadata.get('github_repository') or '')}",
+                    f"github_repository={metadata.get('github_repository') or ''!s}",
                 ]
             ),
             file=sys.stderr,
@@ -1124,9 +1124,9 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
                 + " | ".join(
                     [
                         f"engine={_normalize_engine(entry)}",
-                        f"model={str((entry.get('model') or {}).get('name') or '')}",
+                        f"model={(entry.get('model') or {}).get('name') or ''!s}",
                         f"spec_hash={_get_same_spec_hash(entry) or ''}",
-                        f"submitted_at={str((entry.get('metadata') or {}).get('submitted_at') or '')}",
+                        f"submitted_at={(entry.get('metadata') or {}).get('submitted_at') or ''!s}",
                     ]
                 ),
                 file=sys.stderr,
@@ -1152,9 +1152,9 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
                 + " | ".join(
                     [
                         f"engine={_normalize_engine(entry)}",
-                        f"model={str((entry.get('model') or {}).get('name') or '')}",
+                        f"model={(entry.get('model') or {}).get('name') or ''!s}",
                         f"spec_hash={_get_same_spec_hash(entry) or ''}",
-                        f"github_repository={str((entry.get('metadata') or {}).get('github_repository') or '')}",
+                        f"github_repository={(entry.get('metadata') or {}).get('github_repository') or ''!s}",
                     ]
                 ),
                 file=sys.stderr,
@@ -1340,6 +1340,7 @@ def _upload_existing_snapshots(
     """
     try:
         from huggingface_hub import CommitOperationAdd
+
         from vllm_hust_benchmark.hf_publisher import _create_commit_on_branch
     except ImportError:
         print(
@@ -2320,6 +2321,7 @@ def sync_submission_to_huggingface(
 
     try:
         from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
+
         from vllm_hust_benchmark.hf_publisher import _create_commit_on_branch
     except ImportError:
         print(

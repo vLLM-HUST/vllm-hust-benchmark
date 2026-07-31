@@ -835,58 +835,6 @@ run_offline_client_command() {
     $effective_client_args
 }
 
-append_enforce_eager_flag() {
-  local client_args=${1:-}
-
-  if [[ "$client_args" == *"--enforce-eager"* ]]; then
-    printf '%s\n' "$client_args"
-    return 0
-  fi
-
-  if [[ -n "$client_args" ]]; then
-    printf '%s --enforce-eager\n' "$client_args"
-  else
-    printf '%s\n' "--enforce-eager"
-  fi
-}
-
-run_offline_client_command_with_aclgraph_fallback() {
-  local failure_log=""
-  local runner_status=0
-  local eager_client_args=""
-
-  failure_log=$(mktemp "${TMPDIR:-/tmp}/official-baseline-offline-client-XXXXXX.log")
-  : > "$failure_log"
-
-  # Use a pipe + ``PIPESTATUS`` instead of process substitution
-  # ``> >(tee ...)`` so the function works under macOS sandbox (where
-  # ``/dev/fd/*`` writes are blocked with "Operation not permitted").
-  set +e
-  run_offline_client_command "$CLIENT_ARGS" 2>&1 | tee -a "$failure_log"
-  runner_status=${PIPESTATUS[0]}
-  set -e
-
-  if [[ "$runner_status" -eq 0 ]]; then
-    rm -f "$failure_log"
-    return 0
-  fi
-
-  if ! grep -Fq "weak_ref_tensor" "$failure_log"; then
-    rm -f "$failure_log"
-    return "$runner_status"
-  fi
-
-  eager_client_args=$(append_enforce_eager_flag "$CLIENT_ARGS")
-  if [[ "$eager_client_args" == "$CLIENT_ARGS" ]]; then
-    rm -f "$failure_log"
-    return "$runner_status"
-  fi
-
-  echo "[goal-baseline] observed weak_ref_tensor failure during ${BENCHMARK_TYPE} benchmark; retrying with --enforce-eager" >&2
-  rm -f "$failure_log"
-  run_offline_client_command "$eager_client_args"
-}
-
 prepare_offline_benchmark_runtime() {
   local selection_status=0
   local runtime_ready_status=0
@@ -1111,8 +1059,6 @@ from vllm_hust_benchmark.official_runtime_inputs import normalize_server_paramet
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 normalized = normalize_server_parameters(payload["resolved_server_parameters"])
-if os.environ.get("OFFICIAL_FORCE_EAGER_SERVER") == "1":
-    normalized["enforce_eager"] = True
 print(
     json.dumps(
     normalized,
@@ -1418,85 +1364,6 @@ PY
   printf '%s' "unknown"
 }
 
-official_runtime_supports_aclgraph_weak_ref_tensor() {
-  local probe_status=0
-
-  set +e
-  run_in_official_runtime_python "$OFFICIAL_RUNTIME_PYTHONPATH" <<'PY' >/dev/null 2>&1
-import torch
-
-has_namespace = hasattr(torch.ops, "_C_ascend")
-has_weak_ref = has_namespace and hasattr(torch.ops._C_ascend, "weak_ref_tensor")
-
-raise SystemExit(0 if has_weak_ref else 3)
-PY
-  probe_status=$?
-  set -e
-
-  if [[ "$probe_status" -eq 0 ]]; then
-    return 0
-  fi
-
-  if [[ "$probe_status" -eq 3 ]]; then
-    return 1
-  fi
-
-  echo "[goal-baseline] failed to probe official ACL graph weak_ref_tensor support (status=${probe_status}); leaving graph mode unchanged" >&2
-  return 2
-}
-
-should_force_eager_for_offline_benchmark() {
-  local probe_status=0
-
-  case "${BENCHMARK_TYPE:-}" in
-    throughput|latency)
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-
-  official_runtime_supports_aclgraph_weak_ref_tensor
-  probe_status=$?
-
-  if [[ "$probe_status" -eq 0 ]]; then
-    return 1
-  fi
-
-  if [[ "$probe_status" -eq 1 ]]; then
-    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for ${BENCHMARK_TYPE} benchmark" >&2
-    return 0
-  fi
-
-  return 1
-}
-
-should_force_eager_for_server_benchmark() {
-  local probe_status=0
-
-  case "${BENCHMARK_TYPE:-}" in
-    serve)
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-
-  official_runtime_supports_aclgraph_weak_ref_tensor
-  probe_status=$?
-
-  if [[ "$probe_status" -eq 0 ]]; then
-    return 1
-  fi
-
-  if [[ "$probe_status" -eq 1 ]]; then
-    echo "[goal-baseline] official runtime lacks torch.ops._C_ascend.weak_ref_tensor; forcing --enforce-eager for serve benchmark server" >&2
-    return 0
-  fi
-
-  echo "[goal-baseline] ACL graph weak_ref_tensor probe failed (status=$probe_status); forcing --enforce-eager as safe default" >&2
-  return 0
-}
 server_log_indicates_resource_busy() {
   local log_file=$1
 

@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-
 WORKLOAD_CONFIG_CONTRACT_VERSION = "explicit-effective/v1"
 WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER = "2026-07-24T00:00:00Z"
 OFFICIAL_SPEC_PREFIX = "official-ascend-jan-2026-v0.18.0-"
@@ -169,7 +168,7 @@ def _validate_target_metadata(metadata: Mapping[str, Any]) -> list[str]:
         errors.append("metadata.target_id must be explicitly recorded")
         return errors
 
-    from vllm_hust_benchmark.fixed_target_registry import (  # noqa: E402
+    from vllm_hust_benchmark.fixed_target_registry import (
         get_active_profiles,
         load_fixed_target_registry,
     )

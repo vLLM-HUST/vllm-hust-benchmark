@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from pathlib import Path
 from statistics import median
-from typing import Any, Mapping
+from typing import Any
 
 from vllm_hust_benchmark.registry import get_scenario
 
