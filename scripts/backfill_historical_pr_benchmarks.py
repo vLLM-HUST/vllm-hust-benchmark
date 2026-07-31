@@ -450,6 +450,12 @@ def require_container_workspace_path(
 
 
 def find_local_model_path(model_id: str) -> str | None:
+    override = os.environ.get("VLLM_HUST_LOCAL_MODEL_PATH")
+    if override:
+        override_path = Path(override)
+        if override_path.exists():
+            return str(override_path)
+        return None
     known = {
         "Qwen/Qwen2.5-14B-Instruct": [
             Path("/data/shared_models/Qwen2.5-14B-Instruct"),
@@ -485,11 +491,6 @@ def find_local_model_path(model_id: str) -> str | None:
     for candidate in known.get(model_id, []):
         if candidate.exists():
             return str(candidate)
-    override = os.environ.get("VLLM_HUST_LOCAL_MODEL_PATH")
-    if override:
-        override_path = Path(override)
-        if override_path.exists():
-            return str(override_path)
     return None
 
 
