@@ -60,5 +60,5 @@ def test_token_budget_smaller_than_prompt_fails(tmp_path: Path) -> None:
 def test_runner_enforces_complete_ab_results_and_shared_seed() -> None:
     text = RUNNER.read_text(encoding="utf-8")
     assert "SIMLLM_MEASURE_SEED=${SIMLLM_MEASURE_SEED:-$SIMLLM_WARMCACHE_SEED}" in text
-    assert 'completed $completed/$SIMLLM_THROUGHPUT_NUM_PROMPTS' in text
+    assert "completed $completed/$SIMLLM_THROUGHPUT_NUM_PROMPTS" in text
     assert '"$WARM_CACHE_RUNNER" "$SATURATED_SPEC_FILE"' in text
