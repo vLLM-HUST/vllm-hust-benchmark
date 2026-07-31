@@ -116,7 +116,9 @@
         "ref": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
         "commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda"
       }
-    }
+    },
+    "repetitions": 3,
+    "measurement_strategy": "warmup+primary-median-run"
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
@@ -157,5 +159,61 @@
       "random_input_len": 1024,
       "random_output_len": 256
     }
+  },
+  "measurement": {
+    "schema_version": "perfgate-measurement/v2",
+    "strategy": "warmup+primary-median-run",
+    "warmup_runs": 0,
+    "measured_runs": 3,
+    "aggregation": "primary-median-run",
+    "selection": {
+      "primary_metric": "ttft_ms",
+      "sort_direction": "ascending",
+      "secondary_sort_key": "run_index",
+      "ordered_run_indices": [
+        2,
+        1,
+        3
+      ],
+      "selected_position": 2,
+      "selected_run_index": 1,
+      "selected_raw_result_sha256": "a4dcab1a7f7d5198075bc4f32db5ef48300c54046d266b91ecaeb2d23198fbb1"
+    },
+    "warmup": [],
+    "per_run": [
+      {
+        "run_index": 1,
+        "raw_result_sha256": "a4dcab1a7f7d5198075bc4f32db5ef48300c54046d266b91ecaeb2d23198fbb1",
+        "metrics": {
+          "throughput_tps": 245.94933202427433,
+          "ttft_ms": 265.06909978576005,
+          "tbt_ms": 35.91494058551011,
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0
+        }
+      },
+      {
+        "run_index": 2,
+        "raw_result_sha256": "2b2938fcbdf4147e8b00872b1d2ac664fe2170bb2a2533ff6c18be9b2762b815",
+        "metrics": {
+          "throughput_tps": null,
+          "ttft_ms": 264.3259868584573,
+          "tbt_ms": null,
+          "error_rate": 0.0,
+          "peak_mem_mb": null
+        }
+      },
+      {
+        "run_index": 3,
+        "raw_result_sha256": "722f82228d7b20d84e904dc22b221b351905252a629d6c8a2e6646838b3ab001",
+        "metrics": {
+          "throughput_tps": null,
+          "ttft_ms": 265.90319343842566,
+          "tbt_ms": null,
+          "error_rate": 0.0,
+          "peak_mem_mb": null
+        }
+      }
+    ]
   }
 }
