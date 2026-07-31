@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/official_target_registry_v1.schema.json",
+  "title": "vLLM-HUST official target registry v1",
+  "type": "object",
+  "required": ["schema_version", "registry_version", "effective_from", "source_set_sha256", "targets"],
+  "properties": {
+    "schema_version": {"const": "official-target-registry/v1"},
+    "registry_version": {"type": "string", "minLength": 1},
+    "effective_from": {"type": "string", "format": "date"},
+    "source_set_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/target"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "target": {
+      "type": "object",
+      "required": [
+        "target_id",
+        "target_version",
+        "status",
+        "effective_from",
+        "supersedes",
+        "profile",
+        "intended_use",
+        "baseline_runtime",
+        "model",
+        "hardware",
+        "server_parameters",
+        "workload",
+        "source_spec",
+        "compatibility_policy"
+      ],
+      "properties": {
+        "target_id": {"type": "string", "minLength": 1},
+        "target_version": {"type": "string", "minLength": 1},
+        "status": {"enum": ["active", "provisional", "retired"]},
+        "effective_from": {"type": "string", "format": "date"},
+        "supersedes": {"type": "array", "items": {"type": "string"}},
+        "profile": {"type": "string", "minLength": 1},
+        "intended_use": {"enum": ["public-leaderboard", "perfgate", "specialty"]},
+        "baseline_runtime": {"type": "object"},
+        "model": {"type": "object"},
+        "hardware": {"type": "object"},
+        "server_parameters": {"type": "object"},
+        "workload": {"type": "object"},
+        "source_spec": {
+          "type": "object",
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          },
+          "additionalProperties": false
+        },
+        "compatibility_policy": {"type": "object"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

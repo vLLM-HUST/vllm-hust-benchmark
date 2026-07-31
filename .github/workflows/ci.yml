@@ -47,6 +47,9 @@ jobs:
       - name: Reject non-compliant public leaderboard records
         run: python scripts/validate_public_leaderboard_snapshots.py
 
+      - name: Verify generated official target registry
+        run: python -m vllm_hust_benchmark.official_targets --check --repo-root .
+
       - name: Validate trend admission fixtures (valid entries must pass)
         run: python scripts/validate_trend_entries.py --input tests/fixtures/trend_coverage/valid
 

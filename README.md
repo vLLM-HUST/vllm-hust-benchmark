@@ -65,6 +65,9 @@ Within that boundary, the important design point is:
 - `src/vllm_hust_benchmark/registry.py`: official scenario loading and lookup
 - `src/vllm_hust_benchmark/leaderboard_export.py`: website-compatible artifact and manifest exporter
 - `src/vllm_hust_benchmark/data/official_scenarios.json`: initial official scenario mirror
+- `leaderboard-data/official-targets.json`: versioned machine-readable official target registry
+- `docs/OFFICIAL_TARGETS.zh-CN.md`: generated Chinese official target matrix
+- `docs/OFFICIAL_TARGETS.md`: generated English official target matrix
 - `docs/UPSTREAM_ANALYSIS.md`: analysis of upstream benchmark architecture and why this repo is
   structured this way
 - `docs/LEADERBOARD_ALIGNMENT.md`: scenario taxonomy and exact mapping to website leaderboard schema
@@ -79,6 +82,12 @@ Within that boundary, the important design point is:
 ## Quick Start
 
 ```bash
+# show the active public target matrix; 3B perfgate profiles are excluded
+official-targets
+
+# inspect the complete machine-readable registry
+official-targets --json
+
 # inspect the resolved sibling repositories
 python -m vllm_hust_benchmark.cli show-repos --validate
 
