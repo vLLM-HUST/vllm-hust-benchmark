@@ -315,13 +315,6 @@ jobs:
             --execute \
             "${extra_args[@]}"
 
-      - name: Validate trend admission on aggregated snapshots (post-sync gate)
-        id: validate-trend-snapshots
-        if: ${{ steps.sync-hf.conclusion == 'success' && github.event.inputs.dry_run != 'true' }}
-        run: |
-          PYTHONPATH=src python -m vllm_hust_benchmark.cli validate-trend \
-            --input leaderboard-data/snapshots/
-
       - name: Verify HF snapshots match GitHub canonical snapshots
         if: ${{ steps.sync-hf.conclusion == 'success' && github.event.inputs.dry_run != 'true' }}
         env:

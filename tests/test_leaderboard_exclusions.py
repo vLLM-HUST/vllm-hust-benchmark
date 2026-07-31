@@ -139,8 +139,6 @@ def test_match_target_misalignment_miss_when_no_set_provided() -> None:
     assert match_leaderboard_exclusion(artifact, exclusions) is None
     # 显式传入空集合 → 也不命中
     assert (
-        match_leaderboard_exclusion(
-            artifact, exclusions, misaligned_entry_ids=set()
-        )
+        match_leaderboard_exclusion(artifact, exclusions, misaligned_entry_ids=set())
         is None
     )

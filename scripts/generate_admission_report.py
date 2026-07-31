@@ -105,7 +105,9 @@ def _resolve_entry_artifact_path(entry: Mapping[str, Any]) -> str | None:
 
 
 def _extract_scenario(entry: Mapping[str, Any]) -> str:
-    workload = entry.get("workload") if isinstance(entry.get("workload"), Mapping) else {}
+    workload = (
+        entry.get("workload") if isinstance(entry.get("workload"), Mapping) else {}
+    )
     name = workload.get("name")
     if name:
         return str(name)
