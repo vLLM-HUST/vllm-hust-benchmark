@@ -30,11 +30,11 @@
     "dataset": "hf"
   },
   "metrics": {
-    "ttft_ms": 1341.740622754895,
-    "tbt_ms": 66.69854310012335,
-    "throughput_tps": 113.73801469788552,
-    "peak_mem_mb": 0.0,
-    "error_rate": 0.001
+    "throughput_tps": 107.15075233960071,
+    "ttft_ms": 2105.8203792297477,
+    "tbt_ms": 576.7906801855781,
+    "error_rate": 0.002,
+    "peak_mem_mb": 0.0
   },
   "constraints": {
     "scenario_source": "vllm-benchmark",
@@ -118,7 +118,9 @@
       }
     },
     "target_id": "official-ascend-jan-2026-v0.18.0",
-    "target_version": "Official Ascend Jan 2026"
+    "target_version": "Official Ascend Jan 2026",
+    "repetitions": 3,
+    "measurement_strategy": "warmup+primary-median-run"
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
@@ -162,5 +164,61 @@
       "port": 8010,
       "model": "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-VL-7B-Instruct/snapshots/cc594898137f460bfe9f0759e9844b3ce807cfb5"
     }
+  },
+  "measurement": {
+    "schema_version": "perfgate-measurement/v2",
+    "strategy": "warmup+primary-median-run",
+    "warmup_runs": 0,
+    "measured_runs": 3,
+    "aggregation": "primary-median-run",
+    "selection": {
+      "primary_metric": "throughput_tps",
+      "sort_direction": "ascending",
+      "secondary_sort_key": "run_index",
+      "ordered_run_indices": [
+        1,
+        3,
+        2
+      ],
+      "selected_position": 2,
+      "selected_run_index": 3,
+      "selected_raw_result_sha256": "8eef631c635a49bd0b532dce7855cf192e3ec9470c9d56523f340421d6c402ae"
+    },
+    "warmup": [],
+    "per_run": [
+      {
+        "run_index": 1,
+        "raw_result_sha256": "054d355957aabafc4db1a97a7a85be275d292d25a1a0a51107a9d3dfdaf81dc6",
+        "metrics": {
+          "throughput_tps": 106.95352808404309,
+          "ttft_ms": 2831.9095354294404,
+          "tbt_ms": 669.5200279956828,
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0
+        }
+      },
+      {
+        "run_index": 2,
+        "raw_result_sha256": "173a714698d84991d81c42695c0c36bc408b972c3a52543f2aa564f7b5e75a1e",
+        "metrics": {
+          "throughput_tps": 107.38673333855363,
+          "ttft_ms": 2073.049992182525,
+          "tbt_ms": 572.9669956779333,
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0
+        }
+      },
+      {
+        "run_index": 3,
+        "raw_result_sha256": "8eef631c635a49bd0b532dce7855cf192e3ec9470c9d56523f340421d6c402ae",
+        "metrics": {
+          "throughput_tps": 107.15075233960071,
+          "ttft_ms": 2105.8203792297477,
+          "tbt_ms": 576.7906801855781,
+          "error_rate": 0.002,
+          "peak_mem_mb": 0.0
+        }
+      }
+    ]
   }
 }
