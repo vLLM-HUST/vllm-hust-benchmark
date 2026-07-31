@@ -1436,11 +1436,11 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
     - ``temporary``: directory name matches a temporary naming pattern, or the
       directory lives under ``tests/fixtures/`` or ``.benchmarks/``.
     - ``FAILED``: the ``STATUS`` file content starts with ``FAILED``.
-    - ``NO_STATUS``: a ``STATUS`` file exists but is empty after stripping,
-      or neither a ``STATUS`` file nor a ``run_leaderboard.json`` file is
-      present. Backfill/baseline pipelines don't write a ``STATUS`` file by
-      design (only ``codex-latest-*`` CI runs do); they always produce a
-      ``run_leaderboard.json``, which counts as a valid submission artifact.
+    - ``NO_STATUS``: a ``STATUS`` file exists but is empty after stripping;
+      a ``ci-*`` directory has no ``STATUS``; or neither a ``STATUS`` file nor
+      a ``run_leaderboard.json`` file is present. Historical backfill/baseline
+      pipelines don't write a ``STATUS`` file by design and are admitted when
+      they contain a ``run_leaderboard.json`` artifact.
     """
     failures: list[dict] = []
     if not source_dir.is_dir():
@@ -1470,15 +1470,23 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
 
         status_path = child / "STATUS"
         if not status_path.is_file():
-            # Backfill/baseline pipelines don't write a STATUS file by design;
-            # they do produce run_leaderboard.json. Treat such a directory as a
-            # NO_STATUS failure only if it also lacks run_leaderboard.json.
-            if not (child / "run_leaderboard.json").is_file():
+            # CI publication directories must carry the explicit outcome
+            # written by the runner. Merely finding a JSON artifact is not
+            # enough: a failed run can produce partial data before its final
+            # admission gate executes. Historical backfills remain compatible.
+            if (
+                child.name.startswith("ci-")
+                or not (child / "run_leaderboard.json").is_file()
+            ):
                 failures.append(
                     {
                         "dir": path_str,
                         "reason": "NO_STATUS",
-                        "detail": "STATUS file missing and no run_leaderboard.json",
+                        "detail": (
+                            "STATUS file missing for CI publication"
+                            if child.name.startswith("ci-")
+                            else "STATUS file missing and no run_leaderboard.json"
+                        ),
                     }
                 )
             continue
