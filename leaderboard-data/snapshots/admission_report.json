@@ -1,6 +1,6 @@
 {
   "schema_version": "admission-report/v1",
-  "generated_at": "2026-07-29T04:56:06Z",
+  "generated_at": "2026-07-31T07:33:01Z",
   "registry_version": "official-ascend-jan-2026-v0.18.0",
   "entries": [
     {
@@ -484,6 +484,26 @@
       "reason": null
     },
     {
+      "entry_id": "86a6f519-fde1-446d-80a4-73b0377ac9dc",
+      "scenario": "random-online",
+      "actual_config": {
+        "model": "Qwen/Qwen2.5-3B-Instruct",
+        "hardware_chip_model": "910B2",
+        "chip_count": 1,
+        "model_precision": "BF16",
+        "gpu_memory_utilization": null,
+        "max_model_len": null,
+        "workload_name": "random-online"
+      },
+      "artifact_path": null,
+      "profile_name": null,
+      "required_config": null,
+      "missing_fields": [],
+      "drift_fields": [],
+      "disposition": "keep",
+      "reason": "no matching fixed-target profile (non-official entry)"
+    },
+    {
       "entry_id": "a8fd3263-7ec2-4c23-9790-584695a95a85",
       "scenario": "attention-boundary-online",
       "actual_config": {
@@ -574,26 +594,6 @@
         "gpu_memory_utilization": null,
         "max_model_len": null,
         "workload_name": "ngram-instructcoder-online"
-      },
-      "artifact_path": null,
-      "profile_name": null,
-      "required_config": null,
-      "missing_fields": [],
-      "drift_fields": [],
-      "disposition": "keep",
-      "reason": "no matching fixed-target profile (non-official entry)"
-    },
-    {
-      "entry_id": "07669629-ac6b-45b3-8f87-aaf161ec6fa7",
-      "scenario": "random-online",
-      "actual_config": {
-        "model": "aly16/Qwen2.5-14B-W8A8",
-        "hardware_chip_model": "910B2",
-        "chip_count": 1,
-        "model_precision": "INT8",
-        "gpu_memory_utilization": null,
-        "max_model_len": null,
-        "workload_name": "random-online"
       },
       "artifact_path": null,
       "profile_name": null,

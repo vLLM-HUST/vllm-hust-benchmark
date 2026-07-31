@@ -9,8 +9,10 @@ from typing import Any
 from jsonschema import Draft7Validator
 
 from vllm_hust_benchmark.leaderboard_export import _sanitize_component_version
-from vllm_hust_benchmark.model_registry import normalize_model_identity_payload
-from vllm_hust_benchmark.model_registry import validate_model_identity_payload
+from vllm_hust_benchmark.model_registry import (
+    normalize_model_identity_payload,
+    validate_model_identity_payload,
+)
 
 SUPPORTED_MANIFEST_SCHEMA_VERSIONS = {
     "leaderboard-export-manifest/v1",

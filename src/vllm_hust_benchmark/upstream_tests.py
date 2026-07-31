@@ -7,7 +7,6 @@ from typing import Any
 
 from vllm_hust_benchmark.integration import RepoLayout
 
-
 DEFAULT_TEST_FILES: dict[str, str] = {
     "serve": "serving-tests.json",
     "latency": "latency-tests.json",

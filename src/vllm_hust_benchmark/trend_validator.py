@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import copy
 import json
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 from jsonschema import Draft7Validator
 
@@ -19,7 +20,6 @@ from vllm_hust_benchmark.workload_config_contract import (
     requires_workload_config_contract,
     validate_explicit_workload_config,
 )
-
 
 SCHEMA_PATH = (
     Path(__file__).resolve().parents[2] / "schemas" / "leaderboard_trend_v1.schema.json"

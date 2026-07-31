@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from vllm_hust_benchmark import perfgate_measurement
 from vllm_hust_benchmark.aggregate_results import (
     VALID_AGG_METHODS,
     VALID_OUTLIER_HANDLING,
@@ -35,7 +36,6 @@ from vllm_hust_benchmark.integration import (
     validate_runtime_repo,
 )
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
-from vllm_hust_benchmark import perfgate_measurement
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import filter_scenarios, get_scenario
 from vllm_hust_benchmark.upstream_tests import (
@@ -1314,7 +1314,9 @@ def main(argv: list[str] | None = None) -> int:
                 benchmark_result_file=benchmark_result_file,
                 constraints_file=constraints_file,
                 same_spec_file=same_spec_file,
-                spec_path=Path(args.spec_path).resolve() if getattr(args, "spec_path", None) else None,
+                spec_path=Path(args.spec_path).resolve()
+                if getattr(args, "spec_path", None)
+                else None,
                 output_dir=output_dir,
                 artifact_name="run_leaderboard.json",
                 run_id=args.run_id,

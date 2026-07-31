@@ -10,9 +10,11 @@ from pathlib import Path
 from typing import Any
 
 from vllm_hust_benchmark import __version__ as benchmark_version
-from vllm_hust_benchmark.model_registry import normalize_model_identity_payload
-from vllm_hust_benchmark.model_registry import resolve_model_identity
-from vllm_hust_benchmark.model_registry import validate_model_identity_payload
+from vllm_hust_benchmark.model_registry import (
+    normalize_model_identity_payload,
+    resolve_model_identity,
+    validate_model_identity_payload,
+)
 from vllm_hust_benchmark.models import ScenarioDefinition
 from vllm_hust_benchmark.workload_config_contract import (
     WORKLOAD_CONFIG_CONTRACT_VERSION,
