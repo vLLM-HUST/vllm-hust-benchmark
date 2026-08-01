@@ -1,15 +1,15 @@
 """Tests for the submission admission gate in ``aggregate_to_website``.
 
-The gate rejects submission directories that are FAILED (STATUS file starts
-with ``FAILED``), NO_STATUS (missing or empty STATUS file), or temporary
-(directory name matches ``tmp|temp|wip|scratch|adhoc`` patterns) before they
-enter the formal aggregation pipeline.
+The gate rejects failed, incomplete, temporary, or malformed submission
+directories before they enter the formal aggregation pipeline.
 """
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
+
+import pytest
 
 from vllm_hust_benchmark.integration import (
     RepoLayout,
@@ -77,6 +77,20 @@ def _write_mock_submission(
     (target_dir / "run_leaderboard.json").write_text(
         json.dumps(payload, indent=2) + "\n", encoding="utf-8"
     )
+    _write_manifest(target_dir)
+
+
+def _write_manifest(
+    target_dir: Path, artifact_name: str = "run_leaderboard.json"
+) -> None:
+    manifest = {
+        "schema_version": "leaderboard-export-manifest/v2",
+        "generated_at": "2026-08-01T00:00:00Z",
+        "entries": [{"leaderboard_artifact": artifact_name}],
+    }
+    (target_dir / "leaderboard_manifest.json").write_text(
+        json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def test_failed_status_rejected(tmp_path: Path) -> None:
@@ -122,6 +136,7 @@ def test_backfill_dir_without_status_passes(tmp_path: Path) -> None:
     (backfill_dir / "run_leaderboard.json").write_text(
         '{"entry_id": "test"}\n', encoding="utf-8"
     )
+    _write_manifest(backfill_dir)
 
     failures = _scan_submission_admission_failures(source_dir)
 
@@ -177,10 +192,61 @@ def test_clean_directory_passes(tmp_path: Path) -> None:
     clean_dir = source_dir / "clean-run"
     clean_dir.mkdir()
     (clean_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (clean_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(clean_dir)
 
     failures = _scan_submission_admission_failures(source_dir)
 
     assert failures == []
+
+
+@pytest.mark.parametrize("status", ["BLOCKED", "CANCELLED", "RUNNING"])
+def test_non_publishable_status_rejected(tmp_path: Path, status: str) -> None:
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    run_dir = source_dir / "incomplete-run"
+    run_dir.mkdir()
+    (run_dir / "STATUS").write_text(status + "\n", encoding="utf-8")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "RUN_STATUS"
+    assert status in failures[0]["detail"]
+
+
+@pytest.mark.parametrize(
+    ("artifact", "manifest", "expected_reason"),
+    [
+        (False, False, "MISSING_ARTIFACT"),
+        (True, False, "MISSING_MANIFEST"),
+        (True, True, "INVALID_MANIFEST"),
+    ],
+)
+def test_incomplete_artifact_pair_rejected(
+    tmp_path: Path,
+    artifact: bool,
+    manifest: bool,
+    expected_reason: str,
+) -> None:
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    run_dir = source_dir / "candidate-run"
+    run_dir.mkdir()
+    (run_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    if artifact:
+        (run_dir / "run_leaderboard.json").write_text(
+            '{"entry_id": "test"}\n', encoding="utf-8"
+        )
+    if manifest:
+        _write_manifest(run_dir, artifact_name="different.json")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == expected_reason
 
 
 def test_aggregate_to_website_returns_2_on_admission_failure(
@@ -555,6 +621,10 @@ def test_report_generated_on_success(tmp_path: Path) -> None:
     clean_dir = source_dir / "clean-run"
     clean_dir.mkdir()
     (clean_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (clean_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(clean_dir)
 
     output_dir = tmp_path / "out"
 
