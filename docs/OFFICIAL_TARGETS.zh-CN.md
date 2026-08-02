@@ -2,8 +2,8 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.0.0`
-- Effective from: `2026-07-31`
+- Registry version: `1.1.0`
+- Effective from: `2026-08-02`
 
 公开排行榜固定靶与 3B 快速门禁是不同契约；provisional 记录不得作为公开成果对比。
 
@@ -68,6 +68,12 @@ BF16 | — | 256 |
 | | specialty | provisional | multi-chip | agent-research-online-4chip | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 4 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-4chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-4chip-910b2.json)
+| | specialty | provisional | multi-chip | moe-alltoall-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
+2 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-moe-alltoall-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-moe-alltoall-online-qwen25-14b-910b2.json)
+| | specialty | provisional | multi-chip | multi-nic-throughput | Qwen/Qwen2.5-14B-Instruct | 910B2
+× 2 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-multi-nic-throughput-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-multi-nic-throughput-qwen25-14b-910b2.json)
 | | specialty | provisional | multi-chip | prefix-repetition-online-2chip |
 Qwen/Qwen2.5-14B-Instruct | 910B2 × 2 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-2chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-2chip-910b2.json)
@@ -95,15 +101,45 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 4 | FP16 | — | — |
 | | specialty | provisional | multi-chip | sonnet-throughput-8chip | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 8 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-8chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-8chip-910b2.json)
+| | specialty | provisional | multi-chip | unified-comm-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
+2 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-910b2.json)
 | | specialty | provisional | specialty | kv-tiering-prefix-online | Qwen/Qwen2.5-7B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json)
 | | specialty | provisional | specialty | ngram-instructcoder-online | Qwen/Qwen2.5-7B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-ngram-instructcoder-online-qwen25-7b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-ngram-instructcoder-online-qwen25-7b-910b2.json)
+| | specialty | provisional | specialty-text | agent-cache-pressure-online |
+Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-agent-cache-pressure-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-agent-cache-pressure-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | attention-boundary-online | Qwen/Qwen2.5-14B-Instruct
+| 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-attention-boundary-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-attention-boundary-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | eplb-expert-rebalance-online |
+Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-eplb-expert-rebalance-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-eplb-expert-rebalance-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | knorm-kv-compression-longctx |
+Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-knorm-kv-compression-longctx-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-knorm-kv-compression-longctx-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | kv-pressure-online | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-kv-pressure-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-kv-pressure-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | kv-transfer-latency | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-kv-transfer-latency-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-kv-transfer-latency-qwen25-14b-910b2.json)
 | | specialty | provisional | specialty-text | logprobs-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-logprobs-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-logprobs-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | saturated-warm-cache-online |
+Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-saturated-warm-cache-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-saturated-warm-cache-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | slicegpt-compression-online |
+Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-slicegpt-compression-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-slicegpt-compression-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | spec-decode-online | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json)
 |
 
 机器可读快照：[`leaderboard-data/official-targets.json`](../leaderboard-data/official-targets.json)
