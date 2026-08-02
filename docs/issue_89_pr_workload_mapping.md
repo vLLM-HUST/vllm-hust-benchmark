@@ -140,18 +140,19 @@ Specialty profiles 已在 registry 但 workload 仍占位 `random-online`（需�
 ## 5. 非可运行性发现（修复状态）
 
 1. **#115/#116 `gpu_memory_utilization`** — ✅ RESOLVED. 服务器日志证实 backfill 重跑实际已使用
-   `gpu_memory_utilization=0.6`（非 0.90）。`reproducible_cmd` 已补全 `--gpu-memory-utilization 0.6
-   --max-model-len 32768` flags，与 `same_spec.resolved_server_parameters` 对齐。
+   `gpu_memory_utilization=0.6`（非 0.90）。`reproducible_cmd` 已补全
+   `--gpu-memory-utilization 0.6 --max-model-len 32768` flags，与
+   `same_spec.resolved_server_parameters` 对齐。
 1. **#124 `coverage_class` 标记** — ✅ RESOLVED. PR#124 artifact（7B specialty card）已补
    `coverage_class=targeted-pair`，不会混入 14B 主折线。
 1. **#133 attention-boundary spec** — ⏳ DEFERRED. `attention-boundary-online` scenario 已在
-   `feat/issue_89` 分支创建（见 §2.2），当前 `feat/issue-89-evidence` 分支尚未同步该 spec；
-   需在独立 PR 中 cherry-pick 或重建 scenario 定义后再走 canonical 聚合。
+   `feat/issue_89` 分支创建（见 §2.2），当前 `feat/issue-89-evidence` 分支尚未同步该 spec； 需在独立 PR 中 cherry-pick 或重建
+   scenario 定义后再走 canonical 聚合。
 1. **#135 ngram paired 不完整** — 🟡 PARTIAL. 当前仅有 head artifact（commit
-   `63743c94c94a69e2aa542be622d2359d1940f3b1`），base 点缺失。需在 NPU 上单独跑 base commit
-   后补全 paired；暂标记为 partial，不进入主折线。
-1. **SimLLM 系列 (#66/#70/#80-ascend)** — 🔒 BLOCKED. 现有 artifact 用通用 workload，不能证明
-   SimLLM 机制收益；`saturated-warm-cache-online` spec 依赖 issue #59，未就绪前无法修复。
+   `63743c94c94a69e2aa542be622d2359d1940f3b1`），base 点缺失。需在 NPU 上单独跑 base commit 后补全 paired；暂标记为
+   partial，不进入主折线。
+1. **SimLLM 系列 (#66/#70/#80-ascend)** — 🔒 BLOCKED. 现有 artifact 用通用 workload，不能证明 SimLLM
+   机制收益；`saturated-warm-cache-online` spec 依赖 issue #59，未就绪前无法修复。
 
 ### 5.1 trend schema 对 "latest 第三点" 的建模方式（无需改代码）
 
@@ -414,9 +415,9 @@ consumption.
 | base/head/latest | #37  | instructcoder-online                 | 3               | 2 (base+head; latest pending) | 🟡 PARTIAL                     |
 
 **P0 subset current progress**: 5 of 7 P0 tasks fully completed (DONE), 1 partial (#37, latest
-pending a separate run), 1 blocked (#30, `Qwen2.5-VL-7B` model unavailable on server). 12 data points
-collected across the 6 runnable tasks. This is a P0 subset progress snapshot only; Issue #89 tracks
-the complete historical PR set (30 items) and remains open until all items are resolved.
+pending a separate run), 1 blocked (#30, `Qwen2.5-VL-7B` model unavailable on server). 12 data
+points collected across the 6 runnable tasks. This is a P0 subset progress snapshot only; Issue #89
+tracks the complete historical PR set (30 items) and remains open until all items are resolved.
 
 ### 9.8 Final verification (2026-07-31)
 
@@ -454,9 +455,9 @@ the complete historical PR set (30 items) and remains open until all items are r
 - ✅ No 半成品 submissions
 
 **Conclusion**: This PR reports P0 subset current progress only — 5/7 P0 tasks have valid
-leaderboard artifacts ready for trend producer consumption (12 data points). PR#37 is partial
-(2/3 points, latest pending a separate run). PR#30 remains blocked (`Qwen2.5-VL-7B` model
-unavailable on server). This does not close Issue #89, which tracks the complete historical PR
-set (30 items) and remains open until all items are resolved. The legacy
-`npu_apply_top_k_top_p` operator gap was resolved for PR#46 and #37 via a sampler PyTorch-fallback
-patch combined with `VLLM_VERSION`/`TMPDIR`/`datasets` environment fixes.
+leaderboard artifacts ready for trend producer consumption (12 data points). PR#37 is partial (2/3
+points, latest pending a separate run). PR#30 remains blocked (`Qwen2.5-VL-7B` model unavailable on
+server). This does not close Issue #89, which tracks the complete historical PR set (30 items) and
+remains open until all items are resolved. The legacy `npu_apply_top_k_top_p` operator gap was
+resolved for PR#46 and #37 via a sampler PyTorch-fallback patch combined with
+`VLLM_VERSION`/`TMPDIR`/`datasets` environment fixes.
