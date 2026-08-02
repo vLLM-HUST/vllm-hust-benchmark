@@ -88,7 +88,7 @@
     "data_source": "real-online-historical-pr-backfill",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3506-g87f2a3480",
-    "reproducible_cmd": "# Server: cd /root/vllm/vllm-hust && git checkout 87f2a3480f0d && cd /root/vllm/vllm-ascend-hust && git checkout 52f923884b9a\n# Launch: vllm serve /data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct --dtype float16 -tp 1 --port 8001 --enforce-eager\n# Bench: benchmark prefix_repetition --num-prompts 200 --input-len 1024 --output-len 256",
+    "reproducible_cmd": "# Server: cd /root/vllm/vllm-hust && git checkout 87f2a3480f0d && cd /root/vllm/vllm-ascend-hust && git checkout 52f923884b9a\n# Launch: vllm serve /data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct --dtype float16 -tp 1 --port 8001 --gpu-memory-utilization 0.6 --max-model-len 32768 --enforce-eager\n# Bench: benchmark prefix_repetition --num-prompts 200 --input-len 1024 --output-len 256",
     "git_commit": "87f2a3480f0d06dd3576f94c532562ec7b8280dd",
     "github_user": "SuccinctPaul",
     "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/87f2a3480f0d06dd3576f94c532562ec7b8280dd",

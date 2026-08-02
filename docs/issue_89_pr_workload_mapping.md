@@ -137,16 +137,21 @@ Specialty profiles 已在 registry 但 workload 仍占位 `random-online`（需�
 | 需先创建 specialty spec（非 GPU） | 12 个 spec 缺口，覆盖 ~15 个 PR                           |
 | 外部阻塞                          | #80 (by #97), SimLLM 系 (by #59)                          |
 
-## 5. 非可运行性发现（需修复）
+## 5. 非可运行性发现（修复状态）
 
-1. **#115/#116 现有 artifact 使用 `gpu_memory_utilization=0.90`**，违反主线 0.6 默认。重跑时必须用 0.6/32768。
-1. **#124 base/head 使用 Qwen2.5-7B-Instruct**，非 14B 主线。作为 specialty card 可接受，但需在 artifact 明确标记
-   `coverage_class=targeted-pair`，不得混入 14B 主折线。
-1. **#133 attention-boundary artifact 已存在但无规范 spec**，需补建 `attention-boundary-online` scenario 并重新走
-   canonical 聚合。
-1. **#135 ngram 仅有 head 无 base**，paired 不完整。
-1. SimLLM 系列 (#66/#70/#80-ascend) 现有 artifact 用通用 workload，不能证明 SimLLM 机制收益，必须等 #59 saturated
-   warm-cache spec。
+1. **#115/#116 `gpu_memory_utilization`** — ✅ RESOLVED. 服务器日志证实 backfill 重跑实际已使用
+   `gpu_memory_utilization=0.6`（非 0.90）。`reproducible_cmd` 已补全 `--gpu-memory-utilization 0.6
+   --max-model-len 32768` flags，与 `same_spec.resolved_server_parameters` 对齐。
+1. **#124 `coverage_class` 标记** — ✅ RESOLVED. PR#124 artifact（7B specialty card）已补
+   `coverage_class=targeted-pair`，不会混入 14B 主折线。
+1. **#133 attention-boundary spec** — ⏳ DEFERRED. `attention-boundary-online` scenario 已在
+   `feat/issue_89` 分支创建（见 §2.2），当前 `feat/issue-89-evidence` 分支尚未同步该 spec；
+   需在独立 PR 中 cherry-pick 或重建 scenario 定义后再走 canonical 聚合。
+1. **#135 ngram paired 不完整** — 🟡 PARTIAL. 当前仅有 head artifact（commit
+   `63743c94c94a69e2aa542be622d2359d1940f3b1`），base 点缺失。需在 NPU 上单独跑 base commit
+   后补全 paired；暂标记为 partial，不进入主折线。
+1. **SimLLM 系列 (#66/#70/#80-ascend)** — 🔒 BLOCKED. 现有 artifact 用通用 workload，不能证明
+   SimLLM 机制收益；`saturated-warm-cache-online` spec 依赖 issue #59，未就绪前无法修复。
 
 ### 5.1 trend schema 对 "latest 第三点" 的建模方式（无需改代码）
 
