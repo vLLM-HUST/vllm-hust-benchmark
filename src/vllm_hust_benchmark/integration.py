@@ -40,6 +40,14 @@ from vllm_hust_benchmark.workload_config_contract import (
 )
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
+_FULL_HEX_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def _is_full_hex_sha(value: object) -> bool:
+    """Return True only for a 40-character lowercase hex SHA."""
+    return isinstance(value, str) and bool(_FULL_HEX_SHA_RE.match(value))
+
+
 DEFAULT_RUNTIME_ENGINE = "vllm-hust"
 DEFAULT_LOCAL_SERVER_HOST = "127.0.0.1"
 DEFAULT_LOCAL_SERVER_PORT = 8000
@@ -1614,6 +1622,25 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
                             "detail": (
                                 "env-manifest.json git_info has 'not available' "
                                 f"for: {', '.join(_missing_provenance)}"
+                            ),
+                        }
+                    )
+                    continue
+                _short_sha = [
+                    k
+                    for k in ("vllm_hust", "vllm_ascend_hust")
+                    if isinstance(_gi.get(k), str)
+                    and _gi.get(k) != "not available"
+                    and not _is_full_hex_sha(_gi.get(k))
+                ]
+                if _short_sha:
+                    failures.append(
+                        {
+                            "dir": path_str,
+                            "reason": "PROVENANCE_INCOMPLETE",
+                            "detail": (
+                                "env-manifest.json git_info has a non-40-char "
+                                f"hex SHA for: {', '.join(_short_sha)}"
                             ),
                         }
                     )

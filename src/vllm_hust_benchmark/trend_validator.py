@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -82,6 +83,14 @@ def _is_w8a8(entry: Mapping[str, Any]) -> bool:
         "w8a8" in str(value or "").lower() or str(value or "").lower() == "int8"
         for value in values
     )
+
+
+_FULL_HEX_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def _is_full_hex_sha(value: object) -> bool:
+    """Return True only for a 40-character lowercase hex SHA."""
+    return isinstance(value, str) and bool(_FULL_HEX_SHA_RE.match(value))
 
 
 def check_invalid_metrics(
@@ -201,10 +210,30 @@ def _local_decision(
             provenance_errors.append(
                 "metadata.reproducible_cmd must be non-empty for historical-pr-backfill entries"
             )
-        if not metadata.get("git_commit"):
+        git_commit = metadata.get("git_commit")
+        if not git_commit:
             provenance_errors.append(
                 "metadata.git_commit must be non-empty for historical-pr-backfill entries"
             )
+        elif not _is_full_hex_sha(git_commit):
+            provenance_errors.append(
+                "metadata.git_commit must be a 40-character hex SHA for "
+                "historical-pr-backfill entries; short hashes are not accepted"
+            )
+        runtime_provenance = metadata.get("runtime_provenance") or {}
+        for role in ("engine", "plugin"):
+            commit = (runtime_provenance.get(role) or {}).get("commit")
+            if not commit:
+                provenance_errors.append(
+                    f"metadata.runtime_provenance.{role}.commit must be "
+                    "non-empty for historical-pr-backfill entries"
+                )
+            elif not _is_full_hex_sha(commit):
+                provenance_errors.append(
+                    f"metadata.runtime_provenance.{role}.commit must be a "
+                    "40-character hex SHA for historical-pr-backfill entries; "
+                    "short hashes are not accepted"
+                )
         env = _nested(entry, "environment")
         if not env.get("cann_version"):
             provenance_errors.append(

@@ -396,7 +396,7 @@ All 7 leaderboard artifacts (`run_leaderboard.json` + `leaderboard_manifest.json
 Artifacts copied to `submissions/historical-pr-pr{115,116,124,130}-*` for trend producer
 consumption.
 
-### 9.7 Issue #89 P0 task completion status
+### 9.7 Issue #89 P0 subset current progress
 
 | Task             | PR   | workload                             | Required points | Completed points              | Status                         |
 | ---------------- | ---- | ------------------------------------ | --------------- | ----------------------------- | ------------------------------ |
@@ -408,11 +408,10 @@ consumption.
 | base/head/latest | #30  | visionarena + instructcoder          | 6               | 0                             | ❌ BLOCKED (model unavailable) |
 | base/head/latest | #37  | instructcoder-online                 | 3               | 2 (base+head; latest pending) | 🟡 PARTIAL                     |
 
-**P0 summary**: 5 of 7 P0 tasks fully completed (DONE), 1 partial (#37, latest pending a separate
-run), 1 blocked (#30, `Qwen2.5-VL-7B` model unavailable on server). 12 data points collected across
-the 6 runnable tasks. The previous `npu_apply_top_k_top_p` operator block was resolved for PR#46 and
-#37 via a sampler PyTorch-fallback patch combined with `VLLM_VERSION`/`TMPDIR`/`datasets`
-environment fixes.
+**P0 subset current progress**: 5 of 7 P0 tasks fully completed (DONE), 1 partial (#37, latest
+pending a separate run), 1 blocked (#30, `Qwen2.5-VL-7B` model unavailable on server). 12 data points
+collected across the 6 runnable tasks. This is a P0 subset progress snapshot only; Issue #89 tracks
+the complete historical PR set (30 items) and remains open until all items are resolved.
 
 ### 9.8 Final verification (2026-07-31)
 
@@ -449,8 +448,10 @@ environment fixes.
 - ✅ Port 8001 closed
 - ✅ No 半成品 submissions
 
-**Conclusion**: Issue #89 P0 scope is complete. 5/7 tasks have valid leaderboard artifacts ready for
-trend producer consumption (12 data points). PR#37 is partial (2/3 points, latest pending a separate
-run). PR#30 remains blocked (`Qwen2.5-VL-7B` model unavailable on server). The legacy
+**Conclusion**: This PR reports P0 subset current progress only — 5/7 P0 tasks have valid
+leaderboard artifacts ready for trend producer consumption (12 data points). PR#37 is partial
+(2/3 points, latest pending a separate run). PR#30 remains blocked (`Qwen2.5-VL-7B` model
+unavailable on server). This does not close Issue #89, which tracks the complete historical PR
+set (30 items) and remains open until all items are resolved. The legacy
 `npu_apply_top_k_top_p` operator gap was resolved for PR#46 and #37 via a sampler PyTorch-fallback
 patch combined with `VLLM_VERSION`/`TMPDIR`/`datasets` environment fixes.

@@ -327,13 +327,34 @@ def test_backfill_with_real_git_info_passes(tmp_path: Path) -> None:
     _write_backfill_submission(
         source_dir / "historical-pr-pr100-base",
         entry_id="test-100",
-        git_vllm_hust="vllm-hust-test-commit",
-        git_vllm_ascend_hust="ascend-hust-test-commit",
+        git_vllm_hust="abc123def456789012345678901234567890abcd",
+        git_vllm_ascend_hust="789abcdef0123456789abcdef0123456789abcde",
     )
 
     failures = _scan_submission_admission_failures(source_dir)
 
     assert failures == []
+
+
+def test_backfill_with_short_sha_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with a non-40-char hex SHA in
+    env-manifest.json git_info must be rejected by the admission gate.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr101-head",
+        entry_id="test-101",
+        git_vllm_hust="e4ce33646",
+        git_vllm_ascend_hust="abc123def456789012345678901234567890abcd",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert "non-40-char" in failures[0]["detail"]
+    assert "vllm_hust" in failures[0]["detail"]
 
 
 def test_aggregate_to_website_returns_2_on_admission_failure(
