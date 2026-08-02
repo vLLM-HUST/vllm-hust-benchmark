@@ -147,9 +147,22 @@ for repo in ("vllm_hust", "vllm_ascend_hust"):
         )
 
 campaign = manifest.get("campaign") or {}
-for field in ("campaign_id", "coverage_class", "point_role", "load_profile"):
+for field in ("campaign_id", "coverage_class", "load_profile"):
     if not campaign.get(field):
         errors.append(f"campaign.{field} is empty")
+coverage_class = campaign.get("coverage_class")
+if coverage_class == "full-matrix" and campaign.get("point_role") != "checkpoint":
+    errors.append("campaign.point_role must be checkpoint for full-matrix")
+elif coverage_class == "targeted-pair":
+    if campaign.get("point_role") not in ("baseline", "head"):
+        errors.append("campaign.point_role must be baseline or head for targeted-pair")
+    if not campaign.get("comparison_id"):
+        errors.append("campaign.comparison_id is empty for targeted-pair")
+elif coverage_class == "experimental":
+    if campaign.get("point_role") or campaign.get("comparison_id"):
+        errors.append("experimental campaign declares a point_role or comparison_id")
+else:
+    errors.append(f"campaign.coverage_class is unsupported: {coverage_class!r}")
 if campaign.get("repetitions", 0) < 3:
     errors.append("campaign.repetitions is less than 3")
 

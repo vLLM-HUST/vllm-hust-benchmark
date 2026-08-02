@@ -144,7 +144,6 @@ if [[ "$CAMPAIGN_REQUIRE_FROZEN_INPUTS" == "1" ]]; then
   require_nonempty CURRENT_TOPOLOGY
   require_nonempty CAMPAIGN_ID
   require_nonempty CAMPAIGN_COVERAGE_CLASS
-  require_nonempty CAMPAIGN_POINT_ROLE
   require_nonempty CAMPAIGN_LOAD_PROFILE
   require_nonempty ASCEND_RT_VISIBLE_DEVICES
   require_nonempty ASCEND_VISIBLE_DEVICES
@@ -182,6 +181,7 @@ if [[ "$CAMPAIGN_REQUIRE_FROZEN_INPUTS" == "1" ]]; then
 
   case "$CAMPAIGN_COVERAGE_CLASS" in
     full-matrix)
+      require_nonempty CAMPAIGN_POINT_ROLE
       if [[ "$CAMPAIGN_POINT_ROLE" != "checkpoint" ]]; then
         echo "Error: full-matrix campaigns require CAMPAIGN_POINT_ROLE=checkpoint" >&2
         exit 2
@@ -189,8 +189,15 @@ if [[ "$CAMPAIGN_REQUIRE_FROZEN_INPUTS" == "1" ]]; then
       ;;
     targeted-pair)
       require_nonempty CAMPAIGN_COMPARISON_ID
+      require_nonempty CAMPAIGN_POINT_ROLE
       if [[ "$CAMPAIGN_POINT_ROLE" != "baseline" && "$CAMPAIGN_POINT_ROLE" != "head" ]]; then
         echo "Error: targeted-pair campaigns require CAMPAIGN_POINT_ROLE=baseline or head" >&2
+        exit 2
+      fi
+      ;;
+    experimental)
+      if [[ -n "${CAMPAIGN_COMPARISON_ID:-}" || -n "${CAMPAIGN_POINT_ROLE:-}" ]]; then
+        echo "Error: experimental campaigns must not declare CAMPAIGN_COMPARISON_ID or CAMPAIGN_POINT_ROLE" >&2
         exit 2
       fi
       ;;

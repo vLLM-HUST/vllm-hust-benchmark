@@ -88,6 +88,16 @@ export CAMPAIGN_COMPARISON_ID=<stable-matched-comparison-id>
 export CAMPAIGN_POINT_ROLE=baseline  # use head for the enabled side
 ```
 
+An integration branch may use the same frozen-input checks for explicitly non-publishable pilots:
+
+```bash
+export CAMPAIGN_COVERAGE_CLASS=experimental
+unset CAMPAIGN_COMPARISON_ID CAMPAIGN_POINT_ROLE
+```
+
+Those artifacts remain experimental even when their three repetitions are complete. Re-run the
+required cells after the implementation commits merge and a unique current-main stack is frozen.
+
 Strict mode fails before model startup when a commit is not full length, a checked-out repository
 does not match its declared commit, either source tree is dirty, immutable model/image identity is
 missing, the formal role is invalid, fewer than three repetitions are requested, or same-server

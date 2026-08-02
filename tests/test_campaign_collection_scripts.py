@@ -198,6 +198,43 @@ def test_formal_campaign_accepts_matching_frozen_repositories(tmp_path: Path) ->
     assert summary["coverage_class"] == "full-matrix"
 
 
+def test_strict_campaign_accepts_explicit_experimental_series(tmp_path: Path) -> None:
+    core = tmp_path / "core"
+    backend = tmp_path / "backend"
+    core_commit = _init_git_repo(core)
+    backend_commit = _init_git_repo(backend)
+    result = _run_campaign(
+        tmp_path,
+        extra_env={
+            "CAMPAIGN_REQUIRE_FROZEN_INPUTS": "1",
+            "CAMPAIGN_ID": "issue-136-integration/v1",
+            "CAMPAIGN_COVERAGE_CLASS": "experimental",
+            "CAMPAIGN_POINT_ROLE": "",
+            "CAMPAIGN_COMPARISON_ID": "",
+            "CAMPAIGN_LOAD_PROFILE": "fixed-1-rps",
+            "CURRENT_GIT_COMMIT": core_commit,
+            "CURRENT_PLUGIN_GIT_COMMIT": backend_commit,
+            "CURRENT_IMAGE_ID": "b" * 64,
+            "CURRENT_MODEL_REVISION": "c" * 40,
+            "CURRENT_CANN_VERSION": "9.0.0",
+            "CURRENT_TORCH_NPU_VERSION": "2.10.0",
+            "CURRENT_TOPOLOGY": "single-node-hccs",
+            "ASCEND_RT_VISIBLE_DEVICES": "0,1",
+            "ASCEND_VISIBLE_DEVICES": "0,1",
+            "CURRENT_VLLM_HUST_REPO": str(core),
+            "CURRENT_VLLM_ASCEND_HUST_REPO": str(backend),
+            "PERFGATE_WARMUP_RUNS": "0",
+            "PERFGATE_MEASURED_RUNS": "1",
+        },
+    )
+
+    assert result.returncode == 0, result.stderr
+    summary = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))
+    assert summary["coverage_class"] == "experimental"
+    assert summary["comparison_id"] == ""
+    assert summary["point_role"] == ""
+
+
 def test_formal_campaign_rejects_dirty_frozen_repository(tmp_path: Path) -> None:
     core = tmp_path / "core"
     backend = tmp_path / "backend"
