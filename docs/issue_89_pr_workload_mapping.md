@@ -167,6 +167,20 @@ Specialty profiles 已在 registry 但 workload 仍占位 `random-online`（需�
 即 "latest" 不是新角色，而是第二个 targeted-pair 的 head。`coverage_class=targeted-pair` 已支持此用法。
 `aggregate_results.py` 的 `method="latest"`（取最高 repeat_index）与此无关，不要混淆。
 
+### 5.2 证据自校验：checksums.sha256 同步与 CI 覆盖
+
+- **问题**：修复 #115/#116/#124 的 reproducible_cmd / coverage_class 后，4 份 historical submission 的
+  run_leaderboard.json 内容变更，但 checksums.sha256 未同步， 导致 sha256sum -c 失败。CI 的 tests/lint 双绿未覆盖该证据自校验。
+- **修复**：
+  1. 重新生成 4 份 checksums.sha256（pr115-base/head、pr116-head、pr124-latest）。
+  1. 修复 3 份 codex-latest-main-tf5-\* 目录预先存在的 checksum 漂移。
+  1. 新增 scripts/verify_submission_checksums.py：遍历 submissions/，对每份 checksums.sha256 执行逐文件 sha256
+     校验，跳过 quarantine/.pre105-backup 临时目录。
+  1. 新增 tests/test_submission_checksums.py（10 个测试覆盖 happy/stale/missing/
+     malformed/empty/quarantine-skip/root/main 退出码）。
+  1. .github/workflows/ci.yml tests job 在 "Reject non-compliant public leaderboard records" 之后插入
+     "Verify submission checksums" step，确保 PR 级 CI 强制 sha256sum -c 通过，不再依赖 tests/lint 双绿隐式覆盖。
+
 ## 6. GPU/NPU 依赖任务清单（暂 skip，待资源）
 
 以下任务需要 910B2 NPU 资源，当前 skip 并 tracking：
