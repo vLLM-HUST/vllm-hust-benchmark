@@ -265,7 +265,7 @@ def test_execute_replay_sends_exact_synthetic_token_count(tmp_path: Path) -> Non
             base_url=f"http://127.0.0.1:{server.server_port}",
             endpoint="/v1/completions",
             model="test-model",
-            api_key="test-key",
+            api_key="test-key",  # pragma: allowlist secret
             max_concurrency=1,
             timeout_s=5,
             token_id_min=1000,

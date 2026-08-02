@@ -31,8 +31,8 @@ as measured 910B2 performance.
   tokens, and whether the step was triggered by a user message or tool result.
 - Replay caveat: the sanitized release intentionally excludes prompt, response, and tool-result
   text. Synthetic payloads keep the reported prefix stable per session and make the reported append
-  request-specific. This preserves the accounting boundary but cannot reproduce the provider's
-  exact token identity, semantic content, or cache hit ratio.
+  request-specific. This preserves the accounting boundary but cannot reproduce the provider's exact
+  token identity, semantic content, or cache hit ratio.
 
 ## Usage
 
@@ -83,7 +83,7 @@ metadata because they change the arrival process.
 
 ## Attribution
 
-- Yuxin Wang et al., “BurstGPT: A Real-World Workload Dataset to Optimize LLM Serving Systems,”
-  KDD 2025, <https://doi.org/10.1145/3711896.3737413>.
+- Yuxin Wang et al., “BurstGPT: A Real-World Workload Dataset to Optimize LLM Serving Systems,” KDD
+  2025, <https://doi.org/10.1145/3711896.3737413>.
 - Kan Zhu et al., “TraceLab: Characterizing Coding Agent Workloads for LLM Serving,” 2026,
   <https://arxiv.org/abs/2606.30560>.
