@@ -77,10 +77,10 @@
   "environment": {
     "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
     "python_version": "3.11.15",
-    "pytorch_version": null,
+    "pytorch_version": "2.1.0+ascend-cann9.0.0",
     "cuda_version": null,
-    "cann_version": null,
-    "driver_version": null
+    "cann_version": "9.0.0",
+    "driver_version": "26.0.rc1 (firmware 9.0.0.0.205)"
   },
   "metadata": {
     "submitted_at": "2026-07-30T21:11:02Z",
@@ -88,19 +88,19 @@
     "data_source": "real-online-historical-pr-backfill",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3506-g87f2a3480",
-    "reproducible_cmd": null,
+    "reproducible_cmd": "# Server: cd /root/vllm/vllm-hust && git checkout 87f2a3480f0d && cd /root/vllm/vllm-ascend-hust && git checkout 52f923884b9a\n# Launch: vllm serve /data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct --dtype float16 -tp 1 --port 8001 --enforce-eager\n# Bench: benchmark prefix_repetition --num-prompts 200 --input-len 1024 --output-len 256",
     "git_commit": "87f2a3480f0d06dd3576f94c532562ec7b8280dd",
     "github_user": "SuccinctPaul",
     "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/87f2a3480f0d06dd3576f94c532562ec7b8280dd",
     "github_repository": "vLLM-HUST/vllm-hust",
     "github_ref": "pr115-base-prefix-repetition-online",
     "github_event_name": null,
-    "github_pr_number": null,
-    "github_pr_url": null,
+    "github_pr_number": 115,
+    "github_pr_url": "https://github.com/vLLM-HUST/vllm-hust/pull/115",
     "release_date": null,
     "changelog_url": null,
-    "notes": null,
-    "verified": null,
+    "notes": "Historical PR backfill single-run measurement for PR#115 (base). Environment: CANN 9.0.0, driver 26.0.rc1 (firmware 9.0.0.0.205).",
+    "verified": true,
     "idempotency_key": "8890b59c585d6daa2f5c52abd8801634725ebd135ee18aefe7640f6fded4f70c",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {

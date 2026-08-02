@@ -1,0 +1,78 @@
+{
+  "schema_version": "raw-benchmark-result/v1",
+  "collected_at": "2026-07-31T10:41:16Z",
+  "pr_number": 37,
+  "point_label": "base",
+  "engine_version": "v0.17.2.post1-1079-gd4a408c47",
+  "git_commit": "d4a408c4710783113780c21c41e6d76279f37245",
+  "runtime_provenance": {
+    "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+    "engine": {
+      "repository": "vLLM-HUST/vllm-hust",
+      "ref": "pr37-base-instructcoder-online",
+      "commit": "d4a408c4710783113780c21c41e6d76279f37245"
+    },
+    "plugin": {
+      "engine": "vllm-ascend-hust",
+      "repository": "vLLM-HUST/vllm-ascend-hust",
+      "ref": "7bce23cc",
+      "commit": "7bce23cc0572a7793636ae215015a528e4503f1e"
+    }
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+    "spec_label": "Official Ascend Jan 2026 InstructCoder online baseline for vllm-hust goal tracking",
+    "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
+    "scenario": "instructcoder-online",
+    "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "model_parameters": "14B",
+    "model_precision": "FP16",
+    "model_quantization": "",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "gpu_memory_utilization": 0.6,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "disable_log_requests": "",
+      "host": "0.0.0.0",
+      "port": 8001,
+      "max_model_len": 32768,
+      "model": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct",
+      "dtype": "float16"
+    },
+    "resolved_client_parameters": {
+      "backend": "vllm",
+      "endpoint": "/v1/completions",
+      "dataset_name": "hf",
+      "dataset_path": "likaixin/InstructCoder",
+      "no_stream": true,
+      "num_prompts": 2048,
+      "request_rate": 1,
+      "host": "127.0.0.1",
+      "port": 8001,
+      "model": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct"
+    },
+    "resolved_spec_hash": "8b0eda0c27055ec8449469dde022d9b37bd7efb201622c811e1add76dd9ffc10"
+  },
+  "metrics": {
+    "ttft_ms": 114.1530589826516,
+    "tbt_ms": 34.43730654677836,
+    "throughput_tps": 125.98532257307157,
+    "peak_mem_mb": 0,
+    "error_rate": 0.0
+  },
+  "raw_metrics_snapshot": {
+    "ttft_ms": 114.1530589826516,
+    "tbt_ms": 34.43730654677836,
+    "throughput_tps": 125.98532257307157,
+    "peak_mem_mb": 0,
+    "error_rate": 0.0
+  },
+  "reproducibility_note": "Single-run measurement from historical PR backfill. Repeat group not available; raw per-request traces were not persisted."
+}
