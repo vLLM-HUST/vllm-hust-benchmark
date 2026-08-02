@@ -79,9 +79,7 @@ def verify_directory(submission_dir: Path) -> list[str]:
     for raw in raw_lines:
         parsed = _parse_checksum_line(raw)
         if parsed is None:
-            failures.append(
-                f"{checksums_path}: malformed line: {raw!r}"
-            )
+            failures.append(f"{checksums_path}: malformed line: {raw!r}")
             continue
         expected_entries.append(parsed)
 
@@ -98,9 +96,7 @@ def verify_directory(submission_dir: Path) -> list[str]:
             normalized = normalized[2:]
         target = submission_dir / normalized
         if not target.is_file():
-            failures.append(
-                f"{checksums_path}: missing file {relative_path}"
-            )
+            failures.append(f"{checksums_path}: missing file {relative_path}")
             continue
         actual_hex = _sha256(target)
         if actual_hex != expected_hex:

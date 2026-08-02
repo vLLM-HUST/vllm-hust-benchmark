@@ -11,12 +11,13 @@ from __future__ import annotations
 
 import hashlib
 import importlib.util
-import sys
 from pathlib import Path
 
 import pytest
 
-_SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "verify_submission_checksums.py"
+_SCRIPT_PATH = (
+    Path(__file__).resolve().parents[1] / "scripts" / "verify_submission_checksums.py"
+)
 
 
 def _load_module():
@@ -45,9 +46,7 @@ def _sha256(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def _write_checksums(
-    directory: Path, entries: list[tuple[str, str]]
-) -> None:
+def _write_checksums(directory: Path, entries: list[tuple[str, str]]) -> None:
     """Write ``checksums.sha256`` with ``./`` prefix like sha256sum does."""
     directory.mkdir(parents=True, exist_ok=True)
     lines = [f"{hex_digest}  ./{name}" for hex_digest, name in entries]
@@ -113,9 +112,7 @@ def test_malformed_line_rejected(verifier, tmp_path: Path) -> None:
     """A line that does not parse as ``<hex>  <path>`` is a failure."""
     sub = tmp_path / "submissions" / "malformed"
     sub.mkdir(parents=True)
-    (sub / "checksums.sha256").write_text(
-        "not-a-valid-line\n", encoding="utf-8"
-    )
+    (sub / "checksums.sha256").write_text("not-a-valid-line\n", encoding="utf-8")
     failures = verifier.verify_directory(sub)
     assert len(failures) == 1
     assert "malformed line" in failures[0]
