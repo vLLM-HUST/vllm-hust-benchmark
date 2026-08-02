@@ -17,6 +17,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+
 ARTIFACT_DIR="${1:?Usage: validate-run-artifact.sh <artifact-dir>}"
 
 if [[ ! -d "$ARTIFACT_DIR" ]]; then
@@ -196,9 +199,6 @@ else
 fi
 
 # ─── 6. Schema normalization (if Python available) ──────────────────────────
-
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 
 if [[ -f "run_leaderboard.json" ]] && [[ -d "$REPO_ROOT/src" ]]; then
   if python3 -c "

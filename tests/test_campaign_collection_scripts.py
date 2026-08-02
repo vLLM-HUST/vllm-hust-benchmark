@@ -371,3 +371,23 @@ def test_validator_rejects_missing_environment_manifest_fields(tmp_path: Path) -
         result.stderr
     )
     assert "validation error(s)" in result.stderr
+
+
+def test_validator_resolves_repo_before_changing_to_artifact_dir(
+    tmp_path: Path,
+) -> None:
+    artifact = tmp_path / "artifact"
+    artifact.mkdir()
+    (artifact / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [bash_executable(), "scripts/validate-run-artifact.sh", str(artifact)],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+    )
+
+    assert result.returncode > 0
+    assert "cd: scripts: No such file or directory" not in result.stderr
+    assert "artifact contract normalization passes" in result.stderr
