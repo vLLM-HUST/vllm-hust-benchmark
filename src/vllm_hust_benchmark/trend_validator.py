@@ -189,6 +189,43 @@ def _local_decision(
             issues,
         )
 
+    # Provenance completeness: historical-pr-backfill entries must carry real
+    # reproducibility evidence, not just a structurally valid summary JSON.
+    provenance_errors: list[str] = []
+    if metadata.get("data_source") == "real-online-historical-pr-backfill":
+        if not metadata.get("verified"):
+            provenance_errors.append(
+                "metadata.verified must be true for historical-pr-backfill entries"
+            )
+        if not metadata.get("reproducible_cmd"):
+            provenance_errors.append(
+                "metadata.reproducible_cmd must be non-empty for historical-pr-backfill entries"
+            )
+        if not metadata.get("git_commit"):
+            provenance_errors.append(
+                "metadata.git_commit must be non-empty for historical-pr-backfill entries"
+            )
+        env = _nested(entry, "environment")
+        if not env.get("cann_version"):
+            provenance_errors.append(
+                "environment.cann_version must be non-empty for historical-pr-backfill entries"
+            )
+        if not env.get("driver_version"):
+            provenance_errors.append(
+                "environment.driver_version must be non-empty for historical-pr-backfill entries"
+            )
+    if provenance_errors:
+        issues = tuple(
+            ValidationIssue("PROVENANCE_INCOMPLETE", message, entry_id, "error")
+            for message in provenance_errors
+        )
+        return AdmissionDecision(
+            entry_id,
+            "blocked",
+            "Provenance evidence incomplete; fix the listed fields before admission",
+            issues,
+        )
+
     metrics, metric_reasons, critical_invalid = check_invalid_metrics(entry)
     entry["metrics"] = metrics
     if critical_invalid:

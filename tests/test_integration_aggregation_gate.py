@@ -249,6 +249,93 @@ def test_incomplete_artifact_pair_rejected(
     assert failures[0]["reason"] == expected_reason
 
 
+def _write_backfill_submission(
+    target_dir: Path,
+    *,
+    entry_id: str,
+    git_vllm_hust: str,
+    git_vllm_ascend_hust: str,
+) -> None:
+    """Write a historical-pr-backfill submission dir with env-manifest."""
+    target_dir.mkdir(parents=True, exist_ok=True)
+    (target_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (target_dir / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "entry_id": entry_id,
+                "metadata": {
+                    "data_source": "real-online-historical-pr-backfill",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (target_dir / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "leaderboard-export-manifest/v2",
+                "entries": [
+                    {
+                        "idempotency_key": "test",
+                        "leaderboard_artifact": "run_leaderboard.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (target_dir / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "git_info": {
+                    "vllm_hust": git_vllm_hust,
+                    "vllm_ascend_hust": git_vllm_ascend_hust,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_backfill_with_not_available_git_info_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with ``not available`` git_info in
+    env-manifest.json must be rejected by the admission gate, not silently
+    admitted as structurally valid.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr99-base",
+        entry_id="test-99",
+        git_vllm_hust="not available",
+        git_vllm_ascend_hust="not available",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert "not available" in failures[0]["detail"]
+
+
+def test_backfill_with_real_git_info_passes(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with real git commit provenance
+    in env-manifest.json pass the admission gate.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr100-base",
+        entry_id="test-100",
+        git_vllm_hust="vllm-hust-test-commit",
+        git_vllm_ascend_hust="ascend-hust-test-commit",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert failures == []
+
+
 def test_aggregate_to_website_returns_2_on_admission_failure(
     capsys, tmp_path: Path
 ) -> None:

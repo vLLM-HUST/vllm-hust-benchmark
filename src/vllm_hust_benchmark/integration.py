@@ -1583,6 +1583,51 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
             )
             continue
 
+        # Provenance completeness: historical-pr-backfill submissions must
+        # carry real git commit provenance in env-manifest.json, not the
+        # "not available" placeholder emitted when CURRENT_VLLM_HUST_REPO /
+        # CURRENT_VLLM_ASCEND_HUST_REPO were unset at collection time.
+        env_manifest_path = child / "env-manifest.json"
+        is_historical_backfill = False
+        try:
+            _rl = json.loads(artifact_path.read_text(encoding="utf-8"))
+            is_historical_backfill = (
+                _rl.get("metadata", {}).get("data_source")
+                == "real-online-historical-pr-backfill"
+            )
+        except (OSError, json.JSONDecodeError):
+            pass
+        if is_historical_backfill and env_manifest_path.is_file():
+            try:
+                _em = json.loads(env_manifest_path.read_text(encoding="utf-8"))
+                _gi = _em.get("git_info", {})
+                _missing_provenance = [
+                    k
+                    for k in ("vllm_hust", "vllm_ascend_hust")
+                    if _gi.get(k) == "not available"
+                ]
+                if _missing_provenance:
+                    failures.append(
+                        {
+                            "dir": path_str,
+                            "reason": "PROVENANCE_INCOMPLETE",
+                            "detail": (
+                                "env-manifest.json git_info has 'not available' "
+                                f"for: {', '.join(_missing_provenance)}"
+                            ),
+                        }
+                    )
+                    continue
+            except (OSError, json.JSONDecodeError):
+                failures.append(
+                    {
+                        "dir": path_str,
+                        "reason": "PROVENANCE_INCOMPLETE",
+                        "detail": "env-manifest.json missing or unreadable",
+                    }
+                )
+                continue
+
     return failures
 
 
