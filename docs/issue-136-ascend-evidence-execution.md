@@ -89,8 +89,9 @@ export CAMPAIGN_POINT_ROLE=baseline  # use head for the enabled side
 ```
 
 Strict mode fails before model startup when a commit is not full length, a checked-out repository
-does not match its declared commit, immutable model/image identity is missing, the formal role is
-invalid, fewer than three repetitions are requested, or same-server measurements are configured.
+does not match its declared commit, either source tree is dirty, immutable model/image identity is
+missing, the formal role is invalid, fewer than three repetitions are requested, or same-server
+measurements are configured.
 
 Each repetition's `env-manifest.json` records both declared and observed source commits, image and
 model identity, declared and detected runtime versions, topology, visible devices, campaign role,

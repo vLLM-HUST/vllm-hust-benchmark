@@ -123,6 +123,10 @@ assert_repo_commit() {
     echo "Error: $repo_name HEAD $observed does not match frozen commit $expected" >&2
     exit 2
   fi
+  if [[ -n "$(git -C "$repo_path" status --porcelain --untracked-files=all 2>/dev/null)" ]]; then
+    echo "Error: $repo_name repository has tracked or untracked changes; formal campaigns require a clean frozen source tree" >&2
+    exit 2
+  fi
 }
 
 if [[ "$CAMPAIGN_REQUIRE_FROZEN_INPUTS" == "1" ]]; then
