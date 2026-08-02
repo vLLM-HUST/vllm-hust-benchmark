@@ -7,6 +7,11 @@ the real benchmark implementations stay in `vllm-hust`. This repo resolves the s
 and `vllm-hust-website` repositories, invokes the benchmark entrypoints from there, and keeps result
 export and website publication flows in one place.
 
+Production-trace workload targets are versioned separately from public leaderboard baselines.
+BurstGPT and TraceLab download, integrity, normalization, and replay contracts are documented in
+[`docs/OFFICIAL_TRACE_TARGETS.md`](docs/OFFICIAL_TRACE_TARGETS.md). Use
+`official-trace-targets list` to inspect the pinned registry.
+
 For runtime comparisons, the wrapper now understands two execution targets:
 
 - `vllm-hust` (default): the sibling workspace checkout at `../vllm-hust`
