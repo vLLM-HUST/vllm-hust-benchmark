@@ -1,0 +1,166 @@
+{
+  "schema_version": "official-baseline-immutable-input-audit/v1",
+  "audited_at": "2026-08-03",
+  "scope": "11 official Ascend targets in registry 1.6.2",
+  "no_npu_used": true,
+  "v0180_runtime": {
+    "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+    "vllm_ascend_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+    "required_image_digest": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+    "image_resolution": "blocked",
+    "image_resolution_reason": "The required digest is absent from all four audited Docker daemons and is not a pullable Quay manifest. Do not substitute another digest without an authorized immutable image reference or archive."
+  },
+  "model_revisions": [
+    {
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "revision_date": "2024-09-25T12:33:04Z",
+      "source": "https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct/commits/main",
+      "jan_2026_cutoff_safe": true
+    },
+    {
+      "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+      "revision": "aedcc2d42b622764e023cf882b6652e646b95671",
+      "revision_date": "2025-01-12T02:02:59Z",
+      "source": "https://huggingface.co/api/models/Qwen/Qwen2.5-Coder-14B-Instruct/commits/main",
+      "jan_2026_cutoff_safe": true
+    },
+    {
+      "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+      "revision_date": "2025-04-06T16:23:01Z",
+      "source": "https://huggingface.co/api/models/Qwen/Qwen2.5-VL-7B-Instruct/commits/main",
+      "jan_2026_cutoff_safe": true
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+      "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746",
+      "revision_date": "2025-02-24T03:31:29Z",
+      "source": "https://huggingface.co/api/models/deepseek-ai/DeepSeek-R1-Distill-Qwen-32B/commits/711ad2ea6aa40cfca18895e8aca02ab92df1a746",
+      "jan_2026_cutoff_safe": true
+    }
+  ],
+  "workload_data_identities": [
+    {
+      "workloads": [
+        "agent-research-online"
+      ],
+      "kind": "repository-file",
+      "path": "scripts/traces/evoscientist-workload-custom.jsonl",
+      "size_bytes": 27198,
+      "sha256": "13347797c3660c5b3efbf8912bbcb76d8bba50ffee5f77944b95b9cde1b6ca3c",
+      "git_blob": "0219d4f02ec6e0c1a70dbe5ff7a06ce1c90c4baa",
+      "pinning_action": "Pin the SHA-256 in the target contract and verify the runtime copy before every start."
+    },
+    {
+      "workloads": [
+        "instructcoder-online"
+      ],
+      "kind": "huggingface-dataset",
+      "repository": "likaixin/InstructCoder",
+      "revision": "6a778a720284d6520b56bd03d5c3070930d41071",
+      "revision_date": "2024-12-14T16:09:15Z",
+      "source": "https://huggingface.co/api/datasets/likaixin/InstructCoder/commits/main",
+      "pinning_action": "Pass and attest this exact dataset revision."
+    },
+    {
+      "workloads": [
+        "prefix-repetition-online",
+        "random-online"
+      ],
+      "kind": "deterministic-vllm-generator",
+      "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "generator_path": "vllm/benchmarks/datasets.py",
+      "generator_git_blob": "21ebeb9069bbb77994c931b7669ef99e4eba5279",
+      "generator_sha256": "85b4e3b7407ef35ad364ccd454efdcfa9a06759144582d5a3a3761e3f85a41e2",
+      "seed": 0,
+      "source": "https://github.com/vllm-project/vllm/blob/bcf2be96120005e9aea171927f85055a6a5c0cf6/vllm/benchmarks/datasets.py",
+      "pinning_action": "Bind commit, generator file SHA-256, seed, tokenizer revision, and resolved workload parameters."
+    },
+    {
+      "workloads": [
+        "random-latency"
+      ],
+      "kind": "nondeterministic-vllm-generator",
+      "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "generator_path": "vllm/benchmarks/latency.py",
+      "generator_git_blob": "a9d149666e8ba5a6571b342a338368ac1d7109e4",
+      "generator_sha256": "4be2c05d5bcd39d7d1251563e0ab57d1655121dc83ebe97b04e9f309f901ff52",
+      "seed": null,
+      "source": "https://github.com/vllm-project/vllm/blob/bcf2be96120005e9aea171927f85055a6a5c0cf6/vllm/benchmarks/latency.py",
+      "pinning_action": "The immutable source calls numpy.random without a seed. Preserve the target unchanged and require a per-repeat hash of the actual generated token IDs; do not claim a static dataset revision."
+    },
+    {
+      "workloads": [
+        "sharegpt-online",
+        "sharegpt-throughput"
+      ],
+      "kind": "huggingface-file",
+      "repository": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+      "revision": "192ab2185289094fc556ec8ce5ce1e8e587154ca",
+      "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+      "size_bytes": 672837942,
+      "sha256": "35f0e213ce091ed9b9af2a1f0755e9d39f9ccec34ab281cd4ca60d70f6479ba4",
+      "source": "https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/192ab2185289094fc556ec8ce5ce1e8e587154ca/ShareGPT_V3_unfiltered_cleaned_split.json",
+      "pinning_action": "Download by revision and verify size plus SHA-256 before every campaign."
+    },
+    {
+      "workloads": [
+        "sonnet-throughput"
+      ],
+      "kind": "vllm-repository-file",
+      "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "path": "benchmarks/sonnet.txt",
+      "size_bytes": 22706,
+      "sha256": "d58663195ba6780da5f029b920c7ac00cad1e435ee1df7e03bf9ec2470f8dea4",
+      "source": "https://raw.githubusercontent.com/vllm-project/vllm/bcf2be96120005e9aea171927f85055a6a5c0cf6/benchmarks/sonnet.txt",
+      "pinning_action": "Materialize from the immutable vLLM commit and verify SHA-256 before every campaign."
+    },
+    {
+      "workloads": [
+        "visionarena-online"
+      ],
+      "kind": "huggingface-dataset",
+      "repository": "lmarena-ai/VisionArena-Chat",
+      "revision": "1394b4f59ab6f1f2e5aff6bc15b448e15960e170",
+      "revision_date": "2025-02-04T00:57:01Z",
+      "data_upload_commit": "7448eee2a6acae4359298398a5b1312765d61d57",
+      "data_upload_date": "2025-01-14T01:41:03Z",
+      "expected_parquet_shards": 43,
+      "source": "https://huggingface.co/api/datasets/lmarena-ai/VisionArena-Chat/commits/main",
+      "pinning_action": "Pin the repository revision, require all 43 parquet shards, and verify the real PIL/chat-transform preflight."
+    },
+    {
+      "workloads": [
+        "burstgpt-production-replay"
+      ],
+      "kind": "release-asset",
+      "repository": "https://github.com/HPMLL/BurstGPT",
+      "release": "v2.0",
+      "path": "BurstGPT_3.csv",
+      "size_bytes": 231682327,
+      "sha256": "2299986a07388aa303ec2c41d1131e756db650a39ed6ef9dfe7cc3d7f9a43b8f",
+      "source": "https://github.com/HPMLL/BurstGPT/releases/download/v2.0/BurstGPT_3.csv",
+      "pinning_action": "Already pinned by the official trace registry; verify the downloaded asset before replay."
+    },
+    {
+      "workloads": [
+        "tracelab-coding-agent-replay"
+      ],
+      "kind": "release-asset",
+      "repository": "https://github.com/uw-syfi/TraceLab",
+      "release": "v0.0.1",
+      "path": "syfi_coding_trace.jsonl.gz",
+      "size_bytes": 53601226,
+      "sha256": "9d265eae69a31cae203848bea936f018148eed7ca8bf56050c5abe96da0b4e6b",
+      "source": "https://github.com/uw-syfi/TraceLab/releases/download/v0.0.1/syfi_coding_trace.jsonl.gz",
+      "pinning_action": "Already pinned by the official trace registry; verify the downloaded asset before replay."
+    }
+  ],
+  "next_contract_actions": [
+    "Add model_revision and workload data identity to every v0.18 source spec and generated registry entry.",
+    "Require exact model/data identity in strict_execution_evidence.json and aggregate attestation.",
+    "For random-latency, add evidence capture for the actual generated token-ID tensor hash without changing the immutable workload implementation.",
+    "Do not start any v0.18 NPU repeat until the required image digest has an authorized pullable reference or image archive and the shared-card safety gate passes."
+  ]
+}
