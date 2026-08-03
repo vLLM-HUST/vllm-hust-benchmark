@@ -3,15 +3,71 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.0.0"
-EFFECTIVE_FROM = "2026-07-31"
+REGISTRY_VERSION = "1.6.2"
+EFFECTIVE_FROM = "2026-08-03"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
+PUBLIC_TRACE_MODEL = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+PUBLIC_TRACE_MODEL_REVISION = "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
+PUBLIC_TRACE_VLLM_REF = "v0.22.1"
+PUBLIC_TRACE_VLLM_ASCEND_REF = "v0.22.1rc1"
+PUBLIC_TRACE_VLLM_COMMIT = "0decac0d96c42b49572498019f0a0e3600f50398"
+PUBLIC_TRACE_VLLM_ASCEND_COMMIT = "5f6faa0cb8830f667266f3b8121cd1383606f2a1"
+PUBLIC_TRACE_RUNTIME_IMAGE_DIGEST = (
+    "sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092"
+)
+PUBLIC_TRACE_RUNTIME_IMAGE = (
+    f"quay.io/ascend/vllm-ascend@{PUBLIC_TRACE_RUNTIME_IMAGE_DIGEST}"
+)
+PUBLIC_TRACE_RUNTIME_PACKAGES = {
+    "transformers": "5.5.4",
+    "huggingface-hub": "1.21.0",
+    "click": "8.4.1",
+    "vllm": "0.22.1+empty",
+    "vllm-ascend": "0.22.1rc1",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0",
+}
+PUBLIC_TRACE_RUNTIME_ENVIRONMENT = {"VLLM_BATCH_INVARIANT": "1"}
+PUBLIC_TRACE_ADDITIONAL_CONFIG = {
+    "ascend_compilation_config": {"fuse_norm_quant": False}
+}
+PUBLIC_TRACE_COMPILATION_CONFIG = {"cudagraph_mode": "PIECEWISE"}
+PUBLIC_TRACE_SCENARIOS = {
+    "burstgpt-production-replay",
+    "tracelab-coding-agent-replay",
+}
+SIMLLM_WORKLOAD_IDS = {
+    "simllm-random-online-warm-cache",
+    "simllm-saturated-throughput-warm-cache",
+}
+SIMLLM_VLLM_HUST_COMMIT = "f229ba7cad21a4dba58681af6738a9fd947388e2"
+SIMLLM_VLLM_ASCEND_HUST_COMMIT = "590855422839c1e885eee19339b7a015687215e5"
+SIMLLM_RUNTIME_IMAGE_DIGEST = (
+    "sha256:105834a38766a6b1b89a7eeb313a37351d098a69e8cdee87ad0ca3a6e090ce13"
+)
+SIMLLM_RUNTIME_IMAGE = f"quay.io/ascend/vllm-ascend@{SIMLLM_RUNTIME_IMAGE_DIGEST}"
+SIMLLM_RUNTIME_PACKAGES = {
+    "vllm": "0.21.0+empty",
+    "vllm-ascend": "0.21.0rc1",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0",
+    "transformers": "5.5.4",
+    "huggingface-hub": "1.19.0",
+    "click": "8.4.1",
+}
+CORE_PUBLIC_TARGET_VERSION = "1.2.0"
+PUBLIC_TRACE_TARGET_VERSIONS = {
+    "burstgpt-production-replay": "1.5.0",
+    "tracelab-coding-agent-replay": "1.6.1",
+}
+SIMLLM_TARGET_VERSION = "1.6.2"
 PUBLIC_TEXT_SCENARIOS = {
     "agent-research-online",
     "prefix-repetition-online",
@@ -63,6 +119,10 @@ def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
     scenario = str(spec["scenario"])
     model = str(spec["model"])
     chip_count = int(spec["chip_count"])
+    workload_id = str(spec.get("workload_id") or "")
+
+    if workload_id in SIMLLM_WORKLOAD_IDS:
+        return "specialty", "active", "simllm-warm-cache"
 
     if path.name.startswith("perfgate-"):
         if "Coder" in model:
@@ -77,6 +137,8 @@ def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
         if scenario in PUBLIC_TEXT_SCENARIOS:
             return "public-leaderboard", "active", "core-text"
         return "specialty", "provisional", "specialty-text"
+    if chip_count == 2 and model == PUBLIC_TRACE_MODEL and scenario in PUBLIC_TRACE_SCENARIOS:
+        return "public-leaderboard", "active", "production-trace"
     if (
         chip_count == 1
         and model == PUBLIC_CODE_MODEL
@@ -96,27 +158,170 @@ def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
 
 def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
     server = spec["server_parameters"]
-    expected = {
-        "tensor_parallel_size": 1,
-        "gpu_memory_utilization": 0.6,
-        "max_model_len": 32768,
-    }
+    if spec["scenario"] in PUBLIC_TRACE_SCENARIOS:
+        expected = {
+            "tensor_parallel_size": 2,
+            "gpu_memory_utilization": 0.92,
+            "max_model_len": 131072,
+        }
+    else:
+        expected = {
+            "tensor_parallel_size": 1,
+            "gpu_memory_utilization": 0.6,
+            "max_model_len": 32768,
+        }
     for name, value in expected.items():
         if server.get(name) != value:
             raise ValueError(
                 f"public target {path} requires {name}={value!r}, "
                 f"got {server.get(name)!r}"
             )
-    if int(spec["chip_count"]) != 1 or int(spec["node_count"]) != 1:
-        raise ValueError(f"public target must be single-node/single-chip: {path}")
-    if str(spec["model_precision"]) != "FP16":
-        raise ValueError(f"public target must use FP16: {path}")
+    expected_chip_count = 2 if spec["scenario"] in PUBLIC_TRACE_SCENARIOS else 1
+    if int(spec["chip_count"]) != expected_chip_count or int(spec["node_count"]) != 1:
+        raise ValueError(
+            f"public target must be single-node/{expected_chip_count}-chip: {path}"
+        )
+    expected_precision = "BF16" if spec["scenario"] in PUBLIC_TRACE_SCENARIOS else "FP16"
+    if str(spec["model_precision"]) != expected_precision:
+        raise ValueError(f"public target must use {expected_precision}: {path}")
 
     baseline = spec["baseline_target"]
-    if baseline.get("vllm_ref") != "v0.18.0":
-        raise ValueError(f"public target must use vLLM v0.18.0: {path}")
-    if baseline.get("vllm_ascend_ref") != "v0.18.0":
-        raise ValueError(f"public target must use vLLM-Ascend v0.18.0: {path}")
+    if spec["scenario"] in PUBLIC_TRACE_SCENARIOS:
+        if baseline.get("vllm_ref") != PUBLIC_TRACE_VLLM_REF:
+            raise ValueError(
+                f"production-trace target must use vLLM {PUBLIC_TRACE_VLLM_REF}: {path}"
+            )
+        if baseline.get("vllm_ascend_ref") != PUBLIC_TRACE_VLLM_ASCEND_REF:
+            raise ValueError(
+                "production-trace target must use vLLM-Ascend "
+                f"{PUBLIC_TRACE_VLLM_ASCEND_REF}: {path}"
+            )
+        if server.get("revision") != PUBLIC_TRACE_MODEL_REVISION:
+            raise ValueError(
+                f"production-trace target must pin the DeepSeek revision: {path}"
+            )
+        if server.get("additional_config") != PUBLIC_TRACE_ADDITIONAL_CONFIG:
+            raise ValueError(
+                "production-trace target must pin the audited Ascend compilation "
+                f"configuration: {path}"
+            )
+        if server.get("compilation_config") != PUBLIC_TRACE_COMPILATION_CONFIG:
+            raise ValueError(
+                "production-trace target must pin the audited compilation mode: "
+                f"{path}"
+            )
+        if spec["client_parameters"].get("cohort_context_cap") != server.get(
+            "max_model_len"
+        ):
+            raise ValueError(
+                f"production-trace cohort cap must match max_model_len: {path}"
+            )
+        if baseline.get("vllm_commit") != PUBLIC_TRACE_VLLM_COMMIT:
+            raise ValueError(f"production-trace target must pin the vLLM commit: {path}")
+        if baseline.get("vllm_ascend_commit") != PUBLIC_TRACE_VLLM_ASCEND_COMMIT:
+            raise ValueError(
+                f"production-trace target must pin the vLLM-Ascend commit: {path}"
+            )
+        if baseline.get("runtime_packages") != PUBLIC_TRACE_RUNTIME_PACKAGES:
+            raise ValueError(
+                f"production-trace target must pin the runtime packages: {path}"
+            )
+        if baseline.get("runtime_environment") != PUBLIC_TRACE_RUNTIME_ENVIRONMENT:
+            raise ValueError(
+                f"production-trace target must pin the audited runtime environment: {path}"
+            )
+        if baseline.get("runtime_image") != PUBLIC_TRACE_RUNTIME_IMAGE:
+            raise ValueError(
+                f"production-trace target must pin the official runtime image: {path}"
+            )
+        digest = str(baseline.get("runtime_image_digest") or "")
+        if digest != PUBLIC_TRACE_RUNTIME_IMAGE_DIGEST or not re.fullmatch(
+            r"sha256:[0-9a-f]{64}", digest
+        ):
+            raise ValueError(
+                f"production-trace target must pin the runtime image digest: {path}"
+            )
+        if not str(baseline["runtime_image"]).endswith(f"@{digest}"):
+            raise ValueError(
+                f"production-trace runtime image/digest mismatch: {path}"
+            )
+    else:
+        if baseline.get("vllm_ref") != "v0.18.0":
+            raise ValueError(f"public target must use vLLM v0.18.0: {path}")
+        if baseline.get("vllm_ascend_ref") != "v0.18.0":
+            raise ValueError(f"public target must use vLLM-Ascend v0.18.0: {path}")
+
+
+def _validate_simllm_target(spec: dict[str, Any], path: Path) -> None:
+    workload_id = str(spec.get("workload_id") or "")
+    if workload_id not in SIMLLM_WORKLOAD_IDS:
+        return
+    if spec.get("scenario") != "random-online":
+        raise ValueError(f"SimLLM target must use random-online as its base scenario: {path}")
+    if spec.get("model") != PUBLIC_TEXT_MODEL or spec.get("model_precision") != "FP16":
+        raise ValueError(f"SimLLM target must use Qwen2.5-14B FP16: {path}")
+    if int(spec.get("chip_count") or 0) != 1 or int(spec.get("node_count") or 0) != 1:
+        raise ValueError(f"SimLLM target must be single-node/single-chip: {path}")
+    if spec.get("hardware_chip_model") != "910B2":
+        raise ValueError(f"SimLLM target must use Ascend 910B2: {path}")
+    server = spec.get("server_parameters") or {}
+    if server.get("tensor_parallel_size") != 1 or server.get("gpu_memory_utilization") != 0.6:
+        raise ValueError(f"SimLLM target must pin TP1 and gpu_memory_utilization=0.6: {path}")
+    baseline = spec.get("baseline_target") or {}
+    if baseline.get("engine") != "vllm-hust":
+        raise ValueError(f"SimLLM target must use vllm-hust: {path}")
+    if baseline.get("vllm_commit") != SIMLLM_VLLM_HUST_COMMIT:
+        raise ValueError(f"SimLLM target must pin the vllm-hust commit: {path}")
+    if baseline.get("vllm_ascend_commit") != SIMLLM_VLLM_ASCEND_HUST_COMMIT:
+        raise ValueError(f"SimLLM target must pin the vllm-ascend-hust commit: {path}")
+    if baseline.get("runtime_image") != SIMLLM_RUNTIME_IMAGE:
+        raise ValueError(f"SimLLM target must pin the verified runtime image: {path}")
+    if baseline.get("runtime_image_digest") != SIMLLM_RUNTIME_IMAGE_DIGEST:
+        raise ValueError(f"SimLLM target must pin the verified image digest: {path}")
+    if baseline.get("runtime_packages") != SIMLLM_RUNTIME_PACKAGES:
+        raise ValueError(f"SimLLM target must pin the verified runtime packages: {path}")
+    protocol = spec.get("ab_protocol") or {}
+    required_protocol = {
+        "schema_version": "simllm-ab-protocol/v1",
+        "baseline_variant": "simllm-disabled",
+        "candidate_variant": "simllm-enabled-warm-cache",
+        "baseline_engine": "vllm-hust",
+        "candidate_engine": "vllm-hust-simllm",
+        "minimum_independent_repetitions": 3,
+        "aggregation": "median",
+        "maximum_primary_metric_cv_percent": 5,
+        "setting_signature_required": True,
+        "local_reference_results_are_official": False,
+    }
+    for key, expected in required_protocol.items():
+        if protocol.get(key) != expected:
+            raise ValueError(f"SimLLM A/B protocol requires {key}={expected!r}: {path}")
+    expected_cache_size = (
+        200 if workload_id == "simllm-random-online-warm-cache" else 32
+    )
+    expected_simllm_config = {
+        "cosine_threshold": 0.8,
+        "lsh_num_bits": 64,
+        "lsh_batch_threshold": 32,
+        "kv_cache_size": expected_cache_size,
+        "sandwich_bottom": 3,
+        "sandwich_top": 3,
+        "unmatched_store_mode": "top",
+    }
+    if protocol.get("simllm_config") != expected_simllm_config:
+        raise ValueError(
+            f"SimLLM target must pin simllm_config={expected_simllm_config!r}: {path}"
+        )
+    if spec["server_parameters"].get("prefix_caching_hash_algo") != "sha256":
+        raise ValueError(
+            "SimLLM immutable runtime requires prefix_caching_hash_algo='sha256': "
+            f"{path}"
+        )
+    warmup = protocol.get("candidate_warmup") or {}
+    if warmup.get("passes") != 1 or warmup.get("restart_before_measurement") is not False:
+        raise ValueError(f"SimLLM candidate must use one in-process warm-cache pass: {path}")
+    if warmup.get("same_requests_as_measurement") is not True:
+        raise ValueError(f"SimLLM warmup must reuse the measured request set: {path}")
 
 
 def _source_set_sha256(targets: list[dict[str, Any]]) -> str:
@@ -169,7 +374,8 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
     for path in spec_paths:
         spec = _load_spec(path)
         intended_use, status, profile = _classify_spec(path, spec)
-        if status == "active":
+        _validate_simllm_target(spec, path)
+        if status == "active" and intended_use == "public-leaderboard":
             _validate_public_target(spec, path)
 
         baseline = spec["baseline_target"]
@@ -178,7 +384,18 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
         targets.append(
             {
                 "target_id": spec["id"],
-                "target_version": REGISTRY_VERSION,
+                # Target contracts are versioned independently from the registry
+                # container. Adding or hardening the production-trace profile must
+                # not invalidate unchanged, already-attested core baselines.
+                "target_version": (
+                    PUBLIC_TRACE_TARGET_VERSIONS[spec["scenario"]]
+                    if profile == "production-trace"
+                    else SIMLLM_TARGET_VERSION
+                    if profile == "simllm-warm-cache"
+                    else CORE_PUBLIC_TARGET_VERSION
+                    if status == "active"
+                    else REGISTRY_VERSION
+                ),
                 "status": status,
                 "effective_from": EFFECTIVE_FROM,
                 "supersedes": [],
@@ -191,6 +408,12 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
                     "vllm_ref": baseline["vllm_ref"],
                     "vllm_ascend_ref": baseline["vllm_ascend_ref"],
                     "git_commit": export.get("git_commit"),
+                    "core_commit": baseline.get("vllm_commit"),
+                    "backend_commit": baseline.get("vllm_ascend_commit"),
+                    "runtime_image": baseline.get("runtime_image"),
+                    "runtime_image_digest": baseline.get("runtime_image_digest"),
+                    "runtime_packages": baseline.get("runtime_packages"),
+                    "runtime_environment": baseline.get("runtime_environment"),
                 },
                 "model": {
                     "id": spec["model"],
@@ -205,8 +428,10 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
                 },
                 "server_parameters": spec["server_parameters"],
                 "workload": {
-                    "name": spec["scenario"],
+                    "name": spec.get("workload_id") or spec["scenario"],
+                    "base_scenario": spec["scenario"],
                     "client_parameters": spec["client_parameters"],
+                    "protocol": spec.get("ab_protocol"),
                 },
                 "source_spec": {
                     "path": relative_path,

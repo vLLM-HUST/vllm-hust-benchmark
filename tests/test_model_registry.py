@@ -19,6 +19,8 @@ def test_load_model_identity_registry_contains_seeded_qwen_models() -> None:
     assert "hf:meta-llama/Llama-3.1-8B-Instruct" in canonical_ids
     assert "hf:deepseek-ai/DeepSeek-R1-Distill-Qwen-7B" in canonical_ids
     assert "hf:mistralai/Mistral-7B-Instruct-v0.3" in canonical_ids
+    assert "hf:zai-org/GLM-4.7-Flash" in canonical_ids
+    assert "hf:deepseek-ai/DeepSeek-R1-Distill-Qwen-32B" in canonical_ids
 
 
 def test_resolve_model_identity_by_short_alias() -> None:
@@ -28,6 +30,26 @@ def test_resolve_model_identity_by_short_alias() -> None:
     assert identity.repo_id == "Qwen/Qwen2.5-14B-Instruct"
     assert identity.short_name == "Qwen2.5-14B-Instruct"
     assert identity.display_name == "Qwen2.5-14B-Instruct"
+
+
+def test_resolve_glm47_flash_identity_by_short_alias() -> None:
+    identity = resolve_model_identity("GLM-4.7-Flash")
+
+    assert identity.canonical_id == "hf:zai-org/GLM-4.7-Flash"
+    assert identity.repo_id == "zai-org/GLM-4.7-Flash"
+    assert identity.short_name == "GLM-4.7-Flash"
+    assert identity.display_name == "GLM-4.7-Flash"
+
+
+def test_resolve_deepseek_r1_distill_qwen_32b_identity_by_short_alias() -> None:
+    identity = resolve_model_identity("DeepSeek-R1-Distill-Qwen-32B")
+
+    assert identity.canonical_id == (
+        "hf:deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+    )
+    assert identity.repo_id == "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+    assert identity.short_name == "DeepSeek-R1-Distill-Qwen-32B"
+    assert identity.display_name == "DeepSeek-R1-Distill-Qwen-32B"
 
 
 def test_resolve_model_identity_by_hf_cache_path() -> None:

@@ -4,23 +4,22 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
 from typing import Any
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash  # noqa: E402
-from vllm_hust_benchmark.workload_config_contract import (  # noqa: E402
+from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
+from vllm_hust_benchmark.workload_config_contract import (
     WORKLOAD_CONFIG_CONTRACT_VERSION,
     requires_workload_config_contract,
     validate_explicit_workload_config,
 )
-
 
 PUBLIC_BASELINE_ENGINE = "vllm"
 PUBLIC_BASELINE_VERSION = "0.18.0"
@@ -57,6 +56,14 @@ REJECTED_SUPERSEDED_REPORT_REQUIRED_FIELDS = (
     "excluded_plugin_commits",
 )
 REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION = "rejected-superseded-report/v1"
+COMPARE_SNAPSHOT_FILE = "leaderboard_compare.json"
+OFFICIAL_TARGET_REGISTRY = REPO_ROOT / "leaderboard-data" / "official-targets.json"
+OFFICIAL_TARGET_REGISTRY_CHECKSUM = (
+    REPO_ROOT / "leaderboard-data" / "official-targets.sha256"
+)
+PRODUCTION_TRACE_PROFILE = "production-trace"
+PRODUCTION_TRACE_ATTESTATION_SCHEMA = "official-baseline-attestation/v1"
+PRODUCTION_TRACE_MINIMUM_REPEATS = 3
 
 
 def parse_args() -> argparse.Namespace:
@@ -101,6 +108,73 @@ def parse_optional_int(value: Any) -> int | None:
         return None
 
 
+def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
+    """Allow the separately pinned production-trace baseline family fail closed."""
+    if not OFFICIAL_TARGET_REGISTRY.is_file() or not OFFICIAL_TARGET_REGISTRY_CHECKSUM.is_file():
+        return False
+    registry_bytes = OFFICIAL_TARGET_REGISTRY.read_bytes()
+    registry_sha256 = hashlib.sha256(registry_bytes).hexdigest()
+    declared_sha256 = OFFICIAL_TARGET_REGISTRY_CHECKSUM.read_text(
+        encoding="utf-8"
+    ).split()[0]
+    if registry_sha256 != declared_sha256:
+        return False
+
+    metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+    same_spec = entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
+    target_id = str(same_spec.get("spec_id") or "")
+    attestation = (
+        metadata.get("verification_attestation")
+        if isinstance(metadata.get("verification_attestation"), dict)
+        else {}
+    )
+    if not (
+        entry.get("engine") == PUBLIC_BASELINE_ENGINE
+        and metadata.get("verified") is True
+        and metadata.get("target_id") == target_id
+        and metadata.get("profile_id") == PRODUCTION_TRACE_PROFILE
+        and metadata.get("target_registry_sha256") == registry_sha256
+        and attestation.get("schema_version") == PRODUCTION_TRACE_ATTESTATION_SCHEMA
+        and int(attestation.get("successful_repeats") or 0)
+        >= PRODUCTION_TRACE_MINIMUM_REPEATS
+    ):
+        return False
+
+    registry = json.loads(registry_bytes)
+    target = next(
+        (
+            item
+            for item in registry.get("targets", [])
+            if isinstance(item, dict) and item.get("target_id") == target_id
+        ),
+        None,
+    )
+    if not target or not (
+        target.get("profile") == PRODUCTION_TRACE_PROFILE
+        and target.get("status") == "active"
+        and target.get("intended_use") == "public-leaderboard"
+        and metadata.get("target_version") == target.get("target_version")
+    ):
+        return False
+
+    model = entry.get("model") if isinstance(entry.get("model"), dict) else {}
+    hardware = entry.get("hardware") if isinstance(entry.get("hardware"), dict) else {}
+    workload = entry.get("workload") if isinstance(entry.get("workload"), dict) else {}
+    runtime = target.get("baseline_runtime") or {}
+    provenance = metadata.get("runtime_provenance") or {}
+    return bool(
+        entry.get("engine_version") == runtime.get("engine_version")
+        and workload.get("name") == (target.get("workload") or {}).get("name")
+        and (model.get("name") or model.get("repo_id"))
+        == (target.get("model") or {}).get("id")
+        and model.get("precision") == (target.get("model") or {}).get("precision")
+        and hardware.get("chip_model") == (target.get("hardware") or {}).get("chip_model")
+        and hardware.get("chip_count") == (target.get("hardware") or {}).get("chip_count")
+        and (provenance.get("engine") or {}).get("commit") == runtime.get("core_commit")
+        and (provenance.get("plugin") or {}).get("commit") == runtime.get("backend_commit")
+    )
+
+
 def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     errors: list[str] = []
     entry_id = str(entry.get("entry_id") or "<missing-entry-id>")
@@ -119,8 +193,13 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     )
     spec_id = str(same_spec.get("spec_id") or "")
     metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+    production_trace_baseline = is_attested_production_trace_baseline(entry)
 
-    if engine == PUBLIC_BASELINE_ENGINE and engine_version != PUBLIC_BASELINE_VERSION:
+    if (
+        engine == PUBLIC_BASELINE_ENGINE
+        and engine_version != PUBLIC_BASELINE_VERSION
+        and not production_trace_baseline
+    ):
         errors.append(
             f"{source.name}:{entry_id}: public vllm baseline must be "
             f"{PUBLIC_BASELINE_VERSION}, got {engine_version!r}"
@@ -141,7 +220,10 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         errors.append(
             f"{source.name}:{entry_id}: retired public model {entry_model_name!r}"
         )
-    if entry_precision_value in RETIRED_PUBLIC_PRECISIONS:
+    if (
+        entry_precision_value in RETIRED_PUBLIC_PRECISIONS
+        and not production_trace_baseline
+    ):
         errors.append(
             f"{source.name}:{entry_id}: retired public precision "
             f"{entry_precision_value!r}"
@@ -294,10 +376,87 @@ def validate_rejected_superseded_report(snapshot_dir: Path) -> list[str]:
     return errors
 
 
+def validate_compare_snapshot(
+    snapshot_dir: Path,
+    entries_by_id: dict[str, dict[str, Any]],
+) -> list[str]:
+    errors: list[str] = []
+    path = snapshot_dir / COMPARE_SNAPSHOT_FILE
+    if not path.is_file():
+        return [f"missing compare snapshot: {path}"]
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"invalid JSON in {path}: {exc}"]
+    if not isinstance(payload, dict):
+        return [f"{path}: compare snapshot payload must be a JSON object"]
+
+    pairs = payload.get("preferred_pairs")
+    if not isinstance(pairs, list):
+        return [f"{path.name}: preferred_pairs must be an array"]
+    declared_count = payload.get("preferred_pair_count")
+    if declared_count != len(pairs):
+        errors.append(
+            f"{path.name}: preferred_pair_count={declared_count!r} does not match "
+            f"preferred_pairs length={len(pairs)}"
+        )
+
+    for index, item in enumerate(pairs):
+        pair = item.get("preferred_pair") if isinstance(item, dict) else None
+        if not isinstance(pair, dict):
+            errors.append(f"{path.name}: preferred_pairs[{index}] missing preferred_pair")
+            continue
+        summaries: dict[str, dict[str, Any]] = {}
+        for side in ("left", "right"):
+            summary = pair.get(side)
+            if not isinstance(summary, dict):
+                errors.append(
+                    f"{path.name}: preferred_pairs[{index}].preferred_pair.{side} "
+                    "must be an object"
+                )
+                continue
+            summaries[side] = summary
+            entry_id = str(summary.get("entry_id") or "")
+            source_entry = entries_by_id.get(entry_id)
+            if source_entry is None:
+                errors.append(
+                    f"{path.name}: preferred_pairs[{index}] {side} references "
+                    f"unknown entry_id {entry_id!r}"
+                )
+                continue
+            summary_hash = str(
+                ((summary.get("same_spec") or {}).get("resolved_spec_hash") or "")
+            )
+            source_hash = str(
+                ((source_entry.get("same_spec") or {}).get("resolved_spec_hash") or "")
+            )
+            if not summary_hash or summary_hash != source_hash:
+                errors.append(
+                    f"{path.name}: preferred_pairs[{index}] {side} hash "
+                    f"{summary_hash!r} does not match source entry {entry_id!r} "
+                    f"hash {source_hash!r}"
+                )
+        if set(summaries) != {"left", "right"}:
+            continue
+        left_hash = str(
+            ((summaries["left"].get("same_spec") or {}).get("resolved_spec_hash") or "")
+        )
+        right_hash = str(
+            ((summaries["right"].get("same_spec") or {}).get("resolved_spec_hash") or "")
+        )
+        if not left_hash or left_hash != right_hash:
+            errors.append(
+                f"{path.name}: preferred_pairs[{index}] resolved_spec_hash mismatch: "
+                f"left={left_hash!r} right={right_hash!r}"
+            )
+    return errors
+
+
 def main() -> int:
     args = parse_args()
     snapshot_dir = Path(args.snapshot_dir)
     errors: list[str] = []
+    entries_by_id: dict[str, dict[str, Any]] = {}
 
     hash_fingerprints: dict[str, tuple[str, str]] = {}
     for file_name in SNAPSHOT_FILES:
@@ -306,6 +465,9 @@ def main() -> int:
             errors.append(f"missing snapshot file: {path}")
             continue
         for entry in load_entries(path):
+            entry_id = str(entry.get("entry_id") or "")
+            if entry_id:
+                entries_by_id[entry_id] = entry
             errors.extend(validate_entry(entry, source=path))
             same_spec = (
                 entry.get("same_spec")
@@ -333,6 +495,7 @@ def main() -> int:
             else:
                 hash_fingerprints[spec_hash] = (fingerprint, source_label)
 
+    errors.extend(validate_compare_snapshot(snapshot_dir, entries_by_id))
     errors.extend(validate_rejected_superseded_report(snapshot_dir))
 
     if errors:

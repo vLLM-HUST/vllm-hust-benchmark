@@ -16,7 +16,7 @@
           "id": {"type": "string", "minLength": 1},
           "title": {"type": "string", "minLength": 1},
           "status": {"enum": ["provisional", "active", "retired"]},
-          "intended_use": {"const": "specialty-trace-replay"},
+          "intended_use": {"enum": ["specialty-trace-replay", "public-leaderboard-production-trace"]},
           "source": {
             "type": "object",
             "required": ["repository", "release", "asset", "url", "size_bytes", "sha256", "license", "citation"],

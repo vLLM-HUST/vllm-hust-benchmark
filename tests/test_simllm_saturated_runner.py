@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts" / "run_simllm_saturated_throughput_warm_cache.sh"
+WARM_CACHE_RUNNER = ROOT / "scripts" / "run_simllm_random_online_warm_cache.sh"
 
 
 def run_dry(tmp_path: Path, **overrides: str) -> subprocess.CompletedProcess[str]:
@@ -62,3 +63,18 @@ def test_runner_enforces_complete_ab_results_and_shared_seed() -> None:
     assert "SIMLLM_MEASURE_SEED=${SIMLLM_MEASURE_SEED:-$SIMLLM_WARMCACHE_SEED}" in text
     assert "completed $completed/$SIMLLM_THROUGHPUT_NUM_PROMPTS" in text
     assert '"$WARM_CACHE_RUNNER" "$SATURATED_SPEC_FILE"' in text
+    assert 'if [[ "$RUN_BASELINE" != "1" || "$RUN_SIMLLM" != "1" ]]' in text
+    assert "single-arm run complete; comparison not requested" in text
+
+
+def test_baseline_with_no_rewrite_log_is_not_rejected_by_pipefail() -> None:
+    text = WARM_CACHE_RUNNER.read_text(encoding="utf-8")
+    assert "grep 'SimLLM rewrite_scheduler: skipped prefill'" in text
+    assert "2>/dev/null || true; }" in text
+
+
+def test_live_worker_binding_is_accepted_as_activation_evidence() -> None:
+    text = WARM_CACHE_RUNNER.read_text(encoding="utf-8")
+    assert "SimLLM worker patch state:" in text
+    assert "_simllm_execute_model" in text
+    assert "_simllm_model_forward" in text

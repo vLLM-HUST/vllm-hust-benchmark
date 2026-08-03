@@ -92,6 +92,8 @@ READY_PROBE_TIMEOUT_SECONDS=${READY_PROBE_TIMEOUT_SECONDS:-5}
 NPU_OOM_EXIT_CODE=87
 SERVER_PID=""
 RUNNER_LOCK_FD=""
+PEAK_HBM_SAMPLER_PID=""
+PEAK_HBM_EVIDENCE_FILE=""
 
 if [[ "$CURRENT_USE_MANAGED_SERVER" == "1" ]]; then
   CURRENT_RUNTIME_SOURCE_PYTHONPATH="$CURRENT_VLLM_HUST_REPO"
@@ -1025,7 +1027,28 @@ run_client_command_with_server_monitor() {
   return "$client_status"
 }
 
+stop_peak_hbm_sampler() {
+  if [[ -n "${PEAK_HBM_SAMPLER_PID:-}" ]]; then
+    kill -TERM "$PEAK_HBM_SAMPLER_PID" >/dev/null 2>&1 || true
+    wait "$PEAK_HBM_SAMPLER_PID" >/dev/null 2>&1 || true
+    PEAK_HBM_SAMPLER_PID=""
+  fi
+}
+
+start_peak_hbm_sampler() {
+  local device_scope=${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
+  if [[ -z "$device_scope" ]]; then
+    echo "Explicit ASCEND_RT_VISIBLE_DEVICES or ASCEND_VISIBLE_DEVICES is required for peak HBM evidence" >&2
+    exit 2
+  fi
+  PEAK_HBM_EVIDENCE_FILE="$RESULT_DIR/peak_hbm_evidence.json"
+  python3 "$REPO_ROOT/scripts/sample_ascend_peak_hbm.py" \
+    --devices "$device_scope" --output "$PEAK_HBM_EVIDENCE_FILE" &
+  PEAK_HBM_SAMPLER_PID=$!
+}
+
 kill_server() {
+  stop_peak_hbm_sampler
   cleanup_managed_server || true
 }
 
@@ -1099,6 +1122,7 @@ fi
 
 SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
 resolve_same_spec
+start_peak_hbm_sampler
 
 resolved_dataset_path=$(jq -r '.resolved_client_parameters.dataset_path // empty' "$SAME_SPEC_FILE")
 ensure_runtime_dataset_available "$resolved_dataset_path"
@@ -1242,6 +1266,16 @@ if [[ "$BENCHMARK_TYPE" != "serve" ]]; then
   fi
 fi
 
+stop_peak_hbm_sampler
+if [[ ! -f "$PEAK_HBM_EVIDENCE_FILE" ]] || ! jq -e \
+  '.sample_count > 0 and .peak_hbm_mb > 0' "$PEAK_HBM_EVIDENCE_FILE" >/dev/null; then
+  echo "Peak HBM sampling did not produce valid evidence" >&2
+  exit 2
+fi
+PEAK_HBM_MB=$(jq -r '.peak_hbm_mb' "$PEAK_HBM_EVIDENCE_FILE")
+SPEC_REPRO_PATH=$(realpath --relative-to="$REPO_ROOT" "$SPEC_FILE")
+printf -v REPRODUCIBLE_CMD 'bash scripts/run-current-ascend-same-spec.sh %q' "$SPEC_REPRO_PATH"
+
 EXPORT_ARGS=(
   "$SCENARIO"
   --benchmark-result-file "$RAW_RESULT_FILE"
@@ -1267,6 +1301,8 @@ EXPORT_ARGS=(
   --git-commit "$CURRENT_GIT_COMMIT"
   --github-repository "$CURRENT_GITHUB_REPOSITORY"
   --github-ref "$CURRENT_GITHUB_REF"
+  --peak-mem-mb "$PEAK_HBM_MB"
+  --reproducible-cmd "$REPRODUCIBLE_CMD"
   --runtime-python "$CURRENT_RUNTIME_PYTHON"
   --engine-source-repository "$CURRENT_GITHUB_REPOSITORY"
   --engine-source-ref "$CURRENT_GITHUB_REF"

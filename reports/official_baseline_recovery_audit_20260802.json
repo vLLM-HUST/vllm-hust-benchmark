@@ -1,0 +1,644 @@
+{
+  "schema_version": "official-baseline-recovery-audit/v1",
+  "generated_at": "2026-08-03T06:15:48.001163Z",
+  "registry": {
+    "version": "1.6.2",
+    "sha256": "3ce844f44d9dfb097afa8d146cd42e9b57cfd9b26ccca2c9900b46802640706d"
+  },
+  "summary": {
+    "scanned": 19,
+    "active_public_candidates": 9,
+    "recoverable": 3,
+    "rerun_required": 6,
+    "provisional_or_specialty": 10
+  },
+  "records": [
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
+      "entry_id": "a3de245d-1cc7-43db-aa9e-69e559638e22",
+      "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "fa65644e2973d69dd5b01cc40fb215fe662c49de5c75db50115948ceedf8572c",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "a574ce160ac0293e75291ca38c23731d9ca1d4ffab368089c4af155e5f5e4bf6",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
+      "entry_id": "da84b1fc-f351-40ea-b7db-ec2caa430865",
+      "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "c229ce00a32baef6e47b7a62f87d9216e77fc881812113a67e3f336b111869e1",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "93239b728615757eee28a995ec3c4185b68f4e44fd333142fcc42374425ef0cf",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "entry_id": "35491f66-2a01-41c9-aa19-a98ac8d7689a",
+      "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "rerun-required",
+      "reasons": [
+        "exact-target-mismatch",
+        "target-binding-missing-or-mismatched",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [
+        {
+          "field": "server_parameters.gpu_memory_utilization",
+          "expected": 0.6,
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "server_parameters.max_model_len",
+          "expected": 32768,
+          "actual": null,
+          "kind": "missing"
+        }
+      ],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "01d2a536d844b1155cdc3ff3149a92e83492aef919436213df0aa7253d8739fd",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "6fe3235bb9e72fba8a93bac40a8a4821c85d5027c9b323311dfdd8f53ebbef8e",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json"
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "entry_id": "cd18f8ec-f598-4161-a6f7-b41b8b7329a7",
+      "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "rerun-required",
+      "reasons": [
+        "exact-target-mismatch",
+        "target-binding-missing-or-mismatched",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [
+        {
+          "field": "server_parameters.max_model_len",
+          "expected": 32768,
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "server_parameters.port",
+          "expected": 8000,
+          "actual": 8010,
+          "kind": "value-mismatch"
+        },
+        {
+          "field": "client_parameters.no_stream",
+          "expected": true,
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "client_parameters.port",
+          "expected": 8000,
+          "actual": 8010,
+          "kind": "value-mismatch"
+        }
+      ],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "61fdfdc913099ca757988e040e00a9ce18925ef7e52a268fd56084cf41f33b29",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "1dccc129e6015b76526cb83d6bd3fdcaf45c6762b20eeaf2717f3c74fa991f95",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json"
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
+      "entry_id": "191c0ce0-8510-4a54-a3f9-2143130f7be6",
+      "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "edcbac1f297ac6a9d2bf58c90b3558be68e1777ff39135e2473572cf782eeed7",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "b90b1adce20c66d1d1f29adb65441e27312e08c8c78bf4b72ac4299ff415b653",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
+      "entry_id": "3383cf19-a4dd-41a3-a62e-68235c940e26",
+      "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "b703d29d1909625436135fbd1e1935eef781cc59a07995078a386a7c552d0942",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "36875c609f59a32ed6abfde0a3e593970aa324b34e8c4d64b2fc496c5be918a0",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "entry_id": "dcd563d1-890d-4211-8dab-b2d6969c2f86",
+      "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "recoverable",
+      "reasons": [],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "766951873c01729056a41141661909d8015939e11147b68bee7e4414f91bb1fe",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "9d08541745c3a634be2fe14d3cbf26489c4a33676c22e3b3e95e9b42ffa4415a",
+        "referenced_by_manifest": true,
+        "independent_files": [
+          "repeat_suite.json"
+        ],
+        "registry_binding": "current-registry"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json"
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "entry_id": "cd850c8b-7743-413a-ad5f-e4924d883e2c",
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "recoverable",
+      "reasons": [],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "f1385a837de4d49dbdea990cd9e1a5b09cee20fae6061af7422e6bd9a5fc5bf6",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "2e890a8d32c0ae65725b623ab903a8b60e0a4aa567e964a444a6e0e917a2fc39",
+        "referenced_by_manifest": true,
+        "independent_files": [
+          "repeat_suite.json"
+        ],
+        "registry_binding": "current-registry"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json"
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
+      "entry_id": "8fc4b22c-2007-4305-b346-79ae4138edfc",
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "e30acad36fd60ed3a25060fc90c5d2cb9d492d449b18529d9b57dfa2b6dde72a",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "83aa6685ef0d4cd981969563b448ed36116e14efb52d14ed548aa905c46081ab",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
+      "entry_id": "6f71ae01-0b3e-4683-b13b-4329c4d96aa9",
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "0bdc0fd252d5d7ffee0415e40f27df6870e5001aff7aac38c54854a060f57564",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "dae8bc7b2620a70b2bda477ac21ac6eab8f425cfc4657f2592e789a6569523f7",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "entry_id": "bbd407e5-00b1-4f8a-9a3d-e0592efcba22",
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "rerun-required",
+      "reasons": [
+        "exact-target-mismatch",
+        "target-binding-missing-or-mismatched",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [
+        {
+          "field": "server_parameters.max_model_len",
+          "expected": 32768,
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "server_parameters.port",
+          "expected": 8000,
+          "actual": 8010,
+          "kind": "value-mismatch"
+        },
+        {
+          "field": "client_parameters.no_stream",
+          "expected": false,
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "client_parameters.port",
+          "expected": 8000,
+          "actual": 8010,
+          "kind": "value-mismatch"
+        }
+      ],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "b416c4272cf1606186710846318c073828028d4b87a595e27f100fe72f63294c",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "11d638599198bda5323e2fb2dd311c55d71d1760eded6d46b756f0eec5889f9f",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
+      "entry_id": "7c4c7186-6452-4543-9144-c1c1fc353dab",
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "0cdc31039ae4810294f781ab0c9baaf7133d3d545c7048b268b62858eb240c44",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "533773e3ce6148d468ba3d5ebe7238dbb28d73fb45f71ef1048c13a4c28cc40a",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
+      "entry_id": "c6689556-63fe-427b-aa83-b662d0371aa1",
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "c848d2d5ee0b2b1b2a68919118569687f86b8bcd889d722b003c9c34eb539f4e",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "27e825005ebd9e6f87a56adecf8158e9215244e08f2905ab4be40ad38ec5a6e7",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "entry_id": "fd320f6d-1c42-4d9a-8943-c80a2e064610",
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "rerun-required",
+      "reasons": [
+        "exact-target-mismatch",
+        "target-binding-missing-or-mismatched",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [
+        {
+          "field": "server_parameters.max_model_len",
+          "expected": 32768,
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "server_parameters.port",
+          "expected": 8000,
+          "actual": 8010,
+          "kind": "value-mismatch"
+        },
+        {
+          "field": "client_parameters.no_stream",
+          "expected": false,
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "client_parameters.port",
+          "expected": 8000,
+          "actual": 8010,
+          "kind": "value-mismatch"
+        }
+      ],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "3288917163acd6ed825b99eaa102db3d635864e4449cbf8ee46f9ac30520fbcd",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "b94b374742ec7c03543ac468ea7481d25c05b001091234ec19f099ca4819d8be",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json"
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "entry_id": "99ca704d-a2cc-49f0-af44-76da3ce1cf47",
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "rerun-required",
+      "reasons": [
+        "exact-target-mismatch",
+        "target-binding-missing-or-mismatched",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [
+        {
+          "field": "server_parameters.max_model_len",
+          "expected": 32768,
+          "actual": null,
+          "kind": "missing"
+        }
+      ],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "49ccf3b79977e526023ef11c6c6e73241edf67eac26b4c49e9aa1a820f5624d4",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "4cb5a70912e5e2754d83780c0609608e803c5b382b5d01fb2435f72e1d4f817f",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json"
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
+      "entry_id": "e09707c0-3d28-4e61-9507-c63c0c687110",
+      "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "cceee01756697867d3776ca6e69368c8616cba88b3f85e71478b2f35743ee0c9",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "df6da1a60f2b10020e0421d3b65ca481f47456e1470f672d008620e1106317e4",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
+      "entry_id": "922f3a84-5b57-499a-9d6f-55bc9454d142",
+      "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
+      "target_status": "provisional",
+      "target_intended_use": "specialty",
+      "disposition": "not-public-candidate",
+      "reasons": [
+        "target-binding-missing-or-mismatched",
+        "target-not-active-public",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "2c09b92dfd51e140bcd694bcba3c1c3d769b9b554d736a1a8fd980782f501db6",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "2ad6f4b266a6244e7ba1fe5429d88c8326766031e3325f4a4ccdfcb798413ff6",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": null
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "entry_id": "d3366614-b70b-4f96-ba6c-b52b4614bae1",
+      "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "recoverable",
+      "reasons": [],
+      "exact_mismatches": [],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "8b640c161afc36e639c8606eb7f05ea01bbad7c42b6c934c7a2f83cf32a6cf4d",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "01fb0f42dd9984d205cc451ccf08113c49787a9dc56615b2179cc81f6717b080",
+        "referenced_by_manifest": true,
+        "independent_files": [
+          "repeat_suite.json"
+        ],
+        "registry_binding": "current-registry"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-910b2.json"
+    },
+    {
+      "submission": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "entry_id": "c00bb0bf-84d0-4045-9c22-3f04803c1b9d",
+      "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "target_status": "active",
+      "target_intended_use": "public-leaderboard",
+      "disposition": "rerun-required",
+      "reasons": [
+        "exact-target-mismatch",
+        "target-binding-missing-or-mismatched",
+        "target-registry-hash-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "verified-attestation-missing"
+      ],
+      "exact_mismatches": [
+        {
+          "field": "server_parameters.max_model_len",
+          "expected": 32768,
+          "actual": 30720,
+          "kind": "value-mismatch"
+        },
+        {
+          "field": "server_parameters.port",
+          "expected": 8000,
+          "actual": 8010,
+          "kind": "value-mismatch"
+        },
+        {
+          "field": "client_parameters.no_stream",
+          "expected": false,
+          "actual": null,
+          "kind": "missing"
+        },
+        {
+          "field": "client_parameters.port",
+          "expected": 8000,
+          "actual": 8010,
+          "kind": "value-mismatch"
+        }
+      ],
+      "evidence": {
+        "artifact": "run_leaderboard.json",
+        "artifact_sha256": "858303a3b518de79ea6c7abb89b8436b42d563dfbbae10def20748a3e64d4be4",
+        "manifest": "leaderboard_manifest.json",
+        "manifest_sha256": "e88be6673b3a7190c1c54e16d2673d76334c3601ab32c862ef4178085291534a",
+        "referenced_by_manifest": true,
+        "independent_files": [],
+        "registry_binding": "unverified"
+      },
+      "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
+    }
+  ],
+  "rerun_specs": [
+    "docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
+  ],
+  "rerun_args": [
+    "env",
+    "REPEAT_COUNT=3",
+    "MIN_SUCCESSFUL_REPEATS=3",
+    "MATRIX_RESULT_ROOT=.benchmarks/official-baseline-recovery-runs",
+    "EXISTING_CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-empty",
+    "CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-staged",
+    "bash",
+    "scripts/run-official-ascend-goal-baseline-matrix.sh",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+    "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
+  ],
+  "rerun_command": "env REPEAT_COUNT=3 MIN_SUCCESSFUL_REPEATS=3 MATRIX_RESULT_ROOT=.benchmarks/official-baseline-recovery-runs EXISTING_CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-empty CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-staged bash scripts/run-official-ascend-goal-baseline-matrix.sh docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
+}

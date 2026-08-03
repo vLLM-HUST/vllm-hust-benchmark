@@ -147,15 +147,14 @@ def test_legacy_official_entry_passes_require_official_validation() -> None:
     )
 
 
-def test_official_single_chip_specs_define_required_effective_defaults() -> None:
+def test_official_specs_define_required_effective_defaults() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     specs = []
     for path in (repo_root / "docs" / "official-baselines").glob(
-        "official-ascend-jan-2026-v0180-*.json"
+        "official-ascend-jan-2026-v*.json"
     ):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        if payload.get("chip_count") == 1:
-            specs.append(payload)
+        specs.append(payload)
 
     by_scenario = {str(spec.get("scenario") or ""): spec for spec in specs}
     for scenario, scopes in REQUIRED_EFFECTIVE_PARAMETERS.items():

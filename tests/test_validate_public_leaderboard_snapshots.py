@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 import sys
 from pathlib import Path
 
 from vllm_hust_benchmark.same_spec import build_same_spec_payload
-
 
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[1]
@@ -111,3 +111,69 @@ def test_future_official_entry_requires_effective_config_contract() -> None:
 
     assert any("workload config contract" in error for error in errors)
     assert any("workload_config_contract" in error for error in errors)
+
+
+def test_accepts_only_attested_registered_production_trace_baseline() -> None:
+    module = load_module()
+    repo_root = Path(__file__).resolve().parents[1]
+    artifact = json.loads(
+        (
+            repo_root
+            / "submissions"
+            / "official-ascend-jan-2026-v0.22.1rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2"
+            / "run_leaderboard.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert module.validate_entry(
+        artifact, source=Path("leaderboard_multi.json")
+    ) == []
+
+    spoofed = copy.deepcopy(artifact)
+    spoofed["metadata"]["verified"] = False
+    errors = module.validate_entry(spoofed, source=Path("leaderboard_multi.json"))
+    assert any("public vllm baseline must be 0.18.0" in error for error in errors)
+    assert any("retired public precision 'BF16'" in error for error in errors)
+
+
+def test_compare_snapshot_rejects_mismatched_resolved_hashes(tmp_path: Path) -> None:
+    module = load_module()
+    left = entry("left", same_spec())
+    right_payload = same_spec()
+    right_payload["resolved_server_parameters"]["tensor_parallel_size"] = 2
+    right_payload["resolved_spec_hash"] = "different-hash"
+    right = entry("right", right_payload)
+    (tmp_path / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "preferred_pair_count": 1,
+                "preferred_pairs": [
+                    {
+                        "preferred_pair": {
+                            "left": {
+                                "entry_id": "left",
+                                "same_spec": {
+                                    "resolved_spec_hash": left["same_spec"][
+                                        "resolved_spec_hash"
+                                    ]
+                                },
+                            },
+                            "right": {
+                                "entry_id": "right",
+                                "same_spec": {
+                                    "resolved_spec_hash": "different-hash"
+                                },
+                            },
+                        }
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    errors = module.validate_compare_snapshot(
+        tmp_path, {"left": left, "right": right}
+    )
+
+    assert any("resolved_spec_hash mismatch" in error for error in errors)

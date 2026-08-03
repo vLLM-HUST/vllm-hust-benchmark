@@ -43,11 +43,11 @@
         "supersedes": {"type": "array", "items": {"type": "string"}},
         "profile": {"type": "string", "minLength": 1},
         "intended_use": {"enum": ["public-leaderboard", "perfgate", "specialty"]},
-        "baseline_runtime": {"type": "object"},
+        "baseline_runtime": {"$ref": "#/$defs/baseline_runtime"},
         "model": {"type": "object"},
         "hardware": {"type": "object"},
         "server_parameters": {"type": "object"},
-        "workload": {"type": "object"},
+        "workload": {"$ref": "#/$defs/workload"},
         "source_spec": {
           "type": "object",
           "required": ["path", "sha256"],
@@ -58,6 +58,118 @@
           "additionalProperties": false
         },
         "compatibility_policy": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "simllm_ab_protocol": {
+      "type": "object",
+      "required": [
+        "schema_version", "baseline_variant", "candidate_variant",
+        "baseline_engine", "candidate_engine", "simllm_config",
+        "only_functional_difference", "candidate_warmup",
+        "minimum_independent_repetitions", "aggregation", "primary_metric",
+        "maximum_primary_metric_cv_percent", "setting_signature_required",
+        "local_reference_results_are_official"
+      ],
+      "properties": {
+        "schema_version": {"const": "simllm-ab-protocol/v1"},
+        "baseline_variant": {"const": "simllm-disabled"},
+        "candidate_variant": {"const": "simllm-enabled-warm-cache"},
+        "baseline_engine": {"const": "vllm-hust"},
+        "candidate_engine": {"const": "vllm-hust-simllm"},
+        "simllm_config": {
+          "type": "object",
+          "required": [
+            "cosine_threshold", "lsh_num_bits", "lsh_batch_threshold",
+            "kv_cache_size", "sandwich_bottom", "sandwich_top",
+            "unmatched_store_mode"
+          ],
+          "properties": {
+            "cosine_threshold": {"const": 0.8},
+            "lsh_num_bits": {"const": 64},
+            "lsh_batch_threshold": {"const": 32},
+            "kv_cache_size": {"enum": [32, 200]},
+            "sandwich_bottom": {"const": 3},
+            "sandwich_top": {"const": 3},
+            "unmatched_store_mode": {"const": "top"}
+          },
+          "additionalProperties": false
+        },
+        "only_functional_difference": {"type": "string", "minLength": 1},
+        "candidate_warmup": {
+          "type": "object",
+          "required": [
+            "passes", "request_rate", "same_requests_as_measurement",
+            "same_seed_as_measurement", "restart_before_measurement"
+          ],
+          "properties": {
+            "passes": {"const": 1},
+            "request_rate": {"type": ["integer", "number", "string"]},
+            "same_requests_as_measurement": {"const": true},
+            "same_seed_as_measurement": {"const": true},
+            "restart_before_measurement": {"const": false}
+          },
+          "additionalProperties": false
+        },
+        "minimum_independent_repetitions": {"type": "integer", "minimum": 3},
+        "aggregation": {"const": "median"},
+        "primary_metric": {"const": "request_throughput"},
+        "maximum_primary_metric_cv_percent": {"type": "number", "maximum": 5},
+        "setting_signature_required": {"const": true},
+        "local_reference_results_are_official": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "workload": {
+      "type": "object",
+      "required": ["name", "base_scenario", "client_parameters", "protocol"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "base_scenario": {"type": "string", "minLength": 1},
+        "client_parameters": {"type": "object"},
+        "protocol": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/simllm_ab_protocol"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "baseline_runtime": {
+      "type": "object",
+      "required": [
+        "engine", "engine_version", "github_repository", "vllm_ref",
+        "vllm_ascend_ref", "git_commit", "core_commit", "backend_commit",
+        "runtime_image", "runtime_image_digest", "runtime_packages",
+        "runtime_environment"
+      ],
+      "properties": {
+        "engine": {"type": "string", "minLength": 1},
+        "engine_version": {"type": "string", "minLength": 1},
+        "github_repository": {"type": "string", "minLength": 1},
+        "vllm_ref": {"type": "string", "minLength": 1},
+        "vllm_ascend_ref": {"type": "string", "minLength": 1},
+        "git_commit": {"type": ["string", "null"]},
+        "core_commit": {"type": ["string", "null"]},
+        "backend_commit": {"type": ["string", "null"]},
+        "runtime_image": {
+          "type": ["string", "null"],
+          "pattern": "^.+@sha256:[0-9a-f]{64}$"
+        },
+        "runtime_image_digest": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtime_packages": {
+          "type": ["object", "null"],
+          "additionalProperties": {"type": "string"}
+        },
+        "runtime_environment": {
+          "type": ["object", "null"],
+          "propertyNames": {"enum": ["VLLM_BATCH_INVARIANT"]},
+          "additionalProperties": {"type": "string"}
+        }
       },
       "additionalProperties": false
     }

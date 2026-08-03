@@ -29,8 +29,14 @@ CURRENT_VLLM_HUST_REPO=${CURRENT_VLLM_HUST_REPO:-"$WORKSPACE_ROOT/vllm-hust"}
 CURRENT_VLLM_ASCEND_HUST_REPO=${CURRENT_VLLM_ASCEND_HUST_REPO:-"$WORKSPACE_ROOT/vllm-ascend-hust"}
 CURRENT_ENV_PREFIX=${CURRENT_ENV_PREFIX:-"/root/miniconda3/envs/vllm-hust-dev"}
 CURRENT_RUNTIME_PYTHON=${CURRENT_RUNTIME_PYTHON:-"$CURRENT_ENV_PREFIX/bin/python"}
+CURRENT_RUNTIME_IMAGE=${CURRENT_RUNTIME_IMAGE:-}
+CURRENT_RUNTIME_IMAGE_DIGEST=${CURRENT_RUNTIME_IMAGE_DIGEST:-}
+CURRENT_DEVICE_ID=${CURRENT_DEVICE_ID:-${ASCEND_RT_VISIBLE_DEVICES:-}}
+CURRENT_NPU_SMI_DEVICE_ID=${CURRENT_NPU_SMI_DEVICE_ID:-$CURRENT_DEVICE_ID}
 CURRENT_VLLM_CACHE_ROOT=${CURRENT_VLLM_CACHE_ROOT:-"$REPO_ROOT/.cache/simllm-warm-cache"}
 CURRENT_ENGINE=${CURRENT_ENGINE:-"vllm-hust"}
+CURRENT_BASELINE_ARM_ENGINE=${CURRENT_BASELINE_ARM_ENGINE:-"vllm-hust"}
+CURRENT_SIMLLM_ARM_ENGINE=${CURRENT_SIMLLM_ARM_ENGINE:-"vllm-hust-simllm"}
 CURRENT_BASELINE_ENGINE=${CURRENT_BASELINE_ENGINE:-"vllm"}
 CURRENT_DATA_SOURCE=${CURRENT_DATA_SOURCE:-"vllm-hust-benchmark"}
 CURRENT_SUBMITTER=${CURRENT_SUBMITTER:-"simllm-warm-cache"}
@@ -79,6 +85,8 @@ SIMLLM_SANDWICH_TOP=${VLLM_ASCEND_SIMLLM_SANDWICH_TOP:-${SIMLLM_SANDWICH_TOP:-3}
 SIMLLM_UNMATCHED_STORE_MODE=${VLLM_ASCEND_SIMLLM_UNMATCHED_STORE_MODE:-${SIMLLM_UNMATCHED_STORE_MODE:-top}}
 SIMLLM_PROFILE=${VLLM_ASCEND_SIMLLM_PROFILE:-${SIMLLM_PROFILE:-0}}
 SIMLLM_PROFILE_INTERVAL=${VLLM_ASCEND_SIMLLM_PROFILE_INTERVAL:-${SIMLLM_PROFILE_INTERVAL:-20}}
+SIMLLM_REQUIRE_REWRITE_EVIDENCE=${SIMLLM_REQUIRE_REWRITE_EVIDENCE:-1}
+SIMLLM_OFFICIAL_EVIDENCE=${SIMLLM_OFFICIAL_EVIDENCE:-1}
 
 SIMLLM_WARMCACHE_PASSES=${SIMLLM_WARMCACHE_PASSES:-1}
 SIMLLM_WARMCACHE_NUM_PROMPTS=${SIMLLM_WARMCACHE_NUM_PROMPTS:-}
@@ -88,6 +96,7 @@ SIMLLM_MEASURE_SEED=${SIMLLM_MEASURE_SEED:-$SIMLLM_WARMCACHE_SEED}
 SIMLLM_WARMCACHE_PAUSE_SECONDS=${SIMLLM_WARMCACHE_PAUSE_SECONDS:-5}
 
 ACTIVE_SERVER_PID=""
+ACTIVE_ARM_LABEL=""
 CURRENT_RUNTIME_SOURCE_PYTHONPATH="$BENCHMARK_REPO/src:$CURRENT_VLLM_ASCEND_HUST_REPO:$CURRENT_VLLM_HUST_REPO"
 CURRENT_RUNTIME_PYTHONPATH="${CURRENT_RUNTIME_SOURCE_PYTHONPATH}${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}"
 
@@ -157,10 +166,13 @@ json2args() {
   local json_string=$1
   echo "$json_string" | jq -r '
     to_entries
-    | map(if (.value | tostring) == ""
+    | map(
+        select(.value != null and .value != false)
+        | if .value == true or (.value | tostring) == ""
           then "--" + (.key | gsub("_"; "-"))
           else "--" + (.key | gsub("_"; "-")) + " " + (.value | tostring)
-          end)
+          end
+      )
     | join(" ")
   '
 }
@@ -386,6 +398,7 @@ cleanup_active_server() {
   if [[ -n "${ACTIVE_SERVER_PID:-}" ]]; then
     terminate_pid_tree "$ACTIVE_SERVER_PID" "active SimLLM benchmark server" || true
     ACTIVE_SERVER_PID=""
+    ACTIVE_ARM_LABEL=""
   fi
 }
 
@@ -435,6 +448,7 @@ start_server() {
   local simllm_enabled=$1
   local server_args=$2
   local log_file=$3
+  local arm_label=$4
 
   : >"$log_file"
   (
@@ -464,12 +478,309 @@ start_server() {
     export VLLM_ASCEND_SIMLLM_UNMATCHED_STORE_MODE="$SIMLLM_UNMATCHED_STORE_MODE"
     export VLLM_ASCEND_SIMLLM_PROFILE="$SIMLLM_PROFILE"
     export VLLM_ASCEND_SIMLLM_PROFILE_INTERVAL="$SIMLLM_PROFILE_INTERVAL"
+    # Both arms use the same log level.  Debug is required for the current
+    # SimLLM implementation's per-batch rewrite/cache evidence and therefore
+    # must not be enabled only on the optimized arm.
+    export VLLM_LOGGING_LEVEL=DEBUG
     export PYTHONUNBUFFERED=1
     export PYTHONPATH="$CURRENT_RUNTIME_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}"
     "$CURRENT_RUNTIME_PYTHON" -u -m vllm.entrypoints.openai.api_server $server_args
   ) >"$log_file" 2>&1 &
 
   ACTIVE_SERVER_PID=$!
+  ACTIVE_ARM_LABEL=$arm_label
+}
+
+sha256_file() {
+  sha256sum "$1" | awk '{print $1}'
+}
+
+capture_device_state() {
+  local output_file=$1
+  local device_id=${CURRENT_NPU_SMI_DEVICE_ID%%,*}
+  if [[ -z "$device_id" ]] || ! command -v npu-smi >/dev/null 2>&1; then
+    if [[ "$SIMLLM_OFFICIAL_EVIDENCE" == "1" ]]; then
+      echo "official SimLLM evidence requires CURRENT_NPU_SMI_DEVICE_ID and npu-smi" >&2
+      return 1
+    fi
+    return 0
+  fi
+  {
+    echo "logical_device_id=${CURRENT_DEVICE_ID%%,*}"
+    echo "physical_npu_smi_device_id=$device_id"
+    npu-smi info -t usages -i "$device_id"
+    npu-smi info -t proc-mem -i "$device_id"
+  } >"$output_file" 2>&1
+}
+
+wait_for_device_release() {
+  local output_file=$1
+  local device_id=${CURRENT_NPU_SMI_DEVICE_ID%%,*}
+  if [[ -z "$device_id" ]] || ! command -v npu-smi >/dev/null 2>&1; then
+    [[ "$SIMLLM_OFFICIAL_EVIDENCE" != "1" ]]
+    return
+  fi
+  local state=""
+  for _ in $(seq 1 30); do
+    state=$(npu-smi info -t proc-mem -i "$device_id" 2>&1 || true)
+    if grep -q 'No process in device' <<<"$state"; then
+      capture_device_state "$output_file"
+      return 0
+    fi
+    sleep 1
+  done
+  printf '%s\n' "$state" >"$output_file"
+  echo "device $device_id still has a process after server cleanup" >&2
+  return 1
+}
+
+validate_benchmark_result() {
+  local label=$1
+  local result_file=$2
+  local expected_requests=$3
+
+  "$CURRENT_RUNTIME_PYTHON" - "$label" "$result_file" "$expected_requests" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+label, raw_path, expected_text = sys.argv[1:]
+payload = json.loads(Path(raw_path).read_text(encoding="utf-8"))
+expected = int(expected_text)
+completed = int(payload.get("completed") or 0)
+errors = payload.get("errors") or []
+failed = int(payload.get("failed") or 0)
+if isinstance(errors, list):
+    failed = max(failed, sum(bool(str(item).strip()) for item in errors))
+if completed != expected or failed != 0:
+    raise SystemExit(
+        f"{label}: incomplete benchmark evidence: "
+        f"completed={completed}/{expected} failed={failed}"
+    )
+PY
+}
+
+write_prompt_cohort_evidence() {
+  local same_spec_file=$1
+  local output_file=$2
+  local runtime_model=$3
+  local client_json=$4
+
+  run_in_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
+    env SAME_SPEC_FILE="$same_spec_file" OUTPUT_FILE="$output_file" \
+    RUNTIME_MODEL="$runtime_model" CLIENT_JSON="$client_json" \
+    "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+import hashlib
+import json
+import os
+from pathlib import Path
+
+from transformers import AutoTokenizer
+from vllm.benchmarks.datasets import RandomDataset
+
+client = json.loads(os.environ["CLIENT_JSON"])
+same_spec = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+if client.get("dataset_name") != "random":
+    raise SystemExit("official SimLLM prompt evidence only supports deterministic random")
+
+seed = int(client.get("seed", 0))
+num_prompts = int(client["num_prompts"])
+input_len_value = client.get("input_len", client.get("random_input_len"))
+output_len_value = client.get("output_len", client.get("random_output_len"))
+if input_len_value is None or output_len_value is None:
+    raise SystemExit(
+        "official SimLLM prompt evidence requires input/output token lengths"
+    )
+input_len = int(input_len_value)
+output_len = int(output_len_value)
+prefix_len = int(client.get("random_prefix_len") or client.get("prefix_len") or 0)
+range_ratio = float(client.get("random_range_ratio") or 0)
+tokenizer = AutoTokenizer.from_pretrained(
+    os.environ["RUNTIME_MODEL"], trust_remote_code=False
+)
+dataset = RandomDataset(random_seed=seed)
+requests = dataset.sample(
+    tokenizer=tokenizer,
+    num_requests=num_prompts,
+    prefix_len=prefix_len,
+    range_ratio=range_ratio,
+    input_len=input_len,
+    output_len=output_len,
+)
+rows = []
+for index, request in enumerate(requests):
+    token_ids = tokenizer.encode(request.prompt, add_special_tokens=False)
+    rows.append(
+        {
+            "index": index,
+            "prompt_token_ids_sha256": hashlib.sha256(
+                json.dumps(token_ids, separators=(",", ":")).encode()
+            ).hexdigest(),
+            "prompt_tokens": len(token_ids),
+            "requested_output_tokens": int(request.expected_output_len or 0),
+        }
+    )
+cohort_payload = {
+    "seed": seed,
+    "num_prompts": num_prompts,
+    "input_len": input_len,
+    "output_len": output_len,
+    "prefix_len": prefix_len,
+    "range_ratio": range_ratio,
+    "requests": rows,
+}
+cohort_sha256 = hashlib.sha256(
+    json.dumps(cohort_payload, sort_keys=True, separators=(",", ":")).encode()
+).hexdigest()
+payload = {
+    "schema_version": "simllm-prompt-cohort-evidence/v1",
+    "spec_id": same_spec["spec_id"],
+    "resolved_spec_hash": same_spec["resolved_spec_hash"],
+    "cohort_sha256": cohort_sha256,
+    **cohort_payload,
+}
+Path(os.environ["OUTPUT_FILE"]).write_text(
+    json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+)
+PY
+}
+
+write_arm_evidence() {
+  local label=$1
+  local simllm_enabled=$2
+  local did_warmup=$3
+  local result_dir=$4
+  local same_spec_file=$5
+  local cohort_file=$6
+  local measured_client_json=$7
+
+  local raw_result_file="$result_dir/raw_benchmark_result.json"
+  local server_log="$result_dir/server.stdout.log"
+  local rewrite_events=0
+  local rewritten_requests=0
+  local patch_applied=false
+  rewrite_events=$(grep -c 'SimLLM rewrite_scheduler: skipped prefill' "$server_log" 2>/dev/null || true)
+  # A disabled baseline legitimately has no rewrite records.  Keep that case at
+  # zero without letting grep's no-match status abort this set -e/pipefail runner.
+  rewritten_requests=$({ grep 'SimLLM rewrite_scheduler: skipped prefill' "$server_log" 2>/dev/null || true; } \
+    | sed -nE 's/.*skipped prefill for ([0-9]+) matched requests.*/\1/p' \
+    | awk '{sum += $1} END {print sum + 0}')
+  if grep -q 'Sim-LLM patch applied' "$server_log" 2>/dev/null \
+    || grep -Eq 'SimLLM worker patch state: .*execute_model=vllm_ascend\.simllm\.patch\.patch_model_runner\._simllm_execute_model .*_model_forward=vllm_ascend\.simllm\.patch\.patch_model_runner\._simllm_model_forward' "$server_log" 2>/dev/null; then
+    patch_applied=true
+  fi
+
+  LABEL="$label" SIMLLM_ENABLED="$simllm_enabled" DID_WARMUP="$did_warmup" \
+  RAW_RESULT_FILE="$raw_result_file" SERVER_LOG="$server_log" \
+  SAME_SPEC_FILE="$same_spec_file" COHORT_FILE="$cohort_file" \
+  MEASURED_CLIENT_JSON="$measured_client_json" PATCH_APPLIED="$patch_applied" \
+  REWRITE_EVENTS="$rewrite_events" REWRITTEN_REQUESTS="$rewritten_requests" \
+  CURRENT_BASELINE_ARM_ENGINE="$CURRENT_BASELINE_ARM_ENGINE" \
+  CURRENT_SIMLLM_ARM_ENGINE="$CURRENT_SIMLLM_ARM_ENGINE" \
+  CURRENT_GIT_COMMIT="$CURRENT_GIT_COMMIT" \
+  CURRENT_PLUGIN_GIT_COMMIT="$CURRENT_PLUGIN_GIT_COMMIT" \
+  CURRENT_RUNTIME_PYTHON="$CURRENT_RUNTIME_PYTHON" \
+  CURRENT_RUNTIME_IMAGE="$CURRENT_RUNTIME_IMAGE" \
+  CURRENT_RUNTIME_IMAGE_DIGEST="$CURRENT_RUNTIME_IMAGE_DIGEST" \
+  CURRENT_DEVICE_ID="$CURRENT_DEVICE_ID" \
+  CURRENT_NPU_SMI_DEVICE_ID="$CURRENT_NPU_SMI_DEVICE_ID" \
+  SIMLLM_COSINE_THRESHOLD="$SIMLLM_COSINE_THRESHOLD" \
+  SIMLLM_LSH_NUM_BITS="$SIMLLM_LSH_NUM_BITS" \
+  SIMLLM_LSH_BATCH_THRESHOLD="$SIMLLM_LSH_BATCH_THRESHOLD" \
+  SIMLLM_KV_CACHE_SIZE="$SIMLLM_KV_CACHE_SIZE" \
+  SIMLLM_SANDWICH_BOTTOM="$SIMLLM_SANDWICH_BOTTOM" \
+  SIMLLM_SANDWICH_TOP="$SIMLLM_SANDWICH_TOP" \
+  SIMLLM_UNMATCHED_STORE_MODE="$SIMLLM_UNMATCHED_STORE_MODE" \
+  "$CURRENT_RUNTIME_PYTHON" - "$result_dir/arm_evidence.json" <<'PY'
+import hashlib
+import importlib.metadata
+import json
+import os
+import platform
+import sys
+from pathlib import Path
+
+def sha(path: str) -> str:
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+raw = json.loads(Path(os.environ["RAW_RESULT_FILE"]).read_text(encoding="utf-8"))
+same_spec = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+cohort = json.loads(Path(os.environ["COHORT_FILE"]).read_text(encoding="utf-8"))
+enabled = os.environ["SIMLLM_ENABLED"] == "1"
+runtime_packages = {}
+for package in (
+    "vllm",
+    "vllm-ascend",
+    "torch",
+    "torch-npu",
+    "transformers",
+    "huggingface-hub",
+    "click",
+):
+    runtime_packages[package] = importlib.metadata.version(package)
+payload = {
+    "schema_version": "simllm-official-arm-evidence/v1",
+    "arm": "simllm-enabled-warm-cache" if enabled else "baseline-disabled",
+    "engine": (
+        os.environ["CURRENT_SIMLLM_ARM_ENGINE"]
+        if enabled else os.environ["CURRENT_BASELINE_ARM_ENGINE"]
+    ),
+    "simllm_enabled": enabled,
+    "warmup_performed": os.environ["DID_WARMUP"] == "1",
+    "spec_id": same_spec["spec_id"],
+    "resolved_spec_hash": same_spec["resolved_spec_hash"],
+    "measured_client_parameters": json.loads(os.environ["MEASURED_CLIENT_JSON"]),
+    "prompt_cohort_sha256": cohort["cohort_sha256"],
+    "core_commit": os.environ["CURRENT_GIT_COMMIT"],
+    "backend_commit": os.environ["CURRENT_PLUGIN_GIT_COMMIT"],
+    "runtime": {
+        "image": os.environ["CURRENT_RUNTIME_IMAGE"],
+        "image_digest": os.environ["CURRENT_RUNTIME_IMAGE_DIGEST"],
+        "python_executable": os.environ["CURRENT_RUNTIME_PYTHON"],
+        "python_version": platform.python_version(),
+        "packages": runtime_packages,
+        "cann_home": os.environ.get("ASCEND_HOME_PATH") or os.environ.get("ASCEND_TOOLKIT_HOME"),
+        "visible_device": os.environ["CURRENT_DEVICE_ID"],
+        "physical_npu_smi_device": os.environ["CURRENT_NPU_SMI_DEVICE_ID"],
+    },
+    "simllm_config": {
+        "cosine_threshold": float(os.environ["SIMLLM_COSINE_THRESHOLD"]),
+        "lsh_num_bits": int(os.environ["SIMLLM_LSH_NUM_BITS"]),
+        "lsh_batch_threshold": int(os.environ["SIMLLM_LSH_BATCH_THRESHOLD"]),
+        "kv_cache_size": int(os.environ["SIMLLM_KV_CACHE_SIZE"]),
+        "sandwich_bottom": int(os.environ["SIMLLM_SANDWICH_BOTTOM"]),
+        "sandwich_top": int(os.environ["SIMLLM_SANDWICH_TOP"]),
+        "unmatched_store_mode": os.environ["SIMLLM_UNMATCHED_STORE_MODE"],
+    },
+    "completed": int(raw.get("completed") or 0),
+    "failed": int(raw.get("failed") or 0),
+    "patch_applied": os.environ["PATCH_APPLIED"] == "true",
+    "rewrite_events": int(os.environ["REWRITE_EVENTS"]),
+    "rewritten_requests": int(os.environ["REWRITTEN_REQUESTS"]),
+    "hashes": {
+        "raw_result_sha256": sha(os.environ["RAW_RESULT_FILE"]),
+        "server_log_sha256": sha(os.environ["SERVER_LOG"]),
+        "same_spec_sha256": sha(os.environ["SAME_SPEC_FILE"]),
+        "prompt_cohort_evidence_sha256": sha(os.environ["COHORT_FILE"]),
+        "device_state_before_sha256": sha(str(Path(os.environ["RAW_RESULT_FILE"]).parent / "device_state_before.txt")),
+        "device_state_after_sha256": sha(str(Path(os.environ["RAW_RESULT_FILE"]).parent / "device_state_after.txt")),
+    },
+}
+Path(sys.argv[1]).write_text(
+    json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+)
+PY
+
+  if [[ "$SIMLLM_OFFICIAL_EVIDENCE" == "1" && "$simllm_enabled" == "1" ]]; then
+    if [[ "$patch_applied" != "true" ]]; then
+      echo "[$label] SimLLM patch activation evidence is missing" >&2
+      return 1
+    fi
+    if [[ "$SIMLLM_REQUIRE_REWRITE_EVIDENCE" == "1" && "$rewritten_requests" -le 0 ]]; then
+      echo "[$label] SimLLM cache/rewrite evidence is missing" >&2
+      return 1
+    fi
+  fi
 }
 
 collect_server_info() {
@@ -491,6 +802,7 @@ export_leaderboard_artifact() {
   local raw_result_file=$4
   local artifact_dir=$5
   local scenario=$6
+  local arm_engine=$7
 
   local model
   local model_parameters
@@ -521,7 +833,7 @@ export_leaderboard_artifact() {
     --same-spec-file "$same_spec_file"
     --output-dir "$artifact_dir"
     --run-id "$label-$RUN_TIMESTAMP"
-    --engine "$CURRENT_ENGINE"
+    --engine "$arm_engine"
     --engine-version "${CURRENT_ENGINE_VERSION:-$(maybe_git_describe "$CURRENT_VLLM_HUST_REPO" "$CURRENT_GIT_COMMIT")}"
     --core-version "${CURRENT_CORE_VERSION:-${CURRENT_ENGINE_VERSION:-$(maybe_git_describe "$CURRENT_VLLM_HUST_REPO" "$CURRENT_GIT_COMMIT")}}"
     --backend-version "${CURRENT_BACKEND_VERSION:-$(maybe_git_describe "$CURRENT_VLLM_ASCEND_HUST_REPO" "$CURRENT_PLUGIN_GIT_COMMIT")}"
@@ -580,9 +892,18 @@ run_experiment() {
   local warmup_json
   local warmup_args
   local server_args
+  local expected_requests
+  local prompt_cohort_file
+  local arm_engine
   local status
 
   mkdir -p "$result_dir" "$artifact_dir"
+  capture_device_state "$result_dir/device_state_before.txt"
+  if [[ "$SIMLLM_OFFICIAL_EVIDENCE" == "1" ]] \
+    && ! grep -q 'No process in device' "$result_dir/device_state_before.txt"; then
+    echo "target device is not idle before $label" >&2
+    return 1
+  fi
 
   scenario=$(jq -r '.scenario' "$SPEC_FILE")
   benchmark_type=$(resolve_benchmark_type "$scenario")
@@ -607,6 +928,15 @@ run_experiment() {
   base_client_json=$(normalized_client_parameters_json "$same_spec_file")
   measure_client_json=$(client_json_with_seed "$base_client_json" "$SIMLLM_MEASURE_SEED")
   measure_args=$(json2args "$measure_client_json")
+  expected_requests=$(echo "$measure_client_json" | jq -er '.num_prompts')
+  prompt_cohort_file="$result_dir/prompt_cohort_evidence.json"
+  arm_engine="$CURRENT_BASELINE_ARM_ENGINE"
+  if [[ "$simllm_enabled" == "1" ]]; then
+    arm_engine="$CURRENT_SIMLLM_ARM_ENGINE"
+  fi
+
+  write_prompt_cohort_evidence \
+    "$same_spec_file" "$prompt_cohort_file" "$runtime_model" "$measure_client_json"
 
   assert_port_available "$client_port"
 
@@ -615,7 +945,7 @@ run_experiment() {
   echo "[$label] endpoint: ${client_host}:${client_port}"
   echo "[$label] measured seed: ${SIMLLM_MEASURE_SEED:-<benchmark-default>}"
 
-  start_server "$simllm_enabled" "$server_args" "$server_log"
+  start_server "$simllm_enabled" "$server_args" "$server_log" "$label"
   echo "$ACTIVE_SERVER_PID" > "$result_dir/server.pid"
 
   if ! wait_for_server "$client_host" "$client_port" "$server_log"; then
@@ -646,6 +976,10 @@ run_experiment() {
         cleanup_active_server
         return "$status"
       fi
+      validate_benchmark_result \
+        "$label warm-cache pass ${pass}" \
+        "$result_dir/warmup_pass_${pass}.json" \
+        "$(echo "$warmup_json" | jq -er '.num_prompts')"
     done
 
     if (( SIMLLM_WARMCACHE_PAUSE_SECONDS > 0 )); then
@@ -672,7 +1006,21 @@ run_experiment() {
     return "$status"
   fi
 
-  export_leaderboard_artifact "$label" "$result_dir" "$same_spec_file" "$raw_result_file" "$artifact_dir" "$scenario"
+  wait_for_device_release "$result_dir/device_state_after.txt"
+
+  validate_benchmark_result "$label measured pass" "$raw_result_file" "$expected_requests"
+  write_arm_evidence \
+    "$label" "$simllm_enabled" "$do_warmup" "$result_dir" \
+    "$same_spec_file" "$prompt_cohort_file" "$measure_client_json"
+
+  if port_has_listener "$client_port"; then
+    echo "[$label] service port ${client_port} remains occupied after cleanup" >&2
+    return 1
+  fi
+
+  export_leaderboard_artifact \
+    "$label" "$result_dir" "$same_spec_file" "$raw_result_file" \
+    "$artifact_dir" "$scenario" "$arm_engine"
   echo "[$label] done: $result_dir"
 }
 
@@ -684,6 +1032,79 @@ fi
 
 if [[ "$RUN_SIMLLM" == "1" ]]; then
   run_experiment "simllm-warm-cache" "1" "1" "$SIMLLM_DIR" "$SIMLLM_SERVER_PORT"
+fi
+
+if [[ "$RUN_BASELINE" == "1" && "$RUN_SIMLLM" == "1" ]]; then
+  BASELINE_EVIDENCE="$BASELINE_DIR/arm_evidence.json"
+  SIMLLM_EVIDENCE="$SIMLLM_DIR/arm_evidence.json"
+  if [[ ! -f "$BASELINE_EVIDENCE" || ! -f "$SIMLLM_EVIDENCE" ]]; then
+    echo "paired SimLLM arm evidence is incomplete" >&2
+    exit 1
+  fi
+  BASELINE_EVIDENCE="$BASELINE_EVIDENCE" SIMLLM_EVIDENCE="$SIMLLM_EVIDENCE" \
+  PAIR_OUTPUT="$RESULT_DIR/paired_protocol_evidence.json" \
+  "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+import hashlib
+import json
+import os
+from pathlib import Path
+
+def load(name: str) -> dict:
+    return json.loads(Path(os.environ[name]).read_text(encoding="utf-8"))
+
+def sha(name: str) -> str:
+    return hashlib.sha256(Path(os.environ[name]).read_bytes()).hexdigest()
+
+baseline = load("BASELINE_EVIDENCE")
+simllm = load("SIMLLM_EVIDENCE")
+if baseline["simllm_enabled"] or baseline["warmup_performed"]:
+    raise SystemExit("baseline arm incorrectly enables SimLLM or warmup")
+if not simllm["simllm_enabled"] or not simllm["warmup_performed"]:
+    raise SystemExit("SimLLM arm is missing enablement or warmup evidence")
+for field in (
+    "spec_id",
+    "resolved_spec_hash",
+    "measured_client_parameters",
+    "prompt_cohort_sha256",
+    "core_commit",
+    "backend_commit",
+    "runtime",
+    "simllm_config",
+    "completed",
+):
+    if baseline[field] != simllm[field]:
+        raise SystemExit(f"paired SimLLM arms differ at {field}")
+if baseline["failed"] or simllm["failed"]:
+    raise SystemExit("paired SimLLM result contains failed requests")
+if simllm["engine"] == baseline["engine"]:
+    raise SystemExit("paired SimLLM arms require distinct leaderboard engine labels")
+if not simllm["patch_applied"] or simllm["rewritten_requests"] <= 0:
+    raise SystemExit("SimLLM arm lacks positive patch/rewrite evidence")
+payload = {
+    "schema_version": "simllm-official-paired-protocol/v1",
+    "spec_id": baseline["spec_id"],
+    "resolved_spec_hash": baseline["resolved_spec_hash"],
+    "prompt_cohort_sha256": baseline["prompt_cohort_sha256"],
+    "core_commit": baseline["core_commit"],
+    "backend_commit": baseline["backend_commit"],
+    "allowed_arm_differences": ["engine", "simllm_enabled", "warmup_performed"],
+    "exact_measured_setting_match": True,
+    "zero_failed_requests": True,
+    "baseline": {
+        "engine": baseline["engine"],
+        "evidence_sha256": sha("BASELINE_EVIDENCE"),
+    },
+    "simllm": {
+        "engine": simllm["engine"],
+        "evidence_sha256": sha("SIMLLM_EVIDENCE"),
+        "rewrite_events": simllm["rewrite_events"],
+        "rewritten_requests": simllm["rewritten_requests"],
+    },
+}
+Path(os.environ["PAIR_OUTPUT"]).write_text(
+    json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+)
+PY
 fi
 
 echo ""

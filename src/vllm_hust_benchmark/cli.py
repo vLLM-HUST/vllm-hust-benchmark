@@ -491,6 +491,10 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--github-pr-number", type=int)
     export_parser.add_argument("--github-pr-url")
     export_parser.add_argument("--runtime-python")
+    export_parser.add_argument("--reproducible-cmd")
+    export_parser.add_argument("--pytorch-version")
+    export_parser.add_argument("--cann-version")
+    export_parser.add_argument("--driver-version")
     export_parser.add_argument("--engine-source-repository")
     export_parser.add_argument("--engine-source-ref")
     export_parser.add_argument("--engine-source-commit")
@@ -1030,6 +1034,10 @@ def main(argv: list[str] | None = None) -> int:
                 plugin_source_repository=args.plugin_source_repository,
                 plugin_source_ref=args.plugin_source_ref,
                 plugin_source_commit=args.plugin_source_commit,
+                reproducible_cmd=args.reproducible_cmd,
+                pytorch_version=args.pytorch_version,
+                cann_version=args.cann_version,
+                driver_version=args.driver_version,
             )
         except (OSError, ValueError) as error:
             print(str(error), file=sys.stderr)
@@ -1277,6 +1285,10 @@ def main(argv: list[str] | None = None) -> int:
                 ),
                 plugin_source_ref=getattr(args, "plugin_source_ref", None),
                 plugin_source_commit=getattr(args, "plugin_source_commit", None),
+                reproducible_cmd=getattr(args, "reproducible_cmd", None),
+                pytorch_version=getattr(args, "pytorch_version", None),
+                cann_version=getattr(args, "cann_version", None),
+                driver_version=getattr(args, "driver_version", None),
             )
         except (OSError, ValueError) as error:
             print(str(error), file=sys.stderr)

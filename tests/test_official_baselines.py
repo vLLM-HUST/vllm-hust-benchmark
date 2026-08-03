@@ -406,7 +406,7 @@ def test_select_canonical_candidate_prefers_lower_error_rate(tmp_path: Path) -> 
     assert Path(payload["selected_result_dir"]) == repeat_b.resolve()
 
 
-def test_public_official_baseline_specs_are_v0180_910b2_fp16() -> None:
+def test_public_official_baseline_specs_use_declared_profile_precision() -> None:
     spec_dir = REPO_ROOT / "docs" / "official-baselines"
     spec_paths = [
         path
@@ -419,6 +419,24 @@ def test_public_official_baseline_specs_are_v0180_910b2_fp16() -> None:
     for path in spec_paths:
         payload = json.loads(path.read_text(encoding="utf-8"))
         spec_id = str(payload.get("id") or "")
-        assert "v0180" in path.name or "v0.18.0" in spec_id
         assert payload.get("hardware_chip_model") == "910B2"
-        assert payload.get("model_precision") == "FP16"
+        if payload.get("workload_id") in {
+            "simllm-random-online-warm-cache",
+            "simllm-saturated-throughput-warm-cache",
+        }:
+            assert path.name.startswith("official-simllm-")
+            assert payload.get("model_precision") == "FP16"
+            assert payload.get("chip_count") == 1
+        elif payload.get("scenario") in {
+            "burstgpt-production-replay",
+            "tracelab-coding-agent-replay",
+        }:
+            assert "v0221rc1" in path.name
+            assert "v0.22.1rc1" in spec_id
+            assert payload.get("model_precision") == "BF16"
+            assert payload.get("chip_count") == 2
+            if payload.get("scenario") == "tracelab-coding-agent-replay":
+                assert payload["client_parameters"]["timeout_s"] == 21600
+        else:
+            assert "v0180" in path.name or "v0.18.0" in spec_id
+            assert payload.get("model_precision") == "FP16"

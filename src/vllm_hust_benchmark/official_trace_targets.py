@@ -54,10 +54,10 @@ def load_trace_target_registry() -> dict[str, Any]:
         digest = source.get("sha256", "")
         if not isinstance(digest, str) or len(digest) != 64:
             raise ValueError(f"invalid source checksum for {target.get('id')!r}")
-        if target.get("status") == "active":
-            raise ValueError(
-                "trace targets require real matched baseline evidence before activation"
-            )
+        if target.get("status") == "active" and target.get("intended_use") != (
+            "public-leaderboard-production-trace"
+        ):
+            raise ValueError("active trace targets must use the production-trace profile")
     return payload
 
 
