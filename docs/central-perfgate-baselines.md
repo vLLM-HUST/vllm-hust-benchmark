@@ -51,7 +51,7 @@ latest-main pointer.
 - at least one warmup and three measured runs with ordered raw-result checksums;
 - selection metadata recomputed from all measured runs;
 - a published client-metric tuple that exactly matches the selected real run;
-- exact core, plugin, and benchmark runner revisions;
+- exact core, plugin, benchmark runner, and runtime manager revisions;
 - hardware, CANN, PyTorch, and torch-npu provenance.
 
 An existing baseline key is immutable. Repeating the same write is idempotent, while different
