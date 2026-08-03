@@ -18,12 +18,12 @@
       "summary_zh": "新增 12 个 Ascend v0.18.0 专用基线场景（KV 压力、注意力边界、MoE alltoall、投机解码等）作为 provisional profile。"
     },
     {
-      "version": "1.2.0",
-      "effective_from": "2026-08-02",
-      "source_set_sha256": "87af9ac5e694fbef3dbaa214ae321eaba0eb80abb26228f4be6f1e741d5f142e",
+      "version": "1.3.0",
+      "effective_from": "2026-08-03",
+      "source_set_sha256": "20e94aab3fdb09b47aa388d87bee1464e129b39bad97af34db810437a9d31c9a",
       "supersedes": "1.1.0",
-      "summary_en": "Activate executable paths for 12 specialty scenarios (EPLB, SliceGPT, KNorm, spec-decode, etc.) by adding feature-enabling server_parameters, correcting model/topology mismatches, and extending longctx input_len.",
-      "summary_zh": "为 12 个专用场景（EPLB、SliceGPT、KNorm、投机解码等）补齐可执行路径配置：添加功能启用 server_parameters、修正 model/拓扑不匹配、扩展长上下文 input_len。"
+      "summary_en": "Revert non-executable specialty specs to non-executable drafts: remove unsupported vLLM CLI parameters (enable_alltoall, compression_plugin, enable_simllm_scheduler, etc.) and placeholder model names (Qwen2.5-MoE-A14B-Instruct, Qwen2.5-14B-Instruct-EAGLE, Qwen2.5-14B-Instruct-slicegpt-75pct). Add parameter validation test covering MoE/EPLB, spec decode, SliceGPT/KNorm.",
+      "summary_zh": "将不可执行的专用 spec 回退为非可执行草案：移除不支持的 vLLM CLI 参数（enable_alltoall、compression_plugin、enable_simllm_scheduler 等）和占位模型名（Qwen2.5-MoE-A14B-Instruct、Qwen2.5-14B-Instruct-EAGLE、Qwen2.5-14B-Instruct-slicegpt-75pct）。添加覆盖 MoE/EPLB、投机解码、SliceGPT/KNorm 的参数验证测试。"
     }
   ]
 }

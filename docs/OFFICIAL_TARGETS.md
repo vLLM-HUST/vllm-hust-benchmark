@@ -2,8 +2,8 @@
 
 > This file is generated from the official specs. Do not edit it manually.
 
-- Registry version: `1.2.0`
-- Effective from: `2026-08-02`
+- Registry version: `1.3.0`
+- Effective from: `2026-08-03`
 
 Public leaderboard targets and 3B perfgate profiles are separate contracts. Provisional entries are
 not valid public-result comparison targets.
@@ -69,14 +69,14 @@ BF16 | — | 256 |
 | | specialty | provisional | multi-chip | agent-research-online-4chip | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 4 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-4chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-4chip-910b2.json)
-| | specialty | provisional | multi-chip | eplb-expert-rebalance-online |
-Qwen/Qwen2.5-MoE-A14B-Instruct | 910B2 × 2 | FP16 | — | — |
+| | specialty | provisional | multi-chip | eplb-expert-rebalance-online | Qwen/Qwen2.5-14B-Instruct
+| 910B2 × 2 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-eplb-expert-rebalance-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-eplb-expert-rebalance-online-qwen25-14b-910b2.json)
 | | specialty | provisional | multi-chip | kv-transfer-latency | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
 2 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-kv-transfer-latency-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-kv-transfer-latency-qwen25-14b-910b2.json)
-| | specialty | provisional | multi-chip | moe-alltoall-online | Qwen/Qwen2.5-MoE-A14B-Instruct |
-910B2 × 2 | FP16 | — | — |
+| | specialty | provisional | multi-chip | moe-alltoall-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
+2 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-moe-alltoall-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-moe-alltoall-online-qwen25-14b-910b2.json)
 | | specialty | provisional | multi-chip | multi-nic-throughput | Qwen/Qwen2.5-14B-Instruct | 910B2
 × 4 | FP16 | — | — |
@@ -117,9 +117,6 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 4 | FP16 | — | — |
 | | specialty | provisional | specialty | ngram-instructcoder-online | Qwen/Qwen2.5-7B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-ngram-instructcoder-online-qwen25-7b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-ngram-instructcoder-online-qwen25-7b-910b2.json)
-| | specialty | provisional | specialty | slicegpt-compression-online |
-Qwen/Qwen2.5-14B-Instruct-slicegpt-75pct | 910B2 × 1 | FP16 | — | — |
-[`official-ascend-jan-2026-v0180-slicegpt-compression-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-slicegpt-compression-online-qwen25-14b-910b2.json)
 | | specialty | provisional | specialty-text | agent-cache-pressure-online |
 Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-agent-cache-pressure-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-agent-cache-pressure-online-qwen25-14b-910b2.json)
@@ -138,6 +135,9 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 | | specialty | provisional | specialty-text | saturated-warm-cache-online |
 Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-saturated-warm-cache-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-saturated-warm-cache-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | slicegpt-compression-online |
+Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-slicegpt-compression-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-slicegpt-compression-online-qwen25-14b-910b2.json)
 | | specialty | provisional | specialty-text | spec-decode-online | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json)
