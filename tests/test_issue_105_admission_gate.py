@@ -51,11 +51,13 @@ def paired_mod():
 # Shared fixtures
 # ---------------------------------------------------------------------------
 
-_VALID_ENGINE_COMMIT = "e4ce33646f2ef1781289e6dc651fad0d00177c55"
-_VALID_PLUGIN_COMMIT = "0f38988f47b55e2e896551bc6125fda27fae5392"
-_VALID_RESOLVED_HASH = (
-    "f8cc8fc26b4b9bb06d50f079174894a95d2bc0f49799374a652e6e04b75c8feb"
+_VALID_ENGINE_COMMIT = (
+    "e4ce33646f2ef1781289e6dc651fad0d00177c55"  # pragma: allowlist secret
 )
+_VALID_PLUGIN_COMMIT = (
+    "0f38988f47b55e2e896551bc6125fda27fae5392"  # pragma: allowlist secret
+)
+_VALID_RESOLVED_HASH = "f8cc8fc26b4b9bb06d50f079174894a95d2bc0f49799374a652e6e04b75c8feb"  # pragma: allowlist secret
 
 
 def _valid_active_entry() -> dict:
