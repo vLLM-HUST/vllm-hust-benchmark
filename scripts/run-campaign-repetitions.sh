@@ -36,7 +36,7 @@ SPEC_FILE=""
 CAMPAIGN_PREFIX=""
 REPETITIONS=3
 COOLDOWN_SECONDS=60
-MAX_PORT_WAIT_SECONDS=120
+MAX_PORT_WAIT_SECONDS=${MAX_PORT_WAIT_SECONDS:-120}
 CAMPAIGN_REQUIRE_FROZEN_INPUTS=${CAMPAIGN_REQUIRE_FROZEN_INPUTS:-0}
 CAMPAIGN_SUMMARY_FILE=${CAMPAIGN_SUMMARY_FILE:-}
 
@@ -76,8 +76,8 @@ if [[ ! -f "$SPEC_FILE" ]]; then
   exit 2
 fi
 
-if [[ ! -x "$SINGLE_REPETITION_RUNNER" ]]; then
-  echo "Error: single-repetition runner is not executable: $SINGLE_REPETITION_RUNNER" >&2
+if [[ ! -f "$SINGLE_REPETITION_RUNNER" || ! -r "$SINGLE_REPETITION_RUNNER" ]]; then
+  echo "Error: single-repetition runner is not a readable file: $SINGLE_REPETITION_RUNNER" >&2
   exit 2
 fi
 
@@ -88,6 +88,11 @@ fi
 
 if ! [[ "$COOLDOWN_SECONDS" =~ ^[0-9]+$ ]]; then
   echo "Error: cooldown must be a non-negative integer: $COOLDOWN_SECONDS" >&2
+  exit 2
+fi
+
+if ! [[ "$MAX_PORT_WAIT_SECONDS" =~ ^[0-9]+$ ]]; then
+  echo "Error: MAX_PORT_WAIT_SECONDS must be a non-negative integer: $MAX_PORT_WAIT_SECONDS" >&2
   exit 2
 fi
 
@@ -262,7 +267,6 @@ wait_for_port_free() {
     (( waited += 5 ))
   done
 
-  echo "[campaign] WARNING: port ${port} still has listeners after ${MAX_PORT_WAIT_SECONDS}s; proceeding anyway" >&2
   return 1
 }
 
@@ -271,6 +275,8 @@ wait_for_port_free() {
 SUCCESS_COUNT=0
 FAIL_COUNT=0
 FIRST_FAILURE_EXIT_CODE=0
+CAMPAIGN_ABORT_EXIT_CODE=0
+CAMPAIGN_ABORT_REASON=""
 ARTIFACT_DIRS=()
 SUMMARY_ROWS_FILE=$(mktemp)
 trap 'rm -f "$SUMMARY_ROWS_FILE"' EXIT
@@ -281,12 +287,25 @@ for (( i=1; i<=REPETITIONS; i++ )); do
   echo "  Repetition ${i}/${REPETITIONS}"
   echo "───────────────────────────────────────────────────────────────────────"
 
-  # Wait for port to be free between repetitions (first run skips this)
+  # Enforce a cooldown between repetitions, then prove that the target port is
+  # free before every launch. The first-run check also prevents a formal
+  # campaign from accidentally attaching to a pre-existing service.
   if (( i > 1 )); then
-    # Also enforce a cooldown to let NPU memory settle
     echo "[campaign] cooldown ${COOLDOWN_SECONDS}s before next repetition..."
     sleep "$COOLDOWN_SECONDS"
-    wait_for_port_free "${CURRENT_SERVER_PORT:-8001}" || true
+  fi
+  CAMPAIGN_PORT=${CURRENT_SERVER_PORT:-8001}
+  if ! wait_for_port_free "$CAMPAIGN_PORT"; then
+    if [[ "$CAMPAIGN_REQUIRE_FROZEN_INPUTS" == "1" ]]; then
+      CAMPAIGN_ABORT_EXIT_CODE=2
+      CAMPAIGN_ABORT_REASON="target port ${CAMPAIGN_PORT} still has listeners after ${MAX_PORT_WAIT_SECONDS}s"
+      if [[ "$FIRST_FAILURE_EXIT_CODE" -eq 0 ]]; then
+        FIRST_FAILURE_EXIT_CODE=$CAMPAIGN_ABORT_EXIT_CODE
+      fi
+      echo "[campaign] ERROR: ${CAMPAIGN_ABORT_REASON}; refusing to start repetition ${i}/${REPETITIONS} in formal mode" >&2
+      break
+    fi
+    echo "[campaign] WARNING: port ${CAMPAIGN_PORT} still has listeners after ${MAX_PORT_WAIT_SECONDS}s; proceeding in diagnostic mode" >&2
   fi
 
   # Pin a single timestamp so run-single-repetition.sh uses the same
@@ -331,6 +350,8 @@ if [[ -n "$CAMPAIGN_SUMMARY_FILE" ]]; then
     CAMPAIGN_SUMMARY_FILE="$CAMPAIGN_SUMMARY_FILE" \
     CAMPAIGN_SPEC_FILE="$(realpath "$SPEC_FILE")" \
     CAMPAIGN_PREFIX_VALUE="$CAMPAIGN_PREFIX" \
+    CAMPAIGN_ABORT_EXIT_CODE_VALUE="$CAMPAIGN_ABORT_EXIT_CODE" \
+    CAMPAIGN_ABORT_REASON_VALUE="$CAMPAIGN_ABORT_REASON" \
     python3 - <<'PY'
 import json
 import os
@@ -349,6 +370,8 @@ for line in Path(os.environ["SUMMARY_ROWS_FILE"]).read_text(encoding="utf-8").sp
         }
     )
 
+abort_exit_code = int(os.environ["CAMPAIGN_ABORT_EXIT_CODE_VALUE"])
+abort_reason = os.environ["CAMPAIGN_ABORT_REASON_VALUE"]
 payload = {
     "schema_version": "independent-service-campaign-summary/v1",
     "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -370,7 +393,15 @@ payload = {
         "topology": os.environ.get("CURRENT_TOPOLOGY", ""),
     },
     "requested_repetitions": int(os.environ.get("CAMPAIGN_REPETITIONS", "0")),
+    "attempted_repetitions": len(rows),
     "successful_repetitions": sum(row["status"] == "ok" for row in rows),
+    "status": (
+        "aborted"
+        if abort_exit_code
+        else ("failed" if any(row["status"] == "failed" for row in rows) else "ok")
+    ),
+    "abort_exit_code": abort_exit_code,
+    "abort_reason": abort_reason,
     "runs": rows,
 }
 Path(os.environ["CAMPAIGN_SUMMARY_FILE"]).write_text(
@@ -399,7 +430,10 @@ for dir in "${ARTIFACT_DIRS[@]}"; do
 done
 echo ""
 
-if (( FAIL_COUNT > 0 )); then
+if (( CAMPAIGN_ABORT_EXIT_CODE > 0 )); then
+  echo "[campaign] ❌ campaign aborted: ${CAMPAIGN_ABORT_REASON}" >&2
+  exit "$FIRST_FAILURE_EXIT_CODE"
+elif (( FAIL_COUNT > 0 )); then
   echo "[campaign] ❌ ${FAIL_COUNT}/${REPETITIONS} repetitions failed" >&2
   exit "$FIRST_FAILURE_EXIT_CODE"
 else

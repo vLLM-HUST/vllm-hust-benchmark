@@ -114,7 +114,7 @@ if missing:
       echo "  missing env-manifest fields: $MISSING" >&2
       check "env-manifest.json has required fields" 1
     fi
-    FROZEN_INPUT_ERRORS=$(python3 - <<'PY'
+    FROZEN_INPUT_ERRORS=$(python3 - <<'PY' || echo "parse-error"
 import json
 
 manifest = json.load(open("env-manifest.json", encoding="utf-8"))

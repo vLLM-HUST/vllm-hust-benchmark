@@ -24,7 +24,9 @@ def _write_spec(path: Path, *, chip_count: int = 2) -> None:
     )
 
 
-def _write_fake_runner(path: Path, *, fail_index: int | None = None) -> None:
+def _write_fake_runner(
+    path: Path, *, fail_index: int | None = None, mode: int = 0o755
+) -> None:
     failure = (
         f'if [[ "$3" == "{fail_index}" ]]; then exit 19; fi'
         if fail_index is not None
@@ -38,13 +40,14 @@ printf '%s\\t%s\\t%s\\t%s\\n' "$1" "$2" "$3" "$CAMPAIGN_REPEAT_INDEX" >> "$CALL_
 """,
         encoding="utf-8",
     )
-    path.chmod(0o755)
+    path.chmod(mode)
 
 
 def _run_campaign(
     tmp_path: Path,
     *,
     fail_index: int | None = None,
+    runner_mode: int = 0o755,
     extra_env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     spec = tmp_path / "spec.json"
@@ -52,7 +55,7 @@ def _run_campaign(
     call_log = tmp_path / "calls.tsv"
     summary = tmp_path / "summary.json"
     _write_spec(spec)
-    _write_fake_runner(fake_runner, fail_index=fail_index)
+    _write_fake_runner(fake_runner, fail_index=fail_index, mode=runner_mode)
     env = {
         **os.environ,
         "SINGLE_REPETITION_RUNNER": str(fake_runner),
@@ -112,6 +115,13 @@ def test_campaign_runner_preserves_failure_after_later_success(tmp_path: Path) -
     ]
 
 
+def test_campaign_runner_accepts_readable_non_executable_runner(tmp_path: Path) -> None:
+    result = _run_campaign(tmp_path, runner_mode=0o644)
+
+    assert result.returncode == 0, result.stderr
+    assert len((tmp_path / "calls.tsv").read_text(encoding="utf-8").splitlines()) == 3
+
+
 def test_formal_campaign_rejects_same_server_measurement_repetitions(
     tmp_path: Path,
 ) -> None:
@@ -161,6 +171,117 @@ def _init_git_repo(path: Path) -> str:
         capture_output=True,
         text=True,
     ).stdout.strip()
+
+
+def _formal_campaign_env(tmp_path: Path) -> dict[str, str]:
+    core = tmp_path / "core"
+    backend = tmp_path / "backend"
+    core_commit = _init_git_repo(core)
+    backend_commit = _init_git_repo(backend)
+    return {
+        "CAMPAIGN_REQUIRE_FROZEN_INPUTS": "1",
+        "CAMPAIGN_ID": "issue-136/v1",
+        "CAMPAIGN_COVERAGE_CLASS": "full-matrix",
+        "CAMPAIGN_POINT_ROLE": "checkpoint",
+        "CAMPAIGN_LOAD_PROFILE": "fixed-1-rps",
+        "CURRENT_GIT_COMMIT": core_commit,
+        "CURRENT_PLUGIN_GIT_COMMIT": backend_commit,
+        "CURRENT_IMAGE_ID": "b" * 64,
+        "CURRENT_MODEL_REVISION": "c" * 40,
+        "CURRENT_CANN_VERSION": "9.0.0",
+        "CURRENT_TORCH_NPU_VERSION": "2.10.0",
+        "CURRENT_TOPOLOGY": "single-node-hccs",
+        "ASCEND_RT_VISIBLE_DEVICES": "0,1",
+        "ASCEND_VISIBLE_DEVICES": "0,1",
+        "CURRENT_VLLM_HUST_REPO": str(core),
+        "CURRENT_VLLM_ASCEND_HUST_REPO": str(backend),
+        "PERFGATE_WARMUP_RUNS": "0",
+        "PERFGATE_MEASURED_RUNS": "1",
+    }
+
+
+def _write_port_busy_after_first_run_tools(tmp_path: Path) -> Path:
+    fake_bin = tmp_path / "fake-bin"
+    fake_bin.mkdir()
+    (fake_bin / "ss").write_text(
+        """#!/bin/bash
+if [[ "${PORT_BUSY_FROM_START:-0}" == "1" || -s "$CALL_LOG" ]]; then
+  echo "LISTEN 0 4096 0.0.0.0:8001 0.0.0.0:*"
+fi
+""",
+        encoding="utf-8",
+    )
+    (fake_bin / "sleep").write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    (fake_bin / "ss").chmod(0o755)
+    (fake_bin / "sleep").chmod(0o755)
+    return fake_bin
+
+
+def test_formal_campaign_aborts_when_previous_service_keeps_port(
+    tmp_path: Path,
+) -> None:
+    fake_bin = _write_port_busy_after_first_run_tools(tmp_path)
+    result = _run_campaign(
+        tmp_path,
+        extra_env={
+            **_formal_campaign_env(tmp_path),
+            "PATH": f"{fake_bin}:{os.environ['PATH']}",
+            "MAX_PORT_WAIT_SECONDS": "5",
+        },
+    )
+
+    assert result.returncode == 2
+    calls = (tmp_path / "calls.tsv").read_text(encoding="utf-8").splitlines()
+    assert len(calls) == 1
+    assert "refusing to start repetition 2/3 in formal mode" in result.stderr
+    summary = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))
+    assert summary["status"] == "aborted"
+    assert summary["attempted_repetitions"] == 1
+    assert summary["abort_exit_code"] == 2
+    assert "still has listeners" in summary["abort_reason"]
+
+
+def test_formal_campaign_rejects_port_listener_before_first_run(
+    tmp_path: Path,
+) -> None:
+    fake_bin = _write_port_busy_after_first_run_tools(tmp_path)
+    result = _run_campaign(
+        tmp_path,
+        extra_env={
+            **_formal_campaign_env(tmp_path),
+            "PATH": f"{fake_bin}:{os.environ['PATH']}",
+            "MAX_PORT_WAIT_SECONDS": "5",
+            "PORT_BUSY_FROM_START": "1",
+        },
+    )
+
+    assert result.returncode == 2
+    assert not (tmp_path / "calls.tsv").exists()
+    assert "refusing to start repetition 1/3 in formal mode" in result.stderr
+    summary = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))
+    assert summary["status"] == "aborted"
+    assert summary["attempted_repetitions"] == 0
+
+
+def test_diagnostic_campaign_warns_and_continues_when_port_stays_busy(
+    tmp_path: Path,
+) -> None:
+    fake_bin = _write_port_busy_after_first_run_tools(tmp_path)
+    result = _run_campaign(
+        tmp_path,
+        extra_env={
+            "PATH": f"{fake_bin}:{os.environ['PATH']}",
+            "MAX_PORT_WAIT_SECONDS": "5",
+        },
+    )
+
+    assert result.returncode == 0, result.stderr
+    calls = (tmp_path / "calls.tsv").read_text(encoding="utf-8").splitlines()
+    assert len(calls) == 3
+    assert result.stderr.count("proceeding in diagnostic mode") == 2
+    summary = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))
+    assert summary["status"] == "ok"
+    assert summary["attempted_repetitions"] == 3
 
 
 def test_formal_campaign_accepts_matching_frozen_repositories(tmp_path: Path) -> None:
@@ -370,6 +491,81 @@ def test_validator_rejects_missing_environment_manifest_fields(tmp_path: Path) -
     assert "missing env-manifest fields: os, python_version, collected_at" in (
         result.stderr
     )
+    assert "validation error(s)" in result.stderr
+
+
+def test_validator_reports_frozen_input_parser_failure_and_continues(
+    tmp_path: Path,
+) -> None:
+    artifact = tmp_path / "artifact"
+    artifact.mkdir()
+    (artifact / "STATUS").write_text("OK\n", encoding="utf-8")
+    (artifact / "run_leaderboard.json").write_text("{}\n", encoding="utf-8")
+    (artifact / "leaderboard_manifest.json").write_text(
+        json.dumps({"entries": [{"leaderboard_artifact": "run_leaderboard.json"}]})
+        + "\n",
+        encoding="utf-8",
+    )
+    (artifact / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "os": "test",
+                "python_version": "test",
+                "collected_at": "2026-08-03T00:00:00Z",
+                "frozen_inputs_required": True,
+                "frozen_inputs": {
+                    "image_id": "a" * 64,
+                    "model_revision": "b" * 40,
+                    "topology": "single-node-hccs",
+                    "cann": {"declared": "9.0.0", "detected": "9.0.0"},
+                    "torch_npu_version": {
+                        "declared": "2.10.0",
+                        "detected": "2.10.0",
+                    },
+                },
+                "git_info": {
+                    "vllm_hust": {"declared": "c" * 40, "observed": "c" * 40},
+                    "vllm_ascend_hust": {
+                        "declared": "d" * 40,
+                        "observed": "d" * 40,
+                    },
+                },
+                "campaign": {
+                    "campaign_id": "issue-136/v1",
+                    "coverage_class": "full-matrix",
+                    "point_role": "checkpoint",
+                    "load_profile": "fixed-1-rps",
+                    "repetitions": "three",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    checksums = subprocess.run(
+        [
+            "sha256sum",
+            "run_leaderboard.json",
+            "leaderboard_manifest.json",
+            "env-manifest.json",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=artifact,
+    ).stdout
+    (artifact / "checksums.sha256").write_text(checksums, encoding="utf-8")
+
+    result = subprocess.run(
+        [bash_executable(), str(VALIDATOR), str(artifact)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode > 0
+    assert "parse-error" in result.stderr
+    assert "checksums.sha256 all pass" in result.stdout
     assert "validation error(s)" in result.stderr
 
 
