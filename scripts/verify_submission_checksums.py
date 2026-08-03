@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import re
 import sys
 from pathlib import Path
 
@@ -36,27 +37,27 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+_CHECKSUM_LINE_RE = re.compile(r"^(?P<hex>[0-9a-fA-F]{64})\s+\*?(?P<path>.+)$")
+
+
 def _parse_checksum_line(line: str) -> tuple[str, str] | None:
     """Return ``(expected_hex, relative_path)`` for a sha256sum line.
 
     ``sha256sum`` writes ``<hex>  <path>`` (two spaces) for text mode and
     ``<hex> *<path>`` (space + asterisk) for binary mode. Both forms are
     accepted; the leading ``./`` prefix is preserved as written.
+
+    A single regex is used so that both text mode (``<hex>  ./file``) and
+    binary mode (``<hex> *./file``) are handled by one code path, avoiding
+    the dead-branch / ordering pitfall of chained ``in`` checks.
     """
     line = line.rstrip("\n")
     if not line:
         return None
-    # sha256sum format: "<hex>  ./file" or "<hex> *file"
-    if "  " in line:
-        hex_part, _, path_part = line.partition("  ")
-    elif " *" in line:
-        hex_part, _, path_part = line.partition(" *")
-    else:
+    match = _CHECKSUM_LINE_RE.match(line)
+    if match is None:
         return None
-    hex_part = hex_part.strip()
-    if len(hex_part) != 64:
-        return None
-    return hex_part, path_part
+    return match.group("hex").lower(), match.group("path")
 
 
 def verify_directory(submission_dir: Path) -> list[str]:

@@ -81,6 +81,22 @@ def test_valid_checksums_pass(verifier, tmp_path: Path) -> None:
     assert failures == []
 
 
+def test_binary_mode_checksums_pass(verifier, tmp_path: Path) -> None:
+    """Binary mode ``sha256sum -b`` output (``<hex> *./file``) parses and
+    verifies correctly, not just text mode (``<hex>  ./file``)."""
+    sub = tmp_path / "submissions" / "binary-mode"
+    content_a = '{"entry_id": "bin"}\n'
+    _write_file(sub / "run_leaderboard.json", content_a)
+    sub.mkdir(parents=True, exist_ok=True)
+    hex_a = _sha256(content_a)
+    # Binary mode format: "<hex> *./run_leaderboard.json"
+    (sub / "checksums.sha256").write_text(
+        f"{hex_a} *./run_leaderboard.json\n", encoding="utf-8"
+    )
+    failures = verifier.verify_directory(sub)
+    assert failures == []
+
+
 def test_stale_checksum_rejected(verifier, tmp_path: Path) -> None:
     """A stale checksum (file edited after manifest generation) is a failure."""
     sub = tmp_path / "submissions" / "stale"

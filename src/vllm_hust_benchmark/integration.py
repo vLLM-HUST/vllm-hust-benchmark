@@ -1612,7 +1612,7 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
                 _missing_provenance = [
                     k
                     for k in ("vllm_hust", "vllm_ascend_hust")
-                    if _gi.get(k) == "not available"
+                    if _gi.get(k) in (None, "not available")
                 ]
                 if _missing_provenance:
                     failures.append(
@@ -1620,7 +1620,8 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
                             "dir": path_str,
                             "reason": "PROVENANCE_INCOMPLETE",
                             "detail": (
-                                "env-manifest.json git_info has 'not available' "
+                                "env-manifest.json git_info is missing or has "
+                                "'not available' "
                                 f"for: {', '.join(_missing_provenance)}"
                             ),
                         }

@@ -357,6 +357,66 @@ def test_backfill_with_short_sha_rejected(tmp_path: Path) -> None:
     assert "vllm_hust" in failures[0]["detail"]
 
 
+def test_backfill_with_missing_git_info_key_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with a completely missing
+    ``vllm_hust`` or ``vllm_ascend_hust`` key in env-manifest.json git_info
+    must be rejected by the admission gate, not silently admitted.
+
+    This closes the fail-open gap where ``_gi.get(k)`` returns ``None`` for a
+    missing key and ``None == "not available"`` is ``False``, so the missing
+    provenance slipped past both the ``_missing_provenance`` and
+    ``_short_sha`` checks.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    sub = source_dir / "historical-pr-pr102-head"
+    sub.mkdir(parents=True, exist_ok=True)
+    (sub / "STATUS").write_text("OK\n", encoding="utf-8")
+    (sub / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "entry_id": "test-102",
+                "metadata": {
+                    "data_source": "real-online-historical-pr-backfill",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (sub / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "leaderboard-export-manifest/v2",
+                "entries": [
+                    {
+                        "idempotency_key": "test",
+                        "leaderboard_artifact": "run_leaderboard.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    # vllm_hust key is completely absent (not even "not available")
+    (sub / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "git_info": {
+                    "vllm_ascend_hust": "abc123def456789012345678901234567890abcd",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert "vllm_hust" in failures[0]["detail"]
+    assert "missing" in failures[0]["detail"]
+
+
 def test_aggregate_to_website_returns_2_on_admission_failure(
     capsys, tmp_path: Path
 ) -> None:
