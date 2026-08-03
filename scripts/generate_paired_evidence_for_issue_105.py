@@ -25,7 +25,6 @@ import json
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SUBMISSIONS_DIR = REPO_ROOT / "submissions"
@@ -52,9 +51,13 @@ def _extract_metrics(entry: dict) -> dict:
     """Extract a normalized metrics dict from a run_leaderboard entry."""
     metrics = entry.get("metrics", {}) or {}
     measurement = entry.get("measurement", {}) or {}
-    selection = measurement.get("selection", {}) if isinstance(measurement, dict) else {}
+    selection = (
+        measurement.get("selection", {}) if isinstance(measurement, dict) else {}
+    )
 
-    has_measurement_block = isinstance(measurement, dict) and bool(measurement.get("per_run"))
+    has_measurement_block = isinstance(measurement, dict) and bool(
+        measurement.get("per_run")
+    )
     selected_run_index = selection.get("selected_run_index")
 
     # Try metadata for repetitions count
@@ -77,10 +80,18 @@ def _extract_metrics(entry: dict) -> dict:
             if isinstance(entry.get("versions"), dict)
             else None
         ),
-        "ttft_ms": round(float(metrics.get("ttft_ms", 0)), 2) if metrics.get("ttft_ms") is not None else None,
-        "tbt_ms": round(float(metrics.get("tbt_ms", 0)), 2) if metrics.get("tbt_ms") is not None else None,
-        "throughput_tps": round(float(metrics.get("throughput_tps", 0)), 2) if metrics.get("throughput_tps") is not None else None,
-        "error_rate": float(metrics.get("error_rate", 0)) if metrics.get("error_rate") is not None else 0.0,
+        "ttft_ms": round(float(metrics.get("ttft_ms", 0)), 2)
+        if metrics.get("ttft_ms") is not None
+        else None,
+        "tbt_ms": round(float(metrics.get("tbt_ms", 0)), 2)
+        if metrics.get("tbt_ms") is not None
+        else None,
+        "throughput_tps": round(float(metrics.get("throughput_tps", 0)), 2)
+        if metrics.get("throughput_tps") is not None
+        else None,
+        "error_rate": float(metrics.get("error_rate", 0))
+        if metrics.get("error_rate") is not None
+        else 0.0,
         "repetitions": repetitions,
         "has_measurement_block": has_measurement_block,
         "measurement_strategy": measurement_strategy,

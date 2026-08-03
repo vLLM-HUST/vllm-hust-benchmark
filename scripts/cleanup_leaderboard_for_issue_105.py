@@ -23,7 +23,6 @@ Quarantine policy (issue #105):
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 import sys
 from datetime import datetime, timezone
@@ -176,8 +175,14 @@ def _match_active_profile(entry: dict) -> dict | None:
     return None
 
 
-def _build_admission_entry(entry: dict, disposition: str, profile: dict | None,
-                           reason: str, drift_fields: list[str], missing_fields: list[str]) -> dict:
+def _build_admission_entry(
+    entry: dict,
+    disposition: str,
+    profile: dict | None,
+    reason: str,
+    drift_fields: list[str],
+    missing_fields: list[str],
+) -> dict:
     actual_config = {
         "model": _entry_model(entry) or None,
         "hardware_chip_model": _get(entry, "hardware", "chip_model"),
@@ -243,12 +248,20 @@ def _classify_entry(entry: dict) -> tuple[dict | None, str, str, list[str], list
     if inferred_prof:
         if _entry_model(entry) and _entry_model(entry) != inferred_prof["model"]:
             drift.append("model")
-        if _entry_precision(entry) and _entry_precision(entry) != inferred_prof["precision"]:
+        if (
+            _entry_precision(entry)
+            and _entry_precision(entry) != inferred_prof["precision"]
+        ):
             drift.append("model.precision")
         try:
-            if _entry_gpu_mem(entry) is not None and abs(
-                float(_entry_gpu_mem(entry)) - float(inferred_prof["gpu_memory_utilization"])
-            ) > 1e-6:
+            if (
+                _entry_gpu_mem(entry) is not None
+                and abs(
+                    float(_entry_gpu_mem(entry))
+                    - float(inferred_prof["gpu_memory_utilization"])
+                )
+                > 1e-6
+            ):
                 drift.append("gpu_memory_utilization")
         except (TypeError, ValueError):
             pass
@@ -260,10 +273,28 @@ def _classify_entry(entry: dict) -> tuple[dict | None, str, str, list[str], list
         except (TypeError, ValueError):
             pass
         if drift:
-            return inferred_prof, "quarantine", f"config drift: {','.join(drift)}", drift, missing
+            return (
+                inferred_prof,
+                "quarantine",
+                f"config drift: {','.join(drift)}",
+                drift,
+                missing,
+            )
         if missing:
-            return inferred_prof, "quarantine", f"missing fields: {','.join(missing)}", [], missing
-        return inferred_prof, "quarantine", "out-of-scope (specialty workload)", [], missing
+            return (
+                inferred_prof,
+                "quarantine",
+                f"missing fields: {','.join(missing)}",
+                [],
+                missing,
+            )
+        return (
+            inferred_prof,
+            "quarantine",
+            "out-of-scope (specialty workload)",
+            [],
+            missing,
+        )
 
     # No workload match: specialty or unknown
     if missing:
@@ -271,13 +302,18 @@ def _classify_entry(entry: dict) -> tuple[dict | None, str, str, list[str], list
     return None, "quarantine", "out-of-scope (specialty workload)", [], missing
 
 
-def cleanup_snapshot(snapshot_path: Path, output_path: Path,
-                     admission_entries: list[dict],
-                     rejected_entries: list[dict]) -> tuple[int, int]:
+def cleanup_snapshot(
+    snapshot_path: Path,
+    output_path: Path,
+    admission_entries: list[dict],
+    rejected_entries: list[dict],
+) -> tuple[int, int]:
     """Filter snapshot to keep only active-spec entries. Returns (kept, removed)."""
     data = json.loads(snapshot_path.read_text(encoding="utf-8"))
     if not isinstance(data, list):
-        raise ValueError(f"{snapshot_path}: expected JSON list, got {type(data).__name__}")
+        raise ValueError(
+            f"{snapshot_path}: expected JSON list, got {type(data).__name__}"
+        )
 
     kept: list[dict] = []
     for entry in data:
@@ -302,7 +338,9 @@ def cleanup_snapshot(snapshot_path: Path, output_path: Path,
                 }
             )
 
-    output_path.write_text(json.dumps(kept, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    output_path.write_text(
+        json.dumps(kept, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     return len(kept), len(data) - len(kept)
 
 
@@ -334,7 +372,9 @@ def main() -> int:
     pre_cleanup_summary = {
         "schema_version": "pre-cleanup-freeze/v1",
         "frozen_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "source_file": str(single_path.relative_to(REPO_ROOT)) if single_path.is_relative_to(REPO_ROOT) else str(single_path),
+        "source_file": str(single_path.relative_to(REPO_ROOT))
+        if single_path.is_relative_to(REPO_ROOT)
+        else str(single_path),
         "entry_count": len(pre_cleanup),
         "entry_ids": [e.get("entry_id") for e in pre_cleanup],
     }
@@ -354,12 +394,20 @@ def main() -> int:
             if disposition == "keep":
                 kept_count += 1
             else:
-                rejected_entries.append({"entry_id": entry.get("entry_id"), "reason": reason})
-        print(f"[dry-run] leaderboard_single.json: {len(temp_data)} entries -> keep {kept_count}, quarantine {len(temp_data) - kept_count}")
+                rejected_entries.append(
+                    {"entry_id": entry.get("entry_id"), "reason": reason}
+                )
+        print(
+            f"[dry-run] leaderboard_single.json: {len(temp_data)} entries -> keep {kept_count}, quarantine {len(temp_data) - kept_count}"
+        )
         if multi_path.is_file():
             multi_data = json.loads(multi_path.read_text(encoding="utf-8"))
-            multi_kept = sum(1 for e in multi_data if _match_active_profile(e) is not None)
-            print(f"[dry-run] leaderboard_multi.json: {len(multi_data)} entries -> keep {multi_kept}")
+            multi_kept = sum(
+                1 for e in multi_data if _match_active_profile(e) is not None
+            )
+            print(
+                f"[dry-run] leaderboard_multi.json: {len(multi_data)} entries -> keep {multi_kept}"
+            )
         return 0
 
     # Real run: write cleaned snapshots + reports
@@ -404,25 +452,28 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    # Write rejected_superseded_report.json
+    # Write rejected_superseded_report.json (conforms to schemas/rejected_superseded_report_v1.schema.json)
+    rejected_submissions = [
+        {
+            "dir": str(r.get("entry_id") or ""),
+            "reason": "exclusion_match",
+            "detail": (
+                f"{r.get('reason', 'unknown')}; "
+                f"scenario={r.get('scenario', '')}, model={r.get('model', '')}, "
+                f"engine_version={r.get('engine_version', '')}, "
+                f"drift_fields={r.get('drift_fields', [])}, "
+                f"missing_fields={r.get('missing_fields', [])}"
+            ),
+        }
+        for r in rejected_entries
+    ]
     rejected_report = {
-        "schema_version": "rejected-superseded/v1",
+        "schema_version": "rejected-superseded-report/v1",
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "policy": (
-            "Issue #105: only target-aligned active-spec entries remain in public snapshots. "
-            "Quarantined entries are kept in source submissions/ for audit; they do NOT enter "
-            "official views, paired evidence, or PR merge attribution."
-        ),
-        "summary": {
-            "total_rejected": len(rejected_entries),
-            "by_reason": {},
-        },
-        "rejected_entries": rejected_entries,
+        "rejected_submissions": rejected_submissions,
+        "superseded_entries": [],
+        "excluded_plugin_commits": [],
     }
-    by_reason: dict[str, int] = {}
-    for r in rejected_entries:
-        by_reason[r["reason"]] = by_reason.get(r["reason"], 0) + 1
-    rejected_report["summary"]["by_reason"] = by_reason
     (snapshot_dir / "rejected_superseded_report.json").write_text(
         json.dumps(rejected_report, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
