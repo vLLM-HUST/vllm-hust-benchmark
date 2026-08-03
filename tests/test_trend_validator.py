@@ -142,3 +142,68 @@ def test_effective_config_contract_failure_is_blocked() -> None:
     report = validate_entries([entry])
     assert report.decisions[0].status == "blocked"
     assert "EFFECTIVE_CONFIG_INVALID" in {issue.code for issue in report.issues}
+
+
+_FULL_SHA = "e4ce33646f2ef1781289e6dc651fad0d00177c55"
+_FULL_PLUGIN_SHA = "52f923884b9adaedfc2e764428207d0448227549"
+
+
+def _make_backfill_entry(git_commit, engine_commit, plugin_commit) -> dict:
+    entry = fixture("targeted-pair.json")
+    entry["entry_id"] = "33333333-3333-4333-8333-333333333333"
+    entry["metadata"] = {
+        "data_source": "real-online-historical-pr-backfill",
+        "verified": True,
+        "reproducible_cmd": "vllm-hust bench serve --model Qwen/Qwen2.5-14B-Instruct",
+        "git_commit": git_commit,
+        "runtime_provenance": {
+            "engine": {"commit": engine_commit},
+            "plugin": {"commit": plugin_commit},
+        },
+    }
+    entry["environment"] = {
+        "cann_version": "9.0.0",
+        "driver_version": "26.0.rc1",
+    }
+    return entry
+
+
+def test_backfill_short_git_commit_is_blocked() -> None:
+    entry = _make_backfill_entry(
+        git_commit="e4ce33646",
+        engine_commit=_FULL_SHA,
+        plugin_commit=_FULL_PLUGIN_SHA,
+    )
+    report = validate_entries([entry])
+    assert report.decisions[0].status == "blocked"
+    codes = {issue.code for issue in report.issues}
+    assert "PROVENANCE_INCOMPLETE" in codes
+    reasons = " ".join(issue.message for issue in report.issues)
+    assert "metadata.git_commit" in reasons
+    assert "40-character" in reasons
+
+
+def test_backfill_short_runtime_provenance_commit_is_blocked() -> None:
+    entry = _make_backfill_entry(
+        git_commit=_FULL_SHA,
+        engine_commit="e4ce33646",
+        plugin_commit=_FULL_PLUGIN_SHA,
+    )
+    report = validate_entries([entry])
+    assert report.decisions[0].status == "blocked"
+    codes = {issue.code for issue in report.issues}
+    assert "PROVENANCE_INCOMPLETE" in codes
+    reasons = " ".join(issue.message for issue in report.issues)
+    assert "runtime_provenance.engine.commit" in reasons
+    assert "40-character" in reasons
+
+
+def test_backfill_full_sha_passes() -> None:
+    entry = _make_backfill_entry(
+        git_commit=_FULL_SHA,
+        engine_commit=_FULL_SHA,
+        plugin_commit=_FULL_PLUGIN_SHA,
+    )
+    report = validate_entries([entry])
+    codes = {issue.code for issue in report.issues}
+    assert "PROVENANCE_INCOMPLETE" not in codes

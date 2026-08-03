@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -42,6 +43,14 @@ from vllm_hust_benchmark.workload_config_contract import (
 )
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
+_FULL_HEX_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def _is_full_hex_sha(value: object) -> bool:
+    """Return True only for a 40-character lowercase hex SHA."""
+    return isinstance(value, str) and bool(_FULL_HEX_SHA_RE.match(value))
+
+
 DEFAULT_RUNTIME_ENGINE = "vllm-hust"
 DEFAULT_LOCAL_SERVER_HOST = "127.0.0.1"
 DEFAULT_LOCAL_SERVER_PORT = 8000
@@ -1614,6 +1623,192 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
             )
             continue
 
+        # Provenance completeness: historical-pr-backfill submissions must
+        # carry real git commit provenance in env-manifest.json, not the
+        # "not available" placeholder emitted when CURRENT_VLLM_HUST_REPO /
+        # CURRENT_VLLM_ASCEND_HUST_REPO were unset at collection time.
+        env_manifest_path = child / "env-manifest.json"
+        is_historical_backfill = False
+        try:
+            _rl = json.loads(artifact_path.read_text(encoding="utf-8"))
+            is_historical_backfill = (
+                _rl.get("metadata", {}).get("data_source")
+                == "real-online-historical-pr-backfill"
+            )
+        except (OSError, json.JSONDecodeError):
+            # Fail-closed: if run_leaderboard.json is unreadable or corrupt,
+            # we cannot determine data_source — reject rather than silently
+            # bypassing provenance checks.
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "PROVENANCE_INCOMPLETE",
+                    "detail": (
+                        "run_leaderboard.json is unreadable or corrupt; "
+                        "cannot verify provenance"
+                    ),
+                }
+            )
+            continue
+        if is_historical_backfill and not env_manifest_path.is_file():
+            # Fail-closed: historical-pr-backfill entries MUST carry
+            # env-manifest.json; missing file must not silently bypass
+            # the git commit provenance checks below.
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "PROVENANCE_INCOMPLETE",
+                    "detail": (
+                        "env-manifest.json is missing for a "
+                        "historical-pr-backfill submission"
+                    ),
+                }
+            )
+            continue
+        if is_historical_backfill and env_manifest_path.is_file():
+            try:
+                _em = json.loads(env_manifest_path.read_text(encoding="utf-8"))
+                _gi = _em.get("git_info", {})
+                _missing_provenance = [
+                    k
+                    for k in ("vllm_hust", "vllm_ascend_hust")
+                    if _gi.get(k) in (None, "not available")
+                ]
+                if _missing_provenance:
+                    failures.append(
+                        {
+                            "dir": path_str,
+                            "reason": "PROVENANCE_INCOMPLETE",
+                            "detail": (
+                                "env-manifest.json git_info is missing or has "
+                                "'not available' "
+                                f"for: {', '.join(_missing_provenance)}"
+                            ),
+                        }
+                    )
+                    continue
+                _short_sha = [
+                    k
+                    for k in ("vllm_hust", "vllm_ascend_hust")
+                    if isinstance(_gi.get(k), str)
+                    and _gi.get(k) != "not available"
+                    and not _is_full_hex_sha(_gi.get(k))
+                ]
+                if _short_sha:
+                    failures.append(
+                        {
+                            "dir": path_str,
+                            "reason": "PROVENANCE_INCOMPLETE",
+                            "detail": (
+                                "env-manifest.json git_info has a non-40-char "
+                                f"hex SHA for: {', '.join(_short_sha)}"
+                            ),
+                        }
+                    )
+                    continue
+            except (OSError, json.JSONDecodeError):
+                failures.append(
+                    {
+                        "dir": path_str,
+                        "reason": "PROVENANCE_INCOMPLETE",
+                        "detail": "env-manifest.json missing or unreadable",
+                    }
+                )
+                continue
+
+        # Review feedback: checksum gate must not be bypassable. A submission
+        # that reaches this point has passed STATUS/artifact/manifest/provenance
+        # checks, so it is in the formal admission scope and must carry a
+        # checksums.sha256 manifest covering the three critical evidence files.
+        # Deleting the whole checksum file or removing a critical entry must
+        # fail closed here.
+        checksum_failures = _verify_admission_checksums(child)
+        if checksum_failures:
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "CHECKSUM_INCOMPLETE",
+                    "detail": "; ".join(checksum_failures),
+                }
+            )
+            continue
+
+    return failures
+
+
+# Files that must appear in checksums.sha256 for any submission entering the
+# formal admission scope. Review feedback: deleting the whole checksum file or
+# removing these critical entries must not bypass the gate.
+_ADMISSION_REQUIRED_CHECKSUM_FILES: tuple[str, ...] = (
+    "run_leaderboard.json",
+    "leaderboard_manifest.json",
+    "env-manifest.json",
+)
+
+# sha256sum line: ``<64-hex>  ./path`` or ``<64-hex> *./path``
+_ADMISSION_CHECKSUM_LINE_RE = re.compile(
+    r"^(?P<hex>[0-9a-fA-F]{64})\s+\*?(?P<path>.+)$"
+)
+
+
+def _verify_admission_checksums(submission_dir: Path) -> list[str]:
+    """Fail-closed checksum check for submissions entering admission scope.
+
+    Unlike the lenient :func:`scripts.verify_submission_checksums.verify_directory`
+    (which silently skips directories without ``checksums.sha256``), this function
+    **requires** the manifest to exist and to cover every file in
+    :data:`_ADMISSION_REQUIRED_CHECKSUM_FILES`. It also verifies that each
+    listed file's actual SHA256 matches.
+
+    Returns a list of failure messages (empty = passed).
+    """
+    checksums_path = submission_dir / "checksums.sha256"
+    if not checksums_path.is_file():
+        return [
+            f"{checksums_path}: missing checksum manifest "
+            f"(required for admission scope)"
+        ]
+
+    failures: list[str] = []
+    covered: set[str] = set()
+
+    try:
+        raw_lines = checksums_path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        return [f"{checksums_path}: unreadable: {exc}"]
+
+    for raw in raw_lines:
+        match = _ADMISSION_CHECKSUM_LINE_RE.match(raw.strip())
+        if match is None:
+            if raw.strip():
+                failures.append(f"{checksums_path}: malformed line: {raw!r}")
+            continue
+        expected_hex = match.group("hex").lower()
+        rel_path = match.group("path")
+        if rel_path.startswith("./"):
+            rel_path = rel_path[2:]
+        covered.add(rel_path)
+        target = submission_dir / rel_path
+        if not target.is_file():
+            failures.append(f"{checksums_path}: missing file {rel_path}")
+            continue
+        actual_hex = hashlib.sha256(target.read_bytes()).hexdigest()
+        if actual_hex != expected_hex:
+            failures.append(
+                f"{checksums_path}: {rel_path} checksum mismatch "
+                f"(expected {expected_hex}, got {actual_hex})"
+            )
+
+    if not covered and not failures:
+        failures.append(f"{checksums_path}: empty checksum manifest")
+        return failures
+
+    for required in _ADMISSION_REQUIRED_CHECKSUM_FILES:
+        if required not in covered:
+            failures.append(
+                f"{checksums_path}: required file {required!r} "
+                f"is not covered by the checksum manifest"
+            )
     return failures
 
 
