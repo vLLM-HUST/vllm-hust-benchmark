@@ -56,7 +56,9 @@ if $DRY_RUN; then
 fi
 
 # 通知评论模板（含幂等标识）
-NOTIFY_BODY="
+# 使用单引号 heredoc 防止 Markdown 反引号被 Bash 当作命令替换执行
+NOTIFY_BODY=$(cat <<'NOTIFY_EOF'
+<!-- issue-95-perf-notify-v1 -->
 ## issue #95 Merge Gate 通知
 
 本仓库已启用 PR 合并前性能证据门禁（merge gate）。
@@ -77,15 +79,18 @@ NOTIFY_BODY="
 详细要求见 [issue #95](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/95)。
 
 > 这是一次性通知（issue #95 §12.4 验收项），后续新 PR 会由 CI 自动检查。
-"
+NOTIFY_EOF
+)
 
-DOCS_BODY="
+DOCS_BODY=$(cat <<'DOCS_EOF'
+<!-- issue-95-perf-notify-v1 -->
 ## issue #95 Merge Gate 通知
 
 本 PR 看起来是文档/测试/网站类改动。如果确实不涉及热路径修改，请添加对应的 `perf-skip:*` label 并 @ 一个 reviewer 确认审批。
 
 详细要求见 [issue #95](https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/95)。
-"
+DOCS_EOF
+)
 
 # 检查 PR 是否已被通知过（评论中包含幂等标识）
 # 参数: $1 = PR number

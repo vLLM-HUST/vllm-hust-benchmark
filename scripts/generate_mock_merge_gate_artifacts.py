@@ -20,12 +20,35 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
 VALID_SPEC_ID = "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
 VALID_SPEC_HASH = "f8cc8fc26b4b9bb06d50f079174894a95d2bc0f49799374a652e6e04b75c8feb"  # pragma: allowlist secret
+VALID_ENGINE_COMMIT = (
+    "e4ce33646f2ef1781289e6dc651fad0d00177c55"  # pragma: allowlist secret
+)
+VALID_PLUGIN_COMMIT = (
+    "0f38988f47b55e2e896551bc6125fda27fae5392"  # pragma: allowlist secret
+)
 SHAREGPT_SPEC_ID = "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2"
+
+# Must match the registry's target_version for the matching profile.
+REGISTRY_TARGET_VERSION = "Official Ascend Jan 2026"
+
+# Compute the actual registry hash so mock artifacts pass the registry hash check.
+_REGISTRY_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "src"
+    / "vllm_hust_benchmark"
+    / "data"
+    / "fixed_target_registry.json"
+)
+_h = hashlib.sha256()
+with _REGISTRY_PATH.open("rb") as _f:
+    _h.update(_f.read())
+VALID_REGISTRY_HASH = _h.hexdigest()  # pragma: allowlist secret
 
 
 def _make_run_leaderboard(
@@ -42,6 +65,9 @@ def _make_run_leaderboard(
     max_model_len: int = 32768,
     spec_id: str = VALID_SPEC_ID,
     spec_hash: str = VALID_SPEC_HASH,
+    registry_hash: str = VALID_REGISTRY_HASH,
+    engine_commit: str = VALID_ENGINE_COMMIT,
+    plugin_commit: str = VALID_PLUGIN_COMMIT,
     same_spec_present: bool = True,
 ) -> dict:
     """构造一个 run_leaderboard.json payload。"""
@@ -66,12 +92,17 @@ def _make_run_leaderboard(
         "metadata": {
             "submitted_at": "2026-07-29T00:00:00Z",
             "data_source": data_source,
+            "runtime_provenance": {
+                "engine": {"commit": engine_commit},
+                "plugin": {"commit": plugin_commit},
+            },
         },
     }
     if same_spec_present:
         payload["same_spec"] = {
             "spec_id": spec_id,
             "resolved_spec_hash": spec_hash,
+            "resolved_registry_hash": registry_hash,
             "resolved_server_parameters": {
                 "tensor_parallel_size": tensor_parallel_size,
                 "gpu_memory_utilization": gpu_memory_utilization,
@@ -89,7 +120,7 @@ _SCENARIOS: dict[str, dict] = {
     "pass": {
         "expected_disposition": "pass",
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(),
         "head": lambda: _make_run_leaderboard(),
@@ -97,7 +128,7 @@ _SCENARIOS: dict[str, dict] = {
     "fail_config_drift": {
         "expected_disposition": "fail",
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(gpu_memory_utilization=0.9),
         "head": lambda: _make_run_leaderboard(gpu_memory_utilization=0.9),
@@ -105,7 +136,7 @@ _SCENARIOS: dict[str, dict] = {
     "fail_config_drift_head_only": {
         "expected_disposition": "fail",
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(),
         "head": lambda: _make_run_leaderboard(gpu_memory_utilization=0.9),
@@ -113,7 +144,7 @@ _SCENARIOS: dict[str, dict] = {
     "fail_data_source": {
         "expected_disposition": "fail",
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(data_source="smoke-test"),
         "head": lambda: _make_run_leaderboard(data_source="smoke-test"),
@@ -121,7 +152,7 @@ _SCENARIOS: dict[str, dict] = {
     "fail_unpaired_spec": {
         "expected_disposition": "fail",
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(spec_id=VALID_SPEC_ID),
         "head": lambda: _make_run_leaderboard(spec_id=SHAREGPT_SPEC_ID),
@@ -129,7 +160,7 @@ _SCENARIOS: dict[str, dict] = {
     "fail_3b_not_14b": {
         "expected_disposition": "fail",
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(
             model_repo_id="Qwen/Qwen2.5-3B-Instruct",
@@ -169,7 +200,7 @@ _SCENARIOS: dict[str, dict] = {
     "specialty_valid": {
         "expected_disposition": "pass",
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "multi-chip-2chip-text-14b",
         "specialty_spec": "multi-chip-2chip-text-14b",
         "specialty_reason": "验证 2-chip TP 并行扩展收益",
@@ -185,7 +216,7 @@ _SCENARIOS: dict[str, dict] = {
     "specialty_no_reason": {
         "expected_disposition": "fail",
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "multi-chip-2chip-text-14b",
         "specialty_spec": "multi-chip-2chip-text-14b",
         # specialty_reason 不传
@@ -201,10 +232,19 @@ _SCENARIOS: dict[str, dict] = {
     "fail_registry_hash_mismatch": {
         "expected_disposition": "fail",
         "declared_target_id": "nonexistent-target",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
         "base": lambda: _make_run_leaderboard(),
         "head": lambda: _make_run_leaderboard(),
+    },
+    "fail_head_commit_mismatch": {
+        "expected_disposition": "fail",
+        "declared_target_id": "official-ascend-jan-2026-v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
+        "declared_profile_id": "core-text-14b",
+        # head artifact's engine_commit differs from PR head_sha (VALID_ENGINE_COMMIT)
+        "base": lambda: _make_run_leaderboard(),
+        "head": lambda: _make_run_leaderboard(engine_commit="a" * 40),
     },
 }
 
@@ -238,6 +278,9 @@ def generate(scenario: str, output_dir: Path) -> dict:
     manifest = {
         "scenario": scenario,
         "expected_disposition": config["expected_disposition"],
+        # Issue #95 review comment 2: PR SHA must match artifact commit provenance.
+        "pr_head_sha": VALID_ENGINE_COMMIT,
+        "pr_base_sha": VALID_ENGINE_COMMIT,
     }
     if "expected_head_status" in config:
         manifest["expected_head_status"] = config["expected_head_status"]

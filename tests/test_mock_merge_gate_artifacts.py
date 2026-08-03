@@ -26,6 +26,12 @@ GENERATOR_SCRIPT = (
     / "generate_mock_merge_gate_artifacts.py"
 )
 
+# Must match the constants in generate_mock_merge_gate_artifacts.py
+VALID_ENGINE_COMMIT = (
+    "e4ce33646f2ef1781289e6dc651fad0d00177c55"  # pragma: allowlist secret
+)
+REGISTRY_TARGET_VERSION = "Official Ascend Jan 2026"
+
 
 def _run_generator(tmp_path: Path, scenario: str) -> Path:
     """运行 mock 生成器，返回 output_dir。"""
@@ -66,10 +72,10 @@ def _default_pr_context(**overrides) -> PRContext:
     defaults = {
         "repo": "vllm-hust",
         "number": 193,
-        "head_sha": "abc1234",
-        "base_sha": "def5678",
+        "head_sha": VALID_ENGINE_COMMIT,
+        "base_sha": VALID_ENGINE_COMMIT,
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
     }
     defaults.update(overrides)
@@ -82,8 +88,8 @@ def _pr_context_from_manifest(output_dir: Path, **overrides) -> PRContext:
     kwargs = {
         "repo": "vllm-hust",
         "number": 193,
-        "head_sha": "abc1234",
-        "base_sha": "def5678",
+        "head_sha": manifest.get("pr_head_sha", VALID_ENGINE_COMMIT),
+        "base_sha": manifest.get("pr_base_sha", VALID_ENGINE_COMMIT),
         "declared_target_id": manifest.get("declared_target_id"),
         "declared_target_version": manifest.get("declared_target_version"),
         "declared_profile_id": manifest.get("declared_profile_id"),
@@ -318,6 +324,20 @@ class TestMockSkipDocsOnlyNoApproverScenario:
         )
 
 
+class TestMockHeadCommitMismatchScenario:
+    """fail 场景：head artifact 的 engine_commit 与 PR head_sha 不匹配。"""
+
+    def test_head_commit_mismatch_blocked(self, tmp_path):
+        out = _run_generator(tmp_path, "fail_head_commit_mismatch")
+        base = _accepted(_load_artifact(out, "base"))
+        head = _accepted(_load_artifact(out, "head"))
+        decision = evaluate_merge_gate(
+            base=base, head=head, pr_context=_pr_context_from_manifest(out)
+        )
+        assert decision.disposition == "fail"
+        assert "head_sha" in decision.reason or "head artifact" in decision.reason
+
+
 class TestMockScenarioList:
     """生成器必须支持全部场景。"""
 
@@ -337,6 +357,7 @@ class TestMockScenarioList:
             "specialty_valid",
             "specialty_no_reason",
             "fail_registry_hash_mismatch",
+            "fail_head_commit_mismatch",
         ],
     )
     def test_scenario_supported(self, tmp_path, scenario):

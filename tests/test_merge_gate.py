@@ -34,6 +34,28 @@ DEFAULT_REGISTRY_PATH = (
 
 VALID_SPEC_ID = "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
 VALID_SPEC_HASH = "f8cc8fc26b4b9bb06d50f079174894a95d2bc0f49799374a652e6e04b75c8feb"  # pragma: allowlist secret
+VALID_ENGINE_COMMIT = (
+    "e4ce33646f2ef1781289e6dc651fad0d00177c55"  # pragma: allowlist secret
+)
+VALID_PLUGIN_COMMIT = (
+    "0f38988f47b55e2e896551bc6125fda27fae5392"  # pragma: allowlist secret
+)
+
+# Target version must match registry's target_version for the matching profile.
+REGISTRY_TARGET_VERSION = "Official Ascend Jan 2026"
+
+
+def _compute_registry_hash() -> str:
+    """Compute SHA256 of the actual registry file for test fixtures."""
+    import hashlib
+
+    h = hashlib.sha256()
+    with DEFAULT_REGISTRY_PATH.open("rb") as f:
+        h.update(f.read())
+    return h.hexdigest()
+
+
+VALID_REGISTRY_HASH = _compute_registry_hash()  # pragma: allowlist secret
 
 
 def _make_run_leaderboard(
@@ -49,6 +71,9 @@ def _make_run_leaderboard(
     max_model_len: int = 32768,
     spec_id: str = VALID_SPEC_ID,
     spec_hash: str = VALID_SPEC_HASH,
+    registry_hash: str = VALID_REGISTRY_HASH,
+    engine_commit: str = VALID_ENGINE_COMMIT,
+    plugin_commit: str = VALID_PLUGIN_COMMIT,
     same_spec_present: bool = True,
 ) -> dict:
     """构造一个合规的 14B 单卡 run_leaderboard.json payload。"""
@@ -73,12 +98,17 @@ def _make_run_leaderboard(
         "metadata": {
             "submitted_at": "2026-07-29T00:00:00Z",
             "data_source": data_source,
+            "runtime_provenance": {
+                "engine": {"commit": engine_commit},
+                "plugin": {"commit": plugin_commit},
+            },
         },
     }
     if same_spec_present:
         payload["same_spec"] = {
             "spec_id": spec_id,
             "resolved_spec_hash": spec_hash,
+            "resolved_registry_hash": registry_hash,
             "resolved_server_parameters": {
                 "tensor_parallel_size": 1,
                 "gpu_memory_utilization": gpu_memory_utilization,
@@ -112,10 +142,10 @@ def _default_pr_context(**overrides) -> PRContext:
     defaults = {
         "repo": "vllm-hust",
         "number": 193,
-        "head_sha": "abc1234",
-        "base_sha": "def5678",
+        "head_sha": VALID_ENGINE_COMMIT,
+        "base_sha": VALID_ENGINE_COMMIT,
         "declared_target_id": "official-ascend-jan-2026-v0.18.0",
-        "declared_target_version": "v0.18.0",
+        "declared_target_version": REGISTRY_TARGET_VERSION,
         "declared_profile_id": "core-text-14b",
     }
     defaults.update(overrides)
@@ -823,9 +853,9 @@ class TestDryRunMode:
                 "--pr-number",
                 "193",
                 "--head-sha",
-                "abc1234",
+                VALID_ENGINE_COMMIT,
                 "--base-sha",
-                "def5678",
+                VALID_ENGINE_COMMIT,
                 "--base-artifact",
                 str(base_path),
                 "--head-artifact",
@@ -833,7 +863,7 @@ class TestDryRunMode:
                 "--declared-target-id",
                 "official-ascend-jan-2026-v0.18.0",
                 "--declared-target-version",
-                "v0.18.0",
+                REGISTRY_TARGET_VERSION,
                 "--declared-profile-id",
                 "core-text-14b",
                 "--dry-run",
@@ -893,3 +923,172 @@ class TestDryRunMode:
         assert decision_path.exists()
         saved = json.loads(decision_path.read_text(encoding="utf-8"))
         assert saved["disposition"] == "fail"
+
+
+# ---------------------------------------------------------------------------
+# Review comment 2: commit provenance must match PR base/head SHA
+# ---------------------------------------------------------------------------
+
+
+class TestCommitProvenanceMatching:
+    """Review comment 2: artifact commit provenance must match PR SHA."""
+
+    def test_base_commit_mismatch_blocked(self, tmp_path):
+        """base artifact's engine/plugin commit != PR base_sha → fail."""
+        wrong_commit = "a" * 40  # pragma: allowlist secret
+        payload = _make_run_leaderboard(engine_commit=wrong_commit)
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", _make_run_leaderboard())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(base_sha=VALID_ENGINE_COMMIT),
+        )
+        assert decision.disposition == "fail"
+        assert "base_sha" in decision.reason or "base artifact" in decision.reason
+
+    def test_head_commit_mismatch_blocked(self, tmp_path):
+        """head artifact's engine/plugin commit != PR head_sha → fail."""
+        wrong_commit = "b" * 40  # pragma: allowlist secret
+        base_path = _write_artifact(tmp_path, "base", _make_run_leaderboard())
+        head_payload = _make_run_leaderboard(engine_commit=wrong_commit)
+        head_path = _write_artifact(tmp_path, "head", head_payload)
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(head_sha=VALID_ENGINE_COMMIT),
+        )
+        assert decision.disposition == "fail"
+        assert "head_sha" in decision.reason or "head artifact" in decision.reason
+
+    def test_plugin_commit_matches_head_sha_passes(self, tmp_path):
+        """Cross-repo: plugin.commit matches head_sha → pass."""
+        base_path = _write_artifact(tmp_path, "base", _make_run_leaderboard())
+        head_path = _write_artifact(tmp_path, "head", _make_run_leaderboard())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(
+                head_sha=VALID_PLUGIN_COMMIT,
+                base_sha=VALID_PLUGIN_COMMIT,
+            ),
+        )
+        assert decision.disposition == "pass"
+
+    def test_missing_provenance_blocked(self, tmp_path):
+        """artifact has no runtime_provenance → fail (fail closed)."""
+        payload = _make_run_leaderboard()
+        del payload["metadata"]["runtime_provenance"]
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", _make_run_leaderboard())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+        )
+        assert decision.disposition == "fail"
+        assert "provenance" in decision.reason.lower() or "base_sha" in decision.reason
+
+
+# ---------------------------------------------------------------------------
+# Review comment 3: declared_target_version must bind to registry, and
+# registry_hash_matched must verify actual registry hash
+# ---------------------------------------------------------------------------
+
+
+class TestDeclaredTargetVersionBinding:
+    """Review comment 3: declared_target_version must equal registry's target_version."""
+
+    def test_wrong_target_version_blocked(self, tmp_path):
+        """declared_target_version != profile.target_version → fail."""
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(
+                declared_target_version="v0.18.0-wrong",
+            ),
+        )
+        assert decision.disposition == "fail"
+        assert "target_version" in decision.reason
+        assert "does not match" in decision.reason
+
+    def test_correct_target_version_passes(self, tmp_path):
+        """declared_target_version == profile.target_version → pass."""
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(
+                declared_target_version=REGISTRY_TARGET_VERSION,
+            ),
+            registry_path=DEFAULT_REGISTRY_PATH,
+        )
+        assert decision.disposition == "pass"
+
+    def test_any_string_no_longer_passes(self, tmp_path):
+        """Arbitrary non-None string should NOT pass (was fail-open before fix)."""
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(
+                declared_target_version="arbitrary-version-string",
+            ),
+        )
+        assert decision.disposition == "fail"
+        assert "target_version" in decision.reason
+
+
+class TestRegistryHashValidation:
+    """Review comment 3: registry_hash_matched must verify actual registry hash."""
+
+    def test_registry_hash_mismatch_blocked(self, tmp_path):
+        """artifact's resolved_registry_hash != current registry hash → fail."""
+        wrong_hash = "0" * 64  # pragma: allowlist secret
+        payload = _make_run_leaderboard(registry_hash=wrong_hash)
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+            registry_path=DEFAULT_REGISTRY_PATH,
+        )
+        assert decision.disposition == "fail"
+        assert decision.registry_hash_matched is False
+
+    def test_registry_hash_match_passes(self, tmp_path):
+        """artifact's resolved_registry_hash == current registry hash → pass."""
+        payload = _make_run_leaderboard()
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+            registry_path=DEFAULT_REGISTRY_PATH,
+        )
+        assert decision.disposition == "pass"
+        assert decision.registry_hash_matched is True
+
+    def test_missing_registry_hash_blocked(self, tmp_path):
+        """artifact missing resolved_registry_hash → registry_hash_matched=False."""
+        payload = _make_run_leaderboard()
+        del payload["same_spec"]["resolved_registry_hash"]
+        base_path = _write_artifact(tmp_path, "base", payload)
+        head_path = _write_artifact(tmp_path, "head", payload.copy())
+        decision = evaluate_merge_gate(
+            base=_accepted(base_path),
+            head=_accepted(head_path),
+            pr_context=_default_pr_context(),
+            registry_path=DEFAULT_REGISTRY_PATH,
+        )
+        assert decision.disposition == "fail"
+        assert decision.registry_hash_matched is False

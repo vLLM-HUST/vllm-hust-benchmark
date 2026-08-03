@@ -8,19 +8,25 @@ CI 状态判定、data_source real-online 校验、paired base/head 一致性校
 
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any
 
 from vllm_hust_benchmark.fixed_target_registry import (
+    REGISTRY_PATH,
     find_matching_profile,
     load_fixed_target_registry,
 )
 
 # 受认可的 data_source 前缀（issue §4.2）。必须以 real-online 开头。
 _REAL_ONLINE_PREFIXES: tuple[str, ...] = ("real-online",)
+
+# 40-char hex SHA regex for commit provenance validation.
+_HEX40_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 
 # docs-only / test-only / website-only 受控 label（issue §5.2.4）。
 _SKIP_LABELS: tuple[str, ...] = (
@@ -161,6 +167,69 @@ def _extract_meta(payload: dict) -> dict:
     }
 
 
+def _extract_provenance(payload: dict) -> dict:
+    """从 run_leaderboard.json 提取 runtime_provenance 的 engine/plugin commit。
+
+    Returns a dict with ``engine_commit`` and ``plugin_commit`` (str | None).
+    Issue #95 review comment 2: commit provenance must be read from artifacts
+    and compared against the PR's base/head SHA to prevent evidence reuse
+    across PRs.
+    """
+    metadata = payload.get("metadata")
+    if not isinstance(metadata, dict):
+        return {"engine_commit": None, "plugin_commit": None}
+    provenance = metadata.get("runtime_provenance")
+    if not isinstance(provenance, dict):
+        return {"engine_commit": None, "plugin_commit": None}
+    engine_prov = provenance.get("engine")
+    engine_commit = engine_prov.get("commit") if isinstance(engine_prov, dict) else None
+    plugin_prov = provenance.get("plugin")
+    plugin_commit = plugin_prov.get("commit") if isinstance(plugin_prov, dict) else None
+    return {
+        "engine_commit": engine_commit if isinstance(engine_commit, str) else None,
+        "plugin_commit": plugin_commit if isinstance(plugin_commit, str) else None,
+    }
+
+
+def _compute_registry_hash(registry_path: Path) -> str:
+    """计算 registry 文件的 SHA256 hash（用于校验 artifact 生成时使用的 registry 版本）。
+
+    Issue #95 review comment 3: registry_hash_matched 必须校验生成 artifact
+    时使用的 registry hash 与当前 registry 的 hash 一致，防止 stale artifact
+    在 registry 更新后被误用。
+    """
+    h = hashlib.sha256()
+    with registry_path.open("rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _extract_registry_hash(payload: dict) -> str | None:
+    """从 artifact 的 same_spec 提取 resolved_registry_hash。"""
+    same_spec = payload.get("same_spec")
+    if not isinstance(same_spec, dict):
+        return None
+    raw = same_spec.get("resolved_registry_hash")
+    return raw if isinstance(raw, str) and raw else None
+
+
+def _commit_matches_sha(commit: str | None, sha: str | None) -> bool:
+    """检查 commit provenance 是否与 PR SHA 匹配。
+
+    Both must be 40-char hex SHA and equal. Handles cross-repo: the PR may
+    be in vllm-hust (engine.commit matches) or vllm-ascend-hust
+    (plugin.commit matches).
+    """
+    if not commit or not sha:
+        return False
+    if not (isinstance(commit, str) and isinstance(sha, str)):
+        return False
+    if not (_HEX40_RE.match(commit) and _HEX40_RE.match(sha)):
+        return False
+    return commit.lower() == sha.lower()
+
+
 def evaluate_merge_gate(
     base: ArtifactRef,
     head: ArtifactRef,
@@ -266,6 +335,61 @@ def evaluate_merge_gate(
                 chip_count=base_meta.get("chip_count"),
             )
 
+    # 4.5 commit provenance 校验（review comment 2: fail closed）
+    #     base artifact 的 engine/plugin commit 必须匹配 PR base_sha，
+    #     head artifact 的必须匹配 PR head_sha。防止旧 PR 的成对证据
+    #     被另一个 PR 直接复用。跨仓库场景：PR 可能在 vllm-hust
+    #     （engine.commit 匹配）或 vllm-ascend-hust（plugin.commit 匹配）。
+    base_provenance = _extract_provenance(base_payload)
+    head_provenance = _extract_provenance(head_payload)
+
+    # base artifact commit 必须匹配 base_sha（engine 或 plugin 之一）
+    base_commit_match = _commit_matches_sha(
+        base_provenance["engine_commit"], pr_context.base_sha
+    ) or _commit_matches_sha(base_provenance["plugin_commit"], pr_context.base_sha)
+    if not base_commit_match:
+        return MergeGateDecision(
+            disposition="fail",
+            reason=(
+                f"base artifact commit provenance does not match PR base_sha: "
+                f"engine_commit={base_provenance['engine_commit']!r} "
+                f"plugin_commit={base_provenance['plugin_commit']!r} "
+                f"base_sha={pr_context.base_sha!r} "
+                f"(evidence reuse across PRs blocked, fail closed)"
+            ),
+            **common,
+            base_status="accepted",
+            head_status="accepted",
+            data_source=data_source,
+            model=base_meta.get("model_repo_id"),
+            model_parameters=base_meta.get("model_parameters"),
+            hardware_chip_model=base_meta.get("chip_model"),
+            chip_count=base_meta.get("chip_count"),
+        )
+    # head artifact commit 必须匹配 head_sha（engine 或 plugin 之一）
+    head_commit_match = _commit_matches_sha(
+        head_provenance["engine_commit"], pr_context.head_sha
+    ) or _commit_matches_sha(head_provenance["plugin_commit"], pr_context.head_sha)
+    if not head_commit_match:
+        return MergeGateDecision(
+            disposition="fail",
+            reason=(
+                f"head artifact commit provenance does not match PR head_sha: "
+                f"engine_commit={head_provenance['engine_commit']!r} "
+                f"plugin_commit={head_provenance['plugin_commit']!r} "
+                f"head_sha={pr_context.head_sha!r} "
+                f"(evidence reuse across PRs blocked, fail closed)"
+            ),
+            **common,
+            base_status="accepted",
+            head_status="accepted",
+            data_source=data_source,
+            model=base_meta.get("model_repo_id"),
+            model_parameters=base_meta.get("model_parameters"),
+            hardware_chip_model=base_meta.get("chip_model"),
+            chip_count=base_meta.get("chip_count"),
+        )
+
     # 5. registry 匹配（复用 #104 find_matching_profile）
     #    M3 fix: registry 加载异常时 fail closed（返回 decision 而非 raise）
     try:
@@ -300,7 +424,29 @@ def evaluate_merge_gate(
     # M2 fix: base/head 必须匹配同一 profile，否则 fail（不同 workload 不可比）
     profile = base_profile
     profile_match = base_profile.profile_name == head_profile.profile_name
-    registry_hash_matched = base_profile.target_id == head_profile.target_id
+
+    # review comment 3: registry_hash_matched 必须校验生成 artifact 时使用的
+    # registry hash 与当前 registry 的 hash 一致，而非仅比较 target_id。
+    base_registry_hash = _extract_registry_hash(base_payload)
+    head_registry_hash = _extract_registry_hash(head_payload)
+    current_registry_path = registry_path or REGISTRY_PATH
+    try:
+        current_registry_hash = _compute_registry_hash(current_registry_path)
+    except OSError as exc:
+        return MergeGateDecision(
+            disposition="fail",
+            reason=f"failed to compute current registry hash (fail closed): {exc}",
+            **common,
+            base_status="accepted",
+            head_status="accepted",
+            data_source=data_source,
+            model=base_meta.get("model_repo_id"),
+        )
+    registry_hash_matched = (
+        base_registry_hash is not None
+        and head_registry_hash is not None
+        and base_registry_hash == head_registry_hash == current_registry_hash
+    )
     if not profile_match:
         return MergeGateDecision(
             disposition="fail",
@@ -351,6 +497,26 @@ def evaluate_merge_gate(
             head_status="accepted",
             data_source=data_source,
         )
+    # review comment 3: declared_target_version 必须与 registry 中实际
+    # target_version 绑定（fail closed），不再仅检查非空。
+    if pr_context.declared_target_version != profile.target_version:
+        return MergeGateDecision(
+            disposition="fail",
+            reason=(
+                f"declared_target_version {pr_context.declared_target_version!r} "
+                f"does not match registry target_version "
+                f"{profile.target_version!r} for target_id "
+                f"{profile.target_id!r} (version must bind to registry)"
+            ),
+            **common,
+            target_id=profile.target_id,
+            target_version=profile.target_version,
+            profile_id=profile.profile_name,
+            registry_hash_matched=registry_hash_matched,
+            base_status="accepted",
+            head_status="accepted",
+            data_source=data_source,
+        )
     if pr_context.declared_profile_id is None:
         return MergeGateDecision(
             disposition="fail",
@@ -389,9 +555,8 @@ def evaluate_merge_gate(
 
     # M6: 声明的 target_id/profile_id 必须与 artifact 实际匹配的 profile 一致，
     # 否则 fail（防止声明有效但与实际不匹配的 target 来 bypass）。
-    # 注意：declared_target_version 是版本号（如 v0.18.0），registry 的
-    # target_version 是描述性名称（如 "Official Ascend Jan 2026"），两者不同概念，
-    # 不做一致性比较，仅 C3 强制非 None。
+    # 注意：declared_target_version 已在上方 step 6 与 profile.target_version
+    # 做了一致性比较（review comment 3 fix），此处不再重复检查。
     if pr_context.declared_target_id != profile.target_id:
         return MergeGateDecision(
             disposition="fail",
@@ -447,6 +612,35 @@ def evaluate_merge_gate(
             target_version=profile.target_version,
             profile_id=profile.profile_name,
             registry_hash_matched=registry_hash_matched,
+            base_status="accepted",
+            head_status="accepted",
+            data_source=data_source,
+            model=base_meta.get("model_repo_id"),
+            model_parameters=base_meta.get("model_parameters"),
+            hardware_chip_model=base_meta.get("chip_model"),
+            chip_count=base_meta.get("chip_count"),
+            gpu_memory_utilization=base_gmu,
+            max_model_len=base_mml,
+            base_spec_id=base_spec_id,
+            head_spec_id=head_spec_id,
+        )
+
+    # review comment 3: registry_hash_matched must block stale artifacts.
+    # Placed after spec_id check so missing same_spec is caught with a more
+    # specific error; only fails when same_spec exists but registry hash
+    # is absent or mismatched.
+    if not registry_hash_matched:
+        return MergeGateDecision(
+            disposition="fail",
+            reason=(
+                "registry hash mismatch: artifact resolved_registry_hash does not "
+                "match current registry hash (stale artifact blocked, fail closed)"
+            ),
+            **common,
+            target_id=profile.target_id,
+            target_version=profile.target_version,
+            profile_id=profile.profile_name,
+            registry_hash_matched=False,
             base_status="accepted",
             head_status="accepted",
             data_source=data_source,
