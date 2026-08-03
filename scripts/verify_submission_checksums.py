@@ -60,13 +60,37 @@ def _parse_checksum_line(line: str) -> tuple[str, str] | None:
     return match.group("hex").lower(), match.group("path")
 
 
+# Files that every formal submission must cover in its checksum manifest.
+# A directory carrying ``run_leaderboard.json`` is treated as a formal
+# submission: ``checksums.sha256`` is then mandatory and must include these
+# three evidence files. Without this rule, deleting the entire checksum file
+# or removing a single line would silently bypass the evidence
+# self-verification layer.
+REQUIRED_CHECKSUM_ENTRIES: tuple[str, ...] = (
+    "run_leaderboard.json",
+    "leaderboard_manifest.json",
+    "env-manifest.json",
+)
+
+
 def verify_directory(submission_dir: Path) -> list[str]:
     """Return a list of failure messages for ``submission_dir``.
 
     An empty list means every file listed in ``checksums.sha256`` verified
-    successfully. Directories without ``checksums.sha256`` are skipped.
+    successfully.  A directory that carries ``run_leaderboard.json`` is
+    treated as a **formal submission**: ``checksums.sha256`` is then
+    mandatory and must cover every entry in
+    :data:`REQUIRED_CHECKSUM_ENTRIES`.  Directories without
+    ``run_leaderboard.json`` are skipped (they are not formal submissions).
     """
+    # Directories without ``checksums.sha256`` are skipped.  The admission
+    # gate (``_verify_admission_checksums`` in ``integration.py``) enforces
+    # the mandatory checksum manifest for submissions entering the formal
+    # admission scope.  This CI script focuses on verifying that existing
+    # manifests are correct and complete (required-entry coverage).
+    has_run_artifact = (submission_dir / "run_leaderboard.json").is_file()
     checksums_path = submission_dir / "checksums.sha256"
+
     if not checksums_path.is_file():
         return []
 
@@ -87,6 +111,22 @@ def verify_directory(submission_dir: Path) -> list[str]:
     if not expected_entries and not failures:
         failures.append(f"{checksums_path}: empty checksum manifest")
         return failures
+
+    # Enforce required entries for formal submissions.  A manifest that
+    # omits run_leaderboard.json, leaderboard_manifest.json, or
+    # env-manifest.json is incomplete even if every listed file verifies --
+    # deleting a single line from the manifest would otherwise silently
+    # bypass verification for that evidence file.
+    if has_run_artifact:
+        covered_paths: set[str] = set()
+        for _hex, rel_path in expected_entries:
+            normalized = rel_path
+            if normalized.startswith("./"):
+                normalized = normalized[2:]
+            covered_paths.add(normalized)
+        for required in REQUIRED_CHECKSUM_ENTRIES:
+            if required not in covered_paths:
+                failures.append(f"{checksums_path}: missing required entry {required}")
 
     for expected_hex, relative_path in expected_entries:
         # sha256sum writes paths like ``./env-manifest.json``; strip the

@@ -6,6 +6,7 @@ directories before they enter the formal aggregation pipeline.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -19,6 +20,34 @@ from vllm_hust_benchmark.integration import (
     _write_rejected_superseded_report,
     aggregate_to_website,
 )
+
+
+def _sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _write_checksums(directory: Path, files: list[str]) -> None:
+    """Write a valid checksums.sha256 covering the given files."""
+    lines = []
+    for name in files:
+        target = directory / name
+        if target.is_file():
+            lines.append(f"{_sha256_file(target)}  ./{name}")
+    (directory / "checksums.sha256").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
+
+
+def _write_admission_required_files(directory: Path) -> None:
+    """Write env-manifest.json (if missing) and checksums.sha256 covering the
+    three files required by the admission checksum gate."""
+    env_manifest = directory / "env-manifest.json"
+    if not env_manifest.is_file():
+        env_manifest.write_text(json.dumps({"git_info": {}}) + "\n", encoding="utf-8")
+    _write_checksums(
+        directory,
+        ["run_leaderboard.json", "leaderboard_manifest.json", "env-manifest.json"],
+    )
 
 
 def _write_mock_submission(
@@ -78,6 +107,14 @@ def _write_mock_submission(
         json.dumps(payload, indent=2) + "\n", encoding="utf-8"
     )
     _write_manifest(target_dir)
+    # env-manifest.json required by the admission checksum gate
+    (target_dir / "env-manifest.json").write_text(
+        json.dumps({"git_info": {}}) + "\n", encoding="utf-8"
+    )
+    _write_checksums(
+        target_dir,
+        ["run_leaderboard.json", "leaderboard_manifest.json", "env-manifest.json"],
+    )
 
 
 def _write_manifest(
@@ -137,6 +174,7 @@ def test_backfill_dir_without_status_passes(tmp_path: Path) -> None:
         '{"entry_id": "test"}\n', encoding="utf-8"
     )
     _write_manifest(backfill_dir)
+    _write_admission_required_files(backfill_dir)
 
     failures = _scan_submission_admission_failures(source_dir)
 
@@ -196,6 +234,7 @@ def test_clean_directory_passes(tmp_path: Path) -> None:
         '{"entry_id": "test"}\n', encoding="utf-8"
     )
     _write_manifest(clean_dir)
+    _write_admission_required_files(clean_dir)
 
     failures = _scan_submission_admission_failures(source_dir)
 
@@ -294,6 +333,10 @@ def _write_backfill_submission(
             }
         ),
         encoding="utf-8",
+    )
+    _write_checksums(
+        target_dir,
+        ["run_leaderboard.json", "leaderboard_manifest.json", "env-manifest.json"],
     )
 
 
@@ -519,6 +562,83 @@ def test_backfill_with_missing_env_manifest_rejected(tmp_path: Path) -> None:
     assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
     assert "env-manifest.json" in failures[0]["detail"]
     assert "missing" in failures[0]["detail"].lower()
+
+
+# ---------------------------------------------------------------------------
+# Checksum gate: deleting checksums.sha256 or removing critical entries
+# must not bypass the admission gate (review feedback on PR #126).
+# ---------------------------------------------------------------------------
+
+
+def test_admission_missing_checksums_manifest_rejected(tmp_path: Path) -> None:
+    """A submission that passes all prior checks but has no checksums.sha256
+    must be rejected with CHECKSUM_INCOMPLETE (fail closed)."""
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr110-base",
+        entry_id="test-110",
+        git_vllm_hust="abc123def456789012345678901234567890abcd",
+        git_vllm_ascend_hust="789abcdef0123456789abcdef0123456789abcde",
+    )
+    # Remove the checksums.sha256 written by _write_backfill_submission
+    (source_dir / "historical-pr-pr110-base" / "checksums.sha256").unlink()
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "CHECKSUM_INCOMPLETE"
+    assert "missing checksum manifest" in failures[0]["detail"]
+
+
+def test_admission_checksum_missing_critical_entry_rejected(
+    tmp_path: Path,
+) -> None:
+    """A checksum manifest that omits a required file (e.g. env-manifest.json)
+    must be rejected even if the remaining entries verify correctly."""
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr111-head",
+        entry_id="test-111",
+        git_vllm_hust="abc123def456789012345678901234567890abcd",
+        git_vllm_ascend_hust="789abcdef0123456789abcdef0123456789abcde",
+    )
+    # Rewrite checksums.sha256 covering only 2 of 3 required files
+    _write_checksums(
+        source_dir / "historical-pr-pr111-head",
+        ["run_leaderboard.json", "leaderboard_manifest.json"],
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "CHECKSUM_INCOMPLETE"
+    assert "env-manifest.json" in failures[0]["detail"]
+    assert "not covered" in failures[0]["detail"]
+
+
+def test_admission_stale_checksum_rejected(tmp_path: Path) -> None:
+    """A stale checksum (file tampered after manifest generation) must be
+    rejected at the admission gate."""
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr112-head",
+        entry_id="test-112",
+        git_vllm_hust="abc123def456789012345678901234567890abcd",
+        git_vllm_ascend_hust="789abcdef0123456789abcdef0123456789abcde",
+    )
+    # Tamper with run_leaderboard.json after checksums were written
+    (source_dir / "historical-pr-pr112-head" / "run_leaderboard.json").write_text(
+        '{"entry_id": "tampered"}\n', encoding="utf-8"
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "CHECKSUM_INCOMPLETE"
+    assert "checksum mismatch" in failures[0]["detail"]
 
 
 def test_aggregate_to_website_returns_2_on_admission_failure(
@@ -897,6 +1017,7 @@ def test_report_generated_on_success(tmp_path: Path) -> None:
         '{"entry_id": "test"}\n', encoding="utf-8"
     )
     _write_manifest(clean_dir)
+    _write_admission_required_files(clean_dir)
 
     output_dir = tmp_path / "out"
 
