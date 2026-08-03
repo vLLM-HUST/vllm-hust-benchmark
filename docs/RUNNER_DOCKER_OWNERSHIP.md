@@ -24,6 +24,20 @@ python scripts/run-watchdog-owned-npu-container.py \
 - `ASCEND_RT_VISIBLE_DEVICES`
 - `ASCEND_VISIBLE_DEVICES`
 
+### Volume / mount 约束
+
+Volume 入口若不约束，可以通过 `--volume /dev:/dev` 或 `--volume /:/host` 绕过单卡容器的设备隔离。启动脚本和
+`validate_container_inspect` 双层校验所有 volume：
+
+- **宿主机源路径黑名单**：禁止 bind-mount
+  `/`、`/dev`、`/dev/davinci*`、`/sys`、`/proc`、`/var/run/docker.sock`、`/usr/local/Ascend`、`/etc/dcmi*`
+  等路径，这些路径会暴露宿主机设备节点、NPU 驱动 sysfs 或 Docker socket，从而绕过隔离。
+- **容器目标路径白名单**：只允许挂载到 `/workspace`、`/tmp`、`/data`、`/root/.cache`、`/home`、`/opt/models` 及其子目录。
+- **禁止危险选项**：`shared`/`slave` propagation、privileged 模式、`SYS_ADMIN`/`SYS_PTRACE`/`SYS_MODULE`
+  capabilities 均被拒绝。
+- **Docker inspect 双重校验**：`validate_container_inspect` 同时检查 `Mounts` 数组和旧式 `HostConfig.Binds`
+  列表，确保运行时配置与构建时一致。
+
 `job.container` 目前无法通过该脚本完成创建前校验。在 GitHub Actions 能可靠写入 上述 label 和设备映射以前，不得把 `job.container` 作业调度到
 `linux-aarch64-a2b3-pool`。
 
