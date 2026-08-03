@@ -44,7 +44,7 @@ TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-"$HF_HOME/transformers"}
 export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE
 CURRENT_MODEL_PATH=${CURRENT_MODEL_PATH:-}
 CURRENT_SERVER_HOST=${CURRENT_SERVER_HOST:-}
-CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-"8001"}
+CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-}
 CURRENT_CLIENT_HOST=${CURRENT_CLIENT_HOST:-}
 CURRENT_CLIENT_PORT=${CURRENT_CLIENT_PORT:-$CURRENT_SERVER_PORT}
 CURRENT_USE_MANAGED_SERVER=${CURRENT_USE_MANAGED_SERVER:-0}
@@ -759,10 +759,12 @@ resolve_same_spec() {
   fi
 
   if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
-    resolve_args+=(
-      --server-port "$CURRENT_SERVER_PORT"
-      --client-port "$CURRENT_CLIENT_PORT"
-    )
+    if [[ -n "$CURRENT_SERVER_PORT" ]]; then
+      resolve_args+=(--server-port "$CURRENT_SERVER_PORT")
+    fi
+    if [[ -n "$CURRENT_CLIENT_PORT" ]]; then
+      resolve_args+=(--client-port "$CURRENT_CLIENT_PORT")
+    fi
 
     if [[ -n "$CURRENT_SERVER_HOST" ]]; then
       resolve_args+=(--server-host "$CURRENT_SERVER_HOST")

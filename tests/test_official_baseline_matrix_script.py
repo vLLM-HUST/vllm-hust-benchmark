@@ -97,6 +97,7 @@ def _run_matrix(
     spec_file: Path, env: dict[str, str]
 ) -> subprocess.CompletedProcess[str]:
     merged_env = {**os.environ, **env}
+    merged_env.setdefault("STRICT_CANONICAL_ATTESTATION", "0")
     # Forward the modern bash to the matrix script so its child ``$SINGLE_RUNNER``
     # invocation also uses bash 4+ (macOS system bash is 3.2 and chokes on
     # ``;;&`` fall-through and ``mapfile``).

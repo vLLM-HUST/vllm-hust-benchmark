@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from statistics import median
 from typing import Any, Mapping
 
+from vllm_hust_benchmark.official_targets import PACKAGE_REGISTRY_PATH
 from vllm_hust_benchmark.registry import get_scenario
 
 OFFICIAL_BASELINE_SUBMITTER = "official-ascend-baseline"
@@ -164,3 +166,222 @@ def select_canonical_candidate(
         "selected_result_dir": selected["result_dir"],
         "candidates": candidates,
     }
+
+
+def _sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _assert_target_parameters(
+    expected: Mapping[str, Any],
+    actual: Mapping[str, Any],
+    *,
+    aliases: Mapping[str, tuple[str, ...]] | None = None,
+) -> None:
+    aliases = aliases or {}
+    for key, expected_value in expected.items():
+        if (
+            key == "input_len"
+            and isinstance(actual.get("prefix_repetition_prefix_len"), int)
+            and isinstance(actual.get("prefix_repetition_suffix_len"), int)
+        ):
+            actual_value = (
+                actual["prefix_repetition_prefix_len"]
+                + actual["prefix_repetition_suffix_len"]
+            )
+            if actual_value != expected_value:
+                raise ValueError(
+                    f"resolved target parameter mismatch: {key}="
+                    f"{actual_value!r}, expected {expected_value!r}"
+                )
+            continue
+        actual_keys = (key, *aliases.get(key, ()))
+        actual_key = next((name for name in actual_keys if name in actual), None)
+        if actual_key is None:
+            raise ValueError(f"resolved target parameter is missing: {key}")
+        if actual[actual_key] != expected_value:
+            raise ValueError(
+                f"resolved target parameter mismatch: {key}="
+                f"{actual[actual_key]!r}, expected {expected_value!r}"
+            )
+
+
+def attest_canonical_submission(
+    canonical_dir: Path,
+    *,
+    spec: Mapping[str, Any],
+    result_dirs: list[Path],
+    selected_result_dir: Path,
+    primary_metric_name: str,
+    registry_path: Path = PACKAGE_REGISTRY_PATH,
+) -> dict[str, Any]:
+    """Bind a promoted candidate to its target and repeated-run evidence.
+
+    The matrix starts a fresh runner process for every result directory.  This
+    function fails closed unless at least three distinct, zero-error artifacts
+    agree on target, resolved configuration, runtime provenance, and required
+    environment evidence.
+    """
+
+    if len(result_dirs) < 3:
+        raise ValueError("canonical verification requires at least three repeats")
+
+    spec_id = get_official_baseline_spec_id(spec)
+    registry = _load_json_object(registry_path)
+    targets = registry.get("targets") if registry else None
+    if not isinstance(targets, list):
+        raise ValueError(f"official target registry is invalid: {registry_path}")
+    target = next(
+        (
+            item
+            for item in targets
+            if isinstance(item, Mapping) and item.get("target_id") == spec_id
+        ),
+        None,
+    )
+    if target is None or target.get("status") != "active":
+        raise ValueError(f"canonical verification requires an active target: {spec_id}")
+    target_version = str(target.get("target_version") or "").strip()
+    if not target_version:
+        raise ValueError(f"active target is missing target_version: {spec_id}")
+
+    selected_resolved = selected_result_dir.resolve()
+    resolved_result_dirs = [path.resolve() for path in result_dirs]
+    if selected_resolved not in resolved_result_dirs:
+        raise ValueError("selected canonical candidate is not one of the repeats")
+
+    repeat_evidence: list[dict[str, Any]] = []
+    identities: set[str] = set()
+    resolved_hashes: set[str] = set()
+    provenance_pairs: set[tuple[str, str]] = set()
+    for repeat_index, result_dir in enumerate(resolved_result_dirs, start=1):
+        artifact_path = result_dir / "submission" / "run_leaderboard.json"
+        raw_path = result_dir / "raw_benchmark_result.json"
+        payload = _load_json_object(artifact_path)
+        raw_payload = _load_json_object(raw_path)
+        if payload is None or raw_payload is None:
+            raise ValueError(f"repeat evidence is incomplete: {result_dir}")
+
+        metadata = payload.get("metadata")
+        metadata = metadata if isinstance(metadata, Mapping) else {}
+        same_spec = payload.get("same_spec")
+        same_spec = same_spec if isinstance(same_spec, Mapping) else {}
+        metrics = payload.get("metrics")
+        metrics = metrics if isinstance(metrics, Mapping) else {}
+        environment = payload.get("environment")
+        environment = environment if isinstance(environment, Mapping) else {}
+        provenance = metadata.get("runtime_provenance")
+        provenance = provenance if isinstance(provenance, Mapping) else {}
+        engine_provenance = provenance.get("engine")
+        engine_provenance = (
+            engine_provenance if isinstance(engine_provenance, Mapping) else {}
+        )
+        plugin_provenance = provenance.get("plugin")
+        plugin_provenance = (
+            plugin_provenance if isinstance(plugin_provenance, Mapping) else {}
+        )
+
+        if same_spec.get("spec_id") != spec_id:
+            raise ValueError(f"repeat target mismatch: {result_dir}")
+        resolved_server = same_spec.get("resolved_server_parameters")
+        resolved_server = (
+            resolved_server if isinstance(resolved_server, Mapping) else {}
+        )
+        resolved_client = same_spec.get("resolved_client_parameters")
+        resolved_client = (
+            resolved_client if isinstance(resolved_client, Mapping) else {}
+        )
+        target_server = target.get("server_parameters")
+        target_server = target_server if isinstance(target_server, Mapping) else {}
+        target_workload = target.get("workload")
+        target_workload = target_workload if isinstance(target_workload, Mapping) else {}
+        target_client = target_workload.get("client_parameters")
+        target_client = target_client if isinstance(target_client, Mapping) else {}
+        _assert_target_parameters(target_server, resolved_server)
+        _assert_target_parameters(
+            target_client,
+            resolved_client,
+            aliases={
+                "input_len": ("random_input_len",),
+                "output_len": (
+                    "random_output_len",
+                    "prefix_repetition_output_len",
+                ),
+            },
+        )
+        resolved_hash = str(same_spec.get("resolved_spec_hash") or "").strip()
+        if not resolved_hash:
+            raise ValueError(f"repeat is missing resolved spec hash: {result_dir}")
+        resolved_hashes.add(resolved_hash)
+        if metrics.get("error_rate") not in (0, 0.0):
+            raise ValueError(f"repeat has nonzero or missing error rate: {result_dir}")
+        peak_mem = metrics.get("peak_mem_mb")
+        if not isinstance(peak_mem, (int, float)) or peak_mem <= 0:
+            raise ValueError(f"repeat is missing measured peak memory: {result_dir}")
+        if raw_payload.get("failed", 0) not in (0, 0.0):
+            raise ValueError(f"repeat raw result contains failures: {result_dir}")
+        if not metadata.get("reproducible_cmd"):
+            raise ValueError(f"repeat is missing reproducible command: {result_dir}")
+        if metadata.get("workload_config_contract") != "explicit-effective/v1":
+            raise ValueError(f"repeat is missing explicit config contract: {result_dir}")
+        for field in ("pytorch_version", "cann_version", "driver_version"):
+            if not environment.get(field):
+                raise ValueError(f"repeat is missing {field}: {result_dir}")
+
+        engine_commit = str(engine_provenance.get("commit") or "").strip()
+        plugin_commit = str(plugin_provenance.get("commit") or "").strip()
+        if not engine_commit or not plugin_commit:
+            raise ValueError(f"repeat is missing runtime provenance: {result_dir}")
+        provenance_pairs.add((engine_commit, plugin_commit))
+
+        identity = str(metadata.get("idempotency_key") or "").strip()
+        if not identity or identity in identities:
+            raise ValueError(f"repeat identity is missing or duplicated: {result_dir}")
+        identities.add(identity)
+        repeat_evidence.append(
+            {
+                "repeat_index": repeat_index,
+                "idempotency_key": identity,
+                "leaderboard_artifact_sha256": _sha256_file(artifact_path),
+                "raw_result_sha256": _sha256_file(raw_path),
+                "submitted_at": metadata.get("submitted_at"),
+            }
+        )
+
+    if len(resolved_hashes) != 1:
+        raise ValueError("repeats do not share one resolved spec hash")
+    if len(provenance_pairs) != 1:
+        raise ValueError("repeats do not share one runtime provenance pair")
+
+    canonical_path = canonical_dir / "run_leaderboard.json"
+    canonical_payload = _load_json_object(canonical_path)
+    if canonical_payload is None:
+        raise ValueError(f"canonical artifact is missing: {canonical_path}")
+    canonical_metadata = canonical_payload.get("metadata")
+    canonical_metadata = (
+        dict(canonical_metadata) if isinstance(canonical_metadata, Mapping) else {}
+    )
+    selected_index = resolved_result_dirs.index(selected_resolved) + 1
+    canonical_metadata.update(
+        {
+            "verified": True,
+            "target_id": spec_id,
+            "target_version": target_version,
+            "verification_attestation": {
+                "schema_version": "official-repeat-attestation/v1",
+                "successful_repeats": len(repeat_evidence),
+                "independent_service_processes": len(repeat_evidence),
+                "selection_policy": "median-primary-metric",
+                "primary_metric_name": primary_metric_name,
+                "selected_repeat_index": selected_index,
+                "resolved_spec_hash": next(iter(resolved_hashes)),
+                "repeat_evidence": repeat_evidence,
+            },
+        }
+    )
+    canonical_payload["metadata"] = canonical_metadata
+    canonical_path.write_text(
+        json.dumps(canonical_payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return canonical_payload

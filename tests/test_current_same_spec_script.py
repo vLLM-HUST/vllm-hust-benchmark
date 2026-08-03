@@ -116,6 +116,15 @@ def test_current_same_spec_runner_defaults_to_one_start_attempt() -> None:
     assert "SERVER_START_RETRIES=${SERVER_START_RETRIES:-1}" in script
 
 
+def test_current_same_spec_runner_preserves_target_port_by_default() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    assert "CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-}" in script
+    assert 'if [[ -n "$CURRENT_SERVER_PORT" ]]; then' in script
+    assert 'if [[ -n "$CURRENT_CLIENT_PORT" ]]; then' in script
+    assert 'CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-"8001"}' not in script
+
+
 def test_current_same_spec_runner_requires_offline_graph_proof() -> None:
     script = RUNNER.read_text(encoding="utf-8")
 

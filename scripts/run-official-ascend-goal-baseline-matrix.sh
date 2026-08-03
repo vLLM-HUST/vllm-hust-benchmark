@@ -22,6 +22,7 @@ FORCE_RUN_EXISTING=${FORCE_RUN_EXISTING:-0}
 REPEAT_COUNT=${REPEAT_COUNT:-3}
 MIN_SUCCESSFUL_REPEATS=${MIN_SUCCESSFUL_REPEATS:-}
 MAX_REPEAT_ATTEMPTS=${MAX_REPEAT_ATTEMPTS:-}
+STRICT_CANONICAL_ATTESTATION=${STRICT_CANONICAL_ATTESTATION:-1}
 PREPARE_OFFICIAL_ENV=${PREPARE_OFFICIAL_ENV:-1}
 READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-900}
 SUMMARY_FILE=${MATRIX_SUMMARY_FILE:-"$MATRIX_RESULT_ROOT/summary.md"}
@@ -49,6 +50,8 @@ Behavior:
   - Repeats missing-canonical specs REPEAT_COUNT times (default: 3)
   - Allows bounded repeat failures and still selects a canonical candidate when enough successful repeats exist
   - Chooses the repeat whose primary metric is closest to the median run and promotes only that candidate into canonical submissions/<spec-id>/
+  - Requires three machine-attested repeats before canonical promotion by default
+  - Set STRICT_CANONICAL_ATTESTATION=0 only for non-public legacy/test workflows
   - Set FORCE_RUN_EXISTING=1 to run specs even when a canonical submission already exists
     Existing canonical submissions are preserved and the new run is left in .benchmarks/ for manual review
   - Set PUBLISH_WEBSITE=1 to rebuild website data from the full submissions/ tree after the batch
@@ -202,6 +205,35 @@ promote_submission_to_canonical() {
   mkdir -p "$(dirname "$canonical_dir")"
   cp -a "$submission_dir" "$canonical_dir"
   echo "[official-baseline-matrix] promoted canonical submission: $spec_id -> $canonical_dir"
+}
+
+attest_promoted_submission() {
+  local canonical_dir=$1
+  local spec_file=$2
+  local selected_result_dir=$3
+  local primary_metric_name=$4
+  shift 4
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" - <<'PY' \
+    "$canonical_dir" "$spec_file" "$selected_result_dir" "$primary_metric_name" "$@"
+from pathlib import Path
+import sys
+
+from vllm_hust_benchmark.official_baselines import attest_canonical_submission
+from vllm_hust_benchmark.official_baselines import load_official_baseline_spec
+
+canonical_dir = Path(sys.argv[1])
+spec_file = Path(sys.argv[2])
+selected_result_dir = Path(sys.argv[3])
+primary_metric_name = sys.argv[4]
+result_dirs = [Path(item) for item in sys.argv[5:]]
+attest_canonical_submission(
+    canonical_dir,
+    spec=load_official_baseline_spec(spec_file),
+    result_dirs=result_dirs,
+    selected_result_dir=selected_result_dir,
+    primary_metric_name=primary_metric_name,
+)
+PY
 }
 
 append_summary() {
@@ -528,6 +560,13 @@ for spec_file in "${SPEC_FILES[@]}"; do
     append_summary "  - Proceeding with degraded sample count for $spec_id: ${successful_repeat_count}/${target_successful_repeats} successful repeat(s), failures=${repeat_failure_count}"
   fi
 
+  if [[ "$should_promote" == "1" ]] \
+    && [[ "$STRICT_CANONICAL_ATTESTATION" == "1" ]] \
+    && (( successful_repeat_count < 3 )); then
+    record_failed_spec "$spec_id" "strict canonical attestation requires three successful repeats"
+    continue
+  fi
+
   selection_error_log="$MATRIX_RESULT_ROOT/$spec_slug/candidate-selection.stderr.log"
   set +e
   selection_json=$(select_canonical_candidate "$benchmark_type" "${repeat_result_dirs[@]}" 2>"$selection_error_log")
@@ -549,6 +588,14 @@ for spec_file in "${SPEC_FILES[@]}"; do
 
   if [[ "$should_promote" == "1" ]]; then
     promote_submission_to_canonical "$selected_result_dir" "$canonical_dir" "$spec_id"
+    if [[ "$STRICT_CANONICAL_ATTESTATION" == "1" ]]; then
+      attest_promoted_submission \
+        "$canonical_dir" \
+        "$spec_file" \
+        "$selected_result_dir" \
+        "$primary_metric_name" \
+        "${repeat_result_dirs[@]}"
+    fi
     append_summary "  - Selected canonical candidate: $selected_result_dir"
     ((PROMOTED_COUNT+=1))
 
