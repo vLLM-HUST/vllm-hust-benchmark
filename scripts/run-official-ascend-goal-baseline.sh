@@ -1518,7 +1518,7 @@ stop_peak_hbm_sampler() {
 }
 
 start_peak_hbm_sampler() {
-  local device_scope=${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
+  local device_scope=${ASCEND_HBM_PHYSICAL_DEVICES:-${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}}
   stop_peak_hbm_sampler
   if [[ -z "$device_scope" ]]; then
     echo "Explicit Ascend device scope is required for peak HBM evidence" >&2

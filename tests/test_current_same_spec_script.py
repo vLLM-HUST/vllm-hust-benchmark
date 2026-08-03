@@ -313,3 +313,19 @@ def test_current_same_spec_runner_aggregates_measured_runs_after_export() -> Non
     assert (
         'AGGREGATE_ARGS+=(--run-raw-result "$measured_raw_result")' in aggregate_block
     )
+
+
+def test_current_same_spec_runner_separates_physical_hbm_scope() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    assert "ASCEND_HBM_PHYSICAL_DEVICES" in script
+    assert "sample_ascend_peak_hbm.py" in script
+
+
+def test_current_same_spec_runner_checks_xxhash_before_server_start() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    verify_index = script.index("verify_current_runtime_requirements")
+    resolve_index = script.index("resolve_same_spec", verify_index)
+    assert 'required_modules = ("xxhash",)' in script
+    assert verify_index < resolve_index

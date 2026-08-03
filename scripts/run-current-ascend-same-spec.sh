@@ -775,6 +775,26 @@ resolve_same_spec() {
   run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" "${resolve_args[@]}"
 }
 
+verify_current_runtime_requirements() {
+  run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
+    "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+import importlib
+
+required_modules = ("xxhash",)
+missing = []
+for module_name in required_modules:
+    try:
+        importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        missing.append(module_name)
+
+if missing:
+    raise SystemExit(
+        "current runtime is missing required module(s): " + ", ".join(missing)
+    )
+PY
+}
+
 resolve_scenario_benchmark_type() {
   run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" \
     env SCENARIO_NAME="$SCENARIO" \
@@ -1036,9 +1056,9 @@ stop_peak_hbm_sampler() {
 }
 
 start_peak_hbm_sampler() {
-  local device_scope=${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
+  local device_scope=${ASCEND_HBM_PHYSICAL_DEVICES:-${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}}
   if [[ -z "$device_scope" ]]; then
-    echo "Explicit ASCEND_RT_VISIBLE_DEVICES or ASCEND_VISIBLE_DEVICES is required for peak HBM evidence" >&2
+    echo "Explicit ASCEND_HBM_PHYSICAL_DEVICES, ASCEND_RT_VISIBLE_DEVICES, or ASCEND_VISIBLE_DEVICES is required for peak HBM evidence" >&2
     exit 2
   fi
   PEAK_HBM_EVIDENCE_FILE="$RESULT_DIR/peak_hbm_evidence.json"
@@ -1121,6 +1141,7 @@ if cached_model_path=$(resolve_runtime_model); then
 fi
 
 SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
+verify_current_runtime_requirements
 resolve_same_spec
 start_peak_hbm_sampler
 
