@@ -809,6 +809,8 @@ run_server_command() {
 run_client_command() {
   case "$BENCHMARK_TYPE" in
     serve)
+      VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE="$IMMUTABLE_INPUT_ATTESTATION_FILE" \
+      VLLM_HUST_IMMUTABLE_INPUT_METADATA="$IMMUTABLE_INPUT_METADATA" \
       run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
         python "$VLLM_CLI_COMPAT" bench serve \
         --save-result \
@@ -831,6 +833,8 @@ run_client_command() {
 run_offline_client_command() {
   local effective_client_args=${1:-$CLIENT_ARGS}
 
+  VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE="$IMMUTABLE_INPUT_ATTESTATION_FILE" \
+  VLLM_HUST_IMMUTABLE_INPUT_METADATA="$IMMUTABLE_INPUT_METADATA" \
   run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
     python "$VLLM_CLI_COMPAT" bench "$BENCHMARK_TYPE" \
     --output-json "$RAW_RESULT_FILE" \
@@ -1049,6 +1053,62 @@ ensure_runtime_dataset_available() {
   esac
 }
 
+verify_immutable_input_contract() {
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    SPEC_FILE="$SPEC_FILE" \
+    BENCHMARK_REPO="$REPO_ROOT" \
+    OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
+    OFFICIAL_BENCHMARK_DATASET_ROOT="$OFFICIAL_BENCHMARK_DATASET_ROOT" \
+    OFFICIAL_SHAREGPT_DATASET_URL="$OFFICIAL_SHAREGPT_DATASET_URL" \
+    TRACE_ASSET_PATH="${TRACE_ASSET_PATH:-}" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.immutable_input_attestation import (
+    build_metadata,
+    verify_data_contract,
+)
+
+spec = json.loads(Path(os.environ["SPEC_FILE"]).read_text(encoding="utf-8"))
+metadata = build_metadata(spec)
+trace_path = os.environ.get("TRACE_ASSET_PATH")
+verify_data_contract(
+    metadata["data_identity"],
+    benchmark_repo=Path(os.environ["BENCHMARK_REPO"]),
+    vllm_worktree=Path(os.environ["OFFICIAL_VLLM_WORKTREE"]),
+    dataset_root=Path(os.environ["OFFICIAL_BENCHMARK_DATASET_ROOT"]),
+    sharegpt_url=os.environ["OFFICIAL_SHAREGPT_DATASET_URL"],
+    trace_asset_path=Path(trace_path) if trace_path else None,
+)
+print(json.dumps(metadata, separators=(",", ":"), sort_keys=True))
+PY
+}
+
+finalize_trace_immutable_input_attestation() {
+  if ! jq -e '.selected_requests_sha256 | strings' "$RAW_RESULT_FILE" >/dev/null 2>&1; then
+    return 0
+  fi
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    IMMUTABLE_INPUT_ATTESTATION_FILE="$IMMUTABLE_INPUT_ATTESTATION_FILE" \
+    IMMUTABLE_INPUT_METADATA="$IMMUTABLE_INPUT_METADATA" \
+    RAW_RESULT_FILE="$RAW_RESULT_FILE" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.immutable_input_attestation import write_trace_attestation
+
+write_trace_attestation(
+    Path(os.environ["IMMUTABLE_INPUT_ATTESTATION_FILE"]),
+    json.loads(os.environ["IMMUTABLE_INPUT_METADATA"]),
+    json.loads(Path(os.environ["RAW_RESULT_FILE"]).read_text(encoding="utf-8")),
+)
+PY
+}
+
 normalized_server_parameters_json() {
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
     SAME_SPEC_FILE="$SAME_SPEC_FILE" \
@@ -1108,18 +1168,36 @@ PY
 resolve_runtime_model() {
   local runtime_model_candidate=""
   local complete_runtime_model=""
+  local model_revision=""
+
+  model_revision=$(jq -r '.model_revision // .server_parameters.revision // empty' "$SPEC_FILE")
+  if [[ ! "$model_revision" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "Official model requires an exact 40-character revision" >&2
+    return 2
+  fi
 
   if [[ -n "$OFFICIAL_MODEL_PATH" ]]; then
-    printf '%s\n' "$OFFICIAL_MODEL_PATH"
+    runtime_model_candidate=$(realpath "$OFFICIAL_MODEL_PATH")
+    if [[ "$(basename "$runtime_model_candidate")" != "$model_revision" ]] || \
+       [[ "$(basename "$(dirname "$runtime_model_candidate")")" != "snapshots" ]]; then
+      echo "OFFICIAL_MODEL_PATH is not the exact model snapshot ${model_revision}: ${runtime_model_candidate}" >&2
+      return 2
+    fi
+    printf '%s\n' "$runtime_model_candidate"
     return 0
   fi
 
   runtime_model_candidate=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
-    env MODEL_ID="$MODEL" \
-    python -c "import os; from huggingface_hub import snapshot_download; print(snapshot_download(os.environ['MODEL_ID'], local_files_only=True))" \
+    env MODEL_ID="$MODEL" MODEL_REVISION="$model_revision" \
+    python -c "import os; from huggingface_hub import snapshot_download; print(snapshot_download(os.environ['MODEL_ID'], revision=os.environ['MODEL_REVISION'], local_files_only=True))" \
     2>/dev/null) || return 1
 
   complete_runtime_model=$(resolve_complete_local_runtime_model_candidate "$runtime_model_candidate") || return 2
+  if [[ "$(basename "$complete_runtime_model")" != "$model_revision" ]] || \
+     [[ "$(basename "$(dirname "$complete_runtime_model")")" != "snapshots" ]]; then
+    echo "Resolved model is not the exact snapshot ${model_revision}: ${complete_runtime_model}" >&2
+    return 2
+  fi
   printf '%s\n' "$complete_runtime_model"
 }
 
@@ -1633,6 +1711,8 @@ CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
+IMMUTABLE_INPUT_ATTESTATION_FILE="$RESULT_DIR/immutable-input-attestation.json"
+IMMUTABLE_INPUT_METADATA=$(verify_immutable_input_contract)
 
 echo "[goal-baseline] using worktrees: $OFFICIAL_VLLM_WORKTREE and $OFFICIAL_VLLM_ASCEND_WORKTREE"
 echo "[goal-baseline] neutral cwd: $OFFICIAL_RUNTIME_CWD"
@@ -1762,6 +1842,7 @@ esac
 
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
 run_client_command
+finalize_trace_immutable_input_attestation
 stop_peak_hbm_sampler
 if [[ ! -f "$PEAK_HBM_EVIDENCE_FILE" ]] || ! jq -e \
   '.sample_count > 0 and .peak_hbm_mb > 0' "$PEAK_HBM_EVIDENCE_FILE" >/dev/null; then

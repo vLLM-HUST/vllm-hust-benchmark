@@ -1,3 +1,4 @@
+import json
 import os
 import shlex
 import signal
@@ -1004,12 +1005,12 @@ def test_normalized_server_parameters_json_preserves_graph_mode(
     assert result.returncode == 0
 
 
-def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
+def test_resolve_runtime_model_requires_complete_exact_snapshot(
     tmp_path: Path,
 ) -> None:
     snapshots_dir = tmp_path / "hub" / "models--foo--bar" / "snapshots"
-    incomplete_snapshot = snapshots_dir / "000-incomplete"
-    complete_snapshot = snapshots_dir / "111-complete"
+    incomplete_snapshot = snapshots_dir / ("0" * 40)
+    complete_snapshot = snapshots_dir / ("1" * 40)
     incomplete_snapshot.mkdir(parents=True)
     complete_snapshot.mkdir(parents=True)
 
@@ -1021,14 +1022,21 @@ def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
         "weights\n", encoding="utf-8"
     )
 
+    spec_file = tmp_path / "spec.json"
+    spec_file.write_text(
+        json.dumps({"model_revision": "1" * 40}) + "\n", encoding="utf-8"
+    )
+
     result = _run_bash(
         _source_run_official_runtime_model_functions(
             f"""
             MODEL=foo/bar
             OFFICIAL_MODEL_PATH=
+            SPEC_FILE={shlex.quote(str(spec_file))}
+            OFFICIAL_RUNTIME_PYTHONPATH=/tmp/runtime
 
             run_in_official_runtime() {{
-                printf '%s\n' {shlex.quote(str(incomplete_snapshot))}
+                printf '%s\n' {shlex.quote(str(complete_snapshot))}
             }}
 
             resolved=$(resolve_runtime_model)
