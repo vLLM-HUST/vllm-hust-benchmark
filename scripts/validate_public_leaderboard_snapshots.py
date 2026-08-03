@@ -57,6 +57,7 @@ REJECTED_SUPERSEDED_REPORT_REQUIRED_FIELDS = (
     "excluded_plugin_commits",
 )
 REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION = "rejected-superseded-report/v1"
+COMPARE_SNAPSHOT_FILE = "leaderboard_compare.json"
 
 
 def parse_args() -> argparse.Namespace:
@@ -294,10 +295,87 @@ def validate_rejected_superseded_report(snapshot_dir: Path) -> list[str]:
     return errors
 
 
+def validate_compare_snapshot(
+    snapshot_dir: Path,
+    entries_by_id: dict[str, dict[str, Any]],
+) -> list[str]:
+    errors: list[str] = []
+    path = snapshot_dir / COMPARE_SNAPSHOT_FILE
+    if not path.is_file():
+        return [f"missing compare snapshot: {path}"]
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return [f"invalid JSON in {path}: {exc}"]
+    if not isinstance(payload, dict):
+        return [f"{path}: compare snapshot payload must be a JSON object"]
+
+    pairs = payload.get("preferred_pairs")
+    if not isinstance(pairs, list):
+        return [f"{path.name}: preferred_pairs must be an array"]
+    declared_count = payload.get("preferred_pair_count")
+    if declared_count != len(pairs):
+        errors.append(
+            f"{path.name}: preferred_pair_count={declared_count!r} does not match "
+            f"preferred_pairs length={len(pairs)}"
+        )
+
+    for index, item in enumerate(pairs):
+        pair = item.get("preferred_pair") if isinstance(item, dict) else None
+        if not isinstance(pair, dict):
+            errors.append(f"{path.name}: preferred_pairs[{index}] missing preferred_pair")
+            continue
+        summaries: dict[str, dict[str, Any]] = {}
+        for side in ("left", "right"):
+            summary = pair.get(side)
+            if not isinstance(summary, dict):
+                errors.append(
+                    f"{path.name}: preferred_pairs[{index}].preferred_pair.{side} "
+                    "must be an object"
+                )
+                continue
+            summaries[side] = summary
+            entry_id = str(summary.get("entry_id") or "")
+            source_entry = entries_by_id.get(entry_id)
+            if source_entry is None:
+                errors.append(
+                    f"{path.name}: preferred_pairs[{index}] {side} references "
+                    f"unknown entry_id {entry_id!r}"
+                )
+                continue
+            summary_hash = str(
+                ((summary.get("same_spec") or {}).get("resolved_spec_hash") or "")
+            )
+            source_hash = str(
+                ((source_entry.get("same_spec") or {}).get("resolved_spec_hash") or "")
+            )
+            if not summary_hash or summary_hash != source_hash:
+                errors.append(
+                    f"{path.name}: preferred_pairs[{index}] {side} hash "
+                    f"{summary_hash!r} does not match source entry {entry_id!r} "
+                    f"hash {source_hash!r}"
+                )
+        if set(summaries) != {"left", "right"}:
+            continue
+        left_hash = str(
+            ((summaries["left"].get("same_spec") or {}).get("resolved_spec_hash") or "")
+        )
+        right_hash = str(
+            ((summaries["right"].get("same_spec") or {}).get("resolved_spec_hash") or "")
+        )
+        if not left_hash or left_hash != right_hash:
+            errors.append(
+                f"{path.name}: preferred_pairs[{index}] resolved_spec_hash mismatch: "
+                f"left={left_hash!r} right={right_hash!r}"
+            )
+    return errors
+
+
 def main() -> int:
     args = parse_args()
     snapshot_dir = Path(args.snapshot_dir)
     errors: list[str] = []
+    entries_by_id: dict[str, dict[str, Any]] = {}
 
     hash_fingerprints: dict[str, tuple[str, str]] = {}
     for file_name in SNAPSHOT_FILES:
@@ -306,6 +384,9 @@ def main() -> int:
             errors.append(f"missing snapshot file: {path}")
             continue
         for entry in load_entries(path):
+            entry_id = str(entry.get("entry_id") or "")
+            if entry_id:
+                entries_by_id[entry_id] = entry
             errors.extend(validate_entry(entry, source=path))
             same_spec = (
                 entry.get("same_spec")
@@ -333,6 +414,7 @@ def main() -> int:
             else:
                 hash_fingerprints[spec_hash] = (fingerprint, source_label)
 
+    errors.extend(validate_compare_snapshot(snapshot_dir, entries_by_id))
     errors.extend(validate_rejected_superseded_report(snapshot_dir))
 
     if errors:

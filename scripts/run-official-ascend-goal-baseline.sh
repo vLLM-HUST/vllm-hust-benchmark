@@ -49,6 +49,8 @@ NPU_SMI_TIMEOUT_SECONDS=${NPU_SMI_TIMEOUT_SECONDS:-20}
 GOAL_BASELINE_DEVICE_PREFERENCE_FILE=${GOAL_BASELINE_DEVICE_PREFERENCE_FILE:-}
 SERVER_PID=""
 RUNNER_LOCK_FD=""
+PEAK_HBM_SAMPLER_PID=""
+PEAK_HBM_EVIDENCE_FILE=""
 
 if [[ -z "$GOAL_BASELINE_ENV_PREFIX" ]]; then
   echo "GOAL_BASELINE_ENV_PREFIX is required" >&2
@@ -1507,7 +1509,29 @@ wait_for_single_card_ascend_device() {
   return "$selection_status"
 }
 
+stop_peak_hbm_sampler() {
+  if [[ -n "${PEAK_HBM_SAMPLER_PID:-}" ]]; then
+    kill -TERM "$PEAK_HBM_SAMPLER_PID" >/dev/null 2>&1 || true
+    wait "$PEAK_HBM_SAMPLER_PID" >/dev/null 2>&1 || true
+    PEAK_HBM_SAMPLER_PID=""
+  fi
+}
+
+start_peak_hbm_sampler() {
+  local device_scope=${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
+  stop_peak_hbm_sampler
+  if [[ -z "$device_scope" ]]; then
+    echo "Explicit Ascend device scope is required for peak HBM evidence" >&2
+    exit 2
+  fi
+  PEAK_HBM_EVIDENCE_FILE="$RESULT_DIR/peak_hbm_evidence.json"
+  "$HOST_PYTHON_BIN" "$REPO_ROOT/scripts/sample_ascend_peak_hbm.py" \
+    --devices "$device_scope" --output "$PEAK_HBM_EVIDENCE_FILE" &
+  PEAK_HBM_SAMPLER_PID=$!
+}
+
 kill_server() {
+  stop_peak_hbm_sampler
   cleanup_managed_server || true
 }
 
@@ -1679,6 +1703,7 @@ case "$BENCHMARK_TYPE" in
       fi
 
       echo "[goal-baseline] Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-<unset>} (rt=${ASCEND_RT_VISIBLE_DEVICES:-<unset>})"
+      start_peak_hbm_sampler
 
       if wait_for_ascend_runtime_ready; then
         runtime_ready_status=0
@@ -1724,6 +1749,9 @@ case "$BENCHMARK_TYPE" in
     fi
     ;;
   throughput|latency)
+    wait_for_single_card_ascend_device
+    echo "[goal-baseline] Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-<unset>} (rt=${ASCEND_RT_VISIBLE_DEVICES:-<unset>})"
+    start_peak_hbm_sampler
     CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} $OFFICIAL_RUNTIME_PYTHON $VLLM_CLI_COMPAT bench $BENCHMARK_TYPE --output-json $RAW_RESULT_FILE $CLIENT_ARGS"
     ;;
   *)
@@ -1734,6 +1762,15 @@ esac
 
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
 run_client_command
+stop_peak_hbm_sampler
+if [[ ! -f "$PEAK_HBM_EVIDENCE_FILE" ]] || ! jq -e \
+  '.sample_count > 0 and .peak_hbm_mb > 0' "$PEAK_HBM_EVIDENCE_FILE" >/dev/null; then
+  echo "Peak HBM sampling did not produce valid evidence" >&2
+  exit 2
+fi
+PEAK_HBM_MB=$(jq -r '.peak_hbm_mb' "$PEAK_HBM_EVIDENCE_FILE")
+SPEC_REPRO_PATH=$(realpath --relative-to="$REPO_ROOT" "$SPEC_FILE")
+printf -v REPRODUCIBLE_CMD 'GOAL_BASELINE_ENV_PREFIX=<env-prefix> bash scripts/run-official-ascend-goal-baseline.sh %q' "$SPEC_REPRO_PATH"
 
 EXPORT_ARGS=(
   python -m vllm_hust_benchmark.cli export-leaderboard-artifact
@@ -1761,6 +1798,9 @@ EXPORT_ARGS=(
   --git-commit "$GIT_COMMIT"
   --github-repository "$GITHUB_REPOSITORY"
   --github-ref "$GITHUB_REF"
+  --peak-mem-mb "$PEAK_HBM_MB"
+  --reproducible-cmd "$REPRODUCIBLE_CMD"
+  --runtime-python "$OFFICIAL_RUNTIME_PYTHON"
   --engine-source-repository "$OFFICIAL_CORE_SOURCE_REPOSITORY"
   --engine-source-ref "$OFFICIAL_CORE_SOURCE_REF"
   --engine-source-commit "$OFFICIAL_CORE_SOURCE_COMMIT"

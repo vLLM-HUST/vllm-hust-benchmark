@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vllm-hust.sage.org.ai/schemas/leaderboard_comparison_gap_audit_v1.schema.json",
+  "title": "Leaderboard strict comparison gap audit",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "registry",
+    "policy",
+    "current_heads",
+    "summary",
+    "records",
+    "rerun_queue"
+  ],
+  "properties": {
+    "schema_version": {"const": "leaderboard-comparison-gap-audit/v1"},
+    "generated_at": {"type": "string"},
+    "registry": {
+      "type": "object",
+      "required": ["version", "sha256"]
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "excluded_workloads",
+        "minimum_successful_repeats",
+        "require_verified",
+        "require_exact_resolved_spec_hash",
+        "require_current_heads",
+        "require_runtime_environment",
+        "require_measured_peak_memory"
+      ],
+      "properties": {
+        "excluded_workloads": {
+          "type": "array",
+          "const": [
+            "burstgpt-production-replay",
+            "tracelab-coding-agent-replay"
+          ]
+        },
+        "minimum_successful_repeats": {"const": 3},
+        "require_verified": {"const": true},
+        "require_exact_resolved_spec_hash": {"const": true},
+        "require_current_heads": {"type": "boolean"},
+        "require_runtime_environment": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "require_measured_peak_memory": {"const": true}
+      }
+    },
+    "current_heads": {
+      "type": "object",
+      "required": ["vllm_hust", "vllm_ascend_hust"]
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "target_count",
+        "ready_pair_count",
+        "rerun_target_count",
+        "rerun_job_count"
+      ]
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "target_id",
+          "target_version",
+          "workload",
+          "source_spec",
+          "status",
+          "hash_match",
+          "baseline",
+          "current",
+          "required_sides"
+        ],
+        "properties": {
+          "status": {"enum": ["ready", "rerun-required"]},
+          "required_sides": {
+            "type": "array",
+            "items": {"enum": ["vllm", "vllm-hust"]},
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "rerun_queue": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "target_id",
+          "workload",
+          "engine",
+          "source_spec",
+          "reasons",
+          "repeat_count",
+          "min_successful_repeats"
+        ],
+        "properties": {
+          "engine": {"enum": ["vllm", "vllm-hust"]},
+          "repeat_count": {"const": 3},
+          "min_successful_repeats": {"const": 3}
+        }
+      }
+    }
+  }
+}

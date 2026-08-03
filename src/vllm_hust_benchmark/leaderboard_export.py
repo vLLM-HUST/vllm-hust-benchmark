@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.metadata
 import json
+import os
 import platform
 import re
 import uuid
@@ -82,6 +84,57 @@ KNOWN_MEMORY_PER_CHIP_GB = {
     "ascend 910b2": 64.0,
     "ascend 910b3": 64.0,
 }
+
+
+def _read_version_value(path: Path) -> str | None:
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    for line in text.splitlines():
+        match = re.match(r"\s*(?:Version|version|package_version)\s*=\s*[\"']?([^\"'\s]+)", line)
+        if match:
+            return match.group(1)
+    return None
+
+
+def _detect_pytorch_version() -> str | None:
+    try:
+        return importlib.metadata.version("torch")
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def _detect_cann_version() -> str | None:
+    candidates: list[Path] = []
+    for env_name in ("ASCEND_HOME_PATH", "ASCEND_TOOLKIT_HOME"):
+        root = os.environ.get(env_name)
+        if root:
+            candidates.extend((Path(root) / "version.info", Path(root) / "version.cfg"))
+    ascend_root = Path("/usr/local/Ascend")
+    candidates.extend(
+        (
+            ascend_root / "ascend-toolkit/latest/version.info",
+            ascend_root / "ascend-toolkit/latest/version.cfg",
+        )
+    )
+    candidates.extend(sorted(ascend_root.glob("cann-*/compiler/version.info"), reverse=True))
+    for candidate in candidates:
+        version = _read_version_value(candidate)
+        if version:
+            return version
+    return None
+
+
+def _detect_driver_version() -> str | None:
+    for candidate in (
+        Path("/usr/local/Ascend/driver/version.info"),
+        Path("/usr/local/Ascend/version.info"),
+    ):
+        version = _read_version_value(candidate)
+        if version:
+            return version
+    return None
 
 
 def _short_commit(value: Any) -> str:
@@ -560,6 +613,10 @@ def export_leaderboard_artifacts(
     plugin_source_repository: str | None,
     plugin_source_ref: str | None,
     plugin_source_commit: str | None,
+    reproducible_cmd: str | None = None,
+    pytorch_version: str | None = None,
+    cann_version: str | None = None,
+    driver_version: str | None = None,
 ) -> tuple[Path, Path]:
     engine_version = _sanitize_engine_version(engine_version, git_commit=git_commit)
     model_identity = resolve_model_identity(model_name)
@@ -689,10 +746,10 @@ def export_leaderboard_artifacts(
         "environment": {
             "os": platform.platform(),
             "python_version": platform.python_version(),
-            "pytorch_version": None,
+            "pytorch_version": pytorch_version or _detect_pytorch_version(),
             "cuda_version": None,
-            "cann_version": None,
-            "driver_version": None,
+            "cann_version": cann_version or _detect_cann_version(),
+            "driver_version": driver_version or _detect_driver_version(),
         },
         "metadata": {
             "submitted_at": submitted_at,
@@ -700,7 +757,7 @@ def export_leaderboard_artifacts(
             "data_source": data_source,
             "engine": engine,
             "engine_version": engine_version,
-            "reproducible_cmd": None,
+            "reproducible_cmd": reproducible_cmd,
             "git_commit": git_commit,
             "github_user": github_user,
             "github_commit_url": github_commit_url,

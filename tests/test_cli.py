@@ -1384,6 +1384,14 @@ def test_export_leaderboard_artifact_embeds_same_spec_payload(tmp_path: Path) ->
             "ci",
             "--runtime-python",
             "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+            "--reproducible-cmd",
+            "bash scripts/run-current-ascend-same-spec.sh docs/spec.json",
+            "--pytorch-version",
+            "2.8.0",
+            "--cann-version",
+            "9.0.0",
+            "--driver-version",
+            "26.0.rc1",
             "--engine-source-repository",
             "vLLM-HUST/vllm-hust",
             "--engine-source-ref",
@@ -1416,6 +1424,10 @@ def test_export_leaderboard_artifact_embeds_same_spec_payload(tmp_path: Path) ->
     assert artifact["metadata"]["runtime_provenance"]["plugin"]["repository"] == (
         "vLLM-HUST/vllm-ascend-hust"
     )
+    assert artifact["metadata"]["reproducible_cmd"].startswith("bash scripts/")
+    assert artifact["environment"]["pytorch_version"] == "2.8.0"
+    assert artifact["environment"]["cann_version"] == "9.0.0"
+    assert artifact["environment"]["driver_version"] == "26.0.rc1"
 
 
 def test_export_leaderboard_artifact_rejects_zero_long_context_length(

@@ -111,3 +111,46 @@ def test_future_official_entry_requires_effective_config_contract() -> None:
 
     assert any("workload config contract" in error for error in errors)
     assert any("workload_config_contract" in error for error in errors)
+
+
+def test_compare_snapshot_rejects_mismatched_resolved_hashes(tmp_path: Path) -> None:
+    module = load_module()
+    left = entry("left", same_spec())
+    right_payload = same_spec()
+    right_payload["resolved_server_parameters"]["tensor_parallel_size"] = 2
+    right_payload["resolved_spec_hash"] = "different-hash"
+    right = entry("right", right_payload)
+    (tmp_path / "leaderboard_compare.json").write_text(
+        json.dumps(
+            {
+                "preferred_pair_count": 1,
+                "preferred_pairs": [
+                    {
+                        "preferred_pair": {
+                            "left": {
+                                "entry_id": "left",
+                                "same_spec": {
+                                    "resolved_spec_hash": left["same_spec"][
+                                        "resolved_spec_hash"
+                                    ]
+                                },
+                            },
+                            "right": {
+                                "entry_id": "right",
+                                "same_spec": {
+                                    "resolved_spec_hash": "different-hash"
+                                },
+                            },
+                        }
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    errors = module.validate_compare_snapshot(
+        tmp_path, {"left": left, "right": right}
+    )
+
+    assert any("resolved_spec_hash mismatch" in error for error in errors)
