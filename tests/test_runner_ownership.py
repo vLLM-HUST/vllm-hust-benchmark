@@ -87,3 +87,191 @@ def test_validate_container_inspect_rejects_wrong_device() -> None:
     payload["HostConfig"]["Devices"][0]["PathOnHost"] = "/dev/davinci2"
     with pytest.raises(ValueError, match="mapping is missing or incorrect"):
         validate_container_inspect(payload, assignment)
+
+
+# --- mount constraint tests (issue #127 review feedback) ---
+
+
+@pytest.mark.parametrize(
+    "volume_spec",
+    [
+        "/dev:/dev",  # exposes all device nodes
+        "/dev/davinci1:/dev/davinci1",  # bypasses single-card isolation
+        "/:/host",  # exposes host root filesystem
+        "/sys:/sys",  # exposes NPU driver sysfs
+        "/var/run/docker.sock:/var/run/docker.sock",  # container escape
+        "/usr/local/Ascend:/usr/local/Ascend",  # exposes CANN stack
+    ],
+)
+def test_docker_command_rejects_bypass_volume(volume_spec: str) -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="forbidden host path"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[],
+            volumes=[volume_spec],
+        )
+
+
+@pytest.mark.parametrize(
+    "volume_spec",
+    [
+        "/host/data:/etc",  # non-allowlisted destination
+        "/host/data:/usr/bin",  # non-allowlisted destination
+    ],
+)
+def test_docker_command_rejects_non_allowlisted_destination(volume_spec: str) -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="forbidden container destination"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[],
+            volumes=[volume_spec],
+        )
+
+
+def test_docker_command_rejects_invalid_volume_format() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="invalid volume spec"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[],
+            volumes=["a:b:c:d"],
+        )
+
+
+def test_docker_command_accepts_workspace_volume() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    command = build_docker_create_command(
+        assignment=assignment,
+        container_name="benchmark-job",
+        image="example/ascend:latest",
+        command=[],
+        volumes=["/host/ws:/workspace", "/host/cache:/root/.cache"],
+    )
+    joined = " ".join(command)
+    assert "/host/ws:/workspace" in joined
+    assert "/host/cache:/root/.cache" in joined
+
+
+def test_docker_command_accepts_named_and_anonymous_volumes() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    command = build_docker_create_command(
+        assignment=assignment,
+        container_name="benchmark-job",
+        image="example/ascend:latest",
+        command=[],
+        volumes=["my_vol:/workspace", "/tmp"],
+    )
+    joined = " ".join(command)
+    assert "my_vol:/workspace" in joined
+    assert "/tmp" in joined
+
+
+def test_docker_command_accepts_readonly_option() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    command = build_docker_create_command(
+        assignment=assignment,
+        container_name="benchmark-job",
+        image="example/ascend:latest",
+        command=[],
+        volumes=["/host/ws:/workspace:ro"],
+    )
+    assert "/host/ws:/workspace:ro" in " ".join(command)
+
+
+def test_inspect_rejects_dev_bind_mount() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["Mounts"] = [
+        {
+            "Type": "bind",
+            "Source": "/dev",
+            "Destination": "/dev",
+            "Mode": "rw",
+            "RW": True,
+            "Propagation": "rprivate",
+        }
+    ]
+    with pytest.raises(ValueError, match="forbidden bind mount source"):
+        validate_container_inspect(payload, assignment)
+
+
+def test_inspect_rejects_root_bind_mount() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["Mounts"] = [
+        {
+            "Type": "bind",
+            "Source": "/",
+            "Destination": "/host",
+            "Mode": "rw",
+            "RW": True,
+            "Propagation": "rprivate",
+        }
+    ]
+    with pytest.raises(ValueError, match="forbidden"):
+        validate_container_inspect(payload, assignment)
+
+
+def test_inspect_rejects_privileged_mode() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["HostConfig"]["Privileged"] = True
+    with pytest.raises(ValueError, match="privileged"):
+        validate_container_inspect(payload, assignment)
+
+
+def test_inspect_rejects_dangerous_capabilities() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["HostConfig"]["CapAdd"] = ["SYS_ADMIN"]
+    with pytest.raises(ValueError, match="dangerous capabilities"):
+        validate_container_inspect(payload, assignment)
+
+
+def test_inspect_rejects_legacy_binds() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["HostConfig"]["Binds"] = ["/dev:/dev"]
+    with pytest.raises(ValueError, match="forbidden host path"):
+        validate_container_inspect(payload, assignment)
+
+
+def test_inspect_rejects_shared_propagation() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["Mounts"] = [
+        {
+            "Type": "bind",
+            "Source": "/host/data",
+            "Destination": "/workspace",
+            "Mode": "rw",
+            "RW": True,
+            "Propagation": "shared",
+        }
+    ]
+    with pytest.raises(ValueError, match="propagation"):
+        validate_container_inspect(payload, assignment)
+
+
+def test_inspect_accepts_workspace_bind_mount() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["Mounts"] = [
+        {
+            "Type": "bind",
+            "Source": "/home/user/workspace",
+            "Destination": "/workspace",
+            "Mode": "rw",
+            "RW": True,
+            "Propagation": "rprivate",
+        }
+    ]
+    validate_container_inspect(payload, assignment)
