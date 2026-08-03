@@ -40,8 +40,10 @@ def parse_hbm_usage(output: str) -> dict[int, tuple[int, int]]:
 
 
 def _device_scope(value: str | None) -> list[int]:
-    raw = value or os.environ.get("ASCEND_RT_VISIBLE_DEVICES") or os.environ.get(
-        "ASCEND_VISIBLE_DEVICES"
+    raw = (
+        value
+        or os.environ.get("ASCEND_RT_VISIBLE_DEVICES")
+        or os.environ.get("ASCEND_VISIBLE_DEVICES")
     )
     if not raw:
         raise ValueError(

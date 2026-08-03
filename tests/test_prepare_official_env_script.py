@@ -654,7 +654,7 @@ def test_explicit_multicard_scope_checks_each_npu_process_table(tmp_path: Path) 
         process_row = "| 1 0 | 4321 | python |" if busy else ""
         fake_npu_smi.write_text(
             "#!/bin/bash\n"
-            "if [[ \"${2:-}\" == \"-m\" ]]; then\n"
+            'if [[ "${2:-}" == "-m" ]]; then\n'
             "  printf '0 0 0 Ascend\\n1 0 1 Ascend\\n'\n"
             "else\n"
             "  printf '| NPU | Process id | Process name |\\n'\n"
@@ -1109,8 +1109,10 @@ def test_official_runner_fail_closes_and_exports_pinned_runtime_environment() ->
 
     assert "Unsupported official runtime environment" in script
     assert "OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT=1" in script
-    assert 'export VLLM_BATCH_INVARIANT="$OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT"' in script
-    assert 'unset VLLM_BATCH_INVARIANT' in script
+    assert (
+        'export VLLM_BATCH_INVARIANT="$OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT"' in script
+    )
+    assert "unset VLLM_BATCH_INVARIANT" in script
 
 
 def test_wait_for_ascend_runtime_ready_returns_resource_busy_status(
@@ -1196,8 +1198,8 @@ def test_normalized_client_parameters_json_carries_offline_runtime_knobs(
             SAME_SPEC_FILE={shlex.quote(str(same_spec_file))}
             BENCHMARK_TYPE=latency
             CLIENT_READY_CHECK_TIMEOUT_SECONDS=900
-            OFFICIAL_VLLM_WORKTREE={shlex.quote(str(tmp_path / 'vllm'))}
-            OFFICIAL_BENCHMARK_DATASET_ROOT={shlex.quote(str(tmp_path / 'datasets'))}
+            OFFICIAL_VLLM_WORKTREE={shlex.quote(str(tmp_path / "vllm"))}
+            OFFICIAL_BENCHMARK_DATASET_ROOT={shlex.quote(str(tmp_path / "datasets"))}
 
             client_json=$(normalized_client_parameters_json)
             printf '%s\n' "$client_json"
@@ -1233,8 +1235,8 @@ def test_official_runner_has_fail_closed_trace_replay_branch() -> None:
     assert "runtime_package_provenance.json" in source
     assert "OFFICIAL_RUNTIME_IMAGE must exactly match" in source
     assert '"runtime_image_digest": os.environ["EXPECTED_IMAGE_DIGEST"]' in source
-    assert ".resolved_server_parameters.host // \"127.0.0.1\"" in source
-    assert ".resolved_client_parameters.host // \"127.0.0.1\"" in source
+    assert '.resolved_server_parameters.host // "127.0.0.1"' in source
+    assert '.resolved_client_parameters.host // "127.0.0.1"' in source
 
 
 def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
@@ -1275,7 +1277,7 @@ def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
 
 
 def test_trace_model_verification_writes_pinned_provenance(tmp_path: Path) -> None:
-    revision = "7dd20894a642a0aa287e9827cb1a1f7f91386b67"
+    revision = "7dd20894a642a0aa287e9827cb1a1f7f91386b67"  # pragma: allowlist secret
     model_dir = tmp_path / "model"
     download_metadata = model_dir / ".cache/huggingface/download"
     download_metadata.mkdir(parents=True)
@@ -1324,7 +1326,7 @@ def test_trace_model_verification_fails_closed_on_incomplete_download(
             f"""
             REPO_ROOT={shlex.quote(str(REPO_ROOT))}
             HOST_PYTHON_BIN={shlex.quote(sys.executable)}
-            RESULT_DIR={shlex.quote(str(tmp_path / 'result'))}
+            RESULT_DIR={shlex.quote(str(tmp_path / "result"))}
             MODEL_REVISION=7dd20894a642a0aa287e9827cb1a1f7f91386b67
             verify_runtime_model_artifact {shlex.quote(str(model_dir))}
             """
@@ -1377,9 +1379,7 @@ def test_existing_worktree_must_match_ref_and_be_tracked_clean(tmp_path: Path) -
     )
     assert mismatch.returncode != 0
     assert "HEAD mismatch" in mismatch.stderr
-    _run_bash(
-        f"git -C {shlex.quote(str(source_repo))} tag -f pinned {original_commit}"
-    )
+    _run_bash(f"git -C {shlex.quote(str(source_repo))} tag -f pinned {original_commit}")
 
     (worktree / "tracked.txt").write_text("dirty\n", encoding="utf-8")
     dirty = _run_bash(
@@ -1437,8 +1437,8 @@ def test_trace_startup_evidence_binds_plan_sources_model_and_results(
             TRACE_TIME_SCALE=1
             TRACE_MAX_INTERARRIVAL_S=1
             OFFICIAL_RUNTIME_PYTHONPATH=/tmp/runtime
-            OFFICIAL_CORE_SOURCE_COMMIT={'1' * 40}
-            OFFICIAL_BACKEND_SOURCE_COMMIT={'2' * 40}
+            OFFICIAL_CORE_SOURCE_COMMIT={"1" * 40}
+            OFFICIAL_BACKEND_SOURCE_COMMIT={"2" * 40}
             RAW_RESULT_FILE={shlex.quote(str(raw))}
             TRACE_DETAIL_RESULT_FILE={shlex.quote(str(detail))}
             run_in_official_runtime() {{
@@ -1489,8 +1489,8 @@ def test_trace_runtime_provenance_rejects_unpinned_image(tmp_path: Path) -> None
         _source_run_official_runtime_model_functions(
             f"""
             SPEC_FILE={shlex.quote(str(spec))}
-            RESULT_DIR={shlex.quote(str(tmp_path / 'result'))}
-            OFFICIAL_RUNTIME_IMAGE=quay.io/ascend/vllm-ascend@sha256:{'c' * 64}
+            RESULT_DIR={shlex.quote(str(tmp_path / "result"))}
+            OFFICIAL_RUNTIME_IMAGE=quay.io/ascend/vllm-ascend@sha256:{"c" * 64}
             verify_trace_runtime_packages
             """
         ),

@@ -187,7 +187,10 @@ def _entry_reasons(
     if engine == "vllm-hust":
         if current_core_head and engine_provenance.get("commit") != current_core_head:
             reasons.append("current-core-head-stale")
-        if current_plugin_head and plugin_provenance.get("commit") != current_plugin_head:
+        if (
+            current_plugin_head
+            and plugin_provenance.get("commit") != current_plugin_head
+        ):
             reasons.append("current-plugin-head-stale")
     return sorted(set(reasons))
 
@@ -255,8 +258,7 @@ def build_comparison_gap_audit(
         candidates = [
             entry
             for entry in entries
-            if str(_mapping(entry.get("same_spec")).get("spec_id") or "")
-            == target_id
+            if str(_mapping(entry.get("same_spec")).get("spec_id") or "") == target_id
         ]
         by_engine = {
             engine: sorted(
@@ -317,7 +319,9 @@ def build_comparison_gap_audit(
         records.append(record)
         for side in required_sides:
             selected = baseline if side == "vllm" else current
-            reasons = ["entry-missing"] if selected is None else list(selected["reasons"])
+            reasons = (
+                ["entry-missing"] if selected is None else list(selected["reasons"])
+            )
             if selected and selected.get("eligible") and not hash_match:
                 reasons.append("cross-engine-resolved-spec-hash-mismatch")
             rerun_queue.append(

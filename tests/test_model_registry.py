@@ -44,9 +44,7 @@ def test_resolve_glm47_flash_identity_by_short_alias() -> None:
 def test_resolve_deepseek_r1_distill_qwen_32b_identity_by_short_alias() -> None:
     identity = resolve_model_identity("DeepSeek-R1-Distill-Qwen-32B")
 
-    assert identity.canonical_id == (
-        "hf:deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
-    )
+    assert identity.canonical_id == ("hf:deepseek-ai/DeepSeek-R1-Distill-Qwen-32B")
     assert identity.repo_id == "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
     assert identity.short_name == "DeepSeek-R1-Distill-Qwen-32B"
     assert identity.display_name == "DeepSeek-R1-Distill-Qwen-32B"

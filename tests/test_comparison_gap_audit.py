@@ -161,9 +161,9 @@ def test_current_workspace_report_matches_schema_and_includes_trace_targets() ->
     repo_root = Path(__file__).resolve().parents[1]
     report = build_comparison_gap_audit(repo_root)
     schema = json.loads(
-        (repo_root / "schemas/leaderboard_comparison_gap_audit_v1.schema.json").read_text(
-            encoding="utf-8"
-        )
+        (
+            repo_root / "schemas/leaderboard_comparison_gap_audit_v1.schema.json"
+        ).read_text(encoding="utf-8")
     )
     Draft7Validator(schema).validate(report)
     workloads = {record["workload"] for record in report["records"]}

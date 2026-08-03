@@ -11,7 +11,9 @@ from vllm_hust_benchmark.baseline_recovery import build_recovery_audit
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_current_baselines_report_attested_recoveries_and_complete_rerun_matrix() -> None:
+def test_current_baselines_report_attested_recoveries_and_complete_rerun_matrix() -> (
+    None
+):
     report = build_recovery_audit(REPO_ROOT, generated_at="2026-08-02T00:00:00Z")
     summary = report["summary"]
     assert summary["scanned"] == 19
@@ -21,22 +23,21 @@ def test_current_baselines_report_attested_recoveries_and_complete_rerun_matrix(
     assert summary["provisional_or_specialty"] == 10
     assert len(report["rerun_specs"]) == summary["rerun_required"]
     assert (
-        sum(
-        record["disposition"] == "rerun-required" for record in report["records"]
-        )
+        sum(record["disposition"] == "rerun-required" for record in report["records"])
         == summary["rerun_required"]
     )
-    assert sum(
-        record["disposition"] == "not-public-candidate"
-        for record in report["records"]
-    ) == 10
+    assert (
+        sum(
+            record["disposition"] == "not-public-candidate"
+            for record in report["records"]
+        )
+        == 10
+    )
     assert "REPEAT_COUNT=3" in report["rerun_args"]
     assert "MIN_SUCCESSFUL_REPEATS=3" in report["rerun_args"]
     assert "FORCE_RUN_EXISTING" not in report["rerun_command"]
     assert report["rerun_args"][0] == "env"
-    assert "scripts/run-official-ascend-goal-baseline-matrix.sh" in report[
-        "rerun_args"
-    ]
+    assert "scripts/run-official-ascend-goal-baseline-matrix.sh" in report["rerun_args"]
 
 
 def test_visionarena_remains_blocked_by_max_model_len_contract() -> None:
@@ -61,7 +62,9 @@ def test_visionarena_remains_blocked_by_max_model_len_contract() -> None:
 def test_manifest_is_audited_but_does_not_imply_verification() -> None:
     report = build_recovery_audit(REPO_ROOT, generated_at="2026-08-02T00:00:00Z")
     record = next(
-        item for item in report["records"] if "random-online-qwen25-14b-910b2" in item["target_id"]
+        item
+        for item in report["records"]
+        if "random-online-qwen25-14b-910b2" in item["target_id"]
     )
     assert record["evidence"]["referenced_by_manifest"] is True
     assert record["evidence"]["independent_files"] == []

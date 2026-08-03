@@ -45,11 +45,22 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
             "engine_version": "0.18.0",
             "git_commit": "plugin-sha",
         },
-        "hardware": {"vendor": "Huawei", "chip_model": "910B2", "chip_count": 1, "node_count": 1},
+        "hardware": {
+            "vendor": "Huawei",
+            "chip_model": "910B2",
+            "chip_count": 1,
+            "node_count": 1,
+        },
         "model": {"id": "Qwen/model", "parameters": "14B", "precision": "FP16"},
         "server_parameters": {"max_model_len": 32768},
-        "workload": {"name": "sonnet-throughput", "client_parameters": {"num_prompts": 200}},
-        "source_spec": {"path": "docs/spec.json", "sha256": hashlib.sha256(spec_path.read_bytes()).hexdigest()},
+        "workload": {
+            "name": "sonnet-throughput",
+            "client_parameters": {"num_prompts": 200},
+        },
+        "source_spec": {
+            "path": "docs/spec.json",
+            "sha256": hashlib.sha256(spec_path.read_bytes()).hexdigest(),
+        },
     }
     registry_path = repo / "leaderboard-data" / "official-targets.json"
     _write(registry_path, {"targets": [target]})
@@ -64,9 +75,14 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
         "model": {"repo_id": "Qwen/model", "parameters": "14B", "precision": "FP16"},
         "metrics": {"throughput_tps": 100.0, "error_rate": 0},
         "same_spec": {
-            "spec_id": "target-1", "model": "Qwen/model", "model_parameters": "14B",
-            "model_precision": "FP16", "hardware_vendor": "Huawei", "hardware_chip_model": "910B2",
-            "chip_count": 1, "node_count": 1,
+            "spec_id": "target-1",
+            "model": "Qwen/model",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "hardware_vendor": "Huawei",
+            "hardware_chip_model": "910B2",
+            "chip_count": 1,
+            "node_count": 1,
             "resolved_server_parameters": {"max_model_len": 32768},
             "resolved_client_parameters": {"num_prompts": 200},
         },
@@ -80,7 +96,17 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
     }
     staged = repo / "staged" / "target-1"
     _write(staged / "run_leaderboard.json", entry)
-    _write(staged / "leaderboard_manifest.json", {"entries": [{"idempotency_key": "key-1", "leaderboard_artifact": "run_leaderboard.json"}]})
+    _write(
+        staged / "leaderboard_manifest.json",
+        {
+            "entries": [
+                {
+                    "idempotency_key": "key-1",
+                    "leaderboard_artifact": "run_leaderboard.json",
+                }
+            ]
+        },
+    )
     results = repo / "results" / "target-1"
     for number in range(1, 4):
         repeat = results / f"repeat-{number:02d}"
@@ -192,8 +218,12 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
     repo, staged, results, _, target = _fixture(tmp_path)
     output = repo / "submissions" / "target-1"
     attested = attest_completed_baseline(
-        repo, staged, results, output,
-        verified_by="test-review", verified_at="2026-08-02T00:00:00Z",
+        repo,
+        staged,
+        results,
+        output,
+        verified_by="test-review",
+        verified_at="2026-08-02T00:00:00Z",
     )
     assert attested["metadata"]["verified"] is True
     assert attested["metadata"]["target_version"] == target["target_version"]

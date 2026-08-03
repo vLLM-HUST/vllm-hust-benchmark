@@ -14,8 +14,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
-from vllm_hust_benchmark.workload_config_contract import (
+from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash  # noqa: E402
+from vllm_hust_benchmark.workload_config_contract import (  # noqa: E402
     WORKLOAD_CONFIG_CONTRACT_VERSION,
     requires_workload_config_contract,
     validate_explicit_workload_config,
@@ -110,7 +110,10 @@ def parse_optional_int(value: Any) -> int | None:
 
 def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
     """Allow the separately pinned production-trace baseline family fail closed."""
-    if not OFFICIAL_TARGET_REGISTRY.is_file() or not OFFICIAL_TARGET_REGISTRY_CHECKSUM.is_file():
+    if (
+        not OFFICIAL_TARGET_REGISTRY.is_file()
+        or not OFFICIAL_TARGET_REGISTRY_CHECKSUM.is_file()
+    ):
         return False
     registry_bytes = OFFICIAL_TARGET_REGISTRY.read_bytes()
     registry_sha256 = hashlib.sha256(registry_bytes).hexdigest()
@@ -121,7 +124,9 @@ def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
         return False
 
     metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
-    same_spec = entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
+    same_spec = (
+        entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
+    )
     target_id = str(same_spec.get("spec_id") or "")
     attestation = (
         metadata.get("verification_attestation")
@@ -168,10 +173,13 @@ def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
         and (model.get("name") or model.get("repo_id"))
         == (target.get("model") or {}).get("id")
         and model.get("precision") == (target.get("model") or {}).get("precision")
-        and hardware.get("chip_model") == (target.get("hardware") or {}).get("chip_model")
-        and hardware.get("chip_count") == (target.get("hardware") or {}).get("chip_count")
+        and hardware.get("chip_model")
+        == (target.get("hardware") or {}).get("chip_model")
+        and hardware.get("chip_count")
+        == (target.get("hardware") or {}).get("chip_count")
         and (provenance.get("engine") or {}).get("commit") == runtime.get("core_commit")
-        and (provenance.get("plugin") or {}).get("commit") == runtime.get("backend_commit")
+        and (provenance.get("plugin") or {}).get("commit")
+        == runtime.get("backend_commit")
     )
 
 
@@ -404,7 +412,9 @@ def validate_compare_snapshot(
     for index, item in enumerate(pairs):
         pair = item.get("preferred_pair") if isinstance(item, dict) else None
         if not isinstance(pair, dict):
-            errors.append(f"{path.name}: preferred_pairs[{index}] missing preferred_pair")
+            errors.append(
+                f"{path.name}: preferred_pairs[{index}] missing preferred_pair"
+            )
             continue
         summaries: dict[str, dict[str, Any]] = {}
         for side in ("left", "right"):
@@ -442,7 +452,10 @@ def validate_compare_snapshot(
             ((summaries["left"].get("same_spec") or {}).get("resolved_spec_hash") or "")
         )
         right_hash = str(
-            ((summaries["right"].get("same_spec") or {}).get("resolved_spec_hash") or "")
+            (
+                (summaries["right"].get("same_spec") or {}).get("resolved_spec_hash")
+                or ""
+            )
         )
         if not left_hash or left_hash != right_hash:
             errors.append(

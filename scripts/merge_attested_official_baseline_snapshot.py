@@ -23,7 +23,9 @@ def _load_aggregator(path: Path) -> ModuleType:
 
 def _load_entries(path: Path) -> list[dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, list) or not all(isinstance(item, dict) for item in payload):
+    if not isinstance(payload, list) or not all(
+        isinstance(item, dict) for item in payload
+    ):
         raise ValueError(f"snapshot must be a JSON object array: {path}")
     return payload
 
@@ -35,7 +37,7 @@ def _target_id(entry: dict[str, Any]) -> str:
 def _mark_covered(entry: dict[str, Any], target_id: str) -> None:
     if _target_id(entry) != target_id:
         return
-    accountable = ((entry.get("constraints") or {}).get("accountable_scope") or {})
+    accountable = (entry.get("constraints") or {}).get("accountable_scope") or {}
     accountable["baseline_engine"] = "vllm"
     accountable["declared_baseline_engine"] = "vllm"
     accountable["baseline_status"] = "official-covered"
@@ -63,12 +65,19 @@ def main() -> int:
     args = parser.parse_args()
 
     aggregate = _load_aggregator(args.aggregator_script.resolve())
-    schema = args.aggregator_script.resolve().parents[1] / "data" / "schemas" / "leaderboard_v1.schema.json"
+    schema = (
+        args.aggregator_script.resolve().parents[1]
+        / "data"
+        / "schemas"
+        / "leaderboard_v1.schema.json"
+    )
     validator = aggregate.Draft7Validator(aggregate.load_schema(schema))
     incoming = aggregate.load_manifest_entries(args.submission_dir.resolve(), validator)
     incoming, rejected = aggregate.filter_public_snapshot_entries(incoming)
     if rejected or len(incoming) != 1:
-        raise ValueError(f"expected one valid incoming baseline, got {len(incoming)}; rejected={rejected}")
+        raise ValueError(
+            f"expected one valid incoming baseline, got {len(incoming)}; rejected={rejected}"
+        )
     baseline = incoming[0]
     metadata = baseline.get("metadata") or {}
     target_id = _target_id(baseline)
@@ -77,7 +86,9 @@ def main() -> int:
     if not target_id or metadata.get("target_id") != target_id:
         raise ValueError("incoming baseline target binding is missing")
 
-    current_single = _load_entries(args.current_snapshot_dir / "leaderboard_single.json")
+    current_single = _load_entries(
+        args.current_snapshot_dir / "leaderboard_single.json"
+    )
     current_multi = _load_entries(args.current_snapshot_dir / "leaderboard_multi.json")
     current = current_single + current_multi
     old_ids = {str(entry.get("entry_id")) for entry in current}
@@ -95,7 +106,9 @@ def main() -> int:
     new_ids = {str(entry.get("entry_id")) for entry in single + multi}
     removed_ids = old_ids - new_ids
     if removed_ids:
-        raise ValueError(f"curated merge removed existing entries: {sorted(removed_ids)}")
+        raise ValueError(
+            f"curated merge removed existing entries: {sorted(removed_ids)}"
+        )
     compare_entries = aggregate.filter_compare_publish_entries(single + multi)
     aggregate.validate_same_spec_goal_pairs(compare_entries)
     aggregate.validate_same_spec_compare_pairs(compare_entries)

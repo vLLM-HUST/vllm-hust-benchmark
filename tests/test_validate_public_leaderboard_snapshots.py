@@ -125,9 +125,7 @@ def test_accepts_only_attested_registered_production_trace_baseline() -> None:
         ).read_text(encoding="utf-8")
     )
 
-    assert module.validate_entry(
-        artifact, source=Path("leaderboard_multi.json")
-    ) == []
+    assert module.validate_entry(artifact, source=Path("leaderboard_multi.json")) == []
 
     spoofed = copy.deepcopy(artifact)
     spoofed["metadata"]["verified"] = False
@@ -160,9 +158,7 @@ def test_compare_snapshot_rejects_mismatched_resolved_hashes(tmp_path: Path) -> 
                             },
                             "right": {
                                 "entry_id": "right",
-                                "same_spec": {
-                                    "resolved_spec_hash": "different-hash"
-                                },
+                                "same_spec": {"resolved_spec_hash": "different-hash"},
                             },
                         }
                     }
@@ -172,8 +168,6 @@ def test_compare_snapshot_rejects_mismatched_resolved_hashes(tmp_path: Path) -> 
         encoding="utf-8",
     )
 
-    errors = module.validate_compare_snapshot(
-        tmp_path, {"left": left, "right": right}
-    )
+    errors = module.validate_compare_snapshot(tmp_path, {"left": left, "right": right})
 
     assert any("resolved_spec_hash mismatch" in error for error in errors)

@@ -51,7 +51,9 @@ def test_registry_matches_schema() -> None:
 def test_public_target_matrix_is_exact() -> None:
     registry = build_registry(REPO_ROOT)
     active = [target for target in registry["targets"] if target["status"] == "active"]
-    public = [target for target in active if target["intended_use"] == "public-leaderboard"]
+    public = [
+        target for target in active if target["intended_use"] == "public-leaderboard"
+    ]
     assert len(public) == 11
     assert {target["model"]["id"] for target in public} == {
         PUBLIC_TEXT_MODEL,
@@ -59,8 +61,12 @@ def test_public_target_matrix_is_exact() -> None:
         PUBLIC_TRACE_MODEL,
         PUBLIC_VISION_MODEL,
     }
-    core_targets = [target for target in public if target["profile"] != "production-trace"]
-    trace_targets = [target for target in public if target["profile"] == "production-trace"]
+    core_targets = [
+        target for target in public if target["profile"] != "production-trace"
+    ]
+    trace_targets = [
+        target for target in public if target["profile"] == "production-trace"
+    ]
 
     assert {target["workload"]["name"] for target in trace_targets} == {
         "burstgpt-production-replay",
@@ -192,7 +198,9 @@ def test_simllm_ab_targets_are_exact_and_do_not_promote_local_results() -> None:
     }
 
 
-def test_simllm_target_rejects_promoting_local_reference_results(tmp_path: Path) -> None:
+def test_simllm_target_rejects_promoting_local_reference_results(
+    tmp_path: Path,
+) -> None:
     source = (
         REPO_ROOT
         / "docs"

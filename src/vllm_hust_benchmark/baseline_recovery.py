@@ -81,7 +81,11 @@ def _identity_mismatches(
     target_hardware = _nested(target, "hardware")
     target_model = _nested(target, "model")
     expected_actual = (
-        ("engine", _nested(target, "baseline_runtime").get("engine"), entry.get("engine")),
+        (
+            "engine",
+            _nested(target, "baseline_runtime").get("engine"),
+            entry.get("engine"),
+        ),
         (
             "engine_version",
             _nested(target, "baseline_runtime").get("engine_version"),
@@ -158,9 +162,10 @@ def _manifest_evidence(
     for item in manifest.get("entries", []):
         if not isinstance(item, Mapping):
             continue
-        if item.get("leaderboard_artifact") == artifact_path.name and item.get(
-            "idempotency_key"
-        ) == idempotency_key:
+        if (
+            item.get("leaderboard_artifact") == artifact_path.name
+            and item.get("idempotency_key") == idempotency_key
+        ):
             evidence["referenced_by_manifest"] = True
             break
     if not evidence["referenced_by_manifest"]:

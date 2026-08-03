@@ -92,7 +92,9 @@ def _read_version_value(path: Path) -> str | None:
     except OSError:
         return None
     for line in text.splitlines():
-        match = re.match(r"\s*(?:Version|version|package_version)\s*=\s*[\"']?([^\"'\s]+)", line)
+        match = re.match(
+            r"\s*(?:Version|version|package_version)\s*=\s*[\"']?([^\"'\s]+)", line
+        )
         if match:
             return match.group(1)
     return None
@@ -118,7 +120,9 @@ def _detect_cann_version() -> str | None:
             ascend_root / "ascend-toolkit/latest/version.cfg",
         )
     )
-    candidates.extend(sorted(ascend_root.glob("cann-*/compiler/version.info"), reverse=True))
+    candidates.extend(
+        sorted(ascend_root.glob("cann-*/compiler/version.info"), reverse=True)
+    )
     for candidate in candidates:
         version = _read_version_value(candidate)
         if version:
@@ -756,15 +760,11 @@ def export_leaderboard_artifacts(
             "dataset": dataset_name,
             "input_token_distribution": trace_plan.get("input_tokens"),
             "output_token_distribution": trace_plan.get("output_tokens"),
-            "cohort_setting_signature": trace_plan.get(
-                "cohort_setting_signature"
-            ),
+            "cohort_setting_signature": trace_plan.get("cohort_setting_signature"),
             "arrival_transform": (
                 {
                     "time_scale": trace_settings.get("time_scale"),
-                    "max_interarrival_s": trace_settings.get(
-                        "max_interarrival_s"
-                    ),
+                    "max_interarrival_s": trace_settings.get("max_interarrival_s"),
                 }
                 if trace_plan
                 else None

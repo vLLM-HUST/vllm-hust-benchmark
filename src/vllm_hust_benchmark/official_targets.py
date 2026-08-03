@@ -14,11 +14,17 @@ PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
 PUBLIC_TRACE_MODEL = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
-PUBLIC_TRACE_MODEL_REVISION = "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
+PUBLIC_TRACE_MODEL_REVISION = (
+    "711ad2ea6aa40cfca18895e8aca02ab92df1a746"  # pragma: allowlist secret
+)
 PUBLIC_TRACE_VLLM_REF = "v0.22.1"
 PUBLIC_TRACE_VLLM_ASCEND_REF = "v0.22.1rc1"
-PUBLIC_TRACE_VLLM_COMMIT = "0decac0d96c42b49572498019f0a0e3600f50398"
-PUBLIC_TRACE_VLLM_ASCEND_COMMIT = "5f6faa0cb8830f667266f3b8121cd1383606f2a1"
+PUBLIC_TRACE_VLLM_COMMIT = (
+    "0decac0d96c42b49572498019f0a0e3600f50398"  # pragma: allowlist secret
+)
+PUBLIC_TRACE_VLLM_ASCEND_COMMIT = (
+    "5f6faa0cb8830f667266f3b8121cd1383606f2a1"  # pragma: allowlist secret
+)
 PUBLIC_TRACE_RUNTIME_IMAGE_DIGEST = (
     "sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092"
 )
@@ -47,8 +53,12 @@ SIMLLM_WORKLOAD_IDS = {
     "simllm-random-online-warm-cache",
     "simllm-saturated-throughput-warm-cache",
 }
-SIMLLM_VLLM_HUST_COMMIT = "f229ba7cad21a4dba58681af6738a9fd947388e2"
-SIMLLM_VLLM_ASCEND_HUST_COMMIT = "590855422839c1e885eee19339b7a015687215e5"
+SIMLLM_VLLM_HUST_COMMIT = (
+    "f229ba7cad21a4dba58681af6738a9fd947388e2"  # pragma: allowlist secret
+)
+SIMLLM_VLLM_ASCEND_HUST_COMMIT = (
+    "590855422839c1e885eee19339b7a015687215e5"  # pragma: allowlist secret
+)
 SIMLLM_RUNTIME_IMAGE_DIGEST = (
     "sha256:105834a38766a6b1b89a7eeb313a37351d098a69e8cdee87ad0ca3a6e090ce13"
 )
@@ -137,7 +147,11 @@ def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
         if scenario in PUBLIC_TEXT_SCENARIOS:
             return "public-leaderboard", "active", "core-text"
         return "specialty", "provisional", "specialty-text"
-    if chip_count == 2 and model == PUBLIC_TRACE_MODEL and scenario in PUBLIC_TRACE_SCENARIOS:
+    if (
+        chip_count == 2
+        and model == PUBLIC_TRACE_MODEL
+        and scenario in PUBLIC_TRACE_SCENARIOS
+    ):
         return "public-leaderboard", "active", "production-trace"
     if (
         chip_count == 1
@@ -181,7 +195,9 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
         raise ValueError(
             f"public target must be single-node/{expected_chip_count}-chip: {path}"
         )
-    expected_precision = "BF16" if spec["scenario"] in PUBLIC_TRACE_SCENARIOS else "FP16"
+    expected_precision = (
+        "BF16" if spec["scenario"] in PUBLIC_TRACE_SCENARIOS else "FP16"
+    )
     if str(spec["model_precision"]) != expected_precision:
         raise ValueError(f"public target must use {expected_precision}: {path}")
 
@@ -207,8 +223,7 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
             )
         if server.get("compilation_config") != PUBLIC_TRACE_COMPILATION_CONFIG:
             raise ValueError(
-                "production-trace target must pin the audited compilation mode: "
-                f"{path}"
+                f"production-trace target must pin the audited compilation mode: {path}"
             )
         if spec["client_parameters"].get("cohort_context_cap") != server.get(
             "max_model_len"
@@ -217,7 +232,9 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
                 f"production-trace cohort cap must match max_model_len: {path}"
             )
         if baseline.get("vllm_commit") != PUBLIC_TRACE_VLLM_COMMIT:
-            raise ValueError(f"production-trace target must pin the vLLM commit: {path}")
+            raise ValueError(
+                f"production-trace target must pin the vLLM commit: {path}"
+            )
         if baseline.get("vllm_ascend_commit") != PUBLIC_TRACE_VLLM_ASCEND_COMMIT:
             raise ValueError(
                 f"production-trace target must pin the vLLM-Ascend commit: {path}"
@@ -242,9 +259,7 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
                 f"production-trace target must pin the runtime image digest: {path}"
             )
         if not str(baseline["runtime_image"]).endswith(f"@{digest}"):
-            raise ValueError(
-                f"production-trace runtime image/digest mismatch: {path}"
-            )
+            raise ValueError(f"production-trace runtime image/digest mismatch: {path}")
     else:
         if baseline.get("vllm_ref") != "v0.18.0":
             raise ValueError(f"public target must use vLLM v0.18.0: {path}")
@@ -257,7 +272,9 @@ def _validate_simllm_target(spec: dict[str, Any], path: Path) -> None:
     if workload_id not in SIMLLM_WORKLOAD_IDS:
         return
     if spec.get("scenario") != "random-online":
-        raise ValueError(f"SimLLM target must use random-online as its base scenario: {path}")
+        raise ValueError(
+            f"SimLLM target must use random-online as its base scenario: {path}"
+        )
     if spec.get("model") != PUBLIC_TEXT_MODEL or spec.get("model_precision") != "FP16":
         raise ValueError(f"SimLLM target must use Qwen2.5-14B FP16: {path}")
     if int(spec.get("chip_count") or 0) != 1 or int(spec.get("node_count") or 0) != 1:
@@ -265,8 +282,13 @@ def _validate_simllm_target(spec: dict[str, Any], path: Path) -> None:
     if spec.get("hardware_chip_model") != "910B2":
         raise ValueError(f"SimLLM target must use Ascend 910B2: {path}")
     server = spec.get("server_parameters") or {}
-    if server.get("tensor_parallel_size") != 1 or server.get("gpu_memory_utilization") != 0.6:
-        raise ValueError(f"SimLLM target must pin TP1 and gpu_memory_utilization=0.6: {path}")
+    if (
+        server.get("tensor_parallel_size") != 1
+        or server.get("gpu_memory_utilization") != 0.6
+    ):
+        raise ValueError(
+            f"SimLLM target must pin TP1 and gpu_memory_utilization=0.6: {path}"
+        )
     baseline = spec.get("baseline_target") or {}
     if baseline.get("engine") != "vllm-hust":
         raise ValueError(f"SimLLM target must use vllm-hust: {path}")
@@ -279,7 +301,9 @@ def _validate_simllm_target(spec: dict[str, Any], path: Path) -> None:
     if baseline.get("runtime_image_digest") != SIMLLM_RUNTIME_IMAGE_DIGEST:
         raise ValueError(f"SimLLM target must pin the verified image digest: {path}")
     if baseline.get("runtime_packages") != SIMLLM_RUNTIME_PACKAGES:
-        raise ValueError(f"SimLLM target must pin the verified runtime packages: {path}")
+        raise ValueError(
+            f"SimLLM target must pin the verified runtime packages: {path}"
+        )
     protocol = spec.get("ab_protocol") or {}
     required_protocol = {
         "schema_version": "simllm-ab-protocol/v1",
@@ -318,8 +342,13 @@ def _validate_simllm_target(spec: dict[str, Any], path: Path) -> None:
             f"{path}"
         )
     warmup = protocol.get("candidate_warmup") or {}
-    if warmup.get("passes") != 1 or warmup.get("restart_before_measurement") is not False:
-        raise ValueError(f"SimLLM candidate must use one in-process warm-cache pass: {path}")
+    if (
+        warmup.get("passes") != 1
+        or warmup.get("restart_before_measurement") is not False
+    ):
+        raise ValueError(
+            f"SimLLM candidate must use one in-process warm-cache pass: {path}"
+        )
     if warmup.get("same_requests_as_measurement") is not True:
         raise ValueError(f"SimLLM warmup must reuse the measured request set: {path}")
 

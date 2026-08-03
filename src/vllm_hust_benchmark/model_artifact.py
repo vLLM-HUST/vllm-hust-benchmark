@@ -57,14 +57,18 @@ def _required_paths(local_dir: Path) -> tuple[list[PurePosixPath], set[PurePosix
 
     tokenizer_config = local_dir / "tokenizer_config.json"
     if not tokenizer_config.is_file():
-        raise ModelArtifactError("missing required tokenizer file: tokenizer_config.json")
+        raise ModelArtifactError(
+            "missing required tokenizer file: tokenizer_config.json"
+        )
     required.append(PurePosixPath("tokenizer_config.json"))
     tokenizer_payload = next(
         (name for name in _TOKENIZER_PAYLOADS if (local_dir / name).is_file()), None
     )
     if tokenizer_payload is None:
         expected = ", ".join(_TOKENIZER_PAYLOADS)
-        raise ModelArtifactError(f"missing tokenizer payload (expected one of: {expected})")
+        raise ModelArtifactError(
+            f"missing tokenizer payload (expected one of: {expected})"
+        )
     required.append(PurePosixPath(tokenizer_payload))
 
     index_paths = sorted(local_dir.glob("*.safetensors.index.json"))
@@ -76,8 +80,12 @@ def _required_paths(local_dir: Path) -> tuple[list[PurePosixPath], set[PurePosix
             try:
                 payload = json.loads(index_path.read_text(encoding="utf-8"))
             except (OSError, json.JSONDecodeError) as error:
-                raise ModelArtifactError(f"invalid safetensors index: {index_path.name}") from error
-            weight_map = payload.get("weight_map") if isinstance(payload, dict) else None
+                raise ModelArtifactError(
+                    f"invalid safetensors index: {index_path.name}"
+                ) from error
+            weight_map = (
+                payload.get("weight_map") if isinstance(payload, dict) else None
+            )
             if not isinstance(weight_map, dict) or not weight_map:
                 raise ModelArtifactError(
                     f"missing non-empty weight_map in safetensors index: {index_path.name}"
@@ -105,7 +113,9 @@ def _required_paths(local_dir: Path) -> tuple[list[PurePosixPath], set[PurePosix
     return sorted(set(required), key=str), weight_paths
 
 
-def verify_local_hf_model(local_dir: str | Path, expected_revision: str) -> dict[str, Any]:
+def verify_local_hf_model(
+    local_dir: str | Path, expected_revision: str
+) -> dict[str, Any]:
     """Verify a local HF model and return a deterministic content manifest.
 
     The returned ``model_artifact_digest`` is the SHA256 of the canonical JSON
@@ -117,13 +127,16 @@ def verify_local_hf_model(local_dir: str | Path, expected_revision: str) -> dict
     if not root.is_dir():
         raise ModelArtifactError(f"local model directory does not exist: {root}")
     if not _COMMIT_RE.fullmatch(revision):
-        raise ModelArtifactError("expected revision must be a 40-character Git commit SHA")
+        raise ModelArtifactError(
+            "expected revision must be a 40-character Git commit SHA"
+        )
     incomplete = sorted(
-        path.relative_to(root).as_posix()
-        for path in root.rglob("*.incomplete")
+        path.relative_to(root).as_posix() for path in root.rglob("*.incomplete")
     )
     if incomplete:
-        raise ModelArtifactError(f"incomplete Hugging Face downloads present: {incomplete[0]}")
+        raise ModelArtifactError(
+            f"incomplete Hugging Face downloads present: {incomplete[0]}"
+        )
 
     required_paths, weight_paths = _required_paths(root)
     files: list[dict[str, Any]] = []

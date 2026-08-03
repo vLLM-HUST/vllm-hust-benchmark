@@ -11,7 +11,9 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from vllm_hust_benchmark.comparison_gap_audit import build_comparison_gap_audit
+from vllm_hust_benchmark.comparison_gap_audit import (  # noqa: E402
+    build_comparison_gap_audit,
+)
 
 
 def main() -> int:

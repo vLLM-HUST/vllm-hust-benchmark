@@ -13,13 +13,19 @@ from vllm_hust_benchmark.model_artifact import verify_local_hf_model
 REVISION = "a" * 40
 
 
-def _write(root: Path, relative: str, payload: bytes, *, revision: str = REVISION) -> None:
+def _write(
+    root: Path, relative: str, payload: bytes, *, revision: str = REVISION
+) -> None:
     path = root / relative
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(payload)
     metadata = root / ".cache" / "huggingface" / "download" / f"{relative}.metadata"
     metadata.parent.mkdir(parents=True, exist_ok=True)
-    object_digest = hashlib.sha256(payload).hexdigest() if relative.endswith(".safetensors") else "b" * 40
+    object_digest = (
+        hashlib.sha256(payload).hexdigest()
+        if relative.endswith(".safetensors")
+        else "b" * 40
+    )
     metadata.write_text(f"{revision}\n{object_digest}\n1234.5\n", encoding="utf-8")
 
 
@@ -43,7 +49,9 @@ def _complete_model(root: Path) -> None:
     )
 
 
-def test_verify_rejects_missing_index_shard_even_when_another_exists(tmp_path: Path) -> None:
+def test_verify_rejects_missing_index_shard_even_when_another_exists(
+    tmp_path: Path,
+) -> None:
     _complete_model(tmp_path)
     (tmp_path / "model-00002-of-00002.safetensors").unlink()
 
@@ -82,8 +90,12 @@ def test_verify_returns_stable_canonical_manifest_and_digest(tmp_path: Path) -> 
     assert len(first["model_artifact_digest"]) == 64
 
 
-@pytest.mark.parametrize("missing", ["config.json", "tokenizer_config.json", "tokenizer.json"])
-def test_verify_rejects_missing_config_or_tokenizer(tmp_path: Path, missing: str) -> None:
+@pytest.mark.parametrize(
+    "missing", ["config.json", "tokenizer_config.json", "tokenizer.json"]
+)
+def test_verify_rejects_missing_config_or_tokenizer(
+    tmp_path: Path, missing: str
+) -> None:
     _complete_model(tmp_path)
     (tmp_path / missing).unlink()
 

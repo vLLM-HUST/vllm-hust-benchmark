@@ -108,16 +108,16 @@ def attest_completed_baseline(
     repeat_records: list[dict[str, Any]] = []
     staged_sha256 = _sha256(artifact_path)
     selected_repeat: str | None = None
-    expected_core = ((entry.get("metadata") or {}).get("runtime_provenance") or {}).get(
-        "engine", {}
-    ).get("commit")
+    expected_core = (
+        ((entry.get("metadata") or {}).get("runtime_provenance") or {})
+        .get("engine", {})
+        .get("commit")
+    )
     expected_plugin = (target.get("baseline_runtime") or {}).get("git_commit")
     trace_profile = target.get("profile") == TRACE_PROFILE
     if trace_profile:
         expected_core = (target.get("baseline_runtime") or {}).get("core_commit")
-        expected_plugin = (target.get("baseline_runtime") or {}).get(
-            "backend_commit"
-        )
+        expected_plugin = (target.get("baseline_runtime") or {}).get("backend_commit")
         if not expected_core or not expected_plugin:
             raise ValueError("production-trace target is missing exact source commits")
     unique_raw_hashes: set[str] = set()
@@ -142,7 +142,9 @@ def attest_completed_baseline(
         error_rate = float(metrics.get("error_rate") or 0)
         if failed != 0 or error_rate != 0:
             raise ValueError(f"repeat has failures: {repeat_dir}")
-        provenance = (repeat_entry.get("metadata") or {}).get("runtime_provenance") or {}
+        provenance = (repeat_entry.get("metadata") or {}).get(
+            "runtime_provenance"
+        ) or {}
         if (provenance.get("engine") or {}).get("commit") != expected_core:
             raise ValueError(f"core provenance mismatch: {repeat_dir}")
         if (provenance.get("plugin") or {}).get("commit") != expected_plugin:
@@ -178,9 +180,7 @@ def attest_completed_baseline(
                 or 0
             )
             if int(raw.get("completed") or 0) != max_requests:
-                raise ValueError(
-                    f"production-trace repeat is incomplete: {repeat_dir}"
-                )
+                raise ValueError(f"production-trace repeat is incomplete: {repeat_dir}")
             plan = _load_object(plan_path)
             startup = _load_object(startup_path)
             model_provenance = _load_object(model_provenance_path)
@@ -200,9 +200,7 @@ def attest_completed_baseline(
             if signature != startup.get("cohort_setting_signature"):
                 raise ValueError(f"trace startup signature mismatch: {repeat_dir}")
             model_digest = str(model_provenance.get("model_artifact_digest") or "")
-            if not model_digest or model_digest != startup.get(
-                "model_artifact_digest"
-            ):
+            if not model_digest or model_digest != startup.get("model_artifact_digest"):
                 raise ValueError(f"model artifact digest mismatch: {repeat_dir}")
             if startup.get("engine_source_commit") != expected_core:
                 raise ValueError(f"startup core commit mismatch: {repeat_dir}")
@@ -265,12 +263,8 @@ def attest_completed_baseline(
                 "trace_detail_sha256": _sha256(detail_path),
                 "trace_plan_sha256": _sha256(plan_path),
                 "startup_evidence_sha256": _sha256(startup_path),
-                "model_artifact_provenance_sha256": _sha256(
-                    model_provenance_path
-                ),
-                "runtime_package_provenance_sha256": _sha256(
-                    runtime_provenance_path
-                ),
+                "model_artifact_provenance_sha256": _sha256(model_provenance_path),
+                "runtime_package_provenance_sha256": _sha256(runtime_provenance_path),
                 "cohort_setting_signature": signature,
                 "model_artifact_digest": model_digest,
                 "startup_instance_id": startup_id,
@@ -303,7 +297,9 @@ def attest_completed_baseline(
     if selected_repeat is None:
         raise ValueError("staged artifact does not match any successful repeat")
 
-    timestamp = verified_at or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    timestamp = verified_at or datetime.now(timezone.utc).isoformat().replace(
+        "+00:00", "Z"
+    )
     repeat_suite = {
         "schema_version": ATTESTATION_SCHEMA_VERSION,
         "target_id": target["target_id"],

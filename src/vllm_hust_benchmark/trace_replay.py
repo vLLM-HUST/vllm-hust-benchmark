@@ -78,9 +78,7 @@ def _token_distribution(values: list[int]) -> dict[str, int | float]:
     }
 
 
-def _offset_at(
-    segments: tuple[tuple[int, int, int], ...], position: int
-) -> int | None:
+def _offset_at(segments: tuple[tuple[int, int, int], ...], position: int) -> int | None:
     for start, end, offset in segments:
         if start <= position < end:
             return offset
@@ -113,9 +111,7 @@ def _plan_token_segments(
 
     previous = previous or ()
     previous_length = max((end for _, end, _ in previous), default=0)
-    reported_prefix = (
-        request.prefix_tokens if request.prefix_tokens is not None else 0
-    )
+    reported_prefix = request.prefix_tokens if request.prefix_tokens is not None else 0
     effective_prefix = min(reported_prefix, input_tokens, previous_length)
     segments = _clip_segments(previous, effective_prefix)
     if effective_prefix < input_tokens:
@@ -333,8 +329,7 @@ def summarize_results(
     """Build a vLLM-bench-compatible summary without relabelling E2E latency as TTFT."""
 
     completed = sum(
-        result.get("http_status") == 200 and "error" not in result
-        for result in results
+        result.get("http_status") == 200 and "error" not in result for result in results
     )
     failed = len(results) - completed
     duration_s = max(
@@ -459,8 +454,7 @@ def _invoke(
                     actual_started - replay_started - item.scheduled_offset_s,
                 ),
                 "replay_latency_s": finished - started,
-                "e2e_latency_s": finished
-                - (replay_started + item.scheduled_offset_s),
+                "e2e_latency_s": finished - (replay_started + item.scheduled_offset_s),
                 "response_usage": usage,
                 "response_sha256": hashlib.sha256(body).hexdigest(),
             }

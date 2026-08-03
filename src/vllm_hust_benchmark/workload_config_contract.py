@@ -207,13 +207,19 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
     output_length = _positive_int(workload.get("output_length"))
     if variable_length_trace:
         if workload.get("input_length") is not None:
-            errors.append("workload.input_length must be null for variable-length trace replay")
+            errors.append(
+                "workload.input_length must be null for variable-length trace replay"
+            )
         if workload.get("output_length") is not None:
-            errors.append("workload.output_length must be null for variable-length trace replay")
+            errors.append(
+                "workload.output_length must be null for variable-length trace replay"
+            )
         for field in ("input_token_distribution", "output_token_distribution"):
             distribution = workload.get(field)
             if not isinstance(distribution, Mapping):
-                errors.append(f"workload.{field} must record the trace cohort distribution")
+                errors.append(
+                    f"workload.{field} must record the trace cohort distribution"
+                )
                 continue
             if _positive_int(distribution.get("count")) is None:
                 errors.append(f"workload.{field}.count must be a positive integer")

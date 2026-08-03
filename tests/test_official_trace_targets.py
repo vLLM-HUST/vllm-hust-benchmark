@@ -229,21 +229,17 @@ def test_plan_summary_has_token_distributions_and_stable_sensitive_signature(
     }
     assert len(summary["selected_requests_sha256"]) == 64
     assert len(summary["cohort_setting_signature"]) == 64
-    assert repeated["cohort_setting_signature"] == summary[
-        "cohort_setting_signature"
-    ]
-    assert reordered["selected_requests_sha256"] != summary[
-        "selected_requests_sha256"
-    ]
-    assert reordered["cohort_setting_signature"] != summary[
-        "cohort_setting_signature"
-    ]
-    assert changed_settings["selected_requests_sha256"] == summary[
-        "selected_requests_sha256"
-    ]
-    assert changed_settings["cohort_setting_signature"] != summary[
-        "cohort_setting_signature"
-    ]
+    assert repeated["cohort_setting_signature"] == summary["cohort_setting_signature"]
+    assert reordered["selected_requests_sha256"] != summary["selected_requests_sha256"]
+    assert reordered["cohort_setting_signature"] != summary["cohort_setting_signature"]
+    assert (
+        changed_settings["selected_requests_sha256"]
+        == summary["selected_requests_sha256"]
+    )
+    assert (
+        changed_settings["cohort_setting_signature"]
+        != summary["cohort_setting_signature"]
+    )
 
 
 def test_context_overflow_fails_closed_and_requires_explicit_truncation(

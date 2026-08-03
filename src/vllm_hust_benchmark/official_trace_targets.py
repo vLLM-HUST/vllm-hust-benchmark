@@ -57,7 +57,9 @@ def load_trace_target_registry() -> dict[str, Any]:
         if target.get("status") == "active" and target.get("intended_use") != (
             "public-leaderboard-production-trace"
         ):
-            raise ValueError("active trace targets must use the production-trace profile")
+            raise ValueError(
+                "active trace targets must use the production-trace profile"
+            )
     return payload
 
 

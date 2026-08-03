@@ -38,7 +38,9 @@ def _target(repo_root: Path, target_id: str) -> tuple[dict[str, Any], str]:
             if target.get("status") != "active":
                 raise ValueError(f"SimLLM target is not active: {target_id}")
             if target.get("profile") != "simllm-warm-cache":
-                raise ValueError(f"target is not a SimLLM warm-cache profile: {target_id}")
+                raise ValueError(
+                    f"target is not a SimLLM warm-cache profile: {target_id}"
+                )
             return target, registry_sha
     raise ValueError(f"SimLLM target not found: {target_id}")
 
@@ -59,7 +61,9 @@ def _stats(values: list[float]) -> dict[str, float]:
     }
 
 
-def _normalized_candidate(entry: Mapping[str, Any], baseline_engine: str) -> dict[str, Any]:
+def _normalized_candidate(
+    entry: Mapping[str, Any], baseline_engine: str
+) -> dict[str, Any]:
     payload = json.loads(json.dumps(entry))
     payload["engine"] = baseline_engine
     return payload
@@ -112,7 +116,11 @@ def attest_simllm_campaign(
         )
         or 0
     )
-    if not baseline_engine or not candidate_engine or baseline_engine == candidate_engine:
+    if (
+        not baseline_engine
+        or not candidate_engine
+        or baseline_engine == candidate_engine
+    ):
         raise ValueError("SimLLM target has invalid paired engine labels")
 
     repeats: list[dict[str, Any]] = []
@@ -161,14 +169,18 @@ def attest_simllm_campaign(
         if candidate_evidence.get("engine") != candidate_engine:
             raise ValueError(f"candidate engine label mismatch: {repeat_dir}")
         if candidate_evidence.get("rewritten_requests", 0) <= 0:
-            raise ValueError(f"candidate has no positive rewrite evidence: {repeat_dir}")
+            raise ValueError(
+                f"candidate has no positive rewrite evidence: {repeat_dir}"
+            )
         if candidate_evidence.get("patch_applied") is not True:
             raise ValueError(f"candidate patch activation is missing: {repeat_dir}")
         expected_simllm_config = protocol.get("simllm_config") or {}
         if candidate_evidence.get("simllm_config") != expected_simllm_config:
             raise ValueError(f"candidate SimLLM config mismatch: {repeat_dir}")
         if baseline_evidence.get("simllm_config") != expected_simllm_config:
-            raise ValueError(f"baseline SimLLM config provenance mismatch: {repeat_dir}")
+            raise ValueError(
+                f"baseline SimLLM config provenance mismatch: {repeat_dir}"
+            )
 
         for arm_dir, evidence in (
             (baseline_dir, baseline_evidence),
@@ -179,7 +191,10 @@ def attest_simllm_campaign(
             entry_path = arm_dir / "submission" / "run_leaderboard.json"
             manifest_path = arm_dir / "submission" / "leaderboard_manifest.json"
             cohort_path = arm_dir / "prompt_cohort_evidence.json"
-            if not all(path.is_file() for path in (raw_path, entry_path, manifest_path, cohort_path)):
+            if not all(
+                path.is_file()
+                for path in (raw_path, entry_path, manifest_path, cohort_path)
+            ):
                 raise ValueError(f"SimLLM arm output is incomplete: {arm_dir}")
             raw = _load(raw_path)
             if int(raw.get("completed") or 0) != expected_requests:
@@ -196,7 +211,9 @@ def attest_simllm_campaign(
                 if "No process in device" not in (arm_dir / state_name).read_text(
                     encoding="utf-8"
                 ):
-                    raise ValueError(f"device state is not clean: {arm_dir / state_name}")
+                    raise ValueError(
+                        f"device state is not clean: {arm_dir / state_name}"
+                    )
 
         baseline_entry = _load(baseline_dir / "submission" / "run_leaderboard.json")
         candidate_entry = _load(candidate_dir / "submission" / "run_leaderboard.json")
@@ -252,7 +269,9 @@ def attest_simllm_campaign(
         )
 
     if len(repeats) < minimum_repeats:
-        raise ValueError(f"insufficient successful repeats: {len(repeats)} < {minimum_repeats}")
+        raise ValueError(
+            f"insufficient successful repeats: {len(repeats)} < {minimum_repeats}"
+        )
     if len(pair_signatures) != 1:
         raise ValueError("SimLLM repeats use different paired setting signatures")
     baseline_stats = _stats(baseline_values)
@@ -266,9 +285,7 @@ def attest_simllm_campaign(
 
     selected = min(
         range(len(repeats)),
-        key=lambda index: abs(
-            candidate_values[index] - candidate_stats["median"]
-        ),
+        key=lambda index: abs(candidate_values[index] - candidate_stats["median"]),
     )
     selected_repeat = repeats[selected]["repeat"]
     selected_dir = result_spec_dir / selected_repeat
@@ -303,7 +320,11 @@ def attest_simllm_campaign(
     output_dir.mkdir(parents=True, exist_ok=True)
     for source_name, output_name, arm in (
         ("baseline-disabled", "baseline-disabled", "baseline-disabled"),
-        ("enabled-warm-cache", "simllm-enabled-warm-cache", "simllm-enabled-warm-cache"),
+        (
+            "enabled-warm-cache",
+            "simllm-enabled-warm-cache",
+            "simllm-enabled-warm-cache",
+        ),
     ):
         source = selected_dir / source_name / "submission"
         destination = output_dir / output_name
