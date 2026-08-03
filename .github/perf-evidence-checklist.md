@@ -22,7 +22,7 @@
 - model: `<!-- 如 Qwen/Qwen2.5-14B-Instruct -->`
 - hardware: `<!-- 如 910B2 x1 -->`
 - gpu_memory_utilization: `<!-- 14B 文本线=0.6, vision 线见 registry -->`
-- max_model_len: `<!-- 14B 文本线=32768, vision 线=30720 -->`
+- max_model_len: `<!-- 14B 文本线=32768, vision 线=32768（见 registry） -->`
 
 ### Specialty Target Evidence（选 specialty-target 时必填）
 
@@ -40,7 +40,7 @@
 - [ ] data_source 以 `real-online` 开头（不接受 smoke/replay/derived/截图）
 - [ ] base/head 的 CI 状态均为 accepted（missing/cancelled/skipped/resource_busy 一律 fail closed）
 - [ ] 3B perfgate 通过 **不等于** 14B public-target evidence 通过
-- [ ] registry hash 匹配（target_id 在 #104 registry active 列表）
+- [ ] registry hash 匹配（artifact 的 resolved_registry_hash == 当前 registry SHA256）
 
 > 判定工具：`python -m vllm_hust_benchmark.cli merge-gate-check`
 > Registry：`vllm-hust-benchmark/src/vllm_hust_benchmark/data/fixed_target_registry.json`
