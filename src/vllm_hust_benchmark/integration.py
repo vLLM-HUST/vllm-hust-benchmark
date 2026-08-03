@@ -15,7 +15,10 @@ import urllib.request
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
+
+if TYPE_CHECKING:
+    from vllm_hust_benchmark.fixed_target_registry import FixedTargetProfile
 
 from vllm_hust_benchmark.aggregate_results import build_series_signature
 from vllm_hust_benchmark.models import render_parameter_flags
@@ -33,7 +36,6 @@ from vllm_hust_benchmark.submission_artifacts import (
     normalize_submission_artifacts_in_tree,
 )
 from vllm_hust_benchmark.workload_config_contract import (
-    WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER,
     is_official_workload_contract_entry,
     requires_workload_config_contract,
     validate_explicit_workload_config,
@@ -605,12 +607,41 @@ def aggregate_to_website(
     ]
     rc = run_external_command(command, cwd=layout.website_repo, execute=execute)
 
+    # Fixed-target admission gate: after the external aggregation has written
+    # the snapshot, scan for entries that misalign with the fixed-target
+    # registry and quarantine them out of the official snapshot.
+    target_misaligned_entries: list[dict] = []
+    try:
+        from vllm_hust_benchmark.fixed_target_registry import (
+            load_fixed_target_registry,
+        )
+
+        registry = load_fixed_target_registry()
+        target_misaligned_entries = _scan_fixed_target_misaligned_entries(
+            destination, registry
+        )
+        if target_misaligned_entries:
+            _quarantine_misaligned_snapshot_entries(
+                destination, target_misaligned_entries
+            )
+            print(
+                f"fixed-target admission gate quarantined "
+                f"{len(target_misaligned_entries)} entries",
+                file=sys.stderr,
+            )
+    except (OSError, ValueError) as exc:
+        print(
+            f"fixed-target admission gate skipped: {exc}",
+            file=sys.stderr,
+        )
+
     report = _build_rejected_superseded_report(
         [],
         [],
         [],
         source_dir=source_dir,
         layout=layout,
+        target_misaligned_entries=target_misaligned_entries,
     )
     _write_rejected_superseded_report(destination, report)
     return rc
@@ -1858,6 +1889,7 @@ def _build_rejected_superseded_report(
     *,
     source_dir: Path | None = None,
     layout: RepoLayout | None = None,
+    target_misaligned_entries: list[dict] | None = None,
 ) -> dict:
     """Build the rejected/superseded report dict from gate scan results."""
     from datetime import datetime, timezone
@@ -1921,6 +1953,7 @@ def _build_rejected_superseded_report(
         "rejected_submissions": rejected_submissions,
         "superseded_entries": superseded_entries,
         "excluded_plugin_commits": excluded_plugin_commits,
+        "target_misaligned_entries": target_misaligned_entries or [],
     }
 
 
@@ -1960,6 +1993,225 @@ def _filter_excluded_snapshot_entries(
             encoding="utf-8",
         )
     return removed_count
+
+
+def _fixed_target_numeric_equal(left: Any, right: Any) -> bool:
+    """Compare two values numerically, falling back to direct equality."""
+    try:
+        return float(left) == float(right)
+    except (TypeError, ValueError):
+        return left == right
+
+
+def _resolve_entry_artifact_path(entry: Mapping[str, Any]) -> str | None:
+    """Resolve the original submission artifact path for a snapshot entry.
+
+    Checks ``metadata.artifact_path`` then ``metadata.submission_dir``.
+    Returns ``None`` when neither is present.
+    """
+    metadata = entry.get("metadata")
+    if not isinstance(metadata, Mapping):
+        return None
+    for key in ("artifact_path", "submission_dir"):
+        value = metadata.get(key)
+        if value:
+            return str(value)
+    return None
+
+
+def _scan_fixed_target_misaligned_entries(
+    snapshot_dir: Path,
+    registry: tuple[FixedTargetProfile, ...] | None = None,
+) -> list[dict]:
+    """Scan leaderboard snapshot entries that misalign with fixed-target profiles.
+
+    Returns a list of dicts, each containing:
+    - entry_id
+    - snapshot_file (leaderboard_single.json / leaderboard_multi.json)
+    - reason (missing_gpu_memory_utilization / config_drift / wrong_profile /
+      retired_target / specialty_without_contract)
+    - detail (field-level detail)
+    - profile_name (matched profile name, or None)
+    - artifact_path (original submission path if resolvable, else None)
+    - disposition (quarantine / specialty)
+    """
+    from vllm_hust_benchmark.fixed_target_registry import (
+        find_matching_profile,
+        load_fixed_target_registry,
+    )
+
+    if registry is None:
+        registry = load_fixed_target_registry()
+
+    misaligned: list[dict] = []
+    for snapshot_file_name in ("leaderboard_single.json", "leaderboard_multi.json"):
+        snapshot_path = snapshot_dir / snapshot_file_name
+        if not snapshot_path.is_file():
+            continue
+        try:
+            payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, list):
+            continue
+        for entry in payload:
+            if not isinstance(entry, Mapping):
+                continue
+            entry_id = str(entry.get("entry_id") or "")
+            if not entry_id:
+                continue
+
+            profile = find_matching_profile(entry, registry)
+            if profile is None:
+                continue  # non-official entry — outside this gate's scope
+
+            artifact_path = _resolve_entry_artifact_path(entry)
+            base_record = {
+                "entry_id": entry_id,
+                "snapshot_file": snapshot_file_name,
+                "profile_name": profile.profile_name,
+                "artifact_path": artifact_path,
+            }
+
+            if profile.status == "specialty":
+                misaligned.append(
+                    {
+                        **base_record,
+                        "reason": "specialty_without_contract",
+                        "detail": {
+                            "profile_name": profile.profile_name,
+                            "target_id": profile.target_id,
+                        },
+                        "disposition": "specialty",
+                    }
+                )
+                continue
+
+            if profile.status == "retired":
+                misaligned.append(
+                    {
+                        **base_record,
+                        "reason": "retired_target",
+                        "detail": {
+                            "profile_name": profile.profile_name,
+                            "target_id": profile.target_id,
+                        },
+                        "disposition": "quarantine",
+                    }
+                )
+                continue
+
+            # status == "active"
+            same_spec = entry.get("same_spec")
+            same_spec = same_spec if isinstance(same_spec, Mapping) else {}
+            server = same_spec.get("resolved_server_parameters")
+            server = server if isinstance(server, Mapping) else {}
+
+            # Defensive model match check (find_matching_profile already
+            # filters by model, so this should never trigger in practice).
+            model_obj = entry.get("model")
+            model_obj = model_obj if isinstance(model_obj, Mapping) else {}
+            candidate_model_ids = (
+                model_obj.get("repo_id"),
+                model_obj.get("canonical_id"),
+                model_obj.get("name"),
+            )
+            if profile.model not in candidate_model_ids:
+                misaligned.append(
+                    {
+                        **base_record,
+                        "reason": "wrong_profile",
+                        "detail": {
+                            "field": "model",
+                            "actual": [v for v in candidate_model_ids if v is not None],
+                            "required": profile.model,
+                        },
+                        "disposition": "quarantine",
+                    }
+                )
+                continue
+
+            # Validate required effective server parameters.
+            found_misalignment = False
+            for field_name, required_value in (
+                ("gpu_memory_utilization", profile.gpu_memory_utilization),
+                ("max_model_len", profile.max_model_len),
+            ):
+                if field_name not in server:
+                    misaligned.append(
+                        {
+                            **base_record,
+                            "reason": f"missing_{field_name}",
+                            "detail": {
+                                "field": field_name,
+                                "required": required_value,
+                            },
+                            "disposition": "quarantine",
+                        }
+                    )
+                    found_misalignment = True
+                    break
+                actual_value = server[field_name]
+                if not _fixed_target_numeric_equal(actual_value, required_value):
+                    misaligned.append(
+                        {
+                            **base_record,
+                            "reason": "config_drift",
+                            "detail": {
+                                "field": field_name,
+                                "actual": actual_value,
+                                "required": required_value,
+                            },
+                            "disposition": "quarantine",
+                        }
+                    )
+                    found_misalignment = True
+                    break
+            if found_misalignment:
+                continue
+            # All fields aligned — keep the entry.
+
+    return misaligned
+
+
+def _quarantine_misaligned_snapshot_entries(
+    snapshot_dir: Path,
+    misaligned_entries: list[dict],
+) -> None:
+    """Remove misaligned entries from the leaderboard snapshot files in-place.
+
+    The entries are filtered out of ``leaderboard_single.json`` and
+    ``leaderboard_multi.json`` without physically deleting the original
+    submission artifacts.
+    """
+    misaligned_ids = {
+        entry["entry_id"] for entry in misaligned_entries if entry.get("entry_id")
+    }
+    if not misaligned_ids:
+        return
+    for snapshot_file_name in ("leaderboard_single.json", "leaderboard_multi.json"):
+        snapshot_path = snapshot_dir / snapshot_file_name
+        if not snapshot_path.is_file():
+            continue
+        try:
+            payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, list):
+            continue
+        retained = [
+            entry
+            for entry in payload
+            if not (
+                isinstance(entry, Mapping)
+                and str(entry.get("entry_id") or "") in misaligned_ids
+            )
+        ]
+        if len(retained) != len(payload):
+            snapshot_path.write_text(
+                json.dumps(retained, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
 
 
 def _validate_formal_submission_sources(
@@ -2030,7 +2282,7 @@ def _validate_entry_workload_contract(
     payload: Mapping[str, Any],
     *,
     source: str,
-    require_official: bool = False,
+    require_official: bool = True,
 ) -> bool:
     metadata = payload.get("metadata")
     has_contract_marker = isinstance(metadata, Mapping) and bool(
@@ -2039,22 +2291,13 @@ def _validate_entry_workload_contract(
     must_validate = requires_workload_config_contract(payload) or has_contract_marker
 
     # ``require_official`` additionally validates official-spec entries that
-    # don't carry the contract marker yet — but exempts entries whose
-    # ``submitted_at`` predates ``WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER``
-    # (grandfathered historical-pr-backfill data).  Entries with NO
-    # ``submitted_at`` are NOT exempt: omitting the timestamp must not bypass
-    # the contract.
+    # don't carry the contract marker yet.  After the BREAKING change, entries
+    # whose ``submitted_at`` predates the contract activation date are no
+    # longer grandfathered: any official-spec entry must pass the contract
+    # regardless of submission time.
     if not must_validate and require_official:
         if is_official_workload_contract_entry(payload):
-            submitted_at = ""
-            if isinstance(metadata, Mapping):
-                submitted_at = str(metadata.get("submitted_at") or "").strip()
-            if not submitted_at:
-                must_validate = True
-            elif submitted_at < WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER:
-                pass  # grandfathered — pre-activation official entry
-            else:
-                must_validate = True
+            must_validate = True
 
     if not must_validate:
         return True
@@ -2091,6 +2334,7 @@ def _validate_snapshot_workload_contracts(snapshot_dir: Path) -> bool:
             if not _validate_entry_workload_contract(
                 entry,
                 source=f"{snapshot_path}[{index}]",
+                require_official=False,
             ):
                 valid = False
     return valid
