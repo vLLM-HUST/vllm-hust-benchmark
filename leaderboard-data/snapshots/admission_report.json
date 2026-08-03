@@ -1,6 +1,6 @@
 {
   "schema_version": "admission-report/v1",
-  "generated_at": "2026-08-03T02:28:46Z",
+  "generated_at": "2026-08-03T06:53:00Z",
   "registry_version": "official-ascend-jan-2026-v0.18.0",
   "active_profiles": [
     "core-text-14b",
@@ -10,8 +10,8 @@
   "summary": {
     "leaderboard_single": {
       "total": 21,
-      "keep": 2,
-      "quarantine": 19
+      "keep": 0,
+      "quarantine": 21
     },
     "leaderboard_multi": {
       "total": 0,
@@ -155,10 +155,13 @@
         "max_model_len": 32768,
         "workload_name": "random-online"
       },
-      "missing_fields": [],
+      "missing_fields": [
+        "gpu_memory_utilization",
+        "max_model_len"
+      ],
       "drift_fields": [],
-      "disposition": "keep",
-      "reason": null
+      "disposition": "quarantine",
+      "reason": "missing fields: gpu_memory_utilization,max_model_len"
     },
     {
       "entry_id": "c40f5805-bf3c-46d9-ab5f-b86ffca786b5",
@@ -185,10 +188,13 @@
         "max_model_len": 32768,
         "workload_name": "random-online"
       },
-      "missing_fields": [],
+      "missing_fields": [
+        "gpu_memory_utilization",
+        "max_model_len"
+      ],
       "drift_fields": [],
-      "disposition": "keep",
-      "reason": null
+      "disposition": "quarantine",
+      "reason": "missing fields: gpu_memory_utilization,max_model_len"
     },
     {
       "entry_id": "e6f0f8f7-816a-4670-8358-724da27e3879",

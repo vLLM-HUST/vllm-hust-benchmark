@@ -11,12 +11,19 @@ Issue #105 requirements enforced:
 - Specialty profiles require an approved specialty contract reference
 - git_commit must be full 40-char hex SHA (not 12-char short SHA)
 - current_main candidate selection is deterministic (sorted by name)
+- Admission-critical fields are preserved on each side and validated:
+  metadata.verified is True, target_id is present (and aligned with the
+  official TARGET_ID for the official paired evidence), same_spec.resolved_spec_hash
+  is 64-char hex, metadata.runtime_provenance.{engine,plugin}.commit are 40-char
+  hex, metrics.peak_mem_mb > 0, metrics.error_rate < 1.0. Any missing field
+  sets paired_evidence_valid = false.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,6 +39,10 @@ ANOMALY_TTFT_THRESHOLD_MS = 60_000
 
 # Issue #105: minimum repetitions for valid paired evidence
 MIN_REPETITIONS = 3
+
+# Issue #105 fail-closed provenance shape helpers.
+_HEX40_RE = re.compile(r"^[0-9a-fA-F]{40}$")
+_HEX64_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
 def _load_submission(submission_dir: Path) -> dict:
@@ -58,7 +69,13 @@ def _full_commit(commit: str | None) -> str:
 
 
 def _extract_metrics(entry: dict) -> dict:
-    """Extract a normalized metrics dict from a run_leaderboard entry."""
+    """Extract a normalized metrics dict from a run_leaderboard entry.
+
+    Issue #105: preserves the admission-critical fields (verified, target
+    binding, resolved spec hash, runtime provenance, peak memory, error
+    rate) so ``_is_valid_paired_side`` can fail closed on any missing field
+    rather than only checking repetitions/measurement block/TTFT/SHA length.
+    """
     metrics = entry.get("metrics", {}) or {}
     measurement = entry.get("measurement", {}) or {}
     selection = (
@@ -72,6 +89,8 @@ def _extract_metrics(entry: dict) -> dict:
 
     # Try metadata for repetitions count
     metadata = entry.get("metadata", {}) or {}
+    if not isinstance(metadata, dict):
+        metadata = {}
     repetitions = metadata.get("repetitions")
     if not repetitions and has_measurement_block:
         repetitions = len(measurement.get("per_run", []))
@@ -97,6 +116,25 @@ def _extract_metrics(entry: dict) -> dict:
         if "-g" in ev:
             raw_commit = ev.split("-g")[-1]
 
+    # Issue #105: preserve admission-critical fields for fail-closed
+    # validation downstream. These were previously dropped, which let
+    # unverifiable entries (verified=None/False, peak_mem_mb=0) through.
+    same_spec = entry.get("same_spec")
+    same_spec = same_spec if isinstance(same_spec, dict) else {}
+    target_id = same_spec.get("spec_id") or metadata.get("target_id") or ""
+    resolved_spec_hash = same_spec.get("resolved_spec_hash") or ""
+
+    runtime_provenance = metadata.get("runtime_provenance")
+    runtime_provenance = (
+        runtime_provenance if isinstance(runtime_provenance, dict) else {}
+    )
+    engine_prov = runtime_provenance.get("engine")
+    engine_prov = engine_prov if isinstance(engine_prov, dict) else {}
+    plugin_prov = runtime_provenance.get("plugin")
+    plugin_prov = plugin_prov if isinstance(plugin_prov, dict) else {}
+    engine_commit = engine_prov.get("commit") or ""
+    plugin_commit = plugin_prov.get("commit") or ""
+
     return {
         "engine_version": entry.get("engine_version", ""),
         "git_commit": _full_commit(raw_commit),
@@ -112,10 +150,17 @@ def _extract_metrics(entry: dict) -> dict:
         "error_rate": float(metrics.get("error_rate", 0))
         if metrics.get("error_rate") is not None
         else 0.0,
+        "peak_mem_mb": metrics.get("peak_mem_mb"),
         "repetitions": repetitions,
         "has_measurement_block": has_measurement_block,
         "measurement_strategy": measurement_strategy,
         "selected_run_index": selected_run_index,
+        # Admission-critical fields (issue #105 fail-closed):
+        "verified": metadata.get("verified"),
+        "target_id": target_id,
+        "resolved_spec_hash": resolved_spec_hash,
+        "engine_commit": engine_commit,
+        "plugin_commit": plugin_commit,
     }
 
 
@@ -141,7 +186,10 @@ def _is_anomalous(metrics: dict) -> str | None:
     return None
 
 
-def _is_valid_paired_side(metrics: dict | None) -> tuple[bool, str | None]:
+def _is_valid_paired_side(
+    metrics: dict | None,
+    expected_target_id: str | None = None,
+) -> tuple[bool, str | None]:
     """Check if one side of a paired comparison is valid per issue #105.
 
     Returns (valid, invalid_reason).  A valid side must:
@@ -150,6 +198,18 @@ def _is_valid_paired_side(metrics: dict | None) -> tuple[bool, str | None]:
     - have a measurement block (has_measurement_block == True)
     - not be anomalous (TTFT within sane bounds)
     - have a 40-char git_commit SHA
+    - carry ``verified == True`` (admission gate, fail closed)
+    - carry a non-empty ``target_id``; when ``expected_target_id`` is given it
+      must be a prefix of the entry's target_id (target alignment)
+    - carry a 64-char hex ``resolved_spec_hash``
+    - carry 40-char hex ``engine_commit`` and ``plugin_commit`` (runtime
+      provenance)
+    - have ``peak_mem_mb > 0`` (0 indicates missing/invalid memory reading)
+    - have ``error_rate < 1.0`` (100% errors = invalid run)
+
+    Any missing or invalid field => paired_evidence_valid is set to False
+    (fail closed), consistent with the file header's target_aligned +
+    verified contract.
     """
     if metrics is None:
         return False, "metrics_missing"
@@ -165,17 +225,58 @@ def _is_valid_paired_side(metrics: dict | None) -> tuple[bool, str | None]:
     commit = metrics.get("git_commit", "")
     if len(commit) != 40:
         return False, f"git_commit not 40-char SHA (got {len(commit)} chars)"
+
+    # Admission-critical field checks (issue #105 fail-closed).
+    if metrics.get("verified") is not True:
+        return False, f"verified is not True (got {metrics.get('verified')!r})"
+
+    target_id = metrics.get("target_id") or ""
+    if not target_id:
+        return False, "target_id missing (no same_spec.spec_id or metadata.target_id)"
+    if expected_target_id and not target_id.startswith(expected_target_id):
+        return False, (
+            f"target_id '{target_id}' does not align with expected "
+            f"'{expected_target_id}'"
+        )
+
+    resolved_hash = metrics.get("resolved_spec_hash") or ""
+    if not (isinstance(resolved_hash, str) and _HEX64_RE.match(resolved_hash)):
+        return False, (
+            f"resolved_spec_hash not 64-char hex (got {len(resolved_hash)} chars)"
+        )
+
+    engine_commit = metrics.get("engine_commit") or ""
+    if not (isinstance(engine_commit, str) and _HEX40_RE.match(engine_commit)):
+        return False, (
+            f"engine_commit not 40-char hex SHA (got {len(engine_commit)} chars)"
+        )
+    plugin_commit = metrics.get("plugin_commit") or ""
+    if not (isinstance(plugin_commit, str) and _HEX40_RE.match(plugin_commit)):
+        return False, (
+            f"plugin_commit not 40-char hex SHA (got {len(plugin_commit)} chars)"
+        )
+
+    peak_mem = metrics.get("peak_mem_mb")
+    if not (isinstance(peak_mem, (int, float)) and peak_mem > 0):
+        return False, f"peak_mem_mb must be > 0 (got {peak_mem!r})"
+
+    error_rate = metrics.get("error_rate")
+    if not (isinstance(error_rate, (int, float)) and 0 <= error_rate < 1):
+        return False, f"error_rate must be in [0, 1) (got {error_rate!r})"
+
     return True, None
 
 
 def _is_valid_paired_evidence(
-    base: dict | None, head: dict | None
+    base: dict | None,
+    head: dict | None,
+    expected_target_id: str | None = None,
 ) -> tuple[bool, str | None]:
     """Check if a base/head pair is valid: both sides must be valid."""
-    base_valid, base_reason = _is_valid_paired_side(base)
+    base_valid, base_reason = _is_valid_paired_side(base, expected_target_id)
     if not base_valid:
         return False, f"base: {base_reason}"
-    head_valid, head_reason = _is_valid_paired_side(head)
+    head_valid, head_reason = _is_valid_paired_side(head, expected_target_id)
     if not head_valid:
         return False, f"head: {head_reason}"
     return True, None
@@ -269,9 +370,12 @@ def generate_official_paired_evidence() -> dict:
                     baseline_metrics.get(base_key), current_main_metrics.get(head_key)
                 )
 
-        # Issue #105: dynamic validity check (fail closed)
+        # Issue #105: dynamic validity check (fail closed). Both sides must
+        # pass the full admission gate: verified flag, target alignment with
+        # TARGET_ID, resolved spec hash, runtime provenance commits, peak
+        # memory, and error rate. Any missing field => invalid.
         valid, invalid_reason = _is_valid_paired_evidence(
-            baseline_metrics, current_main_metrics
+            baseline_metrics, current_main_metrics, expected_target_id=TARGET_ID
         )
         spec_entry = {
             "profile": profile,
@@ -292,8 +396,12 @@ def generate_official_paired_evidence() -> dict:
         "measurement_strategy": "primary-median-run (3 repetitions)",
         "validity_policy": (
             "paired_evidence_valid requires both sides to have >= 3 repetitions, "
-            "a measurement block, a 40-char git_commit SHA, and TTFT below "
-            f"{ANOMALY_TTFT_THRESHOLD_MS}ms (anomaly threshold)."
+            "a measurement block, a 40-char git_commit SHA, TTFT below "
+            f"{ANOMALY_TTFT_THRESHOLD_MS}ms (anomaly threshold), verified == True, "
+            "a target_id aligned with the official target, a 64-char hex "
+            "resolved_spec_hash, 40-char hex engine+plugin provenance commits, "
+            "peak_mem_mb > 0, and error_rate < 1.0. Any missing field fails "
+            "closed (paired_evidence_valid = false)."
         ),
         "specs": spec_entries,
     }
@@ -376,8 +484,14 @@ def generate_p0_pr_paired_evidence() -> dict:
                 base_metrics.get(key), head_metrics.get(key)
             )
 
-        # Issue #105: dynamic validity (not hardcoded True)
-        valid, invalid_reason = _is_valid_paired_evidence(base_metrics, head_metrics)
+        # Issue #105: dynamic validity (not hardcoded True). P0 PR paired
+        # evidence requires a target binding (target_id present) but does
+        # not constrain it to a single official target — each PR pair may
+        # bind to its own specialty/profile target. Passing
+        # expected_target_id=None enforces presence without prefix match.
+        valid, invalid_reason = _is_valid_paired_evidence(
+            base_metrics, head_metrics, expected_target_id=None
+        )
 
         # Issue #105: specialty profiles require an approved specialty contract
         profile = pair["profile"]
@@ -420,8 +534,12 @@ def generate_p0_pr_paired_evidence() -> dict:
         "validity_policy": (
             "paired_evidence_valid requires both sides to have >= 3 repetitions, "
             "a measurement block, a 40-char git_commit SHA, TTFT below "
-            f"{ANOMALY_TTFT_THRESHOLD_MS}ms, and (for specialty profiles) an "
-            "approved specialty contract."
+            f"{ANOMALY_TTFT_THRESHOLD_MS}ms, verified == True, a non-empty "
+            "target_id (target binding), a 64-char hex resolved_spec_hash, "
+            "40-char hex engine+plugin provenance commits, peak_mem_mb > 0, "
+            "error_rate < 1.0, and (for specialty profiles) an approved "
+            "specialty contract. Any missing field fails closed "
+            "(paired_evidence_valid = false)."
         ),
         "prs": prs,
     }

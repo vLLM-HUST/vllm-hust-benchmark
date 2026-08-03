@@ -13,17 +13,23 @@ Outputs:
   - leaderboard-data/snapshots/pre_cleanup_freeze.json (copy of pre-cleanup single)
   - leaderboard-data/snapshots/rejected_superseded_report.json
 
-Quarantine policy (issue #105):
-  - keep: entry whose (workload, model, precision, gpu_mem, max_model_len) matches one of 3 active specs
-  - quarantine: everything else (specialty/out-of-scope/config drift/missing fields)
-  - The "current_main" entries (engine_version containing e4ce33646f or matching active spec) are kept
-    so that paired evidence (baseline vs current_main) is consumable from the public snapshot.
+Quarantine policy (issue #105, fail closed):
+  - keep: entry whose (workload, model, precision, gpu_mem, max_model_len) matches one of 3 active
+    specs AND passes the admission gate (metadata.verified is True, metrics.peak_mem_mb > 0,
+    metrics.error_rate < 1.0, same_spec.resolved_spec_hash is 64-char hex, and both
+    metadata.runtime_provenance.{engine,plugin}.commit are 40-char hex SHA)
+  - quarantine: everything else (specialty/out-of-scope/config drift/missing fields/admission
+    gate failure). Missing gpu_mem or max_len is a fail-closed rejection, not a skipped check.
+  - The "current_main" entries (engine_version containing e4ce33646f or matching active spec) are
+    kept only when they also pass the admission gate, so that paired evidence (baseline vs
+    current_main) is consumable from the public snapshot without reintroducing unverifiable data.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,6 +37,14 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SNAPSHOT_DIR = REPO_ROOT / "leaderboard-data" / "snapshots"
+
+# Issue #105 fail-closed admission helpers. A leaderboard entry is only
+# eligible for the public snapshot when it carries a verified flag, real
+# peak memory, a sub-100% error rate, a resolved spec hash, and 40-char
+# hex SHA provenance for both engine and plugin commits. Missing or
+# invalid values => quarantine (never keep).
+_HEX40_RE = re.compile(r"^[0-9a-fA-F]{40}$")
+_HEX64_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
 # Active fixed-target profiles: (workload_name, model_repo_id, precision, gpu_mem_util, max_model_len)
 ACTIVE_PROFILES = [
@@ -142,13 +156,20 @@ def _match_active_profile(entry: dict) -> dict | None:
     """Return matching profile dict if entry aligns with one of the 3 active specs, else None.
 
     Alignment is strict (issue #105 "fail closed"): workload + model + precision + gpu_mem +
-    max_model_len must all match. Missing fields => quarantine.
+    max_model_len must all be present AND match. Missing gpu_mem or max_len is a fail-closed
+    rejection (returns None) rather than a skipped comparison, so an entry with absent
+    config fields can never be admitted purely on workload/model shape.
     """
     workload = _entry_workload(entry)
     model = _entry_model(entry)
     precision = _entry_precision(entry)
     gpu_mem = _entry_gpu_mem(entry)
     max_len = _entry_max_model_len(entry)
+
+    # Fail closed: gpu_mem and max_len are required config fields. Missing
+    # values must not fall through to a profile match.
+    if gpu_mem is None or max_len is None:
+        return None
 
     for prof in ACTIVE_PROFILES:
         if workload != prof["workload"]:
@@ -157,22 +178,73 @@ def _match_active_profile(entry: dict) -> dict | None:
             continue
         if precision and prof["precision"] and precision != prof["precision"]:
             continue
-        # gpu_mem and max_len: try to coerce to float for comparison
         try:
-            if gpu_mem is not None and prof["gpu_memory_utilization"] is not None:
-                if abs(float(gpu_mem) - float(prof["gpu_memory_utilization"])) > 1e-6:
-                    continue
+            if abs(float(gpu_mem) - float(prof["gpu_memory_utilization"])) > 1e-6:
+                continue
         except (TypeError, ValueError):
-            # Missing/invalid => fail closed
+            # Invalid (non-numeric) => fail closed
             return None
         try:
-            if max_len is not None and prof["max_model_len"] is not None:
-                if int(max_len) != int(prof["max_model_len"]):
-                    continue
+            if int(max_len) != int(prof["max_model_len"]):
+                continue
         except (TypeError, ValueError):
             return None
         return prof
     return None
+
+
+def _passes_admission_gate(entry: dict) -> tuple[bool, list[str]]:
+    """Issue #105 fail-closed admission gate for a single leaderboard entry.
+
+    Returns (passes, failure_fields). A passing entry must carry:
+    - ``metadata.verified`` is exactly ``True`` (not None/False)
+    - ``metrics.peak_mem_mb`` is a positive number (0 indicates missing/invalid)
+    - ``metrics.error_rate`` is present and below 1.0 (100% errors = invalid)
+    - ``same_spec.resolved_spec_hash`` is a 64-char hex string
+    - ``metadata.runtime_provenance.engine.commit`` is a 40-char hex SHA
+    - ``metadata.runtime_provenance.plugin.commit`` is a 40-char hex SHA
+
+    Any missing or invalid field => the entry is rejected (fail closed),
+    per the project hard constraint "Missing registry or required fields in
+    aggregator must result in fail closed".
+    """
+    failures: list[str] = []
+
+    metadata = entry.get("metadata")
+    metadata = metadata if isinstance(metadata, dict) else {}
+    verified = metadata.get("verified")
+    if verified is not True:
+        failures.append("metadata.verified")
+
+    metrics = entry.get("metrics")
+    metrics = metrics if isinstance(metrics, dict) else {}
+    peak_mem = metrics.get("peak_mem_mb")
+    if not (isinstance(peak_mem, (int, float)) and peak_mem > 0):
+        failures.append("metrics.peak_mem_mb")
+    error_rate = metrics.get("error_rate")
+    if not (isinstance(error_rate, (int, float)) and 0 <= error_rate < 1):
+        failures.append("metrics.error_rate")
+
+    same_spec = entry.get("same_spec")
+    same_spec = same_spec if isinstance(same_spec, dict) else {}
+    resolved_hash = same_spec.get("resolved_spec_hash")
+    if not (isinstance(resolved_hash, str) and _HEX64_RE.match(resolved_hash)):
+        failures.append("same_spec.resolved_spec_hash")
+
+    provenance = metadata.get("runtime_provenance")
+    provenance = provenance if isinstance(provenance, dict) else {}
+    engine_prov = provenance.get("engine")
+    engine_prov = engine_prov if isinstance(engine_prov, dict) else {}
+    engine_commit = engine_prov.get("commit")
+    if not (isinstance(engine_commit, str) and _HEX40_RE.match(engine_commit)):
+        failures.append("metadata.runtime_provenance.engine.commit")
+    plugin_prov = provenance.get("plugin")
+    plugin_prov = plugin_prov if isinstance(plugin_prov, dict) else {}
+    plugin_commit = plugin_prov.get("commit")
+    if not (isinstance(plugin_commit, str) and _HEX40_RE.match(plugin_commit)):
+        failures.append("metadata.runtime_provenance.plugin.commit")
+
+    return (len(failures) == 0, failures)
 
 
 def _build_admission_entry(
@@ -236,7 +308,20 @@ def _classify_entry(entry: dict) -> tuple[dict | None, str, str, list[str], list
 
     prof = _match_active_profile(entry)
     if prof is not None:
-        return prof, "keep", None, [], []
+        # Issue #105 fail-closed: profile shape match alone is not enough.
+        # The entry must also pass the admission gate (verified flag, real
+        # peak memory, sub-100% error rate, resolved spec hash, 40-char hex
+        # engine+plugin commits). Any missing field => quarantine.
+        admission_ok, admission_failures = _passes_admission_gate(entry)
+        if admission_ok:
+            return prof, "keep", None, [], []
+        return (
+            prof,
+            "quarantine",
+            f"admission_gate_failure: {','.join(admission_failures)}",
+            [],
+            admission_failures,
+        )
 
     # Build drift fields if a profile could be inferred from workload alone
     inferred_prof = None
@@ -403,9 +488,7 @@ def main() -> int:
         )
         if multi_path.is_file():
             multi_data = json.loads(multi_path.read_text(encoding="utf-8"))
-            multi_kept = sum(
-                1 for e in multi_data if _match_active_profile(e) is not None
-            )
+            multi_kept = sum(1 for e in multi_data if _classify_entry(e)[1] == "keep")
             print(
                 f"[dry-run] leaderboard_multi.json: {len(multi_data)} entries -> keep {multi_kept}"
             )

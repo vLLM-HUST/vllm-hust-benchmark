@@ -1,10 +1,10 @@
 {
   "schema_version": "1.2",
-  "generated_at": "2026-08-03T02:28:53Z",
+  "generated_at": "2026-08-03T06:53:00Z",
   "target_id": "historical-pr-paired-evidence",
   "measurement_strategy": "primary-median-run (3 repetitions)",
   "source": "issue #89 P0 PR paired reruns (real-online, single NPU 910B2)",
-  "validity_policy": "paired_evidence_valid requires both sides to have >= 3 repetitions, a measurement block, a 40-char git_commit SHA, TTFT below 60000ms, and (for specialty profiles) an approved specialty contract.",
+  "validity_policy": "paired_evidence_valid requires both sides to have >= 3 repetitions, a measurement block, a 40-char git_commit SHA, TTFT below 60000ms, verified == True, a non-empty target_id (target binding), a 64-char hex resolved_spec_hash, 40-char hex engine+plugin provenance commits, peak_mem_mb > 0, error_rate < 1.0, and (for specialty profiles) an approved specialty contract. Any missing field fails closed (paired_evidence_valid = false).",
   "prs": [
     {
       "pr_number": 130,
@@ -18,10 +18,16 @@
         "tbt_ms": 35.72,
         "throughput_tps": 245.99,
         "error_rate": 0.0,
+        "peak_mem_mb": 0,
         "repetitions": 3,
         "has_measurement_block": true,
         "measurement_strategy": "warmup+primary-median-run",
-        "selected_run_index": 3
+        "selected_run_index": 3,
+        "verified": null,
+        "target_id": "official-ascend-jan-2026-v0.18.0-logprobs-online-qwen25-14b-910b2",
+        "resolved_spec_hash": "6a7f1255d4a5b7f3a09f30554154ed5af4a36fbab406c2ec067ad2b8cc336159",
+        "engine_commit": "611bcabeb730ebcd0a44881236bfead67830625a",
+        "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda"
       },
       "head": {
         "engine_version": "v0.23.1rc0-1272-g3b8e5cff01",
@@ -30,17 +36,24 @@
         "tbt_ms": 35.91,
         "throughput_tps": 245.95,
         "error_rate": 0.0,
+        "peak_mem_mb": 0,
         "repetitions": 3,
         "has_measurement_block": true,
         "measurement_strategy": "warmup+primary-median-run",
-        "selected_run_index": 1
+        "selected_run_index": 1,
+        "verified": null,
+        "target_id": "official-ascend-jan-2026-v0.18.0-logprobs-online-qwen25-14b-910b2",
+        "resolved_spec_hash": "6a7f1255d4a5b7f3a09f30554154ed5af4a36fbab406c2ec067ad2b8cc336159",
+        "engine_commit": "3b8e5cff01e8a54f067d261db07ba1940a363b96",
+        "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda"
       },
       "delta_percent": {
         "ttft": 1.59,
         "tbt": 0.53,
         "throughput": -0.02
       },
-      "paired_evidence_valid": true
+      "paired_evidence_valid": false,
+      "invalid_reason": "base: verified is not True (got None)"
     },
     {
       "pr_number": 115,
@@ -54,10 +67,16 @@
         "tbt_ms": 54.35,
         "throughput_tps": 165.56,
         "error_rate": 0.0,
+        "peak_mem_mb": 0,
         "repetitions": 1,
         "has_measurement_block": false,
         "measurement_strategy": null,
-        "selected_run_index": null
+        "selected_run_index": null,
+        "verified": null,
+        "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+        "resolved_spec_hash": "cc71667b7c3de8614f22a4296a9b7bc1ca67a398550289150a8d15ec01507415",
+        "engine_commit": "87f2a3480f0d06dd3576f94c532562ec7b8280dd",
+        "plugin_commit": "52f923884b9adaedfc2e764428207d0448227549"
       },
       "head": {
         "engine_version": "v0.23.1rc0-1251-g0e84e42c71",
@@ -66,10 +85,16 @@
         "tbt_ms": 34.11,
         "throughput_tps": 53.96,
         "error_rate": 0.0,
+        "peak_mem_mb": 0,
         "repetitions": 3,
         "has_measurement_block": true,
         "measurement_strategy": "warmup+primary-median-run",
-        "selected_run_index": 2
+        "selected_run_index": 2,
+        "verified": null,
+        "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+        "resolved_spec_hash": "1344b893a226d65950bfa68e91e60ef3f5eff0c2a34114d2bdd12b61475bdc8c",
+        "engine_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
+        "plugin_commit": "9b40f1c4e35b54a3ff1eb80272125c24a3eb5fe9"
       },
       "delta_percent": {
         "ttft": -65.5,
@@ -91,10 +116,16 @@
         "tbt_ms": 34.11,
         "throughput_tps": 53.96,
         "error_rate": 0.0,
+        "peak_mem_mb": 0,
         "repetitions": 3,
         "has_measurement_block": true,
         "measurement_strategy": "warmup+primary-median-run",
-        "selected_run_index": 2
+        "selected_run_index": 2,
+        "verified": null,
+        "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+        "resolved_spec_hash": "1344b893a226d65950bfa68e91e60ef3f5eff0c2a34114d2bdd12b61475bdc8c",
+        "engine_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
+        "plugin_commit": "9b40f1c4e35b54a3ff1eb80272125c24a3eb5fe9"
       },
       "head": {
         "engine_version": "v0.23.1rc0-1252-gab0a8e87d5",
@@ -103,17 +134,24 @@
         "tbt_ms": 30.82,
         "throughput_tps": 48.45,
         "error_rate": 0.0,
+        "peak_mem_mb": 0,
         "repetitions": 3,
         "has_measurement_block": true,
         "measurement_strategy": "warmup+primary-median-run",
-        "selected_run_index": 2
+        "selected_run_index": 2,
+        "verified": null,
+        "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+        "resolved_spec_hash": "1344b893a226d65950bfa68e91e60ef3f5eff0c2a34114d2bdd12b61475bdc8c",
+        "engine_commit": "ab0a8e87d5b8a361e4c26d83c400d440b1c85f87",
+        "plugin_commit": "9b40f1c4e35b54a3ff1eb80272125c24a3eb5fe9"
       },
       "delta_percent": {
         "ttft": -0.96,
         "tbt": -9.65,
         "throughput": -10.21
       },
-      "paired_evidence_valid": true,
+      "paired_evidence_valid": false,
+      "invalid_reason": "base: verified is not True (got None)",
       "base_note": "PR#116 base reuses PR#115 head (same commit 0e84e42c7) per issue #89 section 9.3"
     },
     {
@@ -128,10 +166,16 @@
         "tbt_ms": 15.74,
         "throughput_tps": 62.44,
         "error_rate": 0.0,
+        "peak_mem_mb": 0,
         "repetitions": 3,
         "has_measurement_block": true,
         "measurement_strategy": "warmup+primary-median-run",
-        "selected_run_index": 1
+        "selected_run_index": 1,
+        "verified": null,
+        "target_id": "official-ascend-jan-2026-v0.18.0-kv-tiering-prefix-online-qwen25-7b-910b2",
+        "resolved_spec_hash": "45148e57918ebb19132db413da4eab83f2746a37ae44b6ce7ffa00da140f1c8a",
+        "engine_commit": "e0c0ce8e37e0fcd0f7a133c5c8eee68110295445",
+        "plugin_commit": "8b2adf16061c494dd1474faae90dc4d9e1ff0aad"
       },
       "head": {
         "engine_version": "v0.23.1rc0-1268-g89334ef1f0",
@@ -140,10 +184,16 @@
         "tbt_ms": 16.77,
         "throughput_tps": 78.38,
         "error_rate": 0.0,
+        "peak_mem_mb": 0,
         "repetitions": 3,
         "has_measurement_block": true,
         "measurement_strategy": "warmup+primary-median-run",
-        "selected_run_index": 2
+        "selected_run_index": 2,
+        "verified": null,
+        "target_id": "official-ascend-jan-2026-v0.18.0-kv-tiering-prefix-online-qwen25-7b-910b2",
+        "resolved_spec_hash": "45148e57918ebb19132db413da4eab83f2746a37ae44b6ce7ffa00da140f1c8a",
+        "engine_commit": "89334ef1f043c69f9b51b7ebb73ab755a34e2059",
+        "plugin_commit": "8b2adf16061c494dd1474faae90dc4d9e1ff0aad"
       },
       "delta_percent": {
         "ttft": -27.7,
