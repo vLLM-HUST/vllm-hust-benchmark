@@ -72,7 +72,10 @@ if [ "$CURRENT_BRANCH" = "main-dev" ]; then
     echo -e "${YELLOW}⚠️  main-dev 已计划退役，建议切换到 main 进行提交。${NC}"
 fi
 
-mapfile -t staged_paths < <(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
+staged_paths=()
+while IFS= read -r line; do
+    staged_paths+=("$line")
+done < <(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
 if [ "${#staged_paths[@]}" -eq 0 ]; then
     echo -e "${GREEN}✓ No staged changes${NC}"
     exit 0
@@ -125,7 +128,10 @@ fi
 echo -e "${GREEN}✓ No large files${NC}"
 
 # --- Ruff: auto-fix + lint staged Python files ---
-mapfile -t staged_py < <(printf '%s\n' "${staged_paths[@]}" | grep '\.py$' || true)
+staged_py=()
+while IFS= read -r line; do
+    staged_py+=("$line")
+done < <(printf '%s\n' "${staged_paths[@]}" | grep '\.py$' || true)
 if [ "${#staged_py[@]}" -gt 0 ]; then
     if command -v ruff &>/dev/null; then
         echo -e "${YELLOW}📝 Auto-fixing staged Python files...${NC}"

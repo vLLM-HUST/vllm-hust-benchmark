@@ -1,0 +1,31 @@
+{
+  "schema_version": "perfgate-measurement/v2",
+  "strategy": "single-run-historical-backfill",
+  "aggregation": {
+    "method": "single-run",
+    "note": "Historical PR backfill single measurement; no warmup/measured-run separation available."
+  },
+  "warmup_runs": 0,
+  "measured_runs": 1,
+  "per_run": [
+    {
+      "run_index": 0,
+      "metrics": {
+        "ttft_ms": 230.0984175200574,
+        "tbt_ms": 38.66130162191614,
+        "throughput_tps": 244.92889478985794,
+        "error_rate": 0.0
+      }
+    }
+  ],
+  "selection": {
+    "method": "only-run",
+    "selected_run_index": 0
+  },
+  "artifact_metrics_cross_check": {
+    "ttft_ms": 230.0984175200574,
+    "tbt_ms": 38.66130162191614,
+    "throughput_tps": 244.92889478985794,
+    "match": true
+  }
+}

@@ -6,6 +6,7 @@ directories before they enter the formal aggregation pipeline.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -19,6 +20,34 @@ from vllm_hust_benchmark.integration import (
     _write_rejected_superseded_report,
     aggregate_to_website,
 )
+
+
+def _sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _write_checksums(directory: Path, files: list[str]) -> None:
+    """Write a valid checksums.sha256 covering the given files."""
+    lines = []
+    for name in files:
+        target = directory / name
+        if target.is_file():
+            lines.append(f"{_sha256_file(target)}  ./{name}")
+    (directory / "checksums.sha256").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
+
+
+def _write_admission_required_files(directory: Path) -> None:
+    """Write env-manifest.json (if missing) and checksums.sha256 covering the
+    three files required by the admission checksum gate."""
+    env_manifest = directory / "env-manifest.json"
+    if not env_manifest.is_file():
+        env_manifest.write_text(json.dumps({"git_info": {}}) + "\n", encoding="utf-8")
+    _write_checksums(
+        directory,
+        ["run_leaderboard.json", "leaderboard_manifest.json", "env-manifest.json"],
+    )
 
 
 def _write_mock_submission(
@@ -78,6 +107,14 @@ def _write_mock_submission(
         json.dumps(payload, indent=2) + "\n", encoding="utf-8"
     )
     _write_manifest(target_dir)
+    # env-manifest.json required by the admission checksum gate
+    (target_dir / "env-manifest.json").write_text(
+        json.dumps({"git_info": {}}) + "\n", encoding="utf-8"
+    )
+    _write_checksums(
+        target_dir,
+        ["run_leaderboard.json", "leaderboard_manifest.json", "env-manifest.json"],
+    )
 
 
 def _write_manifest(
@@ -137,6 +174,7 @@ def test_backfill_dir_without_status_passes(tmp_path: Path) -> None:
         '{"entry_id": "test"}\n', encoding="utf-8"
     )
     _write_manifest(backfill_dir)
+    _write_admission_required_files(backfill_dir)
 
     failures = _scan_submission_admission_failures(source_dir)
 
@@ -196,6 +234,7 @@ def test_clean_directory_passes(tmp_path: Path) -> None:
         '{"entry_id": "test"}\n', encoding="utf-8"
     )
     _write_manifest(clean_dir)
+    _write_admission_required_files(clean_dir)
 
     failures = _scan_submission_admission_failures(source_dir)
 
@@ -247,6 +286,359 @@ def test_incomplete_artifact_pair_rejected(
 
     assert len(failures) == 1
     assert failures[0]["reason"] == expected_reason
+
+
+def _write_backfill_submission(
+    target_dir: Path,
+    *,
+    entry_id: str,
+    git_vllm_hust: str,
+    git_vllm_ascend_hust: str,
+) -> None:
+    """Write a historical-pr-backfill submission dir with env-manifest."""
+    target_dir.mkdir(parents=True, exist_ok=True)
+    (target_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (target_dir / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "entry_id": entry_id,
+                "metadata": {
+                    "data_source": "real-online-historical-pr-backfill",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (target_dir / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "leaderboard-export-manifest/v2",
+                "entries": [
+                    {
+                        "idempotency_key": "test",
+                        "leaderboard_artifact": "run_leaderboard.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (target_dir / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "git_info": {
+                    "vllm_hust": git_vllm_hust,
+                    "vllm_ascend_hust": git_vllm_ascend_hust,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    _write_checksums(
+        target_dir,
+        ["run_leaderboard.json", "leaderboard_manifest.json", "env-manifest.json"],
+    )
+
+
+def test_backfill_with_not_available_git_info_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with ``not available`` git_info in
+    env-manifest.json must be rejected by the admission gate, not silently
+    admitted as structurally valid.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr99-base",
+        entry_id="test-99",
+        git_vllm_hust="not available",
+        git_vllm_ascend_hust="not available",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert "not available" in failures[0]["detail"]
+
+
+def test_backfill_with_real_git_info_passes(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with real git commit provenance
+    in env-manifest.json pass the admission gate.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr100-base",
+        entry_id="test-100",
+        git_vllm_hust="abc123def456789012345678901234567890abcd",
+        git_vllm_ascend_hust="789abcdef0123456789abcdef0123456789abcde",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert failures == []
+
+
+def test_backfill_with_short_sha_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with a non-40-char hex SHA in
+    env-manifest.json git_info must be rejected by the admission gate.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr101-head",
+        entry_id="test-101",
+        git_vllm_hust="e4ce33646",
+        git_vllm_ascend_hust="abc123def456789012345678901234567890abcd",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert "non-40-char" in failures[0]["detail"]
+    assert "vllm_hust" in failures[0]["detail"]
+
+
+def test_backfill_with_missing_git_info_key_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with a completely missing
+    ``vllm_hust`` or ``vllm_ascend_hust`` key in env-manifest.json git_info
+    must be rejected by the admission gate, not silently admitted.
+
+    This closes the fail-open gap where ``_gi.get(k)`` returns ``None`` for a
+    missing key and ``None == "not available"`` is ``False``, so the missing
+    provenance slipped past both the ``_missing_provenance`` and
+    ``_short_sha`` checks.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    sub = source_dir / "historical-pr-pr102-head"
+    sub.mkdir(parents=True, exist_ok=True)
+    (sub / "STATUS").write_text("OK\n", encoding="utf-8")
+    (sub / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "entry_id": "test-102",
+                "metadata": {
+                    "data_source": "real-online-historical-pr-backfill",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (sub / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "leaderboard-export-manifest/v2",
+                "entries": [
+                    {
+                        "idempotency_key": "test",
+                        "leaderboard_artifact": "run_leaderboard.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    # vllm_hust key is completely absent (not even "not available")
+    (sub / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "git_info": {
+                    "vllm_ascend_hust": "abc123def456789012345678901234567890abcd",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert "vllm_hust" in failures[0]["detail"]
+    assert "missing" in failures[0]["detail"]
+
+
+def test_backfill_with_corrupt_run_leaderboard_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with a corrupt or unreadable
+    run_leaderboard.json must be rejected by the admission gate, not silently
+    bypass provenance checks.
+
+    This closes the fail-open gap where except (OSError, json.JSONDecodeError):
+    pass left is_historical_backfill = False, causing the entire
+    provenance block to be skipped without recording any failure.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    sub = source_dir / "historical-pr-pr103-head"
+    sub.mkdir(parents=True, exist_ok=True)
+    (sub / "STATUS").write_text("OK\n", encoding="utf-8")
+    # Corrupt JSON — not parseable
+    (sub / "run_leaderboard.json").write_text(
+        "{not valid json}",
+        encoding="utf-8",
+    )
+    (sub / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "leaderboard-export-manifest/v2",
+                "entries": [
+                    {
+                        "idempotency_key": "test",
+                        "leaderboard_artifact": "run_leaderboard.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (sub / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "git_info": {
+                    "vllm_hust": "abc123def456789012345678901234567890abcd",
+                    "vllm_ascend_hust": "789abcdef0123456789abcdef0123456789abcde",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert (
+        "unreadable" in failures[0]["detail"].lower()
+        or "corrupt" in failures[0]["detail"].lower()
+    )
+
+
+def test_backfill_with_missing_env_manifest_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions without an env-manifest.json file
+    must be rejected by the admission gate, not silently bypass the git commit
+    provenance checks.
+
+    This closes the fail-open gap where if is_historical_backfill and
+    env_manifest_path.is_file(): had no else branch, so a missing
+    env-manifest.json caused the entire provenance block to be skipped.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    sub = source_dir / "historical-pr-pr104-head"
+    sub.mkdir(parents=True, exist_ok=True)
+    (sub / "STATUS").write_text("OK\n", encoding="utf-8")
+    (sub / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "entry_id": "test-104",
+                "metadata": {
+                    "data_source": "real-online-historical-pr-backfill",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (sub / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "leaderboard-export-manifest/v2",
+                "entries": [
+                    {
+                        "idempotency_key": "test",
+                        "leaderboard_artifact": "run_leaderboard.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    # env-manifest.json is intentionally NOT created
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert "env-manifest.json" in failures[0]["detail"]
+    assert "missing" in failures[0]["detail"].lower()
+
+
+# ---------------------------------------------------------------------------
+# Checksum gate: deleting checksums.sha256 or removing critical entries
+# must not bypass the admission gate (review feedback on PR #126).
+# ---------------------------------------------------------------------------
+
+
+def test_admission_missing_checksums_manifest_rejected(tmp_path: Path) -> None:
+    """A submission that passes all prior checks but has no checksums.sha256
+    must be rejected with CHECKSUM_INCOMPLETE (fail closed)."""
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr110-base",
+        entry_id="test-110",
+        git_vllm_hust="abc123def456789012345678901234567890abcd",
+        git_vllm_ascend_hust="789abcdef0123456789abcdef0123456789abcde",
+    )
+    # Remove the checksums.sha256 written by _write_backfill_submission
+    (source_dir / "historical-pr-pr110-base" / "checksums.sha256").unlink()
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "CHECKSUM_INCOMPLETE"
+    assert "missing checksum manifest" in failures[0]["detail"]
+
+
+def test_admission_checksum_missing_critical_entry_rejected(
+    tmp_path: Path,
+) -> None:
+    """A checksum manifest that omits a required file (e.g. env-manifest.json)
+    must be rejected even if the remaining entries verify correctly."""
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr111-head",
+        entry_id="test-111",
+        git_vllm_hust="abc123def456789012345678901234567890abcd",
+        git_vllm_ascend_hust="789abcdef0123456789abcdef0123456789abcde",
+    )
+    # Rewrite checksums.sha256 covering only 2 of 3 required files
+    _write_checksums(
+        source_dir / "historical-pr-pr111-head",
+        ["run_leaderboard.json", "leaderboard_manifest.json"],
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "CHECKSUM_INCOMPLETE"
+    assert "env-manifest.json" in failures[0]["detail"]
+    assert "not covered" in failures[0]["detail"]
+
+
+def test_admission_stale_checksum_rejected(tmp_path: Path) -> None:
+    """A stale checksum (file tampered after manifest generation) must be
+    rejected at the admission gate."""
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    _write_backfill_submission(
+        source_dir / "historical-pr-pr112-head",
+        entry_id="test-112",
+        git_vllm_hust="abc123def456789012345678901234567890abcd",
+        git_vllm_ascend_hust="789abcdef0123456789abcdef0123456789abcde",
+    )
+    # Tamper with run_leaderboard.json after checksums were written
+    (source_dir / "historical-pr-pr112-head" / "run_leaderboard.json").write_text(
+        '{"entry_id": "tampered"}\n', encoding="utf-8"
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "CHECKSUM_INCOMPLETE"
+    assert "checksum mismatch" in failures[0]["detail"]
 
 
 def test_aggregate_to_website_returns_2_on_admission_failure(
@@ -625,6 +1017,7 @@ def test_report_generated_on_success(tmp_path: Path) -> None:
         '{"entry_id": "test"}\n', encoding="utf-8"
     )
     _write_manifest(clean_dir)
+    _write_admission_required_files(clean_dir)
 
     output_dir = tmp_path / "out"
 

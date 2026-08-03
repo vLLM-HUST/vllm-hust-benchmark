@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -82,6 +83,14 @@ def _is_w8a8(entry: Mapping[str, Any]) -> bool:
         "w8a8" in str(value or "").lower() or str(value or "").lower() == "int8"
         for value in values
     )
+
+
+_FULL_HEX_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def _is_full_hex_sha(value: object) -> bool:
+    """Return True only for a 40-character lowercase hex SHA."""
+    return isinstance(value, str) and bool(_FULL_HEX_SHA_RE.match(value))
 
 
 def check_invalid_metrics(
@@ -186,6 +195,63 @@ def _local_decision(
             entry_id,
             "blocked",
             "Effective workload config is incomplete or inconsistent",
+            issues,
+        )
+
+    # Provenance completeness: historical-pr-backfill entries must carry real
+    # reproducibility evidence, not just a structurally valid summary JSON.
+    provenance_errors: list[str] = []
+    if metadata.get("data_source") == "real-online-historical-pr-backfill":
+        if not metadata.get("verified"):
+            provenance_errors.append(
+                "metadata.verified must be true for historical-pr-backfill entries"
+            )
+        if not metadata.get("reproducible_cmd"):
+            provenance_errors.append(
+                "metadata.reproducible_cmd must be non-empty for historical-pr-backfill entries"
+            )
+        git_commit = metadata.get("git_commit")
+        if not git_commit:
+            provenance_errors.append(
+                "metadata.git_commit must be non-empty for historical-pr-backfill entries"
+            )
+        elif not _is_full_hex_sha(git_commit):
+            provenance_errors.append(
+                "metadata.git_commit must be a 40-character hex SHA for "
+                "historical-pr-backfill entries; short hashes are not accepted"
+            )
+        runtime_provenance = metadata.get("runtime_provenance") or {}
+        for role in ("engine", "plugin"):
+            commit = (runtime_provenance.get(role) or {}).get("commit")
+            if not commit:
+                provenance_errors.append(
+                    f"metadata.runtime_provenance.{role}.commit must be "
+                    "non-empty for historical-pr-backfill entries"
+                )
+            elif not _is_full_hex_sha(commit):
+                provenance_errors.append(
+                    f"metadata.runtime_provenance.{role}.commit must be a "
+                    "40-character hex SHA for historical-pr-backfill entries; "
+                    "short hashes are not accepted"
+                )
+        env = _nested(entry, "environment")
+        if not env.get("cann_version"):
+            provenance_errors.append(
+                "environment.cann_version must be non-empty for historical-pr-backfill entries"
+            )
+        if not env.get("driver_version"):
+            provenance_errors.append(
+                "environment.driver_version must be non-empty for historical-pr-backfill entries"
+            )
+    if provenance_errors:
+        issues = tuple(
+            ValidationIssue("PROVENANCE_INCOMPLETE", message, entry_id, "error")
+            for message in provenance_errors
+        )
+        return AdmissionDecision(
+            entry_id,
+            "blocked",
+            "Provenance evidence incomplete; fix the listed fields before admission",
             issues,
         )
 

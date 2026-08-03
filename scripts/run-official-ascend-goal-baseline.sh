@@ -835,6 +835,58 @@ run_offline_client_command() {
     $effective_client_args
 }
 
+append_enforce_eager_flag() {
+  local client_args=${1:-}
+
+  if [[ "$client_args" == *"--enforce-eager"* ]]; then
+    printf '%s\n' "$client_args"
+    return 0
+  fi
+
+  if [[ -n "$client_args" ]]; then
+    printf '%s --enforce-eager\n' "$client_args"
+  else
+    printf '%s\n' "--enforce-eager"
+  fi
+}
+
+run_offline_client_command_with_aclgraph_fallback() {
+  local failure_log=""
+  local runner_status=0
+  local eager_client_args=""
+
+  failure_log=$(mktemp "${TMPDIR:-/tmp}/official-baseline-offline-client-XXXXXX.log")
+  : > "$failure_log"
+
+  # Use a pipe + ``PIPESTATUS`` instead of process substitution
+  # ``> >(tee ...)`` so the function works under macOS sandbox (where
+  # ``/dev/fd/*`` writes are blocked with "Operation not permitted").
+  set +e
+  run_offline_client_command "$CLIENT_ARGS" 2>&1 | tee -a "$failure_log"
+  runner_status=${PIPESTATUS[0]}
+  set -e
+
+  if [[ "$runner_status" -eq 0 ]]; then
+    rm -f "$failure_log"
+    return 0
+  fi
+
+  if ! grep -Fq "weak_ref_tensor" "$failure_log"; then
+    rm -f "$failure_log"
+    return "$runner_status"
+  fi
+
+  eager_client_args=$(append_enforce_eager_flag "$CLIENT_ARGS")
+  if [[ "$eager_client_args" == "$CLIENT_ARGS" ]]; then
+    rm -f "$failure_log"
+    return "$runner_status"
+  fi
+
+  echo "[goal-baseline] observed weak_ref_tensor failure during ${BENCHMARK_TYPE} benchmark; retrying with --enforce-eager" >&2
+  rm -f "$failure_log"
+  run_offline_client_command "$eager_client_args"
+}
+
 prepare_offline_benchmark_runtime() {
   local selection_status=0
   local runtime_ready_status=0
@@ -1059,6 +1111,8 @@ from vllm_hust_benchmark.official_runtime_inputs import normalize_server_paramet
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 normalized = normalize_server_parameters(payload["resolved_server_parameters"])
+if os.environ.get("OFFICIAL_FORCE_EAGER_SERVER") == "1":
+    normalized["enforce_eager"] = True
 print(
     json.dumps(
     normalized,
