@@ -6,11 +6,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
-
 SCHEMA_VERSION = "leaderboard-comparison-gap-audit/v1"
-EXCLUDED_WORKLOADS = frozenset(
-    {"burstgpt-production-replay", "tracelab-coding-agent-replay"}
-)
+EXCLUDED_WORKLOADS: frozenset[str] = frozenset()
+PRODUCTION_TRACE_PROFILE = "production-trace"
+PRODUCTION_TRACE_ATTESTATION_SCHEMA = "official-baseline-attestation/v1"
 
 
 def _load_json(path: Path) -> Any:
@@ -97,6 +96,8 @@ def _entry_reasons(
     target_workload = _mapping(target.get("workload"))
     target_hardware = _mapping(target.get("hardware"))
     target_model = _mapping(target.get("model"))
+    production_trace = target.get("profile") == PRODUCTION_TRACE_PROFILE
+    attestation = _mapping(metadata.get("verification_attestation"))
 
     if metadata.get("verified") is not True:
         reasons.append("verified-attestation-missing")
@@ -104,10 +105,18 @@ def _entry_reasons(
         reasons.append("target-binding-missing-or-mismatched")
     if metadata.get("target_version") != target.get("target_version"):
         reasons.append("target-version-missing-or-mismatched")
-    if metadata.get("workload_config_contract") != "explicit-effective/v1":
+    if (
+        not production_trace
+        and metadata.get("workload_config_contract") != "explicit-effective/v1"
+    ):
         reasons.append("explicit-effective-contract-missing")
-    if not metadata.get("reproducible_cmd"):
+    if not production_trace and not metadata.get("reproducible_cmd"):
         reasons.append("reproducible-command-missing")
+    if production_trace and not (
+        attestation.get("schema_version") == PRODUCTION_TRACE_ATTESTATION_SCHEMA
+        and attestation.get("evidence") == "repeat_suite.json"
+    ):
+        reasons.append("production-trace-attestation-missing-or-invalid")
 
     expected_identity = {
         "same_spec.spec_id": (target.get("target_id"), same_spec.get("spec_id")),
@@ -157,14 +166,15 @@ def _entry_reasons(
     metrics = _mapping(entry.get("metrics"))
     if metrics.get("error_rate") not in (0, 0.0):
         reasons.append("nonzero-or-missing-error-rate")
-    peak_mem = metrics.get("peak_mem_mb")
-    if not isinstance(peak_mem, (int, float)) or peak_mem <= 0:
-        reasons.append("peak-memory-unmeasured")
+    if not production_trace:
+        peak_mem = metrics.get("peak_mem_mb")
+        if not isinstance(peak_mem, (int, float)) or peak_mem <= 0:
+            reasons.append("peak-memory-unmeasured")
 
-    environment = _mapping(entry.get("environment"))
-    for field in ("cann_version", "driver_version", "pytorch_version"):
-        if not environment.get(field):
-            reasons.append(f"runtime-environment.{field}:missing")
+        environment = _mapping(entry.get("environment"))
+        for field in ("cann_version", "driver_version", "pytorch_version"):
+            if not environment.get(field):
+                reasons.append(f"runtime-environment.{field}:missing")
 
     provenance = _mapping(metadata.get("runtime_provenance"))
     engine_provenance = _mapping(provenance.get("engine"))
@@ -177,7 +187,10 @@ def _entry_reasons(
     if engine == "vllm-hust":
         if current_core_head and engine_provenance.get("commit") != current_core_head:
             reasons.append("current-core-head-stale")
-        if current_plugin_head and plugin_provenance.get("commit") != current_plugin_head:
+        if (
+            current_plugin_head
+            and plugin_provenance.get("commit") != current_plugin_head
+        ):
             reasons.append("current-plugin-head-stale")
     return sorted(set(reasons))
 
@@ -245,8 +258,7 @@ def build_comparison_gap_audit(
         candidates = [
             entry
             for entry in entries
-            if str(_mapping(entry.get("same_spec")).get("spec_id") or "")
-            == target_id
+            if str(_mapping(entry.get("same_spec")).get("spec_id") or "") == target_id
         ]
         by_engine = {
             engine: sorted(
@@ -307,7 +319,9 @@ def build_comparison_gap_audit(
         records.append(record)
         for side in required_sides:
             selected = baseline if side == "vllm" else current
-            reasons = ["entry-missing"] if selected is None else list(selected["reasons"])
+            reasons = (
+                ["entry-missing"] if selected is None else list(selected["reasons"])
+            )
             if selected and selected.get("eligible") and not hash_match:
                 reasons.append("cross-engine-resolved-spec-hash-mismatch")
             rerun_queue.append(
@@ -342,6 +356,7 @@ def build_comparison_gap_audit(
                 "pytorch_version",
             ],
             "require_measured_peak_memory": True,
+            "production_trace_attestation_substitutes_generic_runtime_fields": True,
         },
         "current_heads": {
             "vllm_hust": current_core_head,

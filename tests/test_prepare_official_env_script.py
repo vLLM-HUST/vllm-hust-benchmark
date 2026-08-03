@@ -1,4 +1,6 @@
 import os
+import hashlib
+import json
 import shlex
 import signal
 import subprocess
@@ -42,6 +44,17 @@ PREPARE_SCRIPT = REPO_ROOT / "scripts/prepare-official-ascend-baseline-env.sh"
 RUN_OFFICIAL_SCRIPT = REPO_ROOT / "scripts/run-official-ascend-goal-baseline.sh"
 
 
+def test_admission_only_preflight_does_not_require_conda() -> None:
+    source = PREPARE_SCRIPT.read_text(encoding="utf-8")
+
+    admission_branch = source.index(
+        'if [[ "$PREPARE_BENCHMARK_ADMISSION_ONLY" == "1" ]]'
+    )
+    conda_requirement = source.index("if ! command -v conda")
+
+    assert admission_branch < conda_requirement
+
+
 def _source_prepare_functions(snippet: str) -> str:
     script_path = shlex.quote(str(PREPARE_SCRIPT))
     return (
@@ -78,6 +91,14 @@ def _source_run_official_runtime_model_functions(snippet: str) -> str:
     script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
     return (
         r"source <(awk 'BEGIN{capture=0} /^normalized_server_parameters_json\(\) \{/ {capture=1} /^kill_server\(\) \{/ {exit} capture {print}' "
+        f"{script_path}) && {snippet}"
+    )
+
+
+def _source_worktree_functions(snippet: str) -> str:
+    script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
+    return (
+        r"source <(awk 'BEGIN{capture=0} /^ensure_worktree\(\) \{/ {capture=1} /^json2args\(\) \{/ {exit} capture {print}' "
         f"{script_path}) && {snippet}"
     )
 
@@ -565,6 +586,8 @@ def test_configure_single_card_ascend_device_derives_from_generic_visible_device
             """
             unset ASCEND_RT_VISIBLE_DEVICES
             ASCEND_VISIBLE_DEVICES=' 2, 5 '
+            CHIP_COUNT=2
+            verify_explicit_multicard_scope_idle() { return 0; }
 
             configure_single_card_ascend_device
 
@@ -578,6 +601,84 @@ def test_configure_single_card_ascend_device_derives_from_generic_visible_device
         "devices=2,5",
         "preflight=npu:0",
     ]
+
+
+def test_multicard_scope_requires_explicit_exact_cardinality() -> None:
+    missing = _run_bash(
+        _source_run_official_functions(
+            """
+            unset ASCEND_RT_VISIBLE_DEVICES ASCEND_VISIBLE_DEVICES
+            CHIP_COUNT=2
+            configure_single_card_ascend_device
+            """
+        ),
+        check=False,
+    )
+    assert missing.returncode != 0
+    assert "requires an explicit" in missing.stderr
+
+    mismatch = _run_bash(
+        _source_run_official_functions(
+            """
+            ASCEND_RT_VISIBLE_DEVICES=0
+            CHIP_COUNT=2
+            configure_single_card_ascend_device
+            """
+        ),
+        check=False,
+    )
+    assert mismatch.returncode != 0
+    assert "does not match chip_count 2" in mismatch.stderr
+
+
+def test_explicit_multicard_scope_fails_when_idle_state_cannot_be_proven() -> None:
+    result = _run_bash(
+        _source_run_official_functions(
+            """
+            ASCEND_RT_VISIBLE_DEVICES=0,1
+            CHIP_COUNT=2
+            resolve_npu_smi_bin() { return 1; }
+            configure_single_card_ascend_device
+            """
+        ),
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "required to prove" in result.stderr
+
+
+def test_explicit_multicard_scope_checks_each_npu_process_table(tmp_path: Path) -> None:
+    fake_npu_smi = tmp_path / "npu-smi"
+
+    def write_fake(*, busy: bool) -> None:
+        process_row = "| 1 0 | 4321 | python |" if busy else ""
+        fake_npu_smi.write_text(
+            "#!/bin/bash\n"
+            'if [[ "${2:-}" == "-m" ]]; then\n'
+            "  printf '0 0 0 Ascend\\n1 0 1 Ascend\\n'\n"
+            "else\n"
+            "  printf '| NPU | Process id | Process name |\\n'\n"
+            f"  printf '%s\\n' {shlex.quote(process_row)}\n"
+            "fi\n",
+            encoding="utf-8",
+        )
+        fake_npu_smi.chmod(0o755)
+
+    snippet = _source_run_official_functions(
+        f"""
+        HOST_PYTHON_BIN={shlex.quote(sys.executable)}
+        NPU_SMI_TIMEOUT_SECONDS=2
+        resolve_npu_smi_bin() {{ printf '%s\n' {shlex.quote(str(fake_npu_smi))}; }}
+        verify_explicit_multicard_scope_idle 0,1
+        """
+    )
+    write_fake(busy=False)
+    assert _run_bash(snippet).returncode == 0
+
+    write_fake(busy=True)
+    busy = _run_bash(snippet, check=False)
+    assert busy.returncode != 0
+    assert "active processes: [1]" in busy.stderr
 
 
 def test_configure_single_card_ascend_device_selects_detected_device() -> None:
@@ -942,6 +1043,78 @@ def test_wait_for_server_returns_resource_busy_status_when_log_matches(
     assert result.returncode == 0
 
 
+def test_official_runner_preserves_failed_server_wait_status() -> None:
+    script = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+    serve_block = script[script.index('case "$BENCHMARK_TYPE" in') :]
+    wait_block = serve_block[
+        serve_block.index('if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then') :
+    ]
+    wait_block = wait_block[: wait_block.index('if [[ "$server_wait_status" -eq')]
+
+    assert "else" in wait_block
+    assert "server_wait_status=$?" in wait_block
+
+
+def test_wait_for_server_fails_fast_on_fatal_startup_log(tmp_path: Path) -> None:
+    server_log = tmp_path / "server.log"
+    server_log.write_text(
+        "EngineCore failed to start\n"
+        "RuntimeError: Worker failed with error 'aclnnMoeInitRoutingCustom not in libopapi.so'\n",
+        encoding="utf-8",
+    )
+
+    result = _run_bash(
+        _source_run_official_version_functions(
+            f"""
+            READY_TIMEOUT_SECONDS=30
+            READY_STATUS_INTERVAL_SECONDS=30
+            RESOURCE_BUSY_EXIT_CODE=75
+            SERVER_PID=$$
+            SERVER_STDOUT_LOG={shlex.quote(str(server_log))}
+            curl() {{ return 1; }}
+            wait_for_server 127.0.0.1 8000
+            """
+        ),
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "fatal startup error" in result.stderr
+
+
+def test_missing_runtime_operator_is_not_classified_as_resource_busy(
+    tmp_path: Path,
+) -> None:
+    server_log = tmp_path / "server.log"
+    server_log.write_text(
+        "Engine core initialization failed\n"
+        "aclnnMoeInitRoutingCustom or aclnnMoeInitRoutingCustomGetWorkspaceSize not in libopapi.so\n",
+        encoding="utf-8",
+    )
+
+    result = _run_bash(
+        _source_run_official_version_functions(
+            f"""
+            ! server_log_indicates_resource_busy {shlex.quote(str(server_log))}
+            server_log_indicates_fatal_startup_error {shlex.quote(str(server_log))}
+            """
+        )
+    )
+
+    assert result.returncode == 0
+
+
+def test_official_runner_fail_closes_and_exports_pinned_runtime_environment() -> None:
+    script = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+
+    assert "Unsupported official runtime environment" in script
+    assert "OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT=1" in script
+    assert (
+        'export VLLM_BATCH_INVARIANT="$OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT"' in script
+    )
+    assert "unset VLLM_BATCH_INVARIANT" in script
+
+
 def test_wait_for_ascend_runtime_ready_returns_resource_busy_status(
     tmp_path: Path,
 ) -> None:
@@ -1004,6 +1177,68 @@ def test_normalized_server_parameters_json_preserves_graph_mode(
     assert result.returncode == 0
 
 
+def test_normalized_client_parameters_json_carries_offline_runtime_knobs(
+    tmp_path: Path,
+) -> None:
+    same_spec_file = tmp_path / "resolved_same_spec.json"
+    same_spec_file.write_text(
+        '{"resolved_server_parameters":{"model":"/models/qwen",'
+        '"dtype":"float16","max_model_len":32768,'
+        '"tensor_parallel_size":1},'
+        '"resolved_client_parameters":{"input_len":1024,'
+        '"output_len":128,"batch_size":8}}',
+        encoding="utf-8",
+    )
+
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
+            SAME_SPEC_FILE={shlex.quote(str(same_spec_file))}
+            BENCHMARK_TYPE=latency
+            CLIENT_READY_CHECK_TIMEOUT_SECONDS=900
+            OFFICIAL_VLLM_WORKTREE={shlex.quote(str(tmp_path / "vllm"))}
+            OFFICIAL_BENCHMARK_DATASET_ROOT={shlex.quote(str(tmp_path / "datasets"))}
+
+            client_json=$(normalized_client_parameters_json)
+            printf '%s\n' "$client_json"
+            grep -Fq '"dtype":"float16"' <<< "$client_json"
+            grep -Fq '"max_model_len":32768' <<< "$client_json"
+            grep -Fq '"tensor_parallel_size":1' <<< "$client_json"
+            grep -Fq '"model":"/models/qwen"' <<< "$client_json"
+            """
+        )
+    )
+
+    assert result.returncode == 0
+
+
+def test_official_runner_has_fail_closed_trace_replay_branch() -> None:
+    source = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+
+    assert "verify_trace_asset(get_trace_target" in source
+    assert "python -m vllm_hust_benchmark.trace_replay replay" in source
+    assert '--overflow-policy "$TRACE_OVERFLOW_POLICY"' in source
+    assert '--summary-output "$RAW_RESULT_FILE"' in source
+    assert "official trace asset not found" in source
+    assert "revision=os.environ['MODEL_REVISION']" in source
+    assert "model_artifact_provenance.json" in source
+    assert "startup_evidence.json" in source
+    assert "DECLARED_CORE_SOURCE_COMMIT" in source
+    assert "DECLARED_BACKEND_SOURCE_COMMIT" in source
+    assert "Official vLLM source commit mismatch" in source
+    assert "Official vLLM Ascend source commit mismatch" in source
+    assert "trace_replay_plan.json" in source
+    assert "--concurrent-requests" in source
+    assert "verify_trace_runtime_packages" in source
+    assert "runtime_package_provenance.json" in source
+    assert "OFFICIAL_RUNTIME_IMAGE must exactly match" in source
+    assert '"runtime_image_digest": os.environ["EXPECTED_IMAGE_DIGEST"]' in source
+    assert '.resolved_server_parameters.host // "127.0.0.1"' in source
+    assert '.resolved_client_parameters.host // "127.0.0.1"' in source
+
+
 def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
     tmp_path: Path,
 ) -> None:
@@ -1039,6 +1274,230 @@ def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
     )
 
     assert result.returncode == 0
+
+
+def test_trace_model_verification_writes_pinned_provenance(tmp_path: Path) -> None:
+    revision = "7dd20894a642a0aa287e9827cb1a1f7f91386b67"  # pragma: allowlist secret
+    model_dir = tmp_path / "model"
+    download_metadata = model_dir / ".cache/huggingface/download"
+    download_metadata.mkdir(parents=True)
+    files = {
+        "config.json": b"{}\n",
+        "tokenizer_config.json": b"{}\n",
+        "tokenizer.json": b"{}\n",
+        "model.safetensors": b"weights\n",
+    }
+    for name, contents in files.items():
+        (model_dir / name).write_bytes(contents)
+        digest = hashlib.sha256(contents).hexdigest()
+        (download_metadata / f"{name}.metadata").write_text(
+            f"{revision}\n{digest}\n", encoding="utf-8"
+        )
+
+    result_dir = tmp_path / "result"
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
+            RESULT_DIR={shlex.quote(str(result_dir))}
+            MODEL_REVISION={revision}
+            verify_runtime_model_artifact {shlex.quote(str(model_dir))}
+            """
+        )
+    )
+    provenance = json.loads(
+        (result_dir / "model_artifact_provenance.json").read_text(encoding="utf-8")
+    )
+    assert result.returncode == 0
+    assert provenance["manifest"]["revision"] == revision
+    assert len(provenance["model_artifact_digest"]) == 64
+    assert provenance["model_artifact_digest"] in result.stderr
+
+
+def test_trace_model_verification_fails_closed_on_incomplete_download(
+    tmp_path: Path,
+) -> None:
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    (model_dir / "weights.incomplete").write_bytes(b"")
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
+            RESULT_DIR={shlex.quote(str(tmp_path / "result"))}
+            MODEL_REVISION=7dd20894a642a0aa287e9827cb1a1f7f91386b67
+            verify_runtime_model_artifact {shlex.quote(str(model_dir))}
+            """
+        ),
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "incomplete Hugging Face downloads" in result.stderr
+
+
+def test_existing_worktree_must_match_ref_and_be_tracked_clean(tmp_path: Path) -> None:
+    source_repo = tmp_path / "source"
+    source_repo.mkdir()
+    _run_bash(f"git -C {shlex.quote(str(source_repo))} init -q")
+    _run_bash(
+        f"git -C {shlex.quote(str(source_repo))} config user.email test@example.com && "
+        f"git -C {shlex.quote(str(source_repo))} config user.name Test"
+    )
+    tracked = source_repo / "tracked.txt"
+    tracked.write_text("one\n", encoding="utf-8")
+    _run_bash(
+        f"git -C {shlex.quote(str(source_repo))} add tracked.txt && "
+        f"git -C {shlex.quote(str(source_repo))} commit -qm one && "
+        f"git -C {shlex.quote(str(source_repo))} tag pinned"
+    )
+    worktree = tmp_path / "worktree"
+    create = _run_bash(
+        _source_worktree_functions(
+            f"ensure_worktree {shlex.quote(str(source_repo))} "
+            f"{shlex.quote(str(worktree))} pinned"
+        )
+    )
+    assert "verified source" in create.stdout
+
+    original_commit = _run_bash(
+        f"git -C {shlex.quote(str(worktree))} rev-parse HEAD"
+    ).stdout.strip()
+    tracked.write_text("two\n", encoding="utf-8")
+    _run_bash(
+        f"git -C {shlex.quote(str(source_repo))} add tracked.txt && "
+        f"git -C {shlex.quote(str(source_repo))} commit -qm two && "
+        f"git -C {shlex.quote(str(source_repo))} tag -f pinned"
+    )
+    mismatch = _run_bash(
+        _source_worktree_functions(
+            f"ensure_worktree {shlex.quote(str(source_repo))} "
+            f"{shlex.quote(str(worktree))} pinned"
+        ),
+        check=False,
+    )
+    assert mismatch.returncode != 0
+    assert "HEAD mismatch" in mismatch.stderr
+    _run_bash(f"git -C {shlex.quote(str(source_repo))} tag -f pinned {original_commit}")
+
+    (worktree / "tracked.txt").write_text("dirty\n", encoding="utf-8")
+    dirty = _run_bash(
+        _source_worktree_functions(
+            f"ensure_worktree {shlex.quote(str(source_repo))} "
+            f"{shlex.quote(str(worktree))} pinned"
+        ),
+        check=False,
+    )
+    assert dirty.returncode != 0
+    assert "tracked modifications" in dirty.stderr
+
+
+def test_trace_startup_evidence_binds_plan_sources_model_and_results(
+    tmp_path: Path,
+) -> None:
+    result_dir = tmp_path / "result"
+    result_dir.mkdir()
+    provenance = result_dir / "model_artifact_provenance.json"
+    provenance.write_text(
+        json.dumps({"model_artifact_digest": "a" * 64}), encoding="utf-8"
+    )
+    (result_dir / "runtime_package_provenance.json").write_text(
+        json.dumps(
+            {
+                "runtime_packages": {"transformers": "5.5.4"},
+                "runtime_image": "quay.io/ascend/vllm-ascend@sha256:" + "b" * 64,
+                "runtime_image_digest": "sha256:" + "b" * 64,
+                "runtime_environment": {"VLLM_BATCH_INVARIANT": "1"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    raw = result_dir / "raw.json"
+    detail = result_dir / "detail.jsonl"
+    raw.write_text('{"ok":true}\n', encoding="utf-8")
+    detail.write_text('{"request":1}\n', encoding="utf-8")
+    expected_raw_hash = hashlib.sha256(raw.read_bytes()).hexdigest()
+    expected_detail_hash = hashlib.sha256(detail.read_bytes()).hexdigest()
+
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
+            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
+            RESULT_DIR={shlex.quote(str(result_dir))}
+            RUN_ID=run-test
+            TRACE_TARGET_ID=trace-test
+            TRACE_ASSET_PATH=/tmp/trace
+            RUNTIME_MODEL=/tmp/model
+            TRACE_MAX_MODEL_LEN=1024
+            TRACE_MAX_REQUESTS=2
+            TRACE_MAX_CONCURRENCY=1
+            TRACE_OVERFLOW_POLICY=reject
+            TRACE_TIME_SCALE=1
+            TRACE_MAX_INTERARRIVAL_S=1
+            OFFICIAL_RUNTIME_PYTHONPATH=/tmp/runtime
+            OFFICIAL_CORE_SOURCE_COMMIT={"1" * 40}
+            OFFICIAL_BACKEND_SOURCE_COMMIT={"2" * 40}
+            RAW_RESULT_FILE={shlex.quote(str(raw))}
+            TRACE_DETAIL_RESULT_FILE={shlex.quote(str(detail))}
+            run_in_official_runtime() {{
+              printf '%s\n' '{{"cohort_setting_signature":"cohort-1","cohort":{{"setting_signature_payload":{{"trace_asset_sha256":"asset-1"}}}}}}'
+            }}
+            prepare_trace_startup_evidence
+            finalize_trace_startup_evidence
+            """
+        )
+    )
+    evidence = json.loads(
+        (result_dir / "startup_evidence.json").read_text(encoding="utf-8")
+    )
+    assert result.returncode == 0
+    assert evidence["run_id"] == "run-test"
+    assert evidence["engine_source_commit"] == "1" * 40
+    assert evidence["plugin_source_commit"] == "2" * 40
+    assert evidence["model_artifact_digest"] == "a" * 64
+    assert evidence["runtime_packages"] == {"transformers": "5.5.4"}
+    assert evidence["runtime_image_digest"] == "sha256:" + "b" * 64
+    assert evidence["runtime_environment"] == {"VLLM_BATCH_INVARIANT": "1"}
+    assert evidence["trace_asset_sha256"] == "asset-1"
+    assert evidence["cohort_setting_signature"] == "cohort-1"
+    assert evidence["finished_at"]
+    assert evidence["result_hashes"] == {
+        "raw_sha256": expected_raw_hash,
+        "detail_sha256": expected_detail_hash,
+    }
+
+
+def test_trace_runtime_provenance_rejects_unpinned_image(tmp_path: Path) -> None:
+    digest = "sha256:" + "b" * 64
+    expected_image = "quay.io/ascend/vllm-ascend@" + digest
+    spec = tmp_path / "spec.json"
+    spec.write_text(
+        json.dumps(
+            {
+                "baseline_target": {
+                    "runtime_packages": {"transformers": "5.5.4"},
+                    "runtime_image": expected_image,
+                    "runtime_image_digest": digest,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            SPEC_FILE={shlex.quote(str(spec))}
+            RESULT_DIR={shlex.quote(str(tmp_path / "result"))}
+            OFFICIAL_RUNTIME_IMAGE=quay.io/ascend/vllm-ascend@sha256:{"c" * 64}
+            verify_trace_runtime_packages
+            """
+        ),
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "must exactly match" in result.stderr
 
 
 def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) -> None:

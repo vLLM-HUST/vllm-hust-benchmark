@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vllm-hust.sage.org.ai/schemas/official_baseline_recovery_audit_v1.schema.json",
+  "title": "Official baseline recovery audit",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "registry",
+    "summary",
+    "records",
+    "rerun_specs",
+    "rerun_args",
+    "rerun_command"
+  ],
+  "properties": {
+    "schema_version": {"const": "official-baseline-recovery-audit/v1"},
+    "generated_at": {"type": "string"},
+    "registry": {
+      "type": "object",
+      "required": ["version", "sha256"]
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "scanned",
+        "active_public_candidates",
+        "recoverable",
+        "rerun_required",
+        "provisional_or_specialty"
+      ]
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "submission",
+          "entry_id",
+          "target_id",
+          "disposition",
+          "reasons",
+          "exact_mismatches",
+          "evidence"
+        ],
+        "properties": {
+          "disposition": {
+            "enum": ["recoverable", "rerun-required", "not-public-candidate"]
+          }
+        }
+      }
+    },
+    "rerun_specs": {"type": "array", "items": {"type": "string"}},
+    "rerun_args": {"type": "array", "items": {"type": "string"}},
+    "rerun_command": {"type": "string"}
+  }
+}

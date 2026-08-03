@@ -570,6 +570,54 @@
         "dataset_path": "likaixin/InstructCoder",
         "num_prompts": 256
       }
+    },
+    {
+      "name": "burstgpt-production-replay",
+      "title": "BurstGPT v2.0 production arrival replay",
+      "benchmark_type": "serve",
+      "description": "Checksum-pinned BurstGPT Azure OpenAI production requests replayed with preserved arrivals, sessions, token counts, and deterministic synthetic token IDs.",
+      "tags": ["official", "online", "production-trace", "burst"],
+      "leaderboard": {
+      "workload_name": "burstgpt-production-replay",
+      "representative_business_scenario": "production-trace-replay",
+      "default_config_type": "multi_gpu",
+      "variable_token_lengths": true
+      },
+      "defaults": {
+        "trace_target_id": "burstgpt-v2-production-replay",
+        "trace_asset": "BurstGPT_3.csv",
+        "endpoint": "/v1/completions",
+        "max_requests": 1000,
+        "max_concurrency": 64,
+        "overflow_policy": "reject",
+        "time_scale": 60,
+      "max_interarrival_s": 1,
+      "cohort_context_cap": 131072
+      }
+    },
+    {
+      "name": "tracelab-coding-agent-replay",
+      "title": "TraceLab v0.0.1 coding-agent replay",
+      "benchmark_type": "serve",
+      "description": "Checksum-pinned Claude Code and Codex workload replay preserving sessions, prefix/append accounting, tool triggers, and a declared 131K context-window cohort.",
+      "tags": ["official", "online", "production-trace", "coding-agent", "long-context"],
+      "leaderboard": {
+      "workload_name": "tracelab-coding-agent-replay",
+      "representative_business_scenario": "coding-agent-trace-replay",
+      "default_config_type": "multi_gpu",
+      "variable_token_lengths": true
+      },
+      "defaults": {
+        "trace_target_id": "tracelab-v0.0.1-coding-agent-replay",
+        "trace_asset": "syfi_coding_trace.jsonl.gz",
+        "endpoint": "/v1/completions",
+        "max_requests": 1000,
+        "max_concurrency": 64,
+        "overflow_policy": "exclude-overflow",
+        "time_scale": 60,
+      "max_interarrival_s": 1,
+      "cohort_context_cap": 131072
+      }
     }
   ]
 }

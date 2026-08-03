@@ -92,7 +92,9 @@ def _read_version_value(path: Path) -> str | None:
     except OSError:
         return None
     for line in text.splitlines():
-        match = re.match(r"\s*(?:Version|version|package_version)\s*=\s*[\"']?([^\"'\s]+)", line)
+        match = re.match(
+            r"\s*(?:Version|version|package_version)\s*=\s*[\"']?([^\"'\s]+)", line
+        )
         if match:
             return match.group(1)
     return None
@@ -118,7 +120,9 @@ def _detect_cann_version() -> str | None:
             ascend_root / "ascend-toolkit/latest/version.cfg",
         )
     )
-    candidates.extend(sorted(ascend_root.glob("cann-*/compiler/version.info"), reverse=True))
+    candidates.extend(
+        sorted(ascend_root.glob("cann-*/compiler/version.info"), reverse=True)
+    )
     for candidate in candidates:
         version = _read_version_value(candidate)
         if version:
@@ -435,6 +439,26 @@ def _derive_metrics_from_benchmark_result(
         else None,
         "error_rate": float(error_rate),
     }
+    if benchmark_type == "serve":
+        metrics.update(
+            {
+                "request_throughput_rps": _safe_float(
+                    benchmark_result_payload.get("request_throughput")
+                ),
+                "e2e_latency_mean_ms": _safe_float(
+                    benchmark_result_payload.get("mean_e2e_latency_ms")
+                ),
+                "e2e_latency_p50_ms": _safe_float(
+                    benchmark_result_payload.get("p50_e2e_latency_ms")
+                ),
+                "e2e_latency_p95_ms": _safe_float(
+                    benchmark_result_payload.get("p95_e2e_latency_ms")
+                ),
+                "e2e_latency_p99_ms": _safe_float(
+                    benchmark_result_payload.get("p99_e2e_latency_ms")
+                ),
+            }
+        )
 
     # 根据 benchmark_type 覆盖不适用指标
     if benchmark_type == "throughput":
@@ -494,7 +518,9 @@ def _infer_config_type(
 
 def _infer_workload_lengths(
     scenario: ScenarioDefinition, input_length: int | None, output_length: int | None
-) -> tuple[int, int]:
+) -> tuple[int | None, int | None]:
+    if scenario.leaderboard.get("variable_token_lengths") is True:
+        return None, None
     inferred_input = input_length or int(scenario.defaults.get("input_len") or 1024)
     inferred_output = output_length or int(scenario.defaults.get("output_len") or 256)
     return inferred_input, inferred_output
@@ -657,6 +683,20 @@ def export_leaderboard_artifacts(
         scenario, input_length, output_length
     )
     workload_name = str(scenario.leaderboard.get("workload_name") or scenario.name)
+    benchmark_result_payload = payload.get("benchmark_result_payload")
+    trace_plan = (
+        benchmark_result_payload.get("trace_plan")
+        if isinstance(benchmark_result_payload, dict)
+        else None
+    )
+    trace_plan = trace_plan if isinstance(trace_plan, dict) else {}
+    trace_cohort = trace_plan.get("cohort") or {}
+    trace_settings = (
+        trace_cohort.get("setting_signature_payload")
+        if isinstance(trace_cohort, dict)
+        else {}
+    )
+    trace_settings = trace_settings if isinstance(trace_settings, dict) else {}
     representative_business_scenario = str(
         scenario.leaderboard.get("representative_business_scenario")
         or "general-serving"
@@ -685,6 +725,8 @@ def export_leaderboard_artifacts(
     dataset_name = scenario.defaults.get("dataset_name")
     if dataset_name is None:
         dataset_name = scenario.defaults.get("dataset_path")
+    if dataset_name is None and trace_plan:
+        dataset_name = trace_plan.get("target_id")
 
     artifact = {
         "entry_id": str(uuid.uuid4()),
@@ -716,6 +758,17 @@ def export_leaderboard_artifacts(
             "batch_size": batch_size,
             "concurrent_requests": concurrent_requests,
             "dataset": dataset_name,
+            "input_token_distribution": trace_plan.get("input_tokens"),
+            "output_token_distribution": trace_plan.get("output_tokens"),
+            "cohort_setting_signature": trace_plan.get("cohort_setting_signature"),
+            "arrival_transform": (
+                {
+                    "time_scale": trace_settings.get("time_scale"),
+                    "max_interarrival_s": trace_settings.get("max_interarrival_s"),
+                }
+                if trace_plan
+                else None
+            ),
         },
         "metrics": metrics,
         "constraints": {

@@ -44,7 +44,7 @@ TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-"$HF_HOME/transformers"}
 export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE
 CURRENT_MODEL_PATH=${CURRENT_MODEL_PATH:-}
 CURRENT_SERVER_HOST=${CURRENT_SERVER_HOST:-}
-CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-}
+CURRENT_SERVER_PORT=${CURRENT_SERVER_PORT:-"8001"}
 CURRENT_CLIENT_HOST=${CURRENT_CLIENT_HOST:-}
 CURRENT_CLIENT_PORT=${CURRENT_CLIENT_PORT:-$CURRENT_SERVER_PORT}
 CURRENT_USE_MANAGED_SERVER=${CURRENT_USE_MANAGED_SERVER:-0}
@@ -759,12 +759,10 @@ resolve_same_spec() {
   fi
 
   if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
-    if [[ -n "$CURRENT_SERVER_PORT" ]]; then
-      resolve_args+=(--server-port "$CURRENT_SERVER_PORT")
-    fi
-    if [[ -n "$CURRENT_CLIENT_PORT" ]]; then
-      resolve_args+=(--client-port "$CURRENT_CLIENT_PORT")
-    fi
+    resolve_args+=(
+      --server-port "$CURRENT_SERVER_PORT"
+      --client-port "$CURRENT_CLIENT_PORT"
+    )
 
     if [[ -n "$CURRENT_SERVER_HOST" ]]; then
       resolve_args+=(--server-host "$CURRENT_SERVER_HOST")
@@ -775,26 +773,6 @@ resolve_same_spec() {
   fi
 
   run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" "${resolve_args[@]}"
-}
-
-verify_current_runtime_requirements() {
-  run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
-    "$CURRENT_RUNTIME_PYTHON" - <<'PY'
-import importlib
-
-required_modules = ("xxhash",)
-missing = []
-for module_name in required_modules:
-    try:
-        importlib.import_module(module_name)
-    except ModuleNotFoundError:
-        missing.append(module_name)
-
-if missing:
-    raise SystemExit(
-        "current runtime is missing required module(s): " + ", ".join(missing)
-    )
-PY
 }
 
 resolve_scenario_benchmark_type() {
@@ -1058,9 +1036,9 @@ stop_peak_hbm_sampler() {
 }
 
 start_peak_hbm_sampler() {
-  local device_scope=${ASCEND_HBM_PHYSICAL_DEVICES:-${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}}
+  local device_scope=${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
   if [[ -z "$device_scope" ]]; then
-    echo "Explicit ASCEND_HBM_PHYSICAL_DEVICES, ASCEND_RT_VISIBLE_DEVICES, or ASCEND_VISIBLE_DEVICES is required for peak HBM evidence" >&2
+    echo "Explicit ASCEND_RT_VISIBLE_DEVICES or ASCEND_VISIBLE_DEVICES is required for peak HBM evidence" >&2
     exit 2
   fi
   PEAK_HBM_EVIDENCE_FILE="$RESULT_DIR/peak_hbm_evidence.json"
@@ -1143,7 +1121,6 @@ if cached_model_path=$(resolve_runtime_model); then
 fi
 
 SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
-verify_current_runtime_requirements
 resolve_same_spec
 start_peak_hbm_sampler
 

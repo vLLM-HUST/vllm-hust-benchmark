@@ -34,10 +34,7 @@
       "properties": {
         "excluded_workloads": {
           "type": "array",
-          "const": [
-            "burstgpt-production-replay",
-            "tracelab-coding-agent-replay"
-          ]
+          "const": []
         },
         "minimum_successful_repeats": {"const": 3},
         "require_verified": {"const": true},
@@ -47,7 +44,10 @@
           "type": "array",
           "items": {"type": "string"}
         },
-        "require_measured_peak_memory": {"const": true}
+        "require_measured_peak_memory": {"const": true},
+        "production_trace_attestation_substitutes_generic_runtime_fields": {
+          "const": true
+        }
       }
     },
     "current_heads": {

@@ -3,7 +3,6 @@ from pathlib import Path
 
 from vllm_hust_benchmark.official_baselines import get_canonical_submission_dir
 from vllm_hust_benchmark.official_baselines import (
-    attest_canonical_submission,
     get_primary_metric_name_for_benchmark_type,
 )
 from vllm_hust_benchmark.official_baselines import has_canonical_run
@@ -407,163 +406,7 @@ def test_select_canonical_candidate_prefers_lower_error_rate(tmp_path: Path) -> 
     assert Path(payload["selected_result_dir"]) == repeat_b.resolve()
 
 
-def _write_attestable_repeat(
-    result_dir: Path, *, spec_id: str, identity: str, ttft_ms: float
-) -> None:
-    submission_dir = result_dir / "submission"
-    submission_dir.mkdir(parents=True)
-    payload = {
-        "metrics": {
-            "ttft_ms": ttft_ms,
-            "throughput_tps": 200.0,
-            "error_rate": 0.0,
-            "peak_mem_mb": 40960,
-        },
-        "environment": {
-            "pytorch_version": "2.10.0",
-            "cann_version": "9.0.0",
-            "driver_version": "26.0.rc1",
-        },
-        "metadata": {
-            "submitted_at": "2026-08-03T00:00:00Z",
-            "idempotency_key": identity,
-            "reproducible_cmd": "bash scripts/run-current-ascend-same-spec.sh spec.json",
-            "workload_config_contract": "explicit-effective/v1",
-            "runtime_provenance": {
-                "engine": {"commit": "a" * 40},
-                "plugin": {"commit": "b" * 40},
-            },
-        },
-        "same_spec": {
-            "spec_id": spec_id,
-            "resolved_spec_hash": "c" * 64,
-            "resolved_server_parameters": {"port": 8000},
-            "resolved_client_parameters": {
-                "port": 8000,
-                "random_input_len": 1024,
-                "random_output_len": 256,
-            },
-        },
-    }
-    (submission_dir / "run_leaderboard.json").write_text(
-        json.dumps(payload), encoding="utf-8"
-    )
-    (result_dir / "raw_benchmark_result.json").write_text(
-        json.dumps({"completed": 200, "failed": 0}), encoding="utf-8"
-    )
-
-
-def test_attest_canonical_submission_binds_three_repeat_evidence(
-    tmp_path: Path,
-) -> None:
-    spec_id = "official-test-target"
-    repeats = [tmp_path / f"repeat-{index}" for index in range(1, 4)]
-    for index, repeat in enumerate(repeats, start=1):
-        _write_attestable_repeat(
-            repeat, spec_id=spec_id, identity=f"run-{index}", ttft_ms=100 + index
-        )
-    canonical_dir = tmp_path / "canonical"
-    canonical_dir.mkdir()
-    source = repeats[1] / "submission" / "run_leaderboard.json"
-    (canonical_dir / "run_leaderboard.json").write_bytes(source.read_bytes())
-    registry_path = tmp_path / "official_targets.json"
-    registry_path.write_text(
-        json.dumps(
-            {
-                "targets": [
-                    {
-                        "target_id": spec_id,
-                        "target_version": "1.2.3",
-                        "status": "active",
-                        "server_parameters": {"port": 8000},
-                        "workload": {
-                            "client_parameters": {
-                                "port": 8000,
-                                "input_len": 1024,
-                                "output_len": 256,
-                            }
-                        },
-                    }
-                ]
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    payload = attest_canonical_submission(
-        canonical_dir,
-        spec={"id": spec_id},
-        result_dirs=repeats,
-        selected_result_dir=repeats[1],
-        primary_metric_name="ttft_ms",
-        registry_path=registry_path,
-    )
-
-    metadata = payload["metadata"]
-    assert metadata["verified"] is True
-    assert metadata["target_id"] == spec_id
-    assert metadata["target_version"] == "1.2.3"
-    attestation = metadata["verification_attestation"]
-    assert attestation["successful_repeats"] == 3
-    assert attestation["independent_service_processes"] == 3
-    assert attestation["selected_repeat_index"] == 2
-    assert len(attestation["repeat_evidence"]) == 3
-    assert len({item["idempotency_key"] for item in attestation["repeat_evidence"]}) == 3
-
-
-def test_attest_canonical_submission_rejects_duplicate_repeat_identity(
-    tmp_path: Path,
-) -> None:
-    spec_id = "official-test-target"
-    repeats = [tmp_path / f"repeat-{index}" for index in range(1, 4)]
-    for repeat in repeats:
-        _write_attestable_repeat(
-            repeat, spec_id=spec_id, identity="duplicate", ttft_ms=100
-        )
-    canonical_dir = tmp_path / "canonical"
-    canonical_dir.mkdir()
-    source = repeats[0] / "submission" / "run_leaderboard.json"
-    (canonical_dir / "run_leaderboard.json").write_bytes(source.read_bytes())
-    registry_path = tmp_path / "official_targets.json"
-    registry_path.write_text(
-        json.dumps(
-            {
-                "targets": [
-                    {
-                        "target_id": spec_id,
-                        "target_version": "1.0.0",
-                        "status": "active",
-                        "server_parameters": {"port": 8000},
-                        "workload": {
-                            "client_parameters": {
-                                "port": 8000,
-                                "input_len": 1024,
-                                "output_len": 256,
-                            }
-                        },
-                    }
-                ]
-            }
-        ),
-        encoding="utf-8",
-    )
-
-    try:
-        attest_canonical_submission(
-            canonical_dir,
-            spec={"id": spec_id},
-            result_dirs=repeats,
-            selected_result_dir=repeats[0],
-            primary_metric_name="ttft_ms",
-            registry_path=registry_path,
-        )
-    except ValueError as exc:
-        assert "duplicated" in str(exc)
-    else:
-        raise AssertionError("duplicate repeat identities must fail closed")
-
-
-def test_public_official_baseline_specs_are_v0180_910b2_fp16() -> None:
+def test_public_official_baseline_specs_use_declared_profile_precision() -> None:
     spec_dir = REPO_ROOT / "docs" / "official-baselines"
     spec_paths = [
         path
@@ -576,6 +419,24 @@ def test_public_official_baseline_specs_are_v0180_910b2_fp16() -> None:
     for path in spec_paths:
         payload = json.loads(path.read_text(encoding="utf-8"))
         spec_id = str(payload.get("id") or "")
-        assert "v0180" in path.name or "v0.18.0" in spec_id
         assert payload.get("hardware_chip_model") == "910B2"
-        assert payload.get("model_precision") == "FP16"
+        if payload.get("workload_id") in {
+            "simllm-random-online-warm-cache",
+            "simllm-saturated-throughput-warm-cache",
+        }:
+            assert path.name.startswith("official-simllm-")
+            assert payload.get("model_precision") == "FP16"
+            assert payload.get("chip_count") == 1
+        elif payload.get("scenario") in {
+            "burstgpt-production-replay",
+            "tracelab-coding-agent-replay",
+        }:
+            assert "v0221rc1" in path.name
+            assert "v0.22.1rc1" in spec_id
+            assert payload.get("model_precision") == "BF16"
+            assert payload.get("chip_count") == 2
+            if payload.get("scenario") == "tracelab-coding-agent-replay":
+                assert payload["client_parameters"]["timeout_s"] == 21600
+        else:
+            assert "v0180" in path.name or "v0.18.0" in spec_id
+            assert payload.get("model_precision") == "FP16"

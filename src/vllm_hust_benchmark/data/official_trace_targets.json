@@ -1,0 +1,83 @@
+{
+  "schema_version": "official-trace-target-registry/v1",
+  "registry_version": "1.0.0",
+  "effective_from": "2026-08-02",
+  "targets": [
+    {
+      "id": "burstgpt-v2-production-replay",
+      "title": "BurstGPT v2.0 Azure OpenAI production replay",
+      "status": "active",
+      "intended_use": "public-leaderboard-production-trace",
+      "source": {
+        "repository": "https://github.com/HPMLL/BurstGPT",
+        "release": "v2.0",
+        "asset": "BurstGPT_3.csv",
+        "url": "https://github.com/HPMLL/BurstGPT/releases/download/v2.0/BurstGPT_3.csv",
+        "size_bytes": 231682327,
+        "sha256": "2299986a07388aa303ec2c41d1131e756db650a39ed6ef9dfe7cc3d7f9a43b8f",
+        "license": "CC-BY-4.0",
+        "citation": "https://doi.org/10.1145/3711896.3737413"
+      },
+      "format": {
+        "kind": "csv",
+        "arrival": "Timestamp",
+        "session": "Session ID",
+        "input_tokens": "Request tokens",
+        "output_tokens": "Response tokens",
+        "observed_latency": "Elapsed time",
+        "model": "Model"
+      },
+      "replay_contract": {
+        "arrival_unit": "seconds",
+        "preserve_arrival_order": true,
+        "preserve_session_identity": true,
+        "payload": "deterministic-synthetic-token-ids",
+        "limitations": [
+          "The public trace contains token counts, not prompt or response text.",
+          "Session identity is preserved, but exact cross-turn prefix overlap is not published.",
+          "Rows with zero response tokens are source failures and are not replayable inference requests."
+        ]
+      }
+    },
+    {
+      "id": "tracelab-v0.0.1-coding-agent-replay",
+      "title": "TraceLab v0.0.1 Claude Code and Codex replay",
+      "status": "active",
+      "intended_use": "public-leaderboard-production-trace",
+      "source": {
+        "repository": "https://github.com/uw-syfi/TraceLab",
+        "release": "v0.0.1",
+        "asset": "syfi_coding_trace.jsonl.gz",
+        "url": "https://github.com/uw-syfi/TraceLab/releases/download/v0.0.1/syfi_coding_trace.jsonl.gz",
+        "size_bytes": 53601226,
+        "sha256": "9d265eae69a31cae203848bea936f018148eed7ca8bf56050c5abe96da0b4e6b",
+        "license": "CC-BY-4.0",
+        "citation": "https://arxiv.org/abs/2606.30560"
+      },
+      "format": {
+        "kind": "jsonl.gz",
+        "session": "session_id",
+        "input_tokens": "input_tokens_total",
+        "prefix_tokens": "prefix_tokens",
+        "append_tokens": "newly_append_tokens",
+        "output_tokens": "output_tokens",
+        "model": "model",
+        "provider": "provider",
+        "timing_events": "timing_events"
+      },
+      "replay_contract": {
+        "arrival_unit": "rfc3339",
+        "preserve_arrival_order": true,
+        "preserve_session_identity": true,
+        "preserve_prefix_append_accounting_fields": true,
+        "preserve_tool_trigger_class": true,
+        "payload": "deterministic-synthetic-token-ids",
+        "limitations": [
+          "The sanitized public trace contains token and tool metadata, not prompt, response, or tool-result text.",
+          "Synthetic payloads keep the reported prefix stable per session and make the reported append request-specific, but cannot reproduce exact provider cache identity.",
+          "Model context overflow fails closed unless truncation is explicitly requested."
+        ]
+      }
+    }
+  ]
+}

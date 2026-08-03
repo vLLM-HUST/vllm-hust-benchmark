@@ -1101,6 +1101,16 @@ cleanup_benchmark_residual_processes() {
   echo "[official-env] benchmark admission preflight passed: no residual benchmark processes"
 }
 
+if [[ "$PREPARE_BENCHMARK_ADMISSION_ONLY" == "1" ]]; then
+  if [[ "$SKIP_BENCHMARK_RESIDUAL_CLEANUP" == "1" ]]; then
+    echo "[official-env] skipping benchmark admission cleanup for environment preparation"
+  else
+    cleanup_benchmark_residual_processes
+  fi
+  echo "[official-env] admission-only mode completed"
+  exit 0
+fi
+
 if ! command -v conda >/dev/null 2>&1; then
   echo "conda is required" >&2
   exit 2
@@ -1133,11 +1143,6 @@ if [[ "$SKIP_BENCHMARK_RESIDUAL_CLEANUP" == "1" ]]; then
   echo "[official-env] skipping benchmark admission cleanup for environment preparation"
 else
   cleanup_benchmark_residual_processes
-fi
-
-if [[ "$PREPARE_BENCHMARK_ADMISSION_ONLY" == "1" ]]; then
-  echo "[official-env] admission-only mode completed"
-  exit 0
 fi
 
 ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_REF"
