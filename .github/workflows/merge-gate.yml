@@ -1,0 +1,405 @@
+name: Merge Gate
+
+# issue #95 Layer 2 — PR 合并前强制 paired real-online 性能证据的 CI 接线。
+#
+# 当前为 mock 模式：不依赖真实 NPU，用 generate_mock_merge_gate_artifacts.py 产出
+# 各场景的 mock artifact，验证 merge-gate-check 的 CI 接线正确性。
+#
+# 真实模式（real-mode job）等 #103 自托管 Ascend runner 就绪后启用：
+#   1. 在 runner 上跑 paired benchmark（base fork point + head commit）
+#   2. 产出两个 run_leaderboard.json
+#   3. 调用 merge-gate-check 判定
+#
+# 跨仓库触发（core/Ascend PR → benchmark 仓库）走 repository_dispatch，
+# 等 Layer 3 跨仓库 PR 模板 + required check 注册时接入。
+
+'on':
+  # 跨仓库触发：core/Ascend 仓库的 PR 通过 repository_dispatch 触发本 workflow
+  repository_dispatch:
+    types: [merge-gate-check]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "运行模式：mock 用 mock artifact 验证接线；real 用真实 paired benchmark（需 #103）"
+        required: true
+        type: choice
+        default: mock
+        options:
+          - mock
+          - real
+      scenario:
+        description: "mock 模式场景（real 模式忽略）"
+        required: false
+        type: choice
+        default: pass
+        options:
+          - pass
+          - fail_config_drift
+          - fail_config_drift_head_only
+          - fail_data_source
+          - fail_unpaired_spec
+          - fail_3b_not_14b
+          - fail_missing_artifact
+          - fail_missing_target_declaration
+          - skip_docs_only
+          - skip_docs_only_no_approver
+          - specialty_valid
+          - specialty_no_reason
+          - fail_registry_hash_mismatch
+          - all
+      pr_repo:
+        description: "PR 所在仓库（如 vllm-hust），用于日志展示"
+        required: false
+        type: string
+        default: "vllm-hust"
+      pr_number:
+        description: "PR 编号，用于日志展示"
+        required: false
+        type: string
+        default: "193"
+      pr_head_sha:
+        description: "PR head commit SHA"
+        required: false
+        type: string
+        default: "abc1234"
+      pr_base_sha:
+        description: "PR base (fork point) SHA"
+        required: false
+        type: string
+        default: "def5678"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.mode || github.event.client_payload.mode || 'mock' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  checks: write  # issue #95 §5.2.2: 回写 check status 到 core/Ascend PR
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # mock 模式：验证 merge-gate-check 的 CI 接线正确性，不依赖真实 NPU
+  # C2 fix: repository_dispatch 触发时 github.event.inputs 为 null，
+  #         必须从 github.event.client_payload 读取，否则 job 不运行（check 被跳过）
+  # ---------------------------------------------------------------------------
+  mock-merge-gate-check:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'mock' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SCENARIO: ${{ github.event.inputs.scenario || 'pass' }}
+      PR_REPO: ${{ github.event.inputs.pr_repo || 'vllm-hust' }}
+      PR_NUMBER: ${{ github.event.inputs.pr_number || '193' }}
+      PR_HEAD_SHA: ${{ github.event.inputs.pr_head_sha || 'abc1234' }}
+      PR_BASE_SHA: ${{ github.event.inputs.pr_base_sha || 'def5678' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install benchmark repo
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Resolve scenarios to run
+        id: scenarios
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$SCENARIO" == "all" ]]; then
+            echo "list=pass fail_config_drift fail_config_drift_head_only fail_data_source fail_unpaired_spec fail_3b_not_14b fail_missing_artifact fail_missing_target_declaration skip_docs_only skip_docs_only_no_approver specialty_valid specialty_no_reason fail_registry_hash_mismatch" >> "$GITHUB_OUTPUT"
+          else
+            echo "list=$SCENARIO" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run mock merge gate check (per scenario)
+        id: check
+        shell: bash
+        env:
+          SCENARIO_LIST: ${{ steps.scenarios.outputs.list }}
+        run: |
+          set -uo pipefail
+          mkdir -p artifacts/merge-gate
+          overall_rc=0
+          for scenario in $SCENARIO_LIST; do
+            echo "=== Scenario: $scenario ==="
+            mock_dir="artifacts/merge-gate/$scenario"
+            python scripts/generate_mock_merge_gate_artifacts.py \
+              --scenario "$scenario" --output-dir "$mock_dir"
+
+            manifest="$mock_dir/scenario_manifest.json"
+            expected=$(python -c "import json; print(json.load(open('$manifest'))['expected_disposition'])")
+            expected_head_status=$(python -c "import json; m=json.load(open('$manifest')); print(m.get('expected_head_status','accepted'))" 2>/dev/null || echo "accepted")
+            labels=$(python -c "import json; m=json.load(open('$manifest')); print(','.join(m.get('pr_labels',[])))" 2>/dev/null || echo "")
+            specialty_spec=$(python -c "import json; m=json.load(open('$manifest')); print(m.get('specialty_spec','') or '')" 2>/dev/null || echo "")
+            specialty_reason=$(python -c "import json; m=json.load(open('$manifest')); print(m.get('specialty_reason','') or '')" 2>/dev/null || echo "")
+            declared_target=$(python -c "import json; m=json.load(open('$manifest')); print(m.get('declared_target_id','') or '')" 2>/dev/null || echo "")
+            declared_target_version=$(python -c "import json; m=json.load(open('$manifest')); print(m.get('declared_target_version','') or '')" 2>/dev/null || echo "")
+            declared_profile_id=$(python -c "import json; m=json.load(open('$manifest')); print(m.get('declared_profile_id','') or '')" 2>/dev/null || echo "")
+            skip_approver=$(python -c "import json; m=json.load(open('$manifest')); print(m.get('skip_approver','') or '')" 2>/dev/null || echo "")
+
+            base_artifact=""
+            if [[ -f "$mock_dir/base/run_leaderboard.json" ]]; then
+              base_artifact="$mock_dir/base/run_leaderboard.json"
+            fi
+            head_artifact=""
+            if [[ -f "$mock_dir/head/run_leaderboard.json" ]]; then
+              head_artifact="$mock_dir/head/run_leaderboard.json"
+            fi
+
+            # 对应场景的 head CI 状态
+            base_status="accepted"
+            head_status="accepted"
+            if [[ "$expected_head_status" == "missing" ]]; then
+              head_status="missing"
+            fi
+
+            cli_args=(
+              merge-gate-check
+              --repo "$PR_REPO"
+              --pr-number "$PR_NUMBER"
+              --head-sha "$PR_HEAD_SHA"
+              --base-sha "$PR_BASE_SHA"
+              --base-status "$base_status"
+              --head-status "$head_status"
+              --decision-output "$mock_dir/merge-gate-decision.json"
+            )
+            [[ -n "$base_artifact" ]] && cli_args+=(--base-artifact "$base_artifact")
+            [[ -n "$head_artifact" ]] && cli_args+=(--head-artifact "$head_artifact")
+            [[ -n "$labels" ]] && cli_args+=(--labels "$labels")
+            [[ -n "$specialty_spec" ]] && cli_args+=(--specialty-spec "$specialty_spec")
+            [[ -n "$specialty_reason" ]] && cli_args+=(--specialty-reason "$specialty_reason")
+            [[ -n "$declared_target" ]] && cli_args+=(--declared-target-id "$declared_target")
+            [[ -n "$declared_target_version" ]] && cli_args+=(--declared-target-version "$declared_target_version")
+            [[ -n "$declared_profile_id" ]] && cli_args+=(--declared-profile-id "$declared_profile_id")
+            [[ -n "$skip_approver" ]] && cli_args+=(--skip-approver "$skip_approver")
+
+            set +e
+            python -m vllm_hust_benchmark.cli "${cli_args[@]}"
+            rc=$?
+            set -e
+
+            actual=$(python -c "import json; print(json.load(open('$mock_dir/merge-gate-decision.json'))['disposition'])")
+            echo "  expected=$expected actual=$actual exit=$rc"
+
+            # pass/skip 期望 exit 0；fail 期望 exit 1
+            if [[ "$expected" == "pass" || "$expected" == "skip" ]]; then
+              if [[ $rc -ne 0 ]]; then
+                echo "  ❌ FAIL: expected exit 0, got $rc"
+                overall_rc=1
+              elif [[ "$actual" != "$expected" ]]; then
+                echo "  ❌ FAIL: expected disposition=$expected, got $actual"
+                overall_rc=1
+              else
+                echo "  ✅ OK"
+              fi
+            elif [[ "$expected" == "fail" ]]; then
+              if [[ $rc -ne 1 ]]; then
+                echo "  ❌ FAIL: expected exit 1 (fail), got $rc"
+                overall_rc=1
+              elif [[ "$actual" != "fail" ]]; then
+                echo "  ❌ FAIL: expected disposition=fail, got $actual"
+                overall_rc=1
+              else
+                echo "  ✅ OK"
+              fi
+            fi
+            echo ""
+          done
+          exit $overall_rc
+
+      - name: Upload merge gate artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: merge-gate-mock-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/merge-gate/
+          if-no-files-found: warn
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # real 模式：在自托管 Ascend runner 上跑真实 paired benchmark。
+  # 阻塞于 #103（自托管 runner 就绪 + NPU 残留占用处理）。
+  # 接线骨架已就绪，#103 就绪后取消注释并在 step 中填入真实 benchmark 命令。
+  # ---------------------------------------------------------------------------
+  real-merge-gate-check:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'real' }}
+    runs-on:
+      - self-hosted
+      - ARM64
+      - Ascend
+    timeout-minutes: 120
+    env:
+      PR_REPO: ${{ github.event.inputs.pr_repo || 'vllm-hust' }}
+      PR_NUMBER: ${{ github.event.inputs.pr_number || '193' }}
+      PR_HEAD_SHA: ${{ github.event.inputs.pr_head_sha || 'abc1234' }}
+      PR_BASE_SHA: ${{ github.event.inputs.pr_base_sha || 'def5678' }}
+    steps:
+      - name: Block on #103 readiness
+        shell: bash
+        run: |
+          echo "❌ real 模式阻塞于 issue #103（自托管 Ascend runner 就绪）"
+          echo "等 #103 就绪后，在此 step 之前填入："
+          echo "  1. checkout PR base + head commit"
+          echo "  2. 在自托管 runner 上跑 paired benchmark（base fork point + head commit）"
+          echo "  3. 产出 base/head run_leaderboard.json"
+          echo "  4. 调用 python -m vllm_hust_benchmark.cli merge-gate-check"
+          exit 1
+
+  # ---------------------------------------------------------------------------
+  # 跨仓库触发（repository_dispatch）：core/Ascend PR 通过 repository_dispatch
+  # 触发本 job。C2 fix: 单独的 job 处理 repository_dispatch 事件，
+  # 从 github.event.client_payload 读取 PR 信息。
+  # 当前为 mock 模式（用 mock artifact 验证接线）。#103 就绪后改为真实 benchmark。
+  # ---------------------------------------------------------------------------
+  cross-repo-merge-gate-check:
+    if: ${{ github.event_name == 'repository_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PR_REPO: ${{ github.event.client_payload.pr_repo }}
+      PR_NUMBER: ${{ github.event.client_payload.pr_number }}
+      PR_HEAD_SHA: ${{ github.event.client_payload.pr_head_sha }}
+      PR_BASE_SHA: ${{ github.event.client_payload.pr_base_sha }}
+      PR_LABELS: ${{ github.event.client_payload.pr_labels }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install benchmark repo
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Run mock merge gate check (cross-repo trigger)
+        id: gate-check
+        shell: bash
+        run: |
+          set -uo pipefail
+          mkdir -p artifacts/merge-gate/cross-repo
+          # 当前用 mock pass 场景验证跨仓库接线。#103 就绪后改为真实 paired benchmark。
+          python scripts/generate_mock_merge_gate_artifacts.py \
+            --scenario pass --output-dir artifacts/merge-gate/cross-repo
+
+          python -m vllm_hust_benchmark.cli merge-gate-check \
+            --repo "$PR_REPO" \
+            --pr-number "$PR_NUMBER" \
+            --head-sha "$PR_HEAD_SHA" \
+            --base-sha "$PR_BASE_SHA" \
+            --base-artifact artifacts/merge-gate/cross-repo/base/run_leaderboard.json \
+            --head-artifact artifacts/merge-gate/cross-repo/head/run_leaderboard.json \
+            --decision-output artifacts/merge-gate/cross-repo/merge-gate-decision.json \
+            ${PR_LABELS:+--labels "$PR_LABELS"}
+
+      - name: Write check status to cross-repo PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.MERGE_GATE_CHECK_TOKEN }}
+          PR_REPO: ${{ env.PR_REPO }}
+          PR_HEAD_SHA: ${{ env.PR_HEAD_SHA }}
+          PR_NUMBER: ${{ env.PR_NUMBER }}
+          DECISION_FILE: artifacts/merge-gate/cross-repo/merge-gate-decision.json
+        run: |
+          set -uo pipefail
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::warning::MERGE_GATE_CHECK_TOKEN secret not configured;"
+            echo "::warning::skipping check writeback to $PR_REPO#$PR_NUMBER."
+            echo "::warning::Configure a PAT (or GitHub App token) with checks:write"
+            echo "::warning::on $PR_REPO, add it as benchmark repo secret MERGE_GATE_CHECK_TOKEN."
+            exit 0
+          fi
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.request
+          import urllib.error
+
+          token = os.environ["GH_TOKEN"]
+          repo = os.environ["PR_REPO"]
+          head_sha = os.environ["PR_HEAD_SHA"]
+          pr_number = os.environ["PR_NUMBER"]
+          decision_file = os.environ["DECISION_FILE"]
+
+          try:
+              with open(decision_file, encoding="utf-8") as f:
+                  decision = json.load(f)
+              disposition = decision.get("disposition", "fail")
+              reason = decision.get("reason", "")
+          except (OSError, json.JSONDecodeError):
+              disposition, reason = "fail", "no decision file produced (fail closed)"
+
+          # Issue #95 review feedback: mock mode must NOT write "success"
+          # (could be mistaken for real evidence). Use "neutral" for pass in
+          # mock mode; only real mode (post-#103) writes "success".
+          conclusion_map = {"pass": "neutral", "skip": "neutral", "fail": "failure"}
+          conclusion = conclusion_map.get(disposition, "failure")
+          # 当前总是 mock 模式（#103 就绪后移除 MOCK MODE 标注）
+          title = f"merge-gate-check: {disposition} (MOCK MODE)"
+          summary = (
+              f"disposition={disposition}\nreason={reason}\n\n"
+              "MOCK MODE: 当前用 mock artifact 验证跨仓库接线。"
+              "#103 就绪后改为真实 paired benchmark 判定。"
+          )
+
+          payload = json.dumps({
+              "name": "merge-gate-check",
+              "head_sha": head_sha,
+              "status": "completed",
+              "conclusion": conclusion,
+              "output": {
+                  "title": title,
+                  "summary": summary,
+              },
+              "details_url": (
+                  f"https://github.com/{os.environ.get('GITHUB_REPOSITORY','')}"
+                  f"/actions/runs/{os.environ.get('GITHUB_RUN_ID','')}"
+              ),
+          }).encode("utf-8")
+
+          url = f"https://api.github.com/repos/{repo}/check-runs"
+          req = urllib.request.Request(
+              url,
+              data=payload,
+              headers={
+                  "Authorization": f"token {token}",
+                  "Accept": "application/vnd.github.v3+json",
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req) as resp:
+                  body = json.loads(resp.read().decode("utf-8"))
+              print(f"check run created: {body.get('html_url', '')}")
+              print(f"  conclusion={conclusion} disposition={disposition}")
+          except urllib.error.HTTPError as exc:
+              print(f"::error::failed to create check run: HTTP {exc.code}")
+              print(f"::error::{exc.read().decode('utf-8', 'replace')}")
+              # 不让 check writeback 失败导致整个 workflow fail
+              # 判定本身已完成（step gate-check 已通过/失败）
+              sys.exit(0)
+          PY
+
+      - name: Upload merge gate artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: merge-gate-cross-repo-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/merge-gate/
+          if-no-files-found: warn
+          retention-days: 14

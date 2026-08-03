@@ -1969,6 +1969,26 @@ def build_run_id(workload: str, hust_commit: str) -> str:
     return f"single-gpu-backfill-{workload}-{hust_commit[:9]}-{today}"
 
 
+def build_paired_run_id(
+    pr_number: int,
+    side: str,
+    workload: str,
+    hust_commit: str,
+    ascend_commit: str,
+) -> str:
+    """Build the submission directory name for a paired base/head PR rerun.
+
+    The two reruns in a pair share ``pr_number``, ``workload`` and
+    ``ascend_commit``; only ``side`` ("base" or "head") and ``hust_commit``
+    differ.  The 10-char prefixes of the SHAs make the directory name short
+    enough to read while still disambiguating revisions in the leaderboard.
+    """
+    return (
+        f"historical-pr-backend-pr-{pr_number}-{side}-{workload}-"
+        f"{hust_commit[:10]}-{ascend_commit[:10]}"
+    )
+
+
 def _run_bench_with_retry(
     cmd: list[str], env: dict[str, str], output_dir: Path, bench_log: Path
 ) -> tuple[subprocess.CompletedProcess, Path]:
@@ -2887,6 +2907,7 @@ def run_cell(
     npu_id: int = 0,
     *,
     allow_plugin_override: bool = False,
+    run_id_override: str | None = None,
 ) -> dict[str, Any]:
     if ascend_commit is None:
         # Prefer snapshot -> time-align before the blind HEAD fallback so a
@@ -3013,7 +3034,7 @@ def run_cell(
                 )
 
         raw = run_vllm_bench(workload, hust_commit, work_dir / "bench", npu_id=npu_id)
-        run_id = build_run_id(workload, hust_commit)
+        run_id = run_id_override or build_run_id(workload, hust_commit)
         sub_dir = submit_artifact(workload, hust_commit, ascend_commit, run_id, raw)
 
         # Reject results where all requests failed (error_rate == 1.0).
@@ -3179,6 +3200,140 @@ def _resolve_latest_hust_commit() -> str:
     return out.stdout.strip()
 
 
+def _cmd_run_paired(
+    args: argparse.Namespace, state: dict[str, Any], npu_id: int
+) -> int:
+    """Paired PR rerun: base vs head with a shared plugin commit / NPU.
+
+    Validates the paired-mode preconditions (``--pr-number`` and ``--workload``
+    required, ``--commit`` forbidden), resolves both refs to full SHAs, then
+    runs ``run_cell`` twice — base first, then head — passing a
+    ``run_id_override`` derived from :func:`build_paired_run_id` so the two
+    submission directories follow the issue #105 naming contract.
+    """
+    # Argument validation — must happen before any commit resolution so
+    # the missing-arg cases return non-zero without touching the network.
+    if not args.pr_number:
+        log("ERROR: --pr-number is required for --paired-base-head")
+        return 1
+    if not args.workload:
+        log("ERROR: --workload is required for --paired-base-head")
+        return 1
+    if args.commit:
+        log("ERROR: --commit is incompatible with --paired-base-head")
+        return 1
+
+    base_ref, head_ref = args.paired_base_head
+    base_sha = _resolve_full_commit(base_ref)
+    head_sha = _resolve_full_commit(head_ref)
+    log(f"Paired rerun: base={base_sha[:12]} head={head_sha[:12]}")
+
+    # Resolve plugin commit once, shared across both runs.
+    ascend_commit_str = args.ascend_commit or "latest"
+    if ascend_commit_str == "latest":
+        ascend_commit, source = resolve_ascend_commit_chain(base_sha)
+        log(f"Resolved ascend commit via {source}: {ascend_commit[:12]}")
+    else:
+        ascend_commit = ascend_commit_str
+        log(f"Using ascend commit: {ascend_commit[:12]}")
+
+    # Plugin commit consistency — both sides must agree with the canonical
+    # pairing already recorded in the snapshot (unless overridden).
+    try:
+        assert_plugin_commit_consistent(
+            base_sha,
+            ascend_commit,
+            allow_override=bool(args.force_mismatched_plugin_commit),
+        )
+        assert_plugin_commit_consistent(
+            head_sha,
+            ascend_commit,
+            allow_override=bool(args.force_mismatched_plugin_commit),
+        )
+    except PluginCommitMismatch as exc:
+        log(f"ERROR: {exc}")
+        return 1
+
+    if not commit_exists(HUST_REPO, base_sha):
+        log(f"ERROR: base commit {base_sha[:9]} not found in vllm-hust repo")
+        return 1
+    if not commit_exists(HUST_REPO, head_sha):
+        log(f"ERROR: head commit {head_sha[:9]} not found in vllm-hust repo")
+        return 1
+
+    _original_hust = state.get("hust_head")
+    _original_ascend = state.get("ascend_head")
+
+    def _restore_on_exit() -> None:
+        if _original_hust and current_head(HUST_REPO) != _original_hust:
+            log(f"Restoring vllm-hust to {_original_hust[:12]}")
+            subprocess.run(
+                ["git", "checkout", "-fq", _original_hust],
+                cwd=HUST_REPO,
+                check=False,
+            )
+        if _original_ascend and current_head(ASCEND_REPO) != _original_ascend:
+            log(f"Restoring vllm-ascend-hust to {_original_ascend[:12]}")
+            subprocess.run(
+                ["git", "checkout", "-fq", _original_ascend],
+                cwd=ASCEND_REPO,
+                check=False,
+            )
+
+    def _cleanup_npu() -> None:
+        subprocess.run(
+            ["pkill", "-f", "vllm.entrypoints.cli"],
+            check=False,
+            stderr=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            ["pkill", "-f", "api_server"], check=False, stderr=subprocess.DEVNULL
+        )
+        _kill_port_process(8000)
+
+    try:
+        for side, sha in (("base", base_sha), ("head", head_sha)):
+            run_id_override = build_paired_run_id(
+                args.pr_number, side, args.workload, sha, ascend_commit
+            )
+            key = f"{args.workload}:{sha[:9]}:ascend-{ascend_commit[:9]}"
+            if cell_already_present(args.workload, sha) and not args.force:
+                log(f"SKIP paired {side} {key} (already in leaderboard)")
+                state["cells"][key] = {
+                    "status": "done",
+                    "skipped": "already-present",
+                    "paired": True,
+                    "pr_number": args.pr_number,
+                    "side": side,
+                }
+                save_state(state)
+                continue
+            log(f"BEGIN paired {side} {key}")
+            result = run_cell(
+                args.workload,
+                sha,
+                ascend_commit,
+                npu_id=npu_id,
+                allow_plugin_override=bool(args.force_mismatched_plugin_commit),
+                run_id_override=run_id_override,
+            )
+            result["paired"] = True
+            result["pr_number"] = args.pr_number
+            result["side"] = side
+            state["cells"][key] = result
+            save_state(state)
+            if result["status"] == "failed":
+                if args.fail_fast:
+                    log(f"FAIL-FAST: stopping after paired {side} failure")
+                    return 1
+    finally:
+        _cleanup_npu()
+        _restore_on_exit()
+
+    log("RUN paired: done; remember to run `aggregate` and `push`.")
+    return 0
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     state = load_state()
     save_state(state)  # Persist the captured HEADs up front.
@@ -3199,6 +3354,13 @@ def cmd_run(args: argparse.Namespace) -> int:
             return 1
         npu_id = idle
         log(f"Auto-selected idle NPU device: {npu_id}")
+
+    # Paired PR rerun mode: run the same workload against base and head
+    # vllm-hust commits with a shared plugin commit / NPU, producing two
+    # submissions named historical-pr-backend-pr-<n>-{base,head}-<w>-<h>-<p>.
+    # This is the Layer 3 paired-evidence path required by issue #105.
+    if args.paired_base_head:
+        return _cmd_run_paired(args, state, npu_id)
 
     # Resolve commit, ascend_commit, and workload targets.
     # --commit and --ascend-commit are optional; if omitted, the value
@@ -3749,6 +3911,28 @@ def build_parser() -> argparse.ArgumentParser:
             "corruption, or a deliberate plugin revert experiment). The "
             "override is recorded in state.json under "
             "audit.plugin_override for later review."
+        ),
+    )
+    p_run.add_argument(
+        "--paired-base-head",
+        nargs=2,
+        metavar=("BASE_REF", "HEAD_REF"),
+        default=None,
+        help=(
+            "Paired PR rerun mode: run the same workload against both vllm-hust "
+            "base and head commits with a shared plugin commit / NPU, producing "
+            "two submissions named "
+            "historical-pr-backend-pr-<n>-{base,head}-<workload>-<hust>-<plugin>. "
+            "Requires --pr-number and --workload; incompatible with --commit."
+        ),
+    )
+    p_run.add_argument(
+        "--pr-number",
+        type=int,
+        default=None,
+        help=(
+            "GitHub PR number. Required for --paired-base-head mode (used to "
+            "name the paired submission directories and to gate the PR merge)."
         ),
     )
 
