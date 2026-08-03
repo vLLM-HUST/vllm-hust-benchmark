@@ -29,6 +29,114 @@ def _write(path: Path, payload: object) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
+def _write_strict_execution_evidence(
+    repeat: Path,
+    number: int,
+    *,
+    chip_count: int = 1,
+    peak_hbm_mb: int = 2048,
+    runtime_image_digest: str = TRACE_DIGEST,
+) -> None:
+    container_id = f"{number:064x}"
+    devices = list(range(chip_count))
+    host_pids = [1000 + number * 10 + offset for offset in range(chip_count)]
+    snapshots = []
+    for index, second in enumerate((5, 20), start=1):
+        npu_path = repeat / f"npu-smi-pre-{index}.txt"
+        inspect_path = repeat / f"docker-inspect-pre-{index}.json"
+        npu_path.write_text(f"snapshot {index}\n", encoding="utf-8")
+        inspect_path.write_text(f'{{"snapshot": {index}}}\n', encoding="utf-8")
+        snapshots.append(
+            {
+                "captured_at": f"2026-08-02T00:00:{second:02d}Z",
+                "physical_npu_ids": devices,
+                "external_compute_pids": [],
+                "external_container_ids": [],
+                "lease_conflicts": [],
+                "stable": True,
+                "npu_smi": {
+                    "path": npu_path.name,
+                    "sha256": hashlib.sha256(npu_path.read_bytes()).hexdigest(),
+                },
+                "container_inspect": {
+                    "path": inspect_path.name,
+                    "sha256": hashlib.sha256(inspect_path.read_bytes()).hexdigest(),
+                },
+            }
+        )
+
+    per_device_peak = peak_hbm_mb // chip_count
+    per_device = {str(device): per_device_peak for device in devices}
+    hbm_path = repeat / "hbm-samples.jsonl"
+    hbm_path.write_text(
+        json.dumps(
+            {
+                "captured_at": "2026-08-02T00:00:25Z",
+                "host_pids": host_pids,
+                "physical_npu_hbm_mb": per_device,
+                "total_hbm_mb": sum(per_device.values()),
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    cleanup_path = repeat / "cleanup-chain-attestation.json"
+    _write(
+        cleanup_path,
+        {
+            "schema_version": "cleanup-chain-attestation/v1",
+            "hostname": "host-a",
+            "startup_instance_id": f"startup-{number}",
+            "container_id": container_id,
+            "exit_code": 0,
+            "host_pids": host_pids,
+            "physical_npu_ids": devices,
+            "service_port": 8000,
+            "finished_at": "2026-08-02T00:00:30Z",
+            "container_stopped_or_removed": True,
+            "pids_absent": True,
+            "port_released": True,
+            "npu_processes_absent": True,
+            "lease_released": True,
+        },
+    )
+    _write(
+        repeat / "strict_execution_evidence.json",
+        {
+            "schema_version": "strict-execution-evidence/v1",
+            "hostname": "host-a",
+            "startup_instance_id": f"startup-{number}",
+            "container_id": container_id,
+            "runtime_image_digest": runtime_image_digest,
+            "service_port": 8000,
+            "lease": {
+                "physical_npu_ids": devices,
+                "acquired_at": "2026-08-02T00:00:00Z",
+                "released_at": "2026-08-02T00:00:35Z",
+            },
+            "pre_start_snapshots": snapshots,
+            "ownership": [
+                {
+                    "host_pid": host_pid,
+                    "container_id": container_id,
+                    "physical_npu_id": device,
+                    "cgroup": f"/system.slice/docker-{container_id}.scope",
+                }
+                for host_pid, device in zip(host_pids, devices, strict=True)
+            ],
+            "peak_hbm_mb": peak_hbm_mb,
+            "hbm_samples": {
+                "path": hbm_path.name,
+                "sha256": hashlib.sha256(hbm_path.read_bytes()).hexdigest(),
+            },
+            "cleanup": {
+                "path": cleanup_path.name,
+                "sha256": hashlib.sha256(cleanup_path.read_bytes()).hexdigest(),
+            },
+        },
+    )
+
+
 def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
     repo = tmp_path / "repo"
     spec = {"id": "target-1"}
@@ -44,6 +152,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
             "engine": "vllm",
             "engine_version": "0.18.0",
             "git_commit": "plugin-sha",
+            "runtime_image_digest": TRACE_DIGEST,
         },
         "hardware": {
             "vendor": "Huawei",
@@ -73,7 +182,11 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
         "engine_version": "0.18.0",
         "hardware": {"vendor": "Huawei", "chip_model": "910B2", "chip_count": 1},
         "model": {"repo_id": "Qwen/model", "parameters": "14B", "precision": "FP16"},
-        "metrics": {"throughput_tps": 100.0, "error_rate": 0},
+        "metrics": {
+            "throughput_tps": 100.0,
+            "peak_mem_mb": 2048,
+            "error_rate": 0,
+        },
         "same_spec": {
             "spec_id": "target-1",
             "model": "Qwen/model",
@@ -113,6 +226,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
         _write(repeat / "raw_benchmark_result.json", {"failed": 0})
         _write(repeat / "submission" / "run_leaderboard.json", entry)
         (repeat / "runner.log").write_text("ok\n", encoding="utf-8")
+        _write_strict_execution_evidence(repeat, number)
     return repo, staged, results, entry, target
 
 
@@ -231,6 +345,76 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
     suite = json.loads((output / "repeat_suite.json").read_text())
     assert suite["successful_repeats"] == 3
     assert suite["selected_repeat"] == "repeat-01"
+    assert suite["repeats"][0]["startup_instance_id"] == "startup-1"
+    assert suite["repeats"][0]["physical_npu_ids"] == [0]
+    assert suite["repeats"][0]["peak_hbm_mb"] == 2048
+    assert len(suite["repeats"][0]["pre_start_snapshots"]) == 2
+
+
+def test_rejects_missing_strict_execution_evidence(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    (results / "repeat-02" / "strict_execution_evidence.json").unlink()
+    with pytest.raises(ValueError, match="strict execution evidence is missing"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
+
+
+def test_rejects_pre_start_snapshots_less_than_15_seconds_apart(
+    tmp_path: Path,
+) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    evidence_path = results / "repeat-02" / "strict_execution_evidence.json"
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    evidence["pre_start_snapshots"][1]["captured_at"] = "2026-08-02T00:00:10Z"
+    _write(evidence_path, evidence)
+    with pytest.raises(ValueError, match="less than 15 seconds apart"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
+
+
+def test_rejects_pid_to_physical_npu_mapping_mismatch(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    evidence_path = results / "repeat-02" / "strict_execution_evidence.json"
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    evidence["ownership"][0]["physical_npu_id"] = 7
+    _write(evidence_path, evidence)
+    with pytest.raises(ValueError, match="physical NPU mapping mismatch"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
+
+
+def test_rejects_unmeasured_peak_hbm(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    artifact_path = results / "repeat-02" / "submission" / "run_leaderboard.json"
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact["metrics"]["peak_mem_mb"] = 0
+    _write(artifact_path, artifact)
+    with pytest.raises(ValueError, match="peak HBM mismatch"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
+
+
+def test_rejects_failed_cleanup_chain(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    repeat = results / "repeat-02"
+    cleanup_path = repeat / "cleanup-chain-attestation.json"
+    cleanup = json.loads(cleanup_path.read_text(encoding="utf-8"))
+    cleanup["pids_absent"] = False
+    _write(cleanup_path, cleanup)
+    evidence_path = repeat / "strict_execution_evidence.json"
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    evidence["cleanup"]["sha256"] = hashlib.sha256(
+        cleanup_path.read_bytes()
+    ).hexdigest()
+    _write(evidence_path, evidence)
+    with pytest.raises(ValueError, match="cleanup-chain mismatch for pids_absent"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
 
 
 def test_rejects_fewer_than_three_repeats(tmp_path: Path) -> None:

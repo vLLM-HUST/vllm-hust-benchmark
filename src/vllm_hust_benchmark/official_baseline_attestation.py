@@ -2,15 +2,20 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
-from vllm_hust_benchmark.baseline_recovery import _identity_mismatches
-from vllm_hust_benchmark.baseline_recovery import _parameter_mismatches
-
+from vllm_hust_benchmark.baseline_recovery import (
+    _identity_mismatches,
+    _parameter_mismatches,
+)
 
 ATTESTATION_SCHEMA_VERSION = "official-baseline-attestation/v1"
+STRICT_EXECUTION_SCHEMA_VERSION = "strict-execution-evidence/v1"
+CLEANUP_CHAIN_SCHEMA_VERSION = "cleanup-chain-attestation/v1"
 TRACE_PROFILE = "production-trace"
 
 
@@ -34,6 +39,253 @@ def _load_trace_detail_metadata(path: Path) -> tuple[dict[str, Any], int]:
     if not isinstance(metadata, dict) or metadata.get("type") != "metadata":
         raise ValueError(f"trace detail metadata is missing: {path}")
     return metadata, len(lines) - 1
+
+
+def _parse_timestamp(value: Any, *, field: str) -> datetime:
+    text = str(value or "").strip()
+    if not text:
+        raise ValueError(f"strict execution evidence is missing {field}")
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"strict execution evidence has invalid {field}") from exc
+    if parsed.tzinfo is None:
+        raise ValueError(f"strict execution evidence has naive {field}")
+    return parsed
+
+
+def _evidence_path(repeat_dir: Path, value: Any, *, field: str) -> Path:
+    relative = Path(str(value or ""))
+    if not relative.parts or relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"strict execution evidence has invalid {field}")
+    path = repeat_dir / relative
+    if not path.is_file():
+        raise ValueError(f"strict execution evidence is missing {field}: {path}")
+    return path
+
+
+def _verify_hashed_evidence_file(
+    repeat_dir: Path, record: Mapping[str, Any], *, field: str
+) -> Path:
+    path = _evidence_path(repeat_dir, record.get("path"), field=f"{field}.path")
+    digest = str(record.get("sha256") or "")
+    if not re.fullmatch(r"[0-9a-f]{64}", digest) or _sha256(path) != digest:
+        raise ValueError(f"strict execution evidence hash mismatch: {field}")
+    return path
+
+
+def _validate_strict_execution_evidence(
+    repeat_dir: Path,
+    target: Mapping[str, Any],
+    metrics: Mapping[str, Any],
+) -> dict[str, Any]:
+    evidence_path = repeat_dir / "strict_execution_evidence.json"
+    if not evidence_path.is_file():
+        raise ValueError(f"strict execution evidence is missing: {repeat_dir}")
+    evidence = _load_object(evidence_path)
+    if evidence.get("schema_version") != STRICT_EXECUTION_SCHEMA_VERSION:
+        raise ValueError(f"strict execution evidence schema mismatch: {repeat_dir}")
+
+    hostname = str(evidence.get("hostname") or "").strip()
+    startup_id = str(evidence.get("startup_instance_id") or "").strip()
+    container_id = str(evidence.get("container_id") or "").strip()
+    service_port = evidence.get("service_port")
+    if not hostname or not startup_id:
+        raise ValueError(f"strict execution identity is missing: {repeat_dir}")
+    if not re.fullmatch(r"[0-9a-f]{64}", container_id):
+        raise ValueError(f"strict execution container ID is invalid: {repeat_dir}")
+    if not isinstance(service_port, int) or not 0 < service_port < 65536:
+        raise ValueError(f"strict execution service port is invalid: {repeat_dir}")
+
+    expected_digest = str(
+        (target.get("baseline_runtime") or {}).get("runtime_image_digest") or ""
+    )
+    if not re.fullmatch(r"sha256:[0-9a-f]{64}", expected_digest):
+        raise ValueError("official target is missing an immutable runtime image digest")
+    if evidence.get("runtime_image_digest") != expected_digest:
+        raise ValueError(f"strict execution runtime image mismatch: {repeat_dir}")
+
+    chip_count = int((target.get("hardware") or {}).get("chip_count") or 0)
+    lease = evidence.get("lease")
+    lease = lease if isinstance(lease, Mapping) else {}
+    devices = lease.get("physical_npu_ids")
+    if (
+        not isinstance(devices, list)
+        or len(devices) != chip_count
+        or any(not isinstance(device, int) or device < 0 for device in devices)
+        or len(set(devices)) != len(devices)
+    ):
+        raise ValueError(
+            f"strict execution lease device scope is invalid: {repeat_dir}"
+        )
+    acquired_at = _parse_timestamp(lease.get("acquired_at"), field="lease.acquired_at")
+    released_at = _parse_timestamp(lease.get("released_at"), field="lease.released_at")
+    if released_at <= acquired_at:
+        raise ValueError(f"strict execution lease interval is invalid: {repeat_dir}")
+
+    snapshots = evidence.get("pre_start_snapshots")
+    if not isinstance(snapshots, list) or len(snapshots) != 2:
+        raise ValueError(
+            f"strict execution requires two pre-start snapshots: {repeat_dir}"
+        )
+    snapshot_times: list[datetime] = []
+    snapshot_summaries: list[dict[str, Any]] = []
+    for index, snapshot in enumerate(snapshots, start=1):
+        snapshot = snapshot if isinstance(snapshot, Mapping) else {}
+        captured_at = _parse_timestamp(
+            snapshot.get("captured_at"),
+            field=f"pre_start_snapshots[{index}].captured_at",
+        )
+        if snapshot.get("physical_npu_ids") != devices:
+            raise ValueError(f"pre-start snapshot device scope mismatch: {repeat_dir}")
+        for field in (
+            "external_compute_pids",
+            "external_container_ids",
+            "lease_conflicts",
+        ):
+            if snapshot.get(field) != []:
+                raise ValueError(f"pre-start snapshot reports {field}: {repeat_dir}")
+        if snapshot.get("stable") is not True:
+            raise ValueError(f"pre-start snapshot is not stable: {repeat_dir}")
+        npu_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            snapshot.get("npu_smi") or {},
+            field=f"pre_start_snapshots[{index}].npu_smi",
+        )
+        inspect_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            snapshot.get("container_inspect") or {},
+            field=f"pre_start_snapshots[{index}].container_inspect",
+        )
+        if not npu_path.read_text(encoding="utf-8").strip():
+            raise ValueError(f"pre-start npu-smi snapshot is empty: {repeat_dir}")
+        if not inspect_path.read_text(encoding="utf-8").strip():
+            raise ValueError(f"pre-start container snapshot is empty: {repeat_dir}")
+        snapshot_times.append(captured_at)
+        snapshot_summaries.append(
+            {
+                "captured_at": snapshot.get("captured_at"),
+                "npu_smi_sha256": _sha256(npu_path),
+                "container_inspect_sha256": _sha256(inspect_path),
+            }
+        )
+    if (snapshot_times[1] - snapshot_times[0]).total_seconds() < 15:
+        raise ValueError(
+            f"pre-start snapshots are less than 15 seconds apart: {repeat_dir}"
+        )
+    if snapshot_times[0] < acquired_at or snapshot_times[1] >= released_at:
+        raise ValueError(f"pre-start snapshots fall outside the lease: {repeat_dir}")
+
+    ownership = evidence.get("ownership")
+    if not isinstance(ownership, list) or len(ownership) != chip_count:
+        raise ValueError(f"strict execution PID ownership is incomplete: {repeat_dir}")
+    host_pids: list[int] = []
+    owned_devices: list[int] = []
+    for record in ownership:
+        record = record if isinstance(record, Mapping) else {}
+        host_pid = record.get("host_pid")
+        physical_npu_id = record.get("physical_npu_id")
+        cgroup = str(record.get("cgroup") or "")
+        if not isinstance(host_pid, int) or host_pid <= 0:
+            raise ValueError(f"strict execution host PID is invalid: {repeat_dir}")
+        if record.get("container_id") != container_id or container_id not in cgroup:
+            raise ValueError(
+                f"strict execution cgroup ownership mismatch: {repeat_dir}"
+            )
+        if physical_npu_id not in devices:
+            raise ValueError(
+                f"strict execution physical NPU mapping mismatch: {repeat_dir}"
+            )
+        host_pids.append(host_pid)
+        owned_devices.append(physical_npu_id)
+    if len(set(host_pids)) != chip_count or sorted(owned_devices) != sorted(devices):
+        raise ValueError(
+            f"strict execution PID/device mapping is not one-to-one: {repeat_dir}"
+        )
+
+    hbm_record = evidence.get("hbm_samples")
+    hbm_record = hbm_record if isinstance(hbm_record, Mapping) else {}
+    hbm_path = _verify_hashed_evidence_file(repeat_dir, hbm_record, field="hbm_samples")
+    samples: list[dict[str, Any]] = []
+    with hbm_path.open(encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip():
+                sample = json.loads(line)
+                if not isinstance(sample, dict):
+                    raise ValueError(f"HBM sample is not an object: {repeat_dir}")
+                samples.append(sample)
+    if not samples:
+        raise ValueError(f"HBM samples are empty: {repeat_dir}")
+    measured_peak = 0.0
+    for sample in samples:
+        _parse_timestamp(sample.get("captured_at"), field="hbm_samples.captured_at")
+        if sample.get("host_pids") != host_pids:
+            raise ValueError(f"HBM sample PID scope mismatch: {repeat_dir}")
+        per_device = sample.get("physical_npu_hbm_mb")
+        per_device = per_device if isinstance(per_device, Mapping) else {}
+        if set(per_device) != {str(device) for device in devices}:
+            raise ValueError(f"HBM sample device scope mismatch: {repeat_dir}")
+        values = list(per_device.values())
+        if any(not isinstance(value, (int, float)) or value < 0 for value in values):
+            raise ValueError(f"HBM sample value is invalid: {repeat_dir}")
+        total = sample.get("total_hbm_mb")
+        if not isinstance(total, (int, float)) or total != sum(values):
+            raise ValueError(f"HBM sample total mismatch: {repeat_dir}")
+        measured_peak = max(measured_peak, float(total))
+    declared_peak = evidence.get("peak_hbm_mb")
+    metric_peak = metrics.get("peak_mem_mb")
+    if (
+        measured_peak <= 0
+        or declared_peak != measured_peak
+        or metric_peak != measured_peak
+    ):
+        raise ValueError(f"strict execution peak HBM mismatch: {repeat_dir}")
+
+    cleanup_record = evidence.get("cleanup")
+    cleanup_record = cleanup_record if isinstance(cleanup_record, Mapping) else {}
+    cleanup_path = _verify_hashed_evidence_file(
+        repeat_dir, cleanup_record, field="cleanup"
+    )
+    cleanup = _load_object(cleanup_path)
+    if cleanup.get("schema_version") != CLEANUP_CHAIN_SCHEMA_VERSION:
+        raise ValueError(f"cleanup-chain schema mismatch: {repeat_dir}")
+    expected_cleanup = {
+        "hostname": hostname,
+        "startup_instance_id": startup_id,
+        "container_id": container_id,
+        "exit_code": 0,
+        "host_pids": host_pids,
+        "physical_npu_ids": devices,
+        "service_port": service_port,
+        "container_stopped_or_removed": True,
+        "pids_absent": True,
+        "port_released": True,
+        "npu_processes_absent": True,
+        "lease_released": True,
+    }
+    for field, expected in expected_cleanup.items():
+        if cleanup.get(field) != expected:
+            raise ValueError(f"cleanup-chain mismatch for {field}: {repeat_dir}")
+    finished_at = _parse_timestamp(
+        cleanup.get("finished_at"), field="cleanup.finished_at"
+    )
+    if not acquired_at < finished_at <= released_at:
+        raise ValueError(f"cleanup-chain timestamp is outside the lease: {repeat_dir}")
+
+    return {
+        "strict_execution_evidence_sha256": _sha256(evidence_path),
+        "startup_instance_id": startup_id,
+        "hostname": hostname,
+        "container_id": container_id,
+        "runtime_image_digest": expected_digest,
+        "service_port": service_port,
+        "physical_npu_ids": devices,
+        "host_pids": host_pids,
+        "pre_start_snapshots": snapshot_summaries,
+        "peak_hbm_mb": measured_peak,
+        "hbm_samples_sha256": _sha256(hbm_path),
+        "cleanup_chain_sha256": _sha256(cleanup_path),
+    }
 
 
 def _target_for_entry(
@@ -124,6 +376,7 @@ def attest_completed_baseline(
     unique_artifact_hashes: set[str] = set()
     unique_entry_ids: set[str] = set()
     unique_startup_ids: set[str] = set()
+    strict_startup_ids: set[str] = set()
     unique_run_ids: set[str] = set()
     trace_signatures: set[str] = set()
     model_artifact_digests: set[str] = set()
@@ -142,6 +395,13 @@ def attest_completed_baseline(
         error_rate = float(metrics.get("error_rate") or 0)
         if failed != 0 or error_rate != 0:
             raise ValueError(f"repeat has failures: {repeat_dir}")
+        strict_evidence = _validate_strict_execution_evidence(
+            repeat_dir, target, metrics
+        )
+        strict_startup_id = str(strict_evidence["startup_instance_id"])
+        if strict_startup_id in strict_startup_ids:
+            raise ValueError(f"duplicate strict startup identity: {repeat_dir}")
+        strict_startup_ids.add(strict_startup_id)
         provenance = (repeat_entry.get("metadata") or {}).get(
             "runtime_provenance"
         ) or {}
@@ -243,6 +503,8 @@ def attest_completed_baseline(
             entry_id = str(repeat_entry.get("entry_id") or "")
             if not startup_id or not run_id or not entry_id:
                 raise ValueError(f"repeat identity evidence is missing: {repeat_dir}")
+            if startup_id != strict_startup_id:
+                raise ValueError(f"startup evidence identity mismatch: {repeat_dir}")
             if startup_id in unique_startup_ids or run_id in unique_run_ids:
                 raise ValueError(f"duplicate startup identity: {repeat_dir}")
             if entry_id in unique_entry_ids:
@@ -283,6 +545,7 @@ def attest_completed_baseline(
                 "metrics": metrics,
                 "failed_requests": failed,
                 **trace_evidence,
+                **strict_evidence,
             }
         )
 
