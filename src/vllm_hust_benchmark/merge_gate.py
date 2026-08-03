@@ -506,7 +506,10 @@ def evaluate_merge_gate(
                 f"declared_target_version {pr_context.declared_target_version!r} "
                 f"does not match registry target_version "
                 f"{profile.target_version!r} for target_id "
-                f"{profile.target_id!r} (version must bind to registry)"
+                f"{profile.target_id!r} "
+                f"(target_version is the registry's descriptive version name, "
+                f"not the software version; copy the exact value from "
+                f"fixed_target_registry.json)"
             ),
             **common,
             target_id=profile.target_id,

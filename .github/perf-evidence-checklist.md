@@ -14,7 +14,8 @@
 ### Official Fixed-Target Evidence（选 official-fixed-target 时必填）
 
 - target_id: `<!-- 从 #104 registry 读取，如 official-ascend-jan-2026-v0.18.0 -->`
-- target_version: `<!-- 如 v0.18.0 -->`
+- target_version:
+  `<!-- 从 registry 的 target_version 字段读取，如 Official Ascend Jan 2026（注意：不是软件版本号 v0.18.0，是 registry 中 target_id 对应的描述性版本名称，门禁会做严格相等校验） -->`
 - profile_id: `<!-- 如 core-text-14b -->`
 - base artifact: `<!-- base commit (PR fork point) 的 run_leaderboard.json 路径/链接 -->`
 - head artifact: `<!-- head commit (PR 最新 push) 的 run_leaderboard.json 路径/链接 -->`

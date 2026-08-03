@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from vllm_hust_benchmark import perfgate_measurement
 from vllm_hust_benchmark.aggregate_results import (
     VALID_AGG_METHODS,
     VALID_OUTLIER_HANDLING,
@@ -35,7 +36,6 @@ from vllm_hust_benchmark.integration import (
     validate_runtime_repo,
 )
 from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
-from vllm_hust_benchmark import perfgate_measurement
 from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import filter_scenarios, get_scenario
 from vllm_hust_benchmark.upstream_tests import (
@@ -780,9 +780,25 @@ def _build_parser() -> argparse.ArgumentParser:
         default="",
         help="Comma-separated PR labels (e.g. perf-skip:docs-only).",
     )
-    mg_parser.add_argument("--declared-target-id", default=None)
-    mg_parser.add_argument("--declared-target-version", default=None)
-    mg_parser.add_argument("--declared-profile-id", default=None)
+    mg_parser.add_argument(
+        "--declared-target-id",
+        default=None,
+        help="PR-declared target_id from the fixed-target registry "
+        "(e.g. official-ascend-jan-2026-v0.18.0).",
+    )
+    mg_parser.add_argument(
+        "--declared-target-version",
+        default=None,
+        help="PR-declared target_version — must match the registry's "
+        "target_version field exactly (e.g. 'Official Ascend Jan 2026', "
+        "NOT the software version v0.18.0). The gate does strict-equality "
+        "binding against the matched profile.",
+    )
+    mg_parser.add_argument(
+        "--declared-profile-id",
+        default=None,
+        help="PR-declared profile_id from the registry (e.g. core-text-14b).",
+    )
     mg_parser.add_argument("--specialty-spec", default=None)
     mg_parser.add_argument("--specialty-reason", default=None)
     mg_parser.add_argument(

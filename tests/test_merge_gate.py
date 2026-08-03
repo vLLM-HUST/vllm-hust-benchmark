@@ -682,7 +682,8 @@ class TestDeclaredTargetMismatch:
     """M6 fix: 声明的 target_id/profile_id 必须与 artifact 实际匹配的 profile 一致。
 
     防止 PR 声明一个有效但与实际 artifact 不匹配的 target 来 bypass。
-    注意：target_version 是版本号与 registry 描述性名称不同概念，不做一致性比较。
+    注意：target_version 在 TestDeclaredTargetVersionBinding 中已校验与 registry
+    的描述性版本名称严格相等（review comment 3 fix），此处只覆盖 target_id/profile_id。
     """
 
     def test_declared_target_id_matches_profile_passes(self, tmp_path):
