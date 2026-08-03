@@ -417,6 +417,110 @@ def test_backfill_with_missing_git_info_key_rejected(tmp_path: Path) -> None:
     assert "missing" in failures[0]["detail"]
 
 
+def test_backfill_with_corrupt_run_leaderboard_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions with a corrupt or unreadable
+    run_leaderboard.json must be rejected by the admission gate, not silently
+    bypass provenance checks.
+
+    This closes the fail-open gap where except (OSError, json.JSONDecodeError):
+    pass left is_historical_backfill = False, causing the entire
+    provenance block to be skipped without recording any failure.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    sub = source_dir / "historical-pr-pr103-head"
+    sub.mkdir(parents=True, exist_ok=True)
+    (sub / "STATUS").write_text("OK\n", encoding="utf-8")
+    # Corrupt JSON — not parseable
+    (sub / "run_leaderboard.json").write_text(
+        "{not valid json}",
+        encoding="utf-8",
+    )
+    (sub / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "leaderboard-export-manifest/v2",
+                "entries": [
+                    {
+                        "idempotency_key": "test",
+                        "leaderboard_artifact": "run_leaderboard.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (sub / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "git_info": {
+                    "vllm_hust": "abc123def456789012345678901234567890abcd",
+                    "vllm_ascend_hust": "789abcdef0123456789abcdef0123456789abcde",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert (
+        "unreadable" in failures[0]["detail"].lower()
+        or "corrupt" in failures[0]["detail"].lower()
+    )
+
+
+def test_backfill_with_missing_env_manifest_rejected(tmp_path: Path) -> None:
+    """Historical-pr-backfill submissions without an env-manifest.json file
+    must be rejected by the admission gate, not silently bypass the git commit
+    provenance checks.
+
+    This closes the fail-open gap where if is_historical_backfill and
+    env_manifest_path.is_file(): had no else branch, so a missing
+    env-manifest.json caused the entire provenance block to be skipped.
+    """
+    source_dir = tmp_path / "submissions"
+    source_dir.mkdir()
+    sub = source_dir / "historical-pr-pr104-head"
+    sub.mkdir(parents=True, exist_ok=True)
+    (sub / "STATUS").write_text("OK\n", encoding="utf-8")
+    (sub / "run_leaderboard.json").write_text(
+        json.dumps(
+            {
+                "entry_id": "test-104",
+                "metadata": {
+                    "data_source": "real-online-historical-pr-backfill",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (sub / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "leaderboard-export-manifest/v2",
+                "entries": [
+                    {
+                        "idempotency_key": "test",
+                        "leaderboard_artifact": "run_leaderboard.json",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    # env-manifest.json is intentionally NOT created
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "PROVENANCE_INCOMPLETE"
+    assert "env-manifest.json" in failures[0]["detail"]
+    assert "missing" in failures[0]["detail"].lower()
+
+
 def test_aggregate_to_website_returns_2_on_admission_failure(
     capsys, tmp_path: Path
 ) -> None:

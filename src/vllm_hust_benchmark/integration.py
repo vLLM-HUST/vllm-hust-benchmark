@@ -1604,7 +1604,35 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
                 == "real-online-historical-pr-backfill"
             )
         except (OSError, json.JSONDecodeError):
-            pass
+            # Fail-closed: if run_leaderboard.json is unreadable or corrupt,
+            # we cannot determine data_source — reject rather than silently
+            # bypassing provenance checks.
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "PROVENANCE_INCOMPLETE",
+                    "detail": (
+                        "run_leaderboard.json is unreadable or corrupt; "
+                        "cannot verify provenance"
+                    ),
+                }
+            )
+            continue
+        if is_historical_backfill and not env_manifest_path.is_file():
+            # Fail-closed: historical-pr-backfill entries MUST carry
+            # env-manifest.json; missing file must not silently bypass
+            # the git commit provenance checks below.
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "PROVENANCE_INCOMPLETE",
+                    "detail": (
+                        "env-manifest.json is missing for a "
+                        "historical-pr-backfill submission"
+                    ),
+                }
+            )
+            continue
         if is_historical_backfill and env_manifest_path.is_file():
             try:
                 _em = json.loads(env_manifest_path.read_text(encoding="utf-8"))
