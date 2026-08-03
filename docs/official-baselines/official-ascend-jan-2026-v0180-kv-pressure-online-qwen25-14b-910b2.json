@@ -1,6 +1,6 @@
 {
   "id": "official-ascend-jan-2026-v0.18.0-kv-pressure-online-qwen25-14b-910b2",
-  "label": "Official Ascend Jan 2026 KV cache pressure baseline for vllm-hust goal tracking (issue #89)",
+  "label": "Official Ascend Jan 2026 KV cache admission pressure baseline (high concurrency, provisional)",
   "baseline_target": {
     "id": "official-ascend-jan-2026-v0.18.0",
     "label": "Official Ascend Jan 2026",
@@ -25,17 +25,18 @@
     "disable_log_stats": "",
     "disable_log_requests": "",
     "host": "0.0.0.0",
-    "port": 8000
+    "port": 8000,
+    "gpu_memory_utilization": 0.45
   },
   "client_parameters": {
     "backend": "vllm",
     "endpoint": "/v1/completions",
     "dataset_name": "random",
-    "num_prompts": 300,
+    "num_prompts": 1000,
     "input_len": 4096,
     "output_len": 512,
     "request_rate": 1,
-    "max_concurrency": 128,
+    "max_concurrency": 256,
     "host": "127.0.0.1",
     "port": 8000
   },

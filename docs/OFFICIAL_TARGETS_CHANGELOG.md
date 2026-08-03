@@ -2,6 +2,16 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.2.0 — 2026-08-02
+
+- English: Activate executable paths for 12 specialty scenarios (EPLB, SliceGPT, KNorm, spec-decode,
+  etc.) by adding feature-enabling server_parameters, correcting model/topology mismatches, and
+  extending longctx input_len.
+- 中文：为 12 个专用场景（EPLB、SliceGPT、KNorm、投机解码等）补齐可执行路径配置：添加功能启用 server_parameters、修正 model/拓扑不匹配、扩展长上下文
+  input_len。
+- Source set: `87af9ac5e694fbef3dbaa214ae321eaba0eb80abb26228f4be6f1e741d5f142e`
+- Supersedes: `1.1.0`
+
 ## 1.1.0 — 2026-08-02
 
 - English: Add 12 specialty Ascend v0.18.0 baseline scenarios (KV pressure, attention boundary, MoE

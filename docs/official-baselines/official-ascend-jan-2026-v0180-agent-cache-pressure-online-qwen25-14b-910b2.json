@@ -1,6 +1,6 @@
 {
   "id": "official-ascend-jan-2026-v0.18.0-agent-cache-pressure-online-qwen25-14b-910b2",
-  "label": "Official Ascend Jan 2026 agent cache pressure baseline for vllm-hust goal tracking (issue #89)",
+  "label": "Official Ascend Jan 2026 agent cache pressure baseline (BidKV plugin, provisional — pending vllm-ascend-hust #39 BidKV integration)",
   "baseline_target": {
     "id": "official-ascend-jan-2026-v0.18.0",
     "label": "Official Ascend Jan 2026",
@@ -25,7 +25,9 @@
     "disable_log_stats": "",
     "disable_log_requests": "",
     "host": "0.0.0.0",
-    "port": 8000
+    "port": 8000,
+    "kv_cache_plugin": "bidkv",
+    "enable_prefix_caching": "true"
   },
   "client_parameters": {
     "backend": "openai-chat",
