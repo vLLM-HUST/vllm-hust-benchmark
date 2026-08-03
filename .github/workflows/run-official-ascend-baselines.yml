@@ -116,16 +116,18 @@ jobs:
           mkdir -p "$HOME" "$XDG_CACHE_HOME" "$XDG_CONFIG_HOME"
           mkdir -p "$GITHUB_WORKSPACE/artifacts/official-baseline"
 
-      - name: Require GitHub SSH checkout key
+      - name: Select GitHub checkout transport
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$BENCHMARK_CHECKOUT_USE_SSH" != "1" ]]; then
-            echo "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY is required because this workflow checks out repositories over SSH." >&2
-            exit 1
+          if [[ "$BENCHMARK_CHECKOUT_USE_SSH" == "1" ]]; then
+            echo "Using the configured SSH key for GitHub checkouts."
+          else
+            echo "SSH key is not configured; using HTTPS for read-only public checkouts."
           fi
 
       - name: Configure GitHub SSH
+        if: ${{ env.BENCHMARK_CHECKOUT_USE_SSH == '1' }}
         shell: bash
         run: |
           set -euo pipefail
