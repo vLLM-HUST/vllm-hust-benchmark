@@ -447,12 +447,12 @@ class TestValidPasses:
         assert decision.details.get("specialty") is True
 
     def test_vision_profile_passes(self, tmp_path):
-        """vision profile（max_model_len=30720）合规 → pass。"""
+        """vision profile（max_model_len=32768）合规 → pass。"""
         payload = _make_run_leaderboard(
             model_repo_id="Qwen/Qwen2.5-VL-7B-Instruct",
             model_parameters="7B",
             workload_name="visionarena-online",
-            max_model_len=30720,
+            max_model_len=32768,
             spec_id="official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
         )
         base_path = _write_artifact(tmp_path, "base", payload)
@@ -463,7 +463,7 @@ class TestValidPasses:
             pr_context=_default_pr_context(declared_profile_id="vision-7b"),
         )
         assert decision.disposition == "pass"
-        assert decision.max_model_len == 30720
+        assert decision.max_model_len == 32768
 
 
 class TestDocsOnlyException:

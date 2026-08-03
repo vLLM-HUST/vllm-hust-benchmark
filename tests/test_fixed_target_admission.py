@@ -94,12 +94,12 @@ def test_config_drift_quarantined(tmp_path: Path) -> None:
 
 
 def test_wrong_profile_quarantined(tmp_path: Path) -> None:
-    """Vision model entry with text-default max_model_len (32768) instead of
-    the vision default (30720) triggers config_drift."""
+    """Vision model entry with stale max_model_len (30720) instead of
+    the vision default (32768) triggers config_drift."""
     entry = _make_entry(
         model_repo_id="Qwen/Qwen2.5-VL-7B-Instruct",
         workload_name="visionarena-online",
-        max_model_len=32768,
+        max_model_len=30720,
     )
     _write_snapshot(tmp_path, [entry])
 

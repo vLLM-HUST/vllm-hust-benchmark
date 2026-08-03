@@ -343,7 +343,10 @@ jobs:
           except (OSError, json.JSONDecodeError):
               disposition, reason = "fail", "no decision file produced (fail closed)"
 
-          conclusion_map = {"pass": "success", "skip": "neutral", "fail": "failure"}
+          # Issue #95 review feedback: mock mode must NOT write "success"
+          # (could be mistaken for real evidence). Use "neutral" for pass in
+          # mock mode; only real mode (post-#103) writes "success".
+          conclusion_map = {"pass": "neutral", "skip": "neutral", "fail": "failure"}
           conclusion = conclusion_map.get(disposition, "failure")
           # 当前总是 mock 模式（#103 就绪后移除 MOCK MODE 标注）
           title = f"merge-gate-check: {disposition} (MOCK MODE)"
