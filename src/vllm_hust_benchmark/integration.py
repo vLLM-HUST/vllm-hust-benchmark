@@ -28,7 +28,10 @@ from vllm_hust_benchmark.leaderboard_exclusions import (
     match_leaderboard_exclusion,
 )
 from vllm_hust_benchmark.registry import get_scenario
-from vllm_hust_benchmark.submission_artifacts import iter_submission_artifact_paths
+from vllm_hust_benchmark.submission_artifacts import (
+    iter_manifest_artifact_paths,
+    iter_submission_artifact_paths,
+)
 from vllm_hust_benchmark.submission_artifacts import (
     normalize_submission_artifacts_in_tree,
 )
@@ -1469,9 +1472,13 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
     - ``FAILED``: the ``STATUS`` file content starts with ``FAILED``.
     - ``NO_STATUS``: a ``STATUS`` file exists but is empty after stripping;
       a ``ci-*`` directory has no ``STATUS``; or neither a ``STATUS`` file nor
-      a ``run_leaderboard.json`` file is present. Historical backfill/baseline
-      pipelines don't write a ``STATUS`` file by design and are admitted when
-      they contain a ``run_leaderboard.json`` artifact.
+      a ``run_leaderboard.json`` file is present.
+    - ``RUN_STATUS``: a non-empty ``STATUS`` value is neither ``OK`` nor a
+      recognized ``FAILED`` result (for example ``BLOCKED`` or ``CANCELLED``).
+    - ``MISSING_ARTIFACT`` / ``MISSING_MANIFEST`` / ``INVALID_MANIFEST``:
+      the formal artifact pair is incomplete or the manifest does not reference
+      the run artifact. Historical backfills may omit ``STATUS``, but they must
+      still carry this artifact pair.
     """
     failures: list[dict] = []
     if not source_dir.is_dir():
@@ -1504,7 +1511,8 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
             # CI publication directories must carry the explicit outcome
             # written by the runner. Merely finding a JSON artifact is not
             # enough: a failed run can produce partial data before its final
-            # admission gate executes. Historical backfills remain compatible.
+            # admission gate executes. Historical backfills remain compatible
+            # only when their complete artifact pair is present.
             if (
                 child.name.startswith("ci-")
                 or not (child / "run_leaderboard.json").is_file()
@@ -1520,19 +1528,20 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
                         ),
                     }
                 )
-            continue
-
-        try:
-            status_content = status_path.read_text(encoding="utf-8")
-        except OSError as exc:
-            failures.append(
-                {
-                    "dir": path_str,
-                    "reason": "NO_STATUS",
-                    "detail": f"STATUS file unreadable: {exc}",
-                }
-            )
-            continue
+                continue
+            status_content = "OK"
+        else:
+            try:
+                status_content = status_path.read_text(encoding="utf-8")
+            except OSError as exc:
+                failures.append(
+                    {
+                        "dir": path_str,
+                        "reason": "NO_STATUS",
+                        "detail": f"STATUS file unreadable: {exc}",
+                    }
+                )
+                continue
 
         if status_content.startswith("FAILED"):
             failures.append(
@@ -1550,6 +1559,57 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
                     "dir": path_str,
                     "reason": "NO_STATUS",
                     "detail": "STATUS file empty",
+                }
+            )
+            continue
+
+        if status_content.strip() != "OK":
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "RUN_STATUS",
+                    "detail": f"STATUS is not publishable: {status_content.strip()}",
+                }
+            )
+            continue
+
+        artifact_path = child / "run_leaderboard.json"
+        manifest_path = child / "leaderboard_manifest.json"
+        if not artifact_path.is_file():
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "MISSING_ARTIFACT",
+                    "detail": "run_leaderboard.json is required",
+                }
+            )
+            continue
+        if not manifest_path.is_file():
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "MISSING_MANIFEST",
+                    "detail": "leaderboard_manifest.json is required",
+                }
+            )
+            continue
+        try:
+            manifest_artifacts = iter_manifest_artifact_paths(manifest_path)
+        except (OSError, ValueError) as exc:
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "INVALID_MANIFEST",
+                    "detail": str(exc),
+                }
+            )
+            continue
+        if artifact_path not in manifest_artifacts:
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "INVALID_MANIFEST",
+                    "detail": "leaderboard_manifest.json does not reference run_leaderboard.json",
                 }
             )
             continue

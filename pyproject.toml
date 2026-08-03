@@ -18,6 +18,8 @@ dependencies = []
 test = [
   "pytest>=8",
   "jsonschema>=4",
+  "mdformat==1.0.0",
+  "mdformat-gfm",
 ]
 publish = ["huggingface_hub>=0.20"]
 
@@ -25,6 +27,7 @@ publish = ["huggingface_hub>=0.20"]
 vllm-hust-benchmark = "vllm_hust_benchmark.cli:main"
 perfgate = "vllm_hust_benchmark.perfgate:main"
 perfgate-baseline = "vllm_hust_benchmark.perfgate_baselines:main"
+official-targets = "vllm_hust_benchmark.official_targets:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
