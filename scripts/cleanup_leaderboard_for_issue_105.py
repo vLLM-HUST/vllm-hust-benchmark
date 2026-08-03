@@ -377,6 +377,7 @@ def main() -> int:
         else str(single_path),
         "entry_count": len(pre_cleanup),
         "entry_ids": [e.get("entry_id") for e in pre_cleanup],
+        "frozen_entries": pre_cleanup,
     }
 
     admission_entries: list[dict] = []
@@ -424,6 +425,31 @@ def main() -> int:
     # Write pre_cleanup_freeze.json (record of pre-cleanup state)
     (snapshot_dir / "pre_cleanup_freeze.json").write_text(
         json.dumps(pre_cleanup_summary, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+    # Write quarantine_leaderboard_entries.json (full data of removed entries)
+    # Issue #105: original submission artifacts are not physically deleted; they
+    # remain in submissions/ dirs.  This file preserves the full leaderboard
+    # entries that were removed from the public snapshot, for audit without
+    # rescanning submissions/ directories.
+    quarantine_entries = [e for e in pre_cleanup if _classify_entry(e)[1] != "keep"]
+    quarantine_report = {
+        "schema_version": "quarantine-leaderboard-entries/v1",
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "source_file": str(single_path.relative_to(REPO_ROOT))
+        if single_path.is_relative_to(REPO_ROOT)
+        else str(single_path),
+        "quarantined_count": len(quarantine_entries),
+        "policy": (
+            "Issue #105: entries not matching active fixed-target specs are "
+            "removed from public leaderboard snapshots but preserved here for "
+            "audit. Original submission artifacts remain in submissions/ dirs."
+        ),
+        "quarantined_entries": quarantine_entries,
+    }
+    (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
+        json.dumps(quarantine_report, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
     )
 

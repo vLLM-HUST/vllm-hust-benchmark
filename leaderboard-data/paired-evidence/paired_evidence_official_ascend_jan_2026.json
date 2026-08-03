@@ -1,15 +1,16 @@
 {
-  "schema_version": "1.1",
-  "generated_at": "2026-07-31T16:19:31Z",
+  "schema_version": "1.2",
+  "generated_at": "2026-08-03T02:28:53Z",
   "target_id": "official-ascend-jan-2026-v0.18.0",
   "measurement_strategy": "primary-median-run (3 repetitions)",
+  "validity_policy": "paired_evidence_valid requires both sides to have >= 3 repetitions, a measurement block, a 40-char git_commit SHA, and TTFT below 60000ms (anomaly threshold).",
   "specs": [
     {
       "profile": "core-text-14b",
       "scenario": "random-online",
       "baseline": {
         "engine_version": "0.18.0",
-        "git_commit": "e18643f8a4d5",
+        "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "ttft_ms": 244381.59,
         "tbt_ms": 635.55,
         "throughput_tps": 52.56,
@@ -21,7 +22,7 @@
       },
       "current_main": {
         "engine_version": "v0.23.1rc0-1276-g1aa7cd10b7",
-        "git_commit": "1aa7cd10b7",
+        "git_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
         "ttft_ms": 254.68,
         "tbt_ms": 35.82,
         "throughput_tps": 245.81,
@@ -36,14 +37,15 @@
         "tbt": -94.36,
         "throughput": 367.68
       },
-      "paired_evidence_valid": true
+      "paired_evidence_valid": false,
+      "invalid_reason": "base: anomalous_ttft=244382ms exceeds 60000ms threshold; environment damage"
     },
     {
       "profile": "coder-14b",
       "scenario": "instructcoder-online",
       "baseline": {
         "engine_version": "0.18.0",
-        "git_commit": "e18643f8a4d5",
+        "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "ttft_ms": 2097.74,
         "tbt_ms": 772.52,
         "throughput_tps": 118.26,
@@ -55,7 +57,7 @@
       },
       "current_main": {
         "engine_version": "v0.23.1rc0-1276-g1aa7cd10b7",
-        "git_commit": "1aa7cd10b7",
+        "git_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
         "ttft_ms": 155.63,
         "tbt_ms": 31.09,
         "throughput_tps": 125.28,
@@ -70,14 +72,15 @@
         "tbt": -95.98,
         "throughput": 5.94
       },
-      "paired_evidence_valid": true
+      "paired_evidence_valid": false,
+      "invalid_reason": "head: repetitions=1 < required 3"
     },
     {
       "profile": "vision-7b",
       "scenario": "visionarena-online",
       "baseline": {
         "engine_version": "0.18.0",
-        "git_commit": "e18643f8a4d5",
+        "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "ttft_ms": 1724.08,
         "tbt_ms": 487.68,
         "throughput_tps": 107.97,
@@ -89,7 +92,7 @@
       },
       "current_main": {
         "engine_version": "v0.23.1rc0-1276-g1aa7cd10b7",
-        "git_commit": "1aa7cd10b7",
+        "git_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
         "ttft_ms": 323.23,
         "tbt_ms": 21.35,
         "throughput_tps": 110.1,
@@ -104,7 +107,8 @@
         "tbt": -95.62,
         "throughput": 1.97
       },
-      "paired_evidence_valid": true
+      "paired_evidence_valid": false,
+      "invalid_reason": "head: repetitions=1 < required 3"
     }
   ]
 }

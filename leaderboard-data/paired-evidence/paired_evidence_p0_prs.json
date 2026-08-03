@@ -1,9 +1,10 @@
 {
-  "schema_version": "1.1",
-  "generated_at": "2026-07-31T15:25:21Z",
+  "schema_version": "1.2",
+  "generated_at": "2026-08-03T02:28:53Z",
   "target_id": "historical-pr-paired-evidence",
   "measurement_strategy": "primary-median-run (3 repetitions)",
   "source": "issue #89 P0 PR paired reruns (real-online, single NPU 910B2)",
+  "validity_policy": "paired_evidence_valid requires both sides to have >= 3 repetitions, a measurement block, a 40-char git_commit SHA, TTFT below 60000ms, and (for specialty profiles) an approved specialty contract.",
   "prs": [
     {
       "pr_number": 130,
@@ -12,7 +13,7 @@
       "scenario": "logprobs-online",
       "base": {
         "engine_version": "v0.23.1rc0-1270-g611bcabeb7",
-        "git_commit": "611bcabeb7",
+        "git_commit": "611bcabeb730ebcd0a44881236bfead67830625a",
         "ttft_ms": 260.91,
         "tbt_ms": 35.72,
         "throughput_tps": 245.99,
@@ -24,7 +25,7 @@
       },
       "head": {
         "engine_version": "v0.23.1rc0-1272-g3b8e5cff01",
-        "git_commit": "3b8e5cff01",
+        "git_commit": "3b8e5cff01e8a54f067d261db07ba1940a363b96",
         "ttft_ms": 265.07,
         "tbt_ms": 35.91,
         "throughput_tps": 245.95,
@@ -48,7 +49,7 @@
       "scenario": "prefix-repetition-online",
       "base": {
         "engine_version": "v0.17.2.post1-3506-g87f2a3480",
-        "git_commit": "87f2a3480",
+        "git_commit": "87f2a3480f0d06dd3576f94c532562ec7b8280dd",
         "ttft_ms": 592.27,
         "tbt_ms": 54.35,
         "throughput_tps": 165.56,
@@ -60,7 +61,7 @@
       },
       "head": {
         "engine_version": "v0.23.1rc0-1251-g0e84e42c71",
-        "git_commit": "0e84e42c71",
+        "git_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
         "ttft_ms": 204.32,
         "tbt_ms": 34.11,
         "throughput_tps": 53.96,
@@ -75,7 +76,8 @@
         "tbt": -37.24,
         "throughput": -67.41
       },
-      "paired_evidence_valid": true
+      "paired_evidence_valid": false,
+      "invalid_reason": "base: repetitions=1 < required 3"
     },
     {
       "pr_number": 116,
@@ -84,7 +86,7 @@
       "scenario": "prefix-repetition-online",
       "base": {
         "engine_version": "v0.23.1rc0-1251-g0e84e42c71",
-        "git_commit": "0e84e42c71",
+        "git_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
         "ttft_ms": 204.32,
         "tbt_ms": 34.11,
         "throughput_tps": 53.96,
@@ -96,7 +98,7 @@
       },
       "head": {
         "engine_version": "v0.23.1rc0-1252-gab0a8e87d5",
-        "git_commit": "ab0a8e87d5",
+        "git_commit": "ab0a8e87d5b8a361e4c26d83c400d440b1c85f87",
         "ttft_ms": 202.35,
         "tbt_ms": 30.82,
         "throughput_tps": 48.45,
@@ -121,7 +123,7 @@
       "scenario": "kv-tiering-prefix-online",
       "base": {
         "engine_version": "v0.23.1rc0-1263-ge0c0ce8e37",
-        "git_commit": "e0c0ce8e37",
+        "git_commit": "e0c0ce8e37e0fcd0f7a133c5c8eee68110295445",
         "ttft_ms": 291034.92,
         "tbt_ms": 15.74,
         "throughput_tps": 62.44,
@@ -133,7 +135,7 @@
       },
       "head": {
         "engine_version": "v0.23.1rc0-1268-g89334ef1f0",
-        "git_commit": "89334ef1f0",
+        "git_commit": "89334ef1f043c69f9b51b7ebb73ab755a34e2059",
         "ttft_ms": 210408.94,
         "tbt_ms": 16.77,
         "throughput_tps": 78.38,
@@ -148,7 +150,8 @@
         "tbt": 6.54,
         "throughput": 25.53
       },
-      "paired_evidence_valid": true
+      "paired_evidence_valid": false,
+      "invalid_reason": "base: anomalous_ttft=291035ms exceeds 60000ms threshold; environment damage; specialty profile 'vision-7b-specialty' has no approved specialty contract (issue #105 requires approved contract for specialty/out-of-scope results)"
     }
   ]
 }
