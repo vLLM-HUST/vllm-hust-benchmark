@@ -390,7 +390,17 @@ mapfile -t SPEC_FILES < <(
   for path in "$@"; do
     collect_specs "$path"
   done | awk 'NF' | sort -u
-)
+) 2>/dev/null || SPEC_FILES=()
+# Fallback for bash 3.2 (macOS system bash) which lacks ``mapfile``.
+if [[ "${#SPEC_FILES[@]}" -eq 0 ]]; then
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && SPEC_FILES+=("$line")
+  done < <(
+    for path in "$@"; do
+      collect_specs "$path"
+    done | awk 'NF' | sort -u
+  )
+fi
 
 if [[ ${#SPEC_FILES[@]} -eq 0 ]]; then
   echo "No official baseline spec files resolved from input arguments." >&2

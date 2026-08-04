@@ -1,0 +1,164 @@
+{
+  "entry_id": "43b92081-abb6-402b-ac52-17ccdc89b3e6",
+  "engine": "vllm-hust",
+  "engine_version": "v0.17.2.post1-3628-ge4ce33646",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "interconnect": "unknown",
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 64.0
+  },
+  "model": {
+    "canonical_id": "hf:Qwen/Qwen2.5-7B-Instruct",
+    "repo_id": "Qwen/Qwen2.5-7B-Instruct",
+    "short_name": "Qwen2.5-7B-Instruct",
+    "display_name": "Qwen2.5-7B-Instruct",
+    "name": "Qwen/Qwen2.5-7B-Instruct",
+    "parameters": "7B",
+    "precision": "FP16",
+    "quantization": null
+  },
+  "workload": {
+    "name": "kv-tiering-prefix-online",
+    "input_length": 4096,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null,
+    "dataset": "prefix_repetition"
+  },
+  "metrics": {
+    "ttft_ms": 120.42873592930846,
+    "tbt_ms": 19.243307443085204,
+    "throughput_tps": 247.88256804088516,
+    "peak_mem_mb": 0,
+    "error_rate": 0.0
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Ascend-class",
+      "representative_model_band": "7B-13B",
+      "representative_business_scenario": "long-context-chat",
+      "baseline_engine": "",
+      "declared_baseline_engine": "vllm",
+      "baseline_status": "pending-baseline",
+      "owner_confirmed": null,
+      "notes": null
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": null,
+      "long_context_throughput_stable": true,
+      "long_context_ttft_p95_ms": null,
+      "long_context_ttft_p99_ms": 375.7845911220646,
+      "long_context_tpot_p95_ms": null,
+      "long_context_tpot_p99_ms": 22.576399518396048,
+      "long_context_ttft_p95_stable": null,
+      "long_context_ttft_p99_stable": true,
+      "long_context_tpot_p95_stable": null,
+      "long_context_tpot_p99_stable": true,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "N/A",
+    "backend": "N/A",
+    "core": "0.17.2.post1-3628-ge4ce33646",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.11.15",
+    "pytorch_version": "2.1.0+ascend-cann9.0.0",
+    "cuda_version": null,
+    "cann_version": "9.0.0",
+    "driver_version": "26.0.rc1 (firmware 9.0.0.0.205)"
+  },
+  "metadata": {
+    "submitted_at": "2026-07-30T21:36:43Z",
+    "submitter": "succinctpaul-issue89",
+    "data_source": "real-online-historical-pr-backfill",
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2.post1-3628-ge4ce33646",
+    "reproducible_cmd": "# Server: cd /root/vllm/vllm-hust && git checkout e4ce33646 && cd /root/vllm/vllm-ascend-hust && git checkout 52f923884b\n# Launch: vllm serve /data/vllm-hust-benchmark-issue97/models/models/Qwen--Qwen2.5-7B-Instruct/snapshots/master --dtype float16 -tp 1 --port 8001 --enforce-eager\n# Bench: benchmark prefix_repetition --num-prompts 200 --input-len 1024 --output-len 256",
+    "git_commit": "e4ce33646f2ef1781289e6dc651fad0d00177c55",
+    "github_user": "SuccinctPaul",
+    "github_commit_url": null,
+    "github_repository": "vLLM-HUST/vllm-hust-benchmark",
+    "github_ref": null,
+    "github_event_name": null,
+    "github_pr_number": 124,
+    "github_pr_url": "https://github.com/vLLM-HUST/vllm-hust/pull/124",
+    "release_date": null,
+    "changelog_url": null,
+    "notes": "Historical PR backfill single-run measurement for PR#124 (latest). Environment: CANN 9.0.0, driver 26.0.rc1 (firmware 9.0.0.0.205).",
+    "verified": true,
+    "idempotency_key": "9e6dfdc0b6f1493e21db3c2206242579eae5e1bef9107320e605593d24bf5769",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "runtime_provenance": {
+      "python": null,
+      "engine": {
+        "repository": null,
+        "ref": null,
+        "commit": "e4ce33646f2ef1781289e6dc651fad0d00177c55"
+      },
+      "plugin": {
+        "engine": null,
+        "repository": null,
+        "ref": null,
+        "commit": "52f923884b9adaedfc2e764428207d0448227549"
+      }
+    },
+    "workload_config_contract": "explicit-effective/v1"
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-kv-tiering-prefix-online-qwen25-7b-910b2",
+    "spec_label": "Official Ascend Jan 2026 KV tiering pressure baseline for vllm-hust goal tracking",
+    "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json",
+    "scenario": "kv-tiering-prefix-online",
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "model_parameters": "7B",
+    "model_precision": "FP16",
+    "model_quantization": "",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "disable_log_requests": "",
+      "host": "0.0.0.0",
+      "port": 8001,
+      "model": "/data/vllm-hust-benchmark-issue97/models/models/Qwen--Qwen2.5-7B-Instruct/snapshots/master",
+      "dtype": "float16"
+    },
+    "resolved_client_parameters": {
+      "backend": "vllm",
+      "endpoint": "/v1/completions",
+      "dataset_name": "prefix_repetition",
+      "num_prompts": 200,
+      "prefix_repetition_num_prefixes": 10,
+      "prefix_repetition_suffix_len": 256,
+      "prefix_repetition_prefix_len": 3840,
+      "request_rate": 1,
+      "host": "127.0.0.1",
+      "port": 8001,
+      "model": "/data/vllm-hust-benchmark-issue97/models/models/Qwen--Qwen2.5-7B-Instruct/snapshots/master",
+      "prefix_repetition_output_len": 256
+    },
+    "resolved_spec_hash": "45148e57918ebb19132db413da4eab83f2746a37ae44b6ce7ffa00da140f1c8a"
+  },
+  "coverage_class": "targeted-pair"
+}

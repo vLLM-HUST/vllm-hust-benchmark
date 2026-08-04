@@ -47,6 +47,9 @@ jobs:
       - name: Reject non-compliant public leaderboard records
         run: python scripts/validate_public_leaderboard_snapshots.py
 
+      - name: Verify submission checksums (sha256sum -c per directory)
+        run: python scripts/verify_submission_checksums.py --root submissions
+
       - name: Verify generated official target registry
         run: python -m vllm_hust_benchmark.official_targets --check --repo-root .
 
