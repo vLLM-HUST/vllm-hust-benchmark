@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -47,6 +48,40 @@ def _write_valid_manifest(rep_dir: Path) -> None:
         "plugin_patch_file": "derived_patch_plugin.diff",
     }
     (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+
+def _make_temp_git_repo(repo_dir: Path, *, short_sha_len: int = 10) -> tuple[Path, str]:
+    """Create a temporary git repo with one commit.
+
+    Returns (repo_path, real_full_sha).  Used by commit-object verification
+    tests to verify that real SHAs pass and padded/fabricated SHAs are rejected.
+    """
+    repo_dir.mkdir(parents=True)
+    subprocess.run(["git", "init", "--quiet"], cwd=repo_dir, check=True)
+    subprocess.run(
+        ["git", "-C", str(repo_dir), "config", "user.email", "test@example.com"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(repo_dir), "config", "user.name", "Test"],
+        check=True,
+    )
+    (repo_dir / "README").write_text("test\n")
+    subprocess.run(["git", "-C", str(repo_dir), "add", "README"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo_dir), "commit", "-m", "test", "--quiet"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    full_sha = subprocess.run(
+        ["git", "-C", str(repo_dir), "rev-parse", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    assert len(full_sha) == 40
+    return repo_dir, full_sha
 
 
 # ---------------------------------------------------------------------------
@@ -538,22 +573,89 @@ class TestValidateEnvManifest:
         """Reverse test: engine_commit_observed is a short SHA padded with
         zeros (e.g. '2206f1f7b7' + 30 zeros) — must be rejected.
 
-        Per reviewer round 4: 'engine_commit_observed 被写成 2206f1f7b7 后补
-        30 个零...validator 也应校验 observed SHA 能解析到对应 repo commit，
-        至少拒绝这种补零值'.
+        Per reviewer round 5: 'test_rejects_padded_engine_commit_observed 现在对
+        2206f1f7b7 后补 30 个零的值断言 valid...40 位十六进制和 requested prefix
+        只能做格式检查，不能证明对象存在。请让 observed SHA 能在对应仓库解析到
+        commit...并把这个测试改成确实拒绝该补零值'.
+
+        The test creates a real git repo with a real commit, then sets
+        engine_commit_observed to a padded SHA (short prefix + 30 zeros).
+        The validator must reject this because the padded SHA does not resolve
+        to a commit object in the repo (verified via ``git cat-file -t``).
+        """
+        # Create a real git repo with one commit.
+        repo_dir, real_sha = _make_temp_git_repo(tmp_path / "vllm-hust")
+        short_sha = real_sha[:10]
+
+        # Build a padded SHA: short prefix + 30 zeros.  This passes format
+        # (40-hex) and prefix (startswith short_sha) checks but does NOT
+        # resolve to a real commit object.
+        padded_sha = short_sha + "0" * 30
+        assert len(padded_sha) == 40
+        assert padded_sha.startswith(short_sha)
+        assert padded_sha != real_sha
+
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": short_sha,
+            "engine_commit_observed": padded_sha,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": "b" * 10,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        # With repo_paths provided, the validator must verify the observed SHA
+        # resolves to a real commit object.  The padded SHA must be rejected.
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir, repo_paths={"engine": repo_dir}
+        )
+        assert not valid, (
+            f"Padded SHA {padded_sha!r} must be rejected when repo is "
+            f"available, but validator returned valid.  reason={reason!r}"
+        )
+        assert "does not resolve to a commit object" in reason
+
+    def test_real_engine_commit_observed_passes_verification(
+        self, analyze_mod, tmp_path
+    ):
+        """Positive test: a real commit SHA that resolves in the repo passes.
+
+        Per reviewer round 5: '请让 observed SHA 能在对应仓库解析到 commit'.
+        """
+        repo_dir, real_sha = _make_temp_git_repo(tmp_path / "vllm-hust")
+        short_sha = real_sha[:10]
+
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": short_sha,
+            "engine_commit_observed": real_sha,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": "b" * 10,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir, repo_paths={"engine": repo_dir}
+        )
+        assert valid, f"Real commit SHA should pass verification: {reason}"
+
+    def test_padded_sha_passes_without_repo(self, analyze_mod, tmp_path):
+        """Without repo_paths, the validator can only do format+prefix checks.
+
+        A padded SHA that passes format+prefix will be accepted when no repo
+        is available for commit-object verification (fail-open for CI
+        environments without repo access).  This documents the limitation.
         """
         rep_dir = tmp_path / "rep-1"
         rep_dir.mkdir()
         manifest = {
             "engine_commit_requested": "2206f1f7b7",
-            # Padded short SHA: 10 hex chars + 30 zeros = 40 chars but does NOT
-            # start with a valid commit prefix when checked against a real repo.
-            # The validator catches this because the real full SHA of
-            # 2206f1f7b7 would start with '2206f1f7b7' but NOT be all zeros
-            # after.  However, this padded value DOES start with the requested
-            # prefix, so we also check that the SHA is not all-zeros after the
-            # prefix — but that's too specific.  Instead, the test uses a
-            # mismatched requested SHA to trigger the prefix check.
             "engine_commit_observed": "2206f1f7b7" + "0" * 30,
             "engine_patch_sha256": "clean",
             "plugin_commit_requested": "b" * 10,
@@ -562,19 +664,9 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        # This padded SHA is 40-hex and starts with the requested prefix, so
-        # it passes format + prefix checks.  However, in practice, a real repo
-        # checkout would produce the actual full SHA, not a padded one.  The
-        # validator cannot distinguish padded from real without git access.
-        # The reviewer's concern is about fabricated manifests — which we now
-        # prevent by requiring the manifest to exist at all (historical reps
-        # without manifests are skipped).  For real runs, the manifest is
-        # generated by the bash script using `git rev-parse HEAD`, so the SHA
-        # is always real.  This test verifies the format check still works.
+        # No repo_paths — only format + prefix checks are done.
         valid, reason = analyze_mod.validate_env_manifest(rep_dir)
-        # The padded SHA passes format checks (it's 40-hex and prefix matches).
-        # This is acceptable because real runs generate real SHAs.
-        assert valid, f"Padded SHA with matching prefix should pass format: {reason}"
+        assert valid, f"Without repo access, format+prefix checks should pass: {reason}"
 
     def test_rejects_padded_engine_commit_observed_mismatched_prefix(
         self, analyze_mod, tmp_path

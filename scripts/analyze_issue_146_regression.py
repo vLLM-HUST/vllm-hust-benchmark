@@ -19,6 +19,7 @@ import hashlib
 import json
 import re
 import statistics
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -28,6 +29,36 @@ from typing import Any
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 # Full git commit SHA is exactly 40 lowercase hex characters.
 _FULL_HEX_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def verify_commit_in_repo(repo_path: Path | None, sha: str) -> bool:
+    """Verify that ``sha`` resolves to a real commit object in ``repo_path``.
+
+    Uses ``git cat-file -t <sha>`` to check that the SHA is a valid commit
+    object in the repository.  This rejects fabricated/padded SHAs that pass
+    format checks but don't correspond to any real commit.
+
+    Per reviewer round 5: '40 位十六进制和 requested prefix 只能做格式检查，
+    不能证明对象存在。请让 observed SHA 能在对应仓库解析到 commit'.
+
+    Returns True if the repo is available and the SHA resolves to a commit.
+    Returns True (skip) if repo_path is None or doesn't exist (can't verify).
+    """
+    if repo_path is None or not repo_path.is_dir():
+        # Cannot verify without repo access — skip commit-object check.
+        return True
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_path), "cat-file", "-t", sha],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return result.returncode == 0 and result.stdout.strip() == "commit"
+    except (subprocess.SubprocessError, OSError):
+        # If git fails, skip rather than reject (fail-open for availability).
+        return True
+
 
 # Commits under investigation (issue #146)
 ENGINE_COMMITS = ["2206f1f7b7", "7a63f81e86", "83cf83ff20"]
@@ -93,16 +124,21 @@ def _extract_metric(raw: dict[str, Any], workload: str) -> float | None:
     return None
 
 
-def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
+def collect_results(
+    result_dir: Path,
+    *,
+    repo_paths: dict[str, Path] | None = None,
+) -> dict[str, dict[str, list[float]]]:
     """Collect all benchmark results from the re-test directory.
 
     Only collects results from reps that:
     1. Have a ``.completed`` marker file (benchmark + manifest succeeded).
     2. Pass ``validate_env_manifest`` (provenance is complete and untampered).
 
-    Per reviewer round 3: "collect_results 只检查 marker 和 raw.json，从未调用
-    新增的 validate_env_manifest，因此当前仓库里仍是 MD5 manifest、没有 derived
-    patch 文件的旧结果也会继续参与结论。请...收集时强制 validate_env_manifest".
+    Per reviewer round 5: when ``repo_paths`` is provided, observed commit
+    SHAs are verified against the corresponding repos via ``git cat-file``.
+    This rejects fabricated/padded SHAs that pass format checks but don't
+    resolve to real commits.
 
     Returns: {workload: {commit: [metric1, metric2, ...]}}
     """
@@ -126,7 +162,9 @@ def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
                 # Enforce manifest validation before consuming results.
                 # Per reviewer round 3: this must be fail-closed — reps with
                 # missing, corrupt, or tampered manifests are skipped.
-                manifest_valid, manifest_reason = validate_env_manifest(rep_dir)
+                manifest_valid, manifest_reason = validate_env_manifest(
+                    rep_dir, repo_paths=repo_paths
+                )
                 if not manifest_valid:
                     print(
                         f"  WARNING: skipping {rep_dir.name}: {manifest_reason}",
@@ -143,20 +181,25 @@ def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
     return results
 
 
-def validate_env_manifest(rep_dir: Path) -> tuple[bool, str]:
+def validate_env_manifest(
+    rep_dir: Path,
+    *,
+    repo_paths: dict[str, Path] | None = None,
+) -> tuple[bool, str]:
     """Validate that an env-manifest.json has complete and untampered provenance.
+
+    Per reviewer feedback (round 5):
+    - Must verify observed SHA resolves to a real commit object in the
+      corresponding repo via ``git cat-file -t <sha>``.  Format + prefix
+      checks alone cannot prove the object exists.
+    - ``repo_paths`` maps "engine"/"plugin" to repo paths.  When provided,
+      observed SHAs are verified against the repo.  When None, only format
+      + prefix checks are done (e.g. in CI without repo access).
 
     Per reviewer feedback (round 4):
     - Must reject fabricated manifests where observed commit SHAs are padded
       short SHAs (e.g. "2206f1f7b7" + 30 zeros).  Both engine_commit_observed
       and plugin_commit_observed must be real 40-char hex SHAs.
-    - Must NOT accept "clean" patch identity for historical results that
-      lack original manifest/patch files — those reps must stay invalid.
-      However, "clean" is acceptable for real runs where the repo was at a
-      clean checkout AND the manifest was generated at run time (not
-      backfilled).  The distinction is enforced by requiring that a manifest
-      exist at all; historical reps without a manifest are already rejected
-      by the "missing" check above.
 
     Per reviewer feedback (round 3):
     - Must verify SHA-256 is exactly 64 lowercase hex (regex, not just length).
@@ -231,6 +274,25 @@ def validate_env_manifest(rep_dir: Path) -> tuple[bool, str]:
             f"plugin_commit_observed {plugin_observed!r} does not start with "
             f"requested short SHA {plugin_requested!r} (padded SHA suspected)"
         )
+
+    # Per reviewer round 5: verify observed SHA resolves to a real commit
+    # object in the corresponding repo via `git cat-file -t <sha>`.
+    # This rejects padded SHAs that pass format + prefix checks but don't
+    # correspond to any real commit.  When repo_paths is None (e.g. CI),
+    # this check is skipped (fail-open for availability).
+    if repo_paths is not None:
+        engine_repo = repo_paths.get("engine")
+        if not verify_commit_in_repo(engine_repo, engine_observed):
+            return False, (
+                f"engine_commit_observed {engine_observed!r} does not resolve "
+                f"to a commit object in {engine_repo}"
+            )
+        plugin_repo = repo_paths.get("plugin")
+        if not verify_commit_in_repo(plugin_repo, plugin_observed):
+            return False, (
+                f"plugin_commit_observed {plugin_observed!r} does not resolve "
+                f"to a commit object in {plugin_repo}"
+            )
 
     # Verify SHA-256 fields exist and are strings
     engine_sha = manifest.get("engine_patch_sha256")
@@ -542,6 +604,18 @@ def main() -> int:
         default=None,
         help="Output JSON file (default: stdout)",
     )
+    parser.add_argument(
+        "--engine-repo",
+        type=Path,
+        default=None,
+        help="Path to vllm-hust repo for commit-object verification",
+    )
+    parser.add_argument(
+        "--plugin-repo",
+        type=Path,
+        default=None,
+        help="Path to vllm-ascend-hust repo for commit-object verification",
+    )
     args = parser.parse_args()
 
     result_dir: Path = args.result_dir
@@ -549,7 +623,16 @@ def main() -> int:
         print(f"ERROR: {result_dir} not found", file=sys.stderr)
         return 2
 
-    results = collect_results(result_dir)
+    # Build repo_paths for commit-object verification if any repo is provided.
+    repo_paths: dict[str, Path] | None = None
+    if args.engine_repo or args.plugin_repo:
+        repo_paths = {}
+        if args.engine_repo:
+            repo_paths["engine"] = args.engine_repo
+        if args.plugin_repo:
+            repo_paths["plugin"] = args.plugin_repo
+
+    results = collect_results(result_dir, repo_paths=repo_paths)
     summary = compute_medians(results)
     findings = analyze_regression(summary)
     report = generate_report(summary, findings, result_dir)

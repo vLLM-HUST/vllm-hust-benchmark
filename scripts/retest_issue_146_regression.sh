@@ -3,13 +3,16 @@
 # Runs sonnet-throughput and random-latency benchmarks at 3 vllm-hust commits
 # with 3 repetitions each, using a fixed vllm-ascend-hust plugin commit.
 #
-# Key design decisions per reviewer feedback (round 2):
+# Key design decisions per reviewer feedback (round 5):
 #   1. Commits are interleaved (round-robin) across reps, not run sequentially.
 #   2. Benchmark failures are NOT swallowed (no || true); temporary output is
 #      atomically moved to the final location only after field validation.
-#   3. Process cleanup is job-owned: the bench command runs in its own process
-#      group (setsid) and _CURRENT_SERVER_PID tracks the real PGID so
-#      kill_owned_server kills the entire process tree, not a no-op.
+#   3. Process cleanup uses triple-identity verification (PID + starttime +
+#      cmdline) via process_identity.py.  The launcher's identity is recorded
+#      at launch; descendants are snapshotted continuously at 0.5s intervals
+#      with an immediate snapshot before the first sleep to catch fast-detach
+#      processes.  Cleanup verifies ALL three identity dimensions before
+#      killing, preventing PID-reuse false kills.
 #   4. Provenance captures observed full SHA, full derived patch content
 #      (tracked diff + untracked files like _build_info.py) saved to disk
 #      and bound by SHA-256, plus Python/CANN/driver versions.
@@ -31,6 +34,12 @@ NL=$'\n'
 REPS=${REPS:-3}
 DRY_RUN=0
 NPU_DEVICE="${NPU_DEVICE:-0}"
+
+# Locate the process_identity.py helper for triple-identity verification.
+# Per reviewer round 5: '请补齐 launcher 和后代的 PID/start time/cmdline 身份
+# 记录与复核' — cleanup now verifies PID + starttime + cmdline before killing.
+_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_PROCESS_IDENTITY_PY="$_SCRIPT_DIR/process_identity.py"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -83,14 +92,23 @@ export ATB_HOME_PATH="${_atb_home}/${_cxx_abi_dir}"
 
 mkdir -p "$RESULT_DIR"
 
-# Track verified descendant PIDs and their start times (in centiseconds).
-# Populated by _snapshot_descendants() while the launcher is alive and the
-# server is ready.  Used by kill_owned_server() to kill only processes whose
-# PID AND start time still match — preventing PID-reuse false kills.
+# Track verified process identities for safe cleanup.
+# Populated by run_bench_tracked() while the launcher is alive.
+# Used by kill_owned_server() to kill only processes whose PID + starttime
+# + cmdline still match — preventing PID-reuse false kills.
 #
-# Format: "pid1:starttime1 pid2:starttime2 ..."
+# Per reviewer round 5: '后代只记录 PID/start time，没有保存和复核 cmdline；
+# launcher 则连启动时的 start time 都没有记录，cleanup 时只要当前 PID 存在
+# 就会发送 TERM，仍有 PID reuse 误杀风险'.
+#
+# _LAUNCHER_STARTTIME / _LAUNCHER_CMDLINE: identity of the bench launcher,
+#   recorded at launch time so cleanup can verify the PID hasn't been recycled.
+# _VERIFIED_DESCENDANTS_FILE: temp file containing JSON snapshot arrays (one
+#   per line), each from process_identity.py snapshot.  Merged at cleanup time.
 _CURRENT_BENCH_PID=""
-_VERIFIED_DESCENDANTS=""
+_LAUNCHER_STARTTIME=""
+_LAUNCHER_CMDLINE=""
+_VERIFIED_DESCENDANTS_FILE=""
 
 # ---------------------------------------------------------------------------
 # Helper functions
@@ -98,93 +116,59 @@ _VERIFIED_DESCENDANTS=""
 
 log() { echo "[$(date '+%Y%m%dT%H%M%SZ')] $*"; }
 
-# Get the start time of a PID (in centiseconds since boot, from /proc).
-# Returns empty string if PID doesn't exist or /proc is unavailable.
-_get_starttime() {
-    local pid="$1"
-    local stat_file="/proc/$pid/stat"
-    if [ -r "$stat_file" ]; then
-        # Field 22 is starttime in clock ticks.  Use a robust parse that
-        # handles comm fields containing spaces/parens.
-        local content
-        content=$(cat "$stat_file" 2>/dev/null) || return
-        local after_comm
-        after_comm="${content##*)}"
-        # after_comm now starts with " state ..." — field 22 from the start
-        # of the full stat, but after the comm it's field 20.
-        echo "$after_comm" | awk '{print $20}'
-    else
-        # macOS fallback: use ps -o lstart (less precise but works).
-        ps -o lstart= -p "$pid" 2>/dev/null | tr ' ' '_' | tr -s '_'
-    fi
-}
-
-# Recursively snapshot all descendants of a PID: record PID + start time.
-# Called while the launcher is alive so the process tree is intact.
-# Stores results in _VERIFIED_DESCENDANTS.
-_snapshot_descendants() {
-    local parent_pid="$1"
-    local child
-    for child in $(pgrep -P "$parent_pid" 2>/dev/null || true); do
-        # Recurse first (depth-first) to capture grandchildren.
-        _snapshot_descendants "$child"
-        local st
-        st=$(_get_starttime "$child")
-        if [ -n "$st" ]; then
-            _VERIFIED_DESCENDANTS+=" ${child}:${st}"
-        fi
-    done
-}
-
-# Verify that a PID still has the same start time as when we snapshotted it.
-# Returns 0 (true) if PID exists and start time matches, 1 (false) otherwise.
-# This prevents killing a recycled PID that now belongs to a different process.
-_verify_pid() {
-    local pid="$1" recorded_starttime="$2"
-    local current_starttime
-    current_starttime=$(_get_starttime "$pid")
-    [ -n "$current_starttime" ] && [ "$current_starttime" = "$recorded_starttime" ]
-}
-
-# Job-owned cleanup: kill processes whose PID + start time match the
+# Job-owned cleanup: kill processes whose PID + starttime + cmdline match the
 # snapshot taken while the launcher was alive.
-# Per reviewer round 4: "在 launcher 存活、服务 ready 时持久化已验证后代的 PID
-# 和 start time，cleanup 时以 PID/start time/cmdline 等身份再次核验后终止".
+#
+# Per reviewer round 5: '后代只记录 PID/start time，没有保存和复核 cmdline；
+# launcher 则连启动时的 start time 都没有记录，cleanup 时只要当前 PID 存在
+# 就会发送 TERM，仍有 PID reuse 误杀风险。请补齐 launcher 和后代的
+# PID/start time/cmdline 身份记录与复核'.
+#
+# This function:
+# 1. Verifies the launcher's identity (PID + starttime + cmdline) before
+#    sending TERM/KILL.  If the PID was recycled to a different process
+#    (different starttime or cmdline), it is NOT killed.
+# 2. Calls process_identity.py cleanup to kill only descendants whose
+#    identity still matches the recorded snapshot.
 kill_owned_server() {
-    # 1. Kill the launcher itself if still alive (it may have already exited).
-    if [ -n "$_CURRENT_BENCH_PID" ]; then
-        local launcher_st
-        launcher_st=$(_get_starttime "$_CURRENT_BENCH_PID")
-        if [ -n "$launcher_st" ]; then
+    # 1. Kill the launcher only if its identity still matches.
+    if [ -n "$_CURRENT_BENCH_PID" ] && \
+       [ -n "$_LAUNCHER_STARTTIME" ] && \
+       [ -n "$_LAUNCHER_CMDLINE" ]; then
+        if "$PYTHON" "$_PROCESS_IDENTITY_PY" verify \
+            "$_CURRENT_BENCH_PID" "$_LAUNCHER_STARTTIME" "$_LAUNCHER_CMDLINE" \
+            2>/dev/null; then
             kill -TERM "$_CURRENT_BENCH_PID" 2>/dev/null || true
+            sleep 1
+            # Force-kill if still alive AND identity still matches
+            if "$PYTHON" "$_PROCESS_IDENTITY_PY" verify \
+                "$_CURRENT_BENCH_PID" "$_LAUNCHER_STARTTIME" "$_LAUNCHER_CMDLINE" \
+                2>/dev/null; then
+                kill -KILL "$_CURRENT_BENCH_PID" 2>/dev/null || true
+            fi
         fi
     fi
 
-    # 2. Kill each verified descendant whose PID + start time still match.
-    #    This avoids PID-reuse false kills: if a PID was recycled to a new
-    #    process, its start time will differ and we skip it.
-    if [ -n "$_VERIFIED_DESCENDANTS" ]; then
-        local entry pid recorded_st
-        for entry in $_VERIFIED_DESCENDANTS; do
-            pid="${entry%%:*}"
-            recorded_st="${entry##*:}"
-            if _verify_pid "$pid" "$recorded_st"; then
-                kill -TERM "$pid" 2>/dev/null || true
-            fi
-        done
+    # 2. Kill each verified descendant whose identity still matches.
+    #    process_identity.py cleanup merges all snapshots, verifies each
+    #    descendant's PID + starttime + cmdline, and sends the signal only
+    #    to those that still match.
+    if [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
+       [ -s "$_VERIFIED_DESCENDANTS_FILE" ]; then
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup \
+            "$_VERIFIED_DESCENDANTS_FILE" 15 2>/dev/null || true  # SIGTERM
         sleep 1
-        # Force-kill any that survived TERM
-        for entry in $_VERIFIED_DESCENDANTS; do
-            pid="${entry%%:*}"
-            recorded_st="${entry##*:}"
-            if _verify_pid "$pid" "$recorded_st"; then
-                kill -KILL "$pid" 2>/dev/null || true
-            fi
-        done
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup \
+            "$_VERIFIED_DESCENDANTS_FILE" 9 2>/dev/null || true   # SIGKILL
     fi
 
+    # 3. Clean up temp file and reset state.
+    [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
+        rm -f "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
     _CURRENT_BENCH_PID=""
-    _VERIFIED_DESCENDANTS=""
+    _LAUNCHER_STARTTIME=""
+    _LAUNCHER_CMDLINE=""
+    _VERIFIED_DESCENDANTS_FILE=""
     sleep 2
 }
 
@@ -385,20 +369,34 @@ print(f'Validated: {val}')
 
 # Run a benchmark command, tracking its PID and snapshotting descendants.
 # The command's stdout/stderr are tee'd to the log file.
-# Sets _CURRENT_BENCH_PID to the launcher PID, and snapshots all descendant
-# PIDs + start times into _VERIFIED_DESCENDANTS while the launcher is alive
-# (so detached descendants like EngineCore are captured even if they later
-# reparent or setsid).
-# Exits non-zero if the benchmark command fails.
-# Per reviewer round 4: "在 launcher 存活、服务 ready 时持久化已验证后代的 PID
-# 和 start time，cleanup 时以 PID/start time/cmdline 等身份再次核验后终止".
+#
+# Records the launcher's identity (PID + starttime + cmdline) and continuously
+# snapshots descendant identities via process_identity.py while the launcher
+# is alive.  This captures detached descendants like EngineCore even if they
+# later reparent or setsid.
+#
+# Per reviewer round 5: '请补齐 launcher 和后代的 PID/start time/cmdline 身份
+# 记录与复核...每 2 秒轮询一次会漏掉在首次/两次 snapshot 之间快速 spawn、
+# setsid、reparent 的 EngineCore'.
+#
+# Key changes from round 4:
+#   - Launcher starttime + cmdline recorded at launch (not just PID).
+#   - Descendant cmdline recorded (not just PID + starttime).
+#   - Immediate snapshot BEFORE first sleep (catches fast-detach processes).
+#   - Polling interval reduced from 2s to 0.5s.
+#   - Snapshots stored as JSON arrays (one per line) for Python cleanup.
 run_bench_tracked() {
     local log_file="$1"
     shift
 
     # Reset state for this run.
     _CURRENT_BENCH_PID=""
-    _VERIFIED_DESCENDANTS=""
+    _LAUNCHER_STARTTIME=""
+    _LAUNCHER_CMDLINE=""
+    [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
+        rm -f "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
+    _VERIFIED_DESCENDANTS_FILE=$(mktemp)
+    : > "$_VERIFIED_DESCENDANTS_FILE"  # truncate
 
     # Start the bench command.  NOT in a new session — we want it in our
     # process group so we can walk its descendants via pgrep -P.
@@ -406,30 +404,33 @@ run_bench_tracked() {
     local bench_pid=$!
     _CURRENT_BENCH_PID=$bench_pid
 
-    # Background monitor: continuously snapshot descendants while the launcher
-    # is alive.  This captures EngineCore workers even if they later setsid
-    # or reparent to init after the launcher exits.
-    # The monitor writes to a temp file (append mode) to avoid subshell
-    # variable scoping issues.
-    local snapshot_file
-    snapshot_file=$(mktemp)
-    : > "$snapshot_file"  # truncate
+    # Record launcher identity immediately — used by kill_owned_server to
+    # verify the PID hasn't been recycled before killing.
+    # Per reviewer round 5: 'launcher 则连启动时的 start time 都没有记录'.
+    _LAUNCHER_STARTTIME=$("$PYTHON" "$_PROCESS_IDENTITY_PY" get_starttime \
+        "$bench_pid" 2>/dev/null || echo "")
+    _LAUNCHER_CMDLINE=$("$PYTHON" "$_PROCESS_IDENTITY_PY" get_cmdline \
+        "$bench_pid" 2>/dev/null || echo "")
+
+    # Background monitor: continuously snapshot descendants at 0.5s intervals.
+    # Per reviewer round 5: '每 2 秒轮询一次会漏掉在首次/两次 snapshot 之间快速
+    # spawn、setsid、reparent 的 EngineCore'.
+    # The immediate snapshot (before first sleep) catches processes that
+    # spawn and detach between launch and the first poll.
     (
+        # Immediate snapshot BEFORE first sleep — minimizes the window
+        # where a fast-detach process is missed.
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot "$bench_pid" \
+            >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
         while kill -0 "$bench_pid" 2>/dev/null; do
-            _VERIFIED_DESCENDANTS=""
-            _snapshot_descendants "$bench_pid"
-            if [ -n "$_VERIFIED_DESCENDANTS" ]; then
-                echo "$_VERIFIED_DESCENDANTS" >> "$snapshot_file"
-            fi
-            sleep 2
+            "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot "$bench_pid" \
+                >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
+            sleep 0.5
         done
         # Final snapshot right after launcher exits — children may still be
         # alive and traceable via pgrep before they reparent.
-        _VERIFIED_DESCENDANTS=""
-        _snapshot_descendants "$bench_pid"
-        if [ -n "$_VERIFIED_DESCENDANTS" ]; then
-            echo "$_VERIFIED_DESCENDANTS" >> "$snapshot_file"
-        fi
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot "$bench_pid" \
+            >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
     ) &
     local monitor_pid=$!
 
@@ -437,12 +438,8 @@ run_bench_tracked() {
     local rc=0
     wait "$bench_pid" || rc=$?
 
-    # Stop the monitor and collect the accumulated snapshots.
+    # Stop the monitor.
     wait "$monitor_pid" 2>/dev/null || true
-    # Read all snapshot lines, merge unique PID:starttime pairs.
-    # Each line is a space-separated list of "pid:starttime" entries.
-    _VERIFIED_DESCENDANTS=$(tr ' ' '\n' < "$snapshot_file" | sort -u | tr '\n' ' ')
-    rm -f "$snapshot_file"
 
     return $rc
 }
