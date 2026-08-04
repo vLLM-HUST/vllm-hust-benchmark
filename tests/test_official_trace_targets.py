@@ -22,6 +22,7 @@ from vllm_hust_benchmark.trace_replay import (
     build_prompt_token_ids,
     execute_replay,
     load_replay_plan,
+    summarize_executed_inputs,
     summarize_plan,
     summarize_results,
 )
@@ -554,6 +555,16 @@ def test_execute_replay_sends_exact_synthetic_token_count(tmp_path: Path) -> Non
     assert len(captured[0]["prompt"]) == 100
     assert captured[0]["max_tokens"] == 20
     assert captured[0]["model"] == "test-model"
+    input_summary = summarize_executed_inputs(plan, results)
+    assert input_summary["resolved_input_kind"] == ("production-trace-prompt-token-ids")
+    assert len(input_summary["resolved_input_sha256"]) == 64
+
+    changed = [dict(results[0])]
+    changed[0]["prompt_token_ids_sha256"] = "0" * 64
+    assert (
+        summarize_executed_inputs(plan, changed)["resolved_input_sha256"]
+        != input_summary["resolved_input_sha256"]
+    )
 
 
 def test_execute_replay_rejects_inexact_response_usage(tmp_path: Path) -> None:

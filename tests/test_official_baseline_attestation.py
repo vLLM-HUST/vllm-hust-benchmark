@@ -22,6 +22,12 @@ TRACE_PACKAGES = {
     "torch-npu": "2.10.0",
 }
 TRACE_ENVIRONMENT = {"VLLM_BATCH_INVARIANT": "1"}
+MODEL_REVISION = "a" * 40
+STATIC_DATA_IDENTITY = {
+    "kind": "vllm-repository-file",
+    "path": "benchmarks/sonnet.txt",
+    "sha256": "d" * 64,
+}
 
 
 def _write(path: Path, payload: object) -> None:
@@ -36,6 +42,11 @@ def _write_strict_execution_evidence(
     chip_count: int = 1,
     peak_hbm_mb: int = 2048,
     runtime_image_digest: str = TRACE_DIGEST,
+    model_id: str = "Qwen/model",
+    model_revision: str = MODEL_REVISION,
+    data_identity: dict | None = None,
+    resolved_input_sha256: str = "e" * 64,
+    resolved_input_kind: str = "throughput-sample-requests",
 ) -> None:
     container_id = f"{number:064x}"
     devices = list(range(chip_count))
@@ -100,6 +111,18 @@ def _write_strict_execution_evidence(
             "lease_released": True,
         },
     )
+    immutable_path = repeat / "immutable-input-attestation.json"
+    _write(
+        immutable_path,
+        {
+            "schema_version": "immutable-input-attestation/v1",
+            "model_id": model_id,
+            "model_revision": model_revision,
+            "data_identity": data_identity or STATIC_DATA_IDENTITY,
+            "resolved_input_kind": resolved_input_kind,
+            "resolved_input_sha256": resolved_input_sha256,
+        },
+    )
     _write(
         repeat / "strict_execution_evidence.json",
         {
@@ -109,6 +132,10 @@ def _write_strict_execution_evidence(
             "container_id": container_id,
             "runtime_image_digest": runtime_image_digest,
             "service_port": 8000,
+            "immutable_inputs": {
+                "path": immutable_path.name,
+                "sha256": hashlib.sha256(immutable_path.read_bytes()).hexdigest(),
+            },
             "lease": {
                 "physical_npu_ids": devices,
                 "acquired_at": "2026-08-02T00:00:00Z",
@@ -160,11 +187,17 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
             "chip_count": 1,
             "node_count": 1,
         },
-        "model": {"id": "Qwen/model", "parameters": "14B", "precision": "FP16"},
+        "model": {
+            "id": "Qwen/model",
+            "revision": MODEL_REVISION,
+            "parameters": "14B",
+            "precision": "FP16",
+        },
         "server_parameters": {"max_model_len": 32768},
         "workload": {
             "name": "sonnet-throughput",
             "client_parameters": {"num_prompts": 200},
+            "data_identity": STATIC_DATA_IDENTITY,
         },
         "source_spec": {
             "path": "docs/spec.json",
@@ -230,6 +263,19 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
     return repo, staged, results, entry, target
 
 
+def _mutate_immutable_input(repeat: Path, **updates: object) -> None:
+    immutable_path = repeat / "immutable-input-attestation.json"
+    payload = json.loads(immutable_path.read_text(encoding="utf-8"))
+    payload.update(updates)
+    _write(immutable_path, payload)
+    strict_path = repeat / "strict_execution_evidence.json"
+    strict = json.loads(strict_path.read_text(encoding="utf-8"))
+    strict["immutable_inputs"]["sha256"] = hashlib.sha256(
+        immutable_path.read_bytes()
+    ).hexdigest()
+    _write(strict_path, strict)
+
+
 def _trace_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
     repo, staged, results, entry, target = _fixture(tmp_path)
     target["profile"] = "production-trace"
@@ -243,9 +289,15 @@ def _trace_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
             "runtime_environment": TRACE_ENVIRONMENT,
         }
     )
+    trace_data_identity = {
+        "kind": "release-asset",
+        "path": "BurstGPT_3.csv",
+        "sha256": "f" * 64,
+    }
     target["workload"] = {
         "name": "burstgpt-production-replay",
         "client_parameters": {"max_requests": 2},
+        "data_identity": trace_data_identity,
     }
     entry["same_spec"]["resolved_client_parameters"] = {"max_requests": 2}
     registry_path = repo / "leaderboard-data" / "official-targets.json"
@@ -260,6 +312,12 @@ def _trace_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
     model_digest = "a" * 64
     for number in range(1, 4):
         repeat = results / f"repeat-{number:02d}"
+        _write_strict_execution_evidence(
+            repeat,
+            number,
+            data_identity=trace_data_identity,
+            resolved_input_kind="production-trace-prompt-token-ids",
+        )
         repeat_entry = json.loads(json.dumps(entry))
         repeat_entry["entry_id"] = f"entry-{number}"
         repeat_entry["metadata"]["idempotency_key"] = f"key-{number}"
@@ -349,12 +407,63 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
     assert suite["repeats"][0]["physical_npu_ids"] == [0]
     assert suite["repeats"][0]["peak_hbm_mb"] == 2048
     assert len(suite["repeats"][0]["pre_start_snapshots"]) == 2
+    assert suite["repeats"][0]["model_revision"] == MODEL_REVISION
+    assert suite["repeats"][0]["resolved_input_sha256"] == "e" * 64
+    assert len(suite["repeats"][0]["immutable_input_attestation_sha256"]) == 64
 
 
 def test_rejects_missing_strict_execution_evidence(tmp_path: Path) -> None:
     repo, staged, results, _, _ = _fixture(tmp_path)
     (results / "repeat-02" / "strict_execution_evidence.json").unlink()
     with pytest.raises(ValueError, match="strict execution evidence is missing"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
+
+
+def test_rejects_model_revision_mismatch(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    _mutate_immutable_input(
+        results / "repeat-02",
+        model_revision="b" * 40,
+    )
+    with pytest.raises(ValueError, match="model revision mismatch"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
+
+
+def test_rejects_data_identity_mismatch(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    _mutate_immutable_input(
+        results / "repeat-02",
+        data_identity={"kind": "repository-file", "sha256": "c" * 64},
+    )
+    with pytest.raises(ValueError, match="data identity mismatch"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
+
+
+def test_rejects_resolved_input_kind_mismatch(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    _mutate_immutable_input(
+        results / "repeat-02",
+        resolved_input_kind="serve-sample-requests",
+    )
+    with pytest.raises(ValueError, match="resolved input kind mismatch"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out", verified_by="test-review"
+        )
+
+
+def test_rejects_deterministic_input_drift(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    _mutate_immutable_input(
+        results / "repeat-02",
+        resolved_input_sha256="c" * 64,
+    )
+    with pytest.raises(ValueError, match="different resolved inputs"):
         attest_completed_baseline(
             repo, staged, results, repo / "out", verified_by="test-review"
         )

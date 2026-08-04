@@ -387,6 +387,40 @@ def summarize_results(
     }
 
 
+def summarize_executed_inputs(
+    plan: list[PlannedRequest], results: list[dict[str, Any]]
+) -> dict[str, str]:
+    """Hash the exact token-ID payloads materialized immediately before HTTP send."""
+    if len(results) != len(plan):
+        raise ValueError("executed input evidence count does not match replay plan")
+    executed: list[dict[str, str]] = []
+    for item, result in zip(plan, results, strict=True):
+        request = result.get("request")
+        request_id = request.get("request_id") if isinstance(request, dict) else None
+        if request_id != item.request.request_id:
+            raise ValueError("executed input evidence order does not match replay plan")
+        token_digest = result.get("prompt_token_ids_sha256")
+        payload_digest = result.get("request_payload_sha256")
+        if not all(
+            isinstance(digest, str)
+            and len(digest) == 64
+            and all(character in "0123456789abcdef" for character in digest)
+            for digest in (token_digest, payload_digest)
+        ):
+            raise ValueError("replay result lacks exact prompt token-ID evidence")
+        executed.append(
+            {
+                "request_id": item.request.request_id,
+                "prompt_token_ids_sha256": token_digest,
+                "request_payload_sha256": payload_digest,
+            }
+        )
+    return {
+        "resolved_input_kind": "production-trace-prompt-token-ids",
+        "resolved_input_sha256": _canonical_sha256(executed),
+    }
+
+
 def _invoke(
     item: PlannedRequest,
     *,
@@ -419,6 +453,15 @@ def _invoke(
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
     http_request = urllib.request.Request(url, data=payload, headers=headers)
+    wire_payload_bytes = http_request.data
+    if not isinstance(wire_payload_bytes, bytes):
+        raise TypeError("completion request did not retain an exact byte payload")
+    wire_payload = json.loads(wire_payload_bytes)
+    wire_prompt_token_ids = wire_payload.get("prompt")
+    if wire_prompt_token_ids != prompt_token_ids:
+        raise RuntimeError("completion request prompt drifted before HTTP send")
+    prompt_token_ids_sha256 = _canonical_sha256(wire_prompt_token_ids)
+    request_payload_sha256 = hashlib.sha256(wire_payload_bytes).hexdigest()
     started = time.monotonic()
     try:
         with urllib.request.urlopen(http_request, timeout=timeout_s) as response:
@@ -457,6 +500,8 @@ def _invoke(
                 "e2e_latency_s": finished - (replay_started + item.scheduled_offset_s),
                 "response_usage": usage,
                 "response_sha256": hashlib.sha256(body).hexdigest(),
+                "prompt_token_ids_sha256": prompt_token_ids_sha256,
+                "request_payload_sha256": request_payload_sha256,
             }
     except urllib.error.HTTPError as exc:
         body = exc.read()
@@ -475,6 +520,8 @@ def _invoke(
             "replay_latency_s": finished - started,
             "e2e_latency_s": finished - (replay_started + item.scheduled_offset_s),
             "error": body.decode("utf-8", errors="replace")[:2000],
+            "prompt_token_ids_sha256": prompt_token_ids_sha256,
+            "request_payload_sha256": request_payload_sha256,
         }
     except Exception as exc:
         finished = time.monotonic()
@@ -491,6 +538,8 @@ def _invoke(
             "replay_latency_s": finished - started,
             "e2e_latency_s": finished - (replay_started + item.scheduled_offset_s),
             "error": repr(exc),
+            "prompt_token_ids_sha256": prompt_token_ids_sha256,
+            "request_payload_sha256": request_payload_sha256,
         }
 
 
@@ -666,6 +715,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.summary_output is not None:
         args.summary_output.parent.mkdir(parents=True, exist_ok=True)
         result_summary = summarize_results(plan, results)
+        result_summary.update(summarize_executed_inputs(plan, results))
         result_summary.update(
             {
                 "trace_plan": summary,

@@ -1239,12 +1239,12 @@ def test_official_runner_has_fail_closed_trace_replay_branch() -> None:
     assert '.resolved_client_parameters.host // "127.0.0.1"' in source
 
 
-def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
+def test_resolve_runtime_model_requires_complete_exact_snapshot(
     tmp_path: Path,
 ) -> None:
     snapshots_dir = tmp_path / "hub" / "models--foo--bar" / "snapshots"
-    incomplete_snapshot = snapshots_dir / "000-incomplete"
-    complete_snapshot = snapshots_dir / "111-complete"
+    incomplete_snapshot = snapshots_dir / ("0" * 40)
+    complete_snapshot = snapshots_dir / ("1" * 40)
     incomplete_snapshot.mkdir(parents=True)
     complete_snapshot.mkdir(parents=True)
 
@@ -1260,10 +1260,11 @@ def test_resolve_runtime_model_prefers_complete_snapshot_sibling(
         _source_run_official_runtime_model_functions(
             f"""
             MODEL=foo/bar
+            MODEL_REVISION={"1" * 40}
             OFFICIAL_MODEL_PATH=
 
             run_in_official_runtime() {{
-                printf '%s\n' {shlex.quote(str(incomplete_snapshot))}
+                printf '%s\n' {shlex.quote(str(complete_snapshot))}
             }}
 
             resolved=$(resolve_runtime_model)

@@ -16,6 +16,7 @@ from vllm_hust_benchmark.baseline_recovery import (
 ATTESTATION_SCHEMA_VERSION = "official-baseline-attestation/v1"
 STRICT_EXECUTION_SCHEMA_VERSION = "strict-execution-evidence/v1"
 CLEANUP_CHAIN_SCHEMA_VERSION = "cleanup-chain-attestation/v1"
+IMMUTABLE_INPUT_SCHEMA_VERSION = "immutable-input-attestation/v1"
 TRACE_PROFILE = "production-trace"
 
 
@@ -104,6 +105,44 @@ def _validate_strict_execution_evidence(
         raise ValueError("official target is missing an immutable runtime image digest")
     if evidence.get("runtime_image_digest") != expected_digest:
         raise ValueError(f"strict execution runtime image mismatch: {repeat_dir}")
+
+    immutable_record = evidence.get("immutable_inputs")
+    immutable_record = immutable_record if isinstance(immutable_record, Mapping) else {}
+    immutable_path = _verify_hashed_evidence_file(
+        repeat_dir, immutable_record, field="immutable_inputs"
+    )
+    immutable_inputs = _load_object(immutable_path)
+    if immutable_inputs.get("schema_version") != IMMUTABLE_INPUT_SCHEMA_VERSION:
+        raise ValueError(f"immutable input schema mismatch: {repeat_dir}")
+    expected_model = target.get("model") or {}
+    expected_model_id = str(expected_model.get("id") or "")
+    expected_model_revision = str(expected_model.get("revision") or "")
+    if not re.fullmatch(r"[0-9a-f]{40}", expected_model_revision):
+        raise ValueError("official target is missing an immutable model revision")
+    if immutable_inputs.get("model_id") != expected_model_id:
+        raise ValueError(f"immutable input model mismatch: {repeat_dir}")
+    if immutable_inputs.get("model_revision") != expected_model_revision:
+        raise ValueError(f"immutable input model revision mismatch: {repeat_dir}")
+    expected_data_identity = (target.get("workload") or {}).get("data_identity")
+    if not isinstance(expected_data_identity, Mapping) or not expected_data_identity:
+        raise ValueError("official target is missing an immutable data identity")
+    if immutable_inputs.get("data_identity") != expected_data_identity:
+        raise ValueError(f"immutable input data identity mismatch: {repeat_dir}")
+    workload_name = str((target.get("workload") or {}).get("name") or "")
+    data_kind = str(expected_data_identity.get("kind") or "")
+    if data_kind == "release-asset":
+        expected_input_kind = "production-trace-prompt-token-ids"
+    elif "latency" in workload_name:
+        expected_input_kind = "latency-prompt-token-ids"
+    elif "throughput" in workload_name:
+        expected_input_kind = "throughput-sample-requests"
+    else:
+        expected_input_kind = "serve-sample-requests"
+    if immutable_inputs.get("resolved_input_kind") != expected_input_kind:
+        raise ValueError(f"resolved input kind mismatch: {repeat_dir}")
+    resolved_input_sha256 = str(immutable_inputs.get("resolved_input_sha256") or "")
+    if not re.fullmatch(r"[0-9a-f]{64}", resolved_input_sha256):
+        raise ValueError(f"resolved input hash is invalid: {repeat_dir}")
 
     chip_count = int((target.get("hardware") or {}).get("chip_count") or 0)
     lease = evidence.get("lease")
@@ -278,6 +317,10 @@ def _validate_strict_execution_evidence(
         "hostname": hostname,
         "container_id": container_id,
         "runtime_image_digest": expected_digest,
+        "immutable_input_attestation_sha256": _sha256(immutable_path),
+        "model_revision": expected_model_revision,
+        "data_identity_kind": expected_data_identity.get("kind"),
+        "resolved_input_sha256": resolved_input_sha256,
         "service_port": service_port,
         "physical_npu_ids": devices,
         "host_pids": host_pids,
@@ -380,6 +423,7 @@ def attest_completed_baseline(
     unique_run_ids: set[str] = set()
     trace_signatures: set[str] = set()
     model_artifact_digests: set[str] = set()
+    deterministic_input_hashes: set[str] = set()
 
     for repeat_dir in sorted(result_spec_dir.glob("repeat-*")):
         raw_path = repeat_dir / "raw_benchmark_result.json"
@@ -402,6 +446,8 @@ def attest_completed_baseline(
         if strict_startup_id in strict_startup_ids:
             raise ValueError(f"duplicate strict startup identity: {repeat_dir}")
         strict_startup_ids.add(strict_startup_id)
+        if strict_evidence["data_identity_kind"] != "nondeterministic-vllm-generator":
+            deterministic_input_hashes.add(strict_evidence["resolved_input_sha256"])
         provenance = (repeat_entry.get("metadata") or {}).get(
             "runtime_provenance"
         ) or {}
@@ -557,6 +603,14 @@ def attest_completed_baseline(
         raise ValueError("production-trace repeats use different cohort signatures")
     if trace_profile and len(model_artifact_digests) != 1:
         raise ValueError("production-trace repeats use different model artifacts")
+    target_data_kind = str(
+        (((target.get("workload") or {}).get("data_identity") or {}).get("kind")) or ""
+    )
+    if (
+        target_data_kind != "nondeterministic-vllm-generator"
+        and len(deterministic_input_hashes) != 1
+    ):
+        raise ValueError("deterministic repeats use different resolved inputs")
     if selected_repeat is None:
         raise ValueError("staged artifact does not match any successful repeat")
 
