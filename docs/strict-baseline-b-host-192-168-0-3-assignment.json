@@ -5,6 +5,13 @@
   "branch": "data/strict-baseline-b-host-192-168-0-3",
   "host": "192.168.0.3",
   "public_host_alias": "ascend86-host",
+  "runtime_asset_plan": {
+    "required_image_id": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+    "locally_verified": false,
+    "local_candidate_status": "rejected-loaded-config-id-mismatch",
+    "transfer_required": true,
+    "transfer_source_requirement": "archive exported from the explicit required image ID and verified after load by config image ID, source commits, and package versions"
+  },
   "targets": [
     {
       "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
@@ -56,6 +63,8 @@
   "notes": [
     "This document records control-plane assignment and transfer planning only.",
     "It is not benchmark evidence and does not authorize a server or benchmark start.",
+    "The locally loaded image whose config ID begins with sha256:5f80f602 is rejected and must not be used as the official v0.18 runtime.",
+    "Runtime verification remains false until an archive exported from the explicit sha256:9a50c7c6 image ID is loaded and independently verified.",
     "The in-progress model transfer must not be consumed or treated as complete before atomic handoff and strict verification.",
     "Runtime, model, data, input, safety-gate, and run evidence remain independently required."
   ]
