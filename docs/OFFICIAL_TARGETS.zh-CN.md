@@ -2,8 +2,8 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.0.0`
-- Effective from: `2026-07-31`
+- Registry version: `1.7.0`
+- Effective from: `2026-08-03`
 
 公开排行榜固定靶与 3B 快速门禁是不同契约；provisional 记录不得作为公开成果对比。
 
@@ -35,6 +35,12 @@ Qwen/Qwen2.5-Coder-14B-Instruct | 910B2 × 1 | FP16 | 0.6 | 32768 |
 | | public-leaderboard | active | multimodal | visionarena-online | Qwen/Qwen2.5-VL-7B-Instruct |
 910B2 × 1 | FP16 | 0.6 | 32768 |
 [`official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json)
+| | public-leaderboard | active | production-trace | burstgpt-production-replay |
+deepseek-ai/DeepSeek-R1-Distill-Qwen-32B | 910B2 × 2 | BF16 | 0.92 | 131072 |
+[`official-ascend-jan-2026-v0221rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0221rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json)
+| | public-leaderboard | active | production-trace | tracelab-coding-agent-replay |
+deepseek-ai/DeepSeek-R1-Distill-Qwen-32B | 910B2 × 2 | BF16 | 0.92 | 131072 |
+[`official-ascend-jan-2026-v0221rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0221rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json)
 | | perfgate | provisional | perfgate-code | instructcoder-online | Qwen/Qwen2.5-Coder-3B-Instruct |
 910B2 × 1 | BF16 | — | — |
 [`perfgate-ascend-instructcoder-online-qwen25-coder-3b-910b2.json`](../docs/official-baselines/perfgate-ascend-instructcoder-online-qwen25-coder-3b-910b2.json)
@@ -95,6 +101,12 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 4 | FP16 | — | — |
 | | specialty | provisional | multi-chip | sonnet-throughput-8chip | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 8 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-8chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-8chip-910b2.json)
+| | specialty | active | simllm-warm-cache | simllm-random-online-warm-cache |
+Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | 0.6 | 32768 |
+[`official-simllm-random-online-warm-cache-qwen25-14b-1chip-910b2.json`](../docs/official-baselines/official-simllm-random-online-warm-cache-qwen25-14b-1chip-910b2.json)
+| | specialty | active | simllm-warm-cache | simllm-saturated-throughput-warm-cache |
+Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | 0.6 | 32768 |
+[`official-simllm-saturated-throughput-warm-cache-qwen25-14b-1chip-910b2.json`](../docs/official-baselines/official-simllm-saturated-throughput-warm-cache-qwen25-14b-1chip-910b2.json)
 | | specialty | provisional | specialty | kv-tiering-prefix-online | Qwen/Qwen2.5-7B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json)

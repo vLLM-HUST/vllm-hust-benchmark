@@ -4,11 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
 from typing import Any
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
@@ -20,7 +20,6 @@ from vllm_hust_benchmark.workload_config_contract import (  # noqa: E402
     requires_workload_config_contract,
     validate_explicit_workload_config,
 )
-
 
 PUBLIC_BASELINE_ENGINE = "vllm"
 PUBLIC_BASELINE_VERSION = "0.18.0"
@@ -58,6 +57,13 @@ REJECTED_SUPERSEDED_REPORT_REQUIRED_FIELDS = (
 )
 REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION = "rejected-superseded-report/v1"
 COMPARE_SNAPSHOT_FILE = "leaderboard_compare.json"
+OFFICIAL_TARGET_REGISTRY = REPO_ROOT / "leaderboard-data" / "official-targets.json"
+OFFICIAL_TARGET_REGISTRY_CHECKSUM = (
+    REPO_ROOT / "leaderboard-data" / "official-targets.sha256"
+)
+PRODUCTION_TRACE_PROFILE = "production-trace"
+PRODUCTION_TRACE_ATTESTATION_SCHEMA = "official-baseline-attestation/v1"
+PRODUCTION_TRACE_MINIMUM_REPEATS = 3
 
 
 def parse_args() -> argparse.Namespace:
@@ -102,6 +108,81 @@ def parse_optional_int(value: Any) -> int | None:
         return None
 
 
+def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
+    """Allow the separately pinned production-trace baseline family fail closed."""
+    if (
+        not OFFICIAL_TARGET_REGISTRY.is_file()
+        or not OFFICIAL_TARGET_REGISTRY_CHECKSUM.is_file()
+    ):
+        return False
+    registry_bytes = OFFICIAL_TARGET_REGISTRY.read_bytes()
+    registry_sha256 = hashlib.sha256(registry_bytes).hexdigest()
+    declared_sha256 = OFFICIAL_TARGET_REGISTRY_CHECKSUM.read_text(
+        encoding="utf-8"
+    ).split()[0]
+    if registry_sha256 != declared_sha256:
+        return False
+
+    metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+    same_spec = (
+        entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
+    )
+    target_id = str(same_spec.get("spec_id") or "")
+    attestation = (
+        metadata.get("verification_attestation")
+        if isinstance(metadata.get("verification_attestation"), dict)
+        else {}
+    )
+    if not (
+        entry.get("engine") == PUBLIC_BASELINE_ENGINE
+        and metadata.get("verified") is True
+        and metadata.get("target_id") == target_id
+        and metadata.get("profile_id") == PRODUCTION_TRACE_PROFILE
+        and metadata.get("target_registry_sha256") == registry_sha256
+        and attestation.get("schema_version") == PRODUCTION_TRACE_ATTESTATION_SCHEMA
+        and int(attestation.get("successful_repeats") or 0)
+        >= PRODUCTION_TRACE_MINIMUM_REPEATS
+    ):
+        return False
+
+    registry = json.loads(registry_bytes)
+    target = next(
+        (
+            item
+            for item in registry.get("targets", [])
+            if isinstance(item, dict) and item.get("target_id") == target_id
+        ),
+        None,
+    )
+    if not target or not (
+        target.get("profile") == PRODUCTION_TRACE_PROFILE
+        and target.get("status") == "active"
+        and target.get("intended_use") == "public-leaderboard"
+        and metadata.get("target_version") == target.get("target_version")
+    ):
+        return False
+
+    model = entry.get("model") if isinstance(entry.get("model"), dict) else {}
+    hardware = entry.get("hardware") if isinstance(entry.get("hardware"), dict) else {}
+    workload = entry.get("workload") if isinstance(entry.get("workload"), dict) else {}
+    runtime = target.get("baseline_runtime") or {}
+    provenance = metadata.get("runtime_provenance") or {}
+    return bool(
+        entry.get("engine_version") == runtime.get("engine_version")
+        and workload.get("name") == (target.get("workload") or {}).get("name")
+        and (model.get("name") or model.get("repo_id"))
+        == (target.get("model") or {}).get("id")
+        and model.get("precision") == (target.get("model") or {}).get("precision")
+        and hardware.get("chip_model")
+        == (target.get("hardware") or {}).get("chip_model")
+        and hardware.get("chip_count")
+        == (target.get("hardware") or {}).get("chip_count")
+        and (provenance.get("engine") or {}).get("commit") == runtime.get("core_commit")
+        and (provenance.get("plugin") or {}).get("commit")
+        == runtime.get("backend_commit")
+    )
+
+
 def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     errors: list[str] = []
     entry_id = str(entry.get("entry_id") or "<missing-entry-id>")
@@ -120,8 +201,13 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     )
     spec_id = str(same_spec.get("spec_id") or "")
     metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+    production_trace_baseline = is_attested_production_trace_baseline(entry)
 
-    if engine == PUBLIC_BASELINE_ENGINE and engine_version != PUBLIC_BASELINE_VERSION:
+    if (
+        engine == PUBLIC_BASELINE_ENGINE
+        and engine_version != PUBLIC_BASELINE_VERSION
+        and not production_trace_baseline
+    ):
         errors.append(
             f"{source.name}:{entry_id}: public vllm baseline must be "
             f"{PUBLIC_BASELINE_VERSION}, got {engine_version!r}"
@@ -142,7 +228,10 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         errors.append(
             f"{source.name}:{entry_id}: retired public model {entry_model_name!r}"
         )
-    if entry_precision_value in RETIRED_PUBLIC_PRECISIONS:
+    if (
+        entry_precision_value in RETIRED_PUBLIC_PRECISIONS
+        and not production_trace_baseline
+    ):
         errors.append(
             f"{source.name}:{entry_id}: retired public precision "
             f"{entry_precision_value!r}"
@@ -323,7 +412,9 @@ def validate_compare_snapshot(
     for index, item in enumerate(pairs):
         pair = item.get("preferred_pair") if isinstance(item, dict) else None
         if not isinstance(pair, dict):
-            errors.append(f"{path.name}: preferred_pairs[{index}] missing preferred_pair")
+            errors.append(
+                f"{path.name}: preferred_pairs[{index}] missing preferred_pair"
+            )
             continue
         summaries: dict[str, dict[str, Any]] = {}
         for side in ("left", "right"):
@@ -361,7 +452,10 @@ def validate_compare_snapshot(
             ((summaries["left"].get("same_spec") or {}).get("resolved_spec_hash") or "")
         )
         right_hash = str(
-            ((summaries["right"].get("same_spec") or {}).get("resolved_spec_hash") or "")
+            (
+                (summaries["right"].get("same_spec") or {}).get("resolved_spec_hash")
+                or ""
+            )
         )
         if not left_hash or left_hash != right_hash:
             errors.append(

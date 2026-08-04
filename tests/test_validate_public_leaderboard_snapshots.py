@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 import sys
 from pathlib import Path
 
 from vllm_hust_benchmark.same_spec import build_same_spec_payload
-
 
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[1]
@@ -113,6 +113,45 @@ def test_future_official_entry_requires_effective_config_contract() -> None:
     assert any("workload_config_contract" in error for error in errors)
 
 
+def test_accepts_only_attested_registered_production_trace_baseline() -> None:
+    module = load_module()
+    repo_root = Path(__file__).resolve().parents[1]
+    artifact = json.loads(
+        (
+            repo_root
+            / "submissions"
+            / "official-ascend-jan-2026-v0.22.1rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2"
+            / "run_leaderboard.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    stale_errors = module.validate_entry(
+        artifact, source=Path("leaderboard_multi.json")
+    )
+    assert any("public vllm baseline must be 0.18.0" in error for error in stale_errors)
+    assert any("retired public precision 'BF16'" in error for error in stale_errors)
+
+    registry_bytes = module.OFFICIAL_TARGET_REGISTRY.read_bytes()
+    registry = json.loads(registry_bytes)
+    target = next(
+        item
+        for item in registry["targets"]
+        if item["target_id"] == artifact["same_spec"]["spec_id"]
+    )
+    rebound = copy.deepcopy(artifact)
+    rebound["metadata"]["target_version"] = target["target_version"]
+    rebound["metadata"]["target_registry_sha256"] = module.hashlib.sha256(
+        registry_bytes
+    ).hexdigest()
+    assert module.validate_entry(rebound, source=Path("leaderboard_multi.json")) == []
+
+    spoofed = copy.deepcopy(rebound)
+    spoofed["metadata"]["verified"] = False
+    errors = module.validate_entry(spoofed, source=Path("leaderboard_multi.json"))
+    assert any("public vllm baseline must be 0.18.0" in error for error in errors)
+    assert any("retired public precision 'BF16'" in error for error in errors)
+
+
 def test_compare_snapshot_rejects_mismatched_resolved_hashes(tmp_path: Path) -> None:
     module = load_module()
     left = entry("left", same_spec())
@@ -137,9 +176,7 @@ def test_compare_snapshot_rejects_mismatched_resolved_hashes(tmp_path: Path) -> 
                             },
                             "right": {
                                 "entry_id": "right",
-                                "same_spec": {
-                                    "resolved_spec_hash": "different-hash"
-                                },
+                                "same_spec": {"resolved_spec_hash": "different-hash"},
                             },
                         }
                     }
@@ -149,8 +186,6 @@ def test_compare_snapshot_rejects_mismatched_resolved_hashes(tmp_path: Path) -> 
         encoding="utf-8",
     )
 
-    errors = module.validate_compare_snapshot(
-        tmp_path, {"left": left, "right": right}
-    )
+    errors = module.validate_compare_snapshot(tmp_path, {"left": left, "right": right})
 
     assert any("resolved_spec_hash mismatch" in error for error in errors)

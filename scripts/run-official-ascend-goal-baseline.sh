@@ -15,12 +15,14 @@ OFFICIAL_VLLM_ASCEND_WORKTREE=${OFFICIAL_VLLM_ASCEND_WORKTREE:-"/tmp/vllm-ascend
 OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
 OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/official-ascend-goal-baseline-cache"}
 OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/official-baseline-datasets"}
+OFFICIAL_TRACE_ASSET_ROOT=${OFFICIAL_TRACE_ASSET_ROOT:-"$REPO_ROOT/.benchmarks/traces"}
 OFFICIAL_SHAREGPT_DATASET_URL=${OFFICIAL_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
 HF_HOME=${HF_HOME:-"/data/shared_datasets/vllm-hust-benchmark/huggingface"}
 HF_HUB_CACHE=${HF_HUB_CACHE:-"$HF_HOME/hub"}
 TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-"$HF_HOME/transformers"}
 export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE
 OFFICIAL_RUNTIME_PYTHON=${OFFICIAL_RUNTIME_PYTHON:-"$GOAL_BASELINE_ENV_PREFIX/bin/python"}
+OFFICIAL_RUNTIME_IMAGE=${OFFICIAL_RUNTIME_IMAGE:-}
 OFFICIAL_MODEL_PATH=${OFFICIAL_MODEL_PATH:-}
 OFFICIAL_SERVER_HOST=${OFFICIAL_SERVER_HOST:-}
 OFFICIAL_SERVER_PORT=${OFFICIAL_SERVER_PORT:-"8000"}
@@ -325,6 +327,11 @@ run_in_official_runtime() {
     export TRANSFORMERS_CACHE="${TRANSFORMERS_CACHE:-$HF_HOME/transformers}"
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
+    fi
+    if [[ -n "${OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT:-}" ]]; then
+      export VLLM_BATCH_INVARIANT="$OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT"
+    else
+      unset VLLM_BATCH_INVARIANT
     fi
     export PATH="$GOAL_BASELINE_ENV_PREFIX/bin:$PATH"
     PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
@@ -704,6 +711,115 @@ sys.exit(1)
 PY
 }
 
+verify_explicit_multicard_scope_idle() {
+  local visible_devices=$1
+  local npu_smi_bin
+
+  npu_smi_bin=$(resolve_npu_smi_bin 2>/dev/null) || {
+    echo "npu-smi is required to prove every explicitly scoped multi-card device is idle" >&2
+    return 2
+  }
+  NPU_SMI_BIN="$npu_smi_bin" VISIBLE_DEVICES="$visible_devices" \
+    NPU_SMI_TIMEOUT_SECONDS="$NPU_SMI_TIMEOUT_SECONDS" "$HOST_PYTHON_BIN" - <<'PY'
+import os
+import subprocess
+import sys
+
+
+def run(*args: str) -> str:
+    try:
+        result = subprocess.run(
+            [os.environ["NPU_SMI_BIN"], *args],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=float(os.environ.get("NPU_SMI_TIMEOUT_SECONDS", "20")),
+        )
+    except Exception as error:
+        raise RuntimeError(f"npu-smi {' '.join(args)} could not be inspected: {error}") from error
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"npu-smi {' '.join(args)} failed with exit {result.returncode}: {result.stderr.strip()}"
+        )
+    return result.stdout
+
+
+try:
+    requested = {int(value) for value in os.environ["VISIBLE_DEVICES"].split(",")}
+    mapping_output = run("info", "-m")
+    info_output = run("info")
+    mapped = set()
+    physical_to_logical = {}
+    for line in mapping_output.splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and all(part.isdigit() for part in parts[:3]):
+            npu_id, chip_id, logical_id = map(int, parts[:3])
+            mapped.add(logical_id)
+            physical_to_logical[(npu_id, chip_id)] = logical_id
+    if not requested <= mapped:
+        missing = sorted(requested - mapped)
+        raise RuntimeError(f"npu-smi mapping does not prove requested devices exist: {missing}")
+
+    busy = set()
+    in_process_section = False
+    process_header_seen = False
+    for raw_line in info_output.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|"):
+            continue
+        parts = [part.strip() for part in line.strip("|").split("|")]
+        if len(parts) >= 2 and parts[1] == "Process id":
+            in_process_section = True
+            process_header_seen = True
+            continue
+        if not in_process_section or len(parts) < 2:
+            continue
+        left = parts[0].split()
+        if len(left) >= 2 and left[0].isdigit() and left[1].isdigit() and parts[1].isdigit():
+            physical = (int(left[0]), int(left[1]))
+            if physical not in physical_to_logical:
+                raise RuntimeError(f"process table references an unmapped device: {physical}")
+            busy.add(physical_to_logical[physical])
+    if not process_header_seen:
+        raise RuntimeError("npu-smi output did not contain a process table")
+    occupied = sorted(requested & busy)
+    if occupied:
+        raise RuntimeError(f"explicitly scoped Ascend devices have active processes: {occupied}")
+except Exception as error:
+    print(f"[goal-baseline] cannot prove explicit multi-card scope is idle: {error}", file=sys.stderr)
+    sys.exit(2)
+PY
+}
+
+validate_explicit_device_scope() {
+  local visible_devices=$1
+  local expected_count=${CHIP_COUNT:-1}
+  local actual_count
+  local unique_count
+
+  if [[ ! "$expected_count" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Invalid chip_count for device scoping: ${expected_count}" >&2
+    return 2
+  fi
+  if [[ ! "$visible_devices" =~ ^[0-9]+(,[0-9]+)*$ ]]; then
+    echo "Explicit Ascend device scope must be a comma-separated list of numeric IDs" >&2
+    return 2
+  fi
+  actual_count=$(tr ',' '\n' <<< "$visible_devices" | wc -l)
+  unique_count=$(tr ',' '\n' <<< "$visible_devices" | sort -u | wc -l)
+  if [[ "$actual_count" -ne "$unique_count" ]]; then
+    echo "Explicit Ascend device scope contains duplicate device IDs" >&2
+    return 2
+  fi
+  if [[ "$actual_count" -ne "$expected_count" ]]; then
+    echo "Explicit Ascend device scope cardinality ${actual_count} does not match chip_count ${expected_count}" >&2
+    return 2
+  fi
+  if [[ "$expected_count" -gt 1 ]]; then
+    verify_explicit_multicard_scope_idle "$visible_devices"
+  fi
+}
+
 configure_single_card_ascend_device() {
   local start_attempt=${1:-1}
   local busy_exit_code=${RESOURCE_BUSY_EXIT_CODE:-75}
@@ -735,10 +851,17 @@ configure_single_card_ascend_device() {
   fi
 
   if [[ -n "${ASCEND_RT_VISIBLE_DEVICES:-}" ]]; then
+    validate_explicit_device_scope "$ASCEND_RT_VISIBLE_DEVICES" || return $?
     GOAL_BASELINE_DEVICE_SELECTION_REASON="explicit"
     export VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE="${VLLM_ASCEND_TORCH_PREFLIGHT_DEVICE:-npu:0}"
     echo "[goal-baseline] using explicit Ascend visible devices: ${ASCEND_VISIBLE_DEVICES:-$ASCEND_RT_VISIBLE_DEVICES}"
     return 0
+  fi
+
+  if [[ "${CHIP_COUNT:-1}" -gt 1 ]]; then
+    GOAL_BASELINE_DEVICE_SELECTION_REASON="unscoped-multicard"
+    echo "chip_count=${CHIP_COUNT} requires an explicit ASCEND_RT_VISIBLE_DEVICES or ASCEND_VISIBLE_DEVICES scope" >&2
+    return 2
   fi
 
   npu_smi_bin=$(resolve_npu_smi_bin 2>/dev/null || true)
@@ -799,6 +922,11 @@ run_server_command() {
     if [[ -n "${OFFICIAL_CORE_VERSION:-}" ]]; then
       export VLLM_VERSION="$OFFICIAL_CORE_VERSION"
     fi
+    if [[ -n "${OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT:-}" ]]; then
+      export VLLM_BATCH_INVARIANT="$OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT"
+    else
+      unset VLLM_BATCH_INVARIANT
+    fi
     export PATH="$GOAL_BASELINE_ENV_PREFIX/bin:$PATH"
     PYTHONUNBUFFERED=1 \
       PYTHONPATH="$OFFICIAL_RUNTIME_PYTHONPATH${PYTHONPATH:+:$PYTHONPATH}" \
@@ -807,6 +935,26 @@ run_server_command() {
 }
 
 run_client_command() {
+  if [[ -n "${TRACE_TARGET_ID:-}" ]]; then
+    run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" \
+      python -m vllm_hust_benchmark.trace_replay replay \
+      "$TRACE_TARGET_ID" \
+      --trace-path "$TRACE_ASSET_PATH" \
+      --model "$RUNTIME_MODEL" \
+      --base-url "http://${CLIENT_HOST}:${CLIENT_PORT}" \
+      --endpoint "$TRACE_ENDPOINT" \
+      --max-model-len "$TRACE_MAX_MODEL_LEN" \
+      --max-requests "$TRACE_MAX_REQUESTS" \
+      --max-concurrency "$TRACE_MAX_CONCURRENCY" \
+      --timeout-s "$TRACE_TIMEOUT_S" \
+      --overflow-policy "$TRACE_OVERFLOW_POLICY" \
+      --time-scale "$TRACE_TIME_SCALE" \
+      --max-interarrival-s "$TRACE_MAX_INTERARRIVAL_S" \
+      --output "$TRACE_DETAIL_RESULT_FILE" \
+      --summary-output "$RAW_RESULT_FILE"
+    return $?
+  fi
+
   case "$BENCHMARK_TYPE" in
     serve)
       VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE="$IMMUTABLE_INPUT_ATTESTATION_FILE" \
@@ -952,10 +1100,32 @@ ensure_worktree() {
   local source_repo=$1
   local target_dir=$2
   local ref_name=$3
-  if [[ -f "$target_dir/pyproject.toml" ]]; then
-    return 0
+  local expected_commit
+  local actual_commit
+  local tracked_status
+
+  expected_commit=$(git -C "$source_repo" rev-parse --verify "${ref_name}^{commit}") || {
+    echo "Cannot resolve official source ref ${ref_name} in ${source_repo}" >&2
+    return 2
+  }
+  if [[ ! -d "$target_dir/.git" && ! -f "$target_dir/.git" ]]; then
+    git -C "$source_repo" worktree add --detach "$target_dir" "$expected_commit"
   fi
-  git -C "$source_repo" worktree add --detach "$target_dir" "$ref_name"
+
+  actual_commit=$(git -C "$target_dir" rev-parse --verify HEAD 2>/dev/null) || {
+    echo "Official worktree is not a Git worktree: ${target_dir}" >&2
+    return 2
+  }
+  if [[ "$actual_commit" != "$expected_commit" ]]; then
+    echo "Official worktree HEAD mismatch for ${target_dir}: expected ${expected_commit}, got ${actual_commit}" >&2
+    return 2
+  fi
+  tracked_status=$(git -C "$target_dir" status --porcelain --untracked-files=no)
+  if [[ -n "$tracked_status" ]]; then
+    echo "Official worktree has tracked modifications: ${target_dir}" >&2
+    return 2
+  fi
+  echo "[goal-baseline] verified source ${source_repo}@${ref_name}: ${actual_commit}"
 }
 
 json2args() {
@@ -1087,7 +1257,7 @@ PY
 }
 
 finalize_trace_immutable_input_attestation() {
-  if ! jq -e '.selected_requests_sha256 | strings' "$RAW_RESULT_FILE" >/dev/null 2>&1; then
+  if [[ -z "${TRACE_TARGET_ID:-}" ]]; then
     return 0
   fi
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
@@ -1145,14 +1315,26 @@ import os
 from pathlib import Path
 
 from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
+from vllm_hust_benchmark.official_runtime_inputs import (
+    normalize_offline_benchmark_parameters,
+)
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
+benchmark_type = os.environ["BENCHMARK_TYPE"]
+normalizer = normalize_client_parameters
+normalizer_args = (payload["resolved_client_parameters"],)
+if benchmark_type in {"throughput", "latency"}:
+    normalizer = normalize_offline_benchmark_parameters
+    normalizer_args = (
+        payload["resolved_client_parameters"],
+        payload["resolved_server_parameters"],
+    )
 print(
     json.dumps(
-        normalize_client_parameters(
-            payload["resolved_client_parameters"],
-            benchmark_type=os.environ["BENCHMARK_TYPE"],
+        normalizer(
+            *normalizer_args,
+            benchmark_type=benchmark_type,
             ready_check_timeout_sec=ready_timeout,
             vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
             benchmark_repo=os.environ.get("BENCHMARK_REPO"),
@@ -1168,19 +1350,19 @@ PY
 resolve_runtime_model() {
   local runtime_model_candidate=""
   local complete_runtime_model=""
-  local model_revision=""
 
-  model_revision=$(jq -r '.model_revision // .server_parameters.revision // empty' "$SPEC_FILE")
-  if [[ ! "$model_revision" =~ ^[0-9a-f]{40}$ ]]; then
+  if [[ ! "${MODEL_REVISION:-}" =~ ^[0-9a-f]{40}$ ]]; then
     echo "Official model requires an exact 40-character revision" >&2
     return 2
   fi
 
   if [[ -n "$OFFICIAL_MODEL_PATH" ]]; then
     runtime_model_candidate=$(realpath "$OFFICIAL_MODEL_PATH")
-    if [[ "$(basename "$runtime_model_candidate")" != "$model_revision" ]] || \
-       [[ "$(basename "$(dirname "$runtime_model_candidate")")" != "snapshots" ]]; then
-      echo "OFFICIAL_MODEL_PATH is not the exact model snapshot ${model_revision}: ${runtime_model_candidate}" >&2
+    if [[ -n "${TRACE_TARGET_ID:-}" ]]; then
+      verify_runtime_model_artifact "$runtime_model_candidate"
+    elif [[ "$(basename "$runtime_model_candidate")" != "$MODEL_REVISION" ]] || \
+         [[ "$(basename "$(dirname "$runtime_model_candidate")")" != "snapshots" ]]; then
+      echo "OFFICIAL_MODEL_PATH is not the exact model snapshot ${MODEL_REVISION}: ${runtime_model_candidate}" >&2
       return 2
     fi
     printf '%s\n' "$runtime_model_candidate"
@@ -1188,17 +1370,201 @@ resolve_runtime_model() {
   fi
 
   runtime_model_candidate=$(run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
-    env MODEL_ID="$MODEL" MODEL_REVISION="$model_revision" \
+    env MODEL_ID="$MODEL" MODEL_REVISION="${MODEL_REVISION:-}" \
     python -c "import os; from huggingface_hub import snapshot_download; print(snapshot_download(os.environ['MODEL_ID'], revision=os.environ['MODEL_REVISION'], local_files_only=True))" \
     2>/dev/null) || return 1
 
+  if [[ -n "${TRACE_TARGET_ID:-}" ]]; then
+    verify_runtime_model_artifact "$runtime_model_candidate"
+    printf '%s\n' "$runtime_model_candidate"
+    return 0
+  fi
   complete_runtime_model=$(resolve_complete_local_runtime_model_candidate "$runtime_model_candidate") || return 2
-  if [[ "$(basename "$complete_runtime_model")" != "$model_revision" ]] || \
+  if [[ "$(basename "$complete_runtime_model")" != "$MODEL_REVISION" ]] || \
      [[ "$(basename "$(dirname "$complete_runtime_model")")" != "snapshots" ]]; then
-    echo "Resolved model is not the exact snapshot ${model_revision}: ${complete_runtime_model}" >&2
+    echo "Resolved model is not the exact snapshot ${MODEL_REVISION}: ${complete_runtime_model}" >&2
     return 2
   fi
   printf '%s\n' "$complete_runtime_model"
+}
+
+verify_runtime_model_artifact() {
+  local model_path=$1
+  local provenance_file="$RESULT_DIR/model_artifact_provenance.json"
+
+  if [[ -z "${MODEL_REVISION:-}" ]]; then
+    echo "Trace targets require a pinned server_parameters.revision" >&2
+    return 2
+  fi
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    "$HOST_PYTHON_BIN" - "$model_path" "$MODEL_REVISION" "$provenance_file" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+from vllm_hust_benchmark.model_artifact import verify_local_hf_model
+
+payload = verify_local_hf_model(sys.argv[1], sys.argv[2])
+output = Path(sys.argv[3])
+output.parent.mkdir(parents=True, exist_ok=True)
+output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+print(f"[goal-baseline] verified model artifact digest: {payload['model_artifact_digest']}", file=sys.stderr)
+PY
+}
+
+verify_trace_runtime_packages() {
+  local provenance_file="$RESULT_DIR/runtime_package_provenance.json"
+  local expected_packages
+  local expected_image
+  local expected_image_digest
+  local expected_environment
+
+  expected_packages=$(jq -c '.baseline_target.runtime_packages // {}' "$SPEC_FILE")
+  expected_image=$(jq -r '.baseline_target.runtime_image // empty' "$SPEC_FILE")
+  expected_image_digest=$(jq -r '.baseline_target.runtime_image_digest // empty' "$SPEC_FILE")
+  expected_environment=$(jq -c '.baseline_target.runtime_environment // {}' "$SPEC_FILE")
+  if [[ "$expected_packages" == "{}" || -z "$expected_image" || -z "$expected_image_digest" ]]; then
+    echo "Production-trace targets require pinned runtime packages and official image digest" >&2
+    return 2
+  fi
+  if [[ "$expected_image" != *@"$expected_image_digest" ]]; then
+    echo "Production-trace runtime image does not match its pinned digest" >&2
+    return 2
+  fi
+  if [[ -z "$OFFICIAL_RUNTIME_IMAGE" || "$OFFICIAL_RUNTIME_IMAGE" != "$expected_image" ]]; then
+    echo "OFFICIAL_RUNTIME_IMAGE must exactly match the production-trace image digest: $expected_image" >&2
+    return 2
+  fi
+  EXPECTED_PACKAGES="$expected_packages" EXPECTED_IMAGE="$expected_image" \
+  EXPECTED_IMAGE_DIGEST="$expected_image_digest" PROVENANCE_FILE="$provenance_file" \
+  EXPECTED_ENVIRONMENT="$expected_environment" \
+  run_in_official_runtime \
+    "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" python - <<'PY'
+from importlib.metadata import PackageNotFoundError, version
+import json
+import os
+from pathlib import Path
+
+expected = json.loads(os.environ["EXPECTED_PACKAGES"])
+expected_environment = json.loads(os.environ["EXPECTED_ENVIRONMENT"])
+actual = {}
+for package, expected_version in expected.items():
+    try:
+        actual_version = version(package)
+    except PackageNotFoundError as error:
+        raise RuntimeError(f"required runtime package is missing: {package}") from error
+    if actual_version != expected_version:
+        raise RuntimeError(
+            f"runtime package mismatch for {package}: expected {expected_version}, got {actual_version}"
+        )
+    actual[package] = actual_version
+
+payload = {
+    "runtime_packages": actual,
+    "runtime_image": os.environ["EXPECTED_IMAGE"],
+    "runtime_image_digest": os.environ["EXPECTED_IMAGE_DIGEST"],
+    "runtime_environment": {
+        key: os.environ.get(key) for key in expected_environment
+    },
+}
+if payload["runtime_environment"] != expected_environment:
+    raise RuntimeError(
+        "runtime environment mismatch: "
+        f"expected {expected_environment}, got {payload['runtime_environment']}"
+    )
+Path(os.environ["PROVENANCE_FILE"]).write_text(
+    json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+)
+print(f"[goal-baseline] verified trace runtime packages: {actual}")
+PY
+}
+
+prepare_trace_startup_evidence() {
+  TRACE_DRY_RUN_PLAN_FILE="$RESULT_DIR/trace_replay_plan.json"
+  STARTUP_EVIDENCE_FILE="$RESULT_DIR/startup_evidence.json"
+  STARTUP_INSTANCE_ID=$(
+    "$HOST_PYTHON_BIN" -c 'import uuid; print(uuid.uuid4())'
+  )
+  run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" \
+    python -m vllm_hust_benchmark.trace_replay replay \
+    "$TRACE_TARGET_ID" \
+    --trace-path "$TRACE_ASSET_PATH" \
+    --model "$RUNTIME_MODEL" \
+    --max-model-len "$TRACE_MAX_MODEL_LEN" \
+    --max-requests "$TRACE_MAX_REQUESTS" \
+    --max-concurrency "$TRACE_MAX_CONCURRENCY" \
+    --timeout-s "$TRACE_TIMEOUT_S" \
+    --overflow-policy "$TRACE_OVERFLOW_POLICY" \
+    --time-scale "$TRACE_TIME_SCALE" \
+    --max-interarrival-s "$TRACE_MAX_INTERARRIVAL_S" \
+    --dry-run > "$TRACE_DRY_RUN_PLAN_FILE"
+
+  RUN_ID="$RUN_ID" STARTUP_INSTANCE_ID="$STARTUP_INSTANCE_ID" \
+  TRACE_TARGET_ID="$TRACE_TARGET_ID" TRACE_DRY_RUN_PLAN_FILE="$TRACE_DRY_RUN_PLAN_FILE" \
+  MODEL_PROVENANCE_FILE="$RESULT_DIR/model_artifact_provenance.json" \
+  RUNTIME_PACKAGE_PROVENANCE_FILE="$RESULT_DIR/runtime_package_provenance.json" \
+  OFFICIAL_CORE_SOURCE_COMMIT="$OFFICIAL_CORE_SOURCE_COMMIT" \
+  OFFICIAL_BACKEND_SOURCE_COMMIT="$OFFICIAL_BACKEND_SOURCE_COMMIT" \
+  STARTUP_EVIDENCE_FILE="$STARTUP_EVIDENCE_FILE" "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+
+plan = json.loads(Path(os.environ["TRACE_DRY_RUN_PLAN_FILE"]).read_text(encoding="utf-8"))
+model = json.loads(Path(os.environ["MODEL_PROVENANCE_FILE"]).read_text(encoding="utf-8"))
+runtime = json.loads(
+    Path(os.environ["RUNTIME_PACKAGE_PROVENANCE_FILE"]).read_text(encoding="utf-8")
+)
+payload = {
+    "schema_version": "official-trace-startup-evidence/v1",
+    "startup_instance_id": os.environ["STARTUP_INSTANCE_ID"],
+    "run_id": os.environ["RUN_ID"],
+    "trace_target_id": os.environ["TRACE_TARGET_ID"],
+    "started_at": datetime.now(timezone.utc).isoformat(),
+    "engine_source_commit": os.environ["OFFICIAL_CORE_SOURCE_COMMIT"],
+    "plugin_source_commit": os.environ["OFFICIAL_BACKEND_SOURCE_COMMIT"],
+    "model_artifact_digest": model["model_artifact_digest"],
+    "runtime_packages": runtime["runtime_packages"],
+    "runtime_image": runtime["runtime_image"],
+    "runtime_image_digest": runtime["runtime_image_digest"],
+    "runtime_environment": runtime["runtime_environment"],
+    "trace_asset_sha256": plan["cohort"]["setting_signature_payload"]["trace_asset_sha256"],
+    "cohort_setting_signature": plan["cohort_setting_signature"],
+    "dry_run_plan": os.environ["TRACE_DRY_RUN_PLAN_FILE"],
+}
+Path(os.environ["STARTUP_EVIDENCE_FILE"]).write_text(
+    json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+)
+PY
+}
+
+finalize_trace_startup_evidence() {
+  STARTUP_EVIDENCE_FILE="$STARTUP_EVIDENCE_FILE" RAW_RESULT_FILE="$RAW_RESULT_FILE" \
+  TRACE_DETAIL_RESULT_FILE="$TRACE_DETAIL_RESULT_FILE" "$HOST_PYTHON_BIN" - <<'PY'
+import hashlib
+import json
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+evidence_path = Path(os.environ["STARTUP_EVIDENCE_FILE"])
+payload = json.loads(evidence_path.read_text(encoding="utf-8"))
+raw = Path(os.environ["RAW_RESULT_FILE"])
+detail = Path(os.environ["TRACE_DETAIL_RESULT_FILE"])
+if not raw.is_file() or not detail.is_file():
+    raise FileNotFoundError("trace run did not produce both raw and detail results")
+payload["finished_at"] = datetime.now(timezone.utc).isoformat()
+payload["result_hashes"] = {"raw_sha256": sha256(raw), "detail_sha256": sha256(detail)}
+evidence_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
 }
 
 path_has_matching_file() {
@@ -1449,7 +1815,15 @@ server_log_indicates_resource_busy() {
 
   [[ -f "$log_file" ]] || return 1
 
-  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception|Engine core initialization failed" "$log_file"
+  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy" "$log_file"
+}
+
+server_log_indicates_fatal_startup_error() {
+  local log_file=$1
+
+  [[ -f "$log_file" ]] || return 1
+
+  grep -Eq "EngineCore failed to start|Engine core initialization failed|Worker failed with error|aclnn[A-Za-z0-9_]+ or aclnn[A-Za-z0-9_]+GetWorkspaceSize not in libopapi" "$log_file"
 }
 
 wait_for_ascend_runtime_ready() {
@@ -1532,6 +1906,12 @@ wait_for_server() {
       return 0
     fi
 
+    if [[ -n "${SERVER_STDOUT_LOG:-}" ]] && server_log_indicates_fatal_startup_error "$SERVER_STDOUT_LOG"; then
+      echo "Official baseline server reported a fatal startup error at ${host}:${port}" >&2
+      tail -n 40 "$SERVER_STDOUT_LOG" >&2 || true
+      return 1
+    fi
+
     if (( waited >= next_status_at )); then
       echo "[goal-baseline] waiting for official baseline server at ${host}:${port} (${waited}s/${timeout_sec}s)" >&2
       next_status_at=$((waited + status_interval_sec))
@@ -1596,7 +1976,7 @@ stop_peak_hbm_sampler() {
 }
 
 start_peak_hbm_sampler() {
-  local device_scope=${ASCEND_HBM_PHYSICAL_DEVICES:-${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}}
+  local device_scope=${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
   stop_peak_hbm_sampler
   if [[ -z "$device_scope" ]]; then
     echo "Explicit Ascend device scope is required for peak HBM evidence" >&2
@@ -1637,6 +2017,19 @@ cleanup_managed_server
 
 SCENARIO=$(jq -r '.scenario' "$SPEC_FILE")
 MODEL=$(jq -r '.model' "$SPEC_FILE")
+TRACE_TARGET_ID=$(jq -r '.client_parameters.trace_target_id // empty' "$SPEC_FILE")
+OFFICIAL_RUNTIME_ENVIRONMENT=$(jq -c '.baseline_target.runtime_environment // {}' "$SPEC_FILE")
+if [[ "$OFFICIAL_RUNTIME_ENVIRONMENT" != "{}" ]]; then
+  if [[ "$OFFICIAL_RUNTIME_ENVIRONMENT" != '{"VLLM_BATCH_INVARIANT":"1"}' ]]; then
+    echo "Unsupported official runtime environment: $OFFICIAL_RUNTIME_ENVIRONMENT" >&2
+    exit 2
+  fi
+  OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT=1
+  export OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT
+else
+  unset OFFICIAL_RUNTIME_VLLM_BATCH_INVARIANT
+fi
+MODEL_REVISION=$(jq -r '.server_parameters.revision // empty' "$SPEC_FILE")
 MODEL_PARAMETERS=$(jq -r '.model_parameters' "$SPEC_FILE")
 MODEL_PRECISION=$(jq -r '.model_precision' "$SPEC_FILE")
 MODEL_QUANTIZATION=$(jq -r '.model_quantization // empty' "$SPEC_FILE")
@@ -1675,6 +2068,16 @@ OFFICIAL_BACKEND_SOURCE_COMMIT=$(git -C "$OFFICIAL_VLLM_ASCEND_WORKTREE" rev-par
 if [[ -z "$OFFICIAL_BACKEND_SOURCE_COMMIT" ]]; then
   OFFICIAL_BACKEND_SOURCE_COMMIT="$GIT_COMMIT"
 fi
+DECLARED_CORE_SOURCE_COMMIT=$(jq -r '.baseline_target.vllm_commit // empty' "$SPEC_FILE")
+DECLARED_BACKEND_SOURCE_COMMIT=$(jq -r '.baseline_target.vllm_ascend_commit // empty' "$SPEC_FILE")
+if [[ -n "$DECLARED_CORE_SOURCE_COMMIT" && "$OFFICIAL_CORE_SOURCE_COMMIT" != "$DECLARED_CORE_SOURCE_COMMIT" ]]; then
+  echo "Official vLLM source commit mismatch: expected ${DECLARED_CORE_SOURCE_COMMIT}, got ${OFFICIAL_CORE_SOURCE_COMMIT}" >&2
+  exit 2
+fi
+if [[ -n "$DECLARED_BACKEND_SOURCE_COMMIT" && "$OFFICIAL_BACKEND_SOURCE_COMMIT" != "$DECLARED_BACKEND_SOURCE_COMMIT" ]]; then
+  echo "Official vLLM Ascend source commit mismatch: expected ${DECLARED_BACKEND_SOURCE_COMMIT}, got ${OFFICIAL_BACKEND_SOURCE_COMMIT}" >&2
+  exit 2
+fi
 
 if [[ -z "$OFFICIAL_CORE_VERSION" ]]; then
   OFFICIAL_CORE_VERSION=$(detect_official_core_version)
@@ -1690,12 +2093,20 @@ if ! is_valid_engine_version "$OFFICIAL_BACKEND_VERSION"; then
   OFFICIAL_BACKEND_VERSION="$ENGINE_VERSION"
 fi
 
+if [[ -n "$TRACE_TARGET_ID" ]]; then
+  verify_trace_runtime_packages
+fi
+
 RUNTIME_MODEL="$MODEL"
 cached_model_status=0
 if cached_model_path=$(resolve_runtime_model); then
   RUNTIME_MODEL="$cached_model_path"
 else
   cached_model_status=$?
+  if [[ -n "$TRACE_TARGET_ID" ]]; then
+    echo "Trace target model could not be resolved and verified at revision ${MODEL_REVISION:-<missing>}" >&2
+    exit "$cached_model_status"
+  fi
   if [[ "$cached_model_status" -eq 2 ]]; then
     echo "[goal-baseline] cached local snapshot is missing tokenizer or weight artifacts; falling back to model ID ${MODEL}" >&2
   fi
@@ -1711,6 +2122,33 @@ CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
+TRACE_TARGET_ID=$(jq -r '.resolved_client_parameters.trace_target_id // empty' "$SAME_SPEC_FILE")
+TRACE_ASSET_NAME=$(jq -r '.resolved_client_parameters.trace_asset // empty' "$SAME_SPEC_FILE")
+TRACE_ASSET_PATH=""
+TRACE_ENDPOINT=$(jq -r '.resolved_client_parameters.endpoint // "/v1/completions"' "$SAME_SPEC_FILE")
+TRACE_MAX_MODEL_LEN=$(jq -r '.resolved_server_parameters.max_model_len' "$SAME_SPEC_FILE")
+TRACE_MAX_REQUESTS=$(jq -r '.resolved_client_parameters.max_requests // 1000' "$SAME_SPEC_FILE")
+TRACE_MAX_CONCURRENCY=$(jq -r '.resolved_client_parameters.max_concurrency // 64' "$SAME_SPEC_FILE")
+TRACE_TIMEOUT_S=$(jq -r '.resolved_client_parameters.timeout_s // 600' "$SAME_SPEC_FILE")
+TRACE_OVERFLOW_POLICY=$(jq -r '.resolved_client_parameters.overflow_policy // "reject"' "$SAME_SPEC_FILE")
+TRACE_TIME_SCALE=$(jq -r '.resolved_client_parameters.time_scale // 1' "$SAME_SPEC_FILE")
+TRACE_MAX_INTERARRIVAL_S=$(jq -r '.resolved_client_parameters.max_interarrival_s // 1' "$SAME_SPEC_FILE")
+TRACE_DETAIL_RESULT_FILE="$RESULT_DIR/trace_replay_results.jsonl"
+if [[ -n "$TRACE_TARGET_ID" ]]; then
+  TRACE_ASSET_PATH="$OFFICIAL_TRACE_ASSET_ROOT/$TRACE_ASSET_NAME"
+  if [[ ! -f "$TRACE_ASSET_PATH" ]]; then
+    echo "official trace asset not found: $TRACE_ASSET_PATH" >&2
+    exit 2
+  fi
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$HOST_PYTHON_BIN" - <<'PY' "$TRACE_TARGET_ID" "$TRACE_ASSET_PATH"
+from pathlib import Path
+import sys
+from vllm_hust_benchmark.official_trace_targets import get_trace_target, verify_trace_asset
+verify_trace_asset(get_trace_target(sys.argv[1]), Path(sys.argv[2]))
+PY
+  prepare_trace_startup_evidence
+fi
+
 IMMUTABLE_INPUT_ATTESTATION_FILE="$RESULT_DIR/immutable-input-attestation.json"
 IMMUTABLE_INPUT_METADATA=$(verify_immutable_input_contract)
 
@@ -1748,9 +2186,9 @@ PY
 
 case "$BENCHMARK_TYPE" in
   serve)
-    SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
+    SERVER_HOST=$(jq -r '.resolved_server_parameters.host // "127.0.0.1"' "$SAME_SPEC_FILE")
     SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
-    CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
+    CLIENT_HOST=$(jq -r '.resolved_client_parameters.host // "127.0.0.1"' "$SAME_SPEC_FILE")
     CLIENT_PORT=$(jq -r '.resolved_client_parameters.port' "$SAME_SPEC_FILE")
     SERVER_ARGS=$(json2args "$(normalized_server_parameters_json | jq -c 'del(.disable_log_requests)')")
 
@@ -1763,7 +2201,11 @@ case "$BENCHMARK_TYPE" in
     assert_target_port_available "Official baseline" "$CLIENT_HOST" "$CLIENT_PORT"
 
     SERVER_COMMAND="PYTHONUNBUFFERED=1 VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} $OFFICIAL_RUNTIME_PYTHON -u -m vllm.entrypoints.openai.api_server $SERVER_ARGS"
-    CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} $OFFICIAL_RUNTIME_PYTHON $VLLM_CLI_COMPAT bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
+    if [[ -n "$TRACE_TARGET_ID" ]]; then
+      CLIENT_COMMAND="python -m vllm_hust_benchmark.trace_replay replay $TRACE_TARGET_ID --trace-path $TRACE_ASSET_PATH --max-requests $TRACE_MAX_REQUESTS --max-concurrency $TRACE_MAX_CONCURRENCY --timeout-s $TRACE_TIMEOUT_S --overflow-policy $TRACE_OVERFLOW_POLICY"
+    else
+      CLIENT_COMMAND="VLLM_VERSION=$OFFICIAL_CORE_VERSION PYTHONPATH=$OFFICIAL_RUNTIME_PYTHONPATH\${PYTHONPATH:+:\$PYTHONPATH} $OFFICIAL_RUNTIME_PYTHON $VLLM_CLI_COMPAT bench serve --save-result --result-dir $RESULT_DIR --result-filename $(basename "$RAW_RESULT_FILE") $CLIENT_ARGS"
+    fi
 
     echo "[goal-baseline] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
     echo "[goal-baseline] server command: $SERVER_COMMAND"
@@ -1810,9 +2252,13 @@ case "$BENCHMARK_TYPE" in
         persist_managed_server_state
         server_ready=1
         break
+      else
+        # Capture the condition status inside the else branch. The status of
+        # an `if` compound with no executed branch is zero in bash, which used
+        # to turn an early server crash into a successful runner exit.
+        server_wait_status=$?
       fi
 
-      server_wait_status=$?
       if [[ "$server_wait_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
         echo "[goal-baseline] Detected transient Ascend resource busy state; retrying server start in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
         cleanup_managed_server || true
@@ -1843,6 +2289,9 @@ esac
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
 run_client_command
 finalize_trace_immutable_input_attestation
+if [[ -n "$TRACE_TARGET_ID" ]]; then
+  finalize_trace_startup_evidence
+fi
 stop_peak_hbm_sampler
 if [[ ! -f "$PEAK_HBM_EVIDENCE_FILE" ]] || ! jq -e \
   '.sample_count > 0 and .peak_hbm_mb > 0' "$PEAK_HBM_EVIDENCE_FILE" >/dev/null; then
@@ -1894,6 +2343,7 @@ EXPORT_ARGS=(
 append_export_arg_from_spec --input-length '.client_parameters.input_len'
 append_export_arg_from_spec --output-length '.client_parameters.output_len'
 append_export_arg_from_spec --batch-size '.client_parameters.batch_size'
+append_export_arg_from_spec --concurrent-requests '.client_parameters.max_concurrency'
 
 run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" "${EXPORT_ARGS[@]}"
 

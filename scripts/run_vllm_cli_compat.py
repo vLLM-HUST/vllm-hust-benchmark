@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import json
-import base64
 import dataclasses
 import hashlib
+import inspect
+import json
+import math
 import os
 import sys
 from collections.abc import Mapping
@@ -12,147 +13,135 @@ from pathlib import Path
 from typing import Any
 
 
-ATTESTATION_SCHEMA = "immutable-input-attestation/v1"
+IMMUTABLE_INPUT_SCHEMA_VERSION = "immutable-input-attestation/v1"
 
 
-def _canonical_value(value: object) -> object:
-    """Return a JSON value whose encoding is stable across Python processes."""
+def _canonicalize_input(value: object) -> object:
     if value is None or isinstance(value, (bool, int, str)):
         return value
     if isinstance(value, float):
-        if value != value:
-            return {"$float": "nan"}
-        if value == float("inf"):
-            return {"$float": "+inf"}
-        if value == float("-inf"):
-            return {"$float": "-inf"}
+        if not math.isfinite(value):
+            raise ValueError("resolved benchmark input contains a non-finite float")
         return value
-    if isinstance(value, (bytes, bytearray, memoryview)):
-        return {"$bytes": base64.b64encode(bytes(value)).decode("ascii")}
-    if dataclasses.is_dataclass(value) and not isinstance(value, type):
+    if isinstance(value, bytes):
         return {
-            "$dataclass": f"{type(value).__module__}.{type(value).__qualname__}",
-            "fields": _canonical_value(dataclasses.asdict(value)),
+            "type": "bytes",
+            "size_bytes": len(value),
+            "sha256": hashlib.sha256(value).hexdigest(),
         }
+    if isinstance(value, Path):
+        return str(value)
+    if dataclasses.is_dataclass(value) and not isinstance(value, type):
+        return _canonicalize_input(dataclasses.asdict(value))
     if isinstance(value, Mapping):
-        entries = [
-            [_canonical_value(key), _canonical_value(item)]
-            for key, item in value.items()
-        ]
-        entries.sort(key=lambda item: canonical_json_bytes(item[0]))
-        return {"$mapping": entries}
+        return {
+            str(key): _canonicalize_input(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
     if isinstance(value, (list, tuple)):
-        return [_canonical_value(item) for item in value]
-    if isinstance(value, (set, frozenset)):
-        items = [_canonical_value(item) for item in value]
-        items.sort(key=canonical_json_bytes)
-        return {"$set": items}
+        return [_canonicalize_input(item) for item in value]
 
-    # numpy arrays/scalars: include the logical values, dtype and shape.  This
-    # avoids platform-dependent repr output and object-array pointer bytes.
-    module = type(value).__module__.split(".", 1)[0]
-    if module == "numpy":
-        if hasattr(value, "shape") and hasattr(value, "tolist"):
-            return {
-                "$numpy": {
-                    "dtype": str(getattr(value, "dtype", "")),
-                    "shape": list(getattr(value, "shape", ())),
-                    "values": _canonical_value(value.tolist()),
-                }
-            }
-        if hasattr(value, "item"):
-            return _canonical_value(value.item())
-
-    # PIL images are identified by decoded pixels, not container metadata or
-    # repr (which includes a memory address on some Pillow versions).
-    if module == "PIL" and hasattr(value, "tobytes"):
+    module_name = type(value).__module__
+    if module_name.startswith("numpy") and hasattr(value, "tolist"):
+        return _canonicalize_input(value.tolist())
+    if module_name.startswith("PIL.") and all(
+        hasattr(value, attribute) for attribute in ("mode", "size", "tobytes")
+    ):
         pixels = value.tobytes()
         return {
-            "$pil_image": {
-                "mode": str(getattr(value, "mode", "")),
-                "size": list(getattr(value, "size", ())),
-                "pixels_sha256": hashlib.sha256(pixels).hexdigest(),
-            }
+            "type": "pil-image",
+            "mode": str(value.mode),
+            "size": list(value.size),
+            "pixels_sha256": hashlib.sha256(pixels).hexdigest(),
         }
-    if hasattr(value, "__dict__"):
-        return {
-            "$object": f"{type(value).__module__}.{type(value).__qualname__}",
-            "attributes": _canonical_value(vars(value)),
-        }
-    raise TypeError(f"unsupported immutable input value: {type(value)!r}")
+    raise TypeError(
+        "resolved benchmark input contains an unsupported value: "
+        f"{type(value).__module__}.{type(value).__qualname__}"
+    )
 
 
-def canonical_json_bytes(value: object) -> bytes:
-    return json.dumps(
-        _canonical_value(value),
+def _sample_request_payload(request: object) -> dict[str, object]:
+    return {
+        "prompt": _canonicalize_input(getattr(request, "prompt")),
+        "prompt_len": int(getattr(request, "prompt_len")),
+        "expected_output_len": int(getattr(request, "expected_output_len")),
+        "multi_modal_data": _canonicalize_input(
+            getattr(request, "multi_modal_data", None)
+        ),
+        "request_id": _canonicalize_input(getattr(request, "request_id", None)),
+    }
+
+
+def resolved_input_sha256(*, input_kind: str, inputs: object) -> str:
+    canonical = {
+        "input_kind": input_kind,
+        "inputs": _canonicalize_input(inputs),
+    }
+    encoded = json.dumps(
+        canonical,
         ensure_ascii=False,
         separators=(",", ":"),
         sort_keys=True,
     ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
-def canonical_sha256(value: object) -> str:
-    return hashlib.sha256(canonical_json_bytes(value)).hexdigest()
+def record_immutable_inputs(*, input_kind: str, inputs: object) -> None:
+    output_value = os.environ.get("VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE")
+    if not output_value:
+        return
 
-
-def _latency_prompt_token_ids(prompts: object) -> object:
-    if not isinstance(prompts, (list, tuple)):
-        raise TypeError("latency prompts must be a sequence")
-    token_ids = []
-    for prompt in prompts:
-        if not isinstance(prompt, Mapping) or "prompt_token_ids" not in prompt:
-            raise TypeError("latency LLM.generate input lacks prompt_token_ids")
-        token_ids.append(prompt["prompt_token_ids"])
-    return token_ids
-
-
-class ImmutableInputRecorder:
-    def __init__(self, output_file: Path, metadata: Mapping[str, object]) -> None:
-        self.output_file = output_file
-        self.metadata = dict(metadata)
-        self._kind: str | None = None
-        self._sha256: str | None = None
-
-    @classmethod
-    def from_environment(cls) -> "ImmutableInputRecorder | None":
-        output = os.environ.get("VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE")
-        if not output:
-            return None
-        metadata_text = os.environ.get("VLLM_HUST_IMMUTABLE_INPUT_METADATA")
-        if not metadata_text:
-            raise RuntimeError("VLLM_HUST_IMMUTABLE_INPUT_METADATA is required")
+    metadata_text = os.environ.get("VLLM_HUST_IMMUTABLE_INPUT_METADATA")
+    if metadata_text:
         metadata = json.loads(metadata_text)
-        required = {"model_id", "model_revision", "data_identity"}
-        missing = sorted(required - metadata.keys())
-        if missing:
-            raise RuntimeError(f"immutable input metadata missing: {missing}")
-        return cls(Path(output), metadata)
-
-    def record(self, kind: str, value: object) -> None:
-        digest = canonical_sha256(value)
-        if self._sha256 is not None and (kind, digest) != (self._kind, self._sha256):
-            raise RuntimeError(
-                "immutable benchmark input drifted within one process: "
-                f"{self._kind}:{self._sha256} != {kind}:{digest}"
-            )
-        self._kind = kind
-        self._sha256 = digest
-
-    def write(self) -> None:
-        if self._kind is None or self._sha256 is None:
-            raise RuntimeError("benchmark did not expose a real immutable input")
-        payload = {
-            "schema_version": ATTESTATION_SCHEMA,
-            **self.metadata,
-            "resolved_input_kind": self._kind,
-            "resolved_input_sha256": self._sha256,
-        }
-        self.output_file.parent.mkdir(parents=True, exist_ok=True)
-        temporary = self.output_file.with_suffix(self.output_file.suffix + ".tmp")
-        temporary.write_text(
-            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        if not isinstance(metadata, dict):
+            raise RuntimeError("immutable input metadata must be an object")
+        model_id = metadata.get("model_id", "")
+        model_revision = metadata.get("model_revision", "")
+        data_identity = metadata.get("data_identity")
+    else:
+        model_id = os.environ.get("VLLM_HUST_MODEL_ID", "")
+        model_revision = os.environ.get("VLLM_HUST_MODEL_REVISION", "")
+        data_identity_text = os.environ.get("VLLM_HUST_DATA_IDENTITY_JSON", "")
+        data_identity = json.loads(data_identity_text) if data_identity_text else None
+    if not model_id or not model_revision or not data_identity:
+        raise RuntimeError(
+            "immutable input capture requires model ID, model revision, and data identity"
         )
-        temporary.replace(self.output_file)
+    if not isinstance(data_identity, dict) or not data_identity:
+        raise RuntimeError("immutable input data identity must be a non-empty object")
+
+    payload = {
+        "schema_version": IMMUTABLE_INPUT_SCHEMA_VERSION,
+        "model_id": model_id,
+        "model_revision": model_revision,
+        "data_identity": data_identity,
+        "resolved_input_kind": input_kind,
+        "resolved_input_sha256": resolved_input_sha256(
+            input_kind=input_kind,
+            inputs=inputs,
+        ),
+    }
+    output_path = Path(output_value)
+    if output_path.exists():
+        existing = json.loads(output_path.read_text(encoding="utf-8"))
+        if existing != payload:
+            raise RuntimeError("benchmark resolved inputs changed within one run")
+        return
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_path.with_suffix(output_path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    temporary.replace(output_path)
+
+
+def _record_sample_requests(requests: object, *, input_kind: str) -> None:
+    record_immutable_inputs(
+        input_kind=input_kind,
+        inputs=[_sample_request_payload(request) for request in requests],
+    )
 
 
 def _bound_argument(
@@ -161,8 +150,6 @@ def _bound_argument(
     kwargs: dict[str, Any],
     names: tuple[str, ...],
 ) -> object:
-    import inspect
-
     try:
         bound = inspect.signature(function).bind_partial(*args, **kwargs)
     except (TypeError, ValueError):
@@ -174,61 +161,75 @@ def _bound_argument(
     for name in names:
         if name in kwargs:
             return kwargs[name]
-    if args:
-        return args[0]
     raise RuntimeError(f"could not resolve input argument {names}")
 
 
-def install_immutable_input_capture(
-    benchmark: str, module: object
-) -> tuple[ImmutableInputRecorder | None, list[object]]:
-    recorder = ImmutableInputRecorder.from_environment()
-    serve_requests: list[object] = []
-    if recorder is None:
-        return None, serve_requests
+def _latency_prompt_token_ids(prompts: object) -> list[object]:
+    if not isinstance(prompts, (list, tuple)):
+        raise TypeError("latency prompts must be a sequence")
+    token_ids: list[object] = []
+    for prompt in prompts:
+        if not isinstance(prompt, Mapping) or "prompt_token_ids" not in prompt:
+            raise TypeError("latency LLM.generate input lacks prompt_token_ids")
+        token_ids.append(prompt["prompt_token_ids"])
+    return token_ids
+
+
+def install_resolved_input_capture(benchmark_module: Any, benchmark: str) -> None:
+    if not os.environ.get("VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE"):
+        return
 
     if benchmark == "latency":
         from vllm import LLM
 
         original_generate = LLM.generate
 
-        def captured_generate(self, *args, **kwargs):
+        def generate_with_input_capture(self, *args, **kwargs):
             prompts = _bound_argument(
                 original_generate,
                 (self, *args),
                 kwargs,
                 ("prompt_token_ids", "prompts"),
             )
-            recorder.record(
-                "latency-prompt-token-ids", _latency_prompt_token_ids(prompts)
+            record_immutable_inputs(
+                input_kind="latency-prompt-token-ids",
+                inputs=_latency_prompt_token_ids(prompts),
             )
             return original_generate(self, *args, **kwargs)
 
-        LLM.generate = captured_generate
-    elif benchmark == "throughput":
-        original_run_vllm = getattr(module, "run_vllm")
+        LLM.generate = generate_with_input_capture
+        return
 
-        def captured_run_vllm(*args, **kwargs):
+    if benchmark == "serve":
+        original_benchmark = benchmark_module.benchmark
+
+        async def benchmark_with_input_capture(*args, **kwargs):
             requests = _bound_argument(
-                original_run_vllm, args, kwargs, ("requests", "sample_requests")
+                original_benchmark,
+                args,
+                kwargs,
+                ("input_requests", "requests"),
             )
-            recorder.record("throughput-sample-requests", requests)
-            return original_run_vllm(*args, **kwargs)
-
-        setattr(module, "run_vllm", captured_run_vllm)
-    elif benchmark == "serve":
-        original_benchmark = getattr(module, "benchmark")
-
-        async def captured_benchmark(*args, **kwargs):
-            requests = _bound_argument(
-                original_benchmark, args, kwargs, ("input_requests", "requests")
-            )
-            serve_requests.extend(requests)
-            recorder.record("serve-sample-requests", requests)
+            _record_sample_requests(requests, input_kind="serve-sample-requests")
             return await original_benchmark(*args, **kwargs)
 
-        setattr(module, "benchmark", captured_benchmark)
-    return recorder, serve_requests
+        benchmark_module.benchmark = benchmark_with_input_capture
+        return
+
+    if benchmark == "throughput":
+        original_run_vllm = benchmark_module.run_vllm
+
+        def run_vllm_with_input_capture(*args, **kwargs):
+            requests = _bound_argument(
+                original_run_vllm,
+                args,
+                kwargs,
+                ("requests", "sample_requests"),
+            )
+            _record_sample_requests(requests, input_kind="throughput-sample-requests")
+            return original_run_vllm(*args, **kwargs)
+
+        benchmark_module.run_vllm = run_vllm_with_input_capture
 
 
 def restore_huggingface_hub_downloads() -> None:
@@ -313,11 +314,11 @@ def run_single_benchmark(argv: list[str]) -> int | None:
 
     benchmark = argv[1]
     if benchmark == "serve":
-        import vllm.benchmarks.serve as benchmark_module
+        from vllm.benchmarks import serve as benchmark_module
     elif benchmark == "latency":
-        import vllm.benchmarks.latency as benchmark_module
+        from vllm.benchmarks import latency as benchmark_module
     elif benchmark == "throughput":
-        import vllm.benchmarks.throughput as benchmark_module
+        from vllm.benchmarks import throughput as benchmark_module
     else:
         return None
 
@@ -335,12 +336,8 @@ def run_single_benchmark(argv: list[str]) -> int | None:
     restore_huggingface_hub_downloads()
     if benchmark in {"latency", "throughput"}:
         install_offline_graph_guard()
-    recorder, serve_requests = install_immutable_input_capture(
-        benchmark, benchmark_module
-    )
+    install_resolved_input_capture(benchmark_module, benchmark)
     benchmark_main(args)
-    if recorder is not None:
-        recorder.write()
     return 0
 
 

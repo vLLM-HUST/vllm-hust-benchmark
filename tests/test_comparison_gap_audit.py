@@ -76,13 +76,15 @@ def _entry(
     }
 
 
-def test_audit_excludes_new_trace_workloads_and_requires_strict_pairs(
+def test_audit_includes_new_trace_workloads_and_requires_strict_pairs(
     tmp_path: Path,
 ) -> None:
     ready = _target("ready", "random-online")
     missing = _target("missing", "sharegpt-online")
     trace = _target("trace", "tracelab-coding-agent-replay")
     burst = _target("burst", "burstgpt-production-replay")
+    trace["profile"] = "production-trace"
+    burst["profile"] = "production-trace"
     _write_json(
         tmp_path / "leaderboard-data/official-targets.json",
         {
@@ -114,18 +116,19 @@ def test_audit_excludes_new_trace_workloads_and_requires_strict_pairs(
         current_plugin_head="plugin-head",
     )
 
-    assert report["policy"]["excluded_workloads"] == [
-        "burstgpt-production-replay",
-        "tracelab-coding-agent-replay",
-    ]
+    assert report["policy"]["excluded_workloads"] == []
     assert report["summary"] == {
-        "target_count": 2,
+        "target_count": 4,
         "ready_pair_count": 1,
-        "rerun_target_count": 1,
-        "rerun_job_count": 1,
+        "rerun_target_count": 3,
+        "rerun_job_count": 5,
     }
-    assert report["rerun_queue"][0]["engine"] == "vllm-hust"
-    assert "verified-attestation-missing" in report["rerun_queue"][0]["reasons"]
+    missing_current = next(
+        item
+        for item in report["rerun_queue"]
+        if item["target_id"] == "missing" and item["engine"] == "vllm-hust"
+    )
+    assert "verified-attestation-missing" in missing_current["reasons"]
 
 
 def test_current_checkout_must_match_both_heads(tmp_path: Path) -> None:
@@ -154,15 +157,15 @@ def test_current_checkout_must_match_both_heads(tmp_path: Path) -> None:
     assert report["summary"]["ready_pair_count"] == 0
 
 
-def test_current_workspace_report_matches_schema_and_excludes_trace_targets() -> None:
+def test_current_workspace_report_matches_schema_and_includes_trace_targets() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     report = build_comparison_gap_audit(repo_root)
     schema = json.loads(
-        (repo_root / "schemas/leaderboard_comparison_gap_audit_v1.schema.json").read_text(
-            encoding="utf-8"
-        )
+        (
+            repo_root / "schemas/leaderboard_comparison_gap_audit_v1.schema.json"
+        ).read_text(encoding="utf-8")
     )
     Draft7Validator(schema).validate(report)
     workloads = {record["workload"] for record in report["records"]}
-    assert "tracelab-coding-agent-replay" not in workloads
-    assert "burstgpt-production-replay" not in workloads
+    assert "tracelab-coding-agent-replay" in workloads
+    assert "burstgpt-production-replay" in workloads

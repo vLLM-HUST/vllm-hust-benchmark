@@ -7,6 +7,10 @@ from typing import Any
 WORKLOAD_CONFIG_CONTRACT_VERSION = "explicit-effective/v1"
 WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER = "2026-07-24T00:00:00Z"
 OFFICIAL_SPEC_PREFIX = "official-ascend-jan-2026-v0.18.0-"
+VARIABLE_LENGTH_TRACE_SCENARIOS = {
+    "burstgpt-production-replay",
+    "tracelab-coding-agent-replay",
+}
 
 REQUIRED_EFFECTIVE_PARAMETERS: dict[str, dict[str, tuple[str, ...]]] = {
     "agent-research-online": {
@@ -45,6 +49,26 @@ REQUIRED_EFFECTIVE_PARAMETERS: dict[str, dict[str, tuple[str, ...]]] = {
         "server": ("gpu_memory_utilization", "max_model_len"),
         "client": ("no_stream",),
     },
+    "burstgpt-production-replay": {
+        "server": ("gpu_memory_utilization", "max_model_len"),
+        "client": (
+            "trace_target_id",
+            "trace_asset",
+            "max_requests",
+            "overflow_policy",
+            "cohort_context_cap",
+        ),
+    },
+    "tracelab-coding-agent-replay": {
+        "server": ("gpu_memory_utilization", "max_model_len"),
+        "client": (
+            "trace_target_id",
+            "trace_asset",
+            "max_requests",
+            "overflow_policy",
+            "cohort_context_cap",
+        ),
+    },
 }
 
 OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
@@ -74,6 +98,12 @@ OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
     },
     "visionarena-online": {
         "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+    },
+    "burstgpt-production-replay": {
+        "server": {"gpu_memory_utilization": 0.9, "max_model_len": 131072},
+    },
+    "tracelab-coding-agent-replay": {
+        "server": {"gpu_memory_utilization": 0.9, "max_model_len": 131072},
     },
 }
 
@@ -165,13 +195,6 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
         if key not in workload:
             errors.append(f"workload.{key} must be explicitly recorded")
 
-    input_length = _positive_int(workload.get("input_length"))
-    output_length = _positive_int(workload.get("output_length"))
-    if input_length is None:
-        errors.append("workload.input_length must be a positive integer")
-    if output_length is None:
-        errors.append("workload.output_length must be a positive integer")
-
     same_spec = entry.get("same_spec")
     same_spec = same_spec if isinstance(same_spec, Mapping) else {}
     server = same_spec.get("resolved_server_parameters")
@@ -179,6 +202,37 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
     server = server if isinstance(server, Mapping) else {}
     client = client if isinstance(client, Mapping) else {}
     scenario = str(same_spec.get("scenario") or workload.get("name") or "")
+    variable_length_trace = scenario in VARIABLE_LENGTH_TRACE_SCENARIOS
+    input_length = _positive_int(workload.get("input_length"))
+    output_length = _positive_int(workload.get("output_length"))
+    if variable_length_trace:
+        if workload.get("input_length") is not None:
+            errors.append(
+                "workload.input_length must be null for variable-length trace replay"
+            )
+        if workload.get("output_length") is not None:
+            errors.append(
+                "workload.output_length must be null for variable-length trace replay"
+            )
+        for field in ("input_token_distribution", "output_token_distribution"):
+            distribution = workload.get(field)
+            if not isinstance(distribution, Mapping):
+                errors.append(
+                    f"workload.{field} must record the trace cohort distribution"
+                )
+                continue
+            if _positive_int(distribution.get("count")) is None:
+                errors.append(f"workload.{field}.count must be a positive integer")
+            for quantile in ("min", "p50", "p95", "p99", "max", "total"):
+                if _positive_int(distribution.get(quantile)) is None:
+                    errors.append(
+                        f"workload.{field}.{quantile} must be a positive integer"
+                    )
+    else:
+        if input_length is None:
+            errors.append("workload.input_length must be a positive integer")
+        if output_length is None:
+            errors.append("workload.output_length must be a positive integer")
 
     required = REQUIRED_EFFECTIVE_PARAMETERS.get(scenario, {})
     for key in required.get("server", ()):
@@ -201,6 +255,13 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
                 f"{expected!r} for the official single-chip text default, "
                 f"got {actual!r}"
             )
+    if variable_length_trace and not _numeric_equal(
+        client.get("cohort_context_cap"), server.get("max_model_len")
+    ):
+        errors.append(
+            "same_spec.resolved_client_parameters.cohort_context_cap must match "
+            "same_spec.resolved_server_parameters.max_model_len"
+        )
 
     expected_input, expected_output = _expected_workload_lengths(client)
     if expected_input is not None and input_length != expected_input:

@@ -118,6 +118,7 @@ def test_normalize_offline_benchmark_parameters_carries_engine_runtime_knobs(
             "port": 8001,
             "model": "/data/models/qwen",
             "dtype": "float16",
+            "revision": "model-revision",
             "tensor_parallel_size": 1,
             "trust_remote_code": "",
             "enforce_eager": "",
@@ -129,6 +130,7 @@ def test_normalize_offline_benchmark_parameters_carries_engine_runtime_knobs(
 
     assert normalized["model"] == "/data/models/qwen"
     assert normalized["dtype"] == "float16"
+    assert normalized["revision"] == "model-revision"
     assert normalized["tensor_parallel_size"] == 1
     assert normalized["trust_remote_code"] == ""
     assert normalized["enforce_eager"] == ""

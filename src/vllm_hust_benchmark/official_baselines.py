@@ -294,7 +294,9 @@ def attest_canonical_submission(
         target_server = target.get("server_parameters")
         target_server = target_server if isinstance(target_server, Mapping) else {}
         target_workload = target.get("workload")
-        target_workload = target_workload if isinstance(target_workload, Mapping) else {}
+        target_workload = (
+            target_workload if isinstance(target_workload, Mapping) else {}
+        )
         target_client = target_workload.get("client_parameters")
         target_client = target_client if isinstance(target_client, Mapping) else {}
         _assert_target_parameters(target_server, resolved_server)
@@ -323,7 +325,9 @@ def attest_canonical_submission(
         if not metadata.get("reproducible_cmd"):
             raise ValueError(f"repeat is missing reproducible command: {result_dir}")
         if metadata.get("workload_config_contract") != "explicit-effective/v1":
-            raise ValueError(f"repeat is missing explicit config contract: {result_dir}")
+            raise ValueError(
+                f"repeat is missing explicit config contract: {result_dir}"
+            )
         for field in ("pytorch_version", "cann_version", "driver_version"):
             if not environment.get(field):
                 raise ValueError(f"repeat is missing {field}: {result_dir}")

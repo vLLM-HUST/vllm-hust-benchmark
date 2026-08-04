@@ -8,6 +8,9 @@ Unreleased entries concise and workflow-focused.
 ## [Unreleased]
 
 ### Added
+- Added pinned, checksum-verified BurstGPT v2.0 and TraceLab v0.0.1 production-trace
+  workload targets with arrival/session-aware synthetic-token replay, fail-closed
+  context validation, provenance output, tests, and attribution documentation.
 - Added quantized Ascend same-spec benchmark support so workflow-dispatch runs
   can override the runtime model, precision, quantization scheme, dtype, and
   hardware chip metadata without mutating the official FP16 spec files.

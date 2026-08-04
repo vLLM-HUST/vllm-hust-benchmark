@@ -49,6 +49,8 @@ SIMLLM_THROUGHPUT_ENDPOINT=${SIMLLM_THROUGHPUT_ENDPOINT:-/v1/completions}
 SIMLLM_THROUGHPUT_DATASET_NAME=${SIMLLM_THROUGHPUT_DATASET_NAME:-random}
 SIMLLM_THROUGHPUT_BACKEND=${SIMLLM_THROUGHPUT_BACKEND:-vllm}
 SIMLLM_SATURATED_DRY_RUN=${SIMLLM_SATURATED_DRY_RUN:-0}
+RUN_BASELINE=${RUN_BASELINE:-1}
+RUN_SIMLLM=${RUN_SIMLLM:-1}
 
 # Warm slowly enough that entries are committed before the measured burst.
 # The measurement seed defaults to the warmup seed in the underlying runner.
@@ -87,6 +89,15 @@ require_positive_integer SIMLLM_THROUGHPUT_OUTPUT_LEN "$SIMLLM_THROUGHPUT_OUTPUT
 require_positive_integer SIMLLM_THROUGHPUT_MAX_CONCURRENCY "$SIMLLM_THROUGHPUT_MAX_CONCURRENCY"
 require_positive_integer SIMLLM_THROUGHPUT_MAX_NUM_BATCHED_TOKENS "$SIMLLM_THROUGHPUT_MAX_NUM_BATCHED_TOKENS"
 require_positive_integer SIMLLM_KV_CACHE_SIZE "$SIMLLM_KV_CACHE_SIZE"
+
+if [[ ! "$RUN_BASELINE" =~ ^[01]$ || ! "$RUN_SIMLLM" =~ ^[01]$ ]]; then
+  echo "RUN_BASELINE and RUN_SIMLLM must each be 0 or 1" >&2
+  exit 2
+fi
+if [[ "$RUN_BASELINE" == "0" && "$RUN_SIMLLM" == "0" ]]; then
+  echo "At least one benchmark arm must be enabled" >&2
+  exit 2
+fi
 
 if (( SIMLLM_THROUGHPUT_MAX_NUM_BATCHED_TOKENS < SIMLLM_THROUGHPUT_INPUT_LEN )); then
   echo "SIMLLM_THROUGHPUT_MAX_NUM_BATCHED_TOKENS must be at least SIMLLM_THROUGHPUT_INPUT_LEN" >&2
@@ -160,18 +171,30 @@ SIMLLM_RESULT="$RESULT_DIR/enabled-warm-cache/raw_benchmark_result.json"
 COMPARISON_JSON="$RESULT_DIR/throughput_comparison.json"
 COMPARISON_MD="$RESULT_DIR/throughput_comparison.md"
 
-if [[ ! -f "$BASELINE_RESULT" || ! -f "$SIMLLM_RESULT" ]]; then
-  echo "[simllm-throughput] raw result missing; skipping throughput summary" >&2
-  exit 1
+expected_results=()
+if [[ "$RUN_BASELINE" == "1" ]]; then
+  expected_results+=("$BASELINE_RESULT")
+fi
+if [[ "$RUN_SIMLLM" == "1" ]]; then
+  expected_results+=("$SIMLLM_RESULT")
 fi
 
-for result_file in "$BASELINE_RESULT" "$SIMLLM_RESULT"; do
+for result_file in "${expected_results[@]}"; do
+  if [[ ! -f "$result_file" ]]; then
+    echo "[simllm-throughput] expected raw result is missing: $result_file" >&2
+    exit 1
+  fi
   completed=$(jq -r '.completed // 0' "$result_file")
   if [[ "$completed" != "$SIMLLM_THROUGHPUT_NUM_PROMPTS" ]]; then
     echo "[simllm-throughput] invalid result: $result_file completed $completed/$SIMLLM_THROUGHPUT_NUM_PROMPTS requests" >&2
     exit 1
   fi
 done
+
+if [[ "$RUN_BASELINE" != "1" || "$RUN_SIMLLM" != "1" ]]; then
+  echo "[simllm-throughput] single-arm run complete; comparison not requested"
+  exit 0
+fi
 
 jq -n \
   --slurpfile baseline "$BASELINE_RESULT" \

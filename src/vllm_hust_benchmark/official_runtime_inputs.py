@@ -16,6 +16,7 @@ OFFLINE_SERVER_PARAMETER_KEYS = {
     "max_num_seqs",
     "model",
     "quantization",
+    "revision",
     "tensor_parallel_size",
     "tokenizer",
     "trust_remote_code",

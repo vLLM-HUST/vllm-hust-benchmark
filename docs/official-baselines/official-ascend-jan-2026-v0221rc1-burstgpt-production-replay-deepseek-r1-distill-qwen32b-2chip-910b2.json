@@ -1,0 +1,84 @@
+{
+  "id": "official-ascend-jan-2026-v0.22.1rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+  "label": "Official Ascend production-trace BurstGPT baseline",
+  "baseline_target": {
+    "id": "official-ascend-jan-2026-v0.22.1rc1-production-trace",
+    "label": "Official Ascend production trace profile",
+    "engine": "vllm",
+    "engine_version": "0.22.1rc1",
+    "github_repository": "vllm-project/vllm-ascend",
+    "vllm_ref": "v0.22.1",
+    "vllm_commit": "0decac0d96c42b49572498019f0a0e3600f50398",
+    "vllm_ascend_ref": "v0.22.1rc1",
+    "vllm_ascend_commit": "5f6faa0cb8830f667266f3b8121cd1383606f2a1",
+    "runtime_image": "quay.io/ascend/vllm-ascend@sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092",
+    "runtime_image_digest": "sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092",
+    "runtime_packages": {
+      "transformers": "5.5.4",
+      "huggingface-hub": "1.21.0",
+      "click": "8.4.1",
+      "vllm": "0.22.1+empty",
+      "vllm-ascend": "0.22.1rc1",
+      "torch": "2.10.0+cpu",
+      "torch-npu": "2.10.0"
+    },
+    "runtime_environment": {
+      "VLLM_BATCH_INVARIANT": "1"
+    }
+  },
+  "scenario": "burstgpt-production-replay",
+  "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+  "model_revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746",
+  "model_parameters": "32B",
+  "model_precision": "BF16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 2,
+  "node_count": 1,
+  "server_parameters": {
+    "additional_config": {
+      "ascend_compilation_config": {
+        "fuse_norm_quant": false
+      }
+    },
+    "compilation_config": {
+      "cudagraph_mode": "PIECEWISE"
+    },
+    "tensor_parallel_size": 2,
+    "gpu_memory_utilization": 0.92,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "max_model_len": 131072,
+    "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
+  },
+  "client_parameters": {
+    "trace_target_id": "burstgpt-v2-production-replay",
+    "trace_asset": "BurstGPT_3.csv",
+    "endpoint": "/v1/completions",
+    "max_requests": 1000,
+    "max_concurrency": 64,
+    "overflow_policy": "reject",
+    "time_scale": 60,
+    "max_interarrival_s": 1,
+    "cohort_context_cap": 131072
+  },
+  "data_identity": {
+    "kind": "release-asset",
+    "repository": "https://github.com/HPMLL/BurstGPT",
+    "release": "v2.0",
+    "path": "BurstGPT_3.csv",
+    "size_bytes": 231682327,
+    "sha256": "2299986a07388aa303ec2c41d1131e756db650a39ed6ef9dfe7cc3d7f9a43b8f"
+  },
+  "export": {
+    "engine": "vllm",
+    "engine_version": "0.22.1rc1",
+    "submitter": "official-ascend-baseline",
+    "baseline_engine": "vllm",
+    "github_repository": "vllm-project/vllm-ascend",
+    "github_ref": "v0.22.1rc1",
+    "git_commit": "5f6faa0cb8830f667266f3b8121cd1383606f2a1",
+    "data_source": "burstgpt-v2-production-replay"
+  }
+}

@@ -1,15 +1,21 @@
 {
-  "effective_from": "2026-07-31",
-  "registry_version": "1.0.0",
+  "effective_from": "2026-08-03",
+  "registry_version": "1.7.0",
   "schema_version": "official-target-registry/v1",
-  "source_set_sha256": "54d31914a6ceae39fb5a58b972b979f417dd654ff51aa72d1b4b4b8535dc0d36",
+  "source_set_sha256": "9d1637f5a06c59936243bc90917961e821d750be170ce83be076a63a79e90c04",
   "targets": [
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -20,7 +26,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -31,7 +37,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-Coder-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "aedcc2d42b622764e023cf882b6652e646b95671"
       },
       "profile": "code",
       "server_parameters": {
@@ -42,18 +49,20 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "aedcc2d42b622764e023cf882b6652e646b95671",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
-        "sha256": "4ff7fc34318e4dd27c1e63f94a5bb5f567ccd1ff1b732d55c3a9348fe2398ce1"
+        "sha256": "994e9055520305f62777f9bbc2ba934691ad9d46a7fd00b3ab9a0e46bd361fa2"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "instructcoder-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "hf",
@@ -65,15 +74,27 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "instructcoder-online"
+        "data_identity": {
+          "kind": "huggingface-dataset",
+          "repository": "likaixin/InstructCoder",
+          "revision": "6a778a720284d6520b56bd03d5c3070930d41071"
+        },
+        "name": "instructcoder-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -84,7 +105,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -95,7 +116,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -106,18 +128,20 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
-        "sha256": "3ac31e7917b73558ba33ce1ad09c1871371c8f53a1496ab4bda1dc4699ae266a"
+        "sha256": "2e1ca03a9954580b6dab77c688a0ea59926ab20ed8d0a62ebeb23c040f1071e3"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "agent-research-online",
         "client_parameters": {
           "backend": "openai-chat",
           "dataset_name": "custom",
@@ -128,15 +152,28 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "agent-research-online"
+        "data_identity": {
+          "kind": "repository-file",
+          "path": "scripts/traces/evoscientist-workload-custom.jsonl",
+          "sha256": "13347797c3660c5b3efbf8912bbcb76d8bba50ffee5f77944b95b9cde1b6ca3c",
+          "size_bytes": 27198
+        },
+        "name": "agent-research-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -147,7 +184,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -158,7 +195,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -169,18 +207,20 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
-        "sha256": "e27ce2ba69ffea08938dd052b4ba88ef9f1569f21383fe934a1a71fdd63463ec"
+        "sha256": "c0ef92279f6b7052e3fe93c48ebd26289ab82c57722468b4b37b170cd67be7ad"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "prefix-repetition-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "prefix_repetition",
@@ -193,15 +233,29 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "prefix-repetition-online"
+        "data_identity": {
+          "generator_path": "vllm/benchmarks/datasets.py",
+          "generator_sha256": "85b4e3b7407ef35ad364ccd454efdcfa9a06759144582d5a3a3761e3f85a41e2",
+          "kind": "deterministic-vllm-generator",
+          "seed": 0,
+          "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
+        },
+        "name": "prefix-repetition-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -212,7 +266,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -223,7 +277,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -231,18 +286,20 @@
         "enforce_eager": "",
         "gpu_memory_utilization": 0.6,
         "max_model_len": 32768,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
-        "sha256": "ebdd125f8fd61c0331cf80305c665d8151107c32d8fe566089407dbe662b3080"
+        "sha256": "90af30ec2797d5964df9c521bac1a327a9caaf5ff95a1d842396a3e15813b322"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "random-latency",
         "client_parameters": {
           "batch_size": 8,
           "gpu_memory_utilization": 0.6,
@@ -251,15 +308,29 @@
           "num_iters_warmup": 10,
           "output_len": 128
         },
-        "name": "random-latency"
+        "data_identity": {
+          "generator_path": "vllm/benchmarks/latency.py",
+          "generator_sha256": "4be2c05d5bcd39d7d1251563e0ab57d1655121dc83ebe97b04e9f309f901ff52",
+          "kind": "nondeterministic-vllm-generator",
+          "requires_repeat_input_sha256": true,
+          "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
+        },
+        "name": "random-latency",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -270,7 +341,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -281,7 +352,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -292,18 +364,20 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
-        "sha256": "446744f2790968015a933aff7cf84fc096438ba5246eb3db155d808e7010527b"
+        "sha256": "cd89e2504aed79f2443a32af28ddb63a3b4e4a4530339c416b75be56211fb097"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "random-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "random",
@@ -316,15 +390,29 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "random-online"
+        "data_identity": {
+          "generator_path": "vllm/benchmarks/datasets.py",
+          "generator_sha256": "85b4e3b7407ef35ad364ccd454efdcfa9a06759144582d5a3a3761e3f85a41e2",
+          "kind": "deterministic-vllm-generator",
+          "seed": 0,
+          "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
+        },
+        "name": "random-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -335,7 +423,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -346,7 +434,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -357,18 +446,20 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
-        "sha256": "c738c8a2a1c1fdbd3a53ec7c3891634fb63152f230386fab73e5257e79df822f"
+        "sha256": "9872592bb89571bde784df4b4db65157d0083189e717168917c371713770d12b"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "sharegpt-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sharegpt",
@@ -380,15 +471,30 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "sharegpt-online"
+        "data_identity": {
+          "kind": "huggingface-file",
+          "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+          "repository": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+          "revision": "192ab2185289094fc556ec8ce5ce1e8e587154ca",
+          "sha256": "35f0e213ce091ed9b9af2a1f0755e9d39f9ccec34ab281cd4ca60d70f6479ba4",
+          "size_bytes": 672837942
+        },
+        "name": "sharegpt-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -399,7 +505,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -410,7 +516,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -418,18 +525,20 @@
         "enforce_eager": "",
         "gpu_memory_utilization": 0.6,
         "max_model_len": 32768,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
-        "sha256": "d5c4b7fa9d0911b04e69deeafbec5cc56386732dec8113074850ac7daa7a9a29"
+        "sha256": "061a43ef412cf1bc96bc00573e47bc5b36b356d4233b7e252b31514343dc3174"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "sharegpt-throughput",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sharegpt",
@@ -438,15 +547,30 @@
           "num_prompts": 200,
           "num_warmups": 0
         },
-        "name": "sharegpt-throughput"
+        "data_identity": {
+          "kind": "huggingface-file",
+          "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+          "repository": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+          "revision": "192ab2185289094fc556ec8ce5ce1e8e587154ca",
+          "sha256": "35f0e213ce091ed9b9af2a1f0755e9d39f9ccec34ab281cd4ca60d70f6479ba4",
+          "size_bytes": 672837942
+        },
+        "name": "sharegpt-throughput",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -457,7 +581,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -468,7 +592,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -476,18 +601,20 @@
         "enforce_eager": "",
         "gpu_memory_utilization": 0.6,
         "max_model_len": 32768,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-910b2.json",
-        "sha256": "a9905ce7c45fab8c3dd186ec5b7ccb1a0dd6efbc1a8f89afef7f47c9cd596858"
+        "sha256": "431c169a6d37527daed057f5f18f2ad302d8e6e1fec76bfeb104fa57092ab53c"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "sonnet-throughput",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sonnet",
@@ -496,15 +623,29 @@
           "num_prompts": 200,
           "num_warmups": 0
         },
-        "name": "sonnet-throughput"
+        "data_identity": {
+          "kind": "vllm-repository-file",
+          "path": "benchmarks/sonnet.txt",
+          "sha256": "d58663195ba6780da5f029b920c7ac00cad1e435ee1df7e03bf9ec2470f8dea4",
+          "size_bytes": 22706,
+          "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
+        },
+        "name": "sonnet-throughput",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -515,7 +656,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -526,7 +667,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-VL-7B-Instruct",
         "parameters": "7B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5"
       },
       "profile": "multimodal",
       "server_parameters": {
@@ -540,18 +682,20 @@
         },
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json",
-        "sha256": "e9e4a87ad44eb5531989623f28c3d8110bfed2969776b80b1310cab3aa8fd234"
+        "sha256": "bcb6e3f0230b3da25ace475f5cd27063f20effffe8815ebd5876d2308ff7f434"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.3.0",
       "workload": {
+        "base_scenario": "visionarena-online",
         "client_parameters": {
           "backend": "openai-chat",
           "dataset_name": "hf",
@@ -564,15 +708,223 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "visionarena-online"
+        "data_identity": {
+          "expected_parquet_shards": 43,
+          "kind": "huggingface-dataset",
+          "repository": "lmarena-ai/VisionArena-Chat",
+          "revision": "1394b4f59ab6f1f2e5aff6bc15b448e15960e170"
+        },
+        "name": "visionarena-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": "5f6faa0cb8830f667266f3b8121cd1383606f2a1",
+        "core_commit": "0decac0d96c42b49572498019f0a0e3600f50398",
+        "engine": "vllm",
+        "engine_version": "0.22.1rc1",
+        "git_commit": "5f6faa0cb8830f667266f3b8121cd1383606f2a1",
+        "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": {
+          "VLLM_BATCH_INVARIANT": "1"
+        },
+        "runtime_image": "quay.io/ascend/vllm-ascend@sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092",
+        "runtime_image_digest": "sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092",
+        "runtime_packages": {
+          "click": "8.4.1",
+          "huggingface-hub": "1.21.0",
+          "torch": "2.10.0+cpu",
+          "torch-npu": "2.10.0",
+          "transformers": "5.5.4",
+          "vllm": "0.22.1+empty",
+          "vllm-ascend": "0.22.1rc1"
+        },
+        "vllm_ascend_ref": "v0.22.1rc1",
+        "vllm_ref": "v0.22.1"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-08-03",
+      "hardware": {
+        "chip_count": 2,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "public-leaderboard",
+      "model": {
+        "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        "parameters": "32B",
+        "precision": "BF16",
+        "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
+      },
+      "profile": "production-trace",
+      "server_parameters": {
+        "additional_config": {
+          "ascend_compilation_config": {
+            "fuse_norm_quant": false
+          }
+        },
+        "compilation_config": {
+          "cudagraph_mode": "PIECEWISE"
+        },
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.92,
+        "max_model_len": 131072,
+        "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746",
+        "tensor_parallel_size": 2,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
+        "sha256": "58dc4b71dd3e070717f0759822601f4d080885c466fa61ee5bfeabb1271e5276"
+      },
+      "status": "active",
+      "supersedes": [],
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "target_version": "1.5.1",
+      "workload": {
+        "base_scenario": "burstgpt-production-replay",
+        "client_parameters": {
+          "cohort_context_cap": 131072,
+          "endpoint": "/v1/completions",
+          "max_concurrency": 64,
+          "max_interarrival_s": 1,
+          "max_requests": 1000,
+          "overflow_policy": "reject",
+          "time_scale": 60,
+          "trace_asset": "BurstGPT_3.csv",
+          "trace_target_id": "burstgpt-v2-production-replay"
+        },
+        "data_identity": {
+          "kind": "release-asset",
+          "path": "BurstGPT_3.csv",
+          "release": "v2.0",
+          "repository": "https://github.com/HPMLL/BurstGPT",
+          "sha256": "2299986a07388aa303ec2c41d1131e756db650a39ed6ef9dfe7cc3d7f9a43b8f",
+          "size_bytes": 231682327
+        },
+        "name": "burstgpt-production-replay",
+        "protocol": null
+      }
+    },
+    {
+      "baseline_runtime": {
+        "backend_commit": "5f6faa0cb8830f667266f3b8121cd1383606f2a1",
+        "core_commit": "0decac0d96c42b49572498019f0a0e3600f50398",
+        "engine": "vllm",
+        "engine_version": "0.22.1rc1",
+        "git_commit": "5f6faa0cb8830f667266f3b8121cd1383606f2a1",
+        "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": {
+          "VLLM_BATCH_INVARIANT": "1"
+        },
+        "runtime_image": "quay.io/ascend/vllm-ascend@sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092",
+        "runtime_image_digest": "sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092",
+        "runtime_packages": {
+          "click": "8.4.1",
+          "huggingface-hub": "1.21.0",
+          "torch": "2.10.0+cpu",
+          "torch-npu": "2.10.0",
+          "transformers": "5.5.4",
+          "vllm": "0.22.1+empty",
+          "vllm-ascend": "0.22.1rc1"
+        },
+        "vllm_ascend_ref": "v0.22.1rc1",
+        "vllm_ref": "v0.22.1"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-08-03",
+      "hardware": {
+        "chip_count": 2,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "public-leaderboard",
+      "model": {
+        "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        "parameters": "32B",
+        "precision": "BF16",
+        "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
+      },
+      "profile": "production-trace",
+      "server_parameters": {
+        "additional_config": {
+          "ascend_compilation_config": {
+            "fuse_norm_quant": false
+          }
+        },
+        "compilation_config": {
+          "cudagraph_mode": "PIECEWISE"
+        },
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.92,
+        "max_model_len": 131072,
+        "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746",
+        "tensor_parallel_size": 2,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
+        "sha256": "8b3b1d7aac6f1076d6e22e05453859d8d6fdf4cf22785ec18866f94db0a70989"
+      },
+      "status": "active",
+      "supersedes": [],
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "target_version": "1.6.2",
+      "workload": {
+        "base_scenario": "tracelab-coding-agent-replay",
+        "client_parameters": {
+          "cohort_context_cap": 131072,
+          "endpoint": "/v1/completions",
+          "max_concurrency": 64,
+          "max_interarrival_s": 1,
+          "max_requests": 1000,
+          "overflow_policy": "exclude-overflow",
+          "time_scale": 60,
+          "timeout_s": 21600,
+          "trace_asset": "syfi_coding_trace.jsonl.gz",
+          "trace_target_id": "tracelab-v0.0.1-coding-agent-replay"
+        },
+        "data_identity": {
+          "kind": "release-asset",
+          "path": "syfi_coding_trace.jsonl.gz",
+          "release": "v0.0.1",
+          "repository": "https://github.com/uw-syfi/TraceLab",
+          "sha256": "9d265eae69a31cae203848bea936f018148eed7ca8bf56050c5abe96da0b4e6b",
+          "size_bytes": 53601226
+        },
+        "name": "tracelab-coding-agent-replay",
+        "protocol": null
+      }
+    },
+    {
+      "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -583,7 +935,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -615,8 +967,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-instructcoder-online-qwen25-coder-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "instructcoder-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "hf",
@@ -629,15 +982,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "instructcoder-online"
+        "data_identity": null,
+        "name": "instructcoder-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -648,7 +1009,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -683,8 +1044,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-visionarena-online-qwen25-vl-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "visionarena-online",
         "client_parameters": {
           "backend": "openai-chat",
           "dataset_name": "hf",
@@ -697,15 +1059,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "visionarena-online"
+        "data_identity": null,
+        "name": "visionarena-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -716,7 +1086,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -748,8 +1118,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-agent-research-online-qwen25-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "agent-research-online",
         "client_parameters": {
           "backend": "openai-chat",
           "dataset_name": "custom",
@@ -761,15 +1132,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "agent-research-online"
+        "data_identity": null,
+        "name": "agent-research-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -780,7 +1159,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -814,8 +1193,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-prefix-repetition-online-qwen25-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "prefix-repetition-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "prefix_repetition",
@@ -828,15 +1208,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "prefix-repetition-online"
+        "data_identity": null,
+        "name": "prefix-repetition-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -847,7 +1235,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -877,8 +1265,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-random-latency-qwen25-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "random-latency",
         "client_parameters": {
           "batch_size": 1,
           "input_len": 1024,
@@ -886,15 +1275,23 @@
           "num_iters_warmup": 1,
           "output_len": 128
         },
-        "name": "random-latency"
+        "data_identity": null,
+        "name": "random-latency",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -905,7 +1302,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -938,8 +1335,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-qwen25-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "random-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "random",
@@ -952,15 +1350,23 @@
           "port": 8000,
           "request_rate": "inf"
         },
-        "name": "random-online"
+        "data_identity": null,
+        "name": "random-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -971,7 +1377,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -1003,8 +1409,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-sharegpt-online-qwen25-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "sharegpt-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sharegpt",
@@ -1016,15 +1423,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "sharegpt-online"
+        "data_identity": null,
+        "name": "sharegpt-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -1035,7 +1450,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -1064,8 +1479,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-sharegpt-throughput-qwen25-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "sharegpt-throughput",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sharegpt",
@@ -1073,15 +1489,23 @@
           "num_prompts": 8,
           "num_warmups": 0
         },
-        "name": "sharegpt-throughput"
+        "data_identity": null,
+        "name": "sharegpt-throughput",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm-hust",
         "engine_version": "main",
         "git_commit": null,
         "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "main",
         "vllm_ref": "main"
       },
@@ -1092,7 +1516,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -1121,8 +1545,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-sonnet-throughput-qwen25-3b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "sonnet-throughput",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sonnet",
@@ -1130,15 +1555,23 @@
           "num_prompts": 8,
           "num_warmups": 0
         },
-        "name": "sonnet-throughput"
+        "data_identity": null,
+        "name": "sonnet-throughput",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1149,7 +1582,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 2,
         "chip_model": "910B2",
@@ -1179,8 +1612,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "agent-research-online-2chip",
         "client_parameters": {
           "backend": "openai-chat",
           "dataset_name": "custom",
@@ -1191,15 +1625,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "agent-research-online-2chip"
+        "data_identity": null,
+        "name": "agent-research-online-2chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1210,7 +1652,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 4,
         "chip_model": "910B2",
@@ -1240,8 +1682,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "agent-research-online-4chip",
         "client_parameters": {
           "backend": "openai-chat",
           "dataset_name": "custom",
@@ -1252,15 +1695,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "agent-research-online-4chip"
+        "data_identity": null,
+        "name": "agent-research-online-4chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1271,7 +1722,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 2,
         "chip_model": "910B2",
@@ -1301,8 +1752,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "prefix-repetition-online-2chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "prefix_repetition",
@@ -1314,15 +1766,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "prefix-repetition-online-2chip"
+        "data_identity": null,
+        "name": "prefix-repetition-online-2chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1333,7 +1793,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 4,
         "chip_model": "910B2",
@@ -1363,8 +1823,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "prefix-repetition-online-4chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "prefix_repetition",
@@ -1376,15 +1837,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "prefix-repetition-online-4chip"
+        "data_identity": null,
+        "name": "prefix-repetition-online-4chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1395,7 +1864,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 2,
         "chip_model": "910B2",
@@ -1425,8 +1894,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "random-online-2chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "random",
@@ -1438,15 +1908,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "random-online-2chip"
+        "data_identity": null,
+        "name": "random-online-2chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1457,7 +1935,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 4,
         "chip_model": "910B2",
@@ -1487,8 +1965,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "random-online-4chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "random",
@@ -1500,15 +1979,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "random-online-4chip"
+        "data_identity": null,
+        "name": "random-online-4chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1519,7 +2006,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 2,
         "chip_model": "910B2",
@@ -1549,8 +2036,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "sharegpt-online-2chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sharegpt",
@@ -1561,15 +2049,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "sharegpt-online-2chip"
+        "data_identity": null,
+        "name": "sharegpt-online-2chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1580,7 +2076,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 4,
         "chip_model": "910B2",
@@ -1610,8 +2106,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "sharegpt-online-4chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sharegpt",
@@ -1622,15 +2119,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "sharegpt-online-4chip"
+        "data_identity": null,
+        "name": "sharegpt-online-4chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1641,7 +2146,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 2,
         "chip_model": "910B2",
@@ -1668,8 +2173,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "sonnet-throughput-2chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sonnet",
@@ -1680,15 +2186,23 @@
           "num_warmups": 0,
           "tensor_parallel_size": 2
         },
-        "name": "sonnet-throughput-2chip"
+        "data_identity": null,
+        "name": "sonnet-throughput-2chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1699,7 +2213,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 4,
         "chip_model": "910B2",
@@ -1726,8 +2240,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "sonnet-throughput-4chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sonnet",
@@ -1738,15 +2253,23 @@
           "num_warmups": 0,
           "tensor_parallel_size": 4
         },
-        "name": "sonnet-throughput-4chip"
+        "data_identity": null,
+        "name": "sonnet-throughput-4chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1757,7 +2280,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 8,
         "chip_model": "910B2",
@@ -1784,8 +2307,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-8chip-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "sonnet-throughput-8chip",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "sonnet",
@@ -1796,15 +2320,251 @@
           "num_warmups": 0,
           "tensor_parallel_size": 8
         },
-        "name": "sonnet-throughput-8chip"
+        "data_identity": null,
+        "name": "sonnet-throughput-8chip",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": "590855422839c1e885eee19339b7a015687215e5",
+        "core_commit": "f229ba7cad21a4dba58681af6738a9fd947388e2",
+        "engine": "vllm-hust",
+        "engine_version": "main",
+        "git_commit": "f229ba7cad21a4dba58681af6738a9fd947388e2",
+        "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": "quay.io/ascend/vllm-ascend@sha256:105834a38766a6b1b89a7eeb313a37351d098a69e8cdee87ad0ca3a6e090ce13",
+        "runtime_image_digest": "sha256:105834a38766a6b1b89a7eeb313a37351d098a69e8cdee87ad0ca3a6e090ce13",
+        "runtime_packages": {
+          "click": "8.4.1",
+          "huggingface-hub": "1.19.0",
+          "torch": "2.10.0+cpu",
+          "torch-npu": "2.10.0",
+          "transformers": "5.5.4",
+          "vllm": "0.21.0+empty",
+          "vllm-ascend": "0.21.0rc1"
+        },
+        "vllm_ascend_ref": "main",
+        "vllm_ref": "main"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-08-03",
+      "hardware": {
+        "chip_count": 1,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "simllm-warm-cache",
+      "server_parameters": {
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "port": 8000,
+        "prefix_caching_hash_algo": "sha256",
+        "tensor_parallel_size": 1,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/official-simllm-random-online-warm-cache-qwen25-14b-1chip-910b2.json",
+        "sha256": "a8581398256b172cd5b17987d4ebe299488467842dbdb74cf871f8b559fc6ff7"
+      },
+      "status": "active",
+      "supersedes": [],
+      "target_id": "official-simllm-random-online-warm-cache-qwen25-14b-1chip-910b2",
+      "target_version": "1.6.2",
+      "workload": {
+        "base_scenario": "random-online",
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "random",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "input_len": 1024,
+          "no_stream": false,
+          "num_prompts": 200,
+          "output_len": 256,
+          "port": 8000,
+          "request_rate": 1,
+          "temperature": 0
+        },
+        "data_identity": null,
+        "name": "simllm-random-online-warm-cache",
+        "protocol": {
+          "aggregation": "median",
+          "baseline_engine": "vllm-hust",
+          "baseline_variant": "simllm-disabled",
+          "candidate_engine": "vllm-hust-simllm",
+          "candidate_variant": "simllm-enabled-warm-cache",
+          "candidate_warmup": {
+            "passes": 1,
+            "request_rate": 1,
+            "restart_before_measurement": false,
+            "same_requests_as_measurement": true,
+            "same_seed_as_measurement": true
+          },
+          "local_reference_results_are_official": false,
+          "maximum_primary_metric_cv_percent": 5,
+          "minimum_independent_repetitions": 3,
+          "only_functional_difference": "SimLLM enable/config plus candidate warmup",
+          "primary_metric": "request_throughput",
+          "schema_version": "simllm-ab-protocol/v1",
+          "setting_signature_required": true,
+          "simllm_config": {
+            "cosine_threshold": 0.8,
+            "kv_cache_size": 200,
+            "lsh_batch_threshold": 32,
+            "lsh_num_bits": 64,
+            "sandwich_bottom": 3,
+            "sandwich_top": 3,
+            "unmatched_store_mode": "top"
+          }
+        }
+      }
+    },
+    {
+      "baseline_runtime": {
+        "backend_commit": "590855422839c1e885eee19339b7a015687215e5",
+        "core_commit": "f229ba7cad21a4dba58681af6738a9fd947388e2",
+        "engine": "vllm-hust",
+        "engine_version": "main",
+        "git_commit": "f229ba7cad21a4dba58681af6738a9fd947388e2",
+        "github_repository": "vLLM-HUST/vllm-hust",
+        "runtime_environment": null,
+        "runtime_image": "quay.io/ascend/vllm-ascend@sha256:105834a38766a6b1b89a7eeb313a37351d098a69e8cdee87ad0ca3a6e090ce13",
+        "runtime_image_digest": "sha256:105834a38766a6b1b89a7eeb313a37351d098a69e8cdee87ad0ca3a6e090ce13",
+        "runtime_packages": {
+          "click": "8.4.1",
+          "huggingface-hub": "1.19.0",
+          "torch": "2.10.0+cpu",
+          "torch-npu": "2.10.0",
+          "transformers": "5.5.4",
+          "vllm": "0.21.0+empty",
+          "vllm-ascend": "0.21.0rc1"
+        },
+        "vllm_ascend_ref": "main",
+        "vllm_ref": "main"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-08-03",
+      "hardware": {
+        "chip_count": 1,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "simllm-warm-cache",
+      "server_parameters": {
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 4096,
+        "port": 8000,
+        "prefix_caching_hash_algo": "sha256",
+        "tensor_parallel_size": 1,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/official-simllm-saturated-throughput-warm-cache-qwen25-14b-1chip-910b2.json",
+        "sha256": "7e7c92bb5a34ea3e0aa38659d2c0430657a6740ff681ee89885b22a87e77023e"
+      },
+      "status": "active",
+      "supersedes": [],
+      "target_id": "official-simllm-saturated-throughput-warm-cache-qwen25-14b-1chip-910b2",
+      "target_version": "1.6.2",
+      "workload": {
+        "base_scenario": "random-online",
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "random",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "input_len": 4096,
+          "max_concurrency": 16,
+          "no_stream": false,
+          "num_prompts": 32,
+          "output_len": 32,
+          "port": 8000,
+          "request_rate": "inf",
+          "temperature": 0
+        },
+        "data_identity": null,
+        "name": "simllm-saturated-throughput-warm-cache",
+        "protocol": {
+          "aggregation": "median",
+          "baseline_engine": "vllm-hust",
+          "baseline_variant": "simllm-disabled",
+          "candidate_engine": "vllm-hust-simllm",
+          "candidate_variant": "simllm-enabled-warm-cache",
+          "candidate_warmup": {
+            "passes": 1,
+            "request_rate": 1,
+            "restart_before_measurement": false,
+            "same_requests_as_measurement": true,
+            "same_seed_as_measurement": true
+          },
+          "local_reference_results_are_official": false,
+          "maximum_primary_metric_cv_percent": 5,
+          "minimum_independent_repetitions": 3,
+          "only_functional_difference": "SimLLM enable/config plus candidate warmup",
+          "primary_metric": "request_throughput",
+          "schema_version": "simllm-ab-protocol/v1",
+          "setting_signature_required": true,
+          "simllm_config": {
+            "cosine_threshold": 0.8,
+            "kv_cache_size": 32,
+            "lsh_batch_threshold": 32,
+            "lsh_num_bits": 64,
+            "sandwich_bottom": 3,
+            "sandwich_top": 3,
+            "unmatched_store_mode": "top"
+          }
+        }
+      }
+    },
+    {
+      "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1815,7 +2575,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -1845,8 +2605,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-kv-tiering-prefix-online-qwen25-7b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "kv-tiering-prefix-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "prefix_repetition",
@@ -1860,15 +2621,23 @@
           "prefix_repetition_suffix_len": 256,
           "request_rate": 1
         },
-        "name": "kv-tiering-prefix-online"
+        "data_identity": null,
+        "name": "kv-tiering-prefix-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1879,7 +2648,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -1909,8 +2678,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-ngram-instructcoder-online-qwen25-7b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "ngram-instructcoder-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "hf",
@@ -1921,15 +2691,23 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "ngram-instructcoder-online"
+        "data_identity": null,
+        "name": "ngram-instructcoder-online",
+        "protocol": null
       }
     },
     {
       "baseline_runtime": {
+        "backend_commit": null,
+        "core_commit": null,
         "engine": "vllm",
         "engine_version": "0.18.0",
         "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
         "github_repository": "vllm-project/vllm-ascend",
+        "runtime_environment": null,
+        "runtime_image": null,
+        "runtime_image_digest": null,
+        "runtime_packages": null,
         "vllm_ascend_ref": "v0.18.0",
         "vllm_ref": "v0.18.0"
       },
@@ -1940,7 +2718,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-07-31",
+      "effective_from": "2026-08-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -1970,8 +2748,9 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-logprobs-online-qwen25-14b-910b2",
-      "target_version": "1.0.0",
+      "target_version": "1.7.0",
       "workload": {
+        "base_scenario": "logprobs-online",
         "client_parameters": {
           "backend": "vllm",
           "dataset_name": "random",
@@ -1984,7 +2763,9 @@
           "port": 8000,
           "request_rate": 1
         },
-        "name": "logprobs-online"
+        "data_identity": null,
+        "name": "logprobs-online",
+        "protocol": null
       }
     }
   ]

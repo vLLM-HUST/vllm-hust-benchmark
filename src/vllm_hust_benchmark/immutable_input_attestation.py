@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any, Mapping
 
 
 SCHEMA_VERSION = "immutable-input-attestation/v1"
+_SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
 
 def file_identity(path: Path) -> dict[str, object]:
@@ -62,10 +64,7 @@ def verify_data_contract(
         "deterministic-vllm-generator",
         "nondeterministic-vllm-generator",
     }:
-        generator_identity = {
-            "sha256": data_identity.get("generator_sha256"),
-            "size_bytes": data_identity.get("generator_size_bytes"),
-        }
+        generator_identity = {"sha256": data_identity.get("generator_sha256")}
         _require_file(
             vllm_worktree / str(data_identity["generator_path"]),
             generator_identity,
@@ -114,7 +113,7 @@ def build_metadata(spec: Mapping[str, Any]) -> dict[str, object]:
     if not isinstance(model_revision, str) or len(model_revision) != 40:
         raise ValueError("official spec requires an exact model_revision")
     data_identity = spec.get("data_identity")
-    if not isinstance(data_identity, dict):
+    if not isinstance(data_identity, dict) or not data_identity:
         raise ValueError("official spec requires a complete data_identity object")
     return {
         "model_id": spec["model"],
@@ -128,16 +127,21 @@ def write_trace_attestation(
     metadata: Mapping[str, object],
     summary: Mapping[str, Any],
 ) -> None:
-    digest = summary.get("selected_requests_sha256")
-    if not isinstance(digest, str) or len(digest) != 64:
-        raise ValueError("trace summary lacks selected_requests_sha256")
+    digest = summary.get("resolved_input_sha256")
+    if not isinstance(digest, str) or not _SHA256_RE.fullmatch(digest):
+        raise ValueError("trace summary lacks actual resolved_input_sha256")
+    kind = summary.get("resolved_input_kind")
+    if kind != "production-trace-prompt-token-ids":
+        raise ValueError("trace summary lacks the exact token-ID input kind")
     payload = {
         "schema_version": SCHEMA_VERSION,
         **metadata,
-        "resolved_input_kind": "production-trace-selected-requests",
+        "resolved_input_kind": kind,
         "resolved_input_sha256": digest,
     }
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    output_file.write_text(
+    temporary = output_file.with_suffix(output_file.suffix + ".tmp")
+    temporary.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    temporary.replace(output_file)

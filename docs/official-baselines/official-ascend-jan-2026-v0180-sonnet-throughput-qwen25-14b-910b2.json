@@ -12,6 +12,7 @@
   },
   "scenario": "sonnet-throughput",
   "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
   "model_parameters": "14B",
   "model_precision": "FP16",
   "hardware_vendor": "Huawei",
@@ -20,6 +21,7 @@
   "node_count": 1,
   "server_parameters": {
     "tensor_parallel_size": 1,
+    "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
     "gpu_memory_utilization": 0.6,
     "enforce_eager": "",
     "trust_remote_code": "",
@@ -33,6 +35,13 @@
     "dataset_path": "benchmarks/sonnet.txt",
     "num_prompts": 200,
     "num_warmups": 0
+  },
+  "data_identity": {
+    "kind": "vllm-repository-file",
+    "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+    "path": "benchmarks/sonnet.txt",
+    "size_bytes": 22706,
+    "sha256": "d58663195ba6780da5f029b920c7ac00cad1e435ee1df7e03bf9ec2470f8dea4"
   },
   "export": {
     "engine": "vllm",
