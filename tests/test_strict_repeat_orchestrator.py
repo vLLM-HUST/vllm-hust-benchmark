@@ -257,11 +257,122 @@ def test_cli_rejects_relative_host_library_path(tmp_path: Path) -> None:
         )
 
 
+def _trusted_library_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
+    driver = tmp_path / "Ascend" / "driver"
+    first = tmp_path / "Ascend" / "cann-8.0.0"
+    second = tmp_path / "Ascend" / "cann-9.1.RC1"
+    for directory in (
+        driver / "lib64" / "driver",
+        first / "aarch64-linux" / "lib64",
+        second / "runtime" / "lib64",
+    ):
+        directory.mkdir(parents=True)
+    for directory in (tmp_path, tmp_path / "Ascend", driver, first, second):
+        directory.chmod(0o755)
+    return driver, first, second
+
+
+def test_host_library_path_accepts_canonical_driver_and_multiple_versions(
+    tmp_path: Path,
+) -> None:
+    driver, first, second = _trusted_library_fixture(tmp_path)
+    value = ":".join(
+        (
+            str(driver / "lib64" / "driver"),
+            str(first / "aarch64-linux" / "lib64"),
+            str(second / "runtime" / "lib64"),
+        )
+    )
+    assert (
+        orchestrator.validate_host_library_path(
+            value, trusted_roots=[driver, first, second]
+        )
+        == value
+    )
+
+
+@pytest.mark.parametrize("suffix", ("\n/tmp", "\r/tmp", "\x00/tmp"))
+def test_host_library_path_rejects_control_characters(
+    tmp_path: Path, suffix: str
+) -> None:
+    driver, _, _ = _trusted_library_fixture(tmp_path)
+    with pytest.raises(ValueError, match="control character"):
+        orchestrator.validate_host_library_path(
+            str(driver / "lib64" / "driver") + suffix, trusted_roots=[driver]
+        )
+
+
+def test_host_library_path_rejects_tmp_and_missing(tmp_path: Path) -> None:
+    driver, _, _ = _trusted_library_fixture(tmp_path)
+    with pytest.raises(ValueError, match="outside trusted"):
+        orchestrator.validate_host_library_path("/tmp", trusted_roots=[driver])
+    with pytest.raises(ValueError, match="does not exist"):
+        orchestrator.validate_host_library_path(
+            str(driver / "lib64" / "missing"), trusted_roots=[driver]
+        )
+
+
+def test_host_library_path_rejects_symlink_escape(tmp_path: Path) -> None:
+    driver, _, _ = _trusted_library_fixture(tmp_path)
+    escape = driver / "lib64"
+    (escape / "driver").rmdir()
+    escape.rmdir()
+    escape.symlink_to(tmp_path / "outside", target_is_directory=True)
+    (tmp_path / "outside" / "driver").mkdir(parents=True)
+    with pytest.raises(ValueError, match="outside trusted"):
+        orchestrator.validate_host_library_path(
+            str(escape / "driver"), trusted_roots=[driver]
+        )
+
+
+def test_host_library_path_rejects_non_root_equivalent_writable_dir(
+    tmp_path: Path,
+) -> None:
+    driver, _, _ = _trusted_library_fixture(tmp_path)
+    writable = driver / "lib64" / "driver"
+    writable.chmod(0o775)
+    with pytest.raises(ValueError, match="non-root-read-only"):
+        orchestrator.validate_host_library_path(str(writable), trusted_roots=[driver])
+
+
+def test_root_commands_scopes_host_library_path_to_npu_smi(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[list[str]] = []
+    environments: list[dict[str, str]] = []
+
+    def fake_run(argv, **kwargs):
+        calls.append(list(argv))
+        environments.append(kwargs["env"])
+        return SimpleNamespace(stdout="", stderr="", returncode=0)
+
+    monkeypatch.setattr(orchestrator.os, "geteuid", lambda: 0)
+    monkeypatch.setattr(orchestrator.subprocess, "run", fake_run)
+    root = orchestrator.RootCommands("/trusted/lib64")
+    root.run(["npu-smi", "info"])
+    root.run(["docker", "ps", "-aq"])
+    assert calls[0] == [
+        "/usr/bin/env",
+        "LD_LIBRARY_PATH=/trusted/lib64",
+        str(orchestrator.HOST_NPU_SMI),
+        "info",
+    ]
+    assert calls[1] == ["docker", "ps", "-aq"]
+    assert environments == [
+        {"PATH": orchestrator.SAFE_HOST_PATH, "LANG": "C.UTF-8"},
+        {"PATH": orchestrator.SAFE_HOST_PATH, "LANG": "C.UTF-8"},
+    ]
+    assert all("LD_LIBRARY_PATH" not in environment for environment in environments)
+
+
 def test_dry_run_never_writes_canonical_evidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     class FakeRoot:
         prefix: list[str] = []
+
+        def __init__(self, _host_ld_library_path: str) -> None:
+            pass
 
         def run(self, argv, *, check=True):
             return orchestrator.CommandResult("", "", 0)
@@ -291,6 +402,7 @@ def test_dry_run_never_writes_canonical_evidence(
         sample_interval_seconds=1,
         max_idle_hbm_mb=4096,
         max_hbm_drift_mb=256,
+        host_ld_library_path="/trusted/lib64",
         output_uid=1000,
         output_gid=1000,
         dry_run=True,
