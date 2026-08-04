@@ -24,6 +24,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Sequence
 
+from vllm_hust_benchmark.strict_execution_contract import (
+    CANONICAL_WORKER_RULE,
+    canonical_worker_key,
+)
+
 
 STRICT_SCHEMA = "strict-execution-evidence/v1"
 CLEANUP_SCHEMA = "cleanup-chain-attestation/v1"
@@ -31,6 +36,15 @@ FAILURE_SCHEMA = "strict-repeat-failure/v1"
 DRY_RUN_SCHEMA = "strict-repeat-dry-run/v1"
 CONTAINER_ID_RE = re.compile(r"[0-9a-f]{64}")
 IMAGE_DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}")
+DEFAULT_HOST_LD_LIBRARY_PATH = ":".join(
+    (
+        "/usr/local/Ascend/ascend-toolkit/latest/lib64",
+        "/usr/local/Ascend/cann-9.0.0/lib64",
+        "/usr/local/Ascend/driver/lib64",
+        "/usr/local/Ascend/driver/lib64/common",
+        "/usr/local/Ascend/driver/lib64/driver",
+    )
+)
 DEVICE_ROW = re.compile(r"^\|\s*(\d+)\s+\S+\s+\|")
 HBM_CELL = re.compile(r"(\d+)\s*/\s*(\d+)")
 PROCESS_ROW = re.compile(r"^\|\s*(\d+)\s+(?:\d+\s+)?(\d+)\s+\S+")
@@ -84,6 +98,7 @@ def build_strict_evidence(
     released_at: str,
     snapshots: list[dict[str, Any]],
     ownership: list[dict[str, Any]],
+    owned_processes: dict[str, Any],
     hbm_samples: dict[str, str],
     peak_hbm_mb: int | float,
     cleanup: dict[str, str],
@@ -106,6 +121,7 @@ def build_strict_evidence(
         },
         "pre_start_snapshots": snapshots,
         "ownership": ownership,
+        "owned_processes": owned_processes,
         "hbm_samples": hbm_samples,
         "peak_hbm_mb": peak_hbm_mb,
         "cleanup": cleanup,
@@ -158,6 +174,44 @@ def port_listener_pids(output: str, port: int) -> list[int]:
         if not re.findall(r"pid=(\d+)", line):
             listeners.add(-1)
     return sorted(listeners)
+
+
+def process_ancestor_pids(pid: int | None = None) -> set[int]:
+    """Return the complete current process ancestry, including self and PID 1."""
+    current = pid or os.getpid()
+    ancestors: set[int] = set()
+    while current > 0 and current not in ancestors:
+        ancestors.add(current)
+        stat_path = Path(f"/proc/{current}/stat")
+        try:
+            fields = stat_path.read_text(encoding="utf-8").rsplit(")", 1)[1].split()
+            current = int(fields[1])
+        except (IndexError, OSError, ValueError):
+            break
+    return ancestors
+
+
+def benchmark_session_conflicts(
+    *,
+    tmux_output: str,
+    screen_output: str,
+    process_output: str,
+    target_id: str,
+    service_port: int,
+    excluded_pids: set[int],
+) -> list[str]:
+    """Find relevant sessions while excluding the orchestrator's full ancestry."""
+    pattern = re.compile(rf"({re.escape(target_id)}|:{service_port}\b)", re.I)
+    conflicts = []
+    for text in (tmux_output, screen_output, process_output):
+        for line in text.splitlines():
+            if not pattern.search(line):
+                continue
+            match = re.match(r"\s*(\d+)(?:\b|\.)", line)
+            if match and int(match.group(1)) in excluded_pids:
+                continue
+            conflicts.append(line)
+    return conflicts
 
 
 @dataclass(frozen=True)
@@ -336,6 +390,9 @@ class StrictRepeatOrchestrator:
         )
         self.ownership: list[dict[str, Any]] = []
         self.host_pids: list[int] = []
+        self.all_owned_processes: list[dict[str, Any]] = []
+        self.all_owned_host_pids: list[int] = []
+        self.owned_processes_path = self.repeat_dir / "runtime" / "owned-processes.json"
         self.hbm_path = self.repeat_dir / "hbm-samples.jsonl"
         self.host_peak_path = self.repeat_dir / "strict-host-peak-hbm.json"
         self.per_device_peaks = {device: 0 for device in self.devices}
@@ -571,7 +628,15 @@ class StrictRepeatOrchestrator:
         login_sessions = self.root.run(
             ["loginctl", "list-sessions", "--no-legend"], check=False
         )
-        tmux = self.root.run(["tmux", "ls"], check=False)
+        tmux = self.root.run(
+            [
+                "tmux",
+                "list-sessions",
+                "-F",
+                "#{session_pid}\t#{session_name}\t#{session_windows}\t#{session_attached}",
+            ],
+            check=False,
+        )
         screen = self.root.run(["screen", "-ls"], check=False)
         processes = self.root.run(["ps", "-eo", "pid=,ppid=,user=,lstart=,args="])
         fd_holders: dict[int, list[int]] = {}
@@ -625,15 +690,14 @@ class StrictRepeatOrchestrator:
             pid for device in self.devices for pid in compute.get(device, [])
         )
         listener_pids = port_listener_pids(ss.stdout, self.args.service_port)
-        session_pattern = re.compile(
-            rf"({re.escape(self.args.target_id)}|:{self.args.service_port}\b)", re.I
+        session_conflicts = benchmark_session_conflicts(
+            tmux_output=tmux.stdout,
+            screen_output=screen.stdout,
+            process_output=processes.stdout,
+            target_id=self.args.target_id,
+            service_port=self.args.service_port,
+            excluded_pids=process_ancestor_pids(),
         )
-        session_conflicts = [
-            line
-            for text in (tmux.stdout, screen.stdout, processes.stdout)
-            for line in text.splitlines()
-            if session_pattern.search(line) and str(os.getpid()) not in line
-        ]
         lease_conflicts = self.lease.conflicts()
         summary = {
             "captured_at": captured_at,
@@ -708,40 +772,74 @@ class StrictRepeatOrchestrator:
             raise GateFailure(f"runtime npu-smi omitted requested devices: {missing}")
 
         if not self.ownership:
-            ownership: list[dict[str, Any]] = []
+            all_owned: list[dict[str, Any]] = []
             for device in self.devices:
-                candidates = []
+                candidates: list[dict[str, Any]] = []
                 for pid in compute.get(device, []):
                     cgroup_path = Path(f"/proc/{pid}/cgroup")
                     if not cgroup_path.is_file():
                         continue
                     cgroup = cgroup_path.read_text(encoding="utf-8", errors="replace")
                     if self.container_id in cgroup:
-                        candidates.append((pid, cgroup))
-                if len(candidates) != 1:
+                        cmdline_path = Path(f"/proc/{pid}/cmdline")
+                        cmdline = (
+                            cmdline_path.read_bytes()
+                            .replace(b"\0", b" ")
+                            .decode(errors="replace")
+                            if cmdline_path.is_file()
+                            else ""
+                        )
+                        candidates.append(
+                            {
+                                "host_pid": pid,
+                                "physical_npu_id": device,
+                                "container_id": self.container_id,
+                                "cgroup": cgroup,
+                                "cmdline": cmdline,
+                            }
+                        )
+                if not candidates:
                     return
-                pid, cgroup = candidates[0]
-                ownership.append(
-                    {
-                        "host_pid": pid,
-                        "physical_npu_id": device,
-                        "container_id": self.container_id,
-                        "cgroup": cgroup,
-                    }
+                if len(candidates) != len(compute.get(device, [])):
+                    raise GateFailure(
+                        f"physical NPU {device} has compute PIDs outside the owned container"
+                    )
+                all_owned.extend(candidates)
+            self.all_owned_processes = sorted(
+                all_owned,
+                key=lambda item: (item["physical_npu_id"], item["host_pid"]),
+            )
+            self.all_owned_host_pids = [
+                item["host_pid"] for item in self.all_owned_processes
+            ]
+            self.owned_processes_path.parent.mkdir(parents=True, exist_ok=True)
+            atomic_json(self.owned_processes_path, self.all_owned_processes)
+            self.ownership = [
+                min(
+                    (
+                        item
+                        for item in self.all_owned_processes
+                        if item["physical_npu_id"] == device
+                    ),
+                    key=canonical_worker_key,
                 )
-            self.ownership = ownership
-            self.host_pids = [item["host_pid"] for item in ownership]
-            self._capture_pid_context(self.repeat_dir / "runtime", self.host_pids)
+                for device in self.devices
+            ]
+            self.host_pids = [item["host_pid"] for item in self.ownership]
 
         if not self.ownership:
             return
-        for item in self.ownership:
-            device = item["physical_npu_id"]
-            pid = item["host_pid"]
+        for device in self.devices:
+            expected = sorted(
+                item["host_pid"]
+                for item in self.all_owned_processes
+                if item["physical_npu_id"] == device
+            )
             current = compute.get(device, [])
-            if pid not in current or any(value != pid for value in current):
+            if current != expected:
                 raise GateFailure(
-                    f"runtime PID scope changed on physical NPU {device}: {current}"
+                    f"runtime owned PID scope changed on physical NPU {device}: "
+                    f"{current} != {expected}"
                 )
         per_device = {str(device): hbm[device][0] for device in self.devices}
         sample = {
@@ -863,11 +961,13 @@ class StrictRepeatOrchestrator:
             inspect.stdout or inspect.stderr or "container absent\n", encoding="utf-8"
         )
         compute = parse_compute_pids(npu.stdout)
-        pids_absent = all(not Path(f"/proc/{pid}").exists() for pid in self.host_pids)
+        pids_absent = all(
+            not Path(f"/proc/{pid}").exists() for pid in self.all_owned_host_pids
+        )
         npu_absent = all(
             pid not in compute.get(device, [])
             for device in self.devices
-            for pid in self.host_pids
+            for pid in self.all_owned_host_pids
         )
         return {
             "schema_version": CLEANUP_SCHEMA,
@@ -876,6 +976,7 @@ class StrictRepeatOrchestrator:
             "container_id": self.container_id,
             "exit_code": exit_code,
             "host_pids": self.host_pids,
+            "all_owned_host_pids": self.all_owned_host_pids,
             "physical_npu_ids": self.devices,
             "service_port": self.args.service_port,
             "container_stopped_or_removed": self._container_is_stopped_or_removed(),
@@ -978,6 +1079,10 @@ class StrictRepeatOrchestrator:
                 released_at=released_at,
                 snapshots=[snapshot.summary for snapshot in snapshots],
                 ownership=self.ownership,
+                owned_processes={
+                    "selection_rule": CANONICAL_WORKER_RULE,
+                    "raw": evidence_record(self.repeat_dir, self.owned_processes_path),
+                },
                 hbm_samples=evidence_record(self.repeat_dir, self.hbm_path),
                 peak_hbm_mb=peak,
                 cleanup=evidence_record(self.repeat_dir, cleanup_path),
@@ -1054,6 +1159,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--sample-interval-seconds", type=float, default=1.0)
     parser.add_argument("--max-idle-hbm-mb", type=int, default=4096)
     parser.add_argument("--max-hbm-drift-mb", type=int, default=256)
+    parser.add_argument("--host-ld-library-path", default=DEFAULT_HOST_LD_LIBRARY_PATH)
     parser.add_argument(
         "--output-uid",
         type=int,
@@ -1091,6 +1197,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         parser.error("snapshot interval must be at least 15 seconds")
     if args.sample_interval_seconds <= 0:
         parser.error("sample interval must be positive")
+    library_paths = args.host_ld_library_path.split(":")
+    if not library_paths or any(
+        not path or not Path(path).is_absolute() for path in library_paths
+    ):
+        parser.error("host LD_LIBRARY_PATH must contain only absolute paths")
     return args
 
 
@@ -1140,6 +1251,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     signal.signal(signal.SIGTERM, reject_signal)
     try:
         args = parse_args(argv)
+        os.environ["LD_LIBRARY_PATH"] = args.host_ld_library_path
         return StrictRepeatOrchestrator(args).run()
     except GateFailure as error:
         print(f"strict repeat rejected: {error}", file=sys.stderr)

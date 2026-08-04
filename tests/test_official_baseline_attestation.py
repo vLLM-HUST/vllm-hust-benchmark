@@ -9,6 +9,7 @@ import pytest
 from vllm_hust_benchmark.official_baseline_attestation import (
     attest_completed_baseline,
 )
+from vllm_hust_benchmark.strict_execution_contract import CANONICAL_WORKER_RULE
 
 TRACE_IMAGE = "quay.io/ascend/vllm-ascend@sha256:" + "b" * 64
 TRACE_DIGEST = "sha256:" + "b" * 64
@@ -51,6 +52,18 @@ def _write_strict_execution_evidence(
     container_id = f"{number:064x}"
     devices = list(range(chip_count))
     host_pids = [1000 + number * 10 + offset for offset in range(chip_count)]
+    owned_processes = [
+        {
+            "host_pid": host_pid,
+            "container_id": container_id,
+            "physical_npu_id": device,
+            "cgroup": f"/system.slice/docker-{container_id}.scope",
+            "cmdline": f"VLLMWorker_TP --rank {device}",
+        }
+        for host_pid, device in zip(host_pids, devices, strict=True)
+    ]
+    owned_processes_path = repeat / "owned-processes.json"
+    _write(owned_processes_path, owned_processes)
     snapshots = []
     for index, second in enumerate((5, 20), start=1):
         npu_path = repeat / f"npu-smi-pre-{index}.txt"
@@ -101,6 +114,7 @@ def _write_strict_execution_evidence(
             "container_id": container_id,
             "exit_code": 0,
             "host_pids": host_pids,
+            "all_owned_host_pids": host_pids,
             "physical_npu_ids": devices,
             "service_port": 8000,
             "finished_at": "2026-08-02T00:00:30Z",
@@ -151,6 +165,15 @@ def _write_strict_execution_evidence(
                 }
                 for host_pid, device in zip(host_pids, devices, strict=True)
             ],
+            "owned_processes": {
+                "selection_rule": CANONICAL_WORKER_RULE,
+                "raw": {
+                    "path": owned_processes_path.name,
+                    "sha256": hashlib.sha256(
+                        owned_processes_path.read_bytes()
+                    ).hexdigest(),
+                },
+            },
             "peak_hbm_mb": peak_hbm_mb,
             "hbm_samples": {
                 "path": hbm_path.name,

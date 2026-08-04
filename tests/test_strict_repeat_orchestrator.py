@@ -60,6 +60,38 @@ def test_resource_lease_blocks_overlapping_card(tmp_path: Path) -> None:
         first.mark_released()
 
 
+def test_session_filter_excludes_complete_ancestor_chain() -> None:
+    conflicts = orchestrator.benchmark_session_conflicts(
+        tmux_output="20\ttarget-a:18080\t1\t1\n",
+        screen_output="30.target-a-18080\n",
+        process_output=(
+            "  10 1 root cmd --target target-a --port :18080\n"
+            "  20 10 user parent target-a :18080\n"
+            "  30 20 user orchestrator target-a :18080\n"
+            "  99 1 other external-benchmark target-a :18080\n"
+        ),
+        target_id="target-a",
+        service_port=18080,
+        excluded_pids={10, 20, 30},
+    )
+    assert conflicts == ["  99 1 other external-benchmark target-a :18080"]
+
+
+def test_process_ancestor_chain_contains_self_and_init() -> None:
+    ancestors = orchestrator.process_ancestor_pids()
+    assert orchestrator.os.getpid() in ancestors
+    assert 1 in ancestors
+
+
+def test_canonical_worker_rule_prefers_worker_then_lowest_pid() -> None:
+    records = [
+        {"host_pid": 100, "cmdline": "EngineCore"},
+        {"host_pid": 300, "cmdline": "VLLMWorker_TP rank=1"},
+        {"host_pid": 200, "cmdline": "VLLMWorker rank=0"},
+    ]
+    assert min(records, key=orchestrator.canonical_worker_key)["host_pid"] == 200
+
+
 def _orchestrator_stub(tmp_path: Path) -> orchestrator.StrictRepeatOrchestrator:
     instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
     instance.args = SimpleNamespace(
@@ -201,6 +233,30 @@ def test_cli_rejects_snapshot_interval_below_fifteen(tmp_path: Path) -> None:
         )
 
 
+def test_cli_rejects_relative_host_library_path(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        orchestrator.parse_args(
+            [
+                "--repeat-dir",
+                str(tmp_path / "repeat"),
+                "--target-id",
+                "target",
+                "--side",
+                "upstream",
+                "--physical-npu",
+                "0",
+                "--service-port",
+                "18080",
+                "--runtime-image-digest",
+                "sha256:" + "a" * 64,
+                "--host-ld-library-path",
+                "relative/path",
+                "--",
+                "true",
+            ]
+        )
+
+
 def test_dry_run_never_writes_canonical_evidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -283,6 +339,7 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
 
     def write_json(name: str, payload: object) -> Path:
         path = repeat / name
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
         return path
 
@@ -328,6 +385,25 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
         + "\n",
         encoding="utf-8",
     )
+    owned_processes = write_json(
+        "runtime/owned-processes.json",
+        [
+            {
+                "host_pid": 1200,
+                "physical_npu_id": 0,
+                "container_id": container_id,
+                "cgroup": f"0::/docker/{container_id}",
+                "cmdline": "EngineCore",
+            },
+            {
+                "host_pid": 1234,
+                "physical_npu_id": 0,
+                "container_id": container_id,
+                "cgroup": f"0::/docker/{container_id}",
+                "cmdline": "VLLMWorker_TP --rank 0",
+            },
+        ],
+    )
     cleanup = write_json(
         "cleanup-chain-attestation.json",
         {
@@ -337,6 +413,7 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
             "container_id": container_id,
             "exit_code": 0,
             "host_pids": [1234],
+            "all_owned_host_pids": [1200, 1234],
             "physical_npu_ids": [0],
             "service_port": 18080,
             "container_stopped_or_removed": True,
@@ -368,6 +445,10 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
                 "cgroup": f"0::/docker/{container_id}",
             }
         ],
+        owned_processes={
+            "selection_rule": orchestrator.CANONICAL_WORKER_RULE,
+            "raw": orchestrator.evidence_record(repeat, owned_processes),
+        },
         hbm_samples=orchestrator.evidence_record(repeat, hbm),
         peak_hbm_mb=2048,
         cleanup=orchestrator.evidence_record(repeat, cleanup),
@@ -384,3 +465,8 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
     )
     assert validated["container_id"] == container_id
     assert validated["peak_hbm_mb"] == 2048.0
+
+    payload["ownership"][0]["host_pid"] = 1200
+    write_json("strict_execution_evidence.json", payload)
+    with pytest.raises(ValueError, match="canonical worker selection"):
+        _validate_strict_execution_evidence(repeat, target, {"peak_mem_mb": 2048})

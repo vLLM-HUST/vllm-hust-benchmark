@@ -12,6 +12,10 @@ from vllm_hust_benchmark.baseline_recovery import (
     _identity_mismatches,
     _parameter_mismatches,
 )
+from vllm_hust_benchmark.strict_execution_contract import (
+    CANONICAL_WORKER_RULE,
+    canonical_worker_key,
+)
 
 ATTESTATION_SCHEMA_VERSION = "official-baseline-attestation/v1"
 STRICT_EXECUTION_SCHEMA_VERSION = "strict-execution-evidence/v1"
@@ -242,6 +246,61 @@ def _validate_strict_execution_evidence(
             f"strict execution PID/device mapping is not one-to-one: {repeat_dir}"
         )
 
+    owned_processes_record = evidence.get("owned_processes")
+    owned_processes_record = (
+        owned_processes_record if isinstance(owned_processes_record, Mapping) else {}
+    )
+    if owned_processes_record.get("selection_rule") != CANONICAL_WORKER_RULE:
+        raise ValueError(f"canonical worker rule mismatch: {repeat_dir}")
+    owned_processes_path = _verify_hashed_evidence_file(
+        repeat_dir,
+        owned_processes_record.get("raw") or {},
+        field="owned_processes.raw",
+    )
+    owned_processes_payload = json.loads(
+        owned_processes_path.read_text(encoding="utf-8")
+    )
+    if not isinstance(owned_processes_payload, list) or not owned_processes_payload:
+        raise ValueError(f"owned process evidence is empty: {repeat_dir}")
+    all_owned_host_pids: list[int] = []
+    processes_by_device: dict[int, list[dict[str, Any]]] = {
+        device: [] for device in devices
+    }
+    for value in owned_processes_payload:
+        record = value if isinstance(value, dict) else {}
+        host_pid = record.get("host_pid")
+        physical_npu_id = record.get("physical_npu_id")
+        cgroup = str(record.get("cgroup") or "")
+        cmdline = record.get("cmdline")
+        if (
+            not isinstance(host_pid, int)
+            or host_pid <= 0
+            or physical_npu_id not in devices
+            or record.get("container_id") != container_id
+            or container_id not in cgroup
+            or not isinstance(cmdline, str)
+            or not cmdline
+        ):
+            raise ValueError(f"owned process identity is invalid: {repeat_dir}")
+        processes_by_device[physical_npu_id].append(record)
+        all_owned_host_pids.append(host_pid)
+    canonical_records: list[dict[str, Any]] = []
+    for device in devices:
+        candidates = processes_by_device[device]
+        if not candidates:
+            raise ValueError(f"owned process device scope is incomplete: {repeat_dir}")
+        canonical_records.append(min(candidates, key=canonical_worker_key))
+    if len(all_owned_host_pids) != len(set(all_owned_host_pids)):
+        raise ValueError(f"owned process PIDs are not unique: {repeat_dir}")
+    canonical_pairs = [
+        (record["host_pid"], record["physical_npu_id"]) for record in canonical_records
+    ]
+    ownership_pairs = [
+        (record["host_pid"], record["physical_npu_id"]) for record in ownership
+    ]
+    if ownership_pairs != canonical_pairs:
+        raise ValueError(f"canonical worker selection mismatch: {repeat_dir}")
+
     hbm_record = evidence.get("hbm_samples")
     hbm_record = hbm_record if isinstance(hbm_record, Mapping) else {}
     hbm_path = _verify_hashed_evidence_file(repeat_dir, hbm_record, field="hbm_samples")
@@ -294,6 +353,7 @@ def _validate_strict_execution_evidence(
         "container_id": container_id,
         "exit_code": 0,
         "host_pids": host_pids,
+        "all_owned_host_pids": all_owned_host_pids,
         "physical_npu_ids": devices,
         "service_port": service_port,
         "container_stopped_or_removed": True,
@@ -327,6 +387,7 @@ def _validate_strict_execution_evidence(
         "pre_start_snapshots": snapshot_summaries,
         "peak_hbm_mb": measured_peak,
         "hbm_samples_sha256": _sha256(hbm_path),
+        "owned_processes_sha256": _sha256(owned_processes_path),
         "cleanup_chain_sha256": _sha256(cleanup_path),
     }
 

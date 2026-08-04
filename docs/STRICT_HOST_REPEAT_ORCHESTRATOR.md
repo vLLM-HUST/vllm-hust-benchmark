@@ -19,6 +19,11 @@ The orchestrator:
 - starts only that owned container, samples host `npu-smi`, and proves every
   worker PID through `/proc/<pid>/cgroup` against the owned container ID and
   physical card;
+- preserves a hashed raw record for every owned compute PID. When a card has
+  multiple owned PIDs, the canonical PID is selected deterministically by
+  preferring `VLLMWorker`/`Worker_TP`, then `EngineCore`, then other processes,
+  with the lowest host PID as the tie-breaker; the validator recomputes this
+  rule from the raw records;
 - accepts a repeat only after the command exits zero, the owned container is
   stopped or removed, its PIDs and port are absent, host HBM matches the
   submission metric, and the immutable-input attestation exists;
@@ -47,4 +52,6 @@ The command after `--` is the command stored in the temporary container. It is
 not evaluated by a host shell. The caller remains responsible for supplying
 the exact runner environment and matching target spec. Real mode re-executes
 itself through `sudo -n` when necessary; no password prompt or fallback is
-allowed.
+allowed. Host `npu-smi` subprocesses receive only the fixed absolute library
+directories declared by `--host-ld-library-path`; they do not inherit an
+arbitrary caller `LD_LIBRARY_PATH` through sudo.
