@@ -6,11 +6,35 @@
   "host": "192.168.0.3",
   "public_host_alias": "ascend86-host",
   "runtime_asset_plan": {
-    "required_image_id": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
-    "locally_verified": false,
-    "local_candidate_status": "rejected-loaded-config-id-mismatch",
-    "transfer_required": true,
-    "transfer_source_requirement": "archive exported from the explicit required image ID and verified after load by config image ID, source commits, and package versions"
+    "storage_backend": "Docker 29.6 containerd image store",
+    "storage_manifest_digest": "sha256:5f80f602b9460f3a02f9e847edbe69576906e3dd60e200a095a763a4792f5c26",
+    "runtime_config_digest": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+    "archive_sha256": "d28174deca2a8a28173cff1425a585b843421d7e43c8bb34b6c8a1622c289cc0",
+    "locally_loaded": true,
+    "locally_verified": true,
+    "verification_environment": {
+      "npu_devices_exposed": false,
+      "network_mode": "none"
+    },
+    "source_identity": {
+      "vllm": {
+        "commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+        "worktree_clean": true
+      },
+      "vllm_ascend": {
+        "commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        "worktree_clean": true
+      }
+    },
+    "package_identity": {
+      "vllm": "0.18.0+empty",
+      "vllm_ascend": "0.18.0",
+      "datasets": "3.3.0",
+      "xxhash": "3.6.0",
+      "torch": "2.9.0+cpu",
+      "torch_npu": "2.9.0.post1+gitee7ba04"
+    },
+    "transfer_required": false
   },
   "targets": [
     {
@@ -39,33 +63,28 @@
     {
       "model_id": "Qwen/Qwen2.5-14B-Instruct",
       "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
-      "local_path": "/data/shared_datasets/strict-models/Qwen2.5-14B-Instruct",
-      "local_state": "transfer-in-progress-unverified",
+      "local_path": "/data/shared_models/strict-models/Qwen2.5-14B-Instruct",
+      "local_state": "complete-verified",
       "verification": {
-        "completion_marker_present": false,
-        "content_inspected": false,
-        "revision_metadata_matches": false,
-        "weight_shards_verified": 0,
-        "incomplete_files_verified_absent": false
+        "file_count": 37,
+        "per_file_sha256_manifest_aggregate": "3c12f962305b06b77f9b81f2c89c3cce3684a5de1501ca9d23aab4b2057f7b8f",
+        "revision_metadata_path": ".cache/huggingface/download/config.json.metadata",
+        "revision_metadata_matches": true,
+        "weight_shards_verified": 8,
+        "incomplete_files_verified_absent": true,
+        "lock_files_verified_absent": true
       },
-      "transfer_required": true,
-      "transfer_source_requirement": "exact-revision snapshot with complete metadata and per-file size and SHA256 verification"
+      "transfer_required": false
     }
   ],
-  "minimum_transfer_set": [
-    {
-      "model_id": "Qwen/Qwen2.5-14B-Instruct",
-      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
-      "reason": "required by all three assigned targets; the in-progress transfer has no atomic completion marker and has not been inspected"
-    }
-  ],
+  "minimum_transfer_set": [],
   "non_execution_evidence": true,
   "notes": [
     "This document records control-plane assignment and transfer planning only.",
     "It is not benchmark evidence and does not authorize a server or benchmark start.",
-    "The locally loaded image whose config ID begins with sha256:5f80f602 is rejected and must not be used as the official v0.18 runtime.",
-    "Runtime verification remains false until an archive exported from the explicit sha256:9a50c7c6 image ID is loaded and independently verified.",
-    "The in-progress model transfer must not be consumed or treated as complete before atomic handoff and strict verification.",
+    "Under the Docker 29.6 containerd image store, sha256:5f80f602b9460f3a02f9e847edbe69576906e3dd60e200a095a763a4792f5c26 is the generated OCI storage manifest digest; its manifest references the required sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31 runtime config digest.",
+    "The locally loaded runtime was independently verified without NPU exposure and with network mode none; runtime verification alone does not authorize execution.",
+    "The model snapshot is locally complete and verified at the exact assigned revision; this does not establish data readiness or a fresh start safety gate.",
     "Runtime, model, data, input, safety-gate, and run evidence remain independently required."
   ]
 }
