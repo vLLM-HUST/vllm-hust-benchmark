@@ -1,6 +1,6 @@
 {
   "schema_version": "issue-146-retest-report/v1",
-  "generated_at": "2026-08-04T07:33:31Z",
+  "generated_at": "2026-08-04T07:56:04Z",
   "source_dir": "reports/issue_146_retest_raw_results",
   "engine_commits": [
     "2206f1f7b7",
@@ -17,72 +17,48 @@
   "results_summary": {
     "sonnet-throughput": {
       "2206f1f7b7": {
-        "median": 2891.79,
-        "min": 2849.1,
-        "max": 2930.45,
-        "count": 3,
-        "values": [
-          2849.1,
-          2891.79,
-          2930.45
-        ]
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
       },
       "7a63f81e86": {
-        "median": 2898.8,
-        "min": 2889.44,
-        "max": 2929.7,
-        "count": 3,
-        "values": [
-          2929.7,
-          2889.44,
-          2898.8
-        ]
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
       },
       "83cf83ff20": {
-        "median": 2880.05,
-        "min": 2872.5,
-        "max": 2895.22,
-        "count": 3,
-        "values": [
-          2880.05,
-          2895.22,
-          2872.5
-        ]
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
       }
     },
     "random-latency": {
       "2206f1f7b7": {
-        "median": 6030.23,
-        "min": 6008.92,
-        "max": 6047.34,
-        "count": 3,
-        "values": [
-          6030.23,
-          6047.34,
-          6008.92
-        ]
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
       },
       "7a63f81e86": {
-        "median": 6025.93,
-        "min": 5998.95,
-        "max": 6047.33,
-        "count": 3,
-        "values": [
-          6047.33,
-          6025.93,
-          5998.95
-        ]
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
       },
       "83cf83ff20": {
-        "median": 6023.95,
-        "min": 6004.35,
-        "max": 6078.74,
-        "count": 3,
-        "values": [
-          6078.74,
-          6023.95,
-          6004.35
-        ]
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
       }
     }
   },
@@ -90,32 +66,32 @@
     "sonnet-throughput": {
       "base_commit": "2206f1f7b7",
       "head_commit": "7a63f81e86",
-      "base_median": 2891.79,
-      "head_median": 2898.8,
-      "delta_pct": 0.24,
+      "base_median": null,
+      "head_median": null,
+      "delta_pct": null,
       "threshold_pct": 10.0,
       "regression_reproducible": false,
-      "conclusion": "no_regression_or_noise",
-      "evidence_sufficient": true,
-      "evidence_reason": ""
+      "conclusion": "incomplete",
+      "evidence_sufficient": false,
+      "evidence_reason": "sonnet-throughput/2206f1f7b7: only 0 result(s), need >= 3"
     },
     "random-latency": {
       "base_commit": "2206f1f7b7",
       "head_commit": "83cf83ff20",
-      "base_median": 6030.23,
-      "head_median": 6023.95,
-      "delta_pct": -0.1,
+      "base_median": null,
+      "head_median": null,
+      "delta_pct": null,
       "threshold_pct": 20.0,
       "regression_reproducible": false,
-      "conclusion": "no_regression_or_noise",
-      "evidence_sufficient": true,
-      "evidence_reason": ""
+      "conclusion": "incomplete",
+      "evidence_sufficient": false,
+      "evidence_reason": "random-latency/2206f1f7b7: only 0 result(s), need >= 3"
     },
     "overall": {
       "any_regression_confirmed": false,
-      "any_evidence_incomplete": false,
-      "action": "no_action_diagnostic_only",
-      "issue_146_resolution": "No reproducible regression. Results remain diagnostic/historical re-test artifacts and are NOT published as official leaderboard targets (max_model_len=30720 differs from the official 32768)."
+      "any_evidence_incomplete": true,
+      "action": "incomplete_evidence",
+      "issue_146_resolution": "Evidence insufficient for at least one comparison. Do not clean leaderboard points or draw regression conclusions until each compared commit/workload has >= 3 valid results."
     }
   }
 }

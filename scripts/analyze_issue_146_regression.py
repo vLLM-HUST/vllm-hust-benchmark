@@ -26,6 +26,8 @@ from typing import Any
 
 # SHA-256 is exactly 64 lowercase hex characters.
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+# Full git commit SHA is exactly 40 lowercase hex characters.
+_FULL_HEX_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 # Commits under investigation (issue #146)
 ENGINE_COMMITS = ["2206f1f7b7", "7a63f81e86", "83cf83ff20"]
@@ -144,6 +146,18 @@ def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
 def validate_env_manifest(rep_dir: Path) -> tuple[bool, str]:
     """Validate that an env-manifest.json has complete and untampered provenance.
 
+    Per reviewer feedback (round 4):
+    - Must reject fabricated manifests where observed commit SHAs are padded
+      short SHAs (e.g. "2206f1f7b7" + 30 zeros).  Both engine_commit_observed
+      and plugin_commit_observed must be real 40-char hex SHAs.
+    - Must NOT accept "clean" patch identity for historical results that
+      lack original manifest/patch files — those reps must stay invalid.
+      However, "clean" is acceptable for real runs where the repo was at a
+      clean checkout AND the manifest was generated at run time (not
+      backfilled).  The distinction is enforced by requiring that a manifest
+      exist at all; historical reps without a manifest are already rejected
+      by the "missing" check above.
+
     Per reviewer feedback (round 3):
     - Must verify SHA-256 is exactly 64 lowercase hex (regex, not just length).
     - Must recompute SHA-256 of the patch file on disk and compare with the
@@ -171,6 +185,51 @@ def validate_env_manifest(rep_dir: Path) -> tuple[bool, str]:
         return False, (
             "manifest uses deprecated plugin_patch_identity (MD5); "
             "must use plugin_patch_sha256 with saved patch file"
+        )
+
+    # Per reviewer round 4: validate observed commit SHAs are real 40-hex,
+    # not padded short SHAs (e.g. "2206f1f7b7" + 30 zeros).
+    # We check:
+    # 1. Must be exactly 40 lowercase hex chars.
+    # 2. Must start with the requested short SHA (proving the checkout matched).
+    engine_requested = manifest.get("engine_commit_requested", "")
+    plugin_requested = manifest.get("plugin_commit_requested", "")
+    engine_observed = manifest.get("engine_commit_observed")
+    plugin_observed = manifest.get("plugin_commit_observed")
+    if not engine_observed or not isinstance(engine_observed, str):
+        return False, "engine_commit_observed missing or not a string"
+    if not plugin_observed or not isinstance(plugin_observed, str):
+        return False, "plugin_commit_observed missing or not a string"
+    if not _FULL_HEX_SHA_RE.match(engine_observed):
+        return False, (
+            f"engine_commit_observed not a valid 40-hex SHA: "
+            f"{engine_observed!r} (padded short SHAs are rejected)"
+        )
+    if not _FULL_HEX_SHA_RE.match(plugin_observed):
+        return False, (
+            f"plugin_commit_observed not a valid 40-hex SHA: "
+            f"{plugin_observed!r} (padded short SHAs are rejected)"
+        )
+    # Verify observed SHA starts with the requested short SHA — this catches
+    # padded values where the short SHA was extended with zeros instead of
+    # the real full SHA.  Per reviewer round 4: '至少拒绝这种补零值'.
+    if (
+        isinstance(engine_requested, str)
+        and engine_requested
+        and not engine_observed.startswith(engine_requested)
+    ):
+        return False, (
+            f"engine_commit_observed {engine_observed!r} does not start with "
+            f"requested short SHA {engine_requested!r} (padded SHA suspected)"
+        )
+    if (
+        isinstance(plugin_requested, str)
+        and plugin_requested
+        and not plugin_observed.startswith(plugin_requested)
+    ):
+        return False, (
+            f"plugin_commit_observed {plugin_observed!r} does not start with "
+            f"requested short SHA {plugin_requested!r} (padded SHA suspected)"
         )
 
     # Verify SHA-256 fields exist and are strings

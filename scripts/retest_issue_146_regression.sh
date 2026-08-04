@@ -83,11 +83,14 @@ export ATB_HOME_PATH="${_atb_home}/${_cxx_abi_dir}"
 
 mkdir -p "$RESULT_DIR"
 
-# Track the bench process group ID so cleanup is job-owned.
-# Set by run_bench_tracked() to the PGID of the bench command's process group.
-# Retained after wait() returns so kill_owned_server can still reach
-# detached descendants (e.g. EngineCore that did its own setsid).
-_CURRENT_BENCH_PGID=""
+# Track verified descendant PIDs and their start times (in centiseconds).
+# Populated by _snapshot_descendants() while the launcher is alive and the
+# server is ready.  Used by kill_owned_server() to kill only processes whose
+# PID AND start time still match — preventing PID-reuse false kills.
+#
+# Format: "pid1:starttime1 pid2:starttime2 ..."
+_CURRENT_BENCH_PID=""
+_VERIFIED_DESCENDANTS=""
 
 # ---------------------------------------------------------------------------
 # Helper functions
@@ -95,50 +98,94 @@ _CURRENT_BENCH_PGID=""
 
 log() { echo "[$(date '+%Y%m%dT%H%M%SZ')] $*"; }
 
-# Recursively kill all descendants of a PID using pgrep -P.
-# This walks the process tree depth-first so even grandchildren
-# (e.g. EngineCore workers spawned by the server) are reached.
-_kill_descendants() {
+# Get the start time of a PID (in centiseconds since boot, from /proc).
+# Returns empty string if PID doesn't exist or /proc is unavailable.
+_get_starttime() {
+    local pid="$1"
+    local stat_file="/proc/$pid/stat"
+    if [ -r "$stat_file" ]; then
+        # Field 22 is starttime in clock ticks.  Use a robust parse that
+        # handles comm fields containing spaces/parens.
+        local content
+        content=$(cat "$stat_file" 2>/dev/null) || return
+        local after_comm
+        after_comm="${content##*)}"
+        # after_comm now starts with " state ..." — field 22 from the start
+        # of the full stat, but after the comm it's field 20.
+        echo "$after_comm" | awk '{print $20}'
+    else
+        # macOS fallback: use ps -o lstart (less precise but works).
+        ps -o lstart= -p "$pid" 2>/dev/null | tr ' ' '_' | tr -s '_'
+    fi
+}
+
+# Recursively snapshot all descendants of a PID: record PID + start time.
+# Called while the launcher is alive so the process tree is intact.
+# Stores results in _VERIFIED_DESCENDANTS.
+_snapshot_descendants() {
     local parent_pid="$1"
     local child
     for child in $(pgrep -P "$parent_pid" 2>/dev/null || true); do
-        _kill_descendants "$child"
-        kill -9 "$child" 2>/dev/null || true
+        # Recurse first (depth-first) to capture grandchildren.
+        _snapshot_descendants "$child"
+        local st
+        st=$(_get_starttime "$child")
+        if [ -n "$st" ]; then
+            _VERIFIED_DESCENDANTS+=" ${child}:${st}"
+        fi
     done
 }
 
-# Job-owned cleanup: kill the entire process group we started AND walk the
-# process tree for detached descendants that escaped the group (e.g.
-# EngineCore that calls setsid itself).
+# Verify that a PID still has the same start time as when we snapshotted it.
+# Returns 0 (true) if PID exists and start time matches, 1 (false) otherwise.
+# This prevents killing a recycled PID that now belongs to a different process.
+_verify_pid() {
+    local pid="$1" recorded_starttime="$2"
+    local current_starttime
+    current_starttime=$(_get_starttime "$pid")
+    [ -n "$current_starttime" ] && [ "$current_starttime" = "$recorded_starttime" ]
+}
+
+# Job-owned cleanup: kill processes whose PID + start time match the
+# snapshot taken while the launcher was alive.
+# Per reviewer round 4: "在 launcher 存活、服务 ready 时持久化已验证后代的 PID
+# 和 start time，cleanup 时以 PID/start time/cmdline 等身份再次核验后终止".
 kill_owned_server() {
-    if [ -n "$_CURRENT_BENCH_PGID" ]; then
-        local pgid="$_CURRENT_BENCH_PGID"
-        # 1. Kill the entire process group (negative PID) — reaches all
-        #    descendants that stayed in the group.
-        kill -TERM -- -"$pgid" 2>/dev/null || true
-        sleep 1
-
-        # 2. Walk the process tree from the launcher PID to reach detached
-        #    descendants that did their own setsid and left the group.
-        #    Per reviewer round 3: "启动器退出或子进程自行 setsid 后，负 PGID
-        #    都无法覆盖残留 EngineCore".
-        _kill_descendants "$pgid"
-
-        # 3. Force-kill the group and tree.
-        kill -KILL -- -"$pgid" 2>/dev/null || true
-        _kill_descendants "$pgid"
-
-        # 4. Also scan for any remaining processes whose session matches
-        #    our PGID (covers double-fork daemons).
-        local orphan
-        for orphan in $(ps -eo pid,sess --no-headers 2>/dev/null | \
-                        awk -v s="$pgid" '$2 == s {print $1}'); do
-            kill -9 "$orphan" 2>/dev/null || true
-        done
-
-        _CURRENT_BENCH_PGID=""
-        sleep 2
+    # 1. Kill the launcher itself if still alive (it may have already exited).
+    if [ -n "$_CURRENT_BENCH_PID" ]; then
+        local launcher_st
+        launcher_st=$(_get_starttime "$_CURRENT_BENCH_PID")
+        if [ -n "$launcher_st" ]; then
+            kill -TERM "$_CURRENT_BENCH_PID" 2>/dev/null || true
+        fi
     fi
+
+    # 2. Kill each verified descendant whose PID + start time still match.
+    #    This avoids PID-reuse false kills: if a PID was recycled to a new
+    #    process, its start time will differ and we skip it.
+    if [ -n "$_VERIFIED_DESCENDANTS" ]; then
+        local entry pid recorded_st
+        for entry in $_VERIFIED_DESCENDANTS; do
+            pid="${entry%%:*}"
+            recorded_st="${entry##*:}"
+            if _verify_pid "$pid" "$recorded_st"; then
+                kill -TERM "$pid" 2>/dev/null || true
+            fi
+        done
+        sleep 1
+        # Force-kill any that survived TERM
+        for entry in $_VERIFIED_DESCENDANTS; do
+            pid="${entry%%:*}"
+            recorded_st="${entry##*:}"
+            if _verify_pid "$pid" "$recorded_st"; then
+                kill -KILL "$pid" 2>/dev/null || true
+            fi
+        done
+    fi
+
+    _CURRENT_BENCH_PID=""
+    _VERIFIED_DESCENDANTS=""
+    sleep 2
 }
 
 # Install trap so cleanup runs even if the script is interrupted (SIGINT,
@@ -336,28 +383,67 @@ print(f'Validated: {val}')
 " || return 1
 }
 
-# Run a benchmark command in its own process group so kill_owned_server can
-# reach the entire process tree (server, engine core workers, etc.).
+# Run a benchmark command, tracking its PID and snapshotting descendants.
 # The command's stdout/stderr are tee'd to the log file.
-# Sets _CURRENT_BENCH_PGID to the real PGID for job-owned cleanup.
+# Sets _CURRENT_BENCH_PID to the launcher PID, and snapshots all descendant
+# PIDs + start times into _VERIFIED_DESCENDANTS while the launcher is alive
+# (so detached descendants like EngineCore are captured even if they later
+# reparent or setsid).
 # Exits non-zero if the benchmark command fails.
-# Per reviewer round 3: PGID is NOT cleared after wait() so that
-# kill_owned_server can still reach detached descendants.
+# Per reviewer round 4: "在 launcher 存活、服务 ready 时持久化已验证后代的 PID
+# 和 start time，cleanup 时以 PID/start time/cmdline 等身份再次核验后终止".
 run_bench_tracked() {
     local log_file="$1"
     shift
 
-    # Start the bench command in a new session (process group) so we can
-    # kill the entire tree later via the negative PGID.
-    setsid "$@" > >(tee "$log_file") 2>&1 &
+    # Reset state for this run.
+    _CURRENT_BENCH_PID=""
+    _VERIFIED_DESCENDANTS=""
+
+    # Start the bench command.  NOT in a new session — we want it in our
+    # process group so we can walk its descendants via pgrep -P.
+    "$@" > >(tee "$log_file") 2>&1 &
     local bench_pid=$!
-    _CURRENT_BENCH_PGID=$bench_pid
+    _CURRENT_BENCH_PID=$bench_pid
+
+    # Background monitor: continuously snapshot descendants while the launcher
+    # is alive.  This captures EngineCore workers even if they later setsid
+    # or reparent to init after the launcher exits.
+    # The monitor writes to a temp file (append mode) to avoid subshell
+    # variable scoping issues.
+    local snapshot_file
+    snapshot_file=$(mktemp)
+    : > "$snapshot_file"  # truncate
+    (
+        while kill -0 "$bench_pid" 2>/dev/null; do
+            _VERIFIED_DESCENDANTS=""
+            _snapshot_descendants "$bench_pid"
+            if [ -n "$_VERIFIED_DESCENDANTS" ]; then
+                echo "$_VERIFIED_DESCENDANTS" >> "$snapshot_file"
+            fi
+            sleep 2
+        done
+        # Final snapshot right after launcher exits — children may still be
+        # alive and traceable via pgrep before they reparent.
+        _VERIFIED_DESCENDANTS=""
+        _snapshot_descendants "$bench_pid"
+        if [ -n "$_VERIFIED_DESCENDANTS" ]; then
+            echo "$_VERIFIED_DESCENDANTS" >> "$snapshot_file"
+        fi
+    ) &
+    local monitor_pid=$!
 
     # Wait for the bench command to finish; propagate its exit code.
-    # PGID is intentionally retained so kill_owned_server can clean up
-    # any detached descendants that outlive the launcher.
     local rc=0
     wait "$bench_pid" || rc=$?
+
+    # Stop the monitor and collect the accumulated snapshots.
+    wait "$monitor_pid" 2>/dev/null || true
+    # Read all snapshot lines, merge unique PID:starttime pairs.
+    # Each line is a space-separated list of "pid:starttime" entries.
+    _VERIFIED_DESCENDANTS=$(tr ' ' '\n' < "$snapshot_file" | sort -u | tr '\n' ' ')
+    rm -f "$snapshot_file"
+
     return $rc
 }
 
