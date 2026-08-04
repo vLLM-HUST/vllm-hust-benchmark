@@ -37,6 +37,13 @@ def _write(path: Path, payload: object) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
+def _hashed_record(repeat: Path, path: Path) -> dict[str, str]:
+    return {
+        "path": str(path.relative_to(repeat)),
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    }
+
+
 def _write_strict_execution_evidence(
     repeat: Path,
     number: int,
@@ -317,6 +324,110 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
     return repo, staged, results, entry, target
 
 
+def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[str, str]:
+    config_blob = b'{"architecture":"arm64"}'
+    config_digest = "sha256:" + hashlib.sha256(config_blob).hexdigest()
+    layer_digest = "sha256:" + "1" * 64
+    manifest_blob = json.dumps(
+        {
+            "config": {"digest": config_digest},
+            "layers": [{"digest": layer_digest, "size": 123}],
+        },
+        separators=(",", ":"),
+    ).encode()
+    storage_digest = "sha256:" + hashlib.sha256(manifest_blob).hexdigest()
+    archive_digest = "sha256:" + "d" * 64
+    packages = {
+        "datasets": "3.3.0",
+        "torch": "2.9.0+cpu",
+        "torch-npu": "2.9.0.post1",
+        "vllm": "0.18.0+empty",
+        "vllm-ascend": "0.18.0",
+        "xxhash": "3.6.0",
+    }
+    target["baseline_runtime"].update(
+        {
+            "runtime_transport": "docker-archive",
+            "runtime_image": None,
+            "runtime_image_digest": config_digest,
+            "runtime_config_digest": config_digest,
+            "runtime_archive_sha256": archive_digest,
+            "containerd_storage_manifest_digest": storage_digest,
+            "core_commit": "core-sha",
+            "backend_commit": "plugin-sha",
+            "runtime_packages": packages,
+        }
+    )
+    for repeat in sorted(results.glob("repeat-*")):
+        manifest_path = repeat / "runtime/containerd-storage-manifest.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_bytes(manifest_blob)
+        config_path = repeat / "runtime/containerd-config-blob.json"
+        config_path.write_bytes(config_blob)
+        layer_info = repeat / "runtime/containerd-layer-000.txt"
+        layer_info.write_text(f"digest: {layer_digest}\n", encoding="utf-8")
+        archive_identity = repeat / "runtime/archive-identity.json"
+        _write(
+            archive_identity,
+            {
+                "path": "/var/tmp/vllm-ascend-strict-baseline.tar.zst",
+                "size_bytes": 123,
+                "sha256": archive_digest,
+            },
+        )
+        docker_image_inspect = repeat / "runtime/docker-image-inspect.json"
+        _write(docker_image_inspect, [{"Id": storage_digest}])
+        actual_runtime = repeat / "runtime/actual-runtime.json"
+        _write(
+            actual_runtime,
+            {
+                "schema_version": "strict-owned-runtime-preflight/v1",
+                "sources": {
+                    "core": {"commit": "core-sha", "clean": True},
+                    "backend": {"commit": "plugin-sha", "clean": True},
+                },
+                "packages": packages,
+            },
+        )
+        container_inspect = repeat / "owned-container-create-inspect.json"
+        _write(container_inspect, [{"Image": storage_digest}])
+        runtime_identity = repeat / "owned-container-identity.json"
+        _write(
+            runtime_identity,
+            {
+                "runtime_image_digest": config_digest,
+                "runtime_storage_identity": {
+                    "transport": "docker-archive",
+                    "runtime_config_digest": config_digest,
+                    "containerd_storage_manifest_digest": storage_digest,
+                    "local_create_ref": storage_digest,
+                    "manifest_config_digest": config_digest,
+                    "raw_manifest": _hashed_record(repeat, manifest_path),
+                    "raw_config_blob": _hashed_record(repeat, config_path),
+                    "layers": [
+                        {
+                            "digest": layer_digest,
+                            "size": 123,
+                            "raw_info": _hashed_record(repeat, layer_info),
+                        }
+                    ],
+                    "archive": _hashed_record(repeat, archive_identity),
+                    "docker_image_inspect": _hashed_record(
+                        repeat, docker_image_inspect
+                    ),
+                },
+                "inspect": _hashed_record(repeat, container_inspect),
+                "actual_runtime_preflight": _hashed_record(repeat, actual_runtime),
+            },
+        )
+        strict_path = repeat / "strict_execution_evidence.json"
+        strict = json.loads(strict_path.read_text(encoding="utf-8"))
+        strict["runtime_image_digest"] = config_digest
+        strict["runtime_storage_identity"] = _hashed_record(repeat, runtime_identity)
+        _write(strict_path, strict)
+    return config_digest, storage_digest
+
+
 def _mutate_immutable_input(repeat: Path, **updates: object) -> None:
     immutable_path = repeat / "immutable-input-attestation.json"
     payload = json.loads(immutable_path.read_text(encoding="utf-8"))
@@ -472,16 +583,7 @@ def test_docker_archive_runtime_uses_config_digest_for_compatibility(
     tmp_path: Path,
 ) -> None:
     repo, staged, results, _, target = _fixture(tmp_path)
-    storage_manifest_digest = "sha256:" + "c" * 64
-    target["baseline_runtime"].update(
-        {
-            "runtime_transport": "docker-archive",
-            "runtime_image": None,
-            "runtime_config_digest": TRACE_DIGEST,
-            "runtime_archive_sha256": "sha256:" + "d" * 64,
-            "containerd_storage_manifest_digest": storage_manifest_digest,
-        }
-    )
+    config_digest, storage_digest = _materialize_docker_archive_runtime(results, target)
     registry_path = repo / "leaderboard-data" / "official-targets.json"
     _write(registry_path, {"targets": [target]})
     (registry_path.parent / "official-targets.sha256").write_text(
@@ -493,13 +595,14 @@ def test_docker_archive_runtime_uses_config_digest_for_compatibility(
         repo,
         staged,
         results,
-        repo / "out",
+        repo / "out-docker-archive",
         verified_by="test-review",
     )
 
     strict_path = results / "repeat-02" / "strict_execution_evidence.json"
     strict = json.loads(strict_path.read_text(encoding="utf-8"))
-    strict["runtime_image_digest"] = storage_manifest_digest
+    assert strict["runtime_image_digest"] == config_digest
+    strict["runtime_image_digest"] = storage_digest
     _write(strict_path, strict)
     with pytest.raises(ValueError, match="strict execution runtime image mismatch"):
         attest_completed_baseline(
