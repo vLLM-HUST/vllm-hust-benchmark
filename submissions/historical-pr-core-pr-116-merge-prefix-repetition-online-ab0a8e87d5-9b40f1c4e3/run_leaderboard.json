@@ -116,7 +116,9 @@
         "ref": "9b40f1c4e35b54a3ff1eb80272125c24a3eb5fe9",
         "commit": "9b40f1c4e35b54a3ff1eb80272125c24a3eb5fe9"
       }
-    }
+    },
+    "repetitions": 3,
+    "measurement_strategy": "warmup+primary-median-run"
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
@@ -164,5 +166,61 @@
       "prefix_repetition_suffix_len": 256,
       "prefix_repetition_prefix_len": 3840
     }
+  },
+  "measurement": {
+    "schema_version": "perfgate-measurement/v2",
+    "strategy": "warmup+primary-median-run",
+    "warmup_runs": 0,
+    "measured_runs": 3,
+    "aggregation": "primary-median-run",
+    "selection": {
+      "primary_metric": "ttft_ms",
+      "sort_direction": "ascending",
+      "secondary_sort_key": "run_index",
+      "ordered_run_indices": [
+        3,
+        2,
+        1
+      ],
+      "selected_position": 2,
+      "selected_run_index": 2,
+      "selected_raw_result_sha256": "d0d90d04201b79ba580213204a20fd64dce79134ab62dd4c150141dbb65c4a12"
+    },
+    "warmup": [],
+    "per_run": [
+      {
+        "run_index": 1,
+        "raw_result_sha256": "6532d3882dcb02cb7c0a832f0db1cf03bd5c4677b6b4ae93a78b29423f96ba3c",
+        "metrics": {
+          "throughput_tps": null,
+          "ttft_ms": 207.50110886758193,
+          "tbt_ms": null,
+          "error_rate": 0.0,
+          "peak_mem_mb": null
+        }
+      },
+      {
+        "run_index": 2,
+        "raw_result_sha256": "d0d90d04201b79ba580213204a20fd64dce79134ab62dd4c150141dbb65c4a12",
+        "metrics": {
+          "throughput_tps": 48.45295108929884,
+          "ttft_ms": 202.35253922641277,
+          "tbt_ms": 30.82368989468282,
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0
+        }
+      },
+      {
+        "run_index": 3,
+        "raw_result_sha256": "069708572da1c4c056fa42d9495993d23431f46130280b23f52bbdd2dc68f345",
+        "metrics": {
+          "throughput_tps": null,
+          "ttft_ms": 199.84004860045388,
+          "tbt_ms": null,
+          "error_rate": 0.0,
+          "peak_mem_mb": null
+        }
+      }
+    ]
   }
 }
