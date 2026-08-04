@@ -84,6 +84,19 @@
       "reason": "required by agent-research-online and prefix-repetition-online; the local snapshot is incomplete"
     }
   ],
+  "shared_input_assets": [
+    {
+      "asset": "ShareGPT_V3_unfiltered_cleaned_split.json",
+      "host_path": "/data/shared_datasets/strict-inputs/ShareGPT_V3_unfiltered_cleaned_split.json",
+      "container_path": "/data/shared_models/strict-inputs/ShareGPT_V3_unfiltered_cleaned_split.json",
+      "size_bytes": 672837942,
+      "sha256": "35f0e213ce091ed9b9af2a1f0755e9d39f9ccec34ab281cd4ca60d70f6479ba4",
+      "container_path_verified": true,
+      "container_mount_mode": "read-only",
+      "required_by_assigned_targets": false,
+      "state": "content-verified-no-start"
+    }
+  ],
   "instructcoder_no_start_readiness": {
     "ready": false,
     "runtime_identity_verified": true,
@@ -93,6 +106,8 @@
     "data_content_complete": true,
     "data_revision_metadata_matches": true,
     "data_exact_snapshot_resolvable": false,
+    "sharegpt_shared_asset_verified": true,
+    "sharegpt_required_by_instructcoder": false,
     "strict_execution_evidence_validator_present": true,
     "strict_execution_evidence_generator_present": false,
     "blockers": [
