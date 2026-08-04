@@ -1490,8 +1490,11 @@ def _is_ci_publication_submission(child: Path) -> bool:
         .benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>
 
     where ``RUN_ID`` starts with ``ci-`` (matching
-    ``_CI_PUBLICATION_RUN_ID_PATTERN``), and the directory carries a ``STATUS``
-    file whose content starts with ``OK``.
+    ``_CI_PUBLICATION_RUN_ID_PATTERN``), the same ``RUN_ID`` is used for both
+    the result root and the submission directory (producer uses one
+    ``RUN_ID`` for both ``RESULT_ROOT`` and ``SUBMISSION_DIR``), and the
+    directory carries a ``STATUS`` file whose content equals ``OK`` after
+    stripping.
 
     This strict shape check scopes the ``.benchmarks/`` exception to real CI
     submissions only. Other ``.benchmarks/`` subtrees (``.benchmarks/cache``,
@@ -1511,13 +1514,19 @@ def _is_ci_publication_submission(child: Path) -> bool:
     grandparent = parent.parent
     if not _CI_PUBLICATION_RUN_ID_PATTERN.match(grandparent.name):
         return False
+    # Producer uses the same RUN_ID for RESULT_ROOT and SUBMISSION_DIR, so
+    # the submission dir name must equal the result root name. This rejects
+    # .benchmarks/ci/ci-A/submissions/ci-B even when both segments are valid.
+    if child.name != grandparent.name:
+        return False
     # Great-grandparent must be "ci".
     if grandparent.parent.name != "ci":
         return False
     # Great-great-grandparent must be ".benchmarks".
     if grandparent.parent.parent.name != ".benchmarks":
         return False
-    # STATUS file must exist and start with "OK".
+    # STATUS file must exist and strictly equal "OK" after stripping, matching
+    # the downstream admission gate's STATUS comparison.
     status_path = child / "STATUS"
     if not status_path.is_file():
         return False
@@ -1525,7 +1534,7 @@ def _is_ci_publication_submission(child: Path) -> bool:
         status_content = status_path.read_text(encoding="utf-8").strip()
     except OSError:
         return False
-    return status_content.startswith("OK")
+    return status_content == "OK"
 
 
 def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:

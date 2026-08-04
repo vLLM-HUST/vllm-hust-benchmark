@@ -250,12 +250,14 @@ def test_benchmarks_dir_with_ok_status_passes(tmp_path: Path) -> None:
     The CI workflow intentionally places submissions under .benchmarks/ and
     writes "OK" to STATUS after a successful benchmark. The admission gate
     must accept these, not reject them as cache directories.
+
+    The producer uses the same RUN_ID for both RESULT_ROOT and SUBMISSION_DIR,
+    so the result-root segment and the submission dir name must be identical.
     """
-    source_dir = (
-        tmp_path / ".benchmarks" / "ci" / "ci-30835313188-1-ba82f2122b" / "submissions"
-    )
+    run_id = "ci-30835313188-1-ba82f2122b"
+    source_dir = tmp_path / ".benchmarks" / "ci" / run_id / "submissions"
     source_dir.mkdir(parents=True)
-    ci_dir = source_dir / "ci-30835313188-1-ba82f2122b117de38542e9db09f5747a83013b71"
+    ci_dir = source_dir / run_id
     ci_dir.mkdir()
     (ci_dir / "STATUS").write_text("OK\n", encoding="utf-8")
     (ci_dir / "run_leaderboard.json").write_text(
@@ -273,11 +275,63 @@ def test_benchmarks_dir_with_failed_status_rejected(tmp_path: Path) -> None:
     """Directories under .benchmarks/ with a FAILED STATUS must still be
     rejected. Since the STATUS is not "OK", the .benchmarks exception does
     not apply and the directory is rejected as temporary (fail-closed)."""
-    source_dir = tmp_path / ".benchmarks" / "ci" / "ci-run-failed" / "submissions"
+    run_id = "ci-30554037879-1-failed"
+    source_dir = tmp_path / ".benchmarks" / "ci" / run_id / "submissions"
     source_dir.mkdir(parents=True)
-    failed_dir = source_dir / "ci-30554037879-1-failed"
+    failed_dir = source_dir / run_id
     failed_dir.mkdir()
     (failed_dir / "STATUS").write_text("FAILED: server crashed\n", encoding="utf-8")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
+def test_benchmarks_ci_mismatched_run_id_rejected(tmp_path: Path) -> None:
+    """Even when both RUN_ID segments match the ci-* pattern, the submission
+    must be rejected if the result-root RUN_ID and the submission-dir RUN_ID
+    differ. The producer (run_ascend_benchmark_ci.sh) uses the same RUN_ID for
+    both RESULT_ROOT and SUBMISSION_DIR, so ``child.name != grandparent.name``
+    indicates the path does not come from the real CI producer.
+    """
+    source_dir = (
+        tmp_path / ".benchmarks" / "ci" / "ci-30835313188-1-ba82f2122b" / "submissions"
+    )
+    source_dir.mkdir(parents=True)
+    # Different RUN_ID — both valid ci-* but not equal.
+    mismatched_dir = source_dir / "ci-30554037879-1-7363d82b"
+    mismatched_dir.mkdir()
+    (mismatched_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (mismatched_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(mismatched_dir)
+    _write_admission_required_files(mismatched_dir)
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
+def test_benchmarks_status_not_strict_ok_rejected(tmp_path: Path) -> None:
+    """STATUS content must strictly equal ``OK`` after stripping. Values like
+    ``OK-ish`` or ``OKAY`` that merely start with ``OK`` must NOT qualify for
+    the .benchmarks exception, matching the downstream admission gate's strict
+    STATUS comparison.
+    """
+    run_id = "ci-30835313188-1-ba82f2122b"
+    source_dir = tmp_path / ".benchmarks" / "ci" / run_id / "submissions"
+    source_dir.mkdir(parents=True)
+    ci_dir = source_dir / run_id
+    ci_dir.mkdir()
+    (ci_dir / "STATUS").write_text("OK-ish\n", encoding="utf-8")
+    (ci_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(ci_dir)
+    _write_admission_required_files(ci_dir)
 
     failures = _scan_submission_admission_failures(source_dir)
 
