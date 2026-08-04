@@ -4,6 +4,21 @@
   "execution_authorized": false,
   "branch": "data/strict-baseline-a-host-192-168-0-4",
   "host": "192.168.0.4",
+  "runtime_asset": {
+    "state": "identity-verified-no-start",
+    "archive_sha256": "d28174deca2a8a28173cff1425a585b843421d7e43c8bb34b6c8a1622c289cc0",
+    "containerd_storage_manifest_digest": "sha256:5f80f602b9460f3a02f9e847edbe69576906e3dd60e200a095a763a4792f5c26",
+    "oci_config_digest": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+    "oci_config_blob_sha256": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+    "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+    "vllm_ascend_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+    "source_trees_clean": true,
+    "verification_mode": "control-host-attested network-none no-NPU container",
+    "notes": [
+      "The containerd storage manifest digest is not the OCI image config identity.",
+      "The authoritative runtime identity is the verified OCI config digest and matching config blob hash."
+    ]
+  },
   "targets": [
     {
       "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
@@ -39,7 +54,11 @@
         "sha256_manifest_files_total": 16,
         "weight_shards_present": 6,
         "weight_shards_total": 6,
-        "incomplete_files": 0
+        "incomplete_files": 0,
+        "lock_files": 0,
+        "container_visible_path": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct",
+        "container_mount_mode": "read-only",
+        "exact_huggingface_snapshot_path": false
       },
       "transfer_required": false
     },
@@ -65,6 +84,27 @@
       "reason": "required by agent-research-online and prefix-repetition-online; the local snapshot is incomplete"
     }
   ],
+  "instructcoder_no_start_readiness": {
+    "ready": false,
+    "runtime_identity_verified": true,
+    "model_content_complete": true,
+    "model_revision_metadata_matches": true,
+    "model_exact_snapshot_resolvable": false,
+    "data_content_complete": true,
+    "data_revision_metadata_matches": true,
+    "data_exact_snapshot_resolvable": false,
+    "strict_execution_evidence_validator_present": true,
+    "strict_execution_evidence_generator_present": false,
+    "blockers": [
+      "The complete Coder model is materialized as a flat local_dir export, not a Hugging Face snapshots/aedcc2d42b622764e023cf882b6652e646b95671 path required by the official runner.",
+      "The InstructCoder dataset is materialized as a flat local_dir export; local-only snapshot_download cannot resolve likaixin/InstructCoder at revision 6a778a720284d6520b56bd03d5c3070930d41071.",
+      "No production generator writes strict_execution_evidence.json, two host npu-smi snapshots, host PID to physical NPU bindings, host HBM samples, or cleanup-chain-attestation.json."
+    ],
+    "required_code_work": [
+      "Add a fail-closed strict execution evidence collector that consumes authoritative host-side snapshots and PID/HBM/cleanup records without synthesizing values.",
+      "Wire the collector into scripts/run-official-ascend-goal-baseline.sh before submission attestation."
+    ]
+  },
   "non_execution_evidence": true,
   "notes": [
     "This document records control-plane assignment and transfer planning only.",
