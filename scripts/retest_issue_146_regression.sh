@@ -85,6 +85,8 @@ mkdir -p "$RESULT_DIR"
 
 # Track the bench process group ID so cleanup is job-owned.
 # Set by run_bench_tracked() to the PGID of the bench command's process group.
+# Retained after wait() returns so kill_owned_server can still reach
+# detached descendants (e.g. EngineCore that did its own setsid).
 _CURRENT_BENCH_PGID=""
 
 # ---------------------------------------------------------------------------
@@ -93,20 +95,56 @@ _CURRENT_BENCH_PGID=""
 
 log() { echo "[$(date '+%Y%m%dT%H%M%SZ')] $*"; }
 
-# Job-owned cleanup: kill the entire process group we started, not global pkill.
-# This kills the bench command and ALL its descendants (server, engine core
-# workers, etc.) in one shot via the process-group negative PID.
+# Recursively kill all descendants of a PID using pgrep -P.
+# This walks the process tree depth-first so even grandchildren
+# (e.g. EngineCore workers spawned by the server) are reached.
+_kill_descendants() {
+    local parent_pid="$1"
+    local child
+    for child in $(pgrep -P "$parent_pid" 2>/dev/null || true); do
+        _kill_descendants "$child"
+        kill -9 "$child" 2>/dev/null || true
+    done
+}
+
+# Job-owned cleanup: kill the entire process group we started AND walk the
+# process tree for detached descendants that escaped the group (e.g.
+# EngineCore that calls setsid itself).
 kill_owned_server() {
     if [ -n "$_CURRENT_BENCH_PGID" ]; then
-        # Kill the entire process group (negative PID) — this reaches all
-        # descendants including detached engine-core workers.
-        kill -TERM -- -"$_CURRENT_BENCH_PGID" 2>/dev/null || true
+        local pgid="$_CURRENT_BENCH_PGID"
+        # 1. Kill the entire process group (negative PID) — reaches all
+        #    descendants that stayed in the group.
+        kill -TERM -- -"$pgid" 2>/dev/null || true
         sleep 1
-        kill -KILL -- -"$_CURRENT_BENCH_PGID" 2>/dev/null || true
+
+        # 2. Walk the process tree from the launcher PID to reach detached
+        #    descendants that did their own setsid and left the group.
+        #    Per reviewer round 3: "启动器退出或子进程自行 setsid 后，负 PGID
+        #    都无法覆盖残留 EngineCore".
+        _kill_descendants "$pgid"
+
+        # 3. Force-kill the group and tree.
+        kill -KILL -- -"$pgid" 2>/dev/null || true
+        _kill_descendants "$pgid"
+
+        # 4. Also scan for any remaining processes whose session matches
+        #    our PGID (covers double-fork daemons).
+        local orphan
+        for orphan in $(ps -eo pid,sess --no-headers 2>/dev/null | \
+                        awk -v s="$pgid" '$2 == s {print $1}'); do
+            kill -9 "$orphan" 2>/dev/null || true
+        done
+
         _CURRENT_BENCH_PGID=""
         sleep 2
     fi
 }
+
+# Install trap so cleanup runs even if the script is interrupted (SIGINT,
+# SIGTERM) or exits unexpectedly.  Per reviewer round 3: "脚本没有 EXIT/TERM
+# trap".
+trap kill_owned_server EXIT TERM INT
 
 clear_pycache() {
     find "$VLLM_HUST_REPO" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -303,6 +341,8 @@ print(f'Validated: {val}')
 # The command's stdout/stderr are tee'd to the log file.
 # Sets _CURRENT_BENCH_PGID to the real PGID for job-owned cleanup.
 # Exits non-zero if the benchmark command fails.
+# Per reviewer round 3: PGID is NOT cleared after wait() so that
+# kill_owned_server can still reach detached descendants.
 run_bench_tracked() {
     local log_file="$1"
     shift
@@ -314,9 +354,10 @@ run_bench_tracked() {
     _CURRENT_BENCH_PGID=$bench_pid
 
     # Wait for the bench command to finish; propagate its exit code.
+    # PGID is intentionally retained so kill_owned_server can clean up
+    # any detached descendants that outlive the launcher.
     local rc=0
     wait "$bench_pid" || rc=$?
-    _CURRENT_BENCH_PGID=""
     return $rc
 }
 
@@ -390,6 +431,7 @@ run_random_latency() {
 
 run_single_benchmark() {
     local commit="$1" workload="$2" rep="$3"
+    local engine_full="$4" plugin_full="$5"
     local outdir="$RESULT_DIR/$commit/$workload/rep-$rep"
 
     # Clear stale final artifacts before starting this rep.
@@ -418,7 +460,8 @@ EOF
 
     if [ "$DRY_RUN" -eq 1 ]; then
         log "  [DRY RUN] Skipping $workload/$commit/rep-$rep"
-        # Dry-run writes the completion marker so analysis can proceed
+        # Dry-run writes manifest + completion marker so analysis can proceed
+        write_env_manifest "$outdir" "$commit" "$engine_full" "$plugin_full"
         touch "$outdir/.completed"
         return 0
     fi
@@ -432,9 +475,15 @@ EOF
         run_random_latency "$commit" "$rep" "$outdir"
     fi
 
-    # Write completion marker only after successful benchmark + validation.
-    # collect_results skips reps without this marker, preventing stale
-    # results from being consumed if a rerun fails mid-way.
+    # Write env-manifest.json with full provenance BEFORE the .completed marker.
+    # Per reviewer round 3: "run_single_benchmark 在 write_env_manifest 之前就
+    # 写入 .completed，后者失败时 marker 会保留" — this was fail-open.
+    # Now: manifest must succeed first, then .completed is written.
+    write_env_manifest "$outdir" "$commit" "$engine_full" "$plugin_full"
+
+    # Write completion marker ONLY after successful benchmark + validation +
+    # manifest write.  collect_results + validate_env_manifest enforce that
+    # the manifest is valid before consuming results.
     touch "$outdir/.completed"
 }
 
@@ -481,11 +530,10 @@ for rep in $(seq 1 "$REPS"); do
             clear_pycache
             ENGINE_FULL_SHA=$(git -C "$VLLM_HUST_REPO" rev-parse HEAD)
 
-            run_single_benchmark "$commit" "$workload" "$rep"
-
-            # Write env manifest with full provenance
-            write_env_manifest "$RESULT_DIR/$commit/$workload/rep-$rep" \
-                "$commit" "$ENGINE_FULL_SHA" "$PLUGIN_FULL_SHA"
+            # run_single_benchmark now writes env-manifest BEFORE .completed
+            # so manifest failure prevents the completion marker (fail-closed).
+            run_single_benchmark "$commit" "$workload" "$rep" \
+                "$ENGINE_FULL_SHA" "$PLUGIN_FULL_SHA"
 
             kill_owned_server
             sleep 5

@@ -15,12 +15,17 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
 import statistics
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# SHA-256 is exactly 64 lowercase hex characters.
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 # Commits under investigation (issue #146)
 ENGINE_COMMITS = ["2206f1f7b7", "7a63f81e86", "83cf83ff20"]
@@ -89,10 +94,13 @@ def _extract_metric(raw: dict[str, Any], workload: str) -> float | None:
 def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
     """Collect all benchmark results from the re-test directory.
 
-    Only collects results from reps that have a ``.completed`` marker file.
-    This prevents stale results from a previous failed rerun from being
-    consumed by the analysis — the bash script writes ``.completed`` only
-    after successful benchmark + validation.
+    Only collects results from reps that:
+    1. Have a ``.completed`` marker file (benchmark + manifest succeeded).
+    2. Pass ``validate_env_manifest`` (provenance is complete and untampered).
+
+    Per reviewer round 3: "collect_results 只检查 marker 和 raw.json，从未调用
+    新增的 validate_env_manifest，因此当前仓库里仍是 MD5 manifest、没有 derived
+    patch 文件的旧结果也会继续参与结论。请...收集时强制 validate_env_manifest".
 
     Returns: {workload: {commit: [metric1, metric2, ...]}}
     """
@@ -113,6 +121,16 @@ def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
                 # present is stale from a previous run.
                 if not (rep_dir / ".completed").is_file():
                     continue
+                # Enforce manifest validation before consuming results.
+                # Per reviewer round 3: this must be fail-closed — reps with
+                # missing, corrupt, or tampered manifests are skipped.
+                manifest_valid, manifest_reason = validate_env_manifest(rep_dir)
+                if not manifest_valid:
+                    print(
+                        f"  WARNING: skipping {rep_dir.name}: {manifest_reason}",
+                        file=sys.stderr,
+                    )
+                    continue
                 raw = _load_raw_json(rep_dir / "raw.json")
                 if raw is None:
                     continue
@@ -124,11 +142,13 @@ def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
 
 
 def validate_env_manifest(rep_dir: Path) -> tuple[bool, str]:
-    """Validate that an env-manifest.json has complete provenance.
+    """Validate that an env-manifest.json has complete and untampered provenance.
 
-    Per reviewer feedback (round 2): the manifest must use SHA-256 (not MD5)
-    for patch identity, must reference a saved patch file on disk, and must
-    capture both tracked and untracked derived modifications.
+    Per reviewer feedback (round 3):
+    - Must verify SHA-256 is exactly 64 lowercase hex (regex, not just length).
+    - Must recompute SHA-256 of the patch file on disk and compare with the
+      manifest value — reject if they differ (patch tampered).
+    - collect_results must call this validator and skip reps that fail.
 
     Returns (valid, reason).  ``reason`` is empty when valid.
     """
@@ -153,7 +173,7 @@ def validate_env_manifest(rep_dir: Path) -> tuple[bool, str]:
             "must use plugin_patch_sha256 with saved patch file"
         )
 
-    # Verify SHA-256 fields exist
+    # Verify SHA-256 fields exist and are strings
     engine_sha = manifest.get("engine_patch_sha256")
     plugin_sha = manifest.get("plugin_patch_sha256")
     if not engine_sha or not isinstance(engine_sha, str):
@@ -161,26 +181,50 @@ def validate_env_manifest(rep_dir: Path) -> tuple[bool, str]:
     if not plugin_sha or not isinstance(plugin_sha, str):
         return False, "plugin_patch_sha256 missing or not a string"
 
-    # SHA-256 is 64 hex chars; "clean" is also acceptable for unmodified repos
-    if engine_sha != "clean" and len(engine_sha) != 64:
-        return False, f"engine_patch_sha256 not a valid SHA-256: {engine_sha!r}"
-    if plugin_sha != "clean" and len(plugin_sha) != 64:
-        return False, f"plugin_patch_sha256 not a valid SHA-256: {plugin_sha!r}"
+    # Validate SHA-256 format: exactly 64 lowercase hex chars.
+    # Per reviewer round 3: "validator 还需要校验 64 位十六进制" — must use
+    # regex, not just check length==64.
+    if engine_sha != "clean":
+        if not _SHA256_RE.match(engine_sha):
+            return False, (
+                f"engine_patch_sha256 not valid 64-hex SHA-256: {engine_sha!r}"
+            )
+    if plugin_sha != "clean":
+        if not _SHA256_RE.match(plugin_sha):
+            return False, (
+                f"plugin_patch_sha256 not valid 64-hex SHA-256: {plugin_sha!r}"
+            )
 
-    # Verify the referenced patch files exist on disk (when not "clean")
+    # Recompute SHA-256 of the patch file and compare with manifest value.
+    # Per reviewer round 3: "重新计算 patch 文件 SHA-256，而不是只看长度和文件存在"
+    # — this detects patch tampering after manifest creation.
     if engine_sha != "clean":
         engine_patch_file = manifest.get("engine_patch_file")
         if not engine_patch_file:
             return False, "engine_patch_file reference missing"
-        if not (rep_dir / engine_patch_file).is_file():
+        engine_patch_path = rep_dir / engine_patch_file
+        if not engine_patch_path.is_file():
             return False, f"engine patch file not found: {engine_patch_file}"
+        recomputed = hashlib.sha256(engine_patch_path.read_bytes()).hexdigest()
+        if recomputed != engine_sha:
+            return False, (
+                f"engine patch SHA-256 mismatch: manifest={engine_sha} "
+                f"recomputed={recomputed} (patch may be tampered)"
+            )
 
     if plugin_sha != "clean":
         plugin_patch_file = manifest.get("plugin_patch_file")
         if not plugin_patch_file:
             return False, "plugin_patch_file reference missing"
-        if not (rep_dir / plugin_patch_file).is_file():
+        plugin_patch_path = rep_dir / plugin_patch_file
+        if not plugin_patch_path.is_file():
             return False, f"plugin patch file not found: {plugin_patch_file}"
+        recomputed = hashlib.sha256(plugin_patch_path.read_bytes()).hexdigest()
+        if recomputed != plugin_sha:
+            return False, (
+                f"plugin patch SHA-256 mismatch: manifest={plugin_sha} "
+                f"recomputed={recomputed} (patch may be tampered)"
+            )
 
     return True, ""
 

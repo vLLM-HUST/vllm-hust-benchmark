@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import sys
@@ -21,6 +22,29 @@ def analyze_mod():
     sys.modules[spec.name] = mod
     spec.loader.exec_module(mod)
     return mod
+
+
+def _write_valid_manifest(rep_dir: Path) -> None:
+    """Write a valid env-manifest.json with matching patch file SHA-256.
+
+    Used by collect_results tests that need reps to pass manifest validation.
+    """
+    patch_content = "=== PATCH ===\n+change\n"
+    patch_file = rep_dir / "derived_patch_engine.diff"
+    patch_file.write_text(patch_content)
+    plugin_patch_file = rep_dir / "derived_patch_plugin.diff"
+    plugin_patch_file.write_text(patch_content)
+
+    sha = hashlib.sha256(patch_content.encode()).hexdigest()
+    manifest = {
+        "engine_commit_observed": "a" * 40,
+        "engine_patch_sha256": sha,
+        "engine_patch_file": "derived_patch_engine.diff",
+        "plugin_commit_observed": "b" * 40,
+        "plugin_patch_sha256": sha,
+        "plugin_patch_file": "derived_patch_plugin.diff",
+    }
+    (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
 
 # ---------------------------------------------------------------------------
@@ -298,8 +322,9 @@ class TestCollectResults:
                 (d / "raw.json").write_text(
                     json.dumps({"tokens_per_second": 1000.0 + rep * 10})
                 )
-                # .completed marker required for collection
+                # .completed marker + valid manifest required for collection
                 (d / ".completed").touch()
+                _write_valid_manifest(d)
 
         results = analyze_mod.collect_results(tmp_path)
         assert "sonnet-throughput" in results
@@ -314,6 +339,7 @@ class TestCollectResults:
             d.mkdir(parents=True)
             (d / "raw.json").write_text(json.dumps({"avg_latency": 10.0 + rep * 0.1}))
             (d / ".completed").touch()
+            _write_valid_manifest(d)
 
         results = analyze_mod.collect_results(tmp_path)
         # rep-1: avg_latency=10.1s -> 10100.0 ms
@@ -332,6 +358,7 @@ class TestCollectResults:
         d.mkdir(parents=True)
         (d / "raw.json").write_text("not valid json")
         (d / ".completed").touch()
+        _write_valid_manifest(d)
         results = analyze_mod.collect_results(tmp_path)
         assert results["sonnet-throughput"]["2206f1f7b7"] == []
 
@@ -347,6 +374,7 @@ class TestCollectResults:
         d.mkdir(parents=True)
         # Stale raw.json present but NO .completed marker
         (d / "raw.json").write_text(json.dumps({"tokens_per_second": 9999.0}))
+        _write_valid_manifest(d)
         # Deliberately do NOT create .completed
 
         results = analyze_mod.collect_results(tmp_path)
@@ -360,6 +388,7 @@ class TestCollectResults:
             (d / "raw.json").write_text(
                 json.dumps({"tokens_per_second": 1000.0 + rep * 10})
             )
+            _write_valid_manifest(d)
             # rep-2 is "incomplete" (failed, no .completed)
             if rep != 2:
                 (d / ".completed").touch()
@@ -472,7 +501,28 @@ class TestValidateEnvManifest:
 
         valid, reason = analyze_mod.validate_env_manifest(rep_dir)
         assert not valid
-        assert "not a valid SHA-256" in reason
+        assert "not valid 64-hex SHA-256" in reason
+
+    def test_rejects_non_hex_sha256(self, analyze_mod, tmp_path):
+        """Reverse test: 64 chars but with non-hex characters is rejected.
+
+        Per reviewer round 3: 'validator 还需要校验 64 位十六进制' — must
+        verify hex format with regex, not just length==64.
+        """
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            # 64 chars but contains 'g' and 'z' (not hex)
+            "engine_patch_sha256": "g" * 32 + "z" * 32,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "not valid 64-hex SHA-256" in reason
 
     def test_rejects_missing_patch_file_on_disk(self, analyze_mod, tmp_path):
         """Reverse test: a manifest referencing a patch file that doesn't
@@ -493,6 +543,37 @@ class TestValidateEnvManifest:
         assert not valid
         assert "patch file not found" in reason
 
+    def test_rejects_tampered_patch_file(self, analyze_mod, tmp_path):
+        """Reverse test: patch file content modified after manifest creation.
+
+        Per reviewer round 3: '重新计算 patch 文件 SHA-256，而不是只看长度和
+        文件存在' — the validator must recompute the SHA-256 of the patch file
+        and compare with the manifest value to detect tampering.
+        """
+        import hashlib
+
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        original_content = "=== ORIGINAL PATCH ===\n+original line\n"
+        tampered_content = "=== TAMPERED PATCH ===\n+malicious line\n"
+        (rep_dir / "derived_patch_engine.diff").write_text(tampered_content)
+
+        # SHA-256 of the ORIGINAL content, but file now has TAMPERED content
+        original_sha = hashlib.sha256(original_content.encode()).hexdigest()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": original_sha,
+            "engine_patch_file": "derived_patch_engine.diff",
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "SHA-256 mismatch" in reason
+        assert "tampered" in reason
+
     def test_rejects_missing_manifest(self, analyze_mod, tmp_path):
         """Reverse test: a rep directory without env-manifest.json is rejected."""
         rep_dir = tmp_path / "rep-1"
@@ -512,3 +593,130 @@ class TestValidateEnvManifest:
         valid, reason = analyze_mod.validate_env_manifest(rep_dir)
         assert not valid
         assert "corrupt" in reason
+
+
+# ---------------------------------------------------------------------------
+# collect_results manifest enforcement (issue #146 reviewer round 3)
+# ---------------------------------------------------------------------------
+
+
+class TestCollectResultsManifestEnforcement:
+    """Tests that collect_results enforces validate_env_manifest.
+
+    Per reviewer round 3: 'collect_results 只检查 marker 和 raw.json，从未调用
+    新增的 validate_env_manifest，因此当前仓库里仍是 MD5 manifest、没有 derived
+    patch 文件的旧结果也会继续参与结论。请...收集时强制 validate_env_manifest'.
+    """
+
+    def test_collect_skips_rep_with_missing_manifest(self, analyze_mod, tmp_path):
+        """collect_results must skip reps where env-manifest.json is missing,
+        even if .completed and raw.json exist.
+
+        Per reviewer round 3: '后者失败时 marker 会保留' — but now the bash
+        script writes .completed AFTER manifest.  Still, collect_results must
+        enforce manifest validation independently.
+        """
+        d = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-1"
+        d.mkdir(parents=True)
+        (d / "raw.json").write_text(json.dumps({"tokens_per_second": 1000.0}))
+        (d / ".completed").touch()
+        # Deliberately NO env-manifest.json
+
+        results = analyze_mod.collect_results(tmp_path)
+        assert results["sonnet-throughput"]["2206f1f7b7"] == []
+
+    def test_collect_skips_rep_with_old_md5_manifest(self, analyze_mod, tmp_path):
+        """collect_results must skip reps with old MD5-only manifests.
+
+        Per reviewer round 3: '当前仓库里仍是 MD5 manifest、没有 derived patch
+        文件的旧结果也会继续参与结论' — must be rejected.
+        """
+        d = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-1"
+        d.mkdir(parents=True)
+        (d / "raw.json").write_text(json.dumps({"tokens_per_second": 1000.0}))
+        (d / ".completed").touch()
+        # Old MD5 manifest (no sha256 fields)
+        old_manifest = {
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_identity": "abc123def456",  # pragma: allowlist secret
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_identity": "xyz789abc012",  # pragma: allowlist secret
+        }
+        (d / "env-manifest.json").write_text(json.dumps(old_manifest))
+
+        results = analyze_mod.collect_results(tmp_path)
+        assert results["sonnet-throughput"]["2206f1f7b7"] == []
+
+    def test_collect_skips_rep_with_tampered_patch(self, analyze_mod, tmp_path):
+        """collect_results must skip reps where the patch file was tampered
+        (SHA-256 mismatch between manifest and file content).
+
+        Per reviewer round 3: 'patch 被篡改的反向测试'.
+        """
+        import hashlib
+
+        d = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-1"
+        d.mkdir(parents=True)
+        (d / "raw.json").write_text(json.dumps({"tokens_per_second": 1000.0}))
+        (d / ".completed").touch()
+
+        # Write a patch file with tampered content
+        tampered_content = "=== TAMPERED ===\n"
+        (d / "derived_patch_engine.diff").write_text(tampered_content)
+        (d / "derived_patch_plugin.diff").write_text(tampered_content)
+
+        # But manifest records SHA-256 of different (original) content
+        original_sha = hashlib.sha256(b"=== ORIGINAL ===\n").hexdigest()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": original_sha,
+            "engine_patch_file": "derived_patch_engine.diff",
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": original_sha,
+            "plugin_patch_file": "derived_patch_plugin.diff",
+        }
+        (d / "env-manifest.json").write_text(json.dumps(manifest))
+
+        results = analyze_mod.collect_results(tmp_path)
+        assert results["sonnet-throughput"]["2206f1f7b7"] == []
+
+    def test_collect_includes_rep_with_valid_manifest(self, analyze_mod, tmp_path):
+        """collect_results must include reps with valid manifest + .completed."""
+        d = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-1"
+        d.mkdir(parents=True)
+        (d / "raw.json").write_text(json.dumps({"tokens_per_second": 1000.0}))
+        (d / ".completed").touch()
+        _write_valid_manifest(d)
+
+        results = analyze_mod.collect_results(tmp_path)
+        assert len(results["sonnet-throughput"]["2206f1f7b7"]) == 1
+        assert results["sonnet-throughput"]["2206f1f7b7"][0] == 1000.0
+
+    def test_collect_mixed_valid_and_invalid_manifests(self, analyze_mod, tmp_path):
+        """Only reps with valid manifests are collected; invalid ones skipped."""
+        # rep-1: valid manifest
+        d1 = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-1"
+        d1.mkdir(parents=True)
+        (d1 / "raw.json").write_text(json.dumps({"tokens_per_second": 1000.0}))
+        (d1 / ".completed").touch()
+        _write_valid_manifest(d1)
+
+        # rep-2: missing manifest (simulates manifest write failure)
+        d2 = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-2"
+        d2.mkdir(parents=True)
+        (d2 / "raw.json").write_text(json.dumps({"tokens_per_second": 2000.0}))
+        (d2 / ".completed").touch()
+        # No env-manifest.json
+
+        # rep-3: valid manifest
+        d3 = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-3"
+        d3.mkdir(parents=True)
+        (d3 / "raw.json").write_text(json.dumps({"tokens_per_second": 3000.0}))
+        (d3 / ".completed").touch()
+        _write_valid_manifest(d3)
+
+        results = analyze_mod.collect_results(tmp_path)
+        # Only rep-1 and rep-3 collected (rep-2 skipped due to missing manifest)
+        assert len(results["sonnet-throughput"]["2206f1f7b7"]) == 2
+        assert 1000.0 in results["sonnet-throughput"]["2206f1f7b7"]
+        assert 3000.0 in results["sonnet-throughput"]["2206f1f7b7"]
