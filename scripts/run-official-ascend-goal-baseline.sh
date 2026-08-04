@@ -1991,6 +1991,10 @@ wait_for_single_card_ascend_device() {
 }
 
 stop_peak_hbm_sampler() {
+  if [[ "${VLLM_HUST_STRICT_HOST_ORCHESTRATED:-}" == "1" ]]; then
+    PEAK_HBM_SAMPLER_PID=""
+    return 0
+  fi
   if [[ -n "${PEAK_HBM_SAMPLER_PID:-}" ]]; then
     kill -TERM "$PEAK_HBM_SAMPLER_PID" >/dev/null 2>&1 || true
     wait "$PEAK_HBM_SAMPLER_PID" >/dev/null 2>&1 || true
@@ -2001,6 +2005,14 @@ stop_peak_hbm_sampler() {
 start_peak_hbm_sampler() {
   local device_scope=${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
   stop_peak_hbm_sampler
+  if [[ "${VLLM_HUST_STRICT_HOST_ORCHESTRATED:-}" == "1" ]]; then
+    if [[ -z "${VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE:-}" ]]; then
+      echo "Strict host orchestration requires VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE" >&2
+      exit 2
+    fi
+    PEAK_HBM_EVIDENCE_FILE="$VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE"
+    return 0
+  fi
   if [[ -z "$device_scope" ]]; then
     echo "Explicit Ascend device scope is required for peak HBM evidence" >&2
     exit 2
