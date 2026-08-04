@@ -405,8 +405,8 @@ print(f'Validated: {val}')
 #
 # Cgroup v2 is the PRIMARY attribution mechanism:
 #   - A job-owned cgroup is created before launching the bench.
-#   - The launcher PID is added to the cgroup.
-#   - ALL descendants (forks) automatically join the cgroup at fork time —
+#   - The launcher joins the cgroup via exec_in_cgroup BEFORE exec'ing
+#     the benchmark — all descendants inherit membership at fork time,
 #     BEFORE they can call setsid() or reparent.
 #   - Cleanup reads cgroup.procs to find every process, including those that
 #     called setsid() and left the launcher's session.
@@ -416,9 +416,13 @@ print(f'Validated: {val}')
 # environments without cgroup v2, but it explicitly CANNOT catch processes
 # that called setsid().
 #
-# Key design:
+# Key design (reviewer round 8):
 #   - Launcher started via ``setsid`` (session leader) for fallback.
-#   - Launcher added to cgroup BEFORE exec (primary).
+#   - Launcher joins cgroup BEFORE exec via exec_in_cgroup wrapper (primary).
+#   - A ready_file handshake lets the parent detect successful cgroup join.
+#   - If the join fails (timeout or wrapper exit), _JOB_CGROUP_PATH is
+#     cleared so the session fallback is used — fail closed, never silently
+#     swallow the failure.
 #   - Launcher starttime + cmdline recorded at launch.
 #   - All cleanup verifies PID + starttime + cmdline before killing.
 run_bench_tracked() {
@@ -436,23 +440,60 @@ run_bench_tracked() {
     _VERIFIED_DESCENDANTS_FILE=$(mktemp)
     : > "$_VERIFIED_DESCENDANTS_FILE"  # truncate
 
-    # PRIMARY: Create a job-owned cgroup and add the launcher to it.
-    # All descendants will automatically join the cgroup at fork time,
-    # BEFORE they can call setsid() — this is the unforgeable attribution.
+    # PRIMARY: Create a job-owned cgroup BEFORE launching anything.
     local job_id="bench_$$_$(date +%s)"
     _JOB_CGROUP_PATH=$("$PYTHON" "$_PROCESS_IDENTITY_PY" create_cgroup \
         "$job_id" 2>/dev/null || echo "")
 
-    # Start the bench command via setsid — it becomes a session leader so
-    # all descendants inherit the SID (fallback mechanism).
-    setsid "$@" > >(tee "$log_file") 2>&1 &
-    local bench_pid=$!
-    _CURRENT_BENCH_PID=$bench_pid
-
-    # PRIMARY: Add launcher to cgroup — all descendants will join at fork.
+    # Start the bench command via a wrapper that joins the cgroup BEFORE exec.
+    #
+    # Per reviewer round 8: '请用受控 wrapper/握手让 launcher 自身在 exec
+    # benchmark、产生任何后代之前成功加入 job cgroup，加入失败时 fail closed'
+    #
+    # The wrapper (exec_in_cgroup):
+    # 1. Writes its own PID to cgroup.procs (joins the cgroup).
+    # 2. Verifies membership (fail closed — exits 127 if not).
+    # 3. Writes ready_file to signal the parent.
+    # 4. exec's the benchmark command (replaces the process, keeps PID).
+    #
+    # This closes the startup race: the launcher is in the cgroup BEFORE
+    # it can fork any descendants.  All forks inherit cgroup membership
+    # at fork time — BEFORE they can call setsid() or reparent.
+    local bench_pid
     if [ -n "$_JOB_CGROUP_PATH" ]; then
-        "$PYTHON" "$_PROCESS_IDENTITY_PY" add_pid \
-            "$bench_pid" "$_JOB_CGROUP_PATH" 2>/dev/null || true
+        local ready_file
+        ready_file=$(mktemp)
+        rm -f "$ready_file"  # remove so the wrapper can create it
+
+        setsid "$PYTHON" "$_PROCESS_IDENTITY_PY" exec_in_cgroup \
+            "$_JOB_CGROUP_PATH" "$ready_file" "$@" \
+            > >(tee "$log_file") 2>&1 &
+        bench_pid=$!
+        _CURRENT_BENCH_PID=$bench_pid
+
+        # Wait for the wrapper to signal it has joined the cgroup.
+        # Per reviewer round 8: '加入失败时 fail closed' — if the wrapper
+        # doesn't signal within 5 seconds (or exits before signaling),
+        # clear _JOB_CGROUP_PATH so the session fallback is used.
+        local waited=0
+        while [ ! -f "$ready_file" ] && [ $waited -lt 50 ]; do
+            if ! kill -0 "$bench_pid" 2>/dev/null; then
+                break
+            fi
+            sleep 0.1
+            waited=$((waited + 1))
+        done
+
+        if [ ! -f "$ready_file" ]; then
+            log "  WARNING: wrapper did not join cgroup (timeout or exit), using session fallback"
+            _JOB_CGROUP_PATH=""
+        fi
+        rm -f "$ready_file" 2>/dev/null || true
+    else
+        # No cgroup available — use plain setsid (session scan fallback).
+        setsid "$@" > >(tee "$log_file") 2>&1 &
+        bench_pid=$!
+        _CURRENT_BENCH_PID=$bench_pid
     fi
 
     # Record launcher SID — fallback for session-based scan.

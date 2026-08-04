@@ -1126,6 +1126,102 @@ class TestCgroupFunctions:
         else:
             assert exit_code == 1
 
+    def test_pid_in_cgroup_returns_false_for_missing_path(self, pi_mod):
+        """pid_in_cgroup returns False for a non-existent cgroup path."""
+        result = pi_mod.pid_in_cgroup(99999, Path("/nonexistent/cgroup/path"))
+        assert result is False
+
+    def test_pid_in_cgroup_returns_true_when_pid_listed(self, pi_mod, tmp_path):
+        """pid_in_cgroup returns True when the PID is in cgroup.procs."""
+        procs_file = tmp_path / "cgroup.procs"
+        procs_file.write_text("12345\n67890\n")
+        assert pi_mod.pid_in_cgroup(12345, tmp_path) is True
+        assert pi_mod.pid_in_cgroup(67890, tmp_path) is True
+
+    def test_pid_in_cgroup_returns_false_when_pid_not_listed(self, pi_mod, tmp_path):
+        """pid_in_cgroup returns False when the PID is NOT in cgroup.procs."""
+        procs_file = tmp_path / "cgroup.procs"
+        procs_file.write_text("12345\n67890\n")
+        assert pi_mod.pid_in_cgroup(99999, tmp_path) is False
+
+    def test_pid_in_cgroup_cli_exit_codes(self, pi_mod, tmp_path):
+        """pid_in_cgroup CLI exits 0 if PID is in cgroup, 1 if not."""
+        procs_file = tmp_path / "cgroup.procs"
+        procs_file.write_text(f"{__import__('os').getpid()}\n")
+        with patch(
+            "sys.argv",
+            [
+                "process_identity.py",
+                "pid_in_cgroup",
+                str(__import__("os").getpid()),
+                str(tmp_path),
+            ],
+        ):
+            assert pi_mod.main() == 0
+        with patch(
+            "sys.argv",
+            ["process_identity.py", "pid_in_cgroup", "99999", str(tmp_path)],
+        ):
+            assert pi_mod.main() == 1
+
+    def test_exec_in_cgroup_fails_closed_on_join_error(self, pi_mod, tmp_path):
+        """exec_in_cgroup returns 127 when cgroup join fails (fail closed).
+
+        Per reviewer round 8: '加入失败时 fail closed' — if writing to
+        cgroup.procs fails, the wrapper must NOT exec the command.
+        """
+        ready_file = tmp_path / "ready"
+        with (
+            patch("pathlib.Path.write_text", side_effect=PermissionError("denied")),
+            patch("os.execvp") as mock_exec,
+        ):
+            rc = pi_mod.exec_in_cgroup(tmp_path, ready_file, ["echo", "hello"])
+        assert rc == 127
+        mock_exec.assert_not_called()
+        assert not ready_file.exists()
+
+    def test_exec_in_cgroup_fails_closed_on_membership_check(self, pi_mod, tmp_path):
+        """exec_in_cgroup returns 127 when membership verification fails.
+
+        Even if write_text succeeds, if pid_in_cgroup returns False (write
+        was silently ignored), the wrapper must fail closed.
+        """
+        ready_file = tmp_path / "ready"
+        with (
+            patch.object(pi_mod, "pid_in_cgroup", return_value=False),
+            patch("os.execvp") as mock_exec,
+        ):
+            rc = pi_mod.exec_in_cgroup(tmp_path, ready_file, ["echo", "hello"])
+        assert rc == 127
+        mock_exec.assert_not_called()
+
+    def test_exec_in_cgroup_writes_ready_file_and_execs(self, pi_mod, tmp_path):
+        """exec_in_cgroup writes ready_file and calls os.execvp on success."""
+        ready_file = tmp_path / "ready"
+        with (
+            patch.object(pi_mod, "pid_in_cgroup", return_value=True),
+            patch("os.execvp") as mock_exec,
+        ):
+            # On success, exec replaces the process and does not return.
+            # Since execvp is mocked, the function falls through to the
+            # unreachable return 127 — we ignore the return value and
+            # assert the side effects instead.
+            pi_mod.exec_in_cgroup(tmp_path, ready_file, ["echo", "hello"])
+        # 1. ready_file was written (join signaled to parent)
+        assert ready_file.exists()
+        # 2. os.execvp was called with the correct command
+        mock_exec.assert_called_once_with("echo", ["echo", "hello"])
+
+    def test_exec_in_cgroup_returns_127_on_exec_failure(self, pi_mod, tmp_path):
+        """exec_in_cgroup returns 127 if os.execvp raises OSError."""
+        ready_file = tmp_path / "ready"
+        with (
+            patch.object(pi_mod, "pid_in_cgroup", return_value=True),
+            patch("os.execvp", side_effect=OSError("no such command")),
+        ):
+            rc = pi_mod.exec_in_cgroup(tmp_path, ready_file, ["nonexistent_cmd"])
+        assert rc == 127
+
 
 class TestRealCgroupSetsidCleanup:
     """Real subprocess tests: descendant setsid + launcher exit + cgroup cleanup.
@@ -1148,15 +1244,22 @@ class TestRealCgroupSetsidCleanup:
     def test_cgroup_catches_setsid_descendant(self, pi_mod):
         """Cgroup catches a descendant that called setsid().
 
+        Per reviewer round 8: '请用受控 wrapper/握手让 launcher 自身在 exec
+        benchmark、产生任何后代之前成功加入 job cgroup' — uses exec_in_cgroup
+        to ensure the launcher joins the cgroup BEFORE forking descendants.
+
         Steps:
         1. Create a cgroup.
-        2. Start a launcher in the cgroup that forks a child.
-        3. The child calls setsid() (enters a new session).
-        4. Read cgroup.procs — should include the setsid'd child.
+        2. Use exec_in_cgroup to start a launcher that joins the cgroup
+           BEFORE exec'ing bash.
+        3. The launcher forks a child that calls setsid() (new session).
+        4. Read cgroup.procs — should include the setsid'd child via
+           fork-time inheritance (NOT direct migration).
         5. Verify session scan of the launcher's SID does NOT find the child.
         """
         import os
         import signal
+        import tempfile
         import time
 
         parent = pi_mod.get_writable_cgroup_parent()
@@ -1168,70 +1271,82 @@ class TestRealCgroupSetsidCleanup:
         if cgroup_path is None:
             pytest.skip("Could not create cgroup")
 
-        r_fd, w_fd = os.pipe()
+        child_pid_file = tempfile.mktemp()
+        ready_file = tempfile.mktemp()
+        os.unlink(ready_file)  # remove so wrapper can create it
+
         try:
-            # Start a launcher that:
-            # 1. Forks a child that calls setsid() and sleeps
-            # 2. Reports the child's PID via pipe
-            # 3. Sleeps to stay alive
+            # Launcher script: fork a setsid'd child, write its PID, stay alive.
+            launcher_script = (
+                f"setsid bash -c 'sleep 30' & echo $! > {child_pid_file}; sleep 30"
+            )
+
+            # Start via exec_in_cgroup: wrapper joins cgroup, then execs bash.
+            # The launcher (bash) is in the cgroup BEFORE forking the child,
+            # so the child inherits membership at fork time.
             proc = subprocess.Popen(
                 [
                     "setsid",
+                    sys.executable,
+                    str(SCRIPT_PATH),
+                    "exec_in_cgroup",
+                    str(cgroup_path),
+                    ready_file,
                     "bash",
                     "-c",
-                    f"echo $$ > /dev/fd/{w_fd}; "
-                    # Fork a child that setsid's into a new session
-                    "bash -c 'setsid sleep 30 & echo $! >&2' 2>/tmp/setsid_child_pid;"
-                    "sleep 30",
+                    launcher_script,
                 ],
-                pass_fds=(w_fd,),
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            os.close(w_fd)
 
-            leader_pid_str = os.read(r_fd, 32).decode().strip()
-            os.close(r_fd)
-            if not leader_pid_str:
-                pytest.skip("Could not read leader PID")
-            leader_pid = int(leader_pid_str)
+            # Wait for the wrapper to signal cgroup join.
+            waited = 0
+            while not os.path.exists(ready_file) and waited < 50:
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.1)
+                waited += 1
 
-            # Add launcher to cgroup — all descendants join at fork time
-            assert pi_mod.add_pid_to_cgroup(leader_pid, cgroup_path) is True
+            if not os.path.exists(ready_file):
+                pytest.skip("Wrapper did not join cgroup (may lack permissions)")
 
-            time.sleep(1.0)  # Give the setsid child time to start
+            # Wait for the child PID to be written.
+            waited = 0
+            while not os.path.exists(child_pid_file) and waited < 50:
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.1)
+                waited += 1
 
-            # Read the setsid'd child's PID
-            child_pid = None
-            try:
-                with open("/tmp/setsid_child_pid") as f:
-                    child_pid = int(f.read().strip())
-            except (FileNotFoundError, ValueError):
-                pytest.skip("Could not read setsid child PID")
+            if not os.path.exists(child_pid_file):
+                pytest.skip("Could not read child PID")
 
-            # CGROUP scan: should find the setsid'd child
+            with open(child_pid_file) as f:
+                child_pid = int(f.read().strip())
+
+            time.sleep(0.5)  # Give the setsid child time to settle
+
+            # CGROUP scan: should find the setsid'd child via INHERITANCE.
             cgroup_snapshots = pi_mod.snapshot_cgroup_descendants(cgroup_path)
             cgroup_pids = {e["pid"] for e in cgroup_snapshots}
             assert child_pid in cgroup_pids, (
-                f"Cgroup scan MUST find setsid'd child (pid {child_pid}), "
-                f"got pids: {cgroup_pids}"
+                f"Cgroup scan MUST find setsid'd child (pid {child_pid}) via "
+                f"fork-time inheritance. Got pids: {cgroup_pids}"
             )
 
-            # SESSION scan: should NOT find the setsid'd child
-            sid = pi_mod.get_session_id(leader_pid)
-            if sid is not None:
-                session_snapshots = pi_mod.snapshot_session_descendants(sid)
+            # SESSION scan: should NOT find the setsid'd child (it left the
+            # session by calling setsid).  This proves cgroup is superior.
+            launcher_sid = pi_mod.get_session_id(proc.pid)
+            if launcher_sid is not None:
+                session_snapshots = pi_mod.snapshot_session_descendants(launcher_sid)
                 session_pids = {e["pid"] for e in session_snapshots}
-                # The child should NOT be in the session scan
-                # (it left the session by calling setsid)
-                # This proves cgroup is superior to session scan
                 assert child_pid not in session_pids, (
                     f"Session scan should NOT find setsid'd child (pid {child_pid}), "
                     f"but it did. The child may not have actually called setsid()."
                 )
 
         finally:
-            # Clean up: kill all processes in cgroup
             pi_mod.cleanup_cgroup_descendants(cgroup_path, signal.SIGKILL)
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
@@ -1239,29 +1354,38 @@ class TestRealCgroupSetsidCleanup:
                 pass
             proc.wait(timeout=5)
             pi_mod.remove_cgroup(cgroup_path)
-            try:
-                os.unlink("/tmp/setsid_child_pid")
-            except OSError:
-                pass
+            for f in [child_pid_file, ready_file]:
+                try:
+                    os.unlink(f)
+                except OSError:
+                    pass
 
     @_SKIP_NON_LINUX
     @_SKIP_NO_CGROUP
     def test_cgroup_cleanup_kills_setsid_after_launcher_exit(self, pi_mod):
         """Cleanup kills setsid'd descendant AFTER launcher exits.
 
-        Per reviewer round 7: '请让真实测试中的 descendant 确实建立新 session
-        并让 launcher 先退出，确认清理仍能凭已同步登记的 PID/starttime/cmdline
-        找到它'.
+        Per reviewer round 8: '再用真实测试只迁 launcher、让它之后
+        fork→setsid→exit，确认 child 从继承关系进入 cgroup并被清理，
+        不要直接迁 child。'
+
+        This test ONLY migrates the launcher (via exec_in_cgroup).  The
+        child enters the cgroup via fork-time inheritance — NOT via direct
+        migration.  This proves the cgroup attribution mechanism works
+        correctly for the real startup sequence.
 
         Steps:
         1. Create a cgroup.
-        2. Start a launcher in the cgroup that forks a setsid'd child.
-        3. Launcher exits naturally.
-        4. The setsid'd child is still alive (orphaned, reparented to init).
-        5. cleanup_cgroup_descendants finds and kills it via cgroup.
+        2. Use exec_in_cgroup to start a launcher that joins the cgroup
+           BEFORE exec'ing bash.
+        3. The launcher forks a child that calls setsid() (new session).
+        4. The launcher EXITS immediately.
+        5. The setsid'd child is still alive (orphaned, reparented to init).
+        6. cleanup_cgroup_descendants finds and kills it via cgroup.
         """
         import os
         import signal
+        import tempfile
         import time
 
         parent = pi_mod.get_writable_cgroup_parent()
@@ -1273,57 +1397,84 @@ class TestRealCgroupSetsidCleanup:
         if cgroup_path is None:
             pytest.skip("Could not create cgroup")
 
-        r_fd, w_fd = os.pipe()
+        child_pid_file = tempfile.mktemp()
+        ready_file = tempfile.mktemp()
+        os.unlink(ready_file)  # remove so wrapper can create it
+
         try:
-            # Start a launcher that:
-            # 1. Forks a child that calls setsid() and sleeps 30s
-            # 2. Writes the child's PID to the pipe
-            # 3. EXITS immediately (does NOT sleep)
+            # Launcher script: fork a setsid'd child, write its PID, EXIT.
+            # The child survives as an orphan in a new session.
+            launcher_script = f"setsid bash -c 'sleep 30' & echo $! > {child_pid_file}"
+
+            # Start via exec_in_cgroup: wrapper joins cgroup, then execs bash.
+            # The launcher (bash) is in the cgroup BEFORE forking the child,
+            # so the child inherits membership at fork time.
             proc = subprocess.Popen(
                 [
                     "setsid",
+                    sys.executable,
+                    str(SCRIPT_PATH),
+                    "exec_in_cgroup",
+                    str(cgroup_path),
+                    ready_file,
                     "bash",
                     "-c",
-                    # Fork a setsid'd child that survives after launcher exits
-                    f"setsid bash -c 'sleep 30' & echo $! > /dev/fd/{w_fd}",
+                    launcher_script,
                 ],
-                pass_fds=(w_fd,),
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            os.close(w_fd)
 
-            child_pid_str = os.read(r_fd, 32).decode().strip()
-            os.close(r_fd)
-            if not child_pid_str:
+            # Wait for the wrapper to signal cgroup join.
+            waited = 0
+            while not os.path.exists(ready_file) and waited < 50:
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.1)
+                waited += 1
+
+            if not os.path.exists(ready_file):
+                pytest.skip("Wrapper did not join cgroup (may lack permissions)")
+
+            # Wait for the child PID to be written.
+            waited = 0
+            while not os.path.exists(child_pid_file) and waited < 50:
+                if proc.poll() is not None:
+                    break
+                time.sleep(0.1)
+                waited += 1
+
+            if not os.path.exists(child_pid_file):
                 pytest.skip("Could not read child PID")
-            child_pid = int(child_pid_str)
 
-            # Add the launcher to cgroup BEFORE it forks the child.
-            # In this test, the launcher is already gone, so we add the
-            # child directly. In the real script, the launcher is added
-            # before exec, so descendants join automatically.
-            # For the test, we add the child directly to simulate this.
-            assert pi_mod.add_pid_to_cgroup(child_pid, cgroup_path) is True
+            with open(child_pid_file) as f:
+                child_pid = int(f.read().strip())
 
-            # Wait for the launcher to exit
+            # Wait for the launcher to exit.
             proc.wait(timeout=5)
 
             time.sleep(0.5)  # Ensure child is reparented
 
-            # The child should still be alive (orphaned, in a new session)
+            # The child should still be alive (orphaned, in a new session).
             assert pi_mod.get_starttime(child_pid) is not None, (
                 "Setsid'd child should still be alive after launcher exit"
             )
 
-            # CGROUP cleanup should find and kill the child
+            # Verify the child is in the cgroup via INHERITANCE (not direct
+            # migration).  Per reviewer round 8: '不要直接迁 child'.
+            assert pi_mod.pid_in_cgroup(child_pid, cgroup_path), (
+                f"Child (pid {child_pid}) must be in cgroup via fork-time "
+                f"inheritance from the launcher, NOT direct migration."
+            )
+
+            # CGROUP cleanup should find and kill the child.
             summary = pi_mod.cleanup_cgroup_descendants(cgroup_path, signal.SIGTERM)
             assert child_pid in summary["killed"], (
                 f"Cgroup cleanup must kill setsid'd child (pid {child_pid}) "
                 f"after launcher exit. Summary: {summary}"
             )
 
-            # Verify the child is dead
+            # Verify the child is dead.
             time.sleep(0.5)
             assert pi_mod.get_starttime(child_pid) is None, (
                 "Setsid'd child must be dead after cgroup cleanup"
@@ -1338,6 +1489,11 @@ class TestRealCgroupSetsidCleanup:
                 pass
             proc.wait(timeout=5)
             pi_mod.remove_cgroup(cgroup_path)
+            for f in [child_pid_file, ready_file]:
+                try:
+                    os.unlink(f)
+                except OSError:
+                    pass
 
     @_SKIP_NON_LINUX
     @_SKIP_NO_CGROUP

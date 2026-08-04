@@ -470,6 +470,91 @@ def remove_cgroup(cgroup_path: Path) -> bool:
         return False
 
 
+def pid_in_cgroup(pid: int, cgroup_path: Path) -> bool:
+    """Check if ``pid`` is a member of ``cgroup_path``.
+
+    Reads ``cgroup.procs`` and returns True if ``pid`` is listed.
+    """
+    procs_file = cgroup_path / "cgroup.procs"
+    try:
+        content = procs_file.read_text()
+    except (OSError, PermissionError):
+        return False
+    target = str(pid)
+    for line in content.split():
+        if line.strip() == target:
+            return True
+    return False
+
+
+def exec_in_cgroup(
+    cgroup_path: Path,
+    ready_file: Path,
+    cmd: list[str],
+) -> int:
+    """Join ``cgroup_path`` then ``exec`` ``cmd``.
+
+    Per reviewer round 8: '请用受控 wrapper/握手让 launcher 自身在 exec
+    benchmark、产生任何后代之前成功加入 job cgroup，加入失败时 fail closed'.
+
+    This closes the startup race: the process joins the cgroup BEFORE
+    exec'ing the benchmark, so all descendants inherit cgroup membership
+    at fork time — BEFORE they can call ``setsid()`` or reparent.
+
+    Steps:
+    1. Write own PID to ``cgroup.procs`` (join the cgroup).
+    2. Verify membership (fail closed if not).
+    3. Write ``ready_file`` to signal the parent that the join succeeded.
+    4. ``exec`` the command (replaces the process, keeps PID).
+
+    If joining fails, exit with code 127 (fail closed) — do NOT exec
+    the command, as descendants would not be tracked.
+
+    Args:
+        cgroup_path: Path to the job-owned cgroup v2 directory.
+        ready_file: Path to a file that is created after successfully
+            joining the cgroup.  The parent polls for this file to
+            detect that the join completed.
+        cmd: Command and arguments to exec after joining.
+
+    Returns:
+        Does not return on success (``exec`` replaces the process).
+        Returns 127 on cgroup join failure or exec failure.
+    """
+    procs_file = cgroup_path / "cgroup.procs"
+    my_pid = os.getpid()
+    try:
+        procs_file.write_text(f"{my_pid}\n")
+    except (OSError, PermissionError) as exc:
+        print(f"exec_in_cgroup: failed to join cgroup: {exc}", file=sys.stderr)
+        return 127
+
+    # Verify membership — fail closed if the write didn't take effect.
+    if not pid_in_cgroup(my_pid, cgroup_path):
+        print(
+            "exec_in_cgroup: PID not in cgroup after join (write silently ignored?)",
+            file=sys.stderr,
+        )
+        return 127
+
+    # Signal to the parent that the join succeeded.
+    try:
+        ready_file.write_text(f"{my_pid}\n")
+    except OSError:
+        # Best effort — don't block exec on signaling failure.  The
+        # parent will time out and fall back to session scan.
+        pass
+
+    # exec the command — replaces this process, keeps PID.  All forks
+    # from the exec'd process inherit cgroup membership at fork time.
+    try:
+        os.execvp(cmd[0], cmd)
+    except OSError as exc:
+        print(f"exec_in_cgroup: exec failed: {exc}", file=sys.stderr)
+        return 127
+    return 127  # unreachable
+
+
 def cleanup_descendants(
     snapshot_file: Path,
     signal: int,
@@ -531,6 +616,8 @@ def main() -> int:
         python process_identity.py snapshot_cgroup <cgroup_path>
         python process_identity.py cleanup_cgroup <cgroup_path> <signal>
         python process_identity.py remove_cgroup <cgroup_path>
+        python process_identity.py pid_in_cgroup <pid> <cgroup_path>
+        python process_identity.py exec_in_cgroup <cgroup_path> <ready_file> <cmd> [args...]
 
     Output:
     - ``get_starttime`` / ``get_cmdline``: raw value on stdout (or empty).
@@ -542,6 +629,9 @@ def main() -> int:
     - ``create_cgroup``: cgroup path on stdout (or empty on failure).
     - ``add_pid``: exit 0 on success, 1 on failure.
     - ``remove_cgroup``: exit 0 on success, 1 on failure.
+    - ``pid_in_cgroup``: exit 0 if PID is in cgroup, 1 if not.
+    - ``exec_in_cgroup``: does not return on success (exec replaces the
+      process); exits 127 on cgroup join failure.
 
     The raw-value output for ``get_*`` commands makes bash integration simple:
         st=$(python process_identity.py get_starttime $pid)
@@ -631,6 +721,17 @@ def main() -> int:
     elif cmd == "remove_cgroup" and len(sys.argv) == 3:
         cgroup_path = Path(sys.argv[2])
         return 0 if remove_cgroup(cgroup_path) else 1
+
+    elif cmd == "pid_in_cgroup" and len(sys.argv) == 4:
+        pid = int(sys.argv[2])
+        cgroup_path = Path(sys.argv[3])
+        return 0 if pid_in_cgroup(pid, cgroup_path) else 1
+
+    elif cmd == "exec_in_cgroup" and len(sys.argv) >= 5:
+        cgroup_path = Path(sys.argv[2])
+        ready_file = Path(sys.argv[3])
+        exec_cmd = sys.argv[4:]
+        return exec_in_cgroup(cgroup_path, ready_file, exec_cmd)
 
     else:
         print(f"Unknown command/args: {sys.argv[1:]}", file=sys.stderr)
