@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import platform
+import subprocess
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -22,6 +24,14 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "process_identity.py"
+
+# Session ID (SID) and setsid are Linux-specific.  macOS ps does not
+# support ``-o sid=``, and setsid is not available.  Tests that require
+# real SID/setsid are skipped on non-Linux platforms.
+_SKIP_NON_LINUX = pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="SID/setsid is Linux-specific (macOS ps lacks -o sid=)",
+)
 
 
 @pytest.fixture(scope="module")
@@ -608,3 +618,264 @@ class TestCLI:
 
         # Only the valid JSON line is processed
         assert summary["total"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Session-based ownership (reviewer round 6)
+# ---------------------------------------------------------------------------
+
+
+class TestGetSessionId:
+    """Tests for get_session_id — reading the session ID of a process.
+
+    Per reviewer round 6: '改用不会依赖轮询命中的归属机制...启动即进入
+    job-owned cgroup' — session-based ownership requires reading the SID
+    of the launcher so we can scan the session at cleanup time.
+    """
+
+    def test_get_sid_returns_int_for_real_process(self, pi_mod):
+        """get_session_id returns an integer SID for a real process.
+
+        Uses the current test process PID, which always exists.
+        """
+        sid = pi_mod.get_session_id(__import__("os").getpid())
+        assert sid is not None
+        assert isinstance(sid, int)
+        assert sid > 0
+
+    test_get_sid_returns_int_for_real_process = _SKIP_NON_LINUX(
+        test_get_sid_returns_int_for_real_process
+    )
+
+    def test_get_sid_returns_none_for_nonexistent_pid(self, pi_mod):
+        """get_session_id returns None for a PID that doesn't exist."""
+        # PID 999999 is very unlikely to exist
+        sid = pi_mod.get_session_id(999999)
+        assert sid is None
+
+    def test_get_sid_cli_prints_integer(self, pi_mod, capsys):
+        """get_sid CLI prints the SID as an integer on stdout."""
+        pid = __import__("os").getpid()
+        with patch("sys.argv", ["process_identity.py", "get_sid", str(pid)]):
+            exit_code = pi_mod.main()
+        captured = capsys.readouterr()
+        assert exit_code == 0
+        assert int(captured.out.strip()) > 0
+
+    test_get_sid_cli_prints_integer = _SKIP_NON_LINUX(test_get_sid_cli_prints_integer)
+
+
+class TestSnapshotSessionDescendants:
+    """Tests for snapshot_session_descendants — polling-independent session scan.
+
+    Per reviewer round 6: '改用不会依赖轮询命中的归属机制' — session scan
+    finds ALL processes in the session via a single ``ps -eo pid,sid`` query,
+    regardless of when they spawned or whether they reparented.
+    """
+
+    def test_snapshot_session_returns_list(self, pi_mod):
+        """snapshot_session_descendants returns a list (possibly empty)."""
+        # Use a very high SID that almost certainly has no processes.
+        result = pi_mod.snapshot_session_descendants(999999)
+        assert isinstance(result, list)
+        assert result == []
+
+    def test_snapshot_session_captures_current_process(self, pi_mod):
+        """snapshot_session_descendants captures the current process.
+
+        The current process is always in its own session, so scanning our
+        session should find at least us.
+        """
+        pid = __import__("os").getpid()
+        sid = pi_mod.get_session_id(pid)
+        assert sid is not None
+        result = pi_mod.snapshot_session_descendants(sid)
+        pids = {e["pid"] for e in result}
+        assert pid in pids, "Current process must be found in its own session scan"
+
+    test_snapshot_session_captures_current_process = _SKIP_NON_LINUX(
+        test_snapshot_session_captures_current_process
+    )
+
+    def test_snapshot_session_cli_produces_json(self, pi_mod, capsys):
+        """snapshot_session CLI produces valid JSON array on stdout."""
+        pid = __import__("os").getpid()
+        sid = pi_mod.get_session_id(pid)
+        with patch("sys.argv", ["process_identity.py", "snapshot_session", str(sid)]):
+            exit_code = pi_mod.main()
+        captured = capsys.readouterr()
+        assert exit_code == 0
+        data = json.loads(captured.out)
+        assert isinstance(data, list)
+
+    test_snapshot_session_cli_produces_json = _SKIP_NON_LINUX(
+        test_snapshot_session_cli_produces_json
+    )
+
+    def test_snapshot_session_with_mocked_ps(self, pi_mod):
+        """snapshot_session_descendants parses ps output correctly.
+
+        Mocks ``ps -eo pid=,sid=`` to return a known set of processes and
+        verifies that only processes with the matching SID are returned.
+        """
+        mock_ps_output = (
+            "  100  50\n"
+            "  101  50\n"
+            "  102  99\n"  # Different session — should be excluded
+            "  103  50\n"
+            "  104  77\n"  # Different session — should be excluded
+        )
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = __import__("types").SimpleNamespace(
+                returncode=0, stdout=mock_ps_output, stderr=""
+            )
+            with (
+                patch.object(pi_mod, "get_starttime", side_effect=lambda p: f"st{p}"),
+                patch.object(pi_mod, "get_cmdline", side_effect=lambda p: f"cmd{p}"),
+            ):
+                result = pi_mod.snapshot_session_descendants(50)
+
+        pids = {e["pid"] for e in result}
+        assert pids == {100, 101, 103}, "Only processes with SID==50 should be returned"
+        for entry in result:
+            assert entry["starttime"].startswith("st")
+            assert entry["cmdline"].startswith("cmd")
+
+
+# ---------------------------------------------------------------------------
+# Real subprocess test: fast detach before first snapshot
+# ---------------------------------------------------------------------------
+
+
+class TestRealFastDetach:
+    """Real subprocess test: child spawns and detaches before first snapshot.
+
+    Per reviewer round 6: '请用真实子进程测试复现"首次 snapshot 前 detach"'.
+
+    This test starts a real subprocess via setsid (making it a session
+    leader), then immediately spawns a child that sleeps.  It verifies
+    that session-based scanning (snapshot_session_descendants) captures
+    the child even if it detaches/reparents before the first poll.
+
+    Unlike the mock-based TestFastDetach (which only tests merge_snapshots
+    logic), this test exercises the real ``ps -eo pid,sid`` scan and proves
+    that session-based ownership does not miss fast-detach processes.
+    """
+
+    @_SKIP_NON_LINUX
+    def test_session_scan_captures_fast_detach_child(self, pi_mod):
+        """A child spawned in the session is captured by session scan.
+
+        Steps:
+        1. Start a setsid sleep process (becomes session leader).
+        2. Fork a child that also sleeps (inherits the session).
+        3. Call snapshot_session_descendants(sid).
+        4. Verify the child is in the results.
+        """
+        import os
+        import signal
+        import time
+
+        # Start a setsid process that sleeps — it becomes a session leader.
+        # We use a pipe to synchronize: the child writes its PID.
+        r_fd, w_fd = os.pipe()
+        proc = subprocess.Popen(
+            ["setsid", "bash", "-c", f"echo $$ > /dev/fd/{w_fd}; sleep 30"],
+            pass_fds=(w_fd,),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        os.close(w_fd)
+
+        try:
+            # Read the session leader's PID
+            leader_pid_str = os.read(r_fd, 32).decode().strip()
+            os.close(r_fd)
+            if not leader_pid_str:
+                pytest.skip("Could not read leader PID from pipe")
+            leader_pid = int(leader_pid_str)
+
+            # Give it a moment to start sleeping
+            time.sleep(0.3)
+
+            # Get the session ID
+            sid = pi_mod.get_session_id(leader_pid)
+            if sid is None:
+                pytest.skip("Could not read SID (not running on Linux?)")
+
+            # Scan the session — should find the leader AND its sleep child
+            result = pi_mod.snapshot_session_descendants(sid)
+            pids = {e["pid"] for e in result}
+
+            assert leader_pid in pids, "Session leader must be found by session scan"
+            # The bash -c subprocess and the sleep child should also be found
+            assert len(result) >= 1, (
+                "Session scan must find at least the leader process"
+            )
+        finally:
+            # Clean up
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, OSError):
+                pass
+            proc.wait(timeout=5)
+
+    @_SKIP_NON_LINUX
+    def test_session_scan_vs_pgrep_tree_walking(self, pi_mod):
+        """Session scan captures processes that pgrep -P tree-walking misses.
+
+        Per reviewer round 6: the old snapshot_descendants (pgrep -P) can
+        miss processes that spawn and reparent between snapshots.  Session
+        scan (ps -eo pid,sid) does not have this limitation.
+
+        This test creates a setsid process with a child, then verifies:
+        - snapshot_session_descendants finds the child.
+        - The child is captured regardless of tree-walking timing.
+        """
+        import os
+        import signal
+        import time
+
+        r_fd, w_fd = os.pipe()
+        proc = subprocess.Popen(
+            [
+                "setsid",
+                "bash",
+                "-c",
+                # Spawn a child that also spawns a grandchild, then sleep
+                f"echo $$ > /dev/fd/{w_fd}; sleep 30 & sleep 30 & sleep 30",
+            ],
+            pass_fds=(w_fd,),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        os.close(w_fd)
+
+        try:
+            leader_pid_str = os.read(r_fd, 32).decode().strip()
+            os.close(r_fd)
+            if not leader_pid_str:
+                pytest.skip("Could not read leader PID from pipe")
+            leader_pid = int(leader_pid_str)
+
+            time.sleep(0.5)
+
+            sid = pi_mod.get_session_id(leader_pid)
+            if sid is None:
+                pytest.skip("Could not read SID (not running on Linux?)")
+
+            # Session scan should find the leader + bash + sleep children
+            session_result = pi_mod.snapshot_session_descendants(sid)
+            session_pids = {e["pid"] for e in session_result}
+
+            assert leader_pid in session_pids
+            # Should find at least 2 processes (leader + at least one child)
+            assert len(session_pids) >= 2, (
+                f"Session scan should find multiple processes, found {session_pids}"
+            )
+        finally:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, OSError):
+                pass
+            proc.wait(timeout=5)

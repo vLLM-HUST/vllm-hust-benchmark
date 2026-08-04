@@ -97,15 +97,25 @@ mkdir -p "$RESULT_DIR"
 # Used by kill_owned_server() to kill only processes whose PID + starttime
 # + cmdline still match — preventing PID-reuse false kills.
 #
+# Per reviewer round 6: '改用不会依赖轮询命中的归属机制' — the launcher is
+# started with ``setsid`` so it becomes a session leader.  All descendants
+# inherit the same SID.  Cleanup scans ALL processes in the session via
+# ``ps -eo pid,sid`` (polling-independent), instead of relying on
+# ``pgrep -P`` tree-walking which can miss fast-detach processes.
+#
 # Per reviewer round 5: '后代只记录 PID/start time，没有保存和复核 cmdline；
 # launcher 则连启动时的 start time 都没有记录，cleanup 时只要当前 PID 存在
 # 就会发送 TERM，仍有 PID reuse 误杀风险'.
 #
+# _CURRENT_BENCH_PID / _LAUNCHER_SID: PID and session ID of the bench
+#   launcher (started via setsid).  Cleanup scans the session for ALL
+#   descendants regardless of when they spawned or whether they reparented.
 # _LAUNCHER_STARTTIME / _LAUNCHER_CMDLINE: identity of the bench launcher,
 #   recorded at launch time so cleanup can verify the PID hasn't been recycled.
 # _VERIFIED_DESCENDANTS_FILE: temp file containing JSON snapshot arrays (one
-#   per line), each from process_identity.py snapshot.  Merged at cleanup time.
+#   per line), each from process_identity.py snapshot_session.  Merged at cleanup.
 _CURRENT_BENCH_PID=""
+_LAUNCHER_SID=""
 _LAUNCHER_STARTTIME=""
 _LAUNCHER_CMDLINE=""
 _VERIFIED_DESCENDANTS_FILE=""
@@ -153,6 +163,15 @@ kill_owned_server() {
     #    process_identity.py cleanup merges all snapshots, verifies each
     #    descendant's PID + starttime + cmdline, and sends the signal only
     #    to those that still match.
+    #
+    #    Per reviewer round 6: do a final session scan right before cleanup
+    #    to capture any processes that joined the session after the monitor
+    #    stopped (e.g. spawned just before launcher exit).
+    if [ -n "$_LAUNCHER_SID" ] && \
+       [ -n "$_VERIFIED_DESCENDANTS_FILE" ]; then
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot_session "$_LAUNCHER_SID" \
+            >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
+    fi
     if [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
        [ -s "$_VERIFIED_DESCENDANTS_FILE" ]; then
         "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup \
@@ -166,6 +185,7 @@ kill_owned_server() {
     [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
         rm -f "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
     _CURRENT_BENCH_PID=""
+    _LAUNCHER_SID=""
     _LAUNCHER_STARTTIME=""
     _LAUNCHER_CMDLINE=""
     _VERIFIED_DESCENDANTS_FILE=""
@@ -370,27 +390,35 @@ print(f'Validated: {val}')
 # Run a benchmark command, tracking its PID and snapshotting descendants.
 # The command's stdout/stderr are tee'd to the log file.
 #
-# Records the launcher's identity (PID + starttime + cmdline) and continuously
-# snapshots descendant identities via process_identity.py while the launcher
-# is alive.  This captures detached descendants like EngineCore even if they
-# later reparent or setsid.
+# Per reviewer round 6: '改用不会依赖轮询命中的归属机制...启动即进入
+# job-owned cgroup、或由 runtime 在创建 EngineCore 时同步写入带
+# starttime/cmdline 的 registry'.  The launcher is started with ``setsid``
+# so it becomes a session leader.  ALL descendants inherit the same SID.
+# Cleanup scans the entire session via ``ps -eo pid,sid`` (a single query
+# that finds every process in the session regardless of when it spawned or
+# whether it reparented) — this is polling-independent and does not miss
+# fast-detach processes the way ``pgrep -P`` tree-walking does.
 #
 # Per reviewer round 5: '请补齐 launcher 和后代的 PID/start time/cmdline 身份
 # 记录与复核...每 2 秒轮询一次会漏掉在首次/两次 snapshot 之间快速 spawn、
 # setsid、reparent 的 EngineCore'.
 #
-# Key changes from round 4:
+# Key changes from round 5:
+#   - Launcher started via ``setsid`` (session leader) — polling-independent
+#     ownership via SID scan.
+#   - snapshot_session_descendants(sid) used instead of snapshot_descendants(pid)
+#     — scans ALL processes in the session, not just pgrep -P tree.
 #   - Launcher starttime + cmdline recorded at launch (not just PID).
 #   - Descendant cmdline recorded (not just PID + starttime).
 #   - Immediate snapshot BEFORE first sleep (catches fast-detach processes).
 #   - Polling interval reduced from 2s to 0.5s.
-#   - Snapshots stored as JSON arrays (one per line) for Python cleanup.
 run_bench_tracked() {
     local log_file="$1"
     shift
 
     # Reset state for this run.
     _CURRENT_BENCH_PID=""
+    _LAUNCHER_SID=""
     _LAUNCHER_STARTTIME=""
     _LAUNCHER_CMDLINE=""
     [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
@@ -398,11 +426,16 @@ run_bench_tracked() {
     _VERIFIED_DESCENDANTS_FILE=$(mktemp)
     : > "$_VERIFIED_DESCENDANTS_FILE"  # truncate
 
-    # Start the bench command.  NOT in a new session — we want it in our
-    # process group so we can walk its descendants via pgrep -P.
-    "$@" > >(tee "$log_file") 2>&1 &
+    # Start the bench command via setsid — it becomes a session leader so
+    # all descendants inherit the SID.  This is the polling-independent
+    # ownership mechanism: cleanup scans the session, not the process tree.
+    setsid "$@" > >(tee "$log_file") 2>&1 &
     local bench_pid=$!
     _CURRENT_BENCH_PID=$bench_pid
+
+    # Record launcher SID — used for session-wide descendant scan at cleanup.
+    _LAUNCHER_SID=$("$PYTHON" "$_PROCESS_IDENTITY_PY" get_sid \
+        "$bench_pid" 2>/dev/null || echo "")
 
     # Record launcher identity immediately — used by kill_owned_server to
     # verify the PID hasn't been recycled before killing.
@@ -412,34 +445,37 @@ run_bench_tracked() {
     _LAUNCHER_CMDLINE=$("$PYTHON" "$_PROCESS_IDENTITY_PY" get_cmdline \
         "$bench_pid" 2>/dev/null || echo "")
 
-    # Background monitor: continuously snapshot descendants at 0.5s intervals.
-    # Per reviewer round 5: '每 2 秒轮询一次会漏掉在首次/两次 snapshot 之间快速
-    # spawn、setsid、reparent 的 EngineCore'.
-    # The immediate snapshot (before first sleep) catches processes that
-    # spawn and detach between launch and the first poll.
-    (
-        # Immediate snapshot BEFORE first sleep — minimizes the window
-        # where a fast-detach process is missed.
-        "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot "$bench_pid" \
-            >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
-        while kill -0 "$bench_pid" 2>/dev/null; do
-            "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot "$bench_pid" \
+    # Background monitor: continuously snapshot ALL processes in the session
+    # at 0.5s intervals.  Per reviewer round 6: session scan is
+    # polling-independent — any process in the session is captured regardless
+    # of when it spawned or whether it reparented.  The immediate snapshot
+    # (before first sleep) catches processes that spawn and detach between
+    # launch and the first poll.
+    if [ -n "$_LAUNCHER_SID" ]; then
+        (
+            # Immediate session scan BEFORE first sleep — minimizes the window
+            # where a fast-detach process is missed.
+            "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot_session "$_LAUNCHER_SID" \
                 >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
-            sleep 0.5
-        done
-        # Final snapshot right after launcher exits — children may still be
-        # alive and traceable via pgrep before they reparent.
-        "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot "$bench_pid" \
-            >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
-    ) &
-    local monitor_pid=$!
+            while kill -0 "$bench_pid" 2>/dev/null; do
+                "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot_session "$_LAUNCHER_SID" \
+                    >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
+                sleep 0.5
+            done
+            # Final session scan right after launcher exits — children may
+            # still be alive in the session even after reparenting.
+            "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot_session "$_LAUNCHER_SID" \
+                >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
+        ) &
+        local monitor_pid=$!
+    fi
 
     # Wait for the bench command to finish; propagate its exit code.
     local rc=0
     wait "$bench_pid" || rc=$?
 
     # Stop the monitor.
-    wait "$monitor_pid" 2>/dev/null || true
+    [ -n "${monitor_pid:-}" ] && wait "$monitor_pid" 2>/dev/null || true
 
     return $rc
 }
@@ -635,5 +671,9 @@ log ""
 log "========================================"
 log "Re-test complete. Results in $RESULT_DIR"
 log "Artifact class: diagnostic_historical_retest"
-log "Run analysis: python scripts/analyze_issue_146_regression.py --result-dir $RESULT_DIR"
+log "Run analysis (both repos required for fail-closed commit-object verification):"
+log "  python scripts/analyze_issue_146_regression.py \\"
+log "    --result-dir $RESULT_DIR \\"
+log "    --engine-repo $VLLM_HUST_REPO \\"
+log "    --plugin-repo $ASCEND_REPO"
 log "========================================"

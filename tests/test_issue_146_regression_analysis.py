@@ -350,6 +350,12 @@ class TestAnalyzeRegression:
 
 
 class TestCollectResults:
+    @pytest.fixture(autouse=True)
+    def _mock_verify_commit(self, analyze_mod, monkeypatch):
+        monkeypatch.setattr(
+            analyze_mod, "verify_commit_in_repo", lambda repo, sha: True
+        )
+
     def test_collect_from_directory(self, analyze_mod, tmp_path):
         # Create mock results with actual vllm bench output field names
         for commit in ["2206f1f7b7", "7a63f81e86"]:
@@ -363,7 +369,13 @@ class TestCollectResults:
                 (d / ".completed").touch()
                 _write_valid_manifest(d)
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert "sonnet-throughput" in results
         assert "2206f1f7b7" in results["sonnet-throughput"]
         assert len(results["sonnet-throughput"]["2206f1f7b7"]) == 3
@@ -378,14 +390,26 @@ class TestCollectResults:
             (d / ".completed").touch()
             _write_valid_manifest(d)
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         # rep-1: avg_latency=10.1s -> 10100.0 ms
         assert results["random-latency"]["2206f1f7b7"][0] == pytest.approx(
             10100.0, abs=0.1
         )
 
     def test_missing_directory(self, analyze_mod, tmp_path):
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         for workload in ["sonnet-throughput", "random-latency"]:
             for commit in ["2206f1f7b7", "7a63f81e86", "83cf83ff20"]:
                 assert results[workload][commit] == []
@@ -396,7 +420,13 @@ class TestCollectResults:
         (d / "raw.json").write_text("not valid json")
         (d / ".completed").touch()
         _write_valid_manifest(d)
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert results["sonnet-throughput"]["2206f1f7b7"] == []
 
     def test_stale_rep_without_completed_marker_skipped(self, analyze_mod, tmp_path):
@@ -414,7 +444,13 @@ class TestCollectResults:
         _write_valid_manifest(d)
         # Deliberately do NOT create .completed
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert results["sonnet-throughput"]["2206f1f7b7"] == []
 
     def test_mixed_completed_and_incomplete_reps(self, analyze_mod, tmp_path):
@@ -430,7 +466,13 @@ class TestCollectResults:
             if rep != 2:
                 (d / ".completed").touch()
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         # Only 2 reps collected (rep-1 and rep-3), rep-2 skipped
         assert len(results["sonnet-throughput"]["2206f1f7b7"]) == 2
         assert 1010.0 in results["sonnet-throughput"]["2206f1f7b7"]
@@ -451,6 +493,18 @@ class TestValidateEnvManifest:
     ensure_build_info 生成的未跟踪文件，也没有保存可复现的 patch 内容；请把
     tracked/untracked 派生修改完整落盘并用 SHA-256 绑定'.
     """
+
+    @pytest.fixture(autouse=True)
+    def _mock_verify_commit(self, analyze_mod, monkeypatch):
+        """Mock verify_commit_in_repo to return True for all tests in this class.
+
+        Tests that specifically test repo_paths/commit-object verification use
+        real git repos and override this mock individually.
+        """
+        self._real_verify_commit_in_repo = analyze_mod.verify_commit_in_repo
+        monkeypatch.setattr(
+            analyze_mod, "verify_commit_in_repo", lambda repo, sha: True
+        )
 
     def test_valid_manifest_with_sha256_and_patch_files(self, analyze_mod, tmp_path):
         """A manifest with SHA-256 patch identity and existing patch files passes."""
@@ -475,7 +529,13 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert valid, f"Expected valid, got: {reason}"
 
     def test_valid_manifest_with_clean_repos(self, analyze_mod, tmp_path):
@@ -492,7 +552,13 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert valid, f"Expected valid, got: {reason}"
 
     def test_rejects_old_md5_only_manifest(self, analyze_mod, tmp_path):
@@ -524,7 +590,13 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert not valid
         assert "engine_patch_sha256" in reason
 
@@ -540,7 +612,13 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert not valid
         assert "not valid 64-hex SHA-256" in reason
 
@@ -561,7 +639,13 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert not valid
         assert "not valid 64-hex SHA-256" in reason
 
@@ -569,7 +653,9 @@ class TestValidateEnvManifest:
     # Round 4: reject fabricated padded observed commit SHAs
     # ------------------------------------------------------------------
 
-    def test_rejects_padded_engine_commit_observed(self, analyze_mod, tmp_path):
+    def test_rejects_padded_engine_commit_observed(
+        self, analyze_mod, tmp_path, monkeypatch
+    ):
         """Reverse test: engine_commit_observed is a short SHA padded with
         zeros (e.g. '2206f1f7b7' + 30 zeros) — must be rejected.
 
@@ -583,6 +669,15 @@ class TestValidateEnvManifest:
         The validator must reject this because the padded SHA does not resolve
         to a commit object in the repo (verified via ``git cat-file -t``).
         """
+        # Override the autouse mock to use the real verify_commit_in_repo —
+        # this test specifically verifies that a padded SHA is rejected by
+        # the real git cat-file check.
+        monkeypatch.setattr(
+            analyze_mod,
+            "verify_commit_in_repo",
+            self._real_verify_commit_in_repo,
+        )
+
         # Create a real git repo with one commit.
         repo_dir, real_sha = _make_temp_git_repo(tmp_path / "vllm-hust")
         short_sha = real_sha[:10]
@@ -609,8 +704,9 @@ class TestValidateEnvManifest:
 
         # With repo_paths provided, the validator must verify the observed SHA
         # resolves to a real commit object.  The padded SHA must be rejected.
+        # The engine check runs first, so the plugin check is never reached.
         valid, reason = analyze_mod.validate_env_manifest(
-            rep_dir, repo_paths={"engine": repo_dir}
+            rep_dir, repo_paths={"engine": repo_dir, "plugin": repo_dir}
         )
         assert not valid, (
             f"Padded SHA {padded_sha!r} must be rejected when repo is "
@@ -641,16 +737,15 @@ class TestValidateEnvManifest:
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
         valid, reason = analyze_mod.validate_env_manifest(
-            rep_dir, repo_paths={"engine": repo_dir}
+            rep_dir, repo_paths={"engine": repo_dir, "plugin": repo_dir}
         )
         assert valid, f"Real commit SHA should pass verification: {reason}"
 
-    def test_padded_sha_passes_without_repo(self, analyze_mod, tmp_path):
-        """Without repo_paths, the validator can only do format+prefix checks.
+    def test_padded_sha_rejected_without_repo_fail_closed(self, analyze_mod, tmp_path):
+        """Without repo_paths, validate_env_manifest is fail-closed (rejects).
 
-        A padded SHA that passes format+prefix will be accepted when no repo
-        is available for commit-object verification (fail-open for CI
-        environments without repo access).  This documents the limitation.
+        Per reviewer round 6: 'validate_env_manifest() 在 repo_paths=None 时跳过
+        校验，因此默认消费路径仍会接受格式正确但不存在的 SHA' — now fail-closed.
         """
         rep_dir = tmp_path / "rep-1"
         rep_dir.mkdir()
@@ -664,9 +759,10 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        # No repo_paths — only format + prefix checks are done.
+        # No repo_paths — fail-closed (reject) per round 6
         valid, reason = analyze_mod.validate_env_manifest(rep_dir)
-        assert valid, f"Without repo access, format+prefix checks should pass: {reason}"
+        assert not valid
+        assert "repo_paths" in reason.lower() or "fail-closed" in reason.lower()
 
     def test_rejects_padded_engine_commit_observed_mismatched_prefix(
         self, analyze_mod, tmp_path
@@ -744,7 +840,13 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert not valid
         assert "patch file not found" in reason
 
@@ -774,7 +876,13 @@ class TestValidateEnvManifest:
         }
         (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
 
-        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert not valid
         assert "SHA-256 mismatch" in reason
         assert "tampered" in reason
@@ -813,6 +921,12 @@ class TestCollectResultsManifestEnforcement:
     patch 文件的旧结果也会继续参与结论。请...收集时强制 validate_env_manifest'.
     """
 
+    @pytest.fixture(autouse=True)
+    def _mock_verify_commit(self, analyze_mod, monkeypatch):
+        monkeypatch.setattr(
+            analyze_mod, "verify_commit_in_repo", lambda repo, sha: True
+        )
+
     def test_collect_skips_rep_with_missing_manifest(self, analyze_mod, tmp_path):
         """collect_results must skip reps where env-manifest.json is missing,
         even if .completed and raw.json exist.
@@ -827,7 +941,13 @@ class TestCollectResultsManifestEnforcement:
         (d / ".completed").touch()
         # Deliberately NO env-manifest.json
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert results["sonnet-throughput"]["2206f1f7b7"] == []
 
     def test_collect_skips_rep_with_old_md5_manifest(self, analyze_mod, tmp_path):
@@ -849,7 +969,13 @@ class TestCollectResultsManifestEnforcement:
         }
         (d / "env-manifest.json").write_text(json.dumps(old_manifest))
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert results["sonnet-throughput"]["2206f1f7b7"] == []
 
     def test_collect_skips_rep_with_tampered_patch(self, analyze_mod, tmp_path):
@@ -882,7 +1008,13 @@ class TestCollectResultsManifestEnforcement:
         }
         (d / "env-manifest.json").write_text(json.dumps(manifest))
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert results["sonnet-throughput"]["2206f1f7b7"] == []
 
     def test_collect_includes_rep_with_valid_manifest(self, analyze_mod, tmp_path):
@@ -893,7 +1025,13 @@ class TestCollectResultsManifestEnforcement:
         (d / ".completed").touch()
         _write_valid_manifest(d)
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         assert len(results["sonnet-throughput"]["2206f1f7b7"]) == 1
         assert results["sonnet-throughput"]["2206f1f7b7"][0] == 1000.0
 
@@ -920,8 +1058,217 @@ class TestCollectResultsManifestEnforcement:
         (d3 / ".completed").touch()
         _write_valid_manifest(d3)
 
-        results = analyze_mod.collect_results(tmp_path)
+        results = analyze_mod.collect_results(
+            tmp_path,
+            repo_paths={
+                "engine": tmp_path / "fake-engine",
+                "plugin": tmp_path / "fake-plugin",
+            },
+        )
         # Only rep-1 and rep-3 collected (rep-2 skipped due to missing manifest)
         assert len(results["sonnet-throughput"]["2206f1f7b7"]) == 2
         assert 1000.0 in results["sonnet-throughput"]["2206f1f7b7"]
         assert 3000.0 in results["sonnet-throughput"]["2206f1f7b7"]
+
+
+# ---------------------------------------------------------------------------
+# repo_paths fail-closed behavior (issue #146 reviewer round 6)
+# ---------------------------------------------------------------------------
+
+
+class TestRepoPathsFailClosed:
+    """Reverse tests for fail-closed repo_paths behavior (reviewer round 6).
+
+    Per reviewer round 6: 'commit-object 校验仍然是可选且 fail-open...
+    必须要求两个 repo 路径都存在且对应 SHA 可解析，任何缺失或 git 错误
+    都应判 manifest invalid；请为缺 repo、只传一个 repo、git 超时/异常补
+    反向测试'.
+    """
+
+    def test_repo_paths_none_rejected(self, analyze_mod, tmp_path):
+        """repo_paths=None must reject (fail-closed)."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": "a" * 10,
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": "b" * 10,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "repo_paths" in reason
+
+    def test_repo_paths_missing_engine_rejected(self, analyze_mod, tmp_path):
+        """repo_paths with only 'plugin' but no 'engine' must reject."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": "a" * 10,
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": "b" * 10,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir, repo_paths={"plugin": tmp_path}
+        )
+        assert not valid
+        assert "engine" in reason.lower()
+
+    def test_repo_paths_missing_plugin_rejected(self, analyze_mod, tmp_path):
+        """repo_paths with only 'engine' but no 'plugin' must reject."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": "a" * 10,
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": "b" * 10,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir, repo_paths={"engine": tmp_path}
+        )
+        assert not valid
+        assert "plugin" in reason.lower()
+
+    def test_repo_paths_nonexistent_dir_rejected(self, analyze_mod, tmp_path):
+        """repo_paths pointing to a nonexistent directory must reject.
+
+        verify_commit_in_repo returns False when repo_path doesn't exist.
+        """
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": "a" * 10,
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": "b" * 10,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={
+                "engine": tmp_path / "nonexistent-engine",
+                "plugin": tmp_path / "nonexistent-plugin",
+            },
+        )
+        assert not valid
+        assert "does not resolve" in reason or "fail-closed" in reason
+
+    def test_git_timeout_rejected(self, analyze_mod, tmp_path, monkeypatch):
+        """Git timeout must result in manifest rejection (fail-closed).
+
+        Per reviewer round 6: '任何缺失或 git 错误都应判 manifest invalid'.
+        """
+        import subprocess
+
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": "a" * 10,
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": "b" * 10,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        # Create a real git repo so verify_commit_in_repo doesn't fail on
+        # "repo doesn't exist" — it should fail on the git timeout instead.
+        repo_dir = tmp_path / "vllm-hust"
+        repo_dir.mkdir()
+        subprocess.run(["git", "init", "--quiet"], cwd=repo_dir, check=True)
+        subprocess.run(
+            ["git", "-C", str(repo_dir), "config", "user.email", "t@t.com"],
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo_dir), "config", "user.name", "T"],
+            check=True,
+        )
+        (repo_dir / "f").write_text("x")
+        subprocess.run(["git", "-C", str(repo_dir), "add", "f"], check=True)
+        subprocess.run(
+            ["git", "-C", str(repo_dir), "commit", "-m", "x", "--quiet"],
+            capture_output=True,
+            check=True,
+        )
+
+        def _timeout_git(*args, **kwargs):
+            raise subprocess.TimeoutExpired(cmd="git", timeout=0.001)
+
+        monkeypatch.setattr(subprocess, "run", _timeout_git)
+
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={"engine": repo_dir, "plugin": repo_dir},
+        )
+        assert not valid
+        assert "does not resolve" in reason or "fail-closed" in reason
+
+    def test_git_exception_rejected(self, analyze_mod, tmp_path, monkeypatch):
+        """Git OSError must result in manifest rejection (fail-closed)."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": "a" * 10,
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": "b" * 10,
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        import subprocess
+
+        def _error_git(*args, **kwargs):
+            raise OSError("simulated git failure")
+
+        monkeypatch.setattr(subprocess, "run", _error_git)
+
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={"engine": tmp_path, "plugin": tmp_path},
+        )
+        assert not valid
+        assert "does not resolve" in reason or "fail-closed" in reason
+
+    def test_both_repos_with_real_commits_passes(self, analyze_mod, tmp_path):
+        """Positive test: both repos with real commits that match observed SHAs pass."""
+        engine_repo, engine_sha = _make_temp_git_repo(tmp_path / "engine-repo")
+        plugin_repo, plugin_sha = _make_temp_git_repo(tmp_path / "plugin-repo")
+
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_requested": engine_sha[:10],
+            "engine_commit_observed": engine_sha,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_requested": plugin_sha[:10],
+            "plugin_commit_observed": plugin_sha,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(
+            rep_dir,
+            repo_paths={"engine": engine_repo, "plugin": plugin_repo},
+        )
+        assert valid, f"Both repos with real commits should pass: {reason}"

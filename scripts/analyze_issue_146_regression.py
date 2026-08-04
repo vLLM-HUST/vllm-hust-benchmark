@@ -41,12 +41,17 @@ def verify_commit_in_repo(repo_path: Path | None, sha: str) -> bool:
     Per reviewer round 5: '40 位十六进制和 requested prefix 只能做格式检查，
     不能证明对象存在。请让 observed SHA 能在对应仓库解析到 commit'.
 
-    Returns True if the repo is available and the SHA resolves to a commit.
-    Returns True (skip) if repo_path is None or doesn't exist (can't verify).
+    Per reviewer round 6: 'commit-object 校验仍然是可选且 fail-open。
+    verify_commit_in_repo() 在 repo 不存在或 git cat-file 异常时返回 True'
+    — must be fail-closed: any missing repo or git error means the manifest
+    is invalid (we cannot prove the commit object exists).
+
+    Returns True only if the repo exists and the SHA resolves to a commit.
+    Returns False if repo_path is None, doesn't exist, or git errors out.
     """
     if repo_path is None or not repo_path.is_dir():
-        # Cannot verify without repo access — skip commit-object check.
-        return True
+        # Cannot verify without repo access — fail-closed (reject).
+        return False
     try:
         result = subprocess.run(
             ["git", "-C", str(repo_path), "cat-file", "-t", sha],
@@ -56,8 +61,9 @@ def verify_commit_in_repo(repo_path: Path | None, sha: str) -> bool:
         )
         return result.returncode == 0 and result.stdout.strip() == "commit"
     except (subprocess.SubprocessError, OSError):
-        # If git fails, skip rather than reject (fail-open for availability).
-        return True
+        # If git fails, fail-closed (reject) — we cannot prove the object
+        # exists, so the manifest must be treated as invalid.
+        return False
 
 
 # Commits under investigation (issue #146)
@@ -135,10 +141,10 @@ def collect_results(
     1. Have a ``.completed`` marker file (benchmark + manifest succeeded).
     2. Pass ``validate_env_manifest`` (provenance is complete and untampered).
 
-    Per reviewer round 5: when ``repo_paths`` is provided, observed commit
-    SHAs are verified against the corresponding repos via ``git cat-file``.
-    This rejects fabricated/padded SHAs that pass format checks but don't
-    resolve to real commits.
+    Per reviewer round 6: 'validate_env_manifest() 在 repo_paths=None 时跳过
+    校验' — repo_paths is now REQUIRED (fail-closed).  The default consumption
+    path must require both engine and plugin repo paths so that observed SHAs
+    are verified to resolve to real commit objects.
 
     Returns: {workload: {commit: [metric1, metric2, ...]}}
     """
@@ -188,13 +194,16 @@ def validate_env_manifest(
 ) -> tuple[bool, str]:
     """Validate that an env-manifest.json has complete and untampered provenance.
 
+    Per reviewer feedback (round 6):
+    - ``repo_paths`` is now REQUIRED (fail-closed).  When None, the manifest
+      is rejected because we cannot prove observed SHAs resolve to real
+      commits.  Both 'engine' and 'plugin' entries must be present and point
+      to existing git repos.
+
     Per reviewer feedback (round 5):
     - Must verify observed SHA resolves to a real commit object in the
       corresponding repo via ``git cat-file -t <sha>``.  Format + prefix
       checks alone cannot prove the object exists.
-    - ``repo_paths`` maps "engine"/"plugin" to repo paths.  When provided,
-      observed SHAs are verified against the repo.  When None, only format
-      + prefix checks are done (e.g. in CI without repo access).
 
     Per reviewer feedback (round 4):
     - Must reject fabricated manifests where observed commit SHAs are padded
@@ -275,24 +284,35 @@ def validate_env_manifest(
             f"requested short SHA {plugin_requested!r} (padded SHA suspected)"
         )
 
-    # Per reviewer round 5: verify observed SHA resolves to a real commit
-    # object in the corresponding repo via `git cat-file -t <sha>`.
-    # This rejects padded SHAs that pass format + prefix checks but don't
-    # correspond to any real commit.  When repo_paths is None (e.g. CI),
-    # this check is skipped (fail-open for availability).
-    if repo_paths is not None:
-        engine_repo = repo_paths.get("engine")
-        if not verify_commit_in_repo(engine_repo, engine_observed):
-            return False, (
-                f"engine_commit_observed {engine_observed!r} does not resolve "
-                f"to a commit object in {engine_repo}"
-            )
-        plugin_repo = repo_paths.get("plugin")
-        if not verify_commit_in_repo(plugin_repo, plugin_observed):
-            return False, (
-                f"plugin_commit_observed {plugin_observed!r} does not resolve "
-                f"to a commit object in {plugin_repo}"
-            )
+    # Per reviewer round 6: 'validate_env_manifest() 在 repo_paths=None 时跳过
+    # 校验，因此默认消费路径仍会接受格式正确但不存在的 SHA。用于生成结论
+    # 时必须要求两个 repo 路径都存在且对应 SHA 可解析，任何缺失或 git 错误
+    # 都应判 manifest invalid' — this is now fail-closed: repo_paths must
+    # be provided with both engine and plugin repos, and both observed SHAs
+    # must resolve to real commit objects.
+    if repo_paths is None:
+        return False, (
+            "repo_paths is required for commit-object verification "
+            "(fail-closed: cannot prove observed SHAs resolve to commits)"
+        )
+    engine_repo = repo_paths.get("engine")
+    if engine_repo is None:
+        return False, "repo_paths missing 'engine' entry (fail-closed)"
+    plugin_repo = repo_paths.get("plugin")
+    if plugin_repo is None:
+        return False, "repo_paths missing 'plugin' entry (fail-closed)"
+    if not verify_commit_in_repo(engine_repo, engine_observed):
+        return False, (
+            f"engine_commit_observed {engine_observed!r} does not resolve "
+            f"to a commit object in {engine_repo} (fail-closed: missing repo, "
+            f"git error, or fabricated SHA)"
+        )
+    if not verify_commit_in_repo(plugin_repo, plugin_observed):
+        return False, (
+            f"plugin_commit_observed {plugin_observed!r} does not resolve "
+            f"to a commit object in {plugin_repo} (fail-closed: missing repo, "
+            f"git error, or fabricated SHA)"
+        )
 
     # Verify SHA-256 fields exist and are strings
     engine_sha = manifest.get("engine_patch_sha256")
@@ -607,14 +627,14 @@ def main() -> int:
     parser.add_argument(
         "--engine-repo",
         type=Path,
-        default=None,
-        help="Path to vllm-hust repo for commit-object verification",
+        required=True,
+        help="Path to vllm-hust repo for commit-object verification (required, fail-closed)",
     )
     parser.add_argument(
         "--plugin-repo",
         type=Path,
-        default=None,
-        help="Path to vllm-ascend-hust repo for commit-object verification",
+        required=True,
+        help="Path to vllm-ascend-hust repo for commit-object verification (required, fail-closed)",
     )
     args = parser.parse_args()
 
@@ -623,14 +643,13 @@ def main() -> int:
         print(f"ERROR: {result_dir} not found", file=sys.stderr)
         return 2
 
-    # Build repo_paths for commit-object verification if any repo is provided.
-    repo_paths: dict[str, Path] | None = None
-    if args.engine_repo or args.plugin_repo:
-        repo_paths = {}
-        if args.engine_repo:
-            repo_paths["engine"] = args.engine_repo
-        if args.plugin_repo:
-            repo_paths["plugin"] = args.plugin_repo
+    # Per reviewer round 6: '把脚本调用示例改成强制传入两仓库' — both repos
+    # are now required CLI args.  Fail-closed: if either repo is missing or
+    # not a directory, validate_env_manifest will reject all manifests.
+    repo_paths: dict[str, Path] = {
+        "engine": args.engine_repo,
+        "plugin": args.plugin_repo,
+    }
 
     results = collect_results(result_dir, repo_paths=repo_paths)
     summary = compute_medians(results)

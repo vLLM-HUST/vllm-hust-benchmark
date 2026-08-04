@@ -148,6 +148,10 @@ def snapshot_descendants(parent_pid: int) -> list[dict[str, str | int]]:
     spawn、setsid、reparent 的 EngineCore' — the caller should poll at 0.5s
     intervals and call this function immediately after launch (before the
     first sleep) to minimize the window where a fast-detach process is missed.
+
+    Note: this uses ``pgrep -P`` tree-walking, which can miss processes that
+    spawn and setsid/reparent between snapshots.  For a polling-independent
+    ownership mechanism, use ``snapshot_session_descendants`` instead.
     """
     snapshots: list[dict[str, str | int]] = []
     seen: set[int] = set()
@@ -180,6 +184,98 @@ def snapshot_descendants(parent_pid: int) -> list[dict[str, str | int]]:
             pass
 
     _walk(parent_pid)
+    return snapshots
+
+
+def get_session_id(pid: int) -> int | None:
+    """Return the session ID (SID) of ``pid``.
+
+    On Linux, reads /proc/<pid>/stat field 6 (session ID).  On other platforms,
+    falls back to ``ps -o sid=``.
+
+    Returns None if the PID doesn't exist or SID can't be read.
+
+    Per reviewer round 6: '改用不会依赖轮询命中的归属机制，例如启动即进入
+    job-owned cgroup' — session-based ownership is a polling-independent
+    mechanism: all processes in the session are found via a single ``ps`` scan,
+    regardless of when they spawned or whether they reparented.
+    """
+    stat_file = Path(f"/proc/{pid}/stat")
+    if stat_file.is_file():
+        try:
+            content = stat_file.read_text()
+            after_comm = content[content.rfind(")") + 1 :]
+            fields = after_comm.split()
+            # Field 6 in the full stat line is session ID; after comm (field 2)
+            # it's field 4 in the after_comm slice (0-indexed: 3).
+            if len(fields) >= 4:
+                return int(fields[3])
+        except (OSError, IndexError, ValueError):
+            pass
+    # Fallback for macOS / non-Linux
+    try:
+        result = subprocess.run(
+            ["ps", "-o", "sid=", "-p", str(pid)],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return int(result.stdout.strip())
+    except (subprocess.SubprocessError, OSError, ValueError):
+        pass
+    return None
+
+
+def snapshot_session_descendants(sid: int) -> list[dict[str, str | int]]:
+    """Snapshot ALL processes in session ``sid`` via ``ps`` scan.
+
+    Per reviewer round 6: '改用不会依赖轮询命中的归属机制...启动即进入
+    job-owned cgroup、或由 runtime 在创建 EngineCore 时同步写入带
+    starttime/cmdline 的 registry'.
+
+    This is a polling-independent ownership mechanism: instead of walking the
+    process tree via ``pgrep -P`` (which can miss processes that spawn and
+    setsid/reparent between snapshots), we scan ALL processes in the session
+    via a single ``ps -eo pid,sid`` query.  Any process in the session is
+    captured, regardless of when it spawned or whether it reparented to init.
+
+    The launcher must be started with ``setsid`` so it becomes a session
+    leader and all its descendants inherit the same SID.
+
+    Returns: list of ``{"pid": int, "starttime": str, "cmdline": str}``
+    for all processes in the session (excluding the launcher itself if its
+    PID equals the session ID).
+    """
+    snapshots: list[dict[str, str | int]] = []
+    try:
+        result = subprocess.run(
+            ["ps", "-eo", "pid=,sid="],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return snapshots
+        session_pids: list[int] = []
+        for line in result.stdout.splitlines():
+            parts = line.split()
+            if len(parts) < 2:
+                continue
+            try:
+                p_pid = int(parts[0])
+                p_sid = int(parts[1])
+            except ValueError:
+                continue
+            if p_sid == sid:
+                session_pids.append(p_pid)
+        for pid in session_pids:
+            st = get_starttime(pid)
+            cmd = get_cmdline(pid)
+            if st is not None and cmd is not None:
+                snapshots.append({"pid": pid, "starttime": st, "cmdline": cmd})
+    except (subprocess.SubprocessError, OSError):
+        pass
     return snapshots
 
 
@@ -260,12 +356,15 @@ def main() -> int:
         python process_identity.py get_cmdline <pid>
         python process_identity.py verify <pid> <starttime> <cmdline>
         python process_identity.py snapshot <parent_pid>
+        python process_identity.py get_sid <pid>
+        python process_identity.py snapshot_session <sid>
         python process_identity.py cleanup <snapshot_file> <signal>
 
     Output:
     - ``get_starttime`` / ``get_cmdline``: raw value on stdout (or empty).
     - ``verify``: exit 0 if identity matches, 1 if not (no stdout).
-    - ``snapshot``: JSON array on stdout.
+    - ``snapshot`` / ``snapshot_session``: JSON array on stdout.
+    - ``get_sid``: SID integer on stdout (or empty).
     - ``cleanup``: JSON summary on stdout.
 
     The raw-value output for ``get_*`` commands makes bash integration simple:
@@ -301,6 +400,19 @@ def main() -> int:
     elif cmd == "snapshot" and len(sys.argv) == 3:
         pid = int(sys.argv[2])
         result = snapshot_descendants(pid)
+        print(json.dumps(result))
+        return 0
+
+    elif cmd == "get_sid" and len(sys.argv) == 3:
+        pid = int(sys.argv[2])
+        result = get_session_id(pid)
+        if result is not None:
+            print(result)
+        return 0
+
+    elif cmd == "snapshot_session" and len(sys.argv) == 3:
+        sid = int(sys.argv[2])
+        result = snapshot_session_descendants(sid)
         print(json.dumps(result))
         return 0
 
