@@ -135,7 +135,18 @@ wait_for_server() {
     local max_wait=600
     local waited=0
     while [ $waited -lt $max_wait ]; do
-        if curl --noproxy "*" -s "http://${HOST}:${PORT}/health" >/dev/null 2>&1; then
+        # Use Python http.client to avoid proxy env var interference
+        if "$PYTHON" -c "
+import http.client, sys
+try:
+    conn = http.client.HTTPConnection('${HOST}', ${PORT}, timeout=5)
+    conn.request('GET', '/health')
+    r = conn.getresponse()
+    conn.close()
+    sys.exit(0 if r.status == 200 else 1)
+except Exception:
+    sys.exit(1)
+" 2>/dev/null; then
             log "  Server is ready (waited ${waited}s)"
             return 0
         fi
@@ -148,7 +159,18 @@ wait_for_server() {
 
 collect_metrics() {
     local output_file="$1"
-    curl --noproxy "*" -s "http://${HOST}:${PORT}/metrics" > "$output_file" 2>/dev/null || true
+    "$PYTHON" -c "
+import http.client, json
+try:
+    conn = http.client.HTTPConnection('${HOST}', ${PORT}, timeout=10)
+    conn.request('GET', '/metrics')
+    r = conn.getresponse()
+    data = r.read().decode()
+    conn.close()
+    print(data)
+except Exception:
+    pass
+" > "$output_file" 2>/dev/null || true
 }
 
 build_serve_cmd() {
