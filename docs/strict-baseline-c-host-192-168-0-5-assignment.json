@@ -48,13 +48,19 @@
   "runtime_plan": {
     "repo_digest": "quay.io/ascend/vllm-ascend@sha256:bfc46fa57aedf933e6d6d4adcf42ce96aed956689018faf111bb01571891e092",
     "arm64_image_id": "sha256:8c77ea22995f658be57f9ef6e0be46422a0cfd3466477601173aadd098782fd4",
-    "local_state": "not-observable-from-current-container",
+    "local_state": "expected-image-not-loaded",
     "verification": {
-      "observed_at": "2026-08-04T14:21:20Z",
+      "evidence_scope": "control-side host docker load audit",
       "docker_cli_visible": false,
       "docker_socket_visible": false,
-      "locally_loaded": null,
+      "locally_loaded": false,
       "locally_verified": false
+    },
+    "rejected_local_image": {
+      "archive_sha256_prefix": "e043a768",
+      "config_image_id_prefix": "sha256:aade9d8400",
+      "repo_digest_present": false,
+      "reason": "The loaded config image ID does not match the authoritative arm64 image ID and has no authoritative RepoDigest."
     },
     "expected_source": {
       "vllm_clean": true,
@@ -73,7 +79,7 @@
   "notes": [
     "This document records control-plane assignment, transfer planning, and expected runtime verification facts only.",
     "It is not benchmark evidence and does not authorize a server or benchmark start.",
-    "Runtime locally_loaded is null because neither a Docker CLI nor the host Docker socket is visible from the current container; no local load claim is made.",
+    "Control-side host load evidence rejects the local aade9d8400-prefixed config image; the exact 8c77ea22995f image is not locally loaded or verified.",
     "Runtime, model, data, input, safety-gate, and run evidence remain independently required."
   ]
 }
