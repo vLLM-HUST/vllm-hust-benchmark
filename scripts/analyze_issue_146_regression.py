@@ -89,6 +89,11 @@ def _extract_metric(raw: dict[str, Any], workload: str) -> float | None:
 def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
     """Collect all benchmark results from the re-test directory.
 
+    Only collects results from reps that have a ``.completed`` marker file.
+    This prevents stale results from a previous failed rerun from being
+    consumed by the analysis — the bash script writes ``.completed`` only
+    after successful benchmark + validation.
+
     Returns: {workload: {commit: [metric1, metric2, ...]}}
     """
     results: dict[str, dict[str, list[float]]] = {}
@@ -103,6 +108,11 @@ def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
             for rep_dir in sorted(commit_dir.iterdir()):
                 if not rep_dir.is_dir() or not rep_dir.name.startswith("rep-"):
                     continue
+                # Skip incomplete reps — no .completed marker means the
+                # benchmark failed or was interrupted, and any raw.json
+                # present is stale from a previous run.
+                if not (rep_dir / ".completed").is_file():
+                    continue
                 raw = _load_raw_json(rep_dir / "raw.json")
                 if raw is None:
                     continue
@@ -111,6 +121,68 @@ def collect_results(result_dir: Path) -> dict[str, dict[str, list[float]]]:
                     metrics.append(metric)
             results[workload][commit] = metrics
     return results
+
+
+def validate_env_manifest(rep_dir: Path) -> tuple[bool, str]:
+    """Validate that an env-manifest.json has complete provenance.
+
+    Per reviewer feedback (round 2): the manifest must use SHA-256 (not MD5)
+    for patch identity, must reference a saved patch file on disk, and must
+    capture both tracked and untracked derived modifications.
+
+    Returns (valid, reason).  ``reason`` is empty when valid.
+    """
+    manifest_path = rep_dir / "env-manifest.json"
+    if not manifest_path.is_file():
+        return False, "env-manifest.json missing"
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return False, f"env-manifest.json corrupt: {exc}"
+
+    # Reject old MD5-only manifests (engine_patch_identity without sha256)
+    if "engine_patch_identity" in manifest and "engine_patch_sha256" not in manifest:
+        return False, (
+            "manifest uses deprecated engine_patch_identity (MD5); "
+            "must use engine_patch_sha256 with saved patch file"
+        )
+    if "plugin_patch_identity" in manifest and "plugin_patch_sha256" not in manifest:
+        return False, (
+            "manifest uses deprecated plugin_patch_identity (MD5); "
+            "must use plugin_patch_sha256 with saved patch file"
+        )
+
+    # Verify SHA-256 fields exist
+    engine_sha = manifest.get("engine_patch_sha256")
+    plugin_sha = manifest.get("plugin_patch_sha256")
+    if not engine_sha or not isinstance(engine_sha, str):
+        return False, "engine_patch_sha256 missing or not a string"
+    if not plugin_sha or not isinstance(plugin_sha, str):
+        return False, "plugin_patch_sha256 missing or not a string"
+
+    # SHA-256 is 64 hex chars; "clean" is also acceptable for unmodified repos
+    if engine_sha != "clean" and len(engine_sha) != 64:
+        return False, f"engine_patch_sha256 not a valid SHA-256: {engine_sha!r}"
+    if plugin_sha != "clean" and len(plugin_sha) != 64:
+        return False, f"plugin_patch_sha256 not a valid SHA-256: {plugin_sha!r}"
+
+    # Verify the referenced patch files exist on disk (when not "clean")
+    if engine_sha != "clean":
+        engine_patch_file = manifest.get("engine_patch_file")
+        if not engine_patch_file:
+            return False, "engine_patch_file reference missing"
+        if not (rep_dir / engine_patch_file).is_file():
+            return False, f"engine patch file not found: {engine_patch_file}"
+
+    if plugin_sha != "clean":
+        plugin_patch_file = manifest.get("plugin_patch_file")
+        if not plugin_patch_file:
+            return False, "plugin_patch_file reference missing"
+        if not (rep_dir / plugin_patch_file).is_file():
+            return False, f"plugin patch file not found: {plugin_patch_file}"
+
+    return True, ""
 
 
 def compute_medians(

@@ -298,6 +298,8 @@ class TestCollectResults:
                 (d / "raw.json").write_text(
                     json.dumps({"tokens_per_second": 1000.0 + rep * 10})
                 )
+                # .completed marker required for collection
+                (d / ".completed").touch()
 
         results = analyze_mod.collect_results(tmp_path)
         assert "sonnet-throughput" in results
@@ -311,6 +313,7 @@ class TestCollectResults:
             d = tmp_path / "2206f1f7b7" / "random-latency" / f"rep-{rep}"
             d.mkdir(parents=True)
             (d / "raw.json").write_text(json.dumps({"avg_latency": 10.0 + rep * 0.1}))
+            (d / ".completed").touch()
 
         results = analyze_mod.collect_results(tmp_path)
         # rep-1: avg_latency=10.1s -> 10100.0 ms
@@ -328,5 +331,184 @@ class TestCollectResults:
         d = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-1"
         d.mkdir(parents=True)
         (d / "raw.json").write_text("not valid json")
+        (d / ".completed").touch()
         results = analyze_mod.collect_results(tmp_path)
         assert results["sonnet-throughput"]["2206f1f7b7"] == []
+
+    def test_stale_rep_without_completed_marker_skipped(self, analyze_mod, tmp_path):
+        """Reverse test: a rep with raw.json but NO .completed marker must be
+        skipped by collect_results.
+
+        This prevents stale results from a previous failed rerun from being
+        consumed by the analysis.  Per reviewer round 2: '请在开始 rep 前清空
+        最终目录，或使用本次 run 的独立目录和完成标记'.
+        """
+        d = tmp_path / "2206f1f7b7" / "sonnet-throughput" / "rep-1"
+        d.mkdir(parents=True)
+        # Stale raw.json present but NO .completed marker
+        (d / "raw.json").write_text(json.dumps({"tokens_per_second": 9999.0}))
+        # Deliberately do NOT create .completed
+
+        results = analyze_mod.collect_results(tmp_path)
+        assert results["sonnet-throughput"]["2206f1f7b7"] == []
+
+    def test_mixed_completed_and_incomplete_reps(self, analyze_mod, tmp_path):
+        """Only completed reps should be collected; incomplete ones skipped."""
+        for rep in [1, 2, 3]:
+            d = tmp_path / "2206f1f7b7" / "sonnet-throughput" / f"rep-{rep}"
+            d.mkdir(parents=True)
+            (d / "raw.json").write_text(
+                json.dumps({"tokens_per_second": 1000.0 + rep * 10})
+            )
+            # rep-2 is "incomplete" (failed, no .completed)
+            if rep != 2:
+                (d / ".completed").touch()
+
+        results = analyze_mod.collect_results(tmp_path)
+        # Only 2 reps collected (rep-1 and rep-3), rep-2 skipped
+        assert len(results["sonnet-throughput"]["2206f1f7b7"]) == 2
+        assert 1010.0 in results["sonnet-throughput"]["2206f1f7b7"]
+        assert 1030.0 in results["sonnet-throughput"]["2206f1f7b7"]
+
+
+# ---------------------------------------------------------------------------
+# validate_env_manifest (issue #146 reviewer round 2: SHA-256 patch identity)
+# ---------------------------------------------------------------------------
+
+
+class TestValidateEnvManifest:
+    """Tests for validate_env_manifest — verifies that the env-manifest.json
+    has complete provenance with SHA-256 (not MD5) patch identity and
+    references saved patch files on disk.
+
+    Per reviewer round 2: 'patch identity 只对 git diff HEAD 做 MD5，捕获不到
+    ensure_build_info 生成的未跟踪文件，也没有保存可复现的 patch 内容；请把
+    tracked/untracked 派生修改完整落盘并用 SHA-256 绑定'.
+    """
+
+    def test_valid_manifest_with_sha256_and_patch_files(self, analyze_mod, tmp_path):
+        """A manifest with SHA-256 patch identity and existing patch files passes."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        patch_content = "=== TRACKED DIFF ===\n+some change\n"
+        (rep_dir / "derived_patch_engine.diff").write_text(patch_content)
+        (rep_dir / "derived_patch_plugin.diff").write_text(patch_content)
+
+        import hashlib
+
+        sha = hashlib.sha256(patch_content.encode()).hexdigest()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": sha,
+            "engine_patch_file": "derived_patch_engine.diff",
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": sha,
+            "plugin_patch_file": "derived_patch_plugin.diff",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert valid, f"Expected valid, got: {reason}"
+
+    def test_valid_manifest_with_clean_repos(self, analyze_mod, tmp_path):
+        """A manifest with 'clean' patch identity (no modifications) passes."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "clean",
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert valid, f"Expected valid, got: {reason}"
+
+    def test_rejects_old_md5_only_manifest(self, analyze_mod, tmp_path):
+        """Reverse test: a manifest with engine_patch_identity (MD5) but no
+        engine_patch_sha256 must be rejected."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_identity": "abc123def456",  # pragma: allowlist secret
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_identity": "xyz789abc012",  # pragma: allowlist secret
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "deprecated" in reason or "sha256" in reason.lower()
+
+    def test_rejects_missing_sha256_field(self, analyze_mod, tmp_path):
+        """Reverse test: a manifest without engine_patch_sha256 is rejected."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            # engine_patch_sha256 deliberately missing
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "engine_patch_sha256" in reason
+
+    def test_rejects_invalid_sha256_length(self, analyze_mod, tmp_path):
+        """Reverse test: a SHA-256 that is not 64 hex chars is rejected."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "tooshort",  # not 64 chars
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "not a valid SHA-256" in reason
+
+    def test_rejects_missing_patch_file_on_disk(self, analyze_mod, tmp_path):
+        """Reverse test: a manifest referencing a patch file that doesn't
+        exist on disk is rejected."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        manifest = {
+            "engine_commit_observed": "a" * 40,
+            "engine_patch_sha256": "a" * 64,
+            "engine_patch_file": "derived_patch_engine.diff",
+            # But the file is NOT created on disk
+            "plugin_commit_observed": "b" * 40,
+            "plugin_patch_sha256": "clean",
+        }
+        (rep_dir / "env-manifest.json").write_text(json.dumps(manifest))
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "patch file not found" in reason
+
+    def test_rejects_missing_manifest(self, analyze_mod, tmp_path):
+        """Reverse test: a rep directory without env-manifest.json is rejected."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        # No env-manifest.json created
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "missing" in reason
+
+    def test_rejects_corrupt_manifest(self, analyze_mod, tmp_path):
+        """Reverse test: a corrupt env-manifest.json is rejected."""
+        rep_dir = tmp_path / "rep-1"
+        rep_dir.mkdir()
+        (rep_dir / "env-manifest.json").write_text("not valid json")
+
+        valid, reason = analyze_mod.validate_env_manifest(rep_dir)
+        assert not valid
+        assert "corrupt" in reason
