@@ -1,0 +1,79 @@
+{
+  "schema_version": "strict-baseline-host-assignment/v1",
+  "assignment_status": "control-fixed-transfer-incomplete",
+  "execution_authorized": false,
+  "branch": "data/strict-baseline-d-host-192-168-0-2",
+  "host": "192.168.0.2",
+  "public_host_alias": "ascend91-host",
+  "targets": [
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "scenario": "sharegpt-throughput",
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "tensor_parallel_size": 1
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "scenario": "sonnet-throughput",
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "tensor_parallel_size": 1
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "scenario": "visionarena-online",
+      "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "model_revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+      "tensor_parallel_size": 1
+    }
+  ],
+  "model_asset_plan": [
+    {
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "local_path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+      "local_state": "absent",
+      "verification": {
+        "path_exists": false,
+        "revision_metadata_matches": false,
+        "weight_shards_present": 0,
+        "sha256_manifest_present": false
+      },
+      "transfer_required": true,
+      "transfer_source_requirement": "exact-revision snapshot with complete metadata and per-file size and SHA256 verification"
+    },
+    {
+      "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "model_revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+      "local_path": "/data/shared_models/Qwen--Qwen2.5-VL-7B-Instruct",
+      "local_state": "absent",
+      "verification": {
+        "path_exists": false,
+        "revision_metadata_matches": false,
+        "weight_shards_present": 0,
+        "sha256_manifest_present": false
+      },
+      "transfer_required": true,
+      "transfer_source_requirement": "exact-revision snapshot with complete metadata and per-file size and SHA256 verification"
+    }
+  ],
+  "minimum_transfer_set": [
+    {
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "reason": "required by sharegpt-throughput and sonnet-throughput; the local snapshot is absent"
+    },
+    {
+      "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "model_revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+      "reason": "required by visionarena-online; the local snapshot is absent"
+    }
+  ],
+  "non_execution_evidence": true,
+  "notes": [
+    "This document records control-plane assignment and transfer planning only.",
+    "It is not benchmark evidence and does not authorize a server or benchmark start.",
+    "Runtime, model, data, input, safety-gate, and run evidence remain independently required."
+  ]
+}
