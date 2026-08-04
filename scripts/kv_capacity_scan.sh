@@ -17,12 +17,18 @@ set -euo pipefail
 REPS=${REPS:-3}
 PART="both"
 DRY_RUN=0
+WORKLOADS_FILTER=""
+CAPACITIES_FILTER=""
+TIERING_FILTER=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --reps) REPS="$2"; shift 2 ;;
         --part) PART="$2"; shift 2 ;;
         --dry-run) DRY_RUN=1; shift ;;
+        --workloads) WORKLOADS_FILTER="$2"; shift 2 ;;
+        --capacities) CAPACITIES_FILTER="$2"; shift 2 ;;
+        --tiering-configs) TIERING_FILTER="$2"; shift 2 ;;
         *) echo "Unknown arg: $1"; exit 2 ;;
     esac
 done
@@ -36,7 +42,7 @@ PYTHON="/root/miniconda3/envs/vllm-hust-dev/bin/python"
 VLLM_HUST_REPO="/root/vllm/vllm-hust"
 ASCEND_REPO="/root/vllm/vllm-ascend-hust"
 RESULT_DIR="/data/issue134-results"
-PORT=8420
+PORT="${PORT:-8420}"
 HOST="127.0.0.1"
 
 # ShareGPT dataset (search common locations)
@@ -100,15 +106,17 @@ export ATB_HOME_PATH="${_atb_home}/${_cxx_abi_dir}"
 log() { echo "[$(date '+%Y-%m-%dT%H:%M:%S')] $*"; }
 
 kill_leftover_processes() {
-    pkill -9 -f "vllm.entrypoints" 2>/dev/null || true
-    pkill -9 -f "run_engine_core" 2>/dev/null || true
-    pkill -9 -f "api_server" 2>/dev/null || true
-    # Kill anything on our port
+    # Only kill processes on our own port to avoid interfering with parallel experiments
     local pid
     pid=$(lsof -ti ":${PORT}" 2>/dev/null || true)
     if [ -n "$pid" ]; then
         kill -9 $pid 2>/dev/null || true
     fi
+    # Also kill child processes of the server on our port
+    local child
+    for child in $(pgrep -P "${pid:-0}" 2>/dev/null || true); do
+        kill -9 "$child" 2>/dev/null || true
+    done
     sleep 2
 }
 
@@ -301,10 +309,31 @@ EOF
 
 run_part_a() {
     log "=== Part A: KV Capacity Scan ==="
-    log "  ${#KV_CAPACITIES[@]} capacities × ${#SCAN_WORKLOADS[@]} workloads × $REPS reps"
 
-    for workload in "${SCAN_WORKLOADS[@]}"; do
-        for kv_gib in "${KV_CAPACITIES[@]}"; do
+    # Filter workloads if --workloads is set
+    local workloads=("${SCAN_WORKLOADS[@]}")
+    if [ -n "$WORKLOADS_FILTER" ]; then
+        workloads=()
+        IFS=',' read -ra _wl <<< "$WORKLOADS_FILTER"
+        for w in "${_wl[@]}"; do
+            workloads+=("$w")
+        done
+    fi
+
+    # Filter capacities if --capacities is set
+    local capacities=("${KV_CAPACITIES[@]}")
+    if [ -n "$CAPACITIES_FILTER" ]; then
+        capacities=()
+        IFS=',' read -ra _cap <<< "$CAPACITIES_FILTER"
+        for c in "${_cap[@]}"; do
+            capacities+=("$c")
+        done
+    fi
+
+    log "  ${#capacities[@]} capacities × ${#workloads[@]} workloads × $REPS reps"
+
+    for workload in "${workloads[@]}"; do
+        for kv_gib in "${capacities[@]}"; do
             for rep in $(seq 1 "$REPS"); do
                 local output_dir="$RESULT_DIR/raw_results/$workload/$kv_gib/rep-$rep"
                 run_single_experiment \
@@ -316,10 +345,21 @@ run_part_a() {
 
 run_part_b() {
     log "=== Part B: Tiering Comparison ==="
-    log "  ${#TIERING_CONFIGS[@]} configs × $REPS reps"
     log "  Workload: $TIERING_WORKLOAD (fixed 8 GiB KV for constrained configs)"
 
-    for config in "${TIERING_CONFIGS[@]}"; do
+    # Filter tiering configs if --tiering-configs is set
+    local configs=("${TIERING_CONFIGS[@]}")
+    if [ -n "$TIERING_FILTER" ]; then
+        configs=()
+        IFS=',' read -ra _tc <<< "$TIERING_FILTER"
+        for t in "${_tc[@]}"; do
+            configs+=("$t")
+        done
+    fi
+
+    log "  ${#configs[@]} configs × $REPS reps"
+
+    for config in "${configs[@]}"; do
         for rep in $(seq 1 "$REPS"); do
             local output_dir="$RESULT_DIR/tiering/$config/rep-$rep"
             local extra_env=""
