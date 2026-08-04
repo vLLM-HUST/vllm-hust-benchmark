@@ -1504,7 +1504,25 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
             or _TEMPORARY_DIR_SUFFIX_PATTERN.search(path_str)
         )
         is_fixture_path = "tests" in parts and "fixtures" in parts
+        # .benchmarks/ directories are rejected as cache/working directories,
+        # UNLESS the directory carries a valid STATUS file written by the CI
+        # workflow. CI submissions are intentionally placed under .benchmarks/
+        # by run_ascend_benchmark_ci.sh, and the runner writes "OK" to STATUS
+        # after a successful benchmark. This exception allows CI submissions to
+        # pass the admission gate while still rejecting actual cache/working
+        # directories that lack a STATUS file.
         is_benchmark_cache = ".benchmarks" in parts
+        if is_benchmark_cache:
+            status_path_check = child / "STATUS"
+            if status_path_check.is_file():
+                try:
+                    status_content_check = status_path_check.read_text(
+                        encoding="utf-8"
+                    ).strip()
+                    if status_content_check.startswith("OK"):
+                        is_benchmark_cache = False
+                except OSError:
+                    pass  # keep is_benchmark_cache = True
         if is_temporary_name or is_fixture_path or is_benchmark_cache:
             failures.append(
                 {

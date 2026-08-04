@@ -224,6 +224,67 @@ def test_temporary_directory_rejected(tmp_path: Path) -> None:
     assert "tmp-prefix-recheck" in failures[0]["dir"]
 
 
+def test_benchmarks_dir_without_status_rejected(tmp_path: Path) -> None:
+    """Directories under .benchmarks/ without a STATUS file must be rejected
+    as cache/working directories."""
+    source_dir = tmp_path / ".benchmarks" / "ci" / "ci-run-1" / "submissions"
+    source_dir.mkdir(parents=True)
+    cache_dir = source_dir / "ci-30554037879-1-7363d82b"
+    cache_dir.mkdir()
+    (cache_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    # No STATUS file — should be rejected as benchmark cache
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+    assert "directory name matches temporary pattern" in failures[0]["detail"]
+
+
+def test_benchmarks_dir_with_ok_status_passes(tmp_path: Path) -> None:
+    """CI submissions under .benchmarks/ with a valid STATUS file (written by
+    run_ascend_benchmark_ci.sh) must pass the admission gate.
+
+    The CI workflow intentionally places submissions under .benchmarks/ and
+    writes "OK" to STATUS after a successful benchmark. The admission gate
+    must accept these, not reject them as cache directories.
+    """
+    source_dir = (
+        tmp_path / ".benchmarks" / "ci" / "ci-30835313188-1-ba82f2122b" / "submissions"
+    )
+    source_dir.mkdir(parents=True)
+    ci_dir = source_dir / "ci-30835313188-1-ba82f2122b117de38542e9db09f5747a83013b71"
+    ci_dir.mkdir()
+    (ci_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (ci_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(ci_dir)
+    _write_admission_required_files(ci_dir)
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert failures == []
+
+
+def test_benchmarks_dir_with_failed_status_rejected(tmp_path: Path) -> None:
+    """Directories under .benchmarks/ with a FAILED STATUS must still be
+    rejected. Since the STATUS is not "OK", the .benchmarks exception does
+    not apply and the directory is rejected as temporary (fail-closed)."""
+    source_dir = tmp_path / ".benchmarks" / "ci" / "ci-run-failed" / "submissions"
+    source_dir.mkdir(parents=True)
+    failed_dir = source_dir / "ci-30554037879-1-failed"
+    failed_dir.mkdir()
+    (failed_dir / "STATUS").write_text("FAILED: server crashed\n", encoding="utf-8")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
 def test_clean_directory_passes(tmp_path: Path) -> None:
     source_dir = tmp_path / "submissions"
     source_dir.mkdir()
