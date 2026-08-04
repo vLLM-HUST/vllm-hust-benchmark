@@ -11,14 +11,12 @@ from vllm_hust_benchmark.baseline_recovery import build_recovery_audit
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_current_baselines_report_attested_recoveries_and_complete_rerun_matrix() -> (
-    None
-):
+def test_current_baselines_require_rerun_after_input_identity_revision() -> None:
     report = build_recovery_audit(REPO_ROOT, generated_at="2026-08-02T00:00:00Z")
     summary = report["summary"]
     assert summary["scanned"] == 19
     assert summary["active_public_candidates"] == 9
-    assert summary["recoverable"] >= 2
+    assert summary["recoverable"] == 0
     assert summary["recoverable"] + summary["rerun_required"] == 9
     assert summary["provisional_or_specialty"] == 10
     assert len(report["rerun_specs"]) == summary["rerun_required"]
@@ -81,7 +79,8 @@ def test_prefix_lengths_are_normalized_without_false_input_output_mismatch() -> 
     fields = {item["field"] for item in record["exact_mismatches"]}
     assert "client_parameters.input_len" not in fields
     assert "client_parameters.output_len" not in fields
-    assert record["evidence"]["registry_binding"] == "current-registry"
+    assert record["evidence"]["registry_binding"] == "unverified"
+    assert "target-registry-hash-missing-or-mismatched" in record["reasons"]
 
 
 def test_audit_is_json_serializable() -> None:
@@ -89,7 +88,7 @@ def test_audit_is_json_serializable() -> None:
     json.dumps(report)
 
 
-def test_cli_stdout_is_machine_readable_and_require_recoverable_passes() -> None:
+def test_cli_stdout_is_machine_readable_and_require_recoverable_fails() -> None:
     command = [
         sys.executable,
         "scripts/audit_official_baseline_recovery.py",
@@ -100,7 +99,7 @@ def test_cli_stdout_is_machine_readable_and_require_recoverable_passes() -> None
         command, cwd=REPO_ROOT, check=False, capture_output=True, text=True
     )
     assert completed.returncode == 0
-    assert json.loads(completed.stdout)["summary"]["recoverable"] >= 2
+    assert json.loads(completed.stdout)["summary"]["recoverable"] == 0
     assert "baseline recovery audit:" in completed.stderr
 
     required = subprocess.run(
@@ -110,5 +109,5 @@ def test_cli_stdout_is_machine_readable_and_require_recoverable_passes() -> None
         capture_output=True,
         text=True,
     )
-    assert required.returncode == 0
-    assert json.loads(required.stdout)["summary"]["recoverable"] >= 2
+    assert required.returncode == 2
+    assert json.loads(required.stdout)["summary"]["recoverable"] == 0

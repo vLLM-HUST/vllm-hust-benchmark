@@ -125,9 +125,27 @@ def test_accepts_only_attested_registered_production_trace_baseline() -> None:
         ).read_text(encoding="utf-8")
     )
 
-    assert module.validate_entry(artifact, source=Path("leaderboard_multi.json")) == []
+    stale_errors = module.validate_entry(
+        artifact, source=Path("leaderboard_multi.json")
+    )
+    assert any("public vllm baseline must be 0.18.0" in error for error in stale_errors)
+    assert any("retired public precision 'BF16'" in error for error in stale_errors)
 
-    spoofed = copy.deepcopy(artifact)
+    registry_bytes = module.OFFICIAL_TARGET_REGISTRY.read_bytes()
+    registry = json.loads(registry_bytes)
+    target = next(
+        item
+        for item in registry["targets"]
+        if item["target_id"] == artifact["same_spec"]["spec_id"]
+    )
+    rebound = copy.deepcopy(artifact)
+    rebound["metadata"]["target_version"] = target["target_version"]
+    rebound["metadata"]["target_registry_sha256"] = module.hashlib.sha256(
+        registry_bytes
+    ).hexdigest()
+    assert module.validate_entry(rebound, source=Path("leaderboard_multi.json")) == []
+
+    spoofed = copy.deepcopy(rebound)
     spoofed["metadata"]["verified"] = False
     errors = module.validate_entry(spoofed, source=Path("leaderboard_multi.json"))
     assert any("public vllm baseline must be 0.18.0" in error for error in errors)
