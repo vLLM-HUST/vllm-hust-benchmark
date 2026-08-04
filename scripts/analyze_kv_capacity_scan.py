@@ -40,7 +40,10 @@ MIN_REPETITIONS = 3
 # Real tiering configs for Part B:
 #   hbm-only         — 32 GiB KV, no kv-transfer-config (baseline, no pressure)
 #   tiering-disabled — 8 GiB KV, no kv-transfer-config (pressure, no tiering)
-#   tiering-enabled  — 8 GiB KV, CPUOffloadingConnector (pressure + tiering)
+#   tiering-enabled  — 8 GiB KV, SimpleCPUOffloadConnector (pressure + tiering)
+# Per PR #146 review: CPUOffloadingConnector is deprecated/not registered in
+# Ascend; SimpleCPUOffloadConnector is registered and used with kv_role=kv_both
+# and cpu_bytes_to_use inside kv_connector_extra_config.
 REQUIRED_TIERING_CONFIGS = ["hbm-only", "tiering-disabled", "tiering-enabled"]
 # Backward-compatible alias
 TIERING_CONFIGS = REQUIRED_TIERING_CONFIGS
@@ -91,7 +94,24 @@ def compute_stats(values: list[float]) -> dict[str, float | None]:
             "count": 0,
         }
 
-    sorted_vals = sorted(values)
+    # Filter out non-finite values (NaN/inf) so statistics functions don't
+    # crash. The raw_values are preserved separately for per-rep validation,
+    # which will flag any invalid rep.
+    finite_vals = [v for v in values if v is not None and math.isfinite(v)]
+    if not finite_vals:
+        return {
+            "median": None,
+            "p25": None,
+            "p75": None,
+            "iqr": None,
+            "mean": None,
+            "stdev": None,
+            "min": None,
+            "max": None,
+            "count": len(values),
+        }
+
+    sorted_vals = sorted(finite_vals)
     n = len(sorted_vals)
     median = statistics.median(sorted_vals)
     p25 = _percentile(sorted_vals, 25)
@@ -134,7 +154,7 @@ def extract_metrics(raw_result: dict[str, Any]) -> dict[str, float | None]:
 
 def aggregate_reps(
     reps: list[dict[str, Any]],
-) -> dict[str, dict[str, float | None] | dict[str, float | None]]:
+) -> dict[str, dict[str, float | None]]:
     """Aggregate metric values across multiple repetition results.
 
     Args:
@@ -193,6 +213,10 @@ def analyze_capacity_scan(
                 "kv_target_gib": kv_gib,
                 "repetitions": len(rep_list),
                 "stats": agg["per_metric_stats"],
+                # Per PR #146 review: preserve raw per-rep throughput values
+                # so _validate_repetitions can check each rep (not just median),
+                # catching NaN/0 hidden behind a positive median.
+                "raw_values": agg["raw_values"]["output_throughput"],
             }
 
         capacity_curves[workload] = curve
@@ -289,6 +313,60 @@ def _find_max_delta_cap(
     return max_delta_cap
 
 
+# Per PR #146 review: the tiering-enabled config must use a connector that is
+# actually registered in Ascend. CPUOffloadingConnector is deprecated and not
+# registered; SimpleCPUOffloadConnector is the registered connector.
+VALID_TIERING_CONNECTORS = {"SimpleCPUOffloadConnector"}
+# kv_role must be set for KVTransferConfig. For single-node CPU offload,
+# kv_both is the correct role (the node both saves and loads KV cache).
+VALID_KV_ROLES = {"kv_both", "kv_producer", "kv_consumer"}
+
+
+def validate_tiering_config(
+    kv_transfer_config: dict[str, Any] | None,
+) -> tuple[bool, list[str]]:
+    """Validate a kv_transfer_config for the tiering-enabled experiment.
+
+    Per PR #146 review: the config must use a registered connector
+    (SimpleCPUOffloadConnector), set kv_role, and place connector-private
+    parameters inside kv_connector_extra_config.
+
+    Returns:
+        Tuple of (is_valid, issues).
+    """
+    issues: list[str] = []
+
+    if not isinstance(kv_transfer_config, dict) or not kv_transfer_config:
+        return False, ["kv_transfer_config is empty or not a dict"]
+
+    connector = kv_transfer_config.get("kv_connector")
+    if connector not in VALID_TIERING_CONNECTORS:
+        issues.append(
+            f"kv_connector={connector!r} is not registered in Ascend; "
+            f"must be one of {sorted(VALID_TIERING_CONNECTORS)}"
+        )
+
+    kv_role = kv_transfer_config.get("kv_role")
+    if not kv_role:
+        issues.append("kv_role is missing (required by KVTransferConfig)")
+    elif kv_role not in VALID_KV_ROLES:
+        issues.append(
+            f"kv_role={kv_role!r} is not a valid role; "
+            f"must be one of {sorted(VALID_KV_ROLES)}"
+        )
+
+    extra_config = kv_transfer_config.get("kv_connector_extra_config")
+    if not isinstance(extra_config, dict):
+        issues.append(
+            "kv_connector_extra_config is missing or not a dict; "
+            "connector-private params (e.g. cpu_bytes_to_use) must go here"
+        )
+    elif "cpu_bytes_to_use" not in extra_config:
+        issues.append("cpu_bytes_to_use missing from kv_connector_extra_config")
+
+    return len(issues) == 0, issues
+
+
 def analyze_tiering_comparison(
     results: dict[str, list[dict[str, Any]]],
 ) -> dict[str, Any]:
@@ -383,17 +461,36 @@ def _delta_pct(base: float | None, head: float | None) -> float | None:
     return round(((head - base) / base) * 100, 2)
 
 
+# Sentinel values that are non-None but carry no real provenance information.
+# Per PR #146 review: "unknown"/"not available" must NOT be treated as valid.
+_PROVENANCE_SENTINELS = {"unknown", "not available", "n/a", "none", "null", ""}
+
+
+def _is_placeholder(value: Any) -> bool:
+    """Return True if a provenance value is None or a placeholder sentinel."""
+    if value is None:
+        return True
+    if isinstance(value, str) and value.strip().lower() in _PROVENANCE_SENTINELS:
+        return True
+    return False
+
+
 def _validate_provenance(
     provenance: dict[str, Any] | None,
 ) -> tuple[bool, list[str]]:
-    """Validate that all required provenance fields are present and non-None.
+    """Validate that all required provenance fields are present and non-placeholder.
+
+    Per PR #146 review: ``unknown``/``not available`` sentinels must be rejected,
+    not treated as non-empty valid values. Each field must be a real value.
 
     Returns:
         Tuple of (is_valid, missing_fields).
     """
     if not isinstance(provenance, dict) or not provenance:
         return False, list(REQUIRED_PROVENANCE_FIELDS)
-    missing = [f for f in REQUIRED_PROVENANCE_FIELDS if provenance.get(f) is None]
+    missing = [
+        f for f in REQUIRED_PROVENANCE_FIELDS if _is_placeholder(provenance.get(f))
+    ]
     return len(missing) == 0, missing
 
 
@@ -407,6 +504,10 @@ def _validate_repetitions(
     vacuous pass — it is a blocking failure because there is no evidence to
     validate.
 
+    Per reviewer round 2 issue 3: capacity coverage must be checked per
+    workload, not by union. Each workload must individually cover all
+    ``KV_CAPACITY_TARGETS_GIB`` capacities with >= MIN_REPETITIONS valid reps.
+
     Returns:
         Tuple of (is_valid, issues) where issues is a list of human-readable
         problem descriptions.
@@ -417,6 +518,15 @@ def _validate_repetitions(
     if not capacity_curves:
         issues.append("capacity_curves is empty — no evidence to validate")
     for workload, curve in capacity_curves.items():
+        # Per-workload capacity coverage: each workload must have all 4
+        # capacities (8/16/24/32 GiB), not just a union across workloads.
+        present_caps = {int(k) for k in curve.keys()}
+        missing_caps = [c for c in KV_CAPACITY_TARGETS_GIB if c not in present_caps]
+        if missing_caps:
+            issues.append(
+                f"workload {workload}: missing capacities {missing_caps} "
+                f"(present={sorted(present_caps)})"
+            )
         for cap_str, data in curve.items():
             reps = data.get("repetitions", 0)
             if reps < MIN_REPETITIONS:
@@ -452,6 +562,68 @@ def _validate_repetitions(
             issues.append(f"tiering {config}: no throughput data")
         elif not math.isfinite(median) or median <= 0:
             issues.append(f"tiering {config}: invalid throughput {median}")
+
+    return len(issues) == 0, issues
+
+
+def load_all_manifests(results_dir: Path) -> list[dict[str, Any]]:
+    """Load every env-manifest.json under the results directory.
+
+    Per PR #146 review: the analyzer must not use a single manifest to
+    represent all 45 runs. Each rep has its own manifest, and every one
+    must be loaded and validated individually.
+
+    Searches ``raw_results/`` and ``tiering/`` subdirectories (where the scan
+    script writes per-rep manifests), plus the top-level manifest.
+
+    Returns:
+        List of manifest dicts (may be empty if no manifests found).
+    """
+    manifests: list[dict[str, Any]] = []
+    seen_paths: set[str] = set()
+
+    # Top-level manifest
+    top_level = results_dir / "env-manifest.json"
+    if top_level.exists():
+        manifests.append(json.loads(top_level.read_text()))
+        seen_paths.add(str(top_level.resolve()))
+
+    # Per-rep manifests under raw_results/ and tiering/
+    for sub in [results_dir / "raw_results", results_dir / "tiering"]:
+        if not sub.is_dir():
+            continue
+        for candidate in sorted(sub.rglob("env-manifest.json")):
+            resolved = str(candidate.resolve())
+            if resolved not in seen_paths:
+                manifests.append(json.loads(candidate.read_text()))
+                seen_paths.add(resolved)
+
+    return manifests
+
+
+def _validate_per_rep_manifests(
+    manifests: list[dict[str, Any]],
+) -> tuple[bool, list[str]]:
+    """Validate that every rep's env-manifest has complete provenance.
+
+    Per PR #146 review: each rep must have its own manifest with all required
+    fields populated (no ``unknown``/``not available`` sentinels). Using one
+    manifest for the entire batch is not sufficient.
+
+    Returns:
+        Tuple of (is_valid, issues) where issues lists per-manifest problems.
+    """
+    if not manifests:
+        return False, ["no per-rep env-manifest files found"]
+
+    issues: list[str] = []
+    for i, manifest in enumerate(manifests):
+        valid, missing = _validate_provenance(manifest)
+        if not valid:
+            issues.append(
+                f"manifest {i + 1}/{len(manifests)}: missing/placeholder "
+                f"fields {missing}"
+            )
 
     return len(issues) == 0, issues
 
@@ -610,6 +782,26 @@ def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
         }
     )
 
+    # 7. Per-rep manifest binding: every rep must have its own valid manifest
+    per_rep_manifests = analysis.get("per_rep_manifests", [])
+    per_rep_valid, per_rep_issues = _validate_per_rep_manifests(per_rep_manifests)
+    if not per_rep_valid:
+        has_blocking_failure = True
+    criteria.append(
+        {
+            "criterion": (
+                "Per-rep env-manifest binding: every rep has its own manifest "
+                "with complete provenance (not one manifest for the batch)"
+            ),
+            "met": per_rep_valid,
+            "details": (
+                "; ".join(per_rep_issues)
+                if per_rep_issues
+                else f"All {len(per_rep_manifests)} manifests valid"
+            ),
+        }
+    )
+
     all_met = all(c["met"] for c in criteria)
 
     if all_met:
@@ -633,6 +825,11 @@ def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
             "valid": reps_valid,
             "issues": reps_issues,
         },
+        "per_rep_manifest_validation": {
+            "valid": per_rep_valid,
+            "issues": per_rep_issues,
+            "manifest_count": len(per_rep_manifests),
+        },
     }
 
 
@@ -641,6 +838,7 @@ def generate_report(
     tiering_analysis: dict[str, Any] | None = None,
     preempt_timeline: dict[str, Any] | None = None,
     provenance: dict[str, Any] | None = None,
+    per_rep_manifests: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Generate the final issue #134 analysis report.
 
@@ -650,6 +848,9 @@ def generate_report(
         preempt_timeline: Output from reconstruct_preempt_timeline (optional)
         provenance: Environment manifest dict (optional) with
             REQUIRED_PROVENANCE_FIELDS filled
+        per_rep_manifests: List of per-rep manifest dicts (optional). Per
+            PR #146 review, every rep must have its own manifest validated
+            individually, not one manifest for the whole batch.
 
     Returns:
         Complete report dict with all analysis sections and acceptance check.
@@ -661,6 +862,8 @@ def generate_report(
         combined["preempt_timeline"] = preempt_timeline
     if provenance:
         combined["provenance"] = provenance
+    if per_rep_manifests is not None:
+        combined["per_rep_manifests"] = per_rep_manifests
 
     acceptance = check_acceptance_criteria(combined)
 
@@ -728,29 +931,19 @@ def main() -> None:
     if timeline_file.exists():
         preempt_timeline = json.loads(timeline_file.read_text())
 
-    # Load provenance if available.  Per reviewer round 1 issue 4: the scan
-    # script writes env-manifest.json per-rep (under each rep dir), not at the
-    # top level.  Try the top-level manifest first, then fall back to the first
-    # rep-level manifest found under raw_results/ or tiering/<config>/rep-*/.
-    provenance = None
-    manifest_file = results_dir / "env-manifest.json"
-    if manifest_file.exists():
-        provenance = json.loads(manifest_file.read_text())
-    else:
-        for sub in [
-            results_dir / "raw_results",
-            results_dir / "tiering",
-        ]:
-            if not sub.is_dir():
-                continue
-            for candidate in sub.rglob("env-manifest.json"):
-                provenance = json.loads(candidate.read_text())
-                break
-            if provenance is not None:
-                break
+    # Load provenance.  Per PR #146 review: load ALL per-rep manifests, not
+    # just the first one found. Each rep must have its own manifest validated
+    # individually. The top-level manifest (if present) is used as the summary
+    # provenance; per-rep manifests are validated separately.
+    per_rep_manifests = load_all_manifests(results_dir)
+    provenance = per_rep_manifests[0] if per_rep_manifests else None
 
     report = generate_report(
-        capacity_analysis, tiering_analysis, preempt_timeline, provenance
+        capacity_analysis,
+        tiering_analysis,
+        preempt_timeline,
+        provenance,
+        per_rep_manifests,
     )
 
     output = json.dumps(report, indent=2, ensure_ascii=False)

@@ -97,12 +97,33 @@ def _make_complete_capacity_curves():
     """Return capacity_curves with all 4 capacities, 3 reps, valid throughput."""
     return {
         "w": {
-            "8": {"repetitions": 3, "stats": {"output_throughput": {"median": 100.0}}},
-            "16": {"repetitions": 3, "stats": {"output_throughput": {"median": 200.0}}},
-            "24": {"repetitions": 3, "stats": {"output_throughput": {"median": 210.0}}},
-            "32": {"repetitions": 3, "stats": {"output_throughput": {"median": 215.0}}},
+            "8": {
+                "repetitions": 3,
+                "stats": {"output_throughput": {"median": 100.0}},
+                "raw_values": [100.0, 102.0, 98.0],
+            },
+            "16": {
+                "repetitions": 3,
+                "stats": {"output_throughput": {"median": 200.0}},
+                "raw_values": [200.0, 202.0, 198.0],
+            },
+            "24": {
+                "repetitions": 3,
+                "stats": {"output_throughput": {"median": 210.0}},
+                "raw_values": [210.0, 212.0, 208.0],
+            },
+            "32": {
+                "repetitions": 3,
+                "stats": {"output_throughput": {"median": 215.0}},
+                "raw_values": [215.0, 217.0, 213.0],
+            },
         }
     }
+
+
+def _make_per_rep_manifests(count=3):
+    """Return a list of valid per-rep manifests."""
+    return [_make_provenance() for _ in range(count)]
 
 
 def _make_complete_timeline():
@@ -387,6 +408,7 @@ class TestAcceptanceCriteria:
             "tiering_comparison": _make_complete_tiering(),
             "capacity_curves": _make_complete_capacity_curves(),
             "provenance": _make_provenance(),
+            "per_rep_manifests": _make_per_rep_manifests(3),
         }
         result = analyze_mod.check_acceptance_criteria(analysis)
         assert result["all_criteria_met"] is True
@@ -416,23 +438,28 @@ class TestAcceptanceCriteria:
             },
             "tiering_comparison": _make_complete_tiering(),
             "provenance": _make_provenance(),
+            "per_rep_manifests": _make_per_rep_manifests(3),
             "capacity_curves": {
                 "w": {
                     "8": {
                         "repetitions": 2,
                         "stats": {"output_throughput": {"median": 100.0}},
+                        "raw_values": [100.0, 102.0],
                     },  # < 3
                     "16": {
                         "repetitions": 3,
                         "stats": {"output_throughput": {"median": 200.0}},
+                        "raw_values": [200.0, 202.0, 198.0],
                     },
                     "24": {
                         "repetitions": 3,
                         "stats": {"output_throughput": {"median": 210.0}},
+                        "raw_values": [210.0, 212.0, 208.0],
                     },
                     "32": {
                         "repetitions": 3,
                         "stats": {"output_throughput": {"median": 215.0}},
+                        "raw_values": [215.0, 217.0, 213.0],
                     },
                 }
             },
@@ -473,6 +500,7 @@ class TestAcceptanceCriteria:
             "tiering_comparison": _make_complete_tiering(),
             "capacity_curves": _make_complete_capacity_curves(),
             "provenance": _make_provenance(),
+            "per_rep_manifests": _make_per_rep_manifests(3),
         }
         result = analyze_mod.check_acceptance_criteria(analysis)
         assert result["all_criteria_met"] is False
@@ -501,6 +529,7 @@ class TestGenerateReport:
             tiering_analysis,
             preempt_timeline,
             provenance,
+            _make_per_rep_manifests(3),
         )
         assert report["issue"] == 134
         assert "acceptance_criteria" in report
@@ -950,7 +979,22 @@ class TestPerRepThroughputValidation:
                         "repetitions": 3,
                         "raw_values": [100.0, 105.0, 110.0],
                         "stats": {"output_throughput": {"median": 105.0}},
-                    }
+                    },
+                    "16": {
+                        "repetitions": 3,
+                        "raw_values": [200.0, 205.0, 210.0],
+                        "stats": {"output_throughput": {"median": 205.0}},
+                    },
+                    "24": {
+                        "repetitions": 3,
+                        "raw_values": [210.0, 215.0, 220.0],
+                        "stats": {"output_throughput": {"median": 215.0}},
+                    },
+                    "32": {
+                        "repetitions": 3,
+                        "raw_values": [215.0, 220.0, 225.0],
+                        "stats": {"output_throughput": {"median": 220.0}},
+                    },
                 }
             },
             "tiering_comparison": {},
@@ -958,3 +1002,352 @@ class TestPerRepThroughputValidation:
         valid, issues = analyze_mod._validate_repetitions(analysis)
         assert valid is True
         assert issues == []
+
+
+# ===========================================================================
+# Reviewer round 2 tests: end-to-end bad rep, tiering config, per-workload
+# coverage, per-rep manifests, provenance placeholder rejection
+# ===========================================================================
+
+
+class TestEndToEndBadRepBlocksAdmission:
+    """End-to-end: a single bad rep must block admission via the real
+    analyze_capacity_scan → check_acceptance_criteria path.
+
+    Per reviewer round 2 issue 2: analyze_capacity_scan() previously dropped
+    raw_values, so per-rep NaN/0 checks always traversed an empty list.
+    Now raw_values are preserved, and a single bad rep must prevent
+    admission.
+    """
+
+    def test_zero_throughput_rep_blocks_admission(self, analyze_mod):
+        """One rep with throughput=0 must block admission (not hidden by median)."""
+        # Build raw results: 4 capacities × 1 workload × 3 reps
+        # rep-2 of capacity 8 has throughput=0
+        results = {}
+        for workload in ["random-online"]:
+            results[workload] = {}
+            for kv in [8, 16, 24, 32]:
+                results[workload][str(kv)] = {}
+                for rep in range(1, 4):
+                    tput = 200 + kv * 5
+                    if kv == 8 and rep == 2:
+                        tput = 0  # bad rep
+                    results[workload][str(kv)][f"rep-{rep}"] = {
+                        "output_throughput": tput,
+                        "mean_ttft_ms": 200.0,
+                    }
+
+        analysis = analyze_mod.analyze_capacity_scan(results)
+        # raw_values must be populated for capacity 8
+        cap8 = analysis["capacity_curves"]["random-online"]["8"]
+        assert cap8["raw_values"] == [240.0, 0.0, 240.0]
+
+        acceptance = analyze_mod.check_acceptance_criteria(analysis)
+        assert acceptance["all_criteria_met"] is False
+        assert acceptance["overall_status"] != "admitted"
+        # The per-rep issue must be visible in repetition_validation
+        rep_issues = acceptance["repetition_validation"]["issues"]
+        assert any("rep 2 invalid" in i for i in rep_issues)
+
+    def test_nan_throughput_rep_blocks_admission(self, analyze_mod):
+        """One rep with NaN throughput must block admission."""
+        import math as _math
+
+        results = {}
+        for workload in ["sharegpt-online"]:
+            results[workload] = {}
+            for kv in [8, 16, 24, 32]:
+                results[workload][str(kv)] = {}
+                for rep in range(1, 4):
+                    tput = float(200 + kv * 5)
+                    if kv == 16 and rep == 1:
+                        tput = _math.nan  # bad rep
+                    results[workload][str(kv)][f"rep-{rep}"] = {
+                        "output_throughput": tput,
+                    }
+
+        analysis = analyze_mod.analyze_capacity_scan(results)
+        acceptance = analyze_mod.check_acceptance_criteria(analysis)
+        assert acceptance["all_criteria_met"] is False
+        assert acceptance["overall_status"] != "admitted"
+
+    def test_all_valid_reps_can_admit(self, analyze_mod):
+        """All valid reps with proper raw_values → no per-rep issues."""
+        results = {}
+        for workload in ["random-online"]:
+            results[workload] = {}
+            for kv in [8, 16, 24, 32]:
+                results[workload][str(kv)] = {}
+                for rep in range(1, 4):
+                    results[workload][str(kv)][f"rep-{rep}"] = {
+                        "output_throughput": float(200 + kv * 5 + rep),
+                    }
+
+        analysis = analyze_mod.analyze_capacity_scan(results)
+        # Verify raw_values are populated for ALL capacity points
+        for cap_str, data in analysis["capacity_curves"]["random-online"].items():
+            assert len(data["raw_values"]) == 3
+            for v in data["raw_values"]:
+                assert v > 0 and _math_isfinite(v)
+
+
+def _math_isfinite(v):
+    import math
+
+    try:
+        return math.isfinite(v)
+    except (TypeError, ValueError):
+        return False
+
+
+class TestTieringConfigValidation:
+    """Tests for the tiering-enabled kv_transfer_config (reviewer round 2 issue 1).
+
+    Per reviewer: CPUOffloadingConnector is deprecated and not registered in
+    Ascend; SimpleCPUOffloadConnector is the registered connector. kv_role
+    must be set and connector-private params go in kv_connector_extra_config.
+    """
+
+    @pytest.fixture
+    def scan_script(self):
+        """Read the kv_capacity_scan.sh script content."""
+        script_path = _SCRIPTS_DIR / "kv_capacity_scan.sh"
+        return script_path.read_text()
+
+    def _extract_tiering_config(self, script_text):
+        """Extract TIERING_KV_TRANSFER_CONFIG JSON from the shell script."""
+        import re
+
+        m = re.search(r"TIERING_KV_TRANSFER_CONFIG='([^']+)'", script_text)
+        assert m, "TIERING_KV_TRANSFER_CONFIG not found in script"
+        import json
+
+        return json.loads(m.group(1))
+
+    def test_script_uses_simple_cpu_offload_connector(self, scan_script):
+        """The scan script must use SimpleCPUOffloadConnector, not CPUOffloadingConnector."""
+        config = self._extract_tiering_config(scan_script)
+        assert config["kv_connector"] == "SimpleCPUOffloadConnector"
+        assert config["kv_connector"] != "CPUOffloadingConnector"
+
+    def test_script_config_has_kv_role(self, scan_script):
+        """kv_role must be set (required by KVTransferConfig)."""
+        config = self._extract_tiering_config(scan_script)
+        assert "kv_role" in config
+        assert config["kv_role"] == "kv_both"
+
+    def test_script_config_has_extra_config(self, scan_script):
+        """cpu_bytes_to_use must be inside kv_connector_extra_config."""
+        config = self._extract_tiering_config(scan_script)
+        assert "kv_connector_extra_config" in config
+        assert "cpu_bytes_to_use" in config["kv_connector_extra_config"]
+
+    def test_script_config_passes_validation(self, scan_script, analyze_mod):
+        """The script's tiering config must pass validate_tiering_config()."""
+        config = self._extract_tiering_config(scan_script)
+        valid, issues = analyze_mod.validate_tiering_config(config)
+        assert valid, f"Invalid tiering config: {issues}"
+
+    def test_old_cpu_offloading_connector_rejected(self, analyze_mod):
+        """The deprecated CPUOffloadingConnector config must be rejected."""
+        old_config = {
+            "kv_connector": "CPUOffloadingConnector",
+            "cpu_bytes_to_use": "8g",
+        }
+        valid, issues = analyze_mod.validate_tiering_config(old_config)
+        assert valid is False
+        assert any("not registered" in i for i in issues)
+
+    def test_missing_kv_role_rejected(self, analyze_mod):
+        """Missing kv_role must be rejected."""
+        config = {
+            "kv_connector": "SimpleCPUOffloadConnector",
+            "kv_connector_extra_config": {"cpu_bytes_to_use": 8589934592},
+        }
+        valid, issues = analyze_mod.validate_tiering_config(config)
+        assert valid is False
+        assert any("kv_role" in i for i in issues)
+
+    def test_missing_extra_config_rejected(self, analyze_mod):
+        """Missing kv_connector_extra_config must be rejected."""
+        config = {
+            "kv_connector": "SimpleCPUOffloadConnector",
+            "kv_role": "kv_both",
+        }
+        valid, issues = analyze_mod.validate_tiering_config(config)
+        assert valid is False
+        assert any("kv_connector_extra_config" in i for i in issues)
+
+    def test_valid_config_passes(self, analyze_mod):
+        """A fully valid config passes validation."""
+        config = {
+            "kv_connector": "SimpleCPUOffloadConnector",
+            "kv_role": "kv_both",
+            "kv_connector_extra_config": {"cpu_bytes_to_use": 8589934592},
+        }
+        valid, issues = analyze_mod.validate_tiering_config(config)
+        assert valid, f"Expected valid: {issues}"
+
+
+class TestPerWorkloadCapacityCoverage:
+    """Tests for per-workload (not union) capacity coverage (reviewer round 2 issue 3).
+
+    Per reviewer: each workload must individually cover all 4 capacities
+    (8/16/24/32 GiB). Union coverage across workloads is not sufficient.
+    """
+
+    def test_union_coverage_not_sufficient(self, analyze_mod):
+        """Two workloads each missing a different capacity → must fail."""
+        analysis = {
+            "capacity_curves": {
+                "w-a": {
+                    "8": {
+                        "repetitions": 3,
+                        "raw_values": [100.0, 102.0, 98.0],
+                        "stats": {"output_throughput": {"median": 100.0}},
+                    },
+                    "16": {
+                        "repetitions": 3,
+                        "raw_values": [200.0, 202.0, 198.0],
+                        "stats": {"output_throughput": {"median": 200.0}},
+                    },
+                    "24": {
+                        "repetitions": 3,
+                        "raw_values": [210.0, 212.0, 208.0],
+                        "stats": {"output_throughput": {"median": 210.0}},
+                    },
+                    # missing 32
+                },
+                "w-b": {
+                    "8": {
+                        "repetitions": 3,
+                        "raw_values": [100.0, 102.0, 98.0],
+                        "stats": {"output_throughput": {"median": 100.0}},
+                    },
+                    "16": {
+                        "repetitions": 3,
+                        "raw_values": [200.0, 202.0, 198.0],
+                        "stats": {"output_throughput": {"median": 200.0}},
+                    },
+                    "32": {
+                        "repetitions": 3,
+                        "raw_values": [215.0, 217.0, 213.0],
+                        "stats": {"output_throughput": {"median": 215.0}},
+                    },
+                    # missing 24; union covers all 4 but neither is complete
+                },
+            },
+            "tiering_comparison": {},
+        }
+        valid, issues = analyze_mod._validate_repetitions(analysis)
+        assert valid is False
+        assert any("w-a" in i and "missing capacities" in i for i in issues)
+        assert any("w-b" in i and "missing capacities" in i for i in issues)
+
+    def test_all_workloads_complete_passes(self, analyze_mod):
+        """Each workload with all 4 capacities → passes."""
+        analysis = {
+            "capacity_curves": {
+                "w-a": _make_complete_capacity_curves()["w"],
+                "w-b": _make_complete_capacity_curves()["w"],
+            },
+            "tiering_comparison": {},
+        }
+        valid, issues = analyze_mod._validate_repetitions(analysis)
+        assert valid is True
+        assert issues == []
+
+
+class TestPerRepManifestValidation:
+    """Tests for per-rep manifest binding (reviewer round 2 issue 4).
+
+    Per reviewer: each rep must have its own manifest validated individually,
+    not one manifest for the entire batch. Placeholder values like
+    'unknown'/'not available' must be rejected.
+    """
+
+    def test_empty_manifests_blocked(self, analyze_mod):
+        """No manifests → blocked."""
+        valid, issues = analyze_mod._validate_per_rep_manifests([])
+        assert valid is False
+        assert any("no per-rep" in i for i in issues)
+
+    def test_one_bad_manifest_blocks(self, analyze_mod):
+        """One manifest with a placeholder value → blocked."""
+        good_manifest = _make_provenance()
+        bad_manifest = _make_provenance()
+        bad_manifest["engine_commit"] = "unknown"
+        manifests = [good_manifest, bad_manifest, good_manifest]
+        valid, issues = analyze_mod._validate_per_rep_manifests(manifests)
+        assert valid is False
+        assert any("manifest 2" in i and "engine_commit" in i for i in issues)
+
+    def test_all_manifests_valid_passes(self, analyze_mod):
+        """All manifests with real values → passes."""
+        manifests = _make_per_rep_manifests(5)
+        valid, issues = analyze_mod._validate_per_rep_manifests(manifests)
+        assert valid is True
+        assert issues == []
+
+    def test_missing_manifests_blocks_admission(self, analyze_mod):
+        """Empty per_rep_manifests in acceptance check → blocked."""
+        analysis = {
+            "capacities_covered": [8, 16, 24, 32],
+            "inflection_points": {"w": {"throughput_inflection_gib": 16}},
+            "preempt_timeline": _make_complete_timeline(),
+            "tiering_comparison": _make_complete_tiering(),
+            "capacity_curves": _make_complete_capacity_curves(),
+            "provenance": _make_provenance(),
+            "per_rep_manifests": [],  # empty → blocked
+        }
+        result = analyze_mod.check_acceptance_criteria(analysis)
+        assert result["all_criteria_met"] is False
+        assert result["overall_status"] == "blocked"
+
+
+class TestProvenancePlaceholderRejection:
+    """Tests that placeholder provenance values are rejected (reviewer round 2 issue 4).
+
+    Per reviewer: 'unknown'/'not available' must NOT be treated as non-empty
+    valid values.
+    """
+
+    def test_unknown_rejected(self, analyze_mod):
+        """'unknown' value → field is missing."""
+        provenance = _make_provenance()
+        provenance["engine_commit"] = "unknown"
+        valid, missing = analyze_mod._validate_provenance(provenance)
+        assert valid is False
+        assert "engine_commit" in missing
+
+    def test_not_available_rejected(self, analyze_mod):
+        """'not available' value → field is missing."""
+        provenance = _make_provenance()
+        provenance["model_revision"] = "not available"
+        valid, missing = analyze_mod._validate_provenance(provenance)
+        assert valid is False
+        assert "model_revision" in missing
+
+    def test_case_insensitive_placeholder_rejected(self, analyze_mod):
+        """'Unknown' (capitalized) → field is missing."""
+        provenance = _make_provenance()
+        provenance["cann_version"] = "Unknown"
+        valid, missing = analyze_mod._validate_provenance(provenance)
+        assert valid is False
+        assert "cann_version" in missing
+
+    def test_real_values_pass(self, analyze_mod):
+        """All real (non-placeholder) values → valid."""
+        provenance = _make_provenance()
+        valid, missing = analyze_mod._validate_provenance(provenance)
+        assert valid is True
+        assert missing == []
+
+    def test_none_rejected(self, analyze_mod):
+        """None value → field is missing."""
+        provenance = _make_provenance()
+        provenance["driver_version"] = None
+        valid, missing = analyze_mod._validate_provenance(provenance)
+        assert valid is False
+        assert "driver_version" in missing

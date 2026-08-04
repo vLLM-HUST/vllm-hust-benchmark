@@ -88,10 +88,15 @@ SCAN_WORKLOADS=("random-online" "sharegpt-online" "prefix-repetition-online")
 # Real tiering configs for Part B:
 #   hbm-only         — 32 GiB KV, no kv-transfer-config (baseline, no pressure)
 #   tiering-disabled — 8 GiB KV, no kv-transfer-config (pressure, no tiering)
-#   tiering-enabled  — 8 GiB KV, CPUOffloadingConnector (pressure + tiering)
+#   tiering-enabled  — 8 GiB KV, SimpleCPUOffloadConnector (pressure + tiering)
+# Per PR #146 review: CPUOffloadingConnector is deprecated and not registered in
+# Ascend; SimpleCPUOffloadConnector is the registered connector (overridden by
+# AscendSimpleCPUOffloadConnector). kv_role must be set (kv_both for single-node
+# CPU offload) and connector-private params go in kv_connector_extra_config.
 TIERING_CONFIGS=("hbm-only" "tiering-disabled" "tiering-enabled")
 TIERING_WORKLOAD="prefix-repetition-online"
-TIERING_KV_TRANSFER_CONFIG='{"kv_connector":"CPUOffloadingConnector","cpu_bytes_to_use":"8g"}'
+# 8 GiB CPU offload buffer = 8 * 1024^3 = 8589934592 bytes
+TIERING_KV_TRANSFER_CONFIG='{"kv_connector":"SimpleCPUOffloadConnector","kv_role":"kv_both","kv_connector_extra_config":{"cpu_bytes_to_use":8589934592}}'
 
 # ---------------------------------------------------------------------------
 # Environment setup
