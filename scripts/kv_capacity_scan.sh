@@ -86,7 +86,8 @@ export NO_PROXY="127.0.0.1,localhost,${NO_PROXY:-}"
 _atb_home="/usr/local/Ascend/nnal/atb/9.0.0/atb"
 _cxx_abi_dir="cxx_abi_1"
 _conda_lib="$(dirname "$(dirname "$PYTHON")")/lib"
-export LD_LIBRARY_PATH="${_conda_lib}:${_atb_home}/${_cxx_abi_dir}/lib:/usr/local/Ascend/ascend-toolkit/lib64:/usr/local/Ascend/cann-9.0.0/lib64:${LD_LIBRARY_PATH:-}"
+# Include Ascend driver libs (libascend_hal.so) and CANN toolkit libs for NPU runtime
+export LD_LIBRARY_PATH="${_conda_lib}:${_atb_home}/${_cxx_abi_dir}/lib:/usr/local/Ascend/ascend-toolkit/latest/lib64:/usr/local/Ascend/cann-9.0.0/lib64:/usr/local/Ascend/driver/lib64/driver:/usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64:${LD_LIBRARY_PATH:-}"
 export ATB_HOME_PATH="${_atb_home}/${_cxx_abi_dir}"
 
 # ---------------------------------------------------------------------------
@@ -132,7 +133,7 @@ wait_for_server() {
     local max_wait=600
     local waited=0
     while [ $waited -lt $max_wait ]; do
-        if curl -s "http://${HOST}:${PORT}/health" >/dev/null 2>&1; then
+        if curl --noproxy "*" -s "http://${HOST}:${PORT}/health" >/dev/null 2>&1; then
             log "  Server is ready (waited ${waited}s)"
             return 0
         fi
@@ -145,7 +146,7 @@ wait_for_server() {
 
 collect_metrics() {
     local output_file="$1"
-    curl -s "http://${HOST}:${PORT}/metrics" > "$output_file" 2>/dev/null || true
+    curl --noproxy "*" -s "http://${HOST}:${PORT}/metrics" > "$output_file" 2>/dev/null || true
 }
 
 build_serve_cmd() {
