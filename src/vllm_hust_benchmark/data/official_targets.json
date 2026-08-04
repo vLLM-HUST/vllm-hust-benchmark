@@ -1,8 +1,8 @@
 {
   "effective_from": "2026-08-03",
-  "registry_version": "1.6.2",
+  "registry_version": "1.7.0",
   "schema_version": "official-target-registry/v1",
-  "source_set_sha256": "4293db1fb645aa0a39944362818e254bb62d5736d73a2237d5484cb802b8f6a9",
+  "source_set_sha256": "9d1637f5a06c59936243bc90917961e821d750be170ce83be076a63a79e90c04",
   "targets": [
     {
       "baseline_runtime": {
@@ -37,7 +37,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-Coder-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "aedcc2d42b622764e023cf882b6652e646b95671"
       },
       "profile": "code",
       "server_parameters": {
@@ -48,17 +49,18 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "aedcc2d42b622764e023cf882b6652e646b95671",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
-        "sha256": "4ff7fc34318e4dd27c1e63f94a5bb5f567ccd1ff1b732d55c3a9348fe2398ce1"
+        "sha256": "994e9055520305f62777f9bbc2ba934691ad9d46a7fd00b3ab9a0e46bd361fa2"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "instructcoder-online",
         "client_parameters": {
@@ -71,6 +73,11 @@
           "num_prompts": 2048,
           "port": 8000,
           "request_rate": 1
+        },
+        "data_identity": {
+          "kind": "huggingface-dataset",
+          "repository": "likaixin/InstructCoder",
+          "revision": "6a778a720284d6520b56bd03d5c3070930d41071"
         },
         "name": "instructcoder-online",
         "protocol": null
@@ -109,7 +116,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -120,17 +128,18 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
-        "sha256": "3ac31e7917b73558ba33ce1ad09c1871371c8f53a1496ab4bda1dc4699ae266a"
+        "sha256": "2e1ca03a9954580b6dab77c688a0ea59926ab20ed8d0a62ebeb23c040f1071e3"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "agent-research-online",
         "client_parameters": {
@@ -142,6 +151,12 @@
           "num_prompts": 32,
           "port": 8000,
           "request_rate": 1
+        },
+        "data_identity": {
+          "kind": "repository-file",
+          "path": "scripts/traces/evoscientist-workload-custom.jsonl",
+          "sha256": "13347797c3660c5b3efbf8912bbcb76d8bba50ffee5f77944b95b9cde1b6ca3c",
+          "size_bytes": 27198
         },
         "name": "agent-research-online",
         "protocol": null
@@ -180,7 +195,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -191,17 +207,18 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
-        "sha256": "e27ce2ba69ffea08938dd052b4ba88ef9f1569f21383fe934a1a71fdd63463ec"
+        "sha256": "c0ef92279f6b7052e3fe93c48ebd26289ab82c57722468b4b37b170cd67be7ad"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "prefix-repetition-online",
         "client_parameters": {
@@ -215,6 +232,13 @@
           "output_len": 256,
           "port": 8000,
           "request_rate": 1
+        },
+        "data_identity": {
+          "generator_path": "vllm/benchmarks/datasets.py",
+          "generator_sha256": "85b4e3b7407ef35ad364ccd454efdcfa9a06759144582d5a3a3761e3f85a41e2",
+          "kind": "deterministic-vllm-generator",
+          "seed": 0,
+          "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
         },
         "name": "prefix-repetition-online",
         "protocol": null
@@ -253,7 +277,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -261,17 +286,18 @@
         "enforce_eager": "",
         "gpu_memory_utilization": 0.6,
         "max_model_len": 32768,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
-        "sha256": "ebdd125f8fd61c0331cf80305c665d8151107c32d8fe566089407dbe662b3080"
+        "sha256": "90af30ec2797d5964df9c521bac1a327a9caaf5ff95a1d842396a3e15813b322"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "random-latency",
         "client_parameters": {
@@ -281,6 +307,13 @@
           "num_iters": 30,
           "num_iters_warmup": 10,
           "output_len": 128
+        },
+        "data_identity": {
+          "generator_path": "vllm/benchmarks/latency.py",
+          "generator_sha256": "4be2c05d5bcd39d7d1251563e0ab57d1655121dc83ebe97b04e9f309f901ff52",
+          "kind": "nondeterministic-vllm-generator",
+          "requires_repeat_input_sha256": true,
+          "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
         },
         "name": "random-latency",
         "protocol": null
@@ -319,7 +352,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -330,17 +364,18 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
-        "sha256": "446744f2790968015a933aff7cf84fc096438ba5246eb3db155d808e7010527b"
+        "sha256": "cd89e2504aed79f2443a32af28ddb63a3b4e4a4530339c416b75be56211fb097"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "random-online",
         "client_parameters": {
@@ -354,6 +389,13 @@
           "output_len": 256,
           "port": 8000,
           "request_rate": 1
+        },
+        "data_identity": {
+          "generator_path": "vllm/benchmarks/datasets.py",
+          "generator_sha256": "85b4e3b7407ef35ad364ccd454efdcfa9a06759144582d5a3a3761e3f85a41e2",
+          "kind": "deterministic-vllm-generator",
+          "seed": 0,
+          "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
         },
         "name": "random-online",
         "protocol": null
@@ -392,7 +434,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -403,17 +446,18 @@
         "host": "0.0.0.0",
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
-        "sha256": "c738c8a2a1c1fdbd3a53ec7c3891634fb63152f230386fab73e5257e79df822f"
+        "sha256": "9872592bb89571bde784df4b4db65157d0083189e717168917c371713770d12b"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "sharegpt-online",
         "client_parameters": {
@@ -426,6 +470,14 @@
           "num_prompts": 200,
           "port": 8000,
           "request_rate": 1
+        },
+        "data_identity": {
+          "kind": "huggingface-file",
+          "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+          "repository": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+          "revision": "192ab2185289094fc556ec8ce5ce1e8e587154ca",
+          "sha256": "35f0e213ce091ed9b9af2a1f0755e9d39f9ccec34ab281cd4ca60d70f6479ba4",
+          "size_bytes": 672837942
         },
         "name": "sharegpt-online",
         "protocol": null
@@ -464,7 +516,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -472,17 +525,18 @@
         "enforce_eager": "",
         "gpu_memory_utilization": 0.6,
         "max_model_len": 32768,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
-        "sha256": "d5c4b7fa9d0911b04e69deeafbec5cc56386732dec8113074850ac7daa7a9a29"
+        "sha256": "061a43ef412cf1bc96bc00573e47bc5b36b356d4233b7e252b31514343dc3174"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "sharegpt-throughput",
         "client_parameters": {
@@ -492,6 +546,14 @@
           "gpu_memory_utilization": 0.6,
           "num_prompts": 200,
           "num_warmups": 0
+        },
+        "data_identity": {
+          "kind": "huggingface-file",
+          "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+          "repository": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+          "revision": "192ab2185289094fc556ec8ce5ce1e8e587154ca",
+          "sha256": "35f0e213ce091ed9b9af2a1f0755e9d39f9ccec34ab281cd4ca60d70f6479ba4",
+          "size_bytes": 672837942
         },
         "name": "sharegpt-throughput",
         "protocol": null
@@ -530,7 +592,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-14B-Instruct",
         "parameters": "14B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
       },
       "profile": "core-text",
       "server_parameters": {
@@ -538,17 +601,18 @@
         "enforce_eager": "",
         "gpu_memory_utilization": 0.6,
         "max_model_len": 32768,
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-910b2.json",
-        "sha256": "a9905ce7c45fab8c3dd186ec5b7ccb1a0dd6efbc1a8f89afef7f47c9cd596858"
+        "sha256": "431c169a6d37527daed057f5f18f2ad302d8e6e1fec76bfeb104fa57092ab53c"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "sonnet-throughput",
         "client_parameters": {
@@ -558,6 +622,13 @@
           "gpu_memory_utilization": 0.6,
           "num_prompts": 200,
           "num_warmups": 0
+        },
+        "data_identity": {
+          "kind": "vllm-repository-file",
+          "path": "benchmarks/sonnet.txt",
+          "sha256": "d58663195ba6780da5f029b920c7ac00cad1e435ee1df7e03bf9ec2470f8dea4",
+          "size_bytes": 22706,
+          "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
         },
         "name": "sonnet-throughput",
         "protocol": null
@@ -596,7 +667,8 @@
       "model": {
         "id": "Qwen/Qwen2.5-VL-7B-Instruct",
         "parameters": "7B",
-        "precision": "FP16"
+        "precision": "FP16",
+        "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5"
       },
       "profile": "multimodal",
       "server_parameters": {
@@ -610,17 +682,18 @@
         },
         "max_model_len": 32768,
         "port": 8000,
+        "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json",
-        "sha256": "e9e4a87ad44eb5531989623f28c3d8110bfed2969776b80b1310cab3aa8fd234"
+        "sha256": "bcb6e3f0230b3da25ace475f5cd27063f20effffe8815ebd5876d2308ff7f434"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
-      "target_version": "1.2.0",
+      "target_version": "1.3.0",
       "workload": {
         "base_scenario": "visionarena-online",
         "client_parameters": {
@@ -634,6 +707,12 @@
           "num_prompts": 1000,
           "port": 8000,
           "request_rate": 1
+        },
+        "data_identity": {
+          "expected_parquet_shards": 43,
+          "kind": "huggingface-dataset",
+          "repository": "lmarena-ai/VisionArena-Chat",
+          "revision": "1394b4f59ab6f1f2e5aff6bc15b448e15960e170"
         },
         "name": "visionarena-online",
         "protocol": null
@@ -682,7 +761,8 @@
       "model": {
         "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
         "parameters": "32B",
-        "precision": "BF16"
+        "precision": "BF16",
+        "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
       },
       "profile": "production-trace",
       "server_parameters": {
@@ -704,12 +784,12 @@
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
-        "sha256": "565cffff0c7d0e50ff8420e3bfceab4cb729578af69932e4b8482cd66b61217c"
+        "sha256": "58dc4b71dd3e070717f0759822601f4d080885c466fa61ee5bfeabb1271e5276"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.22.1rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
-      "target_version": "1.5.0",
+      "target_version": "1.5.1",
       "workload": {
         "base_scenario": "burstgpt-production-replay",
         "client_parameters": {
@@ -722,6 +802,14 @@
           "time_scale": 60,
           "trace_asset": "BurstGPT_3.csv",
           "trace_target_id": "burstgpt-v2-production-replay"
+        },
+        "data_identity": {
+          "kind": "release-asset",
+          "path": "BurstGPT_3.csv",
+          "release": "v2.0",
+          "repository": "https://github.com/HPMLL/BurstGPT",
+          "sha256": "2299986a07388aa303ec2c41d1131e756db650a39ed6ef9dfe7cc3d7f9a43b8f",
+          "size_bytes": 231682327
         },
         "name": "burstgpt-production-replay",
         "protocol": null
@@ -770,7 +858,8 @@
       "model": {
         "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
         "parameters": "32B",
-        "precision": "BF16"
+        "precision": "BF16",
+        "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
       },
       "profile": "production-trace",
       "server_parameters": {
@@ -792,12 +881,12 @@
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
-        "sha256": "4c6eb10a314dbfd49aee726dfabb371396155e96c7c18807a7c5b9361208cd72"
+        "sha256": "8b3b1d7aac6f1076d6e22e05453859d8d6fdf4cf22785ec18866f94db0a70989"
       },
       "status": "active",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.22.1rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
-      "target_version": "1.6.1",
+      "target_version": "1.6.2",
       "workload": {
         "base_scenario": "tracelab-coding-agent-replay",
         "client_parameters": {
@@ -811,6 +900,14 @@
           "timeout_s": 21600,
           "trace_asset": "syfi_coding_trace.jsonl.gz",
           "trace_target_id": "tracelab-v0.0.1-coding-agent-replay"
+        },
+        "data_identity": {
+          "kind": "release-asset",
+          "path": "syfi_coding_trace.jsonl.gz",
+          "release": "v0.0.1",
+          "repository": "https://github.com/uw-syfi/TraceLab",
+          "sha256": "9d265eae69a31cae203848bea936f018148eed7ca8bf56050c5abe96da0b4e6b",
+          "size_bytes": 53601226
         },
         "name": "tracelab-coding-agent-replay",
         "protocol": null
@@ -870,7 +967,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-instructcoder-online-qwen25-coder-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "instructcoder-online",
         "client_parameters": {
@@ -885,6 +982,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "instructcoder-online",
         "protocol": null
       }
@@ -946,7 +1044,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-visionarena-online-qwen25-vl-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "visionarena-online",
         "client_parameters": {
@@ -961,6 +1059,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "visionarena-online",
         "protocol": null
       }
@@ -1019,7 +1118,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-agent-research-online-qwen25-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "agent-research-online",
         "client_parameters": {
@@ -1033,6 +1132,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "agent-research-online",
         "protocol": null
       }
@@ -1093,7 +1193,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-prefix-repetition-online-qwen25-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "prefix-repetition-online",
         "client_parameters": {
@@ -1108,6 +1208,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "prefix-repetition-online",
         "protocol": null
       }
@@ -1164,7 +1265,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-random-latency-qwen25-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "random-latency",
         "client_parameters": {
@@ -1174,6 +1275,7 @@
           "num_iters_warmup": 1,
           "output_len": 128
         },
+        "data_identity": null,
         "name": "random-latency",
         "protocol": null
       }
@@ -1233,7 +1335,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-qwen25-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "random-online",
         "client_parameters": {
@@ -1248,6 +1350,7 @@
           "port": 8000,
           "request_rate": "inf"
         },
+        "data_identity": null,
         "name": "random-online",
         "protocol": null
       }
@@ -1306,7 +1409,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-sharegpt-online-qwen25-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "sharegpt-online",
         "client_parameters": {
@@ -1320,6 +1423,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "sharegpt-online",
         "protocol": null
       }
@@ -1375,7 +1479,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-sharegpt-throughput-qwen25-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "sharegpt-throughput",
         "client_parameters": {
@@ -1385,6 +1489,7 @@
           "num_prompts": 8,
           "num_warmups": 0
         },
+        "data_identity": null,
         "name": "sharegpt-throughput",
         "protocol": null
       }
@@ -1440,7 +1545,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "perfgate-ascend-sonnet-throughput-qwen25-3b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "sonnet-throughput",
         "client_parameters": {
@@ -1450,6 +1555,7 @@
           "num_prompts": 8,
           "num_warmups": 0
         },
+        "data_identity": null,
         "name": "sonnet-throughput",
         "protocol": null
       }
@@ -1506,7 +1612,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-2chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "agent-research-online-2chip",
         "client_parameters": {
@@ -1519,6 +1625,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "agent-research-online-2chip",
         "protocol": null
       }
@@ -1575,7 +1682,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-4chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "agent-research-online-4chip",
         "client_parameters": {
@@ -1588,6 +1695,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "agent-research-online-4chip",
         "protocol": null
       }
@@ -1644,7 +1752,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-2chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "prefix-repetition-online-2chip",
         "client_parameters": {
@@ -1658,6 +1766,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "prefix-repetition-online-2chip",
         "protocol": null
       }
@@ -1714,7 +1823,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-4chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "prefix-repetition-online-4chip",
         "client_parameters": {
@@ -1728,6 +1837,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "prefix-repetition-online-4chip",
         "protocol": null
       }
@@ -1784,7 +1894,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-2chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "random-online-2chip",
         "client_parameters": {
@@ -1798,6 +1908,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "random-online-2chip",
         "protocol": null
       }
@@ -1854,7 +1965,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-4chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "random-online-4chip",
         "client_parameters": {
@@ -1868,6 +1979,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "random-online-4chip",
         "protocol": null
       }
@@ -1924,7 +2036,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-2chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "sharegpt-online-2chip",
         "client_parameters": {
@@ -1937,6 +2049,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "sharegpt-online-2chip",
         "protocol": null
       }
@@ -1993,7 +2106,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-4chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "sharegpt-online-4chip",
         "client_parameters": {
@@ -2006,6 +2119,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "sharegpt-online-4chip",
         "protocol": null
       }
@@ -2059,7 +2173,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-2chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "sonnet-throughput-2chip",
         "client_parameters": {
@@ -2072,6 +2186,7 @@
           "num_warmups": 0,
           "tensor_parallel_size": 2
         },
+        "data_identity": null,
         "name": "sonnet-throughput-2chip",
         "protocol": null
       }
@@ -2125,7 +2240,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-4chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "sonnet-throughput-4chip",
         "client_parameters": {
@@ -2138,6 +2253,7 @@
           "num_warmups": 0,
           "tensor_parallel_size": 4
         },
+        "data_identity": null,
         "name": "sonnet-throughput-4chip",
         "protocol": null
       }
@@ -2191,7 +2307,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-8chip-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "sonnet-throughput-8chip",
         "client_parameters": {
@@ -2204,6 +2320,7 @@
           "num_warmups": 0,
           "tensor_parallel_size": 8
         },
+        "data_identity": null,
         "name": "sonnet-throughput-8chip",
         "protocol": null
       }
@@ -2287,6 +2404,7 @@
           "request_rate": 1,
           "temperature": 0
         },
+        "data_identity": null,
         "name": "simllm-random-online-warm-cache",
         "protocol": {
           "aggregation": "median",
@@ -2401,6 +2519,7 @@
           "request_rate": "inf",
           "temperature": 0
         },
+        "data_identity": null,
         "name": "simllm-saturated-throughput-warm-cache",
         "protocol": {
           "aggregation": "median",
@@ -2486,7 +2605,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-kv-tiering-prefix-online-qwen25-7b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "kv-tiering-prefix-online",
         "client_parameters": {
@@ -2502,6 +2621,7 @@
           "prefix_repetition_suffix_len": 256,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "kv-tiering-prefix-online",
         "protocol": null
       }
@@ -2558,7 +2678,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-ngram-instructcoder-online-qwen25-7b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "ngram-instructcoder-online",
         "client_parameters": {
@@ -2571,6 +2691,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "ngram-instructcoder-online",
         "protocol": null
       }
@@ -2627,7 +2748,7 @@
       "status": "provisional",
       "supersedes": [],
       "target_id": "official-ascend-jan-2026-v0.18.0-logprobs-online-qwen25-14b-910b2",
-      "target_version": "1.6.2",
+      "target_version": "1.7.0",
       "workload": {
         "base_scenario": "logprobs-online",
         "client_parameters": {
@@ -2642,6 +2763,7 @@
           "port": 8000,
           "request_rate": 1
         },
+        "data_identity": null,
         "name": "logprobs-online",
         "protocol": null
       }

@@ -2,6 +2,14 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.7.0 — 2026-08-03
+
+- English: Pins exact model revisions and workload data identities for all 11 strict official Ascend
+  targets, including run-scoped input hashing for nondeterministic latency prompts.
+- 中文：为 11 个严格 Ascend 官方靶固定精确模型 revision 与负载数据身份，并要求对非确定性延迟输入记录单次运行哈希。
+- Source set: `9d1637f5a06c59936243bc90917961e821d750be170ce83be076a63a79e90c04`
+- Supersedes: `1.6.2`
+
 ## 1.6.2 — 2026-08-03
 
 - English: Pins SHA-256 prefix-cache hashing for both SimLLM targets so the immutable runtime does

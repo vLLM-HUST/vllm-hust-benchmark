@@ -11,6 +11,7 @@ from vllm_hust_benchmark.official_targets import (
     PUBLIC_CODE_MODEL,
     PUBLIC_TEXT_MODEL,
     PUBLIC_TRACE_MODEL,
+    PUBLIC_TRACE_MODEL_REVISION,
     PUBLIC_TRACE_RUNTIME_IMAGE,
     PUBLIC_TRACE_RUNTIME_IMAGE_DIGEST,
     PUBLIC_TRACE_RUNTIME_PACKAGES,
@@ -74,19 +75,22 @@ def test_public_target_matrix_is_exact() -> None:
     }
     assert len(core_targets) == 9
     for target in core_targets:
-        assert target["target_version"] == "1.2.0"
+        assert target["target_version"] == "1.3.0"
         assert target["hardware"]["chip_model"] == "910B2"
         assert target["hardware"]["chip_count"] == 1
         assert target["model"]["precision"] == "FP16"
         assert target["server_parameters"]["tensor_parallel_size"] == 1
         assert target["server_parameters"]["gpu_memory_utilization"] == 0.6
         assert target["server_parameters"]["max_model_len"] == 32768
+        assert target["model"]["revision"]
+        assert target["server_parameters"]["revision"] == target["model"]["revision"]
+        assert target["workload"]["data_identity"]["kind"]
 
     for target in trace_targets:
         expected_target_version = (
-            "1.6.1"
+            "1.6.2"
             if target["workload"]["name"] == "tracelab-coding-agent-replay"
-            else "1.5.0"
+            else "1.5.1"
         )
         assert target["target_version"] == expected_target_version
         assert target["hardware"]["chip_model"] == "910B2"
@@ -94,6 +98,8 @@ def test_public_target_matrix_is_exact() -> None:
         assert target["model"]["id"] == PUBLIC_TRACE_MODEL
         assert target["model"]["parameters"] == "32B"
         assert target["model"]["precision"] == "BF16"
+        assert target["model"]["revision"] == PUBLIC_TRACE_MODEL_REVISION
+        assert target["workload"]["data_identity"]["kind"] == "release-asset"
         assert target["server_parameters"]["tensor_parallel_size"] == 2
         assert target["server_parameters"]["gpu_memory_utilization"] == 0.92
         assert target["server_parameters"]["max_model_len"] == 131072

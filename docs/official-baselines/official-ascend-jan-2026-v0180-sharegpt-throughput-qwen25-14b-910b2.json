@@ -12,6 +12,7 @@
   },
   "scenario": "sharegpt-throughput",
   "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
   "model_parameters": "14B",
   "model_precision": "FP16",
   "hardware_vendor": "Huawei",
@@ -20,6 +21,7 @@
   "node_count": 1,
   "server_parameters": {
     "tensor_parallel_size": 1,
+    "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
     "gpu_memory_utilization": 0.6,
     "enforce_eager": "",
     "trust_remote_code": "",
@@ -33,6 +35,14 @@
     "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
     "num_prompts": 200,
     "num_warmups": 0
+  },
+  "data_identity": {
+    "kind": "huggingface-file",
+    "repository": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+    "revision": "192ab2185289094fc556ec8ce5ce1e8e587154ca",
+    "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+    "size_bytes": 672837942,
+    "sha256": "35f0e213ce091ed9b9af2a1f0755e9d39f9ccec34ab281cd4ca60d70f6479ba4"
   },
   "export": {
     "engine": "vllm",

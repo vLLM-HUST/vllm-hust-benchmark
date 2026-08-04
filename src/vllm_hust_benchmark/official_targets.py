@@ -8,12 +8,18 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.6.2"
+REGISTRY_VERSION = "1.7.0"
 EFFECTIVE_FROM = "2026-08-03"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
 PUBLIC_TRACE_MODEL = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+PUBLIC_MODEL_REVISIONS = {
+    PUBLIC_TEXT_MODEL: "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+    PUBLIC_CODE_MODEL: "aedcc2d42b622764e023cf882b6652e646b95671",
+    PUBLIC_VISION_MODEL: "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+    PUBLIC_TRACE_MODEL: "711ad2ea6aa40cfca18895e8aca02ab92df1a746",
+}
 PUBLIC_TRACE_MODEL_REVISION = (
     "711ad2ea6aa40cfca18895e8aca02ab92df1a746"  # pragma: allowlist secret
 )
@@ -72,10 +78,10 @@ SIMLLM_RUNTIME_PACKAGES = {
     "huggingface-hub": "1.19.0",
     "click": "8.4.1",
 }
-CORE_PUBLIC_TARGET_VERSION = "1.2.0"
+CORE_PUBLIC_TARGET_VERSION = "1.3.0"
 PUBLIC_TRACE_TARGET_VERSIONS = {
-    "burstgpt-production-replay": "1.5.0",
-    "tracelab-coding-agent-replay": "1.6.1",
+    "burstgpt-production-replay": "1.5.1",
+    "tracelab-coding-agent-replay": "1.6.2",
 }
 SIMLLM_TARGET_VERSION = "1.6.2"
 PUBLIC_TEXT_SCENARIOS = {
@@ -172,6 +178,18 @@ def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
 
 def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
     server = spec["server_parameters"]
+    expected_model_revision = PUBLIC_MODEL_REVISIONS[spec["model"]]
+    if spec.get("model_revision") != expected_model_revision:
+        raise ValueError(
+            f"public target must pin model_revision={expected_model_revision}: {path}"
+        )
+    if server.get("revision") != expected_model_revision:
+        raise ValueError(
+            f"public target server must pin revision={expected_model_revision}: {path}"
+        )
+    data_identity = spec.get("data_identity")
+    if not isinstance(data_identity, dict) or not data_identity.get("kind"):
+        raise ValueError(f"public target must pin data_identity: {path}")
     if spec["scenario"] in PUBLIC_TRACE_SCENARIOS:
         expected = {
             "tensor_parallel_size": 2,
@@ -448,6 +466,11 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
                     "id": spec["model"],
                     "parameters": spec.get("model_parameters"),
                     "precision": spec["model_precision"],
+                    **(
+                        {"revision": spec["model_revision"]}
+                        if spec.get("model_revision")
+                        else {}
+                    ),
                 },
                 "hardware": {
                     "vendor": spec["hardware_vendor"],
@@ -460,6 +483,7 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
                     "name": spec.get("workload_id") or spec["scenario"],
                     "base_scenario": spec["scenario"],
                     "client_parameters": spec["client_parameters"],
+                    "data_identity": spec.get("data_identity"),
                     "protocol": spec.get("ab_protocol"),
                 },
                 "source_spec": {
@@ -650,7 +674,7 @@ def write_generated_outputs(repo_root: Path, *, check: bool) -> None:
                 stale.append(path.relative_to(repo_root).as_posix())
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(expected, encoding="utf-8")
+        path.write_text(expected, encoding="utf-8", newline="\n")
     if stale:
         raise SystemExit(
             "official target outputs are stale; regenerate: " + ", ".join(stale)

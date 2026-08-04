@@ -12,6 +12,7 @@
   },
   "scenario": "random-online",
   "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
   "model_parameters": "14B",
   "model_precision": "FP16",
   "hardware_vendor": "Huawei",
@@ -20,6 +21,7 @@
   "node_count": 1,
   "server_parameters": {
     "tensor_parallel_size": 1,
+    "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
     "gpu_memory_utilization": 0.6,
     "enforce_eager": "",
     "trust_remote_code": "",
@@ -40,6 +42,13 @@
     "request_rate": 1,
     "host": "127.0.0.1",
     "port": 8000
+  },
+  "data_identity": {
+    "kind": "deterministic-vllm-generator",
+    "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+    "generator_path": "vllm/benchmarks/datasets.py",
+    "generator_sha256": "85b4e3b7407ef35ad364ccd454efdcfa9a06759144582d5a3a3761e3f85a41e2",
+    "seed": 0
   },
   "export": {
     "engine": "vllm",
