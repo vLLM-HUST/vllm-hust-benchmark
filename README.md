@@ -649,6 +649,11 @@ Notes:
 - Set `PUBLISH_WEBSITE=1` only after you are ready to regenerate `vllm-hust-website/data` from the
   full batch output.
 
+For formal current-main multi-card campaigns, follow `docs/issue-136-ascend-evidence-execution.md`.
+Its strict launch mode requires frozen source, image, model, runtime, and topology identity; uses a
+fresh service for every repetition; and writes a machine-readable campaign summary without treating
+readiness evidence as a performance result.
+
 ## Contributing
 
 The benchmark repo uses the same pre-commit toolchain as `vllm-hust-website` so commits land on

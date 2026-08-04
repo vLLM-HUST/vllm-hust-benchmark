@@ -124,7 +124,7 @@ Producer 在消费 artifact 前必须检查 `STATUS` 内容。只有 `OK` 的 ar
 
 | 字段               | 来源                          | 用途                                                                    |
 | ------------------ | ----------------------------- | ----------------------------------------------------------------------- |
-| `manifest_version` | 固定值 `run-env-manifest/v1`  | schema 版本标识                                                         |
+| `manifest_version` | 固定值 `run-env-manifest/v2`  | schema 版本标识                                                         |
 | `collected_at`     | `date -u +%Y-%m-%dT%H:%M:%SZ` | 采集时间戳                                                              |
 | `os`               | `uname -a`                    | 内核版本、架构                                                          |
 | `python_version`   | `python3 --version`           | Python 版本                                                             |
@@ -133,7 +133,9 @@ Producer 在消费 artifact 前必须检查 `STATUS` 内容。只有 `OK` 的 ar
 | `ascend_toolkit`   | 文件检测                      | CANN 安装路径                                                           |
 | `npu_smi`          | `npu-smi info -t board`       | NPU 硬件信息                                                            |
 | `env_vars`         | 关键环境变量                  | PATH, LD_LIBRARY_PATH, PYTHONPATH, HF_HOME, VLLM_CACHE_ROOT, ASCEND\_\* |
-| `git_info`         | git rev-parse                 | 三个仓库的 commit SHA                                                   |
+| `git_info`         | git rev-parse + 显式环境变量  | core/backend 的 declared/observed SHA 与 benchmark SHA                  |
+| `frozen_inputs`    | 显式环境变量 + runtime 探测   | image、model revision、CANN、torch-npu 与拓扑                           |
+| `campaign`         | campaign runner               | campaign/comparison/role/load profile 与独立服务 repetition 序号        |
 | `pip_packages`     | pip list（引用外部文件）      | 详见 pip-packages.json                                                  |
 
 ### 3.3 `checksums.sha256` — 文件校验和
