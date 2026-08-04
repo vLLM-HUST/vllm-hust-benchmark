@@ -904,6 +904,34 @@ print_server_log_tail() {
   tail -n "$lines" "$log_file" >&2
 }
 
+print_server_attempt_log_tails() {
+  local log_file
+  local found=0
+
+  for log_file in "$SERVER_ATTEMPT_LOG_DIR"/server-attempt-*.stdout.log; do
+    [[ -f "$log_file" ]] || continue
+    found=1
+    echo "---- same-spec server attempt log: $log_file (last ${SERVER_LOG_TAIL_LINES} lines) ----" >&2
+    print_server_log_tail "$log_file"
+    echo "---- end same-spec server attempt log ----" >&2
+  done
+
+  if [[ "$found" == "0" ]]; then
+    echo "No same-spec server attempt logs were captured." >&2
+  fi
+}
+
+prepare_server_attempt_log() {
+  local start_attempt=$1
+  local attempt_log="$SERVER_ATTEMPT_LOG_DIR/server-attempt-${start_attempt}.stdout.log"
+
+  : >"$attempt_log"
+  # Keep the legacy result path pointing at the active attempt while
+  # retaining prior attempts for post-failure diagnosis.
+  ln -f "$attempt_log" "$SERVER_CANONICAL_STDOUT_LOG"
+  printf '%s\n' "$attempt_log"
+}
+
 wait_for_server() {
   local host=$1
   local port=$2
@@ -1113,7 +1141,10 @@ CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
 SERVER_STDOUT_LOG="$RESULT_DIR/server.stdout.log"
+SERVER_CANONICAL_STDOUT_LOG="$SERVER_STDOUT_LOG"
+SERVER_ATTEMPT_LOG_DIR="$RESULT_DIR/server-attempt-logs"
 OFFLINE_GRAPH_PROOF_FILE="$RESULT_DIR/offline_graph_proof.json"
+mkdir -p "$SERVER_ATTEMPT_LOG_DIR"
 
 if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
   SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
@@ -1140,7 +1171,7 @@ if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
   else
     server_ready=0
     for start_attempt in $(seq 1 "$SERVER_START_RETRIES"); do
-      : >"$SERVER_STDOUT_LOG"
+      SERVER_STDOUT_LOG=$(prepare_server_attempt_log "$start_attempt")
       run_server_command >"$SERVER_STDOUT_LOG" 2>&1 &
       SERVER_PID=$!
       persist_managed_server_state
@@ -1163,6 +1194,7 @@ if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
         continue
       fi
 
+      print_server_attempt_log_tails
       exit "$server_wait_status"
     done
 
