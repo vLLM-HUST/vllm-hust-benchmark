@@ -3,16 +3,18 @@
 # Runs sonnet-throughput and random-latency benchmarks at 3 vllm-hust commits
 # with 3 repetitions each, using a fixed vllm-ascend-hust plugin commit.
 #
-# Key design decisions per reviewer feedback (round 5):
+# Key design decisions per reviewer feedback (round 7):
 #   1. Commits are interleaved (round-robin) across reps, not run sequentially.
 #   2. Benchmark failures are NOT swallowed (no || true); temporary output is
 #      atomically moved to the final location only after field validation.
-#   3. Process cleanup uses triple-identity verification (PID + starttime +
-#      cmdline) via process_identity.py.  The launcher's identity is recorded
-#      at launch; descendants are snapshotted continuously at 0.5s intervals
-#      with an immediate snapshot before the first sleep to catch fast-detach
-#      processes.  Cleanup verifies ALL three identity dimensions before
-#      killing, preventing PID-reuse false kills.
+#   3. Process cleanup uses cgroup v2 as the PRIMARY attribution mechanism.
+#      The launcher is added to a job-owned cgroup before exec; ALL descendants
+#      (including those that call setsid() and leave the launcher's session)
+#      remain in the cgroup.  Cleanup reads cgroup.procs to find every process,
+#      then verifies PID + starttime + cmdline before killing.
+#      Session scan is kept as a FALLBACK for environments without cgroup v2,
+#      but it CANNOT catch processes that called setsid() — cgroup is required
+#      for setsid-surviving attribution (reviewer round 7).
 #   4. Provenance captures observed full SHA, full derived patch content
 #      (tracked diff + untracked files like _build_info.py) saved to disk
 #      and bound by SHA-256, plus Python/CANN/driver versions.
@@ -93,31 +95,31 @@ export ATB_HOME_PATH="${_atb_home}/${_cxx_abi_dir}"
 mkdir -p "$RESULT_DIR"
 
 # Track verified process identities for safe cleanup.
-# Populated by run_bench_tracked() while the launcher is alive.
-# Used by kill_owned_server() to kill only processes whose PID + starttime
-# + cmdline still match — preventing PID-reuse false kills.
 #
-# Per reviewer round 6: '改用不会依赖轮询命中的归属机制' — the launcher is
-# started with ``setsid`` so it becomes a session leader.  All descendants
-# inherit the same SID.  Cleanup scans ALL processes in the session via
-# ``ps -eo pid,sid`` (polling-independent), instead of relying on
-# ``pgrep -P`` tree-walking which can miss fast-detach processes.
+# Per reviewer round 7: 'session scan 只能找到仍属于原 SID 的进程。EngineCore
+# 如果自己调用 setsid()，会立即进入新的 session' — session scan CANNOT catch
+# processes that called setsid().  Cgroup v2 is the PRIMARY attribution
+# mechanism: the launcher is added to a job-owned cgroup before exec, and ALL
+# descendants (including setsid'd ones) remain in the cgroup.  Cleanup reads
+# cgroup.procs to find every process, then verifies PID + starttime + cmdline
+# before killing.
 #
-# Per reviewer round 5: '后代只记录 PID/start time，没有保存和复核 cmdline；
-# launcher 则连启动时的 start time 都没有记录，cleanup 时只要当前 PID 存在
-# 就会发送 TERM，仍有 PID reuse 误杀风险'.
+# Session scan is kept as a FALLBACK for environments without cgroup v2, but
+# it explicitly CANNOT catch setsid'd processes — cgroup is required for
+# setsid-surviving attribution.
 #
-# _CURRENT_BENCH_PID / _LAUNCHER_SID: PID and session ID of the bench
-#   launcher (started via setsid).  Cleanup scans the session for ALL
-#   descendants regardless of when they spawned or whether they reparented.
+# _CURRENT_BENCH_PID: PID of the bench launcher.
 # _LAUNCHER_STARTTIME / _LAUNCHER_CMDLINE: identity of the bench launcher,
 #   recorded at launch time so cleanup can verify the PID hasn't been recycled.
-# _VERIFIED_DESCENDANTS_FILE: temp file containing JSON snapshot arrays (one
-#   per line), each from process_identity.py snapshot_session.  Merged at cleanup.
+# _JOB_CGROUP_PATH: path to the job-owned cgroup v2 directory.  When non-empty,
+#   cgroup-based cleanup is used (primary mechanism).
+# _LAUNCHER_SID: session ID of the launcher (fallback mechanism only).
+# _VERIFIED_DESCENDANTS_FILE: temp file for session-scan snapshots (fallback).
 _CURRENT_BENCH_PID=""
-_LAUNCHER_SID=""
 _LAUNCHER_STARTTIME=""
 _LAUNCHER_CMDLINE=""
+_JOB_CGROUP_PATH=""
+_LAUNCHER_SID=""
 _VERIFIED_DESCENDANTS_FILE=""
 
 # ---------------------------------------------------------------------------
@@ -126,22 +128,47 @@ _VERIFIED_DESCENDANTS_FILE=""
 
 log() { echo "[$(date '+%Y%m%dT%H%M%SZ')] $*"; }
 
-# Job-owned cleanup: kill processes whose PID + starttime + cmdline match the
-# snapshot taken while the launcher was alive.
+# Job-owned cleanup: kill processes whose PID + starttime + cmdline match.
 #
-# Per reviewer round 5: '后代只记录 PID/start time，没有保存和复核 cmdline；
-# launcher 则连启动时的 start time 都没有记录，cleanup 时只要当前 PID 存在
-# 就会发送 TERM，仍有 PID reuse 误杀风险。请补齐 launcher 和后代的
-# PID/start time/cmdline 身份记录与复核'.
+# Per reviewer round 7: 'session scan 只能找到仍属于原 SID 的进程。EngineCore
+# 如果自己调用 setsid()，会立即进入新的 session' — session scan CANNOT catch
+# setsid'd processes.  Cgroup v2 is the PRIMARY mechanism: cgroup.procs
+# contains ALL processes in the cgroup, including those that called setsid()
+# and left the launcher's session.
 #
 # This function:
-# 1. Verifies the launcher's identity (PID + starttime + cmdline) before
-#    sending TERM/KILL.  If the PID was recycled to a different process
-#    (different starttime or cmdline), it is NOT killed.
-# 2. Calls process_identity.py cleanup to kill only descendants whose
-#    identity still matches the recorded snapshot.
+# 1. If cgroup is available: use cleanup_cgroup_descendants (PRIMARY).
+#    This catches setsid'd processes that left the launcher's session.
+# 2. Else: fall back to session scan (CANNOT catch setsid'd processes).
+# 3. Kill the launcher only if its identity (PID + starttime + cmdline) matches.
 kill_owned_server() {
-    # 1. Kill the launcher only if its identity still matches.
+    # 1. PRIMARY: cgroup-based cleanup — catches setsid'd processes.
+    if [ -n "$_JOB_CGROUP_PATH" ] && \
+       [ -d "$_JOB_CGROUP_PATH" ]; then
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup_cgroup \
+            "$_JOB_CGROUP_PATH" 15 2>/dev/null || true  # SIGTERM
+        sleep 1
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup_cgroup \
+            "$_JOB_CGROUP_PATH" 9 2>/dev/null || true   # SIGKILL
+    fi
+
+    # 2. FALLBACK: session-based cleanup — cannot catch setsid'd processes.
+    #    Only used when cgroup v2 is not available.
+    if [ -z "$_JOB_CGROUP_PATH" ] && \
+       [ -n "$_LAUNCHER_SID" ] && \
+       [ -n "$_VERIFIED_DESCENDANTS_FILE" ]; then
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot_session "$_LAUNCHER_SID" \
+            >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
+        if [ -s "$_VERIFIED_DESCENDANTS_FILE" ]; then
+            "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup \
+                "$_VERIFIED_DESCENDANTS_FILE" 15 2>/dev/null || true  # SIGTERM
+            sleep 1
+            "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup \
+                "$_VERIFIED_DESCENDANTS_FILE" 9 2>/dev/null || true   # SIGKILL
+        fi
+    fi
+
+    # 3. Kill the launcher only if its identity still matches.
     if [ -n "$_CURRENT_BENCH_PID" ] && \
        [ -n "$_LAUNCHER_STARTTIME" ] && \
        [ -n "$_LAUNCHER_CMDLINE" ]; then
@@ -150,7 +177,6 @@ kill_owned_server() {
             2>/dev/null; then
             kill -TERM "$_CURRENT_BENCH_PID" 2>/dev/null || true
             sleep 1
-            # Force-kill if still alive AND identity still matches
             if "$PYTHON" "$_PROCESS_IDENTITY_PY" verify \
                 "$_CURRENT_BENCH_PID" "$_LAUNCHER_STARTTIME" "$_LAUNCHER_CMDLINE" \
                 2>/dev/null; then
@@ -159,35 +185,18 @@ kill_owned_server() {
         fi
     fi
 
-    # 2. Kill each verified descendant whose identity still matches.
-    #    process_identity.py cleanup merges all snapshots, verifies each
-    #    descendant's PID + starttime + cmdline, and sends the signal only
-    #    to those that still match.
-    #
-    #    Per reviewer round 6: do a final session scan right before cleanup
-    #    to capture any processes that joined the session after the monitor
-    #    stopped (e.g. spawned just before launcher exit).
-    if [ -n "$_LAUNCHER_SID" ] && \
-       [ -n "$_VERIFIED_DESCENDANTS_FILE" ]; then
-        "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot_session "$_LAUNCHER_SID" \
-            >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
+    # 4. Remove cgroup and clean up temp state.
+    if [ -n "$_JOB_CGROUP_PATH" ] && [ -d "$_JOB_CGROUP_PATH" ]; then
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" remove_cgroup \
+            "$_JOB_CGROUP_PATH" 2>/dev/null || true
     fi
-    if [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
-       [ -s "$_VERIFIED_DESCENDANTS_FILE" ]; then
-        "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup \
-            "$_VERIFIED_DESCENDANTS_FILE" 15 2>/dev/null || true  # SIGTERM
-        sleep 1
-        "$PYTHON" "$_PROCESS_IDENTITY_PY" cleanup \
-            "$_VERIFIED_DESCENDANTS_FILE" 9 2>/dev/null || true   # SIGKILL
-    fi
-
-    # 3. Clean up temp file and reset state.
     [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
         rm -f "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
     _CURRENT_BENCH_PID=""
-    _LAUNCHER_SID=""
     _LAUNCHER_STARTTIME=""
     _LAUNCHER_CMDLINE=""
+    _JOB_CGROUP_PATH=""
+    _LAUNCHER_SID=""
     _VERIFIED_DESCENDANTS_FILE=""
     sleep 2
 }
@@ -387,31 +396,31 @@ print(f'Validated: {val}')
 " || return 1
 }
 
-# Run a benchmark command, tracking its PID and snapshotting descendants.
+# Run a benchmark command with cgroup-based process tracking.
 # The command's stdout/stderr are tee'd to the log file.
 #
-# Per reviewer round 6: '改用不会依赖轮询命中的归属机制...启动即进入
-# job-owned cgroup、或由 runtime 在创建 EngineCore 时同步写入带
-# starttime/cmdline 的 registry'.  The launcher is started with ``setsid``
-# so it becomes a session leader.  ALL descendants inherit the same SID.
-# Cleanup scans the entire session via ``ps -eo pid,sid`` (a single query
-# that finds every process in the session regardless of when it spawned or
-# whether it reparented) — this is polling-independent and does not miss
-# fast-detach processes the way ``pgrep -P`` tree-walking does.
+# Per reviewer round 7: '实现上需要 cgroup、runtime 同步 registry，或其他
+# 在它离开 launcher SID 前就完成的不可漏归属机制。仅靠结束时扫描原 SID
+# 无法补回已经离开的进程。'
 #
-# Per reviewer round 5: '请补齐 launcher 和后代的 PID/start time/cmdline 身份
-# 记录与复核...每 2 秒轮询一次会漏掉在首次/两次 snapshot 之间快速 spawn、
-# setsid、reparent 的 EngineCore'.
+# Cgroup v2 is the PRIMARY attribution mechanism:
+#   - A job-owned cgroup is created before launching the bench.
+#   - The launcher PID is added to the cgroup.
+#   - ALL descendants (forks) automatically join the cgroup at fork time —
+#     BEFORE they can call setsid() or reparent.
+#   - Cleanup reads cgroup.procs to find every process, including those that
+#     called setsid() and left the launcher's session.
+#   - This is truly polling-independent: no snapshots or timing windows.
 #
-# Key changes from round 5:
-#   - Launcher started via ``setsid`` (session leader) — polling-independent
-#     ownership via SID scan.
-#   - snapshot_session_descendants(sid) used instead of snapshot_descendants(pid)
-#     — scans ALL processes in the session, not just pgrep -P tree.
-#   - Launcher starttime + cmdline recorded at launch (not just PID).
-#   - Descendant cmdline recorded (not just PID + starttime).
-#   - Immediate snapshot BEFORE first sleep (catches fast-detach processes).
-#   - Polling interval reduced from 2s to 0.5s.
+# Session scan (setsid + ps -eo pid,sid) is kept as a FALLBACK for
+# environments without cgroup v2, but it explicitly CANNOT catch processes
+# that called setsid().
+#
+# Key design:
+#   - Launcher started via ``setsid`` (session leader) for fallback.
+#   - Launcher added to cgroup BEFORE exec (primary).
+#   - Launcher starttime + cmdline recorded at launch.
+#   - All cleanup verifies PID + starttime + cmdline before killing.
 run_bench_tracked() {
     local log_file="$1"
     shift
@@ -421,40 +430,46 @@ run_bench_tracked() {
     _LAUNCHER_SID=""
     _LAUNCHER_STARTTIME=""
     _LAUNCHER_CMDLINE=""
+    _JOB_CGROUP_PATH=""
     [ -n "$_VERIFIED_DESCENDANTS_FILE" ] && \
         rm -f "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
     _VERIFIED_DESCENDANTS_FILE=$(mktemp)
     : > "$_VERIFIED_DESCENDANTS_FILE"  # truncate
 
+    # PRIMARY: Create a job-owned cgroup and add the launcher to it.
+    # All descendants will automatically join the cgroup at fork time,
+    # BEFORE they can call setsid() — this is the unforgeable attribution.
+    local job_id="bench_$$_$(date +%s)"
+    _JOB_CGROUP_PATH=$("$PYTHON" "$_PROCESS_IDENTITY_PY" create_cgroup \
+        "$job_id" 2>/dev/null || echo "")
+
     # Start the bench command via setsid — it becomes a session leader so
-    # all descendants inherit the SID.  This is the polling-independent
-    # ownership mechanism: cleanup scans the session, not the process tree.
+    # all descendants inherit the SID (fallback mechanism).
     setsid "$@" > >(tee "$log_file") 2>&1 &
     local bench_pid=$!
     _CURRENT_BENCH_PID=$bench_pid
 
-    # Record launcher SID — used for session-wide descendant scan at cleanup.
+    # PRIMARY: Add launcher to cgroup — all descendants will join at fork.
+    if [ -n "$_JOB_CGROUP_PATH" ]; then
+        "$PYTHON" "$_PROCESS_IDENTITY_PY" add_pid \
+            "$bench_pid" "$_JOB_CGROUP_PATH" 2>/dev/null || true
+    fi
+
+    # Record launcher SID — fallback for session-based scan.
     _LAUNCHER_SID=$("$PYTHON" "$_PROCESS_IDENTITY_PY" get_sid \
         "$bench_pid" 2>/dev/null || echo "")
 
     # Record launcher identity immediately — used by kill_owned_server to
     # verify the PID hasn't been recycled before killing.
-    # Per reviewer round 5: 'launcher 则连启动时的 start time 都没有记录'.
     _LAUNCHER_STARTTIME=$("$PYTHON" "$_PROCESS_IDENTITY_PY" get_starttime \
         "$bench_pid" 2>/dev/null || echo "")
     _LAUNCHER_CMDLINE=$("$PYTHON" "$_PROCESS_IDENTITY_PY" get_cmdline \
         "$bench_pid" 2>/dev/null || echo "")
 
-    # Background monitor: continuously snapshot ALL processes in the session
-    # at 0.5s intervals.  Per reviewer round 6: session scan is
-    # polling-independent — any process in the session is captured regardless
-    # of when it spawned or whether it reparented.  The immediate snapshot
-    # (before first sleep) catches processes that spawn and detach between
-    # launch and the first poll.
-    if [ -n "$_LAUNCHER_SID" ]; then
+    # FALLBACK: Background monitor for session scan (only if no cgroup).
+    # Cgroup users do not need this monitor — cgroup.procs is always current.
+    if [ -z "$_JOB_CGROUP_PATH" ] && [ -n "$_LAUNCHER_SID" ]; then
         (
-            # Immediate session scan BEFORE first sleep — minimizes the window
-            # where a fast-detach process is missed.
             "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot_session "$_LAUNCHER_SID" \
                 >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
             while kill -0 "$bench_pid" 2>/dev/null; do
@@ -462,8 +477,6 @@ run_bench_tracked() {
                     >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
                 sleep 0.5
             done
-            # Final session scan right after launcher exits — children may
-            # still be alive in the session even after reparenting.
             "$PYTHON" "$_PROCESS_IDENTITY_PY" snapshot_session "$_LAUNCHER_SID" \
                 >> "$_VERIFIED_DESCENDANTS_FILE" 2>/dev/null || true
         ) &

@@ -27,6 +27,7 @@ must NOT be killed.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -230,15 +231,15 @@ def get_session_id(pid: int) -> int | None:
 def snapshot_session_descendants(sid: int) -> list[dict[str, str | int]]:
     """Snapshot ALL processes in session ``sid`` via ``ps`` scan.
 
-    Per reviewer round 6: '改用不会依赖轮询命中的归属机制...启动即进入
-    job-owned cgroup、或由 runtime 在创建 EngineCore 时同步写入带
-    starttime/cmdline 的 registry'.
+    This is a FALLBACK ownership mechanism for environments without cgroup v2.
+    It scans ALL processes in the session via a single ``ps -eo pid,sid`` query.
+    Any process in the session is captured, regardless of when it spawned or
+    whether it reparented to init.
 
-    This is a polling-independent ownership mechanism: instead of walking the
-    process tree via ``pgrep -P`` (which can miss processes that spawn and
-    setsid/reparent between snapshots), we scan ALL processes in the session
-    via a single ``ps -eo pid,sid`` query.  Any process in the session is
-    captured, regardless of when it spawned or whether it reparented to init.
+    LIMITATION (reviewer round 7): 'session scan 只能找到仍属于原 SID 的进程。
+    EngineCore 如果自己调用 setsid()，会立即进入新的 session' — this function
+    CANNOT find processes that called setsid() and left the session.  For
+    setsid-surviving attribution, use ``snapshot_cgroup_descendants`` instead.
 
     The launcher must be started with ``setsid`` so it becomes a session
     leader and all its descendants inherit the same SID.
@@ -302,6 +303,173 @@ def merge_snapshots(
     return list(merged.values())
 
 
+# ---------------------------------------------------------------------------
+# Cgroup v2 based ownership (reviewer round 7)
+# ---------------------------------------------------------------------------
+
+_CGROUP_V2_ROOT = Path("/sys/fs/cgroup")
+
+
+def is_cgroup_v2_available() -> bool:
+    """Check if cgroup v2 is mounted and available.
+
+    Per reviewer round 7: 'session scan 只能找到仍属于原 SID 的进程。
+    EngineCore 如果自己调用 setsid()，会立即进入新的 session' —
+    cgroup v2 is the polling-independent attribution mechanism that survives
+    setsid/reparent: processes stay in the cgroup from fork until exit,
+    regardless of session changes.
+    """
+    return (_CGROUP_V2_ROOT / "cgroup.controllers").is_file()
+
+
+def get_writable_cgroup_parent() -> Path | None:
+    """Find a writable cgroup v2 parent directory.
+
+    Tries (in order):
+    1. /sys/fs/cgroup (root — available on the NPU server)
+    2. /sys/fs/cgroup/user.slice/user-<uid>.slice (systemd user delegation)
+
+    Returns the first writable parent, or None if cgroup v2 is unavailable
+    or no writable parent is found.
+    """
+    if not is_cgroup_v2_available():
+        return None
+
+    # Try root cgroup (NPU server runs as root)
+    if os.access(_CGROUP_V2_ROOT, os.W_OK):
+        return _CGROUP_V2_ROOT
+
+    # Try systemd user delegated cgroup
+    uid = os.getuid()
+    user_slice = _CGROUP_V2_ROOT / "user.slice" / f"user-{uid}.slice"
+    if user_slice.is_dir() and os.access(user_slice, os.W_OK):
+        return user_slice
+
+    return None
+
+
+def create_job_cgroup(job_id: str) -> Path | None:
+    """Create a cgroup v2 directory for the job.
+
+    Per reviewer round 7: '实现上需要 cgroup、runtime 同步 registry，或其他
+    在它离开 launcher SID 前就完成的不可漏归属机制' — cgroup v2 membership
+    is assigned at fork time (before the child can call setsid), making it
+    a truly unforgeable attribution mechanism.
+
+    Returns the cgroup path on success, or None if cgroup v2 is unavailable
+    or the directory cannot be created.
+    """
+    parent = get_writable_cgroup_parent()
+    if parent is None:
+        return None
+
+    cgroup_path = parent / f"vllm_hust_{job_id}"
+    try:
+        cgroup_path.mkdir(exist_ok=False)
+    except (OSError, PermissionError):
+        return None
+    return cgroup_path
+
+
+def add_pid_to_cgroup(pid: int, cgroup_path: Path) -> bool:
+    """Add a PID to the cgroup by writing to cgroup.procs.
+
+    After this call, the PID AND all its future descendants (forks) are
+    members of the cgroup.  Descendants that call setsid() or reparent to
+    init remain in the cgroup — this is the key property that makes cgroup
+    attribution polling-independent and setsid-surviving.
+
+    Returns True on success, False on failure.
+    """
+    procs_file = cgroup_path / "cgroup.procs"
+    try:
+        procs_file.write_text(f"{pid}\n")
+        return True
+    except (OSError, PermissionError):
+        return False
+
+
+def snapshot_cgroup_descendants(cgroup_path: Path) -> list[dict[str, str | int]]:
+    """Read all PIDs from cgroup.procs and return their identity snapshots.
+
+    Per reviewer round 7: '仅靠结束时扫描原 SID 无法补回已经离开的进程' —
+    cgroup.procs contains ALL processes in the cgroup, including those that
+    called setsid() and left the launcher's session.  This is the polling-
+    independent scan that recovers setsid'd processes.
+
+    Returns a list of ``{"pid": int, "starttime": str, "cmdline": str}``.
+    """
+    procs_file = cgroup_path / "cgroup.procs"
+    snapshots: list[dict[str, str | int]] = []
+    try:
+        content = procs_file.read_text()
+    except (OSError, PermissionError):
+        return snapshots
+
+    for line in content.split():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            pid = int(line)
+        except ValueError:
+            continue
+        st = get_starttime(pid)
+        cmd = get_cmdline(pid)
+        if st is not None and cmd is not None:
+            snapshots.append({"pid": pid, "starttime": st, "cmdline": cmd})
+    return snapshots
+
+
+def cleanup_cgroup_descendants(
+    cgroup_path: Path,
+    signal: int,
+) -> dict[str, list[int] | int]:
+    """Kill all processes in the cgroup whose identity still matches.
+
+    Reads cgroup.procs, verifies each process's PID + starttime + cmdline,
+    and sends ``signal`` to those that still match.  This catches processes
+    that called setsid() and left the launcher's session.
+
+    Returns a summary dict: ``{"killed": [pid, ...], "skipped": count, "total": count}``.
+    """
+    snapshots = snapshot_cgroup_descendants(cgroup_path)
+    killed: list[int] = []
+    skipped = 0
+    for entry in snapshots:
+        pid = entry["pid"]
+        if not isinstance(pid, int):
+            continue
+        st = entry["starttime"]
+        cmd = entry["cmdline"]
+        if not isinstance(st, str) or not isinstance(cmd, str):
+            continue
+        if verify_identity(pid, st, cmd):
+            try:
+                os.kill(pid, signal)
+                killed.append(pid)
+            except (ProcessLookupError, PermissionError):
+                skipped += 1
+        else:
+            skipped += 1
+    return {"killed": killed, "skipped": skipped, "total": len(snapshots)}
+
+
+def remove_cgroup(cgroup_path: Path) -> bool:
+    """Remove the cgroup directory after cleanup.
+
+    A cgroup can only be removed when it has no processes.  Call
+    cleanup_cgroup_descendants first.
+
+    Returns True on success, False on failure.
+    """
+    try:
+        cgroup_path.rmdir()
+        return True
+    except (OSError, PermissionError):
+        return False
+
+
 def cleanup_descendants(
     snapshot_file: Path,
     signal: int,
@@ -314,8 +482,6 @@ def cleanup_descendants(
 
     Returns a summary dict: ``{"killed": [pid, ...], "skipped": count, "total": count}``.
     """
-    import os
-
     snapshot_lists: list[list[dict[str, str | int]]] = []
     with snapshot_file.open() as f:
         for line in f:
@@ -359,13 +525,23 @@ def main() -> int:
         python process_identity.py get_sid <pid>
         python process_identity.py snapshot_session <sid>
         python process_identity.py cleanup <snapshot_file> <signal>
+        python process_identity.py cgroup_available
+        python process_identity.py create_cgroup <job_id>
+        python process_identity.py add_pid <pid> <cgroup_path>
+        python process_identity.py snapshot_cgroup <cgroup_path>
+        python process_identity.py cleanup_cgroup <cgroup_path> <signal>
+        python process_identity.py remove_cgroup <cgroup_path>
 
     Output:
     - ``get_starttime`` / ``get_cmdline``: raw value on stdout (or empty).
     - ``verify``: exit 0 if identity matches, 1 if not (no stdout).
-    - ``snapshot`` / ``snapshot_session``: JSON array on stdout.
+    - ``snapshot`` / ``snapshot_session`` / ``snapshot_cgroup``: JSON array on stdout.
     - ``get_sid``: SID integer on stdout (or empty).
-    - ``cleanup``: JSON summary on stdout.
+    - ``cleanup`` / ``cleanup_cgroup``: JSON summary on stdout.
+    - ``cgroup_available``: exit 0 if available, 1 if not.
+    - ``create_cgroup``: cgroup path on stdout (or empty on failure).
+    - ``add_pid``: exit 0 on success, 1 on failure.
+    - ``remove_cgroup``: exit 0 on success, 1 on failure.
 
     The raw-value output for ``get_*`` commands makes bash integration simple:
         st=$(python process_identity.py get_starttime $pid)
@@ -422,6 +598,39 @@ def main() -> int:
         summary = cleanup_descendants(snapshot_file, signal)
         print(json.dumps(summary))
         return 0
+
+    elif cmd == "cgroup_available" and len(sys.argv) == 2:
+        return 0 if is_cgroup_v2_available() else 1
+
+    elif cmd == "create_cgroup" and len(sys.argv) == 3:
+        job_id = sys.argv[2]
+        result = create_job_cgroup(job_id)
+        if result is not None:
+            print(result)
+            return 0
+        return 1
+
+    elif cmd == "add_pid" and len(sys.argv) == 4:
+        pid = int(sys.argv[2])
+        cgroup_path = Path(sys.argv[3])
+        return 0 if add_pid_to_cgroup(pid, cgroup_path) else 1
+
+    elif cmd == "snapshot_cgroup" and len(sys.argv) == 3:
+        cgroup_path = Path(sys.argv[2])
+        result = snapshot_cgroup_descendants(cgroup_path)
+        print(json.dumps(result))
+        return 0
+
+    elif cmd == "cleanup_cgroup" and len(sys.argv) == 4:
+        cgroup_path = Path(sys.argv[2])
+        signal = int(sys.argv[3])
+        summary = cleanup_cgroup_descendants(cgroup_path, signal)
+        print(json.dumps(summary))
+        return 0
+
+    elif cmd == "remove_cgroup" and len(sys.argv) == 3:
+        cgroup_path = Path(sys.argv[2])
+        return 0 if remove_cgroup(cgroup_path) else 1
 
     else:
         print(f"Unknown command/args: {sys.argv[1:]}", file=sys.stderr)

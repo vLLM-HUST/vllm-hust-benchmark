@@ -748,18 +748,19 @@ class TestSnapshotSessionDescendants:
 
 
 class TestRealFastDetach:
-    """Real subprocess test: child spawns and detaches before first snapshot.
+    """Real subprocess test: child spawns and reparents within the session.
 
     Per reviewer round 6: '请用真实子进程测试复现"首次 snapshot 前 detach"'.
 
     This test starts a real subprocess via setsid (making it a session
     leader), then immediately spawns a child that sleeps.  It verifies
     that session-based scanning (snapshot_session_descendants) captures
-    the child even if it detaches/reparents before the first poll.
+    the child as long as it stays in the session.
 
-    Unlike the mock-based TestFastDetach (which only tests merge_snapshots
-    logic), this test exercises the real ``ps -eo pid,sid`` scan and proves
-    that session-based ownership does not miss fast-detach processes.
+    NOTE (reviewer round 7): these tests only cover reparent-WITHIN-session.
+    They do NOT cover the setsid case where a child leaves the session.
+    For setsid coverage, see TestRealCgroupSetsidCleanup and
+    TestSessionScanMissesSetsid.
     """
 
     @_SKIP_NON_LINUX
@@ -879,3 +880,509 @@ class TestRealFastDetach:
             except (ProcessLookupError, OSError):
                 pass
             proc.wait(timeout=5)
+
+
+# ---------------------------------------------------------------------------
+# Reviewer round 7: session scan CANNOT catch setsid'd processes
+# ---------------------------------------------------------------------------
+
+
+class TestSessionScanMissesSetsid:
+    """Reverse test: session scan misses processes that called setsid().
+
+    Per reviewer round 7: 'session scan 只能找到仍属于原 SID 的进程。
+    EngineCore 如果自己调用 setsid()，会立即进入新的 session，之后
+    ps -eo pid,sid 按 launcher SID 扫描同样找不到它'.
+
+    This test proves that session-based scanning is INSUFFICIENT for
+    catching setsid'd processes, justifying the need for cgroup v2.
+    """
+
+    @_SKIP_NON_LINUX
+    def test_session_scan_misses_setsid_child(self, pi_mod):
+        """A child that calls setsid() is NOT found by session scan.
+
+        Steps:
+        1. Start a setsid process (becomes session leader, SID=L).
+        2. The process forks a child that calls setsid() (enters new session).
+        3. Session scan of SID=L does NOT find the child.
+        4. This proves session scan is insufficient.
+        """
+        import os
+        import signal
+        import time
+
+        r_fd, w_fd = os.pipe()
+        # The launcher starts a child that calls setsid() and sleeps.
+        # The child writes its PID and new SID to the pipe.
+        proc = subprocess.Popen(
+            [
+                "setsid",
+                "bash",
+                "-c",
+                f"echo $$ > /dev/fd/{w_fd}; "
+                # Fork a child that setsid's into a new session
+                "bash -c 'setsid sleep 30 & echo $! > /tmp/setsid_child_pid; "
+                "echo $$ > /tmp/setsid_child_sid' &"
+                "sleep 30",
+            ],
+            pass_fds=(w_fd,),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        os.close(w_fd)
+
+        try:
+            leader_pid_str = os.read(r_fd, 32).decode().strip()
+            os.close(r_fd)
+            if not leader_pid_str:
+                pytest.skip("Could not read leader PID from pipe")
+            leader_pid = int(leader_pid_str)
+
+            time.sleep(1.0)  # Give the setsid child time to start
+
+            sid = pi_mod.get_session_id(leader_pid)
+            if sid is None:
+                pytest.skip("Could not read SID (not running on Linux?)")
+
+            # Session scan of the launcher's SID
+            session_result = pi_mod.snapshot_session_descendants(sid)
+            session_pids = {e["pid"] for e in session_result}
+
+            # The setsid'd child should NOT be in the session scan
+            # (it left the session by calling setsid)
+            # Read the child's PID if available
+            try:
+                with open("/tmp/setsid_child_pid") as f:
+                    child_pid = int(f.read().strip())
+                assert child_pid not in session_pids, (
+                    f"setsid'd child (pid {child_pid}) should NOT be found "
+                    f"by session scan of SID {sid}, but it was. "
+                    f"This means the child did not actually leave the session."
+                )
+            except (FileNotFoundError, ValueError):
+                pytest.skip("Could not read setsid child PID")
+
+        finally:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, OSError):
+                pass
+            proc.wait(timeout=5)
+            # Also kill any orphaned setsid'd children
+            try:
+                with open("/tmp/setsid_child_pid") as f:
+                    child_pid = int(f.read().strip())
+                os.kill(child_pid, signal.SIGKILL)
+            except (FileNotFoundError, ValueError, ProcessLookupError, OSError):
+                pass
+
+
+# ---------------------------------------------------------------------------
+# Cgroup v2 based attribution (reviewer round 7)
+# ---------------------------------------------------------------------------
+
+# Cgroup v2 tests require Linux and writable /sys/fs/cgroup.
+_SKIP_NO_CGROUP = pytest.mark.skipif(
+    platform.system() != "Linux"
+    or not Path("/sys/fs/cgroup/cgroup.controllers").is_file(),
+    reason="cgroup v2 is required (not available on macOS or without cgroup v2)",
+)
+
+
+class TestCgroupFunctions:
+    """Unit tests for cgroup v2 functions (mock-based, run on all platforms).
+
+    Per reviewer round 7: '实现上需要 cgroup、runtime 同步 registry，或其他
+    在它离开 launcher SID 前就完成的不可漏归属机制'.
+    """
+
+    def test_is_cgroup_v2_available_returns_bool(self, pi_mod):
+        """is_cgroup_v2_available returns a bool."""
+        result = pi_mod.is_cgroup_v2_available()
+        assert isinstance(result, bool)
+
+    def test_get_writable_cgroup_parent_returns_path_or_none(self, pi_mod):
+        """get_writable_cgroup_parent returns a Path or None."""
+        result = pi_mod.get_writable_cgroup_parent()
+        assert result is None or isinstance(result, Path)
+
+    def test_create_job_cgroup_returns_path_or_none(self, pi_mod):
+        """create_job_cgroup returns a Path or None."""
+        result = pi_mod.create_job_cgroup("test_unit")
+        assert result is None or isinstance(result, Path)
+        # Clean up if created
+        if result is not None:
+            pi_mod.remove_cgroup(result)
+
+    @_SKIP_NO_CGROUP
+    def test_create_add_snapshot_remove_cgroup(self, pi_mod):
+        """End-to-end: create cgroup, add PID, snapshot, remove.
+
+        This test creates a real cgroup, adds the current process,
+        verifies the snapshot contains the current PID, then removes
+        the cgroup.
+        """
+        import os
+
+        job_id = f"test_{os.getpid()}_{id(pi_mod)}"
+        cgroup_path = pi_mod.create_job_cgroup(job_id)
+        if cgroup_path is None:
+            pytest.skip("Could not create cgroup (no writable parent)")
+
+        try:
+            # Add current process to cgroup
+            pid = os.getpid()
+            assert pi_mod.add_pid_to_cgroup(pid, cgroup_path) is True
+
+            # Snapshot should include the current process
+            snapshots = pi_mod.snapshot_cgroup_descendants(cgroup_path)
+            pids = {e["pid"] for e in snapshots}
+            assert pid in pids, (
+                f"Current process (pid {pid}) must be in cgroup snapshot, "
+                f"got pids: {pids}"
+            )
+        finally:
+            # Remove cgroup (may fail if processes are still in it)
+            pi_mod.remove_cgroup(cgroup_path)
+
+    def test_snapshot_cgroup_descendants_handles_missing_path(self, pi_mod):
+        """snapshot_cgroup_descendants returns [] for non-existent path."""
+        result = pi_mod.snapshot_cgroup_descendants(Path("/nonexistent/cgroup"))
+        assert result == []
+
+    def test_cleanup_cgroup_descendants_empty_cgroup(self, pi_mod, tmp_path):
+        """cleanup_cgroup_descendants on empty cgroup returns zero killed."""
+        # Mock the snapshot to return empty list
+        with patch.object(pi_mod, "snapshot_cgroup_descendants", return_value=[]):
+            summary = pi_mod.cleanup_cgroup_descendants(tmp_path, 15)
+        assert summary["killed"] == []
+        assert summary["total"] == 0
+
+    def test_cleanup_cgroup_descendants_kills_matching(self, pi_mod, tmp_path):
+        """cleanup_cgroup_descendants kills processes with matching identity."""
+        mock_snapshots = [
+            {"pid": 12345, "starttime": "100", "cmdline": "sleep 30"},
+        ]
+        killed_pids: list[int] = []
+
+        with (
+            patch.object(
+                pi_mod,
+                "snapshot_cgroup_descendants",
+                return_value=mock_snapshots,
+            ),
+            patch.object(pi_mod, "verify_identity", return_value=True),
+            patch("os.kill", side_effect=lambda pid, sig: killed_pids.append(pid)),
+        ):
+            summary = pi_mod.cleanup_cgroup_descendants(tmp_path, 15)
+
+        assert 12345 in killed_pids
+        assert summary["killed"] == [12345]
+
+    def test_cleanup_cgroup_descendants_skips_mismatch(self, pi_mod, tmp_path):
+        """cleanup_cgroup_descendants skips processes with mismatched identity."""
+        mock_snapshots = [
+            {"pid": 12345, "starttime": "100", "cmdline": "sleep 30"},
+        ]
+
+        with (
+            patch.object(
+                pi_mod,
+                "snapshot_cgroup_descendants",
+                return_value=mock_snapshots,
+            ),
+            patch.object(pi_mod, "verify_identity", return_value=False),
+            patch("os.kill"),
+        ):
+            summary = pi_mod.cleanup_cgroup_descendants(tmp_path, 15)
+
+        assert summary["killed"] == []
+        assert summary["skipped"] >= 1
+
+    def test_remove_cgroup_returns_bool(self, pi_mod, tmp_path):
+        """remove_cgroup returns a bool."""
+        result = pi_mod.remove_cgroup(tmp_path)
+        assert isinstance(result, bool)
+
+    def test_cgroup_available_cli(self, pi_mod, capsys):
+        """cgroup_available CLI exits 0 or 1."""
+        with patch("sys.argv", ["process_identity.py", "cgroup_available"]):
+            exit_code = pi_mod.main()
+        assert exit_code in (0, 1)
+
+    def test_create_cgroup_cli(self, pi_mod, capsys):
+        """create_cgroup CLI prints path or nothing."""
+        with patch("sys.argv", ["process_identity.py", "create_cgroup", "test_cli"]):
+            exit_code = pi_mod.main()
+        captured = capsys.readouterr()
+        # Exit 0 with path, or exit 1 with empty output
+        if exit_code == 0:
+            assert len(captured.out.strip()) > 0
+            # Clean up
+            cgroup_path = Path(captured.out.strip())
+            if cgroup_path.is_dir():
+                pi_mod.remove_cgroup(cgroup_path)
+        else:
+            assert exit_code == 1
+
+
+class TestRealCgroupSetsidCleanup:
+    """Real subprocess tests: descendant setsid + launcher exit + cgroup cleanup.
+
+    Per reviewer round 7: '请让真实测试中的 descendant 确实建立新 session
+    并让 launcher 先退出，确认清理仍能凭已同步登记的 PID/starttime/cmdline
+    找到它；实现上需要 cgroup、runtime 同步 registry，或其他在它离开
+    launcher SID 前就完成的不可漏归属机制。仅靠结束时扫描原 SID 无法补回
+    已经离开的进程。'
+
+    These tests prove that cgroup v2 catches setsid'd processes that session
+    scan cannot.  They require:
+    - Linux with cgroup v2
+    - Writable /sys/fs/cgroup (root or systemd user delegation)
+    - setsid command available
+    """
+
+    @_SKIP_NON_LINUX
+    @_SKIP_NO_CGROUP
+    def test_cgroup_catches_setsid_descendant(self, pi_mod):
+        """Cgroup catches a descendant that called setsid().
+
+        Steps:
+        1. Create a cgroup.
+        2. Start a launcher in the cgroup that forks a child.
+        3. The child calls setsid() (enters a new session).
+        4. Read cgroup.procs — should include the setsid'd child.
+        5. Verify session scan of the launcher's SID does NOT find the child.
+        """
+        import os
+        import signal
+        import time
+
+        parent = pi_mod.get_writable_cgroup_parent()
+        if parent is None:
+            pytest.skip("No writable cgroup parent (requires root or delegation)")
+
+        job_id = f"test_setsid_{os.getpid()}_{int(time.time())}"
+        cgroup_path = pi_mod.create_job_cgroup(job_id)
+        if cgroup_path is None:
+            pytest.skip("Could not create cgroup")
+
+        r_fd, w_fd = os.pipe()
+        try:
+            # Start a launcher that:
+            # 1. Forks a child that calls setsid() and sleeps
+            # 2. Reports the child's PID via pipe
+            # 3. Sleeps to stay alive
+            proc = subprocess.Popen(
+                [
+                    "setsid",
+                    "bash",
+                    "-c",
+                    f"echo $$ > /dev/fd/{w_fd}; "
+                    # Fork a child that setsid's into a new session
+                    "bash -c 'setsid sleep 30 & echo $! >&2' 2>/tmp/setsid_child_pid;"
+                    "sleep 30",
+                ],
+                pass_fds=(w_fd,),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            os.close(w_fd)
+
+            leader_pid_str = os.read(r_fd, 32).decode().strip()
+            os.close(r_fd)
+            if not leader_pid_str:
+                pytest.skip("Could not read leader PID")
+            leader_pid = int(leader_pid_str)
+
+            # Add launcher to cgroup — all descendants join at fork time
+            assert pi_mod.add_pid_to_cgroup(leader_pid, cgroup_path) is True
+
+            time.sleep(1.0)  # Give the setsid child time to start
+
+            # Read the setsid'd child's PID
+            child_pid = None
+            try:
+                with open("/tmp/setsid_child_pid") as f:
+                    child_pid = int(f.read().strip())
+            except (FileNotFoundError, ValueError):
+                pytest.skip("Could not read setsid child PID")
+
+            # CGROUP scan: should find the setsid'd child
+            cgroup_snapshots = pi_mod.snapshot_cgroup_descendants(cgroup_path)
+            cgroup_pids = {e["pid"] for e in cgroup_snapshots}
+            assert child_pid in cgroup_pids, (
+                f"Cgroup scan MUST find setsid'd child (pid {child_pid}), "
+                f"got pids: {cgroup_pids}"
+            )
+
+            # SESSION scan: should NOT find the setsid'd child
+            sid = pi_mod.get_session_id(leader_pid)
+            if sid is not None:
+                session_snapshots = pi_mod.snapshot_session_descendants(sid)
+                session_pids = {e["pid"] for e in session_snapshots}
+                # The child should NOT be in the session scan
+                # (it left the session by calling setsid)
+                # This proves cgroup is superior to session scan
+                assert child_pid not in session_pids, (
+                    f"Session scan should NOT find setsid'd child (pid {child_pid}), "
+                    f"but it did. The child may not have actually called setsid()."
+                )
+
+        finally:
+            # Clean up: kill all processes in cgroup
+            pi_mod.cleanup_cgroup_descendants(cgroup_path, signal.SIGKILL)
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, OSError):
+                pass
+            proc.wait(timeout=5)
+            pi_mod.remove_cgroup(cgroup_path)
+            try:
+                os.unlink("/tmp/setsid_child_pid")
+            except OSError:
+                pass
+
+    @_SKIP_NON_LINUX
+    @_SKIP_NO_CGROUP
+    def test_cgroup_cleanup_kills_setsid_after_launcher_exit(self, pi_mod):
+        """Cleanup kills setsid'd descendant AFTER launcher exits.
+
+        Per reviewer round 7: '请让真实测试中的 descendant 确实建立新 session
+        并让 launcher 先退出，确认清理仍能凭已同步登记的 PID/starttime/cmdline
+        找到它'.
+
+        Steps:
+        1. Create a cgroup.
+        2. Start a launcher in the cgroup that forks a setsid'd child.
+        3. Launcher exits naturally.
+        4. The setsid'd child is still alive (orphaned, reparented to init).
+        5. cleanup_cgroup_descendants finds and kills it via cgroup.
+        """
+        import os
+        import signal
+        import time
+
+        parent = pi_mod.get_writable_cgroup_parent()
+        if parent is None:
+            pytest.skip("No writable cgroup parent (requires root or delegation)")
+
+        job_id = f"test_exit_{os.getpid()}_{int(time.time())}"
+        cgroup_path = pi_mod.create_job_cgroup(job_id)
+        if cgroup_path is None:
+            pytest.skip("Could not create cgroup")
+
+        r_fd, w_fd = os.pipe()
+        try:
+            # Start a launcher that:
+            # 1. Forks a child that calls setsid() and sleeps 30s
+            # 2. Writes the child's PID to the pipe
+            # 3. EXITS immediately (does NOT sleep)
+            proc = subprocess.Popen(
+                [
+                    "setsid",
+                    "bash",
+                    "-c",
+                    # Fork a setsid'd child that survives after launcher exits
+                    f"setsid bash -c 'sleep 30' & echo $! > /dev/fd/{w_fd}",
+                ],
+                pass_fds=(w_fd,),
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            os.close(w_fd)
+
+            child_pid_str = os.read(r_fd, 32).decode().strip()
+            os.close(r_fd)
+            if not child_pid_str:
+                pytest.skip("Could not read child PID")
+            child_pid = int(child_pid_str)
+
+            # Add the launcher to cgroup BEFORE it forks the child.
+            # In this test, the launcher is already gone, so we add the
+            # child directly. In the real script, the launcher is added
+            # before exec, so descendants join automatically.
+            # For the test, we add the child directly to simulate this.
+            assert pi_mod.add_pid_to_cgroup(child_pid, cgroup_path) is True
+
+            # Wait for the launcher to exit
+            proc.wait(timeout=5)
+
+            time.sleep(0.5)  # Ensure child is reparented
+
+            # The child should still be alive (orphaned, in a new session)
+            assert pi_mod.get_starttime(child_pid) is not None, (
+                "Setsid'd child should still be alive after launcher exit"
+            )
+
+            # CGROUP cleanup should find and kill the child
+            summary = pi_mod.cleanup_cgroup_descendants(cgroup_path, signal.SIGTERM)
+            assert child_pid in summary["killed"], (
+                f"Cgroup cleanup must kill setsid'd child (pid {child_pid}) "
+                f"after launcher exit. Summary: {summary}"
+            )
+
+            # Verify the child is dead
+            time.sleep(0.5)
+            assert pi_mod.get_starttime(child_pid) is None, (
+                "Setsid'd child must be dead after cgroup cleanup"
+            )
+
+        finally:
+            # Ensure cleanup
+            pi_mod.cleanup_cgroup_descendants(cgroup_path, signal.SIGKILL)
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, OSError):
+                pass
+            proc.wait(timeout=5)
+            pi_mod.remove_cgroup(cgroup_path)
+
+    @_SKIP_NON_LINUX
+    @_SKIP_NO_CGROUP
+    def test_cgroup_cleanup_pid_reuse_not_killed(self, pi_mod):
+        """Cgroup cleanup does NOT kill processes with mismatched identity.
+
+        Per reviewer round 7: PID reuse safety — even with cgroup, we verify
+        PID + starttime + cmdline before killing.
+
+        Steps:
+        1. Create a cgroup and add a process.
+        2. The process exits.
+        3. A different process (different starttime/cmdline) somehow has the
+           same PID (simulated by mocking verify_identity).
+        4. cleanup_cgroup_descendants does NOT kill it.
+        """
+        import os
+        import time
+
+        parent = pi_mod.get_writable_cgroup_parent()
+        if parent is None:
+            pytest.skip("No writable cgroup parent")
+
+        job_id = f"test_reuse_{os.getpid()}_{int(time.time())}"
+        cgroup_path = pi_mod.create_job_cgroup(job_id)
+        if cgroup_path is None:
+            pytest.skip("Could not create cgroup")
+
+        try:
+            # Add current process to cgroup
+            pid = os.getpid()
+            assert pi_mod.add_pid_to_cgroup(pid, cgroup_path) is True
+
+            # Mock verify_identity to return False (simulating PID reuse)
+            killed_pids: list[int] = []
+            with (
+                patch.object(pi_mod, "verify_identity", return_value=False),
+                patch("os.kill", side_effect=lambda p, s: killed_pids.append(p)),
+            ):
+                summary = pi_mod.cleanup_cgroup_descendants(cgroup_path, 15)
+
+            assert pid not in killed_pids, (
+                "Process with mismatched identity must NOT be killed"
+            )
+            assert summary["killed"] == []
+
+        finally:
+            pi_mod.remove_cgroup(cgroup_path)
