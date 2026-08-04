@@ -286,6 +286,20 @@ def parse_compute_pids(output: str) -> dict[int, list[int]]:
     return {device: sorted(set(pids)) for device, pids in parsed.items()}
 
 
+def parse_ctr_content_digests(output: bytes) -> set[str]:
+    """Parse old-ctr ``content ls -q`` output as exact immutable digests."""
+    try:
+        lines = output.decode("utf-8").splitlines()
+    except UnicodeDecodeError as error:
+        raise GateFailure("containerd content list is not UTF-8") from error
+    if not lines or any(not IMAGE_DIGEST_RE.fullmatch(line) for line in lines):
+        raise GateFailure("containerd content list contains a malformed digest")
+    digests = set(lines)
+    if len(digests) != len(lines):
+        raise GateFailure("containerd content list contains duplicate digests")
+    return digests
+
+
 def port_listener_pids(output: str, port: int) -> list[int]:
     listeners: set[int] = set()
     for line in output.splitlines():
@@ -822,28 +836,26 @@ class StrictRepeatOrchestrator:
         layers = manifest.get("layers")
         if not isinstance(layers, list) or not layers:
             raise GateFailure("containerd storage manifest has no layers")
+        content_list = self.root.run_bytes(
+            ["ctr", "--namespace", "moby", "content", "ls", "-q"]
+        )
+        content_digests = parse_ctr_content_digests(content_list.stdout)
+        content_list_path = self.repeat_dir / "runtime" / "containerd-content-list.txt"
+        content_list_path.write_bytes(content_list.stdout)
         layer_records = []
-        for index, descriptor in enumerate(layers):
+        for descriptor in layers:
             if not isinstance(descriptor, dict):
                 raise GateFailure("containerd layer descriptor is malformed")
             digest = str(descriptor.get("digest") or "")
             size = descriptor.get("size")
             if not IMAGE_DIGEST_RE.fullmatch(digest) or not isinstance(size, int):
                 raise GateFailure("containerd layer identity is incomplete")
-            info = self.root.run_bytes(
-                ["ctr", "--namespace", "moby", "content", "info", digest]
-            )
-            info_path = (
-                self.repeat_dir / "runtime" / f"containerd-layer-{index:03d}.txt"
-            )
-            info_path.write_bytes(info.stdout)
-            if digest.encode() not in info.stdout:
-                raise GateFailure(f"containerd layer info omitted digest: {digest}")
+            if digest not in content_digests:
+                raise GateFailure(f"containerd content list omitted layer: {digest}")
             layer_records.append(
                 {
                     "digest": digest,
                     "size": size,
-                    "raw_info": evidence_record(self.repeat_dir, info_path),
                 }
             )
         archive = STRICT_V018_ARCHIVE
@@ -883,6 +895,7 @@ class StrictRepeatOrchestrator:
             "raw_manifest": evidence_record(self.repeat_dir, raw_path),
             "raw_config_blob": evidence_record(self.repeat_dir, config_path),
             "layers": layer_records,
+            "content_list": evidence_record(self.repeat_dir, content_list_path),
             "archive": evidence_record(self.repeat_dir, archive_identity_path),
             "docker_image_inspect": evidence_record(
                 self.repeat_dir, docker_inspect_path

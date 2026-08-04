@@ -184,13 +184,18 @@ class _Docker29Root:
         self.manifest = manifest
         self.config = config
         self.storage = storage
+        self.calls: list[list[str]] = []
 
     def run_bytes(self, argv, *, check=True):
+        self.calls.append(list(argv))
         digest = argv[-1]
         if argv[-2] == "get":
             payload = self.manifest if digest == self.storage else self.config
         else:
-            payload = f"digest: {digest}\n".encode()
+            manifest = json.loads(self.manifest)
+            payload = (
+                "\n".join(layer["digest"] for layer in manifest["layers"]) + "\n"
+            ).encode()
         return orchestrator.CommandBytesResult(payload, b"", 0)
 
     def run(self, argv, *, check=True):
@@ -230,6 +235,72 @@ def test_docker29_content_attestation_hashes_manifest_config_layers_and_archive(
     assert identity["manifest_config_digest"] == config_digest
     assert identity["containerd_storage_manifest_digest"] == storage_digest
     assert identity["layers"][0]["digest"] == layer_digest
+    assert sum(call[-2:] == ["ls", "-q"] for call in instance.root.calls) == 1
+    assert not any("info" in call for call in instance.root.calls)
+
+
+@pytest.mark.parametrize(
+    "output",
+    (
+        b"",
+        b"sha256:not-a-digest\n",
+        ("sha256:" + "1" * 64 + " extra\n").encode(),
+        ("sha256:" + "1" * 64 + "\n" + "sha256:" + "1" * 64 + "\n").encode(),
+        b"\xff\n",
+    ),
+)
+def test_ctr_content_list_rejects_malformed_output(output: bytes) -> None:
+    with pytest.raises(orchestrator.GateFailure, match="content list"):
+        orchestrator.parse_ctr_content_digests(output)
+
+
+def test_ctr_content_list_uses_exact_digest_not_prefix() -> None:
+    required = "sha256:" + "1" * 64
+    prefixed = required + "0"
+    with pytest.raises(orchestrator.GateFailure, match="malformed"):
+        orchestrator.parse_ctr_content_digests((prefixed + "\n").encode())
+
+
+class _MissingLayerRoot(_Docker29Root):
+    def run_bytes(self, argv, *, check=True):
+        if argv[-2:] == ["ls", "-q"]:
+            return orchestrator.CommandBytesResult(
+                ("sha256:" + "2" * 64 + "\n").encode(), b"", 0
+            )
+        return super().run_bytes(argv, check=check)
+
+
+class _FailedContentListRoot(_Docker29Root):
+    def run_bytes(self, argv, *, check=True):
+        if argv[-2:] == ["ls", "-q"]:
+            raise orchestrator.GateFailure("host command failed: ctr content ls")
+        return super().run_bytes(argv, check=check)
+
+
+@pytest.mark.parametrize("root_type", (_MissingLayerRoot, _FailedContentListRoot))
+def test_docker29_rejects_missing_or_failed_content_list(
+    tmp_path: Path, root_type: type[_Docker29Root]
+) -> None:
+    config = b"config"
+    config_digest = "sha256:" + orchestrator.hashlib.sha256(config).hexdigest()
+    manifest = json.dumps(
+        {
+            "config": {"digest": config_digest},
+            "layers": [{"digest": "sha256:" + "1" * 64, "size": 1}],
+        },
+        separators=(",", ":"),
+    ).encode()
+    storage = "sha256:" + orchestrator.hashlib.sha256(manifest).hexdigest()
+    instance = _orchestrator_stub(tmp_path)
+    instance.repeat_dir.mkdir(parents=True)
+    instance.runtime_transport = "docker-archive"
+    instance.runtime_config_digest = config_digest
+    instance.runtime_storage_manifest_digest = storage
+    instance.root = root_type(manifest, config, storage)
+    with pytest.raises(
+        orchestrator.GateFailure, match="content list|content ls|omitted layer"
+    ):
+        instance._attest_runtime_storage()
 
 
 def test_docker29_content_attestation_rejects_manifest_hash_mismatch(

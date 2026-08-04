@@ -190,17 +190,32 @@ def _validate_strict_execution_evidence(
             manifest_layers
         ):
             raise ValueError(f"containerd layer evidence is incomplete: {repeat_dir}")
+        content_list_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            transport_identity.get("content_list") or {},
+            field="runtime_storage_identity.content_list",
+        )
+        try:
+            content_lines = content_list_path.read_text(encoding="utf-8").splitlines()
+        except UnicodeDecodeError as error:
+            raise ValueError(
+                f"containerd content list is not UTF-8: {repeat_dir}"
+            ) from error
+        if (
+            not content_lines
+            or any(
+                not re.fullmatch(r"sha256:[0-9a-f]{64}", line) for line in content_lines
+            )
+            or len(set(content_lines)) != len(content_lines)
+        ):
+            raise ValueError(f"containerd content list is malformed: {repeat_dir}")
+        content_digests = set(content_lines)
         for descriptor, layer in zip(manifest_layers, layer_evidence, strict=True):
             if not isinstance(layer, Mapping) or layer.get("digest") != descriptor.get(
                 "digest"
             ):
                 raise ValueError(f"containerd layer identity mismatch: {repeat_dir}")
-            info_path = _verify_hashed_evidence_file(
-                repeat_dir,
-                layer.get("raw_info") or {},
-                field="runtime_storage_identity.layers.raw_info",
-            )
-            if str(layer["digest"]) not in info_path.read_text(encoding="utf-8"):
+            if str(layer["digest"]) not in content_digests:
                 raise ValueError(f"containerd layer content is unproven: {repeat_dir}")
         actual_path = _verify_hashed_evidence_file(
             repeat_dir,

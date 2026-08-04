@@ -374,8 +374,8 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
         manifest_path.write_bytes(manifest_blob)
         config_path = repeat / "runtime/containerd-config-blob.json"
         config_path.write_bytes(config_blob)
-        layer_info = repeat / "runtime/containerd-layer-000.txt"
-        layer_info.write_text(f"digest: {layer_digest}\n", encoding="utf-8")
+        content_list = repeat / "runtime/containerd-content-list.txt"
+        content_list.write_text(f"{layer_digest}\n", encoding="utf-8")
         archive_identity = repeat / "runtime/archive-identity.json"
         _write(
             archive_identity,
@@ -503,9 +503,9 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                         {
                             "digest": layer_digest,
                             "size": 123,
-                            "raw_info": _hashed_record(repeat, layer_info),
                         }
                     ],
+                    "content_list": _hashed_record(repeat, content_list),
                     "archive": _hashed_record(repeat, archive_identity),
                     "docker_image_inspect": _hashed_record(
                         repeat, docker_image_inspect
