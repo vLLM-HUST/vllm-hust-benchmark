@@ -13,6 +13,7 @@ Covers the two review comments on PR #139:
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -398,3 +399,133 @@ class TestPairedIsValidPairedEvidence:
         ok, reason = paired_mod._is_valid_paired_evidence(base, head)
         assert not ok
         assert "head" in reason and "peak_mem_mb" in reason
+
+
+# ===========================================================================
+# Idempotency guard tests (reviewer round 3: reverse test for second run)
+# ===========================================================================
+
+
+class TestCleanupIdempotencyGuard:
+    """Reverse tests for the idempotency guard (issue #105 reviewer round 3).
+
+    Per reviewer: '重复运行脚本还可能用已经清空的 leaderboard 覆盖第一次生成的
+    quarantine。请从干净的 4d549c3 输入重新生成，确保 0 keep、21 quarantine，
+    并让 cleanup 重跑保持既有 quarantine 或明确拒绝对已清理输入覆写；补一个
+    幂等/二次运行反向测试'.
+
+    These tests verify that:
+    1. A second run on an already-cleaned input (0 entries) is rejected when
+       pre_cleanup_freeze.json shows a prior run with > 0 entries.
+    2. The --force flag bypasses the guard.
+    3. The guard does NOT trigger when the input has entries (first run).
+    4. The guard does NOT trigger when pre_cleanup_freeze.json is absent.
+    """
+
+    def test_second_run_rejected_when_input_cleaned(
+        self, cleanup_mod, tmp_path, monkeypatch, capsys
+    ):
+        """main() must return exit code 3 on already-cleaned input."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        # Already-cleaned input (0 entries)
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        # Prior freeze shows 21 entries from a previous run
+        freeze = {
+            "schema_version": "pre-cleanup-freeze/v1",
+            "entry_count": 21,
+            "entry_ids": [f"id-{i}" for i in range(21)],
+            "frozen_entries": [],
+        }
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(json.dumps(freeze) + "\n")
+        monkeypatch.setattr(
+            "sys.argv",
+            ["cleanup", "--snapshot-dir", str(snapshot_dir)],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 3
+        captured = capsys.readouterr()
+        assert "Idempotency guard" in captured.err
+
+    def test_force_flag_bypasses_guard(self, cleanup_mod, tmp_path, monkeypatch):
+        """--force flag must bypass the idempotency guard."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        freeze = {
+            "schema_version": "pre-cleanup-freeze/v1",
+            "entry_count": 21,
+            "entry_ids": [],
+            "frozen_entries": [],
+        }
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(json.dumps(freeze) + "\n")
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "cleanup",
+                "--snapshot-dir",
+                str(snapshot_dir),
+                "--force",
+            ],
+        )
+        # Should NOT raise — force bypasses guard, writes 0-entry outputs
+        rc = cleanup_mod.main()
+        assert rc == 0
+
+    def test_first_run_not_blocked(self, cleanup_mod, tmp_path):
+        """First run on input with entries must NOT trigger the guard."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        entry = _valid_active_entry()
+        (snapshot_dir / "leaderboard_single.json").write_text(
+            json.dumps([entry]) + "\n"
+        )
+        # No pre_cleanup_freeze.json — first run
+        kept, removed = cleanup_mod.cleanup_snapshot(
+            snapshot_dir / "leaderboard_single.json",
+            snapshot_dir / "leaderboard_single.json",
+            [],
+            [],
+        )
+        # Entry has verified=True, peak_mem>0, etc. — should be kept
+        assert kept == 1
+        assert removed == 0
+
+    def test_guard_not_triggered_when_freeze_absent(self, cleanup_mod, tmp_path):
+        """0-entry input without pre_cleanup_freeze.json must NOT trigger guard."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        # No pre_cleanup_freeze.json — guard should not trigger
+        kept, removed = cleanup_mod.cleanup_snapshot(
+            snapshot_dir / "leaderboard_single.json",
+            snapshot_dir / "leaderboard_single.json",
+            [],
+            [],
+        )
+        assert kept == 0
+        assert removed == 0
+
+    def test_guard_not_triggered_when_freeze_has_zero_entries(
+        self, cleanup_mod, tmp_path
+    ):
+        """0-entry input with freeze also showing 0 must NOT trigger guard."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        freeze = {
+            "schema_version": "pre-cleanup-freeze/v1",
+            "entry_count": 0,
+            "entry_ids": [],
+            "frozen_entries": [],
+        }
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(json.dumps(freeze) + "\n")
+        # Both input and freeze show 0 — not a re-run scenario
+        kept, removed = cleanup_mod.cleanup_snapshot(
+            snapshot_dir / "leaderboard_single.json",
+            snapshot_dir / "leaderboard_single.json",
+            [],
+            [],
+        )
+        assert kept == 0
+        assert removed == 0

@@ -442,6 +442,12 @@ def main() -> int:
         action="store_true",
         help="Print summary only; do not write files",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Bypass idempotency guard (allow re-running on already-cleaned input). "
+        "Use only when intentionally regenerating from a restored original input.",
+    )
     args = parser.parse_args()
 
     snapshot_dir: Path = args.snapshot_dir
@@ -451,6 +457,33 @@ def main() -> int:
     if not single_path.is_file():
         print(f"ERROR: {single_path} not found", file=sys.stderr)
         return 2
+
+    # Idempotency guard (issue #105 reviewer round 3): if the input has already
+    # been cleaned (0 entries) but pre_cleanup_freeze.json shows a prior run
+    # with > 0 entries, refuse to proceed unless --force is given.  This
+    # prevents a second run from overwriting the real quarantine with an empty
+    # one.  The guard is checked here (before any writes) so that dry-run and
+    # real runs both benefit.
+    if not args.force:
+        input_data = json.loads(single_path.read_text(encoding="utf-8"))
+        if isinstance(input_data, list) and len(input_data) == 0:
+            freeze_path = snapshot_dir / "pre_cleanup_freeze.json"
+            if freeze_path.is_file():
+                try:
+                    freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
+                    prior_count = freeze.get("entry_count", 0)
+                    if isinstance(prior_count, int) and prior_count > 0:
+                        print(
+                            f"ERROR: Idempotency guard — {single_path.name} has 0 "
+                            f"entries but pre_cleanup_freeze.json records "
+                            f"{prior_count} entries from a prior run. Refusing to "
+                            f"overwrite quarantine with empty result. Restore the "
+                            f"original leaderboard or use --force to override.",
+                            file=sys.stderr,
+                        )
+                        return 3
+                except (json.JSONDecodeError, OSError):
+                    pass
 
     # Pre-cleanup freeze (single snapshot only, per issue #105 step 1)
     pre_cleanup = json.loads(single_path.read_text(encoding="utf-8"))
