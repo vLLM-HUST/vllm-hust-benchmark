@@ -45,6 +45,22 @@ def _require_revision(identity: Mapping[str, Any]) -> str:
     return revision
 
 
+def resolve_sharegpt_dataset_url(
+    data_identity: Mapping[str, Any], explicit_url: str
+) -> str:
+    """Resolve an exact-revision ShareGPT URL or reject a drifting override."""
+    if data_identity.get("kind") != "huggingface-file":
+        return explicit_url
+    revision = _require_revision(data_identity)
+    expected_url = (
+        "https://hf-mirror.com/datasets/"
+        f"{data_identity['repository']}/resolve/{revision}/{data_identity['path']}"
+    )
+    if explicit_url and explicit_url != expected_url:
+        raise ValueError(f"ShareGPT URL is not the exact revision URL: {explicit_url}")
+    return expected_url
+
+
 def verify_data_contract(
     data_identity: Mapping[str, Any],
     *,
@@ -71,11 +87,7 @@ def verify_data_contract(
             require_size=False,
         )
     elif kind == "huggingface-file":
-        revision = _require_revision(data_identity)
-        expected_url = (
-            "https://hf-mirror.com/datasets/"
-            f"{data_identity['repository']}/resolve/{revision}/{data_identity['path']}"
-        )
+        expected_url = resolve_sharegpt_dataset_url(data_identity, sharegpt_url)
         if sharegpt_url != expected_url:
             raise ValueError(
                 f"ShareGPT URL is not the exact revision URL: {sharegpt_url}"

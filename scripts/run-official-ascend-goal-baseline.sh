@@ -16,7 +16,7 @@ OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
 OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/official-ascend-goal-baseline-cache"}
 OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/official-baseline-datasets"}
 OFFICIAL_TRACE_ASSET_ROOT=${OFFICIAL_TRACE_ASSET_ROOT:-"$REPO_ROOT/.benchmarks/traces"}
-OFFICIAL_SHAREGPT_DATASET_URL=${OFFICIAL_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
+OFFICIAL_SHAREGPT_DATASET_URL=${OFFICIAL_SHAREGPT_DATASET_URL:-}
 HF_HOME=${HF_HOME:-"/data/shared_datasets/vllm-hust-benchmark/huggingface"}
 HF_HUB_CACHE=${HF_HUB_CACHE:-"$HF_HOME/hub"}
 TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-"$HF_HOME/transformers"}
@@ -98,6 +98,29 @@ SPEC_FILE=$(realpath "$SPEC_FILE")
 CONSTRAINTS_FILE=$(realpath "$CONSTRAINTS_FILE")
 RESULT_DIR=$(realpath -m "$RESULT_DIR")
 OFFICIAL_VLLM_CACHE_ROOT=$(realpath -m "$OFFICIAL_VLLM_CACHE_ROOT")
+
+OFFICIAL_SHAREGPT_DATASET_URL=$(
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    SPEC_FILE="$SPEC_FILE" \
+    EXPLICIT_SHAREGPT_URL="$OFFICIAL_SHAREGPT_DATASET_URL" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.immutable_input_attestation import (
+    resolve_sharegpt_dataset_url,
+)
+
+spec = json.loads(Path(os.environ["SPEC_FILE"]).read_text(encoding="utf-8"))
+print(
+    resolve_sharegpt_dataset_url(
+        spec.get("data_identity") or {},
+        os.environ["EXPLICIT_SHAREGPT_URL"],
+    )
+)
+PY
+)
 
 SCRIPT_BASENAME=$(basename "$0")
 
