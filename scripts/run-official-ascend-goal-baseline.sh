@@ -1279,6 +1279,32 @@ print(json.dumps(metadata, separators=(",", ":"), sort_keys=True))
 PY
 }
 
+verify_resolved_input_attestation() {
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    IMMUTABLE_INPUT_ATTESTATION_FILE="$IMMUTABLE_INPUT_ATTESTATION_FILE" \
+    IMMUTABLE_INPUT_METADATA="$IMMUTABLE_INPUT_METADATA" \
+    "$HOST_PYTHON_BIN" - <<'PY'
+import json
+import os
+from pathlib import Path
+
+from vllm_hust_benchmark.immutable_input_attestation import (
+    validate_attestation_payload,
+)
+
+path = Path(os.environ["IMMUTABLE_INPUT_ATTESTATION_FILE"])
+if not path.is_file():
+    raise RuntimeError(f"benchmark did not write immutable input attestation: {path}")
+payload = json.loads(path.read_text(encoding="utf-8"))
+if not isinstance(payload, dict):
+    raise RuntimeError("immutable input attestation must be a JSON object")
+validate_attestation_payload(
+    payload,
+    json.loads(os.environ["IMMUTABLE_INPUT_METADATA"]),
+)
+PY
+}
+
 finalize_trace_immutable_input_attestation() {
   if [[ -z "${TRACE_TARGET_ID:-}" ]]; then
     return 0
@@ -2324,6 +2350,7 @@ esac
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
 run_client_command
 finalize_trace_immutable_input_attestation
+verify_resolved_input_attestation
 if [[ -n "$TRACE_TARGET_ID" ]]; then
   finalize_trace_startup_evidence
 fi

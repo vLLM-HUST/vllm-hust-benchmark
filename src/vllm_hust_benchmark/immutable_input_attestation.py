@@ -9,6 +9,7 @@ from typing import Any, Mapping
 
 SCHEMA_VERSION = "immutable-input-attestation/v1"
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
+_REVISION_RE = re.compile(r"[0-9a-f]{40}")
 
 
 def file_identity(path: Path) -> dict[str, object]:
@@ -122,7 +123,9 @@ def build_metadata(spec: Mapping[str, Any]) -> dict[str, object]:
     model_revision = spec.get("model_revision") or spec.get(
         "server_parameters", {}
     ).get("revision")
-    if not isinstance(model_revision, str) or len(model_revision) != 40:
+    if not isinstance(model_revision, str) or not _REVISION_RE.fullmatch(
+        model_revision
+    ):
         raise ValueError("official spec requires an exact model_revision")
     data_identity = spec.get("data_identity")
     if not isinstance(data_identity, dict) or not data_identity:
@@ -131,7 +134,39 @@ def build_metadata(spec: Mapping[str, Any]) -> dict[str, object]:
         "model_id": spec["model"],
         "model_revision": model_revision,
         "data_identity": data_identity,
+        "resolved_input_kind": expected_resolved_input_kind(spec),
     }
+
+
+def expected_resolved_input_kind(spec: Mapping[str, Any]) -> str:
+    data_identity = spec.get("data_identity") or {}
+    if data_identity.get("kind") == "release-asset":
+        return "production-trace-prompt-token-ids"
+    scenario = str(spec.get("scenario") or "")
+    if "latency" in scenario:
+        return "latency-prompt-token-ids"
+    if "throughput" in scenario:
+        return "throughput-sample-requests"
+    return "serve-sample-requests"
+
+
+def validate_attestation_payload(
+    payload: Mapping[str, Any], metadata: Mapping[str, Any]
+) -> None:
+    """Fail closed unless a captured input payload exactly matches its spec metadata."""
+    expected = {
+        "schema_version": SCHEMA_VERSION,
+        "model_id": metadata.get("model_id"),
+        "model_revision": metadata.get("model_revision"),
+        "data_identity": metadata.get("data_identity"),
+        "resolved_input_kind": metadata.get("resolved_input_kind"),
+    }
+    for field, value in expected.items():
+        if payload.get(field) != value:
+            raise ValueError(f"immutable input attestation mismatch for {field}")
+    digest = payload.get("resolved_input_sha256")
+    if not isinstance(digest, str) or not _SHA256_RE.fullmatch(digest):
+        raise ValueError("immutable input attestation lacks a resolved input SHA256")
 
 
 def write_trace_attestation(

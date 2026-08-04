@@ -5,6 +5,8 @@ from types import SimpleNamespace
 import pytest
 
 from scripts.run_vllm_cli_compat import (
+    _latency_prompt_token_ids,
+    _sample_request_payload,
     offline_graph_proof,
     record_immutable_inputs,
     require_offline_graph,
@@ -66,6 +68,60 @@ def test_record_immutable_inputs_writes_exact_contract(tmp_path, monkeypatch) ->
             input_kind="prompt-token-ids",
             inputs=[{"prompt_token_ids": [9]}],
         )
+
+
+def test_latency_capture_hashes_actual_generated_token_ids() -> None:
+    first = [{"prompt_token_ids": [10, 20]}, {"prompt_token_ids": [30, 40]}]
+    second = [{"prompt_token_ids": [10, 20]}, {"prompt_token_ids": [30, 41]}]
+    first_tokens = _latency_prompt_token_ids(first)
+    assert first_tokens == [[10, 20], [30, 40]]
+    assert resolved_input_sha256(
+        input_kind="latency-prompt-token-ids", inputs=first_tokens
+    ) != resolved_input_sha256(
+        input_kind="latency-prompt-token-ids",
+        inputs=_latency_prompt_token_ids(second),
+    )
+
+
+def test_serve_sample_request_sequence_is_stable_and_order_sensitive() -> None:
+    requests = [
+        SimpleNamespace(
+            prompt="alpha", prompt_len=1, expected_output_len=2, request_id="0"
+        ),
+        SimpleNamespace(
+            prompt="beta", prompt_len=1, expected_output_len=3, request_id="1"
+        ),
+    ]
+    payloads = [_sample_request_payload(request) for request in requests]
+    repeated = [_sample_request_payload(request) for request in requests]
+    assert payloads == repeated
+    assert resolved_input_sha256(
+        input_kind="serve-sample-requests", inputs=payloads
+    ) == resolved_input_sha256(input_kind="serve-sample-requests", inputs=repeated)
+    assert resolved_input_sha256(
+        input_kind="serve-sample-requests", inputs=payloads
+    ) != resolved_input_sha256(
+        input_kind="serve-sample-requests", inputs=list(reversed(payloads))
+    )
+
+
+def test_capture_rejects_input_kind_mismatch_before_writing(
+    tmp_path, monkeypatch
+) -> None:
+    output = tmp_path / "immutable-input-attestation.json"
+    metadata = {
+        "model_id": "Qwen/model",
+        "model_revision": "a" * 40,
+        "data_identity": {"kind": "deterministic-vllm-generator", "seed": 0},
+        "resolved_input_kind": "serve-sample-requests",
+    }
+    monkeypatch.setenv("VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE", str(output))
+    monkeypatch.setenv("VLLM_HUST_IMMUTABLE_INPUT_METADATA", json.dumps(metadata))
+    with pytest.raises(RuntimeError, match="does not match the official spec"):
+        record_immutable_inputs(
+            input_kind="latency-prompt-token-ids", inputs=[[1, 2, 3]]
+        )
+    assert not output.exists()
 
 
 def _fake_llm(*, enforce_eager: bool, mode: str, cudagraph_mode: str) -> object:

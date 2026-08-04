@@ -7,8 +7,10 @@ import pytest
 
 from vllm_hust_benchmark.immutable_input_attestation import (
     build_metadata,
+    expected_resolved_input_kind,
     file_identity,
     resolve_sharegpt_dataset_url,
+    validate_attestation_payload,
     verify_data_contract,
     write_trace_attestation,
 )
@@ -101,6 +103,54 @@ def test_build_metadata_requires_exact_revision_and_data_identity() -> None:
         build_metadata({"model": "model", "model_revision": "d" * 40})
 
 
+@pytest.mark.parametrize(
+    ("scenario", "kind", "expected"),
+    [
+        (
+            "random-latency",
+            "nondeterministic-vllm-generator",
+            "latency-prompt-token-ids",
+        ),
+        ("random-online", "deterministic-vllm-generator", "serve-sample-requests"),
+        ("sharegpt-online", "huggingface-file", "serve-sample-requests"),
+    ],
+)
+def test_expected_input_kind_matches_b_targets(
+    scenario: str, kind: str, expected: str
+) -> None:
+    assert (
+        expected_resolved_input_kind(
+            {"scenario": scenario, "data_identity": {"kind": kind}}
+        )
+        == expected
+    )
+
+
+def test_attestation_validation_rejects_spec_inference_or_drift() -> None:
+    metadata = {
+        "model_id": "Qwen/model",
+        "model_revision": "a" * 40,
+        "data_identity": {"kind": "deterministic-vllm-generator", "seed": 0},
+        "resolved_input_kind": "serve-sample-requests",
+    }
+    payload = {
+        "schema_version": "immutable-input-attestation/v1",
+        **metadata,
+        "resolved_input_sha256": "b" * 64,
+    }
+    validate_attestation_payload(payload, metadata)
+    for field, value in (
+        ("model_revision", "c" * 40),
+        ("data_identity", {"kind": "spec-placeholder"}),
+        ("resolved_input_kind", "latency-prompt-token-ids"),
+        ("resolved_input_sha256", ""),
+    ):
+        changed = dict(payload)
+        changed[field] = value
+        with pytest.raises(ValueError, match="immutable input attestation"):
+            validate_attestation_payload(changed, metadata)
+
+
 def test_sharegpt_url_defaults_to_spec_exact_revision() -> None:
     assert resolve_sharegpt_dataset_url(SHAREGPT_IDENTITY, "") == SHAREGPT_EXACT_URL
 
@@ -137,5 +187,6 @@ def test_official_runner_wires_real_input_attestation() -> None:
     assert "VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE" in runner
     assert "IMMUTABLE_INPUT_METADATA=$(verify_immutable_input_contract)" in runner
     assert "finalize_trace_immutable_input_attestation" in runner
+    assert "verify_resolved_input_attestation" in runner
     assert "resolve_sharegpt_dataset_url" in runner
     assert "/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json" not in runner

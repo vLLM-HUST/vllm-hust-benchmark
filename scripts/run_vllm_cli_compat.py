@@ -110,6 +110,12 @@ def record_immutable_inputs(*, input_kind: str, inputs: object) -> None:
         )
     if not isinstance(data_identity, dict) or not data_identity:
         raise RuntimeError("immutable input data identity must be a non-empty object")
+    expected_input_kind = metadata.get("resolved_input_kind") if metadata_text else None
+    if expected_input_kind and input_kind != expected_input_kind:
+        raise RuntimeError(
+            "resolved benchmark input kind does not match the official spec: "
+            f"{input_kind} != {expected_input_kind}"
+        )
 
     payload = {
         "schema_version": IMMUTABLE_INPUT_SCHEMA_VERSION,
