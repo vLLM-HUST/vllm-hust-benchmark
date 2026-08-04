@@ -23,7 +23,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from vllm_hust_benchmark.strict_execution_contract import (
     CANONICAL_WORKER_RULE,
@@ -38,6 +38,10 @@ DRY_RUN_SCHEMA = "strict-repeat-dry-run/v1"
 CONTAINER_ID_RE = re.compile(r"[0-9a-f]{64}")
 IMAGE_DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}")
 HOST_NPU_SMI = Path("/usr/local/sbin/npu-smi")
+HOST_CTR = Path("/usr/bin/ctr")
+STRICT_V018_ARCHIVE = Path(
+    "/var/tmp/vllm-ascend-strict-baseline-9a50c7c633d52e25.tar.zst"
+)
 SAFE_HOST_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 DEVICE_ROW = re.compile(r"^\|\s*(\d+)\s+\S+\s+\|")
 HBM_CELL = re.compile(r"(\d+)\s*/\s*(\d+)")
@@ -101,6 +105,26 @@ def secure_host_npu_smi() -> str:
     return str(HOST_NPU_SMI)
 
 
+def secure_host_ctr() -> str:
+    """Revalidate the fixed containerd client immediately before content access."""
+    validate_absolute_executable(HOST_CTR)
+    before = HOST_CTR.lstat()
+    flags = os.O_RDONLY | os.O_CLOEXEC | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(HOST_CTR, flags)
+    except OSError as error:
+        raise GateFailure(f"cannot safely open host ctr: {error}") from error
+    try:
+        opened = os.fstat(descriptor)
+    finally:
+        os.close(descriptor)
+    if (opened.st_dev, opened.st_ino) != (before.st_dev, before.st_ino):
+        raise GateFailure("host ctr changed during safety validation")
+    if opened.st_uid != 0 or opened.st_mode & 0o022 or not stat.S_ISREG(opened.st_mode):
+        raise GateFailure("opened host ctr failed ownership/mode validation")
+    return str(HOST_CTR)
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
@@ -130,6 +154,54 @@ def evidence_record(repeat_dir: Path, path: Path) -> dict[str, str]:
     }
 
 
+def resolve_runtime_storage_contract(
+    runtime: Mapping[str, Any], requested_digest: str
+) -> dict[str, Any]:
+    expected_digest = str(runtime.get("runtime_image_digest") or "")
+    if not IMAGE_DIGEST_RE.fullmatch(expected_digest):
+        raise GateFailure(
+            "official target does not pin an immutable runtime image digest"
+        )
+    if requested_digest != expected_digest:
+        raise GateFailure(
+            f"runtime image does not match official target: {requested_digest} != {expected_digest}"
+        )
+    transport = str(runtime.get("runtime_transport") or "registry")
+    contract = {
+        "transport": transport,
+        "config_digest": expected_digest,
+        "local_image_ref": expected_digest,
+        "storage_manifest_digest": None,
+        "archive_sha256": None,
+    }
+    if transport == "docker-archive":
+        config_digest = str(runtime.get("runtime_config_digest") or "")
+        storage_digest = str(runtime.get("containerd_storage_manifest_digest") or "")
+        archive_digest = str(runtime.get("runtime_archive_sha256") or "")
+        if config_digest != expected_digest:
+            raise GateFailure(
+                "docker-archive runtime config digest differs from runtime image digest"
+            )
+        if not IMAGE_DIGEST_RE.fullmatch(storage_digest):
+            raise GateFailure(
+                "docker-archive runtime lacks a containerd storage manifest digest"
+            )
+        if storage_digest == config_digest:
+            raise GateFailure(
+                "docker-archive storage manifest must not masquerade as config digest"
+            )
+        if not IMAGE_DIGEST_RE.fullmatch(archive_digest):
+            raise GateFailure("docker-archive runtime lacks an archive SHA256")
+        contract.update(
+            local_image_ref=storage_digest,
+            storage_manifest_digest=storage_digest,
+            archive_sha256=archive_digest,
+        )
+    elif transport != "registry":
+        raise GateFailure(f"unsupported runtime transport: {transport}")
+    return contract
+
+
 def build_strict_evidence(
     *,
     hostname: str,
@@ -139,6 +211,7 @@ def build_strict_evidence(
     container_id: str,
     service_port: int,
     runtime_image_digest: str,
+    runtime_storage_identity: dict[str, str],
     immutable_inputs: dict[str, str],
     devices: list[int],
     acquired_at: str,
@@ -160,6 +233,7 @@ def build_strict_evidence(
         "container_id": container_id,
         "service_port": service_port,
         "runtime_image_digest": runtime_image_digest,
+        "runtime_storage_identity": runtime_storage_identity,
         "immutable_inputs": immutable_inputs,
         "lease": {
             "physical_npu_ids": devices,
@@ -268,6 +342,13 @@ class CommandResult:
     returncode: int
 
 
+@dataclass(frozen=True)
+class CommandBytesResult:
+    stdout: bytes
+    stderr: bytes
+    returncode: int
+
+
 class RootCommands:
     """Run allowlisted read-only host commands through root or ``sudo -n``."""
 
@@ -302,6 +383,26 @@ class RootCommands:
                 f"host command failed ({shlex.join(argv)}): {result.stderr.strip()}"
             )
         return CommandResult(result.stdout, result.stderr, result.returncode)
+
+    def run_bytes(
+        self, argv: Sequence[str], *, check: bool = True
+    ) -> CommandBytesResult:
+        command = list(argv)
+        if command and command[0] == "ctr":
+            command = [secure_host_ctr(), *command[1:]]
+        result = subprocess.run(
+            [*self.prefix, *command],
+            capture_output=True,
+            check=False,
+            timeout=60,
+            env=self.environment,
+        )
+        if check and result.returncode:
+            raise GateFailure(
+                f"host command failed ({shlex.join(argv)}): "
+                f"{result.stderr.decode(errors='replace').strip()}"
+            )
+        return CommandBytesResult(result.stdout, result.stderr, result.returncode)
 
 
 class ResourceLease:
@@ -430,6 +531,17 @@ class StrictRepeatOrchestrator:
             Path("/workspace/vllm-hust-benchmark") / relative_repeat
         )
         self.devices = args.physical_npu
+        self.runtime_transport = "registry"
+        self.runtime_config_digest = args.runtime_image_digest
+        self.runtime_local_image_ref = args.runtime_image_digest
+        self.runtime_storage_manifest_digest: str | None = None
+        self.runtime_archive_sha256: str | None = None
+        self.expected_core_commit = ""
+        self.expected_backend_commit = ""
+        self.expected_runtime_packages: dict[str, str] = {}
+        self.runtime_storage_identity_path = (
+            self.repeat_dir / "owned-container-identity.json"
+        )
         self._validate_target_scope()
         self.startup_id = uuid.uuid4().hex
         self.hostname = socket.gethostname()
@@ -477,18 +589,23 @@ class StrictRepeatOrchestrator:
             raise GateFailure(
                 f"physical NPU scope does not match target chip count: {len(self.devices)} != {chip_count}"
             )
-        expected_digest = str(
-            (target.get("baseline_runtime") or {}).get("runtime_image_digest") or ""
+        runtime = target.get("baseline_runtime") or {}
+        contract = resolve_runtime_storage_contract(
+            runtime, self.args.runtime_image_digest
         )
-        if not IMAGE_DIGEST_RE.fullmatch(expected_digest):
-            raise GateFailure(
-                "official target does not pin an immutable runtime image digest"
-            )
-        if expected_digest != self.args.runtime_image_digest:
-            raise GateFailure(
-                f"runtime image does not match official target: "
-                f"{self.args.runtime_image_digest} != {expected_digest}"
-            )
+        self.runtime_transport = contract["transport"]
+        self.runtime_config_digest = contract["config_digest"]
+        self.runtime_storage_manifest_digest = contract["storage_manifest_digest"]
+        self.runtime_archive_sha256 = contract["archive_sha256"]
+        self.runtime_local_image_ref = contract["local_image_ref"]
+        self.expected_core_commit = str(runtime.get("core_commit") or "")
+        self.expected_backend_commit = str(runtime.get("backend_commit") or "")
+        packages = runtime.get("runtime_packages") or {}
+        if not isinstance(packages, dict):
+            raise GateFailure("runtime package identity is malformed")
+        self.expected_runtime_packages = {
+            str(name): str(version) for name, version in packages.items()
+        }
 
     def _resolve_container(self, container: str) -> str:
         result = self.root.run(["docker", "inspect", container])
@@ -501,9 +618,9 @@ class StrictRepeatOrchestrator:
             raise GateFailure("target container inspect is malformed") from error
         if not CONTAINER_ID_RE.fullmatch(container_id):
             raise GateFailure("target container did not resolve to a full immutable ID")
-        if image != self.args.runtime_image_digest:
+        if image != self.runtime_local_image_ref:
             raise GateFailure(
-                f"runtime image mismatch: {image} != {self.args.runtime_image_digest}"
+                f"runtime image mismatch: {image} != {self.runtime_local_image_ref}"
             )
         return container_id
 
@@ -555,8 +672,167 @@ class StrictRepeatOrchestrator:
             argv.extend(["--device", f"/dev/davinci{physical}:/dev/davinci{logical}"])
         for device in ("davinci_manager", "devmm_svm", "hisi_hdc"):
             argv.extend(["--device", f"/dev/{device}:/dev/{device}"])
-        argv.extend([self.args.runtime_image_digest, *self.args.command])
+        if self.runtime_transport == "docker-archive":
+            argv.insert(2, "--pull=never")
+            argv.extend(["--entrypoint", "/usr/local/bin/python"])
+            expected_path = (
+                self.container_repeat_dir / "runtime" / "expected-runtime.json"
+            )
+            output_path = self.container_repeat_dir / "runtime" / "actual-runtime.json"
+            argv.extend(
+                [
+                    self.runtime_local_image_ref,
+                    "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py",
+                    "--expected",
+                    str(expected_path),
+                    "--output",
+                    str(output_path),
+                    "--",
+                    *self.args.command,
+                ]
+            )
+        else:
+            argv.extend([self.runtime_local_image_ref, *self.args.command])
         return argv
+
+    def _write_runtime_preflight_contract(self) -> None:
+        if self.runtime_transport != "docker-archive":
+            return
+        if not self.expected_core_commit or not self.expected_backend_commit:
+            raise GateFailure("runtime source commits are not pinned")
+        required_packages = {
+            "datasets",
+            "torch",
+            "torch-npu",
+            "vllm",
+            "vllm-ascend",
+            "xxhash",
+        }
+        if set(self.expected_runtime_packages) != required_packages:
+            raise GateFailure("runtime does not pin the exact six package versions")
+        atomic_json(
+            self.repeat_dir / "runtime" / "expected-runtime.json",
+            {
+                "schema_version": "strict-owned-runtime-expected/v1",
+                "core_commit": self.expected_core_commit,
+                "backend_commit": self.expected_backend_commit,
+                "packages": self.expected_runtime_packages,
+            },
+        )
+
+    def _attest_runtime_storage(self) -> dict[str, Any]:
+        if self.runtime_transport != "docker-archive":
+            return {
+                "transport": "registry",
+                "runtime_config_digest": self.runtime_config_digest,
+                "local_create_ref": self.runtime_local_image_ref,
+            }
+        storage_digest = self.runtime_storage_manifest_digest
+        if not storage_digest:
+            raise GateFailure("docker-archive storage manifest identity is missing")
+        result = self.root.run_bytes(
+            ["ctr", "--namespace", "moby", "content", "get", storage_digest]
+        )
+        raw = result.stdout
+        actual_digest = "sha256:" + hashlib.sha256(raw).hexdigest()
+        if actual_digest != storage_digest:
+            raise GateFailure(
+                f"containerd manifest hash mismatch: {actual_digest} != {storage_digest}"
+            )
+        try:
+            manifest = json.loads(raw)
+            if not isinstance(manifest, dict):
+                raise TypeError("manifest is not an object")
+            config_digest = str(manifest["config"]["digest"])
+        except (KeyError, TypeError, UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise GateFailure("containerd storage manifest is malformed") from error
+        if config_digest != self.runtime_config_digest:
+            raise GateFailure(
+                "containerd manifest config digest does not match registry runtime identity"
+            )
+        raw_path = self.repeat_dir / "runtime" / "containerd-storage-manifest.json"
+        raw_path.parent.mkdir(parents=True, exist_ok=True)
+        raw_path.write_bytes(raw)
+        config_result = self.root.run_bytes(
+            ["ctr", "--namespace", "moby", "content", "get", config_digest]
+        )
+        config_raw = config_result.stdout
+        actual_config_digest = "sha256:" + hashlib.sha256(config_raw).hexdigest()
+        if actual_config_digest != config_digest:
+            raise GateFailure(
+                f"containerd config blob hash mismatch: {actual_config_digest} != {config_digest}"
+            )
+        config_path = self.repeat_dir / "runtime" / "containerd-config-blob.json"
+        config_path.write_bytes(config_raw)
+        layers = manifest.get("layers")
+        if not isinstance(layers, list) or not layers:
+            raise GateFailure("containerd storage manifest has no layers")
+        layer_records = []
+        for index, descriptor in enumerate(layers):
+            if not isinstance(descriptor, dict):
+                raise GateFailure("containerd layer descriptor is malformed")
+            digest = str(descriptor.get("digest") or "")
+            size = descriptor.get("size")
+            if not IMAGE_DIGEST_RE.fullmatch(digest) or not isinstance(size, int):
+                raise GateFailure("containerd layer identity is incomplete")
+            info = self.root.run_bytes(
+                ["ctr", "--namespace", "moby", "content", "info", digest]
+            )
+            info_path = (
+                self.repeat_dir / "runtime" / f"containerd-layer-{index:03d}.txt"
+            )
+            info_path.write_bytes(info.stdout)
+            if digest.encode() not in info.stdout:
+                raise GateFailure(f"containerd layer info omitted digest: {digest}")
+            layer_records.append(
+                {
+                    "digest": digest,
+                    "size": size,
+                    "raw_info": evidence_record(self.repeat_dir, info_path),
+                }
+            )
+        archive = STRICT_V018_ARCHIVE
+        if not archive.is_file():
+            raise GateFailure(f"required runtime archive is missing: {archive}")
+        actual_archive_digest = "sha256:" + sha256_file(archive)
+        if actual_archive_digest != self.runtime_archive_sha256:
+            raise GateFailure(
+                f"runtime archive hash mismatch: {actual_archive_digest} != {self.runtime_archive_sha256}"
+            )
+        archive_identity_path = self.repeat_dir / "runtime" / "archive-identity.json"
+        atomic_json(
+            archive_identity_path,
+            {
+                "path": str(archive),
+                "size_bytes": archive.stat().st_size,
+                "sha256": actual_archive_digest,
+            },
+        )
+        docker_inspect = self.root.run(["docker", "image", "inspect", storage_digest])
+        docker_inspect_path = self.repeat_dir / "runtime" / "docker-image-inspect.json"
+        docker_inspect_path.write_text(docker_inspect.stdout, encoding="utf-8")
+        try:
+            docker_record = json.loads(docker_inspect.stdout)[0]
+        except (IndexError, TypeError, json.JSONDecodeError) as error:
+            raise GateFailure("docker image inspect is malformed") from error
+        if docker_record.get("Id") != storage_digest:
+            raise GateFailure(
+                "docker image inspect does not resolve the storage manifest"
+            )
+        return {
+            "transport": "docker-archive",
+            "runtime_config_digest": self.runtime_config_digest,
+            "containerd_storage_manifest_digest": storage_digest,
+            "local_create_ref": self.runtime_local_image_ref,
+            "manifest_config_digest": config_digest,
+            "raw_manifest": evidence_record(self.repeat_dir, raw_path),
+            "raw_config_blob": evidence_record(self.repeat_dir, config_path),
+            "layers": layer_records,
+            "archive": evidence_record(self.repeat_dir, archive_identity_path),
+            "docker_image_inspect": evidence_record(
+                self.repeat_dir, docker_inspect_path
+            ),
+        }
 
     def _create_owned_container(self) -> None:
         for path, description in (
@@ -572,6 +848,8 @@ class StrictRepeatOrchestrator:
         for device in ("davinci_manager", "devmm_svm", "hisi_hdc"):
             if not Path(f"/dev/{device}").exists():
                 raise GateFailure(f"Ascend management device is missing: /dev/{device}")
+        self._write_runtime_preflight_contract()
+        storage_identity = self._attest_runtime_storage()
         result = self.root.run(self._docker_create_argv())
         candidate = result.stdout.strip()
         if CONTAINER_ID_RE.fullmatch(candidate):
@@ -587,11 +865,12 @@ class StrictRepeatOrchestrator:
         inspect_path = self.repeat_dir / "owned-container-create-inspect.json"
         inspect_path.write_text(inspect.stdout, encoding="utf-8")
         atomic_json(
-            self.repeat_dir / "owned-container-identity.json",
+            self.runtime_storage_identity_path,
             {
                 "container_id": self.container_id,
                 "container_name": self.container_name,
                 "runtime_image_digest": self.args.runtime_image_digest,
+                "runtime_storage_identity": storage_identity,
                 "create_argv": self._docker_create_argv(),
                 "inspect": evidence_record(self.repeat_dir, inspect_path),
                 "physical_to_logical_npu": {
@@ -607,8 +886,8 @@ class StrictRepeatOrchestrator:
         labels = config.get("Labels") or {}
         if record.get("Id") != self.container_id:
             raise GateFailure("owned container inspect ID mismatch")
-        if record.get("Image") != self.args.runtime_image_digest:
-            raise GateFailure("owned container OCI config digest mismatch")
+        if record.get("Image") != self.runtime_local_image_ref:
+            raise GateFailure("owned container local image identity mismatch")
         if labels.get("vllm-hust.strict-startup-id") != self.startup_id:
             raise GateFailure("owned container label mismatch")
         if host_config.get("AutoRemove") is not True:
@@ -973,6 +1252,34 @@ class StrictRepeatOrchestrator:
             )
             return int(process.returncode)
 
+    def _validate_runtime_preflight_output(self) -> None:
+        if self.runtime_transport != "docker-archive":
+            return
+        actual_path = self.repeat_dir / "runtime" / "actual-runtime.json"
+        try:
+            actual = json.loads(actual_path.read_text(encoding="utf-8"))
+            sources = actual["sources"]
+            packages = actual["packages"]
+        except (KeyError, OSError, TypeError, json.JSONDecodeError) as error:
+            raise GateFailure("owned runtime preflight evidence is missing") from error
+        if actual.get("schema_version") != "strict-owned-runtime-preflight/v1":
+            raise GateFailure("owned runtime preflight schema mismatch")
+        if (
+            sources.get("core", {}).get("commit") != self.expected_core_commit
+            or sources.get("core", {}).get("clean") is not True
+            or sources.get("backend", {}).get("commit") != self.expected_backend_commit
+            or sources.get("backend", {}).get("clean") is not True
+            or packages != self.expected_runtime_packages
+        ):
+            raise GateFailure("owned runtime actual source/package identity mismatch")
+        identity = json.loads(
+            self.runtime_storage_identity_path.read_text(encoding="utf-8")
+        )
+        identity["actual_runtime_preflight"] = evidence_record(
+            self.repeat_dir, actual_path
+        )
+        atomic_json(self.runtime_storage_identity_path, identity)
+
     def _container_is_stopped_or_removed(self) -> bool:
         result = self.root.run(
             ["docker", "inspect", "--format", "{{.State.Running}}", self.container_id],
@@ -1078,6 +1385,7 @@ class StrictRepeatOrchestrator:
                 self._cleanup_owned_container(allow_stop=False)
                 return 0
             command_exit = self._run_command()
+            self._validate_runtime_preflight_output()
             cleanup = self._cleanup_facts(command_exit)
             if command_exit != 0:
                 raise GateFailure(f"owned command exited with {command_exit}")
@@ -1129,6 +1437,9 @@ class StrictRepeatOrchestrator:
                 container_id=self.container_id,
                 service_port=self.args.service_port,
                 runtime_image_digest=self.args.runtime_image_digest,
+                runtime_storage_identity=evidence_record(
+                    self.repeat_dir, self.runtime_storage_identity_path
+                ),
                 immutable_inputs=evidence_record(self.repeat_dir, immutable_path),
                 devices=self.devices,
                 acquired_at=self.lease.acquired_at,

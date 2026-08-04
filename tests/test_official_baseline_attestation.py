@@ -144,6 +144,24 @@ def _write_strict_execution_evidence(
             ),
         },
     )
+    inspect_path = repeat / "owned-container-create-inspect.json"
+    _write(inspect_path, [{"Image": runtime_image_digest}])
+    runtime_identity_path = repeat / "owned-container-identity.json"
+    _write(
+        runtime_identity_path,
+        {
+            "runtime_image_digest": runtime_image_digest,
+            "runtime_storage_identity": {
+                "transport": "registry",
+                "runtime_config_digest": runtime_image_digest,
+                "local_create_ref": runtime_image_digest,
+            },
+            "inspect": {
+                "path": inspect_path.name,
+                "sha256": hashlib.sha256(inspect_path.read_bytes()).hexdigest(),
+            },
+        },
+    )
     _write(
         repeat / "strict_execution_evidence.json",
         {
@@ -152,6 +170,12 @@ def _write_strict_execution_evidence(
             "startup_instance_id": f"startup-{number}",
             "container_id": container_id,
             "runtime_image_digest": runtime_image_digest,
+            "runtime_storage_identity": {
+                "path": runtime_identity_path.name,
+                "sha256": hashlib.sha256(
+                    runtime_identity_path.read_bytes()
+                ).hexdigest(),
+            },
             "service_port": 8000,
             "immutable_inputs": {
                 "path": immutable_path.name,

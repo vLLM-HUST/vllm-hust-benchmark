@@ -113,6 +113,125 @@ def _validate_strict_execution_evidence(
     if evidence.get("runtime_image_digest") != expected_digest:
         raise ValueError(f"strict execution runtime image mismatch: {repeat_dir}")
 
+    runtime = target.get("baseline_runtime") or {}
+    storage_record = evidence.get("runtime_storage_identity")
+    storage_record = storage_record if isinstance(storage_record, Mapping) else {}
+    storage_path = _verify_hashed_evidence_file(
+        repeat_dir, storage_record, field="runtime_storage_identity"
+    )
+    owned_identity = _load_object(storage_path)
+    if owned_identity.get("runtime_image_digest") != expected_digest:
+        raise ValueError(f"owned runtime config identity mismatch: {repeat_dir}")
+    transport_identity = owned_identity.get("runtime_storage_identity")
+    transport_identity = (
+        transport_identity if isinstance(transport_identity, Mapping) else {}
+    )
+    transport = str(runtime.get("runtime_transport") or "registry")
+    if transport_identity.get("transport") != transport:
+        raise ValueError(f"owned runtime transport mismatch: {repeat_dir}")
+    storage_digest = expected_digest
+    if transport == "docker-archive":
+        storage_digest = str(runtime.get("containerd_storage_manifest_digest") or "")
+        config_digest = str(runtime.get("runtime_config_digest") or "")
+        archive_digest = str(runtime.get("runtime_archive_sha256") or "")
+        if config_digest != expected_digest:
+            raise ValueError("docker-archive config digest differs from runtime image")
+        if not re.fullmatch(r"sha256:[0-9a-f]{64}", storage_digest):
+            raise ValueError("docker-archive storage manifest digest is missing")
+        if storage_digest == config_digest:
+            raise ValueError("docker-archive storage manifest masquerades as config")
+        if (
+            transport_identity.get("containerd_storage_manifest_digest")
+            != storage_digest
+        ):
+            raise ValueError(f"owned storage manifest mismatch: {repeat_dir}")
+        if transport_identity.get("manifest_config_digest") != config_digest:
+            raise ValueError(f"owned manifest config mismatch: {repeat_dir}")
+        manifest_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            transport_identity.get("raw_manifest") or {},
+            field="runtime_storage_identity.raw_manifest",
+        )
+        if "sha256:" + _sha256(manifest_path) != storage_digest:
+            raise ValueError(f"raw containerd manifest digest mismatch: {repeat_dir}")
+        manifest = _load_object(manifest_path)
+        if (manifest.get("config") or {}).get("digest") != config_digest:
+            raise ValueError(f"raw manifest config relationship mismatch: {repeat_dir}")
+        config_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            transport_identity.get("raw_config_blob") or {},
+            field="runtime_storage_identity.raw_config_blob",
+        )
+        if "sha256:" + _sha256(config_path) != config_digest:
+            raise ValueError(f"raw config blob digest mismatch: {repeat_dir}")
+        archive_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            transport_identity.get("archive") or {},
+            field="runtime_storage_identity.archive",
+        )
+        archive_identity = _load_object(archive_path)
+        if archive_identity.get("sha256") != archive_digest:
+            raise ValueError(f"runtime archive identity mismatch: {repeat_dir}")
+        docker_inspect_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            transport_identity.get("docker_image_inspect") or {},
+            field="runtime_storage_identity.docker_image_inspect",
+        )
+        docker_inspect = json.loads(docker_inspect_path.read_text(encoding="utf-8"))
+        if not isinstance(docker_inspect, list) or not docker_inspect:
+            raise ValueError(
+                f"docker image inspect evidence is malformed: {repeat_dir}"
+            )
+        if docker_inspect[0].get("Id") != storage_digest:
+            raise ValueError(f"docker image inspect storage mismatch: {repeat_dir}")
+        manifest_layers = manifest.get("layers") or []
+        layer_evidence = transport_identity.get("layers") or []
+        if not isinstance(layer_evidence, list) or len(layer_evidence) != len(
+            manifest_layers
+        ):
+            raise ValueError(f"containerd layer evidence is incomplete: {repeat_dir}")
+        for descriptor, layer in zip(manifest_layers, layer_evidence, strict=True):
+            if not isinstance(layer, Mapping) or layer.get("digest") != descriptor.get(
+                "digest"
+            ):
+                raise ValueError(f"containerd layer identity mismatch: {repeat_dir}")
+            info_path = _verify_hashed_evidence_file(
+                repeat_dir,
+                layer.get("raw_info") or {},
+                field="runtime_storage_identity.layers.raw_info",
+            )
+            if str(layer["digest"]) not in info_path.read_text(encoding="utf-8"):
+                raise ValueError(f"containerd layer content is unproven: {repeat_dir}")
+        actual_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            owned_identity.get("actual_runtime_preflight") or {},
+            field="actual_runtime_preflight",
+        )
+        actual = _load_object(actual_path)
+        sources = actual.get("sources") or {}
+        if (
+            (sources.get("core") or {}).get("commit") != runtime.get("core_commit")
+            or (sources.get("core") or {}).get("clean") is not True
+            or (sources.get("backend") or {}).get("commit")
+            != runtime.get("backend_commit")
+            or (sources.get("backend") or {}).get("clean") is not True
+            or actual.get("packages") != runtime.get("runtime_packages")
+        ):
+            raise ValueError(f"actual owned runtime identity mismatch: {repeat_dir}")
+    elif transport_identity.get("local_create_ref") != expected_digest:
+        raise ValueError(f"registry runtime create identity mismatch: {repeat_dir}")
+
+    inspect_path = _verify_hashed_evidence_file(
+        repeat_dir, owned_identity.get("inspect") or {}, field="owned_container.inspect"
+    )
+    inspect = json.loads(inspect_path.read_text(encoding="utf-8"))
+    if (
+        not isinstance(inspect, list)
+        or not inspect
+        or inspect[0].get("Image") != storage_digest
+    ):
+        raise ValueError(f"owned container inspect image mismatch: {repeat_dir}")
+
     immutable_record = evidence.get("immutable_inputs")
     immutable_record = immutable_record if isinstance(immutable_record, Mapping) else {}
     immutable_path = _verify_hashed_evidence_file(
@@ -389,6 +508,8 @@ def _validate_strict_execution_evidence(
         "hostname": hostname,
         "container_id": container_id,
         "runtime_image_digest": expected_digest,
+        "runtime_storage_manifest_digest": storage_digest,
+        "runtime_storage_identity_sha256": _sha256(storage_path),
         "immutable_input_attestation_sha256": _sha256(immutable_path),
         "model_revision": expected_model_revision,
         "data_identity_kind": expected_data_identity.get("kind"),
