@@ -1470,6 +1470,72 @@ def _find_excluded_submission_dirs(
 _TEMPORARY_DIR_PREFIX_PATTERN = re.compile(r"^(tmp|temp|wip|scratch|adhoc)")
 _TEMPORARY_DIR_SUFFIX_PATTERN = re.compile(r"/(tmp|temp|wip|scratch|adhoc)$")
 
+# CI publication directory contract used by run_ascend_benchmark_ci.sh:
+#   RESULT_ROOT       = $VLLM_HUST_REPO/.benchmarks/ci/$RUN_ID
+#   SUBMISSIONS_ROOT  = $RESULT_ROOT/submissions
+#   SUBMISSION_DIR    = $SUBMISSIONS_ROOT/$RUN_ID
+# where RUN_ID = ci-<gh-run-id>-<attempt>-<sha8> (always starts with ``ci-``).
+# The runner writes ``OK`` to ``$SUBMISSION_DIR/STATUS`` only after a successful
+# benchmark. Both the result-root segment and the submission dir name follow
+# this ``ci-*`` shape.
+_CI_PUBLICATION_RUN_ID_PATTERN = re.compile(r"^ci-[A-Za-z0-9_-]+$")
+
+
+def _is_ci_publication_submission(child: Path) -> bool:
+    """Return True iff ``child`` matches the CI publication directory contract
+    used by ``run_ascend_benchmark_ci.sh``.
+
+    The contract requires the exact shape::
+
+        .benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>
+
+    where ``RUN_ID`` starts with ``ci-`` (matching
+    ``_CI_PUBLICATION_RUN_ID_PATTERN``), the same ``RUN_ID`` is used for both
+    the result root and the submission directory (producer uses one
+    ``RUN_ID`` for both ``RESULT_ROOT`` and ``SUBMISSION_DIR``), and the
+    directory carries a ``STATUS`` file whose content equals ``OK`` after
+    stripping.
+
+    This strict shape check scopes the ``.benchmarks/`` exception to real CI
+    submissions only. Other ``.benchmarks/`` subtrees (``.benchmarks/cache``,
+    ``.benchmarks/raw``, working directories, or paths that happen to contain
+    ``.benchmarks``) remain rejected as cache/working directories even if they
+    carry a ``STATUS=OK`` file, preserving the fail-closed boundary around the
+    temporary/quarantine rejection.
+    """
+    # Directory name must match the ci-* RUN_ID pattern.
+    if not _CI_PUBLICATION_RUN_ID_PATTERN.match(child.name):
+        return False
+    # Parent must be named "submissions".
+    parent = child.parent
+    if parent.name != "submissions":
+        return False
+    # Grandparent (the result root) must also match the ci-* RUN_ID pattern.
+    grandparent = parent.parent
+    if not _CI_PUBLICATION_RUN_ID_PATTERN.match(grandparent.name):
+        return False
+    # Producer uses the same RUN_ID for RESULT_ROOT and SUBMISSION_DIR, so
+    # the submission dir name must equal the result root name. This rejects
+    # .benchmarks/ci/ci-A/submissions/ci-B even when both segments are valid.
+    if child.name != grandparent.name:
+        return False
+    # Great-grandparent must be "ci".
+    if grandparent.parent.name != "ci":
+        return False
+    # Great-great-grandparent must be ".benchmarks".
+    if grandparent.parent.parent.name != ".benchmarks":
+        return False
+    # STATUS file must exist and strictly equal "OK" after stripping, matching
+    # the downstream admission gate's STATUS comparison.
+    status_path = child / "STATUS"
+    if not status_path.is_file():
+        return False
+    try:
+        status_content = status_path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return False
+    return status_content == "OK"
+
 
 def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
     """Scan immediate subdirectories of ``source_dir`` for admission failures.
@@ -1477,7 +1543,10 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
     Returns a list of failure dicts, each with keys ``dir``, ``reason``, and
     ``detail``. A directory is a failure if it matches ANY of:
     - ``temporary``: directory name matches a temporary naming pattern, or the
-      directory lives under ``tests/fixtures/`` or ``.benchmarks/``.
+      directory lives under ``tests/fixtures/`` or ``.benchmarks/``. The only
+      ``.benchmarks/`` exception is the CI publication contract
+      ``.benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>`` with a valid ``OK``
+      STATUS file (see ``_is_ci_publication_submission``).
     - ``FAILED``: the ``STATUS`` file content starts with ``FAILED``.
     - ``NO_STATUS``: a ``STATUS`` file exists but is empty after stripping;
       a ``ci-*`` directory has no ``STATUS``; or neither a ``STATUS`` file nor
@@ -1504,7 +1573,16 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
             or _TEMPORARY_DIR_SUFFIX_PATTERN.search(path_str)
         )
         is_fixture_path = "tests" in parts and "fixtures" in parts
+        # .benchmarks/ directories are rejected as cache/working directories,
+        # UNLESS the directory matches the strict CI publication contract used
+        # by run_ascend_benchmark_ci.sh:
+        #   .benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>  with STATUS=OK.
+        # The strict shape check (see _is_ci_publication_submission) ensures
+        # other .benchmarks/ subtrees (cache, raw, working dirs) remain rejected
+        # even if they carry a STATUS=OK file, preserving fail-closed behavior.
         is_benchmark_cache = ".benchmarks" in parts
+        if is_benchmark_cache and _is_ci_publication_submission(child):
+            is_benchmark_cache = False
         if is_temporary_name or is_fixture_path or is_benchmark_cache:
             failures.append(
                 {
