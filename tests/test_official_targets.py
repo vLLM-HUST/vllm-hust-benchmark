@@ -25,6 +25,12 @@ from vllm_hust_benchmark.official_targets import (
     SIMLLM_VLLM_ASCEND_HUST_COMMIT,
     SIMLLM_VLLM_HUST_COMMIT,
     SIMLLM_WORKLOAD_IDS,
+    V018_CONTAINERD_STORAGE_MANIFEST_DIGEST,
+    V018_RUNTIME_ARCHIVE_SHA256,
+    V018_RUNTIME_CONFIG_DIGEST,
+    V018_RUNTIME_PACKAGES,
+    V018_VLLM_ASCEND_COMMIT,
+    V018_VLLM_COMMIT,
     build_registry,
     generated_outputs,
     render_active_targets,
@@ -75,7 +81,7 @@ def test_public_target_matrix_is_exact() -> None:
     }
     assert len(core_targets) == 9
     for target in core_targets:
-        assert target["target_version"] == "1.3.0"
+        assert target["target_version"] == "1.4.0"
         assert target["hardware"]["chip_model"] == "910B2"
         assert target["hardware"]["chip_count"] == 1
         assert target["model"]["precision"] == "FP16"
@@ -85,6 +91,23 @@ def test_public_target_matrix_is_exact() -> None:
         assert target["model"]["revision"]
         assert target["server_parameters"]["revision"] == target["model"]["revision"]
         assert target["workload"]["data_identity"]["kind"]
+        runtime = target["baseline_runtime"]
+        assert runtime["core_commit"] == V018_VLLM_COMMIT
+        assert runtime["backend_commit"] == V018_VLLM_ASCEND_COMMIT
+        assert runtime["runtime_transport"] == "docker-archive"
+        assert runtime["runtime_image"] is None
+        assert runtime["runtime_image_digest"] == V018_RUNTIME_CONFIG_DIGEST
+        assert runtime["runtime_config_digest"] == V018_RUNTIME_CONFIG_DIGEST
+        assert runtime["runtime_archive_sha256"] == V018_RUNTIME_ARCHIVE_SHA256
+        assert (
+            runtime["containerd_storage_manifest_digest"]
+            == V018_CONTAINERD_STORAGE_MANIFEST_DIGEST
+        )
+        assert runtime["runtime_packages"] == V018_RUNTIME_PACKAGES
+        assert (
+            runtime["runtime_image_digest"]
+            != runtime["containerd_storage_manifest_digest"]
+        )
 
     for target in trace_targets:
         expected_target_version = (

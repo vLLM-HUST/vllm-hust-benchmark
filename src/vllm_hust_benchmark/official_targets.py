@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.7.0"
+REGISTRY_VERSION = "1.8.0"
 EFFECTIVE_FROM = "2026-08-03"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
@@ -19,6 +19,29 @@ PUBLIC_MODEL_REVISIONS = {
     PUBLIC_CODE_MODEL: "aedcc2d42b622764e023cf882b6652e646b95671",  # pragma: allowlist secret
     PUBLIC_VISION_MODEL: "cc594898137f460bfe9f0759e9844b3ce807cfb5",  # pragma: allowlist secret
     PUBLIC_TRACE_MODEL: "711ad2ea6aa40cfca18895e8aca02ab92df1a746",  # pragma: allowlist secret
+}
+V018_VLLM_COMMIT = (
+    "bcf2be96120005e9aea171927f85055a6a5c0cf6"  # pragma: allowlist secret
+)
+V018_VLLM_ASCEND_COMMIT = (
+    "e18643f8a4d5bd9990727654318ad069ea0b56e2"  # pragma: allowlist secret
+)
+V018_RUNTIME_CONFIG_DIGEST = (
+    "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31"
+)
+V018_RUNTIME_ARCHIVE_SHA256 = (
+    "sha256:d28174deca2a8a28173cff1425a585b843421d7e43c8bb34b6c8a1622c289cc0"
+)
+V018_CONTAINERD_STORAGE_MANIFEST_DIGEST = (
+    "sha256:5f80f602b9460f3a02f9e847edbe69576906e3dd60e200a095a763a4792f5c26"
+)
+V018_RUNTIME_PACKAGES = {
+    "vllm": "0.18.0+empty",
+    "vllm-ascend": "0.18.0",
+    "datasets": "3.3.0",
+    "xxhash": "3.6.0",
+    "torch": "2.9.0+cpu",
+    "torch-npu": "2.9.0.post1+gitee7ba04",
 }
 PUBLIC_TRACE_MODEL_REVISION = (
     "711ad2ea6aa40cfca18895e8aca02ab92df1a746"  # pragma: allowlist secret
@@ -78,7 +101,7 @@ SIMLLM_RUNTIME_PACKAGES = {
     "huggingface-hub": "1.19.0",
     "click": "8.4.1",
 }
-CORE_PUBLIC_TARGET_VERSION = "1.3.0"
+CORE_PUBLIC_TARGET_VERSION = "1.4.0"
 PUBLIC_TRACE_TARGET_VERSIONS = {
     "burstgpt-production-replay": "1.5.1",
     "tracelab-coding-agent-replay": "1.6.2",
@@ -283,6 +306,26 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
             raise ValueError(f"public target must use vLLM v0.18.0: {path}")
         if baseline.get("vllm_ascend_ref") != "v0.18.0":
             raise ValueError(f"public target must use vLLM-Ascend v0.18.0: {path}")
+        expected_runtime = {
+            "vllm_commit": V018_VLLM_COMMIT,
+            "vllm_ascend_commit": V018_VLLM_ASCEND_COMMIT,
+            "runtime_transport": "docker-archive",
+            "runtime_image": None,
+            # Compatibility field used by existing attestation/orchestration.
+            # It identifies the runnable image config, not a registry manifest.
+            "runtime_image_digest": V018_RUNTIME_CONFIG_DIGEST,
+            "runtime_config_digest": V018_RUNTIME_CONFIG_DIGEST,
+            "runtime_archive_sha256": V018_RUNTIME_ARCHIVE_SHA256,
+            "containerd_storage_manifest_digest": (
+                V018_CONTAINERD_STORAGE_MANIFEST_DIGEST
+            ),
+            "runtime_packages": V018_RUNTIME_PACKAGES,
+        }
+        for name, expected_value in expected_runtime.items():
+            if baseline.get(name) != expected_value:
+                raise ValueError(
+                    f"public v0.18 target must pin {name}={expected_value!r}: {path}"
+                )
 
 
 def _validate_simllm_target(spec: dict[str, Any], path: Path) -> None:
@@ -459,6 +502,12 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
                     "backend_commit": baseline.get("vllm_ascend_commit"),
                     "runtime_image": baseline.get("runtime_image"),
                     "runtime_image_digest": baseline.get("runtime_image_digest"),
+                    "runtime_transport": baseline.get("runtime_transport"),
+                    "runtime_config_digest": baseline.get("runtime_config_digest"),
+                    "runtime_archive_sha256": baseline.get("runtime_archive_sha256"),
+                    "containerd_storage_manifest_digest": baseline.get(
+                        "containerd_storage_manifest_digest"
+                    ),
                     "runtime_packages": baseline.get("runtime_packages"),
                     "runtime_environment": baseline.get("runtime_environment"),
                 },

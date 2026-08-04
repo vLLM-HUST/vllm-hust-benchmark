@@ -2,6 +2,16 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.8.0 — 2026-08-03
+
+- English: Pins the authorized local Docker archive, runnable config digest, containerd storage
+  manifest, exact clean commits, and package set for all nine official v0.18 targets without
+  claiming a pullable registry image.
+- 中文：为九个官方 v0.18 靶固定已授权本地 Docker 归档、可运行 config 摘要、containerd 存储 manifest、精确干净提交及软件包集合，且不声称存在可拉取的
+  registry 镜像。
+- Source set: `8b520d167b496120c142c2b33088d094774569ffe403d81f14cd4241c83e1fab`
+- Supersedes: `1.7.0`
+
 ## 1.7.0 — 2026-08-03
 
 - English: Pins exact model revisions and workload data identities for all 11 strict official Ascend

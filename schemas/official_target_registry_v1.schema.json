@@ -160,6 +160,23 @@
         },
         "runtime_image_digest": {
           "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "Primary immutable runtime identity expected in existing evidence: a runnable config digest/image ID for docker-archive transport, or the pullable manifest digest for registry transport."
+        },
+        "runtime_transport": {
+          "type": ["string", "null"],
+          "enum": ["docker-archive", "registry", null]
+        },
+        "runtime_config_digest": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "runtime_archive_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "containerd_storage_manifest_digest": {
+          "type": ["string", "null"],
           "pattern": "^sha256:[0-9a-f]{64}$"
         },
         "runtime_packages": {

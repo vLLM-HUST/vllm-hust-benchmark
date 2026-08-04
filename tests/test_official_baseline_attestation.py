@@ -412,6 +412,49 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
     assert len(suite["repeats"][0]["immutable_input_attestation_sha256"]) == 64
 
 
+def test_docker_archive_runtime_uses_config_digest_for_compatibility(
+    tmp_path: Path,
+) -> None:
+    repo, staged, results, _, target = _fixture(tmp_path)
+    storage_manifest_digest = "sha256:" + "c" * 64
+    target["baseline_runtime"].update(
+        {
+            "runtime_transport": "docker-archive",
+            "runtime_image": None,
+            "runtime_config_digest": TRACE_DIGEST,
+            "runtime_archive_sha256": "sha256:" + "d" * 64,
+            "containerd_storage_manifest_digest": storage_manifest_digest,
+        }
+    )
+    registry_path = repo / "leaderboard-data" / "official-targets.json"
+    _write(registry_path, {"targets": [target]})
+    (registry_path.parent / "official-targets.sha256").write_text(
+        hashlib.sha256(registry_path.read_bytes()).hexdigest() + "\n",
+        encoding="utf-8",
+    )
+
+    attest_completed_baseline(
+        repo,
+        staged,
+        results,
+        repo / "out",
+        verified_by="test-review",
+    )
+
+    strict_path = results / "repeat-02" / "strict_execution_evidence.json"
+    strict = json.loads(strict_path.read_text(encoding="utf-8"))
+    strict["runtime_image_digest"] = storage_manifest_digest
+    _write(strict_path, strict)
+    with pytest.raises(ValueError, match="strict execution runtime image mismatch"):
+        attest_completed_baseline(
+            repo,
+            staged,
+            results,
+            repo / "out-storage-digest",
+            verified_by="test-review",
+        )
+
+
 def test_rejects_missing_strict_execution_evidence(tmp_path: Path) -> None:
     repo, staged, results, _, _ = _fixture(tmp_path)
     (results / "repeat-02" / "strict_execution_evidence.json").unlink()

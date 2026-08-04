@@ -2,7 +2,7 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.7.0`
+- Registry version: `1.8.0`
 - Effective from: `2026-08-03`
 
 公开排行榜固定靶与 3B 快速门禁是不同契约；provisional 记录不得作为公开成果对比。
