@@ -213,6 +213,54 @@ def test_current_same_spec_runner_prints_enough_server_log_context() -> None:
     assert "tail -n 40" not in script
 
 
+def test_current_same_spec_runner_retains_each_server_start_attempt_log() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    retry_block = script[script.index("for start_attempt in") :]
+    retry_block = retry_block[: retry_block.index("run_client_command")]
+
+    assert 'SERVER_ATTEMPT_LOG_DIR="$RESULT_DIR/server-attempt-logs"' in script
+    assert 'SERVER_CANONICAL_STDOUT_LOG="$SERVER_STDOUT_LOG"' in script
+    assert 'mkdir -p "$SERVER_ATTEMPT_LOG_DIR"' in script
+    assert "prepare_server_attempt_log()" in script
+    assert (
+        'SERVER_STDOUT_LOG=$(prepare_server_attempt_log "$start_attempt")'
+        in retry_block
+    )
+    assert "print_server_attempt_log_tails" in retry_block
+
+
+def test_current_same_spec_runner_preserves_previous_attempt_log_contents(
+    tmp_path: Path,
+) -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    prepare_attempt_log = _function_text(script, "prepare_server_attempt_log")
+    attempt_dir = tmp_path / "server-attempt-logs"
+    canonical_log = tmp_path / "server.stdout.log"
+    harness = f"""#!/bin/bash
+set -euo pipefail
+{prepare_attempt_log}
+SERVER_ATTEMPT_LOG_DIR="$1"
+SERVER_CANONICAL_STDOUT_LOG="$2"
+mkdir -p "$SERVER_ATTEMPT_LOG_DIR"
+first_log=$(prepare_server_attempt_log 1)
+printf 'first failure\\n' > "$first_log"
+second_log=$(prepare_server_attempt_log 2)
+printf 'second failure\\n' > "$second_log"
+[[ "$(cat "$first_log")" == "first failure" ]]
+[[ "$(cat "$second_log")" == "second failure" ]]
+[[ "$(cat "$SERVER_CANONICAL_STDOUT_LOG")" == "second failure" ]]
+"""
+
+    result = subprocess.run(
+        ["bash", "-c", harness, "bash", str(attempt_dir), str(canonical_log)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+
+
 def test_current_same_spec_runner_prints_server_log_progress_while_waiting() -> None:
     script = RUNNER.read_text(encoding="utf-8")
 
