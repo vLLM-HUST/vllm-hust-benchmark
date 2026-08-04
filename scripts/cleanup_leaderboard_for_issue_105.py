@@ -458,32 +458,89 @@ def main() -> int:
         print(f"ERROR: {single_path} not found", file=sys.stderr)
         return 2
 
-    # Idempotency guard (issue #105 reviewer round 3): if the input has already
-    # been cleaned (0 entries) but pre_cleanup_freeze.json shows a prior run
-    # with > 0 entries, refuse to proceed unless --force is given.  This
-    # prevents a second run from overwriting the real quarantine with an empty
-    # one.  The guard is checked here (before any writes) so that dry-run and
-    # real runs both benefit.
-    if not args.force:
-        input_data = json.loads(single_path.read_text(encoding="utf-8"))
-        if isinstance(input_data, list) and len(input_data) == 0:
-            freeze_path = snapshot_dir / "pre_cleanup_freeze.json"
-            if freeze_path.is_file():
-                try:
-                    freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
-                    prior_count = freeze.get("entry_count", 0)
-                    if isinstance(prior_count, int) and prior_count > 0:
-                        print(
-                            f"ERROR: Idempotency guard — {single_path.name} has 0 "
-                            f"entries but pre_cleanup_freeze.json records "
-                            f"{prior_count} entries from a prior run. Refusing to "
-                            f"overwrite quarantine with empty result. Restore the "
-                            f"original leaderboard or use --force to override.",
-                            file=sys.stderr,
-                        )
-                        return 3
-                except (json.JSONDecodeError, OSError):
-                    pass
+    # Idempotency guard (issue #105 reviewer round 3+4): if the input has
+    # already been cleaned (0 entries) but pre_cleanup_freeze.json shows a
+    # prior run with > 0 entries, refuse to proceed unless --force is given.
+    # This prevents a second run from overwriting the real quarantine with
+    # an empty one.  The guard is fail-closed: a corrupted, unreadable, or
+    # schema-violating freeze file is treated as evidence that a prior run
+    # existed but cannot be verified — the script refuses to continue rather
+    # than silently treating it as a first run.  --force additionally
+    # requires the current input to be non-empty (i.e. restored from a real
+    # original snapshot) so that the guard cannot be trivially bypassed on
+    # an empty input.
+    input_data = json.loads(single_path.read_text(encoding="utf-8"))
+    input_is_empty = isinstance(input_data, list) and len(input_data) == 0
+    freeze_path = snapshot_dir / "pre_cleanup_freeze.json"
+    freeze_exists = freeze_path.is_file()
+
+    if args.force:
+        # --force is an explicit recovery flow: require the current input to
+        # be non-empty so the guard cannot be bypassed on an already-cleaned
+        # empty input.  An empty input with --force is only allowed when no
+        # freeze file exists (genuine first run on empty data).
+        if input_is_empty and freeze_exists:
+            print(
+                f"ERROR: --force on an empty {single_path.name} with an existing "
+                f"pre_cleanup_freeze.json is refused. Restore the original "
+                f"non-empty leaderboard before using --force to regenerate.",
+                file=sys.stderr,
+            )
+            return 4
+    else:
+        if input_is_empty and freeze_exists:
+            # Fail-closed validation of the freeze file: any deviation from
+            # the expected schema is grounds for refusal.
+            try:
+                freeze = json.loads(freeze_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as exc:
+                print(
+                    f"ERROR: Idempotency guard — {single_path.name} has 0 entries "
+                    f"and pre_cleanup_freeze.json exists but cannot be parsed "
+                    f"({exc}). Refusing to proceed: a prior cleanup run likely "
+                    f"occurred but its freeze record is corrupted. Restore the "
+                    f"original leaderboard or use --force with a restored "
+                    f"non-empty input to override.",
+                    file=sys.stderr,
+                )
+                return 3
+            if not isinstance(freeze, dict):
+                print(
+                    f"ERROR: Idempotency guard — pre_cleanup_freeze.json is not a "
+                    f"JSON object (got {type(freeze).__name__}). Refusing to "
+                    f"proceed: freeze record is malformed.",
+                    file=sys.stderr,
+                )
+                return 3
+            if "entry_count" not in freeze:
+                print(
+                    "ERROR: Idempotency guard — pre_cleanup_freeze.json is "
+                    "missing the required 'entry_count' field. Refusing to "
+                    "proceed: cannot verify prior run history.",
+                    file=sys.stderr,
+                )
+                return 3
+            prior_count = freeze["entry_count"]
+            if not isinstance(prior_count, int) or isinstance(prior_count, bool):
+                print(
+                    f"ERROR: Idempotency guard — pre_cleanup_freeze.json "
+                    f"'entry_count' has wrong type {type(prior_count).__name__} "
+                    f"(expected int). Refusing to proceed: freeze record is "
+                    f"malformed.",
+                    file=sys.stderr,
+                )
+                return 3
+            if prior_count > 0:
+                print(
+                    f"ERROR: Idempotency guard — {single_path.name} has 0 "
+                    f"entries but pre_cleanup_freeze.json records "
+                    f"{prior_count} entries from a prior run. Refusing to "
+                    f"overwrite quarantine with empty result. Restore the "
+                    f"original leaderboard or use --force with a restored "
+                    f"non-empty input to override.",
+                    file=sys.stderr,
+                )
+                return 3
 
     # Pre-cleanup freeze (single snapshot only, per issue #105 step 1)
     pre_cleanup = json.loads(single_path.read_text(encoding="utf-8"))

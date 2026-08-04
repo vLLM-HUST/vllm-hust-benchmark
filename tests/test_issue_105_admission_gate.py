@@ -448,10 +448,14 @@ class TestCleanupIdempotencyGuard:
         assert "Idempotency guard" in captured.err
 
     def test_force_flag_bypasses_guard(self, cleanup_mod, tmp_path, monkeypatch):
-        """--force flag must bypass the idempotency guard."""
+        """--force flag must bypass the idempotency guard on non-empty input."""
         snapshot_dir = tmp_path / "snapshots"
         snapshot_dir.mkdir()
-        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        # Non-empty input (restored original) — required for --force
+        entry = _valid_active_entry()
+        (snapshot_dir / "leaderboard_single.json").write_text(
+            json.dumps([entry]) + "\n"
+        )
         freeze = {
             "schema_version": "pre-cleanup-freeze/v1",
             "entry_count": 21,
@@ -468,7 +472,7 @@ class TestCleanupIdempotencyGuard:
                 "--force",
             ],
         )
-        # Should NOT raise — force bypasses guard, writes 0-entry outputs
+        # Should NOT raise — force bypasses guard on restored non-empty input
         rc = cleanup_mod.main()
         assert rc == 0
 
@@ -529,3 +533,178 @@ class TestCleanupIdempotencyGuard:
         )
         assert kept == 0
         assert removed == 0
+
+    # ------------------------------------------------------------------
+    # Round 4 reverse tests: fail-closed on corrupted/missing/wrong-type
+    # freeze fields, and --force requires non-empty input.
+    # ------------------------------------------------------------------
+
+    def test_corrupted_freeze_json_rejected(
+        self, cleanup_mod, tmp_path, monkeypatch, capsys
+    ):
+        """Corrupted pre_cleanup_freeze.json must trigger guard (rc=3)."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        # Corrupted JSON — not parseable
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(
+            "{this is not valid json}\n"
+        )
+        monkeypatch.setattr(
+            "sys.argv",
+            ["cleanup", "--snapshot-dir", str(snapshot_dir)],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 3
+        captured = capsys.readouterr()
+        assert "cannot be parsed" in captured.err
+
+    def test_freeze_missing_entry_count_rejected(
+        self, cleanup_mod, tmp_path, monkeypatch, capsys
+    ):
+        """Freeze missing 'entry_count' field must trigger guard (rc=3)."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        # Freeze is valid JSON dict but missing entry_count
+        freeze = {
+            "schema_version": "pre-cleanup-freeze/v1",
+            "entry_ids": ["id-1"],
+            "frozen_entries": [],
+        }
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(json.dumps(freeze) + "\n")
+        monkeypatch.setattr(
+            "sys.argv",
+            ["cleanup", "--snapshot-dir", str(snapshot_dir)],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 3
+        captured = capsys.readouterr()
+        assert "entry_count" in captured.err
+
+    def test_freeze_entry_count_wrong_type_rejected(
+        self, cleanup_mod, tmp_path, monkeypatch, capsys
+    ):
+        """Freeze with entry_count as string must trigger guard (rc=3)."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        # entry_count is a string "21" instead of int 21
+        freeze = {
+            "schema_version": "pre-cleanup-freeze/v1",
+            "entry_count": "21",
+            "entry_ids": [],
+            "frozen_entries": [],
+        }
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(json.dumps(freeze) + "\n")
+        monkeypatch.setattr(
+            "sys.argv",
+            ["cleanup", "--snapshot-dir", str(snapshot_dir)],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 3
+        captured = capsys.readouterr()
+        assert "wrong type" in captured.err
+
+    def test_freeze_not_a_dict_rejected(
+        self, cleanup_mod, tmp_path, monkeypatch, capsys
+    ):
+        """Freeze that is a JSON list instead of dict must trigger guard (rc=3)."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        # Freeze is a JSON list, not an object
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text("[1, 2, 3]\n")
+        monkeypatch.setattr(
+            "sys.argv",
+            ["cleanup", "--snapshot-dir", str(snapshot_dir)],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 3
+        captured = capsys.readouterr()
+        assert "not a JSON object" in captured.err
+
+    def test_force_on_empty_input_with_freeze_rejected(
+        self, cleanup_mod, tmp_path, monkeypatch, capsys
+    ):
+        """--force on empty input with existing freeze must be refused (rc=4)."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        (snapshot_dir / "leaderboard_single.json").write_text("[]\n")
+        freeze = {
+            "schema_version": "pre-cleanup-freeze/v1",
+            "entry_count": 21,
+            "entry_ids": [],
+            "frozen_entries": [],
+        }
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(json.dumps(freeze) + "\n")
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "cleanup",
+                "--snapshot-dir",
+                str(snapshot_dir),
+                "--force",
+            ],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 4
+        captured = capsys.readouterr()
+        assert "--force" in captured.err
+
+    def test_force_on_nonempty_input_succeeds(self, cleanup_mod, tmp_path, monkeypatch):
+        """--force on non-empty input with existing freeze must succeed (rc=0)."""
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        # Non-empty input (restored original)
+        entry = _valid_active_entry()
+        (snapshot_dir / "leaderboard_single.json").write_text(
+            json.dumps([entry]) + "\n"
+        )
+        freeze = {
+            "schema_version": "pre-cleanup-freeze/v1",
+            "entry_count": 21,
+            "entry_ids": [],
+            "frozen_entries": [],
+        }
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(json.dumps(freeze) + "\n")
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "cleanup",
+                "--snapshot-dir",
+                str(snapshot_dir),
+                "--force",
+            ],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 0
+
+    def test_corrupted_freeze_with_force_and_nonempty_succeeds(
+        self, cleanup_mod, tmp_path, monkeypatch
+    ):
+        """--force on non-empty input with corrupted freeze must succeed (rc=0).
+
+        The fail-closed corruption check only applies when the input is empty
+        (re-run scenario).  With a non-empty restored input and --force, the
+        user is explicitly regenerating from a known-good original.
+        """
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        entry = _valid_active_entry()
+        (snapshot_dir / "leaderboard_single.json").write_text(
+            json.dumps([entry]) + "\n"
+        )
+        # Corrupted freeze
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text("{corrupted json}\n")
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "cleanup",
+                "--snapshot-dir",
+                str(snapshot_dir),
+                "--force",
+            ],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 0
