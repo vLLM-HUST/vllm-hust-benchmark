@@ -1470,6 +1470,42 @@ def _find_excluded_submission_dirs(
 _TEMPORARY_DIR_PREFIX_PATTERN = re.compile(r"^(tmp|temp|wip|scratch|adhoc)")
 _TEMPORARY_DIR_SUFFIX_PATTERN = re.compile(r"/(tmp|temp|wip|scratch|adhoc)$")
 
+# CI publication directory name pattern: ci-<run_id>-<attempt>-<short_sha>
+_CI_PUBLICATION_NAME_PATTERN = re.compile(r"^ci-[A-Za-z0-9_-]+$")
+
+
+def _is_ci_publication_submission(child: Path) -> bool:
+    """Check if a directory is a legitimate CI publication submission.
+
+    CI producer (in vllm-hust repo) generates submissions under:
+      .benchmarks/ci/ci-<run_id>/submissions/ci-<run_id>-<attempt>-<sha>/
+
+    This function verifies the strict path contract so that only real CI
+    publications are exempted from the ``.benchmarks`` temporary check.
+    Random ``.benchmarks/cache/`` or other non-conforming directories are
+    still rejected.
+
+    The STATUS file must also exist and be exactly ``OK`` — a CI directory
+    without a clean STATUS is still a failure (handled by the caller).
+    """
+    parts = child.parts
+    # child.name must match ci-<run>-<attempt>-<sha>
+    if not _CI_PUBLICATION_NAME_PATTERN.match(child.name):
+        return False
+    # parent must be "submissions"
+    if len(parts) < 2 or parts[-2] != "submissions":
+        return False
+    # grandparent must match ci-* (the run-level directory)
+    if len(parts) < 3 or not _CI_PUBLICATION_NAME_PATTERN.match(parts[-3]):
+        return False
+    # great-grandparent must be "ci"
+    if len(parts) < 4 or parts[-4] != "ci":
+        return False
+    # great-great-grandparent must be ".benchmarks"
+    if len(parts) < 5 or parts[-5] != ".benchmarks":
+        return False
+    return True
+
 
 def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
     """Scan immediate subdirectories of ``source_dir`` for admission failures.
@@ -1505,7 +1541,16 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
         )
         is_fixture_path = "tests" in parts and "fixtures" in parts
         is_benchmark_cache = ".benchmarks" in parts
-        if is_temporary_name or is_fixture_path or is_benchmark_cache:
+        # CI publication directories (.benchmarks/ci/ci-<run>/submissions/ci-*)
+        # are legitimate producer outputs, not temporary caches.  Exempt them
+        # from the .benchmarks temporary check so the formal admission gate
+        # can validate their STATUS and artifact pair instead.
+        is_ci_publication = is_benchmark_cache and _is_ci_publication_submission(child)
+        if (
+            is_temporary_name
+            or is_fixture_path
+            or (is_benchmark_cache and not is_ci_publication)
+        ):
             failures.append(
                 {
                     "dir": path_str,

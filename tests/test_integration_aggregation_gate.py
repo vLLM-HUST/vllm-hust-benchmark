@@ -198,6 +198,159 @@ def test_ci_dir_without_status_rejected_even_with_artifact(tmp_path: Path) -> No
     assert "CI publication" in failures[0]["detail"]
 
 
+# ---------------------------------------------------------------------------
+# CI publication directory contract (issue #144)
+# ---------------------------------------------------------------------------
+
+_CI_RUN_ID = "ci-30835313188"
+_CI_PUB_NAME = "ci-30835313188-1-ba82f212"
+
+
+def _make_ci_publication_dir(
+    root: Path,
+    *,
+    run_id: str = _CI_RUN_ID,
+    pub_name: str = _CI_PUB_NAME,
+    status: str | None = "OK",
+    with_artifacts: bool = True,
+) -> Path:
+    """Create a CI publication directory matching the producer contract.
+
+    Path: .benchmarks/ci/<run_id>/submissions/<pub_name>/
+    """
+    source_dir = root / ".benchmarks" / "ci" / run_id / "submissions"
+    ci_dir = source_dir / pub_name
+    ci_dir.mkdir(parents=True, exist_ok=True)
+    if status is not None:
+        (ci_dir / "STATUS").write_text(status + "\n", encoding="utf-8")
+    if with_artifacts:
+        (ci_dir / "run_leaderboard.json").write_text(
+            '{"entry_id": "test"}\n', encoding="utf-8"
+        )
+        _write_manifest(ci_dir)
+        _write_admission_required_files(ci_dir)
+    return source_dir
+
+
+def test_ci_publication_passes_admission(tmp_path: Path) -> None:
+    """A legitimate CI publication directory must pass the admission gate.
+
+    Regression test for issue #144: CI producer generates
+    .benchmarks/ci/ci-<run>/submissions/ci-<run>-<attempt>-<sha>/ which
+    was incorrectly rejected as "temporary" because .benchmarks was in
+    the path.
+    """
+    source_dir = _make_ci_publication_dir(tmp_path)
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert failures == [], f"Expected no failures, got: {failures}"
+
+
+def test_ci_publication_without_status_rejected(tmp_path: Path) -> None:
+    """CI publication without STATUS must be rejected as NO_STATUS, not temporary."""
+    source_dir = _make_ci_publication_dir(tmp_path, status=None)
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "NO_STATUS"
+    assert "CI publication" in failures[0]["detail"]
+
+
+def test_ci_publication_with_failed_status_rejected(tmp_path: Path) -> None:
+    """CI publication with FAILED status must be rejected as FAILED."""
+    source_dir = _make_ci_publication_dir(tmp_path, status="FAILED")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "FAILED"
+
+
+def test_ci_publication_with_okish_status_rejected(tmp_path: Path) -> None:
+    """CI publication with STATUS='OK-ish' must be rejected (strict OK only)."""
+    source_dir = _make_ci_publication_dir(tmp_path, status="OK-ish")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] in ("RUN_STATUS", "NO_STATUS")
+
+
+def test_benchmarks_cache_still_rejected(tmp_path: Path) -> None:
+    """Non-CI .benchmarks directories must still be rejected as temporary."""
+    source_dir = tmp_path / ".benchmarks" / "cache" / "submissions"
+    source_dir.mkdir(parents=True)
+    cache_dir = source_dir / "some-run"
+    cache_dir.mkdir()
+    (cache_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
+def test_benchmarks_non_ci_name_rejected(tmp_path: Path) -> None:
+    """A .benchmarks/ci/ci-<run>/submissions/ directory with a non-ci-* name
+    must still be rejected as temporary."""
+    source_dir = tmp_path / ".benchmarks" / "ci" / _CI_RUN_ID / "submissions"
+    source_dir.mkdir(parents=True)
+    bad_dir = source_dir / "not-ci-prefix"
+    bad_dir.mkdir()
+    (bad_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
+def test_benchmarks_missing_submissions_parent_rejected(tmp_path: Path) -> None:
+    """A ci-* dir without 'submissions' parent must be rejected as temporary."""
+    source_dir = tmp_path / ".benchmarks" / "ci" / _CI_RUN_ID / "output"
+    source_dir.mkdir(parents=True)
+    ci_dir = source_dir / _CI_PUB_NAME
+    ci_dir.mkdir()
+    (ci_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
+def test_benchmarks_non_ci_grandparent_rejected(tmp_path: Path) -> None:
+    """A ci-* dir under submissions but with non-ci-* grandparent must be rejected."""
+    source_dir = tmp_path / ".benchmarks" / "ci" / "manual-run" / "submissions"
+    source_dir.mkdir(parents=True)
+    ci_dir = source_dir / _CI_PUB_NAME
+    ci_dir.mkdir()
+    (ci_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
+def test_benchmarks_mismatched_run_id_rejected(tmp_path: Path) -> None:
+    """A ci-* dir where the run-level dir name differs from the submission
+    name's run-id prefix must still be checked.  Both must be ci-* but the
+    contract does not require them to match — this test verifies the path
+    structure check passes for different ci-* run IDs."""
+    source_dir = _make_ci_publication_dir(
+        tmp_path, run_id="ci-99999999999", pub_name="ci-30835313188-1-ba82f212"
+    )
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    # Both are ci-* so the path contract is satisfied; with OK status and
+    # valid artifacts this should pass.
+    assert failures == [], f"Expected no failures, got: {failures}"
+
+
 def test_empty_status_rejected(tmp_path: Path) -> None:
     source_dir = tmp_path / "submissions"
     source_dir.mkdir()
