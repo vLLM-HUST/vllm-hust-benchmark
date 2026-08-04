@@ -15,6 +15,11 @@ STRICT_V018_RUNTIME_PYTHON = "/usr/local/python3.11.14/bin/python"
 OWNED_RUNTIME_PREFLIGHT = (
     "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py"
 )
+STRICT_ASCEND_READONLY_MOUNTS = (
+    ("/usr/local/Ascend/driver", "directory"),
+    ("/etc/ascend_install.info", "file"),
+    ("/etc/hccn.conf", "file"),
+)
 _WORKER_RE = re.compile(r"(?:vllmworker|worker_tp)", re.IGNORECASE)
 _ENGINE_CORE_RE = re.compile(r"enginecore", re.IGNORECASE)
 

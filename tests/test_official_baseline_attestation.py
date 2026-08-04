@@ -44,6 +44,25 @@ def _hashed_record(repeat: Path, path: Path) -> dict[str, str]:
     }
 
 
+def _ascend_mounts() -> list[dict[str, object]]:
+    return [
+        {"Source": path, "Destination": path, "RW": False}
+        for path in (
+            "/usr/local/Ascend/driver",
+            "/etc/ascend_install.info",
+            "/etc/hccn.conf",
+        )
+    ]
+
+
+def _ascend_mount_argv() -> list[str]:
+    argv = []
+    for mount in _ascend_mounts():
+        path = str(mount["Source"])
+        argv.extend(["--mount", f"type=bind,src={path},dst={path},readonly"])
+    return argv
+
+
 def _write_strict_execution_evidence(
     repeat: Path,
     number: int,
@@ -152,9 +171,22 @@ def _write_strict_execution_evidence(
         },
     )
     inspect_path = repeat / "owned-container-create-inspect.json"
-    _write(inspect_path, [{"Id": container_id, "Image": runtime_image_digest}])
+    _write(
+        inspect_path,
+        [
+            {
+                "Id": container_id,
+                "Image": runtime_image_digest,
+                "HostConfig": {"Privileged": False},
+                "Mounts": _ascend_mounts(),
+            }
+        ],
+    )
     create_argv_path = repeat / "runtime/docker-create-argv.json"
-    _write(create_argv_path, ["docker", "create", runtime_image_digest, "runner"])
+    _write(
+        create_argv_path,
+        ["docker", "create", *_ascend_mount_argv(), runtime_image_digest, "runner"],
+    )
     runtime_identity_path = repeat / "owned-container-identity.json"
     _write(
         runtime_identity_path,
@@ -455,7 +487,9 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                         "Entrypoint": [expected_process_argv[0]],
                         "Cmd": expected_process_argv[1:],
                     },
+                    "HostConfig": {"Privileged": False},
                     "Mounts": [
+                        *_ascend_mounts(),
                         {
                             "Source": str(repo_root),
                             "Destination": "/workspace/vllm-hust-benchmark",
@@ -484,6 +518,7 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                     f"type=bind,src={identity_host_source},"
                     "dst=/run/vllm-hust/container-identity.json,readonly"
                 ),
+                *_ascend_mount_argv(),
                 storage_digest,
                 *expected_process_argv[1:],
             ],
@@ -724,6 +759,9 @@ def test_docker_archive_runtime_uses_config_digest_for_compatibility(
         ("path_drift", "preflight command mismatch"),
         ("args_drift", "preflight command mismatch"),
         ("cmd_drift", "preflight command mismatch"),
+        ("privileged", "must not be privileged"),
+        ("missing_ascend_mount", "Ascend mount mismatch"),
+        ("writable_ascend_mount", "Ascend mount mismatch"),
         ("create_argv_drift", "create/preflight command relationship mismatch"),
         ("writable_alias", "reachable through a writable alias"),
         ("contract_hash_drift", "preflight binding mismatch"),
@@ -751,6 +789,9 @@ def test_rejects_unbound_docker_archive_preflight(
         "path_drift",
         "args_drift",
         "cmd_drift",
+        "privileged",
+        "missing_ascend_mount",
+        "writable_ascend_mount",
         "writable_alias",
     }:
         inspect_path = repeat / identity["inspect"]["path"]
@@ -765,6 +806,20 @@ def test_rejects_unbound_docker_archive_preflight(
             inspect[0]["Args"].append("drift")
         elif mutation == "cmd_drift":
             inspect[0]["Config"]["Cmd"].append("drift")
+        elif mutation == "privileged":
+            inspect[0]["HostConfig"]["Privileged"] = True
+        elif mutation == "missing_ascend_mount":
+            inspect[0]["Mounts"] = [
+                mount
+                for mount in inspect[0]["Mounts"]
+                if mount.get("Destination") != "/etc/ascend_install.info"
+            ]
+        elif mutation == "writable_ascend_mount":
+            next(
+                mount
+                for mount in inspect[0]["Mounts"]
+                if mount.get("Destination") == "/etc/hccn.conf"
+            )["RW"] = True
         else:
             inspect[0]["Mounts"].append(
                 {

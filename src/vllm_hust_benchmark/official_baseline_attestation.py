@@ -18,6 +18,7 @@ from vllm_hust_benchmark.immutable_input_attestation import (
 from vllm_hust_benchmark.strict_execution_contract import (
     CANONICAL_WORKER_RULE,
     OWNED_RUNTIME_PREFLIGHT,
+    STRICT_ASCEND_READONLY_MOUNTS,
     STRICT_V018_RUNTIME_PYTHON,
     canonical_worker_key,
 )
@@ -263,6 +264,33 @@ def _validate_strict_execution_evidence(
         raise ValueError(f"owned docker create argv is malformed: {repeat_dir}")
     if owned_identity.get("container_id") != container_id:
         raise ValueError(f"owned identity container mismatch: {repeat_dir}")
+    host_config = inspect[0].get("HostConfig") or {}
+    if host_config.get("Privileged") is not False:
+        raise ValueError(f"owned container must not be privileged: {repeat_dir}")
+    if "--privileged" in create_argv:
+        raise ValueError(
+            f"owned docker create must not request privileged: {repeat_dir}"
+        )
+    inspect_mounts = inspect[0].get("Mounts") or []
+    for source, _kind in STRICT_ASCEND_READONLY_MOUNTS:
+        expected_mount_arg = f"type=bind,src={source},dst={source},readonly"
+        create_mount_count = sum(
+            create_argv[index : index + 2] == ["--mount", expected_mount_arg]
+            for index in range(len(create_argv) - 1)
+        )
+        matches = [
+            mount
+            for mount in inspect_mounts
+            if mount.get("Source") == source and mount.get("Destination") == source
+        ]
+        if (
+            create_mount_count != 1
+            or len(matches) != 1
+            or matches[0].get("RW") is not False
+        ):
+            raise ValueError(
+                f"owned container Ascend mount mismatch for {source}: {repeat_dir}"
+            )
     if transport == "docker-archive":
         expected_path = _verify_hashed_evidence_file(
             repeat_dir,

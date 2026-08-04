@@ -28,6 +28,7 @@ from typing import Any, Mapping, Sequence
 from vllm_hust_benchmark.strict_execution_contract import (
     CANONICAL_WORKER_RULE,
     OWNED_RUNTIME_PREFLIGHT,
+    STRICT_ASCEND_READONLY_MOUNTS,
     STRICT_V018_RUNTIME_PYTHON,
     canonical_worker_key,
 )
@@ -85,6 +86,45 @@ def validate_absolute_executable(
     metadata = path.lstat()
     if not stat.S_ISREG(metadata.st_mode) or metadata.st_mode & 0o111 == 0:
         raise GateFailure(f"trusted host command is not executable: {path}")
+
+
+def validate_trusted_mount_source(
+    path: Path,
+    kind: str,
+    *,
+    trusted_uid: int = 0,
+    ancestor_floor: Path = Path("/"),
+) -> None:
+    """Reject missing, replaceable, symlinked, or wrong-type host mount sources."""
+    if kind not in {"directory", "file", "executable"}:
+        raise GateFailure(f"unsupported trusted mount source kind: {kind}")
+    if not path.is_absolute() or not ancestor_floor.is_absolute():
+        raise GateFailure("trusted host mount paths must be absolute")
+    try:
+        relative = path.relative_to(ancestor_floor)
+    except ValueError as error:
+        raise GateFailure(f"host mount is outside its trust root: {path}") from error
+    current = ancestor_floor
+    for part in ("", *relative.parts):
+        if part:
+            current /= part
+        try:
+            metadata = current.lstat()
+        except OSError as error:
+            raise GateFailure(f"trusted host mount is missing: {current}") from error
+        if current.is_symlink():
+            raise GateFailure(f"trusted host mount contains a symlink: {current}")
+        if metadata.st_uid != trusted_uid or metadata.st_mode & 0o022:
+            raise GateFailure(
+                f"trusted host mount is owner/group replaceable: {current}"
+            )
+    metadata = path.lstat()
+    if kind == "directory" and not stat.S_ISDIR(metadata.st_mode):
+        raise GateFailure(f"trusted host mount is not a directory: {path}")
+    if kind in {"file", "executable"} and not stat.S_ISREG(metadata.st_mode):
+        raise GateFailure(f"trusted host mount is not a regular file: {path}")
+    if kind == "executable" and metadata.st_mode & 0o111 == 0:
+        raise GateFailure(f"trusted host mount is not executable: {path}")
 
 
 def secure_host_npu_smi() -> str:
@@ -708,9 +748,9 @@ class StrictRepeatOrchestrator:
                 f"type=bind,src={self.args.shared_data_host_path.resolve()},"
                 "dst=/data/shared_datasets,readonly"
             ),
-            "--mount",
-            "type=bind,src=/usr/local/Ascend/driver,dst=/usr/local/Ascend/driver,readonly",
         ]
+        for source, _kind in STRICT_ASCEND_READONLY_MOUNTS:
+            argv.extend(["--mount", f"type=bind,src={source},dst={source},readonly"])
         for logical, physical in enumerate(self.devices):
             argv.extend(["--device", f"/dev/davinci{physical}:/dev/davinci{logical}"])
         for device in ("davinci_manager", "devmm_svm", "hisi_hdc"):
@@ -917,10 +957,11 @@ class StrictRepeatOrchestrator:
         for path, description in (
             (self.args.repo_host_path, "benchmark repository"),
             (self.args.shared_data_host_path, "shared model/data root"),
-            (Path("/usr/local/Ascend/driver"), "Ascend driver mount"),
         ):
             if not path.resolve().exists():
                 raise GateFailure(f"{description} is missing: {path}")
+        for source, kind in STRICT_ASCEND_READONLY_MOUNTS:
+            validate_trusted_mount_source(Path(source), kind)
         for device in self.devices:
             if not Path(f"/dev/davinci{device}").exists():
                 raise GateFailure(f"physical NPU device node is missing: {device}")
@@ -1013,6 +1054,8 @@ class StrictRepeatOrchestrator:
             raise GateFailure("owned container network mode is not none")
         if host_config.get("IpcMode") != "host":
             raise GateFailure("owned container IPC mode is not host")
+        if host_config.get("Privileged") is not False:
+            raise GateFailure("owned container must not be privileged")
         process_argv = self._owned_process_argv()
         if (
             config.get("Entrypoint") != [process_argv[0]]
@@ -1055,7 +1098,6 @@ class StrictRepeatOrchestrator:
             str(self.args.shared_data_host_path.resolve()),
             "/data/shared_datasets",
         )
-        driver_key = ("/usr/local/Ascend/driver", "/usr/local/Ascend/driver")
         if mounts.get(repo_key) is not True:
             raise GateFailure(
                 "owned container repository mount is missing or read-only"
@@ -1066,8 +1108,16 @@ class StrictRepeatOrchestrator:
             )
         if mounts.get(shared_dataset_key) is not False:
             raise GateFailure("owned container dataset mount is missing or writable")
-        if mounts.get(driver_key) is not False:
-            raise GateFailure("owned container driver mount is missing or writable")
+        for source, _kind in STRICT_ASCEND_READONLY_MOUNTS:
+            matches = [
+                item
+                for item in (record.get("Mounts") or [])
+                if item.get("Source") == source and item.get("Destination") == source
+            ]
+            if len(matches) != 1 or matches[0].get("RW") is not False:
+                raise GateFailure(
+                    f"owned container Ascend mount is missing or writable: {source}"
+                )
 
     def _host_snapshot(self, number: int) -> Snapshot:
         directory = self.repeat_dir / f"pre-start-{number}"

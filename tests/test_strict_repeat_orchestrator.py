@@ -130,6 +130,11 @@ def test_docker_create_is_owned_ephemeral_and_scoped(tmp_path: Path) -> None:
     assert "dst=/data/shared_models,readonly" in rendered
     assert "dst=/data/shared_datasets,readonly" in rendered
     assert "VLLM_HUST_STRICT_HOST_ORCHESTRATED=1" in argv
+    assert (
+        "type=bind,src=/etc/ascend_install.info,dst=/etc/ascend_install.info,readonly"
+    ) in argv
+    assert "type=bind,src=/etc/hccn.conf,dst=/etc/hccn.conf,readonly" in argv
+    assert not any("src=/usr/local/bin/npu-smi" in item for item in argv)
     assert any(
         value.startswith("VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE=") for value in argv
     )
@@ -426,6 +431,7 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
             "AutoRemove": True,
             "NetworkMode": "none",
             "IpcMode": "host",
+            "Privileged": False,
             "Devices": devices,
         },
         "Mounts": [
@@ -449,9 +455,28 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
                 "Destination": "/usr/local/Ascend/driver",
                 "RW": False,
             },
+            *[
+                {"Source": path, "Destination": path, "RW": False}
+                for path in (
+                    "/etc/ascend_install.info",
+                    "/etc/hccn.conf",
+                )
+            ],
         ],
     }
     instance._validate_owned_container_inspect(record)
+    record["HostConfig"]["Privileged"] = True
+    with pytest.raises(orchestrator.GateFailure, match="must not be privileged"):
+        instance._validate_owned_container_inspect(record)
+    record["HostConfig"]["Privileged"] = False
+    record["Mounts"][-1]["RW"] = True
+    with pytest.raises(orchestrator.GateFailure, match="Ascend mount"):
+        instance._validate_owned_container_inspect(record)
+    record["Mounts"][-1]["RW"] = False
+    record["Mounts"].append(dict(record["Mounts"][-1]))
+    with pytest.raises(orchestrator.GateFailure, match="Ascend mount"):
+        instance._validate_owned_container_inspect(record)
+    record["Mounts"].pop()
     record["Config"]["Entrypoint"] = ["/image/default-entrypoint"]
     with pytest.raises(orchestrator.GateFailure, match="process argv"):
         instance._validate_owned_container_inspect(record)
@@ -594,6 +619,49 @@ def test_fixed_host_executable_rejects_writable_file(tmp_path: Path) -> None:
     executable.chmod(0o775)
     with pytest.raises(orchestrator.GateFailure, match="replaceable"):
         _validate_fixture(executable, tmp_path)
+
+
+def test_trusted_mount_source_accepts_safe_file_and_directory(tmp_path: Path) -> None:
+    directory = tmp_path / "etc"
+    directory.mkdir()
+    source = directory / "ascend_install.info"
+    source.write_text("Install_Path_Param=/usr/local/Ascend\n", encoding="utf-8")
+    tmp_path.chmod(0o755)
+    directory.chmod(0o755)
+    source.chmod(0o444)
+    uid = source.stat().st_uid
+    orchestrator.validate_trusted_mount_source(
+        directory, "directory", trusted_uid=uid, ancestor_floor=tmp_path
+    )
+    orchestrator.validate_trusted_mount_source(
+        source, "file", trusted_uid=uid, ancestor_floor=tmp_path
+    )
+
+
+@pytest.mark.parametrize("failure", ("missing", "writable", "symlink", "wrong-type"))
+def test_trusted_mount_source_fails_closed(tmp_path: Path, failure: str) -> None:
+    directory = tmp_path / "etc"
+    directory.mkdir()
+    source = directory / "hccn.conf"
+    source.write_text("address_0=127.0.0.1\n", encoding="utf-8")
+    tmp_path.chmod(0o755)
+    directory.chmod(0o755)
+    source.chmod(0o444)
+    uid = source.stat().st_uid
+    if failure == "missing":
+        source.unlink()
+    elif failure == "writable":
+        directory.chmod(0o777)
+    elif failure == "symlink":
+        source.unlink()
+        source.symlink_to(directory)
+    else:
+        source.unlink()
+        source.mkdir()
+    with pytest.raises(orchestrator.GateFailure):
+        orchestrator.validate_trusted_mount_source(
+            source, "file", trusted_uid=uid, ancestor_floor=tmp_path
+        )
 
 
 def test_cli_rejects_removed_host_library_path(tmp_path: Path) -> None:
@@ -823,11 +891,42 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
     )
     container_inspect = write_json(
         "owned-container-create-inspect.json",
-        [{"Id": container_id, "Image": runtime_digest}],
+        [
+            {
+                "Id": container_id,
+                "Image": runtime_digest,
+                "HostConfig": {"Privileged": False},
+                "Mounts": [
+                    {"Source": path, "Destination": path, "RW": False}
+                    for path in (
+                        "/usr/local/Ascend/driver",
+                        "/etc/ascend_install.info",
+                        "/etc/hccn.conf",
+                    )
+                ],
+            }
+        ],
     )
     create_argv = write_json(
         "runtime/docker-create-argv.json",
-        ["docker", "create", runtime_digest, "runner"],
+        [
+            "docker",
+            "create",
+            *[
+                item
+                for path in (
+                    "/usr/local/Ascend/driver",
+                    "/etc/ascend_install.info",
+                    "/etc/hccn.conf",
+                )
+                for item in (
+                    "--mount",
+                    f"type=bind,src={path},dst={path},readonly",
+                )
+            ],
+            runtime_digest,
+            "runner",
+        ],
     )
     runtime_identity = write_json(
         "owned-container-identity.json",
