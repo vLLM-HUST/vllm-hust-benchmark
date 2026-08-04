@@ -1,0 +1,44 @@
+{
+  "schema_version": "strict-baseline-host-assignment/v1",
+  "generated_at": "2026-08-04T14:11:30Z",
+  "control_integration_commit": "564c6ff2a6050b997bf120ab051fe65f6f3bd45c",
+  "assignment_group": "B",
+  "assigned_host": {
+    "alias": "ascend86-host",
+    "ip": "192.168.0.3",
+    "branch": "data/strict-baseline-b-host-192-168-0-3"
+  },
+  "engine_sides": [
+    "vllm",
+    "vllm-hust"
+  ],
+  "required_repeats": 3,
+  "status": "staging-not-authorized",
+  "targets": [
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
+      },
+      "tensor_parallel_size": 1
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
+      },
+      "tensor_parallel_size": 1
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
+      },
+      "tensor_parallel_size": 1
+    }
+  ],
+  "disclaimer": "This assignment manifest records staging ownership only. It does not prove resource admission, benchmark execution, successful repeats, cleanup, submission, or eligibility."
+}
