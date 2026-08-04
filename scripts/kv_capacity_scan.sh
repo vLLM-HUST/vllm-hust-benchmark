@@ -71,8 +71,9 @@ TIERING_WORKLOAD="prefix-repetition-online"
 # Environment setup
 # ---------------------------------------------------------------------------
 
-export ASCEND_RT_VISIBLE_DEVICES=0
-export ASCEND_VISIBLE_DEVICES=0
+NPU_DEVICE="${NPU_DEVICE:-0}"
+export ASCEND_RT_VISIBLE_DEVICES=$NPU_DEVICE
+export ASCEND_VISIBLE_DEVICES=$NPU_DEVICE
 export VLLM_USE_V1=1
 export VLLM_TARGET_DEVICE=npu
 export VLLM_PLUGINS=ascend
@@ -116,7 +117,7 @@ wait_for_npu_idle() {
     local waited=0
     while [ $waited -lt $max_wait ]; do
         local used_mb
-        used_mb=$(npu-smi info -t usages -i 0 2>/dev/null \
+        used_mb=$(npu-smi info -t usages -i $NPU_DEVICE 2>/dev/null \
             | grep 'Device HBM Used' \
             | head -1 \
             | awk -F: '{print $2}' \
@@ -190,7 +191,7 @@ build_bench_cmd() {
     local output_dir="$2"
     local cmd="$PYTHON -m vllm.entrypoints.cli.main bench serve"
     cmd="$cmd --backend vllm --endpoint /v1/completions"
-    cmd="$cmd --model $MODEL_PATH"
+    cmd="$cmd --model $MODEL_PATH --host $HOST --port $PORT"
     cmd="$cmd --num-prompts 200 --request-rate 1"
     cmd="$cmd --save-result --result-dir $output_dir --result-filename raw.json"
 
