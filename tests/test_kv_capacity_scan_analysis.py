@@ -1,4 +1,14 @@
-"""Unit tests for KV capacity scan analysis and scheduler event parsing (issue #134)."""
+"""Unit tests for KV capacity scan analysis and scheduler event parsing (issue #134).
+
+PR #146 review fix tests:
+  - Updated tiering config names (hbm-only / tiering-disabled / tiering-enabled).
+  - Acceptance criteria now returns admitted|blocked|incomplete|negative-result.
+  - Missing evidence → blocked (not negative-result).
+  - Insufficient reps → incomplete or blocked (not negative-result).
+  - Missing provenance → blocked.
+  - Incomplete timeline (preemptions but no 6-stage chain) → incomplete.
+  - Parser tests for stage_events, timeline_complete, verify_kv_capacity_from_log.
+"""
 
 from __future__ import annotations
 
@@ -31,6 +41,77 @@ def analyze_mod():
 @pytest.fixture(scope="module")
 def parse_mod():
     return _load_module("parse_scheduler_events", "parse_scheduler_events.py")
+
+
+# ---------------------------------------------------------------------------
+# Shared fixtures for provenance and complete analysis data
+# ---------------------------------------------------------------------------
+
+
+def _make_provenance():
+    """Return a provenance dict with all REQUIRED_PROVENANCE_FIELDS filled."""
+    return {
+        "engine_commit": "abc123def456",  # pragma: allowlist secret
+        "plugin_commit": "fed654cba321",  # pragma: allowlist secret
+        "cann_version": "8.0.0",
+        "driver_version": "24.1.0",
+        "torch_npu_version": "2.5.0",
+        "model_revision": "abc789xyz",
+        "resolved_parameters": {
+            "gpu_memory_utilization": "0.60",
+            "max_model_len": "32768",
+            "enable_prefix_caching": True,
+            "dtype": "float16",
+            "kv_transfer_config": None,
+        },
+        "actual_kv_bytes": 8638343168,
+    }
+
+
+def _make_complete_tiering():
+    """Return a complete tiering_comparison analysis output dict."""
+    return {
+        "per_config_stats": {
+            "hbm-only": {
+                "repetitions": 3,
+                "stats": {"output_throughput": {"median": 300.0}},
+            },
+            "tiering-disabled": {
+                "repetitions": 3,
+                "stats": {"output_throughput": {"median": 200.0}},
+            },
+            "tiering-enabled": {
+                "repetitions": 3,
+                "stats": {"output_throughput": {"median": 220.0}},
+            },
+        },
+        "comparison": {},
+        "best_config": {"throughput": "hbm-only", "ttft": "hbm-only"},
+        "configs_present": ["hbm-only", "tiering-disabled", "tiering-enabled"],
+        "configs_required": ["hbm-only", "tiering-disabled", "tiering-enabled"],
+        "configs_complete": ["hbm-only", "tiering-disabled", "tiering-enabled"],
+    }
+
+
+def _make_complete_capacity_curves():
+    """Return capacity_curves with all 4 capacities, 3 reps, valid throughput."""
+    return {
+        "w": {
+            "8": {"repetitions": 3, "stats": {"output_throughput": {"median": 100.0}}},
+            "16": {"repetitions": 3, "stats": {"output_throughput": {"median": 200.0}}},
+            "24": {"repetitions": 3, "stats": {"output_throughput": {"median": 210.0}}},
+            "32": {"repetitions": 3, "stats": {"output_throughput": {"median": 215.0}}},
+        }
+    }
+
+
+def _make_complete_timeline():
+    """Return a preempt_timeline with at least one complete episode."""
+    return {
+        "total_preemptions": 1,
+        "pressure_episodes": [{"timeline_complete": True}],
+        "timeline_status": "complete",
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -232,18 +313,19 @@ class TestIdentifyInflectionPoints:
 
 class TestAnalyzeTieringComparison:
     def test_three_configs(self, analyze_mod):
+        # PR #146 fix: real tiering config names
         results = {
             "hbm-only": [
                 {"output_throughput": 300.0, "mean_ttft_ms": 150.0},
                 {"output_throughput": 310.0, "mean_ttft_ms": 145.0},
                 {"output_throughput": 305.0, "mean_ttft_ms": 148.0},
             ],
-            "kv-constrained": [
+            "tiering-disabled": [
                 {"output_throughput": 200.0, "mean_ttft_ms": 250.0},
                 {"output_throughput": 210.0, "mean_ttft_ms": 240.0},
                 {"output_throughput": 205.0, "mean_ttft_ms": 245.0},
             ],
-            "kv-constrained-utility": [
+            "tiering-enabled": [
                 {"output_throughput": 220.0, "mean_ttft_ms": 230.0},
                 {"output_throughput": 230.0, "mean_ttft_ms": 220.0},
                 {"output_throughput": 225.0, "mean_ttft_ms": 225.0},
@@ -251,8 +333,30 @@ class TestAnalyzeTieringComparison:
         }
         analysis = analyze_mod.analyze_tiering_comparison(results)
         assert "hbm-only" in analysis["per_config_stats"]
+        assert "tiering-disabled" in analysis["per_config_stats"]
+        assert "tiering-enabled" in analysis["per_config_stats"]
         assert analysis["best_config"]["throughput"] == "hbm-only"
         assert analysis["best_config"]["ttft"] == "hbm-only"
+        # PR #146 fix: new return fields
+        assert "configs_present" in analysis
+        assert "configs_required" in analysis
+        assert "configs_complete" in analysis
+        assert set(analysis["configs_present"]) == {
+            "hbm-only",
+            "tiering-disabled",
+            "tiering-enabled",
+        }
+        assert analysis["configs_required"] == [
+            "hbm-only",
+            "tiering-disabled",
+            "tiering-enabled",
+        ]
+        # All 3 configs have 3 reps with valid throughput
+        assert set(analysis["configs_complete"]) == {
+            "hbm-only",
+            "tiering-disabled",
+            "tiering-enabled",
+        }
 
     def test_comparison_deltas(self, analyze_mod):
         results = {
@@ -272,27 +376,24 @@ class TestAnalyzeTieringComparison:
 
 class TestAcceptanceCriteria:
     def test_all_met(self, analyze_mod):
+        # PR #146 fix: include provenance, new tiering config names, valid throughput
         analysis = {
             "capacities_covered": [8, 16, 24, 32],
             "inflection_points": {"random-online": {"throughput_inflection_gib": 16}},
-            "preempt_timeline": {"total_preemptions": 5},
-            "tiering_comparison": {
-                "per_config_stats": {"hbm-only": {}, "kv-constrained": {}}
+            "preempt_timeline": {
+                "total_preemptions": 5,
+                "pressure_episodes": [{"timeline_complete": True}],
             },
-            "capacity_curves": {
-                "random-online": {
-                    "8": {"repetitions": 3},
-                    "16": {"repetitions": 3},
-                    "24": {"repetitions": 3},
-                    "32": {"repetitions": 3},
-                }
-            },
+            "tiering_comparison": _make_complete_tiering(),
+            "capacity_curves": _make_complete_capacity_curves(),
+            "provenance": _make_provenance(),
         }
         result = analyze_mod.check_acceptance_criteria(analysis)
         assert result["all_criteria_met"] is True
         assert result["overall_status"] == "admitted"
 
     def test_missing_capacity(self, analyze_mod):
+        # PR #146 fix: missing evidence → blocked (not negative-result)
         analysis = {
             "capacities_covered": [8, 16],
             "inflection_points": {},
@@ -302,25 +403,80 @@ class TestAcceptanceCriteria:
         }
         result = analyze_mod.check_acceptance_criteria(analysis)
         assert result["all_criteria_met"] is False
-        assert result["overall_status"] == "negative-result"
+        assert result["overall_status"] == "blocked"
 
     def test_insufficient_reps(self, analyze_mod):
+        # PR #146 fix: insufficient reps → incomplete or blocked (not negative-result)
         analysis = {
             "capacities_covered": [8, 16, 24, 32],
             "inflection_points": {"w": {"throughput_inflection_gib": 16}},
-            "preempt_timeline": {"total_preemptions": 1},
-            "tiering_comparison": {"per_config_stats": {"a": {}, "b": {}}},
+            "preempt_timeline": {
+                "total_preemptions": 1,
+                "pressure_episodes": [{"timeline_complete": True}],
+            },
+            "tiering_comparison": _make_complete_tiering(),
+            "provenance": _make_provenance(),
             "capacity_curves": {
                 "w": {
-                    "8": {"repetitions": 2},  # < 3
-                    "16": {"repetitions": 3},
-                    "24": {"repetitions": 3},
-                    "32": {"repetitions": 3},
+                    "8": {
+                        "repetitions": 2,
+                        "stats": {"output_throughput": {"median": 100.0}},
+                    },  # < 3
+                    "16": {
+                        "repetitions": 3,
+                        "stats": {"output_throughput": {"median": 200.0}},
+                    },
+                    "24": {
+                        "repetitions": 3,
+                        "stats": {"output_throughput": {"median": 210.0}},
+                    },
+                    "32": {
+                        "repetitions": 3,
+                        "stats": {"output_throughput": {"median": 215.0}},
+                    },
                 }
             },
         }
         result = analyze_mod.check_acceptance_criteria(analysis)
         assert result["all_criteria_met"] is False
+        assert result["overall_status"] in ("incomplete", "blocked")
+
+    def test_missing_provenance_blocked(self, analyze_mod):
+        # PR #146 fix: missing provenance → blocked
+        analysis = {
+            "capacities_covered": [8, 16, 24, 32],
+            "inflection_points": {"w": {"throughput_inflection_gib": 16}},
+            "preempt_timeline": {
+                "total_preemptions": 1,
+                "pressure_episodes": [{"timeline_complete": True}],
+            },
+            "tiering_comparison": _make_complete_tiering(),
+            "capacity_curves": _make_complete_capacity_curves(),
+            # No provenance key
+        }
+        result = analyze_mod.check_acceptance_criteria(analysis)
+        assert result["all_criteria_met"] is False
+        assert result["overall_status"] == "blocked"
+
+    def test_incomplete_timeline_incomplete(self, analyze_mod):
+        # PR #146 fix: preemptions but no complete 6-stage timeline → incomplete
+        analysis = {
+            "capacities_covered": [8, 16, 24, 32],
+            "inflection_points": {"w": {"throughput_inflection_gib": 16}},
+            "preempt_timeline": {
+                "total_preemptions": 2,
+                "pressure_episodes": [
+                    {"timeline_complete": False},
+                    {"timeline_complete": False},
+                ],
+            },
+            "tiering_comparison": _make_complete_tiering(),
+            "capacity_curves": _make_complete_capacity_curves(),
+            "provenance": _make_provenance(),
+        }
+        result = analyze_mod.check_acceptance_criteria(analysis)
+        assert result["all_criteria_met"] is False
+        assert result["overall_status"] == "incomplete"
 
 
 # ---------------------------------------------------------------------------
@@ -330,25 +486,33 @@ class TestAcceptanceCriteria:
 
 class TestGenerateReport:
     def test_full_report(self, analyze_mod):
+        # PR #146 fix: pass provenance, expect status in the 4-value set
         capacity_analysis = {
             "capacities_covered": [8, 16, 24, 32],
             "inflection_points": {"random-online": {"throughput_inflection_gib": 16}},
-            "capacity_curves": {"random-online": {"8": {"repetitions": 3}}},
+            "capacity_curves": _make_complete_capacity_curves(),
         }
-        tiering_analysis = {
-            "per_config_stats": {"hbm-only": {}, "kv-constrained": {}},
-            "comparison": {},
-            "best_config": {"throughput": "hbm-only", "ttft": "hbm-only"},
-        }
-        preempt_timeline = {"total_preemptions": 3, "pressure_episodes": []}
+        tiering_analysis = _make_complete_tiering()
+        preempt_timeline = _make_complete_timeline()
+        provenance = _make_provenance()
 
         report = analyze_mod.generate_report(
-            capacity_analysis, tiering_analysis, preempt_timeline
+            capacity_analysis,
+            tiering_analysis,
+            preempt_timeline,
+            provenance,
         )
         assert report["issue"] == 134
         assert "acceptance_criteria" in report
         assert "issue_89_linkage" in report
-        assert report["issue_89_linkage"]["status"] in ("admitted", "negative-result")
+        assert report["issue_89_linkage"]["status"] in (
+            "admitted",
+            "incomplete",
+            "blocked",
+            "negative-result",
+        )
+        # With complete data and provenance, should be admitted
+        assert report["issue_89_linkage"]["status"] == "admitted"
 
 
 # ---------------------------------------------------------------------------
@@ -416,6 +580,12 @@ class TestParseSchedulerEvents:
         episode = timeline["pressure_episodes"][0]
         assert episode["preempt_seq_group_id"] == 42
         assert episode["peak_waiting_reqs"] == 3
+        # PR #146 fix: check stages dict and timeline_status
+        assert "stages" in episode
+        assert "timeline_status" in timeline
+        # Without stage_events, timeline is incomplete
+        assert timeline["timeline_status"] == "incomplete"
+        assert episode["timeline_complete"] is False
 
     def test_empty_log(self, parse_mod):
         assert parse_mod.parse_kv_cache_info("")["kv_cache_memory_gib"] is None
@@ -426,6 +596,127 @@ class TestParseSchedulerEvents:
         timeline = parse_mod.reconstruct_preempt_timeline([], [])
         assert timeline["total_preemptions"] == 0
         assert timeline["pressure_episodes"] == []
+        # PR #146 fix: timeline_status field
+        assert timeline["timeline_status"] == "no_preemptions"
+
+    def test_stage_events_parsing(self, parse_mod):
+        # PR #146 fix: log with restore/admission patterns → stage_events populated
+        log = """\
+(EngineCore pid=123) WARNING 07-26 15:50:45 [scheduler.py:789] Sequence group 42 is preempted
+(EngineCore pid=123) INFO 07-26 15:50:46 [restore.py:10] Restoring KV cache for seq_group 42
+(EngineCore pid=123) INFO 07-26 15:50:47 [restore.py:20] Restored KV cache for seq_group 42
+(EngineCore pid=123) INFO 07-26 15:50:48 [scheduler.py:100] Scheduler woke up after restore
+(EngineCore pid=123) INFO 07-26 15:50:49 [scheduler.py:200] Sequence group 42 admitted
+(EngineCore pid=123) INFO 07-26 15:50:50 [decode.py:10] First prefill for seq_group 42
+"""
+        stage_events = parse_mod.parse_stage_events(log)
+        assert len(stage_events["preempt"]) >= 1
+        assert stage_events["preempt"][0]["seq_group_id"] == 42
+        assert len(stage_events["restore_start"]) >= 1
+        assert len(stage_events["restore_done"]) >= 1
+        assert len(stage_events["scheduler_wakeup"]) >= 1
+        assert len(stage_events["admission"]) >= 1
+        assert len(stage_events["first_prefill_or_decode"]) >= 1
+
+        # Reconstruct with stage_events → timeline should be complete
+        preempt_events = parse_mod.parse_preemption_events(log)
+        timeline = parse_mod.reconstruct_preempt_timeline(
+            preempt_events, [], stage_events
+        )
+        assert timeline["total_preemptions"] == 1
+        episode = timeline["pressure_episodes"][0]
+        assert episode["timeline_complete"] is True
+        assert timeline["timeline_status"] == "complete"
+        # All 6 stages should have timestamps
+        for stage in parse_mod.TIMELINE_STAGES:
+            assert episode["stages"][stage] is not None, f"Stage {stage} is None"
+
+    def test_timeline_incomplete_without_stages(self, parse_mod):
+        # PR #146 fix: only preempt events, no stage events → timeline_complete=False
+        log = """\
+(EngineCore pid=123) WARNING 07-26 15:50:45 [scheduler.py:789] Sequence group 42 is preempted
+"""
+        preempt_events = parse_mod.parse_preemption_events(log)
+        engine_stats = parse_mod.parse_engine_stats(log)
+        timeline = parse_mod.reconstruct_preempt_timeline(preempt_events, engine_stats)
+        assert timeline["total_preemptions"] == 1
+        assert timeline["timeline_status"] == "incomplete"
+        episode = timeline["pressure_episodes"][0]
+        assert episode["timeline_complete"] is False
+        # preempt stage should have a timestamp, others should be None
+        assert episode["stages"]["preempt"] is not None
+        assert episode["stages"]["restore_start"] is None
+
+    def test_verify_kv_capacity_from_log(self, parse_mod, tmp_path):
+        # PR #146 fix: verify actual KV matches target from server log
+        log_content = """\
+(EngineCore pid=123) INFO 07-26 15:49:29 [worker.py:803] Available KV cache memory: 8.04 GiB
+"""
+        log_file = tmp_path / "server.log"
+        log_file.write_text(log_content)
+
+        result = parse_mod.verify_kv_capacity_from_log(
+            str(log_file), 8, tolerance_gib=2.0
+        )
+        assert result["within_tolerance"] is True
+        assert result["actual_kv_gib"] == 8.04
+        assert result["target_kv_gib"] == 8
+        assert result["diff_gib"] is not None
+        assert result["error"] is None
+
+    def test_verify_kv_capacity_mismatch(self, parse_mod, tmp_path):
+        log_content = """\
+(EngineCore pid=123) INFO 07-26 15:49:29 [worker.py:803] Available KV cache memory: 32.04 GiB
+"""
+        log_file = tmp_path / "server.log"
+        log_file.write_text(log_content)
+
+        result = parse_mod.verify_kv_capacity_from_log(
+            str(log_file), 8, tolerance_gib=2.0
+        )
+        assert result["within_tolerance"] is False
+        assert result["actual_kv_gib"] == 32.04
+
+    def test_verify_kv_capacity_not_found(self, parse_mod, tmp_path):
+        log_content = "No KV cache info here\n"
+        log_file = tmp_path / "server.log"
+        log_file.write_text(log_content)
+
+        result = parse_mod.verify_kv_capacity_from_log(
+            str(log_file), 8, tolerance_gib=2.0
+        )
+        assert result["within_tolerance"] is False
+        assert result["actual_kv_gib"] is None
+        assert result["error"] is not None
+
+    def test_parse_cpu_offload_events(self, parse_mod):
+        log = """\
+(EngineCore pid=123) INFO 07-26 15:50:00 [connector.py:10] CPUOffloadingConnector initialized with cpu_bytes_to_use=8g
+(EngineCore pid=123) INFO 07-26 15:50:01 [connector.py:20] Loading KV from cpu for seq_group 42
+(EngineCore pid=123) INFO 07-26 15:50:02 [connector.py:30] Saving KV to cpu for seq_group 43
+"""
+        events = parse_mod.parse_cpu_offload_events(log)
+        assert len(events) >= 3
+        for ev in events:
+            assert "raw_line" in ev
+            assert "timestamp" in ev
+
+    def test_parse_server_log_includes_new_sections(self, parse_mod, tmp_path):
+        # PR #146 fix: parse_server_log includes stage_events and cpu_offload_events
+        log_content = """\
+(EngineCore pid=123) INFO 07-26 15:49:29 [worker.py:803] Available KV cache memory: 8.04 GiB
+(EngineCore pid=123) WARNING 07-26 15:50:45 [scheduler.py:789] Sequence group 42 is preempted
+(EngineCore pid=123) INFO 07-26 15:50:46 [connector.py:10] CPUOffloadingConnector initialized
+"""
+        log_file = tmp_path / "server.log"
+        log_file.write_text(log_content)
+
+        result = parse_mod.parse_server_log(str(log_file))
+        assert "stage_events" in result
+        assert "cpu_offload_events" in result
+        assert isinstance(result["stage_events"], dict)
+        assert isinstance(result["cpu_offload_events"], list)
+        assert len(result["cpu_offload_events"]) >= 1
 
 
 # ---------------------------------------------------------------------------

@@ -7,14 +7,24 @@ This module processes raw benchmark results from the KV capacity scan
 - Per-repetition metric extraction from ``raw.json`` (vLLM bench serve output)
 - Aggregation across repetitions (median, IQR, mean, std)
 - Capacity curve analysis: identify throughput/latency inflection points
-- Tiering comparison: contrast HBM-only vs KV-constrained vs utility-victim
+- Tiering comparison: contrast HBM-only vs tiering-disabled vs tiering-enabled
 - Preempt timeline analysis from parsed server logs
 - Final report generation with issue #134 acceptance criteria check
+
+PR #146 review fixes:
+  - Real tiering configs (hbm-only / tiering-disabled / tiering-enabled) instead
+    of fake gpu_memory_utilization-only switching.
+  - ``check_acceptance_criteria`` no longer fail-open: missing evidence is
+    reported as ``blocked`` or ``incomplete`` rather than ``negative-result``.
+  - Provenance and repetition validation gate acceptance.
+  - Timeline criterion checks ``timeline_complete`` per episode, not just
+    ``total_preemptions > 0``.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import statistics
 from pathlib import Path
 from typing import Any
@@ -26,7 +36,26 @@ from typing import Any
 KV_CAPACITY_TARGETS_GIB = [8, 16, 24, 32]
 SCAN_WORKLOADS = ["random-online", "sharegpt-online", "prefix-repetition-online"]
 MIN_REPETITIONS = 3
-TIERING_CONFIGS = ["hbm-only", "kv-constrained", "kv-constrained-utility"]
+
+# Real tiering configs for Part B:
+#   hbm-only         — 32 GiB KV, no kv-transfer-config (baseline, no pressure)
+#   tiering-disabled — 8 GiB KV, no kv-transfer-config (pressure, no tiering)
+#   tiering-enabled  — 8 GiB KV, CPUOffloadingConnector (pressure + tiering)
+REQUIRED_TIERING_CONFIGS = ["hbm-only", "tiering-disabled", "tiering-enabled"]
+# Backward-compatible alias
+TIERING_CONFIGS = REQUIRED_TIERING_CONFIGS
+
+# Provenance fields that must be present for evidence to be admissible.
+REQUIRED_PROVENANCE_FIELDS = [
+    "engine_commit",
+    "plugin_commit",
+    "cann_version",
+    "driver_version",
+    "torch_npu_version",
+    "model_revision",
+    "resolved_parameters",
+    "actual_kv_bytes",
+]
 
 # Metric field names in vLLM bench serve raw.json output
 METRIC_FIELDS = {
@@ -267,21 +296,37 @@ def analyze_tiering_comparison(
 
     Args:
         results: Dict ``{config_name: [raw_result, ...]}`` where config_name
-            is one of ``hbm-only``, ``kv-constrained``, ``kv-constrained-utility``.
+            is one of ``hbm-only``, ``tiering-disabled``, ``tiering-enabled``.
 
     Returns:
         Analysis dict with:
         - ``per_config_stats``: aggregated stats per config
         - ``comparison``: pairwise deltas between configs
         - ``best_config``: config with best throughput/latency
+        - ``configs_present``: list of config names with data
+        - ``configs_required``: the required config names
+        - ``configs_complete``: configs with >= MIN_REPETITIONS reps and
+          finite-positive throughput
     """
     per_config: dict[str, Any] = {}
+    configs_complete: list[str] = []
+
     for config, reps in results.items():
         agg = aggregate_reps(reps)
         per_config[config] = {
             "repetitions": len(reps),
             "stats": agg["per_metric_stats"],
         }
+
+        # A config is "complete" if it has >= MIN_REPETITIONS reps with
+        # finite-positive output throughput.
+        tput_vals = [r.get("output_throughput") for r in reps]
+        is_complete = len(reps) >= MIN_REPETITIONS and all(
+            v is not None and math.isfinite(float(v)) and float(v) > 0
+            for v in tput_vals
+        )
+        if is_complete:
+            configs_complete.append(config)
 
     comparison: dict[str, Any] = {}
     configs = list(results.keys())
@@ -325,6 +370,9 @@ def analyze_tiering_comparison(
             "throughput": best_throughput_cfg,
             "ttft": best_ttft_cfg,
         },
+        "configs_present": list(results.keys()),
+        "configs_required": list(REQUIRED_TIERING_CONFIGS),
+        "configs_complete": configs_complete,
     }
 
 
@@ -335,19 +383,92 @@ def _delta_pct(base: float | None, head: float | None) -> float | None:
     return round(((head - base) / base) * 100, 2)
 
 
+def _validate_provenance(
+    provenance: dict[str, Any] | None,
+) -> tuple[bool, list[str]]:
+    """Validate that all required provenance fields are present and non-None.
+
+    Returns:
+        Tuple of (is_valid, missing_fields).
+    """
+    if not isinstance(provenance, dict) or not provenance:
+        return False, list(REQUIRED_PROVENANCE_FIELDS)
+    missing = [f for f in REQUIRED_PROVENANCE_FIELDS if provenance.get(f) is None]
+    return len(missing) == 0, missing
+
+
+def _validate_repetitions(
+    analysis: dict[str, Any],
+) -> tuple[bool, list[str]]:
+    """Check all formal points have >= MIN_REPETITIONS reps with finite-positive throughput.
+
+    Inspects both capacity scan curves and tiering comparison per-config stats.
+
+    Returns:
+        Tuple of (is_valid, issues) where issues is a list of human-readable
+        problem descriptions.
+    """
+    issues: list[str] = []
+
+    for workload, curve in analysis.get("capacity_curves", {}).items():
+        for cap_str, data in curve.items():
+            reps = data.get("repetitions", 0)
+            if reps < MIN_REPETITIONS:
+                issues.append(
+                    f"capacity {workload}/{cap_str}: {reps} reps < {MIN_REPETITIONS}"
+                )
+            stats = data.get("stats", {})
+            median = stats.get("output_throughput", {}).get("median")
+            if median is None:
+                issues.append(f"capacity {workload}/{cap_str}: no throughput data")
+            elif not math.isfinite(median) or median <= 0:
+                issues.append(
+                    f"capacity {workload}/{cap_str}: invalid throughput {median}"
+                )
+
+    tiering = analysis.get("tiering_comparison", {})
+    for config, data in tiering.get("per_config_stats", {}).items():
+        reps = data.get("repetitions", 0)
+        if reps < MIN_REPETITIONS:
+            issues.append(f"tiering {config}: {reps} reps < {MIN_REPETITIONS}")
+        stats = data.get("stats", {})
+        median = stats.get("output_throughput", {}).get("median")
+        if median is None:
+            issues.append(f"tiering {config}: no throughput data")
+        elif not math.isfinite(median) or median <= 0:
+            issues.append(f"tiering {config}: invalid throughput {median}")
+
+    return len(issues) == 0, issues
+
+
 def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
     """Check issue #134 acceptance criteria against analysis results.
 
+    The overall status is determined as follows:
+      - ``admitted``: all criteria met.
+      - ``blocked``: missing evidence (capacities, provenance, tiering configs,
+        or timeline data absent). Cannot determine a result.
+      - ``incomplete``: evidence present but insufficient (too few reps,
+        incomplete preempt timeline). Needs more data.
+      - ``negative-result``: all evidence present but a criterion is not met
+        (e.g., no inflection points found despite complete data).
+
     Returns a dict with:
-    - ``criterion``: description
-    - ``met``: bool
-    - ``details``: str
+    - ``all_criteria_met``: bool
+    - ``criteria``: list of per-criterion dicts
+    - ``overall_status``: one of the four statuses above
+    - ``provenance_validation``: dict from _validate_provenance
+    - ``repetition_validation``: dict from _validate_repetitions
     """
     criteria: list[dict[str, Any]] = []
+    has_blocking_failure = False
+    has_incomplete_failure = False
 
     # 1. 8/16/24/32 GiB capacity curves produced
     caps = analysis.get("capacities_covered", [])
     caps_met = all(c in caps for c in KV_CAPACITY_TARGETS_GIB)
+    if not caps_met:
+        has_blocking_failure = True
     criteria.append(
         {
             "criterion": "8/16/24/32 GiB capacity curves produced",
@@ -362,7 +483,10 @@ def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
         v.get("throughput_inflection_gib") is not None
         or v.get("ttft_inflection_gib") is not None
         for v in inflection.values()
+        if isinstance(v, dict)
     )
+    # Inflection failure alone → negative-result (evidence is complete,
+    # just no inflection found).
     criteria.append(
         {
             "criterion": "Clear service rate/tail latency inflection points identified",
@@ -371,49 +495,129 @@ def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
         }
     )
 
-    # 3. At least one complete preempt timeline
+    # 3. At least one complete preempt timeline (6-stage chain)
     preempt_timeline = analysis.get("preempt_timeline", {})
-    has_timeline = preempt_timeline.get("total_preemptions", 0) > 0
+    total_preemptions = preempt_timeline.get("total_preemptions", 0)
+    episodes = preempt_timeline.get("pressure_episodes", [])
+    has_complete_timeline = any(
+        e.get("timeline_complete") for e in episodes if isinstance(e, dict)
+    )
+    if has_complete_timeline:
+        timeline_met = True
+        timeline_details = (
+            f"{total_preemptions} preemptions, at least one complete 6-stage timeline"
+        )
+    elif total_preemptions > 0:
+        # Preemptions occurred but no episode has a complete 6-stage chain.
+        timeline_met = False
+        has_incomplete_failure = True
+        timeline_details = (
+            f"{total_preemptions} preemptions but no complete 6-stage timeline "
+            f"(stages missing)"
+        )
+    else:
+        # No preemptions or no timeline evidence at all.
+        timeline_met = False
+        has_blocking_failure = True
+        timeline_details = "No preempt timeline evidence"
     criteria.append(
         {
-            "criterion": "At least one complete preempt->restore->requeue/admission timeline",
-            "met": has_timeline,
-            "details": f"Total preemptions: {preempt_timeline.get('total_preemptions', 0)}",
+            "criterion": (
+                "At least one complete preempt->restore->requeue/admission "
+                "6-stage timeline"
+            ),
+            "met": timeline_met,
+            "details": timeline_details,
         }
     )
 
-    # 4. Tiering comparison completed
+    # 4. Tiering comparison completed (all 3 real configs)
     tiering = analysis.get("tiering_comparison", {})
-    tiering_met = len(tiering.get("per_config_stats", {})) >= 2
+    configs_present = tiering.get(
+        "configs_present", list(tiering.get("per_config_stats", {}).keys())
+    )
+    configs_required = tiering.get("configs_required", REQUIRED_TIERING_CONFIGS)
+    configs_complete = tiering.get("configs_complete", [])
+    tiering_met = all(c in configs_complete for c in configs_required)
+    if not tiering_met:
+        if not all(c in configs_present for c in configs_required):
+            has_blocking_failure = True
+            tiering_details = (
+                f"Missing configs: present={configs_present}, "
+                f"required={configs_required}"
+            )
+        else:
+            has_incomplete_failure = True
+            tiering_details = (
+                f"All configs present but not all complete: "
+                f"complete={configs_complete}, required={configs_required}"
+            )
+    else:
+        tiering_details = f"All required configs complete: {configs_complete}"
     criteria.append(
         {
-            "criterion": "Tiering disabled/enabled/HBM-only comparison completed",
+            "criterion": (
+                "Tiering disabled/enabled/HBM-only comparison completed "
+                "(real configs, not gpu_memory_utilization switching)"
+            ),
             "met": tiering_met,
-            "details": f"Configs: {list(tiering.get('per_config_stats', {}).keys())}",
+            "details": tiering_details,
         }
     )
 
-    # 5. All formal points have >= 3 repetitions
-    min_reps_met = True
-    for workload, curve in analysis.get("capacity_curves", {}).items():
-        for cap_str, data in curve.items():
-            if data.get("repetitions", 0) < MIN_REPETITIONS:
-                min_reps_met = False
-                break
+    # 5. All formal points have >= MIN_REPETITIONS reps with finite-positive throughput
+    reps_valid, reps_issues = _validate_repetitions(analysis)
+    if not reps_valid:
+        has_incomplete_failure = True
     criteria.append(
         {
-            "criterion": f"All formal points have >= {MIN_REPETITIONS} independent restarts",
-            "met": min_reps_met,
-            "details": "Checked all capacity scan points",
+            "criterion": (
+                f"All formal points have >= {MIN_REPETITIONS} independent "
+                f"restarts with finite-positive throughput"
+            ),
+            "met": reps_valid,
+            "details": "; ".join(reps_issues) if reps_issues else "All OK",
+        }
+    )
+
+    # 6. Provenance present and complete
+    provenance = analysis.get("provenance", {})
+    prov_valid, prov_missing = _validate_provenance(provenance)
+    if not prov_valid:
+        has_blocking_failure = True
+    criteria.append(
+        {
+            "criterion": "Environment manifest (provenance) complete",
+            "met": prov_valid,
+            "details": (
+                f"Missing fields: {prov_missing}" if prov_missing else "All OK"
+            ),
         }
     )
 
     all_met = all(c["met"] for c in criteria)
 
+    if all_met:
+        overall_status = "admitted"
+    elif has_blocking_failure:
+        overall_status = "blocked"
+    elif has_incomplete_failure:
+        overall_status = "incomplete"
+    else:
+        overall_status = "negative-result"
+
     return {
         "all_criteria_met": all_met,
         "criteria": criteria,
-        "overall_status": "admitted" if all_met else "negative-result",
+        "overall_status": overall_status,
+        "provenance_validation": {
+            "valid": prov_valid,
+            "missing": prov_missing,
+        },
+        "repetition_validation": {
+            "valid": reps_valid,
+            "issues": reps_issues,
+        },
     }
 
 
@@ -421,6 +625,7 @@ def generate_report(
     capacity_scan_analysis: dict[str, Any],
     tiering_analysis: dict[str, Any] | None = None,
     preempt_timeline: dict[str, Any] | None = None,
+    provenance: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Generate the final issue #134 analysis report.
 
@@ -428,6 +633,8 @@ def generate_report(
         capacity_scan_analysis: Output from analyze_capacity_scan
         tiering_analysis: Output from analyze_tiering_comparison (optional)
         preempt_timeline: Output from reconstruct_preempt_timeline (optional)
+        provenance: Environment manifest dict (optional) with
+            REQUIRED_PROVENANCE_FIELDS filled
 
     Returns:
         Complete report dict with all analysis sections and acceptance check.
@@ -437,6 +644,8 @@ def generate_report(
         combined["tiering_comparison"] = tiering_analysis
     if preempt_timeline:
         combined["preempt_timeline"] = preempt_timeline
+    if provenance:
+        combined["provenance"] = provenance
 
     acceptance = check_acceptance_criteria(combined)
 
@@ -446,9 +655,7 @@ def generate_report(
         "analysis": combined,
         "acceptance_criteria": acceptance,
         "issue_89_linkage": {
-            "status": "admitted"
-            if acceptance["all_criteria_met"]
-            else "negative-result",
+            "status": acceptance["overall_status"],
             "note": (
                 "Results linked to #89 KV tiering/offload mechanism evidence. "
                 "This issue provides explicit capacity scan and state machine "
@@ -506,7 +713,15 @@ def main() -> None:
     if timeline_file.exists():
         preempt_timeline = json.loads(timeline_file.read_text())
 
-    report = generate_report(capacity_analysis, tiering_analysis, preempt_timeline)
+    # Load provenance if available
+    provenance = None
+    manifest_file = results_dir / "env-manifest.json"
+    if manifest_file.exists():
+        provenance = json.loads(manifest_file.read_text())
+
+    report = generate_report(
+        capacity_analysis, tiering_analysis, preempt_timeline, provenance
+    )
 
     output = json.dumps(report, indent=2, ensure_ascii=False)
     if args.output:

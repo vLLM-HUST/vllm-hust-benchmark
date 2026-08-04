@@ -10,6 +10,19 @@ Log patterns parsed:
   - Periodic engine stats (running/waiting queue, KV usage %, prefix hit rate)
   - Preemption events with timestamps
   - Utility victim selection events (BidKV)
+  - 6-stage preempt timeline events (restore, scheduler wakeup, admission, etc.)
+  - CPU offload / tiering connector events
+
+PR #146 review fixes:
+  - ``TIMELINE_STAGES`` defines the complete 6-stage event chain.
+  - ``parse_stage_events`` extracts per-stage event lists with timestamps and
+    seq_group_id correlation.
+  - ``reconstruct_preempt_timeline`` now builds a ``stages`` dict per episode,
+    sets ``timeline_complete``, and returns ``timeline_status`` instead of
+    relying solely on ``total_preemptions > 0``.
+  - ``verify_kv_capacity_from_log`` validates actual KV cache memory against
+    the target capacity (fail-closed, not just a warning).
+  - ``parse_cpu_offload_events`` extracts tiering/offload event patterns.
 """
 
 from __future__ import annotations
@@ -19,6 +32,19 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
+
+# ---------------------------------------------------------------------------
+# Timeline stage definitions (6-stage preempt->restore->admission chain)
+# ---------------------------------------------------------------------------
+
+TIMELINE_STAGES = [
+    "preempt",
+    "restore_start",
+    "restore_done",
+    "scheduler_wakeup",
+    "admission",
+    "first_prefill_or_decode",
+]
 
 # ---------------------------------------------------------------------------
 # Regex patterns for vLLM server log parsing
@@ -90,6 +116,73 @@ _SUGGESTED_KV_RE = re.compile(
     r"--kv-cache-memory=(\d+)\s*\(([\d.]+)\s*GiB\)", re.IGNORECASE
 )
 
+# ---------------------------------------------------------------------------
+# 6-stage timeline event patterns
+# ---------------------------------------------------------------------------
+
+# Stage 1: preempt (reuses _PREEMPT_MSG_RE above)
+
+# Stage 2: restore_start — KV cache restore begins for a seq_group
+# Use "restoring" (ing form) to distinguish from "restored" (ed form).
+_RESTORE_START_RE = re.compile(
+    r"(restore_start|restoring\s+kv|begin\s+restore|kv\s+restore.*start|"
+    r"restoring.*seq_group\s+(\d+)|seq_group\s+(\d+)\s+restore.*start)",
+    re.IGNORECASE,
+)
+
+# Stage 3: restore_done — KV cache restore completes for a seq_group
+# Use "restored" (ed form) to distinguish from "restoring" (ing form).
+_RESTORE_DONE_RE = re.compile(
+    r"(restore_done|restored\s+kv|finish\s+restore|kv\s+restore.*complete|"
+    r"restored.*seq_group\s+(\d+)|restore.*complete|"
+    r"seq_group\s+(\d+)\s+restore.*done)",
+    re.IGNORECASE,
+)
+
+# Stage 4: scheduler_wakeup — scheduler woke up after restore
+_SCHEDULER_WAKEUP_RE = re.compile(
+    r"(scheduler_wakeup|scheduler.*woke|woke\s+up|scheduler.*wakeup|"
+    r"scheduler_loop|scheduler.*resumed)",
+    re.IGNORECASE,
+)
+
+# Stage 5: admission — seq_group admitted/re-queued after restore
+_ADMISSION_RE = re.compile(
+    r"(admission|admitted|admitting|seq_group\s+(\d+)\s+(admitted|admitting)|"
+    r"admit.*seq_group\s+(\d+))",
+    re.IGNORECASE,
+)
+
+# Requeue events (related to admission)
+_REQUEUE_RE = re.compile(
+    r"(requeue|re-queue|requeued|re-queued)",
+    re.IGNORECASE,
+)
+
+# Stage 6: first_prefill_or_decode — first prefill or decode after admission
+_FIRST_PREFILL_RE = re.compile(
+    r"(first_prefill|first\s+prefill|prefill.*seq_group\s+(\d+)|"
+    r"seq_group\s+(\d+)\s+prefill)",
+    re.IGNORECASE,
+)
+_FIRST_DECODE_RE = re.compile(
+    r"(first_decode|first\s+decode|decode.*seq_group\s+(\d+)|"
+    r"seq_group\s+(\d+)\s+decode)",
+    re.IGNORECASE,
+)
+
+# ---------------------------------------------------------------------------
+# CPU offload / tiering connector patterns
+# ---------------------------------------------------------------------------
+
+_CPU_OFFLOAD_RE = re.compile(
+    r"(cpu_offload|CPUOffloading|CPUOffloadingConnector|"
+    r"offload.*kv|kv.*offload|cpu_bytes_to_use|"
+    r"load.*from.*cpu|save.*to.*cpu|connector.*cpu|"
+    r"kv_connector|kv_transfer)",
+    re.IGNORECASE,
+)
+
 
 def _parse_log_timestamp(line: str, year: int = 2026) -> str | None:
     """Extract ISO-8601 timestamp from a vLLM log line.
@@ -106,6 +199,19 @@ def _parse_log_timestamp(line: str, year: int = 2026) -> str | None:
         return dt.isoformat()
     except ValueError:
         return None
+
+
+def _extract_seq_group_id(line: str) -> int | None:
+    """Try to extract a seq_group_id from a log line."""
+    # Try the standard "Sequence group N" / "seq_group N" pattern
+    m = re.search(r"(?:Sequence group|seq_group)\s+(\d+)", line, re.IGNORECASE)
+    if m:
+        return int(m.group(1))
+    # Try generic "seq_group_id=N" pattern
+    m = re.search(r"seq_group_id\s*[=:]\s*(\d+)", line, re.IGNORECASE)
+    if m:
+        return int(m.group(1))
+    return None
 
 
 def parse_kv_cache_info(log_text: str) -> dict[str, Any]:
@@ -268,51 +374,187 @@ def parse_victim_selection_events(log_text: str) -> list[dict[str, Any]]:
     return events
 
 
-def parse_server_log(log_path: str | Path) -> dict[str, Any]:
-    """Parse a complete vLLM server log file.
+def parse_stage_events(log_text: str) -> dict[str, list[dict[str, Any]]]:
+    """Extract per-stage events for the 6-stage preempt timeline.
 
-    Returns a dict with all parsed sections:
-      - ``kv_cache_info``: dict from parse_kv_cache_info
-      - ``memory_breakdown``: dict from parse_memory_breakdown
-      - ``engine_stats``: list from parse_engine_stats
-      - ``preemption_events``: list from parse_preemption_events
-      - ``victim_selection_events``: list from parse_victim_selection_events
-      - ``log_file``: str (path to the parsed log)
+    Returns a dict mapping each stage name in ``TIMELINE_STAGES`` to a list of
+    event dicts. Each event dict contains:
+      - ``timestamp``: ISO-8601 string | None
+      - ``seq_group_id``: int | None
+      - ``raw_line``: str (the matched log line)
     """
-    log_path = Path(log_path)
-    log_text = log_path.read_text(encoding="utf-8", errors="replace")
-
-    return {
-        "log_file": str(log_path),
-        "kv_cache_info": parse_kv_cache_info(log_text),
-        "memory_breakdown": parse_memory_breakdown(log_text),
-        "engine_stats": parse_engine_stats(log_text),
-        "preemption_events": parse_preemption_events(log_text),
-        "victim_selection_events": parse_victim_selection_events(log_text),
+    stage_events: dict[str, list[dict[str, Any]]] = {
+        stage: [] for stage in TIMELINE_STAGES
     }
+
+    for line in log_text.splitlines():
+        stripped = line.strip()
+        ts = _parse_log_timestamp(line)
+        sgid = _extract_seq_group_id(line)
+
+        # Stage 1: preempt
+        if _PREEMPT_MSG_RE.search(line):
+            if m := _PREEMPT_MSG_RE.search(line):
+                sgid = int(m.group(2))
+            stage_events["preempt"].append(
+                {"timestamp": ts, "seq_group_id": sgid, "raw_line": stripped}
+            )
+            continue
+
+        # Stage 2: restore_start
+        if _RESTORE_START_RE.search(line):
+            stage_events["restore_start"].append(
+                {"timestamp": ts, "seq_group_id": sgid, "raw_line": stripped}
+            )
+            continue
+
+        # Stage 3: restore_done
+        if _RESTORE_DONE_RE.search(line):
+            stage_events["restore_done"].append(
+                {"timestamp": ts, "seq_group_id": sgid, "raw_line": stripped}
+            )
+            continue
+
+        # Stage 4: scheduler_wakeup
+        if _SCHEDULER_WAKEUP_RE.search(line):
+            stage_events["scheduler_wakeup"].append(
+                {"timestamp": ts, "seq_group_id": sgid, "raw_line": stripped}
+            )
+            continue
+
+        # Stage 5: admission (also matches requeue)
+        if _ADMISSION_RE.search(line) or _REQUEUE_RE.search(line):
+            stage_events["admission"].append(
+                {"timestamp": ts, "seq_group_id": sgid, "raw_line": stripped}
+            )
+            continue
+
+        # Stage 6: first_prefill_or_decode
+        if _FIRST_PREFILL_RE.search(line) or _FIRST_DECODE_RE.search(line):
+            stage_events["first_prefill_or_decode"].append(
+                {"timestamp": ts, "seq_group_id": sgid, "raw_line": stripped}
+            )
+            continue
+
+    return stage_events
+
+
+def parse_cpu_offload_events(log_text: str) -> list[dict[str, Any]]:
+    """Extract CPU offload / tiering connector events from server logs.
+
+    Matches lines mentioning CPUOffloadingConnector, kv_connector,
+    kv_transfer, cpu offload load/save, etc.
+
+    Returns a list of dicts with:
+      - ``timestamp``: ISO-8601 string | None
+      - ``raw_line``: str (the matched log line)
+    """
+    events: list[dict[str, Any]] = []
+    for line in log_text.splitlines():
+        if _CPU_OFFLOAD_RE.search(line):
+            ts = _parse_log_timestamp(line)
+            events.append({"timestamp": ts, "raw_line": line.strip()})
+    return events
+
+
+def validate_timeline_complete(episode: dict[str, Any]) -> bool:
+    """Check that all 6 stages in an episode have non-None timestamps.
+
+    Args:
+        episode: dict with a ``stages`` key mapping stage names to timestamps.
+
+    Returns:
+        True if all stages in ``TIMELINE_STAGES`` have a non-None value.
+    """
+    stages = episode.get("stages", {})
+    if not isinstance(stages, dict):
+        return False
+    return all(stages.get(stage) is not None for stage in TIMELINE_STAGES)
+
+
+def _build_stages_for_episode(
+    preempt_event: dict[str, Any],
+    stage_events: dict[str, list[dict[str, Any]]],
+) -> dict[str, str | None]:
+    """Build a stages dict for a single preempt episode.
+
+    Correlates the preempt event with subsequent stage events by seq_group_id
+    (preferred) or by timestamp ordering (fallback).
+    """
+    stages: dict[str, str | None] = {s: None for s in TIMELINE_STAGES}
+    stages["preempt"] = preempt_event.get("timestamp")
+    pe_sgid = preempt_event.get("seq_group_id")
+    pe_ts = preempt_event.get("timestamp")
+
+    for stage in [
+        "restore_start",
+        "restore_done",
+        "scheduler_wakeup",
+        "admission",
+        "first_prefill_or_decode",
+    ]:
+        events = stage_events.get(stage, [])
+        matched: dict[str, Any] | None = None
+
+        # Strategy 1: match by seq_group_id
+        if pe_sgid is not None:
+            for ev in events:
+                if ev.get("seq_group_id") == pe_sgid:
+                    matched = ev
+                    break
+
+        # Strategy 2: first event with timestamp >= preempt timestamp
+        if matched is None and pe_ts is not None:
+            for ev in events:
+                ev_ts = ev.get("timestamp")
+                if ev_ts and ev_ts >= pe_ts:
+                    matched = ev
+                    break
+
+        # Strategy 3: first event of this stage (no correlation possible)
+        if matched is None and events:
+            matched = events[0]
+
+        if matched:
+            stages[stage] = matched.get("timestamp")
+
+    return stages
 
 
 def reconstruct_preempt_timeline(
     preemption_events: list[dict[str, Any]],
     engine_stats: list[dict[str, Any]],
+    stage_events: dict[str, list[dict[str, Any]]] | None = None,
 ) -> dict[str, Any]:
     """Reconstruct a preempt-to-admission timeline from parsed events.
 
-    This approximates the ``preempt -> restore_start -> restore_done ->
+    This builds the ``preempt -> restore_start -> restore_done ->
     scheduler_wakeup -> admission -> first_prefill/decode`` chain described in
-    issue #134 by correlating preemption events with engine stats snapshots.
+    issue #134. If ``stage_events`` is provided, each episode gets a ``stages``
+    dict with per-stage timestamps and a ``timeline_complete`` bool.
 
-    Returns a dict with:
-      - ``total_preemptions``: int
-      - ``pressure_episodes``: list of dicts, each containing:
-          - ``preempt_timestamp``: str | None
-          - ``preempt_seq_group_id``: int | None
-          - ``restore_approx_timestamp``: str | None (first stat with waiting=0
-            after preemption)
-          - ``restore_to_admission_gap_s``: float | None
-          - ``peak_waiting_reqs``: int
-          - ``peak_kv_usage_pct``: float
-      - ``summary``: dict with aggregate stats
+    Args:
+        preemption_events: list of preempt event dicts from
+            ``parse_preemption_events``.
+        engine_stats: list of engine stat dicts from ``parse_engine_stats``.
+        stage_events: optional dict from ``parse_stage_events``. When provided,
+            episodes are enriched with the 6-stage chain.
+
+    Returns:
+        Dict with:
+        - ``total_preemptions``: int
+        - ``pressure_episodes``: list of dicts, each containing:
+            - ``preempt_timestamp``: str | None
+            - ``preempt_seq_group_id``: int | None
+            - ``restore_approx_timestamp``: str | None
+            - ``restore_to_admission_gap_s``: float | None
+            - ``peak_waiting_reqs``: int
+            - ``peak_kv_usage_pct``: float
+            - ``stages``: dict mapping stage names to timestamps (if stage_events
+              provided)
+            - ``timeline_complete``: bool (if stage_events provided)
+        - ``summary``: dict with aggregate stats
+        - ``timeline_status``: "complete" | "incomplete" | "no_preemptions"
     """
     if not preemption_events:
         return {
@@ -324,6 +566,7 @@ def reconstruct_preempt_timeline(
                 "max_waiting_reqs": 0,
                 "max_kv_usage_pct": 0.0,
             },
+            "timeline_status": "no_preemptions",
         }
 
     episodes: list[dict[str, Any]] = []
@@ -376,22 +619,41 @@ def reconstruct_preempt_timeline(
                         pass
                 break
 
-        episodes.append(
-            {
-                "preempt_timestamp": pe_ts,
-                "preempt_seq_group_id": pe_sgid,
-                "restore_approx_timestamp": restore_ts,
-                "restore_to_admission_gap_s": restore_to_admission_gap_s,
-                "peak_waiting_reqs": peak_waiting,
-                "peak_kv_usage_pct": peak_kv,
-            }
-        )
+        episode: dict[str, Any] = {
+            "preempt_timestamp": pe_ts,
+            "preempt_seq_group_id": pe_sgid,
+            "restore_approx_timestamp": restore_ts,
+            "restore_to_admission_gap_s": restore_to_admission_gap_s,
+            "peak_waiting_reqs": peak_waiting,
+            "peak_kv_usage_pct": peak_kv,
+        }
+
+        # Enrich with 6-stage timeline if stage_events provided
+        if stage_events is not None:
+            stages = _build_stages_for_episode(pe, stage_events)
+            episode["stages"] = stages
+            episode["timeline_complete"] = validate_timeline_complete(episode)
+        else:
+            # Without stage_events, we can only mark preempt; timeline is
+            # inherently incomplete.
+            episode["stages"] = {s: None for s in TIMELINE_STAGES}
+            episode["stages"]["preempt"] = pe_ts
+            episode["timeline_complete"] = False
+
+        episodes.append(episode)
 
     restore_gaps = [
         e["restore_to_admission_gap_s"]
         for e in episodes
         if e["restore_to_admission_gap_s"] is not None
     ]
+
+    # Determine overall timeline_status
+    any_complete = any(e.get("timeline_complete") for e in episodes)
+    if any_complete:
+        timeline_status = "complete"
+    else:
+        timeline_status = "incomplete"
 
     return {
         "total_preemptions": len(preemption_events),
@@ -406,6 +668,97 @@ def reconstruct_preempt_timeline(
                 (e["peak_kv_usage_pct"] for e in episodes), default=0.0
             ),
         },
+        "timeline_status": timeline_status,
+    }
+
+
+def verify_kv_capacity_from_log(
+    log_path: str | Path,
+    target_kv_gib: float,
+    tolerance_gib: float = 2.0,
+) -> dict[str, Any]:
+    """Parse a server log and verify actual KV cache memory matches target.
+
+    This is a fail-closed verification: if the KV cache memory cannot be found
+    in the log, ``within_tolerance`` is False.
+
+    Args:
+        log_path: path to the vLLM server stdout log.
+        target_kv_gib: expected KV cache memory in GiB.
+        tolerance_gib: acceptable difference in GiB (default 2.0).
+
+    Returns:
+        Dict with:
+        - ``actual_kv_gib``: float | None
+        - ``target_kv_gib``: float
+        - ``tolerance_gib``: float
+        - ``diff_gib``: float | None
+        - ``within_tolerance``: bool
+        - ``error``: str | None (error message if verification could not run)
+    """
+    log_path = Path(log_path)
+    try:
+        log_text = log_path.read_text(encoding="utf-8", errors="replace")
+    except (OSError, IOError) as exc:
+        return {
+            "actual_kv_gib": None,
+            "target_kv_gib": target_kv_gib,
+            "tolerance_gib": tolerance_gib,
+            "diff_gib": None,
+            "within_tolerance": False,
+            "error": f"cannot read log file: {exc}",
+        }
+
+    info = parse_kv_cache_info(log_text)
+    actual = info.get("kv_cache_memory_gib")
+
+    if actual is None:
+        return {
+            "actual_kv_gib": None,
+            "target_kv_gib": target_kv_gib,
+            "tolerance_gib": tolerance_gib,
+            "diff_gib": None,
+            "within_tolerance": False,
+            "error": "KV cache memory not found in server log",
+        }
+
+    diff = abs(actual - target_kv_gib)
+    within = diff <= tolerance_gib
+    return {
+        "actual_kv_gib": actual,
+        "target_kv_gib": target_kv_gib,
+        "tolerance_gib": tolerance_gib,
+        "diff_gib": round(diff, 4),
+        "within_tolerance": within,
+        "error": None,
+    }
+
+
+def parse_server_log(log_path: str | Path) -> dict[str, Any]:
+    """Parse a complete vLLM server log file.
+
+    Returns a dict with all parsed sections:
+      - ``kv_cache_info``: dict from parse_kv_cache_info
+      - ``memory_breakdown``: dict from parse_memory_breakdown
+      - ``engine_stats``: list from parse_engine_stats
+      - ``preemption_events``: list from parse_preemption_events
+      - ``victim_selection_events``: list from parse_victim_selection_events
+      - ``stage_events``: dict from parse_stage_events
+      - ``cpu_offload_events``: list from parse_cpu_offload_events
+      - ``log_file``: str (path to the parsed log)
+    """
+    log_path = Path(log_path)
+    log_text = log_path.read_text(encoding="utf-8", errors="replace")
+
+    return {
+        "log_file": str(log_path),
+        "kv_cache_info": parse_kv_cache_info(log_text),
+        "memory_breakdown": parse_memory_breakdown(log_text),
+        "engine_stats": parse_engine_stats(log_text),
+        "preemption_events": parse_preemption_events(log_text),
+        "victim_selection_events": parse_victim_selection_events(log_text),
+        "stage_events": parse_stage_events(log_text),
+        "cpu_offload_events": parse_cpu_offload_events(log_text),
     }
 
 
@@ -423,11 +776,25 @@ def main() -> None:
         default=None,
         help="Output JSON file (default: stdout)",
     )
+    parser.add_argument(
+        "--verify-kv",
+        type=float,
+        default=None,
+        help="Verify KV cache matches this target (GiB) and exit",
+    )
     args = parser.parse_args()
+
+    if args.verify_kv is not None:
+        result = verify_kv_capacity_from_log(args.log_file, args.verify_kv)
+        output = json.dumps(result, indent=2, ensure_ascii=False)
+        print(output)
+        return
 
     result = parse_server_log(args.log_file)
     timeline = reconstruct_preempt_timeline(
-        result["preemption_events"], result["engine_stats"]
+        result["preemption_events"],
+        result["engine_stats"],
+        result["stage_events"],
     )
     result["preempt_timeline"] = timeline
 
