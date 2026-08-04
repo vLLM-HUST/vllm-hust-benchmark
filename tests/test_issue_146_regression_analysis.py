@@ -146,17 +146,38 @@ class TestAnalyzeRegression:
         sonnet_head: float | None = 1589.0,
         latency_base: float | None = 7483.0,
         latency_head: float | None = 12201.0,
+        sonnet_base_count: int = 3,
+        sonnet_head_count: int = 3,
+        latency_base_count: int = 3,
+        latency_head_count: int = 3,
+        sonnet_base_values: list[float] | None = None,
+        sonnet_head_values: list[float] | None = None,
+        latency_base_values: list[float] | None = None,
+        latency_head_values: list[float] | None = None,
     ):
+        def _entry(median, count, values):
+            if values is None:
+                values = [median] * count if median is not None else []
+            return {"median": median, "count": count, "values": values}
+
         return {
             "sonnet-throughput": {
-                "2206f1f7b7": {"median": sonnet_base},
-                "7a63f81e86": {"median": sonnet_head},
-                "83cf83ff20": {"median": None},
+                "2206f1f7b7": _entry(
+                    sonnet_base, sonnet_base_count, sonnet_base_values
+                ),
+                "7a63f81e86": _entry(
+                    sonnet_head, sonnet_head_count, sonnet_head_values
+                ),
+                "83cf83ff20": _entry(None, 0, []),
             },
             "random-latency": {
-                "2206f1f7b7": {"median": latency_base},
-                "7a63f81e86": {"median": None},
-                "83cf83ff20": {"median": latency_head},
+                "2206f1f7b7": _entry(
+                    latency_base, latency_base_count, latency_base_values
+                ),
+                "7a63f81e86": _entry(None, 0, []),
+                "83cf83ff20": _entry(
+                    latency_head, latency_head_count, latency_head_values
+                ),
             },
         }
 
@@ -189,7 +210,7 @@ class TestAnalyzeRegression:
         )
         findings = analyze_mod.analyze_regression(summary)
         assert findings["overall"]["any_regression_confirmed"] is False
-        assert findings["overall"]["action"] == "clean_leaderboard_points"
+        assert findings["overall"]["action"] == "no_action_diagnostic_only"
 
     def test_sonnet_at_threshold(self, analyze_mod):
         """Exactly 10% drop is not a regression (not strictly less than -10%)."""
@@ -215,11 +236,51 @@ class TestAnalyzeRegression:
             sonnet_head=None,
             latency_base=None,
             latency_head=None,
+            sonnet_base_count=0,
+            sonnet_head_count=0,
+            latency_base_count=0,
+            latency_head_count=0,
         )
         findings = analyze_mod.analyze_regression(summary)
         assert findings["sonnet-throughput"]["regression_reproducible"] is False
         assert findings["random-latency"]["regression_reproducible"] is False
-        assert findings["overall"]["action"] == "clean_leaderboard_points"
+        assert findings["overall"]["action"] == "incomplete_evidence"
+        assert findings["overall"]["any_evidence_incomplete"] is True
+
+    def test_insufficient_reps_marks_incomplete(self, analyze_mod):
+        """Fewer than 3 reps must yield incomplete, not no_regression."""
+        summary = self._make_summary(
+            sonnet_base=1926.0,
+            sonnet_head=1850.0,
+            sonnet_head_count=2,
+            sonnet_head_values=[1850.0, 1860.0],
+        )
+        findings = analyze_mod.analyze_regression(summary)
+        assert findings["sonnet-throughput"]["conclusion"] == "incomplete"
+        assert findings["sonnet-throughput"]["evidence_sufficient"] is False
+        assert findings["overall"]["action"] == "incomplete_evidence"
+
+    def test_zero_or_nan_metric_marks_incomplete(self, analyze_mod):
+        """Zero or NaN values must yield incomplete, not no_regression."""
+        summary = self._make_summary(
+            sonnet_base=1926.0,
+            sonnet_head=0.0,
+            sonnet_head_values=[0.0, 0.0, 0.0],
+        )
+        findings = analyze_mod.analyze_regression(summary)
+        assert findings["sonnet-throughput"]["conclusion"] == "incomplete"
+        assert findings["overall"]["action"] == "incomplete_evidence"
+
+    def test_no_clean_leaderboard_action(self, analyze_mod):
+        """The action must never be 'clean_leaderboard_points'."""
+        summary = self._make_summary(
+            sonnet_base=1926.0,
+            sonnet_head=1850.0,
+            latency_base=7483.0,
+            latency_head=8000.0,
+        )
+        findings = analyze_mod.analyze_regression(summary)
+        assert findings["overall"]["action"] != "clean_leaderboard_points"
 
 
 # ---------------------------------------------------------------------------

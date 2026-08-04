@@ -150,6 +150,59 @@ def _delta_pct(base: float | None, head: float | None) -> float | None:
     return round(((head - base) / base) * 100, 2)
 
 
+# Minimum number of valid results required per commit/workload to draw a
+# conclusion.  Below this threshold the report must be marked incomplete
+# rather than claiming no regression.
+MIN_REPS_FOR_CONCLUSION = 3
+
+
+def _is_valid_metric(value: float | None) -> bool:
+    """Return True only for finite, positive metrics."""
+    if value is None:
+        return False
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return False
+    # Must be finite (not NaN/inf) and strictly positive
+    import math
+
+    return math.isfinite(v) and v > 0.0
+
+
+def _check_evidence_sufficient(
+    summary: dict[str, dict[str, dict[str, Any]]],
+    workload: str,
+    commits: list[str],
+) -> tuple[bool, str]:
+    """Verify each commit has at least MIN_REPS_FOR_CONCLUSION valid results.
+
+    Returns (sufficient, reason).  ``reason`` is empty when sufficient.
+    """
+    for commit in commits:
+        entry = summary.get(workload, {}).get(commit, {})
+        count = entry.get("count", 0)
+        median = entry.get("median")
+        if count < MIN_REPS_FOR_CONCLUSION:
+            return False, (
+                f"{workload}/{commit}: only {count} result(s), "
+                f"need >= {MIN_REPS_FOR_CONCLUSION}"
+            )
+        if not _is_valid_metric(median):
+            return False, (
+                f"{workload}/{commit}: median {median!r} is not finite/positive"
+            )
+        # Also verify every individual value is valid
+        values = entry.get("values", [])
+        for i, v in enumerate(values):
+            if not _is_valid_metric(v):
+                return False, (
+                    f"{workload}/{commit}: rep-{i + 1} value {v!r} is not "
+                    f"finite/positive"
+                )
+    return True, ""
+
+
 def analyze_regression(summary: dict[str, dict[str, dict[str, Any]]]) -> dict[str, Any]:
     """Analyze whether the suspected regressions are reproducible.
 
@@ -160,10 +213,20 @@ def analyze_regression(summary: dict[str, dict[str, dict[str, Any]]]) -> dict[st
     Acceptance:
     - sonnet: delta should converge within 10% (not a real regression)
     - random-latency: delta should not stably exceed 20% (not a real regression)
+
+    Evidence gating:
+    - Each compared commit/workload must have >= 3 valid, finite, positive
+      results.  Otherwise the conclusion is ``incomplete`` and no
+      ``clean_leaderboard_points`` action is emitted.
     """
     findings: dict[str, Any] = {}
 
-    # sonnet-throughput regression check
+    # --- sonnet-throughput regression check ---
+    sonnet_commits = ["2206f1f7b7", "7a63f81e86"]
+    sonnet_ok, sonnet_reason = _check_evidence_sufficient(
+        summary, "sonnet-throughput", sonnet_commits
+    )
+
     sonnet_base = (
         summary.get("sonnet-throughput", {}).get("2206f1f7b7", {}).get("median")
     )
@@ -173,8 +236,15 @@ def analyze_regression(summary: dict[str, dict[str, dict[str, Any]]]) -> dict[st
     sonnet_delta = _delta_pct(sonnet_base, sonnet_head)
 
     sonnet_reproducible = False
-    if sonnet_delta is not None and sonnet_delta < -SONNET_THROUGHPUT_THRESHOLD_PCT:
-        sonnet_reproducible = True
+    sonnet_conclusion: str
+    if not sonnet_ok:
+        sonnet_conclusion = "incomplete"
+    else:
+        if sonnet_delta is not None and sonnet_delta < -SONNET_THROUGHPUT_THRESHOLD_PCT:
+            sonnet_reproducible = True
+            sonnet_conclusion = "regression_confirmed"
+        else:
+            sonnet_conclusion = "no_regression_or_noise"
 
     findings["sonnet-throughput"] = {
         "base_commit": "2206f1f7b7",
@@ -184,19 +254,31 @@ def analyze_regression(summary: dict[str, dict[str, dict[str, Any]]]) -> dict[st
         "delta_pct": sonnet_delta,
         "threshold_pct": SONNET_THROUGHPUT_THRESHOLD_PCT,
         "regression_reproducible": sonnet_reproducible,
-        "conclusion": (
-            "regression_confirmed" if sonnet_reproducible else "no_regression_or_noise"
-        ),
+        "conclusion": sonnet_conclusion,
+        "evidence_sufficient": sonnet_ok,
+        "evidence_reason": sonnet_reason,
     }
 
-    # random-latency regression check
+    # --- random-latency regression check ---
+    latency_commits = ["2206f1f7b7", "83cf83ff20"]
+    latency_ok, latency_reason = _check_evidence_sufficient(
+        summary, "random-latency", latency_commits
+    )
+
     latency_base = summary.get("random-latency", {}).get("2206f1f7b7", {}).get("median")
     latency_head = summary.get("random-latency", {}).get("83cf83ff20", {}).get("median")
     latency_delta = _delta_pct(latency_base, latency_head)
 
     latency_reproducible = False
-    if latency_delta is not None and latency_delta > RANDOM_LATENCY_THRESHOLD_PCT:
-        latency_reproducible = True
+    latency_conclusion: str
+    if not latency_ok:
+        latency_conclusion = "incomplete"
+    else:
+        if latency_delta is not None and latency_delta > RANDOM_LATENCY_THRESHOLD_PCT:
+            latency_reproducible = True
+            latency_conclusion = "regression_confirmed"
+        else:
+            latency_conclusion = "no_regression_or_noise"
 
     findings["random-latency"] = {
         "base_commit": "2206f1f7b7",
@@ -206,22 +288,39 @@ def analyze_regression(summary: dict[str, dict[str, dict[str, Any]]]) -> dict[st
         "delta_pct": latency_delta,
         "threshold_pct": RANDOM_LATENCY_THRESHOLD_PCT,
         "regression_reproducible": latency_reproducible,
-        "conclusion": (
-            "regression_confirmed" if latency_reproducible else "no_regression_or_noise"
-        ),
+        "conclusion": latency_conclusion,
+        "evidence_sufficient": latency_ok,
+        "evidence_reason": latency_reason,
     }
 
-    # Overall conclusion
+    # --- Overall conclusion ---
+    any_incomplete = (not sonnet_ok) or (not latency_ok)
     any_confirmed = sonnet_reproducible or latency_reproducible
+
+    if any_incomplete:
+        overall_action = "incomplete_evidence"
+        overall_resolution = (
+            "Evidence insufficient for at least one comparison. "
+            "Do not clean leaderboard points or draw regression conclusions "
+            "until each compared commit/workload has >= "
+            f"{MIN_REPS_FOR_CONCLUSION} valid results."
+        )
+    elif any_confirmed:
+        overall_action = "bisect_and_fix"
+        overall_resolution = "Regression(s) reproduced. Bisect to find root cause."
+    else:
+        overall_action = "no_action_diagnostic_only"
+        overall_resolution = (
+            "No reproducible regression. Results remain diagnostic/historical "
+            "re-test artifacts and are NOT published as official leaderboard "
+            "targets (max_model_len=30720 differs from the official 32768)."
+        )
+
     findings["overall"] = {
         "any_regression_confirmed": any_confirmed,
-        "action": ("bisect_and_fix" if any_confirmed else "clean_leaderboard_points"),
-        "issue_146_resolution": (
-            "Regression(s) reproduced. Bisect to find root cause."
-            if any_confirmed
-            else "No reproducible regression. Clean suspect leaderboard points "
-            "and replace with re-test medians."
-        ),
+        "any_evidence_incomplete": any_incomplete,
+        "action": overall_action,
+        "issue_146_resolution": overall_resolution,
     }
 
     return findings
@@ -239,6 +338,16 @@ def generate_report(
         "source_dir": str(result_dir),
         "engine_commits": ENGINE_COMMITS,
         "workloads": WORKLOADS,
+        # This re-test uses max_model_len=30720 which differs from the
+        # official fixed-target value of 32768.  Results are therefore
+        # diagnostic/historical re-test artifacts and must NOT be published
+        # as current official leaderboard targets.
+        "artifact_class": "diagnostic_historical_retest",
+        "official_target": False,
+        "max_model_len_note": (
+            "Re-test used max_model_len=30720 (original backfill value); "
+            "official fixed-target spec requires 32768."
+        ),
         "results_summary": summary,
         "regression_analysis": findings,
     }

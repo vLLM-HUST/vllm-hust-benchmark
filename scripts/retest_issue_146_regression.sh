@@ -3,17 +3,27 @@
 # Runs sonnet-throughput and random-latency benchmarks at 3 vllm-hust commits
 # with 3 repetitions each, using a fixed vllm-ascend-hust plugin commit.
 #
+# Key design decisions per reviewer feedback:
+#   1. Commits are interleaved (round-robin) across reps, not run sequentially.
+#   2. Benchmark failures are NOT swallowed (no || true); temporary output is
+#      atomically moved to the final location only after field validation.
+#   3. Process cleanup is job-owned (tracks the server PID it started) rather
+#      than global pkill.
+#   4. Provenance captures observed full SHA, dirty diff/patch identity, and
+#      Python/CANN/driver versions in an env-manifest.json.
+#   5. Results are diagnostic/historical re-test artifacts, NOT official targets.
+#
 # Usage:
 #   ./retest_issue_146_regression.sh [--reps N] [--dry-run]
 #
 # Output:
-#   /data/issue146-retest-results/<commit>/<workload>/rep-<N>/raw.json
-#   /data/issue146-retest-results/summary.json
+#   /data/issue146-retest-results/<commit>/<workload>/rep-<N>/{raw.json,bench.log,run_info.txt,env-manifest.json}
 
 set -euo pipefail
 
 REPS=${REPS:-3}
 DRY_RUN=0
+NPU_DEVICE="${NPU_DEVICE:-0}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -26,6 +36,7 @@ done
 # ---------------------------------------------------------------------------
 # Configuration (matches original backfill parameters)
 # ---------------------------------------------------------------------------
+
 MODEL_PATH="/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct"
 VLLM_HUST_REPO="/root/vllm/vllm-hust"
 ASCEND_REPO="/root/vllm/vllm-ascend-hust"
@@ -36,7 +47,7 @@ SONNET_DATASET="/root/vllm/vllm-hust/benchmarks/sonnet.txt"
 # Fixed plugin commit (same as original July backfill)
 PLUGIN_COMMIT="b2328661bd54079ce95eee78037ed9166d52e983"  # pragma: allowlist secret
 
-# Three engine commits from issue #146
+# Three engine commits from issue #146 (full SHAs resolved at checkout)
 ENGINE_COMMITS=("2206f1f7b7" "7a63f81e86" "83cf83ff20")
 
 # Benchmark parameters (matching original backfill)
@@ -44,8 +55,8 @@ MAX_MODEL_LEN=30720
 GPU_MEM_UTIL=0.6
 
 # Export env for NPU access (matches backfill_single_gpu.py:_build_env)
-export ASCEND_RT_VISIBLE_DEVICES=0
-export ASCEND_VISIBLE_DEVICES=0
+export ASCEND_RT_VISIBLE_DEVICES=$NPU_DEVICE
+export ASCEND_VISIBLE_DEVICES=$NPU_DEVICE
 export VLLM_USE_V1=1
 export VLLM_TARGET_DEVICE=npu
 export VLLM_PLUGINS=ascend
@@ -65,23 +76,27 @@ export ATB_HOME_PATH="${_atb_home}/${_cxx_abi_dir}"
 
 mkdir -p "$RESULT_DIR"
 
+# Track the server PID we start so cleanup is job-owned.
+_CURRENT_SERVER_PID=""
+
 # ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
 
-kill_leftover_processes() {
-    pkill -9 -f "vllm.entrypoints" 2>/dev/null || true
-    pkill -9 -f "run_engine_core" 2>/dev/null || true
-    pkill -9 -f "from multiprocessing.resource_tracker import main" 2>/dev/null || true
-    pkill -9 -f "$MODEL_PATH" 2>/dev/null || true
-    sleep 3
-    # Kill any process on NPU 0
-    local pids
-    pids=$(npu-smi info 2>/dev/null | grep "| 0       0" | grep -o '| [0-9]*' | head -5 | tr -d '| ' || true)
-    if [ -n "$pids" ]; then
-        echo "  Killing leftover NPU 0 processes: $pids"
-        for pid in $pids; do kill -9 "$pid" 2>/dev/null || true; done
-        sleep 3
+log() { echo "[$(date '+%Y%m%dT%H%M%SZ')] $*"; }
+
+# Job-owned cleanup: only kill processes we started, not global pkill.
+kill_owned_server() {
+    if [ -n "$_CURRENT_SERVER_PID" ]; then
+        # Kill the server process and its children
+        kill -9 "$_CURRENT_SERVER_PID" 2>/dev/null || true
+        # Kill children (engine core workers spawned by the server)
+        local child
+        for child in $(pgrep -P "$_CURRENT_SERVER_PID" 2>/dev/null || true); do
+            kill -9 "$child" 2>/dev/null || true
+        done
+        _CURRENT_SERVER_PID=""
+        sleep 2
     fi
 }
 
@@ -91,118 +106,191 @@ clear_pycache() {
 }
 
 # Regenerate the auto-generated _build_info.py for vllm-ascend-hust.
-# git checkout / clean removes it because it is created at build time by
-# setup.py:gen_build_info().  Without it, vllm_ascend.utils fails with
-# ImportError: cannot import name '_build_info' from 'vllm_ascend'.
 ensure_build_info() {
     local build_info="$ASCEND_REPO/vllm_ascend/_build_info.py"
-    echo "  Ensuring $build_info exists for 910B2 (A2)..."
     cat > "$build_info" <<'EOF'
 # Auto-generated file
 __device_type__ = 'A2'
 EOF
 }
 
-# Patch triton-ascend API compatibility: vllm-ascend-hust plugin commit
-# b2328661bd references triton.language.extra.ascend.libdevice.pow, but
-# triton-ascend 3.5.0+ renamed the `ascend` extra submodule to `cann`.
-# This patches the single offending line in penalties.py.
+# Patch triton-ascend API compatibility.
 patch_triton_compat() {
     local penalties="$ASCEND_REPO/vllm_ascend/worker/v2/sample/penalties.py"
     if [ -f "$penalties" ] && grep -q 'triton.language.extra.ascend.libdevice' "$penalties"; then
         sed -i 's/triton\.language\.extra\.ascend\.libdevice/triton.language.extra.cann.libdevice/' "$penalties"
-        echo "  Patched: triton.language.extra.ascend -> cann in $penalties"
     fi
 }
 
-# Fix the openai naming conflict: vllm/entrypoints/cli/openai.py shadows
-# the pip-installed openai package, causing circular imports.  Rename it
-# to openai_cmd.py and update main.py references (same fix as
-# backfill_single_gpu.py).
+# Fix the openai naming conflict.
 patch_openai_conflict() {
     local cli_dir="$VLLM_HUST_REPO/vllm/entrypoints/cli"
     local openai_py="$cli_dir/openai.py"
     local openai_cmd_py="$cli_dir/openai_cmd.py"
 
-    # If both exist, remove openai.py (openai_cmd.py is already the renamed copy).
     if [ -f "$openai_py" ] && [ -f "$openai_cmd_py" ]; then
         rm -f "$openai_py"
-        echo "  Patched: removed duplicate $openai_py, keeping $openai_cmd_py"
-    fi
-
-    if [ -f "$openai_cmd_py" ] && [ ! -f "$openai_py" ]; then
-        # Already renamed, just ensure main.py is up to date.
-        :
     elif [ -f "$openai_py" ] && [ ! -f "$openai_cmd_py" ]; then
         mv "$openai_py" "$openai_cmd_py"
-        echo "  Patched: renamed $openai_py -> $openai_cmd_py"
     fi
 
-    # Update all references in main.py.
     local main_py="$cli_dir/main.py"
     if [ -f "$main_py" ]; then
-        local content
-        content=$(cat "$main_py")
-        local orig="$content"
-        content="${content//import vllm.entrypoints.cli.openai\n/import vllm.entrypoints.cli.openai_cmd\n}"
-        # Use sed for the replacement since bash string replacement is tricky
         sed -i \
             -e 's/import vllm\.entrypoints\.cli\.openai$/import vllm.entrypoints.cli.openai_cmd/' \
             -e 's/vllm\.entrypoints\.cli\.openai,/vllm.entrypoints.cli.openai_cmd,/' \
             "$main_py" 2>/dev/null || true
-        if [ "$content" != "$orig" ]; then
-            echo "  Patched: updated imports in $main_py"
-        fi
+    fi
+}
+
+# Capture the dirty diff / patch identity after applying derived patches.
+# Returns a short hash identifying the working-tree modification state.
+capture_patch_identity() {
+    local repo="$1"
+    local diff
+    diff=$(git -C "$repo" diff HEAD 2>/dev/null || true)
+    if [ -z "$diff" ]; then
+        echo "clean"
+    else
+        # Use md5sum of the diff as a patch identity
+        echo "$diff" | md5sum | awk '{print $1}'
     fi
 }
 
 checkout_repo() {
     local repo="$1" commit="$2" name="$3"
-    echo "  Checking out $name at $commit..."
+    log "  Checking out $name at $commit..."
     git -C "$repo" reset --hard HEAD --quiet 2>/dev/null || true
     git -C "$repo" clean -fdx --quiet 2>/dev/null || true
-    # If checkout still fails due to untracked files, force remove them
     if ! git -C "$repo" checkout -f "$commit" 2>/dev/null; then
-        echo "  Retrying with aggressive clean..."
+        log "  Retrying with aggressive clean..."
         git -C "$repo" ls-files --others --ignored --exclude-standard -z 2>/dev/null | \
             xargs -0 rm -f 2>/dev/null || true
         git -C "$repo" checkout -f "$commit" 2>&1
     fi
-    git -C "$repo" rev-parse HEAD
-    # vllm-ascend-hust needs its build-time _build_info.py regenerated
-    # after every checkout because clean -fdx removes it.
     if [ "$repo" = "$ASCEND_REPO" ]; then
         ensure_build_info
         patch_triton_compat
     fi
-    # vllm-hust needs the openai.py naming conflict patched after every
-    # checkout because reset --hard restores the original file names.
     if [ "$repo" = "$VLLM_HUST_REPO" ]; then
         patch_openai_conflict
     fi
 }
 
+# Write a comprehensive env-manifest.json with full provenance.
+write_env_manifest() {
+    local outdir="$1"
+    local engine_short="$2"
+    local engine_full="$3"
+    local plugin_full="$4"
+
+    local engine_patch plugin_patch
+    engine_patch=$(capture_patch_identity "$VLLM_HUST_REPO")
+    plugin_patch=$(capture_patch_identity "$ASCEND_REPO")
+
+    local python_version cann_version driver_version
+    python_version=$("$PYTHON" --version 2>&1 | awk '{print $2}')
+    cann_version=$(cat /usr/local/Ascend/ascend-toolkit/latest/version.cfg 2>/dev/null | head -1 || echo "unknown")
+    driver_version=$(cat /usr/local/Ascend/driver/version.info 2>/dev/null | head -1 || echo "unknown")
+
+    cat > "$outdir/env-manifest.json" <<EOF
+{
+  "engine_commit_requested": "$engine_short",
+  "engine_commit_observed": "$engine_full",
+  "engine_patch_identity": "$engine_patch",
+  "plugin_commit_requested": "$PLUGIN_COMMIT",
+  "plugin_commit_observed": "$plugin_full",
+  "plugin_patch_identity": "$plugin_patch",
+  "python_version": "$python_version",
+  "cann_version": "$cann_version",
+  "driver_version": "$driver_version",
+  "npu_device": "$NPU_DEVICE",
+  "max_model_len": "$MAX_MODEL_LEN",
+  "gpu_memory_utilization": "$GPU_MEM_UTIL",
+  "artifact_class": "diagnostic_historical_retest",
+  "official_target": false,
+  "note": "Re-test used max_model_len=30720 (original backfill value); official fixed-target spec requires 32768. Results are diagnostic only."
+}
+EOF
+}
+
+# Validate that the raw.json contains a valid primary metric.
+# Exits non-zero if validation fails.
+validate_raw_json() {
+    local raw_file="$1" workload="$2"
+    "$PYTHON" -c "
+import json, sys, math
+with open('$raw_file') as f:
+    raw = json.load(f)
+if '$workload' == 'sonnet-throughput':
+    val = raw.get('tokens_per_second') or raw.get('throughput_tps') or raw.get('tokens/s')
+    if not val and isinstance(raw.get('throughput'), dict):
+        val = raw['throughput'].get('tokens/s')
+elif '$workload' == 'random-latency':
+    val = raw.get('mean_ttft_ms') or raw.get('ttft_ms')
+    if val is None:
+        val = raw.get('avg_latency')
+        if val is not None:
+            val = float(val) * 1000.0
+    if val is None:
+        val = raw.get('p50')
+else:
+    print('Unknown workload: $workload', file=sys.stderr)
+    sys.exit(1)
+if val is None:
+    print('Missing primary metric in $raw_file', file=sys.stderr)
+    sys.exit(1)
+val = float(val)
+if not math.isfinite(val) or val <= 0:
+    print(f'Invalid metric value {val} in $raw_file', file=sys.stderr)
+    sys.exit(1)
+print(f'Validated: {val}')
+" || return 1
+}
+
 run_sonnet_throughput() {
     local commit="$1" rep="$2" outdir="$3"
-    local outfile="$outdir/raw.json"
-    echo "  [sonnet-throughput] commit=$commit rep=$rep -> $outfile"
+    local tmpdir="$outdir/.tmp"
+    local tmp_out="$tmpdir/raw.json"
+    log "  [sonnet-throughput] commit=$commit rep=$rep"
 
+    rm -rf "$tmpdir"
+    mkdir -p "$tmpdir"
+
+    # No || true: let failures propagate
     $PYTHON -m vllm.entrypoints.cli.main bench throughput \
         --model "$MODEL_PATH" \
         --dataset-name sonnet \
         --num-prompts 200 \
         --gpu-memory-utilization $GPU_MEM_UTIL \
         --max-model-len $MAX_MODEL_LEN \
-        --output-json "$outfile" \
+        --output-json "$tmp_out" \
         --dataset-path "$SONNET_DATASET" \
-        2>&1 | tee "$outdir/bench.log" || true
+        2>&1 | tee "$tmpdir/bench.log"
+
+    # Validate before atomic move
+    if [ ! -f "$tmp_out" ]; then
+        log "  ERROR: raw.json not produced for sonnet-throughput/$commit/rep-$rep"
+        return 1
+    fi
+    validate_raw_json "$tmp_out" "sonnet-throughput" || return 1
+
+    # Atomic move to final location
+    mv "$tmp_out" "$outdir/raw.json"
+    mv "$tmpdir/bench.log" "$outdir/bench.log"
+    rm -rf "$tmpdir"
 }
 
 run_random_latency() {
     local commit="$1" rep="$2" outdir="$3"
-    local outfile="$outdir/raw.json"
-    echo "  [random-latency] commit=$commit rep=$rep -> $outfile"
+    local tmpdir="$outdir/.tmp"
+    local tmp_out="$tmpdir/raw.json"
+    log "  [random-latency] commit=$commit rep=$rep"
 
+    rm -rf "$tmpdir"
+    mkdir -p "$tmpdir"
+
+    # No || true: let failures propagate
     $PYTHON -m vllm.entrypoints.cli.main bench latency \
         --model "$MODEL_PATH" \
         --input-len 1024 \
@@ -212,80 +300,121 @@ run_random_latency() {
         --num-iters 30 \
         --gpu-memory-utilization $GPU_MEM_UTIL \
         --max-model-len $MAX_MODEL_LEN \
-        --output-json "$outfile" \
-        2>&1 | tee "$outdir/bench.log" || true
+        --output-json "$tmp_out" \
+        2>&1 | tee "$tmpdir/bench.log"
+
+    # Validate before atomic move
+    if [ ! -f "$tmp_out" ]; then
+        log "  ERROR: raw.json not produced for random-latency/$commit/rep-$rep"
+        return 1
+    fi
+    validate_raw_json "$tmp_out" "random-latency" || return 1
+
+    # Atomic move to final location
+    mv "$tmp_out" "$outdir/raw.json"
+    mv "$tmpdir/bench.log" "$outdir/bench.log"
+    rm -rf "$tmpdir"
+}
+
+run_single_benchmark() {
+    local commit="$1" workload="$2" rep="$3"
+    local outdir="$RESULT_DIR/$commit/$workload/rep-$rep"
+    mkdir -p "$outdir"
+
+    # Write run metadata
+    cat > "$outdir/run_info.txt" <<EOF
+engine_commit=$commit
+plugin_commit=$PLUGIN_COMMIT
+workload=$workload
+rep=$rep
+timestamp=$(date -u +%Y%m%dT%H%M%SZ)
+gpu_mem_util=$GPU_MEM_UTIL
+max_model_len=$MAX_MODEL_LEN
+npu_device=$NPU_DEVICE
+artifact_class=diagnostic_historical_retest
+official_target=false
+EOF
+
+    if [ "$DRY_RUN" -eq 1 ]; then
+        log "  [DRY RUN] Skipping $workload/$commit/rep-$rep"
+        return 0
+    fi
+
+    kill_owned_server
+    ensure_build_info
+
+    if [ "$workload" = "sonnet-throughput" ]; then
+        run_sonnet_throughput "$commit" "$rep" "$outdir"
+    else
+        run_random_latency "$commit" "$rep" "$outdir"
+    fi
 }
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
-echo "========================================"
-echo "Issue #146 Regression Re-test"
-echo "Reps: $REPS"
-echo "Engine commits: ${ENGINE_COMMITS[*]}"
-echo "Plugin commit: $PLUGIN_COMMIT (fixed)"
-echo "Model: $MODEL_PATH"
-echo "Result dir: $RESULT_DIR"
-echo "========================================"
+log "========================================"
+log "Issue #146 Regression Re-test"
+log "Reps: $REPS"
+log "Engine commits: ${ENGINE_COMMITS[*]}"
+log "Plugin commit: $PLUGIN_COMMIT (fixed)"
+log "Model: $MODEL_PATH"
+log "Result dir: $RESULT_DIR"
+log "NPU device: $NPU_DEVICE"
+log "Artifact class: diagnostic_historical_retest (NOT official target)"
+log "========================================"
 
 if [ "$DRY_RUN" -eq 1 ]; then
-    echo "[dry-run] Would run $(( ${#ENGINE_COMMITS[@]} * 2 * REPS )) benchmarks"
+    log "[dry-run] Would run $(( ${#ENGINE_COMMITS[@]} * 2 * REPS )) benchmarks"
     exit 0
 fi
 
-# Step 1: Fix plugin commit
-echo ""
-echo "=== Step 1: Checkout vllm-ascend-hust at $PLUGIN_COMMIT ==="
+# Step 1: Fix plugin commit and capture full SHA
+log ""
+log "=== Step 1: Checkout vllm-ascend-hust at $PLUGIN_COMMIT ==="
 checkout_repo "$ASCEND_REPO" "$PLUGIN_COMMIT" "vllm-ascend-hust"
 clear_pycache
+PLUGIN_FULL_SHA=$(git -C "$ASCEND_REPO" rev-parse HEAD)
+log "  Plugin observed full SHA: $PLUGIN_FULL_SHA"
 
-# Step 2: Run benchmarks
-for commit in "${ENGINE_COMMITS[@]}"; do
-    echo ""
-    echo "=== Engine commit: $commit ==="
-    checkout_repo "$VLLM_HUST_REPO" "$commit" "vllm-hust"
-    clear_pycache
-
+# Step 2: Run benchmarks with INTERLEAVED execution (round-robin across reps)
+# Per reviewer: "把三个 commit 交替执行，不要整段跑完一个 commit 后再跑另一个"
+log ""
+log "=== Step 2: Interleaved benchmark execution ==="
+for rep in $(seq 1 "$REPS"); do
     for workload in "sonnet-throughput" "random-latency"; do
-        for rep in $(seq 1 "$REPS"); do
-            outdir="$RESULT_DIR/$commit/$workload/rep-$rep"
-            mkdir -p "$outdir"
+        for commit in "${ENGINE_COMMITS[@]}"; do
+            log ""
+            log "--- Rep $rep / $workload / commit $commit ---"
 
-            # Save run metadata
-            {
-                echo "engine_commit=$commit"
-                echo "plugin_commit=$PLUGIN_COMMIT"
-                echo "workload=$workload"
-                echo "rep=$rep"
-                echo "timestamp=$(date -u +%Y%m%dT%H%M%SZ)"
-                echo "gpu_mem_util=$GPU_MEM_UTIL"
-                echo "max_model_len=$MAX_MODEL_LEN"
-            } > "$outdir/run_info.txt"
+            # Checkout engine commit for this round
+            checkout_repo "$VLLM_HUST_REPO" "$commit" "vllm-hust"
+            clear_pycache
+            ENGINE_FULL_SHA=$(git -C "$VLLM_HUST_REPO" rev-parse HEAD)
 
-            kill_leftover_processes
-            ensure_build_info
+            run_single_benchmark "$commit" "$workload" "$rep"
 
-            if [ "$workload" = "sonnet-throughput" ]; then
-                run_sonnet_throughput "$commit" "$rep" "$outdir"
-            else
-                run_random_latency "$commit" "$rep" "$outdir"
-            fi
+            # Write env manifest with full provenance
+            write_env_manifest "$RESULT_DIR/$commit/$workload/rep-$rep" \
+                "$commit" "$ENGINE_FULL_SHA" "$PLUGIN_FULL_SHA"
 
+            kill_owned_server
             sleep 5
         done
     done
 done
 
 # Step 3: Restore repos to main
-echo ""
-echo "=== Restoring repos to main ==="
+log ""
+log "=== Restoring repos to main ==="
 git -C "$VLLM_HUST_REPO" checkout main --quiet 2>&1 || true
 git -C "$ASCEND_REPO" checkout main --quiet 2>&1 || true
+kill_owned_server
 
-kill_leftover_processes
-
-echo ""
-echo "========================================"
-echo "Re-test complete. Results in $RESULT_DIR"
-echo "========================================"
+log ""
+log "========================================"
+log "Re-test complete. Results in $RESULT_DIR"
+log "Artifact class: diagnostic_historical_retest"
+log "Run analysis: python scripts/analyze_issue_146_regression.py --result-dir $RESULT_DIR"
+log "========================================"
