@@ -152,11 +152,14 @@ def _write_strict_execution_evidence(
         },
     )
     inspect_path = repeat / "owned-container-create-inspect.json"
-    _write(inspect_path, [{"Image": runtime_image_digest}])
+    _write(inspect_path, [{"Id": container_id, "Image": runtime_image_digest}])
+    create_argv_path = repeat / "runtime/docker-create-argv.json"
+    _write(create_argv_path, ["docker", "create", runtime_image_digest, "runner"])
     runtime_identity_path = repeat / "owned-container-identity.json"
     _write(
         runtime_identity_path,
         {
+            "container_id": container_id,
             "runtime_image_digest": runtime_image_digest,
             "runtime_storage_identity": {
                 "transport": "registry",
@@ -167,6 +170,8 @@ def _write_strict_execution_evidence(
                 "path": inspect_path.name,
                 "sha256": hashlib.sha256(inspect_path.read_bytes()).hexdigest(),
             },
+            "create_argv": _hashed_record(repeat, create_argv_path),
+            "runner_argv": ["runner"],
         },
     )
     _write(
@@ -359,6 +364,11 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
         }
     )
     for repeat in sorted(results.glob("repeat-*")):
+        strict = json.loads(
+            (repeat / "strict_execution_evidence.json").read_text(encoding="utf-8")
+        )
+        container_id = strict["container_id"]
+        startup_id = strict["startup_instance_id"]
         manifest_path = repeat / "runtime/containerd-storage-manifest.json"
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest_path.write_bytes(manifest_blob)
@@ -377,11 +387,35 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
         )
         docker_image_inspect = repeat / "runtime/docker-image-inspect.json"
         _write(docker_image_inspect, [{"Id": storage_digest}])
+        expected_runtime = repeat / "runtime/expected-runtime.json"
+        _write(
+            expected_runtime,
+            {
+                "schema_version": "strict-owned-runtime-expected/v1",
+                "core_commit": "core-sha",
+                "backend_commit": "plugin-sha",
+                "packages": packages,
+            },
+        )
+        expected_sha256 = hashlib.sha256(expected_runtime.read_bytes()).hexdigest()
+        container_identity = repeat / "runtime/container-identity.json"
+        _write(
+            container_identity,
+            {"startup_instance_id": startup_id, "container_id": container_id},
+        )
+        identity_host_source = (
+            repeat.parents[3] / "root-identities" / f"{repeat.name}.json"
+        )
+        identity_host_source.parent.mkdir(parents=True, exist_ok=True)
+        identity_host_source.write_bytes(container_identity.read_bytes())
         actual_runtime = repeat / "runtime/actual-runtime.json"
         _write(
             actual_runtime,
             {
                 "schema_version": "strict-owned-runtime-preflight/v1",
+                "startup_instance_id": startup_id,
+                "container_id": container_id,
+                "expected_contract_sha256": expected_sha256,
                 "sources": {
                     "core": {"commit": "core-sha", "clean": True},
                     "backend": {"commit": "plugin-sha", "clean": True},
@@ -389,12 +423,73 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                 "packages": packages,
             },
         )
+        repo_root = repeat.parents[2]
+        expected_cmd = [
+            "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py",
+            "--expected",
+            "/workspace/vllm-hust-benchmark/"
+            + expected_runtime.relative_to(repo_root).as_posix(),
+            "--expected-sha256",
+            expected_sha256,
+            "--container-identity",
+            "/run/vllm-hust/container-identity.json",
+            "--output",
+            "/workspace/vllm-hust-benchmark/"
+            + actual_runtime.relative_to(repo_root).as_posix(),
+            "--startup-instance-id",
+            startup_id,
+            "--",
+            "runner",
+        ]
         container_inspect = repeat / "owned-container-create-inspect.json"
-        _write(container_inspect, [{"Image": storage_digest}])
+        _write(
+            container_inspect,
+            [
+                {
+                    "Id": container_id,
+                    "Image": storage_digest,
+                    "Config": {
+                        "Entrypoint": ["/usr/local/bin/python"],
+                        "Cmd": expected_cmd,
+                    },
+                    "Mounts": [
+                        {
+                            "Source": str(repo_root),
+                            "Destination": "/workspace/vllm-hust-benchmark",
+                            "RW": True,
+                        },
+                        {
+                            "Source": str(identity_host_source),
+                            "Destination": "/run/vllm-hust/container-identity.json",
+                            "RW": False,
+                        },
+                    ],
+                }
+            ],
+        )
+        create_argv_path = repeat / "runtime/docker-create-argv.json"
+        _write(
+            create_argv_path,
+            [
+                "docker",
+                "create",
+                "--pull=never",
+                "--entrypoint",
+                "/usr/local/bin/python",
+                "--mount",
+                (
+                    f"type=bind,src={identity_host_source},"
+                    "dst=/run/vllm-hust/container-identity.json,readonly"
+                ),
+                storage_digest,
+                *expected_cmd,
+            ],
+        )
         runtime_identity = repeat / "owned-container-identity.json"
         _write(
             runtime_identity,
             {
+                "container_id": container_id,
                 "runtime_image_digest": config_digest,
                 "runtime_storage_identity": {
                     "transport": "docker-archive",
@@ -417,11 +512,15 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                     ),
                 },
                 "inspect": _hashed_record(repeat, container_inspect),
+                "create_argv": _hashed_record(repeat, create_argv_path),
+                "runner_argv": ["runner"],
+                "expected_runtime_contract": _hashed_record(repeat, expected_runtime),
+                "container_identity": _hashed_record(repeat, container_identity),
+                "container_identity_host_source": str(identity_host_source),
                 "actual_runtime_preflight": _hashed_record(repeat, actual_runtime),
             },
         )
         strict_path = repeat / "strict_execution_evidence.json"
-        strict = json.loads(strict_path.read_text(encoding="utf-8"))
         strict["runtime_image_digest"] = config_digest
         strict["runtime_storage_identity"] = _hashed_record(repeat, runtime_identity)
         _write(strict_path, strict)
@@ -611,6 +710,85 @@ def test_docker_archive_runtime_uses_config_digest_for_compatibility(
             results,
             repo / "out-storage-digest",
             verified_by="test-review",
+        )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    (
+        ("inspect_only_image", "inspect image mismatch"),
+        ("wrapper_bypass", "preflight entrypoint mismatch"),
+        ("cmd_drift", "preflight command mismatch"),
+        ("create_argv_drift", "create/preflight command relationship mismatch"),
+        ("writable_alias", "reachable through a writable alias"),
+        ("contract_hash_drift", "preflight binding mismatch"),
+        ("container_mismatch", "preflight binding mismatch"),
+        ("startup_mismatch", "preflight binding mismatch"),
+    ),
+)
+def test_rejects_unbound_docker_archive_preflight(
+    tmp_path: Path, mutation: str, message: str
+) -> None:
+    repo, staged, results, _, target = _fixture(tmp_path)
+    _materialize_docker_archive_runtime(results, target)
+    registry_path = repo / "leaderboard-data" / "official-targets.json"
+    _write(registry_path, {"targets": [target]})
+    (registry_path.parent / "official-targets.sha256").write_text(
+        hashlib.sha256(registry_path.read_bytes()).hexdigest() + "\n",
+        encoding="utf-8",
+    )
+    repeat = results / "repeat-01"
+    identity_path = repeat / "owned-container-identity.json"
+    identity = json.loads(identity_path.read_text(encoding="utf-8"))
+    if mutation in {
+        "inspect_only_image",
+        "wrapper_bypass",
+        "cmd_drift",
+        "writable_alias",
+    }:
+        inspect_path = repeat / identity["inspect"]["path"]
+        inspect = json.loads(inspect_path.read_text(encoding="utf-8"))
+        if mutation == "inspect_only_image":
+            inspect[0] = {"Image": inspect[0]["Image"]}
+        elif mutation == "wrapper_bypass":
+            inspect[0]["Config"]["Entrypoint"] = ["/bin/bash"]
+        elif mutation == "cmd_drift":
+            inspect[0]["Config"]["Cmd"].append("drift")
+        else:
+            inspect[0]["Mounts"].append(
+                {
+                    "Source": identity["container_identity_host_source"],
+                    "Destination": "/workspace/identity-alias.json",
+                    "RW": True,
+                }
+            )
+        _write(inspect_path, inspect)
+        identity["inspect"] = _hashed_record(repeat, inspect_path)
+    elif mutation == "create_argv_drift":
+        create_path = repeat / identity["create_argv"]["path"]
+        create_argv = json.loads(create_path.read_text(encoding="utf-8"))
+        create_argv.append("drift")
+        _write(create_path, create_argv)
+        identity["create_argv"] = _hashed_record(repeat, create_path)
+    else:
+        actual_path = repeat / identity["actual_runtime_preflight"]["path"]
+        actual = json.loads(actual_path.read_text(encoding="utf-8"))
+        if mutation == "contract_hash_drift":
+            actual["expected_contract_sha256"] = "0" * 64
+        elif mutation == "container_mismatch":
+            actual["container_id"] = "f" * 64
+        else:
+            actual["startup_instance_id"] = "other-startup"
+        _write(actual_path, actual)
+        identity["actual_runtime_preflight"] = _hashed_record(repeat, actual_path)
+    _write(identity_path, identity)
+    strict_path = repeat / "strict_execution_evidence.json"
+    strict = json.loads(strict_path.read_text(encoding="utf-8"))
+    strict["runtime_storage_identity"] = _hashed_record(repeat, identity_path)
+    _write(strict_path, strict)
+    with pytest.raises(ValueError, match=message):
+        attest_completed_baseline(
+            repo, staged, results, repo / f"out-{mutation}", verified_by="test-review"
         )
 
 

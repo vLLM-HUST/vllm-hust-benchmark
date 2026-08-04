@@ -228,9 +228,141 @@ def _validate_strict_execution_evidence(
     if (
         not isinstance(inspect, list)
         or not inspect
+        or inspect[0].get("Id") != container_id
         or inspect[0].get("Image") != storage_digest
     ):
         raise ValueError(f"owned container inspect image mismatch: {repeat_dir}")
+    create_argv_path = _verify_hashed_evidence_file(
+        repeat_dir,
+        owned_identity.get("create_argv") or {},
+        field="owned_container.create_argv",
+    )
+    create_argv = json.loads(create_argv_path.read_text(encoding="utf-8"))
+    if (
+        not isinstance(create_argv, list)
+        or create_argv[:2] != ["docker", "create"]
+        or storage_digest not in create_argv
+    ):
+        raise ValueError(f"owned docker create argv is malformed: {repeat_dir}")
+    if owned_identity.get("container_id") != container_id:
+        raise ValueError(f"owned identity container mismatch: {repeat_dir}")
+    if transport == "docker-archive":
+        expected_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            owned_identity.get("expected_runtime_contract") or {},
+            field="owned_container.expected_runtime_contract",
+        )
+        expected_sha256 = _sha256(expected_path)
+        container_identity_path = _verify_hashed_evidence_file(
+            repeat_dir,
+            owned_identity.get("container_identity") or {},
+            field="owned_container.container_identity",
+        )
+        container_identity = _load_object(container_identity_path)
+        if (
+            container_identity.get("container_id") != container_id
+            or container_identity.get("startup_instance_id") != startup_id
+        ):
+            raise ValueError(
+                f"owned injected container identity mismatch: {repeat_dir}"
+            )
+        runner_argv = owned_identity.get("runner_argv")
+        if not isinstance(runner_argv, list) or not runner_argv:
+            raise ValueError(f"owned runner argv is missing: {repeat_dir}")
+        repo_mounts = [
+            mount
+            for mount in (inspect[0].get("Mounts") or [])
+            if mount.get("Destination") == "/workspace/vllm-hust-benchmark"
+        ]
+        if len(repo_mounts) != 1:
+            raise ValueError(f"owned benchmark repository mount mismatch: {repeat_dir}")
+        repo_root = Path(str(repo_mounts[0].get("Source") or "")).resolve()
+        try:
+            expected_relative = expected_path.relative_to(repo_root)
+            actual_relative = (repeat_dir / "runtime/actual-runtime.json").relative_to(
+                repo_root
+            )
+        except ValueError as error:
+            raise ValueError(
+                f"owned preflight evidence escapes repository mount: {repeat_dir}"
+            ) from error
+        expected_container_path = (
+            "/workspace/vllm-hust-benchmark/" + expected_relative.as_posix()
+        )
+        identity_container_path = "/run/vllm-hust/container-identity.json"
+        identity_mounts = [
+            mount
+            for mount in (inspect[0].get("Mounts") or [])
+            if mount.get("Destination") == identity_container_path
+        ]
+        identity_host_source = Path(
+            str(owned_identity.get("container_identity_host_source") or "")
+        )
+        if (
+            len(identity_mounts) != 1
+            or Path(str(identity_mounts[0].get("Source") or "")).resolve()
+            != identity_host_source.resolve()
+            or identity_mounts[0].get("RW") is not False
+        ):
+            raise ValueError(f"owned container identity mount mismatch: {repeat_dir}")
+        for mount in inspect[0].get("Mounts") or []:
+            if mount.get("RW") is not True:
+                continue
+            writable_source = Path(str(mount.get("Source") or "")).resolve()
+            try:
+                identity_host_source.resolve().relative_to(writable_source)
+            except ValueError:
+                continue
+            raise ValueError(
+                f"owned container identity is reachable through a writable alias: {repeat_dir}"
+            )
+        actual_container_path = (
+            "/workspace/vllm-hust-benchmark/" + actual_relative.as_posix()
+        )
+        expected_cmd = [
+            "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py",
+            "--expected",
+            expected_container_path,
+            "--expected-sha256",
+            expected_sha256,
+            "--container-identity",
+            identity_container_path,
+            "--output",
+            actual_container_path,
+            "--startup-instance-id",
+            startup_id,
+            "--",
+            *runner_argv,
+        ]
+        config = inspect[0].get("Config") or {}
+        if config.get("Entrypoint") != ["/usr/local/bin/python"]:
+            raise ValueError(
+                f"owned runtime preflight entrypoint mismatch: {repeat_dir}"
+            )
+        if config.get("Cmd") != expected_cmd:
+            raise ValueError(f"owned runtime preflight command mismatch: {repeat_dir}")
+        image_index = create_argv.index(storage_digest)
+        try:
+            entrypoint_index = create_argv.index("--entrypoint")
+        except ValueError as error:
+            raise ValueError(
+                f"docker create lacks the preflight entrypoint: {repeat_dir}"
+            ) from error
+        if (
+            "--pull=never" not in create_argv
+            or create_argv[entrypoint_index + 1 : entrypoint_index + 2]
+            != ["/usr/local/bin/python"]
+            or create_argv[image_index + 1 :] != expected_cmd
+        ):
+            raise ValueError(
+                f"docker create/preflight command relationship mismatch: {repeat_dir}"
+            )
+        if (
+            actual.get("startup_instance_id") != startup_id
+            or actual.get("container_id") != container_id
+            or actual.get("expected_contract_sha256") != expected_sha256
+        ):
+            raise ValueError(f"actual runtime preflight binding mismatch: {repeat_dir}")
 
     immutable_record = evidence.get("immutable_inputs")
     immutable_record = immutable_record if isinstance(immutable_record, Mapping) else {}

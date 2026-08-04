@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from importlib.metadata import PackageNotFoundError, version
 import json
 import os
@@ -59,15 +60,31 @@ def atomic_json(path: Path, payload: object) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--expected", type=Path, required=True)
+    parser.add_argument("--expected-sha256", required=True)
+    parser.add_argument("--container-identity", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--startup-instance-id", required=True)
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
     if not command:
         raise RuntimeError("owned runtime preflight lacks a runner command")
-    expected = json.loads(args.expected.read_text(encoding="utf-8"))
+    expected_raw = args.expected.read_bytes()
+    expected_sha256 = hashlib.sha256(expected_raw).hexdigest()
+    if expected_sha256 != args.expected_sha256:
+        raise RuntimeError("owned runtime expected contract hash mismatch")
+    expected = json.loads(expected_raw)
+    container_identity = json.loads(args.container_identity.read_text(encoding="utf-8"))
+    if container_identity.get("startup_instance_id") != args.startup_instance_id:
+        raise RuntimeError("owned runtime startup identity mismatch")
+    container_id = str(container_identity.get("container_id") or "")
+    if len(container_id) != 64:
+        raise RuntimeError("owned runtime container identity is invalid")
     actual = {
         "schema_version": SCHEMA,
+        "startup_instance_id": args.startup_instance_id,
+        "container_id": container_id,
+        "expected_contract_sha256": expected_sha256,
         "sources": {name: git_identity(path) for name, path in SOURCE_PATHS.items()},
         "packages": package_versions(sorted(expected["packages"])),
     }

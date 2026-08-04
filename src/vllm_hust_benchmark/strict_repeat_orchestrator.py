@@ -542,8 +542,12 @@ class StrictRepeatOrchestrator:
         self.runtime_storage_identity_path = (
             self.repeat_dir / "owned-container-identity.json"
         )
+        self.expected_runtime_contract_sha256 = ""
         self._validate_target_scope()
         self.startup_id = uuid.uuid4().hex
+        self.host_container_identity_path = (
+            args.lease_dir.resolve() / "identities" / f"{self.startup_id}.json"
+        )
         self.hostname = socket.gethostname()
         self.root = RootCommands()
         self.container_name = f"{args.container_name_prefix}-{self.startup_id}"
@@ -673,7 +677,19 @@ class StrictRepeatOrchestrator:
         for device in ("davinci_manager", "devmm_svm", "hisi_hdc"):
             argv.extend(["--device", f"/dev/{device}:/dev/{device}"])
         if self.runtime_transport == "docker-archive":
+            if not re.fullmatch(r"[0-9a-f]{64}", self.expected_runtime_contract_sha256):
+                raise GateFailure("runtime preflight contract has not been hashed")
             argv.insert(2, "--pull=never")
+            argv.extend(
+                [
+                    "--mount",
+                    (
+                        "type=bind,src="
+                        f"{self.host_container_identity_path},"
+                        "dst=/run/vllm-hust/container-identity.json,readonly"
+                    ),
+                ]
+            )
             argv.extend(["--entrypoint", "/usr/local/bin/python"])
             expected_path = (
                 self.container_repeat_dir / "runtime" / "expected-runtime.json"
@@ -685,8 +701,14 @@ class StrictRepeatOrchestrator:
                     "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py",
                     "--expected",
                     str(expected_path),
+                    "--expected-sha256",
+                    self.expected_runtime_contract_sha256,
+                    "--container-identity",
+                    "/run/vllm-hust/container-identity.json",
                     "--output",
                     str(output_path),
+                    "--startup-instance-id",
+                    self.startup_id,
                     "--",
                     *self.args.command,
                 ]
@@ -710,8 +732,9 @@ class StrictRepeatOrchestrator:
         }
         if set(self.expected_runtime_packages) != required_packages:
             raise GateFailure("runtime does not pin the exact six package versions")
+        expected_path = self.repeat_dir / "runtime" / "expected-runtime.json"
         atomic_json(
-            self.repeat_dir / "runtime" / "expected-runtime.json",
+            expected_path,
             {
                 "schema_version": "strict-owned-runtime-expected/v1",
                 "core_commit": self.expected_core_commit,
@@ -719,6 +742,38 @@ class StrictRepeatOrchestrator:
                 "packages": self.expected_runtime_packages,
             },
         )
+        self.expected_runtime_contract_sha256 = sha256_file(expected_path)
+        identity_directory = self.host_container_identity_path.parent
+        identity_directory.mkdir(parents=True, exist_ok=True, mode=0o755)
+        for candidate in (
+            Path("/"),
+            *reversed(self.host_container_identity_path.parents),
+            identity_directory,
+        ):
+            if not candidate.exists():
+                continue
+            metadata = candidate.lstat()
+            if (
+                candidate.is_symlink()
+                or metadata.st_uid != 0
+                or metadata.st_mode & 0o022
+            ):
+                raise GateFailure(
+                    f"owned container identity path is not root-safe: {candidate}"
+                )
+        container_identity_path = self.host_container_identity_path
+        container_identity_path.write_text(
+            json.dumps(
+                {
+                    "startup_instance_id": self.startup_id,
+                    "container_id": None,
+                },
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        container_identity_path.chmod(0o600)
 
     def _attest_runtime_storage(self) -> dict[str, Any]:
         if self.runtime_transport != "docker-archive":
@@ -850,11 +905,42 @@ class StrictRepeatOrchestrator:
                 raise GateFailure(f"Ascend management device is missing: /dev/{device}")
         self._write_runtime_preflight_contract()
         storage_identity = self._attest_runtime_storage()
-        result = self.root.run(self._docker_create_argv())
+        create_argv = self._docker_create_argv()
+        create_argv_path = self.repeat_dir / "runtime" / "docker-create-argv.json"
+        atomic_json(create_argv_path, create_argv)
+        result = self.root.run(create_argv)
         candidate = result.stdout.strip()
         if CONTAINER_ID_RE.fullmatch(candidate):
             self.container_id = candidate
         self.container_id = self._resolve_container(candidate)
+        container_identity_path = self.host_container_identity_path
+        with container_identity_path.open("w", encoding="utf-8") as stream:
+            stream.write(
+                json.dumps(
+                    {
+                        "startup_instance_id": self.startup_id,
+                        "container_id": self.container_id,
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            stream.flush()
+            os.fsync(stream.fileno())
+        container_identity_path.chmod(0o444)
+        identity_metadata = container_identity_path.lstat()
+        if (
+            container_identity_path.is_symlink()
+            or identity_metadata.st_uid != 0
+            or identity_metadata.st_mode & 0o022
+        ):
+            raise GateFailure("owned container identity file is not root-safe")
+        container_identity_evidence_path = (
+            self.repeat_dir / "runtime" / "container-identity.json"
+        )
+        container_identity_evidence_path.write_bytes(
+            container_identity_path.read_bytes()
+        )
         self.lease.bind_container_id(self.container_id)
         inspect = self.root.run(["docker", "inspect", self.container_id])
         try:
@@ -864,21 +950,28 @@ class StrictRepeatOrchestrator:
         self._validate_owned_container_inspect(inspect_record)
         inspect_path = self.repeat_dir / "owned-container-create-inspect.json"
         inspect_path.write_text(inspect.stdout, encoding="utf-8")
-        atomic_json(
-            self.runtime_storage_identity_path,
-            {
-                "container_id": self.container_id,
-                "container_name": self.container_name,
-                "runtime_image_digest": self.args.runtime_image_digest,
-                "runtime_storage_identity": storage_identity,
-                "create_argv": self._docker_create_argv(),
-                "inspect": evidence_record(self.repeat_dir, inspect_path),
-                "physical_to_logical_npu": {
-                    str(physical): logical
-                    for logical, physical in enumerate(self.devices)
-                },
+        identity = {
+            "container_id": self.container_id,
+            "container_name": self.container_name,
+            "runtime_image_digest": self.args.runtime_image_digest,
+            "runtime_storage_identity": storage_identity,
+            "create_argv": evidence_record(self.repeat_dir, create_argv_path),
+            "runner_argv": self.args.command,
+            "container_identity": evidence_record(
+                self.repeat_dir, container_identity_evidence_path
+            ),
+            "container_identity_host_source": str(container_identity_path),
+            "inspect": evidence_record(self.repeat_dir, inspect_path),
+            "physical_to_logical_npu": {
+                str(physical): logical for logical, physical in enumerate(self.devices)
             },
-        )
+        }
+        if self.runtime_transport == "docker-archive":
+            identity["expected_runtime_contract"] = evidence_record(
+                self.repeat_dir,
+                self.repeat_dir / "runtime" / "expected-runtime.json",
+            )
+        atomic_json(self.runtime_storage_identity_path, identity)
 
     def _validate_owned_container_inspect(self, record: dict[str, Any]) -> None:
         config = record.get("Config") or {}
@@ -1265,7 +1358,11 @@ class StrictRepeatOrchestrator:
         if actual.get("schema_version") != "strict-owned-runtime-preflight/v1":
             raise GateFailure("owned runtime preflight schema mismatch")
         if (
-            sources.get("core", {}).get("commit") != self.expected_core_commit
+            actual.get("startup_instance_id") != self.startup_id
+            or actual.get("container_id") != self.container_id
+            or actual.get("expected_contract_sha256")
+            != self.expected_runtime_contract_sha256
+            or sources.get("core", {}).get("commit") != self.expected_core_commit
             or sources.get("core", {}).get("clean") is not True
             or sources.get("backend", {}).get("commit") != self.expected_backend_commit
             or sources.get("backend", {}).get("clean") is not True
@@ -1308,6 +1405,22 @@ class StrictRepeatOrchestrator:
         remaining = self.root.run(["docker", "inspect", self.container_id], check=False)
         if remaining.returncode == 0:
             self.root.run(["docker", "rm", self.container_id])
+
+    def _cleanup_owned_identity_source(self) -> None:
+        path = self.host_container_identity_path
+        if not path.exists():
+            return
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, TypeError, json.JSONDecodeError) as error:
+            raise GateFailure(
+                "refusing to remove malformed owned identity source"
+            ) from error
+        if payload.get("startup_instance_id") != self.startup_id or (
+            self.container_id and payload.get("container_id") != self.container_id
+        ):
+            raise GateFailure("refusing to remove unowned container identity source")
+        path.unlink()
 
     def _cleanup_facts(self, exit_code: int) -> dict[str, Any]:
         npu = self.root.run(["npu-smi", "info"])
@@ -1484,6 +1597,7 @@ class StrictRepeatOrchestrator:
         finally:
             if self.lease.handles:
                 self.lease.mark_released()
+            self._cleanup_owned_identity_source()
             self._make_outputs_readable()
 
     def _make_outputs_readable(self) -> None:

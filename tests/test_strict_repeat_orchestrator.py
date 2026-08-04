@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -112,6 +111,8 @@ def _orchestrator_stub(tmp_path: Path) -> orchestrator.StrictRepeatOrchestrator:
     instance.runtime_config_digest = instance.args.runtime_image_digest
     instance.runtime_local_image_ref = instance.args.runtime_image_digest
     instance.runtime_storage_manifest_digest = None
+    instance.expected_runtime_contract_sha256 = "e" * 64
+    instance.host_container_identity_path = tmp_path / "leases" / "identity.json"
     return instance
 
 
@@ -706,11 +707,16 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
     )
     container_inspect = write_json(
         "owned-container-create-inspect.json",
-        [{"Image": runtime_digest}],
+        [{"Id": container_id, "Image": runtime_digest}],
+    )
+    create_argv = write_json(
+        "runtime/docker-create-argv.json",
+        ["docker", "create", runtime_digest, "runner"],
     )
     runtime_identity = write_json(
         "owned-container-identity.json",
         {
+            "container_id": container_id,
             "runtime_image_digest": runtime_digest,
             "runtime_storage_identity": {
                 "transport": "registry",
@@ -718,6 +724,8 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
                 "local_create_ref": runtime_digest,
             },
             "inspect": orchestrator.evidence_record(repeat, container_inspect),
+            "create_argv": orchestrator.evidence_record(repeat, create_argv),
+            "runner_argv": ["runner"],
         },
     )
     payload = orchestrator.build_strict_evidence(
@@ -762,119 +770,6 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
     )
     assert validated["container_id"] == container_id
     assert validated["peak_hbm_mb"] == 2048.0
-
-    config_blob = b'{"architecture":"arm64"}'
-    config_digest = "sha256:" + hashlib.sha256(config_blob).hexdigest()
-    layer_digest = "sha256:" + "1" * 64
-    manifest_blob = json.dumps(
-        {
-            "config": {"digest": config_digest},
-            "layers": [{"digest": layer_digest, "size": 123}],
-        },
-        separators=(",", ":"),
-    ).encode()
-    storage_digest = "sha256:" + hashlib.sha256(manifest_blob).hexdigest()
-    manifest_path = repeat / "runtime/containerd-storage-manifest.json"
-    manifest_path.write_bytes(manifest_blob)
-    config_path = repeat / "runtime/containerd-config-blob.json"
-    config_path.write_bytes(config_blob)
-    layer_info = repeat / "runtime/containerd-layer-000.txt"
-    layer_info.write_text(f"digest: {layer_digest}\n", encoding="utf-8")
-    archive_digest = "sha256:" + "a" * 64
-    archive_identity = write_json(
-        "runtime/archive-identity.json",
-        {
-            "path": "/var/tmp/runtime.tar.zst",
-            "size_bytes": 123,
-            "sha256": archive_digest,
-        },
-    )
-    docker_image_inspect = write_json(
-        "runtime/docker-image-inspect.json", [{"Id": storage_digest}]
-    )
-    packages = {
-        "datasets": "3.3.0",
-        "torch": "2.9.0+cpu",
-        "torch-npu": "2.9.0",
-        "vllm": "0.18.0+empty",
-        "vllm-ascend": "0.18.0",
-        "xxhash": "3.6.0",
-    }
-    actual_runtime = write_json(
-        "runtime/actual-runtime.json",
-        {
-            "schema_version": "strict-owned-runtime-preflight/v1",
-            "sources": {
-                "core": {"commit": "b" * 40, "clean": True},
-                "backend": {"commit": "c" * 40, "clean": True},
-            },
-            "packages": packages,
-        },
-    )
-    container_inspect.write_text(
-        json.dumps([{"Image": storage_digest}]) + "\n", encoding="utf-8"
-    )
-    runtime_identity.write_text(
-        json.dumps(
-            {
-                "runtime_image_digest": config_digest,
-                "runtime_storage_identity": {
-                    "transport": "docker-archive",
-                    "runtime_config_digest": config_digest,
-                    "containerd_storage_manifest_digest": storage_digest,
-                    "local_create_ref": storage_digest,
-                    "manifest_config_digest": config_digest,
-                    "raw_manifest": orchestrator.evidence_record(repeat, manifest_path),
-                    "raw_config_blob": orchestrator.evidence_record(
-                        repeat, config_path
-                    ),
-                    "layers": [
-                        {
-                            "digest": layer_digest,
-                            "size": 123,
-                            "raw_info": orchestrator.evidence_record(
-                                repeat, layer_info
-                            ),
-                        }
-                    ],
-                    "archive": orchestrator.evidence_record(repeat, archive_identity),
-                    "docker_image_inspect": orchestrator.evidence_record(
-                        repeat, docker_image_inspect
-                    ),
-                },
-                "inspect": orchestrator.evidence_record(repeat, container_inspect),
-                "actual_runtime_preflight": orchestrator.evidence_record(
-                    repeat, actual_runtime
-                ),
-            }
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    payload["runtime_image_digest"] = config_digest
-    payload["runtime_storage_identity"] = orchestrator.evidence_record(
-        repeat, runtime_identity
-    )
-    write_json("strict_execution_evidence.json", payload)
-    target["baseline_runtime"] = {
-        "runtime_transport": "docker-archive",
-        "runtime_image_digest": config_digest,
-        "runtime_config_digest": config_digest,
-        "containerd_storage_manifest_digest": storage_digest,
-        "runtime_archive_sha256": archive_digest,
-        "core_commit": "b" * 40,
-        "backend_commit": "c" * 40,
-        "runtime_packages": packages,
-    }
-    archive_validated = _validate_strict_execution_evidence(
-        repeat, target, {"peak_mem_mb": 2048}
-    )
-    assert archive_validated["runtime_storage_manifest_digest"] == storage_digest
-
-    target["baseline_runtime"]["containerd_storage_manifest_digest"] = config_digest
-    with pytest.raises(ValueError, match="masquerades"):
-        _validate_strict_execution_evidence(repeat, target, {"peak_mem_mb": 2048})
-    target["baseline_runtime"]["containerd_storage_manifest_digest"] = storage_digest
 
     payload["ownership"][0]["host_pid"] = 1200
     write_json("strict_execution_evidence.json", payload)
