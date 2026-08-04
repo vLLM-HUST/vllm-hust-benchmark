@@ -28,7 +28,7 @@
       "local_path": "/home/shuhao/vllm-hust-compat-assets/model-snapshot-711ad2ea6aa40cfca18895e8aca02ab92df1a746",
       "local_state": "incomplete",
       "verification": {
-        "observed_at": "2026-08-04T14:21:20Z",
+        "observed_at": "2026-08-04T15:43:28Z",
         "completed_weight_shards": 1,
         "weight_shards_total": 8,
         "incomplete_weight_files": 7,
@@ -36,6 +36,33 @@
       },
       "transfer_required": true,
       "transfer_source_requirement": "exact-revision snapshot from the control-verified .112 source with complete metadata and per-file size and SHA256 verification"
+    }
+  ],
+  "input_asset_plan": [
+    {
+      "trace_target_id": "burstgpt-v2-production-replay",
+      "asset": "BurstGPT_3.csv",
+      "local_path": "/data/shared_models/strict-inputs/BurstGPT_3.csv",
+      "local_state": "complete",
+      "verification": {
+        "size_bytes": 231682327,
+        "sha256": "2299986a07388aa303ec2c41d1131e756db650a39ed6ef9dfe7cc3d7f9a43b8f",
+        "registry_matches": true
+      },
+      "transfer_required": false
+    },
+    {
+      "trace_target_id": "tracelab-v0.0.1-coding-agent-replay",
+      "asset": "syfi_coding_trace.jsonl.gz",
+      "local_path": "/data/shared_models/strict-inputs/syfi_coding_trace.jsonl.gz",
+      "local_state": "complete",
+      "verification": {
+        "size_bytes": 53601226,
+        "sha256": "9d265eae69a31cae203848bea936f018148eed7ca8bf56050c5abe96da0b4e6b",
+        "registry_matches": true,
+        "gzip_test_passed": true
+      },
+      "transfer_required": false
     }
   ],
   "minimum_transfer_set": [
@@ -71,6 +98,17 @@
       "torch": "2.10.0+cpu",
       "torch_npu": "2.10.0"
     }
+  },
+  "no_start_readiness": {
+    "runtime_ready": true,
+    "input_assets_ready": true,
+    "model_ready": false,
+    "fresh_tp2_safety_gate_ready": false,
+    "ready_for_start": false,
+    "blockers": [
+      "The exact DeepSeek model snapshot is incomplete and still requires transfer plus per-file verification.",
+      "No fresh authorized TP2 safety gate or single-use execution authorization is present."
+    ]
   },
   "non_execution_evidence": true,
   "notes": [
