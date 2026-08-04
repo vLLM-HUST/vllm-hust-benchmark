@@ -18,7 +18,6 @@ OWNED_RUNTIME_PREFLIGHT = (
 STRICT_ASCEND_READONLY_MOUNTS = (
     ("/usr/local/Ascend/driver", "directory"),
     ("/etc/ascend_install.info", "file"),
-    ("/etc/hccn.conf", "file"),
 )
 _WORKER_RE = re.compile(r"(?:vllmworker|worker_tp)", re.IGNORECASE)
 _ENGINE_CORE_RE = re.compile(r"enginecore", re.IGNORECASE)

@@ -50,7 +50,6 @@ def _ascend_mounts() -> list[dict[str, object]]:
         for path in (
             "/usr/local/Ascend/driver",
             "/etc/ascend_install.info",
-            "/etc/hccn.conf",
         )
     ]
 
@@ -818,7 +817,7 @@ def test_rejects_unbound_docker_archive_preflight(
             next(
                 mount
                 for mount in inspect[0]["Mounts"]
-                if mount.get("Destination") == "/etc/hccn.conf"
+                if mount.get("Destination") == "/etc/ascend_install.info"
             )["RW"] = True
         else:
             inspect[0]["Mounts"].append(

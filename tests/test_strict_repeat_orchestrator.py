@@ -133,7 +133,6 @@ def test_docker_create_is_owned_ephemeral_and_scoped(tmp_path: Path) -> None:
     assert (
         "type=bind,src=/etc/ascend_install.info,dst=/etc/ascend_install.info,readonly"
     ) in argv
-    assert "type=bind,src=/etc/hccn.conf,dst=/etc/hccn.conf,readonly" in argv
     assert not any("src=/usr/local/bin/npu-smi" in item for item in argv)
     assert any(
         value.startswith("VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE=") for value in argv
@@ -457,10 +456,7 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
             },
             *[
                 {"Source": path, "Destination": path, "RW": False}
-                for path in (
-                    "/etc/ascend_install.info",
-                    "/etc/hccn.conf",
-                )
+                for path in ("/etc/ascend_install.info",)
             ],
         ],
     }
@@ -642,8 +638,8 @@ def test_trusted_mount_source_accepts_safe_file_and_directory(tmp_path: Path) ->
 def test_trusted_mount_source_fails_closed(tmp_path: Path, failure: str) -> None:
     directory = tmp_path / "etc"
     directory.mkdir()
-    source = directory / "hccn.conf"
-    source.write_text("address_0=127.0.0.1\n", encoding="utf-8")
+    source = directory / "ascend_install.info"
+    source.write_text("Install_Path_Param=/usr/local/Ascend\n", encoding="utf-8")
     tmp_path.chmod(0o755)
     directory.chmod(0o755)
     source.chmod(0o444)
@@ -901,7 +897,6 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
                     for path in (
                         "/usr/local/Ascend/driver",
                         "/etc/ascend_install.info",
-                        "/etc/hccn.conf",
                     )
                 ],
             }
@@ -917,7 +912,6 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
                 for path in (
                     "/usr/local/Ascend/driver",
                     "/etc/ascend_install.info",
-                    "/etc/hccn.conf",
                 )
                 for item in (
                     "--mount",
