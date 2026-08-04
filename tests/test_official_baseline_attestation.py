@@ -424,7 +424,8 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
             },
         )
         repo_root = repeat.parents[2]
-        expected_cmd = [
+        expected_process_argv = [
+            "/usr/local/python3.11.14/bin/python",
             "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py",
             "--expected",
             "/workspace/vllm-hust-benchmark/"
@@ -448,9 +449,11 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                 {
                     "Id": container_id,
                     "Image": storage_digest,
+                    "Path": expected_process_argv[0],
+                    "Args": expected_process_argv[1:],
                     "Config": {
-                        "Entrypoint": ["/usr/local/bin/python"],
-                        "Cmd": expected_cmd,
+                        "Entrypoint": [expected_process_argv[0]],
+                        "Cmd": expected_process_argv[1:],
                     },
                     "Mounts": [
                         {
@@ -475,14 +478,14 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                 "create",
                 "--pull=never",
                 "--entrypoint",
-                "/usr/local/bin/python",
+                expected_process_argv[0],
                 "--mount",
                 (
                     f"type=bind,src={identity_host_source},"
                     "dst=/run/vllm-hust/container-identity.json,readonly"
                 ),
                 storage_digest,
-                *expected_cmd,
+                *expected_process_argv[1:],
             ],
         )
         runtime_identity = repeat / "owned-container-identity.json"
@@ -718,6 +721,8 @@ def test_docker_archive_runtime_uses_config_digest_for_compatibility(
     (
         ("inspect_only_image", "inspect image mismatch"),
         ("wrapper_bypass", "preflight entrypoint mismatch"),
+        ("path_drift", "preflight command mismatch"),
+        ("args_drift", "preflight command mismatch"),
         ("cmd_drift", "preflight command mismatch"),
         ("create_argv_drift", "create/preflight command relationship mismatch"),
         ("writable_alias", "reachable through a writable alias"),
@@ -743,6 +748,8 @@ def test_rejects_unbound_docker_archive_preflight(
     if mutation in {
         "inspect_only_image",
         "wrapper_bypass",
+        "path_drift",
+        "args_drift",
         "cmd_drift",
         "writable_alias",
     }:
@@ -752,6 +759,10 @@ def test_rejects_unbound_docker_archive_preflight(
             inspect[0] = {"Image": inspect[0]["Image"]}
         elif mutation == "wrapper_bypass":
             inspect[0]["Config"]["Entrypoint"] = ["/bin/bash"]
+        elif mutation == "path_drift":
+            inspect[0]["Path"] = "/image/default-entrypoint"
+        elif mutation == "args_drift":
+            inspect[0]["Args"].append("drift")
         elif mutation == "cmd_drift":
             inspect[0]["Config"]["Cmd"].append("drift")
         else:

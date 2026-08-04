@@ -11,6 +11,10 @@ CANONICAL_WORKER_RULE = (
     "per-physical-npu: prefer cmdline matching VLLMWorker/Worker_TP, "
     "then EngineCore, then other owned compute processes; tie-break by lowest host PID"
 )
+STRICT_V018_RUNTIME_PYTHON = "/usr/local/python3.11.14/bin/python"
+OWNED_RUNTIME_PREFLIGHT = (
+    "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py"
+)
 _WORKER_RE = re.compile(r"(?:vllmworker|worker_tp)", re.IGNORECASE)
 _ENGINE_CORE_RE = re.compile(r"enginecore", re.IGNORECASE)
 

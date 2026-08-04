@@ -17,6 +17,8 @@ from vllm_hust_benchmark.immutable_input_attestation import (
 )
 from vllm_hust_benchmark.strict_execution_contract import (
     CANONICAL_WORKER_RULE,
+    OWNED_RUNTIME_PREFLIGHT,
+    STRICT_V018_RUNTIME_PYTHON,
     canonical_worker_key,
 )
 
@@ -334,8 +336,9 @@ def _validate_strict_execution_evidence(
         actual_container_path = (
             "/workspace/vllm-hust-benchmark/" + actual_relative.as_posix()
         )
-        expected_cmd = [
-            "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py",
+        expected_process_argv = [
+            STRICT_V018_RUNTIME_PYTHON,
+            OWNED_RUNTIME_PREFLIGHT,
             "--expected",
             expected_container_path,
             "--expected-sha256",
@@ -350,11 +353,15 @@ def _validate_strict_execution_evidence(
             *runner_argv,
         ]
         config = inspect[0].get("Config") or {}
-        if config.get("Entrypoint") != ["/usr/local/bin/python"]:
+        if config.get("Entrypoint") != [expected_process_argv[0]]:
             raise ValueError(
                 f"owned runtime preflight entrypoint mismatch: {repeat_dir}"
             )
-        if config.get("Cmd") != expected_cmd:
+        if (
+            config.get("Cmd") != expected_process_argv[1:]
+            or inspect[0].get("Path") != expected_process_argv[0]
+            or inspect[0].get("Args") != expected_process_argv[1:]
+        ):
             raise ValueError(f"owned runtime preflight command mismatch: {repeat_dir}")
         image_index = create_argv.index(storage_digest)
         try:
@@ -366,8 +373,8 @@ def _validate_strict_execution_evidence(
         if (
             "--pull=never" not in create_argv
             or create_argv[entrypoint_index + 1 : entrypoint_index + 2]
-            != ["/usr/local/bin/python"]
-            or create_argv[image_index + 1 :] != expected_cmd
+            != [expected_process_argv[0]]
+            or create_argv[image_index + 1 :] != expected_process_argv[1:]
         ):
             raise ValueError(
                 f"docker create/preflight command relationship mismatch: {repeat_dir}"

@@ -27,6 +27,8 @@ from typing import Any, Mapping, Sequence
 
 from vllm_hust_benchmark.strict_execution_contract import (
     CANONICAL_WORKER_RULE,
+    OWNED_RUNTIME_PREFLIGHT,
+    STRICT_V018_RUNTIME_PYTHON,
     canonical_worker_key,
 )
 
@@ -642,6 +644,29 @@ class StrictRepeatOrchestrator:
             )
         return container_id
 
+    def _owned_process_argv(self) -> list[str]:
+        """Return the complete audited argv that Docker must execute."""
+        if self.runtime_transport != "docker-archive":
+            return list(self.args.command)
+        expected_path = self.container_repeat_dir / "runtime" / "expected-runtime.json"
+        output_path = self.container_repeat_dir / "runtime" / "actual-runtime.json"
+        return [
+            STRICT_V018_RUNTIME_PYTHON,
+            OWNED_RUNTIME_PREFLIGHT,
+            "--expected",
+            str(expected_path),
+            "--expected-sha256",
+            self.expected_runtime_contract_sha256,
+            "--container-identity",
+            "/run/vllm-hust/container-identity.json",
+            "--output",
+            str(output_path),
+            "--startup-instance-id",
+            self.startup_id,
+            "--",
+            *self.args.command,
+        ]
+
     def _docker_create_argv(self) -> list[str]:
         argv = [
             "docker",
@@ -704,31 +729,17 @@ class StrictRepeatOrchestrator:
                     ),
                 ]
             )
-            argv.extend(["--entrypoint", "/usr/local/bin/python"])
-            expected_path = (
-                self.container_repeat_dir / "runtime" / "expected-runtime.json"
-            )
-            output_path = self.container_repeat_dir / "runtime" / "actual-runtime.json"
-            argv.extend(
-                [
-                    self.runtime_local_image_ref,
-                    "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py",
-                    "--expected",
-                    str(expected_path),
-                    "--expected-sha256",
-                    self.expected_runtime_contract_sha256,
-                    "--container-identity",
-                    "/run/vllm-hust/container-identity.json",
-                    "--output",
-                    str(output_path),
-                    "--startup-instance-id",
-                    self.startup_id,
-                    "--",
-                    *self.args.command,
-                ]
-            )
-        else:
-            argv.extend([self.runtime_local_image_ref, *self.args.command])
+        process_argv = self._owned_process_argv()
+        if not process_argv:
+            raise GateFailure("owned command is empty")
+        argv.extend(
+            [
+                "--entrypoint",
+                process_argv[0],
+                self.runtime_local_image_ref,
+                *process_argv[1:],
+            ]
+        )
         return argv
 
     def _write_runtime_preflight_contract(self) -> None:
@@ -1002,6 +1013,14 @@ class StrictRepeatOrchestrator:
             raise GateFailure("owned container network mode is not none")
         if host_config.get("IpcMode") != "host":
             raise GateFailure("owned container IPC mode is not host")
+        process_argv = self._owned_process_argv()
+        if (
+            config.get("Entrypoint") != [process_argv[0]]
+            or config.get("Cmd") != process_argv[1:]
+            or record.get("Path") != process_argv[0]
+            or record.get("Args") != process_argv[1:]
+        ):
+            raise GateFailure("owned container process argv mismatch")
 
         actual_devices = {
             (item.get("PathOnHost"), item.get("PathInContainer"))

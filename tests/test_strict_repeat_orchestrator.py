@@ -134,6 +134,27 @@ def test_docker_create_is_owned_ephemeral_and_scoped(tmp_path: Path) -> None:
         value.startswith("VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE=") for value in argv
     )
     assert "--pull=never" not in argv
+    image_index = argv.index(instance.runtime_local_image_ref)
+    entrypoint_index = argv.index("--entrypoint")
+    assert argv[entrypoint_index + 1] == instance.args.command[0]
+    assert argv[image_index + 1 :] == instance.args.command[1:]
+
+
+def test_docker_create_preserves_runner_argument_boundaries(tmp_path: Path) -> None:
+    instance = _orchestrator_stub(tmp_path)
+    instance.args.command = [
+        "/usr/bin/env",
+        "KEY=value with spaces",
+        "bash",
+        "-c",
+        "literal;not-host-shell",
+        "--",
+        "$(not-expanded)",
+    ]
+    argv = instance._docker_create_argv()
+    image_index = argv.index(instance.runtime_local_image_ref)
+    assert argv[argv.index("--entrypoint") + 1] == "/usr/bin/env"
+    assert argv[image_index + 1 :] == instance.args.command[1:]
 
 
 def _docker29_runtime() -> dict[str, object]:
@@ -162,6 +183,16 @@ def test_docker29_contract_maps_storage_to_config_and_create_ref(
     assert runtime["containerd_storage_manifest_digest"] in argv
     assert runtime["runtime_config_digest"] not in argv
     assert "--pull=never" in argv
+    image_index = argv.index(runtime["containerd_storage_manifest_digest"])
+    assert argv[argv.index("--entrypoint") + 1] == (
+        "/usr/local/python3.11.14/bin/python"
+    )
+    assert argv[image_index + 1] == (
+        "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py"
+    )
+    assert argv[image_index + 1 :][-len(instance.args.command) :] == (
+        instance.args.command
+    )
 
 
 def test_docker29_contract_rejects_wrong_config_and_masquerading_storage() -> None:
@@ -384,7 +415,13 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
     record = {
         "Id": instance.container_id,
         "Image": instance.args.runtime_image_digest,
-        "Config": {"Labels": {"vllm-hust.strict-startup-id": instance.startup_id}},
+        "Path": instance.args.command[0],
+        "Args": instance.args.command[1:],
+        "Config": {
+            "Labels": {"vllm-hust.strict-startup-id": instance.startup_id},
+            "Entrypoint": [instance.args.command[0]],
+            "Cmd": instance.args.command[1:],
+        },
         "HostConfig": {
             "AutoRemove": True,
             "NetworkMode": "none",
@@ -415,6 +452,14 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
         ],
     }
     instance._validate_owned_container_inspect(record)
+    record["Config"]["Entrypoint"] = ["/image/default-entrypoint"]
+    with pytest.raises(orchestrator.GateFailure, match="process argv"):
+        instance._validate_owned_container_inspect(record)
+    record["Config"]["Entrypoint"] = [instance.args.command[0]]
+    record["Path"] = "/image/default-entrypoint"
+    with pytest.raises(orchestrator.GateFailure, match="process argv"):
+        instance._validate_owned_container_inspect(record)
+    record["Path"] = instance.args.command[0]
     record["HostConfig"]["Devices"].append(
         {"PathOnHost": "/dev/davinci0", "PathInContainer": "/dev/davinci1"}
     )
