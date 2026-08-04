@@ -9,6 +9,7 @@ import pytest
 from vllm_hust_benchmark.official_baseline_attestation import (
     attest_completed_baseline,
 )
+from vllm_hust_benchmark.immutable_input_attestation import resolved_input_sha256
 from vllm_hust_benchmark.strict_execution_contract import CANONICAL_WORKER_RULE
 
 TRACE_IMAGE = "quay.io/ascend/vllm-ascend@sha256:" + "b" * 64
@@ -46,7 +47,7 @@ def _write_strict_execution_evidence(
     model_id: str = "Qwen/model",
     model_revision: str = MODEL_REVISION,
     data_identity: dict | None = None,
-    resolved_input_sha256: str = "e" * 64,
+    resolved_inputs: object | None = None,
     resolved_input_kind: str = "throughput-sample-requests",
 ) -> None:
     container_id = f"{number:064x}"
@@ -126,6 +127,9 @@ def _write_strict_execution_evidence(
         },
     )
     immutable_path = repeat / "immutable-input-attestation.json"
+    captured_inputs = (
+        resolved_inputs if resolved_inputs is not None else [{"prompt": "fixed"}]
+    )
     _write(
         immutable_path,
         {
@@ -134,7 +138,10 @@ def _write_strict_execution_evidence(
             "model_revision": model_revision,
             "data_identity": data_identity or STATIC_DATA_IDENTITY,
             "resolved_input_kind": resolved_input_kind,
-            "resolved_input_sha256": resolved_input_sha256,
+            "resolved_inputs": captured_inputs,
+            "resolved_input_sha256": resolved_input_sha256(
+                input_kind=resolved_input_kind, inputs=captured_inputs
+            ),
         },
     )
     _write(
@@ -431,7 +438,9 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
     assert suite["repeats"][0]["peak_hbm_mb"] == 2048
     assert len(suite["repeats"][0]["pre_start_snapshots"]) == 2
     assert suite["repeats"][0]["model_revision"] == MODEL_REVISION
-    assert suite["repeats"][0]["resolved_input_sha256"] == "e" * 64
+    assert suite["repeats"][0]["resolved_input_sha256"] == resolved_input_sha256(
+        input_kind="throughput-sample-requests", inputs=[{"prompt": "fixed"}]
+    )
     assert len(suite["repeats"][0]["immutable_input_attestation_sha256"]) == 64
 
 
@@ -527,7 +536,11 @@ def test_rejects_deterministic_input_drift(tmp_path: Path) -> None:
     repo, staged, results, _, _ = _fixture(tmp_path)
     _mutate_immutable_input(
         results / "repeat-02",
-        resolved_input_sha256="c" * 64,
+        resolved_inputs=[{"prompt": "changed"}],
+        resolved_input_sha256=resolved_input_sha256(
+            input_kind="throughput-sample-requests",
+            inputs=[{"prompt": "changed"}],
+        ),
     )
     with pytest.raises(ValueError, match="different resolved inputs"):
         attest_completed_baseline(

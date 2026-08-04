@@ -444,6 +444,7 @@ def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> No
         _source_run_client_functions(
             f"""
             BENCHMARK_TYPE=serve
+            REPO_ROOT=/repo
             OFFICIAL_RUNTIME_PYTHONPATH=/tmp/runtime-a:/tmp/runtime-b
             VLLM_CLI_COMPAT=/tmp/run_vllm_cli_compat.py
             RESULT_DIR=/tmp/result-dir
@@ -465,7 +466,7 @@ def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> No
     assert result.returncode == 0
     assert (
         captured_pythonpath.read_text(encoding="utf-8").strip()
-        == "/tmp/runtime-a:/tmp/runtime-b"
+        == "/repo/src:/tmp/runtime-a:/tmp/runtime-b"
     )
     assert captured_args.read_text(encoding="utf-8").splitlines()[:5] == [
         "python",

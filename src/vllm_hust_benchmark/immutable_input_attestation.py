@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+import os
 import re
+import tempfile
+from collections.abc import Mapping as ABCMapping
+from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -10,6 +15,85 @@ from typing import Any, Mapping
 SCHEMA_VERSION = "immutable-input-attestation/v1"
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
 _REVISION_RE = re.compile(r"[0-9a-f]{40}")
+
+
+def canonicalize_resolved_input(value: object) -> object:
+    """Convert an executed benchmark input into stable, JSON-safe evidence."""
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("resolved benchmark input contains a non-finite float")
+        return value
+    if isinstance(value, bytes):
+        return {
+            "type": "bytes",
+            "size_bytes": len(value),
+            "sha256": hashlib.sha256(value).hexdigest(),
+        }
+    if isinstance(value, Path):
+        return str(value)
+    if is_dataclass(value) and not isinstance(value, type):
+        return canonicalize_resolved_input(asdict(value))
+    if isinstance(value, ABCMapping):
+        return {
+            str(key): canonicalize_resolved_input(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, (list, tuple)):
+        return [canonicalize_resolved_input(item) for item in value]
+    module_name = type(value).__module__
+    if module_name.startswith("numpy") and hasattr(value, "tolist"):
+        return canonicalize_resolved_input(value.tolist())
+    if module_name.startswith("PIL.") and all(
+        hasattr(value, attribute) for attribute in ("mode", "size", "tobytes")
+    ):
+        pixels = value.tobytes()
+        return {
+            "type": "pil-image",
+            "mode": str(value.mode),
+            "size": list(value.size),
+            "pixels_sha256": hashlib.sha256(pixels).hexdigest(),
+        }
+    raise TypeError(
+        "resolved benchmark input contains an unsupported value: "
+        f"{type(value).__module__}.{type(value).__qualname__}"
+    )
+
+
+def resolved_input_sha256(*, input_kind: str, inputs: object) -> str:
+    canonical = {
+        "input_kind": input_kind,
+        "inputs": canonicalize_resolved_input(inputs),
+    }
+    encoded = json.dumps(
+        canonical, ensure_ascii=False, separators=(",", ":"), sort_keys=True
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def write_attestation_atomic(path: Path, payload: Mapping[str, object]) -> None:
+    """Atomically persist a fully built attestation beside its final path."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary_name = temporary.name
+            json.dump(payload, temporary, ensure_ascii=False, indent=2, sort_keys=True)
+            temporary.write("\n")
+            temporary.flush()
+            os.fsync(temporary.fileno())
+        os.replace(temporary_name, path)
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
 
 
 def file_identity(path: Path) -> dict[str, object]:
@@ -167,6 +251,22 @@ def validate_attestation_payload(
     digest = payload.get("resolved_input_sha256")
     if not isinstance(digest, str) or not _SHA256_RE.fullmatch(digest):
         raise ValueError("immutable input attestation lacks a resolved input SHA256")
+    data_identity = metadata.get("data_identity")
+    is_trace = isinstance(data_identity, Mapping) and data_identity.get("kind") == (
+        "release-asset"
+    )
+    if is_trace:
+        return
+    if "resolved_inputs" not in payload:
+        raise ValueError("immutable input attestation lacks captured resolved inputs")
+    inputs = canonicalize_resolved_input(payload["resolved_inputs"])
+    if inputs != payload["resolved_inputs"]:
+        raise ValueError("immutable input attestation inputs are not canonical")
+    recomputed = resolved_input_sha256(
+        input_kind=str(payload.get("resolved_input_kind") or ""), inputs=inputs
+    )
+    if digest != recomputed:
+        raise ValueError("immutable input attestation resolved input SHA256 mismatch")
 
 
 def write_trace_attestation(

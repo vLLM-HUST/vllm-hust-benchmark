@@ -1,89 +1,34 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import dataclasses
-import hashlib
 import inspect
 import json
-import math
 import os
 import sys
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.immutable_input_attestation import (
+    canonicalize_resolved_input,
+    resolved_input_sha256,
+    write_attestation_atomic,
+)
+
 
 IMMUTABLE_INPUT_SCHEMA_VERSION = "immutable-input-attestation/v1"
 
 
-def _canonicalize_input(value: object) -> object:
-    if value is None or isinstance(value, (bool, int, str)):
-        return value
-    if isinstance(value, float):
-        if not math.isfinite(value):
-            raise ValueError("resolved benchmark input contains a non-finite float")
-        return value
-    if isinstance(value, bytes):
-        return {
-            "type": "bytes",
-            "size_bytes": len(value),
-            "sha256": hashlib.sha256(value).hexdigest(),
-        }
-    if isinstance(value, Path):
-        return str(value)
-    if dataclasses.is_dataclass(value) and not isinstance(value, type):
-        return _canonicalize_input(dataclasses.asdict(value))
-    if isinstance(value, Mapping):
-        return {
-            str(key): _canonicalize_input(item)
-            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
-        }
-    if isinstance(value, (list, tuple)):
-        return [_canonicalize_input(item) for item in value]
-
-    module_name = type(value).__module__
-    if module_name.startswith("numpy") and hasattr(value, "tolist"):
-        return _canonicalize_input(value.tolist())
-    if module_name.startswith("PIL.") and all(
-        hasattr(value, attribute) for attribute in ("mode", "size", "tobytes")
-    ):
-        pixels = value.tobytes()
-        return {
-            "type": "pil-image",
-            "mode": str(value.mode),
-            "size": list(value.size),
-            "pixels_sha256": hashlib.sha256(pixels).hexdigest(),
-        }
-    raise TypeError(
-        "resolved benchmark input contains an unsupported value: "
-        f"{type(value).__module__}.{type(value).__qualname__}"
-    )
-
-
 def _sample_request_payload(request: object) -> dict[str, object]:
     return {
-        "prompt": _canonicalize_input(getattr(request, "prompt")),
+        "prompt": canonicalize_resolved_input(getattr(request, "prompt")),
         "prompt_len": int(getattr(request, "prompt_len")),
         "expected_output_len": int(getattr(request, "expected_output_len")),
-        "multi_modal_data": _canonicalize_input(
+        "multi_modal_data": canonicalize_resolved_input(
             getattr(request, "multi_modal_data", None)
         ),
-        "request_id": _canonicalize_input(getattr(request, "request_id", None)),
+        "request_id": canonicalize_resolved_input(getattr(request, "request_id", None)),
     }
-
-
-def resolved_input_sha256(*, input_kind: str, inputs: object) -> str:
-    canonical = {
-        "input_kind": input_kind,
-        "inputs": _canonicalize_input(inputs),
-    }
-    encoded = json.dumps(
-        canonical,
-        ensure_ascii=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
 
 
 def record_immutable_inputs(*, input_kind: str, inputs: object) -> None:
@@ -117,15 +62,17 @@ def record_immutable_inputs(*, input_kind: str, inputs: object) -> None:
             f"{input_kind} != {expected_input_kind}"
         )
 
+    canonical_inputs = canonicalize_resolved_input(inputs)
     payload = {
         "schema_version": IMMUTABLE_INPUT_SCHEMA_VERSION,
         "model_id": model_id,
         "model_revision": model_revision,
         "data_identity": data_identity,
         "resolved_input_kind": input_kind,
+        "resolved_inputs": canonical_inputs,
         "resolved_input_sha256": resolved_input_sha256(
             input_kind=input_kind,
-            inputs=inputs,
+            inputs=canonical_inputs,
         ),
     }
     output_path = Path(output_value)
@@ -134,13 +81,7 @@ def record_immutable_inputs(*, input_kind: str, inputs: object) -> None:
         if existing != payload:
             raise RuntimeError("benchmark resolved inputs changed within one run")
         return
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = output_path.with_suffix(output_path.suffix + ".tmp")
-    temporary.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    temporary.replace(output_path)
+    write_attestation_atomic(output_path, payload)
 
 
 def _record_sample_requests(requests: object, *, input_kind: str) -> None:
@@ -177,7 +118,13 @@ def _latency_prompt_token_ids(prompts: object) -> list[object]:
     for prompt in prompts:
         if not isinstance(prompt, Mapping) or "prompt_token_ids" not in prompt:
             raise TypeError("latency LLM.generate input lacks prompt_token_ids")
-        token_ids.append(prompt["prompt_token_ids"])
+        prompt_token_ids = prompt["prompt_token_ids"]
+        if not isinstance(prompt_token_ids, (list, tuple)) or any(
+            isinstance(token_id, bool) or not isinstance(token_id, int) or token_id < 0
+            for token_id in prompt_token_ids
+        ):
+            raise TypeError("latency prompt_token_ids must be non-negative integers")
+        token_ids.append(list(prompt_token_ids))
     return token_ids
 
 

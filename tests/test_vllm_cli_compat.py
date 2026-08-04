@@ -83,6 +83,12 @@ def test_latency_capture_hashes_actual_generated_token_ids() -> None:
     )
 
 
+@pytest.mark.parametrize("token_ids", [[1, -1], [1, True], [1, "2"], "1,2"])
+def test_latency_capture_rejects_non_token_id_sequences(token_ids: object) -> None:
+    with pytest.raises(TypeError, match="non-negative integers"):
+        _latency_prompt_token_ids([{"prompt_token_ids": token_ids}])
+
+
 def test_serve_sample_request_sequence_is_stable_and_order_sensitive() -> None:
     requests = [
         SimpleNamespace(

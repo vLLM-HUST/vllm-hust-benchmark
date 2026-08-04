@@ -12,6 +12,9 @@ from vllm_hust_benchmark.baseline_recovery import (
     _identity_mismatches,
     _parameter_mismatches,
 )
+from vllm_hust_benchmark.immutable_input_attestation import (
+    validate_attestation_payload,
+)
 from vllm_hust_benchmark.strict_execution_contract import (
     CANONICAL_WORKER_RULE,
     canonical_worker_key,
@@ -144,6 +147,15 @@ def _validate_strict_execution_evidence(
         expected_input_kind = "serve-sample-requests"
     if immutable_inputs.get("resolved_input_kind") != expected_input_kind:
         raise ValueError(f"resolved input kind mismatch: {repeat_dir}")
+    validate_attestation_payload(
+        immutable_inputs,
+        {
+            "model_id": expected_model_id,
+            "model_revision": expected_model_revision,
+            "data_identity": expected_data_identity,
+            "resolved_input_kind": expected_input_kind,
+        },
+    )
     resolved_input_sha256 = str(immutable_inputs.get("resolved_input_sha256") or "")
     if not re.fullmatch(r"[0-9a-f]{64}", resolved_input_sha256):
         raise ValueError(f"resolved input hash is invalid: {repeat_dir}")

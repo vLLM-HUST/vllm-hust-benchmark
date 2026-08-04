@@ -10,9 +10,11 @@ from vllm_hust_benchmark.immutable_input_attestation import (
     expected_resolved_input_kind,
     file_identity,
     resolve_sharegpt_dataset_url,
+    resolved_input_sha256,
     validate_attestation_payload,
     verify_data_contract,
     write_trace_attestation,
+    write_attestation_atomic,
 )
 
 
@@ -136,8 +138,11 @@ def test_attestation_validation_rejects_spec_inference_or_drift() -> None:
     payload = {
         "schema_version": "immutable-input-attestation/v1",
         **metadata,
-        "resolved_input_sha256": "b" * 64,
+        "resolved_inputs": [{"prompt": "captured"}],
     }
+    payload["resolved_input_sha256"] = resolved_input_sha256(
+        input_kind="serve-sample-requests", inputs=payload["resolved_inputs"]
+    )
     validate_attestation_payload(payload, metadata)
     for field, value in (
         ("model_revision", "c" * 40),
@@ -149,6 +154,29 @@ def test_attestation_validation_rejects_spec_inference_or_drift() -> None:
         changed[field] = value
         with pytest.raises(ValueError, match="immutable input attestation"):
             validate_attestation_payload(changed, metadata)
+
+    changed = dict(payload)
+    changed["resolved_inputs"] = [{"prompt": "tampered"}]
+    with pytest.raises(ValueError, match="resolved input SHA256 mismatch"):
+        validate_attestation_payload(changed, metadata)
+
+
+def test_atomic_attestation_failure_leaves_no_final_or_temporary_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output = tmp_path / "immutable-input-attestation.json"
+
+    def fail_replace(_source: object, _destination: object) -> None:
+        raise OSError("simulated atomic replace failure")
+
+    monkeypatch.setattr(
+        "vllm_hust_benchmark.immutable_input_attestation.os.replace", fail_replace
+    )
+    with pytest.raises(OSError, match="atomic replace failure"):
+        write_attestation_atomic(output, {"captured": True})
+
+    assert not output.exists()
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_sharegpt_url_defaults_to_spec_exact_revision() -> None:

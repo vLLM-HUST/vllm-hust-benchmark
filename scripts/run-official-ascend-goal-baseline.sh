@@ -982,7 +982,7 @@ run_client_command() {
     serve)
       VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE="$IMMUTABLE_INPUT_ATTESTATION_FILE" \
       VLLM_HUST_IMMUTABLE_INPUT_METADATA="$IMMUTABLE_INPUT_METADATA" \
-      run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+      run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" \
         python "$VLLM_CLI_COMPAT" bench serve \
         --save-result \
         --result-dir "$RESULT_DIR" \
@@ -1006,7 +1006,7 @@ run_offline_client_command() {
 
   VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE="$IMMUTABLE_INPUT_ATTESTATION_FILE" \
   VLLM_HUST_IMMUTABLE_INPUT_METADATA="$IMMUTABLE_INPUT_METADATA" \
-  run_in_official_runtime "$OFFICIAL_RUNTIME_PYTHONPATH" \
+  run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" \
     python "$VLLM_CLI_COMPAT" bench "$BENCHMARK_TYPE" \
     --output-json "$RAW_RESULT_FILE" \
     $effective_client_args
