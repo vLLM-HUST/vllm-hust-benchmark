@@ -81,7 +81,7 @@ export HF_ENDPOINT="https://hf-mirror.com"
 export TRANSFORMERS_OFFLINE=1
 export HF_HUB_OFFLINE=1
 # Unset proxy env vars to prevent curl from routing localhost through proxy
-unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
+unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
 export no_proxy="127.0.0.1,localhost,${no_proxy:-}"
 export NO_PROXY="127.0.0.1,localhost,${NO_PROXY:-}"
 
