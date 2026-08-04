@@ -124,8 +124,10 @@ def test_docker_create_is_owned_ephemeral_and_scoped(tmp_path: Path) -> None:
     assert "--rm" in argv
     assert "--network none" in rendered
     assert "vllm-hust.strict-startup-id=" + "b" * 32 in argv
-    assert "/dev/davinci7:/dev/davinci0" in argv
-    assert "/dev/davinci0:/dev/davinci0" not in argv
+    assert "/dev/davinci7:/dev/davinci7" in argv
+    assert "/dev/davinci7:/dev/davinci0" not in argv
+    assert "ASCEND_VISIBLE_DEVICES=7" in argv
+    assert "ASCEND_RT_VISIBLE_DEVICES=7" in argv
     assert "vllm-hust-shuhao-21rc" not in rendered
     assert "dst=/data/shared_models,readonly" in rendered
     assert "dst=/data/shared_datasets,readonly" in rendered
@@ -159,6 +161,19 @@ def test_docker_create_preserves_runner_argument_boundaries(tmp_path: Path) -> N
     image_index = argv.index(instance.runtime_local_image_ref)
     assert argv[argv.index("--entrypoint") + 1] == "/usr/bin/env"
     assert argv[image_index + 1 :] == instance.args.command[1:]
+
+
+def test_docker_create_keeps_physical_nodes_and_separate_logical_rank_order(
+    tmp_path: Path,
+) -> None:
+    instance = _orchestrator_stub(tmp_path)
+    instance.devices = [7, 6]
+    argv = instance._docker_create_argv()
+    assert "/dev/davinci7:/dev/davinci7" in argv
+    assert "/dev/davinci6:/dev/davinci6" in argv
+    assert not any("/dev/davinci7:/dev/davinci0" == item for item in argv)
+    assert "ASCEND_VISIBLE_DEVICES=7,6" in argv
+    assert "ASCEND_RT_VISIBLE_DEVICES=7,6" in argv
 
 
 def _docker29_runtime() -> dict[str, object]:
@@ -410,7 +425,7 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
     instance = _orchestrator_stub(tmp_path)
     instance.container_id = "c" * 64
     devices = [
-        {"PathOnHost": "/dev/davinci7", "PathInContainer": "/dev/davinci0"},
+        {"PathOnHost": "/dev/davinci7", "PathInContainer": "/dev/davinci7"},
         *[
             {"PathOnHost": f"/dev/{name}", "PathInContainer": f"/dev/{name}"}
             for name in ("davinci_manager", "devmm_svm", "hisi_hdc")
@@ -425,6 +440,7 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
             "Labels": {"vllm-hust.strict-startup-id": instance.startup_id},
             "Entrypoint": [instance.args.command[0]],
             "Cmd": instance.args.command[1:],
+            "Env": ["ASCEND_VISIBLE_DEVICES=7", "ASCEND_RT_VISIBLE_DEVICES=7"],
         },
         "HostConfig": {
             "AutoRemove": True,
@@ -461,6 +477,10 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
         ],
     }
     instance._validate_owned_container_inspect(record)
+    record["Config"]["Env"][0] = "ASCEND_VISIBLE_DEVICES=0"
+    with pytest.raises(orchestrator.GateFailure, match="visible NPU environment"):
+        instance._validate_owned_container_inspect(record)
+    record["Config"]["Env"][0] = "ASCEND_VISIBLE_DEVICES=7"
     record["HostConfig"]["Privileged"] = True
     with pytest.raises(orchestrator.GateFailure, match="must not be privileged"):
         instance._validate_owned_container_inspect(record)
@@ -891,7 +911,25 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
             {
                 "Id": container_id,
                 "Image": runtime_digest,
-                "HostConfig": {"Privileged": False},
+                "Config": {
+                    "Env": ["ASCEND_VISIBLE_DEVICES=0", "ASCEND_RT_VISIBLE_DEVICES=0"]
+                },
+                "HostConfig": {
+                    "Privileged": False,
+                    "Devices": [
+                        {
+                            "PathOnHost": "/dev/davinci0",
+                            "PathInContainer": "/dev/davinci0",
+                        },
+                        *[
+                            {
+                                "PathOnHost": f"/dev/{name}",
+                                "PathInContainer": f"/dev/{name}",
+                            }
+                            for name in ("davinci_manager", "devmm_svm", "hisi_hdc")
+                        ],
+                    ],
+                },
                 "Mounts": [
                     {"Source": path, "Destination": path, "RW": False}
                     for path in (
@@ -918,6 +956,20 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
                     f"type=bind,src={path},dst={path},readonly",
                 )
             ],
+            "--env",
+            "ASCEND_VISIBLE_DEVICES=0",
+            "--env",
+            "ASCEND_RT_VISIBLE_DEVICES=0",
+            *[
+                item
+                for value in (
+                    "/dev/davinci0:/dev/davinci0",
+                    "/dev/davinci_manager:/dev/davinci_manager",
+                    "/dev/devmm_svm:/dev/devmm_svm",
+                    "/dev/hisi_hdc:/dev/hisi_hdc",
+                )
+                for item in ("--device", value)
+            ],
             runtime_digest,
             "runner",
         ],
@@ -935,6 +987,13 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
             "inspect": orchestrator.evidence_record(repeat, container_inspect),
             "create_argv": orchestrator.evidence_record(repeat, create_argv),
             "runner_argv": ["runner"],
+            "device_node_mapping": {
+                "0": {
+                    "host": "/dev/davinci0",
+                    "container": "/dev/davinci0",
+                }
+            },
+            "physical_to_logical_rank": {"0": 0},
         },
     )
     payload = orchestrator.build_strict_evidence(

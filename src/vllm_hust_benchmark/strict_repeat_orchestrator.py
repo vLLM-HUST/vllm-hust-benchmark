@@ -708,6 +708,7 @@ class StrictRepeatOrchestrator:
         ]
 
     def _docker_create_argv(self) -> list[str]:
+        visible_devices = ",".join(map(str, self.devices))
         argv = [
             "docker",
             "create",
@@ -723,9 +724,9 @@ class StrictRepeatOrchestrator:
             "--workdir",
             "/tmp",
             "--env",
-            "ASCEND_VISIBLE_DEVICES=" + ",".join(map(str, range(len(self.devices)))),
+            "ASCEND_VISIBLE_DEVICES=" + visible_devices,
             "--env",
-            "ASCEND_RT_VISIBLE_DEVICES=" + ",".join(map(str, range(len(self.devices)))),
+            "ASCEND_RT_VISIBLE_DEVICES=" + visible_devices,
             "--env",
             "VLLM_HUST_STRICT_HOST_ORCHESTRATED=1",
             "--env",
@@ -751,8 +752,8 @@ class StrictRepeatOrchestrator:
         ]
         for source, _kind in STRICT_ASCEND_READONLY_MOUNTS:
             argv.extend(["--mount", f"type=bind,src={source},dst={source},readonly"])
-        for logical, physical in enumerate(self.devices):
-            argv.extend(["--device", f"/dev/davinci{physical}:/dev/davinci{logical}"])
+        for physical in self.devices:
+            argv.extend(["--device", f"/dev/davinci{physical}:/dev/davinci{physical}"])
         for device in ("davinci_manager", "devmm_svm", "hisi_hdc"):
             argv.extend(["--device", f"/dev/{device}:/dev/{device}"])
         if self.runtime_transport == "docker-archive":
@@ -1027,8 +1028,15 @@ class StrictRepeatOrchestrator:
             ),
             "container_identity_host_source": str(container_identity_path),
             "inspect": evidence_record(self.repeat_dir, inspect_path),
-            "physical_to_logical_npu": {
-                str(physical): logical for logical, physical in enumerate(self.devices)
+            "device_node_mapping": {
+                str(physical): {
+                    "host": f"/dev/davinci{physical}",
+                    "container": f"/dev/davinci{physical}",
+                }
+                for physical in self.devices
+            },
+            "physical_to_logical_rank": {
+                str(physical): rank for rank, physical in enumerate(self.devices)
             },
         }
         if self.runtime_transport == "docker-archive":
@@ -1065,22 +1073,43 @@ class StrictRepeatOrchestrator:
         ):
             raise GateFailure("owned container process argv mismatch")
 
+        device_records = host_config.get("Devices") or []
         actual_devices = {
             (item.get("PathOnHost"), item.get("PathInContainer"))
-            for item in (host_config.get("Devices") or [])
+            for item in device_records
         }
         expected_devices = {
-            (f"/dev/davinci{physical}", f"/dev/davinci{logical}")
-            for logical, physical in enumerate(self.devices)
+            (f"/dev/davinci{physical}", f"/dev/davinci{physical}")
+            for physical in self.devices
         }
         expected_devices.update(
             (f"/dev/{name}", f"/dev/{name}")
             for name in ("davinci_manager", "devmm_svm", "hisi_hdc")
         )
-        if actual_devices != expected_devices:
+        if (
+            len(device_records) != len(expected_devices)
+            or actual_devices != expected_devices
+        ):
             raise GateFailure(
                 f"owned container device mapping mismatch: {actual_devices}"
             )
+        visible_devices = ",".join(map(str, self.devices))
+        expected_visible_env = {
+            f"ASCEND_VISIBLE_DEVICES={visible_devices}",
+            f"ASCEND_RT_VISIBLE_DEVICES={visible_devices}",
+        }
+        actual_visible_env = [
+            value
+            for value in (config.get("Env") or [])
+            if isinstance(value, str)
+            and value.split("=", 1)[0]
+            in {"ASCEND_VISIBLE_DEVICES", "ASCEND_RT_VISIBLE_DEVICES"}
+        ]
+        if (
+            len(actual_visible_env) != 2
+            or set(actual_visible_env) != expected_visible_env
+        ):
+            raise GateFailure("owned container visible NPU environment mismatch")
 
         mounts = {
             (item.get("Source"), item.get("Destination")): bool(item.get("RW"))

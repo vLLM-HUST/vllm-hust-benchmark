@@ -176,7 +176,29 @@ def _write_strict_execution_evidence(
             {
                 "Id": container_id,
                 "Image": runtime_image_digest,
-                "HostConfig": {"Privileged": False},
+                "Config": {
+                    "Env": [
+                        "ASCEND_VISIBLE_DEVICES=" + ",".join(map(str, devices)),
+                        "ASCEND_RT_VISIBLE_DEVICES=" + ",".join(map(str, devices)),
+                    ]
+                },
+                "HostConfig": {
+                    "Privileged": False,
+                    "Devices": [
+                        {
+                            "PathOnHost": f"/dev/davinci{device}",
+                            "PathInContainer": f"/dev/davinci{device}",
+                        }
+                        for device in devices
+                    ]
+                    + [
+                        {
+                            "PathOnHost": f"/dev/{name}",
+                            "PathInContainer": f"/dev/{name}",
+                        }
+                        for name in ("davinci_manager", "devmm_svm", "hisi_hdc")
+                    ],
+                },
                 "Mounts": _ascend_mounts(),
             }
         ],
@@ -184,7 +206,34 @@ def _write_strict_execution_evidence(
     create_argv_path = repeat / "runtime/docker-create-argv.json"
     _write(
         create_argv_path,
-        ["docker", "create", *_ascend_mount_argv(), runtime_image_digest, "runner"],
+        [
+            "docker",
+            "create",
+            *_ascend_mount_argv(),
+            *[
+                item
+                for value in (
+                    "ASCEND_VISIBLE_DEVICES=" + ",".join(map(str, devices)),
+                    "ASCEND_RT_VISIBLE_DEVICES=" + ",".join(map(str, devices)),
+                )
+                for item in ("--env", value)
+            ],
+            *[
+                item
+                for value in (
+                    *(
+                        f"/dev/davinci{device}:/dev/davinci{device}"
+                        for device in devices
+                    ),
+                    "/dev/davinci_manager:/dev/davinci_manager",
+                    "/dev/devmm_svm:/dev/devmm_svm",
+                    "/dev/hisi_hdc:/dev/hisi_hdc",
+                )
+                for item in ("--device", value)
+            ],
+            runtime_image_digest,
+            "runner",
+        ],
     )
     runtime_identity_path = repeat / "owned-container-identity.json"
     _write(
@@ -203,6 +252,16 @@ def _write_strict_execution_evidence(
             },
             "create_argv": _hashed_record(repeat, create_argv_path),
             "runner_argv": ["runner"],
+            "device_node_mapping": {
+                str(device): {
+                    "host": f"/dev/davinci{device}",
+                    "container": f"/dev/davinci{device}",
+                }
+                for device in devices
+            },
+            "physical_to_logical_rank": {
+                str(device): rank for rank, device in enumerate(devices)
+            },
         },
     )
     _write(
@@ -400,6 +459,7 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
         )
         container_id = strict["container_id"]
         startup_id = strict["startup_instance_id"]
+        devices = strict["lease"]["physical_npu_ids"]
         manifest_path = repeat / "runtime/containerd-storage-manifest.json"
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         manifest_path.write_bytes(manifest_blob)
@@ -485,8 +545,28 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                     "Config": {
                         "Entrypoint": [expected_process_argv[0]],
                         "Cmd": expected_process_argv[1:],
+                        "Env": [
+                            "ASCEND_VISIBLE_DEVICES=" + ",".join(map(str, devices)),
+                            "ASCEND_RT_VISIBLE_DEVICES=" + ",".join(map(str, devices)),
+                        ],
                     },
-                    "HostConfig": {"Privileged": False},
+                    "HostConfig": {
+                        "Privileged": False,
+                        "Devices": [
+                            {
+                                "PathOnHost": f"/dev/davinci{device}",
+                                "PathInContainer": f"/dev/davinci{device}",
+                            }
+                            for device in devices
+                        ]
+                        + [
+                            {
+                                "PathOnHost": f"/dev/{name}",
+                                "PathInContainer": f"/dev/{name}",
+                            }
+                            for name in ("davinci_manager", "devmm_svm", "hisi_hdc")
+                        ],
+                    },
                     "Mounts": [
                         *_ascend_mounts(),
                         {
@@ -518,6 +598,27 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                     "dst=/run/vllm-hust/container-identity.json,readonly"
                 ),
                 *_ascend_mount_argv(),
+                *[
+                    item
+                    for value in (
+                        "ASCEND_VISIBLE_DEVICES=" + ",".join(map(str, devices)),
+                        "ASCEND_RT_VISIBLE_DEVICES=" + ",".join(map(str, devices)),
+                    )
+                    for item in ("--env", value)
+                ],
+                *[
+                    item
+                    for value in (
+                        *(
+                            f"/dev/davinci{device}:/dev/davinci{device}"
+                            for device in devices
+                        ),
+                        "/dev/davinci_manager:/dev/davinci_manager",
+                        "/dev/devmm_svm:/dev/devmm_svm",
+                        "/dev/hisi_hdc:/dev/hisi_hdc",
+                    )
+                    for item in ("--device", value)
+                ],
                 storage_digest,
                 *expected_process_argv[1:],
             ],
@@ -551,6 +652,16 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
                 "inspect": _hashed_record(repeat, container_inspect),
                 "create_argv": _hashed_record(repeat, create_argv_path),
                 "runner_argv": ["runner"],
+                "device_node_mapping": {
+                    str(device): {
+                        "host": f"/dev/davinci{device}",
+                        "container": f"/dev/davinci{device}",
+                    }
+                    for device in devices
+                },
+                "physical_to_logical_rank": {
+                    str(device): rank for rank, device in enumerate(devices)
+                },
                 "expected_runtime_contract": _hashed_record(repeat, expected_runtime),
                 "container_identity": _hashed_record(repeat, container_identity),
                 "container_identity_host_source": str(identity_host_source),
@@ -761,6 +872,11 @@ def test_docker_archive_runtime_uses_config_digest_for_compatibility(
         ("privileged", "must not be privileged"),
         ("missing_ascend_mount", "Ascend mount mismatch"),
         ("writable_ascend_mount", "Ascend mount mismatch"),
+        ("device_node_remap", "physical device scope mismatch"),
+        ("create_device_drift", "create physical device scope mismatch"),
+        ("visible_env_drift", "visible device env mismatch"),
+        ("create_visible_env_drift", "create visible env mismatch"),
+        ("logical_rank_drift", "device/rank identity mismatch"),
         ("create_argv_drift", "create/preflight command relationship mismatch"),
         ("writable_alias", "reachable through a writable alias"),
         ("contract_hash_drift", "preflight binding mismatch"),
@@ -791,6 +907,8 @@ def test_rejects_unbound_docker_archive_preflight(
         "privileged",
         "missing_ascend_mount",
         "writable_ascend_mount",
+        "device_node_remap",
+        "visible_env_drift",
         "writable_alias",
     }:
         inspect_path = repeat / identity["inspect"]["path"]
@@ -819,6 +937,10 @@ def test_rejects_unbound_docker_archive_preflight(
                 for mount in inspect[0]["Mounts"]
                 if mount.get("Destination") == "/etc/ascend_install.info"
             )["RW"] = True
+        elif mutation == "device_node_remap":
+            inspect[0]["HostConfig"]["Devices"][0]["PathInContainer"] = "/dev/davinci7"
+        elif mutation == "visible_env_drift":
+            inspect[0]["Config"]["Env"][0] = "ASCEND_VISIBLE_DEVICES=7"
         else:
             inspect[0]["Mounts"].append(
                 {
@@ -829,12 +951,27 @@ def test_rejects_unbound_docker_archive_preflight(
             )
         _write(inspect_path, inspect)
         identity["inspect"] = _hashed_record(repeat, inspect_path)
-    elif mutation == "create_argv_drift":
+    elif mutation in {
+        "create_argv_drift",
+        "create_visible_env_drift",
+        "create_device_drift",
+    }:
         create_path = repeat / identity["create_argv"]["path"]
         create_argv = json.loads(create_path.read_text(encoding="utf-8"))
-        create_argv.append("drift")
+        if mutation == "create_argv_drift":
+            create_argv.append("drift")
+        elif mutation == "create_visible_env_drift":
+            create_argv[create_argv.index("ASCEND_VISIBLE_DEVICES=0")] = (
+                "ASCEND_VISIBLE_DEVICES=7"
+            )
+        else:
+            create_argv[create_argv.index("/dev/davinci0:/dev/davinci0")] = (
+                "/dev/davinci0:/dev/davinci7"
+            )
         _write(create_path, create_argv)
         identity["create_argv"] = _hashed_record(repeat, create_path)
+    elif mutation == "logical_rank_drift":
+        identity["physical_to_logical_rank"] = {"0": 1}
     else:
         actual_path = repeat / identity["actual_runtime_preflight"]["path"]
         actual = json.loads(actual_path.read_text(encoding="utf-8"))

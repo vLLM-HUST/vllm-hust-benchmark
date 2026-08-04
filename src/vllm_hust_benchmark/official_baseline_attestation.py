@@ -474,6 +474,75 @@ def _validate_strict_execution_evidence(
         raise ValueError(
             f"strict execution lease device scope is invalid: {repeat_dir}"
         )
+    expected_device_nodes = {
+        (f"/dev/davinci{device}", f"/dev/davinci{device}") for device in devices
+    }
+    expected_device_nodes.update(
+        (f"/dev/{name}", f"/dev/{name}")
+        for name in ("davinci_manager", "devmm_svm", "hisi_hdc")
+    )
+    device_records = host_config.get("Devices") or []
+    actual_device_nodes = {
+        (item.get("PathOnHost"), item.get("PathInContainer")) for item in device_records
+    }
+    if (
+        len(device_records) != len(expected_device_nodes)
+        or actual_device_nodes != expected_device_nodes
+    ):
+        raise ValueError(
+            f"owned container physical device scope mismatch: {repeat_dir}"
+        )
+    expected_device_args = {
+        f"{host}:{container}" for host, container in expected_device_nodes
+    }
+    create_device_args = [
+        create_argv[index + 1]
+        for index, value in enumerate(create_argv[:-1])
+        if value == "--device"
+    ]
+    if (
+        len(create_device_args) != len(expected_device_args)
+        or set(create_device_args) != expected_device_args
+    ):
+        raise ValueError(
+            f"owned docker create physical device scope mismatch: {repeat_dir}"
+        )
+    expected_visible = ",".join(map(str, devices))
+    expected_visible_env = [
+        f"ASCEND_VISIBLE_DEVICES={expected_visible}",
+        f"ASCEND_RT_VISIBLE_DEVICES={expected_visible}",
+    ]
+    inspect_visible_env = [
+        value
+        for value in ((inspect[0].get("Config") or {}).get("Env") or [])
+        if isinstance(value, str)
+        and value.split("=", 1)[0]
+        in {"ASCEND_VISIBLE_DEVICES", "ASCEND_RT_VISIBLE_DEVICES"}
+    ]
+    if sorted(inspect_visible_env) != sorted(expected_visible_env):
+        raise ValueError(f"owned container visible device env mismatch: {repeat_dir}")
+    for value in expected_visible_env:
+        if (
+            sum(
+                create_argv[index : index + 2] == ["--env", value]
+                for index in range(len(create_argv) - 1)
+            )
+            != 1
+        ):
+            raise ValueError(f"owned docker create visible env mismatch: {repeat_dir}")
+    expected_node_mapping = {
+        str(device): {
+            "host": f"/dev/davinci{device}",
+            "container": f"/dev/davinci{device}",
+        }
+        for device in devices
+    }
+    expected_logical_ranks = {str(device): rank for rank, device in enumerate(devices)}
+    if (
+        owned_identity.get("device_node_mapping") != expected_node_mapping
+        or owned_identity.get("physical_to_logical_rank") != expected_logical_ranks
+    ):
+        raise ValueError(f"owned device/rank identity mismatch: {repeat_dir}")
     acquired_at = _parse_timestamp(lease.get("acquired_at"), field="lease.acquired_at")
     released_at = _parse_timestamp(lease.get("released_at"), field="lease.released_at")
     if released_at <= acquired_at:
