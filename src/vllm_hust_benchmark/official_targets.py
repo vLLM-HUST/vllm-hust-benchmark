@@ -15,10 +15,10 @@ PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
 PUBLIC_TRACE_MODEL = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
 PUBLIC_MODEL_REVISIONS = {
-    PUBLIC_TEXT_MODEL: "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
-    PUBLIC_CODE_MODEL: "aedcc2d42b622764e023cf882b6652e646b95671",
-    PUBLIC_VISION_MODEL: "cc594898137f460bfe9f0759e9844b3ce807cfb5",
-    PUBLIC_TRACE_MODEL: "711ad2ea6aa40cfca18895e8aca02ab92df1a746",
+    PUBLIC_TEXT_MODEL: "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",  # pragma: allowlist secret
+    PUBLIC_CODE_MODEL: "aedcc2d42b622764e023cf882b6652e646b95671",  # pragma: allowlist secret
+    PUBLIC_VISION_MODEL: "cc594898137f460bfe9f0759e9844b3ce807cfb5",  # pragma: allowlist secret
+    PUBLIC_TRACE_MODEL: "711ad2ea6aa40cfca18895e8aca02ab92df1a746",  # pragma: allowlist secret
 }
 PUBLIC_TRACE_MODEL_REVISION = (
     "711ad2ea6aa40cfca18895e8aca02ab92df1a746"  # pragma: allowlist secret
