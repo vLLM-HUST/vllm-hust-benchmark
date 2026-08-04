@@ -744,3 +744,217 @@ class TestHelpers:
 
     def test_find_max_delta_cap_single(self, analyze_mod):
         assert analyze_mod._find_max_delta_cap([(8, 100.0)]) is None
+
+
+# ===========================================================================
+# Reviewer round 1 reverse tests (issue 2/4 hardening)
+# ===========================================================================
+
+
+class TestTimelineMonotonicity:
+    """Reverse tests for 6-stage timeline monotonicity (reviewer issue 2).
+
+    Per reviewer: the timeline must not only have all stages present but also
+    be monotonically ordered.  A non-monotonic timeline (e.g. restore_done
+    before restore_start) indicates cross-episode contamination and must be
+    rejected.
+    """
+
+    def test_monotonic_timeline_passes(self, parse_mod):
+        """All 6 stages with increasing timestamps → complete."""
+        episode = {
+            "stages": {
+                "preempt": "2026-08-04T15:50:45",
+                "restore_start": "2026-08-04T15:50:46",
+                "restore_done": "2026-08-04T15:50:47",
+                "scheduler_wakeup": "2026-08-04T15:50:48",
+                "admission": "2026-08-04T15:50:49",
+                "first_prefill_or_decode": "2026-08-04T15:50:50",
+            }
+        }
+        assert parse_mod.validate_timeline_complete(episode) is True
+
+    def test_non_monotonic_timeline_rejected(self, parse_mod):
+        """restore_done before restore_start → must be rejected."""
+        episode = {
+            "stages": {
+                "preempt": "2026-08-04T15:50:45",
+                "restore_start": "2026-08-04T15:50:48",
+                "restore_done": "2026-08-04T15:50:46",  # before restore_start
+                "scheduler_wakeup": "2026-08-04T15:50:49",
+                "admission": "2026-08-04T15:50:50",
+                "first_prefill_or_decode": "2026-08-04T15:50:51",
+            }
+        }
+        assert parse_mod.validate_timeline_complete(episode) is False
+
+    def test_admission_before_preempt_rejected(self, parse_mod):
+        """admission before preempt → must be rejected."""
+        episode = {
+            "stages": {
+                "preempt": "2026-08-04T15:50:50",
+                "restore_start": "2026-08-04T15:50:51",
+                "restore_done": "2026-08-04T15:50:52",
+                "scheduler_wakeup": "2026-08-04T15:50:53",
+                "admission": "2026-08-04T15:50:45",  # before preempt
+                "first_prefill_or_decode": "2026-08-04T15:50:54",
+            }
+        }
+        assert parse_mod.validate_timeline_complete(episode) is False
+
+    def test_missing_stage_rejected(self, parse_mod):
+        """One stage None → must be rejected."""
+        episode = {
+            "stages": {
+                "preempt": "2026-08-04T15:50:45",
+                "restore_start": "2026-08-04T15:50:46",
+                "restore_done": "2026-08-04T15:50:47",
+                "scheduler_wakeup": None,  # missing
+                "admission": "2026-08-04T15:50:49",
+                "first_prefill_or_decode": "2026-08-04T15:50:50",
+            }
+        }
+        assert parse_mod.validate_timeline_complete(episode) is False
+
+    def test_all_none_rejected(self, parse_mod):
+        """All stages None → must be rejected."""
+        episode = {"stages": {s: None for s in parse_mod.TIMELINE_STAGES}}
+        assert parse_mod.validate_timeline_complete(episode) is False
+
+
+class TestStrategy3FallbackGuard:
+    """Reverse tests for strategy 3 fallback guard (reviewer issue 2).
+
+    Per reviewer: strategy 3 (no-correlation fallback) should not blindly take
+    the first event when multiple uncorrelated events exist.  Only use it when
+    there is exactly one event for the stage.
+    """
+
+    def test_multiple_uncorrelated_events_not_matched(self, parse_mod):
+        """Multiple scheduler_wakeup events without sgid → stage stays None."""
+        preempt_event = {
+            "timestamp": "2026-08-04T15:50:45",
+            "seq_group_id": 42,
+        }
+        # Two scheduler_wakeup events, neither has seq_group_id
+        stage_events = {
+            "restore_start": [],
+            "restore_done": [],
+            "scheduler_wakeup": [
+                {"timestamp": "2026-08-04T15:50:48", "seq_group_id": None},
+                {"timestamp": "2026-08-04T15:50:48", "seq_group_id": None},
+            ],
+            "admission": [],
+            "first_prefill_or_decode": [],
+        }
+        stages = parse_mod._build_stages_for_episode(preempt_event, stage_events)
+        # Multiple uncorrelated events → strategy 3 should NOT match
+        assert stages["scheduler_wakeup"] is None
+
+    def test_single_uncorrelated_event_matched(self, parse_mod):
+        """Single scheduler_wakeup event without sgid → strategy 3 matches."""
+        preempt_event = {
+            "timestamp": "2026-08-04T15:50:45",
+            "seq_group_id": 42,
+        }
+        stage_events = {
+            "restore_start": [],
+            "restore_done": [],
+            "scheduler_wakeup": [
+                {"timestamp": "2026-08-04T15:50:48", "seq_group_id": None},
+            ],
+            "admission": [],
+            "first_prefill_or_decode": [],
+        }
+        stages = parse_mod._build_stages_for_episode(preempt_event, stage_events)
+        # Single event → strategy 3 is safe to use
+        assert stages["scheduler_wakeup"] is not None
+
+
+class TestEmptyCapacityCurvesBlocked:
+    """Reverse tests for empty capacity_curves (reviewer issue 4).
+
+    Per reviewer: an empty capacity_curves dict should NOT be a vacuous pass.
+    """
+
+    def test_empty_capacity_curves_repetitions_invalid(self, analyze_mod):
+        """Empty capacity_curves → _validate_repetitions returns False."""
+        analysis = {"capacity_curves": {}, "tiering_comparison": {}}
+        valid, issues = analyze_mod._validate_repetitions(analysis)
+        assert valid is False
+        assert any("capacity_curves is empty" in i for i in issues)
+
+    def test_empty_capacity_curves_blocked_status(self, analyze_mod):
+        """Empty capacity_curves → overall_status is blocked."""
+        analysis = {
+            "capacity_curves": {},
+            "tiering_comparison": {},
+            "preempt_timeline": {"total_preemptions": 0, "pressure_episodes": []},
+            "provenance": {},
+        }
+        result = analyze_mod.check_acceptance_criteria(analysis)
+        assert result["overall_status"] == "blocked"
+
+
+class TestPerRepThroughputValidation:
+    """Reverse tests for per-rep throughput check (reviewer issue 4).
+
+    Per reviewer: capacity scan should check each rep's throughput, not just
+    the median, to catch NaN/0 hidden behind a positive median.
+    """
+
+    def test_rep_with_zero_throughput_rejected(self, analyze_mod):
+        """A rep with throughput=0 must fail even if median is positive."""
+        analysis = {
+            "capacity_curves": {
+                "sonnet-throughput": {
+                    "8": {
+                        "repetitions": 3,
+                        "raw_values": [100.0, 0.0, 110.0],  # rep 2 is 0
+                        "stats": {"output_throughput": {"median": 105.0}},
+                    }
+                }
+            },
+            "tiering_comparison": {},
+        }
+        valid, issues = analyze_mod._validate_repetitions(analysis)
+        assert valid is False
+        assert any("rep 2 invalid" in i for i in issues)
+
+    def test_rep_with_nan_throughput_rejected(self, analyze_mod):
+        """A rep with NaN throughput must fail."""
+        import math
+
+        analysis = {
+            "capacity_curves": {
+                "sonnet-throughput": {
+                    "8": {
+                        "repetitions": 3,
+                        "raw_values": [100.0, math.nan, 110.0],
+                        "stats": {"output_throughput": {"median": 105.0}},
+                    }
+                }
+            },
+            "tiering_comparison": {},
+        }
+        valid, issues = analyze_mod._validate_repetitions(analysis)
+        assert valid is False
+        assert any("rep 2 invalid" in i for i in issues)
+
+    def test_all_reps_valid_passes(self, analyze_mod):
+        """All reps with finite-positive throughput → pass."""
+        analysis = {
+            "capacity_curves": {
+                "sonnet-throughput": {
+                    "8": {
+                        "repetitions": 3,
+                        "raw_values": [100.0, 105.0, 110.0],
+                        "stats": {"output_throughput": {"median": 105.0}},
+                    }
+                }
+            },
+            "tiering_comparison": {},
+        }
+        valid, issues = analyze_mod._validate_repetitions(analysis)
+        assert valid is True
+        assert issues == []

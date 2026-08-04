@@ -519,8 +519,14 @@ EOF
 
     # Kill server
     cleanup_server
+    # Per reviewer round 1 issue 3: post-experiment NPU idle check must be
+    # fail-closed too — a dirty NPU means the result may be contaminated and
+    # must not be admitted.  Mark the run as blocked.
     if ! wait_for_npu_idle; then
-        log "  WARNING: NPU not idle after experiment, continuing"
+        log "  ERROR: NPU not idle after experiment — marking run as blocked"
+        STATUS_FILE="$output_dir/STATUS"
+        echo "BLOCKED: NPU not idle after experiment" > "$STATUS_FILE"
+        return 1
     fi
 
     log "  Completed: $output_dir"

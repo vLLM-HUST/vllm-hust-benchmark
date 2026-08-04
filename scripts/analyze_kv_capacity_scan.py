@@ -403,6 +403,9 @@ def _validate_repetitions(
     """Check all formal points have >= MIN_REPETITIONS reps with finite-positive throughput.
 
     Inspects both capacity scan curves and tiering comparison per-config stats.
+    Per reviewer round 1 issue 4: an empty ``capacity_curves`` dict is NOT a
+    vacuous pass — it is a blocking failure because there is no evidence to
+    validate.
 
     Returns:
         Tuple of (is_valid, issues) where issues is a list of human-readable
@@ -410,13 +413,25 @@ def _validate_repetitions(
     """
     issues: list[str] = []
 
-    for workload, curve in analysis.get("capacity_curves", {}).items():
+    capacity_curves = analysis.get("capacity_curves", {})
+    if not capacity_curves:
+        issues.append("capacity_curves is empty — no evidence to validate")
+    for workload, curve in capacity_curves.items():
         for cap_str, data in curve.items():
             reps = data.get("repetitions", 0)
             if reps < MIN_REPETITIONS:
                 issues.append(
                     f"capacity {workload}/{cap_str}: {reps} reps < {MIN_REPETITIONS}"
                 )
+            # Per reviewer round 1 issue 4: check each rep's throughput, not
+            # just the median, to catch NaN/0 hidden behind a positive median.
+            raw_values = data.get("raw_values", [])
+            for i, v in enumerate(raw_values):
+                if v is None or not math.isfinite(v) or v <= 0:
+                    issues.append(
+                        f"capacity {workload}/{cap_str}: rep {i + 1} invalid "
+                        f"throughput {v}"
+                    )
             stats = data.get("stats", {})
             median = stats.get("output_throughput", {}).get("median")
             if median is None:
@@ -713,11 +728,26 @@ def main() -> None:
     if timeline_file.exists():
         preempt_timeline = json.loads(timeline_file.read_text())
 
-    # Load provenance if available
+    # Load provenance if available.  Per reviewer round 1 issue 4: the scan
+    # script writes env-manifest.json per-rep (under each rep dir), not at the
+    # top level.  Try the top-level manifest first, then fall back to the first
+    # rep-level manifest found under raw_results/ or tiering/<config>/rep-*/.
     provenance = None
     manifest_file = results_dir / "env-manifest.json"
     if manifest_file.exists():
         provenance = json.loads(manifest_file.read_text())
+    else:
+        for sub in [
+            results_dir / "raw_results",
+            results_dir / "tiering",
+        ]:
+            if not sub.is_dir():
+                continue
+            for candidate in sub.rglob("env-manifest.json"):
+                provenance = json.loads(candidate.read_text())
+                break
+            if provenance is not None:
+                break
 
     report = generate_report(
         capacity_analysis, tiering_analysis, preempt_timeline, provenance

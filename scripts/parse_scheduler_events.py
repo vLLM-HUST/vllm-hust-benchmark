@@ -460,16 +460,32 @@ def parse_cpu_offload_events(log_text: str) -> list[dict[str, Any]]:
 def validate_timeline_complete(episode: dict[str, Any]) -> bool:
     """Check that all 6 stages in an episode have non-None timestamps.
 
+    Per reviewer round 1 issue 2: the timeline must not only have all stages
+    present but also be **monotonically ordered** — ``preempt ≤ restore_start
+    ≤ restore_done ≤ scheduler_wakeup ≤ admission ≤ first_prefill_or_decode``.
+    Without ordering, events from different episodes could be falsely
+    correlated, yielding a false-positive ``timeline_complete``.
+
     Args:
         episode: dict with a ``stages`` key mapping stage names to timestamps.
 
     Returns:
-        True if all stages in ``TIMELINE_STAGES`` have a non-None value.
+        True if all stages in ``TIMELINE_STAGES`` have a non-None value **and**
+        the timestamps are monotonically non-decreasing.
     """
     stages = episode.get("stages", {})
     if not isinstance(stages, dict):
         return False
-    return all(stages.get(stage) is not None for stage in TIMELINE_STAGES)
+    # Stage 1: all stages must be present
+    if not all(stages.get(stage) is not None for stage in TIMELINE_STAGES):
+        return False
+    # Stage 2: timestamps must be monotonically non-decreasing
+    ts_values = [stages[stage] for stage in TIMELINE_STAGES]
+    for i in range(1, len(ts_values)):
+        if ts_values[i] is not None and ts_values[i - 1] is not None:
+            if ts_values[i] < ts_values[i - 1]:
+                return False
+    return True
 
 
 def _build_stages_for_episode(
@@ -503,16 +519,24 @@ def _build_stages_for_episode(
                     matched = ev
                     break
 
-        # Strategy 2: first event with timestamp >= preempt timestamp
+        # Strategy 2: if exactly one event has timestamp >= preempt timestamp,
+        # use it.  Per reviewer round 1 issue 2: when multiple candidates exist
+        # without seq_group_id correlation, the match is ambiguous — leaving
+        # the stage as None is safer (fail-closed) than risking a false positive.
         if matched is None and pe_ts is not None:
-            for ev in events:
-                ev_ts = ev.get("timestamp")
-                if ev_ts and ev_ts >= pe_ts:
-                    matched = ev
-                    break
+            candidates = [
+                ev for ev in events if ev.get("timestamp") and ev["timestamp"] >= pe_ts
+            ]
+            if len(candidates) == 1:
+                matched = candidates[0]
 
-        # Strategy 3: first event of this stage (no correlation possible)
-        if matched is None and events:
+        # Strategy 3: first event of this stage (no correlation possible).
+        # Per reviewer round 1 issue 2: this fallback is unreliable for stages
+        # whose log lines typically lack seq_group_id (e.g. scheduler_wakeup).
+        # Only use it when there is exactly ONE event for this stage — if
+        # multiple uncorrelated events exist, leaving the stage as None is
+        # safer (fail-closed) than risking a false-positive correlation.
+        if matched is None and len(events) == 1:
             matched = events[0]
 
         if matched:
