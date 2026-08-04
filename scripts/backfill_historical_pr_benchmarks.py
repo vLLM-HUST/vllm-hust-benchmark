@@ -362,6 +362,13 @@ def ensure_worktree(
     path = worktree_root / f"{prefix}-{resolved[:12]}"
     if path.exists():
         return path
+    # Prune stale worktree registrations left by prior crashed runs
+    run_command(
+        ["git", "worktree", "prune"],
+        cwd=source_repo,
+        execute=execute,
+        check=False,
+    )
     run_command(
         ["git", "worktree", "add", "--detach", str(path), resolved],
         cwd=source_repo,
@@ -458,6 +465,7 @@ def find_local_model_path(model_id: str) -> str | None:
         return None
     known = {
         "Qwen/Qwen2.5-14B-Instruct": [
+            Path("/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct"),
             Path("/data/shared_models/Qwen2.5-14B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-14B-Instruct"),
             Path(
@@ -465,6 +473,9 @@ def find_local_model_path(model_id: str) -> str | None:
             ),
         ],
         "Qwen/Qwen2.5-7B-Instruct": [
+            Path(
+                "/data/vllm-hust-benchmark-issue97/models/models/Qwen--Qwen2.5-7B-Instruct/snapshots/master"
+            ),
             Path("/data/shared_models/Qwen2.5-7B-Instruct"),
             Path("/data/shared_models/Qwen--Qwen2.5-7B-Instruct"),
             Path(

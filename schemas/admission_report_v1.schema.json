@@ -1,0 +1,207 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust/vllm-hust-benchmark/schemas/admission_report_v1.schema.json",
+  "title": "Admission Report v1",
+  "description": "Report of admission decisions for leaderboard snapshot entries against the fixed-target registry.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "registry_version",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "admission-report/v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "registry_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": [
+        "entry_id",
+        "scenario",
+        "profile_name",
+        "actual_config",
+        "required_config",
+        "missing_fields",
+        "drift_fields",
+        "artifact_path",
+        "disposition",
+        "reason"
+      ],
+      "properties": {
+        "entry_id": {
+          "type": "string"
+        },
+        "scenario": {
+          "type": "string"
+        },
+        "profile_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "actual_config": {
+          "type": "object",
+          "required": [
+            "model",
+            "hardware_chip_model",
+            "chip_count",
+            "model_precision",
+            "gpu_memory_utilization",
+            "max_model_len",
+            "workload_name"
+          ],
+          "properties": {
+            "model": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "hardware_chip_model": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "chip_count": {
+              "type": [
+                "integer",
+                "string",
+                "null"
+              ]
+            },
+            "model_precision": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "gpu_memory_utilization": {
+              "type": [
+                "number",
+                "string",
+                "null"
+              ]
+            },
+            "max_model_len": {
+              "type": [
+                "integer",
+                "string",
+                "null"
+              ]
+            },
+            "workload_name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "required_config": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "model",
+                "hardware_chip_model",
+                "chip_count",
+                "model_precision",
+                "gpu_memory_utilization",
+                "max_model_len",
+                "workload_name"
+              ],
+              "properties": {
+                "model": {
+                  "type": "string"
+                },
+                "hardware_chip_model": {
+                  "type": "string"
+                },
+                "chip_count": {
+                  "type": "integer"
+                },
+                "model_precision": {
+                  "type": "string"
+                },
+                "gpu_memory_utilization": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "max_model_len": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "workload_name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "drift_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artifact_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "disposition": {
+          "type": "string",
+          "enum": [
+            "keep",
+            "quarantine",
+            "specialty",
+            "rerun"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

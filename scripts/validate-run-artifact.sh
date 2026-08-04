@@ -17,6 +17,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+
 ARTIFACT_DIR="${1:?Usage: validate-run-artifact.sh <artifact-dir>}"
 
 if [[ ! -d "$ARTIFACT_DIR" ]]; then
@@ -35,7 +38,7 @@ check() {
     echo "  ✅ $desc"
   else
     echo "  ❌ $desc" >&2
-    (( ERRORS++ ))
+    ERRORS=$((ERRORS + 1))
   fi
 }
 
@@ -105,8 +108,75 @@ missing = [k for k in required if k not in m]
 if missing:
     print(', '.join(missing))
 " 2>/dev/null || echo "parse-error")
-    if [[ -z "$MISSING" ]] || [[ "$MISSING" == "parse-error" ]]; then
-      [[ -z "$MISSING" ]] && check "env-manifest.json has required fields" 0 || check "env-manifest.json required field check" 1
+    if [[ -z "$MISSING" ]]; then
+      check "env-manifest.json has required fields" 0
+    else
+      echo "  missing env-manifest fields: $MISSING" >&2
+      check "env-manifest.json has required fields" 1
+    fi
+    FROZEN_INPUT_ERRORS=$(python3 - <<'PY' || echo "parse-error"
+import json
+
+manifest = json.load(open("env-manifest.json", encoding="utf-8"))
+if not manifest.get("frozen_inputs_required"):
+    raise SystemExit(0)
+
+errors = []
+inputs = manifest.get("frozen_inputs") or {}
+for field in ("image_id", "model_revision", "topology"):
+    if not inputs.get(field):
+        errors.append(f"frozen_inputs.{field} is empty")
+
+for field in ("cann", "torch_npu_version"):
+    value = inputs.get(field) or {}
+    if not value.get("declared"):
+        errors.append(f"frozen_inputs.{field}.declared is empty")
+    if not value.get("detected"):
+        errors.append(f"frozen_inputs.{field}.detected is empty")
+    elif value.get("declared") != value.get("detected"):
+        errors.append(
+            f"frozen_inputs.{field} declared {value.get('declared')!r} "
+            f"does not match detected {value.get('detected')!r}"
+        )
+
+for repo in ("vllm_hust", "vllm_ascend_hust"):
+    value = (manifest.get("git_info") or {}).get(repo) or {}
+    if not value.get("declared"):
+        errors.append(f"git_info.{repo}.declared is empty")
+    if value.get("declared") != value.get("observed"):
+        errors.append(
+            f"git_info.{repo} declared {value.get('declared')!r} "
+            f"does not match observed {value.get('observed')!r}"
+        )
+
+campaign = manifest.get("campaign") or {}
+for field in ("campaign_id", "coverage_class", "load_profile"):
+    if not campaign.get(field):
+        errors.append(f"campaign.{field} is empty")
+coverage_class = campaign.get("coverage_class")
+if coverage_class == "full-matrix" and campaign.get("point_role") != "checkpoint":
+    errors.append("campaign.point_role must be checkpoint for full-matrix")
+elif coverage_class == "targeted-pair":
+    if campaign.get("point_role") not in ("baseline", "head"):
+        errors.append("campaign.point_role must be baseline or head for targeted-pair")
+    if not campaign.get("comparison_id"):
+        errors.append("campaign.comparison_id is empty for targeted-pair")
+elif coverage_class == "experimental":
+    if campaign.get("point_role") or campaign.get("comparison_id"):
+        errors.append("experimental campaign declares a point_role or comparison_id")
+else:
+    errors.append(f"campaign.coverage_class is unsupported: {coverage_class!r}")
+if campaign.get("repetitions", 0) < 3:
+    errors.append("campaign.repetitions is less than 3")
+
+print("; ".join(errors))
+PY
+)
+    if [[ -z "$FROZEN_INPUT_ERRORS" ]]; then
+      check "formal campaign frozen provenance is complete" 0
+    else
+      echo "  $FROZEN_INPUT_ERRORS" >&2
+      check "formal campaign frozen provenance is complete" 1
     fi
   else
     check "env-manifest.json is valid JSON" 1
@@ -129,9 +199,6 @@ else
 fi
 
 # ─── 6. Schema normalization (if Python available) ──────────────────────────
-
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 
 if [[ -f "run_leaderboard.json" ]] && [[ -d "$REPO_ROOT/src" ]]; then
   if python3 -c "

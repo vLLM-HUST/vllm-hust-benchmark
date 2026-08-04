@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -15,7 +16,10 @@ import urllib.request
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
+
+if TYPE_CHECKING:
+    from vllm_hust_benchmark.fixed_target_registry import FixedTargetProfile
 
 from vllm_hust_benchmark.aggregate_results import build_series_signature
 from vllm_hust_benchmark.models import render_parameter_flags
@@ -33,13 +37,20 @@ from vllm_hust_benchmark.submission_artifacts import (
     normalize_submission_artifacts_in_tree,
 )
 from vllm_hust_benchmark.workload_config_contract import (
-    WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER,
     is_official_workload_contract_entry,
     requires_workload_config_contract,
     validate_explicit_workload_config,
 )
 
 FLAG_PATTERN = re.compile(r"^\s+--([a-z0-9][a-z0-9-_]*)\b", re.MULTILINE)
+_FULL_HEX_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+
+
+def _is_full_hex_sha(value: object) -> bool:
+    """Return True only for a 40-character lowercase hex SHA."""
+    return isinstance(value, str) and bool(_FULL_HEX_SHA_RE.match(value))
+
+
 DEFAULT_RUNTIME_ENGINE = "vllm-hust"
 DEFAULT_LOCAL_SERVER_HOST = "127.0.0.1"
 DEFAULT_LOCAL_SERVER_PORT = 8000
@@ -605,12 +616,41 @@ def aggregate_to_website(
     ]
     rc = run_external_command(command, cwd=layout.website_repo, execute=execute)
 
+    # Fixed-target admission gate: after the external aggregation has written
+    # the snapshot, scan for entries that misalign with the fixed-target
+    # registry and quarantine them out of the official snapshot.
+    target_misaligned_entries: list[dict] = []
+    try:
+        from vllm_hust_benchmark.fixed_target_registry import (
+            load_fixed_target_registry,
+        )
+
+        registry = load_fixed_target_registry()
+        target_misaligned_entries = _scan_fixed_target_misaligned_entries(
+            destination, registry
+        )
+        if target_misaligned_entries:
+            _quarantine_misaligned_snapshot_entries(
+                destination, target_misaligned_entries
+            )
+            print(
+                f"fixed-target admission gate quarantined "
+                f"{len(target_misaligned_entries)} entries",
+                file=sys.stderr,
+            )
+    except (OSError, ValueError) as exc:
+        print(
+            f"fixed-target admission gate skipped: {exc}",
+            file=sys.stderr,
+        )
+
     report = _build_rejected_superseded_report(
         [],
         [],
         [],
         source_dir=source_dir,
         layout=layout,
+        target_misaligned_entries=target_misaligned_entries,
     )
     _write_rejected_superseded_report(destination, report)
     return rc
@@ -1430,6 +1470,72 @@ def _find_excluded_submission_dirs(
 _TEMPORARY_DIR_PREFIX_PATTERN = re.compile(r"^(tmp|temp|wip|scratch|adhoc)")
 _TEMPORARY_DIR_SUFFIX_PATTERN = re.compile(r"/(tmp|temp|wip|scratch|adhoc)$")
 
+# CI publication directory contract used by run_ascend_benchmark_ci.sh:
+#   RESULT_ROOT       = $VLLM_HUST_REPO/.benchmarks/ci/$RUN_ID
+#   SUBMISSIONS_ROOT  = $RESULT_ROOT/submissions
+#   SUBMISSION_DIR    = $SUBMISSIONS_ROOT/$RUN_ID
+# where RUN_ID = ci-<gh-run-id>-<attempt>-<sha8> (always starts with ``ci-``).
+# The runner writes ``OK`` to ``$SUBMISSION_DIR/STATUS`` only after a successful
+# benchmark. Both the result-root segment and the submission dir name follow
+# this ``ci-*`` shape.
+_CI_PUBLICATION_RUN_ID_PATTERN = re.compile(r"^ci-[A-Za-z0-9_-]+$")
+
+
+def _is_ci_publication_submission(child: Path) -> bool:
+    """Return True iff ``child`` matches the CI publication directory contract
+    used by ``run_ascend_benchmark_ci.sh``.
+
+    The contract requires the exact shape::
+
+        .benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>
+
+    where ``RUN_ID`` starts with ``ci-`` (matching
+    ``_CI_PUBLICATION_RUN_ID_PATTERN``), the same ``RUN_ID`` is used for both
+    the result root and the submission directory (producer uses one
+    ``RUN_ID`` for both ``RESULT_ROOT`` and ``SUBMISSION_DIR``), and the
+    directory carries a ``STATUS`` file whose content equals ``OK`` after
+    stripping.
+
+    This strict shape check scopes the ``.benchmarks/`` exception to real CI
+    submissions only. Other ``.benchmarks/`` subtrees (``.benchmarks/cache``,
+    ``.benchmarks/raw``, working directories, or paths that happen to contain
+    ``.benchmarks``) remain rejected as cache/working directories even if they
+    carry a ``STATUS=OK`` file, preserving the fail-closed boundary around the
+    temporary/quarantine rejection.
+    """
+    # Directory name must match the ci-* RUN_ID pattern.
+    if not _CI_PUBLICATION_RUN_ID_PATTERN.match(child.name):
+        return False
+    # Parent must be named "submissions".
+    parent = child.parent
+    if parent.name != "submissions":
+        return False
+    # Grandparent (the result root) must also match the ci-* RUN_ID pattern.
+    grandparent = parent.parent
+    if not _CI_PUBLICATION_RUN_ID_PATTERN.match(grandparent.name):
+        return False
+    # Producer uses the same RUN_ID for RESULT_ROOT and SUBMISSION_DIR, so
+    # the submission dir name must equal the result root name. This rejects
+    # .benchmarks/ci/ci-A/submissions/ci-B even when both segments are valid.
+    if child.name != grandparent.name:
+        return False
+    # Great-grandparent must be "ci".
+    if grandparent.parent.name != "ci":
+        return False
+    # Great-great-grandparent must be ".benchmarks".
+    if grandparent.parent.parent.name != ".benchmarks":
+        return False
+    # STATUS file must exist and strictly equal "OK" after stripping, matching
+    # the downstream admission gate's STATUS comparison.
+    status_path = child / "STATUS"
+    if not status_path.is_file():
+        return False
+    try:
+        status_content = status_path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return False
+    return status_content == "OK"
+
 
 def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
     """Scan immediate subdirectories of ``source_dir`` for admission failures.
@@ -1437,7 +1543,10 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
     Returns a list of failure dicts, each with keys ``dir``, ``reason``, and
     ``detail``. A directory is a failure if it matches ANY of:
     - ``temporary``: directory name matches a temporary naming pattern, or the
-      directory lives under ``tests/fixtures/`` or ``.benchmarks/``.
+      directory lives under ``tests/fixtures/`` or ``.benchmarks/``. The only
+      ``.benchmarks/`` exception is the CI publication contract
+      ``.benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>`` with a valid ``OK``
+      STATUS file (see ``_is_ci_publication_submission``).
     - ``FAILED``: the ``STATUS`` file content starts with ``FAILED``.
     - ``NO_STATUS``: a ``STATUS`` file exists but is empty after stripping;
       a ``ci-*`` directory has no ``STATUS``; or neither a ``STATUS`` file nor
@@ -1464,7 +1573,16 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
             or _TEMPORARY_DIR_SUFFIX_PATTERN.search(path_str)
         )
         is_fixture_path = "tests" in parts and "fixtures" in parts
+        # .benchmarks/ directories are rejected as cache/working directories,
+        # UNLESS the directory matches the strict CI publication contract used
+        # by run_ascend_benchmark_ci.sh:
+        #   .benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>  with STATUS=OK.
+        # The strict shape check (see _is_ci_publication_submission) ensures
+        # other .benchmarks/ subtrees (cache, raw, working dirs) remain rejected
+        # even if they carry a STATUS=OK file, preserving fail-closed behavior.
         is_benchmark_cache = ".benchmarks" in parts
+        if is_benchmark_cache and _is_ci_publication_submission(child):
+            is_benchmark_cache = False
         if is_temporary_name or is_fixture_path or is_benchmark_cache:
             failures.append(
                 {
@@ -1583,6 +1701,192 @@ def _scan_submission_admission_failures(source_dir: Path) -> list[dict]:
             )
             continue
 
+        # Provenance completeness: historical-pr-backfill submissions must
+        # carry real git commit provenance in env-manifest.json, not the
+        # "not available" placeholder emitted when CURRENT_VLLM_HUST_REPO /
+        # CURRENT_VLLM_ASCEND_HUST_REPO were unset at collection time.
+        env_manifest_path = child / "env-manifest.json"
+        is_historical_backfill = False
+        try:
+            _rl = json.loads(artifact_path.read_text(encoding="utf-8"))
+            is_historical_backfill = (
+                _rl.get("metadata", {}).get("data_source")
+                == "real-online-historical-pr-backfill"
+            )
+        except (OSError, json.JSONDecodeError):
+            # Fail-closed: if run_leaderboard.json is unreadable or corrupt,
+            # we cannot determine data_source — reject rather than silently
+            # bypassing provenance checks.
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "PROVENANCE_INCOMPLETE",
+                    "detail": (
+                        "run_leaderboard.json is unreadable or corrupt; "
+                        "cannot verify provenance"
+                    ),
+                }
+            )
+            continue
+        if is_historical_backfill and not env_manifest_path.is_file():
+            # Fail-closed: historical-pr-backfill entries MUST carry
+            # env-manifest.json; missing file must not silently bypass
+            # the git commit provenance checks below.
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "PROVENANCE_INCOMPLETE",
+                    "detail": (
+                        "env-manifest.json is missing for a "
+                        "historical-pr-backfill submission"
+                    ),
+                }
+            )
+            continue
+        if is_historical_backfill and env_manifest_path.is_file():
+            try:
+                _em = json.loads(env_manifest_path.read_text(encoding="utf-8"))
+                _gi = _em.get("git_info", {})
+                _missing_provenance = [
+                    k
+                    for k in ("vllm_hust", "vllm_ascend_hust")
+                    if _gi.get(k) in (None, "not available")
+                ]
+                if _missing_provenance:
+                    failures.append(
+                        {
+                            "dir": path_str,
+                            "reason": "PROVENANCE_INCOMPLETE",
+                            "detail": (
+                                "env-manifest.json git_info is missing or has "
+                                "'not available' "
+                                f"for: {', '.join(_missing_provenance)}"
+                            ),
+                        }
+                    )
+                    continue
+                _short_sha = [
+                    k
+                    for k in ("vllm_hust", "vllm_ascend_hust")
+                    if isinstance(_gi.get(k), str)
+                    and _gi.get(k) != "not available"
+                    and not _is_full_hex_sha(_gi.get(k))
+                ]
+                if _short_sha:
+                    failures.append(
+                        {
+                            "dir": path_str,
+                            "reason": "PROVENANCE_INCOMPLETE",
+                            "detail": (
+                                "env-manifest.json git_info has a non-40-char "
+                                f"hex SHA for: {', '.join(_short_sha)}"
+                            ),
+                        }
+                    )
+                    continue
+            except (OSError, json.JSONDecodeError):
+                failures.append(
+                    {
+                        "dir": path_str,
+                        "reason": "PROVENANCE_INCOMPLETE",
+                        "detail": "env-manifest.json missing or unreadable",
+                    }
+                )
+                continue
+
+        # Review feedback: checksum gate must not be bypassable. A submission
+        # that reaches this point has passed STATUS/artifact/manifest/provenance
+        # checks, so it is in the formal admission scope and must carry a
+        # checksums.sha256 manifest covering the three critical evidence files.
+        # Deleting the whole checksum file or removing a critical entry must
+        # fail closed here.
+        checksum_failures = _verify_admission_checksums(child)
+        if checksum_failures:
+            failures.append(
+                {
+                    "dir": path_str,
+                    "reason": "CHECKSUM_INCOMPLETE",
+                    "detail": "; ".join(checksum_failures),
+                }
+            )
+            continue
+
+    return failures
+
+
+# Files that must appear in checksums.sha256 for any submission entering the
+# formal admission scope. Review feedback: deleting the whole checksum file or
+# removing these critical entries must not bypass the gate.
+_ADMISSION_REQUIRED_CHECKSUM_FILES: tuple[str, ...] = (
+    "run_leaderboard.json",
+    "leaderboard_manifest.json",
+    "env-manifest.json",
+)
+
+# sha256sum line: ``<64-hex>  ./path`` or ``<64-hex> *./path``
+_ADMISSION_CHECKSUM_LINE_RE = re.compile(
+    r"^(?P<hex>[0-9a-fA-F]{64})\s+\*?(?P<path>.+)$"
+)
+
+
+def _verify_admission_checksums(submission_dir: Path) -> list[str]:
+    """Fail-closed checksum check for submissions entering admission scope.
+
+    Unlike the lenient :func:`scripts.verify_submission_checksums.verify_directory`
+    (which silently skips directories without ``checksums.sha256``), this function
+    **requires** the manifest to exist and to cover every file in
+    :data:`_ADMISSION_REQUIRED_CHECKSUM_FILES`. It also verifies that each
+    listed file's actual SHA256 matches.
+
+    Returns a list of failure messages (empty = passed).
+    """
+    checksums_path = submission_dir / "checksums.sha256"
+    if not checksums_path.is_file():
+        return [
+            f"{checksums_path}: missing checksum manifest "
+            f"(required for admission scope)"
+        ]
+
+    failures: list[str] = []
+    covered: set[str] = set()
+
+    try:
+        raw_lines = checksums_path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        return [f"{checksums_path}: unreadable: {exc}"]
+
+    for raw in raw_lines:
+        match = _ADMISSION_CHECKSUM_LINE_RE.match(raw.strip())
+        if match is None:
+            if raw.strip():
+                failures.append(f"{checksums_path}: malformed line: {raw!r}")
+            continue
+        expected_hex = match.group("hex").lower()
+        rel_path = match.group("path")
+        if rel_path.startswith("./"):
+            rel_path = rel_path[2:]
+        covered.add(rel_path)
+        target = submission_dir / rel_path
+        if not target.is_file():
+            failures.append(f"{checksums_path}: missing file {rel_path}")
+            continue
+        actual_hex = hashlib.sha256(target.read_bytes()).hexdigest()
+        if actual_hex != expected_hex:
+            failures.append(
+                f"{checksums_path}: {rel_path} checksum mismatch "
+                f"(expected {expected_hex}, got {actual_hex})"
+            )
+
+    if not covered and not failures:
+        failures.append(f"{checksums_path}: empty checksum manifest")
+        return failures
+
+    for required in _ADMISSION_REQUIRED_CHECKSUM_FILES:
+        if required not in covered:
+            failures.append(
+                f"{checksums_path}: required file {required!r} "
+                f"is not covered by the checksum manifest"
+            )
     return failures
 
 
@@ -1858,6 +2162,7 @@ def _build_rejected_superseded_report(
     *,
     source_dir: Path | None = None,
     layout: RepoLayout | None = None,
+    target_misaligned_entries: list[dict] | None = None,
 ) -> dict:
     """Build the rejected/superseded report dict from gate scan results."""
     from datetime import datetime, timezone
@@ -1921,6 +2226,7 @@ def _build_rejected_superseded_report(
         "rejected_submissions": rejected_submissions,
         "superseded_entries": superseded_entries,
         "excluded_plugin_commits": excluded_plugin_commits,
+        "target_misaligned_entries": target_misaligned_entries or [],
     }
 
 
@@ -1960,6 +2266,225 @@ def _filter_excluded_snapshot_entries(
             encoding="utf-8",
         )
     return removed_count
+
+
+def _fixed_target_numeric_equal(left: Any, right: Any) -> bool:
+    """Compare two values numerically, falling back to direct equality."""
+    try:
+        return float(left) == float(right)
+    except (TypeError, ValueError):
+        return left == right
+
+
+def _resolve_entry_artifact_path(entry: Mapping[str, Any]) -> str | None:
+    """Resolve the original submission artifact path for a snapshot entry.
+
+    Checks ``metadata.artifact_path`` then ``metadata.submission_dir``.
+    Returns ``None`` when neither is present.
+    """
+    metadata = entry.get("metadata")
+    if not isinstance(metadata, Mapping):
+        return None
+    for key in ("artifact_path", "submission_dir"):
+        value = metadata.get(key)
+        if value:
+            return str(value)
+    return None
+
+
+def _scan_fixed_target_misaligned_entries(
+    snapshot_dir: Path,
+    registry: tuple[FixedTargetProfile, ...] | None = None,
+) -> list[dict]:
+    """Scan leaderboard snapshot entries that misalign with fixed-target profiles.
+
+    Returns a list of dicts, each containing:
+    - entry_id
+    - snapshot_file (leaderboard_single.json / leaderboard_multi.json)
+    - reason (missing_gpu_memory_utilization / config_drift / wrong_profile /
+      retired_target / specialty_without_contract)
+    - detail (field-level detail)
+    - profile_name (matched profile name, or None)
+    - artifact_path (original submission path if resolvable, else None)
+    - disposition (quarantine / specialty)
+    """
+    from vllm_hust_benchmark.fixed_target_registry import (
+        find_matching_profile,
+        load_fixed_target_registry,
+    )
+
+    if registry is None:
+        registry = load_fixed_target_registry()
+
+    misaligned: list[dict] = []
+    for snapshot_file_name in ("leaderboard_single.json", "leaderboard_multi.json"):
+        snapshot_path = snapshot_dir / snapshot_file_name
+        if not snapshot_path.is_file():
+            continue
+        try:
+            payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, list):
+            continue
+        for entry in payload:
+            if not isinstance(entry, Mapping):
+                continue
+            entry_id = str(entry.get("entry_id") or "")
+            if not entry_id:
+                continue
+
+            profile = find_matching_profile(entry, registry)
+            if profile is None:
+                continue  # non-official entry — outside this gate's scope
+
+            artifact_path = _resolve_entry_artifact_path(entry)
+            base_record = {
+                "entry_id": entry_id,
+                "snapshot_file": snapshot_file_name,
+                "profile_name": profile.profile_name,
+                "artifact_path": artifact_path,
+            }
+
+            if profile.status == "specialty":
+                misaligned.append(
+                    {
+                        **base_record,
+                        "reason": "specialty_without_contract",
+                        "detail": {
+                            "profile_name": profile.profile_name,
+                            "target_id": profile.target_id,
+                        },
+                        "disposition": "specialty",
+                    }
+                )
+                continue
+
+            if profile.status == "retired":
+                misaligned.append(
+                    {
+                        **base_record,
+                        "reason": "retired_target",
+                        "detail": {
+                            "profile_name": profile.profile_name,
+                            "target_id": profile.target_id,
+                        },
+                        "disposition": "quarantine",
+                    }
+                )
+                continue
+
+            # status == "active"
+            same_spec = entry.get("same_spec")
+            same_spec = same_spec if isinstance(same_spec, Mapping) else {}
+            server = same_spec.get("resolved_server_parameters")
+            server = server if isinstance(server, Mapping) else {}
+
+            # Defensive model match check (find_matching_profile already
+            # filters by model, so this should never trigger in practice).
+            model_obj = entry.get("model")
+            model_obj = model_obj if isinstance(model_obj, Mapping) else {}
+            candidate_model_ids = (
+                model_obj.get("repo_id"),
+                model_obj.get("canonical_id"),
+                model_obj.get("name"),
+            )
+            if profile.model not in candidate_model_ids:
+                misaligned.append(
+                    {
+                        **base_record,
+                        "reason": "wrong_profile",
+                        "detail": {
+                            "field": "model",
+                            "actual": [v for v in candidate_model_ids if v is not None],
+                            "required": profile.model,
+                        },
+                        "disposition": "quarantine",
+                    }
+                )
+                continue
+
+            # Validate required effective server parameters.
+            found_misalignment = False
+            for field_name, required_value in (
+                ("gpu_memory_utilization", profile.gpu_memory_utilization),
+                ("max_model_len", profile.max_model_len),
+            ):
+                if field_name not in server:
+                    misaligned.append(
+                        {
+                            **base_record,
+                            "reason": f"missing_{field_name}",
+                            "detail": {
+                                "field": field_name,
+                                "required": required_value,
+                            },
+                            "disposition": "quarantine",
+                        }
+                    )
+                    found_misalignment = True
+                    break
+                actual_value = server[field_name]
+                if not _fixed_target_numeric_equal(actual_value, required_value):
+                    misaligned.append(
+                        {
+                            **base_record,
+                            "reason": "config_drift",
+                            "detail": {
+                                "field": field_name,
+                                "actual": actual_value,
+                                "required": required_value,
+                            },
+                            "disposition": "quarantine",
+                        }
+                    )
+                    found_misalignment = True
+                    break
+            if found_misalignment:
+                continue
+            # All fields aligned — keep the entry.
+
+    return misaligned
+
+
+def _quarantine_misaligned_snapshot_entries(
+    snapshot_dir: Path,
+    misaligned_entries: list[dict],
+) -> None:
+    """Remove misaligned entries from the leaderboard snapshot files in-place.
+
+    The entries are filtered out of ``leaderboard_single.json`` and
+    ``leaderboard_multi.json`` without physically deleting the original
+    submission artifacts.
+    """
+    misaligned_ids = {
+        entry["entry_id"] for entry in misaligned_entries if entry.get("entry_id")
+    }
+    if not misaligned_ids:
+        return
+    for snapshot_file_name in ("leaderboard_single.json", "leaderboard_multi.json"):
+        snapshot_path = snapshot_dir / snapshot_file_name
+        if not snapshot_path.is_file():
+            continue
+        try:
+            payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(payload, list):
+            continue
+        retained = [
+            entry
+            for entry in payload
+            if not (
+                isinstance(entry, Mapping)
+                and str(entry.get("entry_id") or "") in misaligned_ids
+            )
+        ]
+        if len(retained) != len(payload):
+            snapshot_path.write_text(
+                json.dumps(retained, indent=2, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
 
 
 def _validate_formal_submission_sources(
@@ -2030,7 +2555,7 @@ def _validate_entry_workload_contract(
     payload: Mapping[str, Any],
     *,
     source: str,
-    require_official: bool = False,
+    require_official: bool = True,
 ) -> bool:
     metadata = payload.get("metadata")
     has_contract_marker = isinstance(metadata, Mapping) and bool(
@@ -2039,22 +2564,13 @@ def _validate_entry_workload_contract(
     must_validate = requires_workload_config_contract(payload) or has_contract_marker
 
     # ``require_official`` additionally validates official-spec entries that
-    # don't carry the contract marker yet — but exempts entries whose
-    # ``submitted_at`` predates ``WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER``
-    # (grandfathered historical-pr-backfill data).  Entries with NO
-    # ``submitted_at`` are NOT exempt: omitting the timestamp must not bypass
-    # the contract.
+    # don't carry the contract marker yet.  After the BREAKING change, entries
+    # whose ``submitted_at`` predates the contract activation date are no
+    # longer grandfathered: any official-spec entry must pass the contract
+    # regardless of submission time.
     if not must_validate and require_official:
         if is_official_workload_contract_entry(payload):
-            submitted_at = ""
-            if isinstance(metadata, Mapping):
-                submitted_at = str(metadata.get("submitted_at") or "").strip()
-            if not submitted_at:
-                must_validate = True
-            elif submitted_at < WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER:
-                pass  # grandfathered — pre-activation official entry
-            else:
-                must_validate = True
+            must_validate = True
 
     if not must_validate:
         return True
@@ -2091,6 +2607,7 @@ def _validate_snapshot_workload_contracts(snapshot_dir: Path) -> bool:
             if not _validate_entry_workload_contract(
                 entry,
                 source=f"{snapshot_path}[{index}]",
+                require_official=False,
             ):
                 valid = False
     return valid

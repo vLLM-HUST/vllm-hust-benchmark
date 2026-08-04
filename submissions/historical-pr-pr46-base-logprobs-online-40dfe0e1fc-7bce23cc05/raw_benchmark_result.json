@@ -1,0 +1,77 @@
+{
+  "schema_version": "raw-benchmark-result/v1",
+  "collected_at": "2026-07-31T08:51:19Z",
+  "pr_number": 46,
+  "point_label": "base",
+  "engine_version": "v0.17.2.post1-1186-g40dfe0e1f",
+  "git_commit": "40dfe0e1fc29abc60ea81e4398cda87d9d9b06f5",
+  "runtime_provenance": {
+    "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+    "engine": {
+      "repository": "vLLM-HUST/vllm-hust",
+      "ref": "pr46-base-logprobs-online",
+      "commit": "40dfe0e1fc29abc60ea81e4398cda87d9d9b06f5"
+    },
+    "plugin": {
+      "engine": "vllm-ascend-hust",
+      "repository": "vLLM-HUST/vllm-ascend-hust",
+      "ref": "7bce23cc",
+      "commit": "7bce23cc0572a7793636ae215015a528e4503f1e"
+    }
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-logprobs-online-qwen25-14b-910b2",
+    "spec_label": "Official Ascend Jan 2026 logprobs stress baseline for vllm-hust goal tracking",
+    "spec_source": "/root/vllm/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-logprobs-online-qwen25-14b-910b2.json",
+    "scenario": "logprobs-online",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "model_parameters": "14B",
+    "model_precision": "FP16",
+    "model_quantization": "",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "disable_log_requests": "",
+      "host": "0.0.0.0",
+      "port": 8001,
+      "model": "/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct",
+      "dtype": "float16"
+    },
+    "resolved_client_parameters": {
+      "backend": "vllm",
+      "endpoint": "/v1/completions",
+      "dataset_name": "random",
+      "num_prompts": 200,
+      "request_rate": 1,
+      "logprobs": 20,
+      "host": "127.0.0.1",
+      "port": 8001,
+      "model": "/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct",
+      "random_input_len": 1024,
+      "random_output_len": 256
+    },
+    "resolved_spec_hash": "6a7f1255d4a5b7f3a09f30554154ed5af4a36fbab406c2ec067ad2b8cc336159"
+  },
+  "metrics": {
+    "ttft_ms": 204.7894546657335,
+    "tbt_ms": 38.20747597074574,
+    "throughput_tps": 245.06129236540946,
+    "peak_mem_mb": 0,
+    "error_rate": 0.0
+  },
+  "raw_metrics_snapshot": {
+    "ttft_ms": 204.7894546657335,
+    "tbt_ms": 38.20747597074574,
+    "throughput_tps": 245.06129236540946,
+    "peak_mem_mb": 0,
+    "error_rate": 0.0
+  },
+  "reproducibility_note": "Single-run measurement from historical PR backfill. Repeat group not available; raw per-request traces were not persisted."
+}

@@ -30,12 +30,16 @@ _BASH_CANDIDATES = (
 def _is_bash_version_4_or_newer(path: str) -> bool:
     """Return ``True`` if ``path`` is bash >= 4.0 (supports mapfile)."""
     try:
+        # Force English locale so the version string is always
+        # "GNU bash, version X.Y.Z..." regardless of the user's LANG.
+        env = {**os.environ, "LC_ALL": "C"}
         result = subprocess.run(
             [path, "--version"],
             capture_output=True,
             text=True,
             check=False,
             timeout=2,
+            env=env,
         )
     except (OSError, subprocess.SubprocessError):
         return False
