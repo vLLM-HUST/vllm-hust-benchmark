@@ -1,0 +1,34 @@
+{
+  "schema_version": "strict-baseline-host-assignment-v1",
+  "branch": "data/strict-baseline-c-host-192-168-0-5",
+  "private_host": "192.168.0.5",
+  "public_host_alias": "ascend87-host",
+  "targets": [
+    {
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "model": {
+        "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        "parameters": "32B",
+        "precision": "BF16",
+        "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
+      },
+      "tensor_parallel_size": 2
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "model": {
+        "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        "parameters": "32B",
+        "precision": "BF16",
+        "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746"
+      },
+      "tensor_parallel_size": 2
+    }
+  ],
+  "exact_transfer": {
+    "model_id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+    "revision": "711ad2ea6aa40cfca18895e8aca02ab92df1a746",
+    "status": "incomplete"
+  },
+  "execution_authorized": false
+}
