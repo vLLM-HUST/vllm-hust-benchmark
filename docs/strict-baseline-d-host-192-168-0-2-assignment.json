@@ -1,11 +1,36 @@
 {
   "schema_version": "strict-baseline-host-assignment/v1",
   "assignment_status": "control-fixed-transfer-incomplete",
-  "locally_verified": false,
+  "locally_loaded": true,
+  "locally_verified": true,
   "execution_authorized": false,
   "branch": "data/strict-baseline-d-host-192-168-0-2",
   "host": "192.168.0.2",
   "public_host_alias": "ascend91-host",
+  "runtime_asset": {
+    "storage_backend": "Docker 29.6 containerd image store",
+    "archive_sha256_prefix": "d28174de",
+    "archive_sha256_complete_value_available_in_container": false,
+    "storage_manifest_digest_prefix": "sha256:5f80f602",
+    "storage_manifest_digest_complete_value_available_in_container": false,
+    "runtime_config_digest": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+    "identity_interpretation": "The 5f80 digest identifies the OCI storage manifest; its config.digest and the config blob SHA256 identify the required 9a50 runtime config.",
+    "source_verification_host": "192.168.0.86",
+    "source_verification": {
+      "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "vllm_worktree_clean": true,
+      "vllm_ascend_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+      "vllm_ascend_worktree_clean": true,
+      "packages": {
+        "datasets": "3.3.0",
+        "torch": "2.9.0+cpu",
+        "torch_npu": "2.9.0.post1+gitee7ba04",
+        "vllm": "0.18.0+empty",
+        "vllm_ascend": "0.18.0",
+        "xxhash": "3.6.0"
+      }
+    }
+  },
   "targets": [
     {
       "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
@@ -75,6 +100,7 @@
   "notes": [
     "This document records control-plane assignment and transfer planning only.",
     "It is not benchmark evidence and does not authorize a server or benchmark start.",
+    "The runtime is locally loaded and identity-verified, but model transfer and a fresh safety gate remain incomplete.",
     "Runtime, model, data, input, safety-gate, and run evidence remain independently required."
   ]
 }
