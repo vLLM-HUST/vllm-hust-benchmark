@@ -257,82 +257,79 @@ def test_cli_rejects_relative_host_library_path(tmp_path: Path) -> None:
         )
 
 
-def _trusted_library_fixture(tmp_path: Path) -> tuple[Path, Path, Path]:
-    driver = tmp_path / "Ascend" / "driver"
-    first = tmp_path / "Ascend" / "cann-8.0.0"
-    second = tmp_path / "Ascend" / "cann-9.1.RC1"
+def _trusted_executable_fixture(tmp_path: Path) -> Path:
+    executable = tmp_path / "usr" / "local" / "sbin" / "npu-smi"
+    executable.parent.mkdir(parents=True)
+    executable.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    executable.chmod(0o555)
     for directory in (
-        driver / "lib64" / "driver",
-        first / "aarch64-linux" / "lib64",
-        second / "runtime" / "lib64",
+        tmp_path,
+        tmp_path / "usr",
+        tmp_path / "usr/local",
+        executable.parent,
     ):
-        directory.mkdir(parents=True)
-    for directory in (tmp_path, tmp_path / "Ascend", driver, first, second):
         directory.chmod(0o755)
-    return driver, first, second
+    return executable
 
 
-def test_host_library_path_accepts_canonical_driver_and_multiple_versions(
-    tmp_path: Path,
-) -> None:
-    driver, first, second = _trusted_library_fixture(tmp_path)
-    value = ":".join(
-        (
-            str(driver / "lib64" / "driver"),
-            str(first / "aarch64-linux" / "lib64"),
-            str(second / "runtime" / "lib64"),
-        )
-    )
-    assert (
-        orchestrator.validate_host_library_path(
-            value, trusted_roots=[driver, first, second]
-        )
-        == value
+def _validate_fixture(executable: Path, floor: Path) -> None:
+    orchestrator.validate_absolute_executable(
+        executable, trusted_uid=executable.stat().st_uid, ancestor_floor=floor
     )
 
 
-@pytest.mark.parametrize("suffix", ("\n/tmp", "\r/tmp", "\x00/tmp"))
-def test_host_library_path_rejects_control_characters(
-    tmp_path: Path, suffix: str
-) -> None:
-    driver, _, _ = _trusted_library_fixture(tmp_path)
-    with pytest.raises(ValueError, match="control character"):
-        orchestrator.validate_host_library_path(
-            str(driver / "lib64" / "driver") + suffix, trusted_roots=[driver]
+def test_fixed_host_executable_accepts_complete_safe_chain(tmp_path: Path) -> None:
+    executable = _trusted_executable_fixture(tmp_path)
+    _validate_fixture(executable, tmp_path)
+
+
+def test_fixed_host_executable_rejects_writable_parent(tmp_path: Path) -> None:
+    executable = _trusted_executable_fixture(tmp_path)
+    (tmp_path / "usr/local").chmod(0o777)
+    with pytest.raises(orchestrator.GateFailure, match="replaceable"):
+        _validate_fixture(executable, tmp_path)
+
+
+def test_fixed_host_executable_rejects_symlink_replacement(tmp_path: Path) -> None:
+    executable = _trusted_executable_fixture(tmp_path)
+    replacement = tmp_path / "replacement"
+    replacement.write_text("#!/bin/sh\n", encoding="utf-8")
+    replacement.chmod(0o555)
+    executable.unlink()
+    executable.symlink_to(replacement)
+    with pytest.raises(orchestrator.GateFailure, match="symlink"):
+        _validate_fixture(executable, tmp_path)
+
+
+def test_fixed_host_executable_rejects_writable_file(tmp_path: Path) -> None:
+    executable = _trusted_executable_fixture(tmp_path)
+    executable.chmod(0o775)
+    with pytest.raises(orchestrator.GateFailure, match="replaceable"):
+        _validate_fixture(executable, tmp_path)
+
+
+def test_cli_rejects_removed_host_library_path(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        orchestrator.parse_args(
+            [
+                "--repeat-dir",
+                str(tmp_path / "repeat"),
+                "--target-id",
+                "target",
+                "--side",
+                "upstream",
+                "--physical-npu",
+                "0",
+                "--service-port",
+                "18080",
+                "--runtime-image-digest",
+                "sha256:" + "a" * 64,
+                "--host-ld-library-path",
+                "/tmp",
+                "--",
+                "true",
+            ]
         )
-
-
-def test_host_library_path_rejects_tmp_and_missing(tmp_path: Path) -> None:
-    driver, _, _ = _trusted_library_fixture(tmp_path)
-    with pytest.raises(ValueError, match="outside trusted"):
-        orchestrator.validate_host_library_path("/tmp", trusted_roots=[driver])
-    with pytest.raises(ValueError, match="does not exist"):
-        orchestrator.validate_host_library_path(
-            str(driver / "lib64" / "missing"), trusted_roots=[driver]
-        )
-
-
-def test_host_library_path_rejects_symlink_escape(tmp_path: Path) -> None:
-    driver, _, _ = _trusted_library_fixture(tmp_path)
-    escape = driver / "lib64"
-    (escape / "driver").rmdir()
-    escape.rmdir()
-    escape.symlink_to(tmp_path / "outside", target_is_directory=True)
-    (tmp_path / "outside" / "driver").mkdir(parents=True)
-    with pytest.raises(ValueError, match="outside trusted"):
-        orchestrator.validate_host_library_path(
-            str(escape / "driver"), trusted_roots=[driver]
-        )
-
-
-def test_host_library_path_rejects_non_root_equivalent_writable_dir(
-    tmp_path: Path,
-) -> None:
-    driver, _, _ = _trusted_library_fixture(tmp_path)
-    writable = driver / "lib64" / "driver"
-    writable.chmod(0o775)
-    with pytest.raises(ValueError, match="non-root-read-only"):
-        orchestrator.validate_host_library_path(str(writable), trusted_roots=[driver])
 
 
 def test_root_commands_scopes_host_library_path_to_npu_smi(
@@ -348,13 +345,14 @@ def test_root_commands_scopes_host_library_path_to_npu_smi(
 
     monkeypatch.setattr(orchestrator.os, "geteuid", lambda: 0)
     monkeypatch.setattr(orchestrator.subprocess, "run", fake_run)
-    root = orchestrator.RootCommands("/trusted/lib64")
+    monkeypatch.setattr(
+        orchestrator, "secure_host_npu_smi", lambda: "/usr/local/sbin/npu-smi"
+    )
+    root = orchestrator.RootCommands()
     root.run(["npu-smi", "info"])
     root.run(["docker", "ps", "-aq"])
     assert calls[0] == [
-        "/usr/bin/env",
-        "LD_LIBRARY_PATH=/trusted/lib64",
-        str(orchestrator.HOST_NPU_SMI),
+        "/usr/local/sbin/npu-smi",
         "info",
     ]
     assert calls[1] == ["docker", "ps", "-aq"]
@@ -371,7 +369,7 @@ def test_dry_run_never_writes_canonical_evidence(
     class FakeRoot:
         prefix: list[str] = []
 
-        def __init__(self, _host_ld_library_path: str) -> None:
+        def __init__(self) -> None:
             pass
 
         def run(self, argv, *, check=True):
@@ -402,7 +400,6 @@ def test_dry_run_never_writes_canonical_evidence(
         sample_interval_seconds=1,
         max_idle_hbm_mb=4096,
         max_hbm_drift_mb=256,
-        host_ld_library_path="/trusted/lib64",
         output_uid=1000,
         output_gid=1000,
         dry_run=True,

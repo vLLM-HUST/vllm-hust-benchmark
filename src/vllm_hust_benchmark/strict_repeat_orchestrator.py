@@ -15,6 +15,7 @@ import re
 import shlex
 import signal
 import socket
+import stat
 import subprocess
 import sys
 import time
@@ -36,26 +37,8 @@ FAILURE_SCHEMA = "strict-repeat-failure/v1"
 DRY_RUN_SCHEMA = "strict-repeat-dry-run/v1"
 CONTAINER_ID_RE = re.compile(r"[0-9a-f]{64}")
 IMAGE_DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}")
-DEFAULT_HOST_LD_LIBRARY_PATH = ":".join(
-    (
-        "/usr/local/Ascend/ascend-toolkit/latest/lib64",
-        "/usr/local/Ascend/driver/lib64",
-        "/usr/local/Ascend/driver/lib64/common",
-        "/usr/local/Ascend/driver/lib64/driver",
-    )
-)
-HOST_NPU_SMI = Path("/usr/local/bin/npu-smi")
-ASCEND_INSTALL_ROOT = Path("/usr/local/Ascend")
+HOST_NPU_SMI = Path("/usr/local/sbin/npu-smi")
 SAFE_HOST_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-TRUSTED_LIBRARY_SUFFIXES = {
-    Path("lib64"),
-    Path("lib64/common"),
-    Path("lib64/driver"),
-    Path("aarch64-linux/lib64"),
-    Path("runtime/lib64"),
-    Path("fwkacllib/lib64"),
-    Path("opp/lib64"),
-}
 DEVICE_ROW = re.compile(r"^\|\s*(\d+)\s+\S+\s+\|")
 HBM_CELL = re.compile(r"(\d+)\s*/\s*(\d+)")
 PROCESS_ROW = re.compile(r"^\|\s*(\d+)\s+(?:\d+\s+)?(\d+)\s+\S+")
@@ -65,95 +48,57 @@ class GateFailure(RuntimeError):
     """A condition that makes the repeat ineligible."""
 
 
-def trusted_ascend_roots() -> list[Path]:
-    """Return installation roots selected without consulting user-controlled PATH."""
-    install_root = ASCEND_INSTALL_ROOT.resolve(strict=True)
-    candidates = [
-        ASCEND_INSTALL_ROOT / "driver",
-        ASCEND_INSTALL_ROOT / "ascend-toolkit",
-    ]
-    candidates.extend(
-        path
-        for path in sorted(ASCEND_INSTALL_ROOT.glob("cann-*"))
-        if re.fullmatch(r"cann-[A-Za-z0-9._-]+", path.name)
-    )
-    roots: list[Path] = []
-    for candidate in candidates:
-        try:
-            resolved = candidate.resolve(strict=True)
-        except OSError:
-            continue
-        if (
-            resolved.is_dir()
-            and _is_relative_to(resolved, install_root)
-            and resolved not in roots
-        ):
-            roots.append(resolved)
-    return roots
-
-
-def _is_relative_to(path: Path, root: Path) -> bool:
+def validate_absolute_executable(
+    path: Path, *, trusted_uid: int = 0, ancestor_floor: Path = Path("/")
+) -> None:
+    """Validate an executable and its complete non-replaceable ancestor chain."""
+    if not path.is_absolute() or not ancestor_floor.is_absolute():
+        raise GateFailure("trusted host executable paths must be absolute")
     try:
-        path.relative_to(root)
-    except ValueError:
-        return False
-    return True
-
-
-def validate_host_library_path(
-    value: str, *, trusted_roots: Sequence[Path] | None = None
-) -> str:
-    """Canonicalize a root-safe Ascend-only host dynamic-library path."""
-    if not value or any(
-        ord(character) < 32 or ord(character) == 127 for character in value
-    ):
-        raise ValueError("host LD_LIBRARY_PATH contains a control character")
-    production_roots = trusted_roots is None
-    roots = [
-        root.resolve(strict=True)
-        for root in (trusted_ascend_roots() if production_roots else trusted_roots)
-    ]
-    if not roots:
-        raise ValueError("no trusted Ascend installation roots are available")
-    canonical: list[str] = []
-    for raw_path in value.split(":"):
-        path = Path(raw_path)
-        if not raw_path or not path.is_absolute():
-            raise ValueError("host LD_LIBRARY_PATH must contain only absolute paths")
+        relative = path.relative_to(ancestor_floor)
+    except ValueError as error:
+        raise GateFailure(
+            f"host executable is outside its trust root: {path}"
+        ) from error
+    current = ancestor_floor
+    chain = [current]
+    for part in relative.parts:
+        current /= part
+        chain.append(current)
+    for candidate in chain:
         try:
-            resolved = path.resolve(strict=True)
+            metadata = candidate.lstat()
         except OSError as error:
-            raise ValueError(
-                f"host library directory does not exist: {raw_path}"
-            ) from error
-        if not resolved.is_dir():
-            raise ValueError(f"host library path is not a directory: {raw_path}")
-        matching_root = next(
-            (root for root in roots if _is_relative_to(resolved, root)), None
-        )
-        if matching_root is None:
-            raise ValueError(
-                f"host library directory is outside trusted Ascend roots: {raw_path}"
+            raise GateFailure(f"trusted host path is missing: {candidate}") from error
+        if candidate.is_symlink():
+            raise GateFailure(f"trusted host path contains a symlink: {candidate}")
+        if metadata.st_uid != trusted_uid or metadata.st_mode & 0o022:
+            raise GateFailure(
+                f"trusted host path is owner/group replaceable: {candidate}"
             )
-        relative = resolved.relative_to(matching_root)
-        if relative not in TRUSTED_LIBRARY_SUFFIXES:
-            raise ValueError(f"host library directory is not allowlisted: {raw_path}")
-        trusted_uid = 0 if production_roots else matching_root.stat().st_uid
-        for checked in (
-            matching_root,
-            *resolved.relative_to(matching_root).parents,
-            resolved,
-        ):
-            candidate = (
-                matching_root / checked if not checked.is_absolute() else checked
-            )
-            metadata = candidate.stat()
-            if metadata.st_uid != trusted_uid or metadata.st_mode & 0o022:
-                raise ValueError(
-                    f"host library directory is not root-owned and non-root-read-only: {candidate}"
-                )
-        canonical.append(str(resolved))
-    return ":".join(dict.fromkeys(canonical))
+    metadata = path.lstat()
+    if not stat.S_ISREG(metadata.st_mode) or metadata.st_mode & 0o111 == 0:
+        raise GateFailure(f"trusted host command is not executable: {path}")
+
+
+def secure_host_npu_smi() -> str:
+    """Revalidate and safely open the fixed host npu-smi immediately before use."""
+    validate_absolute_executable(HOST_NPU_SMI)
+    before = HOST_NPU_SMI.lstat()
+    flags = os.O_RDONLY | os.O_CLOEXEC | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(HOST_NPU_SMI, flags)
+    except OSError as error:
+        raise GateFailure(f"cannot safely open host npu-smi: {error}") from error
+    try:
+        opened = os.fstat(descriptor)
+    finally:
+        os.close(descriptor)
+    if (opened.st_dev, opened.st_ino) != (before.st_dev, before.st_ino):
+        raise GateFailure("host npu-smi changed during safety validation")
+    if opened.st_uid != 0 or opened.st_mode & 0o022 or not stat.S_ISREG(opened.st_mode):
+        raise GateFailure("opened host npu-smi failed ownership/mode validation")
+    return str(HOST_NPU_SMI)
 
 
 def utc_now() -> str:
@@ -326,8 +271,7 @@ class CommandResult:
 class RootCommands:
     """Run allowlisted read-only host commands through root or ``sudo -n``."""
 
-    def __init__(self, host_ld_library_path: str) -> None:
-        self.host_ld_library_path = host_ld_library_path
+    def __init__(self) -> None:
         self.environment = {"PATH": SAFE_HOST_PATH, "LANG": "C.UTF-8"}
         self.prefix = [] if os.geteuid() == 0 else ["sudo", "-n"]
         if self.prefix:
@@ -344,12 +288,7 @@ class RootCommands:
     def run(self, argv: Sequence[str], *, check: bool = True) -> CommandResult:
         command = list(argv)
         if command and command[0] == "npu-smi":
-            command = [
-                "/usr/bin/env",
-                f"LD_LIBRARY_PATH={self.host_ld_library_path}",
-                str(HOST_NPU_SMI),
-                *command[1:],
-            ]
+            command = [secure_host_npu_smi(), *command[1:]]
         result = subprocess.run(
             [*self.prefix, *command],
             capture_output=True,
@@ -494,7 +433,7 @@ class StrictRepeatOrchestrator:
         self._validate_target_scope()
         self.startup_id = uuid.uuid4().hex
         self.hostname = socket.gethostname()
-        self.root = RootCommands(args.host_ld_library_path)
+        self.root = RootCommands()
         self.container_name = f"{args.container_name_prefix}-{self.startup_id}"
         self.container_id = ""
         self.lease = ResourceLease(
@@ -1276,7 +1215,6 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--sample-interval-seconds", type=float, default=1.0)
     parser.add_argument("--max-idle-hbm-mb", type=int, default=4096)
     parser.add_argument("--max-hbm-drift-mb", type=int, default=256)
-    parser.add_argument("--host-ld-library-path", default=DEFAULT_HOST_LD_LIBRARY_PATH)
     parser.add_argument(
         "--output-uid",
         type=int,
@@ -1314,12 +1252,6 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         parser.error("snapshot interval must be at least 15 seconds")
     if args.sample_interval_seconds <= 0:
         parser.error("sample interval must be positive")
-    try:
-        args.host_ld_library_path = validate_host_library_path(
-            args.host_ld_library_path
-        )
-    except ValueError as error:
-        parser.error(str(error))
     return args
 
 
