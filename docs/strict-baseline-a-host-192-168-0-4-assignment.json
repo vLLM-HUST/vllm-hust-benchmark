@@ -1,0 +1,74 @@
+{
+  "schema_version": "strict-baseline-host-assignment/v1",
+  "assignment_status": "control-fixed-pending-integration",
+  "execution_authorized": false,
+  "branch": "data/strict-baseline-a-host-192-168-0-4",
+  "host": "192.168.0.4",
+  "targets": [
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "scenario": "instructcoder-online",
+      "model_id": "Qwen/Qwen2.5-Coder-14B-Instruct",
+      "model_revision": "aedcc2d42b622764e023cf882b6652e646b95671",
+      "tensor_parallel_size": 1
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "scenario": "agent-research-online",
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "tensor_parallel_size": 1
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "scenario": "prefix-repetition-online",
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "tensor_parallel_size": 1
+    }
+  ],
+  "model_asset_plan": [
+    {
+      "model_id": "Qwen/Qwen2.5-Coder-14B-Instruct",
+      "model_revision": "aedcc2d42b622764e023cf882b6652e646b95671",
+      "local_path": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct",
+      "local_state": "complete",
+      "verification": {
+        "revision_metadata_matches": true,
+        "sha256_manifest_files_passed": 16,
+        "sha256_manifest_files_total": 16,
+        "weight_shards_present": 6,
+        "weight_shards_total": 6,
+        "incomplete_files": 0
+      },
+      "transfer_required": false
+    },
+    {
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "local_path": "/home/shuhao/compat-baseline-assets/models/Qwen--Qwen2.5-14B-Instruct",
+      "local_state": "incomplete",
+      "verification": {
+        "completed_weight_shards": 0,
+        "weight_shards_total": 8,
+        "incomplete_weight_files": 8,
+        "lock_files": 8
+      },
+      "transfer_required": true,
+      "transfer_source_requirement": "exact-revision snapshot with complete metadata and per-file size and SHA256 verification"
+    }
+  ],
+  "minimum_transfer_set": [
+    {
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "reason": "required by agent-research-online and prefix-repetition-online; the local snapshot is incomplete"
+    }
+  ],
+  "non_execution_evidence": true,
+  "notes": [
+    "This document records control-plane assignment and transfer planning only.",
+    "It is not benchmark evidence and does not authorize a server or benchmark start.",
+    "Runtime, model, data, input, safety-gate, and run evidence remain independently required."
+  ]
+}

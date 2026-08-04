@@ -1,0 +1,104 @@
+{
+  "schema_version": "strict-baseline-host-assignment/v1",
+  "assignment_status": "control-fixed-transfer-incomplete",
+  "locally_loaded": true,
+  "locally_verified": true,
+  "execution_authorized": false,
+  "branch": "data/strict-baseline-d-host-192-168-0-2",
+  "host": "192.168.0.2",
+  "public_host_alias": "ascend91-host",
+  "runtime_asset": {
+    "storage_backend": "Docker 29.6 containerd image store",
+    "archive_sha256": "d28174deca2a8a28173cff1425a585b843421d7e43c8bb34b6c8a1622c289cc0",
+    "storage_manifest_digest": "sha256:5f80f602b9460f3a02f9e847edbe69576906e3dd60e200a095a763a4792f5c26",
+    "runtime_config_digest": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+    "identity_interpretation": "The 5f80 digest identifies the OCI storage manifest; its config.digest and the config blob SHA256 identify the required 9a50 runtime config.",
+    "source_verification_host": "192.168.0.86",
+    "source_verification": {
+      "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "vllm_worktree_clean": true,
+      "vllm_ascend_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+      "vllm_ascend_worktree_clean": true,
+      "packages": {
+        "datasets": "3.3.0",
+        "torch": "2.9.0+cpu",
+        "torch_npu": "2.9.0.post1+gitee7ba04",
+        "vllm": "0.18.0+empty",
+        "vllm_ascend": "0.18.0",
+        "xxhash": "3.6.0"
+      }
+    }
+  },
+  "targets": [
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "scenario": "sharegpt-throughput",
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "tensor_parallel_size": 1
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "scenario": "sonnet-throughput",
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "tensor_parallel_size": 1
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "scenario": "visionarena-online",
+      "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "model_revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+      "tensor_parallel_size": 1
+    }
+  ],
+  "model_asset_plan": [
+    {
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "local_path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+      "local_state": "absent",
+      "verification": {
+        "path_exists": false,
+        "revision_metadata_matches": false,
+        "weight_shards_present": 0,
+        "sha256_manifest_present": false
+      },
+      "transfer_required": true,
+      "transfer_source_requirement": "exact-revision snapshot with complete metadata and per-file size and SHA256 verification"
+    },
+    {
+      "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "model_revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+      "local_path": "/data/shared_models/Qwen--Qwen2.5-VL-7B-Instruct",
+      "local_state": "absent",
+      "verification": {
+        "path_exists": false,
+        "revision_metadata_matches": false,
+        "weight_shards_present": 0,
+        "sha256_manifest_present": false
+      },
+      "transfer_required": true,
+      "transfer_source_requirement": "exact-revision snapshot with complete metadata and per-file size and SHA256 verification"
+    }
+  ],
+  "minimum_transfer_set": [
+    {
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "reason": "required by sharegpt-throughput and sonnet-throughput; the local snapshot is absent"
+    },
+    {
+      "model_id": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "model_revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+      "reason": "required by visionarena-online; the local snapshot is absent"
+    }
+  ],
+  "non_execution_evidence": true,
+  "notes": [
+    "This document records control-plane assignment and transfer planning only.",
+    "It is not benchmark evidence and does not authorize a server or benchmark start.",
+    "The runtime is locally loaded and identity-verified, but model transfer and a fresh safety gate remain incomplete.",
+    "Runtime, model, data, input, safety-gate, and run evidence remain independently required."
+  ]
+}
