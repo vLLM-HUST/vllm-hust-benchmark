@@ -8,12 +8,25 @@ import pytest
 from vllm_hust_benchmark.immutable_input_attestation import (
     build_metadata,
     file_identity,
+    resolve_sharegpt_dataset_url,
     verify_data_contract,
     write_trace_attestation,
 )
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SHAREGPT_REVISION = "192ab2185289094fc556ec8ce5ce1e8e587154ca"
+SHAREGPT_IDENTITY = {
+    "kind": "huggingface-file",
+    "repository": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+    "revision": SHAREGPT_REVISION,
+    "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+}
+SHAREGPT_EXACT_URL = (
+    "https://hf-mirror.com/datasets/"
+    "anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/"
+    f"{SHAREGPT_REVISION}/ShareGPT_V3_unfiltered_cleaned_split.json"
+)
 
 
 def test_file_contract_checks_size_and_sha(tmp_path: Path) -> None:
@@ -88,6 +101,34 @@ def test_build_metadata_requires_exact_revision_and_data_identity() -> None:
         build_metadata({"model": "model", "model_revision": "d" * 40})
 
 
+def test_sharegpt_url_defaults_to_spec_exact_revision() -> None:
+    assert resolve_sharegpt_dataset_url(SHAREGPT_IDENTITY, "") == SHAREGPT_EXACT_URL
+
+
+def test_sharegpt_url_rejects_main_override() -> None:
+    main_url = SHAREGPT_EXACT_URL.replace(
+        f"resolve/{SHAREGPT_REVISION}", "resolve/main"
+    )
+    with pytest.raises(ValueError, match="not the exact revision URL"):
+        resolve_sharegpt_dataset_url(SHAREGPT_IDENTITY, main_url)
+
+
+def test_sharegpt_url_rejects_revision_drift() -> None:
+    drifted_url = SHAREGPT_EXACT_URL.replace(SHAREGPT_REVISION, "a" * 40)
+    with pytest.raises(ValueError, match="not the exact revision URL"):
+        resolve_sharegpt_dataset_url(SHAREGPT_IDENTITY, drifted_url)
+
+
+def test_sharegpt_url_does_not_change_non_sharegpt_contract() -> None:
+    explicit_url = "https://example.test/not-used.json"
+    assert (
+        resolve_sharegpt_dataset_url(
+            {"kind": "deterministic-vllm-generator"}, explicit_url
+        )
+        == explicit_url
+    )
+
+
 def test_official_runner_wires_real_input_attestation() -> None:
     runner = (REPO_ROOT / "scripts" / "run-official-ascend-goal-baseline.sh").read_text(
         encoding="utf-8"
@@ -96,3 +137,5 @@ def test_official_runner_wires_real_input_attestation() -> None:
     assert "VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE" in runner
     assert "IMMUTABLE_INPUT_METADATA=$(verify_immutable_input_contract)" in runner
     assert "finalize_trace_immutable_input_attestation" in runner
+    assert "resolve_sharegpt_dataset_url" in runner
+    assert "/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json" not in runner
