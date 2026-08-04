@@ -285,6 +285,100 @@ def test_benchmarks_dir_with_failed_status_rejected(tmp_path: Path) -> None:
     assert failures[0]["reason"] == "temporary"
 
 
+def test_benchmarks_cache_path_with_ok_status_rejected(tmp_path: Path) -> None:
+    """Directories under .benchmarks/cache/ (or any non-ci subtree) must be
+    rejected even with STATUS=OK. The CI publication exception is scoped to
+    .benchmarks/ci/<RUN_ID>/submissions/<RUN_ID> only, so a path that looks
+    superficially similar but lives under .benchmarks/cache/ must still be
+    rejected as a cache/working directory.
+    """
+    source_dir = tmp_path / ".benchmarks" / "cache" / "ci-run-1" / "submissions"
+    source_dir.mkdir(parents=True)
+    cache_dir = source_dir / "ci-30554037879-1-7363d82b"
+    cache_dir.mkdir()
+    (cache_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (cache_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(cache_dir)
+    _write_admission_required_files(cache_dir)
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+    assert "directory name matches temporary pattern" in failures[0]["detail"]
+
+
+def test_benchmarks_ci_submissions_non_ci_name_rejected(tmp_path: Path) -> None:
+    """Under .benchmarks/ci/<RUN_ID>/submissions/, a directory whose name does
+    NOT start with ci- must be rejected even with STATUS=OK. The CI contract
+    requires the submission dir name to be the ci-* RUN_ID produced by
+    run_ascend_benchmark_ci.sh.
+    """
+    source_dir = tmp_path / ".benchmarks" / "ci" / "ci-run-1" / "submissions"
+    source_dir.mkdir(parents=True)
+    other_dir = source_dir / "manual-submission"
+    other_dir.mkdir()
+    (other_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (other_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(other_dir)
+    _write_admission_required_files(other_dir)
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
+def test_benchmarks_ci_non_submissions_parent_rejected(tmp_path: Path) -> None:
+    """A ci-* directory under .benchmarks/ci/<RUN_ID>/ but NOT inside a
+    submissions/ parent must be rejected even with STATUS=OK. The CI contract
+    requires .benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>.
+    """
+    source_dir = tmp_path / ".benchmarks" / "ci" / "ci-run-1"
+    source_dir.mkdir(parents=True)
+    # Direct child of ci-run-1, not under submissions/
+    stray_dir = source_dir / "ci-30554037879-1-7363d82b"
+    stray_dir.mkdir()
+    (stray_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (stray_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(stray_dir)
+    _write_admission_required_files(stray_dir)
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
+def test_benchmarks_non_ci_grandparent_rejected(tmp_path: Path) -> None:
+    """A ci-* directory under submissions/ whose great-grandparent is not
+    named "ci" must be rejected even with STATUS=OK. The CI contract requires
+    .benchmarks/ci/<RUN_ID>/submissions/<RUN_ID>; .benchmarks/raw/ or
+    .benchmarks/working/ subtrees do not qualify.
+    """
+    source_dir = tmp_path / ".benchmarks" / "raw" / "ci-run-1" / "submissions"
+    source_dir.mkdir(parents=True)
+    ci_dir = source_dir / "ci-30554037879-1-7363d82b"
+    ci_dir.mkdir()
+    (ci_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+    (ci_dir / "run_leaderboard.json").write_text(
+        '{"entry_id": "test"}\n', encoding="utf-8"
+    )
+    _write_manifest(ci_dir)
+    _write_admission_required_files(ci_dir)
+
+    failures = _scan_submission_admission_failures(source_dir)
+
+    assert len(failures) == 1
+    assert failures[0]["reason"] == "temporary"
+
+
 def test_clean_directory_passes(tmp_path: Path) -> None:
     source_dir = tmp_path / "submissions"
     source_dir.mkdir()
