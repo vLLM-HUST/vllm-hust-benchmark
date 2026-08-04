@@ -65,25 +65,27 @@
     {
       "model_id": "Qwen/Qwen2.5-14B-Instruct",
       "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
-      "local_path": "/home/shuhao/compat-baseline-assets/models/Qwen--Qwen2.5-14B-Instruct",
-      "local_state": "incomplete",
+      "local_path": "/data/shared_models/strict-models/Qwen2.5-14B-Instruct",
+      "local_state": "complete",
       "verification": {
-        "completed_weight_shards": 0,
+        "revision_metadata_matches": true,
+        "top_level_files": 18,
+        "completed_weight_shards": 8,
         "weight_shards_total": 8,
-        "incomplete_weight_files": 8,
-        "lock_files": 8
+        "incomplete_weight_files": 0,
+        "lock_files": 0,
+        "control_source_and_target_recursive_manifest_sha256": "02d9200c2f425e32bf8d60f37be71fdd02298f11d95271b43e5ea6f135e8f5e6",
+        "control_source_and_target_manifests_equal": true,
+        "local_top_level_named_sha256_manifest_sha256": "52f017b27e44461cb3b357d90493dfbfe725fdb20ecd4adf0342eb6abcfa6f60",
+        "container_visible_path": "/data/shared_models/strict-models/Qwen2.5-14B-Instruct",
+        "container_mount_mode": "read-only",
+        "exact_huggingface_snapshot_path": false,
+        "verified_per_repeat_cache_staging_supported": true
       },
-      "transfer_required": true,
-      "transfer_source_requirement": "exact-revision snapshot with complete metadata and per-file size and SHA256 verification"
+      "transfer_required": false
     }
   ],
-  "minimum_transfer_set": [
-    {
-      "model_id": "Qwen/Qwen2.5-14B-Instruct",
-      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
-      "reason": "required by agent-research-online and prefix-repetition-online; the local snapshot is incomplete"
-    }
-  ],
+  "minimum_transfer_set": [],
   "shared_input_assets": [
     {
       "asset": "ShareGPT_V3_unfiltered_cleaned_split.json",
@@ -102,10 +104,14 @@
     "runtime_identity_verified": true,
     "model_content_complete": true,
     "model_revision_metadata_matches": true,
-    "model_exact_snapshot_resolvable": false,
+    "model_exact_snapshot_resolvable": true,
     "data_content_complete": true,
     "data_revision_metadata_matches": true,
-    "data_exact_snapshot_resolvable": false,
+    "data_exact_snapshot_resolvable": true,
+    "exact_snapshot_resolution_mode": "owned per-repeat offline HF cache staging from registry-matched flat exports",
+    "flat_cache_staging_fixture_verified": true,
+    "flat_cache_staging_actual_coder_manifest_sha256": "617d1cd2b6a268a8b9310fe70627c8e2726d1fd25351e07c64aaaf0a67063fd8",
+    "flat_cache_staging_actual_dataset_manifest_sha256": "68b33b0fdfa673e0e16bd45ca31420f111b6a5ad76e8809c577e220f27e06141",
     "sharegpt_shared_asset_verified": true,
     "sharegpt_required_by_instructcoder": false,
     "strict_execution_evidence_validator_present": true,
@@ -113,8 +119,6 @@
     "strict_execution_evidence_orchestrator": "scripts/run-strict-host-repeat.sh",
     "strict_execution_evidence_orchestrator_executed": false,
     "blockers": [
-      "The complete Coder model is materialized as a flat local_dir export, not a Hugging Face snapshots/aedcc2d42b622764e023cf882b6652e646b95671 path required by the official runner.",
-      "The InstructCoder dataset is materialized as a flat local_dir export; local-only snapshot_download cannot resolve likaixin/InstructCoder at revision 6a778a720284d6520b56bd03d5c3070930d41071.",
       "The current official target registry does not pin baseline_runtime.runtime_image_digest; both the orchestrator and validator fail closed until the authoritative digest is versioned."
     ],
     "required_code_work": []

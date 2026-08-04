@@ -24,6 +24,8 @@ export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE
 OFFICIAL_RUNTIME_PYTHON=${OFFICIAL_RUNTIME_PYTHON:-"$GOAL_BASELINE_ENV_PREFIX/bin/python"}
 OFFICIAL_RUNTIME_IMAGE=${OFFICIAL_RUNTIME_IMAGE:-}
 OFFICIAL_MODEL_PATH=${OFFICIAL_MODEL_PATH:-}
+OFFICIAL_FLAT_MODEL_SOURCE=${OFFICIAL_FLAT_MODEL_SOURCE:-}
+OFFICIAL_FLAT_DATASET_SOURCE=${OFFICIAL_FLAT_DATASET_SOURCE:-}
 OFFICIAL_SERVER_HOST=${OFFICIAL_SERVER_HOST:-}
 OFFICIAL_SERVER_PORT=${OFFICIAL_SERVER_PORT:-"8000"}
 OFFICIAL_CLIENT_HOST=${OFFICIAL_CLIENT_HOST:-}
@@ -1305,6 +1307,29 @@ validate_attestation_payload(
 PY
 }
 
+stage_flat_hf_inputs() {
+  local staging_root="$RESULT_DIR/hf-cache-staging"
+  local staging_payload
+  local args=(
+    --repo-root "$REPO_ROOT"
+    --spec "$SPEC_FILE"
+    --scratch-root "$staging_root"
+    --model-source "$OFFICIAL_FLAT_MODEL_SOURCE"
+  )
+  if [[ -n "$OFFICIAL_FLAT_DATASET_SOURCE" ]]; then
+    args+=(--dataset-source "$OFFICIAL_FLAT_DATASET_SOURCE")
+  fi
+  staging_payload=$(PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
+    "$HOST_PYTHON_BIN" -m vllm_hust_benchmark.hf_cache_staging "${args[@]}")
+  HF_HOME="$staging_root/hf-home"
+  HF_HUB_CACHE=$(jq -er '.hub_cache' <<<"$staging_payload")
+  TRANSFORMERS_CACHE="$HF_HOME/transformers"
+  OFFICIAL_MODEL_PATH=$(jq -er '.model.snapshot_path' <<<"$staging_payload")
+  export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE OFFICIAL_MODEL_PATH
+  export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+}
+
 finalize_trace_immutable_input_attestation() {
   if [[ -z "${TRACE_TARGET_ID:-}" ]]; then
     return 0
@@ -2156,6 +2181,13 @@ fi
 
 if [[ -n "$TRACE_TARGET_ID" ]]; then
   verify_trace_runtime_packages
+fi
+
+if [[ -n "$OFFICIAL_FLAT_MODEL_SOURCE" ]]; then
+  stage_flat_hf_inputs
+elif [[ -n "$OFFICIAL_FLAT_DATASET_SOURCE" ]]; then
+  echo "OFFICIAL_FLAT_DATASET_SOURCE requires OFFICIAL_FLAT_MODEL_SOURCE" >&2
+  exit 2
 fi
 
 RUNTIME_MODEL="$MODEL"
