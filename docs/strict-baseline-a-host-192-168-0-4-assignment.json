@@ -19,6 +19,26 @@
       "The authoritative runtime identity is the verified OCI config digest and matching config blob hash."
     ]
   },
+  "control_integration_audit": {
+    "bundle_path": "/home/shuhao/strict-integration-899520f.bundle",
+    "bundle_sha256": "11195eeee2e51d05d7dda20753abb848b560f1592bcc4573efb81fd9b8bc8cab",
+    "verified_ref": "refs/control/strict-integration-899520f",
+    "verified_commit": "899520f20f5e5c8af65e9cd8575892f562d54a2e",
+    "merged_into_host_branch": false,
+    "official_registry_version": "1.8.0",
+    "v018_runtime_registry_pinned": true,
+    "immutable_actual_input_capture_present": true,
+    "hf_flat_cache_staging_present": true,
+    "approved_host_orchestrator_present": true,
+    "host_a_readiness_present": true,
+    "host_c_readiness_present": true,
+    "host_c_readiness_consistency": {
+      "runtime_ready": true,
+      "input_assets_ready": true,
+      "model_ready": false,
+      "ready_for_start": false
+    }
+  },
   "targets": [
     {
       "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
@@ -119,10 +139,76 @@
     "strict_execution_evidence_orchestrator": "scripts/run-strict-host-repeat.sh",
     "strict_execution_evidence_orchestrator_executed": false,
     "blockers": [
-      "The current official target registry does not pin baseline_runtime.runtime_image_digest; both the orchestrator and validator fail closed until the authoritative digest is versioned."
+      "The verified control integration pins the authoritative runtime, but it has intentionally not been merged into this host branch.",
+      "No fresh host safety gate or single-use execution authorization is present."
     ],
     "required_code_work": []
   },
+  "no_start_matrix": [
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "runtime_identity_ready_in_control_ref": true,
+      "model_asset_ready": true,
+      "data_contract_ready": true,
+      "actual_input_capture_ready_in_control_ref": true,
+      "hf_staging_ready_in_control_ref": true,
+      "approved_orchestrator_ready_in_control_ref": true,
+      "control_ref_absorbed_into_execution_worktree": false,
+      "fresh_host_safety_gate_ready": false,
+      "execution_authorized": false,
+      "ready_for_start": false,
+      "blockers": [
+        "Verified control integration 899520f is not absorbed into the A execution worktree.",
+        "Fresh host safety gate and single-use execution authorization are absent."
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "runtime_identity_ready_in_control_ref": true,
+      "model_asset_ready": true,
+      "data_contract_ready": true,
+      "data_contract_evidence": {
+        "path": "scripts/traces/evoscientist-workload-custom.jsonl",
+        "size_bytes": 27198,
+        "sha256": "13347797c3660c5b3efbf8912bbcb76d8bba50ffee5f77944b95b9cde1b6ca3c"
+      },
+      "actual_input_capture_ready_in_control_ref": true,
+      "hf_staging_ready_in_control_ref": true,
+      "approved_orchestrator_ready_in_control_ref": true,
+      "control_ref_absorbed_into_execution_worktree": false,
+      "fresh_host_safety_gate_ready": false,
+      "execution_authorized": false,
+      "ready_for_start": false,
+      "blockers": [
+        "Verified control integration 899520f is not absorbed into the A execution worktree.",
+        "Fresh host safety gate and single-use execution authorization are absent."
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "runtime_identity_ready_in_control_ref": true,
+      "model_asset_ready": true,
+      "data_contract_ready": false,
+      "expected_generator_identity": {
+        "path": "vllm/benchmarks/datasets.py",
+        "vllm_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+        "sha256": "85b4e3b7407ef35ad364ccd454efdcfa9a06759144582d5a3a3761e3f85a41e2",
+        "seed": 0
+      },
+      "actual_input_capture_ready_in_control_ref": true,
+      "hf_staging_ready_in_control_ref": true,
+      "approved_orchestrator_ready_in_control_ref": true,
+      "control_ref_absorbed_into_execution_worktree": false,
+      "fresh_host_safety_gate_ready": false,
+      "execution_authorized": false,
+      "ready_for_start": false,
+      "blockers": [
+        "The exact generator file must still be verified inside the immutable v0.18 runtime before start.",
+        "Verified control integration 899520f is not absorbed into the A execution worktree.",
+        "Fresh host safety gate and single-use execution authorization are absent."
+      ]
+    }
+  ],
   "non_execution_evidence": true,
   "notes": [
     "This document records control-plane assignment and transfer planning only.",
