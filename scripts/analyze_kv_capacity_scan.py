@@ -154,7 +154,7 @@ def extract_metrics(raw_result: dict[str, Any]) -> dict[str, float | None]:
 
 def aggregate_reps(
     reps: list[dict[str, Any]],
-) -> dict[str, dict[str, float | None]]:
+) -> dict[str, dict[str, float | None] | list[float | None]]:
     """Aggregate metric values across multiple repetition results.
 
     Args:
@@ -163,15 +163,20 @@ def aggregate_reps(
     Returns:
         Dict with two keys:
         - ``per_metric_stats``: dict mapping metric name to compute_stats output
-        - ``raw_values``: dict mapping metric name to list of float values
+        - ``raw_values``: dict mapping metric name to list of values. Per
+          reviewer round 3 issue 3, None slots are preserved so that
+          ``len(raw_values) == len(reps)``; this prevents a rep with a missing
+          ``output_throughput`` field from silently disappearing, which would
+          make the per-rep validator vacuously pass on a shorter list.
     """
-    all_metrics: dict[str, list[float]] = {name: [] for name in METRIC_FIELDS}
+    all_metrics: dict[str, list[float | None]] = {name: [] for name in METRIC_FIELDS}
 
     for rep in reps:
         metrics = extract_metrics(rep)
         for name, val in metrics.items():
-            if val is not None:
-                all_metrics[name].append(float(val))
+            # Preserve None to keep slot alignment with rep count.
+            # compute_stats filters None/NaN internally.
+            all_metrics[name].append(float(val) if val is not None else None)
 
     return {
         "per_metric_stats": {
@@ -508,6 +513,10 @@ def _validate_repetitions(
     workload, not by union. Each workload must individually cover all
     ``KV_CAPACITY_TARGETS_GIB`` capacities with >= MIN_REPETITIONS valid reps.
 
+    Per reviewer round 3 issue 1: workload coverage must explicitly require
+    ALL ``SCAN_WORKLOADS`` to be present. Providing only one workload (e.g.
+    random-online) with all 4 capacities must NOT pass.
+
     Returns:
         Tuple of (is_valid, issues) where issues is a list of human-readable
         problem descriptions.
@@ -517,6 +526,17 @@ def _validate_repetitions(
     capacity_curves = analysis.get("capacity_curves", {})
     if not capacity_curves:
         issues.append("capacity_curves is empty — no evidence to validate")
+
+    # Per reviewer round 3 issue 1: require ALL SCAN_WORKLOADS to be present.
+    present_workloads = set(capacity_curves.keys())
+    required_workloads = set(SCAN_WORKLOADS)
+    missing_workloads = required_workloads - present_workloads
+    if missing_workloads:
+        issues.append(
+            f"missing required workloads: {sorted(missing_workloads)} "
+            f"(present={sorted(present_workloads)})"
+        )
+
     for workload, curve in capacity_curves.items():
         # Per-workload capacity coverage: each workload must have all 4
         # capacities (8/16/24/32 GiB), not just a union across workloads.
@@ -536,6 +556,16 @@ def _validate_repetitions(
             # Per reviewer round 1 issue 4: check each rep's throughput, not
             # just the median, to catch NaN/0 hidden behind a positive median.
             raw_values = data.get("raw_values", [])
+            # Per reviewer round 3 issue 3: len(raw_values) must match reps.
+            # If a rep is missing output_throughput, aggregate_reps preserves
+            # a None slot so len(raw_values) == reps; otherwise a rep can
+            # silently disappear and the per-rep check vacuously passes.
+            if len(raw_values) != reps:
+                issues.append(
+                    f"capacity {workload}/{cap_str}: len(raw_values)="
+                    f"{len(raw_values)} != repetitions={reps} "
+                    f"(some reps missing output_throughput)"
+                )
             for i, v in enumerate(raw_values):
                 if v is None or not math.isfinite(v) or v <= 0:
                     issues.append(
@@ -566,63 +596,89 @@ def _validate_repetitions(
     return len(issues) == 0, issues
 
 
-def load_all_manifests(results_dir: Path) -> list[dict[str, Any]]:
-    """Load every env-manifest.json under the results directory.
+def build_run_manifest_map(
+    results_dir: Path,
+) -> dict[str, dict[str, Any] | None]:
+    """Build a mapping from run relative paths to their env-manifest content.
 
-    Per PR #146 review: the analyzer must not use a single manifest to
-    represent all 45 runs. Each rep has its own manifest, and every one
-    must be loaded and validated individually.
+    Per PR #146 review round 3 issue 2: manifests must be bound to runs by
+    relative path, not just loaded as a flat list. This function discovers
+    all run directories (containing ``raw.json``) under ``raw_results/`` and
+    ``tiering/``, and for each, loads the co-located ``env-manifest.json``.
 
-    Searches ``raw_results/`` and ``tiering/`` subdirectories (where the scan
-    script writes per-rep manifests), plus the top-level manifest.
+    The top-level manifest is NOT included — it is a summary, not a per-rep
+    manifest. Only manifests co-located with a ``raw.json`` count.
 
     Returns:
-        List of manifest dicts (may be empty if no manifests found).
+        Dict mapping run relative path to manifest dict, or ``None`` if the
+        manifest is missing for that run.
     """
-    manifests: list[dict[str, Any]] = []
-    seen_paths: set[str] = set()
+    run_manifests: dict[str, dict[str, Any] | None] = {}
 
-    # Top-level manifest
-    top_level = results_dir / "env-manifest.json"
-    if top_level.exists():
-        manifests.append(json.loads(top_level.read_text()))
-        seen_paths.add(str(top_level.resolve()))
-
-    # Per-rep manifests under raw_results/ and tiering/
     for sub in [results_dir / "raw_results", results_dir / "tiering"]:
         if not sub.is_dir():
             continue
-        for candidate in sorted(sub.rglob("env-manifest.json")):
-            resolved = str(candidate.resolve())
-            if resolved not in seen_paths:
-                manifests.append(json.loads(candidate.read_text()))
-                seen_paths.add(resolved)
+        for raw_json in sorted(sub.rglob("raw.json")):
+            run_dir = raw_json.parent
+            rel_path = str(run_dir.relative_to(results_dir))
+            manifest_file = run_dir / "env-manifest.json"
+            if manifest_file.exists():
+                run_manifests[rel_path] = json.loads(manifest_file.read_text())
+            else:
+                run_manifests[rel_path] = None  # missing manifest
 
-    return manifests
+    return run_manifests
+
+
+def _find_orphan_manifests(results_dir: Path) -> list[str]:
+    """Find env-manifest.json files without a co-located raw.json.
+
+    Per PR #146 review round 3 issue 2: orphan manifests (manifests without
+    a corresponding run) must be reported so stale or misplaced manifests
+    cannot inflate the manifest count.
+    """
+    orphans: list[str] = []
+    for sub in [results_dir / "raw_results", results_dir / "tiering"]:
+        if not sub.is_dir():
+            continue
+        for manifest in sorted(sub.rglob("env-manifest.json")):
+            run_dir = manifest.parent
+            if not (run_dir / "raw.json").exists():
+                rel = str(manifest.relative_to(results_dir))
+                orphans.append(rel)
+    return orphans
 
 
 def _validate_per_rep_manifests(
-    manifests: list[dict[str, Any]],
+    run_manifests: dict[str, dict[str, Any] | None],
 ) -> tuple[bool, list[str]]:
-    """Validate that every rep's env-manifest has complete provenance.
+    """Validate that every run has a co-located manifest with complete provenance.
 
-    Per PR #146 review: each rep must have its own manifest with all required
-    fields populated (no ``unknown``/``not available`` sentinels). Using one
-    manifest for the entire batch is not sufficient.
+    Per PR #146 review round 3 issue 2: manifests must be bound to runs by
+    relative path. Every run (directory with ``raw.json``) must have its own
+    ``env-manifest.json`` with all required provenance fields populated.
+    Using a single manifest for the entire batch is blocked — the manifest
+    count must match the run count.
+
+    Args:
+        run_manifests: Dict from ``build_run_manifest_map`` mapping run
+            relative paths to manifest dicts (or ``None`` if missing).
 
     Returns:
-        Tuple of (is_valid, issues) where issues lists per-manifest problems.
+        Tuple of (is_valid, issues) where issues lists per-run problems.
     """
-    if not manifests:
-        return False, ["no per-rep env-manifest files found"]
+    if not run_manifests:
+        return False, ["no runs with raw.json found — cannot validate manifest binding"]
 
     issues: list[str] = []
-    for i, manifest in enumerate(manifests):
+    for run_path, manifest in run_manifests.items():
+        if manifest is None:
+            issues.append(f"run {run_path}: missing env-manifest.json")
+            continue
         valid, missing = _validate_provenance(manifest)
         if not valid:
             issues.append(
-                f"manifest {i + 1}/{len(manifests)}: missing/placeholder "
-                f"fields {missing}"
+                f"run {run_path}: manifest missing/placeholder fields {missing}"
             )
 
     return len(issues) == 0, issues
@@ -782,22 +838,34 @@ def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
         }
     )
 
-    # 7. Per-rep manifest binding: every rep must have its own valid manifest
-    per_rep_manifests = analysis.get("per_rep_manifests", [])
-    per_rep_valid, per_rep_issues = _validate_per_rep_manifests(per_rep_manifests)
+    # 7. Per-rep manifest binding: every run must have its own valid manifest,
+    #    bound by relative path. Orphan manifests (without a raw.json) are
+    #    also reported.
+    run_manifest_map = analysis.get("run_manifest_map", {})
+    orphan_manifests = analysis.get("orphan_manifests", [])
+    per_rep_valid, per_rep_issues = _validate_per_rep_manifests(run_manifest_map)
+    # Orphan manifests are a blocking failure — they indicate stale or
+    # misplaced files that could inflate the manifest count.
+    if orphan_manifests:
+        per_rep_valid = False
+        per_rep_issues.append(
+            f"orphan manifests (no co-located raw.json): {orphan_manifests}"
+        )
     if not per_rep_valid:
         has_blocking_failure = True
+    run_count = len(run_manifest_map)
     criteria.append(
         {
             "criterion": (
-                "Per-rep env-manifest binding: every rep has its own manifest "
-                "with complete provenance (not one manifest for the batch)"
+                "Per-rep env-manifest binding: every run has its own manifest "
+                "with complete provenance, bound by relative path (not one "
+                "manifest for the batch)"
             ),
             "met": per_rep_valid,
             "details": (
                 "; ".join(per_rep_issues)
                 if per_rep_issues
-                else f"All {len(per_rep_manifests)} manifests valid"
+                else f"All {run_count} runs have valid manifests"
             ),
         }
     )
@@ -828,7 +896,8 @@ def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
         "per_rep_manifest_validation": {
             "valid": per_rep_valid,
             "issues": per_rep_issues,
-            "manifest_count": len(per_rep_manifests),
+            "run_count": run_count,
+            "orphan_manifests": orphan_manifests,
         },
     }
 
@@ -838,7 +907,8 @@ def generate_report(
     tiering_analysis: dict[str, Any] | None = None,
     preempt_timeline: dict[str, Any] | None = None,
     provenance: dict[str, Any] | None = None,
-    per_rep_manifests: list[dict[str, Any]] | None = None,
+    run_manifest_map: dict[str, dict[str, Any] | None] | None = None,
+    orphan_manifests: list[str] | None = None,
 ) -> dict[str, Any]:
     """Generate the final issue #134 analysis report.
 
@@ -848,9 +918,11 @@ def generate_report(
         preempt_timeline: Output from reconstruct_preempt_timeline (optional)
         provenance: Environment manifest dict (optional) with
             REQUIRED_PROVENANCE_FIELDS filled
-        per_rep_manifests: List of per-rep manifest dicts (optional). Per
-            PR #146 review, every rep must have its own manifest validated
-            individually, not one manifest for the whole batch.
+        run_manifest_map: Dict mapping run relative paths to manifest dicts
+            (or None if missing). Per PR #146 review round 3, every run must
+            have its own manifest bound by relative path.
+        orphan_manifests: List of orphan manifest paths (without a co-located
+            raw.json).
 
     Returns:
         Complete report dict with all analysis sections and acceptance check.
@@ -862,8 +934,10 @@ def generate_report(
         combined["preempt_timeline"] = preempt_timeline
     if provenance:
         combined["provenance"] = provenance
-    if per_rep_manifests is not None:
-        combined["per_rep_manifests"] = per_rep_manifests
+    if run_manifest_map is not None:
+        combined["run_manifest_map"] = run_manifest_map
+    if orphan_manifests is not None:
+        combined["orphan_manifests"] = orphan_manifests
 
     acceptance = check_acceptance_criteria(combined)
 
@@ -931,19 +1005,33 @@ def main() -> None:
     if timeline_file.exists():
         preempt_timeline = json.loads(timeline_file.read_text())
 
-    # Load provenance.  Per PR #146 review: load ALL per-rep manifests, not
-    # just the first one found. Each rep must have its own manifest validated
-    # individually. The top-level manifest (if present) is used as the summary
-    # provenance; per-rep manifests are validated separately.
-    per_rep_manifests = load_all_manifests(results_dir)
-    provenance = per_rep_manifests[0] if per_rep_manifests else None
+    # Load provenance.  Per PR #146 review round 3: build a run→manifest map
+    # bound by relative path, and find orphan manifests. The top-level
+    # manifest (if present) is used as summary provenance; per-run manifests
+    # are validated separately via the run_manifest_map.
+    run_manifest_map = build_run_manifest_map(results_dir)
+    orphan_manifests = _find_orphan_manifests(results_dir)
+
+    # Use the first per-run manifest as summary provenance, or the top-level
+    # manifest if no per-run manifests exist yet.
+    top_level_manifest = results_dir / "env-manifest.json"
+    if run_manifest_map:
+        first_valid = next(
+            (m for m in run_manifest_map.values() if m is not None), None
+        )
+        provenance = first_valid
+    elif top_level_manifest.exists():
+        provenance = json.loads(top_level_manifest.read_text())
+    else:
+        provenance = None
 
     report = generate_report(
         capacity_analysis,
         tiering_analysis,
         preempt_timeline,
         provenance,
-        per_rep_manifests,
+        run_manifest_map,
+        orphan_manifests,
     )
 
     output = json.dumps(report, indent=2, ensure_ascii=False)

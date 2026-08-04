@@ -94,9 +94,9 @@ def _make_complete_tiering():
 
 
 def _make_complete_capacity_curves():
-    """Return capacity_curves with all 4 capacities, 3 reps, valid throughput."""
+    """Return capacity_curves with all 3 SCAN_WORKLOADS, 4 capacities, 3 reps each."""
     return {
-        "w": {
+        workload: {
             "8": {
                 "repetitions": 3,
                 "stats": {"output_throughput": {"median": 100.0}},
@@ -118,11 +118,20 @@ def _make_complete_capacity_curves():
                 "raw_values": [215.0, 217.0, 213.0],
             },
         }
+        for workload in ["random-online", "sharegpt-online", "prefix-repetition-online"]
+    }
+
+
+def _make_run_manifest_map(count=3):
+    """Return a valid run_manifest_map with ``count`` runs, each having a manifest."""
+    return {
+        f"raw_results/random-online/8/rep-{i + 1}": _make_provenance()
+        for i in range(count)
     }
 
 
 def _make_per_rep_manifests(count=3):
-    """Return a list of valid per-rep manifests."""
+    """Return a list of valid per-rep manifests (backward compat)."""
     return [_make_provenance() for _ in range(count)]
 
 
@@ -408,7 +417,7 @@ class TestAcceptanceCriteria:
             "tiering_comparison": _make_complete_tiering(),
             "capacity_curves": _make_complete_capacity_curves(),
             "provenance": _make_provenance(),
-            "per_rep_manifests": _make_per_rep_manifests(3),
+            "run_manifest_map": _make_run_manifest_map(3),
         }
         result = analyze_mod.check_acceptance_criteria(analysis)
         assert result["all_criteria_met"] is True
@@ -438,7 +447,7 @@ class TestAcceptanceCriteria:
             },
             "tiering_comparison": _make_complete_tiering(),
             "provenance": _make_provenance(),
-            "per_rep_manifests": _make_per_rep_manifests(3),
+            "run_manifest_map": _make_run_manifest_map(3),
             "capacity_curves": {
                 "w": {
                     "8": {
@@ -500,7 +509,7 @@ class TestAcceptanceCriteria:
             "tiering_comparison": _make_complete_tiering(),
             "capacity_curves": _make_complete_capacity_curves(),
             "provenance": _make_provenance(),
-            "per_rep_manifests": _make_per_rep_manifests(3),
+            "run_manifest_map": _make_run_manifest_map(3),
         }
         result = analyze_mod.check_acceptance_criteria(analysis)
         assert result["all_criteria_met"] is False
@@ -529,7 +538,7 @@ class TestGenerateReport:
             tiering_analysis,
             preempt_timeline,
             provenance,
-            _make_per_rep_manifests(3),
+            _make_run_manifest_map(3),
         )
         assert report["issue"] == 134
         assert "acceptance_criteria" in report
@@ -973,30 +982,7 @@ class TestPerRepThroughputValidation:
     def test_all_reps_valid_passes(self, analyze_mod):
         """All reps with finite-positive throughput → pass."""
         analysis = {
-            "capacity_curves": {
-                "sonnet-throughput": {
-                    "8": {
-                        "repetitions": 3,
-                        "raw_values": [100.0, 105.0, 110.0],
-                        "stats": {"output_throughput": {"median": 105.0}},
-                    },
-                    "16": {
-                        "repetitions": 3,
-                        "raw_values": [200.0, 205.0, 210.0],
-                        "stats": {"output_throughput": {"median": 205.0}},
-                    },
-                    "24": {
-                        "repetitions": 3,
-                        "raw_values": [210.0, 215.0, 220.0],
-                        "stats": {"output_throughput": {"median": 215.0}},
-                    },
-                    "32": {
-                        "repetitions": 3,
-                        "raw_values": [215.0, 220.0, 225.0],
-                        "stats": {"output_throughput": {"median": 220.0}},
-                    },
-                }
-            },
+            "capacity_curves": _make_complete_capacity_curves(),
             "tiering_comparison": {},
         }
         valid, issues = analyze_mod._validate_repetitions(analysis)
@@ -1246,12 +1232,14 @@ class TestPerWorkloadCapacityCoverage:
         assert any("w-b" in i and "missing capacities" in i for i in issues)
 
     def test_all_workloads_complete_passes(self, analyze_mod):
-        """Each workload with all 4 capacities → passes."""
+        """All SCAN_WORKLOADS, each with all 4 capacities → passes.
+
+        Per reviewer round 3 issue 1: the validator now requires ALL
+        SCAN_WORKLOADS to be present, so this positive case must use the
+        real workload names rather than synthetic ``w-a``/``w-b`` keys.
+        """
         analysis = {
-            "capacity_curves": {
-                "w-a": _make_complete_capacity_curves()["w"],
-                "w-b": _make_complete_capacity_curves()["w"],
-            },
+            "capacity_curves": _make_complete_capacity_curves(),
             "tiering_comparison": {},
         }
         valid, issues = analyze_mod._validate_repetitions(analysis)
@@ -1268,30 +1256,34 @@ class TestPerRepManifestValidation:
     """
 
     def test_empty_manifests_blocked(self, analyze_mod):
-        """No manifests → blocked."""
-        valid, issues = analyze_mod._validate_per_rep_manifests([])
+        """No runs → blocked."""
+        valid, issues = analyze_mod._validate_per_rep_manifests({})
         assert valid is False
-        assert any("no per-rep" in i for i in issues)
+        assert any("no runs" in i for i in issues)
 
     def test_one_bad_manifest_blocks(self, analyze_mod):
-        """One manifest with a placeholder value → blocked."""
+        """One run with a placeholder value → blocked."""
         good_manifest = _make_provenance()
         bad_manifest = _make_provenance()
         bad_manifest["engine_commit"] = "unknown"
-        manifests = [good_manifest, bad_manifest, good_manifest]
-        valid, issues = analyze_mod._validate_per_rep_manifests(manifests)
+        run_map = {
+            "raw_results/random-online/8/rep-1": good_manifest,
+            "raw_results/random-online/8/rep-2": bad_manifest,
+            "raw_results/random-online/8/rep-3": good_manifest,
+        }
+        valid, issues = analyze_mod._validate_per_rep_manifests(run_map)
         assert valid is False
-        assert any("manifest 2" in i and "engine_commit" in i for i in issues)
+        assert any("rep-2" in i and "engine_commit" in i for i in issues)
 
     def test_all_manifests_valid_passes(self, analyze_mod):
-        """All manifests with real values → passes."""
-        manifests = _make_per_rep_manifests(5)
-        valid, issues = analyze_mod._validate_per_rep_manifests(manifests)
+        """All runs with valid manifests → passes."""
+        run_map = _make_run_manifest_map(5)
+        valid, issues = analyze_mod._validate_per_rep_manifests(run_map)
         assert valid is True
         assert issues == []
 
     def test_missing_manifests_blocks_admission(self, analyze_mod):
-        """Empty per_rep_manifests in acceptance check → blocked."""
+        """Empty run_manifest_map in acceptance check → blocked."""
         analysis = {
             "capacities_covered": [8, 16, 24, 32],
             "inflection_points": {"w": {"throughput_inflection_gib": 16}},
@@ -1299,7 +1291,7 @@ class TestPerRepManifestValidation:
             "tiering_comparison": _make_complete_tiering(),
             "capacity_curves": _make_complete_capacity_curves(),
             "provenance": _make_provenance(),
-            "per_rep_manifests": [],  # empty → blocked
+            "run_manifest_map": {},  # empty → blocked
         }
         result = analyze_mod.check_acceptance_criteria(analysis)
         assert result["all_criteria_met"] is False
@@ -1351,3 +1343,223 @@ class TestProvenancePlaceholderRejection:
         valid, missing = analyze_mod._validate_provenance(provenance)
         assert valid is False
         assert "driver_version" in missing
+
+
+class TestWorkloadCoverageRequired:
+    """Tests that ALL SCAN_WORKLOADS must be present (reviewer round 3 issue 1).
+
+    Per reviewer: providing only one workload (e.g. random-online) with all 4
+    capacities must NOT pass — sharegpt-online and prefix-repetition-online are
+    required too.
+    """
+
+    def test_single_workload_does_not_pass(self, analyze_mod):
+        """Only random-online → blocked (missing sharegpt/prefix-repetition)."""
+        analysis = {
+            "capacities_covered": [8, 16, 24, 32],
+            "inflection_points": {"random-online": {"throughput_inflection_gib": 16}},
+            "preempt_timeline": _make_complete_timeline(),
+            "tiering_comparison": _make_complete_tiering(),
+            "capacity_curves": {
+                "random-online": {
+                    "8": {
+                        "repetitions": 3,
+                        "stats": {"output_throughput": {"median": 100.0}},
+                        "raw_values": [100.0, 102.0, 98.0],
+                    },
+                    "16": {
+                        "repetitions": 3,
+                        "stats": {"output_throughput": {"median": 200.0}},
+                        "raw_values": [200.0, 202.0, 198.0],
+                    },
+                    "24": {
+                        "repetitions": 3,
+                        "stats": {"output_throughput": {"median": 210.0}},
+                        "raw_values": [210.0, 212.0, 208.0],
+                    },
+                    "32": {
+                        "repetitions": 3,
+                        "stats": {"output_throughput": {"median": 215.0}},
+                        "raw_values": [215.0, 217.0, 213.0],
+                    },
+                }
+            },
+            "provenance": _make_provenance(),
+            "run_manifest_map": _make_run_manifest_map(3),
+        }
+        result = analyze_mod.check_acceptance_criteria(analysis)
+        assert result["all_criteria_met"] is False
+        reps_issues = result["repetition_validation"]["issues"]
+        assert any("missing required workloads" in i for i in reps_issues)
+        assert any("sharegpt-online" in i for i in reps_issues)
+
+    def test_two_workloads_does_not_pass(self, analyze_mod):
+        """Missing prefix-repetition-online → blocked."""
+        curves = _make_complete_capacity_curves()
+        del curves["prefix-repetition-online"]
+        analysis = {
+            "capacities_covered": [8, 16, 24, 32],
+            "inflection_points": {"random-online": {"throughput_inflection_gib": 16}},
+            "preempt_timeline": _make_complete_timeline(),
+            "tiering_comparison": _make_complete_tiering(),
+            "capacity_curves": curves,
+            "provenance": _make_provenance(),
+            "run_manifest_map": _make_run_manifest_map(3),
+        }
+        result = analyze_mod.check_acceptance_criteria(analysis)
+        assert result["all_criteria_met"] is False
+        reps_issues = result["repetition_validation"]["issues"]
+        assert any("prefix-repetition-online" in i for i in reps_issues)
+
+    def test_all_three_workloads_passes(self, analyze_mod):
+        """All 3 SCAN_WORKLOADS present → no missing workload issues."""
+        valid, issues = analyze_mod._validate_repetitions(
+            {
+                "capacity_curves": _make_complete_capacity_curves(),
+                "tiering_comparison": _make_complete_tiering(),
+            }
+        )
+        assert not any("missing required workloads" in i for i in issues)
+
+
+class TestManifestRunBinding:
+    """Tests for per-run manifest binding (reviewer round 3 issue 2).
+
+    Per reviewer: manifests must be bound to runs by relative path, not loaded
+    as a flat list. Every run must have its own manifest; orphan manifests
+    (without a raw.json) must be rejected.
+    """
+
+    def test_single_manifest_for_many_runs_blocked(self, analyze_mod):
+        """45 runs but only 1 manifest → blocked (44 runs missing manifests)."""
+        run_map = {
+            f"raw_results/w/{cap}/rep-{r}": None
+            for cap in [8, 16, 24, 32]
+            for r in [1, 2, 3]
+        }
+        # Only 1 run has a manifest
+        run_map["raw_results/w/8/rep-1"] = _make_provenance()
+        valid, issues = analyze_mod._validate_per_rep_manifests(run_map)
+        assert valid is False
+        missing_count = sum(1 for i in issues if "missing env-manifest" in i)
+        assert missing_count == 11  # 12 runs - 1 with manifest = 11 missing
+
+    def test_missing_manifest_for_one_run_blocked(self, analyze_mod):
+        """One run missing manifest → blocked."""
+        run_map = {
+            "raw_results/w/8/rep-1": _make_provenance(),
+            "raw_results/w/8/rep-2": _make_provenance(),
+            "raw_results/w/8/rep-3": None,  # missing
+        }
+        valid, issues = analyze_mod._validate_per_rep_manifests(run_map)
+        assert valid is False
+        assert any("rep-3" in i and "missing" in i for i in issues)
+
+    def test_orphan_manifests_block_admission(self, analyze_mod):
+        """Orphan manifests (no raw.json) → blocked."""
+        analysis = {
+            "capacities_covered": [8, 16, 24, 32],
+            "inflection_points": {"random-online": {"throughput_inflection_gib": 16}},
+            "preempt_timeline": _make_complete_timeline(),
+            "tiering_comparison": _make_complete_tiering(),
+            "capacity_curves": _make_complete_capacity_curves(),
+            "provenance": _make_provenance(),
+            "run_manifest_map": _make_run_manifest_map(3),
+            "orphan_manifests": ["raw_results/stale/rep-1/env-manifest.json"],
+        }
+        result = analyze_mod.check_acceptance_criteria(analysis)
+        assert result["all_criteria_met"] is False
+        assert result["overall_status"] == "blocked"
+        assert any(
+            "orphan" in i for i in result["per_rep_manifest_validation"]["issues"]
+        )
+
+
+class TestMissingThroughputPreservesSlot:
+    """Tests that missing output_throughput preserves the rep slot (reviewer round 3 issue 3).
+
+    Per reviewer: aggregate_reps() must preserve None slots so
+    len(raw_values) == repetitions. A rep missing output_throughput must
+    not silently disappear.
+    """
+
+    def test_missing_throughput_keeps_slot(self, analyze_mod):
+        """Rep with missing output_throughput → None in raw_values, not skipped."""
+        reps = [
+            {"output_throughput": 240.0, "mean_ttft_ms": 200.0},
+            {"mean_ttft_ms": 210.0},  # missing output_throughput
+            {"output_throughput": 260.0, "mean_ttft_ms": 220.0},
+        ]
+        agg = analyze_mod.aggregate_reps(reps)
+        raw_tput = agg["raw_values"]["output_throughput"]
+        assert len(raw_tput) == 3  # None preserved
+        assert raw_tput[0] == 240.0
+        assert raw_tput[1] is None
+        assert raw_tput[2] == 260.0
+
+    def test_missing_throughput_blocks_admission_e2e(self, analyze_mod):
+        """End-to-end: one rep missing output_throughput → blocked."""
+        results = {}
+        for workload in [
+            "random-online",
+            "sharegpt-online",
+            "prefix-repetition-online",
+        ]:
+            results[workload] = {}
+            for kv in [8, 16, 24, 32]:
+                results[workload][str(kv)] = {}
+                for rep in range(1, 4):
+                    if workload == "random-online" and kv == 8 and rep == 2:
+                        # Missing output_throughput
+                        results[workload][str(kv)][f"rep-{rep}"] = {
+                            "mean_ttft_ms": 200.0,
+                        }
+                    else:
+                        results[workload][str(kv)][f"rep-{rep}"] = {
+                            "output_throughput": float(200 + kv * 5 + rep),
+                        }
+
+        analysis = analyze_mod.analyze_capacity_scan(results)
+        # Check that raw_values has None for the missing rep
+        raw_vals = analysis["capacity_curves"]["random-online"]["8"]["raw_values"]
+        assert len(raw_vals) == 3
+        assert raw_vals[1] is None
+
+        # aggregate_reps preserves the None slot, so len(raw_values) == reps.
+        # The validator must catch the invalid (None) rep value itself.
+        valid, issues = analyze_mod._validate_repetitions(analysis)
+        assert valid is False
+        assert any("rep 2" in i and "invalid throughput" in i for i in issues)
+
+    def test_compute_stats_handles_none_in_values(self, analyze_mod):
+        """compute_stats with None values → filters them, doesn't crash."""
+        stats = analyze_mod.compute_stats([100.0, None, 300.0])
+        assert stats["count"] == 2  # None filtered
+        assert stats["median"] == 200.0  # median of [100, 300]
+        assert stats["min"] == 100.0
+        assert stats["max"] == 300.0
+
+    def test_raw_values_length_mismatch_blocks_admission(self, analyze_mod):
+        """Regression guard: if raw_values length != repetitions, block.
+
+        Per reviewer round 3 issue 3: even if aggregate_reps were changed to
+        skip None slots (regression), the validator must catch the
+        len(raw_values) != repetitions mismatch and block admission rather
+        than vacuously passing on a shorter list.
+        """
+        # Construct a capacity_curves where one workload/capacity has
+        # repetitions=3 but only 2 raw_values (simulating a regression
+        # where aggregate_reps dropped a None slot).
+        curves = _make_complete_capacity_curves()
+        curves["random-online"]["8"]["repetitions"] = 3
+        curves["random-online"]["8"]["raw_values"] = [240.0, 260.0]  # only 2
+        analysis = {
+            "capacity_curves": curves,
+            "tiering_comparison": {},
+        }
+        valid, issues = analyze_mod._validate_repetitions(analysis)
+        assert valid is False
+        assert any(
+            "len(raw_values)" in i and "!= repetitions" in i and "random-online/8" in i
+            for i in issues
+        )
