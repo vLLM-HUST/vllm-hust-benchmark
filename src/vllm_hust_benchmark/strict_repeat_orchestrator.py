@@ -1382,7 +1382,7 @@ class StrictRepeatOrchestrator:
         first.summary["stable"] = True
         second.summary["stable"] = True
 
-    def _runtime_sample(self, number: int) -> None:
+    def _runtime_sample(self, number: int) -> bool:
         npu = self.root.run(["npu-smi", "info"])
         raw_path = self.repeat_dir / "runtime" / f"npu-smi-{number:06d}.txt"
         raw_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1413,7 +1413,7 @@ class StrictRepeatOrchestrator:
                             }
                         )
                 if not candidates:
-                    return
+                    return True
                 if len(candidates) != len(compute.get(device, [])):
                     raise GateFailure(
                         f"physical NPU {device} has compute PIDs outside the owned container"
@@ -1442,14 +1442,19 @@ class StrictRepeatOrchestrator:
             self.host_pids = [item["host_pid"] for item in self.ownership]
 
         if not self.ownership:
-            return
+            return True
+        current_by_device = {
+            device: compute.get(device, []) for device in self.devices
+        }
+        if all(not current for current in current_by_device.values()):
+            return False
         for device in self.devices:
             expected = sorted(
                 item["host_pid"]
                 for item in self.all_owned_processes
                 if item["physical_npu_id"] == device
             )
-            current = compute.get(device, [])
+            current = current_by_device[device]
             if current != expected:
                 raise GateFailure(
                     f"runtime owned PID scope changed on physical NPU {device}: "
@@ -1488,6 +1493,19 @@ class StrictRepeatOrchestrator:
                 },
             },
         )
+        return True
+
+    def _confirm_terminal_owned_pid_absence(
+        self, process: subprocess.Popen[bytes]
+    ) -> None:
+        grace_seconds = max(15.0, self.args.sample_interval_seconds)
+        try:
+            process.wait(timeout=grace_seconds)
+        except subprocess.TimeoutExpired as exc:
+            raise GateFailure(
+                "owned compute PIDs disappeared while the owned command remained "
+                f"active for {grace_seconds:g} seconds"
+            ) from exc
 
     def _run_command(self) -> int:
         stdout_path = self.repeat_dir / "runner.log"
@@ -1513,7 +1531,9 @@ class StrictRepeatOrchestrator:
             try:
                 while process.poll() is None:
                     sample_number += 1
-                    self._runtime_sample(sample_number)
+                    if not self._runtime_sample(sample_number):
+                        self._confirm_terminal_owned_pid_absence(process)
+                        break
                     time.sleep(self.args.sample_interval_seconds)
             except BaseException:
                 self._cleanup_owned_container(allow_stop=True)

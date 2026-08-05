@@ -115,7 +115,7 @@ def test_runtime_sample_writes_owned_pid_and_hbm_evidence(
         lambda pid: (f"0::/docker/{container_id}", f"python worker-{pid}"),
     )
     monkeypatch.setattr(orchestrator, "evidence_record", lambda *_args: {"sha256": "x"})
-    instance._runtime_sample(1)
+    assert instance._runtime_sample(1) is True
 
     owned = json.loads(instance.owned_processes_path.read_text(encoding="utf-8"))
     assert [(item["physical_npu_id"], item["host_pid"]) for item in owned] == [
@@ -130,6 +130,62 @@ def test_runtime_sample_writes_owned_pid_and_hbm_evidence(
     peak = json.loads(instance.host_peak_path.read_text(encoding="utf-8"))
     assert peak["sample_count"] == 1
     assert peak["peak_hbm_mb"] == 41842
+
+
+def test_runtime_sample_allows_all_owned_pids_to_leave_at_terminal_transition(
+    tmp_path: Path,
+) -> None:
+    class FakeRoot:
+        def run(self, _argv):
+            output = NPU_SMI_26_PROCESS_FIXTURE
+            output = output.replace(
+                "| 0       0                 | 1732754       | python             | 150                   | NA                      |\n",
+                "",
+            )
+            output = output.replace(
+                "| 0       0                 | 1732755       | python             | 151                   | NA                      |\n",
+                "",
+            )
+            output = output.replace(
+                "| 0       0                 | 1732756       | python             | 152                   | NA                      |\n",
+                "",
+            )
+            return orchestrator.CommandResult(output, "", 0)
+
+    instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
+    instance.root = FakeRoot()
+    instance.repeat_dir = tmp_path
+    instance.devices = [0]
+    instance.ownership = [{"host_pid": 1732754, "physical_npu_id": 0}]
+    instance.all_owned_processes = [
+        {"host_pid": 1732754, "physical_npu_id": 0}
+    ]
+
+    assert instance._runtime_sample(2) is False
+
+
+def test_terminal_owned_pid_absence_requires_prompt_command_exit() -> None:
+    class ExitedProcess:
+        returncode = 0
+
+        def wait(self, *, timeout):
+            assert timeout == 15.0
+            return self.returncode
+
+    instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
+    instance.args = SimpleNamespace(sample_interval_seconds=1.0)
+    instance._confirm_terminal_owned_pid_absence(ExitedProcess())
+
+
+def test_terminal_owned_pid_absence_rejects_a_still_active_command() -> None:
+    class ActiveProcess:
+        def wait(self, *, timeout):
+            raise orchestrator.subprocess.TimeoutExpired("docker", timeout)
+
+    instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
+    instance.args = SimpleNamespace(sample_interval_seconds=1.0)
+    with pytest.raises(orchestrator.GateFailure, match="remained active for 15 seconds"):
+        instance._confirm_terminal_owned_pid_absence(ActiveProcess())
 
 
 def test_owned_command_lifecycle_requires_an_identified_compute_pid() -> None:
