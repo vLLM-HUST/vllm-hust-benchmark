@@ -25,6 +25,17 @@ NPU_SMI_FIXTURE = """
 | 7     0      3074335      VLLMWorker_TP  28170              |
 """
 
+NPU_SMI_26_PROCESS_FIXTURE = """
+| NPU   Name                | Health        | Power(W)             Temp(C)                 Hugepages-Usage(page)   |
+| Chip                      | Bus-Id        | AICore(%)            Memory-Usage(MB)        HBM-Usage(MB)           |
+| 0     910B2               | OK            | 90.0                 44                      0    / 0                |
+| 0                         | 0000:C1:00.0  | 0                    0    / 0                41842/ 65536            |
+| NPU     Chip              | Process id    | Process name       | Process memory(MB)    | Process id in container |
+| 0       0                 | 1732754       | python             | 150                   | NA                      |
+| 0       0                 | 1732755       | python             | 151                   | NA                      |
+| 0       0                 | 1732756       | python             | 152                   | NA                      |
+"""
+
 
 def test_parses_host_npu_smi_fixture() -> None:
     assert orchestrator.parse_hbm_usage(NPU_SMI_FIXTURE) == {
@@ -35,6 +46,100 @@ def test_parses_host_npu_smi_fixture() -> None:
         0: [3072791],
         7: [3074335],
     }
+
+
+def test_parses_strict_npu_smi_26_process_columns() -> None:
+    assert orchestrator.parse_hbm_usage(NPU_SMI_26_PROCESS_FIXTURE) == {
+        0: (41842, 65536)
+    }
+    assert orchestrator.parse_compute_pids(NPU_SMI_26_PROCESS_FIXTURE) == {
+        0: [1732754, 1732755, 1732756]
+    }
+
+
+@pytest.mark.parametrize(
+    "row",
+    [
+        "| 0 0 | 1732754 | python | 150 |",
+        "| 0 x | 1732754 | python | 150 | NA |",
+        "| 0 0 | not-a-pid | python | 150 | NA |",
+        "| 0 0 1732754 | python | 150 | NA |",
+        "| 0 0 | 1732754 | python | 150 | 123",
+    ],
+)
+def test_rejects_malformed_npu_smi_process_columns(row: str) -> None:
+    output = "| NPU | Chip | Process ID | Process name | Memory |\n" + row
+    with pytest.raises(orchestrator.GateFailure, match="malformed.*process row"):
+        orchestrator.parse_compute_pids(output)
+
+
+def test_runtime_sample_writes_owned_pid_and_hbm_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    host_pid = orchestrator.os.getpid()
+    npu_smi = (
+        NPU_SMI_26_PROCESS_FIXTURE.replace("1732754", str(host_pid))
+        .replace(
+            "| 0       0                 | 1732755       | python             | 151                   | NA                      |\n",
+            "",
+        )
+        .replace(
+            "| 0       0                 | 1732756       | python             | 152                   | NA                      |\n",
+            "",
+        )
+    )
+
+    class FakeRoot:
+        def run(self, _argv):
+            return orchestrator.CommandResult(npu_smi, "", 0)
+
+    container_id = "c" * 64
+    instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
+    instance.root = FakeRoot()
+    instance.repeat_dir = tmp_path
+    instance.devices = [0]
+    instance.container_id = container_id
+    instance.ownership = []
+    instance.all_owned_processes = []
+    instance.all_owned_host_pids = []
+    instance.host_pids = []
+    instance.owned_processes_path = tmp_path / "runtime" / "owned-processes.json"
+    instance.hbm_path = tmp_path / "hbm-samples.jsonl"
+    instance.host_peak_path = tmp_path / "strict-host-peak-hbm.json"
+    instance.hbm_sample_count = 0
+    instance.per_device_peaks = {0: 0}
+
+    monkeypatch.setattr(
+        orchestrator,
+        "read_host_process_context",
+        lambda pid: (f"0::/docker/{container_id}", f"python worker-{pid}"),
+    )
+    monkeypatch.setattr(orchestrator, "evidence_record", lambda *_args: {"sha256": "x"})
+    instance._runtime_sample(1)
+
+    owned = json.loads(instance.owned_processes_path.read_text(encoding="utf-8"))
+    assert [(item["physical_npu_id"], item["host_pid"]) for item in owned] == [
+        (0, host_pid)
+    ]
+    samples = [
+        json.loads(line)
+        for line in instance.hbm_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert samples[0]["host_pids"] == [host_pid]
+    assert samples[0]["physical_npu_hbm_mb"] == {"0": 41842}
+    peak = json.loads(instance.host_peak_path.read_text(encoding="utf-8"))
+    assert peak["sample_count"] == 1
+    assert peak["peak_hbm_mb"] == 41842
+
+
+def test_owned_command_lifecycle_requires_an_identified_compute_pid() -> None:
+    instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
+    instance.ownership = []
+    with pytest.raises(
+        orchestrator.GateFailure,
+        match="lifecycle ended without an identified owned compute PID",
+    ):
+        instance._require_owned_process_observation()
 
 
 def test_resource_lease_blocks_overlapping_card(tmp_path: Path) -> None:

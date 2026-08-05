@@ -51,7 +51,8 @@ STRICT_V018_ARCHIVE = Path(
 SAFE_HOST_PATH = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 DEVICE_ROW = re.compile(r"^\|\s*(\d+)\s+\S+\s+\|")
 HBM_CELL = re.compile(r"(\d+)\s*/\s*(\d+)")
-PROCESS_ROW = re.compile(r"^\|\s*(\d+)\s+(?:\d+\s+)?(\d+)\s+\S+")
+LEGACY_PROCESS_ROW = re.compile(r"^\|\s*(\d+)\s+(\d+)\s+(\d+)\s+\S+\s+\d+\s*\|$")
+PROCESS_TABLE_EMPTY = re.compile(r"^\|\s*No running processes found in NPU \d+\s*\|$")
 
 
 class GateFailure(RuntimeError):
@@ -324,13 +325,47 @@ def parse_compute_pids(output: str) -> dict[int, list[int]]:
             continue
         if not in_process_table:
             continue
-        match = PROCESS_ROW.match(line)
-        if not match:
+        row = line.strip()
+        if not row.startswith("|") or PROCESS_TABLE_EMPTY.fullmatch(row):
             continue
-        device, pid = (int(value) for value in match.groups())
+        if not row.endswith("|"):
+            raise GateFailure(f"malformed host npu-smi process row: {line}")
+        cells = [cell.strip() for cell in row[1:-1].split("|")]
+        if len(cells) == 5:
+            device_chip = cells[0].split()
+            if (
+                len(device_chip) != 2
+                or any(not value.isdecimal() for value in device_chip)
+                or not cells[1].isdecimal()
+                or not cells[3].isdecimal()
+                or (cells[4] != "NA" and not cells[4].isdecimal())
+            ):
+                raise GateFailure(f"malformed host npu-smi process row: {line}")
+            device = int(device_chip[0])
+            pid = int(cells[1])
+        else:
+            legacy = LEGACY_PROCESS_ROW.fullmatch(row)
+            if legacy is None:
+                raise GateFailure(f"malformed host npu-smi process row: {line}")
+            device, _chip, pid = (int(value) for value in legacy.groups())
         if pid > 0:
             parsed.setdefault(device, []).append(pid)
     return {device: sorted(set(pids)) for device, pids in parsed.items()}
+
+
+def read_host_process_context(pid: int) -> tuple[str, str] | None:
+    """Read the cgroup and command line needed to bind a host PID to the runtime."""
+    cgroup_path = Path(f"/proc/{pid}/cgroup")
+    if not cgroup_path.is_file():
+        return None
+    cgroup = cgroup_path.read_text(encoding="utf-8", errors="replace")
+    cmdline_path = Path(f"/proc/{pid}/cmdline")
+    cmdline = (
+        cmdline_path.read_bytes().replace(b"\0", b" ").decode(errors="replace")
+        if cmdline_path.is_file()
+        else ""
+    )
+    return cgroup, cmdline
 
 
 def parse_ctr_content_digests(output: bytes) -> set[str]:
@@ -1363,19 +1398,11 @@ class StrictRepeatOrchestrator:
             for device in self.devices:
                 candidates: list[dict[str, Any]] = []
                 for pid in compute.get(device, []):
-                    cgroup_path = Path(f"/proc/{pid}/cgroup")
-                    if not cgroup_path.is_file():
+                    context = read_host_process_context(pid)
+                    if context is None:
                         continue
-                    cgroup = cgroup_path.read_text(encoding="utf-8", errors="replace")
+                    cgroup, cmdline = context
                     if self.container_id in cgroup:
-                        cmdline_path = Path(f"/proc/{pid}/cmdline")
-                        cmdline = (
-                            cmdline_path.read_bytes()
-                            .replace(b"\0", b" ")
-                            .decode(errors="replace")
-                            if cmdline_path.is_file()
-                            else ""
-                        )
                         candidates.append(
                             {
                                 "host_pid": pid,
@@ -1503,6 +1530,12 @@ class StrictRepeatOrchestrator:
                 },
             )
             return int(process.returncode)
+
+    def _require_owned_process_observation(self) -> None:
+        if not self.ownership:
+            raise GateFailure(
+                "owned command lifecycle ended without an identified owned compute PID"
+            )
 
     def _validate_runtime_preflight_output(self) -> None:
         if self.runtime_transport != "docker-archive":
@@ -1664,6 +1697,7 @@ class StrictRepeatOrchestrator:
                 self._cleanup_owned_container(allow_stop=False)
                 return 0
             command_exit = self._run_command()
+            self._require_owned_process_observation()
             self._validate_runtime_preflight_output()
             cleanup = self._cleanup_facts(command_exit)
             if command_exit != 0:
