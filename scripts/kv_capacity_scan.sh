@@ -313,7 +313,9 @@ build_serve_cmd() {
     cmd="$cmd --max-model-len 32768"
     cmd="$cmd --enable-prefix-caching"
     if [ -n "$kv_transfer_config" ]; then
-        cmd="$cmd --kv-transfer-config $kv_transfer_config"
+        # Wrap JSON in single quotes so bash -c preserves curly braces and
+        # double quotes instead of performing brace/word expansion.
+        cmd="$cmd --kv-transfer-config '$kv_transfer_config'"
     fi
     echo "$cmd"
 }
