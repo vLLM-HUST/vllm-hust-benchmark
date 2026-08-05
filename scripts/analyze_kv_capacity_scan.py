@@ -998,6 +998,11 @@ def main() -> None:
     if tiering_file.exists():
         tiering_data = json.loads(tiering_file.read_text())
         tiering_analysis = analyze_tiering_comparison(tiering_data)
+    else:
+        # Try loading from tiering/ directory structure
+        tiering_data = _load_from_tiering_dir(results_dir / "tiering")
+        if tiering_data:
+            tiering_analysis = analyze_tiering_comparison(tiering_data)
 
     # Load preempt timeline if available
     timeline_file = results_dir / "preempt_timeline.json"
@@ -1073,6 +1078,49 @@ def _load_from_raw_results(raw_dir: Path) -> dict[str, Any]:
                     results[workload][kv_gib][rep_dir.name] = json.loads(
                         raw_file.read_text()
                     )
+
+    return results
+
+
+def _load_from_tiering_dir(tiering_dir: Path) -> dict[str, list[dict[str, Any]]]:
+    """Load results from the tiering directory structure.
+
+    Expected structure:
+        tiering/<config>/rep-<N>/raw.json
+
+    Returns dict: ``{config: [raw_result, ...]}``
+
+    Skips rep directories that have a STATUS file containing ``BLOCKED``
+    (e.g., tiering-enabled on Ascend where SimpleCPUOffloadConnector is
+    incompatible with the KV cache layout). Those reps are excluded from
+    the results list so the analyzer reports them as incomplete rather
+    than including invalid data.
+    """
+    results: dict[str, list[dict[str, Any]]] = {}
+    if not tiering_dir.exists():
+        return results
+
+    for config_dir in sorted(tiering_dir.iterdir()):
+        if not config_dir.is_dir():
+            continue
+        config = config_dir.name
+        reps: list[dict[str, Any]] = []
+
+        for rep_dir in sorted(config_dir.iterdir()):
+            if not rep_dir.is_dir():
+                continue
+            # Skip blocked reps (e.g., tiering-enabled on Ascend)
+            status_file = rep_dir / "STATUS"
+            if status_file.exists():
+                status_text = status_file.read_text().strip()
+                if status_text.startswith("BLOCKED"):
+                    continue
+            raw_file = rep_dir / "raw.json"
+            if raw_file.exists():
+                reps.append(json.loads(raw_file.read_text()))
+
+        if reps:
+            results[config] = reps
 
     return results
 

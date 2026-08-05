@@ -13,6 +13,7 @@ PR #146 review fix tests:
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
@@ -1563,3 +1564,60 @@ class TestMissingThroughputPreservesSlot:
             "len(raw_values)" in i and "!= repetitions" in i and "random-online/8" in i
             for i in issues
         )
+
+
+class TestLoadFromTieringDir:
+    """Tests for _load_from_tiering_dir (issue #134 follow-up evidence PR).
+
+    Validates that the analyzer can load Part B tiering results from the
+    ``tiering/<config>/rep-<N>/raw.json`` directory structure, including
+    skipping reps marked as BLOCKED.
+    """
+
+    def test_loads_valid_tiering_results(self, analyze_mod, tmp_path):
+        """Valid tiering results are loaded keyed by config name."""
+        tiering_dir = tmp_path / "tiering"
+        for config in ("hbm-only", "tiering-disabled"):
+            for rep in range(1, 4):
+                rep_dir = tiering_dir / config / f"rep-{rep}"
+                rep_dir.mkdir(parents=True)
+                (rep_dir / "raw.json").write_text(
+                    json.dumps({"output_throughput": 100.0 + rep})
+                )
+        results = analyze_mod._load_from_tiering_dir(tiering_dir)
+        assert set(results.keys()) == {"hbm-only", "tiering-disabled"}
+        assert len(results["hbm-only"]) == 3
+        assert len(results["tiering-disabled"]) == 3
+
+    def test_skips_blocked_reps(self, analyze_mod, tmp_path):
+        """Reps with STATUS=BLOCKED are skipped, not included in results."""
+        tiering_dir = tmp_path / "tiering"
+        config_dir = tiering_dir / "tiering-enabled"
+        for rep in range(1, 4):
+            rep_dir = config_dir / f"rep-{rep}"
+            rep_dir.mkdir(parents=True)
+            if rep == 1:
+                (rep_dir / "STATUS").write_text(
+                    "BLOCKED: SimpleCPUOffloadConnector incompatible"
+                )
+            else:
+                (rep_dir / "raw.json").write_text(
+                    json.dumps({"output_throughput": 200.0})
+                )
+        results = analyze_mod._load_from_tiering_dir(tiering_dir)
+        assert "tiering-enabled" in results
+        assert len(results["tiering-enabled"]) == 2  # rep-1 skipped
+
+    def test_empty_dir_returns_empty_dict(self, analyze_mod, tmp_path):
+        """Non-existent tiering directory returns empty dict."""
+        results = analyze_mod._load_from_tiering_dir(tmp_path / "nonexistent")
+        assert results == {}
+
+    def test_no_raw_json_excluded(self, analyze_mod, tmp_path):
+        """Reps without raw.json are silently excluded."""
+        tiering_dir = tmp_path / "tiering"
+        rep_dir = tiering_dir / "hbm-only" / "rep-1"
+        rep_dir.mkdir(parents=True)
+        # No raw.json, no STATUS — just an empty dir
+        results = analyze_mod._load_from_tiering_dir(tiering_dir)
+        assert results == {}
