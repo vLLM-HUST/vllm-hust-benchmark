@@ -568,12 +568,12 @@ class ResourceLease:
         return sorted(conflicts)
 
     def mark_released(self) -> str:
-        self.released_at = utc_now()
-        self._write_global(active=False)
         for handle in reversed(self.handles):
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
             handle.close()
         self.handles.clear()
+        self.released_at = utc_now()
+        self._write_global(active=False)
         return self.released_at
 
     def release(self) -> None:
@@ -1627,6 +1627,13 @@ class StrictRepeatOrchestrator:
             },
         }
 
+    def _release_lease_and_update_cleanup(self, cleanup: dict[str, Any] | None) -> str:
+        """Mark cleanup released only after the lease release is persisted."""
+        released_at = self.lease.mark_released()
+        if cleanup is not None and "error" not in cleanup:
+            cleanup["lease_released"] = True
+        return released_at
+
     def run(self) -> int:
         self.repeat_dir.mkdir(parents=True, exist_ok=False)
         self.lease.acquire()
@@ -1697,8 +1704,7 @@ class StrictRepeatOrchestrator:
             if not all(cleanup[field] is True for field in required_cleanup):
                 raise GateFailure(f"owned cleanup could not be proven: {cleanup}")
 
-            cleanup["lease_released"] = True
-            released_at = self.lease.mark_released()
+            released_at = self._release_lease_and_update_cleanup(cleanup)
             cleanup_path = self.repeat_dir / "cleanup-chain-attestation.json"
             atomic_json(cleanup_path, cleanup)
             evidence = build_strict_evidence(
@@ -1741,6 +1747,13 @@ class StrictRepeatOrchestrator:
                     cleanup = self._cleanup_facts(command_exit)
                 except Exception as cleanup_error:
                     cleanup = {"error": str(cleanup_error)}
+            if self.lease.handles:
+                try:
+                    self._release_lease_and_update_cleanup(cleanup)
+                except Exception as lease_cleanup_error:
+                    error = GateFailure(
+                        f"{error}; resource lease cleanup failed: {lease_cleanup_error}"
+                    )
             atomic_json(
                 self.repeat_dir / "strict_execution_failure.json",
                 {

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -59,6 +60,52 @@ def test_resource_lease_blocks_overlapping_card(tmp_path: Path) -> None:
             second.acquire()
     finally:
         first.mark_released()
+
+
+def test_failure_cleanup_observation_follows_persisted_lease_release(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    lease = orchestrator.ResourceLease(
+        tmp_path / "leases",
+        startup_id="failure",
+        container_id="owned-container",
+        devices=[0],
+        port=18080,
+        repeat_dir=tmp_path / "repeat-01",
+    )
+    lease.repeat_dir.mkdir()
+    lease.acquire()
+    cleanup = {"lease_released": False}
+    instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
+    instance.lease = lease
+
+    original_write = lease._write_global
+
+    def assert_unlocked_before_persist(*, active: bool) -> None:
+        if not active:
+            assert lease.handles == []
+            assert cleanup["lease_released"] is False
+        original_write(active=active)
+
+    monkeypatch.setattr(lease, "_write_global", assert_unlocked_before_persist)
+    released_at = instance._release_lease_and_update_cleanup(cleanup)
+
+    persisted = json.loads(
+        (lease.repeat_dir / "resource-lease.json").read_text(encoding="utf-8")
+    )
+    assert persisted["active"] is False
+    assert persisted["released_at"] == released_at
+    assert cleanup["lease_released"] is True
+
+
+def test_failure_summary_is_written_after_lease_cleanup() -> None:
+    source = inspect.getsource(orchestrator.StrictRepeatOrchestrator.run)
+    failure_branch = source.index("except BaseException as error:")
+    release = source.index(
+        "self._release_lease_and_update_cleanup(cleanup)", failure_branch
+    )
+    failure_summary = source.index('self.repeat_dir / "strict_execution_failure.json"')
+    assert release < failure_summary
 
 
 def test_session_filter_excludes_complete_ancestor_chain() -> None:
