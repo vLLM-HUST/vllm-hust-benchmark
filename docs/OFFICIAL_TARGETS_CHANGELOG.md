@@ -2,6 +2,14 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.8.1 — 2026-08-05
+
+- English: Removes the empty enforce_eager switch from all 11 strict public Ascend targets so formal
+  runs use graph mode instead of silently enabling eager execution.
+- 中文：从 11 个严格公开 Ascend 靶中移除空的 enforce_eager 开关，确保正式运行使用图模式而不会静默启用 eager 执行。
+- Source set: `d5e2f6337ad3bc11b757160ea5ac6bb3ac85836e26b4a625413e42cd7c2c129e`
+- Supersedes: `1.8.0`
+
 ## 1.8.0 — 2026-08-03
 
 - English: Pins the authorized local Docker archive, runnable config digest, containerd storage

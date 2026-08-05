@@ -88,6 +88,7 @@ def test_public_target_matrix_is_exact() -> None:
         assert target["server_parameters"]["tensor_parallel_size"] == 1
         assert target["server_parameters"]["gpu_memory_utilization"] == 0.6
         assert target["server_parameters"]["max_model_len"] == 32768
+        assert "enforce_eager" not in target["server_parameters"]
         assert target["model"]["revision"]
         assert target["server_parameters"]["revision"] == target["model"]["revision"]
         assert target["workload"]["data_identity"]["kind"]
@@ -126,6 +127,7 @@ def test_public_target_matrix_is_exact() -> None:
         assert target["server_parameters"]["tensor_parallel_size"] == 2
         assert target["server_parameters"]["gpu_memory_utilization"] == 0.92
         assert target["server_parameters"]["max_model_len"] == 131072
+        assert "enforce_eager" not in target["server_parameters"]
         if target["workload"]["name"] == "tracelab-coding-agent-replay":
             assert target["workload"]["client_parameters"]["timeout_s"] == 21600
         assert (

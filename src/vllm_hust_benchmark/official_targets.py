@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.8.0"
-EFFECTIVE_FROM = "2026-08-03"
+REGISTRY_VERSION = "1.8.1"
+EFFECTIVE_FROM = "2026-08-05"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
