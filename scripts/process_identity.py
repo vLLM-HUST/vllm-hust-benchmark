@@ -510,6 +510,11 @@ def exec_in_cgroup(
     If joining fails, exit with code 127 (fail closed) — do NOT exec
     the command, as descendants would not be tracked.
 
+    Per reviewer round 9: if writing ``ready_file`` fails, also exit 127
+    — the parent would otherwise time out and degrade to session fallback
+    while the workload is running in the cgroup, losing the cgroup path.
+    The workload must NOT start if the parent cannot be signaled.
+
     Args:
         cgroup_path: Path to the job-owned cgroup v2 directory.
         ready_file: Path to a file that is created after successfully
@@ -519,7 +524,8 @@ def exec_in_cgroup(
 
     Returns:
         Does not return on success (``exec`` replaces the process).
-        Returns 127 on cgroup join failure or exec failure.
+        Returns 127 on cgroup join failure, ready_file write failure,
+        or exec failure.
     """
     procs_file = cgroup_path / "cgroup.procs"
     my_pid = os.getpid()
@@ -538,12 +544,21 @@ def exec_in_cgroup(
         return 127
 
     # Signal to the parent that the join succeeded.
+    #
+    # Per reviewer round 9: 'ready 信号失败必须让 wrapper 在 exec 前退出
+    # 127' — if we cannot write the ready_file, the parent would time out
+    # and clear _JOB_CGROUP_PATH, degrading to session fallback while the
+    # workload is already running in the cgroup.  This is fail-open and
+    # must not happen.  Exit 127 so the workload never starts and the
+    # parent can detect the early exit.
     try:
         ready_file.write_text(f"{my_pid}\n")
-    except OSError:
-        # Best effort — don't block exec on signaling failure.  The
-        # parent will time out and fall back to session scan.
-        pass
+    except OSError as exc:
+        print(
+            f"exec_in_cgroup: failed to write ready_file: {exc}",
+            file=sys.stderr,
+        )
+        return 127
 
     # exec the command — replaces this process, keeps PID.  All forks
     # from the exec'd process inherit cgroup membership at fork time.

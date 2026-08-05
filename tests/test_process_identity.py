@@ -1222,6 +1222,40 @@ class TestCgroupFunctions:
             rc = pi_mod.exec_in_cgroup(tmp_path, ready_file, ["nonexistent_cmd"])
         assert rc == 127
 
+    def test_exec_in_cgroup_fails_closed_on_ready_file_write_error(
+        self, pi_mod, tmp_path
+    ):
+        """exec_in_cgroup returns 127 when ready_file write fails (fail closed).
+
+        Per reviewer round 9: 'ready 信号失败必须让 wrapper 在 exec 前退出
+        127' — if writing ready_file fails, the parent would time out and
+        degrade to session fallback while the workload is running in the
+        cgroup, losing the cgroup path.  The wrapper must exit 127 so the
+        workload never starts.
+        """
+        ready_file = tmp_path / "ready"
+
+        # cgroup.procs write succeeds, membership check succeeds, but
+        # ready_file write fails with OSError.
+        def mock_write_text(self, data, encoding=None, errors=None):
+            if self == ready_file:
+                raise OSError("disk full")
+            # cgroup.procs write succeeds
+            return None
+
+        with (
+            patch.object(pi_mod, "pid_in_cgroup", return_value=True),
+            patch.object(Path, "write_text", mock_write_text),
+            patch("os.execvp") as mock_exec,
+        ):
+            rc = pi_mod.exec_in_cgroup(tmp_path, ready_file, ["echo", "hello"])
+
+        assert rc == 127
+        # Critical: the workload must NOT be exec'd.
+        mock_exec.assert_not_called()
+        # ready_file must NOT exist (write failed).
+        assert not ready_file.exists()
+
 
 class TestRealCgroupSetsidCleanup:
     """Real subprocess tests: descendant setsid + launcher exit + cgroup cleanup.
@@ -1272,8 +1306,10 @@ class TestRealCgroupSetsidCleanup:
             pytest.skip("Could not create cgroup")
 
         child_pid_file = tempfile.mktemp()
+        # tempfile.mktemp() returns a path that does not exist yet —
+        # no os.unlink needed (it would raise FileNotFoundError).
+        # The wrapper creates this file after joining the cgroup.
         ready_file = tempfile.mktemp()
-        os.unlink(ready_file)  # remove so wrapper can create it
 
         try:
             # Launcher script: fork a setsid'd child, write its PID, stay alive.
@@ -1398,8 +1434,10 @@ class TestRealCgroupSetsidCleanup:
             pytest.skip("Could not create cgroup")
 
         child_pid_file = tempfile.mktemp()
+        # tempfile.mktemp() returns a path that does not exist yet —
+        # no os.unlink needed (it would raise FileNotFoundError).
+        # The wrapper creates this file after joining the cgroup.
         ready_file = tempfile.mktemp()
-        os.unlink(ready_file)  # remove so wrapper can create it
 
         try:
             # Launcher script: fork a setsid'd child, write its PID, EXIT.

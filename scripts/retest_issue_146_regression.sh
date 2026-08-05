@@ -472,11 +472,36 @@ run_bench_tracked() {
         _CURRENT_BENCH_PID=$bench_pid
 
         # Wait for the wrapper to signal it has joined the cgroup.
-        # Per reviewer round 8: '加入失败时 fail closed' — if the wrapper
-        # doesn't signal within 5 seconds (or exits before signaling),
-        # clear _JOB_CGROUP_PATH so the session fallback is used.
+        #
+        # Per reviewer round 9: '或由父进程直接核验 bench_pid 的 cgroup
+        # membership 并保留原路径' — use TWO independent detection
+        # mechanisms so that ready_file loss alone does not cause
+        # degradation while the workload is running:
+        #   1. ready_file exists (wrapper signaled success), OR
+        #   2. pid_in_cgroup(bench_pid) returns true (direct membership
+        #      verification)
+        # If neither holds within 5 seconds (or the wrapper exits first),
+        # clear _JOB_CGROUP_PATH so the session fallback is used.  This
+        # is safe because:
+        #   - If the wrapper exited 127 (join/ready failure), the workload
+        #     never started — no degradation.
+        #   - If the wrapper is still running but not in the cgroup,
+        #     something is wrong — fall back to session scan.
         local waited=0
-        while [ ! -f "$ready_file" ] && [ $waited -lt 50 ]; do
+        local joined=0
+        while [ $waited -lt 50 ]; do
+            # Check 1: ready_file exists.
+            if [ -f "$ready_file" ]; then
+                joined=1
+                break
+            fi
+            # Check 2: direct membership verification (defense-in-depth).
+            if "$PYTHON" "$_PROCESS_IDENTITY_PY" pid_in_cgroup \
+                    "$bench_pid" "$_JOB_CGROUP_PATH" 2>/dev/null; then
+                joined=1
+                break
+            fi
+            # If the wrapper exited, stop waiting.
             if ! kill -0 "$bench_pid" 2>/dev/null; then
                 break
             fi
@@ -484,7 +509,7 @@ run_bench_tracked() {
             waited=$((waited + 1))
         done
 
-        if [ ! -f "$ready_file" ]; then
+        if [ $joined -eq 0 ]; then
             log "  WARNING: wrapper did not join cgroup (timeout or exit), using session fallback"
             _JOB_CGROUP_PATH=""
         fi
