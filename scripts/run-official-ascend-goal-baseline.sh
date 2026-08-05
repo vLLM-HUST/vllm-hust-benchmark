@@ -1156,9 +1156,20 @@ ensure_worktree() {
 json2args() {
   local json_string=$1
   echo "$json_string" | jq -r '
+    def empty_string_flag_sentinels:
+      [
+        "disable_log_requests",
+        "disable_log_stats",
+        "enable_prefix_caching",
+        "enforce_eager",
+        "trust_remote_code"
+      ];
     to_entries |
     map(
-      if (.value == null or .value == false or (.value | tostring) == "") then
+      .key as $key |
+      if (.value == "" and (empty_string_flag_sentinels | index($key))) then
+        "--" + (.key | gsub("_"; "-"))
+      elif (.value == null or .value == false or (.value | tostring) == "") then
         empty
       elif .value == true then
         "--" + (.key | gsub("_"; "-"))

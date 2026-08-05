@@ -103,12 +103,62 @@ def _source_worktree_functions(snippet: str) -> str:
     )
 
 
+def _source_json2args(snippet: str) -> str:
+    script_path = shlex.quote(str(RUN_OFFICIAL_SCRIPT))
+    return (
+        r"source <(awk 'BEGIN{capture=0} /^json2args\(\) \{/ {capture=1} /^download_file\(\) \{/ {exit} capture {print}' "
+        f"{script_path}) && {snippet}"
+    )
+
+
 def _run_bash(command: str, *, check: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [bash_executable(), "-lc", command],
         check=check,
         capture_output=True,
         text=True,
+    )
+
+
+def test_official_json2args_preserves_only_known_empty_flag_sentinels() -> None:
+    payload = json.dumps(
+        {
+            "enforce_eager": "",
+            "trust_remote_code": "",
+            "disable_log_stats": "",
+            "model": "",
+            "revision": "",
+            "ordinary_true": True,
+            "ordinary_false": False,
+            "batch_size": 8,
+        },
+        separators=(",", ":"),
+    )
+    result = _run_bash(_source_json2args(f"json2args {shlex.quote(payload)}"))
+
+    assert result.stdout.strip().split() == [
+        "--enforce-eager",
+        "--trust-remote-code",
+        "--disable-log-stats",
+        "--ordinary-true",
+        "--batch-size",
+        "8",
+    ]
+
+
+def test_official_random_latency_empty_enforce_eager_becomes_cli_flag() -> None:
+    payload = json.dumps(
+        {
+            "gpu_memory_utilization": 0.6,
+            "input_len": 1024,
+            "enforce_eager": "",
+        },
+        separators=(",", ":"),
+    )
+    result = _run_bash(_source_json2args(f"json2args {shlex.quote(payload)}"))
+
+    assert result.stdout.strip() == (
+        "--gpu-memory-utilization 0.6 --input-len 1024 --enforce-eager"
     )
 
 
