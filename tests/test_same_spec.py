@@ -74,6 +74,15 @@ def test_build_same_spec_payload_injects_dtype() -> None:
     assert "output_len" not in payload["resolved_client_parameters"]
 
 
+def test_build_same_spec_payload_does_not_inject_eager_mode() -> None:
+    spec = _spec()
+    spec["server_parameters"].pop("enforce_eager")
+
+    payload = build_same_spec_payload(spec)
+
+    assert "enforce_eager" not in payload["resolved_server_parameters"]
+
+
 def test_build_same_spec_payload_maps_prefix_repetition_legacy_lengths() -> None:
     payload = build_same_spec_payload(_prefix_repetition_spec())
 

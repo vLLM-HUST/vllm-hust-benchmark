@@ -209,8 +209,6 @@ def resolve_server_parameters(
         resolved["dtype"] = precision_to_runtime_dtype(
             model_precision_override or _require_string(spec, "model_precision")
         )
-    if "enforce_eager" not in resolved:
-        resolved["enforce_eager"] = ""
     return resolved
 
 
