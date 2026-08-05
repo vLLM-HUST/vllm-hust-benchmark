@@ -34,6 +34,15 @@ The orchestrator:
 Dry-run performs admission and creates/removes a stopped owned container, but
 does not start the command and never writes canonical strict evidence.
 
+Owned runtime containers are nonprivileged by default. A privileged owned
+runtime requires both `--owned-runtime-privileged` and an immutable
+`--privileged-authorization-source` reference. The create argv, Docker inspect,
+owned-container identity, and strict execution evidence must all agree on that
+choice; the official validator rejects missing, extra, or contradictory fields.
+This opt-in applies only to the uniquely named, labeled container created by the
+orchestrator and does not authorize changes to any existing container. The
+contract is versioned by `schemas/owned_runtime_security_v1.schema.json`.
+
 ```bash
 scripts/run-strict-host-repeat.sh \
   --repeat-dir /data/home/vllm-hust-codex-21rc/home/vllm-hust-benchmark/RESULT_DIR/repeat-01 \

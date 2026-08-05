@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.example/schemas/owned_runtime_security_v1.schema.json",
+  "title": "Owned runtime security contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "privileged",
+    "authorization_source"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "owned-runtime-security/v1"
+    },
+    "privileged": {
+      "type": "boolean"
+    },
+    "authorization_source": {
+      "type": ["string", "null"]
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "privileged": {"const": false},
+        "authorization_source": {"type": "null"}
+      }
+    },
+    {
+      "properties": {
+        "privileged": {"const": true},
+        "authorization_source": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,511}$"
+        }
+      }
+    }
+  ]
+}

@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import pytest
 
 from vllm_hust_benchmark import strict_repeat_orchestrator as orchestrator
+from vllm_hust_benchmark.immutable_input_attestation import resolved_input_sha256
 from vllm_hust_benchmark.official_baseline_attestation import (
     _validate_strict_execution_evidence,
 )
@@ -99,6 +100,8 @@ def _orchestrator_stub(tmp_path: Path) -> orchestrator.StrictRepeatOrchestrator:
         shared_data_host_path=tmp_path / "shared",
         runtime_image_digest="sha256:" + "a" * 64,
         command=["bash", "/workspace/vllm-hust-benchmark/run-one.sh"],
+        owned_runtime_privileged=False,
+        privileged_authorization_source=None,
     )
     instance.devices = [7]
     instance.startup_id = "b" * 32
@@ -140,6 +143,7 @@ def test_docker_create_is_owned_ephemeral_and_scoped(tmp_path: Path) -> None:
         value.startswith("VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE=") for value in argv
     )
     assert "--pull=never" not in argv
+    assert "--privileged" not in argv
     image_index = argv.index(instance.runtime_local_image_ref)
     entrypoint_index = argv.index("--entrypoint")
     assert argv[entrypoint_index + 1] == instance.args.command[0]
@@ -160,6 +164,18 @@ def test_docker_create_preserves_runner_argument_boundaries(tmp_path: Path) -> N
     argv = instance._docker_create_argv()
     image_index = argv.index(instance.runtime_local_image_ref)
     assert argv[argv.index("--entrypoint") + 1] == "/usr/bin/env"
+    assert argv[image_index + 1 :] == instance.args.command[1:]
+
+
+def test_privileged_owned_runtime_is_explicit_and_preserves_argv(
+    tmp_path: Path,
+) -> None:
+    instance = _orchestrator_stub(tmp_path)
+    instance.args.owned_runtime_privileged = True
+    instance.args.privileged_authorization_source = "user-explicit:thread-123"
+    argv = instance._docker_create_argv()
+    assert argv.count("--privileged") == 1
+    image_index = argv.index(instance.runtime_local_image_ref)
     assert argv[image_index + 1 :] == instance.args.command[1:]
 
 
@@ -482,7 +498,7 @@ def test_owned_container_inspect_rejects_extra_npu_mapping(tmp_path: Path) -> No
         instance._validate_owned_container_inspect(record)
     record["Config"]["Env"][0] = "ASCEND_VISIBLE_DEVICES=7"
     record["HostConfig"]["Privileged"] = True
-    with pytest.raises(orchestrator.GateFailure, match="must not be privileged"):
+    with pytest.raises(orchestrator.GateFailure, match="privilege contract"):
         instance._validate_owned_container_inspect(record)
     record["HostConfig"]["Privileged"] = False
     record["Mounts"][-1]["RW"] = True
@@ -560,6 +576,64 @@ def test_cli_rejects_snapshot_interval_below_fifteen(tmp_path: Path) -> None:
                 "true",
             ]
         )
+
+
+def _minimal_cli_argv(tmp_path: Path) -> list[str]:
+    return [
+        "--repeat-dir",
+        str(tmp_path / "repeat"),
+        "--target-id",
+        "target",
+        "--side",
+        "upstream",
+        "--physical-npu",
+        "0",
+        "--service-port",
+        "18080",
+        "--runtime-image-digest",
+        "sha256:" + "a" * 64,
+        "--",
+        "true",
+    ]
+
+
+def test_cli_defaults_to_nonprivileged_owned_runtime(tmp_path: Path) -> None:
+    args = orchestrator.parse_args(_minimal_cli_argv(tmp_path))
+    assert args.owned_runtime_privileged is False
+    assert args.privileged_authorization_source is None
+
+
+def test_cli_requires_authorization_for_privileged_owned_runtime(
+    tmp_path: Path,
+) -> None:
+    argv = _minimal_cli_argv(tmp_path)
+    argv[0:0] = ["--owned-runtime-privileged"]
+    with pytest.raises(SystemExit):
+        orchestrator.parse_args(argv)
+
+
+def test_cli_rejects_privileged_authorization_without_opt_in(tmp_path: Path) -> None:
+    argv = _minimal_cli_argv(tmp_path)
+    argv[0:0] = [
+        "--privileged-authorization-source",
+        "user-explicit:thread-019fc873:2026-08-05",
+    ]
+    with pytest.raises(SystemExit):
+        orchestrator.parse_args(argv)
+
+
+def test_cli_accepts_explicit_privileged_authorization(tmp_path: Path) -> None:
+    argv = _minimal_cli_argv(tmp_path)
+    argv[0:0] = [
+        "--owned-runtime-privileged",
+        "--privileged-authorization-source",
+        "user-explicit:thread-019fc873:2026-08-05",
+    ]
+    args = orchestrator.parse_args(argv)
+    assert args.owned_runtime_privileged is True
+    assert args.privileged_authorization_source == (
+        "user-explicit:thread-019fc873:2026-08-05"
+    )
 
 
 def test_cli_rejects_relative_host_library_path(tmp_path: Path) -> None:
@@ -824,6 +898,7 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
         path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
         return path
 
+    captured_inputs = [{"prompt_token_ids": [1, 2, 3], "output_len": 4}]
     immutable = write_json(
         "immutable-input-attestation.json",
         {
@@ -832,7 +907,10 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
             "model_revision": model_revision,
             "data_identity": data_identity,
             "resolved_input_kind": "throughput-sample-requests",
-            "resolved_input_sha256": "f" * 64,
+            "resolved_input_sha256": resolved_input_sha256(
+                input_kind="throughput-sample-requests", inputs=captured_inputs
+            ),
+            "resolved_inputs": captured_inputs,
         },
     )
     snapshots = []
@@ -994,6 +1072,11 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
                 }
             },
             "physical_to_logical_rank": {"0": 0},
+            "owned_runtime_security": {
+                "schema_version": "owned-runtime-security/v1",
+                "privileged": False,
+                "authorization_source": None,
+            },
         },
     )
     payload = orchestrator.build_strict_evidence(
@@ -1005,6 +1088,11 @@ def test_generated_payload_matches_official_validator(tmp_path: Path) -> None:
         service_port=18080,
         runtime_image_digest=runtime_digest,
         runtime_storage_identity=orchestrator.evidence_record(repeat, runtime_identity),
+        owned_runtime_security={
+            "schema_version": "owned-runtime-security/v1",
+            "privileged": False,
+            "authorization_source": None,
+        },
         immutable_inputs=orchestrator.evidence_record(repeat, immutable),
         devices=[0],
         acquired_at="2026-08-04T00:00:00Z",

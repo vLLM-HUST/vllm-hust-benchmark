@@ -27,7 +27,9 @@ from typing import Any, Mapping, Sequence
 
 from vllm_hust_benchmark.strict_execution_contract import (
     CANONICAL_WORKER_RULE,
+    OWNED_RUNTIME_AUTHORIZATION_SOURCE_PATTERN,
     OWNED_RUNTIME_PREFLIGHT,
+    OWNED_RUNTIME_SECURITY_SCHEMA,
     STRICT_ASCEND_READONLY_MOUNTS,
     STRICT_V018_RUNTIME_PYTHON,
     canonical_worker_key,
@@ -40,6 +42,7 @@ FAILURE_SCHEMA = "strict-repeat-failure/v1"
 DRY_RUN_SCHEMA = "strict-repeat-dry-run/v1"
 CONTAINER_ID_RE = re.compile(r"[0-9a-f]{64}")
 IMAGE_DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}")
+AUTHORIZATION_SOURCE_RE = re.compile(OWNED_RUNTIME_AUTHORIZATION_SOURCE_PATTERN)
 HOST_NPU_SMI = Path("/usr/local/sbin/npu-smi")
 HOST_CTR = Path("/usr/bin/ctr")
 STRICT_V018_ARCHIVE = Path(
@@ -254,6 +257,7 @@ def build_strict_evidence(
     service_port: int,
     runtime_image_digest: str,
     runtime_storage_identity: dict[str, str],
+    owned_runtime_security: dict[str, Any],
     immutable_inputs: dict[str, str],
     devices: list[int],
     acquired_at: str,
@@ -276,6 +280,7 @@ def build_strict_evidence(
         "service_port": service_port,
         "runtime_image_digest": runtime_image_digest,
         "runtime_storage_identity": runtime_storage_identity,
+        "owned_runtime_security": owned_runtime_security,
         "immutable_inputs": immutable_inputs,
         "lease": {
             "physical_npu_ids": devices,
@@ -574,6 +579,13 @@ class Snapshot:
 
 
 class StrictRepeatOrchestrator:
+    def _owned_runtime_security(self) -> dict[str, Any]:
+        return {
+            "schema_version": OWNED_RUNTIME_SECURITY_SCHEMA,
+            "privileged": self.args.owned_runtime_privileged,
+            "authorization_source": self.args.privileged_authorization_source,
+        }
+
     def __init__(self, args: argparse.Namespace) -> None:
         self.args = args
         self.repeat_dir = args.repeat_dir.resolve()
@@ -750,6 +762,8 @@ class StrictRepeatOrchestrator:
                 "dst=/data/shared_datasets,readonly"
             ),
         ]
+        if self.args.owned_runtime_privileged:
+            argv.insert(2, "--privileged")
         for source, _kind in STRICT_ASCEND_READONLY_MOUNTS:
             argv.extend(["--mount", f"type=bind,src={source},dst={source},readonly"])
         for physical in self.devices:
@@ -1020,6 +1034,7 @@ class StrictRepeatOrchestrator:
             "container_id": self.container_id,
             "container_name": self.container_name,
             "runtime_image_digest": self.args.runtime_image_digest,
+            "owned_runtime_security": self._owned_runtime_security(),
             "runtime_storage_identity": storage_identity,
             "create_argv": evidence_record(self.repeat_dir, create_argv_path),
             "runner_argv": self.args.command,
@@ -1062,8 +1077,8 @@ class StrictRepeatOrchestrator:
             raise GateFailure("owned container network mode is not none")
         if host_config.get("IpcMode") != "host":
             raise GateFailure("owned container IPC mode is not host")
-        if host_config.get("Privileged") is not False:
-            raise GateFailure("owned container must not be privileged")
+        if host_config.get("Privileged") is not self.args.owned_runtime_privileged:
+            raise GateFailure("owned container privilege contract mismatch")
         process_argv = self._owned_process_argv()
         if (
             config.get("Entrypoint") != [process_argv[0]]
@@ -1664,6 +1679,7 @@ class StrictRepeatOrchestrator:
                 runtime_storage_identity=evidence_record(
                     self.repeat_dir, self.runtime_storage_identity_path
                 ),
+                owned_runtime_security=self._owned_runtime_security(),
                 immutable_inputs=evidence_record(self.repeat_dir, immutable_path),
                 devices=self.devices,
                 acquired_at=self.lease.acquired_at,
@@ -1735,6 +1751,15 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--physical-npu", type=int, action="append", required=True)
     parser.add_argument("--service-port", type=int, required=True)
     parser.add_argument("--runtime-image-digest", required=True)
+    parser.add_argument(
+        "--owned-runtime-privileged",
+        action="store_true",
+        help="explicitly run only the owned ephemeral runtime container privileged",
+    )
+    parser.add_argument(
+        "--privileged-authorization-source",
+        help="immutable user-authorization reference required for privileged runtime",
+    )
     parser.add_argument("--container-name-prefix", default="vllm-hust-strict-repeat")
     parser.add_argument(
         "--repo-host-path",
@@ -1788,6 +1813,18 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         parser.error("snapshot interval must be at least 15 seconds")
     if args.sample_interval_seconds <= 0:
         parser.error("sample interval must be positive")
+    authorization_source = args.privileged_authorization_source
+    if args.owned_runtime_privileged:
+        if not authorization_source or not AUTHORIZATION_SOURCE_RE.fullmatch(
+            authorization_source
+        ):
+            parser.error(
+                "privileged owned runtime requires a valid authorization source"
+            )
+    elif authorization_source is not None:
+        parser.error(
+            "privileged authorization source requires --owned-runtime-privileged"
+        )
     return args
 
 

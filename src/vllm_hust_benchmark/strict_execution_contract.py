@@ -12,6 +12,8 @@ CANONICAL_WORKER_RULE = (
     "then EngineCore, then other owned compute processes; tie-break by lowest host PID"
 )
 STRICT_V018_RUNTIME_PYTHON = "/usr/local/python3.11.14/bin/python"
+OWNED_RUNTIME_SECURITY_SCHEMA = "owned-runtime-security/v1"
+OWNED_RUNTIME_AUTHORIZATION_SOURCE_PATTERN = r"[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,511}"
 OWNED_RUNTIME_PREFLIGHT = (
     "/workspace/vllm-hust-benchmark/scripts/verify-owned-runtime-and-exec.py"
 )

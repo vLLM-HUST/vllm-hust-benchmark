@@ -241,6 +241,11 @@ def _write_strict_execution_evidence(
         {
             "container_id": container_id,
             "runtime_image_digest": runtime_image_digest,
+            "owned_runtime_security": {
+                "schema_version": "owned-runtime-security/v1",
+                "privileged": False,
+                "authorization_source": None,
+            },
             "runtime_storage_identity": {
                 "transport": "registry",
                 "runtime_config_digest": runtime_image_digest,
@@ -277,6 +282,11 @@ def _write_strict_execution_evidence(
                 "sha256": hashlib.sha256(
                     runtime_identity_path.read_bytes()
                 ).hexdigest(),
+            },
+            "owned_runtime_security": {
+                "schema_version": "owned-runtime-security/v1",
+                "privileged": False,
+                "authorization_source": None,
             },
             "service_port": 8000,
             "immutable_inputs": {
@@ -417,6 +427,103 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
         (repeat / "runner.log").write_text("ok\n", encoding="utf-8")
         _write_strict_execution_evidence(repeat, number)
     return repo, staged, results, entry, target
+
+
+def _set_privileged_runtime(results: Path, authorization_source: str | None) -> None:
+    security = {
+        "schema_version": "owned-runtime-security/v1",
+        "privileged": True,
+        "authorization_source": authorization_source,
+    }
+    for repeat in sorted(results.glob("repeat-*")):
+        strict_path = repeat / "strict_execution_evidence.json"
+        strict = json.loads(strict_path.read_text(encoding="utf-8"))
+        identity_path = repeat / strict["runtime_storage_identity"]["path"]
+        identity = json.loads(identity_path.read_text(encoding="utf-8"))
+
+        inspect_path = repeat / identity["inspect"]["path"]
+        inspect = json.loads(inspect_path.read_text(encoding="utf-8"))
+        inspect[0]["HostConfig"]["Privileged"] = True
+        _write(inspect_path, inspect)
+        identity["inspect"] = _hashed_record(repeat, inspect_path)
+
+        create_path = repeat / identity["create_argv"]["path"]
+        create_argv = json.loads(create_path.read_text(encoding="utf-8"))
+        create_argv.insert(2, "--privileged")
+        _write(create_path, create_argv)
+        identity["create_argv"] = _hashed_record(repeat, create_path)
+
+        identity["owned_runtime_security"] = security
+        _write(identity_path, identity)
+        strict["runtime_storage_identity"] = _hashed_record(repeat, identity_path)
+        strict["owned_runtime_security"] = security
+        _write(strict_path, strict)
+
+
+def test_accepts_explicitly_authorized_privileged_owned_runtime(
+    tmp_path: Path,
+) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    _set_privileged_runtime(results, "user-explicit:thread-019fc873:2026-08-05")
+    attest_completed_baseline(
+        repo, staged, results, repo / "out-privileged", verified_by="test-review"
+    )
+
+
+def test_rejects_privileged_owned_runtime_without_authorization(
+    tmp_path: Path,
+) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    _set_privileged_runtime(results, None)
+    with pytest.raises(ValueError, match="lacks user authorization"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out-unauthorized", verified_by="test-review"
+        )
+
+
+def test_rejects_privileged_owned_runtime_argv_drift(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    _set_privileged_runtime(results, "user-explicit:thread-019fc873:2026-08-05")
+    repeat = results / "repeat-01"
+    strict_path = repeat / "strict_execution_evidence.json"
+    strict = json.loads(strict_path.read_text(encoding="utf-8"))
+    identity_path = repeat / strict["runtime_storage_identity"]["path"]
+    identity = json.loads(identity_path.read_text(encoding="utf-8"))
+    create_path = repeat / identity["create_argv"]["path"]
+    create_argv = json.loads(create_path.read_text(encoding="utf-8"))
+    create_argv.insert(2, "--privileged")
+    _write(create_path, create_argv)
+    identity["create_argv"] = _hashed_record(repeat, create_path)
+    _write(identity_path, identity)
+    strict["runtime_storage_identity"] = _hashed_record(repeat, identity_path)
+    _write(strict_path, strict)
+    with pytest.raises(ValueError, match="create privilege mismatch"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out-argv-drift", verified_by="test-review"
+        )
+
+
+def test_rejects_nonprivileged_runtime_with_alternate_privilege_argv(
+    tmp_path: Path,
+) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    repeat = results / "repeat-01"
+    strict_path = repeat / "strict_execution_evidence.json"
+    strict = json.loads(strict_path.read_text(encoding="utf-8"))
+    identity_path = repeat / strict["runtime_storage_identity"]["path"]
+    identity = json.loads(identity_path.read_text(encoding="utf-8"))
+    create_path = repeat / identity["create_argv"]["path"]
+    create_argv = json.loads(create_path.read_text(encoding="utf-8"))
+    create_argv.insert(2, "--privileged=false")
+    _write(create_path, create_argv)
+    identity["create_argv"] = _hashed_record(repeat, create_path)
+    _write(identity_path, identity)
+    strict["runtime_storage_identity"] = _hashed_record(repeat, identity_path)
+    _write(strict_path, strict)
+    with pytest.raises(ValueError, match="create privilege mismatch"):
+        attest_completed_baseline(
+            repo, staged, results, repo / "out-alt-argv", verified_by="test-review"
+        )
 
 
 def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[str, str]:
@@ -629,6 +736,11 @@ def _materialize_docker_archive_runtime(results: Path, target: dict) -> tuple[st
             {
                 "container_id": container_id,
                 "runtime_image_digest": config_digest,
+                "owned_runtime_security": {
+                    "schema_version": "owned-runtime-security/v1",
+                    "privileged": False,
+                    "authorization_source": None,
+                },
                 "runtime_storage_identity": {
                     "transport": "docker-archive",
                     "runtime_config_digest": config_digest,
@@ -869,7 +981,7 @@ def test_docker_archive_runtime_uses_config_digest_for_compatibility(
         ("path_drift", "preflight command mismatch"),
         ("args_drift", "preflight command mismatch"),
         ("cmd_drift", "preflight command mismatch"),
-        ("privileged", "must not be privileged"),
+        ("privileged", "privilege mismatch"),
         ("missing_ascend_mount", "Ascend mount mismatch"),
         ("writable_ascend_mount", "Ascend mount mismatch"),
         ("device_node_remap", "physical device scope mismatch"),

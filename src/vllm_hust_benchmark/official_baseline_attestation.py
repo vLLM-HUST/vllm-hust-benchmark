@@ -17,7 +17,9 @@ from vllm_hust_benchmark.immutable_input_attestation import (
 )
 from vllm_hust_benchmark.strict_execution_contract import (
     CANONICAL_WORKER_RULE,
+    OWNED_RUNTIME_AUTHORIZATION_SOURCE_PATTERN,
     OWNED_RUNTIME_PREFLIGHT,
+    OWNED_RUNTIME_SECURITY_SCHEMA,
     STRICT_ASCEND_READONLY_MOUNTS,
     STRICT_V018_RUNTIME_PYTHON,
     canonical_worker_key,
@@ -265,12 +267,40 @@ def _validate_strict_execution_evidence(
     if owned_identity.get("container_id") != container_id:
         raise ValueError(f"owned identity container mismatch: {repeat_dir}")
     host_config = inspect[0].get("HostConfig") or {}
-    if host_config.get("Privileged") is not False:
-        raise ValueError(f"owned container must not be privileged: {repeat_dir}")
-    if "--privileged" in create_argv:
-        raise ValueError(
-            f"owned docker create must not request privileged: {repeat_dir}"
-        )
+    security = evidence.get("owned_runtime_security")
+    identity_security = owned_identity.get("owned_runtime_security")
+    if not isinstance(security, Mapping) or identity_security != security:
+        raise ValueError(f"owned runtime security identity mismatch: {repeat_dir}")
+    privileged = security.get("privileged")
+    authorization_source = security.get("authorization_source")
+    if security.get("schema_version") != OWNED_RUNTIME_SECURITY_SCHEMA:
+        raise ValueError(f"owned runtime security schema mismatch: {repeat_dir}")
+    if set(security) != {"schema_version", "privileged", "authorization_source"}:
+        raise ValueError(f"owned runtime security fields mismatch: {repeat_dir}")
+    if privileged is True:
+        if not isinstance(authorization_source, str) or not re.fullmatch(
+            OWNED_RUNTIME_AUTHORIZATION_SOURCE_PATTERN, authorization_source
+        ):
+            raise ValueError(
+                f"privileged owned runtime lacks user authorization: {repeat_dir}"
+            )
+    elif privileged is False:
+        if authorization_source is not None:
+            raise ValueError(
+                f"nonprivileged runtime claims privileged authorization: {repeat_dir}"
+            )
+    else:
+        raise ValueError(f"owned runtime privilege flag is invalid: {repeat_dir}")
+    if host_config.get("Privileged") is not privileged:
+        raise ValueError(f"owned container privilege mismatch: {repeat_dir}")
+    privilege_argv = [
+        value
+        for value in create_argv
+        if isinstance(value, str)
+        and (value == "--privileged" or value.startswith("--privileged="))
+    ]
+    if privilege_argv != (["--privileged"] if privileged else []):
+        raise ValueError(f"owned docker create privilege mismatch: {repeat_dir}")
     inspect_mounts = inspect[0].get("Mounts") or []
     for source, _kind in STRICT_ASCEND_READONLY_MOUNTS:
         expected_mount_arg = f"type=bind,src={source},dst={source},readonly"
