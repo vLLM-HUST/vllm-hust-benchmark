@@ -101,6 +101,18 @@ CONSTRAINTS_FILE=$(realpath "$CONSTRAINTS_FILE")
 RESULT_DIR=$(realpath -m "$RESULT_DIR")
 OFFICIAL_VLLM_CACHE_ROOT=$(realpath -m "$OFFICIAL_VLLM_CACHE_ROOT")
 
+OFFICIAL_DATA_IDENTITY_KIND=$(
+  PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    "$HOST_PYTHON_BIN" - "$REPO_ROOT" "$SPEC_FILE" <<'PY'
+import sys
+from pathlib import Path
+
+from vllm_hust_benchmark.hf_cache_staging import target_data_identity_kind
+
+print(target_data_identity_kind(Path(sys.argv[1]), Path(sys.argv[2])))
+PY
+)
+
 OFFICIAL_SHAREGPT_DATASET_URL=$(
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
     SPEC_FILE="$SPEC_FILE" \
@@ -1247,6 +1259,10 @@ ensure_runtime_dataset_available() {
       if [[ -f "$sharegpt_target" ]] && "$HOST_PYTHON_BIN" -m json.tool "$sharegpt_target" >/dev/null 2>&1; then
         return 0
       fi
+      if [[ "$OFFICIAL_DATA_IDENTITY_KIND" == "huggingface-file" ]]; then
+        echo "exact local ShareGPT file was not staged: $sharegpt_target" >&2
+        return 2
+      fi
       echo "[goal-baseline] downloading ShareGPT benchmark dataset to $sharegpt_target"
       download_json_file_atomic "$OFFICIAL_SHAREGPT_DATASET_URL" "$sharegpt_target"
       ;;
@@ -1328,18 +1344,14 @@ stage_flat_hf_inputs() {
     --scratch-root "$staging_root"
     --model-source "$OFFICIAL_FLAT_MODEL_SOURCE"
   )
-  data_identity_kind=$(PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
-    "$HOST_PYTHON_BIN" - "$REPO_ROOT" "$SPEC_FILE" <<'PY'
-import sys
-from pathlib import Path
-
-from vllm_hust_benchmark.hf_cache_staging import target_data_identity_kind
-
-print(target_data_identity_kind(Path(sys.argv[1]), Path(sys.argv[2])))
-PY
-  )
+  data_identity_kind="$OFFICIAL_DATA_IDENTITY_KIND"
   if [[ "$data_identity_kind" == "huggingface-dataset" && -n "$OFFICIAL_FLAT_DATASET_SOURCE" ]]; then
     args+=(--dataset-source "$OFFICIAL_FLAT_DATASET_SOURCE")
+  elif [[ "$data_identity_kind" == "huggingface-file" && -n "$OFFICIAL_FLAT_DATASET_SOURCE" ]]; then
+    args+=(
+      --dataset-source "$OFFICIAL_FLAT_DATASET_SOURCE"
+      --file-dataset-root "$OFFICIAL_BENCHMARK_DATASET_ROOT"
+    )
   fi
   staging_payload=$(PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
     HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \

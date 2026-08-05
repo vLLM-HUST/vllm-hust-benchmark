@@ -7,6 +7,8 @@ import hashlib
 import json
 import os
 import re
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -217,6 +219,78 @@ def stage_flat_export(export: Mapping[str, Any], hub_cache: Path) -> dict[str, A
     return {**dict(export), "snapshot_path": str(snapshot.resolve())}
 
 
+def stage_huggingface_file(
+    source_path: Path, dataset_root: Path, identity: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Bind one authenticated HF file into the owned runtime dataset cache."""
+    if identity.get("kind") != "huggingface-file":
+        raise StagingFailure("local HF file staging requires huggingface-file identity")
+    repository = str(identity.get("repository") or "")
+    revision = str(identity.get("revision") or "")
+    _validate_identity(repository, revision)
+    relative = Path(str(identity.get("path") or ""))
+    if not relative.parts or relative.is_absolute() or ".." in relative.parts:
+        raise StagingFailure("huggingface-file identity contains an unsafe path")
+    expected_size = identity.get("size_bytes")
+    expected_sha256 = identity.get("sha256")
+    if not isinstance(expected_size, int) or expected_size < 0:
+        raise StagingFailure("huggingface-file identity lacks an exact size")
+    if not isinstance(expected_sha256, str) or not re.fullmatch(
+        r"[0-9a-f]{64}", expected_sha256
+    ):
+        raise StagingFailure("huggingface-file identity lacks an exact SHA256")
+
+    if source_path.is_symlink():
+        raise StagingFailure("huggingface-file source must not be a symlink")
+    source = source_path.resolve(strict=True)
+    if not source.is_file():
+        raise StagingFailure(f"huggingface-file source is not a file: {source}")
+    actual_size = source.stat().st_size
+    actual_sha256 = _sha256(source)
+    if actual_size != expected_size or actual_sha256 != expected_sha256:
+        raise StagingFailure("huggingface-file source identity mismatch")
+
+    root = dataset_root.resolve()
+    destination = root / relative
+    if destination.exists() or destination.is_symlink():
+        raise StagingFailure(
+            f"owned huggingface-file destination already exists: {destination}"
+        )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            dir=destination.parent,
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as temporary:
+            temporary_name = temporary.name
+        shutil.copyfile(source, temporary_name)
+        staged = Path(temporary_name)
+        if staged.stat().st_size != expected_size or _sha256(staged) != expected_sha256:
+            raise StagingFailure("staged huggingface-file identity mismatch")
+        with staged.open("r+b") as stream:
+            os.fsync(stream.fileno())
+        os.link(staged, destination)
+        staged.unlink()
+        temporary_name = None
+        destination.chmod(0o444)
+    finally:
+        if temporary_name is not None:
+            Path(temporary_name).unlink(missing_ok=True)
+    return {
+        "kind": "huggingface-file",
+        "repository": repository,
+        "revision": revision,
+        "path": relative.as_posix(),
+        "size_bytes": actual_size,
+        "sha256": actual_sha256,
+        "source_path": str(source),
+        "runtime_path": str(destination.resolve()),
+    }
+
+
 def _registry_target(repo_root: Path, spec_path: Path) -> dict[str, Any]:
     registry = json.loads(
         (repo_root / "src/vllm_hust_benchmark/data/official_targets.json").read_text(
@@ -264,15 +338,19 @@ def stage_target(
     scratch_root: Path,
     model_source: Path,
     dataset_source: Path | None,
+    file_dataset_root: Path | None = None,
 ) -> dict[str, Any]:
     target = _registry_target(repo_root, spec_path)
     model = target["model"]
     data = target["workload"].get("data_identity")
-    if not isinstance(data, dict) or data.get("kind") != "huggingface-dataset":
+    data_kind = data.get("kind") if isinstance(data, dict) else None
+    if data_kind not in {"huggingface-dataset", "huggingface-file"}:
         if dataset_source is not None:
-            raise StagingFailure("dataset source supplied for a non-HF-dataset target")
+            raise StagingFailure("dataset source supplied for an unsupported target")
     elif dataset_source is None:
-        raise StagingFailure("HF dataset target requires a flat dataset source")
+        raise StagingFailure(f"{data_kind} target requires a local dataset source")
+    if data_kind == "huggingface-file" and file_dataset_root is None:
+        raise StagingFailure("huggingface-file target requires a runtime dataset root")
     if scratch_root.exists():
         raise StagingFailure(f"staging scratch already exists: {scratch_root}")
     hub_cache = scratch_root / "hub"
@@ -283,7 +361,7 @@ def stage_target(
         repo_type="model",
     )
     dataset_export = None
-    if dataset_source is not None:
+    if data_kind == "huggingface-dataset" and dataset_source is not None:
         dataset_export = inspect_flat_export(
             dataset_source,
             repository=data["repository"],
@@ -293,6 +371,13 @@ def stage_target(
     staged_model = stage_flat_export(model_export, hub_cache)
     staged_dataset = (
         stage_flat_export(dataset_export, hub_cache) if dataset_export else None
+    )
+    staged_dataset_file = (
+        stage_huggingface_file(dataset_source, file_dataset_root, data)
+        if data_kind == "huggingface-file"
+        and dataset_source is not None
+        and file_dataset_root is not None
+        else None
     )
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -307,6 +392,7 @@ def stage_target(
         "hub_cache": str(hub_cache.resolve()),
         "model": staged_model,
         "dataset": staged_dataset,
+        "dataset_file": staged_dataset_file,
     }
     _atomic_json(scratch_root / "hf-flat-cache-staging.json", payload)
     return payload
@@ -319,6 +405,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--scratch-root", type=Path, required=True)
     parser.add_argument("--model-source", type=Path, required=True)
     parser.add_argument("--dataset-source", type=Path)
+    parser.add_argument("--file-dataset-root", type=Path)
     return parser.parse_args(argv)
 
 
@@ -332,6 +419,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             scratch_root=args.scratch_root,
             model_source=args.model_source,
             dataset_source=args.dataset_source,
+            file_dataset_root=args.file_dataset_root,
         )
     except (OSError, KeyError, TypeError, ValueError, StagingFailure) as error:
         print(f"HF cache staging rejected: {error}", file=os.sys.stderr)

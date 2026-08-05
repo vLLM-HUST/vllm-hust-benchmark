@@ -85,6 +85,114 @@ def test_staged_exact_revisions_resolve_offline(tmp_path: Path) -> None:
     assert (model_source / "config.json").read_bytes() == b"{}\n"
 
 
+def test_huggingface_file_is_hash_verified_and_bound_without_network(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "source" / "ShareGPT.json"
+    source.parent.mkdir()
+    source.write_bytes(b'[{"from":"human"}]\n')
+    identity = {
+        "kind": "huggingface-file",
+        "repository": DATASET_REPOSITORY,
+        "revision": DATASET_REVISION,
+        "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+        "size_bytes": source.stat().st_size,
+        "sha256": staging._sha256(source),
+    }
+    record = staging.stage_huggingface_file(
+        source, tmp_path / "runtime-datasets", identity
+    )
+    runtime_path = Path(record["runtime_path"])
+    assert runtime_path.is_file()
+    assert not runtime_path.is_symlink()
+    assert runtime_path.stat().st_mode & 0o222 == 0
+    assert runtime_path.read_bytes() == source.read_bytes()
+    assert record["sha256"] == identity["sha256"]
+
+
+def test_huggingface_file_binding_rejects_hash_drift_and_other_kinds(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "ShareGPT.json"
+    source.write_bytes(b"[]\n")
+    identity = {
+        "kind": "huggingface-file",
+        "repository": DATASET_REPOSITORY,
+        "revision": DATASET_REVISION,
+        "path": "ShareGPT.json",
+        "size_bytes": source.stat().st_size,
+        "sha256": "0" * 64,
+    }
+    with pytest.raises(staging.StagingFailure, match="identity mismatch"):
+        staging.stage_huggingface_file(source, tmp_path / "runtime", identity)
+    identity["kind"] = "release-asset"
+    with pytest.raises(staging.StagingFailure, match="requires huggingface-file"):
+        staging.stage_huggingface_file(source, tmp_path / "runtime", identity)
+
+
+def test_stage_target_binds_huggingface_file_from_hashed_registry(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    model_source = tmp_path / "model"
+    dataset_source = tmp_path / "ShareGPT.json"
+    _write_export(model_source, _model_files(), MODEL_REVISION)
+    dataset_source.write_bytes(b'[{"value":"exact"}]\n')
+    data_identity = {
+        "kind": "huggingface-file",
+        "repository": DATASET_REPOSITORY,
+        "revision": DATASET_REVISION,
+        "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+        "size_bytes": dataset_source.stat().st_size,
+        "sha256": staging._sha256(dataset_source),
+    }
+    spec = repo / "docs" / "target.json"
+    spec.parent.mkdir(parents=True)
+    spec_payload = {
+        "model": MODEL_REPOSITORY,
+        "model_revision": MODEL_REVISION,
+        "data_identity": data_identity,
+    }
+    spec.write_text(json.dumps(spec_payload), encoding="utf-8")
+    registry = repo / "src/vllm_hust_benchmark/data/official_targets.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        json.dumps(
+            {
+                "registry_version": "test",
+                "targets": [
+                    {
+                        "target_id": "sharegpt-target",
+                        "source_spec": {
+                            "path": "docs/target.json",
+                            "sha256": staging._sha256(spec),
+                        },
+                        "model": {
+                            "id": MODEL_REPOSITORY,
+                            "revision": MODEL_REVISION,
+                        },
+                        "workload": {"data_identity": data_identity},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = staging.stage_target(
+        repo_root=repo,
+        spec_path=spec,
+        scratch_root=tmp_path / "scratch",
+        model_source=model_source,
+        dataset_source=dataset_source,
+        file_dataset_root=tmp_path / "runtime-datasets",
+    )
+    staged = Path(payload["dataset_file"]["runtime_path"])
+    assert staged.read_bytes() == dataset_source.read_bytes()
+    assert payload["dataset_file"]["sha256"] == data_identity["sha256"]
+    assert payload["dataset"] is None
+
+
 def test_wrong_revision_fails_closed(tmp_path: Path) -> None:
     source = tmp_path / "model"
     _write_export(source, _model_files(), "c" * 40)
@@ -249,4 +357,14 @@ def test_official_runner_stages_before_model_and_contract_resolution() -> None:
     assert staging_call < model_resolution < contract
     assert "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1" in script
     assert '[[ "$data_identity_kind" == "huggingface-dataset"' in script
+    assert '[[ "$data_identity_kind" == "huggingface-file"' in script
     assert 'args+=(--dataset-source "$OFFICIAL_FLAT_DATASET_SOURCE")' in script
+    assert '--file-dataset-root "$OFFICIAL_BENCHMARK_DATASET_ROOT"' in script
+    local_file_guard = script.index(
+        '[[ "$OFFICIAL_DATA_IDENTITY_KIND" == "huggingface-file" ]]'
+    )
+    download = script.index(
+        'download_json_file_atomic "$OFFICIAL_SHAREGPT_DATASET_URL"',
+        local_file_guard,
+    )
+    assert local_file_guard < download
