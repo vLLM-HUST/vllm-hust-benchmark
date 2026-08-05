@@ -11,6 +11,7 @@ from vllm_hust_benchmark.leaderboard_export import export_leaderboard_artifacts
 from vllm_hust_benchmark.integration import RepoLayout
 from vllm_hust_benchmark.integration import DEFAULT_RUNTIME_ENGINE
 from vllm_hust_benchmark.integration import build_vllm_bench_command
+from vllm_hust_benchmark.same_spec import build_same_spec_payload
 
 
 def test_build_command_prints_upstream_equivalent(capsys) -> None:
@@ -1743,6 +1744,19 @@ def test_export_leaderboard_artifact_keeps_official_upstream_stack_out_of_hust_c
         ),
         encoding="utf-8",
     )
+    spec_path = (
+        Path(__file__).resolve().parents[1]
+        / "docs"
+        / "official-baselines"
+        / "official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"
+    )
+    same_spec_file = tmp_path / "same_spec.json"
+    same_spec_file.write_text(
+        json.dumps(
+            build_same_spec_payload(json.loads(spec_path.read_text(encoding="utf-8")))
+        ),
+        encoding="utf-8",
+    )
 
     exit_code = main(
         [
@@ -1750,6 +1764,10 @@ def test_export_leaderboard_artifact_keeps_official_upstream_stack_out_of_hust_c
             "random-online",
             "--metrics-file",
             str(metrics_file),
+            "--same-spec-file",
+            str(same_spec_file),
+            "--spec-path",
+            str(spec_path),
             "--output-dir",
             str(tmp_path / "official"),
             "--run-id",
@@ -1765,7 +1783,7 @@ def test_export_leaderboard_artifact_keeps_official_upstream_stack_out_of_hust_c
             "--model-name",
             "Qwen/Qwen2.5-14B-Instruct",
             "--hardware-chip-model",
-            "910B3",
+            "910B2",
             "--submitter",
             "official-ascend-baseline",
             "--data-source",
@@ -1798,6 +1816,8 @@ def test_export_leaderboard_artifact_keeps_official_upstream_stack_out_of_hust_c
         (tmp_path / "official" / "run_leaderboard.json").read_text(encoding="utf-8")
     )
     assert artifact["engine"] == "vllm"
+    assert artifact["metadata"]["target_id"] == "official-ascend-jan-2026-v0.18.0"
+    assert artifact["metadata"]["target_version"] == "Official Ascend Jan 2026"
     assert artifact["versions"] == {
         "protocol": "N/A",
         "backend": "N/A",
