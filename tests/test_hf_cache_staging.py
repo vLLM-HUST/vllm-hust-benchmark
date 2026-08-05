@@ -76,12 +76,14 @@ def test_staged_exact_revisions_resolve_offline(tmp_path: Path) -> None:
         huggingface_hub.snapshot_download(
             DATASET_REPOSITORY,
             repo_type="dataset",
-            revision=DATASET_REVISION,
             cache_dir=hub,
             local_files_only=True,
         )
         == staged_dataset["snapshot_path"]
     )
+    assert (
+        hub / "datasets--owner--dataset" / "refs" / "main"
+    ).read_text(encoding="utf-8") == DATASET_REVISION
     assert (model_source / "config.json").read_bytes() == b"{}\n"
     staged_config_metadata = (
         Path(staged_model["snapshot_path"])

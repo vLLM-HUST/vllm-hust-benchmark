@@ -1284,46 +1284,6 @@ def test_normalized_client_parameters_json_carries_offline_runtime_knobs(
     assert result.returncode == 0
 
 
-def test_normalized_client_parameters_json_uses_staged_hf_dataset_snapshot(
-    tmp_path: Path,
-) -> None:
-    same_spec_file = tmp_path / "resolved_same_spec.json"
-    same_spec_file.write_text(
-        '{"resolved_server_parameters":{"model":"Qwen/model"},'
-        '"resolved_client_parameters":{"backend":"vllm",'
-        '"dataset_name":"hf","dataset_path":"owner/dataset"}}',
-        encoding="utf-8",
-    )
-    staged_snapshot = (
-        tmp_path
-        / "hub"
-        / "datasets--owner--dataset"
-        / "snapshots"
-        / ("a" * 40)
-    )
-
-    result = _run_bash(
-        _source_run_official_runtime_model_functions(
-            f"""
-            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
-            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
-            SAME_SPEC_FILE={shlex.quote(str(same_spec_file))}
-            BENCHMARK_TYPE=serve
-            CLIENT_READY_CHECK_TIMEOUT_SECONDS=900
-            OFFICIAL_VLLM_WORKTREE={shlex.quote(str(tmp_path / "vllm"))}
-            OFFICIAL_BENCHMARK_DATASET_ROOT={shlex.quote(str(tmp_path / "datasets"))}
-            OFFICIAL_RUNTIME_DATASET_PATH={shlex.quote(str(staged_snapshot))}
-
-            client_json=$(normalized_client_parameters_json)
-            printf '%s\n' "$client_json"
-            grep -Fq {shlex.quote(json.dumps(str(staged_snapshot)))} <<< "$client_json"
-            """
-        )
-    )
-
-    assert result.returncode == 0
-
-
 def test_official_runner_has_fail_closed_trace_replay_branch() -> None:
     source = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
 

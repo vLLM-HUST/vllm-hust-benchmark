@@ -196,6 +196,38 @@ def restore_huggingface_hub_downloads() -> None:
         return
 
 
+def install_hf_dataset_snapshot_redirect(args: object) -> None:
+    repository = os.environ.get("VLLM_HUST_HF_DATASET_REPOSITORY", "")
+    revision = os.environ.get("VLLM_HUST_HF_DATASET_REVISION", "")
+    snapshot_value = os.environ.get("VLLM_HUST_HF_DATASET_SNAPSHOT", "")
+    configured = [bool(repository), bool(revision), bool(snapshot_value)]
+    if not any(configured):
+        return
+    if not all(configured):
+        raise RuntimeError("staged HF dataset redirect is only partially configured")
+    if len(revision) != 40 or any(character not in "0123456789abcdef" for character in revision):
+        raise RuntimeError("staged HF dataset revision is not an exact commit")
+    if getattr(args, "dataset_name", None) != "hf" or getattr(
+        args, "dataset_path", None
+    ) != repository:
+        raise RuntimeError("staged HF dataset does not match the benchmark arguments")
+
+    snapshot = Path(snapshot_value).resolve(strict=True)
+    if snapshot.name != revision or snapshot.parent.name != "snapshots":
+        raise RuntimeError("staged HF dataset snapshot is not bound to its revision")
+
+    from vllm.benchmarks import datasets as benchmark_datasets
+
+    original_load_dataset = benchmark_datasets.load_dataset
+
+    def load_dataset_from_staged_snapshot(path, *load_args, **load_kwargs):
+        if path == repository:
+            path = str(snapshot)
+        return original_load_dataset(path, *load_args, **load_kwargs)
+
+    benchmark_datasets.load_dataset = load_dataset_from_staged_snapshot
+
+
 def _enum_label(value: object) -> str:
     name = getattr(value, "name", None)
     return str(name if name is not None else value)
@@ -287,6 +319,8 @@ def run_single_benchmark(argv: list[str]) -> int | None:
     add_cli_args(parser)
     args = parser.parse_args(argv[2:])
     restore_huggingface_hub_downloads()
+    if benchmark == "serve":
+        install_hf_dataset_snapshot_redirect(args)
     if benchmark in {"latency", "throughput"}:
         install_offline_graph_guard()
     install_resolved_input_capture(benchmark_module, benchmark)

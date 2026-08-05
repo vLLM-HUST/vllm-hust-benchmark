@@ -11,6 +11,7 @@ import pytest
 from scripts.run_vllm_cli_compat import (
     _latency_prompt_token_ids,
     _sample_request_payload,
+    install_hf_dataset_snapshot_redirect,
     install_resolved_input_capture,
     offline_graph_proof,
     record_immutable_inputs,
@@ -223,6 +224,55 @@ def test_capture_rejects_input_kind_mismatch_before_writing(
             input_kind="latency-prompt-token-ids", inputs=[[1, 2, 3]]
         )
     assert not output.exists()
+
+
+def test_hf_dataset_repository_is_redirected_only_inside_loader(
+    tmp_path, monkeypatch
+) -> None:
+    repository = "likaixin/InstructCoder"
+    revision = "b" * 40
+    snapshot = tmp_path / "datasets--likaixin--InstructCoder" / "snapshots" / revision
+    snapshot.mkdir(parents=True)
+    calls = []
+
+    datasets_module = ModuleType("vllm.benchmarks.datasets")
+
+    def load_dataset(path, *args, **kwargs):
+        calls.append((path, args, kwargs))
+        return "loaded"
+
+    datasets_module.load_dataset = load_dataset
+    benchmarks_module = ModuleType("vllm.benchmarks")
+    benchmarks_module.datasets = datasets_module
+    vllm_module = ModuleType("vllm")
+    vllm_module.benchmarks = benchmarks_module
+    monkeypatch.setitem(sys.modules, "vllm", vllm_module)
+    monkeypatch.setitem(sys.modules, "vllm.benchmarks", benchmarks_module)
+    monkeypatch.setitem(sys.modules, "vllm.benchmarks.datasets", datasets_module)
+    monkeypatch.setenv("VLLM_HUST_HF_DATASET_REPOSITORY", repository)
+    monkeypatch.setenv("VLLM_HUST_HF_DATASET_REVISION", revision)
+    monkeypatch.setenv("VLLM_HUST_HF_DATASET_SNAPSHOT", str(snapshot))
+
+    args = SimpleNamespace(dataset_name="hf", dataset_path=repository)
+    install_hf_dataset_snapshot_redirect(args)
+
+    assert args.dataset_path == repository
+    assert datasets_module.load_dataset(repository, split="train") == "loaded"
+    assert calls == [(str(snapshot.resolve()), (), {"split": "train"})]
+
+
+def test_hf_dataset_redirect_rejects_argument_mismatch(tmp_path, monkeypatch) -> None:
+    revision = "b" * 40
+    snapshot = tmp_path / "snapshots" / revision
+    snapshot.mkdir(parents=True)
+    monkeypatch.setenv("VLLM_HUST_HF_DATASET_REPOSITORY", "owner/dataset")
+    monkeypatch.setenv("VLLM_HUST_HF_DATASET_REVISION", revision)
+    monkeypatch.setenv("VLLM_HUST_HF_DATASET_SNAPSHOT", str(snapshot))
+
+    with pytest.raises(RuntimeError, match="does not match"):
+        install_hf_dataset_snapshot_redirect(
+            SimpleNamespace(dataset_name="hf", dataset_path="other/dataset")
+        )
 
 
 def _fake_llm(*, enforce_eager: bool, mode: str, cudagraph_mode: str) -> object:

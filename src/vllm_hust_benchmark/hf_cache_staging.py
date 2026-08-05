@@ -208,6 +208,9 @@ def stage_flat_export(export: Mapping[str, Any], hub_cache: Path) -> dict[str, A
         raise StagingFailure(f"owned snapshot destination already exists: {snapshot}")
     snapshot.mkdir(parents=True)
     try:
+        ref = repository_cache / "refs" / "main"
+        ref.parent.mkdir(parents=True)
+        ref.write_text(revision, encoding="utf-8")
         for record in export["files"]:
             relative = Path(record["path"])
             destination = snapshot / relative
