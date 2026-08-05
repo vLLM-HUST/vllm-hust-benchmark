@@ -84,6 +84,46 @@ def test_process_ancestor_chain_contains_self_and_init() -> None:
     assert 1 in ancestors
 
 
+def test_host_snapshot_excludes_only_the_orchestrator_ssh_sudo_ancestry() -> None:
+    process_output = (
+        "  1 0 1 /init.scope root init\n"
+        "  10 1 10 /system.slice/sshd.service root sshd: shuhao@notty\n"
+        "  20 10 10 /user.slice/session-7.scope shuhao bash -lc target-a :18080\n"
+        "  30 20 10 /user.slice/session-7.scope root sudo -n python target-a\n"
+        "  40 30 10 /user.slice/session-7.scope root python target-a :18080\n"
+        "  99 1 99 /system.slice/external.service other external target-a :18080\n"
+    )
+    ancestors = orchestrator.snapshot_process_ancestor_pids(process_output, 40)
+    assert ancestors == {1, 10, 20, 30, 40}
+
+    conflicts = orchestrator.benchmark_session_conflicts(
+        tmux_output="",
+        screen_output="",
+        process_output=process_output,
+        target_id="target-a",
+        service_port=18080,
+        excluded_pids=ancestors,
+    )
+    assert conflicts == [
+        "  99 1 99 /system.slice/external.service other external target-a :18080"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("process_output", "message"),
+    [
+        ("1 0 init\n", "absent"),
+        ("40 30 python\n", "incomplete"),
+        ("40 30 python\n30 40 sudo\n", "cycle"),
+    ],
+)
+def test_host_snapshot_ancestor_proof_fails_closed(
+    process_output: str, message: str
+) -> None:
+    with pytest.raises(orchestrator.GateFailure, match=message):
+        orchestrator.snapshot_process_ancestor_pids(process_output, 40)
+
+
 def test_canonical_worker_rule_prefers_worker_then_lowest_pid() -> None:
     records = [
         {"host_pid": 100, "cmdline": "EngineCore"},

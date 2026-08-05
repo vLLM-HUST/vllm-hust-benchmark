@@ -373,6 +373,37 @@ def process_ancestor_pids(pid: int | None = None) -> set[int]:
     return ancestors
 
 
+def snapshot_process_ancestor_pids(process_output: str, pid: int) -> set[int]:
+    """Recompute one PID's ancestry from the exact captured host process table."""
+    parents: dict[int, int] = {}
+    for line in process_output.splitlines():
+        match = re.match(r"\s*(\d+)\s+(\d+)\s+", line)
+        if match:
+            process_pid, parent_pid = (int(value) for value in match.groups())
+            if process_pid in parents and parents[process_pid] != parent_pid:
+                raise GateFailure(
+                    "host process snapshot contains duplicate PID records"
+                )
+            parents[process_pid] = parent_pid
+    if pid not in parents:
+        raise GateFailure(
+            "current orchestrator PID is absent from host process snapshot"
+        )
+
+    ancestors: set[int] = set()
+    current = pid
+    while current > 0:
+        if current in ancestors:
+            raise GateFailure("host process snapshot contains an ancestor cycle")
+        ancestors.add(current)
+        if current == 1:
+            return ancestors
+        if current not in parents:
+            raise GateFailure("host process snapshot has an incomplete ancestor chain")
+        current = parents[current]
+    raise GateFailure("host process snapshot ancestor chain did not reach PID 1")
+
+
 def benchmark_session_conflicts(
     *,
     tmux_output: str,
@@ -1192,7 +1223,9 @@ class StrictRepeatOrchestrator:
             check=False,
         )
         screen = self.root.run(["screen", "-ls"], check=False)
-        processes = self.root.run(["ps", "-eo", "pid=,ppid=,user=,lstart=,args="])
+        processes = self.root.run(
+            ["ps", "-eo", "pid=,ppid=,sid=,cgroup=,user=,lstart=,args="]
+        )
         fd_holders: dict[int, list[int]] = {}
         fuser_raw: dict[str, dict[str, Any]] = {}
         for device in self.devices:
@@ -1250,7 +1283,7 @@ class StrictRepeatOrchestrator:
             process_output=processes.stdout,
             target_id=self.args.target_id,
             service_port=self.args.service_port,
-            excluded_pids=process_ancestor_pids(),
+            excluded_pids=snapshot_process_ancestor_pids(processes.stdout, os.getpid()),
         )
         lease_conflicts = self.lease.conflicts()
         summary = {
