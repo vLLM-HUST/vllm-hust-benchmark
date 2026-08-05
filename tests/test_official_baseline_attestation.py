@@ -429,6 +429,39 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict, dict]:
     return repo, staged, results, entry, target
 
 
+def _relocate_service_ports(
+    repo: Path,
+    staged: Path,
+    results: Path,
+    entry: dict,
+    target: dict,
+    *,
+    port: int,
+) -> None:
+    target["server_parameters"]["port"] = 8000
+    target["workload"]["client_parameters"]["port"] = 8000
+    registry_path = repo / "leaderboard-data" / "official-targets.json"
+    _write(registry_path, {"targets": [target]})
+    (registry_path.parent / "official-targets.sha256").write_text(
+        hashlib.sha256(registry_path.read_bytes()).hexdigest() + "\n",
+        encoding="utf-8",
+    )
+    entry["same_spec"]["resolved_server_parameters"]["port"] = port
+    entry["same_spec"]["resolved_client_parameters"]["port"] = port
+    _write(staged / "run_leaderboard.json", entry)
+    for repeat in sorted(results.glob("repeat-*")):
+        _write(repeat / "submission" / "run_leaderboard.json", entry)
+        strict_path = repeat / "strict_execution_evidence.json"
+        strict = json.loads(strict_path.read_text(encoding="utf-8"))
+        strict["service_port"] = port
+        cleanup_path = repeat / strict["cleanup"]["path"]
+        cleanup = json.loads(cleanup_path.read_text(encoding="utf-8"))
+        cleanup["service_port"] = port
+        _write(cleanup_path, cleanup)
+        strict["cleanup"] = _hashed_record(repeat, cleanup_path)
+        _write(strict_path, strict)
+
+
 def _set_privileged_runtime(results: Path, authorization_source: str | None) -> None:
     security = {
         "schema_version": "owned-runtime-security/v1",
@@ -936,6 +969,60 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
         input_kind="throughput-sample-requests", inputs=[{"prompt": "fixed"}]
     )
     assert len(suite["repeats"][0]["immutable_input_attestation_sha256"]) == 64
+
+
+def test_normalizes_performance_equivalent_loopback_port_relocation(
+    tmp_path: Path,
+) -> None:
+    repo, staged, results, entry, target = _fixture(tmp_path)
+    _relocate_service_ports(repo, staged, results, entry, target, port=18123)
+    output = repo / "submissions" / "target-1"
+
+    attested = attest_completed_baseline(
+        repo,
+        staged,
+        results,
+        output,
+        verified_by="test-review",
+        verified_at="2026-08-02T00:00:00Z",
+    )
+
+    assert attested["same_spec"]["resolved_server_parameters"]["port"] == 8000
+    assert attested["same_spec"]["resolved_client_parameters"]["port"] == 8000
+    normalization = attested["metadata"]["transport_port_normalization"]
+    assert normalization["actual_service_port"] == 18123
+    assert normalization["performance_metrics_modified"] is False
+    suite = json.loads((output / "repeat_suite.json").read_text())
+    assert suite["repeats"][0]["service_port"] == 18123
+    assert suite["repeats"][0]["transport_port_relocation"] == {
+        "official_port": 8000,
+        "actual_service_port": 18123,
+    }
+
+
+def test_rejects_port_relocation_not_bound_to_strict_evidence(
+    tmp_path: Path,
+) -> None:
+    repo, staged, results, entry, target = _fixture(tmp_path)
+    _relocate_service_ports(repo, staged, results, entry, target, port=18123)
+    strict_path = results / "repeat-02" / "strict_execution_evidence.json"
+    strict = json.loads(strict_path.read_text(encoding="utf-8"))
+    strict["service_port"] = 18124
+    cleanup_path = results / "repeat-02" / strict["cleanup"]["path"]
+    cleanup = json.loads(cleanup_path.read_text(encoding="utf-8"))
+    cleanup["service_port"] = 18124
+    _write(cleanup_path, cleanup)
+    strict["cleanup"] = _hashed_record(results / "repeat-02", cleanup_path)
+    _write(strict_path, strict)
+
+    with pytest.raises(ValueError, match="resolved service port"):
+        attest_completed_baseline(
+            repo,
+            staged,
+            results,
+            repo / "submissions" / "target-1",
+            verified_by="test-review",
+        )
 
 
 def test_docker_archive_runtime_uses_config_digest_for_compatibility(
