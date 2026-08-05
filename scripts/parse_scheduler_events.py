@@ -103,6 +103,13 @@ _PREEMPT_MSG_RE = re.compile(
     r"(Sequence group|seq_group)\s+(\d+)\s+is\s+(preempted|preempting)",
     re.IGNORECASE,
 )
+# Cumulative preemption summary from vLLM UtilityVictim scheduler logs.
+# Format: "total_preemptions=N utility_hits=... default_hits=... tokens_freed=..."
+# Each increase in the cumulative count represents one new preemption event.
+_TOTAL_PREEMPTIONS_RE = re.compile(
+    r"total_preemptions\s*[:=]\s*(\d+)",
+    re.IGNORECASE,
+)
 
 # Utility victim selection events
 _VICTIM_SELECT_RE = re.compile(
@@ -344,8 +351,16 @@ def parse_preemption_events(log_text: str) -> list[dict[str, Any]]:
       - ``timestamp``: ISO-8601 string | None
       - ``seq_group_id``: int | None
       - ``event_type``: str (e.g. "preempted", "preempting")
+
+    Supports two log formats:
+      1. Individual preempt messages: "Sequence group N is preempted"
+      2. Cumulative summary lines: "total_preemptions=N ..." (vLLM
+         UtilityVictim scheduler). Each increase in the cumulative count
+         generates one synthetic preempt event with ``seq_group_id=None``
+         and ``event_type="preempted"``.
     """
     events: list[dict[str, Any]] = []
+    prev_total = 0
     for line in log_text.splitlines():
         if m := _PREEMPT_MSG_RE.search(line):
             ts = _parse_log_timestamp(line)
@@ -356,6 +371,20 @@ def parse_preemption_events(log_text: str) -> list[dict[str, Any]]:
                     "event_type": m.group(3).lower(),
                 }
             )
+        elif m := _TOTAL_PREEMPTIONS_RE.search(line):
+            current_total = int(m.group(1))
+            if current_total > prev_total:
+                ts = _parse_log_timestamp(line)
+                # One synthetic event per new preemption
+                for _ in range(current_total - prev_total):
+                    events.append(
+                        {
+                            "timestamp": ts,
+                            "seq_group_id": None,
+                            "event_type": "preempted",
+                        }
+                    )
+                prev_total = current_total
     return events
 
 

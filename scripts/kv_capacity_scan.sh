@@ -214,7 +214,8 @@ wait_for_npu_idle() {
 }
 
 wait_for_server() {
-    local max_wait=600
+    # Allow override via env var for parallel runs where model loading is slower
+    local max_wait=${SERVER_STARTUP_TIMEOUT:-600}
     local waited=0
     while [ $waited -lt $max_wait ]; do
         # Use Python http.client to avoid proxy env var interference
