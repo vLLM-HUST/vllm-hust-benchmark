@@ -207,10 +207,18 @@ def _validate_plan(
             raise PlanError("index entry paths must be strings")
         original_path = Path(original)
         archive_path = Path(archive)
-        if original_path.parent.as_posix() != source_root_rel:
+        if (
+            original_path.as_posix() != original
+            or ".." in original_path.parts
+            or original_path.parent.as_posix() != source_root_rel
+        ):
             raise PlanError(f"unsafe original path: {original!r}")
         expected_archive_parent = Path(archive_root_rel) / archive_date
-        if archive_path.parent != expected_archive_parent:
+        if (
+            archive_path.as_posix() != archive
+            or ".." in archive_path.parts
+            or archive_path.parent != expected_archive_parent
+        ):
             raise PlanError(f"unsafe archive path: {archive!r}")
         if archive_path.name != original_path.name:
             raise PlanError(f"archive name differs from source: {archive!r}")

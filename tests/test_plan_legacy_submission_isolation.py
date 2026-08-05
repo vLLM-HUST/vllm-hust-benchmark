@@ -21,6 +21,8 @@ SPEC.loader.exec_module(MODULE)
 build_or_verify_plan = MODULE.build_or_verify_plan
 main = MODULE.main
 PlanError = MODULE.PlanError
+plan_core = MODULE._plan_core
+plan_fingerprint = MODULE._plan_fingerprint
 
 
 def _write_submission(
@@ -242,4 +244,28 @@ def test_existing_index_requires_untampered_fingerprint(tmp_path: Path) -> None:
     index = _save_index(tmp_path, plan)
 
     with pytest.raises(PlanError, match="plan_sha256 is required"):
+        _build(tmp_path, existing_index=index)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("original_path", "submissions/..", "unsafe original path"),
+        (
+            "archive_path",
+            "archive/legacy/incomplete-evidence/2026-08-05/..",
+            "unsafe archive path",
+        ),
+    ],
+)
+def test_existing_index_rejects_parent_directory_entry(
+    tmp_path: Path, field: str, value: str, message: str
+) -> None:
+    _write_submission(tmp_path, "legacy", historical=False)
+    plan = _build(tmp_path)
+    plan["entries"][0][field] = value
+    plan["plan_sha256"] = plan_fingerprint(plan_core(plan))
+    index = _save_index(tmp_path, plan)
+
+    with pytest.raises(PlanError, match=message):
         _build(tmp_path, existing_index=index)
