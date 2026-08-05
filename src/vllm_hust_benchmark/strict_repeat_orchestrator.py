@@ -864,31 +864,30 @@ class StrictRepeatOrchestrator:
         return argv
 
     def _write_runtime_preflight_contract(self) -> None:
-        if self.runtime_transport != "docker-archive":
-            return
-        if not self.expected_core_commit or not self.expected_backend_commit:
-            raise GateFailure("runtime source commits are not pinned")
-        required_packages = {
-            "datasets",
-            "torch",
-            "torch-npu",
-            "vllm",
-            "vllm-ascend",
-            "xxhash",
-        }
-        if set(self.expected_runtime_packages) != required_packages:
-            raise GateFailure("runtime does not pin the exact six package versions")
-        expected_path = self.repeat_dir / "runtime" / "expected-runtime.json"
-        atomic_json(
-            expected_path,
-            {
-                "schema_version": "strict-owned-runtime-expected/v1",
-                "core_commit": self.expected_core_commit,
-                "backend_commit": self.expected_backend_commit,
-                "packages": self.expected_runtime_packages,
-            },
-        )
-        self.expected_runtime_contract_sha256 = sha256_file(expected_path)
+        if self.runtime_transport == "docker-archive":
+            if not self.expected_core_commit or not self.expected_backend_commit:
+                raise GateFailure("runtime source commits are not pinned")
+            required_packages = {
+                "datasets",
+                "torch",
+                "torch-npu",
+                "vllm",
+                "vllm-ascend",
+                "xxhash",
+            }
+            if set(self.expected_runtime_packages) != required_packages:
+                raise GateFailure("runtime does not pin the exact six package versions")
+            expected_path = self.repeat_dir / "runtime" / "expected-runtime.json"
+            atomic_json(
+                expected_path,
+                {
+                    "schema_version": "strict-owned-runtime-expected/v1",
+                    "core_commit": self.expected_core_commit,
+                    "backend_commit": self.expected_backend_commit,
+                    "packages": self.expected_runtime_packages,
+                },
+            )
+            self.expected_runtime_contract_sha256 = sha256_file(expected_path)
         identity_directory = self.host_container_identity_path.parent
         identity_directory.mkdir(parents=True, exist_ok=True, mode=0o755)
         for candidate in (
@@ -1443,9 +1442,7 @@ class StrictRepeatOrchestrator:
 
         if not self.ownership:
             return True
-        current_by_device = {
-            device: compute.get(device, []) for device in self.devices
-        }
+        current_by_device = {device: compute.get(device, []) for device in self.devices}
         if all(not current for current in current_by_device.values()):
             return False
         for device in self.devices:
@@ -1616,9 +1613,7 @@ class StrictRepeatOrchestrator:
             self.root.run(["docker", "stop", "--time", "30", self.container_id])
         remaining = self.root.run(["docker", "inspect", self.container_id], check=False)
         if remaining.returncode == 0:
-            removal = self.root.run(
-                ["docker", "rm", self.container_id], check=False
-            )
+            removal = self.root.run(["docker", "rm", self.container_id], check=False)
             if removal.returncode != 0:
                 confirmation = self.root.run(
                     ["docker", "inspect", self.container_id], check=False

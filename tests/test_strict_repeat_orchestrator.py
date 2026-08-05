@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -157,9 +158,7 @@ def test_runtime_sample_allows_all_owned_pids_to_leave_at_terminal_transition(
     instance.repeat_dir = tmp_path
     instance.devices = [0]
     instance.ownership = [{"host_pid": 1732754, "physical_npu_id": 0}]
-    instance.all_owned_processes = [
-        {"host_pid": 1732754, "physical_npu_id": 0}
-    ]
+    instance.all_owned_processes = [{"host_pid": 1732754, "physical_npu_id": 0}]
 
     assert instance._runtime_sample(2) is False
 
@@ -184,7 +183,9 @@ def test_terminal_owned_pid_absence_rejects_a_still_active_command() -> None:
 
     instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
     instance.args = SimpleNamespace(sample_interval_seconds=1.0)
-    with pytest.raises(orchestrator.GateFailure, match="remained active for 15 seconds"):
+    with pytest.raises(
+        orchestrator.GateFailure, match="remained active for 15 seconds"
+    ):
         instance._confirm_terminal_owned_pid_absence(ActiveProcess())
 
 
@@ -396,6 +397,28 @@ def test_docker_create_is_owned_ephemeral_and_scoped(tmp_path: Path) -> None:
     entrypoint_index = argv.index("--entrypoint")
     assert argv[entrypoint_index + 1] == instance.args.command[0]
     assert argv[image_index + 1 :] == instance.args.command[1:]
+
+
+def test_registry_runtime_prepares_owned_container_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    instance = _orchestrator_stub(tmp_path)
+    original_lstat = Path.lstat
+
+    def root_safe_lstat(path: Path) -> os.stat_result:
+        values = list(original_lstat(path))
+        values[0] &= ~0o022
+        values[4] = 0
+        return os.stat_result(values)
+
+    monkeypatch.setattr(Path, "lstat", root_safe_lstat)
+
+    instance._write_runtime_preflight_contract()
+
+    assert json.loads(instance.host_container_identity_path.read_text()) == {
+        "startup_instance_id": instance.startup_id,
+        "container_id": None,
+    }
 
 
 def test_docker_create_preserves_runner_argument_boundaries(tmp_path: Path) -> None:
@@ -814,9 +837,7 @@ def _stopped_owned_container(instance) -> orchestrator.CommandResult:
                 {
                     "Id": instance.container_id,
                     "Config": {
-                        "Labels": {
-                            "vllm-hust.strict-startup-id": instance.startup_id
-                        }
+                        "Labels": {"vllm-hust.strict-startup-id": instance.startup_id}
                     },
                     "State": {"Running": False},
                 }
