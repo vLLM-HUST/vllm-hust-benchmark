@@ -1,0 +1,121 @@
+{
+  "schema_version": "issue-146-retest-report/v1",
+  "generated_at": "2026-08-05T15:13:25Z",
+  "source_dir": "/data/issue146-retest-results",
+  "engine_commits": [
+    "2206f1f7b7",
+    "7a63f81e86",
+    "83cf83ff20"
+  ],
+  "workloads": [
+    "sonnet-throughput",
+    "random-latency"
+  ],
+  "artifact_class": "diagnostic_historical_retest",
+  "official_target": false,
+  "max_model_len_note": "Re-test used max_model_len=30720 (original backfill value); official fixed-target spec requires 32768.",
+  "results_summary": {
+    "sonnet-throughput": {
+      "2206f1f7b7": {
+        "median": 2891.79,
+        "min": 2849.1,
+        "max": 2930.45,
+        "count": 3,
+        "values": [
+          2849.1,
+          2891.79,
+          2930.45
+        ]
+      },
+      "7a63f81e86": {
+        "median": 2898.8,
+        "min": 2889.44,
+        "max": 2929.7,
+        "count": 3,
+        "values": [
+          2929.7,
+          2889.44,
+          2898.8
+        ]
+      },
+      "83cf83ff20": {
+        "median": 2880.05,
+        "min": 2872.5,
+        "max": 2895.22,
+        "count": 3,
+        "values": [
+          2880.05,
+          2895.22,
+          2872.5
+        ]
+      }
+    },
+    "random-latency": {
+      "2206f1f7b7": {
+        "median": 6030.23,
+        "min": 6008.92,
+        "max": 6047.34,
+        "count": 3,
+        "values": [
+          6030.23,
+          6047.34,
+          6008.92
+        ]
+      },
+      "7a63f81e86": {
+        "median": 6025.93,
+        "min": 5998.95,
+        "max": 6047.33,
+        "count": 3,
+        "values": [
+          6047.33,
+          6025.93,
+          5998.95
+        ]
+      },
+      "83cf83ff20": {
+        "median": 6023.95,
+        "min": 6004.35,
+        "max": 6078.74,
+        "count": 3,
+        "values": [
+          6078.74,
+          6023.95,
+          6004.35
+        ]
+      }
+    }
+  },
+  "regression_analysis": {
+    "sonnet-throughput": {
+      "base_commit": "2206f1f7b7",
+      "head_commit": "7a63f81e86",
+      "base_median": 2891.79,
+      "head_median": 2898.8,
+      "delta_pct": 0.24,
+      "threshold_pct": 10.0,
+      "regression_reproducible": false,
+      "conclusion": "no_regression_or_noise",
+      "evidence_sufficient": true,
+      "evidence_reason": ""
+    },
+    "random-latency": {
+      "base_commit": "2206f1f7b7",
+      "head_commit": "83cf83ff20",
+      "base_median": 6030.23,
+      "head_median": 6023.95,
+      "delta_pct": -0.1,
+      "threshold_pct": 20.0,
+      "regression_reproducible": false,
+      "conclusion": "no_regression_or_noise",
+      "evidence_sufficient": true,
+      "evidence_reason": ""
+    },
+    "overall": {
+      "any_regression_confirmed": false,
+      "any_evidence_incomplete": false,
+      "action": "no_action_diagnostic_only",
+      "issue_146_resolution": "No reproducible regression. Results remain diagnostic/historical re-test artifacts and are NOT published as official leaderboard targets (max_model_len=30720 differs from the official 32768)."
+    }
+  }
+}
