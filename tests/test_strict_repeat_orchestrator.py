@@ -730,6 +730,47 @@ class _CleanupRoot:
         return orchestrator.CommandResult("", "", 0)
 
 
+class _CleanupRaceRoot:
+    prefix: list[str] = []
+
+    def __init__(
+        self,
+        inspect_results: list[orchestrator.CommandResult],
+        removal: orchestrator.CommandResult,
+    ) -> None:
+        self.inspect_results = iter(inspect_results)
+        self.removal = removal
+        self.calls: list[list[str]] = []
+
+    def run(self, argv, *, check=True):
+        self.calls.append(list(argv))
+        if argv[:2] == ["docker", "inspect"]:
+            return next(self.inspect_results)
+        if argv[:2] == ["docker", "rm"]:
+            return self.removal
+        return orchestrator.CommandResult("", "", 0)
+
+
+def _stopped_owned_container(instance) -> orchestrator.CommandResult:
+    return orchestrator.CommandResult(
+        json.dumps(
+            [
+                {
+                    "Id": instance.container_id,
+                    "Config": {
+                        "Labels": {
+                            "vllm-hust.strict-startup-id": instance.startup_id
+                        }
+                    },
+                    "State": {"Running": False},
+                }
+            ]
+        ),
+        "",
+        0,
+    )
+
+
 def test_cleanup_refuses_container_without_owned_label(tmp_path: Path) -> None:
     instance = _orchestrator_stub(tmp_path)
     instance.container_id = "c" * 64
@@ -744,6 +785,42 @@ def test_cleanup_refuses_container_without_owned_label(tmp_path: Path) -> None:
         instance._cleanup_owned_container(allow_stop=True)
     assert not any(call[:2] == ["docker", "stop"] for call in instance.root.calls)
     assert not any(call[:2] == ["docker", "rm"] for call in instance.root.calls)
+
+
+def test_cleanup_accepts_auto_remove_race_after_confirming_absence(
+    tmp_path: Path,
+) -> None:
+    instance = _orchestrator_stub(tmp_path)
+    instance.container_id = "c" * 64
+    present = _stopped_owned_container(instance)
+    absent = orchestrator.CommandResult("", "No such container", 1)
+    instance.root = _CleanupRaceRoot(
+        [present, present, absent],
+        orchestrator.CommandResult("", "No such container", 1),
+    )
+
+    instance._cleanup_owned_container(allow_stop=True)
+
+    assert sum(call[:2] == ["docker", "inspect"] for call in instance.root.calls) == 3
+    assert sum(call[:2] == ["docker", "rm"] for call in instance.root.calls) == 1
+
+
+def test_cleanup_rejects_failed_remove_when_owned_container_still_exists(
+    tmp_path: Path,
+) -> None:
+    instance = _orchestrator_stub(tmp_path)
+    instance.container_id = "c" * 64
+    present = _stopped_owned_container(instance)
+    instance.root = _CleanupRaceRoot(
+        [present, present, present],
+        orchestrator.CommandResult("", "remove failed", 1),
+    )
+
+    with pytest.raises(
+        orchestrator.GateFailure,
+        match="removal failed and container still exists",
+    ):
+        instance._cleanup_owned_container(allow_stop=True)
 
 
 def test_cli_rejects_snapshot_interval_below_fifteen(tmp_path: Path) -> None:

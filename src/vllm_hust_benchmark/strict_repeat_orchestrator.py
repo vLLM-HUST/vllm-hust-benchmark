@@ -1596,7 +1596,17 @@ class StrictRepeatOrchestrator:
             self.root.run(["docker", "stop", "--time", "30", self.container_id])
         remaining = self.root.run(["docker", "inspect", self.container_id], check=False)
         if remaining.returncode == 0:
-            self.root.run(["docker", "rm", self.container_id])
+            removal = self.root.run(
+                ["docker", "rm", self.container_id], check=False
+            )
+            if removal.returncode != 0:
+                confirmation = self.root.run(
+                    ["docker", "inspect", self.container_id], check=False
+                )
+                if confirmation.returncode == 0:
+                    raise GateFailure(
+                        "owned container removal failed and container still exists"
+                    )
 
     def _cleanup_owned_identity_source(self) -> None:
         path = self.host_container_identity_path
