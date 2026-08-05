@@ -49,6 +49,9 @@ REQUIRED_TIERING_CONFIGS = ["hbm-only", "tiering-disabled", "tiering-enabled"]
 TIERING_CONFIGS = REQUIRED_TIERING_CONFIGS
 
 # Provenance fields that must be present for evidence to be admissible.
+# Per PR #152 review: model_revision alone (config.json SHA256) does NOT
+# identify actual weights; model_weight_fingerprint captures the real weight
+# file hashes. engine_patch_sha256 + engine_patch_file bind the dirty patch.
 REQUIRED_PROVENANCE_FIELDS = [
     "engine_commit",
     "plugin_commit",
@@ -56,6 +59,7 @@ REQUIRED_PROVENANCE_FIELDS = [
     "driver_version",
     "torch_npu_version",
     "model_revision",
+    "model_weight_fingerprint",
     "resolved_parameters",
     "actual_kv_bytes",
 ]

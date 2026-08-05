@@ -58,6 +58,7 @@ def _make_provenance():
         "driver_version": "24.1.0",
         "torch_npu_version": "2.5.0",
         "model_revision": "abc789xyz",
+        "model_weight_fingerprint": "sha256:deadbeefcafef00d",
         "resolved_parameters": {
             "gpu_memory_utilization": "0.60",
             "max_model_len": "32768",
@@ -1321,6 +1322,22 @@ class TestProvenancePlaceholderRejection:
         valid, missing = analyze_mod._validate_provenance(provenance)
         assert valid is False
         assert "model_revision" in missing
+
+    def test_missing_weight_fingerprint_rejected(self, analyze_mod):
+        """Per PR #152 review: missing model_weight_fingerprint → blocked."""
+        provenance = _make_provenance()
+        del provenance["model_weight_fingerprint"]
+        valid, missing = analyze_mod._validate_provenance(provenance)
+        assert valid is False
+        assert "model_weight_fingerprint" in missing
+
+    def test_placeholder_weight_fingerprint_rejected(self, analyze_mod):
+        """'not available' weight fingerprint → field is missing."""
+        provenance = _make_provenance()
+        provenance["model_weight_fingerprint"] = "not available"
+        valid, missing = analyze_mod._validate_provenance(provenance)
+        assert valid is False
+        assert "model_weight_fingerprint" in missing
 
     def test_case_insensitive_placeholder_rejected(self, analyze_mod):
         """'Unknown' (capitalized) → field is missing."""

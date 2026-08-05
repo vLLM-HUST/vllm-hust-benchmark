@@ -347,19 +347,44 @@ build_bench_cmd() {
 
 generate_env_manifest() {
     # Write env-manifest.json with provenance fields for evidence admission.
+    # Also saves dirty engine/plugin patches and a weight fingerprint next to
+    # the manifest so raw evidence is self-contained and reproducible.
     local output_file="$1"
     local server_log="${2:-}"
     local gpu_util="${3:-}"
     local kv_transfer_config="${4:-}"
     local max_model_len="${5:-32768}"
 
-    local engine_commit plugin_commit cann_version driver_version torch_npu_version model_revision
-    local engine_patch_md5 plugin_patch_md5
+    local manifest_dir
+    manifest_dir=$(dirname "$output_file")
+
+    local engine_commit plugin_commit cann_version driver_version torch_npu_version
+    local engine_patch_md5 plugin_patch_md5 engine_patch_sha256 plugin_patch_sha256
+    local model_revision model_weight_fingerprint
     engine_commit=$(cd "$VLLM_HUST_REPO" 2>/dev/null && git rev-parse HEAD 2>/dev/null || echo "unknown")
     plugin_commit=$(cd "$ASCEND_REPO" 2>/dev/null && git rev-parse HEAD 2>/dev/null || echo "unknown")
-    # Patch identity: md5 of git diff HEAD, per project provenance contract.
-    engine_patch_md5=$(cd "$VLLM_HUST_REPO" 2>/dev/null && git diff HEAD 2>/dev/null | md5sum | awk '{print $1}' || echo "none")
-    plugin_patch_md5=$(cd "$ASCEND_REPO" 2>/dev/null && git diff HEAD 2>/dev/null | md5sum | awk '{print $1}' || echo "none")
+
+    # Dirty patch: save full patch content (not just md5) so raw evidence is
+    # self-contained and reproducible. Patch files live next to env-manifest.
+    local engine_patch_file="$manifest_dir/engine.patch"
+    local plugin_patch_file="$manifest_dir/plugin.patch"
+    if (cd "$VLLM_HUST_REPO" 2>/dev/null && git diff HEAD 2>/dev/null) > "$engine_patch_file"; then
+        engine_patch_md5=$(md5sum "$engine_patch_file" 2>/dev/null | awk '{print $1}' || echo "none")
+        engine_patch_sha256=$(sha256sum "$engine_patch_file" 2>/dev/null | awk '{print $1}' || echo "none")
+    else
+        engine_patch_md5="none"
+        engine_patch_sha256="none"
+        echo "" > "$engine_patch_file"
+    fi
+    if (cd "$ASCEND_REPO" 2>/dev/null && git diff HEAD 2>/dev/null) > "$plugin_patch_file"; then
+        plugin_patch_md5=$(md5sum "$plugin_patch_file" 2>/dev/null | awk '{print $1}' || echo "none")
+        plugin_patch_sha256=$(sha256sum "$plugin_patch_file" 2>/dev/null | awk '{print $1}' || echo "none")
+    else
+        plugin_patch_md5="none"
+        plugin_patch_sha256="none"
+        echo "" > "$plugin_patch_file"
+    fi
+
     # CANN version: parse install.info (version.cfg does not exist on CANN 9.0.0).
     cann_version=$(grep '^version=' /usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info 2>/dev/null \
         | cut -d= -f2 | tr -d '[:space:]' \
@@ -385,16 +410,52 @@ generate_env_manifest() {
         torch_npu_version="unknown"
     fi
 
-    # Model revision: use git HEAD if model is a git repo, otherwise use the
-    # sha256 of config.json as a content-based revision identifier. This is
-    # NOT "not available" — it provides a traceable fingerprint of the exact
-    # model weights/config used.
-    if [ -d "$MODEL_PATH/.git" ]; then
+    # Model revision: prefer a real HuggingFace snapshot commit hash when
+    # available (the authoritative weight identity). Fall back to git HEAD if
+    # the model dir is itself a git repo. Only when neither is available do we
+    # record a content-based fingerprint of the actual weight files — config.json
+    # SHA256 alone does NOT identify weights and is no longer used as the
+    # primary revision.
+    model_revision="not available"
+    model_weight_fingerprint="not available"
+    # 1. HuggingFace hub snapshot revision (refs/main under cache layout)
+    local hf_ref
+    for hf_ref in "$MODEL_PATH/refs/main" "$MODEL_PATH/.cache/refs/main"; do
+        if [ -f "$hf_ref" ]; then
+            model_revision=$(cat "$hf_ref" 2>/dev/null | tr -d '[:space:]')
+            break
+        fi
+    done
+    # 2. Git repo at model path
+    if [ "$model_revision" = "not available" ] && [ -d "$MODEL_PATH/.git" ]; then
         model_revision=$(cd "$MODEL_PATH" 2>/dev/null && git rev-parse HEAD 2>/dev/null || echo "not available")
-    elif [ -f "$MODEL_PATH/config.json" ]; then
-        model_revision="sha256:$(sha256sum "$MODEL_PATH/config.json" 2>/dev/null | awk '{print $1}')"
-    else
-        model_revision="not available"
+    fi
+    # 3. Content fingerprint of actual weight files (.safetensors / .bin).
+    # This identifies the real weights, not just config.json.
+    if [ -d "$MODEL_PATH" ]; then
+        model_weight_fingerprint=$("$PYTHON" - "$MODEL_PATH" <<'WPEOF' 2>/dev/null || echo "not available")
+import hashlib, os, sys
+model_path = sys.argv[1]
+entries = []
+for fname in sorted(os.listdir(model_path)):
+    if fname.endswith((".safetensors", ".bin", ".pt")):
+        fpath = os.path.join(model_path, fname)
+        if not os.path.isfile(fpath):
+            continue
+        h = hashlib.sha256()
+        with open(fpath, "rb") as f:
+            for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                h.update(chunk)
+        entries.append(f"{fname}:{h.hexdigest()}")
+if entries:
+    # Combine all weight file hashes into one fingerprint
+    combined = hashlib.sha256("\n".join(entries).encode()).hexdigest()
+    print(f"sha256:{combined}")
+    print(f"files:{','.join(e.split(':')[0] for e in entries)}", file=sys.stderr)
+else:
+    print("not available")
+WPEOF
+        )
     fi
 
     # Parse actual KV bytes from server log
@@ -426,10 +487,13 @@ PYEOF
     PLUGIN_COMMIT="$plugin_commit" \
     ENGINE_PATCH_MD5="$engine_patch_md5" \
     PLUGIN_PATCH_MD5="$plugin_patch_md5" \
+    ENGINE_PATCH_SHA256="$engine_patch_sha256" \
+    PLUGIN_PATCH_SHA256="$plugin_patch_sha256" \
     CANN_VERSION="$cann_version" \
     DRIVER_VERSION="$driver_version" \
     TORCH_NPU_VERSION="$torch_npu_version" \
     MODEL_REVISION="$model_revision" \
+    MODEL_WEIGHT_FINGERPRINT="$model_weight_fingerprint" \
     GPU_UTIL="$gpu_util" \
     MAX_MODEL_LEN="$max_model_len" \
     KV_TRANSFER_JSON="$kv_transfer_json" \
@@ -460,10 +524,15 @@ manifest = {
     "plugin_commit": env_str("PLUGIN_COMMIT"),
     "engine_patch_md5": env_str("ENGINE_PATCH_MD5", "none"),
     "plugin_patch_md5": env_str("PLUGIN_PATCH_MD5", "none"),
+    "engine_patch_sha256": env_str("ENGINE_PATCH_SHA256", "none"),
+    "plugin_patch_sha256": env_str("PLUGIN_PATCH_SHA256", "none"),
+    "engine_patch_file": "engine.patch",
+    "plugin_patch_file": "plugin.patch",
     "cann_version": env_str("CANN_VERSION"),
     "driver_version": env_str("DRIVER_VERSION"),
     "torch_npu_version": env_str("TORCH_NPU_VERSION"),
     "model_revision": env_str("MODEL_REVISION", "not available"),
+    "model_weight_fingerprint": env_str("MODEL_WEIGHT_FINGERPRINT", "not available"),
     "resolved_parameters": {
         "gpu_memory_utilization": env_str("GPU_UTIL"),
         "max_model_len": env_str("MAX_MODEL_LEN"),
