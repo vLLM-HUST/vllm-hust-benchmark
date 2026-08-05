@@ -83,6 +83,12 @@ def test_staged_exact_revisions_resolve_offline(tmp_path: Path) -> None:
         == staged_dataset["snapshot_path"]
     )
     assert (model_source / "config.json").read_bytes() == b"{}\n"
+    staged_config_metadata = (
+        Path(staged_model["snapshot_path"])
+        / ".cache/huggingface/download/config.json.metadata"
+    )
+    assert staged_config_metadata.is_symlink()
+    assert staged_config_metadata.read_text().splitlines()[0] == MODEL_REVISION
 
 
 def test_huggingface_file_is_hash_verified_and_bound_without_network(

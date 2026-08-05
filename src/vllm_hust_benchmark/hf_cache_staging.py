@@ -213,6 +213,13 @@ def stage_flat_export(export: Mapping[str, Any], hub_cache: Path) -> dict[str, A
             destination = snapshot / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.symlink_to(source / relative)
+            metadata_relative = Path(".cache/huggingface/download") / relative
+            metadata_destination = metadata_relative.with_name(
+                metadata_relative.name + ".metadata"
+            )
+            staged_metadata = snapshot / metadata_destination
+            staged_metadata.parent.mkdir(parents=True, exist_ok=True)
+            staged_metadata.symlink_to(source / metadata_destination)
     except Exception:
         # The caller supplies a fresh owned scratch root; leave partial state visible.
         raise
