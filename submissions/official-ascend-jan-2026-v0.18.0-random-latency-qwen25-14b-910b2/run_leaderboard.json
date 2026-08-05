@@ -1,5 +1,5 @@
 {
-  "entry_id": "cd850c8b-7743-413a-ad5f-e4924d883e2c",
+  "entry_id": "7edc9962-a259-4233-9f36-f5202aafbe21",
   "engine": "vllm",
   "engine_version": "0.18.0",
   "config_type": "single_gpu",
@@ -27,13 +27,17 @@
     "output_length": 128,
     "batch_size": 8,
     "concurrent_requests": null,
-    "dataset": null
+    "dataset": null,
+    "input_token_distribution": null,
+    "output_token_distribution": null,
+    "cohort_setting_signature": null,
+    "arrival_transform": null
   },
   "metrics": {
-    "ttft_ms": 84910.6170389879,
+    "ttft_ms": 5789.500359003432,
     "tbt_ms": null,
     "throughput_tps": null,
-    "peak_mem_mb": 0,
+    "peak_mem_mb": 41533,
     "error_rate": 0.0
   },
   "constraints": {
@@ -76,19 +80,19 @@
   },
   "environment": {
     "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
-    "python_version": "3.11.15",
-    "pytorch_version": null,
+    "python_version": "3.11.14",
+    "pytorch_version": "2.9.0+cpu",
     "cuda_version": null,
-    "cann_version": null,
-    "driver_version": null
+    "cann_version": "8.5.1",
+    "driver_version": "26.0.rc1"
   },
   "metadata": {
-    "submitted_at": "2026-08-02T14:21:02Z",
+    "submitted_at": "2026-08-05T13:51:31Z",
     "submitter": "official-ascend-baseline",
     "data_source": "reference-vllm-ascend-benchmark",
     "engine": "vllm",
     "engine_version": "0.18.0",
-    "reproducible_cmd": null,
+    "reproducible_cmd": "GOAL_BASELINE_ENV_PREFIX=<env-prefix> bash scripts/run-official-ascend-goal-baseline.sh docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
     "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
     "github_user": null,
     "github_commit_url": "https://github.com/vllm-project/vllm-ascend/commit/e18643f8a4d5bd9990727654318ad069ea0b56e2",
@@ -101,10 +105,10 @@
     "changelog_url": null,
     "notes": null,
     "verified": true,
-    "idempotency_key": "e597f6cd44c779c9c88f56f72a150eb2b6d2f9ab6df56ac66cc1ae13d3872b3a",
+    "idempotency_key": "b8f668b7c5853ca1522586d4f52cdc2afa804f22c0f7092ab1a38c0a6ea55ef8",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
-      "python": null,
+      "python": "/usr/local/python3.11.14/bin/python",
       "engine": {
         "repository": "vllm-project/vllm",
         "ref": "v0.18.0",
@@ -118,12 +122,12 @@
       }
     },
     "workload_config_contract": "explicit-effective/v1",
-    "verified_at": "2026-08-02T22:15:50.867858Z",
-    "verified_by": "Codex local Ascend evidence review 2026-08-02",
+    "verified_at": "2026-08-05T14:49:50.034340Z",
+    "verified_by": "codex-strict-baseline-thread-019fb179",
     "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
-    "target_version": "1.2.0",
+    "target_version": "1.4.0",
     "profile_id": "core-text",
-    "target_registry_sha256": "3ce844f44d9dfb097afa8d146cd42e9b57cfd9b26ccca2c9900b46802640706d",
+    "target_registry_sha256": "272bb6b4c1cac8d358813fdd3c485038284ddd4afb1f8871d1893fa5ac0259ea",
     "verification_attestation": {
       "schema_version": "official-baseline-attestation/v1",
       "evidence": "repeat_suite.json",
@@ -147,12 +151,12 @@
     "node_count": 1,
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
+      "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
       "gpu_memory_utilization": 0.6,
-      "enforce_eager": "",
       "trust_remote_code": "",
       "disable_log_stats": "",
       "max_model_len": 32768,
-      "model": "/data/shared_models/Qwen2.5-14B-Instruct",
+      "model": "/workspace/vllm-hust-benchmark/.benchmarks/strict-final-20260805/random-latency/upstream/repeat-03/hf-cache-staging/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
       "dtype": "float16"
     },
     "resolved_client_parameters": {
@@ -162,8 +166,8 @@
       "batch_size": 8,
       "num_iters_warmup": 10,
       "num_iters": 30,
-      "model": "/data/shared_models/Qwen2.5-14B-Instruct"
+      "model": "/workspace/vllm-hust-benchmark/.benchmarks/strict-final-20260805/random-latency/upstream/repeat-03/hf-cache-staging/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
     },
-    "resolved_spec_hash": "3e81e3e00639f882933d45f5420a8e0813225bc6d7370a6f318cb207417c8f6a"
+    "resolved_spec_hash": "6d96c83373eca2d681523f8b4905f82e302a22a57dc09df6787d63c1d238456a"
   }
 }
