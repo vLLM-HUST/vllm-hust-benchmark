@@ -1,5 +1,5 @@
 {
-  "entry_id": "35491f66-2a01-41c9-aa19-a98ac8d7689a",
+  "entry_id": "2a6c102d-2111-43fa-a652-5d39266a1247",
   "engine": "vllm",
   "engine_version": "0.18.0",
   "config_type": "single_gpu",
@@ -27,14 +27,23 @@
     "output_length": 256,
     "batch_size": null,
     "concurrent_requests": null,
-    "dataset": "custom"
+    "dataset": "custom",
+    "input_token_distribution": null,
+    "output_token_distribution": null,
+    "cohort_setting_signature": null,
+    "arrival_transform": null
   },
   "metrics": {
-    "ttft_ms": 2180.945529973542,
-    "tbt_ms": 119.79356728267044,
-    "throughput_tps": 132.50960330087239,
-    "peak_mem_mb": 0,
-    "error_rate": 0.0
+    "ttft_ms": 2000.4359861122794,
+    "tbt_ms": 47.76497213361104,
+    "throughput_tps": 189.3056742916962,
+    "peak_mem_mb": 41360,
+    "error_rate": 0.0,
+    "request_throughput_rps": 0.7394752902019383,
+    "e2e_latency_mean_ms": null,
+    "e2e_latency_p50_ms": null,
+    "e2e_latency_p95_ms": null,
+    "e2e_latency_p99_ms": null
   },
   "constraints": {
     "scenario_source": "vllm-benchmark",
@@ -53,12 +62,12 @@
       "typical_throughput_ratio_vs_baseline": null,
       "typical_ttft_reduction_pct_vs_baseline": null,
       "typical_tpot_reduction_pct_vs_baseline": null,
-      "long_context_length": null,
+      "long_context_length": 32768,
       "long_context_throughput_stable": true,
       "long_context_ttft_p95_ms": null,
-      "long_context_ttft_p99_ms": 9616.008863288444,
+      "long_context_ttft_p99_ms": 9549.132988774218,
       "long_context_tpot_p95_ms": null,
-      "long_context_tpot_p99_ms": 149.17775476921136,
+      "long_context_tpot_p99_ms": 77.87271295805631,
       "long_context_ttft_p95_stable": null,
       "long_context_ttft_p99_stable": true,
       "long_context_tpot_p95_stable": null,
@@ -75,22 +84,22 @@
     "benchmark": "0.1.0"
   },
   "environment": {
-    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.35",
-    "python_version": "3.11.15",
-    "pytorch_version": null,
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.11.14",
+    "pytorch_version": "2.9.0+cpu",
     "cuda_version": null,
-    "cann_version": null,
-    "driver_version": null
+    "cann_version": "8.5.1",
+    "driver_version": "26.0.rc1"
   },
   "metadata": {
-    "submitted_at": "2026-07-02T02:01:46Z",
+    "submitted_at": "2026-08-05T14:34:31Z",
     "submitter": "official-ascend-baseline",
     "data_source": "reference-vllm-ascend-benchmark",
     "engine": "vllm",
     "engine_version": "0.18.0",
-    "reproducible_cmd": null,
+    "reproducible_cmd": "GOAL_BASELINE_ENV_PREFIX=<env-prefix> bash scripts/run-official-ascend-goal-baseline.sh docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
     "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
-    "github_user": "Shuhao Zhang (Tony)",
+    "github_user": null,
     "github_commit_url": "https://github.com/vllm-project/vllm-ascend/commit/e18643f8a4d5bd9990727654318ad069ea0b56e2",
     "github_repository": "vllm-project/vllm-ascend",
     "github_ref": "v0.18.0",
@@ -100,11 +109,11 @@
     "release_date": null,
     "changelog_url": null,
     "notes": null,
-    "verified": null,
-    "idempotency_key": "4d068fa0c6b7169d2044fd0118d3e0611a1ade820e9d03dab92ef12853da51fe",
+    "verified": true,
+    "idempotency_key": "ba1c29c8b24323ac6633864e1172d3c7ceb5e832f4a88c5de1a56aea2355ce8b",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
-      "python": null,
+      "python": "/usr/local/python3.11.14/bin/python",
       "engine": {
         "repository": "vllm-project/vllm",
         "ref": "v0.18.0",
@@ -116,13 +125,34 @@
         "ref": "v0.18.0",
         "commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
       }
+    },
+    "workload_config_contract": "explicit-effective/v1",
+    "transport_port_normalization": {
+      "official_port": 8000,
+      "actual_service_port": 18103,
+      "scope": "submission-same-spec-only",
+      "performance_metrics_modified": false,
+      "raw_execution_evidence_preserved": true,
+      "reason": "loopback service binding relocation"
+    },
+    "verified_at": "2026-08-05T16:25:58.817159Z",
+    "verified_by": "strict-baseline-review-2026-08-06",
+    "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+    "target_version": "1.4.0",
+    "profile_id": "core-text",
+    "target_registry_sha256": "272bb6b4c1cac8d358813fdd3c485038284ddd4afb1f8871d1893fa5ac0259ea",
+    "verification_attestation": {
+      "schema_version": "official-baseline-attestation/v1",
+      "evidence": "repeat_suite.json",
+      "successful_repeats": 3,
+      "selected_repeat": "repeat-01"
     }
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
     "spec_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
     "spec_label": "Official Ascend Jan 2026 agent-research online baseline for vllm-hust goal tracking",
-    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
+    "spec_source": "/workspace/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
     "scenario": "agent-research-online",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
@@ -132,16 +162,17 @@
     "hardware_chip_model": "910B2",
     "chip_count": 1,
     "node_count": 1,
-    "resolved_spec_hash": "5af9fe0419bbce7865b546a224fbc6e5089567f2751de5e0171745c215653bec",
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
-      "enforce_eager": "",
+      "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
       "trust_remote_code": "",
       "disable_log_stats": "",
       "disable_log_requests": "",
       "host": "0.0.0.0",
       "port": 8000,
-      "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+      "gpu_memory_utilization": 0.6,
+      "max_model_len": 32768,
+      "model": "/workspace/vllm-hust-benchmark/.benchmarks/strict-final-20260805/agent-research/upstream/repeat-01/hf-cache-staging/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
       "dtype": "float16"
     },
     "resolved_client_parameters": {
@@ -153,7 +184,8 @@
       "request_rate": 1,
       "host": "127.0.0.1",
       "port": 8000,
-      "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct"
-    }
+      "model": "/workspace/vllm-hust-benchmark/.benchmarks/strict-final-20260805/agent-research/upstream/repeat-01/hf-cache-staging/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
+    },
+    "resolved_spec_hash": "6c930692ae655076214511b1680d96483bc4f28e3d9dfe2d6eba2f55beb72983"
   }
 }

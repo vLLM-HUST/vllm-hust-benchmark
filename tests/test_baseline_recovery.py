@@ -11,12 +11,13 @@ from vllm_hust_benchmark.baseline_recovery import build_recovery_audit
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_current_baselines_require_rerun_after_input_identity_revision() -> None:
+def test_attested_baselines_reduce_the_strict_rerun_queue() -> None:
     report = build_recovery_audit(REPO_ROOT, generated_at="2026-08-02T00:00:00Z")
     summary = report["summary"]
     assert summary["scanned"] == 19
     assert summary["active_public_candidates"] == 9
-    assert summary["recoverable"] == 0
+    assert summary["recoverable"] == 7
+    assert summary["rerun_required"] == 2
     assert summary["recoverable"] + summary["rerun_required"] == 9
     assert summary["provisional_or_specialty"] == 10
     assert len(report["rerun_specs"]) == summary["rerun_required"]
@@ -57,7 +58,7 @@ def test_visionarena_remains_blocked_by_max_model_len_contract() -> None:
     assert "verified-attestation-missing" in record["reasons"]
 
 
-def test_manifest_is_audited_but_does_not_imply_verification() -> None:
+def test_attested_random_online_binds_independent_repeat_evidence() -> None:
     report = build_recovery_audit(REPO_ROOT, generated_at="2026-08-02T00:00:00Z")
     record = next(
         item
@@ -65,8 +66,9 @@ def test_manifest_is_audited_but_does_not_imply_verification() -> None:
         if "random-online-qwen25-14b-910b2" in item["target_id"]
     )
     assert record["evidence"]["referenced_by_manifest"] is True
-    assert record["evidence"]["independent_files"] == []
-    assert "verified-attestation-missing" in record["reasons"]
+    assert record["evidence"]["independent_files"] == ["repeat_suite.json"]
+    assert record["evidence"]["registry_binding"] == "current-registry"
+    assert record["reasons"] == []
 
 
 def test_prefix_lengths_are_normalized_without_false_input_output_mismatch() -> None:
@@ -79,8 +81,8 @@ def test_prefix_lengths_are_normalized_without_false_input_output_mismatch() -> 
     fields = {item["field"] for item in record["exact_mismatches"]}
     assert "client_parameters.input_len" not in fields
     assert "client_parameters.output_len" not in fields
-    assert record["evidence"]["registry_binding"] == "unverified"
-    assert "target-registry-hash-missing-or-mismatched" in record["reasons"]
+    assert record["evidence"]["registry_binding"] == "current-registry"
+    assert record["reasons"] == []
 
 
 def test_audit_is_json_serializable() -> None:
@@ -88,7 +90,7 @@ def test_audit_is_json_serializable() -> None:
     json.dumps(report)
 
 
-def test_cli_stdout_is_machine_readable_and_require_recoverable_fails() -> None:
+def test_cli_stdout_is_machine_readable_and_require_recoverable_succeeds() -> None:
     command = [
         sys.executable,
         "scripts/audit_official_baseline_recovery.py",
@@ -99,7 +101,7 @@ def test_cli_stdout_is_machine_readable_and_require_recoverable_fails() -> None:
         command, cwd=REPO_ROOT, check=False, capture_output=True, text=True
     )
     assert completed.returncode == 0
-    assert json.loads(completed.stdout)["summary"]["recoverable"] == 0
+    assert json.loads(completed.stdout)["summary"]["recoverable"] == 7
     assert "baseline recovery audit:" in completed.stderr
 
     required = subprocess.run(
@@ -109,5 +111,5 @@ def test_cli_stdout_is_machine_readable_and_require_recoverable_fails() -> None:
         capture_output=True,
         text=True,
     )
-    assert required.returncode == 2
-    assert json.loads(required.stdout)["summary"]["recoverable"] == 0
+    assert required.returncode == 0
+    assert json.loads(required.stdout)["summary"]["recoverable"] == 7

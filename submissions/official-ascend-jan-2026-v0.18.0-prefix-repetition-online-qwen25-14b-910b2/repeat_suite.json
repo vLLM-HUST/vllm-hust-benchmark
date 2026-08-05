@@ -1,57 +1,191 @@
 {
   "schema_version": "official-baseline-attestation/v1",
   "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
-  "target_version": "1.2.0",
-  "target_registry_sha256": "3ce844f44d9dfb097afa8d146cd42e9b57cfd9b26ccca2c9900b46802640706d",
-  "verified_at": "2026-08-02T22:15:50.798448Z",
-  "verified_by": "Codex local Ascend evidence review 2026-08-02",
+  "target_version": "1.4.0",
+  "target_registry_sha256": "272bb6b4c1cac8d358813fdd3c485038284ddd4afb1f8871d1893fa5ac0259ea",
+  "verified_at": "2026-08-05T16:21:51.251258Z",
+  "verified_by": "strict-baseline-review-2026-08-06",
   "minimum_repeats": 3,
   "successful_repeats": 3,
-  "selected_repeat": "repeat-02",
+  "selected_repeat": "repeat-01",
   "exact_target_match": true,
+  "transport_port_policy": "performance-equivalent-loopback-relocation",
+  "selected_transport_port_relocation": {
+    "official_port": 8000,
+    "actual_service_port": 18100
+  },
   "zero_failed_requests": true,
   "repeats": [
     {
       "repeat": "repeat-01",
-      "raw_result_sha256": "a32c41a7b63cfed7e457384ab798373ec0daedaecd694799b330f22997192652",
-      "leaderboard_artifact_sha256": "f903b5eeebb6e251f9ba100a56d24f306b0095d3502f80ae4adb380fdb97e348",
-      "runner_log_sha256": "f3a56a9fd562e3dc4849a33acd48fdcdc12b2ca3b1a1b6235e5551783596c002",
+      "raw_result_sha256": "98cc87c34776034c8e01d4e779fb80d112aaa183d2b9a066c21c6bb159d83ecc",
+      "leaderboard_artifact_sha256": "44b1ca9d25828047e164a77e37fc4fc663ecbf8e4c8b1ac9fe816428e0a9b383",
+      "runner_log_sha256": "19a975943e9290b47caf423fa3d3288983232d4f2a5ad06300f5bd6e6d5d6957",
       "metrics": {
-        "ttft_ms": 482395.227367694,
-        "tbt_ms": 680.9935884038173,
-        "throughput_tps": 34.6430949717772,
-        "peak_mem_mb": 0,
-        "error_rate": 0.0
+        "ttft_ms": 261.1512890737504,
+        "tbt_ms": 49.82905693388474,
+        "throughput_tps": 236.36626346955956,
+        "peak_mem_mb": 41386,
+        "error_rate": 0.0,
+        "request_throughput_rps": 0.9454272367887667,
+        "e2e_latency_mean_ms": null,
+        "e2e_latency_p50_ms": null,
+        "e2e_latency_p95_ms": null,
+        "e2e_latency_p99_ms": null
       },
-      "failed_requests": 0
+      "failed_requests": 0,
+      "transport_port_relocation": {
+        "official_port": 8000,
+        "actual_service_port": 18100
+      },
+      "strict_execution_evidence_sha256": "23b9def4cc2d05377c511a6178448f7438698bb86810c3b3f31e4e6052fc3e30",
+      "startup_instance_id": "5a358eb5694d436b85b035c1693ecdb5",
+      "hostname": "host-192-168-0-2",
+      "container_id": "fadfb806f12e25871de4e0a3b00c34304e7fc2b97e89bf8dd0bfe8d10a3568c1",
+      "runtime_image_digest": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+      "runtime_storage_manifest_digest": "sha256:5f80f602b9460f3a02f9e847edbe69576906e3dd60e200a095a763a4792f5c26",
+      "runtime_storage_identity_sha256": "5f3ec24d12254025258cbcdb13a8ad76d0d6955c84f256deba20ee043b25c7d0",
+      "immutable_input_attestation_sha256": "4ffa36ed7ca3f6855d254bff9b42e6ffded12b5f4dc530e5df303913bceb92fb",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "data_identity_kind": "deterministic-vllm-generator",
+      "resolved_input_sha256": "9a2fd63f58bceb11e8481aa08c46ae989f06a74025176169807893d2afea66d1",
+      "service_port": 18100,
+      "physical_npu_ids": [
+        0
+      ],
+      "host_pids": [
+        2836225
+      ],
+      "pre_start_snapshots": [
+        {
+          "captured_at": "2026-08-05T14:27:40.300105Z",
+          "npu_smi_sha256": "f18448ce6320e4c1342cc5e02a6673b3dd9494774ffdb3c27e596d4519aab6a2",
+          "container_inspect_sha256": "f04016e4f4d93ac1bd18d11f0ce2c3fe09d0ffd24f2beb2e7dcfd959d6cc59b5"
+        },
+        {
+          "captured_at": "2026-08-05T14:27:57.858721Z",
+          "npu_smi_sha256": "0014d8bba507aea200ce84ed5c68aa7d425473d41f22c76e25822f6321e0c0e5",
+          "container_inspect_sha256": "b0f9a3e0f13d8e140cbc7d1288f894ec0b54903cc114cf665171eca9f39112bd"
+        }
+      ],
+      "peak_hbm_mb": 41386.0,
+      "hbm_samples_sha256": "e079566b6cf003230225d48485fb39bc4e0ae65d1a7d6296359b61eea7b406c7",
+      "owned_processes_sha256": "ded212f26da2289fbc4c5eee4b7968e0ada4c44b675946719d4ca180832202fc",
+      "cleanup_chain_sha256": "4728572152e742a09b02fda50669dcb38a7c77c5ff4dc9a8fb9e30491f9c7903"
     },
     {
       "repeat": "repeat-02",
-      "raw_result_sha256": "6045e1e51f06a2244f4902dc68141745f37b88b5525fb2cbf198242a1a062e15",
-      "leaderboard_artifact_sha256": "011413eb8d0e47a988631f0f5492f7134a078dfdf4cd7be0bc8bf8c8c1a4d1c9",
-      "runner_log_sha256": "cd918bedb3b94f088a055e76c746d4a387be1a50705b09878224e264012b46e4",
+      "raw_result_sha256": "79cf471b2689a3cf7e6e193c1da19455b00f96ff0cf81a60c9d5d63080ac70e7",
+      "leaderboard_artifact_sha256": "7fb28d55a59ea55650d460833db5ef41181942e5946f5e6a894eb18679e23cd8",
+      "runner_log_sha256": "87edc3187cc1d36ce0f9db53d52ef0944fdc6823d48f4a11edcce642d3663165",
       "metrics": {
-        "ttft_ms": 472340.24028344546,
-        "tbt_ms": 693.9774656741323,
-        "throughput_tps": 34.561325078646384,
-        "peak_mem_mb": 0,
-        "error_rate": 0.0
+        "ttft_ms": 258.47244116361253,
+        "tbt_ms": 49.4854526166842,
+        "throughput_tps": 236.83823006876426,
+        "peak_mem_mb": 41391,
+        "error_rate": 0.0,
+        "request_throughput_rps": 0.9460095866619971,
+        "e2e_latency_mean_ms": null,
+        "e2e_latency_p50_ms": null,
+        "e2e_latency_p95_ms": null,
+        "e2e_latency_p99_ms": null
       },
-      "failed_requests": 0
+      "failed_requests": 0,
+      "transport_port_relocation": {
+        "official_port": 8000,
+        "actual_service_port": 18200
+      },
+      "strict_execution_evidence_sha256": "bb96ec409d30999f6fdae720311946cd69ea666f2dc5190d5bb05b01bf71d695",
+      "startup_instance_id": "bfd8b2bf4bcc4755b01c419852ca9b28",
+      "hostname": "host-192-168-0-3",
+      "container_id": "ec82f5c9057d14c54a0ceb62cb0cf42aaaa071aca51794e1fcfd59c777bcd2bd",
+      "runtime_image_digest": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+      "runtime_storage_manifest_digest": "sha256:5f80f602b9460f3a02f9e847edbe69576906e3dd60e200a095a763a4792f5c26",
+      "runtime_storage_identity_sha256": "ab8bb5dde18532587c1e8df77cb49f55dfed483f1ec44678e26b85c1b08eab1b",
+      "immutable_input_attestation_sha256": "4ffa36ed7ca3f6855d254bff9b42e6ffded12b5f4dc530e5df303913bceb92fb",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "data_identity_kind": "deterministic-vllm-generator",
+      "resolved_input_sha256": "9a2fd63f58bceb11e8481aa08c46ae989f06a74025176169807893d2afea66d1",
+      "service_port": 18200,
+      "physical_npu_ids": [
+        0
+      ],
+      "host_pids": [
+        1648382
+      ],
+      "pre_start_snapshots": [
+        {
+          "captured_at": "2026-08-05T14:27:41.562713Z",
+          "npu_smi_sha256": "10d15767e072dc6112bb0d0546b8b56589d89f29edd3a807919b904c53223588",
+          "container_inspect_sha256": "5534da89ac1b166eda168749db319e546bb4b499f8791e0f6c1479e480b96d0f"
+        },
+        {
+          "captured_at": "2026-08-05T14:27:59.034855Z",
+          "npu_smi_sha256": "1cd50af3329ac5fd5f51c0be571db428ca029aa22d724b9ed59f1ba4243c08cb",
+          "container_inspect_sha256": "ecc47844d983316304ee77cb0ff395131361269db83ab2769e378ffa75d688d8"
+        }
+      ],
+      "peak_hbm_mb": 41391.0,
+      "hbm_samples_sha256": "cccccc1862a1b321153870abe8f019108cfc1c9b6b7d6b747f510b7161d1c1e0",
+      "owned_processes_sha256": "aec9a3c1501886d7e2c49f03d4bfe452449998d390df853bb0d59a1fc3e85139",
+      "cleanup_chain_sha256": "45b716a1160d18795e2dcfce76fa19f0afb2fe7e34ffbac869929c1359f46b67"
     },
     {
       "repeat": "repeat-03",
-      "raw_result_sha256": "6c95676777c42fe08cd483babd3199f8a0143337866629ab23b469bfea4da5ec",
-      "leaderboard_artifact_sha256": "7a565f98013314ede70b9bedeb69b4bf88b14b14795a5eabacf4bcdc9731479c",
-      "runner_log_sha256": "e0e29031da181abe9701ad0e32772e7b26d4458e4b866d4319c46aff23721506",
+      "raw_result_sha256": "9179319b99b412a907a179ca2ed41e693ad3d71dce68782dbf2674747ec1145a",
+      "leaderboard_artifact_sha256": "e19f705fe4e83ebb8d958b50e5d29ee7440b10a31e5cafadf3642538f6627a2d",
+      "runner_log_sha256": "300ff9057fc15d334beccdfefc869e26ded33986873299a974de7ecb5ba4cb18",
       "metrics": {
-        "ttft_ms": 515185.6875219231,
-        "tbt_ms": 691.9270363595313,
-        "throughput_tps": 33.318181530917485,
-        "peak_mem_mb": 0,
-        "error_rate": 0.0
+        "ttft_ms": 265.9969470766373,
+        "tbt_ms": 49.69525050109553,
+        "throughput_tps": 235.8653572356844,
+        "peak_mem_mb": 41388,
+        "error_rate": 0.0,
+        "request_throughput_rps": 0.9466231502646214,
+        "e2e_latency_mean_ms": null,
+        "e2e_latency_p50_ms": null,
+        "e2e_latency_p95_ms": null,
+        "e2e_latency_p99_ms": null
       },
-      "failed_requests": 0
+      "failed_requests": 0,
+      "transport_port_relocation": {
+        "official_port": 8000,
+        "actual_service_port": 18110
+      },
+      "strict_execution_evidence_sha256": "da5a01ed62ab68b5bb57fa57cf387aabcc61448ffb952d8ecec1e70862eef01e",
+      "startup_instance_id": "47b5db37be974f5cab33546a444bd1c8",
+      "hostname": "host-192-168-0-2",
+      "container_id": "8b0331865a106ca63cbd65cc80413c14ecb40547865065fb8ec520cfa5508b1c",
+      "runtime_image_digest": "sha256:9a50c7c633d52e2514593e5021a776572c35be734465ce02d41cd1481240fd31",
+      "runtime_storage_manifest_digest": "sha256:5f80f602b9460f3a02f9e847edbe69576906e3dd60e200a095a763a4792f5c26",
+      "runtime_storage_identity_sha256": "75b71a2b564f9a16efe6ac2ca72b6bf87257e23bb20e5deeee9b247ded30a586",
+      "immutable_input_attestation_sha256": "4ffa36ed7ca3f6855d254bff9b42e6ffded12b5f4dc530e5df303913bceb92fb",
+      "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "data_identity_kind": "deterministic-vllm-generator",
+      "resolved_input_sha256": "9a2fd63f58bceb11e8481aa08c46ae989f06a74025176169807893d2afea66d1",
+      "service_port": 18110,
+      "physical_npu_ids": [
+        0
+      ],
+      "host_pids": [
+        2925311
+      ],
+      "pre_start_snapshots": [
+        {
+          "captured_at": "2026-08-05T14:45:14.065851Z",
+          "npu_smi_sha256": "a0ef290411aaeec06c8e51305f6a62be7c123b7b0b87bf0071e681dd6843ad8b",
+          "container_inspect_sha256": "c5fb64efc2a63d4088bbafdc5291cc1f02ff98f198a24c37b238a74872a0b2e2"
+        },
+        {
+          "captured_at": "2026-08-05T14:45:31.722680Z",
+          "npu_smi_sha256": "8b9127fea991d011cef573f73518e9023c4e93e8581bac1a5672ab21b9f33f49",
+          "container_inspect_sha256": "11b40d9e6f283cb8390fc7dec738682aa0b6fff5196bcb106d109009ae980962"
+        }
+      ],
+      "peak_hbm_mb": 41388.0,
+      "hbm_samples_sha256": "5d786b4af6028ae817de4ac207b18584546b0c98b08805771f4441c39b4b7aa4",
+      "owned_processes_sha256": "41d6c796b6e1af68e8faa44c94a59067b2e0e284c4caed27394602e0c21b6e32",
+      "cleanup_chain_sha256": "7748413703093e67ae3d2893c50a4d21d050f1bde50e77930ead86b2599b0337"
     }
   ]
 }

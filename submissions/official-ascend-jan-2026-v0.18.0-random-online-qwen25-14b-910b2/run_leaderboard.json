@@ -1,5 +1,5 @@
 {
-  "entry_id": "bbd407e5-00b1-4f8a-9a3d-e0592efcba22",
+  "entry_id": "0cf4af74-d969-4ded-b02b-215e68de1537",
   "engine": "vllm",
   "engine_version": "0.18.0",
   "config_type": "single_gpu",
@@ -8,8 +8,8 @@
     "chip_model": "910B2",
     "chip_count": 1,
     "interconnect": "unknown",
-    "memory_per_chip_gb": null,
-    "total_memory_gb": null
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 64.0
   },
   "model": {
     "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
@@ -27,14 +27,23 @@
     "output_length": 256,
     "batch_size": null,
     "concurrent_requests": null,
-    "dataset": "random"
+    "dataset": "random",
+    "input_token_distribution": null,
+    "output_token_distribution": null,
+    "cohort_setting_signature": null,
+    "arrival_transform": null
   },
   "metrics": {
-    "ttft_ms": 268.78517493081745,
-    "tbt_ms": 95.26832097792979,
-    "throughput_tps": 228.1495394644097,
-    "peak_mem_mb": 0.0,
-    "error_rate": 0.0
+    "ttft_ms": 227.9979242105037,
+    "tbt_ms": 43.71752115776397,
+    "throughput_tps": 243.85817960944584,
+    "peak_mem_mb": 41372,
+    "error_rate": 0.0,
+    "request_throughput_rps": 0.9525710140993978,
+    "e2e_latency_mean_ms": null,
+    "e2e_latency_p50_ms": null,
+    "e2e_latency_p95_ms": null,
+    "e2e_latency_p99_ms": null
   },
   "constraints": {
     "scenario_source": "vllm-benchmark",
@@ -49,22 +58,22 @@
       "notes": null
     },
     "metrics": {
-      "single_chip_effective_utilization_pct": 35.7838,
-      "typical_throughput_ratio_vs_baseline": 1.0,
-      "typical_ttft_reduction_pct_vs_baseline": 0.0,
-      "typical_tpot_reduction_pct_vs_baseline": 0.0,
-      "long_context_length": 30720,
-      "long_context_throughput_stable": false,
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": 32768,
+      "long_context_throughput_stable": true,
       "long_context_ttft_p95_ms": null,
-      "long_context_ttft_p99_ms": 26176.540252596616,
+      "long_context_ttft_p99_ms": 400.54555986309384,
       "long_context_tpot_p95_ms": null,
-      "long_context_tpot_p99_ms": 165.79910860879937,
+      "long_context_tpot_p99_ms": 48.77709724371522,
       "long_context_ttft_p95_stable": null,
-      "long_context_ttft_p99_stable": false,
+      "long_context_ttft_p99_stable": true,
       "long_context_tpot_p95_stable": null,
-      "long_context_tpot_p99_stable": false,
-      "unit_token_cost_reduction_pct": 0.0,
-      "multi_tenant_high_utilization": false
+      "long_context_tpot_p99_stable": true,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
     }
   },
   "cluster": null,
@@ -76,19 +85,19 @@
   },
   "environment": {
     "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
-    "python_version": "3.11.15",
-    "pytorch_version": null,
+    "python_version": "3.11.14",
+    "pytorch_version": "2.9.0+cpu",
     "cuda_version": null,
-    "cann_version": null,
-    "driver_version": null
+    "cann_version": "8.5.1",
+    "driver_version": "26.0.rc1"
   },
   "metadata": {
-    "submitted_at": "2026-06-03T18:33:53Z",
+    "submitted_at": "2026-08-05T13:51:49Z",
     "submitter": "official-ascend-baseline",
     "data_source": "reference-vllm-ascend-benchmark",
     "engine": "vllm",
     "engine_version": "0.18.0",
-    "reproducible_cmd": null,
+    "reproducible_cmd": "GOAL_BASELINE_ENV_PREFIX=<env-prefix> bash scripts/run-official-ascend-goal-baseline.sh docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
     "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
     "github_user": null,
     "github_commit_url": "https://github.com/vllm-project/vllm-ascend/commit/e18643f8a4d5bd9990727654318ad069ea0b56e2",
@@ -100,11 +109,11 @@
     "release_date": null,
     "changelog_url": null,
     "notes": null,
-    "verified": null,
-    "idempotency_key": "0ab47126e01b274deb49e50c712477d7d7b9acffb678ce978e4aa7334e3f11e8",
+    "verified": true,
+    "idempotency_key": "0a421ff62d73c4bda2e0f8d02e68f44aff082a5a37bcdd02744ac3278ba3abb6",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
-      "python": null,
+      "python": "/usr/local/python3.11.14/bin/python",
       "engine": {
         "repository": "vllm-project/vllm",
         "ref": "v0.18.0",
@@ -116,45 +125,69 @@
         "ref": "v0.18.0",
         "commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
       }
+    },
+    "workload_config_contract": "explicit-effective/v1",
+    "transport_port_normalization": {
+      "official_port": 8000,
+      "actual_service_port": 18082,
+      "scope": "submission-same-spec-only",
+      "performance_metrics_modified": false,
+      "raw_execution_evidence_preserved": true,
+      "reason": "loopback service binding relocation"
+    },
+    "verified_at": "2026-08-05T16:25:59.817366Z",
+    "verified_by": "strict-baseline-review-2026-08-06",
+    "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+    "target_version": "1.4.0",
+    "profile_id": "core-text",
+    "target_registry_sha256": "272bb6b4c1cac8d358813fdd3c485038284ddd4afb1f8871d1893fa5ac0259ea",
+    "verification_attestation": {
+      "schema_version": "official-baseline-attestation/v1",
+      "evidence": "repeat_suite.json",
+      "successful_repeats": 4,
+      "selected_repeat": "repeat-01"
     }
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
     "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
     "spec_label": "Official Ascend Jan 2026 baseline for vllm-hust goal tracking",
-    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
+    "spec_source": "/workspace/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
     "scenario": "random-online",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
     "model_precision": "FP16",
+    "model_quantization": "",
     "hardware_vendor": "Huawei",
     "hardware_chip_model": "910B2",
     "chip_count": 1,
     "node_count": 1,
-    "resolved_spec_hash": "245580fc65876969225df96070c89551590bcd0a2b39228fab9384520dcbbdcf",
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
-      "enforce_eager": "",
+      "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "gpu_memory_utilization": 0.6,
       "trust_remote_code": "",
       "disable_log_stats": "",
       "disable_log_requests": "",
       "host": "0.0.0.0",
-      "port": 8010,
-      "model": "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
-      "gpu_memory_utilization": 0.6,
+      "port": 8000,
+      "max_model_len": 32768,
+      "model": "/workspace/vllm-hust-benchmark/.benchmarks/strict-final-20260805/random-online/upstream/repeat-01/hf-cache-staging/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
       "dtype": "float16"
     },
     "resolved_client_parameters": {
       "backend": "vllm",
       "endpoint": "/v1/completions",
       "dataset_name": "random",
+      "no_stream": false,
       "num_prompts": 200,
       "request_rate": 1,
       "host": "127.0.0.1",
-      "port": 8010,
-      "model": "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "port": 8000,
+      "model": "/workspace/vllm-hust-benchmark/.benchmarks/strict-final-20260805/random-online/upstream/repeat-01/hf-cache-staging/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
       "random_input_len": 1024,
       "random_output_len": 256
-    }
+    },
+    "resolved_spec_hash": "82639db5194c82c67150b9002f81de4bc2090e5ce7ce4414d4f9ea59858935dc"
   }
 }

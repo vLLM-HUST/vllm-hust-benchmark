@@ -1,5 +1,5 @@
 {
-  "entry_id": "fd320f6d-1c42-4d9a-8943-c80a2e064610",
+  "entry_id": "e7030285-36c0-4943-8e61-f6834953e7f6",
   "engine": "vllm",
   "engine_version": "0.18.0",
   "config_type": "single_gpu",
@@ -8,8 +8,8 @@
     "chip_model": "910B2",
     "chip_count": 1,
     "interconnect": "unknown",
-    "memory_per_chip_gb": null,
-    "total_memory_gb": null
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 64.0
   },
   "model": {
     "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
@@ -27,14 +27,23 @@
     "output_length": 256,
     "batch_size": null,
     "concurrent_requests": null,
-    "dataset": "sharegpt"
+    "dataset": "sharegpt",
+    "input_token_distribution": null,
+    "output_token_distribution": null,
+    "cohort_setting_signature": null,
+    "arrival_transform": null
   },
   "metrics": {
-    "ttft_ms": 248.15935311315116,
-    "tbt_ms": 96.44200152610334,
-    "throughput_tps": 173.62097648101778,
-    "peak_mem_mb": 0.0,
-    "error_rate": 0.0
+    "ttft_ms": 153.52109601255506,
+    "tbt_ms": 42.26932759550941,
+    "throughput_tps": 199.36346232932817,
+    "peak_mem_mb": 41273,
+    "error_rate": 0.0,
+    "request_throughput_rps": 0.8955929216743926,
+    "e2e_latency_mean_ms": null,
+    "e2e_latency_p50_ms": null,
+    "e2e_latency_p95_ms": null,
+    "e2e_latency_p99_ms": null
   },
   "constraints": {
     "scenario_source": "vllm-benchmark",
@@ -49,22 +58,22 @@
       "notes": null
     },
     "metrics": {
-      "single_chip_effective_utilization_pct": 35.7838,
-      "typical_throughput_ratio_vs_baseline": 1.0,
-      "typical_ttft_reduction_pct_vs_baseline": 0.0,
-      "typical_tpot_reduction_pct_vs_baseline": 0.0,
-      "long_context_length": 30720,
-      "long_context_throughput_stable": false,
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": 32768,
+      "long_context_throughput_stable": true,
       "long_context_ttft_p95_ms": null,
-      "long_context_ttft_p99_ms": 26176.540252596616,
+      "long_context_ttft_p99_ms": 245.0535004143603,
       "long_context_tpot_p95_ms": null,
-      "long_context_tpot_p99_ms": 165.79910860879937,
+      "long_context_tpot_p99_ms": 48.96232952961516,
       "long_context_ttft_p95_stable": null,
-      "long_context_ttft_p99_stable": false,
+      "long_context_ttft_p99_stable": true,
       "long_context_tpot_p95_stable": null,
-      "long_context_tpot_p99_stable": false,
-      "unit_token_cost_reduction_pct": 0.0,
-      "multi_tenant_high_utilization": false
+      "long_context_tpot_p99_stable": true,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
     }
   },
   "cluster": null,
@@ -76,19 +85,19 @@
   },
   "environment": {
     "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
-    "python_version": "3.11.15",
-    "pytorch_version": null,
+    "python_version": "3.11.14",
+    "pytorch_version": "2.9.0+cpu",
     "cuda_version": null,
-    "cann_version": null,
-    "driver_version": null
+    "cann_version": "8.5.1",
+    "driver_version": "26.0.rc1"
   },
   "metadata": {
-    "submitted_at": "2026-06-03T18:41:34Z",
+    "submitted_at": "2026-08-05T14:37:45Z",
     "submitter": "official-ascend-baseline",
     "data_source": "reference-vllm-ascend-benchmark",
     "engine": "vllm",
     "engine_version": "0.18.0",
-    "reproducible_cmd": null,
+    "reproducible_cmd": "GOAL_BASELINE_ENV_PREFIX=<env-prefix> bash scripts/run-official-ascend-goal-baseline.sh docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
     "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
     "github_user": null,
     "github_commit_url": "https://github.com/vllm-project/vllm-ascend/commit/e18643f8a4d5bd9990727654318ad069ea0b56e2",
@@ -100,11 +109,11 @@
     "release_date": null,
     "changelog_url": null,
     "notes": null,
-    "verified": null,
-    "idempotency_key": "b3da980144880a5a26c99ea3a3b52bdf3c842d945b4d4c1cb3aee16c53da7dd1",
+    "verified": true,
+    "idempotency_key": "609ec59351900166f818fb328116050af25f2c9d08dec0732eda6b2a88e505e2",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
     "runtime_provenance": {
-      "python": null,
+      "python": "/usr/local/python3.11.14/bin/python",
       "engine": {
         "repository": "vllm-project/vllm",
         "ref": "v0.18.0",
@@ -116,44 +125,68 @@
         "ref": "v0.18.0",
         "commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
       }
+    },
+    "workload_config_contract": "explicit-effective/v1",
+    "transport_port_normalization": {
+      "official_port": 8000,
+      "actual_service_port": 18102,
+      "scope": "submission-same-spec-only",
+      "performance_metrics_modified": false,
+      "raw_execution_evidence_preserved": true,
+      "reason": "loopback service binding relocation"
+    },
+    "verified_at": "2026-08-05T16:25:57.944823Z",
+    "verified_by": "strict-baseline-review-2026-08-06",
+    "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+    "target_version": "1.4.0",
+    "profile_id": "core-text",
+    "target_registry_sha256": "272bb6b4c1cac8d358813fdd3c485038284ddd4afb1f8871d1893fa5ac0259ea",
+    "verification_attestation": {
+      "schema_version": "official-baseline-attestation/v1",
+      "evidence": "repeat_suite.json",
+      "successful_repeats": 3,
+      "selected_repeat": "repeat-01"
     }
   },
   "same_spec": {
     "schema_version": "benchmark-same-spec/v1",
     "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
     "spec_label": "Official Ascend Jan 2026 ShareGPT online baseline for vllm-hust goal tracking",
-    "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
+    "spec_source": "/workspace/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
     "scenario": "sharegpt-online",
     "model": "Qwen/Qwen2.5-14B-Instruct",
     "model_parameters": "14B",
     "model_precision": "FP16",
+    "model_quantization": "",
     "hardware_vendor": "Huawei",
     "hardware_chip_model": "910B2",
     "chip_count": 1,
     "node_count": 1,
-    "resolved_spec_hash": "c0e8dba9570dd27e69a61439fd0ba75cc837677cfcec48dd39ff505cf41478e9",
     "resolved_server_parameters": {
       "tensor_parallel_size": 1,
-      "enforce_eager": "",
+      "revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
+      "gpu_memory_utilization": 0.6,
       "trust_remote_code": "",
       "disable_log_stats": "",
       "disable_log_requests": "",
       "host": "0.0.0.0",
-      "port": 8010,
-      "model": "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
-      "gpu_memory_utilization": 0.6,
+      "port": 8000,
+      "max_model_len": 32768,
+      "model": "/workspace/vllm-hust-benchmark/.benchmarks/strict-final-20260805/sharegpt-online/upstream/repeat-01/hf-cache-staging/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",
       "dtype": "float16"
     },
     "resolved_client_parameters": {
       "backend": "vllm",
       "endpoint": "/v1/completions",
       "dataset_name": "sharegpt",
+      "no_stream": false,
       "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
       "num_prompts": 200,
       "request_rate": 1,
       "host": "127.0.0.1",
-      "port": 8010,
-      "model": "/home/shuhao/.cache/huggingface/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
-    }
+      "port": 8000,
+      "model": "/workspace/vllm-hust-benchmark/.benchmarks/strict-final-20260805/sharegpt-online/upstream/repeat-01/hf-cache-staging/hub/models--Qwen--Qwen2.5-14B-Instruct/snapshots/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8"
+    },
+    "resolved_spec_hash": "9c5d53023ccb3dab730d09db7ec8a7605c1049e4ee5156adf63d815e3b701d9f"
   }
 }
