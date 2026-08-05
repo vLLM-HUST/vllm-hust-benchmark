@@ -19,16 +19,21 @@ from vllm_hust_benchmark.immutable_input_attestation import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SHAREGPT_REVISION = "192ab2185289094fc556ec8ce5ce1e8e587154ca"
+SHAREGPT_REVISION = (
+    "192ab2185289094fc556ec8ce5ce1e8e587154ca"  # pragma: allowlist secret
+)
+SHAREGPT_REPOSITORY = (
+    "anon8231489123/ShareGPT_Vicuna_unfiltered"  # pragma: allowlist secret
+)
 SHAREGPT_IDENTITY = {
     "kind": "huggingface-file",
-    "repository": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+    "repository": SHAREGPT_REPOSITORY,
     "revision": SHAREGPT_REVISION,
     "path": "ShareGPT_V3_unfiltered_cleaned_split.json",
 }
 SHAREGPT_EXACT_URL = (
     "https://hf-mirror.com/datasets/"
-    "anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/"
+    f"{SHAREGPT_REPOSITORY}/resolve/"
     f"{SHAREGPT_REVISION}/ShareGPT_V3_unfiltered_cleaned_split.json"
 )
 
