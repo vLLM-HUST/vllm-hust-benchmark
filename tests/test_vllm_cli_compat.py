@@ -1,5 +1,9 @@
+import asyncio
 import json
+import sys
 from dataclasses import dataclass
+from pathlib import Path
+from types import ModuleType
 from types import SimpleNamespace
 
 import pytest
@@ -7,11 +11,25 @@ import pytest
 from scripts.run_vllm_cli_compat import (
     _latency_prompt_token_ids,
     _sample_request_payload,
+    install_resolved_input_capture,
     offline_graph_proof,
     record_immutable_inputs,
     require_offline_graph,
     resolved_input_sha256,
 )
+
+
+def _capture_environment(tmp_path, monkeypatch, input_kind: str) -> Path:
+    output = tmp_path / "immutable-input-attestation.json"
+    metadata = {
+        "model_id": "Qwen/Qwen2.5-14B-Instruct",
+        "model_revision": "a" * 40,
+        "data_identity": {"kind": "fixture"},
+        "resolved_input_kind": input_kind,
+    }
+    monkeypatch.setenv("VLLM_HUST_IMMUTABLE_INPUT_ATTESTATION_FILE", str(output))
+    monkeypatch.setenv("VLLM_HUST_IMMUTABLE_INPUT_METADATA", json.dumps(metadata))
+    return output
 
 
 @dataclass
@@ -83,6 +101,33 @@ def test_latency_capture_hashes_actual_generated_token_ids() -> None:
     )
 
 
+def test_latency_wrapper_captures_the_tokens_passed_to_generate(
+    tmp_path, monkeypatch
+) -> None:
+    output = _capture_environment(tmp_path, monkeypatch, "latency-prompt-token-ids")
+    calls = []
+
+    class FakeLLM:
+        def generate(self, prompts, **kwargs):
+            calls.append((prompts, kwargs))
+            return "generated"
+
+    fake_vllm = ModuleType("vllm")
+    fake_vllm.LLM = FakeLLM
+    monkeypatch.setitem(sys.modules, "vllm", fake_vllm)
+
+    install_resolved_input_capture(SimpleNamespace(), "latency")
+    prompts = [{"prompt_token_ids": [10, 20]}, {"prompt_token_ids": [30]}]
+    assert FakeLLM().generate(prompts, use_tqdm=False) == "generated"
+    assert calls == [(prompts, {"use_tqdm": False})]
+
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["resolved_inputs"] == [[10, 20], [30]]
+    assert payload["resolved_input_sha256"] == resolved_input_sha256(
+        input_kind="latency-prompt-token-ids", inputs=[[10, 20], [30]]
+    )
+
+
 @pytest.mark.parametrize("token_ids", [[1, -1], [1, True], [1, "2"], "1,2"])
 def test_latency_capture_rejects_non_token_id_sequences(token_ids: object) -> None:
     with pytest.raises(TypeError, match="non-negative integers"):
@@ -109,6 +154,56 @@ def test_serve_sample_request_sequence_is_stable_and_order_sensitive() -> None:
     ) != resolved_input_sha256(
         input_kind="serve-sample-requests", inputs=list(reversed(payloads))
     )
+
+
+def test_serve_wrapper_captures_the_requests_passed_to_benchmark(
+    tmp_path, monkeypatch
+) -> None:
+    output = _capture_environment(tmp_path, monkeypatch, "serve-sample-requests")
+    calls = []
+
+    async def benchmark(input_requests, *, request_rate):
+        calls.append((input_requests, request_rate))
+        return "served"
+
+    module = SimpleNamespace(benchmark=benchmark)
+    install_resolved_input_capture(module, "serve")
+    requests = [
+        SimpleNamespace(
+            prompt="alpha", prompt_len=1, expected_output_len=2, request_id="0"
+        )
+    ]
+    assert asyncio.run(module.benchmark(requests, request_rate=1)) == "served"
+    assert calls == [(requests, 1)]
+    assert json.loads(output.read_text(encoding="utf-8"))["resolved_inputs"] == [
+        _sample_request_payload(requests[0])
+    ]
+
+
+def test_throughput_wrapper_captures_the_requests_passed_to_run_vllm(
+    tmp_path, monkeypatch
+) -> None:
+    output = _capture_environment(tmp_path, monkeypatch, "throughput-sample-requests")
+    calls = []
+
+    def run_vllm(requests, *, do_profile):
+        calls.append((requests, do_profile))
+        return "completed"
+
+    module = SimpleNamespace(run_vllm=run_vllm)
+    install_resolved_input_capture(module, "throughput")
+    requests = [
+        SimpleNamespace(
+            prompt={"prompt_token_ids": [7, 8]},
+            prompt_len=2,
+            expected_output_len=3,
+        )
+    ]
+    assert module.run_vllm(requests, do_profile=False) == "completed"
+    assert calls == [(requests, False)]
+    assert json.loads(output.read_text(encoding="utf-8"))["resolved_inputs"] == [
+        _sample_request_payload(requests[0])
+    ]
 
 
 def test_capture_rejects_input_kind_mismatch_before_writing(
