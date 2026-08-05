@@ -1783,7 +1783,7 @@ def test_export_leaderboard_artifact_keeps_official_upstream_stack_out_of_hust_c
             "--model-name",
             "Qwen/Qwen2.5-14B-Instruct",
             "--hardware-chip-model",
-            "910B3",
+            "910B2",
             "--submitter",
             "official-ascend-baseline",
             "--data-source",
