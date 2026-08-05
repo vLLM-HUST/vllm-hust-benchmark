@@ -712,15 +712,55 @@ def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
     has_incomplete_failure = False
 
     # 1. 8/16/24/32 GiB capacity curves produced
+    # Per PR #152 review round 3: the 32 GiB target must actually be reached
+    # (actual KV within 2 GiB of target).  Widening tolerance to make an
+    # unreachable target appear met is not allowed.  When actual KV deviates
+    # more than 2 GiB from target, that capacity point is marked blocked.
     caps = analysis.get("capacities_covered", [])
-    caps_met = all(c in caps for c in KV_CAPACITY_TARGETS_GIB)
+    caps_present = all(c in caps for c in KV_CAPACITY_TARGETS_GIB)
+    # Check actual KV vs target from per-rep manifests
+    run_manifest_map = analysis.get("run_manifest_map", {})
+    _KV_TOL_GIB = 2.0
+    blocked_caps: list[str] = []
+    if run_manifest_map:
+        # Group actual KV by nominal capacity target
+        cap_actuals: dict[int, list[float]] = {}
+        for run_path, manifest in run_manifest_map.items():
+            if manifest is None or "raw_results/" not in run_path:
+                continue
+            # Parse capacity from path: raw_results/<workload>/<kv_gib>/rep-N
+            parts = run_path.split("/")
+            try:
+                kv_gib = int(parts[-2])
+            except (ValueError, IndexError):
+                continue
+            actual_bytes = manifest.get("actual_kv_bytes")
+            if actual_bytes is None:
+                continue
+            actual_gib = float(actual_bytes) / (1024**3)
+            cap_actuals.setdefault(kv_gib, []).append(actual_gib)
+        for target in KV_CAPACITY_TARGETS_GIB:
+            actuals = cap_actuals.get(target, [])
+            if not actuals:
+                continue
+            median_actual = sorted(actuals)[len(actuals) // 2]
+            if abs(median_actual - target) > _KV_TOL_GIB:
+                blocked_caps.append(f"{target}GiB (actual ~{median_actual:.1f}GiB)")
+    caps_met = caps_present and not blocked_caps
     if not caps_met:
         has_blocking_failure = True
+    if blocked_caps:
+        details = (
+            f"Covered: {sorted(caps)}, expected: {KV_CAPACITY_TARGETS_GIB}; "
+            f"blocked (actual KV > {_KV_TOL_GIB}GiB from target): {blocked_caps}"
+        )
+    else:
+        details = f"Covered: {sorted(caps)}, expected: {KV_CAPACITY_TARGETS_GIB}"
     criteria.append(
         {
             "criterion": "8/16/24/32 GiB capacity curves produced",
             "met": caps_met,
-            "details": f"Covered: {sorted(caps)}, expected: {KV_CAPACITY_TARGETS_GIB}",
+            "details": details,
         }
     )
 

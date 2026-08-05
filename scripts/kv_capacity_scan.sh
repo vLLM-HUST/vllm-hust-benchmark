@@ -258,15 +258,13 @@ except Exception:
 
 kv_capacity_tolerance() {
     # Return the verification tolerance (GiB) for a nominal KV target.
-    # 32 GiB nominal target is not fully reachable on 60.96 GiB HBM after
-    # subtracting model weights (~27.5 GiB) and runtime overhead (~0.9 GiB);
-    # actual achievable KV at util=0.95 is ~29 GiB.  Use 3.5 GiB tolerance
-    # for that target and the strict 2 GiB default for the rest.
-    local target="$1"
-    case "$target" in
-        32) echo "3.5" ;;
-        *)  echo "2.0" ;;
-    esac
+    # Per PR #152 review round 3: the tolerance must NOT be widened to make
+    # an unreachable target appear met.  32 GiB is not reachable on 60.96 GiB
+    # HBM after subtracting model weights (~27.5 GiB) and runtime overhead
+    # (~0.9 GiB); actual achievable KV at util=0.95 is ~29 GiB.  The strict
+    # 2 GiB tolerance applies to ALL targets; when the target is unreachable
+    # the run is recorded with its actual KV and marked blocked.
+    echo "2.0"
 }
 
 verify_kv_capacity() {
@@ -458,6 +456,17 @@ WPEOF
         )
     fi
 
+    # Per PR #152 review round 3: when neither HF ref nor git HEAD is available,
+    # model_revision must be set to weight_fingerprint:<fingerprint> so the
+    # provenance gate accepts the manifest on re-run.  Leaving it as
+    # "not available" would cause the provenance validator to reject the
+    # manifest even though model_weight_fingerprint is populated.
+    if [ "$model_revision" = "not available" ] \
+        && [ "$model_weight_fingerprint" != "not available" ] \
+        && [ -n "$model_weight_fingerprint" ]; then
+        model_revision="weight_fingerprint:${model_weight_fingerprint}"
+    fi
+
     # Parse actual KV bytes from server log
     local actual_kv_bytes="null"
     if [ -n "$server_log" ] && [ -f "$server_log" ]; then
@@ -598,21 +607,25 @@ EOF
         return 1
     fi
 
-    # Verify KV capacity matches target (fail-closed, per-target tolerance).
-    # 32 GiB target uses 3.5 GiB tolerance because the nominal capacity is not
-    # fully reachable on 60.96 GiB HBM after weights+overhead; all other
-    # targets use the strict 2 GiB default.
+    # Verify KV capacity matches target (fail-closed, 2 GiB tolerance).
+    # Per PR #152 review round 3: when the nominal target is unreachable
+    # (e.g. 32 GiB on 60.96 GiB HBM after weights+overhead → actual ~29 GiB),
+    # do NOT widen tolerance.  Instead, record the run with its actual KV and
+    # mark it as BLOCKED so the acceptance report can classify it correctly.
     local _tol
     _tol=$(kv_capacity_tolerance "$kv_gib")
     log "  Verifying KV capacity (target=${kv_gib}GiB, tolerance=${_tol}GiB)"
     if ! verify_kv_capacity "$output_dir/server.log" "$kv_gib" "$_tol"; then
-        log "  ERROR: KV capacity verification failed"
-        cleanup_server
-        return 1
+        log "  WARNING: KV capacity target ${kv_gib}GiB not reachable — \
+marking run as BLOCKED and continuing"
+        # Write a STATUS file so the analyzer can classify this run as blocked.
+        # The actual KV is still recorded in env-manifest.json for reporting.
+        echo "BLOCKED: KV capacity target ${kv_gib}GiB not reachable (tolerance=${_tol}GiB)" \
+            > "$output_dir/STATUS"
     fi
 
     # Collect pre-benchmark metrics
-    collect_metrics "$output_dir/metrics_pre.json"
+    collect_metrics "$output_dir/metrics_pre.prom"
 
     # Run benchmark
     local bench_cmd
@@ -626,7 +639,7 @@ EOF
     fi
 
     # Collect post-benchmark metrics
-    collect_metrics "$output_dir/metrics_post.json"
+    collect_metrics "$output_dir/metrics_post.prom"
 
     # Generate environment manifest (provenance) with actual KV from server log
     generate_env_manifest \
@@ -744,18 +757,30 @@ run_part_b() {
             if ! run_single_experiment \
                 "$TIERING_WORKLOAD" "$config_kv_gib" "$rep" \
                 "$output_dir" "$config_kv_transfer"; then
-                # tiering-enabled relies on SimpleCPUOffloadConnector which may
-                # be incompatible with the Ascend KV cache layout (storage
-                # tensor tuple layout).  Record the failure and continue so
-                # that hbm-only and tiering-disabled results are still
-                # collected.  The acceptance report will classify this as
-                # blocked/incomplete rather than aborting the entire run.
+                # tiering-enabled relies on SimpleCPUOffloadConnector which is
+                # incompatible with the Ascend KV cache layout (storage tensor
+                # tuple layout).  Per PR #152 review round 3: only mark as
+                # BLOCKED if the server log contains the verified shape mismatch
+                # RuntimeError signature; any other failure (network, model load,
+                # NPU runtime, parameter error) must fail closed (exit 1) rather
+                # than being misreported as a known blocked condition.
                 if [ "$config" = "tiering-enabled" ]; then
-                    log "  WARNING: tiering-enabled failed (rep=$rep) — \
-recording as BLOCKED, continuing"
-                    mkdir -p "$output_dir"
-                    echo "BLOCKED: SimpleCPUOffloadConnector incompatible with \
-Ascend KV cache layout" > "$output_dir/STATUS"
+                    local _server_log="$_TMP_DIR/tiering/$config/rep-$rep/server.log"
+                    if [ -f "$_server_log" ] && grep -q \
+                        "RuntimeError: shape.*is invalid for input of size" \
+                        "$_server_log" 2>/dev/null; then
+                        log "  WARNING: tiering-enabled failed (rep=$rep) — \
+verified SimpleCPUOffloadConnector shape mismatch, recording as BLOCKED"
+                        mkdir -p "$output_dir"
+                        echo "BLOCKED: SimpleCPUOffloadConnector incompatible \
+with Ascend KV cache layout (verified shape mismatch RuntimeError)" \
+                            > "$output_dir/STATUS"
+                    else
+                        log "ERROR: tiering-enabled failed (rep=$rep) with an \
+UNVERIFIED error — fail closed (not a known SimpleCPUOffloadConnector signature)"
+                        log "  Check $_server_log for the actual error"
+                        exit 1
+                    fi
                 else
                     log "ERROR: Part B experiment failed (rep=$rep config=$config)"
                     exit 1
