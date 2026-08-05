@@ -808,6 +808,8 @@ class StrictRepeatOrchestrator:
             "--env",
             "VLLM_HUST_STRICT_HOST_ORCHESTRATED=1",
             "--env",
+            "VLLM_HUST_STRICT_HOST_GATE_ATTESTED=1",
+            "--env",
             (
                 "VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE="
                 f"{self.container_repeat_dir}/strict-host-peak-hbm.json"

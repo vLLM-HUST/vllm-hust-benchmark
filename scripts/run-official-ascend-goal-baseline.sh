@@ -853,7 +853,13 @@ validate_explicit_device_scope() {
     return 2
   fi
   if [[ "$expected_count" -gt 1 ]]; then
-    verify_explicit_multicard_scope_idle "$visible_devices"
+    if [[ "${VLLM_HUST_STRICT_HOST_ORCHESTRATED:-}" == "1" &&
+          "${VLLM_HUST_STRICT_HOST_GATE_ATTESTED:-}" == "1" &&
+          -n "${VLLM_HUST_STRICT_HOST_PEAK_HBM_FILE:-}" ]]; then
+      echo "[goal-baseline] explicit multi-card idle proof delegated to strict host orchestration"
+    else
+      verify_explicit_multicard_scope_idle "$visible_devices"
+    fi
   fi
 }
 
@@ -1248,7 +1254,7 @@ ensure_runtime_dataset_available() {
 
   case "$dataset_path" in
     /*)
-      if [[ ! -f "$dataset_path" ]]; then
+      if [[ ! -e "$dataset_path" ]]; then
         echo "runtime dataset path not found: $dataset_path" >&2
         return 2
       fi
@@ -1360,7 +1366,9 @@ stage_flat_hf_inputs() {
   HF_HUB_CACHE=$(jq -er '.hub_cache' <<<"$staging_payload")
   TRANSFORMERS_CACHE="$HF_HOME/transformers"
   OFFICIAL_MODEL_PATH=$(jq -er '.model.snapshot_path' <<<"$staging_payload")
+  OFFICIAL_RUNTIME_DATASET_PATH=$(jq -r '.dataset.snapshot_path // empty' <<<"$staging_payload")
   export HF_HOME HF_HUB_CACHE TRANSFORMERS_CACHE OFFICIAL_MODEL_PATH
+  export OFFICIAL_RUNTIME_DATASET_PATH
   export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 }
 
@@ -1417,6 +1425,7 @@ normalized_client_parameters_json() {
     OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
     BENCHMARK_REPO="$REPO_ROOT" \
     OFFICIAL_BENCHMARK_DATASET_ROOT="$OFFICIAL_BENCHMARK_DATASET_ROOT" \
+    OFFICIAL_RUNTIME_DATASET_PATH="${OFFICIAL_RUNTIME_DATASET_PATH:-}" \
     "$HOST_PYTHON_BIN" - <<'PY'
 import json
 import os
@@ -1428,14 +1437,20 @@ from vllm_hust_benchmark.official_runtime_inputs import (
 )
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
+client_parameters = dict(payload["resolved_client_parameters"])
+runtime_dataset_path = os.environ.get("OFFICIAL_RUNTIME_DATASET_PATH")
+if runtime_dataset_path:
+    if not client_parameters.get("dataset_path"):
+        raise RuntimeError("runtime dataset path cannot replace a missing official dataset identity")
+    client_parameters["dataset_path"] = runtime_dataset_path
 ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
 benchmark_type = os.environ["BENCHMARK_TYPE"]
 normalizer = normalize_client_parameters
-normalizer_args = (payload["resolved_client_parameters"],)
+normalizer_args = (client_parameters,)
 if benchmark_type in {"throughput", "latency"}:
     normalizer = normalize_offline_benchmark_parameters
     normalizer_args = (
-        payload["resolved_client_parameters"],
+        client_parameters,
         payload["resolved_server_parameters"],
     )
 print(
@@ -2243,7 +2258,8 @@ SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
 resolve_same_spec
 
 resolved_dataset_path=$(jq -r '.resolved_client_parameters.dataset_path // empty' "$SAME_SPEC_FILE")
-ensure_runtime_dataset_available "$resolved_dataset_path"
+runtime_dataset_path=${OFFICIAL_RUNTIME_DATASET_PATH:-$resolved_dataset_path}
+ensure_runtime_dataset_available "$runtime_dataset_path"
 
 CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 

@@ -384,6 +384,7 @@ def test_docker_create_is_owned_ephemeral_and_scoped(tmp_path: Path) -> None:
     assert "dst=/data/shared_models,readonly" in rendered
     assert "dst=/data/shared_datasets,readonly" in rendered
     assert "VLLM_HUST_STRICT_HOST_ORCHESTRATED=1" in argv
+    assert "VLLM_HUST_STRICT_HOST_GATE_ATTESTED=1" in argv
     assert (
         "type=bind,src=/etc/ascend_install.info,dst=/etc/ascend_install.info,readonly"
     ) in argv
