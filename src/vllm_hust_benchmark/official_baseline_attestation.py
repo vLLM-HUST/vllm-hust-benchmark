@@ -13,6 +13,7 @@ from vllm_hust_benchmark.baseline_recovery import (
     _parameter_mismatches,
 )
 from vllm_hust_benchmark.immutable_input_attestation import (
+    resolved_input_sha256 as calculate_resolved_input_sha256,
     validate_attestation_payload,
 )
 from vllm_hust_benchmark.strict_execution_contract import (
@@ -41,6 +42,19 @@ def _load_object(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"expected JSON object: {path}")
     return payload
+
+
+def _without_request_ids(value: object) -> object:
+    """Remove client correlation IDs that do not enter the model request payload."""
+    if isinstance(value, Mapping):
+        return {
+            str(key): _without_request_ids(item)
+            for key, item in value.items()
+            if str(key) != "request_id"
+        }
+    if isinstance(value, list):
+        return [_without_request_ids(item) for item in value]
+    return value
 
 
 def _load_trace_detail_metadata(path: Path) -> tuple[dict[str, Any], int]:
@@ -490,6 +504,10 @@ def _validate_strict_execution_evidence(
     resolved_input_sha256 = str(immutable_inputs.get("resolved_input_sha256") or "")
     if not re.fullmatch(r"[0-9a-f]{64}", resolved_input_sha256):
         raise ValueError(f"resolved input hash is invalid: {repeat_dir}")
+    performance_input_sha256 = calculate_resolved_input_sha256(
+        input_kind=expected_input_kind,
+        inputs=_without_request_ids(immutable_inputs.get("resolved_inputs")),
+    )
 
     chip_count = int((target.get("hardware") or {}).get("chip_count") or 0)
     lease = evidence.get("lease")
@@ -795,6 +813,7 @@ def _validate_strict_execution_evidence(
         "model_revision": expected_model_revision,
         "data_identity_kind": expected_data_identity.get("kind"),
         "resolved_input_sha256": resolved_input_sha256,
+        "performance_input_sha256": performance_input_sha256,
         "service_port": service_port,
         "physical_npu_ids": devices,
         "host_pids": host_pids,
@@ -970,7 +989,7 @@ def attest_completed_baseline(
             raise ValueError(f"duplicate strict startup identity: {repeat_dir}")
         strict_startup_ids.add(strict_startup_id)
         if strict_evidence["data_identity_kind"] != "nondeterministic-vllm-generator":
-            deterministic_input_hashes.add(strict_evidence["resolved_input_sha256"])
+            deterministic_input_hashes.add(strict_evidence["performance_input_sha256"])
         provenance = (repeat_entry.get("metadata") or {}).get(
             "runtime_provenance"
         ) or {}
@@ -1154,6 +1173,7 @@ def attest_completed_baseline(
         "exact_target_match": True,
         "transport_port_policy": "performance-equivalent-loopback-relocation",
         "selected_transport_port_relocation": selected_port_relocation,
+        "input_equivalence_policy": "ignore-client-correlation-request-id",
         "zero_failed_requests": True,
         "repeats": repeat_records,
     }

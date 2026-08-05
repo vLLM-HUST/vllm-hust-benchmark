@@ -1254,6 +1254,28 @@ def test_rejects_deterministic_input_drift(tmp_path: Path) -> None:
         )
 
 
+def test_accepts_client_correlation_request_id_drift(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    for index, repeat in enumerate(sorted(results.glob("repeat-*")), start=1):
+        resolved_inputs = [{"prompt": "fixed", "request_id": f"run-{index}-0"}]
+        _mutate_immutable_input(
+            repeat,
+            resolved_inputs=resolved_inputs,
+            resolved_input_sha256=resolved_input_sha256(
+                input_kind="throughput-sample-requests",
+                inputs=resolved_inputs,
+            ),
+        )
+
+    attest_completed_baseline(
+        repo, staged, results, repo / "out", verified_by="test-review"
+    )
+    suite = json.loads((repo / "out" / "repeat_suite.json").read_text())
+    assert suite["input_equivalence_policy"] == ("ignore-client-correlation-request-id")
+    assert len({repeat["resolved_input_sha256"] for repeat in suite["repeats"]}) == 3
+    assert len({repeat["performance_input_sha256"] for repeat in suite["repeats"]}) == 1
+
+
 def test_rejects_pre_start_snapshots_less_than_15_seconds_apart(
     tmp_path: Path,
 ) -> None:
