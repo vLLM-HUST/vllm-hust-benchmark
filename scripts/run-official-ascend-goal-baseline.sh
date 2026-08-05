@@ -1321,13 +1321,24 @@ PY
 stage_flat_hf_inputs() {
   local staging_root="$RESULT_DIR/hf-cache-staging"
   local staging_payload
+  local data_identity_kind
   local args=(
     --repo-root "$REPO_ROOT"
     --spec "$SPEC_FILE"
     --scratch-root "$staging_root"
     --model-source "$OFFICIAL_FLAT_MODEL_SOURCE"
   )
-  if [[ -n "$OFFICIAL_FLAT_DATASET_SOURCE" ]]; then
+  data_identity_kind=$(PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \
+    "$HOST_PYTHON_BIN" - "$REPO_ROOT" "$SPEC_FILE" <<'PY'
+import sys
+from pathlib import Path
+
+from vllm_hust_benchmark.hf_cache_staging import target_data_identity_kind
+
+print(target_data_identity_kind(Path(sys.argv[1]), Path(sys.argv[2])))
+PY
+  )
+  if [[ "$data_identity_kind" == "huggingface-dataset" && -n "$OFFICIAL_FLAT_DATASET_SOURCE" ]]; then
     args+=(--dataset-source "$OFFICIAL_FLAT_DATASET_SOURCE")
   fi
   staging_payload=$(PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" \

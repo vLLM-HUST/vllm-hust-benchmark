@@ -191,6 +191,52 @@ def test_registry_identity_mismatch_fails_closed(tmp_path: Path) -> None:
         staging._registry_target(repo, spec)
 
 
+@pytest.mark.parametrize(
+    ("kind", "expected"),
+    [
+        ("huggingface-dataset", "huggingface-dataset"),
+        ("huggingface-file", "huggingface-file"),
+        ("release-asset", "release-asset"),
+    ],
+)
+def test_target_data_kind_comes_from_the_hashed_registry_contract(
+    tmp_path: Path, kind: str, expected: str
+) -> None:
+    repo = tmp_path / "repo"
+    spec = repo / "docs" / "target.json"
+    spec.parent.mkdir(parents=True)
+    data_identity = {"kind": kind, "repository": DATASET_REPOSITORY}
+    spec_payload = {
+        "model": MODEL_REPOSITORY,
+        "model_revision": MODEL_REVISION,
+        "data_identity": data_identity,
+    }
+    spec.write_text(json.dumps(spec_payload), encoding="utf-8")
+    registry_path = repo / "src/vllm_hust_benchmark/data/official_targets.json"
+    registry_path.parent.mkdir(parents=True)
+    registry_path.write_text(
+        json.dumps(
+            {
+                "targets": [
+                    {
+                        "source_spec": {
+                            "path": "docs/target.json",
+                            "sha256": staging._sha256(spec),
+                        },
+                        "model": {
+                            "id": MODEL_REPOSITORY,
+                            "revision": MODEL_REVISION,
+                        },
+                        "workload": {"data_identity": data_identity},
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert staging.target_data_identity_kind(repo, spec) == expected
+
+
 def test_official_runner_stages_before_model_and_contract_resolution() -> None:
     script = (
         Path(__file__).parents[1] / "scripts/run-official-ascend-goal-baseline.sh"
@@ -202,3 +248,5 @@ def test_official_runner_stages_before_model_and_contract_resolution() -> None:
     )
     assert staging_call < model_resolution < contract
     assert "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1" in script
+    assert '[[ "$data_identity_kind" == "huggingface-dataset"' in script
+    assert 'args+=(--dataset-source "$OFFICIAL_FLAT_DATASET_SOURCE")' in script

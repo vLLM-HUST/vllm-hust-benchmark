@@ -248,6 +248,15 @@ def _registry_target(repo_root: Path, spec_path: Path) -> dict[str, Any]:
     return target
 
 
+def target_data_identity_kind(repo_root: Path, spec_path: Path) -> str:
+    """Return the data kind only after the spec matches its hashed registry target."""
+    target = _registry_target(repo_root, spec_path)
+    data = target["workload"].get("data_identity")
+    if not isinstance(data, dict) or not isinstance(data.get("kind"), str):
+        raise StagingFailure("official target lacks a data identity kind")
+    return data["kind"]
+
+
 def stage_target(
     *,
     repo_root: Path,
