@@ -953,7 +953,13 @@ def attest_completed_baseline(
     model_artifact_digests: set[str] = set()
     deterministic_input_hashes: set[str] = set()
 
-    for repeat_dir in sorted(result_spec_dir.glob("repeat-*")):
+    for repeat_link in sorted(result_spec_dir.glob("repeat-*")):
+        # A strict campaign may run independent repeats on different hosts.
+        # The aggregation directory can therefore contain symlinks to evidence
+        # restored at each repeat's original, attested repository mount path.
+        # Resolve the link before validating absolute host-path relationships;
+        # every referenced evidence file and its hash are still checked below.
+        repeat_dir = repeat_link.resolve()
         raw_path = repeat_dir / "raw_benchmark_result.json"
         repeat_artifact_path = repeat_dir / "submission" / "run_leaderboard.json"
         runner_log_path = repeat_dir / "runner.log"

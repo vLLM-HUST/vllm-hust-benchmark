@@ -1000,6 +1000,31 @@ def test_normalizes_performance_equivalent_loopback_port_relocation(
     }
 
 
+def test_resolves_cross_host_repeat_aggregation_symlinks(tmp_path: Path) -> None:
+    repo, staged, results, entry, target = _fixture(tmp_path)
+    aggregate = repo / "cross-host-repeat-links"
+    aggregate.mkdir()
+    try:
+        for repeat in sorted(results.glob("repeat-*")):
+            (aggregate / repeat.name).symlink_to(repeat, target_is_directory=True)
+    except OSError:
+        pytest.skip("directory symlinks are unavailable")
+    output = repo / "submissions" / "target-cross-host"
+
+    attested = attest_completed_baseline(
+        repo,
+        staged,
+        aggregate,
+        output,
+        verified_by="test-review",
+        verified_at="2026-08-02T00:00:00Z",
+    )
+
+    assert attested["metadata"]["verification_attestation"][
+        "successful_repeats"
+    ] == 3
+
+
 def test_rejects_port_relocation_not_bound_to_strict_evidence(
     tmp_path: Path,
 ) -> None:

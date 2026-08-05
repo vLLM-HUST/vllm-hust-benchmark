@@ -16,8 +16,8 @@ def test_attested_baselines_reduce_the_strict_rerun_queue() -> None:
     summary = report["summary"]
     assert summary["scanned"] == 19
     assert summary["active_public_candidates"] == 9
-    assert summary["recoverable"] == 7
-    assert summary["rerun_required"] == 2
+    assert summary["recoverable"] == 8
+    assert summary["rerun_required"] == 1
     assert summary["recoverable"] + summary["rerun_required"] == 9
     assert summary["provisional_or_specialty"] == 10
     assert len(report["rerun_specs"]) == summary["rerun_required"]
@@ -101,7 +101,7 @@ def test_cli_stdout_is_machine_readable_and_require_recoverable_succeeds() -> No
         command, cwd=REPO_ROOT, check=False, capture_output=True, text=True
     )
     assert completed.returncode == 0
-    assert json.loads(completed.stdout)["summary"]["recoverable"] == 7
+    assert json.loads(completed.stdout)["summary"]["recoverable"] == 8
     assert "baseline recovery audit:" in completed.stderr
 
     required = subprocess.run(
@@ -112,4 +112,4 @@ def test_cli_stdout_is_machine_readable_and_require_recoverable_succeeds() -> No
         text=True,
     )
     assert required.returncode == 0
-    assert json.loads(required.stdout)["summary"]["recoverable"] == 7
+    assert json.loads(required.stdout)["summary"]["recoverable"] == 8
