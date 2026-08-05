@@ -3,10 +3,18 @@
 Covers:
 - Runner name → physical device resolution.
 - ``docker create`` command carries labels, device mapping, env, and rejects
-  forbidden volumes / reserved env overrides.
+  forbidden volumes / reserved env overrides / argument injection.
 - ``validate_container_inspect`` accepts a matching contract and rejects
-  wrong labels, wrong device mapping, forbidden bind mounts, privileged
-  mode, dangerous capabilities, and shared/slave propagation.
+  wrong labels, wrong/extra device mapping, forbidden bind mounts, named
+  volumes, privileged mode, dangerous capabilities, and shared/slave
+  propagation.
+
+PR #150 review fixes:
+- Argument injection: image/name/command starting with ``-`` is rejected; a
+  ``--`` separator is emitted before the image.
+- Host path blacklist covers sub-paths (``/proc/1/root``, ``/sys/kernel``).
+- Named volumes are rejected (local driver can bind ``/`` to a named volume).
+- Device mapping is an exact set: extra ``davinci*`` devices are rejected.
 """
 
 from __future__ import annotations
@@ -14,6 +22,7 @@ from __future__ import annotations
 import pytest
 
 from vllm_hust_benchmark.runner_ownership import (
+    CONTROL_DEVICES,
     LOGICAL_DEVICE_LABEL,
     PHYSICAL_DEVICE_LABEL,
     RUNNER_LABEL,
@@ -24,7 +33,15 @@ from vllm_hust_benchmark.runner_ownership import (
 
 
 def _inspect_payload(runner_name: str, physical_device: int) -> dict:
-    """Return a minimal valid docker inspect payload for the given assignment."""
+    """Return a valid docker inspect payload with the exact expected devices."""
+    devices = [
+        {
+            "PathOnHost": f"/dev/davinci{physical_device}",
+            "PathInContainer": "/dev/davinci0",
+        }
+    ]
+    for device in CONTROL_DEVICES:
+        devices.append({"PathOnHost": device, "PathInContainer": device})
     return {
         "Config": {
             "Labels": {
@@ -34,14 +51,7 @@ def _inspect_payload(runner_name: str, physical_device: int) -> dict:
             },
             "Env": ["ASCEND_RT_VISIBLE_DEVICES=0", "ASCEND_VISIBLE_DEVICES=0"],
         },
-        "HostConfig": {
-            "Devices": [
-                {
-                    "PathOnHost": f"/dev/davinci{physical_device}",
-                    "PathInContainer": "/dev/davinci0",
-                }
-            ]
-        },
+        "HostConfig": {"Devices": devices},
     }
 
 
@@ -83,7 +93,10 @@ def test_docker_command_carries_watchdog_contract() -> None:
     assert "org.vllm-hust.npu-physical=2" in joined
     assert "/dev/davinci2:/dev/davinci0" in joined
     assert "ASCEND_RT_VISIBLE_DEVICES=0" in joined
-    assert command[-3:] == ["example/ascend:latest", "python", "run.py"]
+    # ``--`` separator must precede image so Docker treats it as positional.
+    sep_index = command.index("--")
+    assert command[sep_index + 1] == "example/ascend:latest"
+    assert command[sep_index + 2 :] == ["python", "run.py"]
 
 
 def test_docker_command_includes_control_devices() -> None:
@@ -134,6 +147,68 @@ def test_docker_command_rejects_empty_image() -> None:
         )
 
 
+# --- argument injection guards (PR #150 review) ---
+
+
+@pytest.mark.parametrize(
+    "image",
+    [
+        "--device=/dev/davinci1:/dev/davinci1",
+        "-v",
+        "--privileged",
+    ],
+)
+def test_docker_command_rejects_option_like_image(image: str) -> None:
+    """A caller must not inject docker options via the image field."""
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="must not start with '-'"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image=image,
+            command=["ubuntu"],
+        )
+
+
+def test_docker_command_rejects_option_like_name() -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="must not start with '-'"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="--label=evil",
+            image="example/ascend:latest",
+            command=[],
+        )
+
+
+@pytest.mark.parametrize("cmd_element", ["--device=/dev/davinci1:/dev/davinci1", "-v"])
+def test_docker_command_rejects_option_like_command_element(cmd_element: str) -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="must not start with '-'"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[cmd_element, "ubuntu"],
+        )
+
+
+def test_docker_command_emits_separator_before_image() -> None:
+    """``--`` must appear before the image token."""
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    command = build_docker_create_command(
+        assignment=assignment,
+        container_name="benchmark-job",
+        image="example/ascend:latest",
+        command=["python", "run.py"],
+    )
+    assert "--" in command
+    sep_index = command.index("--")
+    # Image and command must all be after the separator.
+    assert command[sep_index + 1] == "example/ascend:latest"
+    assert command[sep_index + 2 :] == ["python", "run.py"]
+
+
 # ---------------------------------------------------------------------------
 # validate_container_inspect — acceptance
 # ---------------------------------------------------------------------------
@@ -148,7 +223,7 @@ def test_validate_container_inspect_rejects_wrong_device() -> None:
     assignment = resolve_runner_device("poy-180-21rc-npu3")
     payload = _inspect_payload(assignment.runner_name, 3)
     payload["HostConfig"]["Devices"][0]["PathOnHost"] = "/dev/davinci2"
-    with pytest.raises(ValueError, match="mapping is missing or incorrect"):
+    with pytest.raises(ValueError, match="extra device mappings"):
         validate_container_inspect(payload, assignment)
 
 
@@ -165,6 +240,30 @@ def test_validate_container_inspect_rejects_missing_env() -> None:
     payload = _inspect_payload(assignment.runner_name, 0)
     payload["Config"]["Env"] = ["ASCEND_RT_VISIBLE_DEVICES=0"]
     with pytest.raises(ValueError, match="logical-device environment"):
+        validate_container_inspect(payload, assignment)
+
+
+# --- extra device rejection (PR #150 review) ---
+
+
+def test_inspect_rejects_extra_davinci_device() -> None:
+    """A container mapping an extra NPU card must be rejected (exact set)."""
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["HostConfig"]["Devices"].append(
+        {"PathOnHost": "/dev/davinci1", "PathInContainer": "/dev/davinci1"}
+    )
+    with pytest.raises(ValueError, match="extra device mappings"):
+        validate_container_inspect(payload, assignment)
+
+
+def test_inspect_rejects_missing_control_device() -> None:
+    """A container missing a control device must be rejected (exact set)."""
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    # Remove the last control device.
+    payload["HostConfig"]["Devices"].pop()
+    with pytest.raises(ValueError, match="missing or incorrect"):
         validate_container_inspect(payload, assignment)
 
 
@@ -185,6 +284,33 @@ def test_validate_container_inspect_rejects_missing_env() -> None:
     ],
 )
 def test_docker_command_rejects_bypass_volume(volume_spec: str) -> None:
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="forbidden host path"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[],
+            volumes=[volume_spec],
+        )
+
+
+# --- sub-path blacklist (PR #150 review) ---
+
+
+@pytest.mark.parametrize(
+    "volume_spec",
+    [
+        "/proc/1/root:/workspace",  # procfs sub-path escape
+        "/proc/self:/workspace",  # procfs sub-path
+        "/sys/kernel:/workspace",  # sysfs sub-path
+        "/sys/class/devdrv0:/workspace",  # NPU driver sysfs sub-path
+        "/dev/shm:/workspace",  # /dev sub-path
+        "/usr/local/Ascend/driver:/workspace",  # CANN sub-path
+    ],
+)
+def test_docker_command_rejects_forbidden_subpath(volume_spec: str) -> None:
+    """Forbidden host paths must also cover their sub-paths."""
     assignment = resolve_runner_device("poy-180-21rc-npu0")
     with pytest.raises(ValueError, match="forbidden host path"):
         build_docker_create_command(
@@ -241,18 +367,40 @@ def test_docker_command_accepts_workspace_volume() -> None:
     assert "/host/cache:/root/.cache" in joined
 
 
-def test_docker_command_accepts_named_and_anonymous_volumes() -> None:
+# --- named volume rejection (PR #150 review) ---
+
+
+@pytest.mark.parametrize(
+    "volume_spec",
+    [
+        "my_vol:/workspace",  # named volume
+        "data_vol:/data",  # named volume to allowed destination
+    ],
+)
+def test_docker_command_rejects_named_volume(volume_spec: str) -> None:
+    """Named volumes are rejected (local driver can bind / to a named volume)."""
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="named volumes are not allowed"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[],
+            volumes=[volume_spec],
+        )
+
+
+def test_docker_command_accepts_anonymous_volume() -> None:
+    """Anonymous volumes (container path only) are safe and accepted."""
     assignment = resolve_runner_device("poy-180-21rc-npu0")
     command = build_docker_create_command(
         assignment=assignment,
         container_name="benchmark-job",
         image="example/ascend:latest",
         command=[],
-        volumes=["my_vol:/workspace", "/tmp"],
+        volumes=["/tmp"],
     )
-    joined = " ".join(command)
-    assert "my_vol:/workspace" in joined
-    assert "/tmp" in joined
+    assert "/tmp" in " ".join(command)
 
 
 def test_docker_command_accepts_readonly_option() -> None:
@@ -387,3 +535,55 @@ def test_inspect_accepts_tmpfs_mount() -> None:
         }
     ]
     validate_container_inspect(payload, assignment)
+
+
+# --- named volume rejection in inspect (PR #150 review) ---
+
+
+def test_inspect_rejects_named_volume() -> None:
+    """Named volumes in inspect payload must be rejected."""
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["Mounts"] = [
+        {
+            "Type": "volume",
+            "Name": "my_vol",
+            "Source": "/var/lib/docker/volumes/my_vol/_data",
+            "Destination": "/workspace",
+            "Mode": "rw",
+            "RW": True,
+            "Propagation": "rprivate",
+        }
+    ]
+    with pytest.raises(ValueError, match="named volume"):
+        validate_container_inspect(payload, assignment)
+
+
+# --- sub-path rejection in inspect (PR #150 review) ---
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "/proc/1/root",  # procfs sub-path escape
+        "/sys/kernel",  # sysfs sub-path
+        "/dev/shm",  # /dev sub-path
+        "/usr/local/Ascend/driver",  # CANN sub-path
+    ],
+)
+def test_inspect_rejects_forbidden_subpath(source: str) -> None:
+    """Forbidden host path sub-paths must be rejected in inspect too."""
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["Mounts"] = [
+        {
+            "Type": "bind",
+            "Source": source,
+            "Destination": "/workspace",
+            "Mode": "rw",
+            "RW": True,
+            "Propagation": "rprivate",
+        }
+    ]
+    with pytest.raises(ValueError, match="forbidden bind mount source"):
+        validate_container_inspect(payload, assignment)
