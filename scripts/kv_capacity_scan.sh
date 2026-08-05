@@ -650,8 +650,20 @@ run_part_b() {
             if ! run_single_experiment \
                 "$TIERING_WORKLOAD" "$config_kv_gib" "$rep" \
                 "$output_dir" "$config_kv_transfer"; then
-                log "ERROR: Part B experiment failed (rep=$rep config=$config)"
-                exit 1
+                # tiering-enabled relies on SimpleCPUOffloadConnector which is
+                # currently incompatible with the Ascend KV cache layout (vLLM
+                # bug: storage.nbytes() not divisible by num_blocks).  Record
+                # the failure and continue so that hbm-only and tiering-disabled
+                # results are still collected.
+                if [ "$config" = "tiering-enabled" ]; then
+                    log "  WARNING: tiering-enabled failed (rep=$rep) — \
+recording as blocked, continuing"
+                    echo "BLOCKED: SimpleCPUOffloadConnector incompatible with \
+Ascend KV cache layout" > "$output_dir/STATUS"
+                else
+                    log "ERROR: Part B experiment failed (rep=$rep config=$config)"
+                    exit 1
+                fi
             fi
         done
     done
