@@ -450,6 +450,7 @@ def _build_parser() -> argparse.ArgumentParser:
     export_parser.add_argument("--benchmark-result-file")
     export_parser.add_argument("--constraints-file")
     export_parser.add_argument("--same-spec-file")
+    export_parser.add_argument("--spec-path")
     export_parser.add_argument("--output-dir", required=True)
     export_parser.add_argument("--artifact-name", default="run_leaderboard.json")
     export_parser.add_argument("--run-id", required=True)
@@ -699,6 +700,9 @@ def _build_parser() -> argparse.ArgumentParser:
     submit_parser.add_argument("--github-pr-url")
     submit_parser.add_argument(
         "--same-spec-file", help="Path to same-spec benchmark spec file."
+    )
+    submit_parser.add_argument(
+        "--spec-path", help="Path to the source official workload specification."
     )
     submit_parser.add_argument(
         "--runtime-python", help="Python interpreter used to run the engine."
@@ -1073,6 +1077,7 @@ def main(argv: list[str] | None = None) -> int:
         same_spec_file = (
             Path(args.same_spec_file).resolve() if args.same_spec_file else None
         )
+        spec_path = Path(args.spec_path).resolve() if args.spec_path else None
         try:
             artifact_path, manifest_path = export_leaderboard_artifacts(
                 scenario=scenario,
@@ -1124,6 +1129,7 @@ def main(argv: list[str] | None = None) -> int:
                 plugin_source_repository=args.plugin_source_repository,
                 plugin_source_ref=args.plugin_source_ref,
                 plugin_source_commit=args.plugin_source_commit,
+                spec_path=spec_path,
             )
         except (OSError, ValueError) as error:
             print(str(error), file=sys.stderr)
@@ -1318,6 +1324,9 @@ def main(argv: list[str] | None = None) -> int:
             if getattr(args, "same_spec_file", None)
             else None
         )
+        spec_path = (
+            Path(args.spec_path).resolve() if getattr(args, "spec_path", None) else None
+        )
         try:
             artifact_path, manifest_path = export_leaderboard_artifacts(
                 scenario=scenario,
@@ -1371,6 +1380,7 @@ def main(argv: list[str] | None = None) -> int:
                 ),
                 plugin_source_ref=getattr(args, "plugin_source_ref", None),
                 plugin_source_commit=getattr(args, "plugin_source_commit", None),
+                spec_path=spec_path,
             )
         except (OSError, ValueError) as error:
             print(str(error), file=sys.stderr)

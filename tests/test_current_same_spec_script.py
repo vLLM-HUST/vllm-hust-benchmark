@@ -341,6 +341,10 @@ def test_current_same_spec_runner_aggregates_measured_runs_after_export() -> Non
     aggregate_index = script.index("perfgate-aggregate-runs \\")
     assert aggregate_index > export_index
 
+    export_args_index = script.index("EXPORT_ARGS=(")
+    export_block = script[export_args_index:export_index]
+    assert '--spec-path "$SPEC_FILE"' in export_block
+
     aggregate_block = script[
         script.index(
             'if [[ "$PERFGATE_WARMUP_RUNS" -gt 0 || "$PERFGATE_MEASURED_RUNS" -gt 1 ]]'

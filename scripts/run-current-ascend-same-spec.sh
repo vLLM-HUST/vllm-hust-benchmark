@@ -1279,6 +1279,7 @@ EXPORT_ARGS=(
   --benchmark-result-file "$RAW_RESULT_FILE"
   --constraints-file "$CONSTRAINTS_FILE"
   --same-spec-file "$SAME_SPEC_FILE"
+  --spec-path "$SPEC_FILE"
   --output-dir "$ARTIFACT_DIR"
   --run-id "$RUN_ID"
   --engine "$CURRENT_ENGINE"
