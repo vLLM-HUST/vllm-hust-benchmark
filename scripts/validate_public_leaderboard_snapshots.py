@@ -108,8 +108,8 @@ def parse_optional_int(value: Any) -> int | None:
         return None
 
 
-def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
-    """Allow the separately pinned production-trace baseline family fail closed."""
+def is_attested_production_trace_entry(entry: dict[str, Any]) -> bool:
+    """Allow a registry-pinned production-trace comparison entry fail closed."""
     if (
         not OFFICIAL_TARGET_REGISTRY.is_file()
         or not OFFICIAL_TARGET_REGISTRY_CHECKSUM.is_file()
@@ -133,8 +133,12 @@ def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
         if isinstance(metadata.get("verification_attestation"), dict)
         else {}
     )
-    if not (
-        entry.get("engine") == PUBLIC_BASELINE_ENGINE
+    comparison_side = str(attestation.get("comparison_side") or "baseline")
+    expected_engine = (
+        PUBLIC_BASELINE_ENGINE if comparison_side == "baseline" else "vllm-hust"
+    )
+    if comparison_side not in ("baseline", "current") or not (
+        entry.get("engine") == expected_engine
         and metadata.get("verified") is True
         and metadata.get("target_id") == target_id
         and metadata.get("profile_id") == PRODUCTION_TRACE_PROFILE
@@ -167,9 +171,8 @@ def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
     workload = entry.get("workload") if isinstance(entry.get("workload"), dict) else {}
     runtime = target.get("baseline_runtime") or {}
     provenance = metadata.get("runtime_provenance") or {}
-    return bool(
-        entry.get("engine_version") == runtime.get("engine_version")
-        and workload.get("name") == (target.get("workload") or {}).get("name")
+    identity_matches = bool(
+        workload.get("name") == (target.get("workload") or {}).get("name")
         and (model.get("name") or model.get("repo_id"))
         == (target.get("model") or {}).get("id")
         and model.get("precision") == (target.get("model") or {}).get("precision")
@@ -177,6 +180,16 @@ def is_attested_production_trace_baseline(entry: dict[str, Any]) -> bool:
         == (target.get("hardware") or {}).get("chip_model")
         and hardware.get("chip_count")
         == (target.get("hardware") or {}).get("chip_count")
+    )
+    if not identity_matches:
+        return False
+    if comparison_side == "current":
+        return bool(
+            (provenance.get("engine") or {}).get("commit")
+            and (provenance.get("plugin") or {}).get("commit")
+        )
+    return bool(
+        entry.get("engine_version") == runtime.get("engine_version")
         and (provenance.get("engine") or {}).get("commit") == runtime.get("core_commit")
         and (provenance.get("plugin") or {}).get("commit")
         == runtime.get("backend_commit")
@@ -201,12 +214,12 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     )
     spec_id = str(same_spec.get("spec_id") or "")
     metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
-    production_trace_baseline = is_attested_production_trace_baseline(entry)
+    production_trace_entry = is_attested_production_trace_entry(entry)
 
     if (
         engine == PUBLIC_BASELINE_ENGINE
         and engine_version != PUBLIC_BASELINE_VERSION
-        and not production_trace_baseline
+        and not production_trace_entry
     ):
         errors.append(
             f"{source.name}:{entry_id}: public vllm baseline must be "
@@ -230,7 +243,7 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         )
     if (
         entry_precision_value in RETIRED_PUBLIC_PRECISIONS
-        and not production_trace_baseline
+        and not production_trace_entry
     ):
         errors.append(
             f"{source.name}:{entry_id}: retired public precision "

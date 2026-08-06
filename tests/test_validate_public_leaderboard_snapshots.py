@@ -152,6 +152,26 @@ def test_accepts_only_attested_registered_production_trace_baseline() -> None:
     assert any("retired public precision 'BF16'" in error for error in errors)
 
 
+def test_accepts_attested_registered_production_trace_current() -> None:
+    module = load_module()
+    repo_root = Path(__file__).resolve().parents[1]
+    artifact = json.loads(
+        (
+            repo_root
+            / "submissions"
+            / "official-ascend-jan-2026-v0.22.1rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2-current-4a6f5b1ce-a36e8081"
+            / "run_leaderboard.json"
+        ).read_text(encoding="utf-8")
+    )
+
+    assert module.validate_entry(artifact, source=Path("leaderboard_multi.json")) == []
+
+    spoofed = copy.deepcopy(artifact)
+    spoofed["metadata"]["verification_attestation"].pop("comparison_side")
+    errors = module.validate_entry(spoofed, source=Path("leaderboard_multi.json"))
+    assert any("retired public precision 'BF16'" in error for error in errors)
+
+
 def test_compare_snapshot_rejects_mismatched_resolved_hashes(tmp_path: Path) -> None:
     module = load_module()
     left = entry("left", same_spec())
