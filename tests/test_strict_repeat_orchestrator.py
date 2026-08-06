@@ -356,6 +356,18 @@ def test_session_filter_excludes_complete_ancestor_chain() -> None:
     assert conflicts == ["  99 1 other external-benchmark target-a :18080"]
 
 
+def test_session_filter_allows_same_target_on_different_port() -> None:
+    conflicts = orchestrator.benchmark_session_conflicts(
+        tmux_output="20\ttarget-a:18422\t1\t0\n",
+        screen_output="30.target-a-18422\n",
+        process_output="  40 1 40 /scope user benchmark target-a :18422\n",
+        target_id="target-a",
+        service_port=18431,
+        excluded_pids=set(),
+    )
+    assert conflicts == []
+
+
 def test_process_ancestor_chain_contains_self_and_init() -> None:
     ancestors = orchestrator.process_ancestor_pids()
     assert orchestrator.os.getpid() in ancestors

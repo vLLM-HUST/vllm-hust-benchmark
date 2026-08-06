@@ -448,8 +448,13 @@ def benchmark_session_conflicts(
     service_port: int,
     excluded_pids: set[int],
 ) -> list[str]:
-    """Find relevant sessions while excluding the orchestrator's full ancestry."""
-    pattern = re.compile(rf"({re.escape(target_id)}|:{service_port}\b)", re.I)
+    """Find sessions using this repeat's port, excluding our full ancestry.
+
+    A target id alone is not a conflict: independent repeats of the same target
+    may safely share a host when their physical NPUs, leases, and ports differ.
+    """
+    del target_id
+    pattern = re.compile(rf":{service_port}\b", re.I)
     conflicts = []
     for text in (tmux_output, screen_output, process_output):
         for line in text.splitlines():
