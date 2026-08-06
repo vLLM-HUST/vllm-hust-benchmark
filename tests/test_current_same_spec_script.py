@@ -338,3 +338,15 @@ def test_current_same_spec_runner_checks_xxhash_before_server_start() -> None:
     resolve_index = script.index("resolve_same_spec", verify_index)
     assert 'required_modules = ("xxhash",)' in script
     assert verify_index < resolve_index
+
+
+def test_current_same_spec_runner_uses_trace_replay_for_trace_targets() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    client = _function_text(script, "run_client_command")
+
+    assert 'if [[ -n "${TRACE_TARGET_ID:-}" ]]' in client
+    assert "-m vllm_hust_benchmark.trace_replay replay" in client
+    assert '--trace-path "$TRACE_ASSET_PATH"' in client
+    assert '--summary-output "$RAW_RESULT_FILE"' in client
+    assert '--output "$TRACE_DETAIL_RESULT_FILE"' in client
+    assert '--dry-run >"$RESULT_DIR/trace_replay_plan.json"' in script

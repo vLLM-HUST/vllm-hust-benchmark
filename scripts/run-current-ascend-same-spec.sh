@@ -37,6 +37,7 @@ CURRENT_ENV_PREFIX=${CURRENT_ENV_PREFIX:-"/root/miniconda3/envs/vllm-hust-dev"}
 CURRENT_RUNTIME_PYTHON=${CURRENT_RUNTIME_PYTHON:-"$CURRENT_ENV_PREFIX/bin/python"}
 CURRENT_VLLM_CACHE_ROOT=${CURRENT_VLLM_CACHE_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/current-ascend-same-spec-cache"}
 CURRENT_BENCHMARK_DATASET_ROOT=${CURRENT_BENCHMARK_DATASET_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/current-benchmark-datasets"}
+CURRENT_TRACE_ASSET_ROOT=${CURRENT_TRACE_ASSET_ROOT:-"$REPO_ROOT/.benchmarks/traces"}
 CURRENT_SHAREGPT_DATASET_URL=${CURRENT_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
 HF_HOME=${HF_HOME:-"/data/shared_datasets/vllm-hust-benchmark/huggingface"}
 HF_HUB_CACHE=${HF_HUB_CACHE:-"$HF_HOME/hub"}
@@ -515,6 +516,25 @@ run_server_command() {
 }
 
 run_client_command() {
+  if [[ -n "${TRACE_TARGET_ID:-}" ]]; then
+    run_in_current_runtime "$REPO_ROOT/src:$CURRENT_RUNTIME_PYTHONPATH" \
+      "$CURRENT_RUNTIME_PYTHON" -m vllm_hust_benchmark.trace_replay replay \
+      "$TRACE_TARGET_ID" \
+      --trace-path "$TRACE_ASSET_PATH" \
+      --model "$RUNTIME_MODEL" \
+      --base-url "http://${CLIENT_HOST}:${CLIENT_PORT}" \
+      --endpoint "$TRACE_ENDPOINT" \
+      --max-model-len "$TRACE_MAX_MODEL_LEN" \
+      --max-requests "$TRACE_MAX_REQUESTS" \
+      --max-concurrency "$TRACE_MAX_CONCURRENCY" \
+      --timeout-s "$TRACE_TIMEOUT_S" \
+      --overflow-policy "$TRACE_OVERFLOW_POLICY" \
+      --time-scale "$TRACE_TIME_SCALE" \
+      --max-interarrival-s "$TRACE_MAX_INTERARRIVAL_S" \
+      --output "$TRACE_DETAIL_RESULT_FILE" \
+      --summary-output "$RAW_RESULT_FILE"
+    return
+  fi
   case "$BENCHMARK_TYPE" in
     serve)
       run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
@@ -1138,6 +1158,38 @@ RAW_RESULT_FILE="$RESULT_DIR/raw_benchmark_result.json"
 ARTIFACT_DIR="$RESULT_DIR/submission"
 SERVER_STDOUT_LOG="$RESULT_DIR/server.stdout.log"
 OFFLINE_GRAPH_PROOF_FILE="$RESULT_DIR/offline_graph_proof.json"
+TRACE_TARGET_ID=$(jq -r '.resolved_client_parameters.trace_target_id // empty' "$SAME_SPEC_FILE")
+TRACE_ASSET_NAME=$(jq -r '.resolved_client_parameters.trace_asset // empty' "$SAME_SPEC_FILE")
+TRACE_ASSET_PATH=""
+TRACE_ENDPOINT=$(jq -r '.resolved_client_parameters.endpoint // "/v1/completions"' "$SAME_SPEC_FILE")
+TRACE_MAX_MODEL_LEN=$(jq -r '.resolved_server_parameters.max_model_len' "$SAME_SPEC_FILE")
+TRACE_MAX_REQUESTS=$(jq -r '.resolved_client_parameters.max_requests // 1000' "$SAME_SPEC_FILE")
+TRACE_MAX_CONCURRENCY=$(jq -r '.resolved_client_parameters.max_concurrency // 64' "$SAME_SPEC_FILE")
+TRACE_TIMEOUT_S=$(jq -r '.resolved_client_parameters.timeout_s // 600' "$SAME_SPEC_FILE")
+TRACE_OVERFLOW_POLICY=$(jq -r '.resolved_client_parameters.overflow_policy // "reject"' "$SAME_SPEC_FILE")
+TRACE_TIME_SCALE=$(jq -r '.resolved_client_parameters.time_scale // 1' "$SAME_SPEC_FILE")
+TRACE_MAX_INTERARRIVAL_S=$(jq -r '.resolved_client_parameters.max_interarrival_s // 1' "$SAME_SPEC_FILE")
+TRACE_DETAIL_RESULT_FILE="$RESULT_DIR/trace_replay_results.jsonl"
+if [[ -n "$TRACE_TARGET_ID" ]]; then
+  TRACE_ASSET_PATH="$CURRENT_TRACE_ASSET_ROOT/$TRACE_ASSET_NAME"
+  if [[ ! -f "$TRACE_ASSET_PATH" ]]; then
+    echo "current same-spec trace asset not found: $TRACE_ASSET_PATH" >&2
+    exit 2
+  fi
+  run_in_current_runtime "$REPO_ROOT/src:$CURRENT_RUNTIME_PYTHONPATH" \
+    "$CURRENT_RUNTIME_PYTHON" -m vllm_hust_benchmark.trace_replay replay \
+    "$TRACE_TARGET_ID" \
+    --trace-path "$TRACE_ASSET_PATH" \
+    --model "$RUNTIME_MODEL" \
+    --max-model-len "$TRACE_MAX_MODEL_LEN" \
+    --max-requests "$TRACE_MAX_REQUESTS" \
+    --max-concurrency "$TRACE_MAX_CONCURRENCY" \
+    --timeout-s "$TRACE_TIMEOUT_S" \
+    --overflow-policy "$TRACE_OVERFLOW_POLICY" \
+    --time-scale "$TRACE_TIME_SCALE" \
+    --max-interarrival-s "$TRACE_MAX_INTERARRIVAL_S" \
+    --dry-run >"$RESULT_DIR/trace_replay_plan.json"
+fi
 
 if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
   SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
