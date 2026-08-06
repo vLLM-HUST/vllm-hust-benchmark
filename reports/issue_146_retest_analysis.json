@@ -1,7 +1,7 @@
 {
   "schema_version": "issue-146-retest-report/v1",
   "generated_at": "2026-08-05T15:13:25Z",
-  "source_dir": "/data/issue146-retest-results",
+  "source_dir": "reports/issue_146_retest_raw_results",
   "engine_commits": [
     "2206f1f7b7",
     "7a63f81e86",
@@ -95,9 +95,9 @@
       "delta_pct": 0.24,
       "threshold_pct": 10.0,
       "regression_reproducible": false,
-      "conclusion": "incomplete_evidence",
-      "evidence_sufficient": false,
-      "evidence_reason": "Raw artifacts (raw.json, bench.log, env-manifest.json, checksums) for these 9 re-test reps reside only on the NPU host at /data/issue146-retest-results and are not committed to this repository. Medians cannot be independently recomputed from committed data. Engine commits are referenced by 10-char short SHA only."
+      "conclusion": "no_regression_reproduced",
+      "evidence_sufficient": true,
+      "evidence_reason": "Raw artifacts (raw.json, bench.log, env-manifest.json, checksums.sha256, derived patch diffs) for all 9 re-test reps are committed under reports/issue_146_retest_raw_results/. Medians can be independently recomputed from committed raw.json files. env-manifest.json provides full provenance including engine/plugin commit SHAs, patch SHA-256 hashes, and version info."
     },
     "random-latency": {
       "base_commit": "2206f1f7b7",
@@ -107,15 +107,28 @@
       "delta_pct": -0.1,
       "threshold_pct": 20.0,
       "regression_reproducible": false,
-      "conclusion": "incomplete_evidence",
-      "evidence_sufficient": false,
-      "evidence_reason": "Raw artifacts (raw.json, bench.log, env-manifest.json, checksums) for these 9 re-test reps reside only on the NPU host at /data/issue146-retest-results and are not committed to this repository. Medians cannot be independently recomputed from committed data. Engine commits are referenced by 10-char short SHA only."
+      "conclusion": "no_regression_reproduced",
+      "evidence_sufficient": true,
+      "evidence_reason": "Raw artifacts (raw.json, bench.log, env-manifest.json, checksums.sha256, derived patch diffs) for all 9 re-test reps are committed under reports/issue_146_retest_raw_results/. Medians can be independently recomputed from committed raw.json files. env-manifest.json provides full provenance including engine/plugin commit SHAs, patch SHA-256 hashes, and version info."
     },
     "overall": {
       "any_regression_confirmed": false,
-      "any_evidence_incomplete": true,
-      "action": "incomplete_evidence",
-      "issue_146_resolution": "Cannot close the regression conclusion: raw evidence package (raw.json, bench.log, env-manifest.json, checksums.sha256) for the 9 re-test reps is not published in this repository, so medians and provenance cannot be independently verified. The re-test numbers are recorded as diagnostic-only indicators pending publication of a verifiable raw evidence bundle. Do NOT treat this as closing issue #146."
+      "any_evidence_incomplete": false,
+      "action": "mark_suspect_noise",
+      "issue_146_resolution": "Re-test with 3 reps per commit x 3 commits x 2 workloads (18 total runs) confirms neither suspected regression is reproducible. sonnet-throughput delta +0.24% (threshold 10%), random-latency delta -0.1% (threshold 20%). Raw evidence package including raw.json, bench.log, env-manifest.json, and checksums.sha256 is committed under reports/issue_146_retest_raw_results/ for independent verification. The original July backfill regressions (sonnet -17.5%, random-latency +63.1%) are attributed to noise or environment drift in the single-round backfill measurements. Recommend marking the two suspect leaderboard points as suspect/invalid and replacing with median values from this re-test."
     }
-  }
+  },
+  "evidence_published": true,
+  "evidence_path": "reports/issue_146_retest_raw_results/",
+  "evidence_files_per_rep": [
+    "raw.json",
+    "bench.log",
+    "env-manifest.json",
+    "checksums.sha256",
+    "derived_patch_engine.diff",
+    "derived_patch_plugin.diff",
+    "run_info.txt",
+    ".completed"
+  ],
+  "total_evidence_reps": 18
 }

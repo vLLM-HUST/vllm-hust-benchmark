@@ -1,0 +1,21 @@
+{
+  "engine_commit_requested": "2206f1f7b7",
+  "engine_commit_observed": "2206f1f7b7212801187bc001c5f6cb86b2289214",
+  "engine_patch_sha256": "caa8402318d0e380874a976de371be76183e05368eb2288d126080daca348822",
+  "engine_patch_file": "derived_patch_engine.diff",
+  "plugin_commit_requested": "b2328661bd54079ce95eee78037ed9166d52e983",
+  "plugin_commit_observed": "b2328661bd54079ce95eee78037ed9166d52e983",
+  "plugin_patch_sha256": "1d0e60a850983598f0a14ebfb0d4bf2e8ba8104ec1aa0b5040dfc32aff54ee8d",
+  "plugin_patch_file": "derived_patch_plugin.diff",
+  "python_version": "3.11.15",
+  "cann_version": "9.0.0",
+  "driver_version": "26.0.rc1",
+  "npu_device": "0",
+  "max_model_len": "30720",
+  "gpu_memory_utilization": "0.6",
+  "artifact_class": "diagnostic_historical_retest",
+  "official_target": false,
+  "note": "Re-test used max_model_len=30720 (original backfill value); official fixed-target spec requires 32768. Results are diagnostic only. Patch identity uses SHA-256 over tracked diff + untracked files.",
+  "manifest_corrected": true,
+  "manifest_correction_note": "cann_version and driver_version were backfilled from opp/version.info and driver/version.info after the original retest script read from a non-existent path. Values verified on the same host: CANN=9.0.0, driver=26.0.rc1."
+}
