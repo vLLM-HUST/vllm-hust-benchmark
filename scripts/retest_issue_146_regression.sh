@@ -317,10 +317,83 @@ checkout_repo() {
     fi
 }
 
+# Check whether a value is a placeholder provenance sentinel.
+# Per reviewer round 1 (PR #153): '实现对 CANN/driver 只判断空值和精确小写
+# unknown，对 Python 甚至只判断空值；请统一做 trim、大小写归一化后的完整
+# sentinel 校验'.  This function trims whitespace, lowercases, and checks
+# against the full sentinel set: unknown, not available, n/a, none, null, ''.
+#
+# Returns 0 (true) if the value IS a sentinel (i.e. missing/invalid provenance).
+# Returns 1 (false) if the value is a real provenance string.
+is_placeholder_sentinel() {
+    local val="$1"
+    # Trim leading/trailing whitespace
+    val="${val#"${val%%[![:space:]]*}"}"
+    val="${val%"${val##*[![:space:]]}"}"
+    # Lowercase for case-insensitive comparison
+    val="${val,,}"
+    case "$val" in
+        ""|"unknown"|"not available"|"n/a"|"none"|"null")
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+# Resolve an Ascend version from candidate files that contain a 'Version=' line.
+# Per reviewer round 1 (PR #153): '/usr/local/Ascend/ascend-toolkit/latest/
+# version.cfg 已确认该路径在当前环境不存在，实际应从 install.info 解析'.
+#
+# The real Ascend environment (verified on vllm-hust-cyj-21rc-cloud) does NOT
+# have version.cfg; it has:
+#   - /usr/local/Ascend/ascend-toolkit/latest/opp/version.info (CANN)
+#   - /usr/local/Ascend/driver/version.info (driver)
+# Both files contain a 'Version=<value>' line.  This function tries each
+# candidate path, parses the Version= line, and echoes the trimmed value.
+# Echoes nothing (empty) if no candidate yields a valid version.
+#
+# Arguments:
+#   $1: space-separated list of candidate file paths to try in order.
+resolve_ascend_version() {
+    local candidates="$1"
+    local candidate raw match
+    for candidate in $candidates; do
+        if [ -f "$candidate" ]; then
+            raw=$(cat "$candidate" 2>/dev/null || true)
+            # Parse 'Version=<value>' line (case-insensitive key, allows quotes).
+            # NOTE: do NOT use \n inside the character class — BSD sed (macOS)
+            # treats \n as a literal 'n' inside [^...], which truncates values
+            # like 'unknown' to 'u'.  grep already limits output to a single
+            # line, so [^"']+ is sufficient.
+            match=$(echo "$raw" | grep -iE '^Version\s*=' | head -1 | \
+                sed -E 's/^[Vv]ersion[[:space:]]*=[[:space:]]*["'"'"']?([^"'"'"']+)["'"'"']?.*$/\1/' | \
+                tr -d '[:space:]' || true)
+            if [ -n "$match" ]; then
+                echo "$match"
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
 # Write a comprehensive env-manifest.json with full provenance.
 # Saves the full derived patch content to derived_patch_{engine,plugin}.diff
 # and binds it with SHA-256 (not MD5) so tracked AND untracked modifications
 # (e.g. _build_info.py from ensure_build_info) are captured and reproducible.
+#
+# Fail-closed behavior (per project rule: placeholder provenance sentinels
+# such as 'unknown'/'not available'/'n/a'/'none'/'null'/empty must be treated
+# as missing, not as valid provenance values).  If any of the following
+# fail, the function logs a detailed error and returns non-zero so the
+# caller aborts BEFORE the .completed marker is written:
+#   - capture_patch_identity returns empty or a malformed SHA-256
+#   - patch file is not written to disk
+#   - python/cann/driver version cannot be resolved (incl. sentinel values)
+#   - the manifest heredoc fails to write a non-empty file
+#   - the written manifest is not valid JSON
 write_env_manifest() {
     local outdir="$1"
     local engine_short="$2"
@@ -330,16 +403,96 @@ write_env_manifest() {
     local engine_patch_file="$outdir/derived_patch_engine.diff"
     local plugin_patch_file="$outdir/derived_patch_plugin.diff"
 
-    local engine_patch_sha256 plugin_patch_sha256
-    engine_patch_sha256=$(capture_patch_identity "$VLLM_HUST_REPO" "$engine_patch_file")
-    plugin_patch_sha256=$(capture_patch_identity "$ASCEND_REPO" "$plugin_patch_file")
+    log "  Writing env-manifest.json to $outdir"
 
+    # Capture patch identity for both repos.  capture_patch_identity echoes
+    # either 'clean' or a 64-char lowercase hex SHA-256; any other output
+    # (including empty) is a failure.
+    local engine_patch_sha256 plugin_patch_sha256
+    engine_patch_sha256=$(capture_patch_identity "$VLLM_HUST_REPO" "$engine_patch_file") || {
+        log "  ERROR: capture_patch_identity failed for engine repo $VLLM_HUST_REPO"
+        return 1
+    }
+    plugin_patch_sha256=$(capture_patch_identity "$ASCEND_REPO" "$plugin_patch_file") || {
+        log "  ERROR: capture_patch_identity failed for plugin repo $ASCEND_REPO"
+        return 1
+    }
+    if [ -z "$engine_patch_sha256" ]; then
+        log "  ERROR: engine_patch_sha256 is empty (capture_patch_identity returned nothing)"
+        return 1
+    fi
+    if [ -z "$plugin_patch_sha256" ]; then
+        log "  ERROR: plugin_patch_sha256 is empty (capture_patch_identity returned nothing)"
+        return 1
+    fi
+    # Validate SHA-256 format: either 'clean' or exactly 64 lowercase hex chars.
+    if [ "$engine_patch_sha256" != "clean" ] && \
+       ! [[ "$engine_patch_sha256" =~ ^[0-9a-f]{64}$ ]]; then
+        log "  ERROR: engine_patch_sha256 has invalid format: ${engine_patch_sha256:0:80}"
+        return 1
+    fi
+    if [ "$plugin_patch_sha256" != "clean" ] && \
+       ! [[ "$plugin_patch_sha256" =~ ^[0-9a-f]{64}$ ]]; then
+        log "  ERROR: plugin_patch_sha256 has invalid format: ${plugin_patch_sha256:0:80}"
+        return 1
+    fi
+    # Verify the patch file was actually written to disk when SHA is not 'clean'.
+    if [ "$engine_patch_sha256" != "clean" ] && [ ! -s "$engine_patch_file" ]; then
+        log "  ERROR: engine patch file $engine_patch_file is missing or empty"
+        return 1
+    fi
+    if [ "$plugin_patch_sha256" != "clean" ] && [ ! -s "$plugin_patch_file" ]; then
+        log "  ERROR: plugin patch file $plugin_patch_file is missing or empty"
+        return 1
+    fi
+
+    # Resolve Python/CANN/driver versions.  Fail-closed: placeholder sentinels
+    # ('unknown', 'not available', 'n/a', 'none', 'null', empty) are treated
+    # as missing provenance and reject the manifest.
+    #
+    # Per reviewer round 1 (PR #153): CANN version must NOT read version.cfg
+    # (path does not exist on the real Ascend env); use opp/version.info and
+    # parse the 'Version=' line.  Sentinel checks must trim + lowercase + cover
+    # the full sentinel set for ALL three versions (python/cann/driver).
     local python_version cann_version driver_version
     python_version=$("$PYTHON" --version 2>&1 | awk '{print $2}')
-    cann_version=$(cat /usr/local/Ascend/ascend-toolkit/latest/version.cfg 2>/dev/null | head -1 || echo "unknown")
-    driver_version=$(cat /usr/local/Ascend/driver/version.info 2>/dev/null | head -1 || echo "unknown")
+    if is_placeholder_sentinel "$python_version"; then
+        log "  ERROR: python_version is missing or a sentinel: '${python_version:-<empty>}'"
+        return 1
+    fi
+    # CANN version: try candidate files with 'Version=' line (not version.cfg).
+    # Verified paths on vllm-hust-cyj-21rc-cloud:
+    #   /usr/local/Ascend/ascend-toolkit/latest/opp/version.info  -> Version=9.0.0
+    cann_version=$(resolve_ascend_version \
+        "/usr/local/Ascend/ascend-toolkit/latest/opp/version.info \
+         /usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info \
+         /usr/local/Ascend/ascend-toolkit/latest/Ascend_toolkit_install.info \
+         /usr/local/Ascend/ascend-toolkit/latest/version.info \
+         /usr/local/Ascend/cann-9.0.0/opp/version.info \
+         /usr/local/Ascend/ascend-toolkit/latest/version.cfg" || true)
+    if is_placeholder_sentinel "$cann_version"; then
+        log "  ERROR: cann_version is missing or a sentinel: '${cann_version:-<empty>}'"
+        log "  ERROR: tried opp/version.info, install.info, version.info, version.cfg"
+        return 1
+    fi
+    # Driver version: parse 'Version=' line from driver/version.info.
+    driver_version=$(resolve_ascend_version \
+        "/usr/local/Ascend/driver/version.info \
+         /usr/local/Ascend/driver/build.info" || true)
+    if is_placeholder_sentinel "$driver_version"; then
+        log "  ERROR: driver_version is missing or a sentinel: '${driver_version:-<empty>}'"
+        return 1
+    fi
 
-    cat > "$outdir/env-manifest.json" <<EOF
+    log "  engine_patch_sha256=$engine_patch_sha256"
+    log "  plugin_patch_sha256=$plugin_patch_sha256"
+    log "  python_version=$python_version cann_version=$cann_version driver_version=$driver_version"
+
+    # Write the manifest.  Use a temp file + atomic move so a partial write
+    # never leaves a corrupt env-manifest.json that collect_results might
+    # later mistake for a valid (but empty) manifest.
+    local manifest_tmp="$outdir/.env-manifest.json.tmp.$$"
+    cat > "$manifest_tmp" <<EOF
 {
   "engine_commit_requested": "$engine_short",
   "engine_commit_observed": "$engine_full",
@@ -360,6 +513,19 @@ write_env_manifest() {
   "note": "Re-test used max_model_len=30720 (original backfill value); official fixed-target spec requires 32768. Results are diagnostic only. Patch identity uses SHA-256 over tracked diff + untracked files."
 }
 EOF
+    if [ ! -s "$manifest_tmp" ]; then
+        log "  ERROR: manifest write produced empty file at $manifest_tmp"
+        rm -f "$manifest_tmp" 2>/dev/null || true
+        return 1
+    fi
+    # Validate the manifest is well-formed JSON before atomically moving it.
+    if ! "$PYTHON" -c "import json,sys; json.load(open('$manifest_tmp'))" 2>/dev/null; then
+        log "  ERROR: manifest at $manifest_tmp is not valid JSON"
+        rm -f "$manifest_tmp" 2>/dev/null || true
+        return 1
+    fi
+    mv -f "$manifest_tmp" "$outdir/env-manifest.json"
+    log "  env-manifest.json written and validated ($outdir/env-manifest.json)"
 }
 
 # Validate that the raw.json contains a valid primary metric.
