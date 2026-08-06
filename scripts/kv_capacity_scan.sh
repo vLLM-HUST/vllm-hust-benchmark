@@ -431,7 +431,11 @@ generate_env_manifest() {
     # 3. Content fingerprint of actual weight files (.safetensors / .bin).
     # This identifies the real weights, not just config.json.
     if [ -d "$MODEL_PATH" ]; then
-        model_weight_fingerprint=$("$PYTHON" - "$MODEL_PATH" <<'WPEOF' 2>/dev/null || echo "not available")
+        # NOTE: The '||' and '2>/dev/null' MUST be on the heredoc opener line,
+        # and the closing ')' MUST be on its own line after WPEOF.  Putting ')'
+        # on the opener line prematurely closes the $(...) and causes a syntax
+        # error (PR #152 review round 4).
+        model_weight_fingerprint=$("$PYTHON" - "$MODEL_PATH" <<'WPEOF' 2>/dev/null || echo "not available"
 import hashlib, os, sys
 model_path = sys.argv[1]
 entries = []
@@ -507,7 +511,7 @@ PYEOF
     MAX_MODEL_LEN="$max_model_len" \
     KV_TRANSFER_JSON="$kv_transfer_json" \
     ACTUAL_KV_BYTES="$actual_kv_bytes" \
-    "$PYTHON" - <<'PYEOF' > "$output_file" 2>/dev/null || true
+    "$PYTHON" - <<'PYEOF' > "$output_file"
 import json, os
 
 def env_str(key, default="unknown"):
@@ -553,6 +557,48 @@ manifest = {
 }
 print(json.dumps(manifest, indent=2))
 PYEOF
+
+    # Per PR #152 review round 4: the manifest write must NOT use
+    # `2>/dev/null || true` — a silent write failure would produce missing
+    # or truncated provenance that the analyzer cannot distinguish from a
+    # valid manifest.  Validate file existence, JSON parse, and required
+    # provenance fields before returning success.
+    if [ ! -f "$output_file" ]; then
+        log "  ERROR: generate_env_manifest — output file not created: $output_file"
+        return 1
+    fi
+    if ! "$PYTHON" - "$output_file" <<'VEOF'
+import json, sys
+try:
+    with open(sys.argv[1]) as f:
+        data = json.load(f)
+except Exception as exc:
+    print(f"ERROR: manifest JSON parse failed: {exc}")
+    sys.exit(1)
+required = [
+    "engine_commit", "plugin_commit", "cann_version", "driver_version",
+    "torch_npu_version", "model_revision", "model_weight_fingerprint",
+    "resolved_parameters", "actual_kv_bytes",
+]
+missing = [f for f in required if f not in data]
+if missing:
+    print(f"ERROR: manifest missing required fields: {missing}")
+    sys.exit(1)
+# Placeholder provenance sentinels are NOT valid values
+sentinels = {"unknown", "not available", "n/a", "none", "null", ""}
+for f in ["engine_commit", "plugin_commit", "cann_version", "driver_version",
+          "torch_npu_version", "model_revision", "model_weight_fingerprint"]:
+    val = data.get(f, "")
+    if val in sentinels:
+        print(f"ERROR: manifest field '{f}' has placeholder value '{val}'")
+        sys.exit(1)
+sys.exit(0)
+VEOF
+    then
+        log "  ERROR: generate_env_manifest — manifest validation failed for $output_file"
+        return 1
+    fi
+    return 0
 }
 
 run_single_experiment() {
@@ -582,7 +628,10 @@ EOF
     if [ $DRY_RUN -eq 1 ]; then
         log "  [DRY RUN] Skipping actual execution"
         # Still generate manifest for dry-run validation
-        generate_env_manifest "$output_dir/env-manifest.json" "" "$gpu_util" "$kv_transfer_config"
+        if ! generate_env_manifest "$output_dir/env-manifest.json" "" "$gpu_util" "$kv_transfer_config"; then
+            log "  ERROR: manifest generation failed in dry-run — aborting"
+            return 1
+        fi
         return 0
     fi
 
@@ -612,10 +661,22 @@ EOF
     # (e.g. 32 GiB on 60.96 GiB HBM after weights+overhead → actual ~29 GiB),
     # do NOT widen tolerance.  Instead, record the run with its actual KV and
     # mark it as BLOCKED so the acceptance report can classify it correctly.
+    # Per PR #152 review round 4: verify_kv_capacity returns distinct exit
+    # codes — 1 means parse failure (log unreadable / 'Available KV cache
+    # memory' not found) and the caller MUST fail closed; 2 means the value
+    # was parsed but exceeds tolerance, and the caller may record BLOCKED.
+    # Treating both as BLOCKED would misreport missing evidence as a verified
+    # blocked target.
     local _tol
     _tol=$(kv_capacity_tolerance "$kv_gib")
     log "  Verifying KV capacity (target=${kv_gib}GiB, tolerance=${_tol}GiB)"
-    if ! verify_kv_capacity "$output_dir/server.log" "$kv_gib" "$_tol"; then
+    verify_kv_capacity "$output_dir/server.log" "$kv_gib" "$_tol"
+    local _kv_rc=$?
+    if [ "$_kv_rc" -eq 1 ]; then
+        log "  ERROR: KV capacity verification failed (parse error) — fail closed"
+        cleanup_server
+        return 1
+    elif [ "$_kv_rc" -eq 2 ]; then
         log "  WARNING: KV capacity target ${kv_gib}GiB not reachable — \
 marking run as BLOCKED and continuing"
         # Write a STATUS file so the analyzer can classify this run as blocked.
@@ -641,12 +702,18 @@ marking run as BLOCKED and continuing"
     # Collect post-benchmark metrics
     collect_metrics "$output_dir/metrics_post.prom"
 
-    # Generate environment manifest (provenance) with actual KV from server log
-    generate_env_manifest \
+    # Generate environment manifest (provenance) with actual KV from server log.
+    # Per PR #152 review round 4: fail closed if manifest generation fails —
+    # missing provenance must not be silently swallowed.
+    if ! generate_env_manifest \
         "$output_dir/env-manifest.json" \
         "$output_dir/server.log" \
         "$gpu_util" \
-        "$kv_transfer_config"
+        "$kv_transfer_config"; then
+        log "  ERROR: env-manifest generation failed — aborting (fail closed)"
+        cleanup_server
+        return 1
+    fi
 
     # Kill server
     cleanup_server

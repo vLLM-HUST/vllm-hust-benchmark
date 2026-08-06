@@ -1640,6 +1640,33 @@ class TestLoadFromTieringDir:
         assert results == {}
 
 
+class TestShellScriptSyntax:
+    """Verify that scripts/kv_capacity_scan.sh passes `bash -n` syntax check.
+
+    Per PR #152 review round 4: a heredoc-inside-$(...) syntax error was
+    missed because tests only replicated the logic in a temp script instead
+    of checking the real entry point.  This test runs `bash -n` on the real
+    script to catch syntax errors before CI.
+    """
+
+    def test_kv_capacity_scan_sh_syntax_valid(self):
+        """scripts/kv_capacity_scan.sh must pass `bash -n`."""
+        import subprocess
+
+        script_path = _SCRIPTS_DIR / "kv_capacity_scan.sh"
+        result = subprocess.run(
+            ["bash", "-n", str(script_path)],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert result.returncode == 0, (
+            f"bash -n failed for {script_path}:\n"
+            f"stdout: {result.stdout}\n"
+            f"stderr: {result.stderr}"
+        )
+
+
 class TestModelRevisionFallback:
     """Script-level tests for model_revision fallback (reviewer round 3 issue 2).
 
