@@ -108,14 +108,29 @@ def _is_forbidden_host_path(host_path: str) -> bool:
        checked so direct patterns like ``/(var/)?run/docker.sock`` still
        match.
 
+    ``os.path.realpath`` can raise ``PermissionError`` on Linux for paths
+    like ``/proc/1/root`` (requires ``CAP_SYS_PTRACE``).  In that case the
+    original-path check above has already matched, so we return False
+    (not forbidden) — the symlink resolution is best-effort.
+
     Matches both the path itself and any sub-path underneath it (e.g.
     ``/proc`` and ``/proc/1/root``).
     """
-    for path in (host_path, os.path.realpath(host_path)):
-        normalized = _normalize_path(path)
-        if any(pattern.match(normalized) for pattern in FORBIDDEN_HOST_PATH_PATTERNS):
-            return True
-    return False
+    # Check the original path first — catches direct references.
+    normalized = _normalize_path(host_path)
+    if any(pattern.match(normalized) for pattern in FORBIDDEN_HOST_PATH_PATTERNS):
+        return True
+    # Then try realpath to catch symlinks like link -> /proc.
+    try:
+        resolved = os.path.realpath(host_path)
+    except (OSError, PermissionError):
+        # realpath can fail on /proc/1/root (Linux CAP_SYS_PTRACE required).
+        # The original-path check above is sufficient in that case.
+        return False
+    normalized_resolved = _normalize_path(resolved)
+    return any(
+        pattern.match(normalized_resolved) for pattern in FORBIDDEN_HOST_PATH_PATTERNS
+    )
 
 
 def _is_allowed_container_destination(container_path: str) -> bool:
