@@ -1,6 +1,6 @@
 {
   "schema_version": "official-baseline-recovery-audit/v1",
-  "generated_at": "2026-08-05T19:20:23.996056Z",
+  "generated_at": "2026-08-06T03:38:06.718079Z",
   "registry": {
     "version": "1.8.1",
     "sha256": "272bb6b4c1cac8d358813fdd3c485038284ddd4afb1f8871d1893fa5ac0259ea"
@@ -8,8 +8,8 @@
   "summary": {
     "scanned": 19,
     "active_public_candidates": 9,
-    "recoverable": 8,
-    "rerun_required": 1,
+    "recoverable": 9,
+    "rerun_required": 0,
     "provisional_or_specialty": 10
   },
   "records": [
@@ -451,65 +451,28 @@
     },
     {
       "submission": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
-      "entry_id": "c00bb0bf-84d0-4045-9c22-3f04803c1b9d",
+      "entry_id": "04d50fc4-75f1-4df8-b498-24bdb93c93d3",
       "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
       "target_status": "active",
       "target_intended_use": "public-leaderboard",
-      "disposition": "rerun-required",
-      "reasons": [
-        "exact-target-mismatch",
-        "target-binding-missing-or-mismatched",
-        "target-registry-hash-missing-or-mismatched",
-        "target-version-missing-or-mismatched",
-        "verified-attestation-missing"
-      ],
-      "exact_mismatches": [
-        {
-          "field": "server_parameters.max_model_len",
-          "expected": 32768,
-          "actual": 30720,
-          "kind": "value-mismatch"
-        },
-        {
-          "field": "server_parameters.port",
-          "expected": 8000,
-          "actual": 8010,
-          "kind": "value-mismatch"
-        },
-        {
-          "field": "server_parameters.revision",
-          "expected": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
-          "actual": null,
-          "kind": "missing"
-        },
-        {
-          "field": "client_parameters.no_stream",
-          "expected": false,
-          "actual": null,
-          "kind": "missing"
-        },
-        {
-          "field": "client_parameters.port",
-          "expected": 8000,
-          "actual": 8010,
-          "kind": "value-mismatch"
-        }
-      ],
+      "disposition": "recoverable",
+      "reasons": [],
+      "exact_mismatches": [],
       "evidence": {
         "artifact": "run_leaderboard.json",
-        "artifact_sha256": "858303a3b518de79ea6c7abb89b8436b42d563dfbbae10def20748a3e64d4be4",
+        "artifact_sha256": "8779ab40cf65920f315edeef26480a6ea2929d5d3197a15d6406eca19f9f6c2e",
         "manifest": "leaderboard_manifest.json",
-        "manifest_sha256": "e88be6673b3a7190c1c54e16d2673d76334c3601ab32c862ef4178085291534a",
+        "manifest_sha256": "19229b234793e298c03295a1de258f0bc58b8056ee066e6e3230eaeb9ec91023",
         "referenced_by_manifest": true,
-        "independent_files": [],
-        "registry_binding": "unverified"
+        "independent_files": [
+          "repeat_suite.json"
+        ],
+        "registry_binding": "current-registry"
       },
       "rerun_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
     }
   ],
-  "rerun_specs": [
-    "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
-  ],
+  "rerun_specs": [],
   "rerun_args": [
     "env",
     "REPEAT_COUNT=3",
@@ -518,8 +481,7 @@
     "EXISTING_CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-empty",
     "CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-staged",
     "bash",
-    "scripts/run-official-ascend-goal-baseline-matrix.sh",
-    "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
+    "scripts/run-official-ascend-goal-baseline-matrix.sh"
   ],
-  "rerun_command": "env REPEAT_COUNT=3 MIN_SUCCESSFUL_REPEATS=3 MATRIX_RESULT_ROOT=.benchmarks/official-baseline-recovery-runs EXISTING_CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-empty CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-staged bash scripts/run-official-ascend-goal-baseline-matrix.sh docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json"
+  "rerun_command": "env REPEAT_COUNT=3 MIN_SUCCESSFUL_REPEATS=3 MATRIX_RESULT_ROOT=.benchmarks/official-baseline-recovery-runs EXISTING_CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-empty CANONICAL_SUBMISSIONS_ROOT=.benchmarks/official-baseline-recovery-staged bash scripts/run-official-ascend-goal-baseline-matrix.sh"
 }

@@ -1447,18 +1447,61 @@ class StrictRepeatOrchestrator:
         current_by_device = {device: compute.get(device, []) for device in self.devices}
         if all(not current for current in current_by_device.values()):
             return False
+        newly_owned: list[dict[str, Any]] = []
         for device in self.devices:
-            expected = sorted(
+            current = current_by_device[device]
+            if not current:
+                raise GateFailure(
+                    f"runtime compute PID scope disappeared early on physical NPU {device}"
+                )
+            known = {
                 item["host_pid"]
                 for item in self.all_owned_processes
                 if item["physical_npu_id"] == device
-            )
-            current = current_by_device[device]
-            if current != expected:
-                raise GateFailure(
-                    f"runtime owned PID scope changed on physical NPU {device}: "
-                    f"{current} != {expected}"
+            }
+            for pid in current:
+                if pid in known:
+                    continue
+                context = read_host_process_context(pid)
+                if context is None:
+                    raise GateFailure(
+                        f"runtime PID context disappeared before ownership proof: {pid}"
+                    )
+                cgroup, cmdline = context
+                if self.container_id not in cgroup:
+                    raise GateFailure(
+                        f"physical NPU {device} gained compute PID outside the owned container: {pid}"
+                    )
+                newly_owned.append(
+                    {
+                        "host_pid": pid,
+                        "physical_npu_id": device,
+                        "container_id": self.container_id,
+                        "cgroup": cgroup,
+                        "cmdline": cmdline,
+                    }
                 )
+        if newly_owned:
+            self.all_owned_processes = sorted(
+                [*self.all_owned_processes, *newly_owned],
+                key=lambda item: (item["physical_npu_id"], item["host_pid"]),
+            )
+            self.all_owned_host_pids = sorted(
+                {item["host_pid"] for item in self.all_owned_processes}
+            )
+            atomic_json(self.owned_processes_path, self.all_owned_processes)
+            self.ownership = [
+                min(
+                    (
+                        item
+                        for item in self.all_owned_processes
+                        if item["physical_npu_id"] == device
+                    ),
+                    key=canonical_worker_key,
+                )
+                for device in self.devices
+            ]
+            self.host_pids = [item["host_pid"] for item in self.ownership]
         per_device = {str(device): hbm[device][0] for device in self.devices}
         sample = {
             "captured_at": utc_now(),

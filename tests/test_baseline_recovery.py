@@ -16,8 +16,8 @@ def test_attested_baselines_reduce_the_strict_rerun_queue() -> None:
     summary = report["summary"]
     assert summary["scanned"] == 19
     assert summary["active_public_candidates"] == 9
-    assert summary["recoverable"] == 8
-    assert summary["rerun_required"] == 1
+    assert summary["recoverable"] == 9
+    assert summary["rerun_required"] == 0
     assert summary["recoverable"] + summary["rerun_required"] == 9
     assert summary["provisional_or_specialty"] == 10
     assert len(report["rerun_specs"]) == summary["rerun_required"]
@@ -39,23 +39,16 @@ def test_attested_baselines_reduce_the_strict_rerun_queue() -> None:
     assert "scripts/run-official-ascend-goal-baseline-matrix.sh" in report["rerun_args"]
 
 
-def test_visionarena_remains_blocked_by_max_model_len_contract() -> None:
+def test_attested_visionarena_is_exactly_recoverable() -> None:
     report = build_recovery_audit(REPO_ROOT, generated_at="2026-08-02T00:00:00Z")
     record = next(
         item for item in report["records"] if "visionarena-online" in item["target_id"]
     )
-    mismatch = next(
-        item
-        for item in record["exact_mismatches"]
-        if item["field"] == "server_parameters.max_model_len"
-    )
-    assert mismatch == {
-        "field": "server_parameters.max_model_len",
-        "expected": 32768,
-        "actual": 30720,
-        "kind": "value-mismatch",
-    }
-    assert "verified-attestation-missing" in record["reasons"]
+    assert record["disposition"] == "recoverable"
+    assert record["exact_mismatches"] == []
+    assert record["reasons"] == []
+    assert record["evidence"]["independent_files"] == ["repeat_suite.json"]
+    assert record["evidence"]["registry_binding"] == "current-registry"
 
 
 def test_attested_random_online_binds_independent_repeat_evidence() -> None:
@@ -101,7 +94,7 @@ def test_cli_stdout_is_machine_readable_and_require_recoverable_succeeds() -> No
         command, cwd=REPO_ROOT, check=False, capture_output=True, text=True
     )
     assert completed.returncode == 0
-    assert json.loads(completed.stdout)["summary"]["recoverable"] == 8
+    assert json.loads(completed.stdout)["summary"]["recoverable"] == 9
     assert "baseline recovery audit:" in completed.stderr
 
     required = subprocess.run(
@@ -112,4 +105,4 @@ def test_cli_stdout_is_machine_readable_and_require_recoverable_succeeds() -> No
         text=True,
     )
     assert required.returncode == 0
-    assert json.loads(required.stdout)["summary"]["recoverable"] == 8
+    assert json.loads(required.stdout)["summary"]["recoverable"] == 9

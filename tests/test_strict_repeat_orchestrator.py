@@ -163,6 +163,75 @@ def test_runtime_sample_allows_all_owned_pids_to_leave_at_terminal_transition(
     assert instance._runtime_sample(2) is False
 
 
+def test_runtime_sample_tracks_new_pid_from_the_owned_container(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeRoot:
+        def run(self, _argv):
+            return orchestrator.CommandResult(NPU_SMI_26_PROCESS_FIXTURE, "", 0)
+
+    container_id = "d" * 64
+    instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
+    instance.root = FakeRoot()
+    instance.repeat_dir = tmp_path
+    instance.devices = [0]
+    instance.container_id = container_id
+    instance.ownership = [{"host_pid": 1732754, "physical_npu_id": 0}]
+    instance.all_owned_processes = [
+        {
+            "host_pid": 1732754,
+            "physical_npu_id": 0,
+            "container_id": container_id,
+            "cgroup": f"0::/docker/{container_id}",
+            "cmdline": "VLLM::Worker_TP0",
+        }
+    ]
+    instance.all_owned_host_pids = [1732754]
+    instance.host_pids = [1732754]
+    instance.owned_processes_path = tmp_path / "runtime" / "owned-processes.json"
+    instance.hbm_path = tmp_path / "hbm-samples.jsonl"
+    instance.host_peak_path = tmp_path / "strict-host-peak-hbm.json"
+    instance.hbm_sample_count = 0
+    instance.per_device_peaks = {0: 0}
+    monkeypatch.setattr(
+        orchestrator,
+        "read_host_process_context",
+        lambda pid: (f"0::/docker/{container_id}", f"VLLMWorker {pid}"),
+    )
+    monkeypatch.setattr(orchestrator, "evidence_record", lambda *_args: {"sha256": "x"})
+
+    assert instance._runtime_sample(2) is True
+    owned = json.loads(instance.owned_processes_path.read_text(encoding="utf-8"))
+    assert [item["host_pid"] for item in owned] == [1732754, 1732755, 1732756]
+
+
+def test_runtime_sample_rejects_new_pid_outside_owned_container(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeRoot:
+        def run(self, _argv):
+            return orchestrator.CommandResult(NPU_SMI_26_PROCESS_FIXTURE, "", 0)
+
+    container_id = "e" * 64
+    instance = object.__new__(orchestrator.StrictRepeatOrchestrator)
+    instance.root = FakeRoot()
+    instance.repeat_dir = tmp_path
+    instance.devices = [0]
+    instance.container_id = container_id
+    instance.ownership = [{"host_pid": 1732754, "physical_npu_id": 0}]
+    instance.all_owned_processes = [
+        {"host_pid": 1732754, "physical_npu_id": 0}
+    ]
+    monkeypatch.setattr(
+        orchestrator,
+        "read_host_process_context",
+        lambda pid: ("0::/docker/external", f"python {pid}"),
+    )
+
+    with pytest.raises(orchestrator.GateFailure, match="outside the owned container"):
+        instance._runtime_sample(2)
+
+
 def test_terminal_owned_pid_absence_requires_prompt_command_exit() -> None:
     class ExitedProcess:
         returncode = 0
