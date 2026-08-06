@@ -848,11 +848,24 @@ def _target_for_entry(
 
 
 def _validate_exact_target(
-    repo_root: Path, entry: Mapping[str, Any], target: Mapping[str, Any]
+    repo_root: Path,
+    entry: Mapping[str, Any],
+    target: Mapping[str, Any],
+    *,
+    comparison_side: str = "baseline",
 ) -> dict[str, int] | None:
     same_spec = entry.get("same_spec") or {}
     workload = str((target.get("workload") or {}).get("name") or "")
     mismatches = _identity_mismatches(entry, target)
+    if comparison_side == "current":
+        # The official target fixes the performance contract and the upstream
+        # runtime.  A paired current run intentionally has a different engine
+        # identity; all performance-bearing target fields remain exact below.
+        mismatches = [
+            mismatch
+            for mismatch in mismatches
+            if mismatch.get("field") not in {"engine", "engine_version"}
+        ]
     mismatches.extend(
         _parameter_mismatches(
             target.get("server_parameters") or {},
@@ -920,13 +933,18 @@ def attest_completed_baseline(
     verified_by: str,
     verified_at: str | None = None,
     minimum_repeats: int = 3,
+    comparison_side: str = "baseline",
 ) -> dict[str, Any]:
+    if comparison_side not in {"baseline", "current"}:
+        raise ValueError(f"invalid comparison side: {comparison_side}")
     artifact_path = staged_submission_dir / "run_leaderboard.json"
     manifest_path = staged_submission_dir / "leaderboard_manifest.json"
     entry = _load_object(artifact_path)
     manifest = _load_object(manifest_path)
     target, registry_sha256 = _target_for_entry(repo_root, entry)
-    selected_port_relocation = _validate_exact_target(repo_root, entry, target)
+    selected_port_relocation = _validate_exact_target(
+        repo_root, entry, target, comparison_side=comparison_side
+    )
 
     repeat_records: list[dict[str, Any]] = []
     staged_sha256 = _sha256(artifact_path)
@@ -937,8 +955,20 @@ def attest_completed_baseline(
         .get("commit")
     )
     expected_plugin = (target.get("baseline_runtime") or {}).get("git_commit")
+    expected_engine = str(entry.get("engine") or "")
+    expected_engine_version = str(entry.get("engine_version") or "")
+    if comparison_side == "current":
+        if expected_engine != "vllm-hust" or not expected_engine_version:
+            raise ValueError("current comparison must use a versioned vllm-hust entry")
+        staged_provenance = (entry.get("metadata") or {}).get(
+            "runtime_provenance"
+        ) or {}
+        expected_core = (staged_provenance.get("engine") or {}).get("commit")
+        expected_plugin = (staged_provenance.get("plugin") or {}).get("commit")
+        if not expected_core or not expected_plugin:
+            raise ValueError("current comparison is missing exact source commits")
     trace_profile = target.get("profile") == TRACE_PROFILE
-    if trace_profile:
+    if trace_profile and comparison_side == "baseline":
         expected_core = (target.get("baseline_runtime") or {}).get("core_commit")
         expected_plugin = (target.get("baseline_runtime") or {}).get("backend_commit")
         if not expected_core or not expected_plugin:
@@ -967,7 +997,17 @@ def attest_completed_baseline(
             continue
         raw = _load_object(raw_path)
         repeat_entry = _load_object(repeat_artifact_path)
-        repeat_port_relocation = _validate_exact_target(repo_root, repeat_entry, target)
+        repeat_port_relocation = _validate_exact_target(
+            repo_root,
+            repeat_entry,
+            target,
+            comparison_side=comparison_side,
+        )
+        if comparison_side == "current" and (
+            repeat_entry.get("engine") != expected_engine
+            or repeat_entry.get("engine_version") != expected_engine_version
+        ):
+            raise ValueError(f"current runtime identity mismatch: {repeat_dir}")
         metrics = repeat_entry.get("metrics") or {}
         failed = int(raw.get("failed") or 0)
         error_rate = float(metrics.get("error_rate") or 0)
@@ -1173,6 +1213,7 @@ def attest_completed_baseline(
         "target_registry_sha256": registry_sha256,
         "verified_at": timestamp,
         "verified_by": verified_by,
+        "comparison_side": comparison_side,
         "minimum_repeats": minimum_repeats,
         "successful_repeats": len(repeat_records),
         "selected_repeat": selected_repeat,
@@ -1216,6 +1257,7 @@ def attest_completed_baseline(
                 "evidence": "repeat_suite.json",
                 "successful_repeats": len(repeat_records),
                 "selected_repeat": selected_repeat,
+                "comparison_side": comparison_side,
             },
         }
     )

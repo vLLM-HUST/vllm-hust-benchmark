@@ -971,6 +971,54 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
     assert len(suite["repeats"][0]["immutable_input_attestation_sha256"]) == 64
 
 
+def test_attests_three_exact_current_comparison_repeats(tmp_path: Path) -> None:
+    repo, staged, results, entry, _ = _fixture(tmp_path)
+    entry["engine"] = "vllm-hust"
+    entry["engine_version"] = "v0.17.2.post1-current"
+    entry["metadata"]["runtime_provenance"] = {
+        "engine": {"commit": "current-core-sha"},
+        "plugin": {"commit": "current-plugin-sha"},
+    }
+    _write(staged / "run_leaderboard.json", entry)
+    for repeat in sorted(results.glob("repeat-*")):
+        _write(repeat / "submission" / "run_leaderboard.json", entry)
+
+    output = repo / "submissions" / "target-current"
+    attested = attest_completed_baseline(
+        repo,
+        staged,
+        results,
+        output,
+        verified_by="test-review",
+        verified_at="2026-08-02T00:00:00Z",
+        comparison_side="current",
+    )
+
+    assert attested["engine"] == "vllm-hust"
+    assert attested["metadata"]["verification_attestation"][
+        "comparison_side"
+    ] == "current"
+    suite = json.loads((output / "repeat_suite.json").read_text())
+    assert suite["comparison_side"] == "current"
+    assert suite["successful_repeats"] == 3
+
+
+def test_current_comparison_requires_explicit_side(tmp_path: Path) -> None:
+    repo, staged, results, entry, _ = _fixture(tmp_path)
+    entry["engine"] = "vllm-hust"
+    entry["engine_version"] = "v0.17.2.post1-current"
+    _write(staged / "run_leaderboard.json", entry)
+
+    with pytest.raises(ValueError, match="exact target mismatch"):
+        attest_completed_baseline(
+            repo,
+            staged,
+            results,
+            repo / "submissions" / "target-current",
+            verified_by="test-review",
+        )
+
+
 def test_normalizes_performance_equivalent_loopback_port_relocation(
     tmp_path: Path,
 ) -> None:

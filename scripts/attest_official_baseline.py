@@ -24,6 +24,12 @@ def main() -> int:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--verified-by", required=True)
     parser.add_argument("--minimum-repeats", type=int, default=3)
+    parser.add_argument(
+        "--comparison-side",
+        choices=("baseline", "current"),
+        default="baseline",
+        help="Attest the official upstream baseline or its exact-spec current pair.",
+    )
     args = parser.parse_args()
     entry = attest_completed_baseline(
         REPO_ROOT,
@@ -32,6 +38,7 @@ def main() -> int:
         args.output_dir.resolve(),
         verified_by=args.verified_by,
         minimum_repeats=args.minimum_repeats,
+        comparison_side=args.comparison_side,
     )
     print(args.output_dir.resolve())
     print(entry["same_spec"]["spec_id"])
