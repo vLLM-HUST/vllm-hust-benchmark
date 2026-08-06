@@ -971,6 +971,55 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
     assert len(suite["repeats"][0]["immutable_input_attestation_sha256"]) == 64
 
 
+def test_attests_distinct_runner_and_strict_startup_identities(tmp_path: Path) -> None:
+    repo, staged, results = _trace_fixture(tmp_path)
+    for number, repeat in enumerate(sorted(results.glob("repeat-*")), start=1):
+        startup_path = repeat / "startup_evidence.json"
+        startup = json.loads(startup_path.read_text(encoding="utf-8"))
+        startup["startup_instance_id"] = f"runner-startup-{number}"
+        _write(startup_path, startup)
+
+    output = repo / "submissions" / "target-distinct-startups"
+    attest_completed_baseline(
+        repo,
+        staged,
+        results,
+        output,
+        verified_by="test-review",
+        verified_at="2026-08-02T00:00:00Z",
+    )
+    suite = json.loads((output / "repeat_suite.json").read_text())
+    assert suite["repeats"][0]["runner_startup_instance_id"] == "runner-startup-1"
+    assert suite["repeats"][0]["strict_startup_instance_id"] == "startup-1"
+
+
+def test_preserves_validated_evidence_repair_attestation(tmp_path: Path) -> None:
+    repo, staged, results, _, _ = _fixture(tmp_path)
+    repeat = results / "repeat-01"
+    original = repeat / "submission" / "run_leaderboard.pre-repair.json"
+    original.write_bytes((repeat / "submission" / "run_leaderboard.json").read_bytes())
+    failure = repeat / "strict_execution_failure.json"
+    _write(failure, {"error": "peak boundary mismatch"})
+    repair = {
+        "schema_version": "strict-evidence-repair/v1",
+        "performance_request_results_modified": False,
+        "raw_benchmark_result_sha256": hashlib.sha256(
+            (repeat / "raw_benchmark_result.json").read_bytes()
+        ).hexdigest(),
+        "original_submission_sha256": hashlib.sha256(original.read_bytes()).hexdigest(),
+        "original_failure_sha256": hashlib.sha256(failure.read_bytes()).hexdigest(),
+    }
+    _write(repeat / "evidence-repair-attestation.json", repair)
+
+    output = repo / "submissions" / "target-with-repair"
+    attest_completed_baseline(repo, staged, results, output, verified_by="test-review")
+    suite = json.loads((output / "repeat_suite.json").read_text())
+    record = suite["repeats"][0]["evidence_repair_attestation"]
+    copied = output / record["path"]
+    assert copied.is_file()
+    assert hashlib.sha256(copied.read_bytes()).hexdigest() == record["sha256"]
+
+
 def test_attests_three_exact_current_comparison_repeats(tmp_path: Path) -> None:
     repo, staged, results, entry, _ = _fixture(tmp_path)
     entry["engine"] = "vllm-hust"
@@ -980,8 +1029,14 @@ def test_attests_three_exact_current_comparison_repeats(tmp_path: Path) -> None:
         "plugin": {"commit": "current-plugin-sha"},
     }
     _write(staged / "run_leaderboard.json", entry)
-    for repeat in sorted(results.glob("repeat-*")):
+    current_digest = "sha256:" + "c" * 64
+    for number, repeat in enumerate(sorted(results.glob("repeat-*")), start=1):
         _write(repeat / "submission" / "run_leaderboard.json", entry)
+        _write_strict_execution_evidence(
+            repeat,
+            number,
+            runtime_image_digest=current_digest,
+        )
 
     output = repo / "submissions" / "target-current"
     attested = attest_completed_baseline(
@@ -1001,6 +1056,9 @@ def test_attests_three_exact_current_comparison_repeats(tmp_path: Path) -> None:
     suite = json.loads((output / "repeat_suite.json").read_text())
     assert suite["comparison_side"] == "current"
     assert suite["successful_repeats"] == 3
+    assert {repeat["runtime_image_digest"] for repeat in suite["repeats"]} == {
+        current_digest
+    }
 
 
 def test_current_comparison_requires_explicit_side(tmp_path: Path) -> None:

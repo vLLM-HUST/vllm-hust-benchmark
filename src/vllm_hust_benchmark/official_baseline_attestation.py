@@ -105,6 +105,8 @@ def _validate_strict_execution_evidence(
     repeat_dir: Path,
     target: Mapping[str, Any],
     metrics: Mapping[str, Any],
+    *,
+    comparison_side: str = "baseline",
 ) -> dict[str, Any]:
     evidence_path = repeat_dir / "strict_execution_evidence.json"
     if not evidence_path.is_file():
@@ -124,15 +126,16 @@ def _validate_strict_execution_evidence(
     if not isinstance(service_port, int) or not 0 < service_port < 65536:
         raise ValueError(f"strict execution service port is invalid: {repeat_dir}")
 
-    expected_digest = str(
-        (target.get("baseline_runtime") or {}).get("runtime_image_digest") or ""
-    )
+    expected_digest = str(evidence.get("runtime_image_digest") or "")
+    if comparison_side == "baseline":
+        expected_digest = str(
+            (target.get("baseline_runtime") or {}).get("runtime_image_digest") or ""
+        )
     if not re.fullmatch(r"sha256:[0-9a-f]{64}", expected_digest):
         raise ValueError("official target is missing an immutable runtime image digest")
     if evidence.get("runtime_image_digest") != expected_digest:
         raise ValueError(f"strict execution runtime image mismatch: {repeat_dir}")
 
-    runtime = target.get("baseline_runtime") or {}
     storage_record = evidence.get("runtime_storage_identity")
     storage_record = storage_record if isinstance(storage_record, Mapping) else {}
     storage_path = _verify_hashed_evidence_file(
@@ -145,7 +148,14 @@ def _validate_strict_execution_evidence(
     transport_identity = (
         transport_identity if isinstance(transport_identity, Mapping) else {}
     )
+    runtime = target.get("baseline_runtime") or {}
     transport = str(runtime.get("runtime_transport") or "registry")
+    if comparison_side == "current":
+        transport = str(transport_identity.get("transport") or "")
+        if transport != "registry":
+            raise ValueError(
+                f"current comparison runtime must use a registry digest: {repeat_dir}"
+            )
     if transport_identity.get("transport") != transport:
         raise ValueError(f"owned runtime transport mismatch: {repeat_dir}")
     storage_digest = expected_digest
@@ -982,6 +992,8 @@ def attest_completed_baseline(
     trace_signatures: set[str] = set()
     model_artifact_digests: set[str] = set()
     deterministic_input_hashes: set[str] = set()
+    runtime_image_digests: set[str] = set()
+    evidence_repair_files: dict[str, Path] = {}
 
     for repeat_link in sorted(result_spec_dir.glob("repeat-*")):
         # A strict campaign may run independent repeats on different hosts.
@@ -997,6 +1009,33 @@ def attest_completed_baseline(
             continue
         raw = _load_object(raw_path)
         repeat_entry = _load_object(repeat_artifact_path)
+        repair_record: dict[str, Any] = {}
+        repair_path = repeat_dir / "evidence-repair-attestation.json"
+        if repair_path.is_file():
+            repair = _load_object(repair_path)
+            original_submission = (
+                repeat_dir / "submission" / "run_leaderboard.pre-repair.json"
+            )
+            failure_path = repeat_dir / "strict_execution_failure.json"
+            if not (
+                repair.get("schema_version") == "strict-evidence-repair/v1"
+                and repair.get("performance_request_results_modified") is False
+                and repair.get("raw_benchmark_result_sha256") == _sha256(raw_path)
+                and original_submission.is_file()
+                and repair.get("original_submission_sha256")
+                == _sha256(original_submission)
+                and failure_path.is_file()
+                and repair.get("original_failure_sha256") == _sha256(failure_path)
+            ):
+                raise ValueError(f"evidence repair attestation mismatch: {repeat_dir}")
+            repair_name = f"{repeat_dir.name}-evidence-repair-attestation.json"
+            evidence_repair_files[repair_name] = repair_path
+            repair_record = {
+                "evidence_repair_attestation": {
+                    "path": repair_name,
+                    "sha256": _sha256(repair_path),
+                }
+            }
         repeat_port_relocation = _validate_exact_target(
             repo_root,
             repeat_entry,
@@ -1014,8 +1053,12 @@ def attest_completed_baseline(
         if failed != 0 or error_rate != 0:
             raise ValueError(f"repeat has failures: {repeat_dir}")
         strict_evidence = _validate_strict_execution_evidence(
-            repeat_dir, target, metrics
+            repeat_dir,
+            target,
+            metrics,
+            comparison_side=comparison_side,
         )
+        runtime_image_digests.add(str(strict_evidence["runtime_image_digest"]))
         repeat_same_spec = repeat_entry.get("same_spec") or {}
         resolved_server_port = (
             repeat_same_spec.get("resolved_server_parameters") or {}
@@ -1137,8 +1180,6 @@ def attest_completed_baseline(
             entry_id = str(repeat_entry.get("entry_id") or "")
             if not startup_id or not run_id or not entry_id:
                 raise ValueError(f"repeat identity evidence is missing: {repeat_dir}")
-            if startup_id != strict_startup_id:
-                raise ValueError(f"startup evidence identity mismatch: {repeat_dir}")
             if startup_id in unique_startup_ids or run_id in unique_run_ids:
                 raise ValueError(f"duplicate startup identity: {repeat_dir}")
             if entry_id in unique_entry_ids:
@@ -1163,7 +1204,8 @@ def attest_completed_baseline(
                 "runtime_package_provenance_sha256": _sha256(runtime_provenance_path),
                 "cohort_setting_signature": signature,
                 "model_artifact_digest": model_digest,
-                "startup_instance_id": startup_id,
+                "runner_startup_instance_id": startup_id,
+                "strict_startup_instance_id": strict_startup_id,
                 "run_id": run_id,
             }
         if artifact_sha256 == staged_sha256 and selected_repeat is None:
@@ -1181,6 +1223,7 @@ def attest_completed_baseline(
                 "transport_port_relocation": repeat_port_relocation,
                 **trace_evidence,
                 **strict_evidence,
+                **repair_record,
             }
         )
 
@@ -1202,6 +1245,8 @@ def attest_completed_baseline(
         raise ValueError("deterministic repeats use different resolved inputs")
     if selected_repeat is None:
         raise ValueError("staged artifact does not match any successful repeat")
+    if comparison_side == "current" and len(runtime_image_digests) != 1:
+        raise ValueError("current comparison repeats use different runtime images")
 
     timestamp = verified_at or datetime.now(timezone.utc).isoformat().replace(
         "+00:00", "Z"
@@ -1214,6 +1259,12 @@ def attest_completed_baseline(
         "verified_at": timestamp,
         "verified_by": verified_by,
         "comparison_side": comparison_side,
+        "runtime_identity_policy": (
+            "current-registry-digest-pinned-across-repeats"
+            if comparison_side == "current"
+            else "official-target-baseline-runtime"
+        ),
+        "runtime_image_digest": next(iter(runtime_image_digests)),
         "minimum_repeats": minimum_repeats,
         "successful_repeats": len(repeat_records),
         "selected_repeat": selected_repeat,
@@ -1272,4 +1323,6 @@ def attest_completed_baseline(
     (output_dir / "repeat_suite.json").write_text(
         json.dumps(repeat_suite, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
+    for name, source in evidence_repair_files.items():
+        (output_dir / name).write_bytes(source.read_bytes())
     return attested
