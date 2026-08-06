@@ -95,9 +95,9 @@
       "delta_pct": 0.24,
       "threshold_pct": 10.0,
       "regression_reproducible": false,
-      "conclusion": "no_regression_or_noise",
-      "evidence_sufficient": true,
-      "evidence_reason": ""
+      "conclusion": "incomplete_evidence",
+      "evidence_sufficient": false,
+      "evidence_reason": "Raw artifacts (raw.json, bench.log, env-manifest.json, checksums) for these 9 re-test reps reside only on the NPU host at /data/issue146-retest-results and are not committed to this repository. Medians cannot be independently recomputed from committed data. Engine commits are referenced by 10-char short SHA only."
     },
     "random-latency": {
       "base_commit": "2206f1f7b7",
@@ -107,15 +107,15 @@
       "delta_pct": -0.1,
       "threshold_pct": 20.0,
       "regression_reproducible": false,
-      "conclusion": "no_regression_or_noise",
-      "evidence_sufficient": true,
-      "evidence_reason": ""
+      "conclusion": "incomplete_evidence",
+      "evidence_sufficient": false,
+      "evidence_reason": "Raw artifacts (raw.json, bench.log, env-manifest.json, checksums) for these 9 re-test reps reside only on the NPU host at /data/issue146-retest-results and are not committed to this repository. Medians cannot be independently recomputed from committed data. Engine commits are referenced by 10-char short SHA only."
     },
     "overall": {
       "any_regression_confirmed": false,
-      "any_evidence_incomplete": false,
-      "action": "no_action_diagnostic_only",
-      "issue_146_resolution": "No reproducible regression. Results remain diagnostic/historical re-test artifacts and are NOT published as official leaderboard targets (max_model_len=30720 differs from the official 32768)."
+      "any_evidence_incomplete": true,
+      "action": "incomplete_evidence",
+      "issue_146_resolution": "Cannot close the regression conclusion: raw evidence package (raw.json, bench.log, env-manifest.json, checksums.sha256) for the 9 re-test reps is not published in this repository, so medians and provenance cannot be independently verified. The re-test numbers are recorded as diagnostic-only indicators pending publication of a verifiable raw evidence bundle. Do NOT treat this as closing issue #146."
     }
   }
 }

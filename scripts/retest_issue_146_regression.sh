@@ -317,6 +317,68 @@ checkout_repo() {
     fi
 }
 
+# Check whether a value is a placeholder provenance sentinel.
+# Per reviewer round 1 (PR #153): '实现对 CANN/driver 只判断空值和精确小写
+# unknown，对 Python 甚至只判断空值；请统一做 trim、大小写归一化后的完整
+# sentinel 校验'.  This function trims whitespace, lowercases, and checks
+# against the full sentinel set: unknown, not available, n/a, none, null, ''.
+#
+# Returns 0 (true) if the value IS a sentinel (i.e. missing/invalid provenance).
+# Returns 1 (false) if the value is a real provenance string.
+is_placeholder_sentinel() {
+    local val="$1"
+    # Trim leading/trailing whitespace
+    val="${val#"${val%%[![:space:]]*}"}"
+    val="${val%"${val##*[![:space:]]}"}"
+    # Lowercase for case-insensitive comparison
+    val="${val,,}"
+    case "$val" in
+        ""|"unknown"|"not available"|"n/a"|"none"|"null")
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+# Resolve an Ascend version from candidate files that contain a 'Version=' line.
+# Per reviewer round 1 (PR #153): '/usr/local/Ascend/ascend-toolkit/latest/
+# version.cfg 已确认该路径在当前环境不存在，实际应从 install.info 解析'.
+#
+# The real Ascend environment (verified on vllm-hust-cyj-21rc-cloud) does NOT
+# have version.cfg; it has:
+#   - /usr/local/Ascend/ascend-toolkit/latest/opp/version.info (CANN)
+#   - /usr/local/Ascend/driver/version.info (driver)
+# Both files contain a 'Version=<value>' line.  This function tries each
+# candidate path, parses the Version= line, and echoes the trimmed value.
+# Echoes nothing (empty) if no candidate yields a valid version.
+#
+# Arguments:
+#   $1: space-separated list of candidate file paths to try in order.
+resolve_ascend_version() {
+    local candidates="$1"
+    local candidate raw match
+    for candidate in $candidates; do
+        if [ -f "$candidate" ]; then
+            raw=$(cat "$candidate" 2>/dev/null || true)
+            # Parse 'Version=<value>' line (case-insensitive key, allows quotes).
+            # NOTE: do NOT use \n inside the character class — BSD sed (macOS)
+            # treats \n as a literal 'n' inside [^...], which truncates values
+            # like 'unknown' to 'u'.  grep already limits output to a single
+            # line, so [^"']+ is sufficient.
+            match=$(echo "$raw" | grep -iE '^Version\s*=' | head -1 | \
+                sed -E 's/^[Vv]ersion[[:space:]]*=[[:space:]]*["'"'"']?([^"'"'"']+)["'"'"']?.*$/\1/' | \
+                tr -d '[:space:]' || true)
+            if [ -n "$match" ]; then
+                echo "$match"
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
 # Write a comprehensive env-manifest.json with full provenance.
 # Saves the full derived patch content to derived_patch_{engine,plugin}.diff
 # and binds it with SHA-256 (not MD5) so tracked AND untracked modifications
@@ -329,7 +391,7 @@ checkout_repo() {
 # caller aborts BEFORE the .completed marker is written:
 #   - capture_patch_identity returns empty or a malformed SHA-256
 #   - patch file is not written to disk
-#   - python/cann/driver version cannot be resolved
+#   - python/cann/driver version cannot be resolved (incl. sentinel values)
 #   - the manifest heredoc fails to write a non-empty file
 #   - the written manifest is not valid JSON
 write_env_manifest() {
@@ -387,20 +449,38 @@ write_env_manifest() {
     # Resolve Python/CANN/driver versions.  Fail-closed: placeholder sentinels
     # ('unknown', 'not available', 'n/a', 'none', 'null', empty) are treated
     # as missing provenance and reject the manifest.
+    #
+    # Per reviewer round 1 (PR #153): CANN version must NOT read version.cfg
+    # (path does not exist on the real Ascend env); use opp/version.info and
+    # parse the 'Version=' line.  Sentinel checks must trim + lowercase + cover
+    # the full sentinel set for ALL three versions (python/cann/driver).
     local python_version cann_version driver_version
     python_version=$("$PYTHON" --version 2>&1 | awk '{print $2}')
-    if [ -z "$python_version" ]; then
-        log "  ERROR: cannot resolve python_version from $PYTHON"
+    if is_placeholder_sentinel "$python_version"; then
+        log "  ERROR: python_version is missing or a sentinel: '${python_version:-<empty>}'"
         return 1
     fi
-    cann_version=$(cat /usr/local/Ascend/ascend-toolkit/latest/version.cfg 2>/dev/null | head -1 || true)
-    if [ -z "$cann_version" ] || [ "$cann_version" = "unknown" ]; then
-        log "  ERROR: cannot resolve cann_version from /usr/local/Ascend/ascend-toolkit/latest/version.cfg"
+    # CANN version: try candidate files with 'Version=' line (not version.cfg).
+    # Verified paths on vllm-hust-cyj-21rc-cloud:
+    #   /usr/local/Ascend/ascend-toolkit/latest/opp/version.info  -> Version=9.0.0
+    cann_version=$(resolve_ascend_version \
+        "/usr/local/Ascend/ascend-toolkit/latest/opp/version.info \
+         /usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info \
+         /usr/local/Ascend/ascend-toolkit/latest/Ascend_toolkit_install.info \
+         /usr/local/Ascend/ascend-toolkit/latest/version.info \
+         /usr/local/Ascend/cann-9.0.0/opp/version.info \
+         /usr/local/Ascend/ascend-toolkit/latest/version.cfg" || true)
+    if is_placeholder_sentinel "$cann_version"; then
+        log "  ERROR: cann_version is missing or a sentinel: '${cann_version:-<empty>}'"
+        log "  ERROR: tried opp/version.info, install.info, version.info, version.cfg"
         return 1
     fi
-    driver_version=$(cat /usr/local/Ascend/driver/version.info 2>/dev/null | head -1 || true)
-    if [ -z "$driver_version" ] || [ "$driver_version" = "unknown" ]; then
-        log "  ERROR: cannot resolve driver_version from /usr/local/Ascend/driver/version.info"
+    # Driver version: parse 'Version=' line from driver/version.info.
+    driver_version=$(resolve_ascend_version \
+        "/usr/local/Ascend/driver/version.info \
+         /usr/local/Ascend/driver/build.info" || true)
+    if is_placeholder_sentinel "$driver_version"; then
+        log "  ERROR: driver_version is missing or a sentinel: '${driver_version:-<empty>}'"
         return 1
     fi
 
