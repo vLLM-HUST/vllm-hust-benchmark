@@ -66,7 +66,7 @@ INFO 08-03 15:15:56 [__init__.py:229] Platform plugin ascend is activated
 (EngineCore pid=622423) INFO 08-03 15:15:58 [core.py:109] Initializing a V1 LLM engine (vdev) with config: model='/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct', speculative_config=None, tokenizer='/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=30720, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False), seed=0, served_model_name=/data/vllm-hust-benchmark-issue97/models/Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::linear_attention', 'vllm::plamo2_mamba_mixer', 'vllm::gdn_attention_core', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::kda_attention', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update', 'vllm::mla_forward'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.PIECEWISE: 1>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 256, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, moe_backend='auto')
 (EngineCore pid=622423) WARNING 08-03 15:15:59 [nixl_utils.py:34] NIXL is not available
 (EngineCore pid=622423) WARNING 08-03 15:15:59 [nixl_utils.py:44] NIXL agent config is not available
-(EngineCore pid=622423) WARNING 08-03 15:16:00 [camem.py:67] Failed to import vllm_ascend_C:No module named 'vllm_ascend.vllm_ascend_C'. Sleep mode will be disabled. 
+(EngineCore pid=622423) WARNING 08-03 15:16:00 [camem.py:67] Failed to import vllm_ascend_C:No module named 'vllm_ascend.vllm_ascend_C'. Sleep mode will be disabled.
 (EngineCore pid=622423) [transformers] `Qwen2VLImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `Qwen2VLImageProcessor` instead.
 (EngineCore pid=622423) WARNING 08-03 15:16:04 [utils.py:682] Skipping Ascend fused MoE custom op registration because an optional upstream dependency is unavailable: No module named 'vllm.model_executor.layers.fused_moe.runner.default_moe_runner'
 (EngineCore pid=622423) INFO 08-03 15:16:04 [ascend_config.py:639] Dynamic EPLB is False
@@ -86,17 +86,27 @@ INFO 08-03 15:15:56 [__init__.py:229] Platform plugin ascend is activated
 (EngineCore pid=622423) INFO 08-03 15:16:10 [backends.py:871] Post-grad pass configuration time: 1.47 s
 (EngineCore pid=622423) INFO 08-03 15:16:10 [weight_utils.py:904] Filesystem type for checkpoints: OVERLAY. Checkpoint size: 27.51 GiB. Available RAM: 1984.38 GiB.
 (EngineCore pid=622423) INFO 08-03 15:16:10 [weight_utils.py:927] Auto-prefetch is disabled because the filesystem (OVERLAY) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
-(EngineCore pid=622423) Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
-(EngineCore pid=622423) Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:01<00:09,  1.41s/it]
-(EngineCore pid=622423) Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:07<00:23,  3.99s/it]
-(EngineCore pid=622423) Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:09<00:17,  3.44s/it]
-(EngineCore pid=622423) Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:11<00:11,  2.81s/it]
-(EngineCore pid=622423) Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:13<00:07,  2.47s/it]
-(EngineCore pid=622423) Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:15<00:04,  2.28s/it]
-(EngineCore pid=622423) Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:17<00:02,  2.13s/it]
-(EngineCore pid=622423) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:18<00:00,  1.70s/it]
-(EngineCore pid=622423) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:18<00:00,  2.27s/it]
-(EngineCore pid=622423) 
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:01<00:09,  1.41s/it]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:07<00:23,  3.99s/it]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:09<00:17,  3.44s/it]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:11<00:11,  2.81s/it]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:13<00:07,  2.47s/it]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:15<00:04,  2.28s/it]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:17<00:02,  2.13s/it]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:18<00:00,  1.70s/it]
+(EngineCore pid=622423)
+Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:18<00:00,  2.27s/it]
+(EngineCore pid=622423)
 (EngineCore pid=622423) INFO 08-03 15:16:29 [default_loader.py:391] Loading weights took 18.28 seconds
 (EngineCore pid=622423) INFO 08-03 15:16:29 [model_runner_v1.py:3063] Loading model weights took 27.5350 GB
 (EngineCore pid=622423) INFO 08-03 15:16:29 [interface.py:492] Setting kv cache block size to 128 for CUSTOM backend.
@@ -355,7 +365,44 @@ INFO 08-03 15:15:56 [__init__.py:229] Platform plugin ascend is activated
 (EngineCore pid=622423) INFO 08-03 15:17:29 [worker.py:629] Available KV cache memory: 8.12 GiB
 (EngineCore pid=622423) INFO 08-03 15:17:29 [kv_cache_utils.py:1710] GPU KV cache size: 44,288 tokens
 (EngineCore pid=622423) INFO 08-03 15:17:29 [kv_cache_utils.py:1711] Maximum concurrency for 30,720 tokens per request: 1.44x
-(EngineCore pid=622423) Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   3%|▎         | 1/35 [00:00<00:13,  2.59it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   6%|▌         | 2/35 [00:00<00:12,  2.68it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   9%|▊         | 3/35 [00:01<00:11,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  11%|█▏        | 4/35 [00:01<00:11,  2.72it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  14%|█▍        | 5/35 [00:01<00:10,  2.73it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  17%|█▋        | 6/35 [00:02<00:10,  2.74it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  20%|██        | 7/35 [00:02<00:10,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  23%|██▎       | 8/35 [00:02<00:09,  2.72it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  26%|██▌       | 9/35 [00:03<00:09,  2.72it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  29%|██▊       | 10/35 [00:03<00:09,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  31%|███▏      | 11/35 [00:04<00:08,  2.72it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  34%|███▍      | 12/35 [00:04<00:08,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  37%|███▋      | 13/35 [00:04<00:08,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  40%|████      | 14/35 [00:05<00:07,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  43%|████▎     | 15/35 [00:05<00:07,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  46%|████▌     | 16/35 [00:05<00:07,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  49%|████▊     | 17/35 [00:06<00:06,  2.68it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  51%|█████▏    | 18/35 [00:06<00:06,  2.69it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  54%|█████▍    | 19/35 [00:07<00:05,  2.70it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  57%|█████▋    | 20/35 [00:07<00:05,  2.70it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  60%|██████    | 21/35 [00:07<00:05,  2.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  63%|██████▎   | 22/35 [00:08<00:04,  2.86it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  66%|██████▌   | 23/35 [00:08<00:04,  2.97it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  69%|██████▊   | 24/35 [00:08<00:03,  3.06it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  71%|███████▏  | 25/35 [00:08<00:03,  3.12it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  74%|███████▍  | 26/35 [00:09<00:02,  3.18it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  77%|███████▋  | 27/35 [00:09<00:02,  3.22it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  80%|████████  | 28/35 [00:09<00:02,  3.25it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  83%|████████▎ | 29/35 [00:10<00:01,  3.25it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  86%|████████▌ | 30/35 [00:10<00:01,  3.25it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  89%|████████▊ | 31/35 [00:10<00:01,  3.25it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  91%|█████████▏| 32/35 [00:11<00:00,  3.20it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  94%|█████████▍| 33/35 [00:11<00:00,  3.21it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  97%|█████████▋| 34/35 [00:11<00:00,  3.19it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 35/35 [00:12<00:00,  3.22it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 35/35 [00:12<00:00,  2.90it/s]
+(EngineCore pid=622423)
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/35 [00:00<?, ?it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   3%|▎         | 1/35 [00:00<00:13,  2.59it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   6%|▌         | 2/35 [00:00<00:12,  2.68it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   9%|▊         | 3/35 [00:01<00:11,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  11%|█▏        | 4/35 [00:01<00:11,  2.72it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  14%|█▍        | 5/35 [00:01<00:10,  2.73it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  17%|█▋        | 6/35 [00:02<00:10,  2.74it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  20%|██        | 7/35 [00:02<00:10,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  23%|██▎       | 8/35 [00:02<00:09,  2.72it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  26%|██▌       | 9/35 [00:03<00:09,  2.72it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  29%|██▊       | 10/35 [00:03<00:09,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  31%|███▏      | 11/35 [00:04<00:08,  2.72it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  34%|███▍      | 12/35 [00:04<00:08,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  37%|███▋      | 13/35 [00:04<00:08,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  40%|████      | 14/35 [00:05<00:07,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  43%|████▎     | 15/35 [00:05<00:07,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  46%|████▌     | 16/35 [00:05<00:07,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  49%|████▊     | 17/35 [00:06<00:06,  2.68it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  51%|█████▏    | 18/35 [00:06<00:06,  2.69it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  54%|█████▍    | 19/35 [00:07<00:05,  2.70it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  57%|█████▋    | 20/35 [00:07<00:05,  2.70it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  60%|██████    | 21/35 [00:07<00:05,  2.71it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  63%|██████▎   | 22/35 [00:08<00:04,  2.86it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  66%|██████▌   | 23/35 [00:08<00:04,  2.97it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  69%|██████▊   | 24/35 [00:08<00:03,  3.06it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  71%|███████▏  | 25/35 [00:08<00:03,  3.12it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  74%|███████▍  | 26/35 [00:09<00:02,  3.18it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  77%|███████▋  | 27/35 [00:09<00:02,  3.22it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  80%|████████  | 28/35 [00:09<00:02,  3.25it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  83%|████████▎ | 29/35 [00:10<00:01,  3.25it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  86%|████████▌ | 30/35 [00:10<00:01,  3.25it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  89%|████████▊ | 31/35 [00:10<00:01,  3.25it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  91%|█████████▏| 32/35 [00:11<00:00,  3.20it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  94%|█████████▍| 33/35 [00:11<00:00,  3.21it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  97%|█████████▋| 34/35 [00:11<00:00,  3.19it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 35/35 [00:12<00:00,  3.22it/s]
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 35/35 [00:12<00:00,  2.90it/s]
 (EngineCore pid=622423) INFO 08-03 15:17:43 [gpu_model_runner.py:6222] Graph capturing finished in 13 secs, took 0.37 GiB
 (EngineCore pid=622423) INFO 08-03 15:17:43 [worker.py:778] Free memory on device (60.61/60.96 GiB) on startup. Desired GPU memory utilization is (0.6, 36.57 GiB). Actual usage: 27.54 GiB for weights, 0.88 GiB for peak activation, 0.04 GiB for non-torch memory, 0.37 GiB for NPU graph memory. Replace gpu_memory_utilization with `--kv-cache-memory=8170590720` (7.61 GiB) to fit into requested memory, or `--kv-cache-memory=33981514240` (31.65 GiB) to fully utilize NPU free memory. Current KV cache memory: 8.12 GiB.
 (EngineCore pid=622423) INFO 08-03 15:17:45 [cpu_binding.py:328] [cpu_bind_mode] mode=topo_affinity rank=0 visible_npus=[0]
@@ -373,14 +420,56 @@ INFO 08-03 15:15:56 [__init__.py:229] Platform plugin ascend is activated
 (EngineCore pid=622423) INFO 08-03 15:17:55 [utils.py:627] No adjustment needed for ACL graph batch sizes: Qwen2ForCausalLM model (layers: 48) with 35 sizes
 (EngineCore pid=622423) INFO 08-03 15:17:55 [platform.py:564] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
 (EngineCore pid=622423) INFO 08-03 15:17:55 [compilation.py:303] Enabled custom fusions: norm_quant, act_quant
-Rendering prompts:   0%|          | 0/200 [00:00<?, ?it/s]Rendering prompts:  18%|█▊        | 37/200 [00:00<00:00, 365.28it/s]Rendering prompts:  44%|████▍     | 89/200 [00:00<00:00, 452.19it/s](EngineCore pid=622423) 2026-08-03 15:17:56,166 - WARNING - Custom op npu_apply_top_k_top_p is unavailable; falling back to the pytorch implementation.
-Rendering prompts:  70%|███████   | 141/200 [00:00<00:00, 479.03it/s]Rendering prompts:  96%|█████████▌| 192/200 [00:00<00:00, 490.99it/s]Rendering prompts: 100%|██████████| 200/200 [00:00<00:00, 475.64it/s]
-Processed prompts:   0%|          | 0/200 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s](EngineCore pid=622423) INFO 08-03 15:17:59 [acl_graph.py:199] Replaying aclgraph
+
+Rendering prompts:   0%|          | 0/200 [00:00<?, ?it/s]
+Rendering prompts:  18%|█▊        | 37/200 [00:00<00:00, 365.28it/s]
+Rendering prompts:  44%|████▍     | 89/200 [00:00<00:00, 452.19it/s](EngineCore pid=622423) 2026-08-03 15:17:56,166 - WARNING - Custom op npu_apply_top_k_top_p is unavailable; falling back to the pytorch implementation.
+
+Rendering prompts:  70%|███████   | 141/200 [00:00<00:00, 479.03it/s]
+Rendering prompts:  96%|█████████▌| 192/200 [00:00<00:00, 490.99it/s]
+Rendering prompts: 100%|██████████| 200/200 [00:00<00:00, 475.64it/s]
+
+Processed prompts:   0%|          | 0/200 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s](EngineCore pid=622423) INFO 08-03 15:17:59 [acl_graph.py:199] Replaying aclgraph
 INFO 08-03 15:18:06 [loggers.py:280] Engine 000: Avg prompt throughput: 3550.1 tokens/s, Avg generation throughput: 625.5 tokens/s, Running: 65 reqs, Waiting: 135 reqs, GPU KV cache usage: 98.6%, Prefix cache hit rate: 0.0%
-Processed prompts:   0%|          | 1/200 [00:13<44:01, 13.27s/it, est. speed input: 40.23 toks/s, output: 11.30 toks/s]Processed prompts:   1%|          | 2/200 [00:13<18:16,  5.54s/it, est. speed input: 80.08 toks/s, output: 22.39 toks/s]Processed prompts:   8%|▊         | 17/200 [00:13<01:15,  2.41it/s, est. speed input: 675.11 toks/s, output: 188.62 toks/s]Processed prompts:  16%|█▌        | 32/200 [00:14<00:35,  4.79it/s, est. speed input: 1204.08 toks/s, output: 335.20 toks/s]Processed prompts:  24%|██▎       | 47/200 [00:15<00:21,  7.02it/s, est. speed input: 1664.45 toks/s, output: 462.88 toks/s]Processed prompts:  29%|██▉       | 58/200 [00:19<00:31,  4.50it/s, est. speed input: 1600.95 toks/s, output: 445.30 toks/s]INFO 08-03 15:18:16 [loggers.py:280] Engine 000: Avg prompt throughput: 3072.4 tokens/s, Avg generation throughput: 587.2 tokens/s, Running: 67 reqs, Waiting: 74 reqs, GPU KV cache usage: 100.0%, Prefix cache hit rate: 0.0%
-Processed prompts:  30%|███       | 61/200 [00:20<00:31,  4.37it/s, est. speed input: 1613.36 toks/s, output: 448.76 toks/s]Processed prompts:  32%|███▏      | 63/200 [00:20<00:31,  4.40it/s, est. speed input: 1632.70 toks/s, output: 454.16 toks/s]Processed prompts:  32%|███▎      | 65/200 [00:21<00:30,  4.46it/s, est. speed input: 1652.72 toks/s, output: 459.55 toks/s]Processed prompts:  34%|███▎      | 67/200 [00:21<00:27,  4.80it/s, est. speed input: 1686.12 toks/s, output: 468.59 toks/s]Processed prompts:  34%|███▍      | 68/200 [00:21<00:27,  4.86it/s, est. speed input: 1697.09 toks/s, output: 471.64 toks/s]Processed prompts:  34%|███▍      | 69/200 [00:21<00:26,  4.93it/s, est. speed input: 1708.24 toks/s, output: 474.61 toks/s]Processed prompts:  35%|███▌      | 70/200 [00:27<02:06,  1.03it/s, est. speed input: 1383.51 toks/s, output: 384.36 toks/s]Processed prompts:  36%|███▌      | 72/200 [00:27<01:30,  1.42it/s, est. speed input: 1416.66 toks/s, output: 393.58 toks/s]Processed prompts:  44%|████▎     | 87/200 [00:27<00:19,  5.67it/s, est. speed input: 1704.95 toks/s, output: 473.53 toks/s]Processed prompts:  51%|█████     | 102/200 [00:28<00:11,  8.69it/s, est. speed input: 1938.40 toks/s, output: 538.05 toks/s]Processed prompts:  58%|█████▊    | 117/200 [00:29<00:07, 10.88it/s, est. speed input: 2154.65 toks/s, output: 598.00 toks/s]INFO 08-03 15:18:26 [loggers.py:280] Engine 000: Avg prompt throughput: 2493.1 tokens/s, Avg generation throughput: 692.3 tokens/s, Running: 66 reqs, Waiting: 11 reqs, GPU KV cache usage: 96.5%, Prefix cache hit rate: 0.0%
-Processed prompts:  62%|██████▏   | 124/200 [00:33<00:15,  5.05it/s, est. speed input: 2008.75 toks/s, output: 557.86 toks/s]Processed prompts:  64%|██████▎   | 127/200 [00:34<00:16,  4.54it/s, est. speed input: 1988.38 toks/s, output: 552.17 toks/s]Processed prompts:  64%|██████▍   | 129/200 [00:36<00:22,  3.13it/s, est. speed input: 1889.07 toks/s, output: 524.57 toks/s]Processed prompts:  66%|██████▌   | 131/200 [00:37<00:22,  3.10it/s, est. speed input: 1882.22 toks/s, output: 522.94 toks/s]Processed prompts:  66%|██████▌   | 132/200 [00:37<00:21,  3.17it/s, est. speed input: 1884.52 toks/s, output: 523.63 toks/s]Processed prompts:  66%|██████▋   | 133/200 [00:38<00:22,  3.01it/s, est. speed input: 1875.28 toks/s, output: 521.05 toks/s]Processed prompts:  67%|██████▋   | 134/200 [00:38<00:20,  3.20it/s, est. speed input: 1880.92 toks/s, output: 522.55 toks/s]Processed prompts:  68%|██████▊   | 135/200 [00:38<00:18,  3.44it/s, est. speed input: 1886.35 toks/s, output: 524.06 toks/s]Processed prompts:  68%|██████▊   | 136/200 [00:38<00:17,  3.57it/s, est. speed input: 1889.09 toks/s, output: 524.75 toks/s]Processed prompts:  68%|██████▊   | 137/200 [00:39<00:17,  3.53it/s, est. speed input: 1888.49 toks/s, output: 524.63 toks/s]Processed prompts:  69%|██████▉   | 138/200 [00:39<00:16,  3.86it/s, est. speed input: 1893.81 toks/s, output: 526.08 toks/s]INFO 08-03 15:18:36 [loggers.py:280] Engine 000: Avg prompt throughput: 1237.5 tokens/s, Avg generation throughput: 859.3 tokens/s, Running: 58 reqs, Waiting: 4 reqs, GPU KV cache usage: 99.4%, Prefix cache hit rate: 0.0%
-Processed prompts:  70%|██████▉   | 139/200 [00:41<00:38,  1.58it/s, est. speed input: 1824.97 toks/s, output: 506.98 toks/s]Processed prompts:  72%|███████▏  | 144/200 [00:41<00:13,  4.09it/s, est. speed input: 1885.00 toks/s, output: 523.72 toks/s]Processed prompts:  80%|███████▉  | 159/200 [00:41<00:03, 13.02it/s, est. speed input: 2069.02 toks/s, output: 575.03 toks/s]Processed prompts:  94%|█████████▍| 189/200 [00:41<00:00, 36.64it/s, est. speed input: 2454.36 toks/s, output: 681.73 toks/s]Processed prompts: 100%|██████████| 200/200 [00:47<00:00,  6.41it/s, est. speed input: 2283.42 toks/s, output: 634.24 toks/s]Processed prompts: 100%|██████████| 200/200 [00:47<00:00,  6.41it/s, est. speed input: 2283.42 toks/s, output: 634.24 toks/s]Processed prompts: 100%|██████████| 200/200 [00:47<00:00,  4.23it/s, est. speed input: 2283.42 toks/s, output: 634.24 toks/s]
+
+Processed prompts:   0%|          | 1/200 [00:13<44:01, 13.27s/it, est. speed input: 40.23 toks/s, output: 11.30 toks/s]
+Processed prompts:   1%|          | 2/200 [00:13<18:16,  5.54s/it, est. speed input: 80.08 toks/s, output: 22.39 toks/s]
+Processed prompts:   8%|▊         | 17/200 [00:13<01:15,  2.41it/s, est. speed input: 675.11 toks/s, output: 188.62 toks/s]
+Processed prompts:  16%|█▌        | 32/200 [00:14<00:35,  4.79it/s, est. speed input: 1204.08 toks/s, output: 335.20 toks/s]
+Processed prompts:  24%|██▎       | 47/200 [00:15<00:21,  7.02it/s, est. speed input: 1664.45 toks/s, output: 462.88 toks/s]
+Processed prompts:  29%|██▉       | 58/200 [00:19<00:31,  4.50it/s, est. speed input: 1600.95 toks/s, output: 445.30 toks/s]INFO 08-03 15:18:16 [loggers.py:280] Engine 000: Avg prompt throughput: 3072.4 tokens/s, Avg generation throughput: 587.2 tokens/s, Running: 67 reqs, Waiting: 74 reqs, GPU KV cache usage: 100.0%, Prefix cache hit rate: 0.0%
+
+Processed prompts:  30%|███       | 61/200 [00:20<00:31,  4.37it/s, est. speed input: 1613.36 toks/s, output: 448.76 toks/s]
+Processed prompts:  32%|███▏      | 63/200 [00:20<00:31,  4.40it/s, est. speed input: 1632.70 toks/s, output: 454.16 toks/s]
+Processed prompts:  32%|███▎      | 65/200 [00:21<00:30,  4.46it/s, est. speed input: 1652.72 toks/s, output: 459.55 toks/s]
+Processed prompts:  34%|███▎      | 67/200 [00:21<00:27,  4.80it/s, est. speed input: 1686.12 toks/s, output: 468.59 toks/s]
+Processed prompts:  34%|███▍      | 68/200 [00:21<00:27,  4.86it/s, est. speed input: 1697.09 toks/s, output: 471.64 toks/s]
+Processed prompts:  34%|███▍      | 69/200 [00:21<00:26,  4.93it/s, est. speed input: 1708.24 toks/s, output: 474.61 toks/s]
+Processed prompts:  35%|███▌      | 70/200 [00:27<02:06,  1.03it/s, est. speed input: 1383.51 toks/s, output: 384.36 toks/s]
+Processed prompts:  36%|███▌      | 72/200 [00:27<01:30,  1.42it/s, est. speed input: 1416.66 toks/s, output: 393.58 toks/s]
+Processed prompts:  44%|████▎     | 87/200 [00:27<00:19,  5.67it/s, est. speed input: 1704.95 toks/s, output: 473.53 toks/s]
+Processed prompts:  51%|█████     | 102/200 [00:28<00:11,  8.69it/s, est. speed input: 1938.40 toks/s, output: 538.05 toks/s]
+Processed prompts:  58%|█████▊    | 117/200 [00:29<00:07, 10.88it/s, est. speed input: 2154.65 toks/s, output: 598.00 toks/s]INFO 08-03 15:18:26 [loggers.py:280] Engine 000: Avg prompt throughput: 2493.1 tokens/s, Avg generation throughput: 692.3 tokens/s, Running: 66 reqs, Waiting: 11 reqs, GPU KV cache usage: 96.5%, Prefix cache hit rate: 0.0%
+
+Processed prompts:  62%|██████▏   | 124/200 [00:33<00:15,  5.05it/s, est. speed input: 2008.75 toks/s, output: 557.86 toks/s]
+Processed prompts:  64%|██████▎   | 127/200 [00:34<00:16,  4.54it/s, est. speed input: 1988.38 toks/s, output: 552.17 toks/s]
+Processed prompts:  64%|██████▍   | 129/200 [00:36<00:22,  3.13it/s, est. speed input: 1889.07 toks/s, output: 524.57 toks/s]
+Processed prompts:  66%|██████▌   | 131/200 [00:37<00:22,  3.10it/s, est. speed input: 1882.22 toks/s, output: 522.94 toks/s]
+Processed prompts:  66%|██████▌   | 132/200 [00:37<00:21,  3.17it/s, est. speed input: 1884.52 toks/s, output: 523.63 toks/s]
+Processed prompts:  66%|██████▋   | 133/200 [00:38<00:22,  3.01it/s, est. speed input: 1875.28 toks/s, output: 521.05 toks/s]
+Processed prompts:  67%|██████▋   | 134/200 [00:38<00:20,  3.20it/s, est. speed input: 1880.92 toks/s, output: 522.55 toks/s]
+Processed prompts:  68%|██████▊   | 135/200 [00:38<00:18,  3.44it/s, est. speed input: 1886.35 toks/s, output: 524.06 toks/s]
+Processed prompts:  68%|██████▊   | 136/200 [00:38<00:17,  3.57it/s, est. speed input: 1889.09 toks/s, output: 524.75 toks/s]
+Processed prompts:  68%|██████▊   | 137/200 [00:39<00:17,  3.53it/s, est. speed input: 1888.49 toks/s, output: 524.63 toks/s]
+Processed prompts:  69%|██████▉   | 138/200 [00:39<00:16,  3.86it/s, est. speed input: 1893.81 toks/s, output: 526.08 toks/s]INFO 08-03 15:18:36 [loggers.py:280] Engine 000: Avg prompt throughput: 1237.5 tokens/s, Avg generation throughput: 859.3 tokens/s, Running: 58 reqs, Waiting: 4 reqs, GPU KV cache usage: 99.4%, Prefix cache hit rate: 0.0%
+
+Processed prompts:  70%|██████▉   | 139/200 [00:41<00:38,  1.58it/s, est. speed input: 1824.97 toks/s, output: 506.98 toks/s]
+Processed prompts:  72%|███████▏  | 144/200 [00:41<00:13,  4.09it/s, est. speed input: 1885.00 toks/s, output: 523.72 toks/s]
+Processed prompts:  80%|███████▉  | 159/200 [00:41<00:03, 13.02it/s, est. speed input: 2069.02 toks/s, output: 575.03 toks/s]
+Processed prompts:  94%|█████████▍| 189/200 [00:41<00:00, 36.64it/s, est. speed input: 2454.36 toks/s, output: 681.73 toks/s]
+Processed prompts: 100%|██████████| 200/200 [00:47<00:00,  6.41it/s, est. speed input: 2283.42 toks/s, output: 634.24 toks/s]
+Processed prompts: 100%|██████████| 200/200 [00:47<00:00,  6.41it/s, est. speed input: 2283.42 toks/s, output: 634.24 toks/s]
+Processed prompts: 100%|██████████| 200/200 [00:47<00:00,  4.23it/s, est. speed input: 2283.42 toks/s, output: 634.24 toks/s]
 (EngineCore pid=622423) INFO 08-03 15:18:43 [core.py:1243] Shutdown initiated (timeout=0)
 (EngineCore pid=622423) INFO 08-03 15:18:43 [core.py:1266] Shutdown complete
 Throughput: 4.19 requests/s, 2891.79 total tokens/s, 628.62 output tokens/s
