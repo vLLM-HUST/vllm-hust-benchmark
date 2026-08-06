@@ -10,14 +10,19 @@ Covers:
   propagation.
 
 PR #150 review fixes:
-- Argument injection: image/name/command starting with ``-`` is rejected; a
-  ``--`` separator is emitted before the image.
-- Host path blacklist covers sub-paths (``/proc/1/root``, ``/sys/kernel``).
+- Argument injection: image/name starting with ``-`` is rejected; a
+  ``--`` separator is emitted before the image.  ``command`` elements
+  after ``--`` are NOT rejected (normal commands use ``-`` flags).
+- Host path blacklist covers sub-paths (``/proc/1/root``, ``/sys/kernel``)
+  and resolves symlinks via ``realpath`` so ``link -> /proc`` is caught.
 - Named volumes are rejected (local driver can bind ``/`` to a named volume).
+- Anonymous volumes are rejected (build/inspect contract consistency).
 - Device mapping is an exact set: extra ``davinci*`` devices are rejected.
 """
 
 from __future__ import annotations
+
+from pathlib import Path
 
 import pytest
 
@@ -182,15 +187,54 @@ def test_docker_command_rejects_option_like_name() -> None:
 
 
 @pytest.mark.parametrize("cmd_element", ["--device=/dev/davinci1:/dev/davinci1", "-v"])
-def test_docker_command_rejects_option_like_command_element(cmd_element: str) -> None:
+def test_docker_command_accepts_option_like_command_element(cmd_element: str) -> None:
+    """Command elements after ``--`` are positional args, NOT docker options.
+
+    Per PR #150 review round 2: '请保留选项区边界保护，但不要禁止镜像后的
+    正常参数'.  Normal commands like ``python -m vllm ... --model ...`` use
+    ``-``-prefixed flags and must be accepted.
+    """
     assignment = resolve_runner_device("poy-180-21rc-npu0")
-    with pytest.raises(ValueError, match="must not start with '-'"):
-        build_docker_create_command(
-            assignment=assignment,
-            container_name="benchmark-job",
-            image="example/ascend:latest",
-            command=[cmd_element, "ubuntu"],
-        )
+    command = build_docker_create_command(
+        assignment=assignment,
+        container_name="benchmark-job",
+        image="example/ascend:latest",
+        command=[cmd_element, "ubuntu"],
+    )
+    # The element must appear after the ``--`` separator.
+    sep_index = command.index("--")
+    assert cmd_element in command[sep_index + 1 :]
+
+
+def test_docker_command_accepts_normal_vllm_invocation() -> None:
+    """A real-world vLLM command with ``-`` flags must be accepted."""
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    command = build_docker_create_command(
+        assignment=assignment,
+        container_name="benchmark-job",
+        image="example/ascend:latest",
+        command=[
+            "python",
+            "-m",
+            "vllm.entrypoints.cli",
+            "--model",
+            "/data/model",
+            "--port",
+            "8000",
+        ],
+    )
+    sep_index = command.index("--")
+    # After `--` comes the image, then the command elements.
+    assert command[sep_index + 1] == "example/ascend:latest"
+    assert command[sep_index + 2 :] == [
+        "python",
+        "-m",
+        "vllm.entrypoints.cli",
+        "--model",
+        "/data/model",
+        "--port",
+        "8000",
+    ]
 
 
 def test_docker_command_emits_separator_before_image() -> None:
@@ -390,17 +434,23 @@ def test_docker_command_rejects_named_volume(volume_spec: str) -> None:
         )
 
 
-def test_docker_command_accepts_anonymous_volume() -> None:
-    """Anonymous volumes (container path only) are safe and accepted."""
+def test_docker_command_rejects_anonymous_volume() -> None:
+    """Anonymous volumes are rejected to keep build/inspect contracts consistent.
+
+    Per PR #150 review round 2: 'build 仍接受只有 /tmp 的匿名 volume，docker
+    inspect 会把它表示为 Type=volume，而 inspect validator 现在拒绝所有
+    volume，因此这类命令必然 create 成功后再被拒绝。请让 create 前后的
+    契约一致'.
+    """
     assignment = resolve_runner_device("poy-180-21rc-npu0")
-    command = build_docker_create_command(
-        assignment=assignment,
-        container_name="benchmark-job",
-        image="example/ascend:latest",
-        command=[],
-        volumes=["/tmp"],
-    )
-    assert "/tmp" in " ".join(command)
+    with pytest.raises(ValueError, match="anonymous volumes are not allowed"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[],
+            volumes=["/tmp"],
+        )
 
 
 def test_docker_command_accepts_readonly_option() -> None:
@@ -587,3 +637,87 @@ def test_inspect_rejects_forbidden_subpath(source: str) -> None:
     ]
     with pytest.raises(ValueError, match="forbidden bind mount source"):
         validate_container_inspect(payload, assignment)
+
+
+# --- symlink resolution (PR #150 review round 2) ---
+
+
+def test_docker_command_rejects_symlink_to_proc(tmp_path: Path) -> None:
+    """A symlink to a forbidden path must be caught via realpath.
+
+    Per PR #150 review round 2: '_normalize_path 仍然只做 rstrip，没有解析
+    bind source 的符号链接。我本地验证 /tmp/safe/link -> /proc 时
+    _is_forbidden_host_path(link) 返回 false'.
+    """
+    safe_dir = tmp_path / "safe"
+    safe_dir.mkdir()
+    link = safe_dir / "link"
+    link.symlink_to("/proc")
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="forbidden host path"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[],
+            volumes=[f"{link}:/workspace"],
+        )
+
+
+def test_docker_command_rejects_symlink_to_dev(tmp_path: Path) -> None:
+    """A symlink to /dev must be caught via realpath."""
+    safe_dir = tmp_path / "safe"
+    safe_dir.mkdir()
+    link = safe_dir / "devlink"
+    link.symlink_to("/dev")
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    with pytest.raises(ValueError, match="forbidden host path"):
+        build_docker_create_command(
+            assignment=assignment,
+            container_name="benchmark-job",
+            image="example/ascend:latest",
+            command=[],
+            volumes=[f"{link}:/workspace"],
+        )
+
+
+def test_inspect_rejects_symlink_to_proc(tmp_path: Path) -> None:
+    """Inspect path must also resolve symlinks (same contract as build).
+
+    Per PR #150 review round 2: '在 inspect 路径上保持同一契约'.
+    """
+    safe_dir = tmp_path / "safe"
+    safe_dir.mkdir()
+    link = safe_dir / "link"
+    link.symlink_to("/proc")
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    payload = _inspect_payload(assignment.runner_name, 0)
+    payload["Mounts"] = [
+        {
+            "Type": "bind",
+            "Source": str(link),
+            "Destination": "/workspace",
+            "Mode": "rw",
+            "RW": True,
+            "Propagation": "rprivate",
+        }
+    ]
+    with pytest.raises(ValueError, match="forbidden bind mount source"):
+        validate_container_inspect(payload, assignment)
+
+
+def test_docker_command_accepts_symlink_to_safe_path(tmp_path: Path) -> None:
+    """A symlink to a non-forbidden path must be accepted."""
+    real_data = tmp_path / "real_data"
+    real_data.mkdir()
+    link = tmp_path / "link_to_data"
+    link.symlink_to(real_data)
+    assignment = resolve_runner_device("poy-180-21rc-npu0")
+    command = build_docker_create_command(
+        assignment=assignment,
+        container_name="benchmark-job",
+        image="example/ascend:latest",
+        command=[],
+        volumes=[f"{link}:/workspace"],
+    )
+    assert str(link) in " ".join(command)

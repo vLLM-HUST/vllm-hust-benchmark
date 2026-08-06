@@ -32,6 +32,7 @@ Key contracts enforced:
 
 from __future__ import annotations
 
+import os
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -96,11 +97,25 @@ def _normalize_path(path: str) -> str:
 def _is_forbidden_host_path(host_path: str) -> bool:
     """Return True if bind-mounting host_path would bypass isolation.
 
+    Checks BOTH the original path and the realpath-resolved path against
+    the blacklist.  This is necessary because:
+
+    1. ``realpath`` resolves symlinks like ``link -> /proc``, catching
+       indirect references to forbidden paths (PR #150 review round 2).
+    2. On macOS, ``/var`` is a symlink to ``/private/var``, so
+       ``realpath("/var/run/docker.sock")`` returns
+       ``/private/var/run/docker.sock`` — the original path must also be
+       checked so direct patterns like ``/(var/)?run/docker.sock`` still
+       match.
+
     Matches both the path itself and any sub-path underneath it (e.g.
     ``/proc`` and ``/proc/1/root``).
     """
-    normalized = _normalize_path(host_path)
-    return any(pattern.match(normalized) for pattern in FORBIDDEN_HOST_PATH_PATTERNS)
+    for path in (host_path, os.path.realpath(host_path)):
+        normalized = _normalize_path(path)
+        if any(pattern.match(normalized) for pattern in FORBIDDEN_HOST_PATH_PATTERNS):
+            return True
+    return False
 
 
 def _is_allowed_container_destination(container_path: str) -> bool:
@@ -143,8 +158,15 @@ def _validate_volume_spec(volume_spec: str) -> None:
     parts = volume_spec.split(":")
     if len(parts) == 1:
         # Anonymous volume (container path only, Docker-managed).
-        # These cannot carry a host source, so they are safe.
-        return
+        # Rejected per PR #150 review round 2: 'build 仍接受只有 /tmp 的匿名
+        # volume，docker inspect 会把它表示为 Type=volume，而 inspect
+        # validator 现在拒绝所有 volume，因此这类命令必然 create 成功后再被
+        # 拒绝。请让 create 前后的契约一致'.
+        raise ValueError(
+            f"anonymous volumes are not allowed (build/inspect contract "
+            f"inconsistency): {volume_spec!r}; use an explicit bind mount "
+            f"or tmpfs instead"
+        )
     if len(parts) not in (2, 3):
         raise ValueError(
             f"invalid volume spec (expected 1-3 colon-separated parts): {volume_spec!r}"
@@ -267,20 +289,27 @@ def build_docker_create_command(
     - A ``--`` separator before the image so Docker cannot reinterpret
       ``image`` or ``command`` elements as options.
 
-    ``image``, ``container_name`` and every ``command`` element must not
-    start with ``-`` (argument-injection guard).
+    ``image`` and ``container_name`` must not start with ``-``
+    (argument-injection guard for the option region).  ``command`` elements
+    after the ``--`` separator are positional args and are NOT rejected —
+    normal commands like ``python -m vllm ... --model ...`` must work.
+
+    Per PR #150 review round 2: '当前逐项拒绝 command 中以 - 开头的值会让
+    正常的 python -m vllm ... --model ... 直接报错。请保留选项区边界保护，
+    但不要禁止镜像后的正常参数'.
     """
     if not container_name.strip():
         raise ValueError("container name is required")
     if not image.strip():
         raise ValueError("container image is required")
 
-    # Argument-injection guard: reject any value that starts with '-' so a
-    # caller cannot inject extra docker options via image/command/name.
+    # Argument-injection guard: reject values that start with '-' for
+    # fields in the Docker OPTION region (before ``--``).  ``image`` and
+    # ``container_name`` are in this region, so they are checked.  ``command``
+    # elements come AFTER ``--`` and are positional args — they must NOT be
+    # rejected because normal commands use ``-``-prefixed flags.
     _reject_option_like(container_name, "container_name")
     _reject_option_like(image, "image")
-    for element in command:
-        _reject_option_like(element, "command element")
 
     docker_command = [
         docker_bin,
