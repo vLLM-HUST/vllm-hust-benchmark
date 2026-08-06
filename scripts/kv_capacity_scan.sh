@@ -270,6 +270,15 @@ kv_capacity_tolerance() {
 verify_kv_capacity() {
     # Fail-closed KV capacity verification: parse server log and compare
     # actual KV cache memory to target within tolerance.
+    #
+    # Return codes (per PR #152 review round 4+5):
+    #   0 — KV capacity is within tolerance (OK)
+    #   1 — Parse/evidence failure: log unreadable or 'Available KV cache
+    #       memory' not found.  The caller MUST fail closed (abort) — missing
+    #       evidence must not be misreported as a verified blocked target.
+    #   2 — Verified capacity mismatch: the value was successfully parsed but
+    #       deviates more than tolerance from target.  The caller may record
+    #       this as BLOCKED (the target is unreachable on this hardware).
     local server_log="$1"
     local target_kv_gib="$2"
     local tolerance="${3:-2.0}"
@@ -281,19 +290,20 @@ try:
     text = open(log_path, encoding='utf-8', errors='replace').read()
 except Exception as exc:
     print(f"ERROR: cannot read server log: {exc}")
-    sys.exit(1)
+    sys.exit(1)  # parse failure → caller must fail closed
 m = re.search(r'Available KV cache memory:\s*([\d.]+)\s*GiB', text, re.IGNORECASE)
 if not m:
     print("ERROR: 'Available KV cache memory' not found in server log")
-    sys.exit(1)
+    sys.exit(1)  # parse failure → caller must fail closed
 actual = float(m.group(1))
 diff = abs(actual - target)
 if diff > tol:
-    print(f"ERROR: KV capacity mismatch: actual={actual:.2f}GiB "
+    print(f"MISMATCH: KV capacity actual={actual:.2f}GiB "
           f"target={target}GiB diff={diff:.2f}GiB tol={tol}GiB")
-    sys.exit(1)
+    sys.exit(2)  # verified mismatch → caller may record BLOCKED
 print(f"OK: KV capacity actual={actual:.2f}GiB target={target}GiB "
       f"diff={diff:.2f}GiB tol={tol}GiB")
+sys.exit(0)
 PYEOF
 }
 
@@ -661,17 +671,23 @@ EOF
     # (e.g. 32 GiB on 60.96 GiB HBM after weights+overhead → actual ~29 GiB),
     # do NOT widen tolerance.  Instead, record the run with its actual KV and
     # mark it as BLOCKED so the acceptance report can classify it correctly.
-    # Per PR #152 review round 4: verify_kv_capacity returns distinct exit
+    # Per PR #152 review round 4+5: verify_kv_capacity returns distinct exit
     # codes — 1 means parse failure (log unreadable / 'Available KV cache
     # memory' not found) and the caller MUST fail closed; 2 means the value
     # was parsed but exceeds tolerance, and the caller may record BLOCKED.
     # Treating both as BLOCKED would misreport missing evidence as a verified
     # blocked target.
+    #
+    # IMPORTANT: the script uses `set -euo pipefail`, so a bare
+    #   verify_kv_capacity ...; local _kv_rc=$?
+    # would trigger errexit on any non-zero return BEFORE $?) is captured,
+    # making the BLOCKED branch unreachable.  The `|| _kv_rc=$?` idiom
+    # disables errexit for this command because it is part of an OR-list.
     local _tol
     _tol=$(kv_capacity_tolerance "$kv_gib")
     log "  Verifying KV capacity (target=${kv_gib}GiB, tolerance=${_tol}GiB)"
-    verify_kv_capacity "$output_dir/server.log" "$kv_gib" "$_tol"
-    local _kv_rc=$?
+    local _kv_rc=0
+    verify_kv_capacity "$output_dir/server.log" "$kv_gib" "$_tol" || _kv_rc=$?
     if [ "$_kv_rc" -eq 1 ]; then
         log "  ERROR: KV capacity verification failed (parse error) — fail closed"
         cleanup_server

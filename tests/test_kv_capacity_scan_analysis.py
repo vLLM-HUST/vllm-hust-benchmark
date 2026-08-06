@@ -2003,3 +2003,140 @@ class TestTieringEnabledErrorSignature:
         assert "verified shape mismatch RuntimeError" in scan_script, (
             "verified signature BLOCKED message not found in script"
         )
+
+
+class TestVerifyKvCapacityReturnCodes:
+    """Real entry-point tests for verify_kv_capacity return codes (round 5).
+
+    Per PR #152 review round 5: the function must return distinct exit codes:
+      - 0: KV within tolerance (OK)
+      - 1: parse/evidence failure (log unreadable or KV line not found)
+      - 2: verified capacity mismatch (value parsed but exceeds tolerance)
+
+    These tests extract the actual Python heredoc from the bash script and
+    run it against synthetic log files, so they cover the real entry point
+    rather than a copy of the logic.
+    """
+
+    @pytest.fixture
+    def verify_python_code(self):
+        """Extract the Python heredoc from verify_kv_capacity in the script."""
+        import re
+
+        script_path = _SCRIPTS_DIR / "kv_capacity_scan.sh"
+        text = script_path.read_text()
+        # Match the PYEOF heredoc inside verify_kv_capacity()
+        m = re.search(
+            r"verify_kv_capacity\(\).*?<<'PYEOF'\n(.*?)\nPYEOF",
+            text,
+            re.DOTALL,
+        )
+        assert m is not None, "Could not extract verify_kv_capacity Python code"
+        return m.group(1)
+
+    def _run_verify(self, code, log_path, target, tol, tmp_path):
+        """Run the extracted Python code with the given args and return rc."""
+        import subprocess
+        import sys
+
+        py_file = tmp_path / "_verify_kv.py"
+        py_file.write_text(code)
+        result = subprocess.run(
+            [sys.executable, str(py_file), str(log_path), str(target), str(tol)],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        return result
+
+    def test_ok_when_kv_within_tolerance(self, verify_python_code, tmp_path):
+        """Log with KV matching target -> exit 0."""
+        log = tmp_path / "server.log"
+        log.write_text("INFO: Available KV cache memory: 8.04 GiB\n")
+        r = self._run_verify(verify_python_code, log, "8", "2.0", tmp_path)
+        assert r.returncode == 0, f"Expected 0, got {r.returncode}: {r.stderr}"
+        assert "OK" in r.stdout
+
+    def test_exit2_when_verified_mismatch_32gib(self, verify_python_code, tmp_path):
+        """Log with actual ~29 GiB KV vs 32 GiB target -> exit 2 (BLOCKED).
+
+        This is the 32 GiB unreachable scenario: the value is parsed
+        successfully but deviates >2 GiB from target, so the caller should
+        record BLOCKED rather than fail closed.
+        """
+        log = tmp_path / "server.log"
+        log.write_text("INFO: Available KV cache memory: 29.1 GiB\n")
+        r = self._run_verify(verify_python_code, log, "32", "2.0", tmp_path)
+        assert r.returncode == 2, f"Expected 2, got {r.returncode}: {r.stderr}"
+        assert "MISMATCH" in r.stdout
+
+    def test_exit1_when_log_unreadable(self, verify_python_code, tmp_path):
+        """Missing log file -> exit 1 (parse failure, fail closed)."""
+        log = tmp_path / "nonexistent.log"
+        r = self._run_verify(verify_python_code, log, "8", "2.0", tmp_path)
+        assert r.returncode == 1, f"Expected 1, got {r.returncode}: {r.stderr}"
+        assert "cannot read server log" in r.stdout
+
+    def test_exit1_when_kv_line_missing(self, verify_python_code, tmp_path):
+        """Log without 'Available KV cache memory' -> exit 1 (fail closed)."""
+        log = tmp_path / "server.log"
+        log.write_text("INFO: Model loaded successfully\nSome other line\n")
+        r = self._run_verify(verify_python_code, log, "8", "2.0", tmp_path)
+        assert r.returncode == 1, f"Expected 1, got {r.returncode}: {r.stderr}"
+        assert "not found" in r.stdout
+
+    def test_exit2_not_exit1_for_mismatch(self, verify_python_code, tmp_path):
+        """Ensure mismatch returns 2, NOT 1 (the round-4 bug)."""
+        log = tmp_path / "server.log"
+        log.write_text("Available KV cache memory: 16.0 GiB\n")
+        r = self._run_verify(verify_python_code, log, "32", "2.0", tmp_path)
+        assert r.returncode == 2, (
+            f"Mismatch must return 2 (not 1). Got {r.returncode}: {r.stderr}"
+        )
+
+
+class TestVerifyKvCapacityCallerErrexit:
+    """Verify the caller avoids set -e errexit trap (round 5 issue 2).
+
+    Per reviewer: the script uses `set -euo pipefail`, so a bare
+    `verify_kv_capacity ...; local _kv_rc=$?` would terminate the script
+    on non-zero return before $? is captured.  The caller must use the
+    `|| _kv_rc=$?` idiom or an if/else wrapper.
+    """
+
+    @pytest.fixture
+    def scan_script(self):
+        script_path = _SCRIPTS_DIR / "kv_capacity_scan.sh"
+        return script_path.read_text()
+
+    def test_caller_uses_errexit_safe_pattern(self, scan_script):
+        """The caller must use `|| _kv_rc=$?` not bare `; _kv_rc=$?`."""
+        assert "|| _kv_rc=$?" in scan_script, (
+            "Caller must use `|| _kv_rc=$?` to avoid set -e errexit trap. "
+            "A bare `verify_kv_capacity ...; local _kv_rc=$?` would exit "
+            "the script before capturing the return code."
+        )
+
+    def test_caller_does_not_use_bare_rc_capture(self, scan_script):
+        """The bare `verify_kv_capacity ...; local _kv_rc=$?` pattern
+        must NOT appear (it triggers errexit)."""
+        import re
+
+        unsafe = re.search(
+            r"verify_kv_capacity[^\n]*\n\s*local _kv_rc=\$\?",
+            scan_script,
+        )
+        assert unsafe is None, (
+            "Unsafe caller pattern found: bare `verify_kv_capacity ...; "
+            "local _kv_rc=$?` triggers set -e errexit. Use `|| _kv_rc=$?`."
+        )
+
+    def test_caller_handles_exit1_and_exit2_distinctly(self, scan_script):
+        """The caller must handle _kv_rc==1 (fail closed) and _kv_rc==2
+        (BLOCKED) in separate branches."""
+        assert '_kv_rc" -eq 1' in scan_script, (
+            "Caller must check _kv_rc==1 for fail-closed abort"
+        )
+        assert '_kv_rc" -eq 2' in scan_script, (
+            "Caller must check _kv_rc==2 for BLOCKED recording"
+        )
