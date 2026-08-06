@@ -111,3 +111,27 @@ def test_future_official_entry_requires_effective_config_contract() -> None:
 
     assert any("workload config contract" in error for error in errors)
     assert any("workload_config_contract" in error for error in errors)
+
+
+def test_quarantined_entry_ids_are_rejected() -> None:
+    module = load_module()
+    for entry_id in module.QUARANTINED_ENTRY_IDS:
+        candidate = entry(entry_id, same_spec())
+        errors = module.validate_entry(
+            candidate,
+            source=Path("leaderboard_single.json"),
+        )
+        assert any("quarantined entry" in error for error in errors), (
+            f"entry_id {entry_id} should be rejected as quarantined"
+        )
+        assert any("issue #79" in error for error in errors)
+
+
+def test_non_quarantined_entry_id_passes_quarantine_gate() -> None:
+    module = load_module()
+    candidate = entry("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", same_spec())
+    errors = module.validate_entry(
+        candidate,
+        source=Path("leaderboard_single.json"),
+    )
+    assert not any("quarantined entry" in error for error in errors)
