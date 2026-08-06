@@ -350,3 +350,5 @@ def test_current_same_spec_runner_uses_trace_replay_for_trace_targets() -> None:
     assert '--summary-output "$RAW_RESULT_FILE"' in client
     assert '--output "$TRACE_DETAIL_RESULT_FILE"' in client
     assert '--dry-run >"$RESULT_DIR/trace_replay_plan.json"' in script
+    assert "finalize_trace_immutable_input_attestation" in script
+    assert "write_trace_attestation" in script

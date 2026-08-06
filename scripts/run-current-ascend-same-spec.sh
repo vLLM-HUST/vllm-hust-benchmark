@@ -559,6 +559,23 @@ run_client_command() {
   esac
 }
 
+finalize_trace_immutable_input_attestation() {
+  if [[ -z "${TRACE_TARGET_ID:-}" ]]; then
+    return 0
+  fi
+  SPEC_FILE="$SPEC_FILE" RAW_RESULT_FILE="$RAW_RESULT_FILE" \
+    IMMUTABLE_INPUT_ATTESTATION_FILE="$RESULT_DIR/immutable-input-attestation.json" \
+    run_in_current_runtime "$REPO_ROOT/src:$CURRENT_RUNTIME_PYTHONPATH" \
+    "$CURRENT_RUNTIME_PYTHON" -c '
+import json, os
+from pathlib import Path
+from vllm_hust_benchmark.immutable_input_attestation import build_metadata, write_trace_attestation
+spec = json.loads(Path(os.environ["SPEC_FILE"]).read_text(encoding="utf-8"))
+summary = json.loads(Path(os.environ["RAW_RESULT_FILE"]).read_text(encoding="utf-8"))
+write_trace_attestation(Path(os.environ["IMMUTABLE_INPUT_ATTESTATION_FILE"]), build_metadata(spec), summary)
+'
+}
+
 json2args() {
   local json_string=$1
   JSON2ARGS_PAYLOAD="$json_string" "$CURRENT_RUNTIME_PYTHON" - <<'PY'
@@ -1317,6 +1334,8 @@ if [[ "$BENCHMARK_TYPE" != "serve" ]]; then
     exit 86
   fi
 fi
+
+finalize_trace_immutable_input_attestation
 
 stop_peak_hbm_sampler
 if [[ ! -f "$PEAK_HBM_EVIDENCE_FILE" ]] || ! jq -e \
