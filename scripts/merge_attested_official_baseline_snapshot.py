@@ -62,6 +62,12 @@ def main() -> int:
     parser.add_argument("--current-snapshot-dir", type=Path, required=True)
     parser.add_argument("--submission-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--comparison-side",
+        choices=("baseline", "current"),
+        default="baseline",
+        help="Merge the official upstream baseline or its verified current pair.",
+    )
     args = parser.parse_args()
 
     aggregate = _load_aggregator(args.aggregator_script.resolve())
@@ -78,11 +84,20 @@ def main() -> int:
         raise ValueError(
             f"expected one valid incoming baseline, got {len(incoming)}; rejected={rejected}"
         )
-    baseline = incoming[0]
-    metadata = baseline.get("metadata") or {}
-    target_id = _target_id(baseline)
-    if baseline.get("engine") != "vllm" or metadata.get("verified") is not True:
-        raise ValueError("incoming entry is not a verified vllm baseline")
+    incoming_entry = incoming[0]
+    metadata = incoming_entry.get("metadata") or {}
+    target_id = _target_id(incoming_entry)
+    expected_engine = "vllm" if args.comparison_side == "baseline" else "vllm-hust"
+    attestation = metadata.get("verification_attestation") or {}
+    if (
+        incoming_entry.get("engine") != expected_engine
+        or metadata.get("verified") is not True
+        or attestation.get("comparison_side", "baseline") != args.comparison_side
+    ):
+        raise ValueError(
+            f"incoming entry is not a verified {args.comparison_side} "
+            f"comparison ({expected_engine})"
+        )
     if not target_id or metadata.get("target_id") != target_id:
         raise ValueError("incoming baseline target binding is missing")
 
@@ -95,9 +110,12 @@ def main() -> int:
     merged = [
         entry
         for entry in current
-        if not (entry.get("engine") == "vllm" and _target_id(entry) == target_id)
+        if not (
+            entry.get("engine") == expected_engine
+            and _target_id(entry) == target_id
+        )
     ]
-    merged.append(baseline)
+    merged.append(incoming_entry)
     for entry in merged:
         _mark_legacy_unverified(entry)
         _mark_covered(entry, target_id)
