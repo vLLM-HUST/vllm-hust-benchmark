@@ -1,0 +1,80 @@
+{
+  "issue": "#151",
+  "description": "Regression re-test for unexplained performance jumps in single-card leaderboard",
+  "result_dir": "reports/issue_151_retest_raw_results",
+  "intervals": [
+    {
+      "interval": "random-online",
+      "workload": "random-online",
+      "base_commit": "2206f1f7b7",
+      "head_commit": "f273f9c5e2",
+      "reported_jump": "173% TTFT jump",
+      "base_reps": 3,
+      "head_reps": 3,
+      "medians": {
+        "base": {
+          "mean_ttft_ms": 131800.8389255727,
+          "mean_tpot_ms": 392.0936108841015,
+          "output_throughput": 83.87189426446473
+        },
+        "head": {
+          "mean_ttft_ms": 128421.04378375925,
+          "mean_tpot_ms": 382.6286247821899,
+          "output_throughput": 85.96132575381903
+        }
+      },
+      "relative_changes": {
+        "ttft": -0.02564319900666187,
+        "tpot": -0.02413960809147019,
+        "throughput": 0.024912177168264552
+      },
+      "thresholds": {
+        "ttft_increase": 0.2,
+        "tpot_increase": 0.2,
+        "throughput_decrease": 0.1
+      },
+      "verdict": "not_reproducible",
+      "reason": "TTFT +-2.6%, TPOT +-2.4%, Throughput +2.5% \u2014 all within thresholds"
+    },
+    {
+      "interval": "agent-research-online",
+      "workload": "agent-research-online",
+      "base_commit": "7a63f81e86",
+      "head_commit": "ec4847981f",
+      "reported_jump": "7.8x TTFT jump",
+      "base_reps": 3,
+      "head_reps": 3,
+      "medians": {
+        "base": {
+          "mean_ttft_ms": 2258.8050708000083,
+          "mean_tpot_ms": 415.1390221144824,
+          "output_throughput": 60.255182988505275
+        },
+        "head": {
+          "mean_ttft_ms": 2328.788449172862,
+          "mean_tpot_ms": 406.8529116803284,
+          "output_throughput": 61.09106436216921
+        }
+      },
+      "relative_changes": {
+        "ttft": 0.030982477982514616,
+        "tpot": -0.019959844757424187,
+        "throughput": 0.013872356404981736
+      },
+      "thresholds": {
+        "ttft_increase": 0.2,
+        "tpot_increase": 0.2,
+        "throughput_decrease": 0.1
+      },
+      "verdict": "not_reproducible",
+      "reason": "TTFT +3.1%, TPOT +-2.0%, Throughput +1.4% \u2014 all within thresholds"
+    }
+  ],
+  "summary": {
+    "total_intervals": 2,
+    "reproducible_regressions": 0,
+    "not_reproducible": 2,
+    "incomplete_evidence": 0,
+    "overall_verdict": "all_within_thresholds"
+  }
+}
