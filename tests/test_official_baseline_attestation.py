@@ -971,7 +971,7 @@ def test_attests_three_exact_zero_error_repeats(tmp_path: Path) -> None:
     assert len(suite["repeats"][0]["immutable_input_attestation_sha256"]) == 64
 
 
-def test_attests_distinct_runner_and_strict_startup_identities(tmp_path: Path) -> None:
+def test_rejects_distinct_runner_and_strict_startup_identities(tmp_path: Path) -> None:
     repo, staged, results = _trace_fixture(tmp_path)
     for number, repeat in enumerate(sorted(results.glob("repeat-*")), start=1):
         startup_path = repeat / "startup_evidence.json"
@@ -980,17 +980,15 @@ def test_attests_distinct_runner_and_strict_startup_identities(tmp_path: Path) -
         _write(startup_path, startup)
 
     output = repo / "submissions" / "target-distinct-startups"
-    attest_completed_baseline(
-        repo,
-        staged,
-        results,
-        output,
-        verified_by="test-review",
-        verified_at="2026-08-02T00:00:00Z",
-    )
-    suite = json.loads((output / "repeat_suite.json").read_text())
-    assert suite["repeats"][0]["runner_startup_instance_id"] == "runner-startup-1"
-    assert suite["repeats"][0]["strict_startup_instance_id"] == "startup-1"
+    with pytest.raises(ValueError, match="startup identities differ"):
+        attest_completed_baseline(
+            repo,
+            staged,
+            results,
+            output,
+            verified_by="test-review",
+            verified_at="2026-08-02T00:00:00Z",
+        )
 
 
 def test_preserves_validated_evidence_repair_attestation(tmp_path: Path) -> None:
@@ -1018,6 +1016,9 @@ def test_preserves_validated_evidence_repair_attestation(tmp_path: Path) -> None
     copied = output / record["path"]
     assert copied.is_file()
     assert hashlib.sha256(copied.read_bytes()).hexdigest() == record["sha256"]
+    assert (output / "repeat-01-run_leaderboard.pre-repair.json").is_file()
+    assert (output / "repeat-01-strict_execution_failure.json").is_file()
+    assert (output / "repeat-01-raw_benchmark_result.json").is_file()
 
 
 def test_attests_three_exact_current_comparison_repeats(tmp_path: Path) -> None:

@@ -57,6 +57,35 @@ def _without_request_ids(value: object) -> object:
     return value
 
 
+def _strip_peak_mem_metric(payload: Mapping[str, Any]) -> Any:
+    cloned = json.loads(json.dumps(payload))
+    metrics = cloned.get("metrics")
+    if isinstance(metrics, dict):
+        metrics = dict(metrics)
+        metrics.pop("peak_mem_mb", None)
+        cloned["metrics"] = metrics
+    return cloned
+
+
+def _validate_repair_payload_identity(
+    *,
+    repeat_dir: Path,
+    repaired_entry: Mapping[str, Any],
+    original_submission_path: Path,
+) -> None:
+    if not original_submission_path.is_file():
+        raise ValueError(
+            f"evidence repair missing original submission artifact: {repeat_dir}"
+        )
+    pre_repair = _load_object(original_submission_path)
+    pre_repair_values = _strip_peak_mem_metric(pre_repair)
+    post_repair_values = _strip_peak_mem_metric(repaired_entry)
+    if pre_repair_values != post_repair_values:
+        raise ValueError(
+            f"evidence repair modified non-peak-metric fields: {repeat_dir}"
+        )
+
+
 def _load_trace_detail_metadata(path: Path) -> tuple[dict[str, Any], int]:
     with path.open(encoding="utf-8") as handle:
         lines = [line for line in handle if line.strip()]
@@ -1028,13 +1057,30 @@ def attest_completed_baseline(
                 and repair.get("original_failure_sha256") == _sha256(failure_path)
             ):
                 raise ValueError(f"evidence repair attestation mismatch: {repeat_dir}")
+            _validate_repair_payload_identity(
+                repeat_dir=repeat_dir,
+                repaired_entry=repeat_entry,
+                original_submission_path=original_submission,
+            )
             repair_name = f"{repeat_dir.name}-evidence-repair-attestation.json"
             evidence_repair_files[repair_name] = repair_path
+            for artifact_name, artifact_path in (
+                (f"{repeat_dir.name}-run_leaderboard.pre-repair.json", original_submission),
+                (f"{repeat_dir.name}-strict_execution_failure.json", failure_path),
+                (f"{repeat_dir.name}-raw_benchmark_result.json", raw_path),
+            ):
+                evidence_repair_files[artifact_name] = artifact_path
             repair_record = {
                 "evidence_repair_attestation": {
                     "path": repair_name,
                     "sha256": _sha256(repair_path),
-                }
+                },
+                "evidence_repair_artifacts": {
+                    "pre_repair_submission_sha256": _sha256(original_submission),
+                    "failure_sha256": _sha256(failure_path),
+                    "raw_result_sha256": _sha256(raw_path),
+                    "non_peak_fields_unchanged": True,
+                },
             }
         repeat_port_relocation = _validate_exact_target(
             repo_root,
@@ -1180,6 +1226,10 @@ def attest_completed_baseline(
             entry_id = str(repeat_entry.get("entry_id") or "")
             if not startup_id or not run_id or not entry_id:
                 raise ValueError(f"repeat identity evidence is missing: {repeat_dir}")
+            if startup_id != strict_startup_id:
+                raise ValueError(
+                    f"runner and strict startup identities differ: {repeat_dir}"
+                )
             if startup_id in unique_startup_ids or run_id in unique_run_ids:
                 raise ValueError(f"duplicate startup identity: {repeat_dir}")
             if entry_id in unique_entry_ids:
