@@ -1,0 +1,97 @@
+{
+  "schema_version": "issue-146-retest-report/v1",
+  "generated_at": "2026-08-04T07:56:04Z",
+  "source_dir": "reports/issue_146_retest_raw_results",
+  "engine_commits": [
+    "2206f1f7b7",
+    "7a63f81e86",
+    "83cf83ff20"
+  ],
+  "workloads": [
+    "sonnet-throughput",
+    "random-latency"
+  ],
+  "artifact_class": "diagnostic_historical_retest",
+  "official_target": false,
+  "max_model_len_note": "Re-test used max_model_len=30720 (original backfill value); official fixed-target spec requires 32768.",
+  "results_summary": {
+    "sonnet-throughput": {
+      "2206f1f7b7": {
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
+      },
+      "7a63f81e86": {
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
+      },
+      "83cf83ff20": {
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
+      }
+    },
+    "random-latency": {
+      "2206f1f7b7": {
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
+      },
+      "7a63f81e86": {
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
+      },
+      "83cf83ff20": {
+        "median": null,
+        "min": null,
+        "max": null,
+        "count": 0,
+        "values": []
+      }
+    }
+  },
+  "regression_analysis": {
+    "sonnet-throughput": {
+      "base_commit": "2206f1f7b7",
+      "head_commit": "7a63f81e86",
+      "base_median": null,
+      "head_median": null,
+      "delta_pct": null,
+      "threshold_pct": 10.0,
+      "regression_reproducible": false,
+      "conclusion": "incomplete",
+      "evidence_sufficient": false,
+      "evidence_reason": "sonnet-throughput/2206f1f7b7: only 0 result(s), need >= 3"
+    },
+    "random-latency": {
+      "base_commit": "2206f1f7b7",
+      "head_commit": "83cf83ff20",
+      "base_median": null,
+      "head_median": null,
+      "delta_pct": null,
+      "threshold_pct": 20.0,
+      "regression_reproducible": false,
+      "conclusion": "incomplete",
+      "evidence_sufficient": false,
+      "evidence_reason": "random-latency/2206f1f7b7: only 0 result(s), need >= 3"
+    },
+    "overall": {
+      "any_regression_confirmed": false,
+      "any_evidence_incomplete": true,
+      "action": "incomplete_evidence",
+      "issue_146_resolution": "Evidence insufficient for at least one comparison. Do not clean leaderboard points or draw regression conclusions until each compared commit/workload has >= 3 valid results."
+    }
+  }
+}

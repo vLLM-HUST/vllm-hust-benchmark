@@ -207,6 +207,7 @@ def produce_trend_entry(
     plugin_source_repository: str | None = None,
     plugin_source_ref: str | None = None,
     plugin_source_commit: str | None = None,
+    spec_path: Path | None = None,
     # --- trend coverage parameters (explicit, never inferred) ---------------
     coverage_class: str | None = None,
     campaign_id: str | None = None,
@@ -321,6 +322,7 @@ def produce_trend_entry(
         plugin_source_repository=plugin_source_repository,
         plugin_source_ref=plugin_source_ref,
         plugin_source_commit=plugin_source_commit,
+        spec_path=spec_path,
     )
 
     # -- 3. Read back the written entry --------------------------------------

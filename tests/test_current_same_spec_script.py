@@ -41,6 +41,21 @@ def test_current_same_spec_runner_preserves_wait_for_server_exit_code() -> None:
     assert 'if [[ "$server_wait_status" -eq 0 ]]; then' in wait_block
 
 
+def test_current_same_spec_runner_resolves_source_inputs_before_switching_cwd() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    spec_check = script.index('if [[ ! -f "$SPEC_FILE" ]]; then')
+    constraints_check = script.index('if [[ ! -f "$CONSTRAINTS_FILE" ]]; then')
+    spec_realpath = script.index('SPEC_FILE=$(realpath "$SPEC_FILE")')
+    constraints_realpath = script.index(
+        'CONSTRAINTS_FILE=$(realpath "$CONSTRAINTS_FILE")'
+    )
+
+    assert spec_realpath > spec_check
+    assert constraints_realpath > constraints_check
+    assert constraints_realpath < script.index("run_in_current_runtime()")
+
+
 def test_current_same_spec_runner_does_not_retry_generic_engine_startup_wrapper() -> (
     None
 ):
@@ -340,6 +355,10 @@ def test_current_same_spec_runner_aggregates_measured_runs_after_export() -> Non
     export_index = script.index("export-leaderboard-artifact \\")
     aggregate_index = script.index("perfgate-aggregate-runs \\")
     assert aggregate_index > export_index
+
+    export_args_index = script.index("EXPORT_ARGS=(")
+    export_block = script[export_args_index:export_index]
+    assert '--spec-path "$SPEC_FILE"' in export_block
 
     aggregate_block = script[
         script.index(

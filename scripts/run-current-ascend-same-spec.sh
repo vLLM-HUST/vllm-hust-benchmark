@@ -119,6 +119,9 @@ if [[ ! -f "$CONSTRAINTS_FILE" ]]; then
   exit 2
 fi
 
+SPEC_FILE=$(realpath "$SPEC_FILE")
+CONSTRAINTS_FILE=$(realpath "$CONSTRAINTS_FILE")
+
 if [[ ! -f "$VLLM_CLI_COMPAT" ]]; then
   echo "CLI compatibility wrapper not found: $VLLM_CLI_COMPAT" >&2
   exit 2
@@ -1279,6 +1282,7 @@ EXPORT_ARGS=(
   --benchmark-result-file "$RAW_RESULT_FILE"
   --constraints-file "$CONSTRAINTS_FILE"
   --same-spec-file "$SAME_SPEC_FILE"
+  --spec-path "$SPEC_FILE"
   --output-dir "$ARTIFACT_DIR"
   --run-id "$RUN_ID"
   --engine "$CURRENT_ENGINE"
