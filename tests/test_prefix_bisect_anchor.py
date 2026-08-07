@@ -10,17 +10,32 @@ from vllm_hust_benchmark.workload_config_contract import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-BISECT_ANCHOR_DIR = (
+BISECT_ANCHOR_NAME = (
+    "historical-pr-prefix-bisect-20260706-runtime-compat-"
+    "prefix-repetition-online-103d3aa344-bae528a400"
+)
+ACTIVE_BISECT_ANCHOR_DIR = REPO_ROOT / "submissions" / BISECT_ANCHOR_NAME
+ARCHIVED_BISECT_ANCHOR_DIR = (
     REPO_ROOT
-    / "submissions"
-    / "historical-pr-prefix-bisect-20260706-runtime-compat-prefix-repetition-online-103d3aa344-bae528a400"
+    / "archive"
+    / "legacy"
+    / "incomplete-evidence"
+    / "2026-08-07"
+    / BISECT_ANCHOR_NAME
 )
 
 
 def _load_bisect_anchor_entry() -> dict:
     return json.loads(
-        (BISECT_ANCHOR_DIR / "run_leaderboard.json").read_text(encoding="utf-8")
+        (ARCHIVED_BISECT_ANCHOR_DIR / "run_leaderboard.json").read_text(
+            encoding="utf-8"
+        )
     )
+
+
+def test_prefix_bisect_anchor_is_legacy_only() -> None:
+    assert ARCHIVED_BISECT_ANCHOR_DIR.is_dir()
+    assert not ACTIVE_BISECT_ANCHOR_DIR.exists()
 
 
 def test_prefix_bisect_anchor_passes_contract() -> None:

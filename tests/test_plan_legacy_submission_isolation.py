@@ -269,3 +269,33 @@ def test_existing_index_rejects_parent_directory_entry(
 
     with pytest.raises(PlanError, match=message):
         _build(tmp_path, existing_index=index)
+
+
+def test_repository_index_records_completed_move() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    index = (
+        repo_root
+        / "archive"
+        / "legacy"
+        / "incomplete-evidence"
+        / "2026-08-07"
+        / "index.json"
+    )
+    payload = json.loads(index.read_text(encoding="utf-8"))
+
+    result = build_or_verify_plan(
+        repo_root=repo_root,
+        source_root_value="submissions",
+        archive_root_value="archive/legacy/incomplete-evidence",
+        archive_date="2026-08-07",
+        existing_index=index,
+    )
+
+    assert payload["verification"]["ok"] is True
+    assert {state["state"] for state in payload["verification"]["states"]} == {
+        "already_archived"
+    }
+    assert result["verification"]["ok"] is True
+    assert {state["state"] for state in result["verification"]["states"]} == {
+        "already_archived"
+    }
