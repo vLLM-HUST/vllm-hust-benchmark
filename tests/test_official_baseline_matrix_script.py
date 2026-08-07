@@ -11,6 +11,7 @@ from tests._bash_utils import bash_executable
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MATRIX_SCRIPT = REPO_ROOT / "scripts" / "run-official-ascend-goal-baseline-matrix.sh"
 ONE_CLICK_SCRIPT = REPO_ROOT / "scripts" / "run-official-v0180-baselines.sh"
+WORKFLOW = REPO_ROOT / ".github" / "workflows" / "run-official-ascend-baselines.yml"
 
 
 def _write_spec(spec_file: Path, spec_id: str) -> None:
@@ -64,11 +65,18 @@ def _write_runner_stub(
         "submission_dir = result_dir / 'submission'\n"
         "payload = {\n"
         "    'metadata': {'submitter': 'official-ascend-baseline'},\n"
+        "    'model': {'canonical_id': 'hf:Qwen/Qwen2.5-14B-Instruct', 'repo_id': 'Qwen/Qwen2.5-14B-Instruct', 'short_name': 'Qwen2.5-14B-Instruct', 'display_name': 'Qwen2.5-14B-Instruct', 'name': 'Qwen/Qwen2.5-14B-Instruct'},\n"
         "    'same_spec': {'spec_id': spec['id']},\n"
         "    'metrics': {'ttft_ms': ttft_ms, 'throughput_tps': 200.0, 'error_rate': 0.0},\n"
         "}\n"
         "(submission_dir / 'run_leaderboard.json').write_text(json.dumps(payload), encoding='utf-8')\n"
         "(submission_dir / 'leaderboard_manifest.json').write_text(json.dumps({'entries': [{'leaderboard_artifact': 'run_leaderboard.json'}]}), encoding='utf-8')\n"
+        "(submission_dir / 'env-manifest.json').write_text(json.dumps({'os': 'test', 'python_version': 'test', 'collected_at': '2026-08-07T00:00:00Z', 'frozen_inputs_required': False}), encoding='utf-8')\n"
+        "(submission_dir / 'pip-packages.json').write_text('[]\\n', encoding='utf-8')\n"
+        "files = ['leaderboard_manifest.json', 'run_leaderboard.json', 'env-manifest.json', 'pip-packages.json']\n"
+        "checksums = ''.join(f'{__import__(\"hashlib\").sha256((submission_dir / name).read_bytes()).hexdigest()}  ./{name}\\n' for name in files)\n"
+        "(submission_dir / 'checksums.sha256').write_text(checksums, encoding='utf-8')\n"
+        "(submission_dir / 'STATUS').write_text('OK\\n', encoding='utf-8')\n"
         "PY\n",
         encoding="utf-8",
     )
@@ -175,7 +183,15 @@ def test_matrix_script_accepts_partial_successful_repeats(tmp_path: Path) -> Non
     )
 
     assert completed.returncode == 0, completed.stderr
-    assert (canonical_root / spec_id / "run_leaderboard.json").is_file()
+    for file_name in (
+        "leaderboard_manifest.json",
+        "run_leaderboard.json",
+        "env-manifest.json",
+        "pip-packages.json",
+        "checksums.sha256",
+        "STATUS",
+    ):
+        assert (canonical_root / spec_id / file_name).is_file()
     assert runner_call_log.read_text(encoding="utf-8").strip().splitlines() == [
         "repeat-01",
         "repeat-02",
@@ -247,3 +263,138 @@ def test_matrix_script_uses_published_canonical_root_for_resume(tmp_path: Path) 
     ]
     summary_text = summary_file.read_text(encoding="utf-8")
     assert f"Skip existing canonical: {spec_id}" in summary_text
+
+
+def test_matrix_script_requires_complete_evidence_before_promotion(
+    tmp_path: Path,
+) -> None:
+    spec_id = "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
+    spec_file = tmp_path / "spec.json"
+    prepare_stub = tmp_path / "prepare.sh"
+    runner_stub = tmp_path / "runner.sh"
+    runner_call_log = tmp_path / "runner-calls.log"
+    canonical_root = tmp_path / "submissions-local"
+    result_root = tmp_path / "results"
+
+    _write_spec(spec_file, spec_id)
+    _write_prepare_stub(prepare_stub)
+    _write_runner_stub(runner_stub, call_log=runner_call_log, fail_repeat_names=())
+    runner_text = runner_stub.read_text(encoding="utf-8")
+    runner_stub.write_text(
+        runner_text + 'rm -f "$RESULT_DIR/submission/STATUS"\n',
+        encoding="utf-8",
+    )
+
+    completed = _run_matrix(
+        spec_file,
+        {
+            "GOAL_BASELINE_ENV_PREFIX": "/tmp/fake-official-env",
+            "PREPARE_SCRIPT": str(prepare_stub),
+            "SINGLE_RUNNER": str(runner_stub),
+            "PREPARE_OFFICIAL_ENV": "0",
+            "REPEAT_COUNT": "1",
+            "MIN_SUCCESSFUL_REPEATS": "1",
+            "MAX_REPEAT_ATTEMPTS": "1",
+            "CANONICAL_SUBMISSIONS_ROOT": str(canonical_root),
+            "MATRIX_RESULT_ROOT": str(result_root),
+            "PYTHON_BIN": sys.executable,
+        },
+    )
+
+    assert completed.returncode != 0
+    assert not (canonical_root / spec_id).exists()
+
+
+def test_official_runner_finalizes_and_validates_exported_artifact() -> None:
+    runner_text = (
+        REPO_ROOT / "scripts" / "run-official-ascend-goal-baseline.sh"
+    ).read_text(encoding="utf-8")
+
+    export_position = runner_text.index(
+        'run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH"'
+    )
+    collect_position = runner_text.index(
+        'bash "$COLLECT_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"'
+    )
+    validate_position = runner_text.index(
+        'bash "$VALIDATE_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"'
+    )
+
+    assert export_position < collect_position < validate_position
+    assert 'CURRENT_VLLM_HUST_REPO="$OFFICIAL_VLLM_WORKTREE"' in runner_text
+    assert (
+        'CURRENT_VLLM_ASCEND_HUST_REPO="$OFFICIAL_VLLM_ASCEND_WORKTREE"' in runner_text
+    )
+
+
+def test_official_workflow_defaults_live_publication_off() -> None:
+    workflow_text = WORKFLOW.read_text(encoding="utf-8")
+    publish_input = workflow_text.split("      publish_results:", maxsplit=1)[1].split(
+        "      force_repair_official_env:", maxsplit=1
+    )[0]
+    assert "        default: false" in publish_input
+
+
+def test_official_runner_rejects_stale_source_worktree(tmp_path: Path) -> None:
+    source_repo = tmp_path / "source"
+    source_repo.mkdir()
+    subprocess.run(
+        ["git", "init", "--initial-branch=main", str(source_repo)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(source_repo), "config", "user.name", "Test User"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(source_repo), "config", "user.email", "test@example.com"],
+        check=True,
+    )
+    (source_repo / "pyproject.toml").write_text(
+        "[project]\nname='test'\n", encoding="utf-8"
+    )
+    subprocess.run(["git", "-C", str(source_repo), "add", "pyproject.toml"], check=True)
+    subprocess.run(["git", "-C", str(source_repo), "commit", "-m", "first"], check=True)
+    stale_worktree = tmp_path / "stale-worktree"
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(source_repo),
+            "worktree",
+            "add",
+            "--detach",
+            str(stale_worktree),
+            "HEAD",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    (source_repo / "second.txt").write_text("second\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(source_repo), "add", "second.txt"], check=True)
+    subprocess.run(
+        ["git", "-C", str(source_repo), "commit", "-m", "second"], check=True
+    )
+
+    runner_path = shlex.quote(
+        str(REPO_ROOT / "scripts" / "run-official-ascend-goal-baseline.sh")
+    )
+    command = (
+        "source <(awk 'BEGIN{capture=0} "
+        "/^ensure_worktree\\(\\) \\{/ {capture=1} "
+        "/^json2args\\(\\) \\{/ {exit} capture {print}' "
+        f"{runner_path}) && ensure_worktree "
+        f"{shlex.quote(str(source_repo))} {shlex.quote(str(stale_worktree))} HEAD"
+    )
+    completed = subprocess.run(
+        [bash_executable(), "-lc", command],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode != 0
+    assert "official source worktree ref mismatch" in completed.stderr

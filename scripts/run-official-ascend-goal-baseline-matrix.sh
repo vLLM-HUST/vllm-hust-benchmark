@@ -29,6 +29,7 @@ MATRIX_DEVICE_PREFERENCE_FILE=${MATRIX_DEVICE_PREFERENCE_FILE:-"$MATRIX_RESULT_R
 PYTHON_BIN=${PYTHON_BIN:-$(command -v python3 || true)}
 PUBLICATION_SYNC_HELPER=${PUBLICATION_SYNC_HELPER:-}
 PUBLICATION_COMMIT_MESSAGE_PREFIX=${PUBLICATION_COMMIT_MESSAGE_PREFIX:-"chore(data): publish official ascend baseline"}
+VALIDATE_ARTIFACT_SCRIPT=${VALIDATE_ARTIFACT_SCRIPT:-"$SCRIPT_DIR/validate-run-artifact.sh"}
 PREPARED_ENV=0
 SKIPPED_COUNT=0
 RUN_COUNT=0
@@ -73,6 +74,11 @@ fi
 
 if [[ ! -f "$PREPARE_SCRIPT" ]]; then
   echo "Prepare script not found: $PREPARE_SCRIPT" >&2
+  exit 2
+fi
+
+if [[ ! -f "$VALIDATE_ARTIFACT_SCRIPT" ]]; then
+  echo "Artifact validator not found: $VALIDATE_ARTIFACT_SCRIPT" >&2
   exit 2
 fi
 
@@ -188,8 +194,28 @@ promote_submission_to_canonical() {
   local submission_dir="$result_dir/submission"
   local backup_dir
 
-  if [[ ! -f "$submission_dir/run_leaderboard.json" ]] || [[ ! -f "$submission_dir/leaderboard_manifest.json" ]]; then
-    echo "Canonical promotion source is incomplete for $spec_id: $submission_dir" >&2
+  local required_file
+
+  for required_file in \
+    leaderboard_manifest.json \
+    run_leaderboard.json \
+    env-manifest.json \
+    pip-packages.json \
+    checksums.sha256 \
+    STATUS; do
+    if [[ ! -f "$submission_dir/$required_file" ]]; then
+      echo "Canonical promotion source is missing $required_file for $spec_id: $submission_dir" >&2
+      return 1
+    fi
+  done
+
+  if [[ "$(tr -d '[:space:]' < "$submission_dir/STATUS")" != "OK" ]]; then
+    echo "Canonical promotion source is not publishable for $spec_id: $submission_dir/STATUS" >&2
+    return 1
+  fi
+
+  if ! bash "$VALIDATE_ARTIFACT_SCRIPT" "$submission_dir"; then
+    echo "Canonical promotion source failed artifact validation for $spec_id: $submission_dir" >&2
     return 1
   fi
 
