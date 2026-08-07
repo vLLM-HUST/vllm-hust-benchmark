@@ -413,6 +413,11 @@ def main() -> int:
     # Provenance from env vars (exported by the matrix runner).
     engine_commit = _require_env("VLLM_HUST_ENGINE_COMMIT")
     benchmark_commit = _require_env("VLLM_HUST_BENCHMARK_COMMIT")
+    # Per PR #154 review round 2: the plugin (vllm-ascend-hust) commit must
+    # be resolved independently from the benchmark repo commit. Recording the
+    # benchmark commit as the plugin commit produces wrong provenance that
+    # cannot reproduce the experiment.
+    plugin_commit = _require_env("VLLM_HUST_PLUGIN_COMMIT")
     engine_version = _require_env("VLLM_HUST_ENGINE_VERSION")
     cann_version = _require_env("VLLM_HUST_CANN_VERSION")
     driver_version = _require_env("VLLM_HUST_DRIVER_VERSION")
@@ -432,6 +437,12 @@ def main() -> int:
     if not re.match(r"^[0-9a-f]{40}$", benchmark_commit):
         print(
             f"ERROR: benchmark commit {benchmark_commit!r} is not 40-char hex",
+            file=sys.stderr,
+        )
+        return 1
+    if not re.match(r"^[0-9a-f]{40}$", plugin_commit):
+        print(
+            f"ERROR: plugin commit {plugin_commit!r} is not 40-char hex",
             file=sys.stderr,
         )
         return 1
@@ -459,13 +470,61 @@ def main() -> int:
             )
             return 1
     elif args.load_profile in ("burst", "overload-recovery"):
+        # Per PR #154 review round 2: burst_config must reflect the REAL
+        # burst measurement, not placeholder zeros (schema requires
+        # size >= 1, duration_s > 0). Read actual values from the bench
+        # serve client_result.json produced by this cell's run.
+        client_data = json.loads(client_result.read_text(encoding="utf-8"))
+        burst_size = int(client_data.get("completed", 0)) + int(
+            client_data.get("failed", 0)
+        )
+        if burst_size < 1:
+            print(
+                f"ERROR: burst profile requires at least 1 completed or "
+                f"failed request in client_result.json, got size={burst_size}",
+                file=sys.stderr,
+            )
+            return 1
+        burst_duration = float(client_data.get("duration", 0.0))
+        if burst_duration <= 0.0:
+            print(
+                f"ERROR: burst duration_s must be > 0 (from client_result.json "
+                f"'duration'), got {burst_duration}",
+                file=sys.stderr,
+            )
+            return 1
+        burst_interval = 1.0 / args.request_rate if args.request_rate > 0 else 0.0
         burst_config = {
-            "size": 0,
-            "duration_s": 0.0,
-            "interval_s": 0.0,
+            "size": burst_size,
+            "duration_s": burst_duration,
+            "interval_s": burst_interval,
             "mean_arrival_rate": args.request_rate,
         }
-        burst_recovery = 0.0
+        # Per PR #154 review round 2: burst_recovery_s must be a real
+        # measurement, not a fixed 0.0. The matrix runner emits a
+        # probe_result.json containing recovery_ttft_s (the TTFT of a
+        # single probe request sent immediately after the burst phase),
+        # which reflects how quickly the system returns to normal serving
+        # after the burst backlog drains.
+        probe_result_path = cell_dir / "probe_result.json"
+        if probe_result_path.exists():
+            probe_data = json.loads(probe_result_path.read_text(encoding="utf-8"))
+            burst_recovery = float(probe_data.get("recovery_ttft_s", 0.0))
+            if burst_recovery < 0:
+                print(
+                    f"ERROR: burst_recovery_s from probe_result.json must be "
+                    f">= 0, got {burst_recovery}",
+                    file=sys.stderr,
+                )
+                return 1
+        else:
+            print(
+                f"ERROR: burst profile requires probe_result.json "
+                f"(recovery probe) at {probe_result_path}; the matrix "
+                f"runner must run a recovery probe after the burst phase",
+                file=sys.stderr,
+            )
+            return 1
 
     short_name = args.served_model_name.split("/")[-1]
 
@@ -554,7 +613,7 @@ def main() -> int:
                     "engine": "vllm-ascend-hust",
                     "repository": "vLLM-HUST/vllm-ascend-hust",
                     "ref": "main",
-                    "commit": benchmark_commit,
+                    "commit": plugin_commit,
                 },
             },
         },

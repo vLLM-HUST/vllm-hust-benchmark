@@ -291,6 +291,18 @@ if ! [[ "${BENCHMARK_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
     echo "ERROR: benchmark commit ${BENCHMARK_COMMIT} is not a 40-char hex SHA" >&2
     exit 1
 fi
+# Per PR #154 review round 2: resolve the plugin (vllm-ascend-hust) commit
+# independently from the benchmark repo so provenance reflects the actual
+# plugin code that ran, not the benchmark repo's HEAD.
+if [[ ! -d "${VLLM_ASCEND_HUST_REPO}" ]]; then
+    echo "ERROR: VLLM_ASCEND_HUST_REPO=${VLLM_ASCEND_HUST_REPO} is not a directory" >&2
+    exit 1
+fi
+PLUGIN_COMMIT="$(cd "${VLLM_ASCEND_HUST_REPO}" && git rev-parse HEAD)"
+if ! [[ "${PLUGIN_COMMIT}" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "ERROR: plugin commit ${PLUGIN_COMMIT} is not a 40-char hex SHA" >&2
+    exit 1
+fi
 
 # Resolve CANN/driver versions (per project memory: env-manifest.json must
 # include real CANN/driver versions; placeholder sentinels are rejected).
@@ -323,6 +335,7 @@ CHIP_MODEL="${VLLM_HUST_CHIP_MODEL:-910B2}"
 
 echo "INFO: engine_commit=${ENGINE_COMMIT}"
 echo "INFO: benchmark_commit=${BENCHMARK_COMMIT}"
+echo "INFO: plugin_commit=${PLUGIN_COMMIT}"
 echo "INFO: cann_version=${CANN_VERSION} driver_version=${DRIVER_VERSION}"
 echo "INFO: python=${PYTHON_VERSION} pytorch=${PYTORCH_VERSION}"
 echo "INFO: model_path=${MODEL_PATH} served_model_name=${SERVED_MODEL_NAME}"
@@ -330,6 +343,7 @@ echo "INFO: model_path=${MODEL_PATH} served_model_name=${SERVED_MODEL_NAME}"
 # Export provenance env vars for build_readiness_artifact.py.
 export VLLM_HUST_ENGINE_COMMIT="${ENGINE_COMMIT}"
 export VLLM_HUST_BENCHMARK_COMMIT="${BENCHMARK_COMMIT}"
+export VLLM_HUST_PLUGIN_COMMIT="${PLUGIN_COMMIT}"
 export VLLM_HUST_ENGINE_VERSION="${ENGINE_VERSION}"
 export VLLM_HUST_CANN_VERSION="${CANN_VERSION}"
 export VLLM_HUST_DRIVER_VERSION="${DRIVER_VERSION}"
@@ -469,6 +483,64 @@ run_workload() {
 }
 
 # ---------------------------------------------------------------------------
+# Run a recovery probe: send 1 request after the burst phase and record its
+# TTFT (seconds) as burst_recovery_s in probe_result.json.
+#
+# Per PR #154 review round 2: the burst_recovery_s field must be a real
+# measurement. The probe request's TTFT reflects how quickly the server
+# returns to normal serving after the burst backlog drains. A low probe TTFT
+# means the system recovered quickly; a high probe TTFT means the burst
+# caused lasting queueing/scheduling pressure.
+# ---------------------------------------------------------------------------
+run_recovery_probe() {
+    local probe_result="$1"
+    local probe_dir
+    probe_dir="$(dirname "${probe_result}")"
+    local probe_client="${probe_dir}/probe_client_result.json"
+
+    echo "INFO: recovery probe: sending 1 request (rate=0, immediate)"
+
+    NO_PROXY="127.0.0.1,localhost" no_proxy="127.0.0.1,localhost" \
+    "${PYTHON_BIN}" "${CLI_COMPAT}" bench serve \
+        --save-result \
+        --result-dir "${probe_dir}" \
+        --result-filename "probe_client_result.json" \
+        --backend vllm \
+        --endpoint /v1/completions \
+        --base-url "http://127.0.0.1:${PORT}" \
+        --dataset-name random \
+        --model "${SERVED_MODEL_NAME}" \
+        --tokenizer "${MODEL_PATH}" \
+        --num-prompts 1 \
+        --input-len "${INPUT_LEN}" \
+        --output-len "${OUTPUT_LEN}" \
+        --request-rate 0 \
+        --metric-percentiles '50,95,99'
+
+    if [[ ! -f "${probe_client}" ]]; then
+        echo "ERROR: recovery probe did not produce ${probe_client}" >&2
+        return 1
+    fi
+
+    # Extract probe TTFT (ms) and write recovery_ttft_s (seconds) to
+    # probe_result.json. build_readiness_artifact.py reads this file.
+    "${PYTHON_BIN}" - "${probe_client}" "${probe_result}" <<'PYEOF'
+import json, sys
+probe_client, probe_result = sys.argv[1], sys.argv[2]
+data = json.load(open(probe_client))
+ttft_ms = float(data.get("mean_ttft_ms", 0.0))
+json.dump({"recovery_ttft_s": ttft_ms / 1000.0}, open(probe_result, "w"))
+print(f"INFO: recovery probe ttft={ttft_ms:.2f}ms -> recovery_ttft_s={ttft_ms/1000.0:.4f}s")
+PYEOF
+
+    if [[ ! -f "${probe_result}" ]]; then
+        echo "ERROR: failed to write ${probe_result}" >&2
+        return 1
+    fi
+    return 0
+}
+
+# ---------------------------------------------------------------------------
 # Matrix execution loop.
 # ---------------------------------------------------------------------------
 TOTAL_CELLS=$(( ${#WORKLOAD_ARRAY[@]} * ${#PROFILE_ARRAY[@]} * REPETITIONS ))
@@ -514,6 +586,21 @@ for workload in "${WORKLOAD_ARRAY[@]}"; do
                 echo "ERROR: bench serve failed for ${workload}/${profile}/rep${rep}" >&2
                 stop_server
                 exit 1
+            fi
+
+            # Per PR #154 review round 2: burst/overload-recovery profiles
+            # must measure real burst recovery. After the burst phase, send
+            # a single probe request and record its TTFT (seconds) as
+            # burst_recovery_s in probe_result.json. The probe reflects how
+            # quickly the system returns to normal serving after the burst
+            # backlog drains.
+            if [[ "${profile}" == "burst" || "${profile}" == "overload-recovery" ]]; then
+                echo "INFO: running recovery probe (1 request) for ${profile}"
+                if ! run_recovery_probe "${cell_dir}/probe_result.json"; then
+                    echo "ERROR: recovery probe failed for ${workload}/${profile}/rep${rep}" >&2
+                    stop_server
+                    exit 1
+                fi
             fi
 
             # Stop the server before building the artifact (frees NPU for
@@ -564,6 +651,7 @@ echo ""
 echo "=== Aggregating repetitions ==="
 "${PYTHON_BIN}" - "${OUTPUT_DIR}" <<'PY'
 import json
+import statistics
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -602,6 +690,18 @@ for (workload, profile), artifacts in sorted(groups.items()):
     out = aggregates_dir / f"{workload}_{profile}_aggregate.json"
     out.write_text(json.dumps(aggregate, indent=2) + "\n", encoding="utf-8")
     print(f"WROTE {out}")
+    # Per PR #154 review round 2: cold_readiness_median must come from
+    # startup_metrics.cold_readiness_s (seconds), not output_throughput_tps
+    # (tps). The previous code reused throughput median, which had the wrong
+    # field name and the wrong unit.
+    cold_readiness_values = [
+        float(a["startup_metrics"]["cold_readiness_s"])
+        for a in artifacts
+        if "startup_metrics" in a and "cold_readiness_s" in a["startup_metrics"]
+    ]
+    cold_readiness_median = (
+        statistics.median(cold_readiness_values) if cold_readiness_values else 0.0
+    )
     summary.append({
         "workload": workload,
         "load_profile": profile,
@@ -610,7 +710,7 @@ for (workload, profile), artifacts in sorted(groups.items()):
         "throughput_median": aggregate["metrics"]["output_throughput_tps"]["median"],
         "throughput_iqr": aggregate["metrics"]["output_throughput_tps"]["iqr"],
         "ttft_p99_median": aggregate["metrics"]["ttft_ms_p99"]["median"],
-        "cold_readiness_median": aggregate["metrics"]["output_throughput_tps"]["median"],
+        "cold_readiness_median": cold_readiness_median,
         "outlier_count": aggregate["metrics"]["output_throughput_tps"]["outlier_count"],
     })
 
@@ -628,6 +728,7 @@ issue_135_readiness_slo_matrix
 completed_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 engine_commit=${ENGINE_COMMIT}
 benchmark_commit=${BENCHMARK_COMMIT}
+plugin_commit=${PLUGIN_COMMIT}
 cann_version=${CANN_VERSION}
 driver_version=${DRIVER_VERSION}
 model_path=${MODEL_PATH}
