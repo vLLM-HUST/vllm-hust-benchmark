@@ -45,6 +45,17 @@ SNAPSHOT_FILES = (
     "leaderboard_single.json",
     "leaderboard_multi.json",
 )
+
+# Issue #79 P0a: explicit entry-level quarantine gate.
+# These random-latency records have invalid metrics or mismatched
+# client/server configs and must never re-enter public snapshots.
+# Original artifacts are retained in archive/suspect/ for audit.
+QUARANTINED_ENTRY_IDS = frozenset(
+    {
+        "83a812e9-5af5-4c2f-8acb-152cc347e0be",
+        "13e0c174-976d-4644-94b9-a54573183f3c",
+    }
+)
 REJECTED_SUPERSEDED_REPORT_FILE = "rejected_superseded_report.json"
 REJECTED_SUPERSEDED_REPORT_SCHEMA = (
     REPO_ROOT / "schemas" / "rejected_superseded_report_v1.schema.json"
@@ -119,6 +130,12 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     )
     spec_id = str(same_spec.get("spec_id") or "")
     metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+
+    if entry_id in QUARANTINED_ENTRY_IDS:
+        errors.append(
+            f"{source.name}:{entry_id}: quarantined entry must not appear in "
+            f"public snapshot (issue #79: invalid random-latency record)"
+        )
 
     if engine == PUBLIC_BASELINE_ENGINE and engine_version != PUBLIC_BASELINE_VERSION:
         errors.append(
