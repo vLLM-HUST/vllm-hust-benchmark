@@ -1,0 +1,434 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust/vllm-hust-benchmark/schemas/readiness_slo_v1.schema.json",
+  "title": "Readiness SLO v1",
+  "description": "Cold-start readiness, steady-state and burst SLO matrix artifact for issue #135. Each artifact captures exactly one (workload, load_profile, repetition) measurement against an independent server process. Cold and warm startup data MUST NOT be mixed with warm serving throughput.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_class",
+    "report_type",
+    "entry_id",
+    "engine",
+    "engine_version",
+    "config_type",
+    "hardware",
+    "model",
+    "workload",
+    "load_profile",
+    "repetition",
+    "same_spec",
+    "metadata",
+    "versions",
+    "environment",
+    "startup_metrics",
+    "slo_metrics",
+    "queue_metrics",
+    "kv_state_metrics",
+    "cache_boundary",
+    "raw_evidence"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "readiness-slo/v1"
+    },
+    "artifact_class": {
+      "type": "string",
+      "const": "readiness-slo"
+    },
+    "report_type": {
+      "type": "string",
+      "enum": ["startup", "fixed-qps", "burst"]
+    },
+    "entry_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "engine": {
+      "type": "string",
+      "minLength": 1
+    },
+    "engine_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "config_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hardware": {
+      "$ref": "#/$defs/hardware"
+    },
+    "cluster": {
+      "type": ["object", "null"]
+    },
+    "model": {
+      "$ref": "#/$defs/model"
+    },
+    "workload": {
+      "$ref": "#/$defs/workload"
+    },
+    "load_profile": {
+      "$ref": "#/$defs/load_profile"
+    },
+    "repetition": {
+      "$ref": "#/$defs/repetition"
+    },
+    "same_spec": {
+      "$ref": "#/$defs/same_spec"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "versions": {
+      "$ref": "#/$defs/versions"
+    },
+    "environment": {
+      "$ref": "#/$defs/environment"
+    },
+    "startup_metrics": {
+      "$ref": "#/$defs/startup_metrics"
+    },
+    "slo_metrics": {
+      "$ref": "#/$defs/slo_metrics"
+    },
+    "queue_metrics": {
+      "$ref": "#/$defs/queue_metrics"
+    },
+    "kv_state_metrics": {
+      "$ref": "#/$defs/kv_state_metrics"
+    },
+    "cache_boundary": {
+      "$ref": "#/$defs/cache_boundary"
+    },
+    "raw_evidence": {
+      "$ref": "#/$defs/raw_evidence"
+    }
+  },
+  "$defs": {
+    "hardware": {
+      "type": "object",
+      "required": ["vendor", "chip_model", "chip_count"],
+      "additionalProperties": false,
+      "properties": {
+        "vendor": {"type": "string", "minLength": 1},
+        "chip_model": {"type": "string", "minLength": 1},
+        "chip_count": {"type": "integer", "minimum": 1},
+        "interconnect": {"type": ["string", "null"]}
+      }
+    },
+    "model": {
+      "type": "object",
+      "required": ["name", "parameters", "precision"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "parameters": {"type": "string", "minLength": 1},
+        "precision": {"type": "string", "minLength": 1},
+        "quantization": {"type": ["string", "null"]},
+        "canonical_id": {"type": ["string", "null"]},
+        "short_name": {"type": ["string", "null"]},
+        "display_name": {"type": ["string", "null"]}
+      }
+    },
+    "workload": {
+      "type": "object",
+      "required": ["name", "dataset", "input_length", "output_length"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "random-online",
+            "sharegpt-online",
+            "prefix-repetition-online",
+            "burstgpt",
+            "tracelab-specialty"
+          ]
+        },
+        "dataset": {"type": "string", "minLength": 1},
+        "input_length": {"type": "integer", "minimum": 1},
+        "output_length": {"type": "integer", "minimum": 1},
+        "batch_size": {"type": ["integer", "null"], "minimum": 1},
+        "concurrent_requests": {"type": ["integer", "null"], "minimum": 1}
+      }
+    },
+    "load_profile": {
+      "type": "object",
+      "required": ["kind"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["steady-1rps", "steady-1.2rps", "burst", "overload-recovery"]
+        },
+        "request_rate": {"type": ["number", "null"], "minimum": 0},
+        "burst_config": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["size", "duration_s", "interval_s", "mean_arrival_rate"],
+              "additionalProperties": false,
+              "properties": {
+                "size": {"type": "integer", "minimum": 1},
+                "duration_s": {"type": "number", "minimum": 0, "exclusiveMinimum": 0},
+                "interval_s": {"type": "number", "minimum": 0},
+                "mean_arrival_rate": {"type": "number", "minimum": 0}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "repetition": {
+      "type": "object",
+      "required": ["index", "total", "independent_process"],
+      "additionalProperties": false,
+      "properties": {
+        "index": {"type": "integer", "minimum": 1},
+        "total": {"type": "integer", "minimum": 3},
+        "independent_process": {"type": "boolean"},
+        "server_pid": {"type": ["integer", "null"]},
+        "started_at": {"type": ["string", "null"]}
+      }
+    },
+    "same_spec": {
+      "type": "object",
+      "required": ["spec_id", "scenario", "resolved_server_parameters", "resolved_client_parameters"],
+      "additionalProperties": false,
+      "properties": {
+        "spec_id": {"type": "string", "minLength": 1},
+        "spec_label": {"type": ["string", "null"]},
+        "scenario": {"type": "string", "minLength": 1},
+        "resolved_spec_hash": {"type": ["string", "null"]},
+        "resolved_server_parameters": {"type": "object"},
+        "resolved_client_parameters": {"type": "object"}
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["submitted_at", "git_commit", "github_repository"],
+      "additionalProperties": true,
+      "properties": {
+        "submitted_at": {"type": "string", "minLength": 1},
+        "submitter": {"type": ["string", "null"]},
+        "data_source": {"type": "string", "minLength": 1},
+        "engine": {"type": ["string", "null"]},
+        "engine_version": {"type": ["string", "null"]},
+        "git_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "github_repository": {"type": "string", "minLength": 1},
+        "github_ref": {"type": ["string", "null"]},
+        "verified": {"type": ["string", "boolean", "null"]},
+        "idempotency_key": {"type": ["string", "null"]},
+        "runtime_provenance": {"type": ["object", "null"]}
+      }
+    },
+    "versions": {
+      "type": "object",
+      "required": ["protocol", "backend", "core", "benchmark"],
+      "additionalProperties": false,
+      "properties": {
+        "protocol": {"type": "string"},
+        "backend": {"type": "string"},
+        "core": {"type": "string"},
+        "benchmark": {"type": "string"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "required": ["os", "python_version", "cann_version", "driver_version"],
+      "additionalProperties": false,
+      "properties": {
+        "os": {"type": "string", "minLength": 1},
+        "python_version": {"type": "string", "minLength": 1},
+        "pytorch_version": {"type": ["string", "null"]},
+        "cuda_version": {"type": ["string", "null"]},
+        "cann_version": {"type": "string", "minLength": 1},
+        "driver_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "startup_metrics": {
+      "type": "object",
+      "required": ["cold_readiness_s", "warm_restart_readiness_s", "weight_load_s", "torch_compile_s", "compile_cache", "acl_graph_capture", "engine_profile_warmup_s", "first_request_ttft_ms", "second_request_ttft_ms", "warm_vs_cold_improvement_pct"],
+      "additionalProperties": false,
+      "properties": {
+        "cold_readiness_s": {"type": "number", "minimum": 0},
+        "warm_restart_readiness_s": {"type": "number", "minimum": 0},
+        "weight_load_s": {"type": "number", "minimum": 0},
+        "torch_compile_s": {"type": "number", "minimum": 0},
+        "compile_cache": {
+          "type": "object",
+          "required": ["hit", "identity"],
+          "additionalProperties": false,
+          "properties": {
+            "hit": {"type": "boolean"},
+            "identity": {"type": "string", "minLength": 1}
+          }
+        },
+        "acl_graph_capture": {
+          "type": "object",
+          "required": ["time_s", "capture_count", "extra_memory_mb"],
+          "additionalProperties": false,
+          "properties": {
+            "time_s": {"type": "number", "minimum": 0},
+            "capture_count": {"type": "integer", "minimum": 0},
+            "extra_memory_mb": {"type": "number", "minimum": 0}
+          }
+        },
+        "engine_profile_warmup_s": {"type": "number", "minimum": 0},
+        "first_request_ttft_ms": {"type": "number", "minimum": 0},
+        "second_request_ttft_ms": {"type": "number", "minimum": 0},
+        "warm_vs_cold_improvement_pct": {"type": "number"}
+      }
+    },
+    "slo_metrics": {
+      "type": "object",
+      "required": ["output_throughput_tps", "success_rate", "failure_breakdown", "ttft_ms", "tpot_ms", "itl_ms", "prefix_cache_hit_rate", "slo_miss"],
+      "additionalProperties": false,
+      "properties": {
+        "output_throughput_tps": {"type": "number", "minimum": 0},
+        "success_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "failure_breakdown": {
+          "type": "object",
+          "required": ["timeout", "error", "aborted"],
+          "additionalProperties": false,
+          "properties": {
+            "timeout": {"type": "integer", "minimum": 0},
+            "error": {"type": "integer", "minimum": 0},
+            "aborted": {"type": "integer", "minimum": 0}
+          }
+        },
+        "ttft_ms": {"$ref": "#/$defs/percentile_block"},
+        "tpot_ms": {"$ref": "#/$defs/percentile_block"},
+        "itl_ms": {"$ref": "#/$defs/percentile_block"},
+        "prefix_cache_hit_rate": {"type": "number", "minimum": 0, "maximum": 1},
+        "burst_recovery_s": {"type": ["number", "null"], "minimum": 0},
+        "slo_miss": {
+          "type": "object",
+          "required": ["count", "reasons"],
+          "additionalProperties": false,
+          "properties": {
+            "count": {"type": "integer", "minimum": 0},
+            "reasons": {
+              "type": "array",
+              "items": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "percentile_block": {
+      "type": "object",
+      "required": ["mean", "p50", "p95", "p99"],
+      "additionalProperties": false,
+      "properties": {
+        "mean": {"type": "number", "minimum": 0},
+        "p50": {"type": "number", "minimum": 0},
+        "p95": {"type": "number", "minimum": 0},
+        "p99": {"type": "number", "minimum": 0}
+      }
+    },
+    "queue_metrics": {
+      "type": "object",
+      "required": ["queue_wait_ms", "scheduler_admission_wait_ms", "prefill_wait_ms", "running_waiting_timeseries", "first_request_separated"],
+      "additionalProperties": false,
+      "properties": {
+        "queue_wait_ms": {"$ref": "#/$defs/percentile_block"},
+        "scheduler_admission_wait_ms": {"$ref": "#/$defs/percentile_block"},
+        "prefill_wait_ms": {"$ref": "#/$defs/percentile_block"},
+        "running_waiting_timeseries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["t", "running", "waiting"],
+            "additionalProperties": false,
+            "properties": {
+              "t": {"type": "number", "minimum": 0},
+              "running": {"type": "integer", "minimum": 0},
+              "waiting": {"type": "integer", "minimum": 0}
+            }
+          }
+        },
+        "first_request_separated": {
+          "type": "object",
+          "required": ["ttft_ms", "queue_wait_ms"],
+          "additionalProperties": false,
+          "properties": {
+            "ttft_ms": {"type": "number", "minimum": 0},
+            "queue_wait_ms": {"type": "number", "minimum": 0}
+          }
+        }
+      }
+    },
+    "kv_state_metrics": {
+      "type": "object",
+      "required": ["kv_usage", "preemption_count", "eviction_count", "restore_count"],
+      "additionalProperties": false,
+      "properties": {
+        "kv_usage": {
+          "type": "object",
+          "required": ["peak_pct", "mean_pct"],
+          "additionalProperties": false,
+          "properties": {
+            "peak_pct": {"type": "number", "minimum": 0, "maximum": 100},
+            "mean_pct": {"type": "number", "minimum": 0, "maximum": 100},
+            "timeseries": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["t", "pct"],
+                "additionalProperties": false,
+                "properties": {
+                  "t": {"type": "number", "minimum": 0},
+                  "pct": {"type": "number", "minimum": 0, "maximum": 100}
+                }
+              }
+            }
+          }
+        },
+        "preemption_count": {"type": "integer", "minimum": 0},
+        "eviction_count": {"type": "integer", "minimum": 0},
+        "restore_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "cache_boundary": {
+      "type": "object",
+      "required": ["cold_start", "cleared_paths", "preserved_paths", "residual_services"],
+      "additionalProperties": false,
+      "properties": {
+        "cold_start": {"type": "boolean"},
+        "cleared_paths": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "preserved_paths": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "residual_services": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "raw_evidence": {
+      "type": "object",
+      "required": ["server_log_sha256", "client_result_sha256", "metrics_log_sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "server_log_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "client_result_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "metrics_log_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "server_log_path": {"type": ["string", "null"]},
+        "client_result_path": {"type": ["string", "null"]},
+        "metrics_log_path": {"type": ["string", "null"]}
+      }
+    }
+  }
+}
