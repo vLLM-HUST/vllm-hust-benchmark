@@ -2095,48 +2095,263 @@ class TestVerifyKvCapacityReturnCodes:
         )
 
 
-class TestVerifyKvCapacityCallerErrexit:
-    """Verify the caller avoids set -e errexit trap (round 5 issue 2).
+class TestVerifyKvCapacityCallerEndToEnd:
+    """End-to-end tests for the bash caller control flow (round 5 issue 2).
 
-    Per reviewer: the script uses `set -euo pipefail`, so a bare
-    `verify_kv_capacity ...; local _kv_rc=$?` would terminate the script
-    on non-zero return before $? is captured.  The caller must use the
-    `|| _kv_rc=$?` idiom or an if/else wrapper.
+    Per PR #152 review round 4+5: the caller must use ``|| _kv_rc=$?`` to
+    avoid the ``set -e`` errexit trap, and must handle exit 1 (fail closed)
+    and exit 2 (BLOCKED) in distinct branches.
+
+    These tests extract the REAL ``verify_kv_capacity`` function and the REAL
+    caller block from ``scripts/kv_capacity_scan.sh``, embed them in a minimal
+    bash harness with ``set -euo pipefail``, and execute them against
+    synthetic server logs.  This validates the actual bash control flow
+    end-to-end — not just static string assertions on the source.
     """
 
     @pytest.fixture
-    def scan_script(self):
-        script_path = _SCRIPTS_DIR / "kv_capacity_scan.sh"
-        return script_path.read_text()
+    def script_text(self):
+        return (_SCRIPTS_DIR / "kv_capacity_scan.sh").read_text()
 
-    def test_caller_uses_errexit_safe_pattern(self, scan_script):
-        """The caller must use `|| _kv_rc=$?` not bare `; _kv_rc=$?`."""
-        assert "|| _kv_rc=$?" in scan_script, (
-            "Caller must use `|| _kv_rc=$?` to avoid set -e errexit trap. "
-            "A bare `verify_kv_capacity ...; local _kv_rc=$?` would exit "
-            "the script before capturing the return code."
-        )
-
-    def test_caller_does_not_use_bare_rc_capture(self, scan_script):
-        """The bare `verify_kv_capacity ...; local _kv_rc=$?` pattern
-        must NOT appear (it triggers errexit)."""
+    @pytest.fixture
+    def verify_fn(self, script_text):
+        """Extract the verify_kv_capacity() bash function source."""
         import re
 
-        unsafe = re.search(
-            r"verify_kv_capacity[^\n]*\n\s*local _kv_rc=\$\?",
-            scan_script,
+        m = re.search(
+            r"verify_kv_capacity\(\)\s*\{.*?PYEOF\n\}",
+            script_text,
+            re.DOTALL,
         )
-        assert unsafe is None, (
-            "Unsafe caller pattern found: bare `verify_kv_capacity ...; "
-            "local _kv_rc=$?` triggers set -e errexit. Use `|| _kv_rc=$?`."
+        assert m is not None, "Could not extract verify_kv_capacity function"
+        return m.group(0)
+
+    @pytest.fixture
+    def caller_block(self, script_text):
+        """Extract the caller block (local _tol ... fi) that handles _kv_rc."""
+        import re
+
+        m = re.search(
+            r"(    local _tol\n    _tol=\$\(kv_capacity_tolerance.*?\n    fi)",
+            script_text,
+            re.DOTALL,
+        )
+        assert m is not None, "Could not extract caller block"
+        return m.group(1)
+
+    @staticmethod
+    def _run_caller_harness(
+        verify_fn,
+        caller_block,
+        server_log_content,
+        kv_gib,
+        tolerance,
+        tmp_path,
+    ):
+        """Build and run a minimal bash harness with set -euo pipefail.
+
+        The harness defines stubs for ``log``, ``cleanup_server``, and
+        ``kv_capacity_tolerance``, then sources the REAL
+        ``verify_kv_capacity`` function and the REAL caller block extracted
+        from the script.  The caller block is wrapped in a function so that
+        ``return 1`` works as in the original script.
+
+        Returns the ``subprocess.CompletedProcess``.
+        """
+        import subprocess
+        import sys
+
+        output_dir = tmp_path / "output"
+        output_dir.mkdir()
+        if server_log_content is not None:
+            (output_dir / "server.log").write_text(server_log_content)
+
+        harness = """#!/usr/bin/env bash
+set -euo pipefail
+
+PYTHON="__PYTHON__"
+output_dir="__OUTPUT_DIR__"
+kv_gib="__KV_GIB__"
+
+# Stubs for functions the caller block depends on
+log() { echo "$@"; }
+cleanup_server() { true; }
+kv_capacity_tolerance() { echo "__TOL__"; }
+
+# Real verify_kv_capacity function extracted from kv_capacity_scan.sh
+__VERIFY_FN__
+
+# Real caller block wrapped in a function so `return` works
+run_caller() {
+__CALLER_BLOCK__
+}
+
+run_caller
+echo "CALLER_SUCCESS"
+"""
+        harness = harness.replace("__PYTHON__", sys.executable)
+        harness = harness.replace("__OUTPUT_DIR__", str(output_dir))
+        harness = harness.replace("__KV_GIB__", str(kv_gib))
+        harness = harness.replace("__TOL__", str(tolerance))
+        harness = harness.replace("__VERIFY_FN__", verify_fn)
+        harness = harness.replace("__CALLER_BLOCK__", caller_block)
+
+        harness_file = tmp_path / "_caller_harness.sh"
+        harness_file.write_text(harness)
+        result = subprocess.run(
+            ["bash", str(harness_file)],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        return result
+
+    def test_exit2_mismatch_writes_blocked_status(
+        self,
+        verify_fn,
+        caller_block,
+        tmp_path,
+    ):
+        """When KV capacity deviates > tolerance, write BLOCKED STATUS and continue.
+
+        This is the 32 GiB unreachable scenario: actual ~29 GiB vs target 32 GiB
+        with 2 GiB tolerance.  The caller should record BLOCKED and continue
+        (exit 0), NOT abort.
+        """
+        result = self._run_caller_harness(
+            verify_fn,
+            caller_block,
+            server_log_content="Available KV cache memory: 29.1 GiB\n",
+            kv_gib="32",
+            tolerance="2.0",
+            tmp_path=tmp_path,
+        )
+        assert result.returncode == 0, (
+            "Caller should continue after BLOCKED (exit 0). "
+            f"Got {result.returncode}:\nstdout:{result.stdout}\n"
+            f"stderr:{result.stderr}"
+        )
+        assert "CALLER_SUCCESS" in result.stdout, (
+            "Caller must reach CALLER_SUCCESS after recording BLOCKED"
+        )
+        status_file = tmp_path / "output" / "STATUS"
+        assert status_file.exists(), "STATUS file must be created for BLOCKED"
+        assert "BLOCKED" in status_file.read_text()
+
+    def test_exit1_parse_failure_aborts_fail_closed(
+        self,
+        verify_fn,
+        caller_block,
+        tmp_path,
+    ):
+        """When server log is missing, caller must abort (fail closed).
+
+        Missing evidence (parse failure, exit 1) must NOT be misreported as
+        a verified blocked target.  The caller must abort with a non-zero
+        exit code and must NOT write a BLOCKED STATUS file.
+        """
+        result = self._run_caller_harness(
+            verify_fn,
+            caller_block,
+            server_log_content=None,  # file does not exist
+            kv_gib="8",
+            tolerance="2.0",
+            tmp_path=tmp_path,
+        )
+        assert result.returncode != 0, (
+            "Caller must abort on parse failure (non-zero exit). "
+            f"Got {result.returncode}:\nstdout:{result.stdout}\n"
+            f"stderr:{result.stderr}"
+        )
+        assert "CALLER_SUCCESS" not in result.stdout, (
+            "Caller must NOT reach CALLER_SUCCESS on parse failure"
+        )
+        status_file = tmp_path / "output" / "STATUS"
+        assert not status_file.exists() or "BLOCKED" not in status_file.read_text(), (
+            "STATUS file must NOT contain BLOCKED on parse failure (fail closed)"
         )
 
-    def test_caller_handles_exit1_and_exit2_distinctly(self, scan_script):
-        """The caller must handle _kv_rc==1 (fail closed) and _kv_rc==2
-        (BLOCKED) in separate branches."""
-        assert '_kv_rc" -eq 1' in scan_script, (
-            "Caller must check _kv_rc==1 for fail-closed abort"
+    def test_exit0_success_no_status_file(
+        self,
+        verify_fn,
+        caller_block,
+        tmp_path,
+    ):
+        """When KV capacity is within tolerance, continue without STATUS file."""
+        result = self._run_caller_harness(
+            verify_fn,
+            caller_block,
+            server_log_content="Available KV cache memory: 7.9 GiB\n",
+            kv_gib="8",
+            tolerance="2.0",
+            tmp_path=tmp_path,
         )
-        assert '_kv_rc" -eq 2' in scan_script, (
-            "Caller must check _kv_rc==2 for BLOCKED recording"
+        assert result.returncode == 0, (
+            "Caller should succeed (exit 0). "
+            f"Got {result.returncode}:\nstdout:{result.stdout}\n"
+            f"stderr:{result.stderr}"
+        )
+        assert "CALLER_SUCCESS" in result.stdout
+        status_file = tmp_path / "output" / "STATUS"
+        assert not status_file.exists(), (
+            "STATUS file must NOT exist when KV capacity is within tolerance"
+        )
+
+    def test_set_e_does_not_trap_exit2(
+        self,
+        verify_fn,
+        caller_block,
+        tmp_path,
+    ):
+        """The ``|| _kv_rc=$?`` idiom must prevent set -e from trapping exit 2.
+
+        This is the core round-5 fix: without the idiom, ``set -e`` would
+        terminate the script on ``verify_kv_capacity`` returning 2, making
+        the BLOCKED branch unreachable.  If the idiom is missing or broken,
+        this test fails because the harness exits non-zero and never prints
+        CALLER_SUCCESS.
+        """
+        result = self._run_caller_harness(
+            verify_fn,
+            caller_block,
+            server_log_content="Available KV cache memory: 10.0 GiB\n",
+            kv_gib="32",
+            tolerance="2.0",
+            tmp_path=tmp_path,
+        )
+        assert result.returncode == 0, (
+            "set -e must NOT trap exit 2 — the || _kv_rc=$? idiom must "
+            "disable errexit for this command. "
+            f"Got {result.returncode}:\nstdout:{result.stdout}\n"
+            f"stderr:{result.stderr}"
+        )
+        assert "CALLER_SUCCESS" in result.stdout
+        status_file = tmp_path / "output" / "STATUS"
+        assert status_file.exists(), "STATUS file must be created for BLOCKED"
+        assert "BLOCKED" in status_file.read_text()
+
+    def test_exit1_kv_line_missing_aborts(
+        self,
+        verify_fn,
+        caller_block,
+        tmp_path,
+    ):
+        """Log without 'Available KV cache memory' -> exit 1 -> fail closed."""
+        result = self._run_caller_harness(
+            verify_fn,
+            caller_block,
+            server_log_content="Model loaded successfully\nNo KV line here\n",
+            kv_gib="8",
+            tolerance="2.0",
+            tmp_path=tmp_path,
+        )
+        assert result.returncode != 0, (
+            "Caller must abort when KV line is missing (exit 1, fail closed). "
+            f"Got {result.returncode}:\nstdout:{result.stdout}\n"
+            f"stderr:{result.stderr}"
+        )
+        assert "CALLER_SUCCESS" not in result.stdout
+        status_file = tmp_path / "output" / "STATUS"
+        assert not status_file.exists() or "BLOCKED" not in status_file.read_text(), (
+            "STATUS file must NOT contain BLOCKED on parse failure"
         )
