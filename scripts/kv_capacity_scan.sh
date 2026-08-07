@@ -214,7 +214,8 @@ wait_for_npu_idle() {
 }
 
 wait_for_server() {
-    local max_wait=600
+    # Allow override via env var for parallel runs where model loading is slower
+    local max_wait=${SERVER_STARTUP_TIMEOUT:-600}
     local waited=0
     while [ $waited -lt $max_wait ]; do
         # Use Python http.client to avoid proxy env var interference
@@ -255,9 +256,29 @@ except Exception:
 " > "$output_file" 2>/dev/null || true
 }
 
+kv_capacity_tolerance() {
+    # Return the verification tolerance (GiB) for a nominal KV target.
+    # Per PR #152 review round 3: the tolerance must NOT be widened to make
+    # an unreachable target appear met.  32 GiB is not reachable on 60.96 GiB
+    # HBM after subtracting model weights (~27.5 GiB) and runtime overhead
+    # (~0.9 GiB); actual achievable KV at util=0.95 is ~29 GiB.  The strict
+    # 2 GiB tolerance applies to ALL targets; when the target is unreachable
+    # the run is recorded with its actual KV and marked blocked.
+    echo "2.0"
+}
+
 verify_kv_capacity() {
     # Fail-closed KV capacity verification: parse server log and compare
     # actual KV cache memory to target within tolerance.
+    #
+    # Return codes (per PR #152 review round 4+5):
+    #   0 — KV capacity is within tolerance (OK)
+    #   1 — Parse/evidence failure: log unreadable or 'Available KV cache
+    #       memory' not found.  The caller MUST fail closed (abort) — missing
+    #       evidence must not be misreported as a verified blocked target.
+    #   2 — Verified capacity mismatch: the value was successfully parsed but
+    #       deviates more than tolerance from target.  The caller may record
+    #       this as BLOCKED (the target is unreachable on this hardware).
     local server_log="$1"
     local target_kv_gib="$2"
     local tolerance="${3:-2.0}"
@@ -269,19 +290,20 @@ try:
     text = open(log_path, encoding='utf-8', errors='replace').read()
 except Exception as exc:
     print(f"ERROR: cannot read server log: {exc}")
-    sys.exit(1)
+    sys.exit(1)  # parse failure → caller must fail closed
 m = re.search(r'Available KV cache memory:\s*([\d.]+)\s*GiB', text, re.IGNORECASE)
 if not m:
     print("ERROR: 'Available KV cache memory' not found in server log")
-    sys.exit(1)
+    sys.exit(1)  # parse failure → caller must fail closed
 actual = float(m.group(1))
 diff = abs(actual - target)
 if diff > tol:
-    print(f"ERROR: KV capacity mismatch: actual={actual:.2f}GiB "
+    print(f"MISMATCH: KV capacity actual={actual:.2f}GiB "
           f"target={target}GiB diff={diff:.2f}GiB tol={tol}GiB")
-    sys.exit(1)
+    sys.exit(2)  # verified mismatch → caller may record BLOCKED
 print(f"OK: KV capacity actual={actual:.2f}GiB target={target}GiB "
       f"diff={diff:.2f}GiB tol={tol}GiB")
+sys.exit(0)
 PYEOF
 }
 
@@ -298,7 +320,9 @@ build_serve_cmd() {
     cmd="$cmd --max-model-len 32768"
     cmd="$cmd --enable-prefix-caching"
     if [ -n "$kv_transfer_config" ]; then
-        cmd="$cmd --kv-transfer-config $kv_transfer_config"
+        # Wrap JSON in single quotes so bash -c preserves curly braces and
+        # double quotes instead of performing brace/word expansion.
+        cmd="$cmd --kv-transfer-config '$kv_transfer_config'"
     fi
     echo "$cmd"
 }
@@ -331,22 +355,60 @@ build_bench_cmd() {
 
 generate_env_manifest() {
     # Write env-manifest.json with provenance fields for evidence admission.
+    # Also saves dirty engine/plugin patches and a weight fingerprint next to
+    # the manifest so raw evidence is self-contained and reproducible.
     local output_file="$1"
     local server_log="${2:-}"
     local gpu_util="${3:-}"
     local kv_transfer_config="${4:-}"
     local max_model_len="${5:-32768}"
 
-    local engine_commit plugin_commit cann_version driver_version torch_npu_version model_revision
+    local manifest_dir
+    manifest_dir=$(dirname "$output_file")
+
+    local engine_commit plugin_commit cann_version driver_version torch_npu_version
+    local engine_patch_md5 plugin_patch_md5 engine_patch_sha256 plugin_patch_sha256
+    local model_revision model_weight_fingerprint
     engine_commit=$(cd "$VLLM_HUST_REPO" 2>/dev/null && git rev-parse HEAD 2>/dev/null || echo "unknown")
     plugin_commit=$(cd "$ASCEND_REPO" 2>/dev/null && git rev-parse HEAD 2>/dev/null || echo "unknown")
-    cann_version=$(cat /usr/local/Ascend/ascend-toolkit/latest/version.cfg 2>/dev/null | head -1 | tr -d '[:space:]' || echo "unknown")
+
+    # Dirty patch: save full patch content (not just md5) so raw evidence is
+    # self-contained and reproducible. Patch files live next to env-manifest.
+    local engine_patch_file="$manifest_dir/engine.patch"
+    local plugin_patch_file="$manifest_dir/plugin.patch"
+    if (cd "$VLLM_HUST_REPO" 2>/dev/null && git diff HEAD 2>/dev/null) > "$engine_patch_file"; then
+        engine_patch_md5=$(md5sum "$engine_patch_file" 2>/dev/null | awk '{print $1}' || echo "none")
+        engine_patch_sha256=$(sha256sum "$engine_patch_file" 2>/dev/null | awk '{print $1}' || echo "none")
+    else
+        engine_patch_md5="none"
+        engine_patch_sha256="none"
+        echo "" > "$engine_patch_file"
+    fi
+    if (cd "$ASCEND_REPO" 2>/dev/null && git diff HEAD 2>/dev/null) > "$plugin_patch_file"; then
+        plugin_patch_md5=$(md5sum "$plugin_patch_file" 2>/dev/null | awk '{print $1}' || echo "none")
+        plugin_patch_sha256=$(sha256sum "$plugin_patch_file" 2>/dev/null | awk '{print $1}' || echo "none")
+    else
+        plugin_patch_md5="none"
+        plugin_patch_sha256="none"
+        echo "" > "$plugin_patch_file"
+    fi
+
+    # CANN version: parse install.info (version.cfg does not exist on CANN 9.0.0).
+    cann_version=$(grep '^version=' /usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info 2>/dev/null \
+        | cut -d= -f2 | tr -d '[:space:]' \
+        || grep '^version=' /usr/local/Ascend/ascend-toolkit/latest/*/ascend_toolkit_install.info 2>/dev/null \
+        | head -1 | cut -d= -f2 | tr -d '[:space:]' || echo "unknown")
     if [ -z "$cann_version" ]; then
         cann_version="unknown"
     fi
-    driver_version=$(npu-smi info -t board -i "$NPU_DEVICE" 2>/dev/null \
-        | grep -i 'version' | head -1 \
-        | awk -F: '{gsub(/^ +| +$/,"",$2); print $2}' || echo "unknown")
+    # Driver version: parse driver/version.info (more reliable than npu-smi board).
+    driver_version=$(grep '^Version=' /usr/local/Ascend/driver/version.info 2>/dev/null \
+        | cut -d= -f2 | tr -d '[:space:]' || echo "unknown")
+    if [ -z "$driver_version" ]; then
+        driver_version=$(npu-smi info -t board -i "$NPU_DEVICE" 2>/dev/null \
+            | grep -i 'version' | head -1 \
+            | awk -F: '{gsub(/^ +| +$/,"",$2); print $2}' || echo "unknown")
+    fi
     if [ -z "$driver_version" ]; then
         driver_version="unknown"
     fi
@@ -356,10 +418,67 @@ generate_env_manifest() {
         torch_npu_version="unknown"
     fi
 
-    if [ -d "$MODEL_PATH/.git" ]; then
+    # Model revision: prefer a real HuggingFace snapshot commit hash when
+    # available (the authoritative weight identity). Fall back to git HEAD if
+    # the model dir is itself a git repo. Only when neither is available do we
+    # record a content-based fingerprint of the actual weight files — config.json
+    # SHA256 alone does NOT identify weights and is no longer used as the
+    # primary revision.
+    model_revision="not available"
+    model_weight_fingerprint="not available"
+    # 1. HuggingFace hub snapshot revision (refs/main under cache layout)
+    local hf_ref
+    for hf_ref in "$MODEL_PATH/refs/main" "$MODEL_PATH/.cache/refs/main"; do
+        if [ -f "$hf_ref" ]; then
+            model_revision=$(cat "$hf_ref" 2>/dev/null | tr -d '[:space:]')
+            break
+        fi
+    done
+    # 2. Git repo at model path
+    if [ "$model_revision" = "not available" ] && [ -d "$MODEL_PATH/.git" ]; then
         model_revision=$(cd "$MODEL_PATH" 2>/dev/null && git rev-parse HEAD 2>/dev/null || echo "not available")
-    else
-        model_revision="not available"
+    fi
+    # 3. Content fingerprint of actual weight files (.safetensors / .bin).
+    # This identifies the real weights, not just config.json.
+    if [ -d "$MODEL_PATH" ]; then
+        # NOTE: The '||' and '2>/dev/null' MUST be on the heredoc opener line,
+        # and the closing ')' MUST be on its own line after WPEOF.  Putting ')'
+        # on the opener line prematurely closes the $(...) and causes a syntax
+        # error (PR #152 review round 4).
+        model_weight_fingerprint=$("$PYTHON" - "$MODEL_PATH" <<'WPEOF' 2>/dev/null || echo "not available"
+import hashlib, os, sys
+model_path = sys.argv[1]
+entries = []
+for fname in sorted(os.listdir(model_path)):
+    if fname.endswith((".safetensors", ".bin", ".pt")):
+        fpath = os.path.join(model_path, fname)
+        if not os.path.isfile(fpath):
+            continue
+        h = hashlib.sha256()
+        with open(fpath, "rb") as f:
+            for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                h.update(chunk)
+        entries.append(f"{fname}:{h.hexdigest()}")
+if entries:
+    # Combine all weight file hashes into one fingerprint
+    combined = hashlib.sha256("\n".join(entries).encode()).hexdigest()
+    print(f"sha256:{combined}")
+    print(f"files:{','.join(e.split(':')[0] for e in entries)}", file=sys.stderr)
+else:
+    print("not available")
+WPEOF
+        )
+    fi
+
+    # Per PR #152 review round 3: when neither HF ref nor git HEAD is available,
+    # model_revision must be set to weight_fingerprint:<fingerprint> so the
+    # provenance gate accepts the manifest on re-run.  Leaving it as
+    # "not available" would cause the provenance validator to reject the
+    # manifest even though model_weight_fingerprint is populated.
+    if [ "$model_revision" = "not available" ] \
+        && [ "$model_weight_fingerprint" != "not available" ] \
+        && [ -n "$model_weight_fingerprint" ]; then
+        model_revision="weight_fingerprint:${model_weight_fingerprint}"
     fi
 
     # Parse actual KV bytes from server log
@@ -389,15 +508,20 @@ PYEOF
     # Write manifest using Python for proper JSON serialization
     ENGINE_COMMIT="$engine_commit" \
     PLUGIN_COMMIT="$plugin_commit" \
+    ENGINE_PATCH_MD5="$engine_patch_md5" \
+    PLUGIN_PATCH_MD5="$plugin_patch_md5" \
+    ENGINE_PATCH_SHA256="$engine_patch_sha256" \
+    PLUGIN_PATCH_SHA256="$plugin_patch_sha256" \
     CANN_VERSION="$cann_version" \
     DRIVER_VERSION="$driver_version" \
     TORCH_NPU_VERSION="$torch_npu_version" \
     MODEL_REVISION="$model_revision" \
+    MODEL_WEIGHT_FINGERPRINT="$model_weight_fingerprint" \
     GPU_UTIL="$gpu_util" \
     MAX_MODEL_LEN="$max_model_len" \
     KV_TRANSFER_JSON="$kv_transfer_json" \
     ACTUAL_KV_BYTES="$actual_kv_bytes" \
-    "$PYTHON" - <<'PYEOF' > "$output_file" 2>/dev/null || true
+    "$PYTHON" - <<'PYEOF' > "$output_file"
 import json, os
 
 def env_str(key, default="unknown"):
@@ -421,10 +545,17 @@ if kv_transfer_raw and kv_transfer_raw != "null":
 manifest = {
     "engine_commit": env_str("ENGINE_COMMIT"),
     "plugin_commit": env_str("PLUGIN_COMMIT"),
+    "engine_patch_md5": env_str("ENGINE_PATCH_MD5", "none"),
+    "plugin_patch_md5": env_str("PLUGIN_PATCH_MD5", "none"),
+    "engine_patch_sha256": env_str("ENGINE_PATCH_SHA256", "none"),
+    "plugin_patch_sha256": env_str("PLUGIN_PATCH_SHA256", "none"),
+    "engine_patch_file": "engine.patch",
+    "plugin_patch_file": "plugin.patch",
     "cann_version": env_str("CANN_VERSION"),
     "driver_version": env_str("DRIVER_VERSION"),
     "torch_npu_version": env_str("TORCH_NPU_VERSION"),
     "model_revision": env_str("MODEL_REVISION", "not available"),
+    "model_weight_fingerprint": env_str("MODEL_WEIGHT_FINGERPRINT", "not available"),
     "resolved_parameters": {
         "gpu_memory_utilization": env_str("GPU_UTIL"),
         "max_model_len": env_str("MAX_MODEL_LEN"),
@@ -436,6 +567,48 @@ manifest = {
 }
 print(json.dumps(manifest, indent=2))
 PYEOF
+
+    # Per PR #152 review round 4: the manifest write must NOT use
+    # `2>/dev/null || true` — a silent write failure would produce missing
+    # or truncated provenance that the analyzer cannot distinguish from a
+    # valid manifest.  Validate file existence, JSON parse, and required
+    # provenance fields before returning success.
+    if [ ! -f "$output_file" ]; then
+        log "  ERROR: generate_env_manifest — output file not created: $output_file"
+        return 1
+    fi
+    if ! "$PYTHON" - "$output_file" <<'VEOF'
+import json, sys
+try:
+    with open(sys.argv[1]) as f:
+        data = json.load(f)
+except Exception as exc:
+    print(f"ERROR: manifest JSON parse failed: {exc}")
+    sys.exit(1)
+required = [
+    "engine_commit", "plugin_commit", "cann_version", "driver_version",
+    "torch_npu_version", "model_revision", "model_weight_fingerprint",
+    "resolved_parameters", "actual_kv_bytes",
+]
+missing = [f for f in required if f not in data]
+if missing:
+    print(f"ERROR: manifest missing required fields: {missing}")
+    sys.exit(1)
+# Placeholder provenance sentinels are NOT valid values
+sentinels = {"unknown", "not available", "n/a", "none", "null", ""}
+for f in ["engine_commit", "plugin_commit", "cann_version", "driver_version",
+          "torch_npu_version", "model_revision", "model_weight_fingerprint"]:
+    val = data.get(f, "")
+    if val in sentinels:
+        print(f"ERROR: manifest field '{f}' has placeholder value '{val}'")
+        sys.exit(1)
+sys.exit(0)
+VEOF
+    then
+        log "  ERROR: generate_env_manifest — manifest validation failed for $output_file"
+        return 1
+    fi
+    return 0
 }
 
 run_single_experiment() {
@@ -465,7 +638,10 @@ EOF
     if [ $DRY_RUN -eq 1 ]; then
         log "  [DRY RUN] Skipping actual execution"
         # Still generate manifest for dry-run validation
-        generate_env_manifest "$output_dir/env-manifest.json" "" "$gpu_util" "$kv_transfer_config"
+        if ! generate_env_manifest "$output_dir/env-manifest.json" "" "$gpu_util" "$kv_transfer_config"; then
+            log "  ERROR: manifest generation failed in dry-run — aborting"
+            return 1
+        fi
         return 0
     fi
 
@@ -490,16 +666,43 @@ EOF
         return 1
     fi
 
-    # Verify KV capacity matches target (fail-closed, 2 GiB tolerance)
-    log "  Verifying KV capacity (target=${kv_gib}GiB, tolerance=2.0GiB)"
-    if ! verify_kv_capacity "$output_dir/server.log" "$kv_gib" 2.0; then
-        log "  ERROR: KV capacity verification failed"
+    # Verify KV capacity matches target (fail-closed, 2 GiB tolerance).
+    # Per PR #152 review round 3: when the nominal target is unreachable
+    # (e.g. 32 GiB on 60.96 GiB HBM after weights+overhead → actual ~29 GiB),
+    # do NOT widen tolerance.  Instead, record the run with its actual KV and
+    # mark it as BLOCKED so the acceptance report can classify it correctly.
+    # Per PR #152 review round 4+5: verify_kv_capacity returns distinct exit
+    # codes — 1 means parse failure (log unreadable / 'Available KV cache
+    # memory' not found) and the caller MUST fail closed; 2 means the value
+    # was parsed but exceeds tolerance, and the caller may record BLOCKED.
+    # Treating both as BLOCKED would misreport missing evidence as a verified
+    # blocked target.
+    #
+    # IMPORTANT: the script uses `set -euo pipefail`, so a bare
+    #   verify_kv_capacity ...; local _kv_rc=$?
+    # would trigger errexit on any non-zero return BEFORE $?) is captured,
+    # making the BLOCKED branch unreachable.  The `|| _kv_rc=$?` idiom
+    # disables errexit for this command because it is part of an OR-list.
+    local _tol
+    _tol=$(kv_capacity_tolerance "$kv_gib")
+    log "  Verifying KV capacity (target=${kv_gib}GiB, tolerance=${_tol}GiB)"
+    local _kv_rc=0
+    verify_kv_capacity "$output_dir/server.log" "$kv_gib" "$_tol" || _kv_rc=$?
+    if [ "$_kv_rc" -eq 1 ]; then
+        log "  ERROR: KV capacity verification failed (parse error) — fail closed"
         cleanup_server
         return 1
+    elif [ "$_kv_rc" -eq 2 ]; then
+        log "  WARNING: KV capacity target ${kv_gib}GiB not reachable — \
+marking run as BLOCKED and continuing"
+        # Write a STATUS file so the analyzer can classify this run as blocked.
+        # The actual KV is still recorded in env-manifest.json for reporting.
+        echo "BLOCKED: KV capacity target ${kv_gib}GiB not reachable (tolerance=${_tol}GiB)" \
+            > "$output_dir/STATUS"
     fi
 
     # Collect pre-benchmark metrics
-    collect_metrics "$output_dir/metrics_pre.json"
+    collect_metrics "$output_dir/metrics_pre.prom"
 
     # Run benchmark
     local bench_cmd
@@ -513,14 +716,20 @@ EOF
     fi
 
     # Collect post-benchmark metrics
-    collect_metrics "$output_dir/metrics_post.json"
+    collect_metrics "$output_dir/metrics_post.prom"
 
-    # Generate environment manifest (provenance) with actual KV from server log
-    generate_env_manifest \
+    # Generate environment manifest (provenance) with actual KV from server log.
+    # Per PR #152 review round 4: fail closed if manifest generation fails —
+    # missing provenance must not be silently swallowed.
+    if ! generate_env_manifest \
         "$output_dir/env-manifest.json" \
         "$output_dir/server.log" \
         "$gpu_util" \
-        "$kv_transfer_config"
+        "$kv_transfer_config"; then
+        log "  ERROR: env-manifest generation failed — aborting (fail closed)"
+        cleanup_server
+        return 1
+    fi
 
     # Kill server
     cleanup_server
@@ -584,7 +793,7 @@ run_part_b() {
     log "  Workload: $TIERING_WORKLOAD"
     log "  hbm-only: 32 GiB KV, no kv-transfer-config (baseline, no pressure)"
     log "  tiering-disabled: 8 GiB KV, no kv-transfer-config (pressure, no tiering)"
-    log "  tiering-enabled: 8 GiB KV, CPUOffloadingConnector (pressure + tiering)"
+    log "  tiering-enabled: 8 GiB KV, SimpleCPUOffloadConnector (pressure + tiering)"
 
     # Filter tiering configs if --tiering-configs is set
     local configs=("${TIERING_CONFIGS[@]}")
@@ -618,7 +827,7 @@ run_part_b() {
                     config_kv_transfer=""
                     ;;
                 tiering-enabled)
-                    # 8 GiB KV + CPUOffloadingConnector (pressure + tiering)
+                    # 8 GiB KV + SimpleCPUOffloadConnector (pressure + tiering)
                     config_kv_gib="8"
                     config_kv_transfer="$TIERING_KV_TRANSFER_CONFIG"
                     ;;
@@ -631,8 +840,34 @@ run_part_b() {
             if ! run_single_experiment \
                 "$TIERING_WORKLOAD" "$config_kv_gib" "$rep" \
                 "$output_dir" "$config_kv_transfer"; then
-                log "ERROR: Part B experiment failed (rep=$rep config=$config)"
-                exit 1
+                # tiering-enabled relies on SimpleCPUOffloadConnector which is
+                # incompatible with the Ascend KV cache layout (storage tensor
+                # tuple layout).  Per PR #152 review round 3: only mark as
+                # BLOCKED if the server log contains the verified shape mismatch
+                # RuntimeError signature; any other failure (network, model load,
+                # NPU runtime, parameter error) must fail closed (exit 1) rather
+                # than being misreported as a known blocked condition.
+                if [ "$config" = "tiering-enabled" ]; then
+                    local _server_log="$_TMP_DIR/tiering/$config/rep-$rep/server.log"
+                    if [ -f "$_server_log" ] && grep -q \
+                        "RuntimeError: shape.*is invalid for input of size" \
+                        "$_server_log" 2>/dev/null; then
+                        log "  WARNING: tiering-enabled failed (rep=$rep) — \
+verified SimpleCPUOffloadConnector shape mismatch, recording as BLOCKED"
+                        mkdir -p "$output_dir"
+                        echo "BLOCKED: SimpleCPUOffloadConnector incompatible \
+with Ascend KV cache layout (verified shape mismatch RuntimeError)" \
+                            > "$output_dir/STATUS"
+                    else
+                        log "ERROR: tiering-enabled failed (rep=$rep) with an \
+UNVERIFIED error — fail closed (not a known SimpleCPUOffloadConnector signature)"
+                        log "  Check $_server_log for the actual error"
+                        exit 1
+                    fi
+                else
+                    log "ERROR: Part B experiment failed (rep=$rep config=$config)"
+                    exit 1
+                fi
             fi
         done
     done
