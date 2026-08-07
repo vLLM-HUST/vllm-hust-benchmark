@@ -13,12 +13,14 @@ Usage::
         --volume "${GITHUB_WORKSPACE}:/workspace:ro" \\
         -- python /workspace/run_benchmark.py
 
-The script reads ``RUNNER_NAME`` from the environment (or ``--runner-name``),
-resolves the physical NPU device, builds a ``docker create`` command with the
-ownership labels and device mapping, validates the container's inspect
-payload, then starts and waits for the container. The preflight output prints
-only the runner name, physical device, and container logical device — no
-command-line secrets or environment values.
+The runner identity is taken from the ``RUNNER_NAME`` environment variable,
+which MUST be set — it cannot be passed on the command line, because allowing
+a caller to override it would break single-card NPU device isolation. The
+script resolves the physical NPU device from ``RUNNER_NAME``, builds a
+``docker create`` command with the ownership labels and device mapping,
+validates the container's inspect payload, then starts and waits for the
+container. The preflight output prints only the runner name, physical device,
+and container logical device — no command-line secrets or environment values.
 """
 
 from __future__ import annotations
@@ -41,7 +43,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Run one watchdog-owned NPU container from a poy-180 runner."
     )
-    parser.add_argument("--runner-name", default=os.environ.get("RUNNER_NAME", ""))
     parser.add_argument("--name", required=True, help="Unique Docker container name")
     parser.add_argument("--image", required=True)
     parser.add_argument("--volume", action="append", default=[])
@@ -54,8 +55,15 @@ def build_parser() -> argparse.ArgumentParser:
 def run(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
+    runner_name = os.environ.get("RUNNER_NAME", "").strip()
+    if not runner_name:
+        print(
+            "preflight failed: RUNNER_NAME environment variable is not set",
+            file=sys.stderr,
+        )
+        return 2
     try:
-        assignment = resolve_runner_device(args.runner_name)
+        assignment = resolve_runner_device(runner_name)
         create_command = build_docker_create_command(
             assignment=assignment,
             container_name=args.name,

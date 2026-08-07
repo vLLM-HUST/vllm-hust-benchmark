@@ -22,6 +22,7 @@ PR #150 review fixes:
 
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -721,3 +722,141 @@ def test_docker_command_accepts_symlink_to_safe_path(tmp_path: Path) -> None:
         volumes=[f"{link}:/workspace"],
     )
     assert str(link) in " ".join(command)
+
+
+# ---------------------------------------------------------------------------
+# recursive mount propagation rejection (PR #150 review round 3)
+# ---------------------------------------------------------------------------
+
+
+def test_recursive_mount_propagation_rejected():
+    """rshared and rslave must be rejected just like shared and slave."""
+    from vllm_hust_benchmark.runner_ownership import _validate_volume_spec
+
+    for option in ("shared", "slave", "rshared", "rslave"):
+        with pytest.raises(ValueError, match="forbidden mount option"):
+            _validate_volume_spec(f"/tmp:/workspace:{option}")
+
+
+def test_inspect_rejects_recursive_mount_propagation():
+    """Inspect must reject rshared and rslave propagation."""
+    from vllm_hust_benchmark.runner_ownership import _validate_mount_entry
+
+    for prop in ("rshared", "rslave"):
+        with pytest.raises(ValueError, match="forbidden mount propagation"):
+            _validate_mount_entry(
+                {
+                    "Type": "bind",
+                    "Source": "/tmp",
+                    "Destination": "/workspace",
+                    "Propagation": prop,
+                }
+            )
+
+
+def test_dangerous_capabilities_is_module_constant():
+    """DANGEROUS_CAPABILITIES must be a module-level frozenset for consistency."""
+    import vllm_hust_benchmark.runner_ownership as mod
+
+    assert hasattr(mod, "DANGEROUS_CAPABILITIES")
+    assert isinstance(mod.DANGEROUS_CAPABILITIES, frozenset)
+    assert "SYS_ADMIN" in mod.DANGEROUS_CAPABILITIES
+    assert "SYS_PTRACE" in mod.DANGEROUS_CAPABILITIES
+    assert "SYS_MODULE" in mod.DANGEROUS_CAPABILITIES
+
+
+# ---------------------------------------------------------------------------
+# launcher script contract (PR #150 review round 3)
+# ---------------------------------------------------------------------------
+
+
+def test_launcher_does_not_accept_runner_name_arg():
+    """The launcher must not allow --runner-name to be overridden by the caller.
+
+    Runner identity must come from the RUNNER_NAME env var only.
+    """
+    import pathlib
+
+    script_path = (
+        pathlib.Path(__file__).resolve().parents[1]
+        / "scripts"
+        / "run-watchdog-owned-npu-container.py"
+    )
+    assert script_path.exists()
+    text = script_path.read_text(encoding="utf-8")
+    # --runner-name must NOT be a CLI argument
+    assert '"--runner-name"' not in text
+    assert "'--runner-name'" not in text
+    # RUNNER_NAME must be read from environment
+    assert "os.environ" in text
+    assert "RUNNER_NAME" in text
+
+
+def test_launcher_requires_runner_name_env(monkeypatch):
+    """The launcher must fail with exit code 2 when RUNNER_NAME is not set."""
+    import importlib.util
+    import pathlib
+
+    script_path = (
+        pathlib.Path(__file__).resolve().parents[1]
+        / "scripts"
+        / "run-watchdog-owned-npu-container.py"
+    )
+    spec = importlib.util.spec_from_file_location("run_launcher", script_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    monkeypatch.delenv("RUNNER_NAME", raising=False)
+    rc = mod.run(["--name", "test", "--image", "ubuntu", "--", "echo", "hi"])
+    assert rc == 2
+
+
+def test_launcher_uses_runner_name_env(monkeypatch):
+    """The launcher resolves the runner from RUNNER_NAME env var."""
+    import importlib.util
+    import pathlib
+
+    script_path = (
+        pathlib.Path(__file__).resolve().parents[1]
+        / "scripts"
+        / "run-watchdog-owned-npu-container.py"
+    )
+    spec = importlib.util.spec_from_file_location("run_launcher", script_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    monkeypatch.setenv("RUNNER_NAME", "poy-180-21rc-npu2")
+
+    calls = []
+
+    class FakeResult:
+        def __init__(self, stdout="", stderr="", returncode=0):
+            self.stdout = stdout
+            self.stderr = stderr
+            self.returncode = returncode
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        if cmd[:2] == ["docker", "create"]:
+            return FakeResult(stdout="abc123\n")
+        if cmd[:2] == ["docker", "inspect"]:
+            return FakeResult(
+                stdout='[{"Config": {"Labels": {"org.vllm-hust.runner": "poy-180-21rc-npu2", "org.vllm-hust.npu-physical": "2", "org.vllm-hust.npu-logical": "0"}, "Env": ["ASCEND_RT_VISIBLE_DEVICES=0", "ASCEND_VISIBLE_DEVICES=0"]}, "HostConfig": {"Privileged": false, "CapAdd": [], "Devices": [{"PathOnHost": "/dev/davinci2", "PathInContainer": "/dev/davinci0"}, {"PathOnHost": "/dev/davinci_manager", "PathInContainer": "/dev/davinci_manager"}, {"PathOnHost": "/dev/devmm_svm", "PathInContainer": "/dev/devmm_svm"}, {"PathOnHost": "/dev/hisi_hdc", "PathInContainer": "/dev/hisi_hdc"}], "Binds": []}, "Mounts": []}]'
+            )
+        if cmd[:2] == ["docker", "start"]:
+            return FakeResult()
+        if cmd[:2] == ["docker", "wait"]:
+            return FakeResult(stdout="0\n")
+        if cmd[:2] == ["docker", "logs"]:
+            return FakeResult()
+        if cmd[:2] == ["docker", "rm"]:
+            return FakeResult()
+        return FakeResult()
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    rc = mod.run(
+        ["--name", "test-container", "--image", "ubuntu", "--", "echo", "hello"]
+    )
+    assert rc == 0
+    # Verify docker create was called
+    assert any(c[:2] == ["docker", "create"] for c in calls)

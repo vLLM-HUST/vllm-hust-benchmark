@@ -83,8 +83,13 @@ ALLOWED_CONTAINER_DESTINATIONS = (
     "/opt/models",
 )
 
-# Mount options that weaken isolation.
-FORBIDDEN_MOUNT_OPTIONS = {"shared", "slave"}
+# Mount options that weaken isolation. Includes the recursive variants
+# (``rshared`` / ``rslave``) because they propagate mount events just like
+# their non-recursive counterparts.
+FORBIDDEN_MOUNT_OPTIONS = {"shared", "slave", "rshared", "rslave"}
+
+# Linux capabilities that bypass container isolation and must never be added.
+DANGEROUS_CAPABILITIES = frozenset({"SYS_ADMIN", "SYS_PTRACE", "SYS_MODULE"})
 
 
 def _normalize_path(path: str) -> str:
@@ -449,8 +454,7 @@ def validate_container_inspect(
     if host_config.get("Privileged"):
         raise ValueError("container must not run in privileged mode")
     cap_add = host_config.get("CapAdd") or []
-    dangerous_caps = {"SYS_ADMIN", "SYS_PTRACE", "SYS_MODULE"}
-    present = dangerous_caps.intersection(cap_add)
+    present = DANGEROUS_CAPABILITIES.intersection(cap_add)
     if present:
         raise ValueError(
             f"container must not have dangerous capabilities: {sorted(present)}"
