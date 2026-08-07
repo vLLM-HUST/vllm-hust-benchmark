@@ -1,0 +1,730 @@
+{
+  "schema_version": "leaderboard-comparison-gap-audit/v1",
+  "generated_at": "2026-08-06T07:38:01.032656Z",
+  "registry": {
+    "version": "1.8.1",
+    "sha256": "272bb6b4c1cac8d358813fdd3c485038284ddd4afb1f8871d1893fa5ac0259ea"
+  },
+  "policy": {
+    "excluded_workloads": [],
+    "minimum_successful_repeats": 3,
+    "require_verified": true,
+    "require_exact_resolved_spec_hash": true,
+    "require_current_heads": true,
+    "require_runtime_environment": [
+      "cann_version",
+      "driver_version",
+      "pytorch_version"
+    ],
+    "require_measured_peak_memory": true,
+    "production_trace_attestation_substitutes_generic_runtime_fields": true
+  },
+  "current_heads": {
+    "vllm_hust": "4a6f5b1ce78ace4b2b4d77229a9707a7f54ba5d0",
+    "vllm_ascend_hust": "a36e80815738e4a3826376f96a990de686a8af4c"
+  },
+  "summary": {
+    "target_count": 11,
+    "ready_pair_count": 0,
+    "rerun_target_count": 11,
+    "rerun_job_count": 21
+  },
+  "records": [
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "target_version": "1.4.0",
+      "workload": "agent-research-online",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": null,
+      "current": null,
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "target_version": "1.4.0",
+      "workload": "instructcoder-online",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": null,
+      "current": {
+        "entry_id": "b6bfc226-4d0c-4305-a840-9d2724d78c09",
+        "submitted_at": "2026-07-26T16:01:55Z",
+        "git_commit": "6f612fbedff718af2dabb93692f00044e66a9b4b",
+        "resolved_spec_hash": "651db3189c7fa28ed648ae1865aa8007713e3efd1289543a0bd99273bffb917c",
+        "successful_repeats": 0,
+        "eligible": false,
+        "reasons": [
+          "current-core-head-stale",
+          "current-plugin-head-stale",
+          "peak-memory-unmeasured",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-binding-missing-or-mismatched",
+          "target-version-missing-or-mismatched",
+          "three-successful-repeats-missing",
+          "verified-attestation-missing"
+        ]
+      },
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "target_version": "1.4.0",
+      "workload": "prefix-repetition-online",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": true,
+      "baseline": {
+        "entry_id": "dcd563d1-890d-4211-8dab-b2d6969c2f86",
+        "submitted_at": "2026-08-02T12:05:14Z",
+        "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        "resolved_spec_hash": "cc71667b7c3de8614f22a4296a9b7bc1ca67a398550289150a8d15ec01507415",
+        "successful_repeats": 3,
+        "eligible": false,
+        "reasons": [
+          "peak-memory-unmeasured",
+          "reproducible-command-missing",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-version-missing-or-mismatched"
+        ]
+      },
+      "current": {
+        "entry_id": "6cfaf763-7c0a-4309-bf9b-06056b99366e",
+        "submitted_at": "2026-07-26T08:01:54Z",
+        "git_commit": "e4ce33646f2ef1781289e6dc651fad0d00177c55",
+        "resolved_spec_hash": "cc71667b7c3de8614f22a4296a9b7bc1ca67a398550289150a8d15ec01507415",
+        "successful_repeats": 0,
+        "eligible": false,
+        "reasons": [
+          "client_parameters.port:mismatch:8020!=8000",
+          "current-core-head-stale",
+          "current-plugin-head-stale",
+          "peak-memory-unmeasured",
+          "reproducible-command-missing",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.port:mismatch:8020!=8000",
+          "server_parameters.revision:missing",
+          "target-binding-missing-or-mismatched",
+          "target-version-missing-or-mismatched",
+          "three-successful-repeats-missing",
+          "verified-attestation-missing"
+        ]
+      },
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "target_version": "1.4.0",
+      "workload": "random-latency",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": {
+        "entry_id": "cd850c8b-7743-413a-ad5f-e4924d883e2c",
+        "submitted_at": "2026-08-02T14:21:02Z",
+        "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        "resolved_spec_hash": "3e81e3e00639f882933d45f5420a8e0813225bc6d7370a6f318cb207417c8f6a",
+        "successful_repeats": 3,
+        "eligible": false,
+        "reasons": [
+          "peak-memory-unmeasured",
+          "reproducible-command-missing",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-version-missing-or-mismatched"
+        ]
+      },
+      "current": {
+        "entry_id": "cae79867-3a2c-4a9d-9b90-7aae937454d1",
+        "submitted_at": "2026-07-26T23:33:41Z",
+        "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        "resolved_spec_hash": "4372b8fbe4a69db9e6fc5461aba0345133fc2d9c21fb33be0576d729ce9eca7d",
+        "successful_repeats": 0,
+        "eligible": false,
+        "reasons": [
+          "current-core-head-stale",
+          "current-plugin-head-stale",
+          "peak-memory-unmeasured",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-binding-missing-or-mismatched",
+          "target-version-missing-or-mismatched",
+          "three-successful-repeats-missing",
+          "verified-attestation-missing"
+        ]
+      },
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "target_version": "1.4.0",
+      "workload": "random-online",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": null,
+      "current": {
+        "entry_id": "c40f5805-bf3c-46d9-ab5f-b86ffca786b5",
+        "submitted_at": "2026-07-26T22:04:03Z",
+        "git_commit": "e0c0ce8e37e0fcd0f7a133c5c8eee68110295445",
+        "resolved_spec_hash": "806e24f4413cbfdeb06ebcce643ce31e645fe74bffbcbb48f77736ec4fcd0152",
+        "successful_repeats": 0,
+        "eligible": false,
+        "reasons": [
+          "current-core-head-stale",
+          "current-plugin-head-stale",
+          "peak-memory-unmeasured",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-binding-missing-or-mismatched",
+          "target-version-missing-or-mismatched",
+          "three-successful-repeats-missing",
+          "verified-attestation-missing"
+        ]
+      },
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "target_version": "1.4.0",
+      "workload": "sharegpt-online",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": null,
+      "current": {
+        "entry_id": "1cdeb182-fa80-481a-9de6-ff33fe883a3a",
+        "submitted_at": "2026-07-26T22:26:42Z",
+        "git_commit": "e0c0ce8e37e0fcd0f7a133c5c8eee68110295445",
+        "resolved_spec_hash": "1d37c9d71656c4164da97087fa6db74fa806f25bd84a916192239769f0d8dbd1",
+        "successful_repeats": 0,
+        "eligible": false,
+        "reasons": [
+          "current-core-head-stale",
+          "current-plugin-head-stale",
+          "peak-memory-unmeasured",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-binding-missing-or-mismatched",
+          "target-version-missing-or-mismatched",
+          "three-successful-repeats-missing",
+          "verified-attestation-missing"
+        ]
+      },
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "target_version": "1.4.0",
+      "workload": "sharegpt-throughput",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": null,
+      "current": {
+        "entry_id": "a1f75382-967f-4f77-b80e-86ddce8c4808",
+        "submitted_at": "2026-07-26T23:51:42Z",
+        "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        "resolved_spec_hash": "27d3c9c28d82f391744cd893644defd2dd0491b7b51b7b506561dc7fd7a81476",
+        "successful_repeats": 0,
+        "eligible": false,
+        "reasons": [
+          "current-core-head-stale",
+          "current-plugin-head-stale",
+          "peak-memory-unmeasured",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-binding-missing-or-mismatched",
+          "target-version-missing-or-mismatched",
+          "three-successful-repeats-missing",
+          "verified-attestation-missing"
+        ]
+      },
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "target_version": "1.4.0",
+      "workload": "sonnet-throughput",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": {
+        "entry_id": "d3366614-b70b-4f96-ba6c-b52b4614bae1",
+        "submitted_at": "2026-08-02T11:24:59Z",
+        "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+        "resolved_spec_hash": "ecaff7738d2288c97fd8f41df61e62480a1706ea157cd0ed9a6093d805514cd1",
+        "successful_repeats": 3,
+        "eligible": false,
+        "reasons": [
+          "peak-memory-unmeasured",
+          "reproducible-command-missing",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-version-missing-or-mismatched"
+        ]
+      },
+      "current": {
+        "entry_id": "45a1ad9a-c335-41b5-a1e0-a1f20f64467b",
+        "submitted_at": "2026-07-27T00:06:32Z",
+        "git_commit": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
+        "resolved_spec_hash": "0c6403549e077ff38864c362b898b0ea500938bc4f7fda4d0076ad3b1320af87",
+        "successful_repeats": 0,
+        "eligible": false,
+        "reasons": [
+          "current-core-head-stale",
+          "current-plugin-head-stale",
+          "peak-memory-unmeasured",
+          "runtime-environment.cann_version:missing",
+          "runtime-environment.driver_version:missing",
+          "runtime-environment.pytorch_version:missing",
+          "server_parameters.revision:missing",
+          "target-binding-missing-or-mismatched",
+          "target-version-missing-or-mismatched",
+          "three-successful-repeats-missing",
+          "verified-attestation-missing"
+        ]
+      },
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "target_version": "1.4.0",
+      "workload": "visionarena-online",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": null,
+      "current": null,
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "target_version": "1.5.1",
+      "workload": "burstgpt-production-replay",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": {
+        "entry_id": "258c0815-5c3a-4001-9c62-a5d318812248",
+        "submitted_at": "2026-08-02T20:47:52Z",
+        "git_commit": "5f6faa0cb8830f667266f3b8121cd1383606f2a1",
+        "resolved_spec_hash": "e8df0ac5655effe5be1b347f192af2132eefbce1909082f6fe1b21025eee98a8",
+        "successful_repeats": 3,
+        "eligible": false,
+        "reasons": [
+          "target-version-missing-or-mismatched"
+        ]
+      },
+      "current": {
+        "entry_id": "fc7ef214-23b8-4821-825c-e84cd60dc105",
+        "submitted_at": "2026-08-06T06:55:22Z",
+        "git_commit": "4a6f5b1ce78ace4b2b4d77229a9707a7f54ba5d0",
+        "resolved_spec_hash": "e8452cd434003babc406525e5de5b14287f30a1717553463f7352bc56ea337cf",
+        "successful_repeats": 3,
+        "eligible": true,
+        "reasons": []
+      },
+      "required_sides": [
+        "vllm"
+      ]
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "target_version": "1.6.2",
+      "workload": "tracelab-coding-agent-replay",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
+      "status": "rerun-required",
+      "hash_match": false,
+      "baseline": {
+        "entry_id": "76cec392-4fa1-4786-b265-3ffd5c5a89e9",
+        "submitted_at": "2026-08-03T04:04:39Z",
+        "git_commit": "5f6faa0cb8830f667266f3b8121cd1383606f2a1",
+        "resolved_spec_hash": "613ce2cec38b9455e0779eebb9f9c0cce0755d983326f7954e41416d17d6f78d",
+        "successful_repeats": 3,
+        "eligible": false,
+        "reasons": [
+          "target-version-missing-or-mismatched"
+        ]
+      },
+      "current": null,
+      "required_sides": [
+        "vllm",
+        "vllm-hust"
+      ]
+    }
+  ],
+  "rerun_queue": [
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "workload": "agent-research-online",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+      "workload": "agent-research-online",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "workload": "instructcoder-online",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "workload": "instructcoder-online",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2.json",
+      "reasons": [
+        "current-core-head-stale",
+        "current-plugin-head-stale",
+        "peak-memory-unmeasured",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-binding-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "three-successful-repeats-missing",
+        "verified-attestation-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "workload": "prefix-repetition-online",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
+      "reasons": [
+        "peak-memory-unmeasured",
+        "reproducible-command-missing",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-version-missing-or-mismatched"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "workload": "prefix-repetition-online",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
+      "reasons": [
+        "client_parameters.port:mismatch:8020!=8000",
+        "current-core-head-stale",
+        "current-plugin-head-stale",
+        "peak-memory-unmeasured",
+        "reproducible-command-missing",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.port:mismatch:8020!=8000",
+        "server_parameters.revision:missing",
+        "target-binding-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "three-successful-repeats-missing",
+        "verified-attestation-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "workload": "random-latency",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
+      "reasons": [
+        "peak-memory-unmeasured",
+        "reproducible-command-missing",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-version-missing-or-mismatched"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "workload": "random-latency",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
+      "reasons": [
+        "current-core-head-stale",
+        "current-plugin-head-stale",
+        "peak-memory-unmeasured",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-binding-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "three-successful-repeats-missing",
+        "verified-attestation-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "workload": "random-online",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "workload": "random-online",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
+      "reasons": [
+        "current-core-head-stale",
+        "current-plugin-head-stale",
+        "peak-memory-unmeasured",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-binding-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "three-successful-repeats-missing",
+        "verified-attestation-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "workload": "sharegpt-online",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "workload": "sharegpt-online",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json",
+      "reasons": [
+        "current-core-head-stale",
+        "current-plugin-head-stale",
+        "peak-memory-unmeasured",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-binding-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "three-successful-repeats-missing",
+        "verified-attestation-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "workload": "sharegpt-throughput",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "workload": "sharegpt-throughput",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+      "reasons": [
+        "current-core-head-stale",
+        "current-plugin-head-stale",
+        "peak-memory-unmeasured",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-binding-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "three-successful-repeats-missing",
+        "verified-attestation-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "workload": "sonnet-throughput",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-910b2.json",
+      "reasons": [
+        "peak-memory-unmeasured",
+        "reproducible-command-missing",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-version-missing-or-mismatched"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "workload": "sonnet-throughput",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-910b2.json",
+      "reasons": [
+        "current-core-head-stale",
+        "current-plugin-head-stale",
+        "peak-memory-unmeasured",
+        "runtime-environment.cann_version:missing",
+        "runtime-environment.driver_version:missing",
+        "runtime-environment.pytorch_version:missing",
+        "server_parameters.revision:missing",
+        "target-binding-missing-or-mismatched",
+        "target-version-missing-or-mismatched",
+        "three-successful-repeats-missing",
+        "verified-attestation-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "workload": "visionarena-online",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "workload": "visionarena-online",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "workload": "burstgpt-production-replay",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-burstgpt-production-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
+      "reasons": [
+        "target-version-missing-or-mismatched"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "workload": "tracelab-coding-agent-replay",
+      "engine": "vllm",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
+      "reasons": [
+        "target-version-missing-or-mismatched"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    },
+    {
+      "target_id": "official-ascend-jan-2026-v0.22.1rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2",
+      "workload": "tracelab-coding-agent-replay",
+      "engine": "vllm-hust",
+      "source_spec": "docs/official-baselines/official-ascend-jan-2026-v0221rc1-tracelab-coding-agent-replay-deepseek-r1-distill-qwen32b-2chip-910b2.json",
+      "reasons": [
+        "entry-missing"
+      ],
+      "repeat_count": 3,
+      "min_successful_repeats": 3
+    }
+  ]
+}
