@@ -1,0 +1,212 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.sage.org.ai/schemas/independent_repo_result_card_v1.schema.json",
+  "title": "vLLM-HUST independent optimization repo result card v1",
+  "description": "Issue #89: result card registry for independent optimization repos that do not feed the 14B single-card main line. Each repo must have its own canonical result entry point so it does not disappear from the results page.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "repos"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "independent-repo-result-card/v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "issue_ref": {
+      "type": "integer",
+      "const": 89
+    },
+    "repos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/repo"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "repo": {
+      "type": "object",
+      "required": [
+        "repo_name",
+        "repo_url",
+        "coverage_class",
+        "mechanism_summary",
+        "result_cards"
+      ],
+      "properties": {
+        "repo_name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "GitHub repository name without owner prefix."
+        },
+        "repo_url": {
+          "type": "string",
+          "pattern": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+          "description": "Full GitHub URL of the independent optimization repo."
+        },
+        "coverage_class": {
+          "type": "string",
+          "const": "independent-repo"
+        },
+        "mechanism_summary": {
+          "type": "string",
+          "minLength": 1,
+          "description": "One-line description of the optimization mechanism."
+        },
+        "serving_prs": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "PR numbers in the main repo that this independent repo serves."
+        },
+        "result_cards": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/result_card"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "result_card": {
+      "type": "object",
+      "required": [
+        "card_id",
+        "status",
+        "workload",
+        "comparison_id",
+        "point_role",
+        "evidence"
+      ],
+      "properties": {
+        "card_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable unique identifier for this result card."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "formal-presentable",
+            "experimental-presentable",
+            "no-significant-gain",
+            "blocked"
+          ],
+          "description": "Final issue #89 status label for this evidence."
+        },
+        "workload": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Workload name matching the official scenario registry."
+        },
+        "comparison_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier grouping base/head/latest points."
+        },
+        "point_role": {
+          "type": "string",
+          "enum": [
+            "baseline",
+            "head",
+            "latest",
+            "checkpoint"
+          ]
+        },
+        "spec_summary": {
+          "type": "object",
+          "required": [
+            "model",
+            "hardware",
+            "precision"
+          ],
+          "properties": {
+            "model": {
+              "type": "string",
+              "minLength": 1
+            },
+            "hardware": {
+              "type": "string",
+              "minLength": 1
+            },
+            "precision": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "metrics": {
+          "type": ["object", "null"],
+          "properties": {
+            "ttft_ms": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "tbt_ms": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "throughput_tps": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "peak_mem_mb": {
+              "type": ["integer", "null"],
+              "minimum": 0
+            },
+            "error_rate": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "evidence": {
+          "type": "object",
+          "required": [
+            "repo_commit",
+            "artifact_url"
+          ],
+          "properties": {
+            "repo_commit": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$",
+              "description": "40-char lowercase hex SHA of the independent repo commit."
+            },
+            "artifact_url": {
+              "type": "string",
+              "minLength": 1,
+              "description": "URL or repo-relative path to the canonical artifact."
+            },
+            "base_commit": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$"
+            },
+            "repetitions": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "blocker": {
+          "type": ["string", "null"],
+          "description": "If status=blocked, the blocking issue or reason."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
