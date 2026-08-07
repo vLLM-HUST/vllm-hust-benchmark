@@ -48,8 +48,16 @@ ALLOWED_CONTAINER_DESTINATIONS = (
     "/opt/models",
 )
 
-# Mount options that weaken isolation.
-FORBIDDEN_MOUNT_OPTIONS = {"shared", "slave"}
+# Mount options/propagations that weaken isolation.  Docker propagation
+# values include `rshared`, `rslave`, `shared`, `slave` (plus the `private`
+# and `rprivate` defaults which we allow).  Any option whose name ends with
+# `shared` or `slave` would propagate mount events across the container
+# boundary and bypass isolation, so we match by suffix.
+FORBIDDEN_MOUNT_OPTIONS = {"shared", "slave", "rshared", "rslave"}
+
+# Docker capabilities that would bypass container isolation and must never
+# be granted to a watchdog-owned NPU job.
+DANGEROUS_CAPABILITIES = frozenset({"SYS_ADMIN", "SYS_PTRACE", "SYS_MODULE"})
 
 
 def _normalize_path(path: str) -> str:
@@ -85,7 +93,16 @@ def _validate_volume_spec(volume_spec: str) -> None:
     """
     parts = volume_spec.split(":")
     if len(parts) == 1:
-        # Anonymous volume (container path only, Docker-managed) — safe.
+        # Anonymous volume (container path only, Docker-managed).  The
+        # destination must still be in the allowlist so a caller cannot use
+        # `--volume /etc` to mount into a sensitive container path.
+        anonymous_destination = parts[0]
+        if not _is_allowed_container_destination(anonymous_destination):
+            raise ValueError(
+                f"forbidden container destination in volume spec {volume_spec!r}: "
+                f"only {ALLOWED_CONTAINER_DESTINATIONS} are allowed, "
+                f"got {anonymous_destination!r}"
+            )
         return
     if len(parts) not in (2, 3):
         raise ValueError(
@@ -113,7 +130,14 @@ def _validate_volume_spec(volume_spec: str) -> None:
 
     if options:
         for opt in options.split(","):
-            if opt.strip() in FORBIDDEN_MOUNT_OPTIONS:
+            normalized_opt = opt.strip()
+            # Match by suffix so `rshared`/`rslave` are also rejected, not
+            # only the exact `shared`/`slave` values.
+            if (
+                normalized_opt in FORBIDDEN_MOUNT_OPTIONS
+                or normalized_opt.endswith("shared")
+                or normalized_opt.endswith("slave")
+            ):
                 raise ValueError(
                     f"forbidden mount option in volume spec {volume_spec!r}: {opt!r}"
                 )
@@ -168,6 +192,7 @@ def build_docker_create_command(
     volumes: Iterable[str] = (),
     extra_env: Iterable[str] = (),
     docker_bin: str = "docker",
+    init: bool = False,
 ) -> list[str]:
     if not container_name.strip():
         raise ValueError("container name is required")
@@ -188,6 +213,8 @@ def build_docker_create_command(
         "--device",
         f"{assignment.host_device_path}:{assignment.container_device_path}",
     ]
+    if init:
+        docker_command.append("--init")
     for device in CONTROL_DEVICES:
         docker_command.extend(("--device", f"{device}:{device}"))
     docker_command.extend(
@@ -231,7 +258,11 @@ def _validate_mount_entry(mount: Mapping[str, Any]) -> None:
             f"only {ALLOWED_CONTAINER_DESTINATIONS} are allowed"
         )
 
-    if propagation in FORBIDDEN_MOUNT_OPTIONS:
+    if (
+        propagation in FORBIDDEN_MOUNT_OPTIONS
+        or propagation.endswith("shared")
+        or propagation.endswith("slave")
+    ):
         raise ValueError(
             f"forbidden mount propagation {propagation!r} for "
             f"{source!r} -> {destination!r}"
@@ -271,25 +302,32 @@ def validate_container_inspect(
     if host_config.get("Privileged"):
         raise ValueError("container must not run in privileged mode")
     cap_add = host_config.get("CapAdd") or []
-    dangerous_caps = {"SYS_ADMIN", "SYS_PTRACE", "SYS_MODULE"}
-    present = dangerous_caps.intersection(cap_add)
+    present = DANGEROUS_CAPABILITIES.intersection(cap_add)
     if present:
         raise ValueError(
             f"container must not have dangerous capabilities: {sorted(present)}"
         )
 
+    # Device mapping must be EXACT: only the assigned NPU plus the three
+    # control devices may be mapped.  Any extra `/dev/davinciN` would bypass
+    # single-card isolation and must be rejected (fail-closed).
     devices = host_config.get("Devices") or []
     mapped_devices = {
         (device.get("PathOnHost"), device.get("PathInContainer")) for device in devices
     }
-    expected_mapping = (
-        assignment.host_device_path,
-        assignment.container_device_path,
-    )
-    if expected_mapping not in mapped_devices:
+    expected_mappings = {
+        (assignment.host_device_path, assignment.container_device_path),
+        *{(device, device) for device in CONTROL_DEVICES},
+    }
+    if mapped_devices != expected_mappings:
+        missing = expected_mappings - mapped_devices
+        extra = mapped_devices - expected_mappings
         raise ValueError(
-            "container NPU mapping is missing or incorrect: "
-            f"expected {expected_mapping[0]} -> {expected_mapping[1]}"
+            "container device mapping is not exact: "
+            f"missing={sorted(missing)} extra={sorted(extra)}; "
+            f"only {assignment.host_device_path} -> "
+            f"{assignment.container_device_path} plus control devices "
+            f"{CONTROL_DEVICES} are allowed"
         )
 
     environment = config.get("Env") or []

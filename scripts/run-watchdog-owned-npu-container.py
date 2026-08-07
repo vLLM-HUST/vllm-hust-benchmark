@@ -25,6 +25,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--volume", action="append", default=[])
     parser.add_argument("--env", action="append", default=[])
     parser.add_argument("--keep-container", action="store_true")
+    parser.add_argument(
+        "--init",
+        action="store_true",
+        help="Run an init inside the container to reap zombie processes.",
+    )
     parser.add_argument("command", nargs=argparse.REMAINDER)
     return parser
 
@@ -41,6 +46,7 @@ def run(argv: Sequence[str] | None = None) -> int:
             command=command,
             volumes=args.volume,
             extra_env=args.env,
+            init=args.init,
         )
     except ValueError as exc:
         print(f"preflight failed: {exc}", file=sys.stderr)
