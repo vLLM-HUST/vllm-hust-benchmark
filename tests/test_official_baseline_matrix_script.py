@@ -1,5 +1,6 @@
 import json
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -74,15 +75,20 @@ def _write_runner_stub(
     script_path.chmod(0o755)
 
 
-def _write_publish_stub(script_path: Path, *, publish_log: Path) -> None:
+def _write_publish_stub(
+    script_path: Path, *, publish_log: Path, source_submissions_root: Path
+) -> None:
+    # Publish the canonical output created by this test, not a same-named
+    # repository fixture that may be archived independently.
     bash_bin = bash_executable()
     script_path.write_text(
         f"#!{bash_bin}\n"
         "set -euo pipefail\n"
+        f"source_submissions_root={shlex.quote(str(source_submissions_root))}\n"
         f"printf '%s\\n' \"${{SNAPSHOT_SOURCE_PATTERN:-}}\" >> {publish_log!s}\n"
         'mkdir -p "$TARGET_BENCHMARK_REPO_DIR/submissions"\n'
         "shopt -s nullglob\n"
-        'matches=("$SOURCE_BENCHMARK_REPO_DIR"/submissions/$SNAPSHOT_SOURCE_PATTERN)\n'
+        'matches=("$source_submissions_root"/$SNAPSHOT_SOURCE_PATTERN)\n'
         'for source_dir in "${matches[@]}"; do\n'
         '  target_dir="$TARGET_BENCHMARK_REPO_DIR/submissions/$(basename "$source_dir")"\n'
         '  rm -rf "$target_dir"\n'
@@ -198,7 +204,11 @@ def test_matrix_script_uses_published_canonical_root_for_resume(tmp_path: Path) 
     _write_spec(spec_file, spec_id)
     _write_prepare_stub(prepare_stub)
     _write_runner_stub(runner_stub, call_log=runner_call_log, fail_repeat_names=())
-    _write_publish_stub(publish_stub, publish_log=publish_log)
+    _write_publish_stub(
+        publish_stub,
+        publish_log=publish_log,
+        source_submissions_root=local_canonical_root,
+    )
     (website_repo_dir / "scripts").mkdir(parents=True)
     (website_repo_dir / "scripts" / "aggregate_results.py").write_text(
         "print('ok')\n", encoding="utf-8"
