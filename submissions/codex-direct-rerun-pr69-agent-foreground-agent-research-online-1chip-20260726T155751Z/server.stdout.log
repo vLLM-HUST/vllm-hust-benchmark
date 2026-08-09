@@ -1,0 +1,378 @@
+/home/shuhao/.cache/vllm-hust-benchmark-worktrees/codex-agent-dip-rerun/pr69/vllm-hust-ec4847981f2d/vllm/__init__.py:7: RuntimeWarning: Failed to read commit hash:
+cannot import name '_version' from partially initialized module 'vllm' (most likely due to a circular import) (/home/shuhao/.cache/vllm-hust-benchmark-worktrees/codex-agent-dip-rerun/pr69/vllm-hust-ec4847981f2d/vllm/__init__.py)
+  from .version import (  # isort:skip
+INFO 07-26 23:58:09 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 07-26 23:58:09 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 07-26 23:58:09 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 07-26 23:58:09 [__init__.py:229] Platform plugin ascend is activated
+INFO 07-26 23:58:18 [importing.py:68] Triton not installed or not compatible; certain GPU-related functions will not be available.
+INFO 07-26 23:58:19 [nixl_utils.py:20] Setting UCX_RCACHE_MAX_UNRELEASED to '1024' to avoid a rare memory leak in UCX when using NIXL.
+WARNING 07-26 23:58:19 [nixl_utils.py:34] NIXL is not available
+WARNING 07-26 23:58:19 [nixl_utils.py:44] NIXL agent config is not available
+INFO 07-26 23:58:19 [__init__.py:110] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+INFO 07-26 23:58:19 [__init__.py:110] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+(APIServer pid=2147608) INFO 07-26 23:58:19 [utils.py:418] 
+(APIServer pid=2147608) INFO 07-26 23:58:19 [utils.py:418]        █     █     █▄   ▄█
+(APIServer pid=2147608) INFO 07-26 23:58:19 [utils.py:418]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version dev
+(APIServer pid=2147608) INFO 07-26 23:58:19 [utils.py:418]   █▄█▀ █     █     █     █  model   /data/shared_models/Qwen--Qwen2.5-14B-Instruct
+(APIServer pid=2147608) INFO 07-26 23:58:19 [utils.py:418]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
+(APIServer pid=2147608) INFO 07-26 23:58:19 [utils.py:418] 
+(APIServer pid=2147608) INFO 07-26 23:58:19 [utils.py:352] non-default args: {'host': '0.0.0.0', 'port': 8069, 'model': '/data/shared_models/Qwen--Qwen2.5-14B-Instruct', 'dtype': 'float16', 'max_model_len': 32768, 'gpu_memory_utilization': 0.6}
+(APIServer pid=2147608) WARNING 07-26 23:58:19 [envs.py:1842] Unknown vLLM environment variable detected: VLLM_HUST_AUTO_ENABLE_CONTAINER_SSH
+(APIServer pid=2147608) WARNING 07-26 23:58:19 [envs.py:1842] Unknown vLLM environment variable detected: VLLM_ENGINE_EXTRA_ENV_KEYS
+(APIServer pid=2147608) INFO 07-26 23:58:38 [model.py:563] Resolved architecture: Qwen2ForCausalLM
+(APIServer pid=2147608) WARNING 07-26 23:58:38 [model.py:2030] Casting torch.bfloat16 to torch.float16.
+(APIServer pid=2147608) INFO 07-26 23:58:38 [model.py:1692] Using max model len 32768
+(APIServer pid=2147608) INFO 07-26 23:58:38 [vllm.py:840] Asynchronous scheduling is enabled.
+(APIServer pid=2147608) INFO 07-26 23:58:38 [kernel.py:208] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(APIServer pid=2147608) WARNING 07-26 23:58:38 [platform.py:804] Parameter '--disable-cascade-attn' is a GPU-specific feature. Resetting to False for Ascend.
+(APIServer pid=2147608) INFO 07-26 23:58:38 [ascend_config.py:639] Dynamic EPLB is False
+(APIServer pid=2147608) INFO 07-26 23:58:38 [ascend_config.py:640] The number of redundant experts is 0
+(APIServer pid=2147608) INFO 07-26 23:58:38 [platform.py:415] PIECEWISE compilation enabled on NPU. use_inductor not supported - using only ACL Graph mode
+(APIServer pid=2147608) INFO 07-26 23:58:38 [utils.py:594] Calculated maximum supported batch sizes for ACL graph: 36
+(APIServer pid=2147608) WARNING 07-26 23:58:38 [utils.py:595] Currently, communication is performed using FFTS+ method, which reduces the number of available streams and, as a result, limits the range of runtime shapes that can be handled. To both improve communication performance and increase the number of supported shapes, set HCCL_OP_EXPANSION_MODE=AIV.
+(APIServer pid=2147608) INFO 07-26 23:58:38 [utils.py:627] No adjustment needed for ACL graph batch sizes: Qwen2ForCausalLM model (layers: 48) with 35 sizes
+(APIServer pid=2147608) INFO 07-26 23:58:38 [utils.py:1270] Block size is set to 128 if prefix cache or chunked prefill is enabled.
+(APIServer pid=2147608) INFO 07-26 23:58:38 [platform.py:563] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(APIServer pid=2147608) INFO 07-26 23:58:38 [compilation.py:303] Enabled custom fusions: norm_quant, act_quant
+/home/shuhao/.cache/vllm-hust-benchmark-worktrees/codex-agent-dip-rerun/pr69/vllm-hust-ec4847981f2d/vllm/__init__.py:7: RuntimeWarning: Failed to read commit hash:
+cannot import name '_version' from partially initialized module 'vllm' (most likely due to a circular import) (/home/shuhao/.cache/vllm-hust-benchmark-worktrees/codex-agent-dip-rerun/pr69/vllm-hust-ec4847981f2d/vllm/__init__.py)
+  from .version import (  # isort:skip
+/home/shuhao/.cache/vllm-hust-benchmark-worktrees/codex-agent-dip-rerun/pr69/vllm-hust-ec4847981f2d/vllm/__init__.py:7: RuntimeWarning: Failed to read commit hash:
+cannot import name '_version' from partially initialized module 'vllm' (most likely due to a circular import) (/home/shuhao/.cache/vllm-hust-benchmark-worktrees/codex-agent-dip-rerun/pr69/vllm-hust-ec4847981f2d/vllm/__init__.py)
+  from .version import (  # isort:skip
+INFO 07-26 23:58:47 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 07-26 23:58:47 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 07-26 23:58:47 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 07-26 23:58:47 [__init__.py:229] Platform plugin ascend is activated
+INFO 07-26 23:58:55 [importing.py:68] Triton not installed or not compatible; certain GPU-related functions will not be available.
+WARNING 07-26 23:58:56 [nixl_utils.py:34] NIXL is not available
+WARNING 07-26 23:58:56 [nixl_utils.py:44] NIXL agent config is not available
+INFO 07-26 23:58:56 [__init__.py:110] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+INFO 07-26 23:58:56 [__init__.py:110] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:418] 
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:418]        █     █     █▄   ▄█
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:418]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version dev
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:418]   █▄█▀ █     █     █     █  model   /data/shared_models/Qwen--Qwen2.5-14B-Instruct
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:418]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:418] 
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:352] non-default args: {'host': '0.0.0.0', 'port': 8069, 'model': '/data/shared_models/Qwen--Qwen2.5-14B-Instruct', 'dtype': 'float16', 'max_model_len': 32768, 'gpu_memory_utilization': 0.6}
+(APIServer pid=2152712) WARNING 07-26 23:58:57 [envs.py:1842] Unknown vLLM environment variable detected: VLLM_HUST_AUTO_ENABLE_CONTAINER_SSH
+(APIServer pid=2152712) WARNING 07-26 23:58:57 [envs.py:1842] Unknown vLLM environment variable detected: VLLM_ENGINE_EXTRA_ENV_KEYS
+(APIServer pid=2152712) INFO 07-26 23:58:57 [model.py:563] Resolved architecture: Qwen2ForCausalLM
+(APIServer pid=2152712) WARNING 07-26 23:58:57 [model.py:2030] Casting torch.bfloat16 to torch.float16.
+(APIServer pid=2152712) INFO 07-26 23:58:57 [model.py:1692] Using max model len 32768
+(APIServer pid=2152712) INFO 07-26 23:58:57 [vllm.py:840] Asynchronous scheduling is enabled.
+(APIServer pid=2152712) INFO 07-26 23:58:57 [kernel.py:208] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(APIServer pid=2152712) WARNING 07-26 23:58:57 [platform.py:804] Parameter '--disable-cascade-attn' is a GPU-specific feature. Resetting to False for Ascend.
+(APIServer pid=2152712) INFO 07-26 23:58:57 [ascend_config.py:639] Dynamic EPLB is False
+(APIServer pid=2152712) INFO 07-26 23:58:57 [ascend_config.py:640] The number of redundant experts is 0
+(APIServer pid=2152712) INFO 07-26 23:58:57 [platform.py:415] PIECEWISE compilation enabled on NPU. use_inductor not supported - using only ACL Graph mode
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:594] Calculated maximum supported batch sizes for ACL graph: 36
+(APIServer pid=2152712) WARNING 07-26 23:58:57 [utils.py:595] Currently, communication is performed using FFTS+ method, which reduces the number of available streams and, as a result, limits the range of runtime shapes that can be handled. To both improve communication performance and increase the number of supported shapes, set HCCL_OP_EXPANSION_MODE=AIV.
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:627] No adjustment needed for ACL graph batch sizes: Qwen2ForCausalLM model (layers: 48) with 35 sizes
+(APIServer pid=2152712) INFO 07-26 23:58:57 [utils.py:1270] Block size is set to 128 if prefix cache or chunked prefill is enabled.
+(APIServer pid=2152712) INFO 07-26 23:58:57 [platform.py:563] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(APIServer pid=2152712) INFO 07-26 23:58:57 [compilation.py:303] Enabled custom fusions: norm_quant, act_quant
+/home/shuhao/.cache/vllm-hust-benchmark-worktrees/codex-agent-dip-rerun/pr69/vllm-hust-ec4847981f2d/vllm/__init__.py:7: RuntimeWarning: Failed to read commit hash:
+cannot import name '_version' from partially initialized module 'vllm' (most likely due to a circular import) (/home/shuhao/.cache/vllm-hust-benchmark-worktrees/codex-agent-dip-rerun/pr69/vllm-hust-ec4847981f2d/vllm/__init__.py)
+  from .version import (  # isort:skip
+INFO 07-26 23:59:05 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 07-26 23:59:05 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 07-26 23:59:05 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 07-26 23:59:05 [__init__.py:229] Platform plugin ascend is activated
+(EngineCore pid=2155594) INFO 07-26 23:59:15 [importing.py:68] Triton not installed or not compatible; certain GPU-related functions will not be available.
+(EngineCore pid=2155594) WARNING 07-26 23:59:15 [nixl_utils.py:34] NIXL is not available
+(EngineCore pid=2155594) WARNING 07-26 23:59:15 [nixl_utils.py:44] NIXL agent config is not available
+(EngineCore pid=2155594) INFO 07-26 23:59:15 [__init__.py:110] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+(EngineCore pid=2155594) INFO 07-26 23:59:15 [__init__.py:110] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+(EngineCore pid=2155594) INFO 07-26 23:59:15 [core.py:109] Initializing a V1 LLM engine (vdev) with config: model='/data/shared_models/Qwen--Qwen2.5-14B-Instruct', speculative_config=None, tokenizer='/data/shared_models/Qwen--Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.float16, max_seq_len=32768, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False), seed=0, served_model_name=/data/shared_models/Qwen--Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::linear_attention', 'vllm::plamo2_mamba_mixer', 'vllm::gdn_attention_core', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::kda_attention', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update', 'vllm::mla_forward'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.PIECEWISE: 1>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 256, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, moe_backend='auto')
+(EngineCore pid=2155594) WARNING 07-26 23:59:15 [camem.py:67] Failed to import vllm_ascend_C:No module named 'vllm_ascend.vllm_ascend_C'. Sleep mode will be disabled. 
+(EngineCore pid=2155594) `Qwen2VLImageProcessorFast` is deprecated. The `Fast` suffix for image processors has been removed; use `Qwen2VLImageProcessor` instead.
+(EngineCore pid=2155594) WARNING 07-26 23:59:16 [utils.py:682] Skipping Ascend fused MoE custom op registration because an optional upstream dependency is unavailable: No module named 'vllm.model_executor.layers.fused_moe.runner.default_moe_runner'
+(EngineCore pid=2155594) INFO 07-26 23:59:16 [ascend_config.py:639] Dynamic EPLB is False
+(EngineCore pid=2155594) INFO 07-26 23:59:16 [ascend_config.py:640] The number of redundant experts is 0
+(EngineCore pid=2155594) INFO 07-26 23:59:18 [parallel_state.py:1514] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://192.168.0.6:34935 backend=hccl
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+(EngineCore pid=2155594) INFO 07-26 23:59:18 [parallel_state.py:1827] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+(EngineCore pid=2155594) INFO 07-26 23:59:19 [model_runner_v1.py:3030] Starting to load model /data/shared_models/Qwen--Qwen2.5-14B-Instruct...
+(EngineCore pid=2155594) INFO 07-26 23:59:19 [compilation.py:1050] Using OOT custom backend for compilation.
+(EngineCore pid=2155594) WARNING 07-26 23:59:20 [utils.py:313] Warning: Failed to register custom ops, all custom ops will be disabled
+(EngineCore pid=2155594) INFO 07-26 23:59:20 [backends.py:871] Post-grad pass configuration time: 0.90 s
+(EngineCore pid=2155594) INFO 07-26 23:59:21 [weight_utils.py:904] Filesystem type for checkpoints: EXT4. Checkpoint size: 27.51 GiB. Available RAM: 1914.56 GiB.
+(EngineCore pid=2155594) INFO 07-26 23:59:21 [weight_utils.py:927] Auto-prefetch is disabled because the filesystem (EXT4) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=2155594) Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:02<00:16,  2.39s/it]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:03<00:11,  1.84s/it]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:05<00:08,  1.68s/it]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:06<00:06,  1.63s/it]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:08<00:04,  1.61s/it]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:09<00:03,  1.59s/it]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:11<00:01,  1.54s/it]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:11<00:00,  1.18s/it]
+(EngineCore pid=2155594) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:11<00:00,  1.48s/it]
+(EngineCore pid=2155594) 
+(EngineCore pid=2155594) INFO 07-26 23:59:33 [default_loader.py:391] Loading weights took 11.99 seconds
+(EngineCore pid=2155594) INFO 07-26 23:59:33 [model_runner_v1.py:3067] Loading model weights took 27.5350 GB
+(EngineCore pid=2155594) INFO 07-26 23:59:33 [interface.py:492] Setting kv cache block size to 128 for CUSTOM backend.
+(EngineCore pid=2155594) INFO 07-26 23:59:43 [backends.py:1099] Using cache directory: /data/shared_datasets/vllm-hust-benchmark/codex-runs/20260726-agent-dip-pr69-foreground/cache/torch_compile_cache/c8d53ee5e2/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=2155594) INFO 07-26 23:59:43 [backends.py:1158] Dynamo bytecode transform time: 8.97 s
+(EngineCore pid=2155594) INFO 07-26 23:59:43 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:44 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:45 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:45 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:45 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:46 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:47 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:47 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:48 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:48 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:49 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:49 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:50 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:50 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:51 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:51 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:52 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:52 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:52 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:53 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:53 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:54 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:54 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:55 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:55 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:56 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:56 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:57 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:57 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:58 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:58 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:59 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-26 23:59:59 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:00 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:00 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:00 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:01 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:01 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:02 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:02 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:03 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:03 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:04 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:04 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:05 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:05 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:06 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:06 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:06 [compiler_interface.py:162] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:105: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=2155594)   warnings.warn(
+(EngineCore pid=2155594) /data/conda-envs/vllm-hust-main-tf5-backfill/lib/python3.12/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:112: DeprecationWarning: The "reduce-overhead" mode configuration will be deprecated. Please use the "npugraph_ex" backend.
+(EngineCore pid=2155594)   warnings.warn("The \"reduce-overhead\" mode configuration will be deprecated. "
+(EngineCore pid=2155594) INFO 07-27 00:00:07 [backends.py:393] Compiling a graph for compile range (1, 2048) takes 23.28 s
+(EngineCore pid=2155594) INFO 07-27 00:00:11 [decorators.py:713] saved AOT compiled function to /data/shared_datasets/vllm-hust-benchmark/codex-runs/20260726-agent-dip-pr69-foreground/cache/torch_compile_cache/torch_aot_compile/23bbf187ac07aafe591c17e95eebb33cbf3c413fce4c31fe27f39c42589b953f/rank_0_0/model
+(EngineCore pid=2155594) INFO 07-27 00:00:11 [monitor.py:53] torch.compile took 37.15 s in total
+(EngineCore pid=2155594) INFO 07-27 00:00:11 [monitor.py:81] Initial profiling/warmup run took 0.39 s
+(EngineCore pid=2155594) INFO 07-27 00:00:13 [worker.py:629] Available KV cache memory: 8.63 GiB
+(EngineCore pid=2155594) INFO 07-27 00:00:13 [kv_cache_utils.py:1710] GPU KV cache size: 47,104 tokens
+(EngineCore pid=2155594) INFO 07-27 00:00:13 [kv_cache_utils.py:1711] Maximum concurrency for 32,768 tokens per request: 1.44x
+(EngineCore pid=2155594) Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   3%|▎         | 1/35 [00:00<00:10,  3.15it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   6%|▌         | 2/35 [00:00<00:10,  3.21it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   9%|▊         | 3/35 [00:00<00:09,  3.25it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  11%|█▏        | 4/35 [00:01<00:09,  3.28it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  14%|█▍        | 5/35 [00:01<00:09,  3.25it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  17%|█▋        | 6/35 [00:01<00:08,  3.26it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  20%|██        | 7/35 [00:02<00:08,  3.23it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  23%|██▎       | 8/35 [00:02<00:08,  3.27it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  26%|██▌       | 9/35 [00:02<00:07,  3.32it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  29%|██▊       | 10/35 [00:03<00:07,  3.34it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  31%|███▏      | 11/35 [00:03<00:07,  3.27it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  34%|███▍      | 12/35 [00:03<00:06,  3.32it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  37%|███▋      | 13/35 [00:03<00:06,  3.39it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  40%|████      | 14/35 [00:04<00:06,  3.41it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  43%|████▎     | 15/35 [00:04<00:05,  3.48it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  46%|████▌     | 16/35 [00:04<00:05,  3.52it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  49%|████▊     | 17/35 [00:05<00:05,  3.46it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  51%|█████▏    | 18/35 [00:05<00:04,  3.51it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  54%|█████▍    | 19/35 [00:05<00:04,  3.52it/s]

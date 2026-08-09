@@ -21,6 +21,8 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 
 ARTIFACT_DIR="${1:?Usage: validate-run-artifact.sh <artifact-dir>}"
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 
 if [[ ! -d "$ARTIFACT_DIR" ]]; then
   echo "Error: artifact directory not found: $ARTIFACT_DIR" >&2
