@@ -2786,6 +2786,59 @@ def sync_submission_to_huggingface(
             )
             shutil.rmtree(excluded_dir)
 
+        # HF may still contain legacy submissions that predate the current
+        # admission contract. They must not block a publish of valid new
+        # submissions, but newly supplied directories must fail closed.
+        current_submission_names = {path.name for path in normalized_submission_dirs}
+        strict_current_submission_names = {
+            path.name
+            for path in normalized_submission_dirs
+            if (path / "STATUS").is_file()
+        }
+        admission_failures = _scan_submission_admission_failures(merged_source_dir)
+        current_failures = [
+            failure
+            for failure in admission_failures
+            if Path(failure["dir"]).name in strict_current_submission_names
+        ]
+        if current_failures:
+            print(
+                "ERROR: newly supplied submission directories failed admission:",
+                file=sys.stderr,
+            )
+            for failure in current_failures:
+                print(
+                    f"  {failure['dir']}: {failure['reason']} ({failure['detail']})",
+                    file=sys.stderr,
+                )
+            return 2
+
+        invalid_existing_repo_paths: list[str] = []
+        for failure in admission_failures:
+            failed_dir = Path(failure["dir"])
+            if failed_dir.name in current_submission_names:
+                continue
+            try:
+                relative_dir = failed_dir.relative_to(merged_source_dir).as_posix()
+            except ValueError:
+                print(
+                    f"invalid admission failure path outside merged source: {failed_dir}",
+                    file=sys.stderr,
+                )
+                return 2
+            invalid_existing_repo_paths.extend(
+                repo_path
+                for repo_path in prefixed_repo_files
+                if repo_path == f"{repo_prefix}{relative_dir}"
+                or repo_path.startswith(f"{repo_prefix}{relative_dir}/")
+            )
+            if failed_dir.is_dir():
+                shutil.rmtree(failed_dir)
+            print(
+                "Isolating invalid historical submission from active publish: "
+                f"{relative_dir} ({failure['reason']}: {failure['detail']})"
+            )
+
         official_coverage_keys = _load_official_baseline_coverage_keys(layout)
 
         normalize_submission_artifacts_in_tree(merged_source_dir)
@@ -2823,10 +2876,12 @@ def sync_submission_to_huggingface(
         operations: list[CommitOperationAdd] = []
         planned_paths: list[str] = []
 
-        if excluded_repo_paths:
+        if excluded_repo_paths or invalid_existing_repo_paths:
             from huggingface_hub import CommitOperationDelete
 
-            for repo_path in sorted(set(excluded_repo_paths)):
+            for repo_path in sorted(
+                set(excluded_repo_paths + invalid_existing_repo_paths)
+            ):
                 operations.append(CommitOperationDelete(path_in_repo=repo_path))
                 planned_paths.append(f"DELETE {repo_path}")
 
