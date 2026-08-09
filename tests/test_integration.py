@@ -44,7 +44,8 @@ def _write_complete_submission(
 ) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     files = {
-        "run_leaderboard.json": artifact + ("\n" if not artifact.endswith("\n") else ""),
+        "run_leaderboard.json": artifact
+        + ("\n" if not artifact.endswith("\n") else ""),
         "leaderboard_manifest.json": (manifest or _minimal_manifest()) + "\n",
         "env-manifest.json": "{}\n",
     }
