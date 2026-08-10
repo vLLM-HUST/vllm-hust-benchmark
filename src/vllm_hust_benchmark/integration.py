@@ -2613,6 +2613,52 @@ def _validate_snapshot_workload_contracts(snapshot_dir: Path) -> bool:
     return valid
 
 
+def _isolate_remote_legacy_submissions(
+    merged_source_dir: Path,
+    *,
+    local_dir_names: set[str],
+) -> list[dict[str, str]]:
+    """Isolate HF-hosted legacy submissions that fail the active admission gate.
+
+    When the HF dataset still carries historical submissions published before
+    the admission gate required complete evidence, those directories (missing
+    ``env-manifest.json`` / ``checksums.sha256`` / ``STATUS``) would otherwise
+    block every future aggregation. The active admission gate must stay
+    fail-closed, so instead of weakening it we move the non-admissible legacy
+    directories out of the aggregation source. Original bytes are preserved by
+    moving (never deleting, never synthesizing evidence); because the upload
+    pass only walks the active source directory, the legacy directories remain
+    untouched on the HF dataset as audit data.
+
+    Locally supplied submission directories (``local_dir_names``) are never
+    isolated here: their admission failures are handled fail-closed by the
+    strict caller-side validation. Returns a list of isolation records.
+    """
+    isolated: list[dict[str, str]] = []
+    if not merged_source_dir.is_dir():
+        return isolated
+    for failure in _scan_submission_admission_failures(merged_source_dir):
+        dir_path = Path(failure["dir"])
+        if dir_path.name in local_dir_names:
+            continue
+        if not dir_path.is_dir():
+            continue
+        quarantine_root = merged_source_dir.parent / "legacy_isolated"
+        quarantine_root.mkdir(parents=True, exist_ok=True)
+        target = quarantine_root / dir_path.name
+        if not target.exists():
+            shutil.move(str(dir_path), str(target))
+        isolated.append(
+            {
+                "dir": dir_path.name,
+                "reason": failure["reason"],
+                "detail": failure["detail"],
+                "isolated_to": str(target),
+            }
+        )
+    return isolated
+
+
 def sync_submission_to_huggingface(
     *,
     layout: RepoLayout,
@@ -2785,6 +2831,64 @@ def sync_submission_to_huggingface(
                 or repo_path.startswith(f"{repo_prefix}{relative_dir}/")
             )
             shutil.rmtree(excluded_dir)
+
+        # HF may still contain legacy submissions that predate the current
+        # admission contract. They must not block publishing valid new
+        # submissions, but locally supplied directories must fail closed.
+        local_dir_names = {path.name for path in normalized_submission_dirs}
+        admission_failures = _scan_submission_admission_failures(merged_source_dir)
+        # Bug fix: fail-closed must cover every locally supplied submission,
+        # regardless of whether it carries a STATUS file (historical backfills
+        # may omit STATUS). Using the STATUS-file subset alone would let a
+        # non-admissible local backfill silently remain in the aggregation input.
+        current_failures = [
+            failure
+            for failure in admission_failures
+            if Path(failure["dir"]).name in local_dir_names
+        ]
+        if current_failures:
+            print(
+                "ERROR: newly supplied submission directories failed admission:",
+                file=sys.stderr,
+            )
+            for failure in current_failures:
+                print(
+                    f"  {failure['dir']}: {failure['reason']} ({failure['detail']})",
+                    file=sys.stderr,
+                )
+            return 2
+
+        # Isolate HF-hosted legacy submissions that fail the active admission
+        # gate out of the aggregation input, so a single incomplete historical
+        # directory can no longer block publishing the current valid
+        # submissions. The gate stays fail-closed; original bytes are moved
+        # (not deleted, never synthesized) and remain untouched on the HF
+        # dataset as audit data.
+        isolated_legacy = _isolate_remote_legacy_submissions(
+            merged_source_dir, local_dir_names=local_dir_names
+        )
+        if isolated_legacy:
+            print(
+                f"Isolated {len(isolated_legacy)} HF-hosted legacy submission(s) "
+                "failing active admission out of the aggregation input.",
+                file=sys.stderr,
+            )
+            for record in isolated_legacy:
+                print(
+                    f"  legacy {record['dir']}: {record['reason']} "
+                    f"({record['detail']})",
+                    file=sys.stderr,
+                )
+        active_dirs = sorted(
+            path.name for path in merged_source_dir.iterdir() if path.is_dir()
+        )
+        print(
+            "gap report: "
+            f"active={len(active_dirs)} ({', '.join(active_dirs) or 'none'}), "
+            f"legacy_isolated={len(isolated_legacy)}, "
+            f"excluded={len(excluded_repo_paths)}",
+            file=sys.stderr,
+        )
 
         official_coverage_keys = _load_official_baseline_coverage_keys(layout)
 
