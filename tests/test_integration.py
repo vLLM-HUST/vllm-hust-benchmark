@@ -1175,6 +1175,14 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
         return str(downloaded_submission)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    # These sync tests model a fully-valid HF history so the merge/upload
+    # behavior under test stays focused and is not short-circuited by legacy
+    # isolation. Legacy isolation is covered by a dedicated regression test.
+    monkeypatch.setattr(
+        integration,
+        "_scan_submission_admission_failures",
+        lambda source_dir: [],
+    )
     fake_hf_module = types.SimpleNamespace(
         CommitOperationAdd=FakeCommitOperationAdd,
         HfApi=FakeHfApi,
@@ -1237,6 +1245,14 @@ def test_sync_submission_to_huggingface_rejects_local_pr_preview_submission(
         return 0
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    # These sync tests model a fully-valid HF history so the merge/upload
+    # behavior under test stays focused and is not short-circuited by legacy
+    # isolation. Legacy isolation is covered by a dedicated regression test.
+    monkeypatch.setattr(
+        integration,
+        "_scan_submission_admission_failures",
+        lambda source_dir: [],
+    )
 
     exit_code = sync_submission_to_huggingface(
         layout=layout,
@@ -1369,6 +1385,14 @@ def test_sync_submission_to_huggingface_deletes_excluded_remote_submission(
         return str(included_run)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    # These sync tests model a fully-valid HF history so the merge/upload
+    # behavior under test stays focused and is not short-circuited by legacy
+    # isolation. Legacy isolation is covered by a dedicated regression test.
+    monkeypatch.setattr(
+        integration,
+        "_scan_submission_admission_failures",
+        lambda source_dir: [],
+    )
     fake_hf_module = types.SimpleNamespace(
         CommitOperationAdd=FakeCommitOperationAdd,
         CommitOperationDelete=FakeCommitOperationDelete,
@@ -1498,6 +1522,14 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
         return str(downloaded_submission)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    # These sync tests model a fully-valid HF history so the merge/upload
+    # behavior under test stays focused and is not short-circuited by legacy
+    # isolation. Legacy isolation is covered by a dedicated regression test.
+    monkeypatch.setattr(
+        integration,
+        "_scan_submission_admission_failures",
+        lambda source_dir: [],
+    )
     fake_hf_module = types.SimpleNamespace(
         CommitOperationAdd=FakeCommitOperationAdd,
         HfApi=FakeHfApi,
@@ -1614,6 +1646,14 @@ def test_sync_submission_to_huggingface_rejects_invalid_aggregated_snapshots(
         return str(downloaded_submission)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    # These sync tests model a fully-valid HF history so the merge/upload
+    # behavior under test stays focused and is not short-circuited by legacy
+    # isolation. Legacy isolation is covered by a dedicated regression test.
+    monkeypatch.setattr(
+        integration,
+        "_scan_submission_admission_failures",
+        lambda source_dir: [],
+    )
     fake_hf_module = types.SimpleNamespace(
         CommitOperationAdd=FakeCommitOperationAdd,
         HfApi=FakeHfApi,
@@ -1809,6 +1849,14 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
         return str(downloaded_run)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    # These sync tests model a fully-valid HF history so the merge/upload
+    # behavior under test stays focused and is not short-circuited by legacy
+    # isolation. Legacy isolation is covered by a dedicated regression test.
+    monkeypatch.setattr(
+        integration,
+        "_scan_submission_admission_failures",
+        lambda source_dir: [],
+    )
     fake_hf_module = types.SimpleNamespace(
         CommitOperationAdd=FakeCommitOperationAdd,
         HfApi=FakeHfApi,
@@ -1926,6 +1974,14 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
         return str(downloaded_submission)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    # These sync tests model a fully-valid HF history so the merge/upload
+    # behavior under test stays focused and is not short-circuited by legacy
+    # isolation. Legacy isolation is covered by a dedicated regression test.
+    monkeypatch.setattr(
+        integration,
+        "_scan_submission_admission_failures",
+        lambda source_dir: [],
+    )
     monkeypatch.setattr(
         integration,
         "validate_aggregated_leaderboard_outputs",
@@ -2114,3 +2170,121 @@ def test_sync_submission_to_huggingface_requires_submission_dir(
     )
 
     assert exit_code == 2
+
+
+def test_sync_submission_to_huggingface_isolates_hf_legacy_that_fails_admission(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    """Regression: an incomplete HF-hosted legacy directory must not block
+    publishing the current valid submissions.
+
+    Pre-#160 the HF dataset carries historical submissions missing
+    ``env-manifest.json`` / ``checksums.sha256`` / ``STATUS``. The active
+    admission gate is fail-closed, so those legacy directories are isolated
+    out of the aggregation input (bytes preserved by moving, not deleted)
+    while the current valid submission still aggregates and uploads.
+    """
+    website_repo = tmp_path / "vllm-hust-website"
+    (website_repo / "scripts").mkdir(parents=True)
+    (website_repo / "scripts" / "aggregate_results.py").write_text(
+        "print('ok')\n", encoding="utf-8"
+    )
+
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=website_repo,
+    )
+
+    submission_dir = tmp_path / "submission-a"
+    submission_dir.mkdir()
+    (submission_dir / "run_leaderboard.json").write_text(
+        _minimal_artifact() + "\n", encoding="utf-8"
+    )
+    (submission_dir / "leaderboard_manifest.json").write_text(
+        _minimal_manifest() + "\n", encoding="utf-8"
+    )
+
+    # HF history carries an incomplete legacy directory (only the artifact,
+    # no STATUS / manifest / env-manifest / checksums).
+    downloaded_legacy = tmp_path / "downloaded-legacy.json"
+    downloaded_legacy.write_text(_minimal_artifact() + "\n", encoding="utf-8")
+
+    aggregate_sources: list[list[str]] = []
+    uploaded_paths: list[str] = []
+
+    def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
+        aggregate_sources.append(
+            sorted(path.name for path in source_dir.iterdir() if path.is_dir())
+        )
+        _write_valid_aggregate_outputs(output_dir)
+        return 0
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            uploaded_paths.append(path_in_repo)
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            return ["submissions-auto/legacy-run/run_leaderboard.json"]
+
+        def repo_info(self, repo_id, repo_type):
+            return {"repo_id": repo_id, "repo_type": repo_type}
+
+        def create_repo(self, repo_id, repo_type, private, exist_ok):
+            return None
+
+        def create_commit(
+            self,
+            repo_id,
+            repo_type,
+            operations,
+            commit_message,
+            revision=None,
+        ):
+            return {
+                "repo_id": repo_id,
+                "repo_type": repo_type,
+                "branch": revision,
+                "commit_message": commit_message,
+                "count": len(operations),
+            }
+
+    def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
+        return str(downloaded_legacy)
+
+    monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        HfApi=FakeHfApi,
+        hf_hub_download=fake_hf_hub_download,
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=submission_dir,
+        aggregate_output_dir=tmp_path / "aggregated",
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+    )
+
+    assert exit_code == 0
+    # Legacy directory is isolated; the current valid submission is aggregated.
+    assert aggregate_sources == [["submission-a"]]
+    assert "submissions-auto/submission-a/run_leaderboard.json" in uploaded_paths
+    assert not any(
+        path.startswith("submissions-auto/legacy-run/") for path in uploaded_paths
+    )
+    assert "Isolated 1 HF-hosted legacy submission(s)" in capsys.readouterr().err
