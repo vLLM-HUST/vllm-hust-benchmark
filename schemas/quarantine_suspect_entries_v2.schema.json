@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "quarantine_suspect_entries_v2.schema.json",
+  "title": "Quarantine suspect entries (issue-146) / v2",
+  "description": "Additive audit section in quarantine_leaderboard_entries.json recording single-round measurement noise points that were re-tested and found non-reproducible.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "conclusion",
+    "action",
+    "analysis_provenance",
+    "raw_evidence_dir",
+    "note",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "issue-146-suspect/v2"
+    },
+    "conclusion": {
+      "type": "string",
+      "enum": ["no_regression_reproduced", "regression_reproduced"]
+    },
+    "action": {
+      "type": "string",
+      "enum": ["mark_suspect_noise", "exclude", "keep"]
+    },
+    "analysis_provenance": {
+      "type": "string"
+    },
+    "raw_evidence_dir": {
+      "type": "string"
+    },
+    "note": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "git_commit",
+          "workload",
+          "workload_params",
+          "model",
+          "original_value",
+          "original_value_unit",
+          "retest_median",
+          "retest_median_unit",
+          "threshold_pct",
+          "status",
+          "retest_base_commit",
+          "retest_delta_vs_base_commit_pct"
+        ],
+        "properties": {
+          "git_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+          "workload": { "type": "string" },
+          "workload_params": {
+            "type": "object",
+            "properties": {
+              "input_length": { "type": ["integer", "null"] },
+              "output_length": { "type": ["integer", "null"] },
+              "batch_size": { "type": ["integer", "null"] },
+              "dataset": { "type": ["string", "null"] }
+            },
+            "required": ["input_length", "output_length"]
+          },
+          "model": { "type": "string" },
+          "original_value": { "type": "number" },
+          "original_value_unit": { "type": "string" },
+          "retest_median": { "type": "number" },
+          "retest_median_unit": { "type": "string" },
+          "threshold_pct": { "type": "number" },
+          "status": { "type": "string", "enum": ["invalid-suspect-noise", "valid"] },
+          "retest_base_commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+          "retest_delta_vs_base_commit_pct": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

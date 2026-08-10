@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -68,6 +69,13 @@ REJECTED_SUPERSEDED_REPORT_REQUIRED_FIELDS = (
     "excluded_plugin_commits",
 )
 REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION = "rejected-superseded-report/v1"
+
+QUARANTINE_FILE = "quarantine_leaderboard_entries.json"
+QUARANTINE_SUSPECT_SCHEMA = (
+    REPO_ROOT / "schemas" / "quarantine_suspect_entries_v2.schema.json"
+)
+QUARANTINE_SUSPECT_SCHEMA_VERSION = "issue-146-suspect/v2"
+QUARANTINE_ADDITIVE_SECTIONS = ("issue_146_suspect_entries",)
 
 
 def parse_args() -> argparse.Namespace:
@@ -311,6 +319,164 @@ def validate_rejected_superseded_report(snapshot_dir: Path) -> list[str]:
     return errors
 
 
+def _iter_hex_strings(obj: Any) -> list[str]:
+    """Yield string values that look like git commit hashes (hex, 7-40 chars)."""
+    found: list[str] = []
+    if isinstance(obj, dict):
+        for value in obj.values():
+            if isinstance(value, str) and re.fullmatch(r"[0-9a-f]{7,40}", value):
+                found.append(value)
+            elif isinstance(value, (dict, list)):
+                found.extend(_iter_hex_strings(value))
+    elif isinstance(obj, list):
+        for value in obj:
+            found.extend(_iter_hex_strings(value))
+    return found
+
+
+def _public_snapshot_commit_tokens(snapshot_dir: Path) -> set[str]:
+    """Collect commit tokens (full 40-hex and 7-char prefixes) referenced by
+    public leaderboard snapshot entries, so the quarantine validator can enforce
+    that suspect entries stay excluded from public output.
+    """
+    tokens: set[str] = set()
+    for name in SNAPSHOT_FILES:
+        path = snapshot_dir / name
+        if not path.is_file():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        entries = payload if isinstance(payload, list) else []
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            for value in _iter_hex_strings(entry):
+                tokens.add(value)
+                if len(value) >= 7:
+                    tokens.add(value[:7])
+    return tokens
+
+
+def validate_quarantine_suspect_entries(snapshot_dir: Path) -> list[str]:
+    """Validate the additive ``issue_146_suspect_entries`` audit section of the
+    quarantine file against its JSON schema.
+
+    The section is purely additive (it does not change the issue-105
+    ``quarantined_entries`` semantics), so an absent section is acceptable.
+    When present, every entry must carry full 40-hex commit provenance and a
+    retest delta relative to an explicit base commit.
+    """
+    errors: list[str] = []
+    quarantine_path = snapshot_dir / QUARANTINE_FILE
+    if not quarantine_path.is_file():
+        return errors
+
+    try:
+        payload = json.loads(quarantine_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        errors.append(f"invalid JSON in {quarantine_path}: {exc}")
+        return errors
+
+    if not isinstance(payload, dict):
+        errors.append(f"{quarantine_path.name}: payload must be a JSON object")
+        return errors
+
+    schema_payload: dict[str, Any] | None = None
+    if QUARANTINE_SUSPECT_SCHEMA.is_file():
+        try:
+            schema_payload = json.loads(
+                QUARANTINE_SUSPECT_SCHEMA.read_text(encoding="utf-8")
+            )
+        except json.JSONDecodeError:
+            schema_payload = None
+
+    for key in QUARANTINE_ADDITIVE_SECTIONS:
+        section = payload.get(key)
+        if section is None:
+            continue
+        if not isinstance(section, dict):
+            errors.append(f"{quarantine_path.name}:{key} must be a JSON object")
+            continue
+        section_version = section.get("schema_version")
+        if section_version != QUARANTINE_SUSPECT_SCHEMA_VERSION:
+            errors.append(
+                f"{quarantine_path.name}:{key} schema_version must be "
+                f"{QUARANTINE_SUSPECT_SCHEMA_VERSION!r}, got {section_version!r}"
+            )
+        if schema_payload is not None:
+            try:
+                import jsonschema
+
+                jsonschema.validate(instance=section, schema=schema_payload)
+            except ImportError:
+                errors.extend(_structural_suspect_checks(section, quarantine_path, key))
+            except jsonschema.ValidationError as exc:
+                errors.append(
+                    f"{quarantine_path.name}:{key} schema validation error: "
+                    f"{exc.message}"
+                )
+        else:
+            errors.extend(_structural_suspect_checks(section, quarantine_path, key))
+
+    # Enforce that suspect entries flagged for exclusion never appear in the
+    # public leaderboard snapshots (review: "isolation must be consumed").
+    public_commit_tokens = _public_snapshot_commit_tokens(snapshot_dir)
+    for key in QUARANTINE_ADDITIVE_SECTIONS:
+        section = payload.get(key)
+        if not isinstance(section, dict):
+            continue
+        section_action = section.get("action")
+        for entry in section.get("entries") or []:
+            if not isinstance(entry, dict):
+                continue
+            status = entry.get("status")
+            if status != "invalid-suspect-noise" and section_action != "exclude":
+                continue
+            commit = entry.get("git_commit")
+            if not isinstance(commit, str):
+                continue
+            if commit in public_commit_tokens or commit[:7] in public_commit_tokens:
+                errors.append(
+                    f"{quarantine_path.name}:{key}: suspect commit {commit[:12]} "
+                    f"must stay excluded from public snapshots but was found present"
+                )
+    return errors
+
+
+def _structural_suspect_checks(
+    section: dict[str, Any], quarantine_path: Path, key: str
+) -> list[str]:
+    """Structural fallback checks used when ``jsonschema`` is unavailable."""
+    errors: list[str] = []
+    for required in ("conclusion", "action", "note", "entries"):
+        if required not in section:
+            errors.append(
+                f"{quarantine_path.name}:{key} missing required field {required!r}"
+            )
+    entries = section.get("entries")
+    if not isinstance(entries, list) or not entries:
+        errors.append(f"{quarantine_path.name}:{key} entries must be a non-empty array")
+        return errors
+    for entry in entries:
+        if not isinstance(entry, dict):
+            errors.append(f"{quarantine_path.name}:{key} entry must be an object")
+            continue
+        for field in ("git_commit", "retest_base_commit"):
+            value = entry.get(field)
+            if not isinstance(value, str) or len(value) != 40:
+                errors.append(
+                    f"{quarantine_path.name}:{key} entry missing 40-hex {field!r}"
+                )
+        if "retest_delta_vs_base_commit_pct" not in entry:
+            errors.append(
+                f"{quarantine_path.name}:{key} entry missing "
+                "retest_delta_vs_base_commit_pct"
+            )
+    return errors
+
+
 def main() -> int:
     args = parse_args()
     snapshot_dir = Path(args.snapshot_dir)
@@ -351,6 +517,7 @@ def main() -> int:
                 hash_fingerprints[spec_hash] = (fingerprint, source_label)
 
     errors.extend(validate_rejected_superseded_report(snapshot_dir))
+    errors.extend(validate_quarantine_suspect_entries(snapshot_dir))
 
     if errors:
         print("public leaderboard snapshot validation failed:")

@@ -708,3 +708,82 @@ class TestCleanupIdempotencyGuard:
         )
         rc = cleanup_mod.main()
         assert rc == 0
+
+
+class TestCleanupPreservesIssue146SuspectSection:
+    def test_regen_preserves_suspect_section(self, cleanup_mod, tmp_path, monkeypatch):
+        snapshot_dir = tmp_path / "snapshots"
+        snapshot_dir.mkdir()
+        entry = _valid_active_entry()
+        (snapshot_dir / "leaderboard_single.json").write_text(
+            json.dumps([entry]) + "\n"
+        )
+        freeze = {
+            "schema_version": "pre-cleanup-freeze/v1",
+            "entry_count": 21,
+            "entry_ids": [],
+            "frozen_entries": [],
+        }
+        (snapshot_dir / "pre_cleanup_freeze.json").write_text(json.dumps(freeze) + "\n")
+        prior_suspect = {
+            "schema_version": "issue-146-suspect/v2",
+            "conclusion": "no_regression_reproduced",
+            "action": "mark_suspect_noise",
+            "analysis_provenance": "reports/issue_146_retest_analysis.json",
+            "raw_evidence_dir": "reports/issue_146_retest_raw_results/",
+            "note": "no regression reproduced",
+            "entries": [
+                {
+                    "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret  # pragma: allowlist secret
+                    "workload": "sonnet-throughput",
+                    "workload_params": {
+                        "input_length": 1024,
+                        "output_length": 256,
+                        "batch_size": None,
+                        "dataset": "sonnet",
+                    },
+                    "model": "Qwen/Qwen2.5-14B-Instruct",
+                    "original_value": 1589.93,
+                    "original_value_unit": "tok/s",
+                    "retest_median": 2898.8,
+                    "retest_median_unit": "tok/s",
+                    "threshold_pct": 10.0,
+                    "status": "invalid-suspect-noise",
+                    "retest_base_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",  # pragma: allowlist secret  # pragma: allowlist secret
+                    "retest_delta_vs_base_commit_pct": 0.24,
+                }
+            ],
+        }
+        (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "quarantine-leaderboard-entries/v2",
+                    "quarantined_count": 0,
+                    "quarantined_entries": [],
+                    "issue_146_suspect_entries": prior_suspect,
+                }
+            )
+            + "\n"
+        )
+        monkeypatch.setattr(
+            "sys.argv",
+            ["cleanup", "--snapshot-dir", str(snapshot_dir), "--force"],
+        )
+        rc = cleanup_mod.main()
+        assert rc == 0
+        regenerated = json.loads(
+            (snapshot_dir / "quarantine_leaderboard_entries.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        # [major] review: regeneration must NOT silently drop the additive section.
+        assert regenerated["schema_version"] == "quarantine-leaderboard-entries/v2"
+        assert regenerated["suspect_entries_count"] == 1
+        assert (
+            regenerated["issue_146_suspect_entries"]["schema_version"]
+            == "issue-146-suspect/v2"
+        )
+        assert (
+            regenerated["issue_146_suspect_entries"]["entries"][0]["git_commit"]
+            == "7a63f81e86bd71e980adb635870ff56c9e23b545"  # pragma: allowlist secret
+        )
