@@ -3362,5 +3362,51 @@
         }
       }
     }
-  ]
+  ],
+  "issue_146_suspect_entries": {
+    "schema_version": "issue-146-suspect/v1",
+    "conclusion": "no_regression_reproduced",
+    "action": "mark_suspect_noise",
+    "analysis_provenance": "reports/issue_146_retest_analysis.json",
+    "raw_evidence_dir": "reports/issue_146_retest_raw_results/",
+    "note": "Issue #146: July single-card leaderboard backfill had two commit-range regressions. Controlled re-test (3 reps x 3 commits x 2 workloads = 18 runs, same 910B2, same conda env, same vllm-ascend-hust plugin commit b2328661bd54079ce95eee78037ed9166d52e983, max_model_len=30720) confirms neither regression reproduces. The two original points are attributed to single-round measurement noise; they are marked suspect/invalid and should be excluded from the public leaderboard. Replacement with re-test medians is recommended.",
+    "entries": [
+      {
+        "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",
+        "workload": "sonnet-throughput",
+        "workload_params": {
+          "input_length": 1024,
+          "output_length": 256,
+          "batch_size": null,
+          "dataset": "sonnet"
+        },
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "original_value": 1589.93,
+        "original_value_unit": "tok/s",
+        "retest_median": 2898.8,
+        "retest_median_unit": "tok/s",
+        "delta_vs_base_pct": 0.24,
+        "threshold_pct": 10.0,
+        "status": "invalid-suspect-noise"
+      },
+      {
+        "git_commit": "83cf83ff20a880d70b6ba916977c49304d598d9c",
+        "workload": "random-latency",
+        "workload_params": {
+          "input_length": 1024,
+          "output_length": 128,
+          "batch_size": 8,
+          "dataset": null
+        },
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "original_value": 12201.7,
+        "original_value_unit": "ms",
+        "retest_median": 6023.95,
+        "retest_median_unit": "ms",
+        "delta_vs_base_pct": -0.1,
+        "threshold_pct": 20.0,
+        "status": "invalid-suspect-noise"
+      }
+    ]
+  }
 }
