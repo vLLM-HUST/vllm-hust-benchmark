@@ -198,3 +198,59 @@ class TestRequiredRepoCoverage:
         )
         with pytest.raises(ValueError, match="missing required independent repos"):
             check_required_repo_coverage(reg)
+
+
+class TestValidateScriptFailClosed:
+    """Tests that scripts/validate_independent_repo_result_cards.py
+    fail-closed when the registry is invalid (CI consumer wiring)."""
+
+    def _run_validate_script(self, registry_path: Path) -> int:
+        import subprocess
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(
+                    REPO_ROOT / "scripts" / "validate_independent_repo_result_cards.py"
+                ),
+                "--registry",
+                str(registry_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        return result.returncode
+
+    def test_valid_registry_exits_zero(self, tmp_path: Path) -> None:
+        """The committed registry file must pass validation (CI gate)."""
+        assert REGISTRY_PATH.is_file(), "committed registry file missing"
+        rc = self._run_validate_script(REGISTRY_PATH)
+        assert rc == 0
+
+    def test_missing_registry_exits_nonzero(self, tmp_path: Path) -> None:
+        rc = self._run_validate_script(tmp_path / "nonexistent.json")
+        assert rc != 0
+
+    def test_invalid_json_exits_nonzero(self, tmp_path: Path) -> None:
+        bad = tmp_path / "bad.json"
+        bad.write_text("{not valid json", encoding="utf-8")
+        rc = self._run_validate_script(bad)
+        assert rc != 0
+
+    def test_schema_invalid_exits_nonzero(self, tmp_path: Path) -> None:
+        """A registry missing required repos must fail (fail-closed)."""
+        reg = _valid_registry([])  # no repos -> schema minItems=1 fails
+        bad = tmp_path / "empty_repos.json"
+        bad.write_text(json.dumps(reg), encoding="utf-8")
+        rc = self._run_validate_script(bad)
+        assert rc != 0
+
+    def test_missing_required_repo_exits_nonzero(self, tmp_path: Path) -> None:
+        """A registry missing one REQUIRED_REPO must fail (issue #89 coverage)."""
+        reg = _valid_registry(
+            [_valid_repo(name) for name in sorted(REQUIRED_REPOS)[1:]]
+        )
+        bad = tmp_path / "missing_repo.json"
+        bad.write_text(json.dumps(reg), encoding="utf-8")
+        rc = self._run_validate_script(bad)
+        assert rc != 0

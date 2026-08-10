@@ -47,6 +47,9 @@ jobs:
       - name: Reject non-compliant public leaderboard records
         run: python scripts/validate_public_leaderboard_snapshots.py
 
+      - name: Validate independent optimization repo result card registry
+        run: python scripts/validate_independent_repo_result_cards.py
+
       - name: Verify submission checksums (sha256sum -c per directory)
         run: python scripts/verify_submission_checksums.py --root submissions
 
