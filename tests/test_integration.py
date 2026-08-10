@@ -1,4 +1,5 @@
 import builtins
+import hashlib
 import json
 from pathlib import Path
 import types
@@ -34,6 +35,29 @@ def _minimal_manifest(artifact_name: str = "run_leaderboard.json") -> str:
 
 def _minimal_artifact(model_name: str = "Qwen/Qwen2.5-14B-Instruct") -> str:
     return json.dumps({"model": {"name": model_name}})
+
+
+def _write_complete_submission(
+    directory: Path,
+    artifact: str,
+    manifest: str | None = None,
+) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    files = {
+        "run_leaderboard.json": artifact
+        + ("\n" if not artifact.endswith("\n") else ""),
+        "leaderboard_manifest.json": (manifest or _minimal_manifest()) + "\n",
+        "env-manifest.json": "{}\n",
+    }
+    for name, content in files.items():
+        (directory / name).write_text(content, encoding="utf-8")
+    checksums = [
+        f"{hashlib.sha256((directory / name).read_bytes()).hexdigest()}  {name}"
+        for name in files
+    ]
+    (directory / "checksums.sha256").write_text(
+        "\n".join(checksums) + "\n", encoding="utf-8"
+    )
 
 
 def _future_official_artifact() -> dict:
@@ -1118,8 +1142,22 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
         _minimal_manifest() + "\n", encoding="utf-8"
     )
 
-    downloaded_submission = tmp_path / "downloaded-existing.json"
-    downloaded_submission.write_text(_minimal_artifact() + "\n", encoding="utf-8")
+    downloaded_existing = tmp_path / "downloaded-existing"
+    downloaded_existing.mkdir()
+    downloaded_run = downloaded_existing / "run_leaderboard.json"
+    downloaded_manifest = downloaded_existing / "leaderboard_manifest.json"
+    downloaded_env = downloaded_existing / "env-manifest.json"
+    downloaded_run.write_text(_minimal_artifact() + "\n", encoding="utf-8")
+    downloaded_manifest.write_text(_minimal_manifest() + "\n", encoding="utf-8")
+    downloaded_env.write_text("{}\n", encoding="utf-8")
+    checksum_lines = []
+    for path in (downloaded_run, downloaded_manifest, downloaded_env):
+        checksum_lines.append(
+            f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}"
+        )
+    (downloaded_existing / "checksums.sha256").write_text(
+        "\n".join(checksum_lines) + "\n", encoding="utf-8"
+    )
 
     aggregate_calls: list[tuple[Path, Path]] = []
     merged_markers: dict[str, bool] = {}
@@ -1147,7 +1185,12 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
             self.token = token
 
         def list_repo_files(self, repo_id, repo_type, revision):
-            return ["submissions-auto/existing-run/run_leaderboard.json"]
+            return [
+                "submissions-auto/existing-run/run_leaderboard.json",
+                "submissions-auto/existing-run/leaderboard_manifest.json",
+                "submissions-auto/existing-run/env-manifest.json",
+                "submissions-auto/existing-run/checksums.sha256",
+            ]
 
         def repo_info(self, repo_id, repo_type):
             return {"repo_id": repo_id, "repo_type": repo_type}
@@ -1172,7 +1215,7 @@ def test_sync_submission_to_huggingface_merges_existing_submission_and_uploads(
             }
 
     def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
-        return str(downloaded_submission)
+        return str(downloaded_existing / Path(filename).name)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
     # These sync tests model a fully-valid HF history so the merge/upload
@@ -1314,10 +1357,10 @@ def test_sync_submission_to_huggingface_deletes_excluded_remote_submission(
         ),
         encoding="utf-8",
     )
-    included_run = tmp_path / "included-run.json"
-    included_run.write_text(_minimal_artifact(), encoding="utf-8")
-    manifest = tmp_path / "manifest.json"
-    manifest.write_text(_minimal_manifest(), encoding="utf-8")
+    included_dir = tmp_path / "included-files"
+    _write_complete_submission(included_dir, _minimal_artifact())
+    included_run = included_dir / "run_leaderboard.json"
+    manifest = included_dir / "leaderboard_manifest.json"
     seeded_snapshot = tmp_path / "leaderboard_single.json"
     seeded_snapshot.write_text(
         json.dumps(
@@ -1367,6 +1410,8 @@ def test_sync_submission_to_huggingface_deletes_excluded_remote_submission(
                 "submissions-auto/excluded-run/run_leaderboard.json",
                 "submissions-auto/included-run/leaderboard_manifest.json",
                 "submissions-auto/included-run/run_leaderboard.json",
+                "submissions-auto/included-run/env-manifest.json",
+                "submissions-auto/included-run/checksums.sha256",
             ]
 
         def repo_info(self, repo_id, repo_type):
@@ -1380,6 +1425,10 @@ def test_sync_submission_to_huggingface_deletes_excluded_remote_submission(
             return str(seeded_snapshot)
         if filename.endswith("leaderboard_manifest.json"):
             return str(manifest)
+        if filename.endswith("env-manifest.json"):
+            return str(included_dir / "env-manifest.json")
+        if filename.endswith("checksums.sha256"):
+            return str(included_dir / "checksums.sha256")
         if "/excluded-run/" in filename:
             return str(excluded_run)
         return str(included_run)
@@ -1464,8 +1513,8 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
         _minimal_manifest() + "\n", encoding="utf-8"
     )
 
-    downloaded_submission = tmp_path / "downloaded-existing.json"
-    downloaded_submission.write_text(_minimal_artifact() + "\n", encoding="utf-8")
+    downloaded_existing = tmp_path / "downloaded-existing"
+    _write_complete_submission(downloaded_existing, _minimal_artifact())
 
     merged_markers: dict[str, bool] = {}
     uploaded_paths: list[str] = []
@@ -1494,7 +1543,12 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
             self.token = token
 
         def list_repo_files(self, repo_id, repo_type, revision):
-            return ["submissions-auto/existing-run/run_leaderboard.json"]
+            return [
+                "submissions-auto/existing-run/run_leaderboard.json",
+                "submissions-auto/existing-run/leaderboard_manifest.json",
+                "submissions-auto/existing-run/env-manifest.json",
+                "submissions-auto/existing-run/checksums.sha256",
+            ]
 
         def repo_info(self, repo_id, repo_type):
             return {"repo_id": repo_id, "repo_type": repo_type}
@@ -1519,7 +1573,7 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
             }
 
     def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
-        return str(downloaded_submission)
+        return str(downloaded_existing / Path(filename).name)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
     # These sync tests model a fully-valid HF history so the merge/upload
@@ -1532,6 +1586,7 @@ def test_sync_submission_to_huggingface_merges_multiple_submissions_and_uploads(
     )
     fake_hf_module = types.SimpleNamespace(
         CommitOperationAdd=FakeCommitOperationAdd,
+        CommitOperationDelete=lambda **kwargs: None,
         HfApi=FakeHfApi,
         hf_hub_download=fake_hf_hub_download,
     )
@@ -1754,27 +1809,23 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
         _minimal_manifest() + "\n", encoding="utf-8"
     )
 
-    downloaded_run = tmp_path / "downloaded-existing-run.json"
-    downloaded_manifest = tmp_path / "downloaded-existing-manifest.json"
-    downloaded_run.write_text(
-        json.dumps(
-            {
-                "model": {"name": "Qwen2.5-7B-Instruct"},
-                "hardware": {"chip_model": "910B3"},
-                "workload": {"name": "sharegpt-online"},
-                "config_type": "single_gpu",
-                "constraints": {
-                    "accountable_scope": {
-                        "baseline_engine": "vllm",
-                        "declared_baseline_engine": "vllm",
-                        "baseline_status": "pending-baseline",
-                    }
-                },
-            }
-        ),
-        encoding="utf-8",
+    downloaded_existing = tmp_path / "downloaded-existing"
+    downloaded_artifact = json.dumps(
+        {
+            "model": {"name": "Qwen2.5-7B-Instruct"},
+            "hardware": {"chip_model": "910B3"},
+            "workload": {"name": "sharegpt-online"},
+            "config_type": "single_gpu",
+            "constraints": {
+                "accountable_scope": {
+                    "baseline_engine": "vllm",
+                    "declared_baseline_engine": "vllm",
+                    "baseline_status": "pending-baseline",
+                }
+            },
+        }
     )
-    downloaded_manifest.write_text(_minimal_manifest() + "\n", encoding="utf-8")
+    _write_complete_submission(downloaded_existing, downloaded_artifact)
 
     seen_baselines: dict[str, dict[str, str]] = {}
 
@@ -1819,6 +1870,8 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
             return [
                 "submissions-auto/existing-run/leaderboard_manifest.json",
                 "submissions-auto/existing-run/run_leaderboard.json",
+                "submissions-auto/existing-run/env-manifest.json",
+                "submissions-auto/existing-run/checksums.sha256",
             ]
 
         def repo_info(self, repo_id, repo_type):
@@ -1844,9 +1897,7 @@ def test_sync_submission_to_huggingface_normalizes_unsupported_historical_baseli
             }
 
     def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
-        if filename.endswith("leaderboard_manifest.json"):
-            return str(downloaded_manifest)
-        return str(downloaded_run)
+        return str(downloaded_existing / Path(filename).name)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
     # These sync tests model a fully-valid HF history so the merge/upload
@@ -1916,10 +1967,10 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
         website_repo=website_repo,
     )
 
-    downloaded_submission = tmp_path / "downloaded-existing.json"
-    downloaded_submission.write_text(
+    downloaded_existing = tmp_path / "downloaded-existing"
+    _write_complete_submission(
+        downloaded_existing,
         json.dumps({"model": {"name": "Qwen2.5-7B-Instruct"}}),
-        encoding="utf-8",
     )
 
     uploaded_paths: list[str] = []
@@ -1946,7 +1997,12 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
             self.token = token
 
         def list_repo_files(self, repo_id, repo_type, revision):
-            return ["submissions-auto/existing-run/run_leaderboard.json"]
+            return [
+                "submissions-auto/existing-run/run_leaderboard.json",
+                "submissions-auto/existing-run/leaderboard_manifest.json",
+                "submissions-auto/existing-run/env-manifest.json",
+                "submissions-auto/existing-run/checksums.sha256",
+            ]
 
         def repo_info(self, repo_id, repo_type):
             return {"repo_id": repo_id, "repo_type": repo_type}
@@ -1971,7 +2027,7 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
             }
 
     def fake_hf_hub_download(repo_id, repo_type, filename, revision, token):
-        return str(downloaded_submission)
+        return str(downloaded_existing / Path(filename).name)
 
     monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
     # These sync tests model a fully-valid HF history so the merge/upload
@@ -1989,6 +2045,7 @@ def test_sync_submission_to_huggingface_existing_only_backfills_historical_artif
     )
     fake_hf_module = types.SimpleNamespace(
         CommitOperationAdd=FakeCommitOperationAdd,
+        CommitOperationDelete=lambda **kwargs: None,
         HfApi=FakeHfApi,
         hf_hub_download=fake_hf_hub_download,
     )
@@ -2197,14 +2254,9 @@ def test_sync_submission_to_huggingface_isolates_hf_legacy_that_fails_admission(
         website_repo=website_repo,
     )
 
+    # The current valid submission is complete and admissible.
     submission_dir = tmp_path / "submission-a"
-    submission_dir.mkdir()
-    (submission_dir / "run_leaderboard.json").write_text(
-        _minimal_artifact() + "\n", encoding="utf-8"
-    )
-    (submission_dir / "leaderboard_manifest.json").write_text(
-        _minimal_manifest() + "\n", encoding="utf-8"
-    )
+    _write_complete_submission(submission_dir, _minimal_artifact())
 
     # HF history carries an incomplete legacy directory (only the artifact,
     # no STATUS / manifest / env-manifest / checksums).

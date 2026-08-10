@@ -2832,12 +2832,38 @@ def sync_submission_to_huggingface(
             )
             shutil.rmtree(excluded_dir)
 
+        # HF may still contain legacy submissions that predate the current
+        # admission contract. They must not block publishing valid new
+        # submissions, but locally supplied directories must fail closed.
+        local_dir_names = {path.name for path in normalized_submission_dirs}
+        admission_failures = _scan_submission_admission_failures(merged_source_dir)
+        # Bug fix: fail-closed must cover every locally supplied submission,
+        # regardless of whether it carries a STATUS file (historical backfills
+        # may omit STATUS). Using the STATUS-file subset alone would let a
+        # non-admissible local backfill silently remain in the aggregation input.
+        current_failures = [
+            failure
+            for failure in admission_failures
+            if Path(failure["dir"]).name in local_dir_names
+        ]
+        if current_failures:
+            print(
+                "ERROR: newly supplied submission directories failed admission:",
+                file=sys.stderr,
+            )
+            for failure in current_failures:
+                print(
+                    f"  {failure['dir']}: {failure['reason']} ({failure['detail']})",
+                    file=sys.stderr,
+                )
+            return 2
+
         # Isolate HF-hosted legacy submissions that fail the active admission
         # gate out of the aggregation input, so a single incomplete historical
         # directory can no longer block publishing the current valid
         # submissions. The gate stays fail-closed; original bytes are moved
-        # (not deleted) and remain untouched on the HF dataset as audit data.
-        local_dir_names = {path.name for path in normalized_submission_dirs}
+        # (not deleted, never synthesized) and remain untouched on the HF
+        # dataset as audit data.
         isolated_legacy = _isolate_remote_legacy_submissions(
             merged_source_dir, local_dir_names=local_dir_names
         )
