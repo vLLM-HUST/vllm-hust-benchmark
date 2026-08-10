@@ -103,6 +103,13 @@ _PREEMPT_MSG_RE = re.compile(
     r"(Sequence group|seq_group)\s+(\d+)\s+is\s+(preempted|preempting)",
     re.IGNORECASE,
 )
+# Cumulative preemption summary from vLLM UtilityVictim scheduler logs.
+# Format: "total_preemptions=N utility_hits=... default_hits=... tokens_freed=..."
+# Each increase in the cumulative count represents one new preemption event.
+_TOTAL_PREEMPTIONS_RE = re.compile(
+    r"total_preemptions\s*[:=]\s*(\d+)",
+    re.IGNORECASE,
+)
 
 # Utility victim selection events
 _VICTIM_SELECT_RE = re.compile(
@@ -344,8 +351,16 @@ def parse_preemption_events(log_text: str) -> list[dict[str, Any]]:
       - ``timestamp``: ISO-8601 string | None
       - ``seq_group_id``: int | None
       - ``event_type``: str (e.g. "preempted", "preempting")
+
+    Supports two log formats:
+      1. Individual preempt messages: "Sequence group N is preempted"
+      2. Cumulative summary lines: "total_preemptions=N ..." (vLLM
+         UtilityVictim scheduler). Each increase in the cumulative count
+         generates one synthetic preempt event with ``seq_group_id=None``
+         and ``event_type="preempted"``.
     """
     events: list[dict[str, Any]] = []
+    prev_total = 0
     for line in log_text.splitlines():
         if m := _PREEMPT_MSG_RE.search(line):
             ts = _parse_log_timestamp(line)
@@ -356,6 +371,20 @@ def parse_preemption_events(log_text: str) -> list[dict[str, Any]]:
                     "event_type": m.group(3).lower(),
                 }
             )
+        elif m := _TOTAL_PREEMPTIONS_RE.search(line):
+            current_total = int(m.group(1))
+            if current_total > prev_total:
+                ts = _parse_log_timestamp(line)
+                # One synthetic event per new preemption
+                for _ in range(current_total - prev_total):
+                    events.append(
+                        {
+                            "timestamp": ts,
+                            "seq_group_id": None,
+                            "event_type": "preempted",
+                        }
+                    )
+                prev_total = current_total
     return events
 
 
@@ -570,8 +599,13 @@ def reconstruct_preempt_timeline(
         - ``pressure_episodes``: list of dicts, each containing:
             - ``preempt_timestamp``: str | None
             - ``preempt_seq_group_id``: int | None
-            - ``restore_approx_timestamp``: str | None
-            - ``restore_to_admission_gap_s``: float | None
+            - ``queue_drain_approx_timestamp``: str | None — timestamp of the
+              first engine-stats sample after preemption where ``waiting_reqs``
+              drops to 0. This is a global queue-drain approximation derived
+              from periodic stats; it does NOT describe per-request restore
+              or admission and must not be used as a state-machine conclusion.
+            - ``preempt_to_queue_drain_gap_s``: float | None — seconds from
+              preempt to the queue-drain sample above. Same caveat applies.
             - ``peak_waiting_reqs``: int
             - ``peak_kv_usage_pct``: float
             - ``stages``: dict mapping stage names to timestamps (if stage_events
@@ -579,6 +613,15 @@ def reconstruct_preempt_timeline(
             - ``timeline_complete``: bool (if stage_events provided)
         - ``summary``: dict with aggregate stats
         - ``timeline_status``: "complete" | "incomplete" | "no_preemptions"
+
+    Note:
+        The ``queue_drain_approx_timestamp`` / ``preempt_to_queue_drain_gap_s``
+        fields are coarse global approximations from periodic engine stats.
+        They must not be interpreted as restore or admission markers. The
+        authoritative 6-stage chain lives in ``stages`` and
+        ``timeline_complete``; when ``stages`` lacks per-stage timestamps,
+        the timeline is incomplete and no state-machine conclusion can be
+        drawn.
     """
     if not preemption_events:
         return {
@@ -586,7 +629,7 @@ def reconstruct_preempt_timeline(
             "pressure_episodes": [],
             "summary": {
                 "total_preemptions": 0,
-                "total_restore_gaps_s": [],
+                "preempt_to_queue_drain_gaps_s": [],
                 "max_waiting_reqs": 0,
                 "max_kv_usage_pct": 0.0,
             },
@@ -628,17 +671,20 @@ def reconstruct_preempt_timeline(
         peak_waiting = max((s["waiting_reqs"] for s in episode_stats), default=0)
         peak_kv = max((s["kv_cache_usage_pct"] for s in episode_stats), default=0.0)
 
-        # Approximate restore = first stat after preemption where waiting drops to 0
-        restore_ts = None
-        restore_to_admission_gap_s = None
+        # Queue-drain approximation: first stat after preemption where the
+        # GLOBAL waiting queue drops to 0. This is NOT a per-request restore
+        # or admission marker; it only indicates when the global waiting
+        # queue drained. Do not use it for state-machine conclusions.
+        queue_drain_ts = None
+        preempt_to_queue_drain_gap_s = None
         for s in post_stats:
             if s["waiting_reqs"] == 0:
-                restore_ts = s.get("timestamp")
-                if restore_ts and pe_ts:
+                queue_drain_ts = s.get("timestamp")
+                if queue_drain_ts and pe_ts:
                     try:
                         t1 = datetime.fromisoformat(pe_ts)
-                        t2 = datetime.fromisoformat(restore_ts)
-                        restore_to_admission_gap_s = (t2 - t1).total_seconds()
+                        t2 = datetime.fromisoformat(queue_drain_ts)
+                        preempt_to_queue_drain_gap_s = (t2 - t1).total_seconds()
                     except (ValueError, TypeError):
                         pass
                 break
@@ -646,8 +692,8 @@ def reconstruct_preempt_timeline(
         episode: dict[str, Any] = {
             "preempt_timestamp": pe_ts,
             "preempt_seq_group_id": pe_sgid,
-            "restore_approx_timestamp": restore_ts,
-            "restore_to_admission_gap_s": restore_to_admission_gap_s,
+            "queue_drain_approx_timestamp": queue_drain_ts,
+            "preempt_to_queue_drain_gap_s": preempt_to_queue_drain_gap_s,
             "peak_waiting_reqs": peak_waiting,
             "peak_kv_usage_pct": peak_kv,
         }
@@ -666,10 +712,10 @@ def reconstruct_preempt_timeline(
 
         episodes.append(episode)
 
-    restore_gaps = [
-        e["restore_to_admission_gap_s"]
+    queue_drain_gaps = [
+        e["preempt_to_queue_drain_gap_s"]
         for e in episodes
-        if e["restore_to_admission_gap_s"] is not None
+        if e["preempt_to_queue_drain_gap_s"] is not None
     ]
 
     # Determine overall timeline_status
@@ -684,7 +730,7 @@ def reconstruct_preempt_timeline(
         "pressure_episodes": episodes,
         "summary": {
             "total_preemptions": len(preemption_events),
-            "total_restore_gaps_s": restore_gaps,
+            "preempt_to_queue_drain_gaps_s": queue_drain_gaps,
             "max_waiting_reqs": max(
                 (e["peak_waiting_reqs"] for e in episodes), default=0
             ),
