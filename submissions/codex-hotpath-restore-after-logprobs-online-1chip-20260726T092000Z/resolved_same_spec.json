@@ -1,0 +1,42 @@
+{
+  "schema_version": "benchmark-same-spec/v1",
+  "spec_id": "official-ascend-jan-2026-v0.18.0-logprobs-online-qwen25-14b-910b2",
+  "spec_label": "Official Ascend Jan 2026 logprobs stress baseline for vllm-hust goal tracking",
+  "spec_source": "/home/shuhao/vllm-hust-benchmark/docs/official-baselines/official-ascend-jan-2026-v0180-logprobs-online-qwen25-14b-910b2.json",
+  "scenario": "logprobs-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "model_quantization": "",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 1,
+  "node_count": 1,
+  "resolved_server_parameters": {
+    "tensor_parallel_size": 1,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 8025,
+    "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "dtype": "float16",
+    "gpu_memory_utilization": 0.6,
+    "max_model_len": 32768
+  },
+  "resolved_client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "random",
+    "num_prompts": 200,
+    "request_rate": 1,
+    "logprobs": 20,
+    "host": "127.0.0.1",
+    "port": 8025,
+    "model": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+    "random_input_len": 1024,
+    "random_output_len": 256
+  },
+  "resolved_spec_hash": "3f1fd6f20213d049b7613a62b650dfc4b0531e400d59bd6050d459946e141494"
+}
