@@ -49,6 +49,9 @@ REQUIRED_TIERING_CONFIGS = ["hbm-only", "tiering-disabled", "tiering-enabled"]
 TIERING_CONFIGS = REQUIRED_TIERING_CONFIGS
 
 # Provenance fields that must be present for evidence to be admissible.
+# Per PR #152 review: model_revision alone (config.json SHA256) does NOT
+# identify actual weights; model_weight_fingerprint captures the real weight
+# file hashes. engine_patch_sha256 + engine_patch_file bind the dirty patch.
 REQUIRED_PROVENANCE_FIELDS = [
     "engine_commit",
     "plugin_commit",
@@ -56,6 +59,7 @@ REQUIRED_PROVENANCE_FIELDS = [
     "driver_version",
     "torch_npu_version",
     "model_revision",
+    "model_weight_fingerprint",
     "resolved_parameters",
     "actual_kv_bytes",
 ]
@@ -708,15 +712,55 @@ def check_acceptance_criteria(analysis: dict[str, Any]) -> dict[str, Any]:
     has_incomplete_failure = False
 
     # 1. 8/16/24/32 GiB capacity curves produced
+    # Per PR #152 review round 3: the 32 GiB target must actually be reached
+    # (actual KV within 2 GiB of target).  Widening tolerance to make an
+    # unreachable target appear met is not allowed.  When actual KV deviates
+    # more than 2 GiB from target, that capacity point is marked blocked.
     caps = analysis.get("capacities_covered", [])
-    caps_met = all(c in caps for c in KV_CAPACITY_TARGETS_GIB)
+    caps_present = all(c in caps for c in KV_CAPACITY_TARGETS_GIB)
+    # Check actual KV vs target from per-rep manifests
+    run_manifest_map = analysis.get("run_manifest_map", {})
+    _KV_TOL_GIB = 2.0
+    blocked_caps: list[str] = []
+    if run_manifest_map:
+        # Group actual KV by nominal capacity target
+        cap_actuals: dict[int, list[float]] = {}
+        for run_path, manifest in run_manifest_map.items():
+            if manifest is None or "raw_results/" not in run_path:
+                continue
+            # Parse capacity from path: raw_results/<workload>/<kv_gib>/rep-N
+            parts = run_path.split("/")
+            try:
+                kv_gib = int(parts[-2])
+            except (ValueError, IndexError):
+                continue
+            actual_bytes = manifest.get("actual_kv_bytes")
+            if actual_bytes is None:
+                continue
+            actual_gib = float(actual_bytes) / (1024**3)
+            cap_actuals.setdefault(kv_gib, []).append(actual_gib)
+        for target in KV_CAPACITY_TARGETS_GIB:
+            actuals = cap_actuals.get(target, [])
+            if not actuals:
+                continue
+            median_actual = sorted(actuals)[len(actuals) // 2]
+            if abs(median_actual - target) > _KV_TOL_GIB:
+                blocked_caps.append(f"{target}GiB (actual ~{median_actual:.1f}GiB)")
+    caps_met = caps_present and not blocked_caps
     if not caps_met:
         has_blocking_failure = True
+    if blocked_caps:
+        details = (
+            f"Covered: {sorted(caps)}, expected: {KV_CAPACITY_TARGETS_GIB}; "
+            f"blocked (actual KV > {_KV_TOL_GIB}GiB from target): {blocked_caps}"
+        )
+    else:
+        details = f"Covered: {sorted(caps)}, expected: {KV_CAPACITY_TARGETS_GIB}"
     criteria.append(
         {
             "criterion": "8/16/24/32 GiB capacity curves produced",
             "met": caps_met,
-            "details": f"Covered: {sorted(caps)}, expected: {KV_CAPACITY_TARGETS_GIB}",
+            "details": details,
         }
     )
 
@@ -998,6 +1042,11 @@ def main() -> None:
     if tiering_file.exists():
         tiering_data = json.loads(tiering_file.read_text())
         tiering_analysis = analyze_tiering_comparison(tiering_data)
+    else:
+        # Try loading from tiering/ directory structure
+        tiering_data = _load_from_tiering_dir(results_dir / "tiering")
+        if tiering_data:
+            tiering_analysis = analyze_tiering_comparison(tiering_data)
 
     # Load preempt timeline if available
     timeline_file = results_dir / "preempt_timeline.json"
@@ -1073,6 +1122,49 @@ def _load_from_raw_results(raw_dir: Path) -> dict[str, Any]:
                     results[workload][kv_gib][rep_dir.name] = json.loads(
                         raw_file.read_text()
                     )
+
+    return results
+
+
+def _load_from_tiering_dir(tiering_dir: Path) -> dict[str, list[dict[str, Any]]]:
+    """Load results from the tiering directory structure.
+
+    Expected structure:
+        tiering/<config>/rep-<N>/raw.json
+
+    Returns dict: ``{config: [raw_result, ...]}``
+
+    Skips rep directories that have a STATUS file containing ``BLOCKED``
+    (e.g., tiering-enabled on Ascend where SimpleCPUOffloadConnector is
+    incompatible with the KV cache layout). Those reps are excluded from
+    the results list so the analyzer reports them as incomplete rather
+    than including invalid data.
+    """
+    results: dict[str, list[dict[str, Any]]] = {}
+    if not tiering_dir.exists():
+        return results
+
+    for config_dir in sorted(tiering_dir.iterdir()):
+        if not config_dir.is_dir():
+            continue
+        config = config_dir.name
+        reps: list[dict[str, Any]] = []
+
+        for rep_dir in sorted(config_dir.iterdir()):
+            if not rep_dir.is_dir():
+                continue
+            # Skip blocked reps (e.g., tiering-enabled on Ascend)
+            status_file = rep_dir / "STATUS"
+            if status_file.exists():
+                status_text = status_file.read_text().strip()
+                if status_text.startswith("BLOCKED"):
+                    continue
+            raw_file = rep_dir / "raw.json"
+            if raw_file.exists():
+                reps.append(json.loads(raw_file.read_text()))
+
+        if reps:
+            results[config] = reps
 
     return results
 
