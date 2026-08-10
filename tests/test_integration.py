@@ -2340,3 +2340,102 @@ def test_sync_submission_to_huggingface_isolates_hf_legacy_that_fails_admission(
         path.startswith("submissions-auto/legacy-run/") for path in uploaded_paths
     )
     assert "Isolated 1 HF-hosted legacy submission(s)" in capsys.readouterr().err
+
+
+def test_sync_submission_to_huggingface_rejects_incomplete_local_backfill(
+    monkeypatch, capsys, tmp_path: Path
+) -> None:
+    """Regression: a locally supplied backfill without a STATUS file that fails
+    admission must be hard-rejected (exit 2), not silently kept in the
+    aggregation input.
+
+    Pre-fix the fail-closed scope was derived from the STATUS-file subset of
+    locally supplied dirs. Historical backfills may omit STATUS, so an
+    incomplete local backfill was neither in that subset (bypassing the
+    fail-closed check) nor treated as an HF-hosted legacy dir (bypassing
+    isolation), leaving it in the aggregation input.
+    """
+    layout = RepoLayout(
+        workspace_root=tmp_path,
+        benchmark_repo=tmp_path / "vllm-hust-benchmark",
+        vllm_hust_repo=tmp_path / "vllm-hust",
+        website_repo=tmp_path / "vllm-hust-website",
+    )
+
+    # Local backfill: only the run artifact is present, no STATUS, no manifest.
+    submission_dir = tmp_path / "submission-backfill"
+    submission_dir.mkdir()
+    (submission_dir / "run_leaderboard.json").write_text(
+        _minimal_artifact() + "\n", encoding="utf-8"
+    )
+
+    aggregate_called = False
+
+    def fake_aggregate_to_website(*, layout, source_dir, output_dir, execute):
+        nonlocal aggregate_called
+        aggregate_called = True
+        _write_valid_aggregate_outputs(output_dir)
+        return 0
+
+    monkeypatch.setattr(integration, "aggregate_to_website", fake_aggregate_to_website)
+
+    class FakeCommitOperationAdd:
+        def __init__(self, *, path_in_repo, path_or_fileobj):
+            pass
+
+    class FakeHfApi:
+        def __init__(self, token=None):
+            self.token = token
+
+        def list_repo_files(self, repo_id, repo_type, revision):
+            return []
+
+        def repo_info(self, repo_id, repo_type):
+            return {"repo_id": repo_id, "repo_type": repo_type}
+
+        def create_repo(self, repo_id, repo_type, private, exist_ok):
+            return None
+
+        def create_commit(
+            self,
+            repo_id,
+            repo_type,
+            operations,
+            commit_message,
+            revision=None,
+        ):
+            return {
+                "repo_id": repo_id,
+                "repo_type": repo_type,
+                "branch": revision,
+                "commit_message": commit_message,
+                "count": len(operations),
+            }
+
+    fake_hf_module = types.SimpleNamespace(
+        CommitOperationAdd=FakeCommitOperationAdd,
+        HfApi=FakeHfApi,
+        hf_hub_download=lambda *a, **k: str(submission_dir / "run_leaderboard.json"),
+    )
+    real_import = builtins.__import__
+
+    def fake_import(name, globals=None, locals=None, fromlist=(), level=0):
+        if name == "huggingface_hub":
+            return fake_hf_module
+        return real_import(name, globals, locals, fromlist, level)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    exit_code = sync_submission_to_huggingface(
+        layout=layout,
+        submission_dirs=submission_dir,
+        aggregate_output_dir=tmp_path / "aggregated",
+        repo_id="owner/repo",
+        submissions_prefix="submissions-auto",
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 2
+    assert aggregate_called is False
+    assert "newly supplied submission directories failed admission" in captured.err
+    assert "submission-backfill" in captured.err
