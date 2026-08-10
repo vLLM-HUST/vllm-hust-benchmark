@@ -1,0 +1,142 @@
+{
+  "schema_version": "independent-repo-result-card/v1",
+  "generated_at": "2026-08-06T00:00:00Z",
+  "issue_ref": 89,
+  "repos": [
+    {
+      "repo_name": "vllm-hust-bidkv",
+      "repo_url": "https://github.com/vLLM-HUST/vllm-hust-bidkv",
+      "coverage_class": "independent-repo",
+      "mechanism_summary": "Bidirectional KV victim selection for KV pressure, eviction quality, SLO and throughput under cache contention.",
+      "serving_prs": [161, 171],
+      "result_cards": [
+        {
+          "card_id": "bidkv-kv-pressure-baseline",
+          "status": "blocked",
+          "workload": "kv-pressure-online",
+          "comparison_id": "bidkv-default-vs-bidkv",
+          "point_role": "baseline",
+          "spec_summary": {
+            "model": "Qwen2.5-14B-Instruct",
+            "hardware": "1x910B2",
+            "precision": "BF16"
+          },
+          "metrics": null,
+          "evidence": {
+            "repo_commit": "0000000000000000000000000000000000000000",
+            "artifact_url": "https://github.com/vLLM-HUST/vllm-hust-bidkv"
+          },
+          "blocker": "NPU run pending; specialty spec kv-pressure-online created in feat/issue_89 branch, awaiting NPU scheduling."
+        }
+      ]
+    },
+    {
+      "repo_name": "vllm-ascend-hust-diffspec",
+      "repo_url": "https://github.com/vLLM-HUST/vllm-ascend-hust-diffspec",
+      "coverage_class": "independent-repo",
+      "mechanism_summary": "Speculative decoding with target/draft model acceptance rate, throughput and latency on Ascend NPU.",
+      "serving_prs": [121, 123],
+      "result_cards": [
+        {
+          "card_id": "diffspec-spec-decode-baseline",
+          "status": "blocked",
+          "workload": "spec-decode-online",
+          "comparison_id": "diffspec-dense-vs-specdecode",
+          "point_role": "baseline",
+          "spec_summary": {
+            "model": "Qwen2.5-14B-Instruct",
+            "hardware": "1x910B2",
+            "precision": "BF16"
+          },
+          "metrics": null,
+          "evidence": {
+            "repo_commit": "0000000000000000000000000000000000000000",
+            "artifact_url": "https://github.com/vLLM-HUST/vllm-ascend-hust-diffspec"
+          },
+          "blocker": "spec-decode-online specialty spec created in feat/issue_89 branch; NPU run pending target/draft acceptance measurement."
+        }
+      ]
+    },
+    {
+      "repo_name": "vllm-ascend-quant-hust",
+      "repo_url": "https://github.com/vLLM-HUST/vllm-ascend-quant-hust",
+      "coverage_class": "independent-repo",
+      "mechanism_summary": "Quantization accuracy, HBM footprint and throughput curves; quantization type enters same-spec key.",
+      "serving_prs": [161],
+      "result_cards": [
+        {
+          "card_id": "quant-int8-vs-fp16-baseline",
+          "status": "blocked",
+          "workload": "random-online",
+          "comparison_id": "quant-fp16-vs-int8",
+          "point_role": "baseline",
+          "spec_summary": {
+            "model": "Qwen2.5-14B-Instruct",
+            "hardware": "1x910B2",
+            "precision": "FP16"
+          },
+          "metrics": null,
+          "evidence": {
+            "repo_commit": "0000000000000000000000000000000000000000",
+            "artifact_url": "https://github.com/vLLM-HUST/vllm-ascend-quant-hust"
+          },
+          "blocker": "int8-quant-text-14b specialty profile workload placeholder in registry; real int8 workload run pending NPU scheduling."
+        }
+      ]
+    },
+    {
+      "repo_name": "vllm-ascend-hust-LatchMoE",
+      "repo_url": "https://github.com/vLLM-HUST/vllm-ascend-hust-LatchMoE",
+      "coverage_class": "independent-repo",
+      "mechanism_summary": "MoE expert offload, graph compatibility, migration and expert hit rate on Ascend NPU.",
+      "serving_prs": [],
+      "result_cards": [
+        {
+          "card_id": "latchmoe-offload-baseline",
+          "status": "blocked",
+          "workload": "moe-alltoall-online",
+          "comparison_id": "latchmoe-dense-vs-offload",
+          "point_role": "baseline",
+          "spec_summary": {
+            "model": "Qwen3-MoE",
+            "hardware": "multi-NPU",
+            "precision": "BF16"
+          },
+          "metrics": null,
+          "evidence": {
+            "repo_commit": "0000000000000000000000000000000000000000",
+            "artifact_url": "https://github.com/vLLM-HUST/vllm-ascend-hust-LatchMoE"
+          },
+          "blocker": "moe-alltoall-online spec requires multi-card NPU; awaiting multi-NPU resource allocation."
+        }
+      ]
+    },
+    {
+      "repo_name": "adaptive-selector-plugin",
+      "repo_url": "https://github.com/vLLM-HUST/adaptive-selector-plugin",
+      "coverage_class": "independent-repo",
+      "mechanism_summary": "Backend selection accuracy, switching overhead and end-to-end benefit of adaptive backend routing.",
+      "serving_prs": [],
+      "result_cards": [
+        {
+          "card_id": "adaptive-selector-accuracy-baseline",
+          "status": "blocked",
+          "workload": "random-online",
+          "comparison_id": "adaptive-static-vs-adaptive",
+          "point_role": "baseline",
+          "spec_summary": {
+            "model": "Qwen2.5-14B-Instruct",
+            "hardware": "1x910B2",
+            "precision": "BF16"
+          },
+          "metrics": null,
+          "evidence": {
+            "repo_commit": "0000000000000000000000000000000000000000",
+            "artifact_url": "https://github.com/vLLM-HUST/adaptive-selector-plugin"
+          },
+          "blocker": "selection accuracy / switching overhead measurement framework pending; no canonical workload registered yet."
+        }
+      ]
+    }
+  ]
+}
