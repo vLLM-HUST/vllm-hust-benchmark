@@ -147,7 +147,7 @@ def _suspect_section() -> dict:
         "note": "controlled re-test reproduces neither regression",
         "entries": [
             {
-                "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret  # pragma: allowlist secret
+                "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
                 "workload": "sonnet-throughput",
                 "workload_params": {
                     "input_length": 1024,
@@ -162,7 +162,7 @@ def _suspect_section() -> dict:
                 "retest_median_unit": "tok/s",
                 "threshold_pct": 10.0,
                 "status": "invalid-suspect-noise",
-                "retest_base_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",  # pragma: allowlist secret  # pragma: allowlist secret
+                "retest_base_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",  # pragma: allowlist secret
                 "retest_delta_vs_base_commit_pct": 0.24,
             }
         ],
@@ -224,7 +224,7 @@ class TestQuarantineSuspectEntriesValidation:
                     "entry_id": "0d86eb2b-0000-0000-0000-000000000000",
                     "metadata": {
                         "engine_version": "7a63f81",
-                        "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret  # pragma: allowlist secret
+                        "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
                     },
                 }
             ],

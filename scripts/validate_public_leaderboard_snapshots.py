@@ -47,6 +47,12 @@ SNAPSHOT_FILES = (
     "leaderboard_multi.json",
 )
 
+# Files scanned for suspect-commit exclusion enforcement. Unlike SNAPSHOT_FILES
+# (which validates entry lists and requires array payloads), this also includes
+# leaderboard_compare.json — a dict payload that is likewise synced to the public
+# website and must never surface a suspect commit.
+PUBLIC_COMMIT_SCAN_FILES = SNAPSHOT_FILES + ("leaderboard_compare.json",)
+
 # Issue #79 P0a: explicit entry-level quarantine gate.
 # These random-latency records have invalid metrics or mismatched
 # client/server configs and must never re-enter public snapshots.
@@ -319,28 +325,38 @@ def validate_rejected_superseded_report(snapshot_dir: Path) -> list[str]:
     return errors
 
 
-def _iter_hex_strings(obj: Any) -> list[str]:
-    """Yield string values that look like git commit hashes (hex, 7-40 chars)."""
-    found: list[str] = []
+def _find_git_commits(obj: Any) -> set[str]:
+    """Collect full 40-hex ``git_commit`` values referenced anywhere in a public
+    snapshot payload (list or dict).
+
+    Only the dedicated ``git_commit`` field is matched, and only full 40-hex
+    values are collected — no 7-char prefixes and no incidental hex strings
+    (engine_version, URLs, IDs), which avoids spurious failures.
+    """
+    found: set[str] = set()
     if isinstance(obj, dict):
-        for value in obj.values():
-            if isinstance(value, str) and re.fullmatch(r"[0-9a-f]{7,40}", value):
-                found.append(value)
+        for key, value in obj.items():
+            if (
+                key == "git_commit"
+                and isinstance(value, str)
+                and re.fullmatch(r"[0-9a-f]{40}", value)
+            ):
+                found.add(value)
             elif isinstance(value, (dict, list)):
-                found.extend(_iter_hex_strings(value))
+                found |= _find_git_commits(value)
     elif isinstance(obj, list):
         for value in obj:
-            found.extend(_iter_hex_strings(value))
+            found |= _find_git_commits(value)
     return found
 
 
-def _public_snapshot_commit_tokens(snapshot_dir: Path) -> set[str]:
-    """Collect commit tokens (full 40-hex and 7-char prefixes) referenced by
-    public leaderboard snapshot entries, so the quarantine validator can enforce
-    that suspect entries stay excluded from public output.
+def _public_snapshot_commits(snapshot_dir: Path) -> set[str]:
+    """Collect full 40-hex ``git_commit`` values referenced by every public
+    leaderboard snapshot file, so the quarantine validator can enforce that
+    suspect entries stay excluded from public output.
     """
-    tokens: set[str] = set()
-    for name in SNAPSHOT_FILES:
+    commits: set[str] = set()
+    for name in PUBLIC_COMMIT_SCAN_FILES:
         path = snapshot_dir / name
         if not path.is_file():
             continue
@@ -348,15 +364,8 @@ def _public_snapshot_commit_tokens(snapshot_dir: Path) -> set[str]:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             continue
-        entries = payload if isinstance(payload, list) else []
-        for entry in entries:
-            if not isinstance(entry, dict):
-                continue
-            for value in _iter_hex_strings(entry):
-                tokens.add(value)
-                if len(value) >= 7:
-                    tokens.add(value[:7])
-    return tokens
+        commits |= _find_git_commits(payload)
+    return commits
 
 
 def validate_quarantine_suspect_entries(snapshot_dir: Path) -> list[str]:
@@ -422,7 +431,7 @@ def validate_quarantine_suspect_entries(snapshot_dir: Path) -> list[str]:
 
     # Enforce that suspect entries flagged for exclusion never appear in the
     # public leaderboard snapshots (review: "isolation must be consumed").
-    public_commit_tokens = _public_snapshot_commit_tokens(snapshot_dir)
+    public_commits = _public_snapshot_commits(snapshot_dir)
     for key in QUARANTINE_ADDITIVE_SECTIONS:
         section = payload.get(key)
         if not isinstance(section, dict):
@@ -437,7 +446,7 @@ def validate_quarantine_suspect_entries(snapshot_dir: Path) -> list[str]:
             commit = entry.get("git_commit")
             if not isinstance(commit, str):
                 continue
-            if commit in public_commit_tokens or commit[:7] in public_commit_tokens:
+            if commit in public_commits:
                 errors.append(
                     f"{quarantine_path.name}:{key}: suspect commit {commit[:12]} "
                     f"must stay excluded from public snapshots but was found present"
