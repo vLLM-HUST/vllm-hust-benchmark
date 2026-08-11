@@ -425,8 +425,14 @@ for attempt in $(seq 1 "$SNAPSHOT_MAX_PUSH_ATTEMPTS"); do
       write_github_env GITHUB_SNAPSHOT_SYNC_STATUS unchanged
       write_github_env GITHUB_SNAPSHOT_SYNC_COMMIT "$remote_commit"
       write_publication_identity
-      verify_published_state "$remote_commit"
-      exit 0
+      if verify_published_state "$remote_commit"; then
+        exit 0
+      else
+        verification_status=$?
+        write_github_env GITHUB_SNAPSHOT_SYNC_VERIFICATION failed
+        echo "official baseline publication unchanged, but verification failed for $remote_commit" >&2
+        exit "$verification_status"
+      fi
     fi
     write_github_env GITHUB_SNAPSHOT_SYNC_STATUS rejected
     exit "$prepare_status"
@@ -434,4 +440,5 @@ for attempt in $(seq 1 "$SNAPSHOT_MAX_PUSH_ATTEMPTS"); do
 done
 
 echo "failed to push official baseline publication after $SNAPSHOT_MAX_PUSH_ATTEMPTS attempts" >&2
+write_github_env GITHUB_SNAPSHOT_SYNC_STATUS failed
 exit 1

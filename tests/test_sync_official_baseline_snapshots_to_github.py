@@ -201,6 +201,22 @@ def _create_fetch_exhaustion_git(tmp_path: Path) -> Path:
     return fake_git
 
 
+def _create_push_exhaustion_git(tmp_path: Path) -> Path:
+    fake_git = tmp_path / "fake-bin" / "git"
+    fake_git.parent.mkdir(exist_ok=True)
+    fake_git.write_text(
+        "#!/bin/bash\n"
+        "set -euo pipefail\n"
+        'for argument in "$@"; do\n'
+        '  if [[ "$argument" == push ]]; then exit 1; fi\n'
+        "done\n"
+        'exec "$REAL_GIT" "$@"\n',
+        encoding="utf-8",
+    )
+    fake_git.chmod(0o755)
+    return fake_git
+
+
 def _create_target_repo(tmp_path: Path) -> tuple[Path, Path]:
     remote_repo = tmp_path / "benchmark-remote.git"
     _run(["git", "init", "--bare", "--initial-branch=main", str(remote_repo)])
@@ -480,6 +496,84 @@ def test_sync_reports_pushed_but_failed_when_verification_fetch_is_exhausted(
     github_values = github_env.read_text(encoding="utf-8")
     assert "GITHUB_SNAPSHOT_SYNC_STATUS=pushed" in github_values
     assert "GITHUB_SNAPSHOT_SYNC_VERIFICATION=failed" in github_values
+
+
+def test_sync_reports_failed_when_unchanged_verification_fails(tmp_path: Path) -> None:
+    source_repo = tmp_path / "benchmark-source"
+    source_repo.mkdir()
+    run_id = "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+    _write_submission(source_repo, run_id, "Qwen2.5-14B-Instruct")
+    _, target_repo = _create_target_repo(tmp_path)
+    website_repo = _create_dummy_website_repo(tmp_path)
+    first_env = _script_env(
+        ALLOW_LOCAL_GIT_RESET="1",
+        SOURCE_BENCHMARK_REPO_DIR=str(source_repo),
+        TARGET_BENCHMARK_REPO_DIR=str(target_repo),
+        WEBSITE_REPO_DIR=str(website_repo),
+        PYTHON_BIN=_create_fake_python(tmp_path),
+        ARTIFACT_VALIDATOR=str(_create_artifact_validator(tmp_path)),
+    )
+    first_run = _run(["bash", str(SYNC_SCRIPT)], env=first_env, check=False)
+    assert first_run.returncode == 0, first_run.stderr
+
+    github_env = tmp_path / "github.env"
+    fake_git = _create_failing_verify_git(tmp_path)
+    env = _script_env(
+        ALLOW_LOCAL_GIT_RESET="1",
+        SOURCE_BENCHMARK_REPO_DIR=str(source_repo),
+        TARGET_BENCHMARK_REPO_DIR=str(target_repo),
+        WEBSITE_REPO_DIR=str(website_repo),
+        PYTHON_BIN=_create_fake_python(tmp_path),
+        ARTIFACT_VALIDATOR=str(_create_artifact_validator(tmp_path)),
+        PATH=f"{fake_git.parent}:{os.environ['PATH']}",
+        REAL_GIT=shutil.which("git") or "git",
+        SNAPSHOT_MAX_FETCH_ATTEMPTS="1",
+        GITHUB_ENV=str(github_env),
+    )
+    completed = _run(["bash", str(SYNC_SCRIPT)], env=env, check=False)
+
+    assert completed.returncode != 0
+    github_values = dict(
+        line.split("=", maxsplit=1)
+        for line in github_env.read_text(encoding="utf-8").splitlines()
+    )
+    assert github_values["GITHUB_SNAPSHOT_SYNC_STATUS"] == "unchanged"
+    assert github_values["GITHUB_SNAPSHOT_SYNC_VERIFICATION"] == "failed"
+
+
+def test_sync_reports_failed_when_push_retries_are_exhausted(tmp_path: Path) -> None:
+    source_repo = tmp_path / "benchmark-source"
+    source_repo.mkdir()
+    _write_submission(
+        source_repo,
+        "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3",
+        "Qwen2.5-14B-Instruct",
+    )
+    _, target_repo = _create_target_repo(tmp_path)
+    website_repo = _create_dummy_website_repo(tmp_path)
+    fake_git = _create_push_exhaustion_git(tmp_path)
+    github_env = tmp_path / "github.env"
+    env = _script_env(
+        ALLOW_LOCAL_GIT_RESET="1",
+        SOURCE_BENCHMARK_REPO_DIR=str(source_repo),
+        TARGET_BENCHMARK_REPO_DIR=str(target_repo),
+        WEBSITE_REPO_DIR=str(website_repo),
+        PYTHON_BIN=_create_fake_python(tmp_path),
+        ARTIFACT_VALIDATOR=str(_create_artifact_validator(tmp_path)),
+        PATH=f"{fake_git.parent}:{os.environ['PATH']}",
+        REAL_GIT=shutil.which("git") or "git",
+        SNAPSHOT_MAX_PUSH_ATTEMPTS="2",
+        SNAPSHOT_PUSH_RETRY_SECONDS="0",
+        GITHUB_ENV=str(github_env),
+    )
+    completed = _run(["bash", str(SYNC_SCRIPT)], env=env, check=False)
+
+    assert completed.returncode != 0
+    github_values = dict(
+        line.split("=", maxsplit=1)
+        for line in github_env.read_text(encoding="utf-8").splitlines()
+    )
+    assert github_values["GITHUB_SNAPSHOT_SYNC_STATUS"] == "failed"
 
 
 def test_sync_official_baseline_snapshots_to_github_can_skip_empty_source(
