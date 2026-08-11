@@ -14,5 +14,12 @@ must not use this directory as a fallback.
 
 The machine-readable mapping is in `index.json`.
 
+Validate the mapping against the archived and retained repository data with:
+
+```bash
+python scripts/verify_superseded_coexistence_migration.py \
+  --index archive/suspect/superseded-coexistence-historical-pr-backfill-20260811/index.json
+```
+
 The migration preserves the archived directories' original files and checksum manifests. The added
 `README.md` files are explanatory metadata and are not part of the original manifests.
