@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -46,6 +47,12 @@ SNAPSHOT_FILES = (
     "leaderboard_multi.json",
 )
 
+# Files scanned for suspect-commit exclusion enforcement. Unlike SNAPSHOT_FILES
+# (which validates entry lists and requires array payloads), this also includes
+# leaderboard_compare.json — a dict payload that is likewise synced to the public
+# website and must never surface a suspect commit.
+PUBLIC_COMMIT_SCAN_FILES = SNAPSHOT_FILES + ("leaderboard_compare.json",)
+
 # Issue #79 P0a: explicit entry-level quarantine gate.
 # These random-latency records have invalid metrics or mismatched
 # client/server configs and must never re-enter public snapshots.
@@ -68,6 +75,13 @@ REJECTED_SUPERSEDED_REPORT_REQUIRED_FIELDS = (
     "excluded_plugin_commits",
 )
 REJECTED_SUPERSEDED_REPORT_SCHEMA_VERSION = "rejected-superseded-report/v1"
+
+QUARANTINE_FILE = "quarantine_leaderboard_entries.json"
+QUARANTINE_SUSPECT_SCHEMA = (
+    REPO_ROOT / "schemas" / "quarantine_suspect_entries_v2.schema.json"
+)
+QUARANTINE_SUSPECT_SCHEMA_VERSION = "issue-146-suspect/v2"
+QUARANTINE_ADDITIVE_SECTIONS = ("issue_146_suspect_entries",)
 
 
 def parse_args() -> argparse.Namespace:
@@ -311,6 +325,209 @@ def validate_rejected_superseded_report(snapshot_dir: Path) -> list[str]:
     return errors
 
 
+def _full_hex_git_commit(value: Any) -> str | None:
+    """Return ``value`` if it is a full 40-hex git commit string, else ``None``.
+
+    Only full 40-hex values are accepted — no 7-char prefixes and no incidental
+    hex strings (engine_version, URLs, IDs), which avoids spurious failures.
+    """
+    if isinstance(value, str) and re.fullmatch(r"[0-9a-f]{40}", value):
+        return value
+    return None
+
+
+def _workload_name(value: Any) -> str | None:
+    """Resolve the workload label from a public snapshot entry/scope.
+
+    ``workload`` may be a bare string (e.g. ``leaderboard_compare.json`` scopes)
+    or an object with a ``name`` field (e.g. leaderboard entry records).
+    """
+    if isinstance(value, dict):
+        name = value.get("name")
+        return name if isinstance(name, str) else None
+    if isinstance(value, str):
+        return value
+    return None
+
+
+def _commit_pairs_in_payload(name: str, payload: Any) -> set[tuple[str | None, str]]:
+    """Collect ``(workload, git_commit)`` pairs from one public snapshot payload.
+
+    Handles the two payload shapes synced to the public website:
+
+    - ``leaderboard_compare.json``: a dict with ``scopes[]`` where each scope
+      carries ``scope.workload`` and ``latest``/``previous`` ``git_commit``.
+    - Entry-list files (leaderboard_single/multi.json): array of entries with
+      ``workload.name`` and ``metadata.git_commit``.
+    """
+    pairs: set[tuple[str | None, str]] = set()
+    if name == "leaderboard_compare.json":
+        scopes = payload.get("scopes") if isinstance(payload, dict) else None
+        for scope_block in scopes or []:
+            if not isinstance(scope_block, dict):
+                continue
+            workload = _workload_name(scope_block.get("scope"))
+            for slot in ("latest", "previous"):
+                block = scope_block.get(slot)
+                if not isinstance(block, dict):
+                    continue
+                commit = _full_hex_git_commit(block.get("git_commit"))
+                if commit is not None:
+                    pairs.add((workload, commit))
+    else:
+        for entry in payload if isinstance(payload, list) else []:
+            if not isinstance(entry, dict):
+                continue
+            workload = _workload_name(entry.get("workload"))
+            metadata = (
+                entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+            )
+            commit = _full_hex_git_commit(metadata.get("git_commit"))
+            if commit is not None:
+                pairs.add((workload, commit))
+    return pairs
+
+
+def _public_snapshot_commit_pairs(snapshot_dir: Path) -> set[tuple[str | None, str]]:
+    """Collect ``(workload, git_commit)`` pairs referenced by every public
+    leaderboard snapshot file, so the quarantine validator can enforce that
+    suspect (commit, workload) pairs stay excluded from public output.
+    """
+    pairs: set[tuple[str | None, str]] = set()
+    for name in PUBLIC_COMMIT_SCAN_FILES:
+        path = snapshot_dir / name
+        if not path.is_file():
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        pairs |= _commit_pairs_in_payload(name, payload)
+    return pairs
+
+
+def validate_quarantine_suspect_entries(snapshot_dir: Path) -> list[str]:
+    """Validate the additive ``issue_146_suspect_entries`` audit section of the
+    quarantine file against its JSON schema.
+
+    The section is purely additive (it does not change the issue-105
+    ``quarantined_entries`` semantics), so an absent section is acceptable.
+    When present, every entry must carry full 40-hex commit provenance and a
+    retest delta relative to an explicit base commit.
+    """
+    errors: list[str] = []
+    quarantine_path = snapshot_dir / QUARANTINE_FILE
+    if not quarantine_path.is_file():
+        return errors
+
+    try:
+        payload = json.loads(quarantine_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        errors.append(f"invalid JSON in {quarantine_path}: {exc}")
+        return errors
+
+    if not isinstance(payload, dict):
+        errors.append(f"{quarantine_path.name}: payload must be a JSON object")
+        return errors
+
+    schema_payload: dict[str, Any] | None = None
+    if QUARANTINE_SUSPECT_SCHEMA.is_file():
+        try:
+            schema_payload = json.loads(
+                QUARANTINE_SUSPECT_SCHEMA.read_text(encoding="utf-8")
+            )
+        except json.JSONDecodeError:
+            schema_payload = None
+
+    for key in QUARANTINE_ADDITIVE_SECTIONS:
+        section = payload.get(key)
+        if section is None:
+            continue
+        if not isinstance(section, dict):
+            errors.append(f"{quarantine_path.name}:{key} must be a JSON object")
+            continue
+        section_version = section.get("schema_version")
+        if section_version != QUARANTINE_SUSPECT_SCHEMA_VERSION:
+            errors.append(
+                f"{quarantine_path.name}:{key} schema_version must be "
+                f"{QUARANTINE_SUSPECT_SCHEMA_VERSION!r}, got {section_version!r}"
+            )
+        if schema_payload is not None:
+            try:
+                import jsonschema
+
+                jsonschema.validate(instance=section, schema=schema_payload)
+            except ImportError:
+                errors.extend(_structural_suspect_checks(section, quarantine_path, key))
+            except jsonschema.ValidationError as exc:
+                errors.append(
+                    f"{quarantine_path.name}:{key} schema validation error: "
+                    f"{exc.message}"
+                )
+        else:
+            errors.extend(_structural_suspect_checks(section, quarantine_path, key))
+
+    # Enforce that suspect entries flagged for exclusion never appear in the
+    # public leaderboard snapshots (review: "isolation must be consumed"). The
+    # match is workload-aware: only the exact (commit, workload) pair is blocked,
+    # so the same commit under a non-suspect workload is not a false positive.
+    public_pairs = _public_snapshot_commit_pairs(snapshot_dir)
+    for key in QUARANTINE_ADDITIVE_SECTIONS:
+        section = payload.get(key)
+        if not isinstance(section, dict):
+            continue
+        section_action = section.get("action")
+        for entry in section.get("entries") or []:
+            if not isinstance(entry, dict):
+                continue
+            status = entry.get("status")
+            if status != "invalid-suspect-noise" and section_action != "exclude":
+                continue
+            commit = _full_hex_git_commit(entry.get("git_commit"))
+            workload = _workload_name(entry.get("workload"))
+            if commit is None:
+                continue
+            if (workload, commit) in public_pairs:
+                errors.append(
+                    f"{quarantine_path.name}:{key}: suspect entry "
+                    f"{workload!r} @ {commit[:12]} must stay excluded from "
+                    f"public snapshots but was found present"
+                )
+    return errors
+
+
+def _structural_suspect_checks(
+    section: dict[str, Any], quarantine_path: Path, key: str
+) -> list[str]:
+    """Structural fallback checks used when ``jsonschema`` is unavailable."""
+    errors: list[str] = []
+    for required in ("conclusion", "action", "note", "entries"):
+        if required not in section:
+            errors.append(
+                f"{quarantine_path.name}:{key} missing required field {required!r}"
+            )
+    entries = section.get("entries")
+    if not isinstance(entries, list) or not entries:
+        errors.append(f"{quarantine_path.name}:{key} entries must be a non-empty array")
+        return errors
+    for entry in entries:
+        if not isinstance(entry, dict):
+            errors.append(f"{quarantine_path.name}:{key} entry must be an object")
+            continue
+        for field in ("git_commit", "retest_base_commit"):
+            value = entry.get(field)
+            if not isinstance(value, str) or len(value) != 40:
+                errors.append(
+                    f"{quarantine_path.name}:{key} entry missing 40-hex {field!r}"
+                )
+        if "retest_delta_vs_base_commit_pct" not in entry:
+            errors.append(
+                f"{quarantine_path.name}:{key} entry missing "
+                "retest_delta_vs_base_commit_pct"
+            )
+    return errors
+
+
 def main() -> int:
     args = parse_args()
     snapshot_dir = Path(args.snapshot_dir)
@@ -351,6 +568,7 @@ def main() -> int:
                 hash_fingerprints[spec_hash] = (fingerprint, source_label)
 
     errors.extend(validate_rejected_superseded_report(snapshot_dir))
+    errors.extend(validate_quarantine_suspect_entries(snapshot_dir))
 
     if errors:
         print("public leaderboard snapshot validation failed:")

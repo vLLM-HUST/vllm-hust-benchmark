@@ -607,20 +607,39 @@ def main() -> int:
     # entries that were removed from the public snapshot, for audit without
     # rescanning submissions/ directories.
     quarantine_entries = [e for e in pre_cleanup if _classify_entry(e)[1] != "keep"]
-    quarantine_report = {
-        "schema_version": "quarantine-leaderboard-entries/v1",
+    # Carry forward additive audit sections (e.g. issue_146_suspect_entries) from
+    # a previously generated quarantine file so they survive regeneration.
+    quarantine_path = snapshot_dir / "quarantine_leaderboard_entries.json"
+    additive_sections: dict[str, Any] = {}
+    if quarantine_path.is_file():
+        try:
+            prior = json.loads(quarantine_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            prior = None
+        if isinstance(prior, dict):
+            for key in ("issue_146_suspect_entries",):
+                if key in prior:
+                    additive_sections[key] = prior[key]
+    suspect_entries = additive_sections.get("issue_146_suspect_entries")
+    quarantine_report: dict[str, Any] = {
+        "schema_version": "quarantine-leaderboard-entries/v2",
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "source_file": str(single_path.relative_to(REPO_ROOT))
         if single_path.is_relative_to(REPO_ROOT)
         else str(single_path),
         "quarantined_count": len(quarantine_entries),
-        "policy": (
-            "Issue #105: entries not matching active fixed-target specs are "
-            "removed from public leaderboard snapshots but preserved here for "
-            "audit. Original submission artifacts remain in submissions/ dirs."
-        ),
-        "quarantined_entries": quarantine_entries,
     }
+    if isinstance(suspect_entries, dict):
+        quarantine_report["suspect_entries_count"] = len(
+            suspect_entries.get("entries") or []
+        )
+    quarantine_report["policy"] = (
+        "Issue #105: entries not matching active fixed-target specs are "
+        "removed from public leaderboard snapshots but preserved here for "
+        "audit. Original submission artifacts remain in submissions/ dirs."
+    )
+    quarantine_report["quarantined_entries"] = quarantine_entries
+    quarantine_report.update(additive_sections)
     (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
         json.dumps(quarantine_report, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
