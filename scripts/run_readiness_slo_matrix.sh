@@ -164,6 +164,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# CLI_COMPAT is defaulted from BENCHMARK_REPO above, but BENCHMARK_REPO is only
+# finalized by --benchmark-repo during arg parsing. If the user passed
+# --benchmark-repo (or VLLM_HUST_BENCHMARK_REPO env) without an explicit
+# --cli-compat / VLLM_HUST_CLI_COMPAT, recompute CLI_COMPAT so it points at the
+# resolved benchmark repo instead of the pre-parse default (e.g. $(pwd)).
+if [[ -z "${VLLM_HUST_CLI_COMPAT:-}" ]]; then
+    CLI_COMPAT="${BENCHMARK_REPO}/scripts/run_vllm_cli_compat.py"
+fi
+
 # ---------------------------------------------------------------------------
 # Validate inputs (fail-closed).
 # ---------------------------------------------------------------------------
@@ -442,6 +451,28 @@ stop_server() {
         sleep 1
         wait_attempts=$((wait_attempts + 1))
     done
+    # Precise residual cleanup. vllm's multiprocessing spawn can re-launch the
+    # `-m vllm.entrypoints.openai.api_server` launcher (and its engine children)
+    # into a NEW process group, so `kill -- -PGID` above may not reach them.
+    # The smoke run for issue #135 observed exactly this: a launcher process
+    # survived the process-group kill and kept HBM allocated on the chip.
+    # Clean up any remaining vllm server process bound to OUR ${PORT}. The
+    # pattern is anchored on `api_server`, NOT a bare `vllm`, so this does NOT
+    # match this runner script itself (its cmdline contains a `vllm` path and
+    # `--port ${PORT}` but no `api_server`). Scoping on `--port ${PORT}` keeps
+    # this precise to this server and avoids killing other tenants' servers on
+    # other ports (per project memory: use precise cleanup, never broad pkill).
+    local residual_pids
+    residual_pids="$(pgrep -f "api_server.*--port ${PORT}" 2>/dev/null || true)"
+    if [[ -n "${residual_pids}" ]]; then
+        echo "WARN: killing residual vllm processes on port ${PORT}: ${residual_pids}" >&2
+        # shellcheck disable=SC2086
+        for pid in ${residual_pids}; do
+            kill -9 "${pid}" 2>/dev/null || true
+        done
+        # Give the killed processes a moment to release HBM.
+        sleep 3
+    fi
 }
 
 # ---------------------------------------------------------------------------
