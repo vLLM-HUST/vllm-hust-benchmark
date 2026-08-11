@@ -15,6 +15,7 @@ from vllm_hust_benchmark.official_targets import (
     generated_outputs,
     render_active_targets,
 )
+from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -61,6 +62,18 @@ def test_perfgate_never_appears_as_active_public_target() -> None:
     assert perfgate
     assert {target["status"] for target in perfgate} == {"provisional"}
     assert all(target["model"]["parameters"] == "3B" for target in perfgate)
+
+
+def test_prefix_repetition_targets_reuse_each_prefix_at_least_twice() -> None:
+    for target in build_registry(REPO_ROOT)["targets"]:
+        client = target["workload"]["client_parameters"]
+        if client.get("dataset_name") != "prefix_repetition":
+            continue
+        num_prefixes = client.get(
+            "prefix_repetition_num_prefixes",
+            PREFIX_REPETITION_DEFAULT_NUM_PREFIXES,
+        )
+        assert client["num_prompts"] // num_prefixes >= 2
 
 
 def test_source_spec_hashes_match() -> None:

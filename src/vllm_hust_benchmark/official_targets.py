@@ -6,8 +6,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
+
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.4.0"
+REGISTRY_VERSION = "1.3.2"
 EFFECTIVE_FROM = "2026-08-11"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
@@ -141,6 +143,25 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
         raise ValueError(f"public target must use vLLM-Ascend v0.18.0: {path}")
 
 
+def _validate_prefix_repetition_workload(spec: dict[str, Any], path: Path) -> None:
+    client = spec["client_parameters"]
+    if client.get("dataset_name") != "prefix_repetition":
+        return
+
+    num_prompts = int(client.get("num_prompts", 0))
+    num_prefixes = int(
+        client.get(
+            "prefix_repetition_num_prefixes",
+            PREFIX_REPETITION_DEFAULT_NUM_PREFIXES,
+        )
+    )
+    if num_prompts < 1 or num_prefixes < 1 or num_prompts // num_prefixes < 2:
+        raise ValueError(
+            f"prefix-repetition target {path} must reuse each prefix at least twice: "
+            f"num_prompts={num_prompts}, num_prefixes={num_prefixes}"
+        )
+
+
 def _source_set_sha256(targets: list[dict[str, Any]]) -> str:
     sources = sorted(
         (target["source_spec"] for target in targets), key=lambda source: source["path"]
@@ -190,6 +211,7 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
     targets: list[dict[str, Any]] = []
     for path in spec_paths:
         spec = _load_spec(path)
+        _validate_prefix_repetition_workload(spec, path)
         intended_use, status, profile = _classify_spec(path, spec)
         if status == "active":
             _validate_public_target(spec, path)

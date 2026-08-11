@@ -139,6 +139,16 @@ observed_core_commit = _git_commit(_env("CURRENT_VLLM_HUST_REPO"))
 observed_backend_commit = _git_commit(_env("CURRENT_VLLM_ASCEND_HUST_REPO"))
 package_versions = _runtime_package_versions()
 
+official_source_provenance = {}
+provenance_path = os.environ.get("OFFICIAL_SOURCE_PROVENANCE_FILE", "")
+if provenance_path:
+    try:
+        candidate = json.loads(Path(provenance_path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        candidate = None
+    if isinstance(candidate, dict):
+        official_source_provenance = candidate
+
 manifest = {
     "manifest_version": "run-env-manifest/v2",
     "collected_at": _run(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"]),
@@ -192,6 +202,8 @@ manifest = {
         "benchmark": _git_commit(_env("BENCHMARK_REPO_ROOT")),
     },
 }
+if official_source_provenance:
+    manifest["official_source_provenance"] = official_source_provenance
 
 # Use the explicit pip-packages.json file rather than embedding a second copy
 manifest["pip_packages"] = "see pip-packages.json"
