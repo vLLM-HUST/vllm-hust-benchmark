@@ -2439,6 +2439,13 @@ def run_vllm_bench(
     return raw
 
 
+def _official_spec_path(workload: str) -> Path:
+    """Resolve the official baseline spec file for a backfill workload."""
+    model_tag = "qwen25-coder-14b" if "instructcoder" in workload else "qwen25-14b"
+    spec_name = f"official-ascend-jan-2026-v0180-{workload}-{model_tag}-910b2.json"
+    return REPO_ROOT / "docs" / "official-baselines" / spec_name
+
+
 def _generate_same_spec(workload: str) -> dict[str, Any]:
     """Generate a same_spec payload matching the official baseline hash.
 
@@ -2448,9 +2455,7 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
     that exact logic so the ``resolved_spec_hash`` matches the official
     baseline, enabling leaderboard goal-progress pairing.
     """
-    model_tag = "qwen25-coder-14b" if "instructcoder" in workload else "qwen25-14b"
-    spec_name = f"official-ascend-jan-2026-v0180-{workload}-{model_tag}-910b2.json"
-    spec_path = REPO_ROOT / "docs" / "official-baselines" / spec_name
+    spec_path = _official_spec_path(workload)
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
 
     # ------------------------------------------------------------------
@@ -2738,6 +2743,8 @@ def submit_artifact(
         str(constraints),
         "--same-spec-file",
         str(same_spec_file),
+        "--spec-path",
+        str(_official_spec_path(workload)),
         "--run-id",
         run_id,
         "--engine",
