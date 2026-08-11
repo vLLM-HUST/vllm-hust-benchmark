@@ -97,8 +97,7 @@ def test_perfgate_prefix_repetition_online_spec_is_available_for_ci() -> None:
     assert spec["client_parameters"]["output_len"] == 64
     assert same_spec["scenario"] == "prefix-repetition-online"
     assert (
-        same_spec["resolved_client_parameters"]["prefix_repetition_num_prefixes"]
-        == 8
+        same_spec["resolved_client_parameters"]["prefix_repetition_num_prefixes"] == 8
     )
     assert (
         same_spec["resolved_client_parameters"]["prefix_repetition_prefix_len"] == 768
