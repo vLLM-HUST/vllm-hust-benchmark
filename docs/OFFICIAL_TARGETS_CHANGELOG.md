@@ -2,6 +2,14 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.1 — 2026-08-11
+
+- English: Align the provisional prefix-repetition workload with its request count and ensure each
+  prefix is reused at least twice.
+- 中文：确保 provisional prefix-repetition workload 中每个前缀至少复用两次。
+- Source set: `237b1cf782ba1f073dfa9d1a63b278414aefd92ff774857982e140a3c7799110`
+- Supersedes: `1.3.0`
+
 ## 1.3.0 — 2026-08-03
 
 - English: Revert non-executable specialty specs to non-executable drafts: remove unsupported vLLM
