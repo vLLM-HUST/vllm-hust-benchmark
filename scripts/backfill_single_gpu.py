@@ -618,6 +618,37 @@ def select_idle_npu() -> int | None:
 # ---------------------------------------------------------------------------
 
 
+def _branch_for_commit(repo: Path, commit: str) -> str | None:
+    """Return a local branch whose tip is ``commit``, preferring the current one.
+
+    Checking out a bare SHA leaves the repo in detached-HEAD state.  When the
+    target commit is the tip of a local branch (e.g. restore targets recorded
+    in state.json), checking out the branch name instead keeps HEAD attached.
+    """
+    r = subprocess.run(
+        ["git", "branch", "--points-at", commit, "--format=%(refname:short)"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if r.returncode != 0:
+        return None
+    candidates = [line.strip() for line in r.stdout.splitlines() if line.strip()]
+    if not candidates:
+        return None
+    current = subprocess.run(
+        ["git", "branch", "--show-current"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout.strip()
+    if current in candidates:
+        return current
+    return candidates[0]
+
+
 def git_checkout(repo: Path, commit: str) -> None:
     # Only fetch from remote if the commit is not already available locally.
     # This avoids blocking on slow/unreachable GitHub connections when the
@@ -631,9 +662,12 @@ def git_checkout(repo: Path, commit: str) -> None:
     )
     if r.returncode != 0:
         subprocess.run(["git", "fetch", "--all", "--quiet"], cwd=repo, check=False)
+    # Prefer a branch whose tip matches the commit so HEAD stays attached;
+    # fall back to the raw SHA (detached) for historical commits.
+    target = _branch_for_commit(repo, commit) or commit
     # Force checkout to discard any local modifications (e.g. from
     # install_ascend_plugin) that would block the checkout.
-    subprocess.run(["git", "checkout", "-fq", commit], cwd=repo, check=False)
+    subprocess.run(["git", "checkout", "-fq", target], cwd=repo, check=False)
     # If the commit is still not local, fetch and retry.
     head = current_head(repo)
     if not head.startswith(commit):
