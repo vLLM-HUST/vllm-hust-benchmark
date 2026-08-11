@@ -2,6 +2,14 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.1 — 2026-08-11
+
+- English: Align the provisional prefix-repetition workload with its request count by setting eight
+  repeated prefixes for eight prompts.
+- 中文：将 provisional prefix-repetition workload 与请求数量对齐：8 个请求使用 8 个重复前缀。
+- Source set: `d44a084792b2a33218f19ea070870405c7684cae518a2e7ccbee77d69fda2e76`
+- Supersedes: `1.3.0`
+
 ## 1.3.0 — 2026-08-03
 
 - English: Revert non-executable specialty specs to non-executable drafts: remove unsupported vLLM
