@@ -202,6 +202,58 @@ def test_matrix_script_accepts_partial_successful_repeats(tmp_path: Path) -> Non
     assert "Failed specs: 0" in summary_text
 
 
+def test_matrix_rejects_mixed_official_source_tuples(tmp_path: Path) -> None:
+    specs_dir = tmp_path / "specs"
+    specs_dir.mkdir()
+    first = specs_dir / "first.json"
+    second = specs_dir / "second.json"
+    first.write_text(
+        json.dumps(
+            {
+                "id": "first",
+                "scenario": "random-online",
+                "baseline_target": {
+                    "vllm_ref": "v0.18.0",
+                    "vllm_ascend_ref": "v0.18.0",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    second.write_text(
+        json.dumps(
+            {
+                "id": "second",
+                "scenario": "random-online",
+                "baseline_target": {"vllm_ref": "main", "vllm_ascend_ref": "main"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    prepare_stub = tmp_path / "prepare.sh"
+    runner_stub = tmp_path / "runner.sh"
+    _write_prepare_stub(prepare_stub)
+    _write_runner_stub(
+        runner_stub, call_log=tmp_path / "calls.log", fail_repeat_names=()
+    )
+
+    completed = _run_matrix(
+        specs_dir,
+        {
+            "GOAL_BASELINE_ENV_PREFIX": "/tmp/fake-official-env",
+            "PREPARE_SCRIPT": str(prepare_stub),
+            "SINGLE_RUNNER": str(runner_stub),
+            "PREPARE_OFFICIAL_ENV": "0",
+            "CANONICAL_SUBMISSIONS_ROOT": str(tmp_path / "submissions"),
+            "MATRIX_RESULT_ROOT": str(tmp_path / "results"),
+            "PYTHON_BIN": sys.executable,
+        },
+    )
+
+    assert completed.returncode == 2
+    assert "mixed source tuples" in completed.stderr
+
+
 def test_matrix_script_uses_published_canonical_root_for_resume(tmp_path: Path) -> None:
     spec_id = "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
     spec_file = tmp_path / "spec.json"

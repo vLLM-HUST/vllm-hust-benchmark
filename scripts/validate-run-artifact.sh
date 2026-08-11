@@ -180,6 +180,38 @@ PY
       echo "  $FROZEN_INPUT_ERRORS" >&2
       check "formal campaign frozen provenance is complete" 1
     fi
+
+    OFFICIAL_SOURCE_ERRORS=$(python3 - <<'PY' || echo "parse-error"
+import json
+
+manifest = json.load(open("env-manifest.json", encoding="utf-8"))
+payload = manifest.get("official_source_provenance")
+if not payload:
+    raise SystemExit(0)
+
+errors = []
+if payload.get("schema_version") != "official-source-provenance/v1":
+    errors.append("unsupported official source provenance schema")
+for role in ("engine", "plugin"):
+    source = (payload.get("sources") or {}).get(role) or {}
+    for field in ("repository", "requested_ref", "observed_commit", "tracked_patch_sha256", "working_tree_sha256", "status"):
+        if not source.get(field):
+            errors.append(f"official_source_provenance.{role}.{field} is empty")
+    if source.get("status") not in ("clean", "modified"):
+        errors.append(f"official_source_provenance.{role}.status is invalid")
+    if source.get("status") == "modified" and not source.get("tracked_patch_sha256"):
+        errors.append(f"official_source_provenance.{role} modified without patch digest")
+    if source.get("status") == "modified" and not source.get("working_tree_sha256"):
+        errors.append(f"official_source_provenance.{role} modified without tree digest")
+print("; ".join(errors))
+PY
+)
+    if [[ -z "$OFFICIAL_SOURCE_ERRORS" ]]; then
+      check "official source provenance is complete" 0
+    else
+      echo "  $OFFICIAL_SOURCE_ERRORS" >&2
+      check "official source provenance is complete" 1
+    fi
   else
     check "env-manifest.json is valid JSON" 1
   fi

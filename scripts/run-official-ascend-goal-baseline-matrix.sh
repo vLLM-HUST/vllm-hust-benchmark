@@ -132,6 +132,11 @@ print(get_official_baseline_spec_id(load_official_baseline_spec(Path(sys.argv[1]
 PY
 }
 
+resolve_source_tuple() {
+  local spec_file=$1
+  jq -er '[.baseline_target.vllm_ref // "v0.18.0", .baseline_target.vllm_ascend_ref // "v0.18.0"] | @tsv' "$spec_file"
+}
+
 resolve_canonical_dir() {
   local spec_file=$1
   PYTHONPATH="$REPO_ROOT/src${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" - <<'PY' "$spec_file" "$CANONICAL_SUBMISSIONS_ROOT"
@@ -433,6 +438,17 @@ if [[ ${#SPEC_FILES[@]} -eq 0 ]]; then
   exit 2
 fi
 
+SOURCE_TUPLE=""
+for spec_file in "${SPEC_FILES[@]}"; do
+  spec_source_tuple=$(resolve_source_tuple "$spec_file")
+  if [[ -z "$SOURCE_TUPLE" ]]; then
+    SOURCE_TUPLE="$spec_source_tuple"
+  elif [[ "$spec_source_tuple" != "$SOURCE_TUPLE" ]]; then
+    echo "Official baseline matrix contains mixed source tuples: $SOURCE_TUPLE vs $spec_source_tuple ($spec_file)" >&2
+    exit 2
+  fi
+done
+
 echo "[official-baseline-matrix] result root: $MATRIX_RESULT_ROOT"
 echo "[official-baseline-matrix] canonical submissions root: $CANONICAL_SUBMISSIONS_ROOT"
 echo "[official-baseline-matrix] sticky Ascend device preference file: $MATRIX_DEVICE_PREFERENCE_FILE"
@@ -444,6 +460,7 @@ append_summary "- Sticky Ascend device preference file: $MATRIX_DEVICE_PREFERENC
 append_summary "- Existing canonical submissions root: $EXISTING_CANONICAL_SUBMISSIONS_ROOT"
 append_summary "- Force rerun existing canonical: $FORCE_RUN_EXISTING"
 append_summary "- Repeat count for missing canonical specs: $REPEAT_COUNT"
+append_summary "- Immutable source tuple: $SOURCE_TUPLE"
 
 for spec_file in "${SPEC_FILES[@]}"; do
   spec_slug=$(slugify "$spec_file")
