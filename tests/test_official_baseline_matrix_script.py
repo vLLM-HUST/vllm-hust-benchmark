@@ -202,7 +202,9 @@ def test_matrix_script_accepts_partial_successful_repeats(tmp_path: Path) -> Non
     assert "Failed specs: 0" in summary_text
 
 
-def test_matrix_rejects_mixed_official_source_tuples(tmp_path: Path) -> None:
+def test_matrix_accepts_mixed_official_source_tuples_as_independent_specs(
+    tmp_path: Path,
+) -> None:
     specs_dir = tmp_path / "specs"
     specs_dir.mkdir()
     first = specs_dir / "first.json"
@@ -232,7 +234,13 @@ def test_matrix_rejects_mixed_official_source_tuples(tmp_path: Path) -> None:
     )
     prepare_stub = tmp_path / "prepare.sh"
     runner_stub = tmp_path / "runner.sh"
-    _write_prepare_stub(prepare_stub)
+    prepare_log = tmp_path / "prepare.log"
+    prepare_stub.write_text(
+        f"#!{bash_executable()}\n"
+        f'printf \'%s\\t%s\\n\' "$OFFICIAL_VLLM_REF" "$OFFICIAL_VLLM_WORKTREE" >> {prepare_log}\n',
+        encoding="utf-8",
+    )
+    prepare_stub.chmod(0o755)
     _write_runner_stub(
         runner_stub, call_log=tmp_path / "calls.log", fail_repeat_names=()
     )
@@ -243,15 +251,26 @@ def test_matrix_rejects_mixed_official_source_tuples(tmp_path: Path) -> None:
             "GOAL_BASELINE_ENV_PREFIX": "/tmp/fake-official-env",
             "PREPARE_SCRIPT": str(prepare_stub),
             "SINGLE_RUNNER": str(runner_stub),
-            "PREPARE_OFFICIAL_ENV": "0",
+            "PREPARE_OFFICIAL_ENV": "1",
+            "REPEAT_COUNT": "1",
+            "MIN_SUCCESSFUL_REPEATS": "1",
+            "MAX_REPEAT_ATTEMPTS": "1",
             "CANONICAL_SUBMISSIONS_ROOT": str(tmp_path / "submissions"),
             "MATRIX_RESULT_ROOT": str(tmp_path / "results"),
             "PYTHON_BIN": sys.executable,
         },
     )
 
-    assert completed.returncode == 2
-    assert "mixed source tuples" in completed.stderr
+    assert completed.returncode == 0, completed.stderr
+    assert "mixed source tuples" not in completed.stderr
+    assert "prepared and executed independently" in (
+        tmp_path / "results" / "summary.md"
+    ).read_text(encoding="utf-8")
+    prepare_lines = prepare_log.read_text(encoding="utf-8").splitlines()
+    assert prepare_lines[0].startswith("v0.18.0\t")
+    assert prepare_lines[1].startswith("main\t")
+    assert prepare_lines[0].split("\t", 1)[1] != prepare_lines[1].split("\t", 1)[1]
+    assert all("/results/" not in line for line in prepare_lines)
 
 
 def test_matrix_script_uses_published_canonical_root_for_resume(tmp_path: Path) -> None:

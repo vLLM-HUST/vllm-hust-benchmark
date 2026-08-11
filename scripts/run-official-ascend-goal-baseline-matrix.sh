@@ -26,11 +26,13 @@ PREPARE_OFFICIAL_ENV=${PREPARE_OFFICIAL_ENV:-1}
 READY_TIMEOUT_SECONDS=${READY_TIMEOUT_SECONDS:-900}
 SUMMARY_FILE=${MATRIX_SUMMARY_FILE:-"$MATRIX_RESULT_ROOT/summary.md"}
 MATRIX_DEVICE_PREFERENCE_FILE=${MATRIX_DEVICE_PREFERENCE_FILE:-"$MATRIX_RESULT_ROOT/preferred-ascend-device"}
+OFFICIAL_SOURCE_WORKTREE_ROOT=${OFFICIAL_SOURCE_WORKTREE_ROOT:-"${TMPDIR:-/tmp}/vllm-hust-official-worktrees"}
 PYTHON_BIN=${PYTHON_BIN:-$(command -v python3 || true)}
 PUBLICATION_SYNC_HELPER=${PUBLICATION_SYNC_HELPER:-}
 PUBLICATION_COMMIT_MESSAGE_PREFIX=${PUBLICATION_COMMIT_MESSAGE_PREFIX:-"chore(data): publish official ascend baseline"}
 VALIDATE_ARTIFACT_SCRIPT=${VALIDATE_ARTIFACT_SCRIPT:-"$SCRIPT_DIR/validate-run-artifact.sh"}
 PREPARED_ENV=0
+PREPARED_SOURCE_TUPLE=""
 SKIPPED_COUNT=0
 RUN_COUNT=0
 PROMOTED_COUNT=0
@@ -180,16 +182,33 @@ PY
 }
 
 prepare_official_env_once() {
-  if [[ "$PREPARED_ENV" == "1" ]] || [[ "$PREPARE_OFFICIAL_ENV" != "1" ]]; then
+  local source_tuple=$1
+  local source_core_ref
+  local source_backend_ref
+  local source_slug
+  local source_worktree_root
+
+  if [[ "$PREPARED_SOURCE_TUPLE" == "$source_tuple" ]] || [[ "$PREPARE_OFFICIAL_ENV" != "1" ]]; then
     return 0
   fi
 
-  echo "[official-baseline-matrix] preparing official baseline environment: $GOAL_BASELINE_ENV_PREFIX"
+  IFS=$'\t' read -r source_core_ref source_backend_ref <<< "$source_tuple"
+  source_slug=$(printf '%s-%s' "$source_core_ref" "$source_backend_ref" | sed -E 's/[^A-Za-z0-9_.-]+/-/g')
+  source_worktree_root="$OFFICIAL_SOURCE_WORKTREE_ROOT/$source_slug"
+  mkdir -p "$source_worktree_root"
+
+  export OFFICIAL_VLLM_REF="$source_core_ref"
+  export OFFICIAL_VLLM_ASCEND_REF="$source_backend_ref"
+  export OFFICIAL_VLLM_WORKTREE="$source_worktree_root/vllm"
+  export OFFICIAL_VLLM_ASCEND_WORKTREE="$source_worktree_root/vllm-ascend"
+
+  echo "[official-baseline-matrix] preparing official baseline environment: $GOAL_BASELINE_ENV_PREFIX (source tuple=$source_tuple)"
   ENV_PREFIX="$GOAL_BASELINE_ENV_PREFIX" \
   BENCHMARK_SERVER_PORT="${OFFICIAL_SERVER_PORT:-8000}" \
   VLLM_HUST_WORKSPACE_ROOT="$WORKSPACE_ROOT" \
   bash "$PREPARE_SCRIPT"
   PREPARED_ENV=1
+  PREPARED_SOURCE_TUPLE="$source_tuple"
 }
 
 promote_submission_to_canonical() {
@@ -438,17 +457,6 @@ if [[ ${#SPEC_FILES[@]} -eq 0 ]]; then
   exit 2
 fi
 
-SOURCE_TUPLE=""
-for spec_file in "${SPEC_FILES[@]}"; do
-  spec_source_tuple=$(resolve_source_tuple "$spec_file")
-  if [[ -z "$SOURCE_TUPLE" ]]; then
-    SOURCE_TUPLE="$spec_source_tuple"
-  elif [[ "$spec_source_tuple" != "$SOURCE_TUPLE" ]]; then
-    echo "Official baseline matrix contains mixed source tuples: $SOURCE_TUPLE vs $spec_source_tuple ($spec_file)" >&2
-    exit 2
-  fi
-done
-
 echo "[official-baseline-matrix] result root: $MATRIX_RESULT_ROOT"
 echo "[official-baseline-matrix] canonical submissions root: $CANONICAL_SUBMISSIONS_ROOT"
 echo "[official-baseline-matrix] sticky Ascend device preference file: $MATRIX_DEVICE_PREFERENCE_FILE"
@@ -460,7 +468,7 @@ append_summary "- Sticky Ascend device preference file: $MATRIX_DEVICE_PREFERENC
 append_summary "- Existing canonical submissions root: $EXISTING_CANONICAL_SUBMISSIONS_ROOT"
 append_summary "- Force rerun existing canonical: $FORCE_RUN_EXISTING"
 append_summary "- Repeat count for missing canonical specs: $REPEAT_COUNT"
-append_summary "- Immutable source tuple: $SOURCE_TUPLE"
+append_summary "- Source tuples are prepared and executed independently per immutable ref pair"
 
 for spec_file in "${SPEC_FILES[@]}"; do
   spec_slug=$(slugify "$spec_file")
@@ -468,6 +476,7 @@ for spec_file in "${SPEC_FILES[@]}"; do
   canonical_dir=$(resolve_canonical_dir "$spec_file")
   existing_canonical_dir=$(resolve_existing_canonical_dir "$spec_file")
   benchmark_type=$(resolve_benchmark_type "$spec_file")
+  source_tuple=$(resolve_source_tuple "$spec_file")
 
   echo
   echo "[official-baseline-matrix] spec: $spec_file"
@@ -491,7 +500,7 @@ for spec_file in "${SPEC_FILES[@]}"; do
     should_promote=1
   fi
 
-  prepare_official_env_once
+  prepare_official_env_once "$source_tuple"
 
   target_successful_repeats=1
   min_successful_repeats=1

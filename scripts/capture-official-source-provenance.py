@@ -25,25 +25,44 @@ def _sha256(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _tree_digest(repo: Path) -> tuple[str, int, int]:
-    paths = _run(repo, "ls-files", "-co", "--exclude-standard", "-z").split(b"\0")
+def _tree_digest(repo: Path) -> tuple[str, int, int, int]:
+    paths = set(
+        path
+        for path in _run(repo, "ls-files", "-co", "--exclude-standard", "-z").split(
+            b"\0"
+        )
+        if path
+    )
+    tracked_paths = set(paths)
+    generated_paths = {b"vllm_ascend/_build_info.py"}
+    generated_paths.update(
+        os.fsencode(path.relative_to(repo))
+        for pattern in ("vllm-*.dist-info/*", "vllm_ascend-*.dist-info/*")
+        for path in repo.glob(pattern)
+        if path.is_file()
+    )
+    paths.update(
+        path for path in generated_paths if (repo / os.fsdecode(path)).is_file()
+    )
     entries: list[bytes] = []
     tracked = 0
     untracked = 0
-    for raw_path in sorted(path for path in paths if path):
+    generated = 0
+    for raw_path in sorted(paths):
         path = repo / os.fsdecode(raw_path)
         if not path.is_file():
             continue
         if b"\0" in raw_path:
             raise ValueError("source path contains NUL")
-        status = _run(repo, "ls-files", "--stage", "--", os.fsdecode(raw_path))
-        if status:
+        if raw_path in tracked_paths:
             tracked += 1
         else:
             untracked += 1
+            if raw_path in generated_paths:
+                generated += 1
         digest = hashlib.sha256(path.read_bytes()).hexdigest().encode("ascii")
         entries.append(raw_path + b"\t" + digest + b"\n")
-    return _sha256(b"".join(entries)), tracked, untracked
+    return _sha256(b"".join(entries)), tracked, untracked, generated
 
 
 def capture(repo: Path, requested_ref: str, repository: str) -> dict[str, object]:
@@ -54,7 +73,7 @@ def capture(repo: Path, requested_ref: str, repository: str) -> dict[str, object
     )
     patch = _run(repo, "diff", "--binary", "HEAD")
     status = _run(repo, "status", "--porcelain=v1", "--untracked-files=all")
-    tree_digest, tracked_count, untracked_count = _tree_digest(repo)
+    tree_digest, tracked_count, untracked_count, generated_count = _tree_digest(repo)
     return {
         "schema_version": "official-source-provenance/v1",
         "repository": repository,
@@ -62,9 +81,10 @@ def capture(repo: Path, requested_ref: str, repository: str) -> dict[str, object
         "observed_commit": observed_commit,
         "tracked_patch_sha256": _sha256(patch),
         "working_tree_sha256": tree_digest,
-        "status": "clean" if not status else "modified",
+        "status": "clean" if not status and generated_count == 0 else "modified",
         "tracked_file_count": tracked_count,
         "untracked_file_count": untracked_count,
+        "generated_file_count": generated_count,
     }
 
 
