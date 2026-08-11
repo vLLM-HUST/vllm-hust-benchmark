@@ -325,37 +325,75 @@ def validate_rejected_superseded_report(snapshot_dir: Path) -> list[str]:
     return errors
 
 
-def _find_git_commits(obj: Any) -> set[str]:
-    """Collect full 40-hex ``git_commit`` values referenced anywhere in a public
-    snapshot payload (list or dict).
+def _full_hex_git_commit(value: Any) -> str | None:
+    """Return ``value`` if it is a full 40-hex git commit string, else ``None``.
 
-    Only the dedicated ``git_commit`` field is matched, and only full 40-hex
-    values are collected — no 7-char prefixes and no incidental hex strings
-    (engine_version, URLs, IDs), which avoids spurious failures.
+    Only full 40-hex values are accepted — no 7-char prefixes and no incidental
+    hex strings (engine_version, URLs, IDs), which avoids spurious failures.
     """
-    found: set[str] = set()
-    if isinstance(obj, dict):
-        for key, value in obj.items():
-            if (
-                key == "git_commit"
-                and isinstance(value, str)
-                and re.fullmatch(r"[0-9a-f]{40}", value)
-            ):
-                found.add(value)
-            elif isinstance(value, (dict, list)):
-                found |= _find_git_commits(value)
-    elif isinstance(obj, list):
-        for value in obj:
-            found |= _find_git_commits(value)
-    return found
+    if isinstance(value, str) and re.fullmatch(r"[0-9a-f]{40}", value):
+        return value
+    return None
 
 
-def _public_snapshot_commits(snapshot_dir: Path) -> set[str]:
-    """Collect full 40-hex ``git_commit`` values referenced by every public
+def _workload_name(value: Any) -> str | None:
+    """Resolve the workload label from a public snapshot entry/scope.
+
+    ``workload`` may be a bare string (e.g. ``leaderboard_compare.json`` scopes)
+    or an object with a ``name`` field (e.g. leaderboard entry records).
+    """
+    if isinstance(value, dict):
+        name = value.get("name")
+        return name if isinstance(name, str) else None
+    if isinstance(value, str):
+        return value
+    return None
+
+
+def _commit_pairs_in_payload(name: str, payload: Any) -> set[tuple[str | None, str]]:
+    """Collect ``(workload, git_commit)`` pairs from one public snapshot payload.
+
+    Handles the two payload shapes synced to the public website:
+
+    - ``leaderboard_compare.json``: a dict with ``scopes[]`` where each scope
+      carries ``scope.workload`` and ``latest``/``previous`` ``git_commit``.
+    - Entry-list files (leaderboard_single/multi.json): array of entries with
+      ``workload.name`` and ``metadata.git_commit``.
+    """
+    pairs: set[tuple[str | None, str]] = set()
+    if name == "leaderboard_compare.json":
+        scopes = payload.get("scopes") if isinstance(payload, dict) else None
+        for scope_block in scopes or []:
+            if not isinstance(scope_block, dict):
+                continue
+            workload = _workload_name(scope_block.get("scope"))
+            for slot in ("latest", "previous"):
+                block = scope_block.get(slot)
+                if not isinstance(block, dict):
+                    continue
+                commit = _full_hex_git_commit(block.get("git_commit"))
+                if commit is not None:
+                    pairs.add((workload, commit))
+    else:
+        for entry in payload if isinstance(payload, list) else []:
+            if not isinstance(entry, dict):
+                continue
+            workload = _workload_name(entry.get("workload"))
+            metadata = (
+                entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+            )
+            commit = _full_hex_git_commit(metadata.get("git_commit"))
+            if commit is not None:
+                pairs.add((workload, commit))
+    return pairs
+
+
+def _public_snapshot_commit_pairs(snapshot_dir: Path) -> set[tuple[str | None, str]]:
+    """Collect ``(workload, git_commit)`` pairs referenced by every public
     leaderboard snapshot file, so the quarantine validator can enforce that
-    suspect entries stay excluded from public output.
+    suspect (commit, workload) pairs stay excluded from public output.
     """
-    commits: set[str] = set()
+    pairs: set[tuple[str | None, str]] = set()
     for name in PUBLIC_COMMIT_SCAN_FILES:
         path = snapshot_dir / name
         if not path.is_file():
@@ -364,8 +402,8 @@ def _public_snapshot_commits(snapshot_dir: Path) -> set[str]:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             continue
-        commits |= _find_git_commits(payload)
-    return commits
+        pairs |= _commit_pairs_in_payload(name, payload)
+    return pairs
 
 
 def validate_quarantine_suspect_entries(snapshot_dir: Path) -> list[str]:
@@ -430,8 +468,10 @@ def validate_quarantine_suspect_entries(snapshot_dir: Path) -> list[str]:
             errors.extend(_structural_suspect_checks(section, quarantine_path, key))
 
     # Enforce that suspect entries flagged for exclusion never appear in the
-    # public leaderboard snapshots (review: "isolation must be consumed").
-    public_commits = _public_snapshot_commits(snapshot_dir)
+    # public leaderboard snapshots (review: "isolation must be consumed"). The
+    # match is workload-aware: only the exact (commit, workload) pair is blocked,
+    # so the same commit under a non-suspect workload is not a false positive.
+    public_pairs = _public_snapshot_commit_pairs(snapshot_dir)
     for key in QUARANTINE_ADDITIVE_SECTIONS:
         section = payload.get(key)
         if not isinstance(section, dict):
@@ -443,13 +483,15 @@ def validate_quarantine_suspect_entries(snapshot_dir: Path) -> list[str]:
             status = entry.get("status")
             if status != "invalid-suspect-noise" and section_action != "exclude":
                 continue
-            commit = entry.get("git_commit")
-            if not isinstance(commit, str):
+            commit = _full_hex_git_commit(entry.get("git_commit"))
+            workload = _workload_name(entry.get("workload"))
+            if commit is None:
                 continue
-            if commit in public_commits:
+            if (workload, commit) in public_pairs:
                 errors.append(
-                    f"{quarantine_path.name}:{key}: suspect commit {commit[:12]} "
-                    f"must stay excluded from public snapshots but was found present"
+                    f"{quarantine_path.name}:{key}: suspect entry "
+                    f"{workload!r} @ {commit[:12]} must stay excluded from "
+                    f"public snapshots but was found present"
                 )
     return errors
 

@@ -216,12 +216,14 @@ class TestQuarantineSuspectEntriesValidation:
     def test_suspect_commit_reappearing_in_public_snapshot_fails(self, tmp_path):
         # [blocking] review: suspect entries flagged invalid-suspect-noise must be
         # consumed by snapshot exclusion logic, i.e. they must not re-enter public
-        # snapshots. A public entry referencing the suspect commit must fail.
+        # snapshots. A public entry carrying the suspect (commit, workload) pair
+        # must fail.
         snapshot_dir = _make_snapshot_dir(
             tmp_path,
             public_entries=[
                 {
                     "entry_id": "0d86eb2b-0000-0000-0000-000000000000",
+                    "workload": {"name": "sonnet-throughput"},
                     "metadata": {
                         "engine_version": "7a63f81",
                         "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
@@ -236,3 +238,30 @@ class TestQuarantineSuspectEntriesValidation:
         module = load_module()
         errors = module.validate_quarantine_suspect_entries(snapshot_dir)
         assert any("must stay excluded" in e for e in errors)
+
+    def test_suspect_commit_under_other_workload_passes(self, tmp_path):
+        # [minor] review: the exclusion match is workload-aware. The same commit
+        # under a non-suspect workload must NOT be flagged, otherwise valid
+        # public entries are rejected (cf. leaderboard_compare.json carrying
+        # 7a63f81e under random-latency/random-online while only
+        # sonnet-throughput@7a63f81e is suspect).
+        snapshot_dir = _make_snapshot_dir(
+            tmp_path,
+            public_entries=[
+                {
+                    "entry_id": "0d86eb2b-0000-0000-0000-000000000000",
+                    "workload": {"name": "random-latency"},
+                    "metadata": {
+                        "engine_version": "7a63f81",
+                        "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
+                    },
+                }
+            ],
+        )
+        (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
+            json.dumps({"issue_146_suspect_entries": _suspect_section()}) + "\n",
+            encoding="utf-8",
+        )
+        module = load_module()
+        errors = module.validate_quarantine_suspect_entries(snapshot_dir)
+        assert not any("must stay excluded" in e for e in errors)
