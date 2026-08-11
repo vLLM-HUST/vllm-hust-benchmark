@@ -391,14 +391,14 @@ def test_run_cell_uses_run_id_override_for_submission_dir(tmp_path: Path) -> Non
 
     override = "historical-pr-backend-pr-131-base-random-online-1aa7cd10b7-cd29480d96"
 
-    def _submit_artifact(workload, hust_commit, ascend_commit, run_id, raw):
+    def _submit_artifact(workload, hust_commit, ascend_commit, run_id, raw, **kwargs):
         # run_cell must pass the override through as the run_id.
         assert run_id == override
         sub_dir = submissions_dir / run_id
         sub_dir.mkdir(parents=True, exist_ok=True)
         return sub_dir
 
-    def _run_vllm_bench(workload, hust_commit, output_dir, npu_id=0):
+    def _run_vllm_bench(workload, hust_commit, output_dir, npu_id=0, **kwargs):
         output_dir.mkdir(parents=True, exist_ok=True)
         raw = output_dir / "raw.json"
         raw.write_text("{}", encoding="utf-8")
