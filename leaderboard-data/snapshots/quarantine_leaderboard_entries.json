@@ -1,8 +1,9 @@
 {
-  "schema_version": "quarantine-leaderboard-entries/v1",
+  "schema_version": "quarantine-leaderboard-entries/v2",
   "generated_at": "2026-08-04T09:35:06Z",
   "source_file": "leaderboard-data/snapshots/leaderboard_single.json",
   "quarantined_count": 21,
+  "suspect_entries_count": 2,
   "policy": "Issue #105: entries not matching active fixed-target specs are removed from public leaderboard snapshots but preserved here for audit. Original submission artifacts remain in submissions/ dirs.",
   "quarantined_entries": [
     {
@@ -3362,5 +3363,53 @@
         }
       }
     }
-  ]
+  ],
+  "issue_146_suspect_entries": {
+    "schema_version": "issue-146-suspect/v2",
+    "conclusion": "no_regression_reproduced",
+    "action": "mark_suspect_noise",
+    "analysis_provenance": "reports/issue_146_retest_analysis.json",
+    "raw_evidence_dir": "reports/issue_146_retest_raw_results/",
+    "note": "Two July single-card backfill points showed commit-range regressions (sonnet-throughput -17.5%, random-latency +63.1%). A controlled re-test (3 reps x 3 commits x 2 workloads = 18 runs; same 910B2, same conda env, same plugin commit, max_model_len=30720) reproduces neither. Both are attributed to single-round measurement noise and marked invalid-suspect-noise; replacement with re-test medians is recommended.",
+    "entries": [
+      {
+        "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",
+        "workload": "sonnet-throughput",
+        "workload_params": {
+          "input_length": 1024,
+          "output_length": 256,
+          "batch_size": null,
+          "dataset": "sonnet"
+        },
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "original_value": 1589.93,
+        "original_value_unit": "tok/s",
+        "retest_median": 2898.8,
+        "retest_median_unit": "tok/s",
+        "threshold_pct": 10.0,
+        "status": "invalid-suspect-noise",
+        "retest_base_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",
+        "retest_delta_vs_base_commit_pct": 0.24
+      },
+      {
+        "git_commit": "83cf83ff20a880d70b6ba916977c49304d598d9c",
+        "workload": "random-latency",
+        "workload_params": {
+          "input_length": 1024,
+          "output_length": 128,
+          "batch_size": 8,
+          "dataset": null
+        },
+        "model": "Qwen/Qwen2.5-14B-Instruct",
+        "original_value": 12201.7,
+        "original_value_unit": "ms",
+        "retest_median": 6023.95,
+        "retest_median_unit": "ms",
+        "threshold_pct": 20.0,
+        "status": "invalid-suspect-noise",
+        "retest_base_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",
+        "retest_delta_vs_base_commit_pct": -0.1
+      }
+    ]
+  }
 }

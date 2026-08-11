@@ -135,3 +135,133 @@ def test_non_quarantined_entry_id_passes_quarantine_gate() -> None:
         source=Path("leaderboard_single.json"),
     )
     assert not any("quarantined entry" in error for error in errors)
+
+
+def _suspect_section() -> dict:
+    return {
+        "schema_version": "issue-146-suspect/v2",
+        "conclusion": "no_regression_reproduced",
+        "action": "mark_suspect_noise",
+        "analysis_provenance": "reports/issue_146_retest_analysis.json",
+        "raw_evidence_dir": "reports/issue_146_retest_raw_results/",
+        "note": "controlled re-test reproduces neither regression",
+        "entries": [
+            {
+                "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
+                "workload": "sonnet-throughput",
+                "workload_params": {
+                    "input_length": 1024,
+                    "output_length": 256,
+                    "batch_size": None,
+                    "dataset": "sonnet",
+                },
+                "model": "Qwen/Qwen2.5-14B-Instruct",
+                "original_value": 1589.93,
+                "original_value_unit": "tok/s",
+                "retest_median": 2898.8,
+                "retest_median_unit": "tok/s",
+                "threshold_pct": 10.0,
+                "status": "invalid-suspect-noise",
+                "retest_base_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",  # pragma: allowlist secret
+                "retest_delta_vs_base_commit_pct": 0.24,
+            }
+        ],
+    }
+
+
+def _make_snapshot_dir(tmp_path: Path, *, public_entries=None) -> Path:
+    snapshot_dir = tmp_path / "snapshots"
+    snapshot_dir.mkdir()
+    (snapshot_dir / "leaderboard_single.json").write_text(
+        json.dumps(public_entries or []) + "\n", encoding="utf-8"
+    )
+    (snapshot_dir / "leaderboard_multi.json").write_text("[]\n", encoding="utf-8")
+    return snapshot_dir
+
+
+class TestQuarantineSuspectEntriesValidation:
+    def test_valid_suspect_section_passes(self, tmp_path):
+        snapshot_dir = _make_snapshot_dir(tmp_path)
+        (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
+            json.dumps({"issue_146_suspect_entries": _suspect_section()}) + "\n",
+            encoding="utf-8",
+        )
+        module = load_module()
+        assert module.validate_quarantine_suspect_entries(snapshot_dir) == []
+
+    def test_wrong_schema_version_fails(self, tmp_path):
+        snapshot_dir = _make_snapshot_dir(tmp_path)
+        section = _suspect_section()
+        section["schema_version"] = "issue-146-suspect/v1"
+        (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
+            json.dumps({"issue_146_suspect_entries": section}) + "\n",
+            encoding="utf-8",
+        )
+        module = load_module()
+        errors = module.validate_quarantine_suspect_entries(snapshot_dir)
+        assert any("schema_version" in e for e in errors)
+
+    def test_missing_retest_base_commit_fails(self, tmp_path):
+        snapshot_dir = _make_snapshot_dir(tmp_path)
+        section = _suspect_section()
+        del section["entries"][0]["retest_base_commit"]
+        (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
+            json.dumps({"issue_146_suspect_entries": section}) + "\n",
+            encoding="utf-8",
+        )
+        module = load_module()
+        errors = module.validate_quarantine_suspect_entries(snapshot_dir)
+        assert any("retest_base_commit" in e for e in errors)
+
+    def test_suspect_commit_reappearing_in_public_snapshot_fails(self, tmp_path):
+        # [blocking] review: suspect entries flagged invalid-suspect-noise must be
+        # consumed by snapshot exclusion logic, i.e. they must not re-enter public
+        # snapshots. A public entry carrying the suspect (commit, workload) pair
+        # must fail.
+        snapshot_dir = _make_snapshot_dir(
+            tmp_path,
+            public_entries=[
+                {
+                    "entry_id": "0d86eb2b-0000-0000-0000-000000000000",
+                    "workload": {"name": "sonnet-throughput"},
+                    "metadata": {
+                        "engine_version": "7a63f81",
+                        "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
+                    },
+                }
+            ],
+        )
+        (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
+            json.dumps({"issue_146_suspect_entries": _suspect_section()}) + "\n",
+            encoding="utf-8",
+        )
+        module = load_module()
+        errors = module.validate_quarantine_suspect_entries(snapshot_dir)
+        assert any("must stay excluded" in e for e in errors)
+
+    def test_suspect_commit_under_other_workload_passes(self, tmp_path):
+        # [minor] review: the exclusion match is workload-aware. The same commit
+        # under a non-suspect workload must NOT be flagged, otherwise valid
+        # public entries are rejected (cf. leaderboard_compare.json carrying
+        # 7a63f81e under random-latency/random-online while only
+        # sonnet-throughput@7a63f81e is suspect).
+        snapshot_dir = _make_snapshot_dir(
+            tmp_path,
+            public_entries=[
+                {
+                    "entry_id": "0d86eb2b-0000-0000-0000-000000000000",
+                    "workload": {"name": "random-latency"},
+                    "metadata": {
+                        "engine_version": "7a63f81",
+                        "git_commit": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
+                    },
+                }
+            ],
+        )
+        (snapshot_dir / "quarantine_leaderboard_entries.json").write_text(
+            json.dumps({"issue_146_suspect_entries": _suspect_section()}) + "\n",
+            encoding="utf-8",
+        )
+        module = load_module()
+        errors = module.validate_quarantine_suspect_entries(snapshot_dir)
+        assert not any("must stay excluded" in e for e in errors)
