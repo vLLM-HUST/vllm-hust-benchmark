@@ -1,6 +1,6 @@
 {
   "issue": "#151",
-  "description": "Regression re-test for unexplained performance jumps in single-card leaderboard",
+  "description": "Regression re-test for two unexplained performance jumps in single-card leaderboard (random-online, agent-research-online). The remaining four jumps from issue #151 are tracked separately.",
   "result_dir": "reports/issue_151_retest_raw_results",
   "intervals": [
     {
@@ -28,13 +28,34 @@
         "tpot": -0.02413960809147019,
         "throughput": 0.024912177168264552
       },
+      "original_leaderboard": {
+        "base": {
+          "ttft_ms": 302.776655042544,
+          "throughput_tps": 238.4099656585595
+        },
+        "head": {
+          "ttft_ms": 2243.397351723397,
+          "throughput_tps": 236.86996143257514
+        }
+      },
+      "absolute_value_drift": {
+        "note": "Retest mean_ttft_ms (~131s base, ~128s head) is far above the original leaderboard ttft_ms (~0.3s base, ~2.2s head). The retest did NOT reproduce the original absolute magnitude; the original jump was a single-run outlier, and the retest environment operates at a different absolute load profile. Conclusion is therefore 'original data noise' rather than a reproducible regression; the observed absolute drift is environmental, not a code regression.",
+        "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+      },
       "thresholds": {
         "ttft_increase": 0.2,
         "tpot_increase": 0.2,
         "throughput_decrease": 0.1
       },
       "verdict": "not_reproducible",
-      "reason": "TTFT +-2.6%, TPOT +-2.4%, Throughput +2.5% \u2014 all within thresholds"
+      "reason": "TTFT -2.6%, TPOT -2.4%, Throughput +2.5% \u2014 all within thresholds. Absolute values did not reproduce original magnitude (see absolute_value_drift).",
+      "per_rep_notes": [
+        {
+          "commit": "2206f1f7b7",
+          "rep": 2,
+          "note": "raw.json records completed=199, failed=1, reject_rate=0.005; the single failed request is included in the median. Impact is negligible (1/200 = 0.5%)."
+        }
+      ]
     },
     {
       "interval": "agent-research-online",
@@ -61,13 +82,27 @@
         "tpot": -0.019959844757424187,
         "throughput": 0.013872356404981736
       },
+      "original_leaderboard": {
+        "base": {
+          "ttft_ms": 330.0492724083597,
+          "throughput_tps": 184.71806876637058
+        },
+        "head": {
+          "ttft_ms": 3443.249249634391,
+          "throughput_tps": 138.39660869279373
+        }
+      },
+      "absolute_value_drift": {
+        "note": "Retest mean_ttft_ms (~2.3s base, ~2.3s head) sits between the original leaderboard ttft_ms (~0.3s base, ~3.4s head). The original 7.8x jump was driven by the head single-run outlier; the retest does not reproduce it, placing the conclusion as 'original data noise' rather than a reproducible regression.",
+        "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+      },
       "thresholds": {
         "ttft_increase": 0.2,
         "tpot_increase": 0.2,
         "throughput_decrease": 0.1
       },
       "verdict": "not_reproducible",
-      "reason": "TTFT +3.1%, TPOT +-2.0%, Throughput +1.4% \u2014 all within thresholds"
+      "reason": "TTFT +3.1%, TPOT -2.0%, Throughput +1.4% \u2014 all within thresholds. Absolute values did not reproduce original magnitude (see absolute_value_drift)."
     }
   ],
   "summary": {

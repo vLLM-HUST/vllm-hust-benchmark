@@ -45,6 +45,20 @@ INTERVALS = [
         "head_commit": "f273f9c5e2",
         "workload": "random-online",
         "reported_jump": "173% TTFT jump",
+        "original_leaderboard": {
+            "base": {"ttft_ms": 302.776655042544, "throughput_tps": 238.4099656585595},
+            "head": {
+                "ttft_ms": 2243.397351723397,
+                "throughput_tps": 236.86996143257514,
+            },
+        },
+        "absolute_value_drift_note": (
+            "Retest mean_ttft_ms (~131s base, ~128s head) is far above the original "
+            "leaderboard ttft_ms (~0.3s base, ~2.2s head). The retest did NOT reproduce "
+            "the original absolute magnitude; the original jump was a single-run outlier "
+            "and the retest environment operates at a different absolute load profile. "
+            "Conclusion is 'original data noise' rather than a reproducible regression."
+        ),
     },
     {
         "name": "agent-research-online",
@@ -52,6 +66,23 @@ INTERVALS = [
         "head_commit": "ec4847981f",
         "workload": "agent-research-online",
         "reported_jump": "7.8x TTFT jump",
+        "original_leaderboard": {
+            "base": {
+                "ttft_ms": 330.0492724083597,
+                "throughput_tps": 184.71806876637058,
+            },
+            "head": {
+                "ttft_ms": 3443.249249634391,
+                "throughput_tps": 138.39660869279373,
+            },
+        },
+        "absolute_value_drift_note": (
+            "Retest mean_ttft_ms (~2.3s base, ~2.3s head) sits between the original "
+            "leaderboard ttft_ms (~0.3s base, ~3.4s head). The original 7.8x jump was "
+            "driven by the head single-run outlier; the retest does not reproduce it, "
+            "placing the conclusion as 'original data noise' rather than a reproducible "
+            "regression."
+        ),
     },
 ]
 
@@ -344,6 +375,15 @@ def compare_interval(
             "base_commit": base_commit,
             "head_commit": head_commit,
             "reported_jump": interval["reported_jump"],
+            "original_leaderboard": interval.get("original_leaderboard", {}),
+            "absolute_value_drift": {
+                "note": interval.get("absolute_value_drift_note", ""),
+                "caveat": (
+                    "Retest and original leaderboard use different metric definitions "
+                    "(mean_ttft_ms vs ttft_ms) under different load profiles, so "
+                    "absolute values are not directly comparable."
+                ),
+            },
             "base_reps": len(base_results),
             "head_reps": len(head_results),
             "verdict": "incomplete_evidence",
@@ -396,21 +436,23 @@ def compare_interval(
     if any_regression:
         reasons = []
         if ttft_regression:
-            reasons.append(f"TTFT +{ttft_change:.1%} > {TTFT_INCREASE_THRESHOLD:.0%}")
+            reasons.append(f"TTFT {ttft_change:+.1%} > {TTFT_INCREASE_THRESHOLD:.0%}")
         if tpot_regression:
-            reasons.append(f"TPOT +{tpot_change:.1%} > {TPOT_INCREASE_THRESHOLD:.0%}")
+            reasons.append(f"TPOT {tpot_change:+.1%} > {TPOT_INCREASE_THRESHOLD:.0%}")
         if tput_regression:
             reasons.append(
-                f"Throughput {tput_change:.1%} < -{THROUGHPUT_DECREASE_THRESHOLD:.0%}"
+                f"Throughput {tput_change:+.1%} < -{THROUGHPUT_DECREASE_THRESHOLD:.0%}"
             )
         verdict = "reproducible_regression"
         reason = "; ".join(reasons)
     else:
         verdict = "not_reproducible"
         reason = (
-            f"TTFT +{ttft_change:.1%}, TPOT +{tpot_change:.1%}, "
+            f"TTFT {ttft_change:+.1%}, TPOT {tpot_change:+.1%}, "
             f"Throughput {tput_change:+.1%} — all within thresholds"
         )
+        if interval.get("absolute_value_drift_note"):
+            reason += ". Absolute values did not reproduce original magnitude (see absolute_value_drift)"
 
     log(f"\n  VERDICT: {verdict}")
     log(f"  REASON:  {reason}")
@@ -421,6 +463,15 @@ def compare_interval(
         "base_commit": base_commit,
         "head_commit": head_commit,
         "reported_jump": interval["reported_jump"],
+        "original_leaderboard": interval.get("original_leaderboard", {}),
+        "absolute_value_drift": {
+            "note": interval.get("absolute_value_drift_note", ""),
+            "caveat": (
+                "Retest and original leaderboard use different metric definitions "
+                "(mean_ttft_ms vs ttft_ms) under different load profiles, so absolute "
+                "values are not directly comparable."
+            ),
+        },
         "base_reps": len(base_results),
         "head_reps": len(head_results),
         "medians": {

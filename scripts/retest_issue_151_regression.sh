@@ -526,41 +526,41 @@ start_server() {
     return 0
 }
 
-# 17. Kill the server PID + descendants using kill_owned_server logic,
-#     plus extra cleanup for stale vllm/NPU processes and NPU memory wait.
+# 17. Stop the server. Cleanup is STRICTLY scoped to the tracked launcher
+#     session (started via setsid) plus its identity-verified descendants.
+#     No broad pkill patterns or /proc scans are used, so processes owned by
+#     other tenants on a shared NPU server are never touched. Only the
+#     read-only NPU memory wait is retained.
 stop_server() {
     log "Stopping server..."
-    kill_owned_server
 
-    # Extra cleanup: kill any stale vllm processes (including EngineCore)
-    pkill -9 -f "vllm serve" 2>/dev/null || true
-    pkill -9 -f "vllm.entrypoints" 2>/dev/null || true
-    pkill -9 -f "run_engine_core" 2>/dev/null || true
-    pkill -9 -f "VLLM::EngineCore" 2>/dev/null || true
-    pkill -9 -f "from multiprocessing.resource_tracker import main" \
-        2>/dev/null || true
-    pkill -9 -f "$MODEL_PATH" 2>/dev/null || true
+    # Capture tracked launcher identity before it is reset below.
+    local launcher_pid="${_LAUNCHER_PID:-}"
+    local launcher_st="${_LAUNCHER_STARTTIME:-}"
+    local launcher_ch="${_LAUNCHER_CMDLINE_HASH:-}"
 
-    sleep 5
-
-    # Find and kill any processes holding NPU 0 device files
-    local npu_holders
-    npu_holders=$(for pid in $(ls /proc | grep -E '^[0-9]+$'); do
-        if ls -l /proc/$pid/fd 2>/dev/null | grep -q 'davinci0\|davinci_manager'; then
-            echo "$pid"
+    # Scoped process-group kill: because the launcher was started with
+    # setsid, its PGID equals its PID, so `kill -- -<pgid>` reaps the whole
+    # tracked session (including any descendant not captured by the
+    # recursive snapshot) without matching other processes by name.
+    if [[ -n "$launcher_pid" ]] \
+        && _verify_pid_identity "$launcher_pid" "$launcher_st" "$launcher_ch"; then
+        local pgid
+        pgid=$(ps -o pgid= -p "$launcher_pid" 2>/dev/null | tr -d ' ')
+        if [[ -n "$pgid" && "$pgid" =~ ^[0-9]+$ ]]; then
+            log "Killing tracked session/process group $pgid"
+            kill -TERM -- "-$pgid" 2>/dev/null || true
+            sleep 3
+            kill -KILL -- "-$pgid" 2>/dev/null || true
         fi
-    done 2>/dev/null || true)
-    if [[ -n "$npu_holders" ]]; then
-        log "Killing NPU 0 holder processes: $npu_holders"
-        local npid
-        for npid in $npu_holders; do
-            [[ "$npid" == "0" || -z "$npid" ]] && continue
-            kill -9 "$npid" 2>/dev/null || true
-        done
-        sleep 5
     fi
 
-    # Wait for NPU 0 memory to be released (up to 60s)
+    # Identity-verified cleanup of the launcher + descendants (also resets
+    # tracking state).
+    kill_owned_server
+
+    # Wait for NPU 0 memory to be released (up to 60s). Read-only monitor —
+    # never kills other processes.
     local wait_sec=0
     while (( wait_sec < 60 )); do
         local npu_mem
@@ -908,7 +908,10 @@ main() {
     log "========================================"
     log ""
     log "Analyze with:"
-    log "  $PYTHON /tmp/analyze_issue_151_regression.py --result-dir $RESULT_DIR"
+    log "  $PYTHON scripts/analyze_issue_151_regression.py --result-dir $RESULT_DIR"
 }
 
-main "$@"
+# Run main only when executed directly, so the script can be sourced in tests.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
