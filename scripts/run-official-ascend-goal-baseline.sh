@@ -5,6 +5,9 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 PREPARE_SCRIPT=${PREPARE_SCRIPT:-"$REPO_ROOT/scripts/prepare-official-ascend-baseline-env.sh"}
 VLLM_CLI_COMPAT=${VLLM_CLI_COMPAT:-"$REPO_ROOT/scripts/run_vllm_cli_compat.py"}
+COLLECT_ARTIFACT_SCRIPT=${COLLECT_ARTIFACT_SCRIPT:-"$REPO_ROOT/scripts/collect-run-artifact.sh"}
+VALIDATE_ARTIFACT_SCRIPT=${VALIDATE_ARTIFACT_SCRIPT:-"$REPO_ROOT/scripts/validate-run-artifact.sh"}
+CAPTURE_SOURCE_PROVENANCE_SCRIPT=${CAPTURE_SOURCE_PROVENANCE_SCRIPT:-"$REPO_ROOT/scripts/capture-official-source-provenance.py"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
@@ -82,6 +85,21 @@ fi
 
 if [[ ! -f "$VLLM_CLI_COMPAT" ]]; then
   echo "CLI compatibility wrapper not found: $VLLM_CLI_COMPAT" >&2
+  exit 2
+fi
+
+if [[ ! -f "$COLLECT_ARTIFACT_SCRIPT" ]]; then
+  echo "Artifact collector not found: $COLLECT_ARTIFACT_SCRIPT" >&2
+  exit 2
+fi
+
+if [[ ! -f "$VALIDATE_ARTIFACT_SCRIPT" ]]; then
+  echo "Artifact validator not found: $VALIDATE_ARTIFACT_SCRIPT" >&2
+  exit 2
+fi
+
+if [[ ! -f "$CAPTURE_SOURCE_PROVENANCE_SCRIPT" ]]; then
+  echo "Official source provenance helper not found: $CAPTURE_SOURCE_PROVENANCE_SCRIPT" >&2
   exit 2
 fi
 
@@ -998,10 +1016,24 @@ ensure_worktree() {
   local source_repo=$1
   local target_dir=$2
   local ref_name=$3
-  if [[ -f "$target_dir/pyproject.toml" ]]; then
-    return 0
+  if [[ ! -f "$target_dir/pyproject.toml" ]]; then
+    git -C "$source_repo" worktree add --detach "$target_dir" "$ref_name"
   fi
-  git -C "$source_repo" worktree add --detach "$target_dir" "$ref_name"
+
+  local expected_commit
+  local observed_commit
+  expected_commit=$(git -C "$source_repo" rev-parse --verify "${ref_name}^{commit}" 2>/dev/null) || {
+    echo "official source ref does not resolve to a commit: $ref_name ($source_repo)" >&2
+    return 1
+  }
+  observed_commit=$(git -C "$target_dir" rev-parse --verify HEAD 2>/dev/null) || {
+    echo "official source worktree has no observable commit: $target_dir" >&2
+    return 1
+  }
+  if [[ "$observed_commit" != "$expected_commit" ]]; then
+    echo "official source worktree ref mismatch: $target_dir is $observed_commit, expected $ref_name ($expected_commit)" >&2
+    return 1
+  fi
 }
 
 json2args() {
@@ -1569,8 +1601,48 @@ trap kill_server EXIT
 
 OFFICIAL_VLLM_REF=${OFFICIAL_VLLM_REF:-$(jq -r '.baseline_target.vllm_ref // "v0.18.0"' "$SPEC_FILE")}
 OFFICIAL_VLLM_ASCEND_REF=${OFFICIAL_VLLM_ASCEND_REF:-$(jq -r '.baseline_target.vllm_ascend_ref // "v0.18.0"' "$SPEC_FILE")}
-ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_VLLM_REF"
-ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_VLLM_ASCEND_REF"
+OFFICIAL_CORE_SOURCE_REF=${OFFICIAL_CORE_SOURCE_REF:-$(jq -r '.baseline_target.vllm_ref // empty' "$SPEC_FILE")}
+OFFICIAL_BACKEND_SOURCE_REF=${OFFICIAL_BACKEND_SOURCE_REF:-$(jq -r '.baseline_target.vllm_ascend_ref // empty' "$SPEC_FILE")}
+OFFICIAL_CORE_SOURCE_REF=${OFFICIAL_CORE_SOURCE_REF:-$OFFICIAL_VLLM_REF}
+OFFICIAL_BACKEND_SOURCE_REF=${OFFICIAL_BACKEND_SOURCE_REF:-$OFFICIAL_VLLM_ASCEND_REF}
+OFFICIAL_CORE_SOURCE_REPOSITORY=${OFFICIAL_CORE_SOURCE_REPOSITORY:-"vllm-project/vllm"}
+OFFICIAL_BACKEND_SOURCE_REPOSITORY=${OFFICIAL_BACKEND_SOURCE_REPOSITORY:-"vllm-project/vllm-ascend"}
+ensure_worktree "$OFFICIAL_VLLM_REPO" "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_CORE_SOURCE_REF"
+ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_BACKEND_SOURCE_REF"
+
+SOURCE_PROVENANCE_DIR="$RESULT_DIR/source-provenance"
+SOURCE_PROVENANCE_FILE="$SOURCE_PROVENANCE_DIR/official-source-provenance.json"
+mkdir -p "$SOURCE_PROVENANCE_DIR"
+"$HOST_PYTHON_BIN" - "$CAPTURE_SOURCE_PROVENANCE_SCRIPT" \
+  "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_CORE_SOURCE_REF" \
+  "$OFFICIAL_CORE_SOURCE_REPOSITORY" "$SOURCE_PROVENANCE_DIR/engine.json" \
+  "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_BACKEND_SOURCE_REF" \
+  "$OFFICIAL_BACKEND_SOURCE_REPOSITORY" "$SOURCE_PROVENANCE_DIR/plugin.json" \
+  "$SOURCE_PROVENANCE_FILE" <<'PY'
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+helper, *values = sys.argv[1:]
+if len(values) != 9:
+    raise SystemExit("official source provenance arguments are incomplete")
+engine_args = values[:4]
+plugin_args = values[4:8]
+output_path = Path(values[8])
+subprocess.run([sys.executable, helper, *engine_args], check=True)
+subprocess.run([sys.executable, helper, *plugin_args], check=True)
+payload = {
+    "schema_version": "official-source-provenance/v1",
+    "sources": {
+        "engine": json.loads(Path(engine_args[3]).read_text(encoding="utf-8")),
+        "plugin": json.loads(Path(plugin_args[3]).read_text(encoding="utf-8")),
+    },
+}
+output_path.write_text(
+    json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+)
+PY
 
 OFFICIAL_RUNTIME_PYTHONPATH="$OFFICIAL_VLLM_ASCEND_WORKTREE:$OFFICIAL_VLLM_WORKTREE"
 
@@ -1609,19 +1681,7 @@ GITHUB_REF=$(jq -r '.export.github_ref' "$SPEC_FILE")
 GIT_COMMIT=$(jq -r '.export.git_commit' "$SPEC_FILE")
 DATA_SOURCE=$(jq -r '.export.data_source' "$SPEC_FILE")
 BENCHMARK_TYPE=$(resolve_scenario_benchmark_type)
-OFFICIAL_CORE_SOURCE_REPOSITORY=${OFFICIAL_CORE_SOURCE_REPOSITORY:-"vllm-project/vllm"}
 OFFICIAL_BACKEND_SOURCE_ENGINE=${OFFICIAL_BACKEND_SOURCE_ENGINE:-"vllm-ascend"}
-OFFICIAL_BACKEND_SOURCE_REPOSITORY=${OFFICIAL_BACKEND_SOURCE_REPOSITORY:-"vllm-project/vllm-ascend"}
-OFFICIAL_CORE_SOURCE_REF=$(jq -r '.baseline_target.vllm_ref // empty' "$SPEC_FILE")
-OFFICIAL_BACKEND_SOURCE_REF=$(jq -r '.baseline_target.vllm_ascend_ref // empty' "$SPEC_FILE")
-
-if [[ -z "$OFFICIAL_CORE_SOURCE_REF" ]] || [[ "$OFFICIAL_CORE_SOURCE_REF" == "null" ]]; then
-  OFFICIAL_CORE_SOURCE_REF="$OFFICIAL_VLLM_REF"
-fi
-if [[ -z "$OFFICIAL_BACKEND_SOURCE_REF" ]] || [[ "$OFFICIAL_BACKEND_SOURCE_REF" == "null" ]]; then
-  OFFICIAL_BACKEND_SOURCE_REF="$OFFICIAL_VLLM_ASCEND_REF"
-fi
-
 OFFICIAL_CORE_SOURCE_COMMIT=$(git -C "$OFFICIAL_VLLM_WORKTREE" rev-parse HEAD 2>/dev/null || true)
 OFFICIAL_BACKEND_SOURCE_COMMIT=$(git -C "$OFFICIAL_VLLM_ASCEND_WORKTREE" rev-parse HEAD 2>/dev/null || true)
 if [[ -z "$OFFICIAL_BACKEND_SOURCE_COMMIT" ]]; then
@@ -1789,6 +1849,28 @@ esac
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
 run_client_command
 
+"$HOST_PYTHON_BIN" "$CAPTURE_SOURCE_PROVENANCE_SCRIPT" \
+  "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_CORE_SOURCE_REF" \
+  "$OFFICIAL_CORE_SOURCE_REPOSITORY" "$SOURCE_PROVENANCE_DIR/engine-after.json"
+"$HOST_PYTHON_BIN" "$CAPTURE_SOURCE_PROVENANCE_SCRIPT" \
+  "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$OFFICIAL_BACKEND_SOURCE_REF" \
+  "$OFFICIAL_BACKEND_SOURCE_REPOSITORY" "$SOURCE_PROVENANCE_DIR/plugin-after.json"
+"$HOST_PYTHON_BIN" - \
+  "$SOURCE_PROVENANCE_DIR/engine.json" "$SOURCE_PROVENANCE_DIR/engine-after.json" \
+  "$SOURCE_PROVENANCE_DIR/plugin.json" "$SOURCE_PROVENANCE_DIR/plugin-after.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+paths = [Path(item) for item in sys.argv[1:]]
+for before_path, after_path in zip(paths[::2], paths[1::2]):
+    before = json.loads(before_path.read_text(encoding="utf-8"))
+    after = json.loads(after_path.read_text(encoding="utf-8"))
+    fields = ("observed_commit", "tracked_patch_sha256", "working_tree_sha256", "status")
+    if any(before.get(field) != after.get(field) for field in fields):
+        raise SystemExit(f"official source changed during benchmark: {before_path.stem}")
+PY
+
 EXPORT_ARGS=(
   python -m vllm_hust_benchmark.cli export-leaderboard-artifact
   "$SCENARIO"
@@ -1830,4 +1912,45 @@ append_export_arg_from_spec --batch-size '.client_parameters.batch_size'
 
 run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" "${EXPORT_ARGS[@]}"
 
-echo "[goal-baseline] exported leaderboard artifact to $ARTIFACT_DIR"
+"$HOST_PYTHON_BIN" - "$ARTIFACT_DIR/run_leaderboard.json" "$SOURCE_PROVENANCE_FILE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+artifact_path, provenance_path = map(Path, sys.argv[1:])
+artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+metadata = artifact.setdefault("metadata", {})
+metadata["official_source_provenance"] = provenance
+artifact_path.write_text(json.dumps(artifact, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+PY
+
+CURRENT_RUNTIME_PYTHON="$OFFICIAL_RUNTIME_PYTHON" \
+CURRENT_VLLM_HUST_REPO="$OFFICIAL_VLLM_WORKTREE" \
+CURRENT_VLLM_ASCEND_HUST_REPO="$OFFICIAL_VLLM_ASCEND_WORKTREE" \
+CURRENT_GIT_COMMIT="$OFFICIAL_CORE_SOURCE_COMMIT" \
+CURRENT_PLUGIN_GIT_COMMIT="$OFFICIAL_BACKEND_SOURCE_COMMIT" \
+OFFICIAL_SOURCE_PROVENANCE_FILE="$SOURCE_PROVENANCE_FILE" \
+bash "$COLLECT_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"
+
+"$HOST_PYTHON_BIN" - "$ARTIFACT_DIR" "$SOURCE_PROVENANCE_FILE" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+artifact_dir, provenance_path = map(Path, sys.argv[1:])
+expected = json.loads(provenance_path.read_text(encoding="utf-8"))
+artifact = json.loads((artifact_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
+manifest = json.loads((artifact_dir / "env-manifest.json").read_text(encoding="utf-8"))
+artifact_value = (artifact.get("metadata") or {}).get("official_source_provenance")
+manifest_value = manifest.get("official_source_provenance")
+if artifact_value != expected or manifest_value != expected:
+    raise SystemExit("official source provenance mismatch between artifact, manifest, and capture")
+for role, source in expected.get("sources", {}).items():
+    if source.get("status") == "modified" and not source.get("tracked_patch_sha256"):
+        raise SystemExit(f"{role} source is modified without tracked patch provenance")
+PY
+
+bash "$VALIDATE_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"
+
+echo "[goal-baseline] exported and validated leaderboard artifact at $ARTIFACT_DIR"
