@@ -1,0 +1,56 @@
+{
+  "id": "specialty-ascend-full-graph-parallel-inplace-sharegpt-online-qwen25-14b-910b3",
+  "label": "Specialty Ascend full-graph-parallel inplace dual-stream baseline (sharegpt-online, provisional)",
+  "baseline_target": {
+    "id": "specialty-ascend-full-graph-parallel-inplace",
+    "label": "Specialty Ascend full-graph-parallel inplace dual-stream",
+    "engine": "vllm",
+    "engine_version": "0.18.0",
+    "github_repository": "vllm-hust/vllm-hust",
+    "vllm_ref": "9ca08a102a068cba27c03efd86e858b76a99fde7",
+    "vllm_ascend_ref": "c9560ce761d8f0154f1db15f679b4d8d246ea249"
+  },
+  "scenario": "sharegpt-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B3",
+  "chip_count": 1,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 1,
+    "gpu_memory_utilization": 0.6,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 8000,
+    "max_model_len": 32768
+  },
+  "client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "sharegpt",
+    "no_stream": false,
+    "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+    "num_prompts": 200,
+    "request_rate": 1,
+    "host": "127.0.0.1",
+    "port": 8000
+  },
+  "export": {
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2.post1-3680-g9ca08a102",
+    "submitter": "vllm-hust-org-member",
+    "baseline_engine": "vllm",
+    "github_repository": "vllm-hust/vllm-hust",
+    "github_ref": "9ca08a102a",
+    "git_commit": "9ca08a102a068cba27c03efd86e858b76a99fde7",
+    "ascend_commit": "c9560ce761d8f0154f1db15f679b4d8d246ea249",
+    "data_source": "real-online-full-graph-parallel-backfill"
+  },
+  "status": "provisional",
+  "notes": "Specialty full-graph-parallel inplace dual-stream experiment (workload=sharegpt-online). Named specialty experiment (reviewer PR #76 decision): cudagraph_mode=FULL_DECODE_ONLY + split_batch_config{enabled=true, mode=inplace_parallel, num_splits=2, enable_parallel_streams=true, enable_inplace_lazy_capture=true, inplace_split_planner_policy=largest_lower, inplace_offset_match_policy=exact, inplace_parallel_replay_policy=full_graph_parallel, inplace_offset_capture_sizes=[1,2,4,8,16,32,64], parallel_capture_sizes=[1,2,4,8,16,32,64]} + --temperature 0.0 (aclnnApplyTopKTopPCustom workaround). Hardware is Huawei Ascend 910B3 (measured on machine via npu-smi; the official public target is 910B2). This experiment does NOT participate in the default official target (official-ascend-jan-2026-v0.18.0 / 910B2); it is a provisional specialty profile and must be excluded from the public leaderboard snapshot. Engine commit is vllm-hust 9ca08a102 + vllm-ascend-hust c9560ce76 (migrated full-graph branch)."
+}

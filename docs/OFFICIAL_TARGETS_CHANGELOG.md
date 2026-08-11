@@ -2,6 +2,22 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.4.0 — 2026-08-11
+
+- English: Add 7 Ascend 910B3 full-graph-parallel inplace specialty specs
+  (cudagraph_mode=FULL_DECODE_ONLY + split_batch inplace_parallel, temperature 0.0) as provisional
+  profiles, one per workload (random-online, random-latency, sharegpt-online, sharegpt-throughput,
+  sonnet-throughput, prefix-repetition-online, instructcoder-online). Registry classifier now gates
+  public-leaderboard/active on hardware_chip_model == 910B2; 910B3 specs are always
+  specialty/provisional.
+- 中文：新增 7 个 Ascend 910B3 full-graph-parallel inplace 专用 spec（cudagraph_mode=FULL_DECODE_ONLY +
+  split_batch inplace_parallel、temperature 0.0）作为 provisional profile，每个 workload
+  一份（random-online、random-latency、sharegpt-online、sharegpt-throughput、sonnet-throughput、prefix-repetition-online、instructcoder-online）。registry
+  分类器新增硬件门禁：仅 hardware_chip_model == 910B2 可判为 public-leaderboard/active；910B3 一律为
+  specialty/provisional。
+- Source set: `af85e0f896670e1e7a270d2f14a32898f6de9fba702ce44c349977eff67a6b39`
+- Supersedes: `1.3.0`
+
 ## 1.3.0 — 2026-08-03
 
 - English: Revert non-executable specialty specs to non-executable drafts: remove unsupported vLLM

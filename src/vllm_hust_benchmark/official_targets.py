@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.3.0"
-EFFECTIVE_FROM = "2026-08-03"
+REGISTRY_VERSION = "1.4.0"
+EFFECTIVE_FROM = "2026-08-11"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
@@ -21,6 +21,13 @@ PUBLIC_TEXT_SCENARIOS = {
     "sharegpt-throughput",
     "sonnet-throughput",
 }
+# Public-leaderboard targets are defined on the official Ascend 910B2 fleet.
+# Records measured on other hardware (e.g. 910B3) must be classified as
+# specialty/provisional even when the scenario/model/chip-count match a
+# public text/code/vision target shape.
+PUBLIC_TEXT_HARDWARE = "910B2"
+PUBLIC_CODE_HARDWARE = "910B2"
+PUBLIC_VISION_HARDWARE = "910B2"
 PACKAGE_REGISTRY_PATH = Path(__file__).parent / "data" / "official_targets.json"
 VERSION_HISTORY_RELATIVE_PATH = (
     Path("src") / "vllm_hust_benchmark" / "data" / "official_target_versions.json"
@@ -74,19 +81,24 @@ def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
         return "perfgate", "provisional", profile
 
     if chip_count == 1 and model == PUBLIC_TEXT_MODEL:
-        if scenario in PUBLIC_TEXT_SCENARIOS:
+        if (
+            scenario in PUBLIC_TEXT_SCENARIOS
+            and spec.get("hardware_chip_model") == PUBLIC_TEXT_HARDWARE
+        ):
             return "public-leaderboard", "active", "core-text"
         return "specialty", "provisional", "specialty-text"
     if (
         chip_count == 1
         and model == PUBLIC_CODE_MODEL
         and scenario == "instructcoder-online"
+        and spec.get("hardware_chip_model") == PUBLIC_CODE_HARDWARE
     ):
         return "public-leaderboard", "active", "code"
     if (
         chip_count == 1
         and model == PUBLIC_VISION_MODEL
         and scenario == "visionarena-online"
+        and spec.get("hardware_chip_model") == PUBLIC_VISION_HARDWARE
     ):
         return "public-leaderboard", "active", "multimodal"
     if chip_count > 1:
@@ -96,6 +108,16 @@ def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
 
 def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
     server = spec["server_parameters"]
+    public_hardware = {
+        PUBLIC_TEXT_HARDWARE,
+        PUBLIC_CODE_HARDWARE,
+        PUBLIC_VISION_HARDWARE,
+    }
+    if str(spec["hardware_chip_model"]) not in public_hardware:
+        raise ValueError(
+            f"public target {path} must run on 910B2 hardware, "
+            f"got {spec['hardware_chip_model']!r}"
+        )
     expected = {
         "tensor_parallel_size": 1,
         "gpu_memory_utilization": 0.6,

@@ -2,8 +2,8 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.3.0`
-- Effective from: `2026-08-03`
+- Registry version: `1.4.0`
+- Effective from: `2026-08-11`
 
 公开排行榜固定靶与 3B 快速门禁是不同契约；provisional 记录不得作为公开成果对比。
 
@@ -122,6 +122,9 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 | | specialty | provisional | specialty-text | attention-boundary-online | Qwen/Qwen2.5-14B-Instruct
 | 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-attention-boundary-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-attention-boundary-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | instructcoder-online | Qwen/Qwen2.5-14B-Instruct |
+910B3 × 1 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-full-graph-parallel-inplace-instructcoder-online-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-instructcoder-online-qwen25-14b-910b3.json)
 | | specialty | provisional | specialty-text | knorm-kv-compression-longctx |
 Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-knorm-kv-compression-longctx-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-knorm-kv-compression-longctx-qwen25-14b-910b2.json)
@@ -131,12 +134,30 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 | | specialty | provisional | specialty-text | logprobs-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-logprobs-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-logprobs-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | prefix-repetition-online | Qwen/Qwen2.5-14B-Instruct
+| 910B3 × 1 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-full-graph-parallel-inplace-prefix-repetition-online-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-prefix-repetition-online-qwen25-14b-910b3.json)
+| | specialty | provisional | specialty-text | random-latency | Qwen/Qwen2.5-14B-Instruct | 910B3 ×
+1 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-full-graph-parallel-inplace-random-latency-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-random-latency-qwen25-14b-910b3.json)
+| | specialty | provisional | specialty-text | random-online | Qwen/Qwen2.5-14B-Instruct | 910B3 × 1
+| FP16 | 0.6 | 32768 |
+[`specialty-ascend-full-graph-parallel-inplace-random-online-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-random-online-qwen25-14b-910b3.json)
 | | specialty | provisional | specialty-text | saturated-warm-cache-online |
 Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-saturated-warm-cache-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-saturated-warm-cache-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | sharegpt-online | Qwen/Qwen2.5-14B-Instruct | 910B3 ×
+1 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-full-graph-parallel-inplace-sharegpt-online-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-sharegpt-online-qwen25-14b-910b3.json)
+| | specialty | provisional | specialty-text | sharegpt-throughput | Qwen/Qwen2.5-14B-Instruct |
+910B3 × 1 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-full-graph-parallel-inplace-sharegpt-throughput-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-sharegpt-throughput-qwen25-14b-910b3.json)
 | | specialty | provisional | specialty-text | slicegpt-compression-online |
 Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-slicegpt-compression-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-slicegpt-compression-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | sonnet-throughput | Qwen/Qwen2.5-14B-Instruct | 910B3
+× 1 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-full-graph-parallel-inplace-sonnet-throughput-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-sonnet-throughput-qwen25-14b-910b3.json)
 | | specialty | provisional | specialty-text | spec-decode-online | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json)
