@@ -4,10 +4,10 @@
 
 ## 1.3.1 — 2026-08-11
 
-- English: Align the provisional prefix-repetition workload with its request count by setting eight
-  repeated prefixes for eight prompts.
-- 中文：将 provisional prefix-repetition workload 与请求数量对齐：8 个请求使用 8 个重复前缀。
-- Source set: `d44a084792b2a33218f19ea070870405c7684cae518a2e7ccbee77d69fda2e76`
+- English: Align the provisional prefix-repetition workload with its request count and ensure each
+  prefix is reused at least twice.
+- 中文：确保 provisional prefix-repetition workload 中每个前缀至少复用两次。
+- Source set: `237b1cf782ba1f073dfa9d1a63b278414aefd92ff774857982e140a3c7799110`
 - Supersedes: `1.3.0`
 
 ## 1.3.0 — 2026-08-03
