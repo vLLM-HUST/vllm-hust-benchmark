@@ -111,3 +111,97 @@ def test_public_target_drift_fails_closed(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="gpu_memory_utilization=0.6"):
         build_registry(tmp_path)
+
+
+def _classify(spec: dict) -> tuple[str, str, str]:
+    from vllm_hust_benchmark.official_targets import _classify_spec
+
+    return _classify_spec(Path("classify-spec.json"), spec)
+
+
+def test_910b2_text_spec_remains_public_leaderboard_active() -> None:
+    """The hardware gate must not regress the existing 910B2 public targets."""
+    assert _classify(
+        {
+            "scenario": "random-online",
+            "model": PUBLIC_TEXT_MODEL,
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+        }
+    ) == ("public-leaderboard", "active", "core-text")
+    assert _classify(
+        {
+            "scenario": "instructcoder-online",
+            "model": PUBLIC_CODE_MODEL,
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+        }
+    ) == ("public-leaderboard", "active", "code")
+    assert _classify(
+        {
+            "scenario": "visionarena-online",
+            "model": PUBLIC_VISION_MODEL,
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+        }
+    ) == ("public-leaderboard", "active", "multimodal")
+
+
+def test_910b3_spec_is_classified_as_specialty_provisional() -> None:
+    """Non-910B2 hardware must never enter the public-leaderboard/active set,
+    even when scenario/model/chip-count match a public target shape."""
+    for scenario in ("random-online", "random-latency", "sharegpt-online"):
+        assert _classify(
+            {
+                "scenario": scenario,
+                "model": PUBLIC_TEXT_MODEL,
+                "chip_count": 1,
+                "hardware_chip_model": "910B3",
+            }
+        ) == ("specialty", "provisional", "specialty-text")
+    assert _classify(
+        {
+            "scenario": "instructcoder-online",
+            "model": PUBLIC_CODE_MODEL,
+            "chip_count": 1,
+            "hardware_chip_model": "910B3",
+        }
+    ) == ("specialty", "provisional", "specialty")
+
+
+def test_built_registry_marks_910b3_targets_specialty() -> None:
+    """Every 910B3 spec in docs/official-baselines must land as
+    specialty/provisional in the built registry, never active."""
+    registry = build_registry(REPO_ROOT)
+    hardware_910b3 = [
+        target
+        for target in registry["targets"]
+        if target["hardware"]["chip_model"] == "910B3"
+    ]
+    assert hardware_910b3
+    for target in hardware_910b3:
+        assert target["intended_use"] == "specialty"
+        assert target["status"] == "provisional"
+        assert target["profile"] == "specialty-text"
+
+
+def test_public_target_validation_rejects_non_910b2_hardware() -> None:
+    """_validate_public_target must reject hardware other than 910B2."""
+    from vllm_hust_benchmark.official_targets import _validate_public_target
+
+    spec = {
+        "scenario": "random-online",
+        "model": PUBLIC_TEXT_MODEL,
+        "chip_count": 1,
+        "node_count": 1,
+        "model_precision": "FP16",
+        "hardware_chip_model": "910B3",
+        "server_parameters": {
+            "tensor_parallel_size": 1,
+            "gpu_memory_utilization": 0.6,
+            "max_model_len": 32768,
+        },
+        "baseline_target": {"vllm_ref": "v0.18.0", "vllm_ascend_ref": "v0.18.0"},
+    }
+    with pytest.raises(ValueError, match="910B2"):
+        _validate_public_target(spec, Path("specialty-910b3.json"))

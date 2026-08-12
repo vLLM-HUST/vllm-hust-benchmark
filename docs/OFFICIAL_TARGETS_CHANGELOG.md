@@ -2,6 +2,22 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.2 — 2026-08-11
+
+- English: Add 7 Ascend 910B3 full-graph-parallel inplace specialty specs
+  (cudagraph_mode=FULL_DECODE_ONLY + split_batch inplace_parallel, temperature 0.0) as provisional
+  profiles, one per workload (random-online, random-latency, sharegpt-online, sharegpt-throughput,
+  sonnet-throughput, prefix-repetition-online, instructcoder-online). Registry classifier now gates
+  public-leaderboard/active on hardware_chip_model == 910B2; 910B3 specs are always
+  specialty/provisional.
+- 中文：新增 7 个 Ascend 910B3 full-graph-parallel inplace 专用 spec（cudagraph_mode=FULL_DECODE_ONLY +
+  split_batch inplace_parallel、temperature 0.0）作为 provisional profile，每个 workload
+  一份（random-online、random-latency、sharegpt-online、sharegpt-throughput、sonnet-throughput、prefix-repetition-online、instructcoder-online）。registry
+  分类器新增硬件门禁：仅 hardware_chip_model == 910B2 可判为 public-leaderboard/active；910B3 一律为
+  specialty/provisional。
+- Source set: `550fb56cfa642490f1a4d82c19032711bbb01acc2a7eb7498d0fd2a00a1481ae`
+- Supersedes: `1.3.1`
+
 ## 1.3.1 — 2026-08-11
 
 - English: Align the provisional prefix-repetition workload with its request count and ensure each
