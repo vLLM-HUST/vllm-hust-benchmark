@@ -2473,14 +2473,51 @@ def run_vllm_bench(
     return raw
 
 
-def _official_spec_path(workload: str) -> Path:
-    """Resolve the official baseline spec file for a backfill workload."""
+def _default_spec_model(workload: str) -> str:
+    """The model the official 910B2 baseline spec encodes for ``workload``."""
+    return (
+        "Qwen/Qwen2.5-Coder-14B-Instruct"
+        if "instructcoder" in workload
+        else "Qwen/Qwen2.5-14B-Instruct"
+    )
+
+
+def _model_matches_official_spec(workload: str, model: str) -> bool:
+    """True if ``model`` matches the workload's default official-baseline model.
+
+    Accepts the full repo id, the ``hf:``-prefixed id, the bare short name, and
+    a local path whose basename matches the default model short name.
+    """
+    ref = _default_spec_model(workload)
+    short_ref = ref.rsplit("/", maxsplit=1)[-1]
+    short_model = model.rstrip("/").rsplit("/", maxsplit=1)[-1]
+    return model == ref or short_model == short_ref
+
+
+def _official_spec_path(workload: str, model: str | None = None) -> Path:
+    """Resolve the official baseline spec file for a backfill workload.
+
+    If an explicit ``model`` is supplied, it must match the workload's default
+    official-baseline model (e.g. instructcoder -> Qwen2.5-Coder-14B-Instruct);
+    otherwise the auto-resolved 910B2 spec would pair the submission against a
+    different model contract and corrupt goal-progress pairing.  Non-default
+    models (local paths or other HF repos) require an explicit ``--spec-path``
+    (e.g. a matching specialty spec) instead of this auto-resolution.
+    """
+    if model is not None and not _model_matches_official_spec(workload, model):
+        raise ValueError(
+            f"--model {model!r} does not match the default official baseline "
+            f"model for workload {workload!r} "
+            f"({_default_spec_model(workload)!r}); pass an explicit --spec-path "
+            "(e.g. a matching specialty spec) to avoid goal-pairing against the "
+            "wrong model contract"
+        )
     model_tag = "qwen25-coder-14b" if "instructcoder" in workload else "qwen25-14b"
     spec_name = f"official-ascend-jan-2026-v0180-{workload}-{model_tag}-910b2.json"
     return REPO_ROOT / "docs" / "official-baselines" / spec_name
 
 
-def _generate_same_spec(workload: str) -> dict[str, Any]:
+def _generate_same_spec(workload: str, model: str | None = None) -> dict[str, Any]:
     """Generate a same_spec payload matching the official baseline hash.
 
     The official v0.18.0 baseline was generated at commit ``2d6f5de`` using
@@ -2489,7 +2526,7 @@ def _generate_same_spec(workload: str) -> dict[str, Any]:
     that exact logic so the ``resolved_spec_hash`` matches the official
     baseline, enabling leaderboard goal-progress pairing.
     """
-    spec_path = _official_spec_path(workload)
+    spec_path = _official_spec_path(workload, model)
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
 
     # ------------------------------------------------------------------
@@ -2760,7 +2797,7 @@ def submit_artifact(
     constraints = REPO_ROOT / "docs" / "examples" / "constraints_metrics.sample.json"
 
     # Generate same_spec so the submission passes the public-snapshot filter.
-    same_spec = _generate_same_spec(workload)
+    same_spec = _generate_same_spec(workload, model)
     same_spec_file = STATE_DIR / f"same_spec_{workload}.json"
     same_spec_file.parent.mkdir(parents=True, exist_ok=True)
     same_spec_file.write_text(json.dumps(same_spec, indent=2) + "\n", encoding="utf-8")
@@ -2778,7 +2815,7 @@ def submit_artifact(
         "--same-spec-file",
         str(same_spec_file),
         "--spec-path",
-        str(_official_spec_path(workload)),
+        str(_official_spec_path(workload, model)),
         "--run-id",
         run_id,
         "--engine",
@@ -4083,7 +4120,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--temperature",
         type=float,
         default=None,
-        help="Sampling temperature (e.g. 0.0). Only has effect on serve workloads.",
+        help="Sampling temperature (e.g. 0.0). Applied for serve workloads and "
+        "passed via override-generation-config for latency/throughput.",
     )
     p_run.add_argument(
         "--workload",
