@@ -1,0 +1,928 @@
+INFO 08-11 06:02:19 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 08-11 06:02:19 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 08-11 06:02:19 [__init__.py:58] Loading plugin ascend
+INFO 08-11 06:02:19 [__init__.py:246] Platform plugin ascend is activated
+INFO 08-11 06:02:19 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.
+ERROR 08-11 06:02:28 [config.py:29] Failed to import Triton kernels. Please make sure your triton version is compatible. Error: No module named 'triton.language.target_info'
+INFO 08-11 06:02:37 [api_utils.py:404] non-default args: {'tokenizer': '/data/shared-models/Qwen2.5-14B-Instruct', 'max_model_len': 32768, 'gpu_memory_utilization': 0.6, 'enable_lora': None, 'reasoning_parser_plugin': '', 'compilation_config': {'mode': None, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': None, 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'override_generation_config': {'temperature': 0.0}, 'additional_config': {'split_batch_config': {'enabled': True, 'mode': 'inplace_parallel', 'num_splits': 2, 'enable_parallel_streams': True, 'enable_inplace_lazy_capture': True, 'inplace_split_planner_policy': 'largest_lower', 'inplace_offset_match_policy': 'exact', 'inplace_parallel_replay_policy': 'full_graph_parallel', 'inplace_offset_capture_sizes': [1, 2, 4, 8, 16, 32, 64], 'parallel_capture_sizes': [1, 2, 4, 8, 16, 32, 64]}}, 'model': '/data/shared-models/Qwen2.5-14B-Instruct'}
+WARNING 08-11 06:02:37 [envs.py:2096] Unknown vLLM environment variable detected: VLLM_USE_V1
+WARNING 08-11 06:02:37 [envs.py:2096] Unknown vLLM environment variable detected: VLLM_VERSION
+WARNING 08-11 06:02:37 [envs.py:2096] Unknown vLLM environment variable detected: VLLM_ASCEND_TORCH_PREFLIGHT
+INFO 08-11 06:02:37 [model.py:606] Resolved architecture: Qwen2ForCausalLM
+INFO 08-11 06:02:37 [model.py:1736] Using max model len 32768
+INFO 08-11 06:02:37 [scheduler.py:252] Chunked prefill is enabled with max_num_batched_tokens=8192.
+INFO 08-11 06:02:37 [vllm.py:1040] Asynchronous scheduling is enabled.
+INFO 08-11 06:02:37 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 08-11 06:02:37 [utils.py:203] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+WARNING 08-11 06:02:37 [platform.py:1182] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+INFO 08-11 06:02:37 [ascend_config.py:917] Dynamic EPLB is False
+INFO 08-11 06:02:37 [ascend_config.py:918] The number of redundant experts is 0
+INFO 08-11 06:02:37 [utils.py:1458] Block size is set to 128 if prefix cache or chunked prefill is enabled.
+INFO 08-11 06:02:37 [platform.py:892] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+INFO 08-11 06:02:37 [compilation.py:312] Enabled custom fusions: norm_quant, act_quant
+INFO 08-11 06:02:47 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 08-11 06:02:47 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 08-11 06:02:47 [__init__.py:58] Loading plugin ascend
+INFO 08-11 06:02:47 [__init__.py:246] Platform plugin ascend is activated
+INFO 08-11 06:02:47 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.
+ERROR 08-11 06:02:56 [config.py:29] Failed to import Triton kernels. Please make sure your triton version is compatible. Error: No module named 'triton.language.target_info'
+INFO 08-11 06:03:04 [api_utils.py:404] non-default args: {'tokenizer': '/data/shared-models/Qwen2.5-14B-Instruct', 'max_model_len': 32768, 'gpu_memory_utilization': 0.6, 'enable_lora': None, 'reasoning_parser_plugin': '', 'compilation_config': {'mode': None, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': None, 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}, 'override_generation_config': {'temperature': 0.0}, 'additional_config': {'split_batch_config': {'enabled': True, 'mode': 'inplace_parallel', 'num_splits': 2, 'enable_parallel_streams': True, 'enable_inplace_lazy_capture': True, 'inplace_split_planner_policy': 'largest_lower', 'inplace_offset_match_policy': 'exact', 'inplace_parallel_replay_policy': 'full_graph_parallel', 'inplace_offset_capture_sizes': [1, 2, 4, 8, 16, 32, 64], 'parallel_capture_sizes': [1, 2, 4, 8, 16, 32, 64]}}, 'model': '/data/shared-models/Qwen2.5-14B-Instruct'}
+WARNING 08-11 06:03:04 [envs.py:2096] Unknown vLLM environment variable detected: VLLM_USE_V1
+WARNING 08-11 06:03:04 [envs.py:2096] Unknown vLLM environment variable detected: VLLM_VERSION
+WARNING 08-11 06:03:04 [envs.py:2096] Unknown vLLM environment variable detected: VLLM_ASCEND_TORCH_PREFLIGHT
+INFO 08-11 06:03:04 [model.py:606] Resolved architecture: Qwen2ForCausalLM
+INFO 08-11 06:03:04 [model.py:1736] Using max model len 32768
+INFO 08-11 06:03:04 [scheduler.py:252] Chunked prefill is enabled with max_num_batched_tokens=8192.
+INFO 08-11 06:03:04 [vllm.py:1040] Asynchronous scheduling is enabled.
+INFO 08-11 06:03:04 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 08-11 06:03:04 [utils.py:203] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+WARNING 08-11 06:03:04 [platform.py:1182] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+INFO 08-11 06:03:04 [ascend_config.py:917] Dynamic EPLB is False
+INFO 08-11 06:03:04 [ascend_config.py:918] The number of redundant experts is 0
+INFO 08-11 06:03:04 [utils.py:1458] Block size is set to 128 if prefix cache or chunked prefill is enabled.
+INFO 08-11 06:03:04 [platform.py:892] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+INFO 08-11 06:03:04 [compilation.py:312] Enabled custom fusions: norm_quant, act_quant
+INFO 08-11 06:03:14 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 08-11 06:03:14 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 08-11 06:03:14 [__init__.py:58] Loading plugin ascend
+INFO 08-11 06:03:14 [__init__.py:246] Platform plugin ascend is activated
+INFO 08-11 06:03:15 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.
+ERROR 08-11 06:03:23 [config.py:29] Failed to import Triton kernels. Please make sure your triton version is compatible. Error: No module named 'triton.language.target_info'
+(EngineCore pid=732978) INFO 08-11 06:03:23 [core.py:114] Initializing a V1 LLM engine (v0.17.2.post2.dev1191+g1b1021111) with config: model='/data/shared-models/Qwen2.5-14B-Instruct', speculative_config=None, tokenizer='/data/shared-models/Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=32768, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/data/shared-models/Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY: (2, 0)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 256, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=732978) WARNING 08-11 06:03:26 [worker.py:321] COMPILE_CUSTOM_KERNELS is set to False. In most scenarios, without custom kernels, vllm-ascend will not function correctly.
+(EngineCore pid=732978) INFO 08-11 06:03:26 [ascend_config.py:917] Dynamic EPLB is False
+(EngineCore pid=732978) INFO 08-11 06:03:26 [ascend_config.py:918] The number of redundant experts is 0
+(EngineCore pid=732978) INFO 08-11 06:03:28 [parallel_state.py:1692] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://11.11.10.27:42423 backend=hccl
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+(EngineCore pid=732978) INFO 08-11 06:03:30 [parallel_state.py:2027] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+(EngineCore pid=732978) INFO 08-11 06:03:30 [model_runner_v1.py:3891] Starting to load model /data/shared-models/Qwen2.5-14B-Instruct...
+(EngineCore pid=732978) INFO 08-11 06:03:31 [compilation.py:1068] Using OOT custom backend for compilation.
+(EngineCore pid=732978) WARNING 08-11 06:03:31 [utils.py:381] Disable npu_add_rms_norm_bias custom op because libopapi.so misses required symbol(s): aclnnAddRmsNormBias, aclnnAddRmsNormBiasGetWorkspaceSize
+(EngineCore pid=732978) INFO 08-11 06:03:32 [backends.py:888] Post-grad pass configuration time: 1.36 s
+(EngineCore pid=732978) INFO 08-11 06:03:32 [weight_utils.py:854] Filesystem type for checkpoints: DPC. Checkpoint size: 27.51 GiB. Available RAM: 1952.94 GiB.
+(EngineCore pid=732978) INFO 08-11 06:03:32 [weight_utils.py:877] Auto-prefetch is disabled because the filesystem (DPC) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=732978) Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:00<00:02,  2.75it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:00<00:03,  1.99it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:01<00:02,  1.84it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:02<00:02,  1.83it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:02<00:01,  1.83it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:03<00:01,  1.80it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:03<00:00,  1.76it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:04<00:00,  1.97it/s]
+(EngineCore pid=732978) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:04<00:00,  1.90it/s]
+(EngineCore pid=732978) 
+(EngineCore pid=732978) INFO 08-11 06:03:37 [default_loader.py:430] Loading weights took 4.33 seconds
+(EngineCore pid=732978) INFO 08-11 06:03:38 [model_runner_v1.py:3967] Loading model weights took 27.5350 GB
+(EngineCore pid=732978) INFO 08-11 06:03:38 [model_runner_v1.py:4002] DUAL_INPLACE mode enabled: mode=inplace_parallel, parallel_streams=True
+(EngineCore pid=732978) INFO 08-11 06:03:38 [model_runner_v1.py:4012] Model runner load_model total time: 7.88 seconds
+(EngineCore pid=732978) INFO 08-11 06:03:38 [interface.py:620] Setting kv cache block size to 128 for CUSTOM backend.
+(EngineCore pid=732978) WARNING 08-11 06:03:38 [single_type_kv_cache_manager.py:1532] Knorm KV compression is disabled because prefix caching is enabled. Set --no-enable-prefix-caching to use Knorm.
+(EngineCore pid=732978) INFO 08-11 06:03:46 [compiler_interface.py:248] AscendCompiler hash factors: {'torch_npu_version': '2.9.0', 'enable_npugraph_ex': True, 'enable_static_kernel': False}
+(EngineCore pid=732978) INFO 08-11 06:03:46 [backends.py:1116] Using cache directory: /root/.cache/vllm/torch_compile_cache/165878527f/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=732978) INFO 08-11 06:03:46 [backends.py:1175] Dynamo bytecode transform time: 8.21 s
+(EngineCore pid=732978) INFO 08-11 06:03:47 [compiler_interface.py:285] enable_npugraph_ex is enabled, which will bring graph compilation optimization.
+(EngineCore pid=732978) /root/miniconda3/envs/vllm-hust-dev/lib/python3.11/site-packages/torch_npu/dynamo/torchair/configs/compiler_config.py:106: UserWarning: The following torchair config or properties may not take effect or report error in reduce-overhead mode: config.experimental_config.enable_view_optimize:True, set_dim_gears, dynamo_export, scope, npu_print
+(EngineCore pid=732978)   warnings.warn(
+(EngineCore pid=732978) INFO 08-11 06:04:07 [backends.py:393] Compiling a graph for compile range (1, 8192) takes 20.19 s
+(EngineCore pid=732978) INFO 08-11 06:04:10 [monitor.py:53] torch.compile and initial profiling/warmup run together took 32.08 s in total
+(EngineCore pid=732978) INFO 08-11 06:04:12 [gpu_model_runner.py:6549] Profiling CUDA graph memory: FULL=35 (largest=256)
+mki_log delete old file:/root/ascend/log/atb/atb_539187_20260722110933.log
+(EngineCore pid=732978) INFO 08-11 06:04:14 [gpu_model_runner.py:6654] Estimated CUDA graph memory: 0.49 GiB total
+(EngineCore pid=732978) INFO 08-11 06:04:15 [worker.py:808] Available KV cache memory: 7.67 GiB
+(EngineCore pid=732978) INFO 08-11 06:04:15 [worker.py:824] ACL graph memory profiling is enabled (default since v0.22.1). The current --gpu-memory-utilization=0.6000 is equivalent to --gpu-memory-utilization=0.5920 without ACL graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.6080. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=732978) INFO 08-11 06:04:15 [kv_cache_utils.py:2203] GPU KV cache size: 41,856 tokens
+(EngineCore pid=732978) INFO 08-11 06:04:15 [kv_cache_utils.py:2204] Maximum concurrency for 32,768 tokens per request: 1.28x
+(EngineCore pid=732978) Capturing CUDA graphs (decode, FULL):   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graphs (decode, FULL):   3%|▎         | 1/35 [00:00<00:08,  3.99it/s]Capturing CUDA graphs (decode, FULL):   6%|▌         | 2/35 [00:00<00:08,  4.12it/s]Capturing CUDA graphs (decode, FULL):   9%|▊         | 3/35 [00:00<00:07,  4.17it/s]Capturing CUDA graphs (decode, FULL):  11%|█▏        | 4/35 [00:00<00:07,  4.19it/s]Capturing CUDA graphs (decode, FULL):  14%|█▍        | 5/35 [00:01<00:07,  4.19it/s]Capturing CUDA graphs (decode, FULL):  17%|█▋        | 6/35 [00:01<00:06,  4.19it/s]Capturing CUDA graphs (decode, FULL):  20%|██        | 7/35 [00:01<00:06,  4.20it/s]Capturing CUDA graphs (decode, FULL):  23%|██▎       | 8/35 [00:01<00:06,  4.20it/s]Capturing CUDA graphs (decode, FULL):  26%|██▌       | 9/35 [00:02<00:06,  4.22it/s]Capturing CUDA graphs (decode, FULL):  29%|██▊       | 10/35 [00:02<00:05,  4.28it/s]Capturing CUDA graphs (decode, FULL):  31%|███▏      | 11/35 [00:02<00:05,  4.30it/s]Capturing CUDA graphs (decode, FULL):  34%|███▍      | 12/35 [00:02<00:05,  4.32it/s]Capturing CUDA graphs (decode, FULL):  37%|███▋      | 13/35 [00:03<00:05,  4.34it/s]Capturing CUDA graphs (decode, FULL):  40%|████      | 14/35 [00:03<00:04,  4.35it/s]Capturing CUDA graphs (decode, FULL):  43%|████▎     | 15/35 [00:03<00:04,  4.36it/s]Capturing CUDA graphs (decode, FULL):  46%|████▌     | 16/35 [00:03<00:04,  4.35it/s]Capturing CUDA graphs (decode, FULL):  49%|████▊     | 17/35 [00:03<00:04,  4.39it/s]Capturing CUDA graphs (decode, FULL):  51%|█████▏    | 18/35 [00:04<00:03,  4.44it/s]Capturing CUDA graphs (decode, FULL):  54%|█████▍    | 19/35 [00:04<00:03,  4.48it/s]Capturing CUDA graphs (decode, FULL):  57%|█████▋    | 20/35 [00:04<00:03,  4.49it/s]Capturing CUDA graphs (decode, FULL):  60%|██████    | 21/35 [00:04<00:03,  4.51it/s]Capturing CUDA graphs (decode, FULL):  63%|██████▎   | 22/35 [00:05<00:02,  4.52it/s]Capturing CUDA graphs (decode, FULL):  66%|██████▌   | 23/35 [00:05<00:02,  4.53it/s]Capturing CUDA graphs (decode, FULL):  69%|██████▊   | 24/35 [00:05<00:02,  4.53it/s]Capturing CUDA graphs (decode, FULL):  71%|███████▏  | 25/35 [00:05<00:02,  4.55it/s]Capturing CUDA graphs (decode, FULL):  74%|███████▍  | 26/35 [00:05<00:01,  4.57it/s]Capturing CUDA graphs (decode, FULL):  77%|███████▋  | 27/35 [00:06<00:01,  4.58it/s]Capturing CUDA graphs (decode, FULL):  80%|████████  | 28/35 [00:06<00:01,  4.59it/s]Capturing CUDA graphs (decode, FULL):  83%|████████▎ | 29/35 [00:06<00:01,  4.58it/s]Capturing CUDA graphs (decode, FULL):  86%|████████▌ | 30/35 [00:06<00:01,  4.56it/s]Capturing CUDA graphs (decode, FULL):  89%|████████▊ | 31/35 [00:07<00:00,  4.62it/s]Capturing CUDA graphs (decode, FULL):  91%|█████████▏| 32/35 [00:07<00:00,  4.58it/s]Capturing CUDA graphs (decode, FULL):  94%|█████████▍| 33/35 [00:07<00:00,  4.57it/s]Capturing CUDA graphs (decode, FULL):  97%|█████████▋| 34/35 [00:07<00:00,  4.57it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 35/35 [00:07<00:00,  4.59it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 35/35 [00:07<00:00,  4.43it/s]
+(EngineCore pid=732978) INFO 08-11 06:04:24 [gpu_model_runner.py:6722] Graph capturing finished in 9 secs, took 0.32 GiB
+(EngineCore pid=732978) INFO 08-11 06:04:25 [worker.py:989] ACL graph pool memory: 0.32 GiB (actual), 0.49 GiB (estimated), difference: 0.17 GiB (54.7%).
+(EngineCore pid=732978) INFO 08-11 06:04:25 [worker.py:1034] Free memory on device (60.62/60.96 GiB) on startup. Desired GPU memory utilization is (0.6, 36.57 GiB). Actual usage: 27.54 GiB for weights, 0.73 GiB for peak activation, 0.16 GiB for non-torch memory, 0.32 GiB for NPU graph memory. Replace gpu_memory_utilization with `--kv-cache-memory=8260445696` (7.69 GiB) to fit into requested memory, or `--kv-cache-memory=34077234688` (31.74 GiB) to fully utilize NPU free memory. Current KV cache memory: 7.67 GiB.
+(EngineCore pid=732978) INFO 08-11 06:04:27 [cpu_binding.py:389] [cpu_bind_mode] mode=topo_affinity rank=0 visible_npus=[0]
+(EngineCore pid=732978) INFO 08-11 06:04:27 [cpu_binding.py:454] The CPU allocation plan is as follows:
+(EngineCore pid=732978) INFO 08-11 06:04:27 [cpu_binding.py:459] NPU0: main=[146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165]  acl=[166]  release=[[167]]
+(EngineCore pid=732978) INFO 08-11 06:04:27 [cpu_binding.py:485] [migrate] NPU:0 -> NUMA [6]
+(EngineCore pid=732978) INFO 08-11 06:04:29 [cpu_binding.py:584] NPU0(PCI 0000:c1:00.0): sq_send_trigger_irq IRQ_ID=3331 -> CPU144, cq_update_irq IRQ_ID=3332 -> CPU145
+(EngineCore pid=732978) INFO 08-11 06:04:29 [core.py:342] init engine (profile, create kv cache, warmup model) took 51.68 s (compilation: 32.08 s)
+(EngineCore pid=732978) INFO 08-11 06:04:31 [vllm.py:1040] Asynchronous scheduling is enabled.
+(EngineCore pid=732978) INFO 08-11 06:04:31 [kernel.py:286] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=732978) INFO 08-11 06:04:31 [utils.py:203] No quantization signature detected from model files for "/data/shared-models/Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(EngineCore pid=732978) INFO 08-11 06:04:31 [platform.py:892] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(EngineCore pid=732978) INFO 08-11 06:04:31 [compilation.py:312] Enabled custom fusions: norm_quant, act_quant
+Rendering prompts:   0%|          | 0/200 [00:00<?, ?it/s](EngineCore pid=732978) INFO 08-11 06:04:31 [model_runner_v1.py:2223] DUAL_INPLACE check: enabled=True, mode=inplace_parallel, cudagraph_mode=NONE
+Rendering prompts:  28%|██▊       | 55/200 [00:00<00:00, 545.25it/s]Rendering prompts:  67%|██████▋   | 134/200 [00:00<00:00, 688.25it/s]Rendering prompts: 100%|██████████| 200/200 [00:00<00:00, 716.94it/s]
+Processed prompts:   0%|          | 0/200 [00:00<?, ?it/s, est. speed input: 0.00 toks/s, output: 0.00 toks/s](EngineCore pid=732978) INFO 08-11 06:04:34 [model_runner_v1.py:2223] DUAL_INPLACE check: enabled=True, mode=inplace_parallel, cudagraph_mode=FULL
+(EngineCore pid=732978) INFO 08-11 06:04:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=132
+(EngineCore pid=732978) INFO 08-11 06:04:35 [acl_graph.py:298] Replaying aclgraph
+(EngineCore pid=732978) INFO 08-11 06:04:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=131
+Processed prompts:   0%|          | 1/200 [00:04<13:36,  4.10s/it, est. speed input: 2.44 toks/s, output: 0.98 toks/s]Processed prompts:   1%|          | 2/200 [00:04<06:08,  1.86s/it, est. speed input: 5.47 toks/s, output: 1.82 toks/s](EngineCore pid=732978) INFO 08-11 06:04:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=130
+Processed prompts:   2%|▏         | 3/200 [00:04<03:45,  1.14s/it, est. speed input: 141.84 toks/s, output: 2.78 toks/s](EngineCore pid=732978) INFO 08-11 06:04:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=133
+Processed prompts:   2%|▏         | 4/200 [00:05<02:47,  1.17it/s, est. speed input: 209.09 toks/s, output: 4.12 toks/s]Processed prompts:   4%|▍         | 8/200 [00:05<00:57,  3.34it/s, est. speed input: 726.48 toks/s, output: 9.99 toks/s]Processed prompts:   4%|▍         | 9/200 [00:05<00:52,  3.64it/s, est. speed input: 766.35 toks/s, output: 11.50 toks/s]Processed prompts:   6%|▌         | 12/200 [00:05<00:32,  5.87it/s, est. speed input: 1022.20 toks/s, output: 15.82 toks/s]Processed prompts:   7%|▋         | 14/200 [00:05<00:26,  7.12it/s, est. speed input: 1067.26 toks/s, output: 19.41 toks/s]Processed prompts:   8%|▊         | 17/200 [00:06<00:21,  8.58it/s, est. speed input: 1198.97 toks/s, output: 24.47 toks/s]Processed prompts:  10%|▉         | 19/200 [00:06<00:19,  9.09it/s, est. speed input: 1329.35 toks/s, output: 28.74 toks/s]Processed prompts:  10%|█         | 21/200 [00:06<00:16, 10.71it/s, est. speed input: 1401.82 toks/s, output: 33.20 toks/s](EngineCore pid=732978) INFO 08-11 06:04:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=149
+(EngineCore pid=732978) INFO 08-11 06:04:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=149
+Processed prompts:  12%|█▏        | 23/200 [00:06<00:24,  7.28it/s, est. speed input: 1419.81 toks/s, output: 36.09 toks/s](EngineCore pid=732978) INFO 08-11 06:04:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=149
+(EngineCore pid=732978) INFO 08-11 06:04:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=148
+Processed prompts:  12%|█▎        | 25/200 [00:07<00:31,  5.63it/s, est. speed input: 1411.91 toks/s, output: 39.50 toks/s]Processed prompts:  14%|█▎        | 27/200 [00:07<00:24,  7.03it/s, est. speed input: 1437.71 toks/s, output: 44.66 toks/s]Processed prompts:  15%|█▌        | 30/200 [00:07<00:17,  9.94it/s, est. speed input: 1569.64 toks/s, output: 50.27 toks/s]Processed prompts:  18%|█▊        | 35/200 [00:07<00:10, 15.25it/s, est. speed input: 1709.57 toks/s, output: 63.93 toks/s](EngineCore pid=732978) INFO 08-11 06:04:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  19%|█▉        | 38/200 [00:07<00:11, 13.69it/s, est. speed input: 1771.93 toks/s, output: 70.27 toks/s]Processed prompts:  20%|██        | 40/200 [00:08<00:11, 13.50it/s, est. speed input: 1759.67 toks/s, output: 75.20 toks/s]Processed prompts:  21%|██        | 42/200 [00:08<00:10, 14.41it/s, est. speed input: 1788.33 toks/s, output: 78.58 toks/s]Processed prompts:  22%|██▎       | 45/200 [00:08<00:10, 15.05it/s, est. speed input: 1861.06 toks/s, output: 82.47 toks/s](EngineCore pid=732978) INFO 08-11 06:04:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=150
+Processed prompts:  24%|██▎       | 47/200 [00:08<00:16,  9.37it/s, est. speed input: 1842.31 toks/s, output: 85.47 toks/s]Processed prompts:  24%|██▍       | 49/200 [00:09<00:15,  9.75it/s, est. speed input: 1913.49 toks/s, output: 86.19 toks/s](EngineCore pid=732978) INFO 08-11 06:04:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=151
+(EngineCore pid=732978) INFO 08-11 06:04:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=150
+(EngineCore pid=732978) INFO 08-11 06:04:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=150
+(EngineCore pid=732978) INFO 08-11 06:04:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=148
+Processed prompts:  26%|██▌       | 51/200 [00:09<00:22,  6.53it/s, est. speed input: 1843.95 toks/s, output: 88.98 toks/s](EngineCore pid=732978) INFO 08-11 06:04:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=145
+Processed prompts:  26%|██▋       | 53/200 [00:09<00:23,  6.25it/s, est. speed input: 1779.93 toks/s, output: 91.52 toks/s](EngineCore pid=732978) INFO 08-11 06:04:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=145
+INFO 08-11 06:04:41 [loggers.py:282] Engine 000: Avg prompt throughput: 4220.6 tokens/s, Avg generation throughput: 584.7 tokens/s, Running: 145 reqs, Waiting: 0 reqs, GPU KV cache usage: 96.3%, Prefix cache hit rate: 0.0%
+(EngineCore pid=732978) INFO 08-11 06:04:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=142
+Processed prompts:  28%|██▊       | 56/200 [00:10<00:21,  6.71it/s, est. speed input: 1773.69 toks/s, output: 94.80 toks/s](EngineCore pid=732978) INFO 08-11 06:04:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=141
+Processed prompts:  30%|██▉       | 59/200 [00:10<00:18,  7.57it/s, est. speed input: 1758.41 toks/s, output: 101.48 toks/s](EngineCore pid=732978) INFO 08-11 06:04:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=141
+(EngineCore pid=732978) INFO 08-11 06:04:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=140
+Processed prompts:  30%|███       | 60/200 [00:11<00:23,  5.93it/s, est. speed input: 1738.49 toks/s, output: 101.89 toks/s](EngineCore pid=732978) INFO 08-11 06:04:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=140
+(EngineCore pid=732978) INFO 08-11 06:04:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=139
+Processed prompts:  30%|███       | 61/200 [00:11<00:28,  4.85it/s, est. speed input: 1731.05 toks/s, output: 101.82 toks/s](EngineCore pid=732978) INFO 08-11 06:04:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=139
+(EngineCore pid=732978) INFO 08-11 06:04:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=139
+(EngineCore pid=732978) INFO 08-11 06:04:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=139
+(EngineCore pid=732978) INFO 08-11 06:04:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=139
+(EngineCore pid=732978) INFO 08-11 06:04:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=138
+Processed prompts:  31%|███       | 62/200 [00:12<00:40,  3.43it/s, est. speed input: 1653.28 toks/s, output: 98.38 toks/s] (EngineCore pid=732978) INFO 08-11 06:04:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=137
+(EngineCore pid=732978) INFO 08-11 06:04:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=137
+Processed prompts:  32%|███▏      | 63/200 [00:12<00:39,  3.44it/s, est. speed input: 1618.88 toks/s, output: 99.73 toks/s](EngineCore pid=732978) INFO 08-11 06:04:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=137
+(EngineCore pid=732978) INFO 08-11 06:04:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  32%|███▏      | 64/200 [00:12<00:36,  3.72it/s, est. speed input: 1599.38 toks/s, output: 102.75 toks/s](EngineCore pid=732978) INFO 08-11 06:04:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=135
+Processed prompts:  32%|███▎      | 65/200 [00:12<00:38,  3.49it/s, est. speed input: 1567.73 toks/s, output: 104.46 toks/s](EngineCore pid=732978) INFO 08-11 06:04:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=135
+(EngineCore pid=732978) INFO 08-11 06:04:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=135
+(EngineCore pid=732978) INFO 08-11 06:04:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=134
+Processed prompts:  33%|███▎      | 66/200 [00:13<00:43,  3.05it/s, est. speed input: 1516.75 toks/s, output: 103.63 toks/s](EngineCore pid=732978) INFO 08-11 06:04:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=134
+(EngineCore pid=732978) INFO 08-11 06:04:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=134
+(EngineCore pid=732978) INFO 08-11 06:04:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=134
+(EngineCore pid=732978) INFO 08-11 06:04:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=134
+(EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=133
+Processed prompts:  34%|███▎      | 67/200 [00:13<00:43,  3.02it/s, est. speed input: 1493.48 toks/s, output: 104.87 toks/s](EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=132
+(EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=131
+Processed prompts:  34%|███▍      | 69/200 [00:13<00:28,  4.57it/s, est. speed input: 1505.82 toks/s, output: 112.93 toks/s](EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=131
+(EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=131
+(EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=130
+Processed prompts:  35%|███▌      | 70/200 [00:14<00:28,  4.51it/s, est. speed input: 1499.42 toks/s, output: 115.06 toks/s](EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=130
+(EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=130
+(EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=130
+(EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=130
+(EngineCore pid=732978) INFO 08-11 06:04:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=129
+Processed prompts:  36%|███▌      | 71/200 [00:14<00:41,  3.07it/s, est. speed input: 1456.13 toks/s, output: 113.06 toks/s](EngineCore pid=732978) INFO 08-11 06:04:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=127
+Processed prompts:  36%|███▌      | 72/200 [00:15<00:40,  3.16it/s, est. speed input: 1430.76 toks/s, output: 115.99 toks/s](EngineCore pid=732978) INFO 08-11 06:04:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=126
+Processed prompts:  37%|███▋      | 74/200 [00:15<00:30,  4.12it/s, est. speed input: 1427.97 toks/s, output: 121.69 toks/s](EngineCore pid=732978) INFO 08-11 06:04:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=126
+(EngineCore pid=732978) INFO 08-11 06:04:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=126
+(EngineCore pid=732978) INFO 08-11 06:04:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=125
+Processed prompts:  38%|███▊      | 75/200 [00:15<00:36,  3.47it/s, est. speed input: 1389.60 toks/s, output: 121.80 toks/s](EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=125
+(EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=125
+(EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=125
+(EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=125
+(EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=125
+(EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+Processed prompts:  38%|███▊      | 76/200 [00:16<00:47,  2.59it/s, est. speed input: 1356.71 toks/s, output: 122.13 toks/s](EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=123
+(EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=122
+Processed prompts:  39%|███▉      | 78/200 [00:17<00:57,  2.11it/s, est. speed input: 1297.05 toks/s, output: 123.91 toks/s](EngineCore pid=732978) INFO 08-11 06:04:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=122
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=122
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=122
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=121
+Processed prompts:  40%|███▉      | 79/200 [00:18<00:58,  2.07it/s, est. speed input: 1289.40 toks/s, output: 126.12 toks/s](EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=121
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:49 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:50 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:50 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:50 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:50 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=118
+Processed prompts:  40%|████      | 81/200 [00:19<00:58,  2.02it/s, est. speed input: 1221.46 toks/s, output: 130.71 toks/s](EngineCore pid=732978) INFO 08-11 06:04:50 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=117
+Processed prompts:  42%|████▏     | 83/200 [00:19<00:42,  2.72it/s, est. speed input: 1222.87 toks/s, output: 139.10 toks/s](EngineCore pid=732978) INFO 08-11 06:04:50 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=117
+(EngineCore pid=732978) INFO 08-11 06:04:50 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=117
+(EngineCore pid=732978) INFO 08-11 06:04:50 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=116
+Processed prompts:  42%|████▏     | 84/200 [00:19<00:44,  2.61it/s, est. speed input: 1195.91 toks/s, output: 142.12 toks/s](EngineCore pid=732978) INFO 08-11 06:04:51 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=116
+(EngineCore pid=732978) INFO 08-11 06:04:51 [victim_selector.py:408] [UtilityVictim][AsyncScheduler] total_preemptions=2 utility_hits=0 default_hits=2 hit_rate=0.000 tokens_freed=887 kv_pressure_events=0 consecutive_preempt_ratio=0.000 p95_preemptions_per_request=1.00
+(EngineCore pid=732978) INFO 08-11 06:04:51 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=114
+INFO 08-11 06:04:51 [loggers.py:282] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 1011.9 tokens/s, Running: 114 reqs, Waiting: 2 reqs, GPU KV cache usage: 98.2%, Prefix cache hit rate: 0.0%
+(EngineCore pid=732978) INFO 08-11 06:04:51 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=113
+Processed prompts:  42%|████▎     | 85/200 [00:20<00:50,  2.27it/s, est. speed input: 1163.26 toks/s, output: 143.74 toks/s](EngineCore pid=732978) INFO 08-11 06:04:51 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=113
+(EngineCore pid=732978) INFO 08-11 06:04:51 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=113
+(EngineCore pid=732978) INFO 08-11 06:04:52 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=111
+Processed prompts:  43%|████▎     | 86/200 [00:20<00:50,  2.28it/s, est. speed input: 1146.26 toks/s, output: 146.84 toks/s](EngineCore pid=732978) INFO 08-11 06:04:52 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=110
+Processed prompts:  44%|████▍     | 88/200 [00:21<00:35,  3.16it/s, est. speed input: 1133.69 toks/s, output: 156.76 toks/s](EngineCore pid=732978) INFO 08-11 06:04:52 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=109
+Processed prompts:  44%|████▍     | 89/200 [00:21<00:34,  3.20it/s, est. speed input: 1118.30 toks/s, output: 160.57 toks/s](EngineCore pid=732978) INFO 08-11 06:04:52 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=109
+(EngineCore pid=732978) INFO 08-11 06:04:52 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=109
+(EngineCore pid=732978) INFO 08-11 06:04:53 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=109
+(EngineCore pid=732978) INFO 08-11 06:04:53 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=109
+(EngineCore pid=732978) INFO 08-11 06:04:53 [victim_selector.py:408] [UtilityVictim][AsyncScheduler] total_preemptions=3 utility_hits=0 default_hits=3 hit_rate=0.000 tokens_freed=1387 kv_pressure_events=0 consecutive_preempt_ratio=0.000 p95_preemptions_per_request=1.00
+(EngineCore pid=732978) INFO 08-11 06:04:53 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=108
+(EngineCore pid=732978) INFO 08-11 06:04:53 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=107
+Processed prompts:  45%|████▌     | 90/200 [00:22<00:49,  2.22it/s, est. speed input: 1108.40 toks/s, output: 160.34 toks/s](EngineCore pid=732978) INFO 08-11 06:04:53 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=107
+Processed prompts:  46%|████▌     | 91/200 [00:22<00:39,  2.73it/s, est. speed input: 1120.20 toks/s, output: 164.00 toks/s](EngineCore pid=732978) INFO 08-11 06:04:54 [victim_selector.py:408] [UtilityVictim][AsyncScheduler] total_preemptions=4 utility_hits=0 default_hits=4 hit_rate=0.000 tokens_freed=1494 kv_pressure_events=0 consecutive_preempt_ratio=0.000 p95_preemptions_per_request=2.00
+(EngineCore pid=732978) INFO 08-11 06:04:54 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=107
+Processed prompts:  46%|████▌     | 92/200 [00:22<00:35,  3.03it/s, est. speed input: 1142.03 toks/s, output: 168.37 toks/s](EngineCore pid=732978) INFO 08-11 06:04:54 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=108
+(EngineCore pid=732978) INFO 08-11 06:04:54 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=107
+Processed prompts:  46%|████▋     | 93/200 [00:23<00:32,  3.30it/s, est. speed input: 1147.34 toks/s, output: 172.75 toks/s](EngineCore pid=732978) INFO 08-11 06:04:54 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=107
+(EngineCore pid=732978) INFO 08-11 06:04:54 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=107
+(EngineCore pid=732978) INFO 08-11 06:04:54 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=107
+(EngineCore pid=732978) INFO 08-11 06:04:54 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=107
+(EngineCore pid=732978) INFO 08-11 06:04:54 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=106
+Processed prompts:  47%|████▋     | 94/200 [00:23<00:41,  2.53it/s, est. speed input: 1131.51 toks/s, output: 174.37 toks/s](EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=105
+Processed prompts:  48%|████▊     | 95/200 [00:23<00:37,  2.78it/s, est. speed input: 1128.49 toks/s, output: 178.47 toks/s](EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=105
+(EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=105
+(EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=105
+(EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  48%|████▊     | 96/200 [00:24<00:33,  3.08it/s, est. speed input: 1124.63 toks/s, output: 182.99 toks/s](EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:55 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=103
+Processed prompts:  48%|████▊     | 97/200 [00:24<00:40,  2.54it/s, est. speed input: 1100.30 toks/s, output: 185.14 toks/s](EngineCore pid=732978) INFO 08-11 06:04:56 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=102
+Processed prompts:  49%|████▉     | 98/200 [00:24<00:36,  2.76it/s, est. speed input: 1087.84 toks/s, output: 188.97 toks/s](EngineCore pid=732978) INFO 08-11 06:04:56 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+Processed prompts:  50%|████▉     | 99/200 [00:25<00:34,  2.94it/s, est. speed input: 1078.32 toks/s, output: 193.13 toks/s](EngineCore pid=732978) INFO 08-11 06:04:56 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:56 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:56 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:56 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:56 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:56 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=101
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=100
+Processed prompts:  50%|█████     | 100/200 [00:26<00:54,  1.85it/s, est. speed input: 1038.38 toks/s, output: 192.13 toks/s](EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=100
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=100
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  50%|█████     | 101/200 [00:26<00:42,  2.33it/s, est. speed input: 1040.58 toks/s, output: 197.51 toks/s](EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:57 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=95
+Processed prompts:  52%|█████▎    | 105/200 [00:27<00:25,  3.66it/s, est. speed input: 1018.62 toks/s, output: 216.65 toks/s](EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=95
+(EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=95
+(EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=95
+(EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=95
+(EngineCore pid=732978) INFO 08-11 06:04:58 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=94
+Processed prompts:  53%|█████▎    | 106/200 [00:27<00:31,  3.03it/s, est. speed input: 998.97 toks/s, output: 218.22 toks/s] (EngineCore pid=732978) INFO 08-11 06:04:59 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=94
+(EngineCore pid=732978) INFO 08-11 06:04:59 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=93
+Processed prompts:  54%|█████▎    | 107/200 [00:28<00:31,  2.97it/s, est. speed input: 986.67 toks/s, output: 221.54 toks/s](EngineCore pid=732978) INFO 08-11 06:04:59 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=93
+(EngineCore pid=732978) INFO 08-11 06:04:59 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=93
+(EngineCore pid=732978) INFO 08-11 06:04:59 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=92
+Processed prompts:  54%|█████▍    | 108/200 [00:28<00:33,  2.78it/s, est. speed input: 990.82 toks/s, output: 224.56 toks/s](EngineCore pid=732978) INFO 08-11 06:04:59 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=90
+Processed prompts:  55%|█████▍    | 109/200 [00:28<00:31,  2.93it/s, est. speed input: 981.28 toks/s, output: 229.01 toks/s](EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=89
+Processed prompts:  56%|█████▌    | 111/200 [00:29<00:22,  3.89it/s, est. speed input: 973.94 toks/s, output: 240.11 toks/s](EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=89
+(EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=89
+(EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=89
+(EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=89
+(EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=89
+(EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=89
+(EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=89
+(EngineCore pid=732978) INFO 08-11 06:05:00 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  56%|█████▌    | 112/200 [00:29<00:27,  3.17it/s, est. speed input: 957.32 toks/s, output: 242.74 toks/s](EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=87
+Processed prompts:  56%|█████▋    | 113/200 [00:30<00:28,  3.03it/s, est. speed input: 945.44 toks/s, output: 246.45 toks/s](EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=87
+(EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=87
+(EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+INFO 08-11 06:05:01 [loggers.py:282] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 815.8 tokens/s, Running: 86 reqs, Waiting: 0 reqs, GPU KV cache usage: 87.7%, Prefix cache hit rate: 0.0%
+Processed prompts:  57%|█████▋    | 114/200 [00:30<00:30,  2.79it/s, est. speed input: 932.15 toks/s, output: 249.68 toks/s](EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:01 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=86
+(EngineCore pid=732978) INFO 08-11 06:05:02 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=85
+Processed prompts:  57%|█████▊    | 115/200 [00:31<00:51,  1.66it/s, est. speed input: 895.51 toks/s, output: 245.93 toks/s](EngineCore pid=732978) INFO 08-11 06:05:03 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=84
+Processed prompts:  58%|█████▊    | 116/200 [00:32<00:43,  1.94it/s, est. speed input: 887.85 toks/s, output: 250.63 toks/s](EngineCore pid=732978) INFO 08-11 06:05:03 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=83
+Processed prompts:  58%|█████▊    | 117/200 [00:32<00:37,  2.22it/s, est. speed input: 881.15 toks/s, output: 255.08 toks/s](EngineCore pid=732978) INFO 08-11 06:05:03 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=82
+Processed prompts:  59%|█████▉    | 118/200 [00:32<00:32,  2.49it/s, est. speed input: 873.79 toks/s, output: 259.78 toks/s](EngineCore pid=732978) INFO 08-11 06:05:03 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=82
+(EngineCore pid=732978) INFO 08-11 06:05:03 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=81
+Processed prompts:  60%|█████▉    | 119/200 [00:32<00:31,  2.61it/s, est. speed input: 872.59 toks/s, output: 263.94 toks/s](EngineCore pid=732978) INFO 08-11 06:05:04 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:04 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=79
+Processed prompts:  60%|██████    | 121/200 [00:33<00:22,  3.50it/s, est. speed input: 887.76 toks/s, output: 274.61 toks/s](EngineCore pid=732978) INFO 08-11 06:05:04 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=79
+(EngineCore pid=732978) INFO 08-11 06:05:04 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=79
+(EngineCore pid=732978) INFO 08-11 06:05:04 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=78
+Processed prompts:  61%|██████    | 122/200 [00:33<00:24,  3.12it/s, est. speed input: 877.32 toks/s, output: 278.03 toks/s](EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=78
+(EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=78
+(EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=78
+(EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=78
+(EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=78
+(EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=77
+Processed prompts:  62%|██████▏   | 123/200 [00:34<00:30,  2.51it/s, est. speed input: 862.24 toks/s, output: 279.85 toks/s](EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+Processed prompts:  62%|██████▏   | 124/200 [00:34<00:28,  2.71it/s, est. speed input: 855.33 toks/s, output: 284.38 toks/s](EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:05 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=76
+(EngineCore pid=732978) INFO 08-11 06:05:06 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=75
+Processed prompts:  62%|██████▎   | 125/200 [00:35<00:42,  1.75it/s, est. speed input: 829.65 toks/s, output: 282.65 toks/s](EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=74
+Processed prompts:  63%|██████▎   | 126/200 [00:35<00:36,  2.04it/s, est. speed input: 845.03 toks/s, output: 287.40 toks/s](EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=74
+(EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=74
+(EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=74
+(EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=74
+(EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=74
+(EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+Processed prompts:  64%|██████▎   | 127/200 [00:36<00:37,  1.94it/s, est. speed input: 833.14 toks/s, output: 289.87 toks/s](EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+(EngineCore pid=732978) INFO 08-11 06:05:07 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=73
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  64%|██████▍   | 128/200 [00:37<00:37,  1.93it/s, est. speed input: 835.30 toks/s, output: 292.96 toks/s](EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:08 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=71
+Processed prompts:  64%|██████▍   | 129/200 [00:37<00:40,  1.75it/s, est. speed input: 820.07 toks/s, output: 294.87 toks/s](EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=71
+(EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=71
+(EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=71
+(EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=71
+(EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=70
+Processed prompts:  65%|██████▌   | 130/200 [00:38<00:39,  1.79it/s, est. speed input: 808.96 toks/s, output: 298.09 toks/s](EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=70
+(EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=70
+(EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=70
+(EngineCore pid=732978) INFO 08-11 06:05:09 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=69
+Processed prompts:  66%|██████▌   | 131/200 [00:38<00:37,  1.86it/s, est. speed input: 805.91 toks/s, output: 301.61 toks/s](EngineCore pid=732978) INFO 08-11 06:05:10 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=69
+(EngineCore pid=732978) INFO 08-11 06:05:10 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=68
+Processed prompts:  66%|██████▌   | 132/200 [00:39<00:32,  2.06it/s, est. speed input: 798.71 toks/s, output: 306.08 toks/s](EngineCore pid=732978) INFO 08-11 06:05:10 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=68
+(EngineCore pid=732978) INFO 08-11 06:05:10 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=68
+(EngineCore pid=732978) INFO 08-11 06:05:10 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=67
+Processed prompts:  66%|██████▋   | 133/200 [00:39<00:31,  2.16it/s, est. speed input: 790.67 toks/s, output: 310.23 toks/s](EngineCore pid=732978) INFO 08-11 06:05:10 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=67
+(EngineCore pid=732978) INFO 08-11 06:05:10 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=67
+(EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=66
+Processed prompts:  67%|██████▋   | 134/200 [00:39<00:29,  2.24it/s, est. speed input: 782.76 toks/s, output: 314.15 toks/s](EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=66
+(EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=66
+(EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=66
+(EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=66
+(EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=66
+(EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=66
+(EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=65
+INFO 08-11 06:05:11 [loggers.py:282] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 693.1 tokens/s, Running: 65 reqs, Waiting: 0 reqs, GPU KV cache usage: 84.7%, Prefix cache hit rate: 0.0%
+Processed prompts:  68%|██████▊   | 135/200 [00:40<00:32,  2.00it/s, est. speed input: 770.97 toks/s, output: 316.66 toks/s](EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=65
+(EngineCore pid=732978) INFO 08-11 06:05:11 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=65
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  68%|██████▊   | 136/200 [00:40<00:25,  2.54it/s, est. speed input: 770.02 toks/s, output: 322.91 toks/s](EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:12 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=63
+Processed prompts:  68%|██████▊   | 137/200 [00:41<00:35,  1.77it/s, est. speed input: 752.55 toks/s, output: 322.98 toks/s](EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=63
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+Processed prompts:  69%|██████▉   | 138/200 [00:42<00:30,  2.01it/s, est. speed input: 762.97 toks/s, output: 326.69 toks/s](EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:13 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=62
+(EngineCore pid=732978) INFO 08-11 06:05:14 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=61
+Processed prompts:  70%|██████▉   | 139/200 [00:42<00:37,  1.61it/s, est. speed input: 750.06 toks/s, output: 326.80 toks/s](EngineCore pid=732978) INFO 08-11 06:05:14 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=61
+(EngineCore pid=732978) INFO 08-11 06:05:14 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=61
+(EngineCore pid=732978) INFO 08-11 06:05:14 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=61
+(EngineCore pid=732978) INFO 08-11 06:05:14 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=61
+(EngineCore pid=732978) INFO 08-11 06:05:14 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=61
+(EngineCore pid=732978) INFO 08-11 06:05:14 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=60
+Processed prompts:  70%|███████   | 140/200 [00:43<00:36,  1.63it/s, est. speed input: 740.10 toks/s, output: 330.02 toks/s](EngineCore pid=732978) INFO 08-11 06:05:14 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=59
+Processed prompts:  70%|███████   | 141/200 [00:43<00:30,  1.94it/s, est. speed input: 735.77 toks/s, output: 335.49 toks/s](EngineCore pid=732978) INFO 08-11 06:05:15 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=59
+(EngineCore pid=732978) INFO 08-11 06:05:15 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=59
+(EngineCore pid=732978) INFO 08-11 06:05:15 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=58
+Processed prompts:  71%|███████   | 142/200 [00:44<00:27,  2.09it/s, est. speed input: 730.11 toks/s, output: 340.03 toks/s](EngineCore pid=732978) INFO 08-11 06:05:15 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=58
+(EngineCore pid=732978) INFO 08-11 06:05:15 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=57
+Processed prompts:  72%|███████▏  | 143/200 [00:44<00:24,  2.31it/s, est. speed input: 730.52 toks/s, output: 345.16 toks/s](EngineCore pid=732978) INFO 08-11 06:05:15 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:15 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:15 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=55
+Processed prompts:  72%|███████▎  | 145/200 [00:45<00:22,  2.46it/s, est. speed input: 719.23 toks/s, output: 354.64 toks/s](EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=55
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=55
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=55
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=55
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=55
+(EngineCore pid=732978) INFO 08-11 06:05:16 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=54
+Processed prompts:  73%|███████▎  | 146/200 [00:45<00:24,  2.18it/s, est. speed input: 709.95 toks/s, output: 357.59 toks/s](EngineCore pid=732978) INFO 08-11 06:05:17 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=54
+(EngineCore pid=732978) INFO 08-11 06:05:17 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=54
+(EngineCore pid=732978) INFO 08-11 06:05:17 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=54
+(EngineCore pid=732978) INFO 08-11 06:05:17 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=54
+(EngineCore pid=732978) INFO 08-11 06:05:17 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=54
+(EngineCore pid=732978) INFO 08-11 06:05:17 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=54
+(EngineCore pid=732978) INFO 08-11 06:05:17 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=54
+(EngineCore pid=732978) INFO 08-11 06:05:17 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=53
+Processed prompts:  74%|███████▎  | 147/200 [00:46<00:27,  1.90it/s, est. speed input: 711.48 toks/s, output: 359.44 toks/s](EngineCore pid=732978) INFO 08-11 06:05:18 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=53
+(EngineCore pid=732978) INFO 08-11 06:05:18 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=53
+(EngineCore pid=732978) INFO 08-11 06:05:18 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=53
+(EngineCore pid=732978) INFO 08-11 06:05:18 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=52
+Processed prompts:  74%|███████▍  | 148/200 [00:47<00:26,  1.94it/s, est. speed input: 704.36 toks/s, output: 363.36 toks/s](EngineCore pid=732978) INFO 08-11 06:05:18 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=52
+(EngineCore pid=732978) INFO 08-11 06:05:18 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=51
+Processed prompts:  74%|███████▍  | 149/200 [00:47<00:23,  2.14it/s, est. speed input: 700.50 toks/s, output: 368.56 toks/s](EngineCore pid=732978) INFO 08-11 06:05:18 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+Processed prompts:  75%|███████▌  | 150/200 [00:47<00:20,  2.43it/s, est. speed input: 696.67 toks/s, output: 373.89 toks/s](EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:19 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=50
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  76%|███████▌  | 151/200 [00:49<00:34,  1.43it/s, est. speed input: 677.01 toks/s, output: 371.19 toks/s](EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=47
+Processed prompts:  76%|███████▋  | 153/200 [00:49<00:22,  2.09it/s, est. speed input: 675.85 toks/s, output: 383.32 toks/s](EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=47
+(EngineCore pid=732978) INFO 08-11 06:05:20 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=47
+(EngineCore pid=732978) INFO 08-11 06:05:21 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=47
+(EngineCore pid=732978) INFO 08-11 06:05:21 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=47
+(EngineCore pid=732978) INFO 08-11 06:05:21 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=47
+(EngineCore pid=732978) INFO 08-11 06:05:21 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=47
+(EngineCore pid=732978) INFO 08-11 06:05:21 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=47
+(EngineCore pid=732978) INFO 08-11 06:05:21 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=46
+Processed prompts:  77%|███████▋  | 154/200 [00:50<00:24,  1.85it/s, est. speed input: 674.16 toks/s, output: 385.76 toks/s](EngineCore pid=732978) INFO 08-11 06:05:21 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=46
+(EngineCore pid=732978) INFO 08-11 06:05:21 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=45
+INFO 08-11 06:05:22 [loggers.py:282] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 592.5 tokens/s, Running: 45 reqs, Waiting: 0 reqs, GPU KV cache usage: 73.3%, Prefix cache hit rate: 0.0%
+Processed prompts:  78%|███████▊  | 155/200 [00:50<00:22,  2.04it/s, est. speed input: 671.08 toks/s, output: 390.83 toks/s](EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=45
+(EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=44
+Processed prompts:  78%|███████▊  | 156/200 [00:50<00:19,  2.22it/s, est. speed input: 667.20 toks/s, output: 396.17 toks/s](EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=44
+(EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=44
+(EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=44
+(EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=44
+(EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=42
+Processed prompts:  78%|███████▊  | 157/200 [00:51<00:20,  2.11it/s, est. speed input: 660.68 toks/s, output: 400.04 toks/s](EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=42
+(EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=42
+(EngineCore pid=732978) INFO 08-11 06:05:22 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  80%|███████▉  | 159/200 [00:51<00:11,  3.43it/s, est. speed input: 660.43 toks/s, output: 414.86 toks/s](EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=39
+Processed prompts:  80%|████████  | 161/200 [00:52<00:11,  3.38it/s, est. speed input: 670.00 toks/s, output: 425.60 toks/s](EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=39
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=39
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=39
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=39
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=39
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=39
+(EngineCore pid=732978) INFO 08-11 06:05:23 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+Processed prompts:  81%|████████  | 162/200 [00:52<00:14,  2.66it/s, est. speed input: 662.20 toks/s, output: 428.15 toks/s](EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:24 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=38
+(EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=37
+Processed prompts:  82%|████████▏ | 163/200 [00:54<00:20,  1.81it/s, est. speed input: 651.13 toks/s, output: 427.48 toks/s](EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=37
+(EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=37
+(EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=37
+(EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=37
+(EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=37
+(EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=36
+Processed prompts:  82%|████████▏ | 164/200 [00:54<00:20,  1.78it/s, est. speed input: 650.42 toks/s, output: 431.13 toks/s](EngineCore pid=732978) INFO 08-11 06:05:25 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=36
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=36
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=36
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+Processed prompts:  82%|████████▎ | 165/200 [00:55<00:18,  1.86it/s, est. speed input: 658.94 toks/s, output: 435.17 toks/s](EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=35
+(EngineCore pid=732978) INFO 08-11 06:05:26 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+Processed prompts:  83%|████████▎ | 166/200 [00:55<00:20,  1.65it/s, est. speed input: 652.24 toks/s, output: 437.36 toks/s](EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:27 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=34
+(EngineCore pid=732978) INFO 08-11 06:05:28 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=33
+Processed prompts:  84%|████████▎ | 167/200 [00:57<00:31,  1.04it/s, est. speed input: 635.21 toks/s, output: 431.54 toks/s](EngineCore pid=732978) INFO 08-11 06:05:29 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:29 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=31
+Processed prompts:  84%|████████▍ | 169/200 [00:58<00:18,  1.64it/s, est. speed input: 636.56 toks/s, output: 445.80 toks/s](EngineCore pid=732978) INFO 08-11 06:05:29 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=30
+Processed prompts:  85%|████████▌ | 170/200 [00:58<00:15,  1.89it/s, est. speed input: 633.63 toks/s, output: 451.98 toks/s](EngineCore pid=732978) INFO 08-11 06:05:29 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=30
+(EngineCore pid=732978) INFO 08-11 06:05:29 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=30
+(EngineCore pid=732978) INFO 08-11 06:05:29 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=30
+(EngineCore pid=732978) INFO 08-11 06:05:29 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=30
+(EngineCore pid=732978) INFO 08-11 06:05:29 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=30
+(EngineCore pid=732978) INFO 08-11 06:05:30 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=30
+(EngineCore pid=732978) INFO 08-11 06:05:30 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=29
+Processed prompts:  86%|████████▌ | 171/200 [00:59<00:16,  1.78it/s, est. speed input: 627.13 toks/s, output: 455.01 toks/s](EngineCore pid=732978) INFO 08-11 06:05:30 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=28
+Processed prompts:  86%|████████▌ | 172/200 [00:59<00:13,  2.06it/s, est. speed input: 624.57 toks/s, output: 461.30 toks/s](EngineCore pid=732978) INFO 08-11 06:05:30 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+Processed prompts:  86%|████████▋ | 173/200 [00:59<00:11,  2.33it/s, est. speed input: 622.06 toks/s, output: 467.12 toks/s](EngineCore pid=732978) INFO 08-11 06:05:30 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:30 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=27
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=26
+Processed prompts:  87%|████████▋ | 174/200 [01:00<00:13,  1.86it/s, est. speed input: 614.13 toks/s, output: 469.31 toks/s](EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=26
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=26
+(EngineCore pid=732978) INFO 08-11 06:05:31 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=25
+INFO 08-11 06:05:32 [loggers.py:282] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 377.5 tokens/s, Running: 25 reqs, Waiting: 0 reqs, GPU KV cache usage: 47.5%, Prefix cache hit rate: 0.0%
+Processed prompts:  88%|████████▊ | 175/200 [01:00<00:12,  2.03it/s, est. speed input: 626.29 toks/s, output: 474.79 toks/s](EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=25
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=25
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=25
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  88%|████████▊ | 176/200 [01:00<00:09,  2.52it/s, est. speed input: 634.75 toks/s, output: 482.02 toks/s](EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=23
+Processed prompts:  88%|████████▊ | 177/200 [01:01<00:10,  2.24it/s, est. speed input: 629.84 toks/s, output: 486.11 toks/s](EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=23
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=23
+(EngineCore pid=732978) INFO 08-11 06:05:32 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=23
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=23
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=23
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=23
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=22
+Processed prompts:  89%|████████▉ | 178/200 [01:02<00:11,  1.99it/s, est. speed input: 634.68 toks/s, output: 489.52 toks/s](EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=22
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=22
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=22
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=22
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=22
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=22
+(EngineCore pid=732978) INFO 08-11 06:05:33 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=21
+Processed prompts:  90%|████████▉ | 179/200 [01:02<00:11,  1.85it/s, est. speed input: 630.18 toks/s, output: 492.79 toks/s](EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=21
+(EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=21
+(EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=21
+(EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=20
+Processed prompts:  90%|█████████ | 180/200 [01:03<00:10,  1.94it/s, est. speed input: 626.65 toks/s, output: 497.44 toks/s](EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=20
+(EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=20
+(EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=20
+(EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=20
+(EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=20
+(EngineCore pid=732978) INFO 08-11 06:05:34 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=19
+Processed prompts:  90%|█████████ | 181/200 [01:03<00:10,  1.89it/s, est. speed input: 628.33 toks/s, output: 501.28 toks/s](EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=19
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=19
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=19
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=19
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=19
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=19
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=19
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+Processed prompts:  91%|█████████ | 182/200 [01:04<00:10,  1.74it/s, est. speed input: 622.00 toks/s, output: 504.62 toks/s](EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:35 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=18
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=17
+Processed prompts:  92%|█████████▏| 183/200 [01:05<00:11,  1.45it/s, est. speed input: 617.78 toks/s, output: 506.03 toks/s](EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=17
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=17
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  92%|█████████▏| 184/200 [01:05<00:08,  1.93it/s, est. speed input: 624.27 toks/s, output: 513.47 toks/s](EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:36 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=15
+Processed prompts:  92%|█████████▎| 185/200 [01:06<00:07,  1.98it/s, est. speed input: 624.62 toks/s, output: 518.57 toks/s](EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=15
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=15
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=15
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+Processed prompts:  93%|█████████▎| 186/200 [01:06<00:06,  2.05it/s, est. speed input: 621.29 toks/s, output: 523.72 toks/s](EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:37 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:38 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=14
+(EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=13
+Processed prompts:  94%|█████████▎| 187/200 [01:07<00:10,  1.28it/s, est. speed input: 608.13 toks/s, output: 521.27 toks/s](EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=13
+(EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=13
+(EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=13
+(EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=13
+(EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=13
+(EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=13
+(EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+Processed prompts:  94%|█████████▍| 188/200 [01:08<00:08,  1.37it/s, est. speed input: 603.44 toks/s, output: 525.56 toks/s](EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:39 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:40 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=12
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+Processed prompts:  94%|█████████▍| 189/200 [01:10<00:10,  1.04it/s, est. speed input: 591.78 toks/s, output: 523.42 toks/s](EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=11
+(EngineCore pid=732978) INFO 08-11 06:05:41 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+Processed prompts:  95%|█████████▌| 190/200 [01:10<00:08,  1.12it/s, est. speed input: 585.97 toks/s, output: 526.40 toks/s](EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+INFO 08-11 06:05:42 [loggers.py:282] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 215.7 tokens/s, Running: 10 reqs, Waiting: 0 reqs, GPU KV cache usage: 22.1%, Prefix cache hit rate: 0.0%
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=10
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+Processed prompts:  96%|█████████▌| 191/200 [01:11<00:07,  1.19it/s, est. speed input: 580.11 toks/s, output: 529.85 toks/s](EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:42 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:43 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=9
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  96%|█████████▌| 192/200 [01:12<00:07,  1.04it/s, est. speed input: 579.00 toks/s, output: 530.02 toks/s](EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:44 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:45 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+Processed prompts:  96%|█████████▋| 193/200 [01:15<00:10,  1.50s/it, est. speed input: 558.23 toks/s, output: 520.52 toks/s](EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:46 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=7
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+Processed prompts:  97%|█████████▋| 194/200 [01:16<00:08,  1.37s/it, est. speed input: 555.14 toks/s, output: 523.19 toks/s](EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:47 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=True, reason=inplace_split_dry_run, total_tokens=6
+(EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  98%|█████████▊| 195/200 [01:17<00:05,  1.12s/it, est. speed input: 551.52 toks/s, output: 529.46 toks/s](EngineCore pid=732978) INFO 08-11 06:05:48 [inplace_split_runner.py:475] DUAL_INPLACE split decision: has_plan=False, reason=no_split_exact_graph_hit, total_tokens=0
+Processed prompts:  99%|█████████▉| 198/200 [01:17<00:01,  1.88it/s, est. speed input: 562.39 toks/s, output: 557.82 toks/s]Processed prompts: 100%|█████████▉| 199/200 [01:17<00:00,  2.18it/s, est. speed input: 561.63 toks/s, output: 566.44 toks/s]Processed prompts: 100%|██████████| 200/200 [01:17<00:00,  2.18it/s, est. speed input: 561.16 toks/s, output: 575.81 toks/s]Processed prompts: 100%|██████████| 200/200 [01:17<00:00,  2.58it/s, est. speed input: 561.16 toks/s, output: 575.81 toks/s]
+(EngineCore pid=732978) INFO 08-11 06:05:48 [core.py:1219] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=732978) INFO 08-11 06:05:48 [core.py:1338] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=732978) INFO 08-11 06:05:48 [core.py:1369] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=732978) INFO 08-11 06:05:48 [core.py:1232] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=732978) WARNING 08-11 06:05:50 [parallel_state.py:2228] torch._C._host_emptyCache() only available in Pytorch >=2.5
+WARNING 08-11 06:05:53 [utils.py:635] [shutdown] Process manager: force killing remaining processes count=1
+Throughput: 2.57 requests/s, 1132.86 total tokens/s, 573.72 output tokens/s
+Total num prompt tokens:  43560
+Total num output tokens:  44697
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/vllm-hust/vllm/entrypoints/cli/main.py", line 105, in <module>
+    main()
+  File "/workspace/vllm-hust/vllm/entrypoints/cli/main.py", line 99, in main
+    args.dispatch_function(args)
+  File "/workspace/vllm-hust/vllm/entrypoints/cli/benchmark/throughput.py", line 22, in cmd
+    main(args)
+  File "/workspace/vllm-hust/vllm/benchmarks/throughput.py", line 1199, in main
+    elapsed_time, request_outputs = run_vllm(
+                                    ^^^^^^^^^
+  File "/workspace/vllm-hust/vllm/benchmarks/throughput.py", line 61, in run_vllm
+    llm = LLM.from_engine_args(engine_args)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/vllm-hust/vllm/entrypoints/llm.py", line 409, in from_engine_args
+    return cls(**vars(engine_args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/vllm-hust/vllm/entrypoints/llm.py", line 377, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/vllm-hust/vllm/v1/engine/llm_engine.py", line 181, in from_engine_args
+    return cls(
+           ^^^^
+  File "/workspace/vllm-hust/vllm/v1/engine/llm_engine.py", line 107, in __init__
+    self.engine_core = EngineCoreClient.make_client(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/vllm-hust/vllm/v1/engine/core_client.py", line 103, in make_client
+    return SyncMPClient(vllm_config, executor_class, log_stats)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/vllm-hust/vllm/tracing/otel.py", line 178, in sync_wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/vllm-hust/vllm/v1/engine/core_client.py", line 790, in __init__
+    super().__init__(
+  File "/workspace/vllm-hust/vllm/v1/engine/core_client.py", line 573, in __init__
+    with launch_core_engines(
+  File "/root/miniconda3/envs/vllm-hust-dev/lib/python3.11/contextlib.py", line 144, in __exit__
+    next(self.gen)
+  File "/workspace/vllm-hust/vllm/v1/engine/utils.py", line 1213, in launch_core_engines
+    wait_for_engine_startup(
+  File "/workspace/vllm-hust/vllm/v1/engine/utils.py", line 1272, in wait_for_engine_startup
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[ERROR] 2026-08-11-06:05:56 (PID:732518, Device:-1, RankID:-1) ERR99999 UNKNOWN applicaiton exception
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
