@@ -15,6 +15,8 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "backfill_single_gpu.py"
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -391,14 +393,14 @@ def test_run_cell_uses_run_id_override_for_submission_dir(tmp_path: Path) -> Non
 
     override = "historical-pr-backend-pr-131-base-random-online-1aa7cd10b7-cd29480d96"
 
-    def _submit_artifact(workload, hust_commit, ascend_commit, run_id, raw):
+    def _submit_artifact(workload, hust_commit, ascend_commit, run_id, raw, **kwargs):
         # run_cell must pass the override through as the run_id.
         assert run_id == override
         sub_dir = submissions_dir / run_id
         sub_dir.mkdir(parents=True, exist_ok=True)
         return sub_dir
 
-    def _run_vllm_bench(workload, hust_commit, output_dir, npu_id=0):
+    def _run_vllm_bench(workload, hust_commit, output_dir, npu_id=0, **kwargs):
         output_dir.mkdir(parents=True, exist_ok=True)
         raw = output_dir / "raw.json"
         raw.write_text("{}", encoding="utf-8")
@@ -432,3 +434,121 @@ def test_run_cell_uses_run_id_override_for_submission_dir(tmp_path: Path) -> Non
     assert result["status"] == "done"
     assert result["run_id"] == override
     assert (submissions_dir / override).is_dir()
+
+
+# ---------------------------------------------------------------------------
+# _official_spec_path model guard
+# ---------------------------------------------------------------------------
+
+
+def test_official_spec_path_default_models() -> None:
+    mod = load_module()
+    with patch.object(mod, "REPO_ROOT", Path("/repo")):
+        p = mod._official_spec_path("random-online")
+        assert p.name == (
+            "official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"
+        )
+        p = mod._official_spec_path("instructcoder-online")
+        assert p.name == (
+            "official-ascend-jan-2026-v0180-instructcoder-online-"
+            "qwen25-coder-14b-910b2.json"
+        )
+
+
+def test_official_spec_path_accepts_matching_model() -> None:
+    mod = load_module()
+    with patch.object(mod, "REPO_ROOT", Path("/repo")):
+        # Full repo id, hf: id, bare short name, local path with matching basename.
+        for m in (
+            "Qwen/Qwen2.5-14B-Instruct",
+            "hf:Qwen/Qwen2.5-14B-Instruct",
+            "Qwen2.5-14B-Instruct",
+            "/data/models/Qwen2.5-14B-Instruct",
+        ):
+            p = mod._official_spec_path("random-online", m)
+            assert p.name.endswith("qwen25-14b-910b2.json")
+        p = mod._official_spec_path(
+            "instructcoder-online", "Qwen/Qwen2.5-Coder-14B-Instruct"
+        )
+        assert p.name.endswith("qwen25-coder-14b-910b2.json")
+
+
+def test_official_spec_path_rejects_non_default_model() -> None:
+    mod = load_module()
+    with patch.object(mod, "REPO_ROOT", Path("/repo")):
+        # Coder model on a base-14B workload, and base model on instructcoder.
+        for wl, m in (
+            ("random-online", "Qwen/Qwen2.5-Coder-14B-Instruct"),
+            ("instructcoder-online", "Qwen/Qwen2.5-14B-Instruct"),
+            ("random-online", "/data/models/Qwen2.5-Coder-14B-Instruct"),
+        ):
+            with pytest.raises(ValueError, match="--model"):
+                mod._official_spec_path(wl, m)
+
+
+# ---------------------------------------------------------------------------
+# run_cell propagates temperature / additional-config / compilation-config
+# ---------------------------------------------------------------------------
+
+
+def test_run_cell_propagates_temperature_and_configs(tmp_path: Path) -> None:
+    mod = load_module()
+    state_dir = tmp_path / ".benchmarks" / "backfill-single-gpu"
+    state_dir.mkdir(parents=True)
+    submissions_dir = tmp_path / "submissions"
+    submissions_dir.mkdir(parents=True, exist_ok=True)
+
+    seen: dict = {}
+
+    def _run_vllm_bench(workload, hust_commit, output_dir, npu_id=0, **kwargs):
+        output_dir.mkdir(parents=True, exist_ok=True)
+        seen["bench_kwargs"] = kwargs
+        raw = output_dir / "raw.json"
+        raw.write_text("{}", encoding="utf-8")
+        return raw
+
+    def _submit_artifact(workload, hust_commit, ascend_commit, run_id, raw, **kwargs):
+        seen["submit_kwargs"] = kwargs
+        sub_dir = submissions_dir / run_id
+        sub_dir.mkdir(parents=True, exist_ok=True)
+        return sub_dir
+
+    with (
+        patch.object(mod, "STATE_DIR", state_dir),
+        patch.object(mod, "REPO_ROOT", tmp_path),
+        patch.object(mod, "HUST_REPO", tmp_path / "hust"),
+        patch.object(mod, "ASCEND_REPO", tmp_path / "ascend"),
+        patch.object(mod, "assert_plugin_commit_consistent", return_value=None),
+        patch.object(mod.subprocess, "run", return_value=MagicMock(returncode=0)),
+        patch.object(mod, "_kill_port_process", return_value=None),
+        patch.object(mod.time, "sleep", return_value=None),
+        patch.object(mod, "git_checkout", return_value=None),
+        patch.object(mod, "install_ascend_plugin", return_value=None),
+        patch.object(mod, "run_vllm_bench", side_effect=_run_vllm_bench),
+        patch.object(mod, "submit_artifact", side_effect=_submit_artifact),
+        patch.object(mod, "_check_error_rate", return_value=None),
+        patch.object(mod, "validate_submission", return_value=[]),
+        patch.object(mod, "normalize_submission_artifact_file", return_value=None),
+    ):
+        result = mod.run_cell(
+            "random-online",
+            BASE_SHA,
+            ascend_commit=PLUGIN_SHA,
+            npu_id=0,
+            model="Qwen/Qwen2.5-14B-Instruct",
+            temperature=0.0,
+            additional_config='{"full_graph_parallel": true}',
+            compilation_config='{"cudagraph_mode": "FULL_DECODE_ONLY"}',
+        )
+
+    assert result["status"] == "done"
+    assert seen["bench_kwargs"]["temperature"] == 0.0
+    assert seen["bench_kwargs"]["additional_config"] == '{"full_graph_parallel": true}'
+    assert seen["bench_kwargs"]["compilation_config"] == (
+        '{"cudagraph_mode": "FULL_DECODE_ONLY"}'
+    )
+    assert seen["submit_kwargs"]["temperature"] == 0.0
+    assert seen["submit_kwargs"]["additional_config"] == '{"full_graph_parallel": true}'
+    assert seen["submit_kwargs"]["compilation_config"] == (
+        '{"cudagraph_mode": "FULL_DECODE_ONLY"}'
+    )

@@ -61,14 +61,18 @@ python3 scripts/backfill_single_gpu.py fill
 
 ### 选项
 
-| 选项                  | 说明                                                  |
-| --------------------- | ----------------------------------------------------- |
-| `--commit SHA`        | vllm-hust commit（可选，默认 latest → origin/main）   |
-| `--ascend-commit SHA` | ascend 插件 commit（可选，默认 latest → origin/main） |
-| `--workload NAME`     | 指定 workload（可选，省略则补全所有缺失 workload）    |
-| `--force`             | 重新运行已完成的 cell                                 |
-| `--fail-fast`         | 遇到第一个失败停止                                    |
-| `--npu-device N`      | 指定 NPU 设备索引                                     |
+| 选项                        | 说明                                                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `--commit SHA`              | vllm-hust commit（可选，默认 latest → origin/main）                                                                |
+| `--ascend-commit SHA`       | ascend 插件 commit（可选，默认 latest → origin/main）                                                              |
+| `--model NAME/PATH`         | 指定模型名称或本地路径（默认 `Qwen/Qwen2.5-14B-Instruct`）                                                         |
+| `--additional-config JSON`  | 传入 vllm `--additional-config`（vllm-ascend 特定配置，如 split_batch_config；对 latency/throughput/serve 均生效） |
+| `--compilation-config JSON` | 传入 vllm `--compilation-config`（如 cudagraph 配置；对 latency/throughput/serve 均生效）                          |
+| `--temperature FLOAT`       | 采样温度；serve 场景传 `--temperature`，latency/throughput 传 `--override-generation-config`                       |
+| `--workload NAME`           | 指定 workload（可选，省略则补全所有缺失 workload）                                                                 |
+| `--force`                   | 重新运行已完成的 cell                                                                                              |
+| `--fail-fast`               | 遇到第一个失败停止                                                                                                 |
+| `--npu-device N`            | 指定 NPU 设备索引                                                                                                  |
 
 ### 示例
 
@@ -90,6 +94,26 @@ python3 scripts/backfill_single_gpu.py run \
 # 两个都指定
 python3 scripts/backfill_single_gpu.py run \
     --commit 83cf83f --ascend-commit 03a12f9 --workload random-latency
+
+# 使用本地模型路径
+python3 scripts/backfill_single_gpu.py run --commit 83cf83f \
+    --workload sharegpt-throughput \
+    --model /data/shared-models/Qwen2.5-14B-Instruct
+
+# 使用 --additional-config 传入 vllm-ascend 特定配置（split_batch_config 等）
+python3 scripts/backfill_single_gpu.py run --commit 83cf83f \
+    --workload sharegpt-throughput \
+    --additional-config '{"split_batch_config":{"enabled":true,"mode":"inplace_parallel","num_splits":2,"enable_parallel_streams":true,"enable_inplace_lazy_capture":true,"inplace_split_planner_policy":"largest_lower","inplace_offset_match_policy":"exact","inplace_parallel_replay_policy":"full_graph_parallel","inplace_offset_capture_sizes":[1,2,4,8,16,32,64],"parallel_capture_sizes":[1,2,4,8,16,32,64]}}'
+
+# 使用 --compilation-config 传入 cudagraph 配置
+python3 scripts/backfill_single_gpu.py run --commit 83cf83f \
+    --workload sharegpt-throughput \
+    --compilation-config '{"cudagraph_mode":"FULL_DECODE_ONLY","cudagraph_capture_sizes":[1,2,4,8,16,32,64,128,256]}'
+
+# 使用 --temperature 传入温度
+python3 scripts/backfill_single_gpu.py run --commit 83cf83f \
+    --workload sharegpt-throughput \
+    --temperature 0.0
 ```
 
 ### 支持的 workload
@@ -99,6 +123,9 @@ random-latency    sharegpt-throughput   sonnet-throughput
 random-online     sharegpt-online       prefix-repetition-online
 instructcoder-online
 ```
+
+不支持的 workload：`visionarena-online` 和 `agent-research-online` 使用 `openai-chat` backend +
+`/v1/chat/completions` 端点，需要不同的 CLI 调用方式，暂未集成。
 
 ## plan — 查看缺失 cell
 
