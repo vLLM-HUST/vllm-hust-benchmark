@@ -2451,14 +2451,22 @@ def _quarantine_misaligned_snapshot_entries(
     snapshot_dir: Path,
     misaligned_entries: list[dict],
 ) -> None:
-    """Remove misaligned entries from the leaderboard snapshot files in-place.
+    """Remove quarantined entries from the leaderboard snapshot files in-place.
 
-    The entries are filtered out of ``leaderboard_single.json`` and
-    ``leaderboard_multi.json`` without physically deleting the original
-    submission artifacts.
+    Only entries whose ``disposition`` is ``"quarantine"`` (missing server
+    parameters, config drift, retired targets, wrong profiles) are filtered out
+    of ``leaderboard_single.json`` / ``leaderboard_multi.json``.  Entries marked
+    ``disposition="specialty"`` are a valid independent hardware series (issue
+    #178): they must stay in the public snapshot as their own series, separated
+    from 910B2 by ``build_series_signature``'s chip-model component, and must
+    not be silently dropped.
+
+    The original submission artifacts are never physically deleted.
     """
     misaligned_ids = {
-        entry["entry_id"] for entry in misaligned_entries if entry.get("entry_id")
+        entry["entry_id"]
+        for entry in misaligned_entries
+        if entry.get("entry_id") and entry.get("disposition") == "quarantine"
     }
     if not misaligned_ids:
         return
