@@ -196,3 +196,62 @@ def test_quarantine_misaligned_snapshot_entries(tmp_path: Path) -> None:
     )
     assert len(remaining) == 1
     assert remaining[0]["entry_id"] == "aligned-001"
+
+
+def test_specialty_disposition_kept_in_snapshot(tmp_path: Path) -> None:
+    """A 910B3 specialty entry is flagged but must stay in the public snapshot.
+
+    issue #178: specialty/provisional is a separately-labeled independent
+    hardware series, not a reason to globally hide the record.  Only
+    disposition=quarantine entries are removed.
+    """
+    entry = _make_entry(entry_id="specialty-910b3-001", chip_model="910B3")
+    _write_snapshot(tmp_path, [entry])
+
+    misaligned = _scan_fixed_target_misaligned_entries(tmp_path)
+    assert len(misaligned) == 1
+    assert misaligned[0]["disposition"] == "specialty"
+    assert misaligned[0]["reason"] == "specialty_without_contract"
+
+    _quarantine_misaligned_snapshot_entries(tmp_path, misaligned)
+
+    remaining = json.loads(
+        (tmp_path / "leaderboard_single.json").read_text(encoding="utf-8")
+    )
+    assert len(remaining) == 1
+    assert remaining[0]["entry_id"] == "specialty-910b3-001"
+
+
+def test_quarantine_entries_still_removed_alongside_specialty(tmp_path: Path) -> None:
+    """Quarantine and specialty dispositions coexist: quarantine is removed,
+    specialty is retained in the same snapshot."""
+    entry_specialty = _make_entry(entry_id="specialty-910b3-001", chip_model="910B3")
+    entry_quarantine = _make_entry(
+        entry_id="quarantine-001", gpu_memory_utilization=None
+    )
+    _write_snapshot(tmp_path, [entry_specialty, entry_quarantine])
+
+    misaligned = _scan_fixed_target_misaligned_entries(tmp_path)
+    assert {m["entry_id"] for m in misaligned} == {
+        "specialty-910b3-001",
+        "quarantine-001",
+    }
+
+    _quarantine_misaligned_snapshot_entries(tmp_path, misaligned)
+
+    remaining = json.loads(
+        (tmp_path / "leaderboard_single.json").read_text(encoding="utf-8")
+    )
+    assert [e["entry_id"] for e in remaining] == ["specialty-910b3-001"]
+
+
+def test_b2_b3_series_signatures_differ() -> None:
+    """910B2 and 910B3 entries with otherwise identical model/workload/config
+    must form separate series (chip_model is part of the series signature)."""
+    from vllm_hust_benchmark.aggregate_results import build_series_signature
+
+    b2 = _make_entry(chip_model="910B2")
+    b3 = _make_entry(chip_model="910B3")
+    assert build_series_signature(b2) != build_series_signature(b3)
+    assert "910B2" in build_series_signature(b2)
+    assert "910B3" in build_series_signature(b3)
