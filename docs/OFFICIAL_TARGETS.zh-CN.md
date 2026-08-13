@@ -2,8 +2,8 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.3.2`
-- Effective from: `2026-08-11`
+- Registry version: `1.3.3`
+- Effective from: `2026-08-13`
 
 公开排行榜固定靶与 3B 快速门禁是不同契约；provisional 记录不得作为公开成果对比。
 
@@ -110,6 +110,9 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 4 | FP16 | — | — |
 | | specialty | provisional | multi-chip | unified-comm-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
 2 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-910b2.json)
+| | specialty | provisional | multi-chip | unified-comm-online-4chip | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 4 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-4chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-4chip-910b2.json)
 | | specialty | provisional | specialty | kv-tiering-prefix-online | Qwen/Qwen2.5-7B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json)
@@ -161,6 +164,9 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 | | specialty | provisional | specialty-text | spec-decode-online | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | unified-comm-online-1chip | Qwen/Qwen2.5-14B-Instruct
+| 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-1chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-1chip-910b2.json)
 |
 
 机器可读快照：[`leaderboard-data/official-targets.json`](../leaderboard-data/official-targets.json)

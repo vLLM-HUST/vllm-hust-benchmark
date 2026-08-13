@@ -9,8 +9,8 @@ from typing import Any
 from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.3.2"
-EFFECTIVE_FROM = "2026-08-11"
+REGISTRY_VERSION = "1.3.3"
+EFFECTIVE_FROM = "2026-08-13"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
