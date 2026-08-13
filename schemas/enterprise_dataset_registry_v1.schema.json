@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/enterprise_dataset_registry_v1.schema.json",
+  "title": "vLLM-HUST enterprise dataset registry v1",
+  "type": "object",
+  "required": ["schema_version", "registry_version", "effective_from", "data_policy", "datasets", "cases"],
+  "properties": {
+    "schema_version": {"const": "enterprise-dataset-registry/v1"},
+    "registry_version": {"type": "string", "minLength": 1},
+    "effective_from": {"type": "string", "format": "date"},
+    "data_policy": {"type": "object"},
+    "datasets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/dataset"}},
+    "cases": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/case"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "dataset": {
+      "type": "object",
+      "required": ["dataset_id", "relative_path", "source_format", "source_model_name", "record_count", "sha256", "workload_family_id"],
+      "properties": {
+        "dataset_id": {"type": "string", "minLength": 1},
+        "relative_path": {"type": "string", "minLength": 1},
+        "source_format": {"enum": ["wrapped_openai_request_jsonl", "direct_messages_jsonl"]},
+        "source_model_name": {"type": "string", "minLength": 1},
+        "record_count": {"type": "integer", "minimum": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "workload_family_id": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "case": {
+      "type": "object",
+      "required": ["case_id", "dataset_id", "filter_id"],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "dataset_id": {"type": "string", "minLength": 1},
+        "filter_id": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,211 @@
+{
+  "schema_version": "delivery-suite-registry/v1",
+  "registry_version": "1.0.0",
+  "effective_from": "2026-08-13",
+  "academic_workload_contract": {
+    "descriptor_schema_version": "workload-descriptor/v1",
+    "family_generator_version": "family-generator/v1"
+  },
+  "acceptance_policy": {
+    "comparison": "same-spec baseline versus candidate with identical model, workload, hardware, server and client parameters",
+    "repetitions": 3,
+    "required_run_status": "valid",
+    "quality_gate": "benchmark-specific quality must not regress outside its declared tolerance",
+    "performance_gate": "report median plus tail latency and throughput; no single composite score may hide a failed metric"
+  },
+  "entries": [
+    {
+      "workload_id": "general_qa",
+      "label": "通用问答与短对话",
+      "workload_family_ids": ["session-affine-multi-turn", "session-affine-bursty", "multi-turn-support-chat"],
+      "benchmark": {
+        "id": "sharegpt-serving",
+        "authority_url": "https://github.com/vllm-project/vllm/blob/main/benchmarks/benchmark_serving.py",
+        "dataset": "ShareGPT",
+        "arrival_profile": "BurstGPT trace is an optional arrival-process overlay, not a second benchmark"
+      },
+      "model": {
+        "id": "Qwen/Qwen3-32B",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 4,
+        "reason": "high-quality general instruction model with enough headroom for concurrency and KV cache on 8x64GB 910B2"
+      },
+      "enterprise_case_ids": ["enterprise_normal_chat_all", "enterprise_normal_chat_support_multi_turn", "enterprise_normal_chat_single_turn"],
+      "engine_pressure": ["short_prefill", "mixed_decode", "online_arrival", "continuous_batching"],
+      "acceptance_metrics": ["request_throughput", "output_token_throughput", "ttft_p50_p95_p99", "tpot_p50_p95_p99", "e2el_p95_p99", "error_rate"]
+    },
+    {
+      "workload_id": "code",
+      "label": "代码生成与代码判定",
+      "workload_family_ids": ["code-eval-judge", "repo-aware-coding-assistant"],
+      "benchmark": {
+        "id": "livecodebench",
+        "authority_url": "https://github.com/LiveCodeBench/LiveCodeBench",
+        "dataset": "LiveCodeBench"
+      },
+      "model": {
+        "id": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 4,
+        "reason": "code-specialized MoE exposes both code quality and serving scheduling/dispatch behavior at deployable total weight"
+      },
+      "enterprise_case_ids": ["enterprise_code_eval_all", "enterprise_code_reward_hack_judge", "enterprise_code_correctness_judge"],
+      "engine_pressure": ["long_prefill", "long_decode", "moe_dispatch", "ttft_sensitive"],
+      "acceptance_metrics": ["pass_at_1", "request_throughput", "ttft_p95_p99", "tpot_p95", "error_rate"]
+    },
+    {
+      "workload_id": "reasoning",
+      "label": "长思维链推理",
+      "workload_family_ids": ["preemption-resume-long-decode"],
+      "benchmark": {
+        "id": "aime-2025",
+        "authority_url": "https://artofproblemsolving.com/wiki/index.php/AIME_Problems_and_Solutions",
+        "dataset": "AIME 2025"
+      },
+      "model": {
+        "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 4,
+        "reason": "reasoning-specialized dense 32B model produces the long decode sequences needed to test scheduler stability without multi-node dependence"
+      },
+      "enterprise_case_ids": [],
+      "engine_pressure": ["very_long_decode", "decode_bound", "preemption", "tail_latency"],
+      "acceptance_metrics": ["accuracy", "output_token_throughput", "tpot_p50_p95_p99", "e2el_p95_p99", "error_rate"]
+    },
+    {
+      "workload_id": "multimodal",
+      "label": "图文多模态请求",
+      "workload_family_ids": ["realtime-voice-assistant"],
+      "benchmark": {
+        "id": "visionarena-serving",
+        "authority_url": "https://github.com/vllm-project/vllm/blob/main/benchmarks/benchmark_serving.py",
+        "dataset": "VisionArena"
+      },
+      "model": {
+        "id": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 4,
+        "reason": "current deployable Qwen vision-language MoE exercises vision preprocessing, multimodal batching and decoder serving"
+      },
+      "enterprise_case_ids": [],
+      "engine_pressure": ["vision_encoder", "variable_image_tokens", "multimodal_batching", "mixed_prefill"],
+      "acceptance_metrics": ["request_throughput", "ttft_p50_p95_p99", "tpot_p95", "e2el_p95_p99", "error_rate"]
+    },
+    {
+      "workload_id": "kv_reuse",
+      "label": "前缀与会话 KV 复用",
+      "workload_family_ids": ["shared-prefix-multi-tenant-assistant", "session-affine-multi-turn", "memory-write-then-reuse"],
+      "benchmark": {
+        "id": "vllm-prefix-repetition",
+        "authority_url": "https://github.com/vllm-project/vllm/blob/main/benchmarks/benchmark_serving.py",
+        "dataset": "prefix_repetition"
+      },
+      "model": {
+        "id": "Qwen/Qwen3-32B",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 4,
+        "reason": "same general checkpoint isolates KV reuse benefit from model-quality changes"
+      },
+      "enterprise_case_ids": ["enterprise_prefix_shared", "enterprise_reuse_conversation", "enterprise_semantic_similar"],
+      "engine_pressure": ["prefix_cache", "kv_lookup", "kv_capacity", "cache_hit_miss_mix"],
+      "acceptance_metrics": ["prefix_cache_hit_rate", "ttft_hit_miss_delta", "request_throughput", "kv_cache_utilization", "error_rate"]
+    },
+    {
+      "workload_id": "structured_output",
+      "label": "JSON 与 Schema 约束输出",
+      "workload_family_ids": ["structured-json-generation"],
+      "benchmark": {
+        "id": "jsonschemabench",
+        "authority_url": "https://github.com/guidance-ai/jsonschemabench",
+        "dataset": "JSONSchemaBench"
+      },
+      "model": {
+        "id": "Qwen/Qwen3-32B",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 4,
+        "reason": "general model in non-thinking mode isolates constrained-decoding overhead and schema compliance"
+      },
+      "enterprise_case_ids": ["enterprise_json_all", "enterprise_json_extraction", "enterprise_json_planning"],
+      "engine_pressure": ["guided_decoding", "grammar_state", "small_batch_overhead", "format_validation"],
+      "acceptance_metrics": ["schema_compliance_rate", "valid_json_rate", "request_throughput", "ttft_p95", "tpot_p95", "error_rate"]
+    },
+    {
+      "workload_id": "long_context",
+      "label": "长上下文理解与长 Prefill",
+      "workload_family_ids": ["long-context-doc-analysis"],
+      "benchmark": {
+        "id": "longbench-v2",
+        "authority_url": "https://github.com/THUDM/LongBench",
+        "dataset": "LongBench v2"
+      },
+      "model": {
+        "id": "Qwen/Qwen3.5-27B",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 4,
+        "reason": "strong 27B long-context checkpoint leaves HBM for long prompts and concurrency on a single 8-card node"
+      },
+      "enterprise_case_ids": ["enterprise_long_text", "enterprise_long_prefill"],
+      "engine_pressure": ["long_prefill", "attention_memory", "chunked_prefill", "kv_capacity"],
+      "acceptance_metrics": ["longbench_v2_score", "ttft_by_context_bucket", "prefill_token_throughput", "peak_hbm", "oom_rate", "error_rate"]
+    },
+    {
+      "workload_id": "agent",
+      "label": "Agent 工具调用",
+      "workload_family_ids": ["tool-scaffold-agent", "experiment-planning-assistant"],
+      "benchmark": {
+        "id": "bfcl-v4",
+        "authority_url": "https://github.com/ShishirPatil/gorilla/tree/main/berkeley-function-call-leaderboard",
+        "dataset": "Berkeley Function Calling Leaderboard V4"
+      },
+      "model": {
+        "id": "zai-org/GLM-4.5-Air",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 8,
+        "reason": "106B-A12B agent-oriented MoE represents the enterprise GLM class while remaining a single-node target"
+      },
+      "enterprise_case_ids": ["enterprise_json_planning"],
+      "engine_pressure": ["tool_schema_prefill", "multi_turn", "structured_arguments", "long_lived_session"],
+      "acceptance_metrics": ["bfcl_accuracy", "valid_tool_call_rate", "request_throughput", "ttft_p95_p99", "e2el_p95_p99", "error_rate"]
+    },
+    {
+      "workload_id": "ai4science",
+      "label": "AI4Science 科学问题求解",
+      "workload_family_ids": ["simulation-analysis-verification"],
+      "benchmark": {
+        "id": "naturebench",
+        "authority_url": "https://arxiv.org/pdf/2606.24530",
+        "dataset": "NatureBench"
+      },
+      "model": {
+        "id": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+        "deployment_tier": "single_node_main",
+        "precision": "BF16",
+        "tensor_parallel_size": 4,
+        "reason": "scientific problem solving frequently requires code and tool-like reasoning; reusing the deployable code MoE avoids another heavyweight checkpoint"
+      },
+      "enterprise_case_ids": [],
+      "engine_pressure": ["heterogeneous_prompt", "reasoning_decode", "code_generation", "long_tail_output"],
+      "acceptance_metrics": ["naturebench_score", "request_throughput", "ttft_p95", "tpot_p95_p99", "error_rate"]
+    }
+  ],
+  "conditional_single_node_extensions": [
+    {
+      "model_id": "zai-org/GLM-4.6-W8A8",
+      "deployment_tier": "single_node_conditional",
+      "gate": "load and 32k-context KV-capacity preflight must pass before campaign admission"
+    }
+  ],
+  "customer_multinode_extensions": [
+    {"model_id": "zai-org/GLM-5", "deployment_tier": "customer_multinode_extension"},
+    {"model_id": "moonshotai/Kimi-K2", "deployment_tier": "customer_multinode_extension"},
+    {"model_id": "moonshotai/Kimi-K3", "deployment_tier": "customer_multinode_extension"}
+  ]
+}

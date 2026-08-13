@@ -8,6 +8,13 @@ Unreleased entries concise and workflow-focused.
 ## [Unreleased]
 
 ### Added
+- Added a versioned nine-workload delivery suite registry that binds one
+  authoritative benchmark and deployable single-node model to each acceptance
+  class while keeping GLM-5 and Kimi-class models in a multi-node extension tier.
+- Added manifest-only enterprise dataset registration and fail-closed replay
+  loading with explicit data roots, dataset-scoped authorization, full-file
+  checksum/count validation, deterministic sampling, model provenance, and
+  redacted result records.
 - Added quantized Ascend same-spec benchmark support so workflow-dispatch runs
   can override the runtime model, precision, quantization scheme, dtype, and
   hardware chip metadata without mutating the official FP16 spec files.
