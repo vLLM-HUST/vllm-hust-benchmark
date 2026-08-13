@@ -396,6 +396,18 @@ def test_official_runner_finalizes_and_validates_exported_artifact() -> None:
     assert (
         'CURRENT_VLLM_ASCEND_HUST_REPO="$OFFICIAL_VLLM_ASCEND_WORKTREE"' in runner_text
     )
+    assert (
+        'capture_official_runtime_provenance "$RUNTIME_PROVENANCE_FILE"' in runner_text
+    )
+    assert (
+        'capture_official_runtime_provenance "$RUNTIME_PROVENANCE_AFTER_FILE"'
+        in runner_text
+    )
+    assert 'metadata["official_runtime_provenance"] = runtime' in runner_text
+    assert 'manifest["official_runtime_provenance"] = runtime' in runner_text
+    assert (
+        "recorded engine_version does not match imported runtime package" in runner_text
+    )
 
 
 def test_official_workflow_defaults_live_publication_off() -> None:

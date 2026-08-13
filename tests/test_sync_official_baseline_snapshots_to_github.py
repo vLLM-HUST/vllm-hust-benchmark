@@ -17,6 +17,7 @@ SYNC_SCRIPT = (
     / "scripts"
     / "sync_official_baseline_snapshots_to_github.sh"
 )
+ARTIFACT_VALIDATOR = REPO_ROOT / "scripts" / "validate-run-artifact.sh"
 
 
 def _script_env(**overrides: str) -> dict[str, str]:
@@ -90,6 +91,65 @@ def _write_submission(source_repo: Path, run_id: str, model_name: str) -> None:
         encoding="utf-8",
     )
     (submission_dir / "STATUS").write_text("OK\n", encoding="utf-8")
+
+
+def _add_mismatched_runtime_provenance(submission_dir: Path) -> None:
+    runtime = {
+        "schema_version": "official-runtime-provenance/v1",
+        "python_executable": "/runtime/bin/python",
+        "python_version": "3.12.0",
+        "sources": {
+            role: {
+                "module": module,
+                "module_path": f"/prepared/{module}/__init__.py",
+                "module_version": "1.2.3",
+                "distribution": distribution,
+                "distribution_version": "1.2.3",
+                "prepared_worktree": f"/prepared/{module}",
+                "prepared_commit": commit * 40,
+                "source_version": "v1.2.3",
+                "extension_policy": "none-discovered",
+                "source_patch_sha256": "d" * 64,
+                "source_tree_sha256": "e" * 64,
+                "source_status": "clean",
+                "extensions": [],
+            }
+            for role, module, distribution, commit in (
+                ("engine", "vllm", "vllm", "a"),
+                ("plugin", "vllm_ascend", "vllm-ascend", "b"),
+            )
+        },
+    }
+    artifact_path = submission_dir / "run_leaderboard.json"
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact.setdefault("metadata", {})["official_runtime_provenance"] = runtime
+    artifact_path.write_text(json.dumps(artifact) + "\n", encoding="utf-8")
+
+    env_path = submission_dir / "env-manifest.json"
+    env_manifest = json.loads(env_path.read_text(encoding="utf-8"))
+    env_manifest["official_runtime_provenance"] = runtime
+    env_path.write_text(json.dumps(env_manifest) + "\n", encoding="utf-8")
+
+    stale_runtime = json.loads(json.dumps(runtime))
+    stale_runtime["sources"]["engine"]["prepared_commit"] = "c" * 40
+    manifest_path = submission_dir / "leaderboard_manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["official_runtime_provenance"] = stale_runtime
+    manifest_path.write_text(json.dumps(manifest) + "\n", encoding="utf-8")
+
+    checksum_files = (
+        "leaderboard_manifest.json",
+        "run_leaderboard.json",
+        "env-manifest.json",
+        "pip-packages.json",
+    )
+    (submission_dir / "checksums.sha256").write_text(
+        "".join(
+            f"{hashlib.sha256((submission_dir / name).read_bytes()).hexdigest()}  ./{name}\n"
+            for name in checksum_files
+        ),
+        encoding="utf-8",
+    )
 
 
 def _create_artifact_validator(tmp_path: Path) -> Path:
@@ -384,6 +444,43 @@ def test_sync_verification_rejects_remote_content_mismatch(tmp_path: Path) -> No
     completed = _run(["bash", str(SYNC_SCRIPT)], env=env, check=False)
     assert completed.returncode != 0
     assert "content mismatch" in completed.stderr
+
+
+def test_sync_rejects_runtime_provenance_mismatch_before_snapshot_write(
+    tmp_path: Path,
+) -> None:
+    source_repo = tmp_path / "benchmark-source"
+    source_repo.mkdir()
+    run_id = "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3"
+    _write_submission(source_repo, run_id, "Qwen2.5-14B-Instruct")
+    _add_mismatched_runtime_provenance(source_repo / "submissions" / run_id)
+    remote_repo, target_repo = _create_target_repo(tmp_path)
+    website_repo = _create_dummy_website_repo(tmp_path)
+    original_head = _git(target_repo, "rev-parse", "HEAD").stdout.strip()
+    env = _script_env(
+        ALLOW_LOCAL_GIT_RESET="1",
+        SOURCE_BENCHMARK_REPO_DIR=str(source_repo),
+        TARGET_BENCHMARK_REPO_DIR=str(target_repo),
+        WEBSITE_REPO_DIR=str(website_repo),
+        PYTHON_BIN=_create_fake_python(tmp_path),
+        ARTIFACT_VALIDATOR=str(ARTIFACT_VALIDATOR),
+    )
+
+    completed = _run(["bash", str(SYNC_SCRIPT)], env=env, check=False)
+
+    assert completed.returncode != 0
+    assert "official_runtime_provenance differs across artifact and manifests" in (
+        completed.stderr
+    )
+    assert "source submission artifact validation failed" in completed.stderr
+    assert _git(target_repo, "rev-parse", "HEAD").stdout.strip() == original_head
+    assert (
+        _run(
+            ["git", f"--git-dir={remote_repo}", "rev-parse", "refs/heads/main"]
+        ).stdout.strip()
+        == original_head
+    )
+    assert not (target_repo / "submissions" / run_id).exists()
 
 
 @pytest.mark.parametrize(

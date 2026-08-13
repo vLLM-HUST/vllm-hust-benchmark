@@ -149,6 +149,16 @@ if provenance_path:
     if isinstance(candidate, dict):
         official_source_provenance = candidate
 
+official_runtime_provenance = {}
+runtime_provenance_path = os.environ.get("OFFICIAL_RUNTIME_PROVENANCE_FILE", "")
+if runtime_provenance_path:
+    try:
+        candidate = json.loads(Path(runtime_provenance_path).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        candidate = None
+    if isinstance(candidate, dict):
+        official_runtime_provenance = candidate
+
 manifest = {
     "manifest_version": "run-env-manifest/v2",
     "collected_at": _run(["date", "-u", "+%Y-%m-%dT%H:%M:%SZ"]),
@@ -204,6 +214,8 @@ manifest = {
 }
 if official_source_provenance:
     manifest["official_source_provenance"] = official_source_provenance
+if official_runtime_provenance:
+    manifest["official_runtime_provenance"] = official_runtime_provenance
 
 # Use the explicit pip-packages.json file rather than embedding a second copy
 manifest["pip_packages"] = "see pip-packages.json"

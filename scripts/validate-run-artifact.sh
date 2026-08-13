@@ -212,6 +212,86 @@ PY
       echo "  $OFFICIAL_SOURCE_ERRORS" >&2
       check "official source provenance is complete" 1
     fi
+
+    OFFICIAL_RUNTIME_ERRORS=$(python3 - <<'PY' || echo "parse-error"
+import json
+from pathlib import Path
+
+env_manifest = json.load(open("env-manifest.json", encoding="utf-8"))
+artifact = (
+    json.load(open("run_leaderboard.json", encoding="utf-8"))
+    if Path("run_leaderboard.json").is_file()
+    else {}
+)
+leaderboard_manifest = (
+    json.load(open("leaderboard_manifest.json", encoding="utf-8"))
+    if Path("leaderboard_manifest.json").is_file()
+    else {}
+)
+values = {
+    "artifact": (artifact.get("metadata") or {}).get("official_runtime_provenance"),
+    "leaderboard_manifest": leaderboard_manifest.get("official_runtime_provenance"),
+    "env_manifest": env_manifest.get("official_runtime_provenance"),
+}
+if not any(values.values()):
+    raise SystemExit(0)
+
+errors = []
+for location, value in values.items():
+    if not value:
+        errors.append(f"official_runtime_provenance missing from {location}")
+if len({json.dumps(value, sort_keys=True) for value in values.values()}) != 1:
+    errors.append("official_runtime_provenance differs across artifact and manifests")
+
+payload = next((value for value in values.values() if value), {})
+if payload.get("schema_version") != "official-runtime-provenance/v1":
+    errors.append("unsupported official runtime provenance schema")
+for field in ("python_executable", "python_version"):
+    if not payload.get(field):
+        errors.append(f"official_runtime_provenance.{field} is empty")
+for role in ("engine", "plugin"):
+    source = (payload.get("sources") or {}).get(role) or {}
+    for field in (
+        "module",
+        "module_path",
+        "module_version",
+        "distribution",
+        "distribution_version",
+        "prepared_worktree",
+        "prepared_commit",
+        "source_version",
+        "extension_policy",
+        "source_patch_sha256",
+        "source_tree_sha256",
+        "source_status",
+    ):
+        if not source.get(field):
+            errors.append(f"official_runtime_provenance.{role}.{field} is empty")
+    extensions = source.get("extensions")
+    if source.get("extension_policy") not in ("present", "none-discovered"):
+        errors.append(f"official_runtime_provenance.{role}.extension_policy is invalid")
+    if not isinstance(extensions, list):
+        errors.append(f"official_runtime_provenance.{role}.extensions is not a list")
+    elif bool(extensions) != (source.get("extension_policy") == "present"):
+        errors.append(
+            f"official_runtime_provenance.{role}.extension_policy does not match extensions"
+        )
+    else:
+        for index, extension in enumerate(extensions):
+            for field in ("module", "status", "path", "sha256"):
+                if not (extension or {}).get(field):
+                    errors.append(
+                        f"official_runtime_provenance.{role}.extensions[{index}].{field} is empty"
+                    )
+print("; ".join(errors))
+PY
+)
+    if [[ -z "$OFFICIAL_RUNTIME_ERRORS" ]]; then
+      check "official runtime provenance is complete and consistent" 0
+    else
+      echo "  $OFFICIAL_RUNTIME_ERRORS" >&2
+      check "official runtime provenance is complete and consistent" 1
+    fi
   else
     check "env-manifest.json is valid JSON" 1
   fi
