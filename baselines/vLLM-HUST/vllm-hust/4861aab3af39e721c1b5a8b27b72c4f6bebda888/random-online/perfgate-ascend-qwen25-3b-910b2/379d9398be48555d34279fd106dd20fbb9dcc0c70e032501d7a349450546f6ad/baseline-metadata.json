@@ -1,0 +1,85 @@
+{
+  "artifact": {
+    "path": "run_leaderboard.json",
+    "sha256": "8bb33158ec728a9e4b977cc167338a88e7bc6fd8c32958ab587b791c3073143f"
+  },
+  "identity": {
+    "scenario": "random-online",
+    "spec_hash": "379d9398be48555d34279fd106dd20fbb9dcc0c70e032501d7a349450546f6ad",
+    "spec_id": "perfgate-ascend-qwen25-3b-910b2",
+    "target_repository": "vLLM-HUST/vllm-hust",
+    "target_sha": "4861aab3af39e721c1b5a8b27b72c4f6bebda888"
+  },
+  "measurement": {
+    "aggregation": "primary-median-run",
+    "measured_runs": 3,
+    "per_run": [
+      {
+        "metrics": {
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0,
+          "tbt_ms": 11.551884235814214,
+          "throughput_tps": 64.60652131421188,
+          "ttft_ms": 630.7165442267433
+        },
+        "raw_result_sha256": "4835606ccc9a508b2f37dec96d110092a56bac433e58026ea84378a8643c3fd4",
+        "run_index": 1
+      },
+      {
+        "metrics": {
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0,
+          "tbt_ms": 11.594488518312573,
+          "throughput_tps": 64.37849232741016,
+          "ttft_ms": 632.6780410017818
+        },
+        "raw_result_sha256": "d90e6391d1097596851c8003346d96f062bee917918b00a6ccfdafd06ca89a1c",
+        "run_index": 2
+      },
+      {
+        "metrics": {
+          "error_rate": 0.0,
+          "peak_mem_mb": 0.0,
+          "tbt_ms": 11.405406356789172,
+          "throughput_tps": 65.30924836819901,
+          "ttft_ms": 624.9766558175907
+        },
+        "raw_result_sha256": "611e8309c09c036834caf43ef6b385f4ca2a1ccd3779532ce571987bf52d3ae7",
+        "run_index": 3
+      }
+    ],
+    "schema_version": "perfgate-measurement/v2",
+    "selection": {
+      "ordered_run_indices": [
+        2,
+        1,
+        3
+      ],
+      "primary_metric": "throughput_tps",
+      "secondary_sort_key": "run_index",
+      "selected_position": 2,
+      "selected_raw_result_sha256": "4835606ccc9a508b2f37dec96d110092a56bac433e58026ea84378a8643c3fd4",
+      "selected_run_index": 1,
+      "sort_direction": "ascending"
+    },
+    "strategy": "warmup+primary-median-run",
+    "warmup": [
+      {
+        "raw_result_sha256": "a191bb7187492937c5c3510990d862dcf65f492acf5b6a538df204944805f008",
+        "run_index": 1
+      }
+    ],
+    "warmup_runs": 1
+  },
+  "provenance": {
+    "benchmark_runner_sha": "abb62abb8dc081fd076901263a5aac9de417641f",
+    "cann_version": "9.0.0",
+    "hardware_chip_model": "910B2",
+    "runtime_manager_sha": "2a113e514fb4b5678483cb7efaa7fa56140f60d3",
+    "torch_npu_version": "2.10.0",
+    "torch_version": "2.10.0+cpu",
+    "vllm_ascend_hust_sha": "52f923884b9adaedfc2e764428207d0448227549",
+    "vllm_hust_sha": "4861aab3af39e721c1b5a8b27b72c4f6bebda888"
+  },
+  "schema_version": "perfgate-baseline/v1"
+}

@@ -1,0 +1,163 @@
+{
+  "cluster": null,
+  "config_type": "single_gpu",
+  "constraints": {
+    "accountable_scope": {
+      "baseline_engine": "",
+      "baseline_status": "pending-baseline",
+      "declared_baseline_engine": "vllm",
+      "domestic_chip_class": "Ascend-class",
+      "notes": null,
+      "owner_confirmed": null,
+      "representative_business_scenario": "online-chat",
+      "representative_model_band": "7B-13B"
+    },
+    "metrics": {
+      "long_context_length": 256,
+      "long_context_throughput_stable": true,
+      "long_context_tpot_p95_ms": null,
+      "long_context_tpot_p95_stable": null,
+      "long_context_tpot_p99_ms": 11.593542364115518,
+      "long_context_tpot_p99_stable": true,
+      "long_context_ttft_p95_ms": null,
+      "long_context_ttft_p95_stable": null,
+      "long_context_ttft_p99_ms": 817.0926520228386,
+      "long_context_ttft_p99_stable": true,
+      "multi_tenant_high_utilization": null,
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "unit_token_cost_reduction_pct": null
+    },
+    "scenario_source": "vllm-benchmark"
+  },
+  "engine": "vllm-hust",
+  "engine_version": "4861aab3",
+  "entry_id": "5a0c8111-8ae1-47f8-ba35-537f9cd155f4",
+  "environment": {
+    "cann_version": null,
+    "cuda_version": null,
+    "driver_version": null,
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.12.13",
+    "pytorch_version": null
+  },
+  "hardware": {
+    "chip_count": 1,
+    "chip_model": "910B2",
+    "interconnect": "unknown",
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 64.0,
+    "vendor": "Huawei"
+  },
+  "metadata": {
+    "changelog_url": null,
+    "data_source": "vllm-hust-ci-same-spec",
+    "engine": "vllm-hust",
+    "engine_version": "4861aab3",
+    "git_commit": "4861aab3af39e721c1b5a8b27b72c4f6bebda888",
+    "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/4861aab3af39e721c1b5a8b27b72c4f6bebda888",
+    "github_event_name": "push",
+    "github_pr_number": null,
+    "github_pr_url": null,
+    "github_ref": "main",
+    "github_repository": "vLLM-HUST/vllm-hust",
+    "github_user": "Irisuko",
+    "idempotency_key": "dadc4f13cf0bb9f5ff9cb1f9f4acc988c534002e70d37444495fbc1b9d9d5dd1",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "notes": null,
+    "release_date": null,
+    "reproducible_cmd": null,
+    "runtime_provenance": {
+      "engine": {
+        "commit": "4861aab3af39e721c1b5a8b27b72c4f6bebda888",
+        "ref": "main",
+        "repository": "vLLM-HUST/vllm-hust"
+      },
+      "plugin": {
+        "commit": "52f923884b9adaedfc2e764428207d0448227549",
+        "engine": "vllm-ascend-hust",
+        "ref": "",
+        "repository": "vLLM-HUST/vllm-ascend-hust"
+      },
+      "python": "/usr/local/python3.12.13/bin/python3"
+    },
+    "submitted_at": "2026-08-13T05:16:06Z",
+    "submitter": "Irisuko",
+    "verified": null
+  },
+  "metrics": {
+    "error_rate": 0.0,
+    "peak_mem_mb": 0,
+    "tbt_ms": 11.551884235814214,
+    "throughput_tps": 64.60652131421188,
+    "ttft_ms": 630.7165442267433
+  },
+  "model": {
+    "canonical_id": "hf:Qwen/Qwen2.5-3B-Instruct",
+    "display_name": "Qwen2.5-3B-Instruct",
+    "name": "Qwen/Qwen2.5-3B-Instruct",
+    "parameters": "3B",
+    "precision": "BF16",
+    "quantization": null,
+    "repo_id": "Qwen/Qwen2.5-3B-Instruct",
+    "short_name": "Qwen2.5-3B-Instruct"
+  },
+  "same_spec": {
+    "chip_count": 1,
+    "hardware_chip_model": "910B2",
+    "hardware_vendor": "Huawei",
+    "model": "Qwen/Qwen2.5-3B-Instruct",
+    "model_parameters": "3B",
+    "model_precision": "BF16",
+    "model_quantization": "",
+    "node_count": 1,
+    "resolved_client_parameters": {
+      "backend": "vllm",
+      "dataset_name": "random",
+      "endpoint": "/v1/completions",
+      "host": "127.0.0.1",
+      "max_concurrency": 4,
+      "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-3B-Instruct/snapshots/aa8e72537993ba99e69dfaafa59ed015b17504d1",
+      "num_prompts": 8,
+      "port": 41815,
+      "random_input_len": 64,
+      "random_output_len": 16,
+      "request_rate": "inf"
+    },
+    "resolved_server_parameters": {
+      "disable_log_requests": "",
+      "disable_log_stats": "",
+      "dtype": "bfloat16",
+      "enforce_eager": "",
+      "host": "0.0.0.0",
+      "max_model_len": 256,
+      "max_num_seqs": 1,
+      "model": "/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-3B-Instruct/snapshots/aa8e72537993ba99e69dfaafa59ed015b17504d1",
+      "port": 41815,
+      "tensor_parallel_size": 1,
+      "trust_remote_code": ""
+    },
+    "resolved_spec_hash": "379d9398be48555d34279fd106dd20fbb9dcc0c70e032501d7a349450546f6ad",
+    "scenario": "random-online",
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "perfgate-ascend-qwen25-3b-910b2",
+    "spec_label": "Performance gate Ascend baseline for Qwen2.5-3B on 910B2",
+    "spec_source": "/data/actions-runners/poy-180-21rc-npu2-3/_work/vllm-hust/vllm-hust/vllm-hust-benchmark/docs/official-baselines/perfgate-ascend-qwen25-3b-910b2.json"
+  },
+  "versions": {
+    "backend": "0.19.1.post1.dev1+g52f9238",
+    "benchmark": "0.1.0",
+    "core": "N/A",
+    "protocol": "N/A"
+  },
+  "workload": {
+    "batch_size": null,
+    "concurrent_requests": 4,
+    "dataset": "random",
+    "input_length": 64,
+    "name": "random-online",
+    "output_length": 16
+  }
+}
