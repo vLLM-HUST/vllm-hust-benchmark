@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import heapq
 import json
 import os
 import re
@@ -35,14 +34,47 @@ class EnterpriseReplayRequest:
     request_type: str
     request_body: dict[str, Any]
     workload_family_id: str
+    source_group_id: str | None
+    source_session_id: str | None
+    source_conversation_id: str | None
+    source_created_at_ms: int | None
+    source_prompt_hash: str | None
+    source_prompt_tokens_est: int | None
+    source_shape_metadata: dict[str, Any]
 
-    def to_openai_payload(self, *, served_model: str) -> dict[str, Any]:
+    def to_openai_payload(
+        self,
+        *,
+        served_model: str,
+        generation_overrides: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
         payload = dict(self.request_body)
         payload["model"] = served_model
+        for key, value in dict(generation_overrides or {}).items():
+            if key not in {
+                "temperature",
+                "top_p",
+                "max_tokens",
+                "max_completion_tokens",
+                "stop",
+                "seed",
+                "n",
+            }:
+                raise EnterpriseReplayError(
+                    f"unsupported benchmark normalization override: {key}"
+                )
+            payload[key] = value
         return payload
 
-    def redacted_record(self, *, served_model: str) -> dict[str, Any]:
-        payload = self.to_openai_payload(served_model=served_model)
+    def redacted_record(
+        self,
+        *,
+        served_model: str,
+        generation_overrides: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        payload = self.to_openai_payload(
+            served_model=served_model, generation_overrides=generation_overrides
+        )
         canonical = json.dumps(
             payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
         )
@@ -60,12 +92,50 @@ class EnterpriseReplayRequest:
             "request_sha256": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
             "prompt_chars": len(prompt_text),
             "prompt_tokens_est": _fallback_token_count(prompt_text),
+            "source_prompt_tokens_est": self.source_prompt_tokens_est,
             "max_output_tokens": _request_output_len(payload),
             "message_count": len(payload.get("messages") or []),
             "stream": bool(payload.get("stream", False)),
             "tool_count": len(payload.get("tools") or []),
             "has_response_format": isinstance(payload.get("response_format"), dict),
+            "source_group_key_sha256": _optional_identity_hash(self.source_group_id),
+            "source_session_key_sha256": _optional_identity_hash(self.source_session_id),
+            "source_conversation_key_sha256": _optional_identity_hash(
+                self.source_conversation_id
+            ),
+            "source_created_at_ms": self.source_created_at_ms,
+            "source_prompt_hash": self.source_prompt_hash,
+            "source_shape_metadata": dict(self.source_shape_metadata),
         }
+
+
+SAFE_SOURCE_METADATA_FIELDS = frozenset(
+    {
+        "workload_type",
+        "topic",
+        "batch_group_id",
+        "batch_size",
+        "batch_mix_type",
+        "reuse_tier",
+        "target_matched_ratio",
+        "matched_flag",
+        "length_bucket",
+        "output_bucket",
+        "output_tokens_target",
+        "topic_family",
+        "reuse_type",
+        "prefix_strength",
+        "conversation_strength",
+        "request_variation",
+        "timestamp_bucket_ms",
+    }
+)
+
+
+def _optional_identity_hash(value: str | None) -> str | None:
+    if not value:
+        return None
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
 def _registry_resource() -> Any:
@@ -105,6 +175,13 @@ def validate_enterprise_dataset_registry(payload: Mapping[str, Any]) -> None:
             raise ValueError(f"{dataset_id}: record_count must be positive")
         if not re.fullmatch(r"[0-9a-f]{64}", str(dataset.get("sha256") or "")):
             raise ValueError(f"{dataset_id}: sha256 must be lowercase hex")
+        if dataset.get("provenance_class") not in {
+            "enterprise_observed_request",
+            "enterprise_provided_synthetic_or_hybrid",
+        }:
+            raise ValueError(f"{dataset_id}: unsupported provenance_class")
+        if not isinstance(dataset.get("preserved_source_fields"), list):
+            raise ValueError(f"{dataset_id}: preserved_source_fields must be an array")
         dataset_ids.add(dataset_id)
 
     case_ids: set[str] = set()
@@ -116,6 +193,19 @@ def validate_enterprise_dataset_registry(payload: Mapping[str, Any]) -> None:
             raise ValueError(f"invalid or duplicate enterprise case_id: {case_id!r}")
         if case.get("dataset_id") not in dataset_ids:
             raise ValueError(f"{case_id}: unknown dataset_id {case.get('dataset_id')!r}")
+        if case.get("sampling_unit") not in {
+            "request",
+            "group",
+            "session",
+            "conversation",
+        }:
+            raise ValueError(f"{case_id}: unsupported sampling_unit")
+        if case.get("replay_order") not in {
+            "source_order",
+            "timestamp",
+            "group_then_timestamp",
+        }:
+            raise ValueError(f"{case_id}: unsupported replay_order")
         case_ids.add(case_id)
 
 
@@ -271,7 +361,7 @@ def _validate_request_body(request_body: Mapping[str, Any]) -> None:
 
 def _parse_source_row(
     row: Mapping[str, Any], *, source_format: str, fallback_source_model: str
-) -> tuple[str, str, dict[str, Any]]:
+) -> tuple[str, str, dict[str, Any], dict[str, Any]]:
     if source_format == "wrapped_openai_request_jsonl":
         raw_body = row.get("request_body")
         if isinstance(raw_body, str):
@@ -285,6 +375,7 @@ def _parse_source_row(
             raise EnterpriseReplayError("wrapped request_body must be an object or JSON string")
         source_model = str(row.get("model_name") or body.get("model") or fallback_source_model)
         request_type = str(row.get("request_type") or "ChatCompletion")
+        source_metadata: dict[str, Any] = {}
     else:
         allowed = {
             "messages", "prompt", "stream", "tools", "tool_choice", "response_format",
@@ -295,10 +386,18 @@ def _parse_source_row(
             body["messages"] = [{"role": "user", "content": row["prompt"]}]
         source_model = str(row.get("model_name") or row.get("model") or fallback_source_model)
         request_type = str(row.get("request_type") or "ChatCompletion")
+        nested_metadata = row.get("metadata")
+        nested_metadata = nested_metadata if isinstance(nested_metadata, Mapping) else {}
+        combined_metadata = {**nested_metadata, **row}
+        source_metadata = {
+            key: combined_metadata[key]
+            for key in SAFE_SOURCE_METADATA_FIELDS
+            if key in combined_metadata
+        }
     if not isinstance(body, dict):
         raise EnterpriseReplayError("request body must decode to an object")
     _validate_request_body(body)
-    return source_model, request_type, body
+    return source_model, request_type, body, source_metadata
 
 
 def _combined_request_text(request_body: Mapping[str, Any]) -> str:
@@ -346,6 +445,68 @@ def _sample_score(*, dataset_id: str, case_id: str, seed: int, source_index: int
     return int(hashlib.sha256(material.encode("utf-8")).hexdigest(), 16)
 
 
+def _sample_group_score(*, dataset_id: str, case_id: str, seed: int, group_key: str) -> int:
+    material = f"{SAMPLER_VERSION}\0{dataset_id}\0{case_id}\0{seed}\0{group_key}"
+    return int(hashlib.sha256(material.encode("utf-8")).hexdigest(), 16)
+
+
+def _optional_string(value: object) -> str | None:
+    normalized = str(value or "").strip()
+    return normalized or None
+
+
+def _optional_integer(value: object) -> int | None:
+    try:
+        return int(value) if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _sampling_key(request: EnterpriseReplayRequest, sampling_unit: str) -> str:
+    if sampling_unit == "request":
+        return request.request_id
+    candidates = {
+        "group": request.source_group_id,
+        "session": request.source_session_id,
+        "conversation": request.source_conversation_id,
+    }
+    if sampling_unit not in candidates:
+        raise EnterpriseReplayError(f"unsupported enterprise sampling_unit: {sampling_unit}")
+    value = candidates[sampling_unit]
+    if not value:
+        raise EnterpriseReplayError(
+            f"{request.dataset_id}: sampling_unit={sampling_unit!r} requires source metadata"
+        )
+    return value
+
+
+def _order_selected_requests(
+    requests: list[EnterpriseReplayRequest], *, replay_order: str
+) -> list[EnterpriseReplayRequest]:
+    if replay_order == "source_order":
+        return sorted(requests, key=lambda item: item.source_index)
+    if replay_order == "timestamp":
+        return sorted(
+            requests,
+            key=lambda item: (
+                item.source_created_at_ms is None,
+                item.source_created_at_ms or 0,
+                item.source_index,
+            ),
+        )
+    if replay_order == "group_then_timestamp":
+        return sorted(
+            requests,
+            key=lambda item: (
+                item.source_group_id or item.source_session_id or item.source_conversation_id or "",
+                item.source_created_at_ms is None,
+                item.source_created_at_ms or 0,
+                item.source_index,
+            ),
+        )
+    raise EnterpriseReplayError(f"unsupported enterprise replay_order: {replay_order}")
+
+
 def load_enterprise_replay_requests(
     case_id: str,
     *,
@@ -371,7 +532,7 @@ def load_enterprise_replay_requests(
     )
     path = verify_enterprise_dataset_asset(dataset, data_root=root)
 
-    heap: list[tuple[int, int, EnterpriseReplayRequest]] = []
+    eligible: list[EnterpriseReplayRequest] = []
     with path.open("r", encoding="utf-8") as handle:
         for source_index, line in enumerate(handle):
             if not line.strip():
@@ -384,7 +545,7 @@ def load_enterprise_replay_requests(
                 ) from exc
             if not isinstance(row, dict):
                 raise EnterpriseReplayError("enterprise JSONL records must be objects")
-            source_model, request_type, request_body = _parse_source_row(
+            source_model, request_type, request_body, source_shape_metadata = _parse_source_row(
                 row,
                 source_format=dataset["source_format"],
                 fallback_source_model=dataset["source_model_name"],
@@ -406,22 +567,50 @@ def load_enterprise_replay_requests(
                 request_type=request_type,
                 request_body=request_body,
                 workload_family_id=dataset["workload_family_id"],
+                source_group_id=_optional_string(row.get("group_id")),
+                source_session_id=_optional_string(row.get("session_id")),
+                source_conversation_id=_optional_string(row.get("conversation_id")),
+                source_created_at_ms=_optional_integer(row.get("created_at_ms")),
+                source_prompt_hash=_optional_string(row.get("prompt_hash")),
+                source_prompt_tokens_est=_optional_integer(row.get("prompt_tokens_est")),
+                source_shape_metadata=source_shape_metadata,
             )
-            score = _sample_score(
+            eligible.append(request)
+
+    sampling_unit = str(case.get("sampling_unit") or "request")
+    replay_order = str(case.get("replay_order") or "source_order")
+    grouped: dict[str, list[EnterpriseReplayRequest]] = {}
+    for request in eligible:
+        grouped.setdefault(_sampling_key(request, sampling_unit), []).append(request)
+    ranked_groups = sorted(
+        grouped.items(),
+        key=lambda item: (
+            _sample_group_score(
                 dataset_id=dataset["dataset_id"],
                 case_id=case_id,
                 seed=seed,
-                source_index=source_index,
+                group_key=item[0],
+            ),
+            item[0],
+        ),
+    )
+    selected_requests: list[EnterpriseReplayRequest] = []
+    for _, group_requests in ranked_groups:
+        if sampling_unit == "request" and len(selected_requests) >= limit:
+            break
+        if sampling_unit != "request" and selected_requests and len(selected_requests) + len(group_requests) > limit:
+            continue
+        selected_requests.extend(group_requests)
+        if len(selected_requests) >= limit:
+            break
+    if not selected_requests and ranked_groups:
+        first_group = ranked_groups[0][1]
+        if len(first_group) > limit:
+            raise EnterpriseReplayError(
+                f"limit={limit} cannot preserve the first {sampling_unit} group of {len(first_group)} requests"
             )
-            item = (-score, -source_index, request)
-            if len(heap) < limit:
-                heapq.heappush(heap, item)
-            elif score < -heap[0][0]:
-                heapq.heapreplace(heap, item)
-
-    selected = [(-neg_score, -neg_index, request) for neg_score, neg_index, request in heap]
-    selected.sort(key=lambda item: (item[0], item[1]))
-    return [request for _, _, request in selected]
+        selected_requests.extend(first_group)
+    return _order_selected_requests(selected_requests, replay_order=replay_order)
 
 
 def main(argv: list[str] | None = None) -> int:

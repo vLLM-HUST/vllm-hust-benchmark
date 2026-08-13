@@ -37,10 +37,18 @@ def _fixture_registry(path: Path, rows: list[dict[str, object]]) -> dict[str, ob
                 "record_count": len(rows),
                 "sha256": hashlib.sha256(asset_bytes).hexdigest(),
                 "workload_family_id": "fixture-family",
+                "provenance_class": "enterprise_observed_request",
+                "preserved_source_fields": [],
             }
         ],
         "cases": [
-            {"case_id": "fixture_all", "dataset_id": "fixture_dataset", "filter_id": None}
+            {
+                "case_id": "fixture_all",
+                "dataset_id": "fixture_dataset",
+                "filter_id": None,
+                "sampling_unit": "request",
+                "replay_order": "source_order",
+            }
         ],
     }
 
@@ -193,3 +201,79 @@ def test_redacted_record_keeps_shape_but_not_request_body(tmp_path: Path) -> Non
     assert record["tool_count"] == 1
     assert record["has_response_format"] is True
     assert len(record["request_sha256"]) == 64
+
+
+def test_group_sampling_preserves_group_order_and_allowlisted_shape_metadata(
+    tmp_path: Path,
+) -> None:
+    rows = []
+    for group_id in ("group-a", "group-b", "group-c"):
+        for turn in range(2):
+            rows.append(
+                {
+                    "id": f"{group_id}-{turn}",
+                    "messages": [{"role": "user", "content": f"question {turn}"}],
+                    "group_id": group_id,
+                    "session_id": f"session-{group_id}",
+                    "created_at_ms": 100 + turn,
+                    "prompt_hash": f"hash-{group_id}-{turn}",
+                    "prompt_tokens_est": 1000 + turn,
+                    "metadata": {
+                        "length_bucket": "1k-2k",
+                        "output_tokens_target": 64,
+                        "private_note": "must-not-leak",
+                    },
+                }
+            )
+    asset = tmp_path / "fixture.jsonl"
+    rendered = "".join(json.dumps(row) + "\n" for row in rows)
+    asset.write_text(rendered, encoding="utf-8")
+    registry = {
+        "schema_version": "enterprise-dataset-registry/v1",
+        "registry_version": "test",
+        "effective_from": "2026-08-14",
+        "data_policy": {},
+        "datasets": [
+            {
+                "dataset_id": "grouped_fixture",
+                "relative_path": asset.name,
+                "source_format": "direct_messages_jsonl",
+                "source_model_name": "source",
+                "record_count": len(rows),
+                "sha256": hashlib.sha256(asset.read_bytes()).hexdigest(),
+                "workload_family_id": "grouped-family",
+                "provenance_class": "enterprise_provided_synthetic_or_hybrid",
+                "preserved_source_fields": ["group_id", "session_id", "metadata"],
+            }
+        ],
+        "cases": [
+            {
+                "case_id": "grouped_case",
+                "dataset_id": "grouped_fixture",
+                "filter_id": None,
+                "sampling_unit": "group",
+                "replay_order": "group_then_timestamp",
+            }
+        ],
+    }
+    authorization = _authorization_file(tmp_path, "grouped_fixture")
+
+    selected = load_enterprise_replay_requests(
+        "grouped_case",
+        data_root=tmp_path,
+        authorization_file=authorization,
+        registry=registry,
+        limit=4,
+        seed=7,
+    )
+
+    assert len(selected) == 4
+    assert all(selected[index].source_group_id == selected[index + 1].source_group_id for index in (0, 2))
+    assert selected[0].source_created_at_ms < selected[1].source_created_at_ms
+    record = selected[0].redacted_record(
+        served_model="Qwen/Qwen3-32B", generation_overrides={"max_tokens": 64}
+    )
+    assert record["max_output_tokens"] == 64
+    assert record["source_shape_metadata"]["length_bucket"] == "1k-2k"
+    assert "private_note" not in record["source_shape_metadata"]
+    assert record["source_group_key_sha256"] != selected[0].source_group_id

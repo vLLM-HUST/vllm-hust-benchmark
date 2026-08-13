@@ -6,7 +6,8 @@
     "raw_data_in_git": false,
     "data_root_resolution": "explicit_argument_or_VLLM_HUST_ENTERPRISE_DATA_ROOT_only",
     "authorization": "dataset-scoped authorization file required",
-    "result_redaction": "request bodies are excluded; canonical hashes and shape metadata only"
+    "result_redaction": "request bodies are excluded; canonical hashes and allowlisted shape metadata only",
+    "evidence_model": "observed requests prove request-shape realism; synthetic or hybrid sets prove controlled stress coverage; runtime cache hits and gains require engine telemetry"
   },
   "datasets": [
     {
@@ -16,7 +17,9 @@
       "source_model_name": "qwen3",
       "record_count": 1000,
       "sha256": "dc22bd65cbea0fa61d436282178a30d728d2e3a0ed3f4269361601b43177bbc8",
-      "workload_family_id": "code-eval-judge"
+      "workload_family_id": "code-eval-judge",
+      "provenance_class": "enterprise_observed_request",
+      "preserved_source_fields": []
     },
     {
       "dataset_id": "enterprise_structured_json_v1",
@@ -25,7 +28,9 @@
       "source_model_name": "qwen3",
       "record_count": 500,
       "sha256": "7090c161d155be77af77f96a22900643145dd583944a2df959a94f362dba4640",
-      "workload_family_id": "structured-json-generation"
+      "workload_family_id": "structured-json-generation",
+      "provenance_class": "enterprise_observed_request",
+      "preserved_source_fields": []
     },
     {
       "dataset_id": "enterprise_normal_chat_v1",
@@ -34,7 +39,9 @@
       "source_model_name": "qwen3",
       "record_count": 1000,
       "sha256": "1097f4c57d3f958e726c4c671edafc301cd6152a1f9ce04231fd83e9531086bd",
-      "workload_family_id": "multi-turn-support-chat"
+      "workload_family_id": "multi-turn-support-chat",
+      "provenance_class": "enterprise_observed_request",
+      "preserved_source_fields": []
     },
     {
       "dataset_id": "enterprise_long_text_v1",
@@ -43,7 +50,9 @@
       "source_model_name": "enterprise-unspecified",
       "record_count": 4000,
       "sha256": "97d40d4f66eb184ea13e24397b57614c70aedf2c9dea0d0f970c5b3547d6779c",
-      "workload_family_id": "long-context-doc-analysis"
+      "workload_family_id": "long-context-doc-analysis",
+      "provenance_class": "enterprise_observed_request",
+      "preserved_source_fields": ["id", "request_id", "workload_type", "prompt_hash"]
     },
     {
       "dataset_id": "enterprise_prefix_shared_v2",
@@ -52,7 +61,9 @@
       "source_model_name": "enterprise-unspecified",
       "record_count": 5000,
       "sha256": "355ed42e0050bd178bee74f616d16c6036117f2eea338bb30eff0f941b86027e",
-      "workload_family_id": "shared-prefix-multi-tenant-assistant"
+      "workload_family_id": "shared-prefix-multi-tenant-assistant",
+      "provenance_class": "enterprise_provided_synthetic_or_hybrid",
+      "preserved_source_fields": ["id", "workload_type", "group_id", "session_id", "created_at_ms", "prompt_hash", "prompt_tokens_est", "metadata"]
     },
     {
       "dataset_id": "enterprise_reuse_conversation_v2",
@@ -61,7 +72,9 @@
       "source_model_name": "enterprise-unspecified",
       "record_count": 5000,
       "sha256": "3b69ef16266945121df6d752367c9d132f3a21de2dea0158fcd03f2014649a77",
-      "workload_family_id": "session-affine-multi-turn"
+      "workload_family_id": "session-affine-multi-turn",
+      "provenance_class": "enterprise_provided_synthetic_or_hybrid",
+      "preserved_source_fields": ["id", "workload_type", "group_id", "session_id", "conversation_id", "created_at_ms", "prompt_hash", "prompt_tokens_est", "metadata"]
     },
     {
       "dataset_id": "enterprise_semantic_similar_v2",
@@ -70,7 +83,9 @@
       "source_model_name": "enterprise-unspecified",
       "record_count": 5000,
       "sha256": "eecb069a51af828f3388525fcaf84f82cb15a56116fdffc293a69dd77bc9a746",
-      "workload_family_id": "dynamic-rag-corpus-update"
+      "workload_family_id": "dynamic-rag-corpus-update",
+      "provenance_class": "enterprise_provided_synthetic_or_hybrid",
+      "preserved_source_fields": ["id", "workload_type", "group_id", "session_id", "created_at_ms", "prompt_hash", "prompt_tokens_est", "metadata"]
     },
     {
       "dataset_id": "enterprise_long_prefill_v2",
@@ -79,23 +94,25 @@
       "source_model_name": "enterprise-unspecified",
       "record_count": 5000,
       "sha256": "11baa5e4b25fc760a14517b734c5ce0ceb1abf8e0361697fbeef66e0f48e14c1",
-      "workload_family_id": "long-context-doc-analysis"
+      "workload_family_id": "long-context-doc-analysis",
+      "provenance_class": "enterprise_provided_synthetic_or_hybrid",
+      "preserved_source_fields": ["id", "workload_type", "group_id", "session_id", "created_at_ms", "prompt_hash", "prompt_tokens_est", "metadata"]
     }
   ],
   "cases": [
-    {"case_id": "enterprise_code_eval_all", "dataset_id": "enterprise_code_eval_v1", "filter_id": null},
-    {"case_id": "enterprise_code_reward_hack_judge", "dataset_id": "enterprise_code_eval_v1", "filter_id": "code_reward_hack_judge"},
-    {"case_id": "enterprise_code_correctness_judge", "dataset_id": "enterprise_code_eval_v1", "filter_id": "code_answer_correctness_judge"},
-    {"case_id": "enterprise_json_all", "dataset_id": "enterprise_structured_json_v1", "filter_id": null},
-    {"case_id": "enterprise_json_extraction", "dataset_id": "enterprise_structured_json_v1", "filter_id": "json_structured_extraction"},
-    {"case_id": "enterprise_json_planning", "dataset_id": "enterprise_structured_json_v1", "filter_id": "json_planning_orchestration"},
-    {"case_id": "enterprise_normal_chat_all", "dataset_id": "enterprise_normal_chat_v1", "filter_id": null},
-    {"case_id": "enterprise_normal_chat_support_multi_turn", "dataset_id": "enterprise_normal_chat_v1", "filter_id": "normal_chat_support_multi_turn"},
-    {"case_id": "enterprise_normal_chat_single_turn", "dataset_id": "enterprise_normal_chat_v1", "filter_id": "normal_chat_single_turn_general"},
-    {"case_id": "enterprise_long_text", "dataset_id": "enterprise_long_text_v1", "filter_id": null},
-    {"case_id": "enterprise_prefix_shared", "dataset_id": "enterprise_prefix_shared_v2", "filter_id": null},
-    {"case_id": "enterprise_reuse_conversation", "dataset_id": "enterprise_reuse_conversation_v2", "filter_id": null},
-    {"case_id": "enterprise_semantic_similar", "dataset_id": "enterprise_semantic_similar_v2", "filter_id": null},
-    {"case_id": "enterprise_long_prefill", "dataset_id": "enterprise_long_prefill_v2", "filter_id": null}
+    {"case_id": "enterprise_code_eval_all", "dataset_id": "enterprise_code_eval_v1", "filter_id": null, "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_code_reward_hack_judge", "dataset_id": "enterprise_code_eval_v1", "filter_id": "code_reward_hack_judge", "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_code_correctness_judge", "dataset_id": "enterprise_code_eval_v1", "filter_id": "code_answer_correctness_judge", "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_json_all", "dataset_id": "enterprise_structured_json_v1", "filter_id": null, "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_json_extraction", "dataset_id": "enterprise_structured_json_v1", "filter_id": "json_structured_extraction", "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_json_planning", "dataset_id": "enterprise_structured_json_v1", "filter_id": "json_planning_orchestration", "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_normal_chat_all", "dataset_id": "enterprise_normal_chat_v1", "filter_id": null, "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_normal_chat_support_multi_turn", "dataset_id": "enterprise_normal_chat_v1", "filter_id": "normal_chat_support_multi_turn", "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_normal_chat_single_turn", "dataset_id": "enterprise_normal_chat_v1", "filter_id": "normal_chat_single_turn_general", "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_long_text", "dataset_id": "enterprise_long_text_v1", "filter_id": null, "sampling_unit": "request", "replay_order": "source_order"},
+    {"case_id": "enterprise_prefix_shared", "dataset_id": "enterprise_prefix_shared_v2", "filter_id": null, "sampling_unit": "group", "replay_order": "group_then_timestamp"},
+    {"case_id": "enterprise_reuse_conversation", "dataset_id": "enterprise_reuse_conversation_v2", "filter_id": null, "sampling_unit": "conversation", "replay_order": "group_then_timestamp"},
+    {"case_id": "enterprise_semantic_similar", "dataset_id": "enterprise_semantic_similar_v2", "filter_id": null, "sampling_unit": "group", "replay_order": "group_then_timestamp"},
+    {"case_id": "enterprise_long_prefill", "dataset_id": "enterprise_long_prefill_v2", "filter_id": null, "sampling_unit": "request", "replay_order": "timestamp"}
   ]
 }

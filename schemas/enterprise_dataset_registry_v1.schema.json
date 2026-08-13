@@ -16,7 +16,7 @@
   "$defs": {
     "dataset": {
       "type": "object",
-      "required": ["dataset_id", "relative_path", "source_format", "source_model_name", "record_count", "sha256", "workload_family_id"],
+      "required": ["dataset_id", "relative_path", "source_format", "source_model_name", "record_count", "sha256", "workload_family_id", "provenance_class", "preserved_source_fields"],
       "properties": {
         "dataset_id": {"type": "string", "minLength": 1},
         "relative_path": {"type": "string", "minLength": 1},
@@ -24,17 +24,21 @@
         "source_model_name": {"type": "string", "minLength": 1},
         "record_count": {"type": "integer", "minimum": 1},
         "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-        "workload_family_id": {"type": "string", "minLength": 1}
+        "workload_family_id": {"type": "string", "minLength": 1},
+        "provenance_class": {"enum": ["enterprise_observed_request", "enterprise_provided_synthetic_or_hybrid"]},
+        "preserved_source_fields": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
       },
       "additionalProperties": false
     },
     "case": {
       "type": "object",
-      "required": ["case_id", "dataset_id", "filter_id"],
+      "required": ["case_id", "dataset_id", "filter_id", "sampling_unit", "replay_order"],
       "properties": {
         "case_id": {"type": "string", "minLength": 1},
         "dataset_id": {"type": "string", "minLength": 1},
-        "filter_id": {"type": ["string", "null"]}
+        "filter_id": {"type": ["string", "null"]},
+        "sampling_unit": {"enum": ["request", "group", "session", "conversation"]},
+        "replay_order": {"enum": ["source_order", "timestamp", "group_then_timestamp"]}
       },
       "additionalProperties": false
     }

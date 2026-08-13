@@ -1,13 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/delivery_suite_registry_v1.schema.json",
-  "title": "vLLM-HUST delivery suite registry v1",
+  "title": "vLLM-HUST proposed future delivery suite registry v1",
   "type": "object",
-  "required": ["schema_version", "registry_version", "effective_from", "academic_workload_contract", "acceptance_policy", "entries", "conditional_single_node_extensions", "customer_multinode_extensions"],
+  "required": [
+    "schema_version",
+    "registry_version",
+    "effective_from",
+    "lifecycle_status",
+    "academic_workload_contract",
+    "acceptance_policy",
+    "evaluation_assets",
+    "engine_capability_targets",
+    "entries",
+    "conditional_single_node_extensions",
+    "customer_multinode_extensions"
+  ],
   "properties": {
     "schema_version": {"const": "delivery-suite-registry/v1"},
     "registry_version": {"type": "string", "minLength": 1},
     "effective_from": {"type": "string", "format": "date"},
+    "lifecycle_status": {"const": "proposal_for_future_fixed_targets"},
     "academic_workload_contract": {
       "type": "object",
       "required": ["descriptor_schema_version", "family_generator_version"],
@@ -17,7 +30,49 @@
       },
       "additionalProperties": false
     },
-    "acceptance_policy": {"type": "object"},
+    "acceptance_policy": {
+      "type": "object",
+      "required": ["experimental_design", "causal_baselines", "global_guardrails", "portfolio_gate"],
+      "properties": {
+        "experimental_design": {"type": "object", "required": ["paired_blocks", "bootstrap_resamples", "confidence_level"], "additionalProperties": true},
+        "causal_baselines": {
+          "type": "object",
+          "required": ["upstream_stock", "hust_feature_off", "hust_feature_on", "minus_one_ablation"],
+          "properties": {
+            "upstream_stock": {"type": "string", "minLength": 1},
+            "hust_feature_off": {"type": "string", "minLength": 1},
+            "hust_feature_on": {"type": "string", "minLength": 1},
+            "minus_one_ablation": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        },
+        "global_guardrails": {"type": "object", "required": ["protocol_conformance_percent", "maximum_secondary_regression_percent", "silent_fallbacks_allowed"], "additionalProperties": true},
+        "portfolio_gate": {
+          "type": "object",
+          "required": ["required_valid_scenarios", "required_quality_non_inferiority_scenarios", "minimum_primary_pass_count", "mandatory_primary_pass_scenarios", "mechanism_gate"],
+          "properties": {
+            "required_valid_scenarios": {"type": "integer", "minimum": 1, "maximum": 9},
+            "required_quality_non_inferiority_scenarios": {"type": "integer", "minimum": 1, "maximum": 9},
+            "minimum_primary_pass_count": {"type": "integer", "minimum": 1, "maximum": 9},
+            "mandatory_primary_pass_scenarios": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+            "mechanism_gate": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "evaluation_assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/evaluation_asset"}
+    },
+    "engine_capability_targets": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {"$ref": "#/$defs/capability_target"}
+    },
     "entries": {
       "type": "array",
       "minItems": 9,
@@ -29,39 +84,91 @@
   },
   "additionalProperties": false,
   "$defs": {
+    "evaluation_asset": {
+      "type": "object",
+      "required": ["asset_id", "asset_type", "authority_url", "freeze_rule"],
+      "properties": {
+        "asset_id": {"type": "string", "minLength": 1},
+        "asset_type": {"enum": ["quality_benchmark", "serving_trace", "serving_harness", "microbenchmark", "enterprise_replay", "design_reference"]},
+        "authority_url": {"type": "string", "format": "uri"},
+        "freeze_rule": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "capability_target": {
+      "type": "object",
+      "required": ["capability_id", "layer", "profiles", "pass_gate"],
+      "properties": {
+        "capability_id": {"type": "string", "minLength": 1},
+        "layer": {"enum": ["L0", "L1"]},
+        "profiles": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "pass_gate": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "runtime_profile": {
+      "type": "object",
+      "required": ["dtype", "tensor_parallel_size", "data_parallel_size", "expert_parallel", "max_model_len"],
+      "properties": {
+        "dtype": {"type": "string", "minLength": 1},
+        "tensor_parallel_size": {"type": "integer", "minimum": 1, "maximum": 16},
+        "data_parallel_size": {"type": "integer", "minimum": 1, "maximum": 16},
+        "expert_parallel": {"type": "boolean"},
+        "max_model_len": {"type": "integer", "minimum": 1024}
+      },
+      "additionalProperties": false
+    },
+    "model_artifact": {
+      "type": "object",
+      "required": ["repo_id", "revision", "tokenizer_revision", "processor_revision", "chat_template_source", "artifact_status", "deployment_tier", "runtime_profile", "reason"],
+      "properties": {
+        "repo_id": {"type": "string", "pattern": "^[^/]+/.+$"},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "tokenizer_revision": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "processor_revision": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+        "chat_template_source": {"type": "string", "minLength": 1},
+        "artifact_status": {"enum": ["pinned_candidate", "admitted"]},
+        "deployment_tier": {"enum": ["single_node_main", "single_node_conditional"]},
+        "runtime_profile": {"$ref": "#/$defs/runtime_profile"},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "primary_endpoint": {
+      "type": "object",
+      "required": ["metric", "direction", "minimum_effect_percent"],
+      "properties": {
+        "metric": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["higher", "lower"]},
+        "minimum_effect_percent": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "quality_gate": {
+      "type": "object",
+      "required": ["metric", "non_inferiority_margin", "unit"],
+      "properties": {
+        "metric": {"type": "string", "minLength": 1},
+        "non_inferiority_margin": {"type": "number", "minimum": 0},
+        "unit": {"type": "string", "minLength": 1},
+        "absolute_minimum_percent": {"type": "number", "minimum": 0, "maximum": 100}
+      },
+      "additionalProperties": false
+    },
     "entry": {
       "type": "object",
-      "required": ["workload_id", "label", "workload_family_ids", "benchmark", "model", "enterprise_case_ids", "engine_pressure", "acceptance_metrics"],
+      "required": ["application_scenario_id", "label", "workload_family_ids", "public_asset_ids", "enterprise_case_ids", "engine_capability_ids", "model_artifact", "primary_endpoint", "quality_gate"],
       "properties": {
-        "workload_id": {"enum": ["general_qa", "code", "reasoning", "multimodal", "kv_reuse", "structured_output", "long_context", "agent", "ai4science"]},
+        "application_scenario_id": {"enum": ["general_qa", "code", "reasoning", "multimodal", "kv_reuse", "structured_output", "long_context", "agent", "ai4science"]},
         "label": {"type": "string", "minLength": 1},
         "workload_family_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-        "benchmark": {
-          "type": "object",
-          "required": ["id", "authority_url", "dataset"],
-          "properties": {
-            "id": {"type": "string", "minLength": 1},
-            "authority_url": {"type": "string", "format": "uri"},
-            "dataset": {"type": "string", "minLength": 1},
-            "arrival_profile": {"type": "string"}
-          },
-          "additionalProperties": false
-        },
-        "model": {
-          "type": "object",
-          "required": ["id", "deployment_tier", "precision", "tensor_parallel_size", "reason"],
-          "properties": {
-            "id": {"type": "string", "pattern": "^[^/]+/.+$"},
-            "deployment_tier": {"enum": ["single_node_main", "single_node_conditional"]},
-            "precision": {"type": "string", "minLength": 1},
-            "tensor_parallel_size": {"type": "integer", "minimum": 1, "maximum": 8},
-            "reason": {"type": "string", "minLength": 1}
-          },
-          "additionalProperties": false
-        },
+        "public_asset_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
         "enterprise_case_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-        "engine_pressure": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-        "acceptance_metrics": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+        "engine_capability_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "model_artifact": {"$ref": "#/$defs/model_artifact"},
+        "primary_endpoint": {"$ref": "#/$defs/primary_endpoint"},
+        "quality_gate": {"$ref": "#/$defs/quality_gate"},
+        "mechanism_guardrails": {"type": "object"}
       },
       "additionalProperties": false
     }
