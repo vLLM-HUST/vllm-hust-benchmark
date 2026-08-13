@@ -2517,7 +2517,63 @@ def _official_spec_path(workload: str, model: str | None = None) -> Path:
     return REPO_ROOT / "docs" / "official-baselines" / spec_name
 
 
-def _generate_same_spec(workload: str, model: str | None = None) -> dict[str, Any]:
+def _resolve_spec_path(
+    workload: str, model: str | None = None, spec_path: str | None = None
+) -> Path:
+    """Resolve the spec file for a backfill run.
+
+    An explicit ``spec_path`` (e.g. a 910B3 specialty spec) takes precedence
+    and bypasses the default 910B2 auto-resolution.  Otherwise fall back to
+    ``_official_spec_path``.
+    """
+    if spec_path is not None:
+        path = Path(spec_path)
+        if not path.is_absolute():
+            path = (REPO_ROOT / path).resolve()
+        if not path.is_file():
+            raise ValueError(f"--spec-path does not exist: {path}")
+        return path
+    return _official_spec_path(workload, model)
+
+
+def _validate_explicit_spec(
+    spec: dict[str, Any], workload: str, model: str | None
+) -> None:
+    """Validate that an explicit spec matches the run being submitted.
+
+    Guards against pairing a 910B3 rerun against a mismatched workload, model,
+    or chip-count contract, which would corrupt goal-progress pairing and the
+    hardware-series isolation required by issue #178.
+    """
+    spec_scenario = str(spec.get("scenario") or "")
+    if spec_scenario != workload:
+        raise ValueError(
+            f"--spec-path scenario {spec_scenario!r} does not match "
+            f"workload {workload!r}"
+        )
+
+    if model is not None:
+        spec_model = str(spec.get("model") or "")
+        spec_short = spec_model.rstrip("/").rsplit("/", maxsplit=1)[-1]
+        model_short = model.rstrip("/").rsplit("/", maxsplit=1)[-1]
+        if model_short != spec_short and model != spec_model:
+            raise ValueError(
+                f"--spec-path model {spec_model!r} does not match --model {model!r}"
+            )
+
+    chip_count = int(spec.get("chip_count") or 0)
+    if chip_count != CHIP_COUNT:
+        raise ValueError(
+            f"--spec-path chip_count {chip_count} does not match runner "
+            f"chip_count {CHIP_COUNT}"
+        )
+    if not spec.get("hardware_chip_model"):
+        raise ValueError("--spec-path is missing hardware_chip_model")
+
+
+def _generate_same_spec(
+    workload: str, model: str | None = None, spec_path: str | None = None
+) -> dict[str, Any]:
     """Generate a same_spec payload matching the official baseline hash.
 
     The official v0.18.0 baseline was generated at commit ``2d6f5de`` using
@@ -2526,8 +2582,10 @@ def _generate_same_spec(workload: str, model: str | None = None) -> dict[str, An
     that exact logic so the ``resolved_spec_hash`` matches the official
     baseline, enabling leaderboard goal-progress pairing.
     """
-    spec_path = _official_spec_path(workload, model)
-    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    resolved_path = _resolve_spec_path(workload, model, spec_path)
+    spec = json.loads(resolved_path.read_text(encoding="utf-8"))
+    if spec_path is not None:
+        _validate_explicit_spec(spec, workload, model)
 
     # ------------------------------------------------------------------
     # Replicate the old ``resolve_server_parameters`` (commit 2d6f5de).
@@ -2607,7 +2665,7 @@ def _generate_same_spec(workload: str, model: str | None = None) -> dict[str, An
         "schema_version": "benchmark-same-spec/v1",
         "spec_id": spec["id"],
         "spec_label": str(spec.get("label") or ""),
-        "spec_source": str(spec_path.resolve()),
+        "spec_source": str(resolved_path.resolve()),
         "scenario": spec["scenario"],
         "model": spec["model"],
         "model_parameters": spec["model_parameters"],
@@ -2776,19 +2834,47 @@ def submit_artifact(
     temperature: float | None = None,
     additional_config: str | None = None,
     compilation_config: str | None = None,
+    spec_path: str | None = None,
 ) -> Path:
-    # 对提交元数据使用规范的模型名（非本地文件系统路径）
-    if model is not None and model.startswith("/"):
-        basename = model.rstrip("/").rsplit("/", maxsplit=1)[-1]
-        try:
-            from vllm_hust_benchmark.model_registry import resolve_model_identity
+    # Resolve the spec source: an explicit --spec-path (e.g. a 910B3 specialty
+    # spec) takes precedence over the default 910B2 official-spec auto-resolve.
+    resolved_spec_path = _resolve_spec_path(workload, model, spec_path)
+    explicit_spec: dict[str, Any] | None = None
+    if spec_path is not None:
+        explicit_spec = json.loads(resolved_spec_path.read_text(encoding="utf-8"))
+        _validate_explicit_spec(explicit_spec, workload, model)
 
-            resolve_model_identity(basename)
-            model_to_use = basename
-        except Exception:
-            model_to_use = MODEL_NAME.rsplit("/", maxsplit=1)[-1]
+    # Derive submission identity fields.  An explicit spec is authoritative for
+    # its hardware/model contract (issue #173: a 910B3 rerun must bind 910B3);
+    # otherwise use the runner's 910B2 official-baseline defaults.
+    if explicit_spec is not None:
+        model_to_use = str(explicit_spec["model"])
+        model_parameters = str(
+            explicit_spec.get("model_parameters") or MODEL_PARAMETERS
+        )
+        model_precision = str(explicit_spec.get("model_precision") or MODEL_PRECISION)
+        hardware_chip_model = str(
+            explicit_spec.get("hardware_chip_model") or HARDWARE_CHIP_MODEL
+        )
+        chip_count = int(explicit_spec.get("chip_count") or CHIP_COUNT)
     else:
-        model_to_use = model if model is not None else MODEL_NAME
+        # 对提交元数据使用规范的模型名（非本地文件系统路径）
+        if model is not None and model.startswith("/"):
+            basename = model.rstrip("/").rsplit("/", maxsplit=1)[-1]
+            try:
+                from vllm_hust_benchmark.model_registry import resolve_model_identity
+
+                resolve_model_identity(basename)
+                model_to_use = basename
+            except Exception:
+                model_to_use = MODEL_NAME.rsplit("/", maxsplit=1)[-1]
+        else:
+            model_to_use = model if model is not None else MODEL_NAME
+        model_parameters = MODEL_PARAMETERS
+        model_precision = MODEL_PRECISION
+        hardware_chip_model = HARDWARE_CHIP_MODEL
+        chip_count = CHIP_COUNT
+
     if engine_version is None:
         engine_version = _derive_engine_version(HUST_REPO, hust_commit)
 
@@ -2797,7 +2883,7 @@ def submit_artifact(
     constraints = REPO_ROOT / "docs" / "examples" / "constraints_metrics.sample.json"
 
     # Generate same_spec so the submission passes the public-snapshot filter.
-    same_spec = _generate_same_spec(workload, model)
+    same_spec = _generate_same_spec(workload, model, spec_path)
     same_spec_file = STATE_DIR / f"same_spec_{workload}.json"
     same_spec_file.parent.mkdir(parents=True, exist_ok=True)
     same_spec_file.write_text(json.dumps(same_spec, indent=2) + "\n", encoding="utf-8")
@@ -2815,7 +2901,7 @@ def submit_artifact(
         "--same-spec-file",
         str(same_spec_file),
         "--spec-path",
-        str(_official_spec_path(workload, model)),
+        str(resolved_spec_path),
         "--run-id",
         run_id,
         "--engine",
@@ -2827,15 +2913,15 @@ def submit_artifact(
         "--model-name",
         model_to_use,
         "--model-parameters",
-        MODEL_PARAMETERS,
+        model_parameters,
         "--model-precision",
-        MODEL_PRECISION,
+        model_precision,
         "--hardware-vendor",
         HARDWARE_VENDOR,
         "--hardware-chip-model",
-        HARDWARE_CHIP_MODEL,
+        hardware_chip_model,
         "--chip-count",
-        str(CHIP_COUNT),
+        str(chip_count),
         "--node-count",
         str(NODE_COUNT),
         "--submitter",
@@ -3100,6 +3186,7 @@ def run_cell(
     additional_config: str | None = None,
     compilation_config: str | None = None,
     temperature: float | None = None,
+    spec_path: str | None = None,
     allow_plugin_override: bool = False,
     run_id_override: str | None = None,
 ) -> dict[str, Any]:
@@ -3248,6 +3335,7 @@ def run_cell(
             temperature=temperature,
             additional_config=additional_config,
             compilation_config=compilation_config,
+            spec_path=spec_path,
         )
 
         # Reject results where all requests failed (error_rate == 1.0).
@@ -3720,6 +3808,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                     additional_config=args.additional_config,
                     compilation_config=args.compilation_config,
                     temperature=args.temperature,
+                    spec_path=args.spec_path,
                     allow_plugin_override=bool(args.force_mismatched_plugin_commit),
                 )
                 state["cells"][key] = result
@@ -4104,6 +4193,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--model",
         default=MODEL_NAME,
         help="Model name or path (default: %(default)s).",
+    )
+    p_run.add_argument(
+        "--spec-path",
+        type=str,
+        default=None,
+        help=(
+            "Explicit spec file (e.g. a 910B3 specialty spec under "
+            "docs/official-baselines/). When supplied, it overrides the default "
+            "910B2 official-baseline auto-resolution and drives the same_spec "
+            "hash, --spec-path, hardware chip model, and model contract."
+        ),
     )
     p_run.add_argument(
         "--additional-config",
