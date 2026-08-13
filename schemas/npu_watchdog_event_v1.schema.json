@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust/vllm-hust-benchmark/schemas/npu_watchdog_event_v1.schema.json",
+  "title": "NPU Runner Watchdog Event v1",
+  "description": "One JSONL audit record produced by the poy-180 NPU runner watchdog (issue #125). Each record describes a single scan decision for one NPU-occupying process on NPU 0-4: ownership determination, the action taken, the exit/cleanup result, alert dedup state and recovery status. The raw command line is never recorded; only a sha256 digest (cmdline_sha256) is kept so the same process can be recognised across scans without leaking arguments that may contain secrets.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "schema_name",
+    "host",
+    "scan_epoch",
+    "scan_time",
+    "npu",
+    "pid",
+    "user",
+    "process",
+    "exe",
+    "vram_mb",
+    "cmdline_sha256",
+    "cmdline_redacted",
+    "determination",
+    "owner",
+    "action",
+    "result",
+    "recovery_status",
+    "dedup_key",
+    "alert_suppressed",
+    "npu4_unregistered_runner",
+    "event_sequence"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "npu-watchdog-event/v1"
+    },
+    "schema_name": {
+      "const": "npu-watchdog-event"
+    },
+    "host": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scan_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "scan_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "npu": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4
+    },
+    "pid": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "user": {
+      "type": ["string", "null"]
+    },
+    "process": {
+      "type": "string",
+      "minLength": 1
+    },
+    "exe": {
+      "type": ["string", "null"]
+    },
+    "vram_mb": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "cmdline_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "cmdline_redacted": {
+      "const": true
+    },
+    "determination": {
+      "enum": [
+        "runner-job",
+        "sibling-container",
+        "unauthorized-container",
+        "unowned-process"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "enum": ["none", "sigterm", "sigkill"]
+    },
+    "result": {
+      "enum": ["no-op", "exited-before-action", "terminated", "killed", "not-found"]
+    },
+    "recovery_status": {
+      "enum": ["open", "recovered"]
+    },
+    "dedup_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "alert_suppressed": {
+      "type": "boolean"
+    },
+    "npu4_unregistered_runner": {
+      "type": "boolean"
+    },
+    "event_sequence": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
