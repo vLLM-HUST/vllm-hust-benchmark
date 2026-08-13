@@ -552,3 +552,150 @@ def test_run_cell_propagates_temperature_and_configs(tmp_path: Path) -> None:
     assert seen["submit_kwargs"]["compilation_config"] == (
         '{"cudagraph_mode": "FULL_DECODE_ONLY"}'
     )
+
+
+# ---------------------------------------------------------------------------
+# --spec-path: explicit specialty spec binding (issue #173)
+# ---------------------------------------------------------------------------
+
+
+def _write_910b3_spec(
+    tmp_path: Path,
+    workload: str = "random-online",
+    model: str = "Qwen/Qwen2.5-14B-Instruct",
+    chip_model: str = "910B3",
+    chip_count: int = 1,
+) -> tuple[Path, dict]:
+    spec = {
+        "id": (
+            f"specialty-ascend-full-graph-parallel-inplace-{workload}-qwen25-14b-910b3"
+        ),
+        "label": "Specialty Ascend full-graph-parallel inplace dual-stream",
+        "scenario": workload,
+        "model": model,
+        "model_parameters": "14B",
+        "model_precision": "FP16",
+        "hardware_vendor": "Huawei",
+        "hardware_chip_model": chip_model,
+        "chip_count": chip_count,
+        "node_count": 1,
+        "server_parameters": {
+            "tensor_parallel_size": 1,
+            "gpu_memory_utilization": 0.6,
+            "max_model_len": 32768,
+        },
+        "client_parameters": {
+            "backend": "vllm",
+            "endpoint": "/v1/completions",
+            "dataset_name": "random",
+            "num_prompts": 200,
+            "request_rate": 1,
+        },
+    }
+    spec_dir = tmp_path / "docs" / "official-baselines"
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    path = spec_dir / (
+        f"specialty-ascend-full-graph-parallel-inplace-{workload}-qwen25-14b-910b3.json"
+    )
+    path.write_text(json.dumps(spec), encoding="utf-8")
+    return path, spec
+
+
+def test_resolve_spec_path_explicit_overrides_default(tmp_path: Path) -> None:
+    mod = load_module()
+    spec_path, _ = _write_910b3_spec(tmp_path)
+    with patch.object(mod, "REPO_ROOT", tmp_path):
+        resolved = mod._resolve_spec_path(
+            "random-online", "Qwen/Qwen2.5-14B-Instruct", str(spec_path)
+        )
+        assert resolved == spec_path.resolve()
+        # 不传 spec_path 时回到默认 910B2 official spec
+        default = mod._resolve_spec_path("random-online", "Qwen/Qwen2.5-14B-Instruct")
+        assert default.name.endswith("qwen25-14b-910b2.json")
+
+
+def test_resolve_spec_path_rejects_missing_file(tmp_path: Path) -> None:
+    mod = load_module()
+    with patch.object(mod, "REPO_ROOT", tmp_path):
+        with pytest.raises(ValueError, match="--spec-path does not exist"):
+            mod._resolve_spec_path("random-online", None, str(tmp_path / "nope.json"))
+
+
+def test_validate_explicit_spec_accepts_matching(tmp_path: Path) -> None:
+    mod = load_module()
+    _, spec = _write_910b3_spec(tmp_path)
+    mod._validate_explicit_spec(spec, "random-online", "Qwen/Qwen2.5-14B-Instruct")
+
+
+def test_validate_explicit_spec_rejects_mismatched_scenario(tmp_path: Path) -> None:
+    mod = load_module()
+    _, spec = _write_910b3_spec(tmp_path, workload="random-online")
+    with pytest.raises(ValueError, match="scenario"):
+        mod._validate_explicit_spec(
+            spec, "sharegpt-online", "Qwen/Qwen2.5-14B-Instruct"
+        )
+
+
+def test_validate_explicit_spec_rejects_mismatched_model(tmp_path: Path) -> None:
+    mod = load_module()
+    _, spec = _write_910b3_spec(tmp_path, model="Qwen/Qwen2.5-14B-Instruct")
+    with pytest.raises(ValueError, match="model"):
+        mod._validate_explicit_spec(
+            spec, "random-online", "Qwen/Qwen2.5-Coder-14B-Instruct"
+        )
+
+
+def test_validate_explicit_spec_rejects_mismatched_chip_count(tmp_path: Path) -> None:
+    mod = load_module()
+    _, spec = _write_910b3_spec(tmp_path, chip_count=2)
+    with pytest.raises(ValueError, match="chip_count"):
+        mod._validate_explicit_spec(spec, "random-online", "Qwen/Qwen2.5-14B-Instruct")
+
+
+def test_generate_same_spec_explicit_910b3_binds_910b3(tmp_path: Path) -> None:
+    mod = load_module()
+    spec_path, _ = _write_910b3_spec(tmp_path)
+    with patch.object(mod, "REPO_ROOT", tmp_path):
+        same_spec = mod._generate_same_spec(
+            "random-online", "Qwen/Qwen2.5-14B-Instruct", str(spec_path)
+        )
+    assert same_spec["hardware_chip_model"] == "910B3"
+    assert same_spec["chip_count"] == 1
+    assert "910b3" in same_spec["spec_id"]
+    assert "910b3" in same_spec["spec_source"]
+
+
+def test_submit_artifact_explicit_spec_drives_910b3(tmp_path: Path) -> None:
+    mod = load_module()
+    spec_path, _ = _write_910b3_spec(tmp_path)
+    raw = tmp_path / "raw.json"
+    raw.write_text("{}", encoding="utf-8")
+
+    submit_cmds: list[list[str]] = []
+
+    def _fake_run(cmd, **kwargs):
+        submit_cmds.append(list(cmd))
+        return MagicMock(returncode=0)
+
+    with (
+        patch.object(mod, "REPO_ROOT", tmp_path),
+        patch.object(mod, "STATE_DIR", tmp_path / "state"),
+        patch.object(mod, "_derive_engine_version", return_value="v0.0.0-test"),
+        patch.object(mod.subprocess, "run", side_effect=_fake_run),
+    ):
+        mod.submit_artifact(
+            "random-online",
+            BASE_SHA,
+            PLUGIN_SHA,
+            "run-id",
+            raw,
+            model="Qwen/Qwen2.5-14B-Instruct",
+            spec_path=str(spec_path),
+        )
+
+    assert len(submit_cmds) == 1
+    cmd = submit_cmds[0]
+    assert cmd[cmd.index("--hardware-chip-model") + 1] == "910B3"
+    assert cmd[cmd.index("--chip-count") + 1] == "1"
+    assert cmd[cmd.index("--spec-path") + 1] == str(spec_path.resolve())
+    assert cmd[cmd.index("--model-name") + 1] == "Qwen/Qwen2.5-14B-Instruct"
