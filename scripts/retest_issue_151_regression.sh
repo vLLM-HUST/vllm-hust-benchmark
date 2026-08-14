@@ -857,8 +857,19 @@ main() {
     export LD_LIBRARY_PATH="$conda_lib:$atb_lib_path:/usr/local/Ascend/ascend-toolkit/lib64:/usr/local/Ascend/cann-9.0.0/lib64:${LD_LIBRARY_PATH:-}"
     export ATB_HOME_PATH="$atb_home/$cxx_abi_dir"
 
+    # Put the engine/plugin source roots at the front of PYTHONPATH so the
+    # "vllm" and "vllm_ascend" top-level packages resolve to the intended
+    # editable installs. Without this, a stray container directory
+    # $PARENT/vllm (which has no __init__.py) can win when $PARENT happens to
+    # appear on sys.path (e.g. $HOME=/root with /root/vllm present), causing
+    # Python to treat "vllm" as an empty namespace package — every subsequent
+    # `from vllm import X` inside the CLI entrypoint then fails with
+    # "cannot import name X from vllm (unknown location)".
+    export PYTHONPATH="$VLLM_HUST_REPO:$ASCEND_REPO:${PYTHONPATH:-}"
+
     log "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
     log "ATB_HOME_PATH=$ATB_HOME_PATH"
+    log "PYTHONPATH=$PYTHONPATH"
 
     # Checkout plugin repo at PLUGIN_COMMIT
     log "Checking out plugin repo at $PLUGIN_COMMIT"
