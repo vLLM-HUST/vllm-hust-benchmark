@@ -122,7 +122,10 @@ DEFAULT_MAX_MODEL_LEN = "32768"
 CHIP_COUNT = 1
 NODE_COUNT = 1
 SUBMITTER = "vllm-hust-org-member"
-DATA_SOURCE = "vllm-hust-benchmark"
+# perf-evidence-checklist (issue #95) requires data_source to start with
+# real-online; smoke/replay/derived/screenshot sources are rejected by the
+# merge gate. backfill runs are real online measurements.
+DATA_SOURCE = "real-online-backfill-single-gpu"
 
 # vllm-ascend-hust commits are resolved dynamically by time-aligning
 # to each vllm-hust commit (old PR-branch SHAs have been GC'd, so we
@@ -1964,7 +1967,16 @@ def cell_already_present(
             continue
         if entry.get("config_type") != "single_gpu":
             continue
-        if (entry.get("hardware", {}).get("chip_model") or "").upper() != "910B2":
+        # Match the bound chip model when a same-spec pins one (910B3 specialty
+        # series); legacy entries without a same-spec stay on 910B2.
+        entry_spec_chip = str(
+            (entry.get("same_spec") or {}).get("hardware_chip_model", "") or ""
+        ).upper()
+        entry_chip = str(entry.get("hardware", {}).get("chip_model", "") or "").upper()
+        if entry_spec_chip:
+            if entry_chip != entry_spec_chip:
+                continue
+        elif entry_chip != "910B2":
             continue
         meta_commit = entry.get("metadata", {}).get("git_commit", "") or ""
         if meta_commit.startswith(short):
@@ -1985,7 +1997,14 @@ def cell_already_present(
                 continue
             if run.get("config_type") != "single_gpu":
                 continue
-            if (run.get("hardware", {}).get("chip_model") or "").upper() != "910B2":
+            run_spec_chip = str(
+                (run.get("same_spec") or {}).get("hardware_chip_model", "") or ""
+            ).upper()
+            run_chip = str(run.get("hardware", {}).get("chip_model", "") or "").upper()
+            if run_spec_chip:
+                if run_chip != run_spec_chip:
+                    continue
+            elif run_chip != "910B2":
                 continue
             meta_commit = run.get("metadata", {}).get("git_commit", "") or ""
             if meta_commit.startswith(short):
@@ -2822,6 +2841,78 @@ def _build_reproducible_cmd(
     return " ".join(shlex.quote(p) for p in parts)
 
 
+def _fill_environment_provenance(artifact: dict[str, Any]) -> None:
+    """Fill environment.driver_version / firmware_version on the artifact
+    (PR #172 review: driver_version was null while env-manifest carries the
+    NPU versions). Reads the local Ascend driver info and npu-smi output."""
+    env = artifact.setdefault("environment", {})
+    env.setdefault("pytorch_version", _runtime_package_version("torch"))
+    env.setdefault("cann_version", _detect_cann_version())
+    if env.get("driver_version") is None:
+        driver = _read_version_info("/usr/local/Ascend/driver/version.info")
+        if driver:
+            env["driver_version"] = driver
+    if env.get("firmware_version") is None:
+        fw = _npu_smi_firmware_version()
+        if fw:
+            env["firmware_version"] = fw
+
+
+def _runtime_package_version(dist: str) -> str | None:
+    try:
+        import importlib.metadata
+
+        return importlib.metadata.version(dist)
+    except Exception:
+        return None
+
+
+def _detect_cann_version() -> str | None:
+    import re as _re
+
+    for candidate in (
+        Path("/usr/local/Ascend/ascend-toolkit/latest/version.cfg"),
+        Path("/usr/local/Ascend/latest/version.cfg"),
+    ):
+        try:
+            text = candidate.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        match = _re.search(r'^Version\s*=\s*["\']?([^"\'\n]+)', text, _re.MULTILINE)
+        if match:
+            return match.group(1).strip()
+    return None
+
+
+def _read_version_info(path: str) -> str | None:
+    try:
+        for line in (
+            Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+        ):
+            if line.startswith("Version="):
+                return line.split("=", 1)[1].strip()
+    except OSError:
+        return None
+    return None
+
+
+def _npu_smi_firmware_version() -> str | None:
+    import re as _re
+
+    try:
+        out = subprocess.run(
+            ["npu-smi", "info", "-t", "board", "-i", "0"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    match = _re.search(r"Firmware Version\s*:\s*(\S+)", out)
+    return match.group(1) if match else None
+
+
 def submit_artifact(
     workload: str,
     hust_commit: str,
@@ -2878,9 +2969,29 @@ def submit_artifact(
     if engine_version is None:
         engine_version = _derive_engine_version(HUST_REPO, hust_commit)
 
+    # Record the backend component version (vllm-ascend-hust) instead of the
+    # CLI default "N/A" (PR #172 review round 2). The installed plugin version
+    # matches env-manifest runtime_packages and honestly carries .dirty when
+    # the worktree has uncommitted build patches.
+    backend_version = "N/A"
+    try:
+        import importlib.metadata
+
+        backend_version = importlib.metadata.version("vllm-ascend-hust")
+    except Exception:
+        pass
+
     output_dir = REPO_ROOT / "submissions" / run_id
     output_dir.mkdir(parents=True, exist_ok=True)
-    constraints = REPO_ROOT / "docs" / "examples" / "constraints_metrics.sample.json"
+    # Declared-only constraint claims (utilization/ratio/reduction targets) must
+    # not be written into records as if measured (PR #172 review round 2).
+    # Official 910B2 baselines keep the sample file; specialty specs (910B3)
+    # submit without a constraints file so only derived/measured values remain.
+    constraints: Path | None = None
+    if explicit_spec is None:
+        constraints = (
+            REPO_ROOT / "docs" / "examples" / "constraints_metrics.sample.json"
+        )
 
     # Generate same_spec so the submission passes the public-snapshot filter.
     same_spec = _generate_same_spec(workload, model, spec_path)
@@ -2896,8 +3007,10 @@ def submit_artifact(
         workload,
         "--benchmark-result-file",
         str(raw),
-        "--constraints-file",
-        str(constraints),
+    ]
+    if constraints is not None:
+        cmd += ["--constraints-file", str(constraints)]
+    cmd += [
         "--same-spec-file",
         str(same_spec_file),
         "--spec-path",
@@ -2908,6 +3021,8 @@ def submit_artifact(
         "vllm-hust",
         "--engine-version",
         engine_version,
+        "--backend-version",
+        backend_version,
         "--core-version",
         engine_version,
         "--model-name",
@@ -2975,6 +3090,7 @@ def submit_artifact(
         artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
         artifact["metadata"]["reproducible_cmd"] = reproducible_cmd
         artifact["metadata"]["verified"] = False
+        _fill_environment_provenance(artifact)
         artifact_path.write_text(
             json.dumps(artifact, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",
@@ -3089,8 +3205,17 @@ def validate_submission(sub_dir: Path) -> list[str]:
     # Check hardware
     hw = run.get("hardware", {})
     chip = str(hw.get("chip_model", "") or "").upper()
-    if chip != "910B2":
-        errors.append(f"{rid}: hardware.chip_model is {chip!r}, expected 910B2")
+    # The authoritative chip model is the one bound through the same-spec
+    # (e.g. a 910B3 specialty spec); legacy dirs without a same-spec fall back
+    # to the historical 910B2 default.
+    expected_chip = "910B2"
+    spec_chip = str((run.get("same_spec") or {}).get("hardware_chip_model", "") or "")
+    if spec_chip:
+        expected_chip = spec_chip.upper()
+    if chip != expected_chip:
+        errors.append(
+            f"{rid}: hardware.chip_model is {chip!r}, expected {expected_chip}"
+        )
 
     return errors
 
