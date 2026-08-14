@@ -122,27 +122,19 @@ REMAINING_INTERVALS = [
             "spec_id=official-ascend-jan-2026-v0.18.0-"
             "agent-research-online-qwen25-14b-910b2"
         ),
-        "config": {
-            "expected_config": {
-                "source": (
-                    "official target spec "
-                    "official-ascend-jan-2026-v0.18.0-"
-                    "agent-research-online-qwen25-14b-910b2"
-                ),
+        "server_config": {
+            "official_target_expected": {
                 "max_model_len": 32768,
                 "gpu_memory_utilization": 0.6,
                 "dtype": "float16",
                 "enforce_eager": False,
             },
-            "actual_captured_config": {
-                "status": "config-unverified",
-                "note": (
-                    "Original historical leaderboard records did not capture "
-                    "the actual server runtime config; same resolved_spec_hash "
-                    "does not prove identical actual config (per #151). Verify "
-                    "during rerun."
-                ),
-            },
+            "historical_captured": "unknown/config-unverified",
+            "note": (
+                "official-target expected config; the config actually captured "
+                "at original run time was not recorded, and a matched "
+                "resolved_spec_hash does not prove config identity (issue #151)"
+            ),
         },
         "client_config": {
             "protocol": "online serving",
@@ -171,7 +163,7 @@ REMAINING_INTERVALS = [
             "provenance. Must rerun with 3 interleaved reps per side using the "
             "same metric/config contract as #165 before concluding."
         ),
-        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/192",
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/188",
         "related_prs": "#165 (methodology), #49/#41 (target commits)",
     },
     {
@@ -196,27 +188,19 @@ REMAINING_INTERVALS = [
             "spec_id=official-ascend-jan-2026-v0.18.0-"
             "instructcoder-online-qwen25-coder-14b-910b2"
         ),
-        "config": {
-            "expected_config": {
-                "source": (
-                    "official target spec "
-                    "official-ascend-jan-2026-v0.18.0-"
-                    "instructcoder-online-qwen25-coder-14b-910b2"
-                ),
+        "server_config": {
+            "official_target_expected": {
                 "max_model_len": 32768,
                 "gpu_memory_utilization": 0.6,
                 "dtype": "float16",
                 "enforce_eager": False,
             },
-            "actual_captured_config": {
-                "status": "config-unverified",
-                "note": (
-                    "Original historical leaderboard records did not capture "
-                    "the actual server runtime config; same resolved_spec_hash "
-                    "does not prove identical actual config (per #151). Verify "
-                    "during rerun."
-                ),
-            },
+            "historical_captured": "unknown/config-unverified",
+            "note": (
+                "official-target expected config; the config actually captured "
+                "at original run time was not recorded, and a matched "
+                "resolved_spec_hash does not prove config identity (issue #151)"
+            ),
         },
         "client_config": {
             "protocol": "online serving",
@@ -245,7 +229,7 @@ REMAINING_INTERVALS = [
             "provenance. Must rerun with 3 interleaved reps per side using the "
             "same metric/config contract as #165 before concluding."
         ),
-        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/193",
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/189",
         "related_prs": "#165 (methodology), #41/#66 (target commits)",
     },
     {
@@ -270,27 +254,19 @@ REMAINING_INTERVALS = [
             "spec_id=official-ascend-jan-2026-v0.18.0-"
             "random-online-qwen25-14b-910b2"
         ),
-        "config": {
-            "expected_config": {
-                "source": (
-                    "official target spec "
-                    "official-ascend-jan-2026-v0.18.0-"
-                    "random-online-qwen25-14b-910b2"
-                ),
+        "server_config": {
+            "official_target_expected": {
                 "max_model_len": 32768,
                 "gpu_memory_utilization": 0.6,
                 "dtype": "float16",
                 "enforce_eager": False,
             },
-            "actual_captured_config": {
-                "status": "config-unverified",
-                "note": (
-                    "Original historical leaderboard records did not capture "
-                    "the actual server runtime config; same resolved_spec_hash "
-                    "does not prove identical actual config (per #151). Verify "
-                    "during rerun."
-                ),
-            },
+            "historical_captured": "unknown/config-unverified",
+            "note": (
+                "official-target expected config; the config actually captured "
+                "at original run time was not recorded, and a matched "
+                "resolved_spec_hash does not prove config identity (issue #151)"
+            ),
         },
         "client_config": {
             "protocol": "online serving",
@@ -319,7 +295,7 @@ REMAINING_INTERVALS = [
             "provenance. Must rerun with 3 interleaved reps per side using the "
             "same metric/config contract as #165 before concluding."
         ),
-        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/194",
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/190",
         "related_prs": "#165 (methodology), #66/#69 (target commits)",
     },
     {
@@ -344,27 +320,19 @@ REMAINING_INTERVALS = [
             "spec_id=official-ascend-jan-2026-v0.18.0-"
             "visionarena-online-qwen25-vl-7b-910b2"
         ),
-        "config": {
-            "expected_config": {
-                "source": (
-                    "official target spec "
-                    "official-ascend-jan-2026-v0.18.0-"
-                    "visionarena-online-qwen25-vl-7b-910b2"
-                ),
+        "server_config": {
+            "official_target_expected": {
                 "max_model_len": 32768,
                 "gpu_memory_utilization": 0.6,
                 "dtype": "float16",
                 "enforce_eager": False,
             },
-            "actual_captured_config": {
-                "status": "config-unverified",
-                "note": (
-                    "Original historical leaderboard records did not capture "
-                    "the actual server runtime config; same resolved_spec_hash "
-                    "does not prove identical actual config (per #151). Verify "
-                    "during rerun."
-                ),
-            },
+            "historical_captured": "unknown/config-unverified",
+            "note": (
+                "official-target expected config; the config actually captured "
+                "at original run time was not recorded, and a matched "
+                "resolved_spec_hash does not prove config identity (issue #151)"
+            ),
         },
         "client_config": {
             "protocol": "online serving",
@@ -393,7 +361,7 @@ REMAINING_INTERVALS = [
             "provenance. Must rerun with 3 interleaved reps per side using the "
             "same metric/config contract as #165 before concluding."
         ),
-        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/195",
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/191",
         "related_prs": "#165 (methodology), #69/#77 (target commits)",
     },
 ]
@@ -846,12 +814,7 @@ def generate_remaining_jumps_report(
                 "hardware": dict(iv["hardware"]),
                 "model": dict(iv["model"]),
                 "same_spec_identity": iv["same_spec_identity"],
-                "config": {
-                    "expected_config": dict(iv["config"]["expected_config"]),
-                    "actual_captured_config": dict(
-                        iv["config"]["actual_captured_config"]
-                    ),
-                },
+                "server_config": dict(iv["server_config"]),
                 "client_config": dict(iv["client_config"]),
                 "provenance": dict(iv["provenance"]),
                 "reps_completed": iv["reps_completed"],
