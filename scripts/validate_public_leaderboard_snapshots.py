@@ -40,6 +40,10 @@ OFFICIAL_PUBLIC_WORKLOADS = {
     "visionarena-online",
 }
 OFFICIAL_V0180_SPEC_PREFIX = "official-ascend-jan-2026-v0.18.0-"
+# Specialty series (e.g. the 910B3 full-graph-parallel dual-stream records) are
+# published as their own isolated hardware series (issue #178) and are exempt
+# from the official v0.18.0 same-spec pairing check below.
+SPECIALTY_SPEC_PREFIX = "specialty-"
 DEFAULT_PUBLIC_GPU_MEMORY_UTILIZATION = 0.6
 RETIRED_PUBLIC_MAX_MODEL_LEN = 30720
 SNAPSHOT_FILES = (
@@ -189,6 +193,7 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         and workload in OFFICIAL_PUBLIC_WORKLOADS
         and spec_id
         and not spec_id.startswith(OFFICIAL_V0180_SPEC_PREFIX)
+        and not spec_id.startswith(SPECIALTY_SPEC_PREFIX)
     ):
         errors.append(
             f"{source.name}:{entry_id}: public vllm-hust official workload "

@@ -1,0 +1,162 @@
+{
+  "entry_id": "cb012a7a-b163-456d-b88e-046d949ce0fe",
+  "engine": "vllm-hust",
+  "engine_version": "v0.17.2.post1-3680-g9ca08a102",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B3",
+    "chip_count": 1,
+    "interconnect": "unknown",
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 64.0
+  },
+  "model": {
+    "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+    "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+    "short_name": "Qwen2.5-14B-Instruct",
+    "display_name": "Qwen2.5-14B-Instruct",
+    "name": "Qwen/Qwen2.5-14B-Instruct",
+    "parameters": "14B",
+    "precision": "FP16",
+    "quantization": null
+  },
+  "workload": {
+    "name": "instructcoder-online",
+    "input_length": 1024,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null,
+    "dataset": "hf"
+  },
+  "metrics": {
+    "ttft_ms": 165.46123179426786,
+    "tbt_ms": 49.20066765057884,
+    "throughput_tps": 133.39472624474445,
+    "peak_mem_mb": 0,
+    "error_rate": 0.0
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Ascend-class",
+      "representative_model_band": "7B-13B",
+      "representative_business_scenario": "code-assistant",
+      "baseline_engine": "",
+      "declared_baseline_engine": "vllm",
+      "baseline_status": "pending-baseline",
+      "owner_confirmed": null,
+      "notes": null
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": 92.0,
+      "typical_throughput_ratio_vs_baseline": 2.2,
+      "typical_ttft_reduction_pct_vs_baseline": 23.0,
+      "typical_tpot_reduction_pct_vs_baseline": 25.0,
+      "long_context_length": 32768,
+      "long_context_throughput_stable": true,
+      "long_context_ttft_p95_ms": 80.0,
+      "long_context_ttft_p99_ms": 95.0,
+      "long_context_tpot_p95_ms": 9.0,
+      "long_context_tpot_p99_ms": 10.0,
+      "long_context_ttft_p95_stable": true,
+      "long_context_ttft_p99_stable": true,
+      "long_context_tpot_p95_stable": true,
+      "long_context_tpot_p99_stable": true,
+      "unit_token_cost_reduction_pct": 35.0,
+      "multi_tenant_high_utilization": true
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "N/A",
+    "backend": "N/A",
+    "core": "0.17.2.post1-3680-g9ca08a102",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.10.0-60.18.0.50.oe2203.aarch64-aarch64-with-glibc2.38",
+    "python_version": "3.11.15",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null
+  },
+  "metadata": {
+    "submitted_at": "2026-08-14T04:32:21Z",
+    "submitter": "vllm-hust-org-member",
+    "data_source": "vllm-hust-benchmark",
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2.post1-3680-g9ca08a102",
+    "reproducible_cmd": "/root/miniconda3/envs/vllm-hust-dev/bin/python -m vllm.entrypoints.cli.main bench serve --backend vllm --endpoint /v1/completions --host 127.0.0.1 --port 8000 --model Qwen/Qwen2.5-14B-Instruct --dataset-name hf --num-prompts 2048 --request-rate 1 --save-result --result-dir /workspace/vllm-hust-benchmark/submissions/single-gpu-backfill-instructcoder-online-9ca08a102-20260814 --result-filename raw.json --dataset-path likaixin/InstructCoder --temperature 0.0 --additional-config '{\"split_batch_config\":{\"enabled\":true,\"mode\":\"inplace_parallel\",\"num_splits\":2,\"enable_parallel_streams\":true,\"enable_inplace_lazy_capture\":true,\"inplace_split_planner_policy\":\"largest_lower\",\"inplace_offset_match_policy\":\"exact\",\"inplace_parallel_replay_policy\":\"full_graph_parallel\",\"inplace_offset_capture_sizes\":[1,2,4,8,16,32,64],\"parallel_capture_sizes\":[1,2,4,8,16,32,64]}}' --compilation-config '{\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}'",
+    "git_commit": "9ca08a102a068cba27c03efd86e858b76a99fde7",
+    "github_user": "Raing5Days",
+    "github_commit_url": "https://github.com/vllm-hust/vllm-hust/commit/9ca08a102a068cba27c03efd86e858b76a99fde7",
+    "github_repository": "vllm-hust/vllm-hust",
+    "github_ref": "main",
+    "github_event_name": null,
+    "github_pr_number": null,
+    "github_pr_url": null,
+    "release_date": null,
+    "changelog_url": null,
+    "notes": null,
+    "verified": false,
+    "idempotency_key": "42243e2b4fa701594c788bcbc81dfaa1c09c38220dacd2470bb7a44bc42cb03e",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "runtime_provenance": {
+      "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+      "engine": {
+        "repository": "vllm-hust/vllm-hust",
+        "ref": "9ca08a102a",
+        "commit": "9ca08a102a068cba27c03efd86e858b76a99fde7"
+      },
+      "plugin": {
+        "engine": "vllm-ascend-hust",
+        "repository": "vllm-hust/vllm-ascend-hust",
+        "ref": "c9560ce761",
+        "commit": "c9560ce761d8f0154f1db15f679b4d8d246ea249"
+      }
+    }
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "specialty-ascend-full-graph-parallel-inplace-instructcoder-online-qwen25-14b-910b3",
+    "spec_label": "Specialty Ascend full-graph-parallel inplace dual-stream baseline (instructcoder-online, provisional)",
+    "spec_source": "/workspace/vllm-hust-benchmark/docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-instructcoder-online-qwen25-14b-910b3.json",
+    "scenario": "instructcoder-online",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "model_parameters": "14B",
+    "model_precision": "FP16",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B3",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_spec_hash": "5a6551f722b536e303b43018be5806728c2a53a13eb8c35c7cbb9b3986573d8f",
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "gpu_memory_utilization": 0.6,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "disable_log_requests": "",
+      "host": "0.0.0.0",
+      "port": 8000,
+      "max_model_len": 32768,
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "dtype": "float16",
+      "enable_prefix_caching": true
+    },
+    "resolved_client_parameters": {
+      "backend": "vllm",
+      "endpoint": "/v1/completions",
+      "dataset_name": "hf",
+      "dataset_path": "likaixin/InstructCoder",
+      "no_stream": true,
+      "num_prompts": 2048,
+      "request_rate": 1,
+      "host": "127.0.0.1",
+      "port": 8000,
+      "model": "Qwen/Qwen2.5-14B-Instruct"
+    }
+  }
+}

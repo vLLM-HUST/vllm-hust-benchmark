@@ -1964,7 +1964,15 @@ def cell_already_present(
             continue
         if entry.get("config_type") != "single_gpu":
             continue
-        if (entry.get("hardware", {}).get("chip_model") or "").upper() != "910B2":
+        # Match the bound chip model when a same-spec pins one (910B3 specialty
+        # series); legacy entries without a same-spec stay on 910B2.
+        entry_spec_chip = str((entry.get("same_spec") or {}).get(
+            "hardware_chip_model", "") or "").upper()
+        entry_chip = str(entry.get("hardware", {}).get("chip_model", "") or "").upper()
+        if entry_spec_chip:
+            if entry_chip != entry_spec_chip:
+                continue
+        elif entry_chip != "910B2":
             continue
         meta_commit = entry.get("metadata", {}).get("git_commit", "") or ""
         if meta_commit.startswith(short):
@@ -1985,7 +1993,13 @@ def cell_already_present(
                 continue
             if run.get("config_type") != "single_gpu":
                 continue
-            if (run.get("hardware", {}).get("chip_model") or "").upper() != "910B2":
+            run_spec_chip = str((run.get("same_spec") or {}).get(
+                "hardware_chip_model", "") or "").upper()
+            run_chip = str(run.get("hardware", {}).get("chip_model", "") or "").upper()
+            if run_spec_chip:
+                if run_chip != run_spec_chip:
+                    continue
+            elif run_chip != "910B2":
                 continue
             meta_commit = run.get("metadata", {}).get("git_commit", "") or ""
             if meta_commit.startswith(short):
@@ -3089,8 +3103,17 @@ def validate_submission(sub_dir: Path) -> list[str]:
     # Check hardware
     hw = run.get("hardware", {})
     chip = str(hw.get("chip_model", "") or "").upper()
-    if chip != "910B2":
-        errors.append(f"{rid}: hardware.chip_model is {chip!r}, expected 910B2")
+    # The authoritative chip model is the one bound through the same-spec
+    # (e.g. a 910B3 specialty spec); legacy dirs without a same-spec fall back
+    # to the historical 910B2 default.
+    expected_chip = "910B2"
+    spec_chip = str((run.get("same_spec") or {}).get("hardware_chip_model", "") or "")
+    if spec_chip:
+        expected_chip = spec_chip.upper()
+    if chip != expected_chip:
+        errors.append(
+            f"{rid}: hardware.chip_model is {chip!r}, expected {expected_chip}"
+        )
 
     return errors
 
