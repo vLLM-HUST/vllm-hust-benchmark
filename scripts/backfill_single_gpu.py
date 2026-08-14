@@ -122,7 +122,10 @@ DEFAULT_MAX_MODEL_LEN = "32768"
 CHIP_COUNT = 1
 NODE_COUNT = 1
 SUBMITTER = "vllm-hust-org-member"
-DATA_SOURCE = "vllm-hust-benchmark"
+# perf-evidence-checklist (issue #95) requires data_source to start with
+# real-online; smoke/replay/derived/screenshot sources are rejected by the
+# merge gate. backfill runs are real online measurements.
+DATA_SOURCE = "real-online-backfill-single-gpu"
 
 # vllm-ascend-hust commits are resolved dynamically by time-aligning
 # to each vllm-hust commit (old PR-branch SHAs have been GC'd, so we
@@ -1966,8 +1969,9 @@ def cell_already_present(
             continue
         # Match the bound chip model when a same-spec pins one (910B3 specialty
         # series); legacy entries without a same-spec stay on 910B2.
-        entry_spec_chip = str((entry.get("same_spec") or {}).get(
-            "hardware_chip_model", "") or "").upper()
+        entry_spec_chip = str(
+            (entry.get("same_spec") or {}).get("hardware_chip_model", "") or ""
+        ).upper()
         entry_chip = str(entry.get("hardware", {}).get("chip_model", "") or "").upper()
         if entry_spec_chip:
             if entry_chip != entry_spec_chip:
@@ -1993,8 +1997,9 @@ def cell_already_present(
                 continue
             if run.get("config_type") != "single_gpu":
                 continue
-            run_spec_chip = str((run.get("same_spec") or {}).get(
-                "hardware_chip_model", "") or "").upper()
+            run_spec_chip = str(
+                (run.get("same_spec") or {}).get("hardware_chip_model", "") or ""
+            ).upper()
             run_chip = str(run.get("hardware", {}).get("chip_model", "") or "").upper()
             if run_spec_chip:
                 if run_chip != run_spec_chip:
@@ -2894,7 +2899,15 @@ def submit_artifact(
 
     output_dir = REPO_ROOT / "submissions" / run_id
     output_dir.mkdir(parents=True, exist_ok=True)
-    constraints = REPO_ROOT / "docs" / "examples" / "constraints_metrics.sample.json"
+    # Declared-only constraint claims (utilization/ratio/reduction targets) must
+    # not be written into records as if measured (PR #172 review round 2).
+    # Official 910B2 baselines keep the sample file; specialty specs (910B3)
+    # submit without a constraints file so only derived/measured values remain.
+    constraints: Path | None = None
+    if explicit_spec is None:
+        constraints = (
+            REPO_ROOT / "docs" / "examples" / "constraints_metrics.sample.json"
+        )
 
     # Generate same_spec so the submission passes the public-snapshot filter.
     same_spec = _generate_same_spec(workload, model, spec_path)
@@ -2910,8 +2923,10 @@ def submit_artifact(
         workload,
         "--benchmark-result-file",
         str(raw),
-        "--constraints-file",
-        str(constraints),
+    ]
+    if constraints is not None:
+        cmd += ["--constraints-file", str(constraints)]
+    cmd += [
         "--same-spec-file",
         str(same_spec_file),
         "--spec-path",

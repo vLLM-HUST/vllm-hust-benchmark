@@ -137,6 +137,67 @@ def test_non_quarantined_entry_id_passes_quarantine_gate() -> None:
     assert not any("quarantined entry" in error for error in errors)
 
 
+def test_unregistered_specialty_prefix_does_not_bypass_official_spec_gate() -> None:
+    """A bare specialty- string prefix must not exempt an official workload from
+    the v0.18.0 same-spec pairing check — the spec must be registry-verified
+    (PR #172 review round 2)."""
+    module = load_module()
+    payload = same_spec()
+    payload["spec_id"] = "specialty-fake-unregistered-qwen25-14b-910b3"
+    payload["hardware_chip_model"] = "910B3"
+    candidate = entry("bypass-attempt", payload)
+    candidate["engine"] = "vllm-hust"
+    candidate["workload"] = {
+        "name": "random-online",
+        "input_length": 1024,
+        "output_length": 256,
+        "batch_size": None,
+        "concurrent_requests": None,
+        "dataset": "random",
+    }
+    candidate["model"]["name"] = "Qwen/Qwen2.5-14B-Instruct"
+    candidate["hardware"] = {"chip_model": "910B3"}
+
+    errors = module.validate_entry(
+        candidate,
+        source=Path("leaderboard_single.json"),
+    )
+    assert any("must use official v0.18.0 same_spec" in error for error in errors)
+
+
+def test_registered_specialty_spec_passes_official_spec_gate() -> None:
+    """A registry-verified specialty spec (the 7 real 910B3 dual-stream specs)
+    is exempt from the v0.18.0 pairing check (issue #178)."""
+    module = load_module()
+    assert (
+        "specialty-ascend-full-graph-parallel-inplace-random-online-qwen25-14b-910b3"
+        in module.specialty_spec_ids()
+    )
+    payload = same_spec()
+    payload["spec_id"] = (
+        "specialty-ascend-full-graph-parallel-inplace-random-online-qwen25-14b-910b3"
+    )
+    payload["hardware_chip_model"] = "910B3"
+    candidate = entry("registered-specialty", payload)
+    candidate["engine"] = "vllm-hust"
+    candidate["workload"] = {
+        "name": "random-online",
+        "input_length": 1024,
+        "output_length": 256,
+        "batch_size": None,
+        "concurrent_requests": None,
+        "dataset": "random",
+    }
+    candidate["model"]["name"] = "Qwen/Qwen2.5-14B-Instruct"
+    candidate["hardware"] = {"chip_model": "910B3"}
+
+    errors = module.validate_entry(
+        candidate,
+        source=Path("leaderboard_single.json"),
+    )
+    assert not any("must use official v0.18.0 same_spec" in error for error in errors)
+
+
 def _suspect_section() -> dict:
     return {
         "schema_version": "issue-146-suspect/v2",
