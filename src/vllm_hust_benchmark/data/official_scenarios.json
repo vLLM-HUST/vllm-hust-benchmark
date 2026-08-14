@@ -733,6 +733,60 @@
       }
     },
     {
+      "name": "unified-comm-online-1chip",
+      "title": "Unified communication abstraction online serving benchmark (1-chip)",
+      "benchmark_type": "serve",
+      "description": "Communication-sensitive single-chip online workload for unified_comm abstraction evaluation. Non-executable draft pending upstream custom comm path support (Issue #136).",
+      "tags": [
+        "official",
+        "online",
+        "communication",
+        "multi-chip",
+        "issue-89",
+        "1chip"
+      ],
+      "leaderboard": {
+        "workload_name": "unified-comm-online-1chip",
+        "representative_business_scenario": "multi-chip-serving",
+        "default_config_type": "single_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "input_len": 1024,
+        "output_len": 256
+      }
+    },
+    {
+      "name": "unified-comm-online-4chip",
+      "title": "Unified communication abstraction online serving benchmark (4-chip)",
+      "benchmark_type": "serve",
+      "description": "Communication-sensitive four-chip single-node online workload for unified_comm abstraction evaluation. Non-executable draft pending upstream custom comm path support (Issue #136).",
+      "tags": [
+        "official",
+        "online",
+        "communication",
+        "multi-chip",
+        "issue-89",
+        "4chip"
+      ],
+      "leaderboard": {
+        "workload_name": "unified-comm-online-4chip",
+        "representative_business_scenario": "multi-chip-serving",
+        "default_config_type": "multi_gpu"
+      },
+      "defaults": {
+        "backend": "vllm",
+        "endpoint": "/v1/completions",
+        "dataset_name": "random",
+        "num_prompts": 200,
+        "input_len": 1024,
+        "output_len": 256
+      }
+    },
+    {
       "name": "multi-nic-throughput",
       "title": "Multi-NIC throughput benchmark (issue #89)",
       "benchmark_type": "throughput",
