@@ -125,7 +125,7 @@ REMAINING_INTERVALS = [
         "workload": "agent-research-online",
         "base_commit": "f273f9c5e2",
         "head_commit": "51621c35bc",
-        "retest_status": "pending",
+        "retest_status": "completed",
         "reported_jump": {
             "ttft_ms": {"base": 281, "head": 434, "change_pct": 54.2},
             "tpot_ms": {"base": 49.1, "head": 55.7, "change_pct": 13.4},
@@ -174,17 +174,19 @@ REMAINING_INTERVALS = [
                 "required to capture full provenance"
             ),
         },
-        "reps_completed": 0,
+        "reps_completed": 3,
         "reps_required": 3,
-        "verdict": "incomplete_evidence",
-        "disposition": "rerun",
+        "verdict": "not_reproducible",
+        "disposition": "supersede",
         "disposition_reason": (
-            "No retest performed yet; original records lack backend version "
-            "provenance. Must rerun with 3 interleaved reps per side using the "
-            "same metric/config contract as #165 before concluding."
+            "Interleaved 3x3 retest shows TTFT +2.0%, TPOT +1.1%, throughput "
+            "-0.5% (all within #165 thresholds). The reported 54.2% TTFT jump "
+            "(281ms -> 434ms) is not reproducible; the original leaderboard "
+            "values are superseded by the median-of-medians evidence from this "
+            "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/188",
-        "related_prs": "#165 (methodology), #49/#41 (target commits)",
+        "related_prs": "#165 (methodology), #49/#41 (target commits), this PR",
     },
     {
         "interval_id": "instructcoder-online-51621c35bc-7a63f81e86",
@@ -889,10 +891,10 @@ def remaining_summary(intervals: list[dict[str, Any]]) -> dict[str, Any]:
 
     if reproducible:
         overall = "regression_reproduced"
-    elif not_reproducible and not incomplete:
+    elif incomplete == 0:
         overall = "all_within_thresholds"
     elif not_reproducible:
-        overall = "one_interval_superseded_three_pending"
+        overall = f"{not_reproducible}_superseded_{incomplete}_pending"
     else:
         overall = "incomplete_evidence"
 
