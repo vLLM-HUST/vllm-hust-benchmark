@@ -80,6 +80,9 @@ def _workload(
         "workload": name,
         "model": "Qwen2.5-14B-Instruct",
         "precision": "FP16",
+        "model_revision": "cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8",  # pragma: allowlist secret
+        "engine_backend_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",  # pragma: allowlist secret
+        "node_topology": "single-node",
         "cells": cells,
     }
 
@@ -283,3 +286,67 @@ def test_detects_core_workload_not_spec_ready(tmp_path: Path) -> None:
 def test_missing_matrix_file_raises(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="not found"):
         validate_dense_matrix_target(tmp_path / "nope.json")
+
+
+def test_detects_duplicate_workload(tmp_path: Path) -> None:
+    def _mutate(matrix: dict) -> None:
+        matrix["workloads"].append(matrix["workloads"][0])
+
+    matrix_path = _setup(tmp_path, mutate=_mutate)
+    status = validate_dense_matrix_target(matrix_path)
+    assert any("duplicate workload" in error for error in status.errors)
+
+
+def test_detects_unknown_workload(tmp_path: Path) -> None:
+    def _mutate(matrix: dict) -> None:
+        matrix["workloads"].append(_workload("unknown-workload", CORE_CELLS))
+
+    matrix_path = _setup(tmp_path, mutate=_mutate)
+    status = validate_dense_matrix_target(matrix_path)
+    assert any("unknown workload" in error for error in status.errors)
+
+
+def test_detects_missing_core_workload(tmp_path: Path) -> None:
+    def _mutate(matrix: dict) -> None:
+        matrix["workloads"] = [
+            w for w in matrix["workloads"] if w["workload"] != "random-online"
+        ]
+
+    matrix_path = _setup(tmp_path, mutate=_mutate)
+    status = validate_dense_matrix_target(matrix_path)
+    assert any("missing required workload" in error for error in status.errors)
+
+
+def test_detects_missing_identity_field(tmp_path: Path) -> None:
+    def _mutate(matrix: dict) -> None:
+        del matrix["workloads"][0]["model_revision"]
+
+    matrix_path = _setup(tmp_path, mutate=_mutate)
+    status = validate_dense_matrix_target(matrix_path)
+    assert any("missing required identity" in error for error in status.errors)
+
+
+def test_detects_identity_mismatch_across_workloads(tmp_path: Path) -> None:
+    def _mutate(matrix: dict) -> None:
+        matrix["workloads"][1]["model_revision"] = "0" * 40
+
+    matrix_path = _setup(tmp_path, mutate=_mutate)
+    status = validate_dense_matrix_target(matrix_path)
+    assert any(
+        "identity field 'model_revision'" in error and "differs" in error
+        for error in status.errors
+    )
+
+
+def test_detects_missing_tensor_parallel_size(tmp_path: Path) -> None:
+    matrix_path = _setup(tmp_path)
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    spec_path = tmp_path / matrix["workloads"][0]["cells"]["1chip"]["spec"]
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    del spec["server_parameters"]["tensor_parallel_size"]
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+
+    status = validate_dense_matrix_target(matrix_path)
+    assert any(
+        "missing required 'tensor_parallel_size'" in error for error in status.errors
+    )

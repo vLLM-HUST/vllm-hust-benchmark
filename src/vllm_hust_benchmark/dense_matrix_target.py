@@ -5,11 +5,17 @@ that the fixed Dense 1/2/4 matrix target is internally consistent:
 
 * every ``spec-ready`` cell's spec file exists and its ``chip_count`` /
   ``server_parameters.tensor_parallel_size`` match the declared chip key;
+* ``server_parameters.tensor_parallel_size`` is required and matches the chip key;
 * every ``blocked`` cell carries a ``blocker_reason``;
 * every workload has exactly the ``1chip`` / ``2chip`` / ``4chip`` cells;
 * cell status is a legal value (``spec-ready`` / ``blocked``);
+* the workload set is exactly the four core workloads plus
+  ``communication-sensitive`` (no duplicates, no unknown workloads);
 * the four core workloads are fully ``spec-ready``;
-* the ``communication-sensitive`` cells are all ``blocked``.
+* the ``communication-sensitive`` cells are all ``blocked``;
+* every workload declares the same frozen-stack identity (``model``,
+  ``precision``, ``model_revision``, ``engine_backend_commit``,
+  ``node_topology``), so all cells run the same frozen stack (#136).
 
 This module only fixes the matrix target/config/provenance. It never computes
 or publishes performance percentages.
@@ -33,6 +39,15 @@ CORE_WORKLOADS: tuple[str, ...] = (
     "agent-research-online",
 )
 COMMUNICATION_WORKLOAD = "communication-sensitive"
+EXPECTED_WORKLOADS: tuple[str, ...] = CORE_WORKLOADS + (COMMUNICATION_WORKLOAD,)
+# Frozen-stack identity fields that all dense cells must share (#136).
+IDENTITY_FIELDS: tuple[str, ...] = (
+    "model",
+    "precision",
+    "model_revision",
+    "engine_backend_commit",
+    "node_topology",
+)
 DEFAULT_MATRIX_PATH = Path("leaderboard-data/dense-matrix-issue-136.json")
 
 
@@ -73,12 +88,22 @@ def validate_dense_matrix_target(path: Path | None = None) -> DenseMatrixStatus:
     errors: list[str] = []
     spec_ready_count = 0
     blocked_count = 0
+    seen_workloads: set[str] = set()
+    identity: dict[str, str] = {}
 
     for index, workload in enumerate(workloads):
         if not isinstance(workload, Mapping):
             _error(f"workloads[{index}] must be a JSON object", errors)
             continue
         workload_name = str(workload.get("workload") or "")
+        if not workload_name:
+            _error(f"workloads[{index}] is missing 'workload'", errors)
+            continue
+        if workload_name in seen_workloads:
+            _error(f"duplicate workload {workload_name!r}", errors)
+            continue
+        seen_workloads.add(workload_name)
+
         cells = workload.get("cells")
         if not isinstance(cells, Mapping):
             _error(f"workload {workload_name!r}: 'cells' must be a JSON object", errors)
@@ -101,6 +126,9 @@ def validate_dense_matrix_target(path: Path | None = None) -> DenseMatrixStatus:
         if workload_name == COMMUNICATION_WORKLOAD:
             _require_status(workload_name, cells, "blocked", errors)
 
+        _check_identity(workload, workload_name, identity, errors)
+
+    _validate_workload_set(seen_workloads, errors)
     _check_declared_count(status, "spec_ready_cells", spec_ready_count, errors)
     _check_declared_count(status, "blocked_cells", blocked_count, errors)
 
@@ -221,18 +249,69 @@ def _validate_cell(
             errors,
         )
     server_parameters = spec.get("server_parameters")
-    if isinstance(server_parameters, Mapping):
-        tensor_parallel_size = server_parameters.get("tensor_parallel_size")
-        if (
-            tensor_parallel_size is not None
-            and int(tensor_parallel_size) != expected_chip
-        ):
+    if not isinstance(server_parameters, Mapping):
+        _error(
+            f"workload {workload_name!r} {chip_key}: spec is missing required "
+            "'server_parameters'",
+            errors,
+        )
+        return
+    tensor_parallel_size = server_parameters.get("tensor_parallel_size")
+    if tensor_parallel_size is None:
+        _error(
+            f"workload {workload_name!r} {chip_key}: spec server_parameters is "
+            "missing required 'tensor_parallel_size'",
+            errors,
+        )
+    elif int(tensor_parallel_size) != expected_chip:
+        _error(
+            f"workload {workload_name!r} {chip_key}: spec server "
+            f"tensor_parallel_size {tensor_parallel_size!r} does not match "
+            f"{chip_key!r}",
+            errors,
+        )
+
+
+def _check_identity(
+    workload: Mapping[str, Any],
+    workload_name: str,
+    identity: dict[str, str],
+    errors: list[str],
+) -> None:
+    """Collect each workload's frozen-stack identity and enforce consistency."""
+    for field in IDENTITY_FIELDS:
+        value = workload.get(field)
+        if value in (None, ""):
             _error(
-                f"workload {workload_name!r} {chip_key}: spec server "
-                f"tensor_parallel_size {tensor_parallel_size!r} does not match "
-                f"{chip_key!r}",
+                f"workload {workload_name!r}: missing required identity field "
+                f"{field!r}",
                 errors,
             )
+            continue
+        value = str(value)
+        if field in identity:
+            if identity[field] != value:
+                _error(
+                    f"workload {workload_name!r}: identity field {field!r} "
+                    f"{value!r} differs from other workloads "
+                    f"({identity[field]!r})",
+                    errors,
+                )
+        else:
+            identity[field] = value
+
+
+def _validate_workload_set(
+    seen: set[str],
+    errors: list[str],
+) -> None:
+    """Ensure the workload set is exactly the expected workloads."""
+    expected = set(EXPECTED_WORKLOADS)
+    actual = set(seen)
+    for missing in sorted(expected - actual):
+        _error(f"missing required workload {missing!r}", errors)
+    for unknown in sorted(actual - expected):
+        _error(f"unknown workload {unknown!r}", errors)
 
 
 def _require_status(
