@@ -111,6 +111,19 @@ def derive_dedup_key(npu: int, pid: int, cmdline_sha256: str) -> str:
     return f"npu{npu}/pid{pid}/cmd{cmdline_sha256[:12]}"
 
 
+def derive_recovery_status(result: str) -> str:
+    """Return the recovery status implied by an exit/cleanup result.
+
+    A violation is ``recovered`` once the offending process is gone: we
+    terminated/killed it, it exited before our action, or it was already gone
+    (``not-found``). A ``no-op`` record (owned process left alone) stays
+    ``open`` because there is no violation to close out.
+    """
+    if result in ("terminated", "killed", "not-found", "exited-before-action"):
+        return "recovered"
+    return "open"
+
+
 def validate_event_record(record: Mapping[str, Any]) -> list[str]:
     """Validate one event record against the v1 schema; return error strings.
 

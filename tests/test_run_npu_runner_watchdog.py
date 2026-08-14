@@ -124,7 +124,7 @@ def test_run_scan_clean_runner_plus_violating_process(tmp_path) -> None:
     assert runner["action"] == "none"
     assert runner["result"] == "no-op"
     assert runner["recovery_status"] == "open"
-    assert runner["alert_suppressed"] is False  # new event alerts
+    assert runner["alert_suppressed"] is True  # owned process; audit-only, never alerts
 
     rogue = by_pid[2002]
     assert rogue["determination"] == "unauthorized-container"

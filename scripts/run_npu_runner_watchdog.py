@@ -55,6 +55,7 @@ from vllm_hust_benchmark.watchdog_ops import (
     classify_determination,
     derive_cmdline_sha256,
     derive_dedup_key,
+    derive_recovery_status,
     npu_is_policy_violation,
     parse_npu_smi_processes,
     render_github_summary,
@@ -170,6 +171,24 @@ def run_npu_smi_process() -> str:
     return completed.stdout or ""
 
 
+def read_proc_cmdline(pid: int) -> list[str] | None:
+    """Read ``/proc/<pid>/cmdline`` into an argument list (or ``None``).
+
+    ``npu-smi`` does not expose the command line, so the daemon reads it from
+    ``/proc`` directly. The list is only ever hashed in memory via
+    ``derive_cmdline_sha256`` and never recorded or uploaded. Returns ``None``
+    when the process is gone or the file cannot be read (permission/race).
+    """
+    try:
+        raw = Path(f"/proc/{pid}/cmdline").read_bytes()
+    except (OSError, ValueError):
+        return None
+    parts = raw.split(b"\x00")
+    if parts and parts[-1] == b"":
+        parts = parts[:-1]
+    return [part.decode("utf-8", errors="replace") for part in parts]
+
+
 def container_facts(pid: int) -> dict[str, Any] | None:
     """Best-effort docker facts for a host PID.
 
@@ -241,11 +260,20 @@ def build_record(
     scan_epoch: int,
     scan_time: str,
     host: str,
+    cmdline: Sequence[str] | None = None,
 ) -> dict[str, Any]:
-    """Build one conforming event record for a scanned process."""
+    """Build one conforming event record for a scanned process.
+
+    ``cmdline`` is the real argument list read from ``/proc/<pid>/cmdline``;
+    it is only hashed, never recorded. ``recovery_status`` is derived from the
+    cleanup ``result`` so the audit closes (open -> recovered) once the
+    offending process is gone.
+    """
     npu = int(process["npu"])
     pid = int(process["pid"])
-    cmdline_sha256 = derive_cmdline_sha256(process.get("cmdline"))
+    if cmdline is None:
+        cmdline = process.get("cmdline")
+    cmdline_sha256 = derive_cmdline_sha256(cmdline)
     return {
         "schema_version": "npu-watchdog-event/v1",
         "schema_name": "npu-watchdog-event",
@@ -264,7 +292,7 @@ def build_record(
         "owner": owner,
         "action": action,
         "result": result,
-        "recovery_status": "open",
+        "recovery_status": derive_recovery_status(result),
         "dedup_key": derive_dedup_key(npu, pid, cmdline_sha256),
         "alert_suppressed": False,
         "npu4_unregistered_runner": npu_is_policy_violation(npu),
@@ -317,17 +345,29 @@ def reclaim(pid: int, *, dry_run: bool, sigkill_delay: int) -> str:
 
 def post_alert(
     summary: str, *, repo: str, issue: int, gh_bin: str, dry_run: bool
-) -> None:
-    """Post (or preview) the rendered GitHub alert for one event."""
+) -> bool:
+    """Post (or preview) the rendered GitHub alert for one event.
+
+    Returns True when the alert was accepted (or would be, in dry-run mode),
+    False when ``gh`` failed so the caller keeps the event un-alerted and can
+    retry on the next scan.
+    """
     if dry_run:
         print("--- would post to GitHub (dry-run) ---")
         print(summary)
         print("--- end dry-run alert ---")
-        return
-    subprocess.run(
-        [gh_bin, "issue", "comment", str(issue), "--repo", repo, "--body", summary],
-        check=False,
-    )
+        return True
+    try:
+        completed = subprocess.run(
+            [gh_bin, "issue", "comment", str(issue), "--repo", repo, "--body", summary],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return completed.returncode == 0
 
 
 def run_scan(
@@ -379,6 +419,9 @@ def run_scan(
             if action == "none"
             else reclaim(pid, dry_run=dry_run, sigkill_delay=sigkill_delay)
         )
+        # npu-smi does not expose the command line; read it from /proc so the
+        # dedup digest is per-process instead of hashing None for everything.
+        cmdline = read_proc_cmdline(pid) if not dry_run else process.get("cmdline")
         record = build_record(
             process,
             facts,
@@ -390,6 +433,7 @@ def run_scan(
             scan_epoch=scan_epoch,
             scan_time=scan_time,
             host=host,
+            cmdline=cmdline,
         )
 
         errors = validate_event_record(record)
@@ -400,21 +444,34 @@ def run_scan(
             )
             continue
 
-        alert, reason = should_alert(record, state)
+        # Only unauthorized containers and unowned processes are violations;
+        # owned runner-job/sibling-container processes never alert.
+        alerts_enabled = determination in ("unauthorized-container", "unowned-process")
+        if alerts_enabled:
+            alert, reason = should_alert(record, state)
+        else:
+            alert, reason = False, "owned process; audit only"
         record["alert_suppressed"] = not alert
         line_number = append_event(events, record)
         appended += 1
 
         if alert:
-            state[record["dedup_key"]] = {
-                "result": record["result"],
-                "recovery_status": record["recovery_status"],
-            }
             summary = render_github_summary(record, event_line=line_number)
-            post_alert(summary, repo=repo, issue=issue, gh_bin=gh_bin, dry_run=dry_run)
-            if not dry_run:
+            if post_alert(
+                summary, repo=repo, issue=issue, gh_bin=gh_bin, dry_run=dry_run
+            ):
+                state[record["dedup_key"]] = {
+                    "result": record["result"],
+                    "recovery_status": record["recovery_status"],
+                }
+                if not dry_run:
+                    print(
+                        f"INFO: alerted pid {pid} ({record['dedup_key']}) reason={reason}"
+                    )
+            elif not dry_run:
                 print(
-                    f"INFO: alerted pid {pid} ({record['dedup_key']}) reason={reason}"
+                    f"WARN: post_alert failed for pid {pid}; keeping event un-alerted",
+                    file=sys.stderr,
                 )
         elif not dry_run:
             print(f"INFO: suppressed pid {pid} ({record['dedup_key']}) reason={reason}")
