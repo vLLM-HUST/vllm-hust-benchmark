@@ -2841,6 +2841,78 @@ def _build_reproducible_cmd(
     return " ".join(shlex.quote(p) for p in parts)
 
 
+def _fill_environment_provenance(artifact: dict[str, Any]) -> None:
+    """Fill environment.driver_version / firmware_version on the artifact
+    (PR #172 review: driver_version was null while env-manifest carries the
+    NPU versions). Reads the local Ascend driver info and npu-smi output."""
+    env = artifact.setdefault("environment", {})
+    env.setdefault("pytorch_version", _runtime_package_version("torch"))
+    env.setdefault("cann_version", _detect_cann_version())
+    if env.get("driver_version") is None:
+        driver = _read_version_info("/usr/local/Ascend/driver/version.info")
+        if driver:
+            env["driver_version"] = driver
+    if env.get("firmware_version") is None:
+        fw = _npu_smi_firmware_version()
+        if fw:
+            env["firmware_version"] = fw
+
+
+def _runtime_package_version(dist: str) -> str | None:
+    try:
+        import importlib.metadata
+
+        return importlib.metadata.version(dist)
+    except Exception:
+        return None
+
+
+def _detect_cann_version() -> str | None:
+    import re as _re
+
+    for candidate in (
+        Path("/usr/local/Ascend/ascend-toolkit/latest/version.cfg"),
+        Path("/usr/local/Ascend/latest/version.cfg"),
+    ):
+        try:
+            text = candidate.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        match = _re.search(r'^Version\s*=\s*["\']?([^"\'\n]+)', text, _re.MULTILINE)
+        if match:
+            return match.group(1).strip()
+    return None
+
+
+def _read_version_info(path: str) -> str | None:
+    try:
+        for line in (
+            Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+        ):
+            if line.startswith("Version="):
+                return line.split("=", 1)[1].strip()
+    except OSError:
+        return None
+    return None
+
+
+def _npu_smi_firmware_version() -> str | None:
+    import re as _re
+
+    try:
+        out = subprocess.run(
+            ["npu-smi", "info", "-t", "board", "-i", "0"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    match = _re.search(r"Firmware Version\s*:\s*(\S+)", out)
+    return match.group(1) if match else None
+
+
 def submit_artifact(
     workload: str,
     hust_commit: str,
@@ -3018,6 +3090,7 @@ def submit_artifact(
         artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
         artifact["metadata"]["reproducible_cmd"] = reproducible_cmd
         artifact["metadata"]["verified"] = False
+        _fill_environment_provenance(artifact)
         artifact_path.write_text(
             json.dumps(artifact, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",
