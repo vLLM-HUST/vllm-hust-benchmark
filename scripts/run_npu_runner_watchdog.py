@@ -444,9 +444,17 @@ def run_scan(
             )
             continue
 
-        # Only unauthorized containers and unowned processes are violations;
-        # owned runner-job/sibling-container processes never alert.
-        alerts_enabled = determination in ("unauthorized-container", "unowned-process")
+        # Only unauthorized containers and unowned processes alert by default.
+        # A runner-tagged container on an unregistered NPU (npu4_unregistered_runner)
+        # is also a policy violation and must alert even though it is "owned".
+        alerts_enabled = (
+            determination
+            in (
+                "unauthorized-container",
+                "unowned-process",
+            )
+            or record["npu4_unregistered_runner"]
+        )
         if alerts_enabled:
             alert, reason = should_alert(record, state)
         else:

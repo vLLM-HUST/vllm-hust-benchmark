@@ -136,6 +136,49 @@ def test_run_scan_clean_runner_plus_violating_process(tmp_path) -> None:
         assert validate_event_record(record) == []
 
 
+def test_run_scan_runner_label_container_on_npu4_alerts(tmp_path) -> None:
+    """A runner-labeled container on the unregistered NPU4 must alert.
+
+    NPU4 has no registered runner (npu4_unregistered_runner=True), so any
+    occupancy is a policy violation per issue #125 and must not be audit-only.
+    With the current runner-name pattern (devices 0-3) this container classifies
+    as ``unauthorized-container``; the ``or record["npu4_unregistered_runner"]``
+    guard also keeps it alerting defensively even if a future classification
+    were to label such a process ``runner-job``.
+    """
+    npu_smi = _smi_text((4, 3003, "root", "python3", 512))
+    facts = {
+        "3003": {
+            "container_name": "poy-180-21rc-npu4",
+            "container_runner_label": "poy-180-21rc-npu4",
+            "npu_physical_label": "4",
+        }
+    }
+    events = tmp_path / "events.jsonl"
+    state_file = tmp_path / "state.json"
+
+    appended = run_scan(
+        npus=[4],
+        owner="SuccinctPaul",
+        events=events,
+        state_file=state_file,
+        repo="vLLM-HUST/vllm-hust-benchmark",
+        issue=125,
+        gh_bin="gh",
+        dry_run=True,
+        sigkill_delay=0,
+        host="host-192-168-0-6",
+        sequence_start=1,
+        npu_smi_text=npu_smi,
+        facts_by_pid=facts,
+    )
+    assert appended == 1
+    record = json.loads(events.read_text(encoding="utf-8").splitlines()[0])
+    assert record["npu4_unregistered_runner"] is True
+    assert record["alert_suppressed"] is False  # policy violation, not audit-only
+    assert validate_event_record(record) == []
+
+
 def test_run_scan_dedup_suppresses_second_scan(tmp_path) -> None:
     """The same open event must not alert twice (dedup acceptance)."""
     npu_smi = _smi_text((4, 777, "root", "VLLMEngineCor", 999))
