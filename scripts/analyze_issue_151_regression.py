@@ -86,6 +86,286 @@ INTERVALS = [
     },
 ]
 
+# Metric definitions shared across all remaining intervals.
+METRIC_DEFINITIONS = {
+    "ttft_ms": "Time To First Token in milliseconds (lower is better)",
+    "tpot_ms": "Time Per Output Token in milliseconds (lower is better)",
+    "throughput_tps": "Output throughput in tokens per second (higher is better)",
+}
+
+# Remaining intervals from issue #151 that PR #165 did not re-test. Tracked by
+# issue #177. Each entry carries the full provenance contract but marks
+# ``retest_status="pending"`` because no interleaved retest has run yet, so the
+# verdict is ``incomplete_evidence`` with disposition ``rerun``. The original
+# leaderboard values below are taken verbatim from the issue #151 table; backend
+# version provenance was not captured at original run time.
+REMAINING_INTERVALS = [
+    {
+        "interval_id": "agent-research-online-f273f9c5e2-51621c35bc",
+        "workload": "agent-research-online",
+        "base_commit": "f273f9c5e2",
+        "head_commit": "51621c35bc",
+        "retest_status": "pending",
+        "reported_jump": {
+            "ttft_ms": {"base": 281, "head": 434, "change_pct": 54.2},
+            "tpot_ms": {"base": 49.1, "head": 55.7, "change_pct": 13.4},
+            "throughput_tps": {"base": 187.9, "head": 180.8, "change_pct": -3.7},
+        },
+        "original_leaderboard": {
+            "base": {"ttft_ms": 281, "tpot_ms": 49.1, "throughput_tps": 187.9},
+            "head": {"ttft_ms": 434, "tpot_ms": 55.7, "throughput_tps": 180.8},
+        },
+        "hardware": {"chip_model": "910B2", "chip_count": 1, "node_count": 1},
+        "model": {"name": "Qwen2.5-14B-Instruct", "precision": "float16"},
+        "same_spec_identity": (
+            "resolved_spec_hash matched between base and head (per issue #151); "
+            "spec_id=official-ascend-jan-2026-v0.18.0-"
+            "agent-research-online-qwen25-14b-910b2"
+        ),
+        "server_config": {
+            "official_target_expected": {
+                "max_model_len": 32768,
+                "gpu_memory_utilization": 0.6,
+                "dtype": "float16",
+                "enforce_eager": False,
+            },
+            "historical_captured": "unknown/config-unverified",
+            "note": (
+                "official-target expected config; the config actually captured "
+                "at original run time was not recorded, and a matched "
+                "resolved_spec_hash does not prove config identity (issue #151)"
+            ),
+        },
+        "client_config": {
+            "protocol": "online serving",
+            "workload_source": "standard benchmark workload",
+        },
+        "provenance": {
+            "engine_repo": "vLLM-HUST/vllm-hust",
+            "plugin_repo": "vLLM-HUST/vllm-ascend-hust",
+            "base_backend_version": (
+                "N/A (historical record, not captured at original run time)"
+            ),
+            "head_backend_version": (
+                "N/A (historical record, not captured at original run time)"
+            ),
+            "note": (
+                "Original leaderboard records have backend_version=N/A; retest "
+                "required to capture full provenance"
+            ),
+        },
+        "reps_completed": 0,
+        "reps_required": 3,
+        "verdict": "incomplete_evidence",
+        "disposition": "rerun",
+        "disposition_reason": (
+            "No retest performed yet; original records lack backend version "
+            "provenance. Must rerun with 3 interleaved reps per side using the "
+            "same metric/config contract as #165 before concluding."
+        ),
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/188",
+        "related_prs": "#165 (methodology), #49/#41 (target commits)",
+    },
+    {
+        "interval_id": "instructcoder-online-51621c35bc-7a63f81e86",
+        "workload": "instructcoder-online",
+        "base_commit": "51621c35bc",
+        "head_commit": "7a63f81e86",
+        "retest_status": "pending",
+        "reported_jump": {
+            "ttft_ms": {"base": 244, "head": 297, "change_pct": 21.4},
+            "tpot_ms": {"base": 49.8, "head": 54.7, "change_pct": 9.9},
+            "throughput_tps": {"base": 167.3, "head": 167.7, "change_pct": 0.2},
+        },
+        "original_leaderboard": {
+            "base": {"ttft_ms": 244, "tpot_ms": 49.8, "throughput_tps": 167.3},
+            "head": {"ttft_ms": 297, "tpot_ms": 54.7, "throughput_tps": 167.7},
+        },
+        "hardware": {"chip_model": "910B2", "chip_count": 1, "node_count": 1},
+        "model": {"name": "Qwen2.5-Coder-14B-Instruct", "precision": "float16"},
+        "same_spec_identity": (
+            "resolved_spec_hash matched between base and head (per issue #151); "
+            "spec_id=official-ascend-jan-2026-v0.18.0-"
+            "instructcoder-online-qwen25-coder-14b-910b2"
+        ),
+        "server_config": {
+            "official_target_expected": {
+                "max_model_len": 32768,
+                "gpu_memory_utilization": 0.6,
+                "dtype": "float16",
+                "enforce_eager": False,
+            },
+            "historical_captured": "unknown/config-unverified",
+            "note": (
+                "official-target expected config; the config actually captured "
+                "at original run time was not recorded, and a matched "
+                "resolved_spec_hash does not prove config identity (issue #151)"
+            ),
+        },
+        "client_config": {
+            "protocol": "online serving",
+            "workload_source": "standard benchmark workload",
+        },
+        "provenance": {
+            "engine_repo": "vLLM-HUST/vllm-hust",
+            "plugin_repo": "vLLM-HUST/vllm-ascend-hust",
+            "base_backend_version": (
+                "N/A (historical record, not captured at original run time)"
+            ),
+            "head_backend_version": (
+                "N/A (historical record, not captured at original run time)"
+            ),
+            "note": (
+                "Original leaderboard records have backend_version=N/A; retest "
+                "required to capture full provenance"
+            ),
+        },
+        "reps_completed": 0,
+        "reps_required": 3,
+        "verdict": "incomplete_evidence",
+        "disposition": "rerun",
+        "disposition_reason": (
+            "No retest performed yet; original records lack backend version "
+            "provenance. Must rerun with 3 interleaved reps per side using the "
+            "same metric/config contract as #165 before concluding."
+        ),
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/189",
+        "related_prs": "#165 (methodology), #41/#66 (target commits)",
+    },
+    {
+        "interval_id": "random-online-7a63f81e86-ec4847981f",
+        "workload": "random-online",
+        "base_commit": "7a63f81e86",
+        "head_commit": "ec4847981f",
+        "retest_status": "pending",
+        "reported_jump": {
+            "ttft_ms": {"base": 1261, "head": 1535, "change_pct": 21.7},
+            "tpot_ms": {"base": 52.1, "head": 54.0, "change_pct": 3.6},
+            "throughput_tps": {"base": 238.9, "head": 237.4, "change_pct": -0.7},
+        },
+        "original_leaderboard": {
+            "base": {"ttft_ms": 1261, "tpot_ms": 52.1, "throughput_tps": 238.9},
+            "head": {"ttft_ms": 1535, "tpot_ms": 54.0, "throughput_tps": 237.4},
+        },
+        "hardware": {"chip_model": "910B2", "chip_count": 1, "node_count": 1},
+        "model": {"name": "Qwen2.5-14B-Instruct", "precision": "float16"},
+        "same_spec_identity": (
+            "resolved_spec_hash matched between base and head (per issue #151); "
+            "spec_id=official-ascend-jan-2026-v0.18.0-"
+            "random-online-qwen25-14b-910b2"
+        ),
+        "server_config": {
+            "official_target_expected": {
+                "max_model_len": 32768,
+                "gpu_memory_utilization": 0.6,
+                "dtype": "float16",
+                "enforce_eager": False,
+            },
+            "historical_captured": "unknown/config-unverified",
+            "note": (
+                "official-target expected config; the config actually captured "
+                "at original run time was not recorded, and a matched "
+                "resolved_spec_hash does not prove config identity (issue #151)"
+            ),
+        },
+        "client_config": {
+            "protocol": "online serving",
+            "workload_source": "standard benchmark workload",
+        },
+        "provenance": {
+            "engine_repo": "vLLM-HUST/vllm-hust",
+            "plugin_repo": "vLLM-HUST/vllm-ascend-hust",
+            "base_backend_version": (
+                "N/A (historical record, not captured at original run time)"
+            ),
+            "head_backend_version": (
+                "N/A (historical record, not captured at original run time)"
+            ),
+            "note": (
+                "Original leaderboard records have backend_version=N/A; retest "
+                "required to capture full provenance"
+            ),
+        },
+        "reps_completed": 0,
+        "reps_required": 3,
+        "verdict": "incomplete_evidence",
+        "disposition": "rerun",
+        "disposition_reason": (
+            "No retest performed yet; original records lack backend version "
+            "provenance. Must rerun with 3 interleaved reps per side using the "
+            "same metric/config contract as #165 before concluding."
+        ),
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/190",
+        "related_prs": "#165 (methodology), #66/#69 (target commits)",
+    },
+    {
+        "interval_id": "visionarena-online-ec4847981f-ceec19abb0",
+        "workload": "visionarena-online",
+        "base_commit": "ec4847981f",
+        "head_commit": "ceec19abb0",
+        "retest_status": "pending",
+        "reported_jump": {
+            "ttft_ms": {"base": 369, "head": 387, "change_pct": 5.0},
+            "tpot_ms": {"base": 35.2, "head": 60.3, "change_pct": 71.4},
+            "throughput_tps": {"base": 117.0, "head": 118.2, "change_pct": 1.0},
+        },
+        "original_leaderboard": {
+            "base": {"ttft_ms": 369, "tpot_ms": 35.2, "throughput_tps": 117.0},
+            "head": {"ttft_ms": 387, "tpot_ms": 60.3, "throughput_tps": 118.2},
+        },
+        "hardware": {"chip_model": "910B2", "chip_count": 1, "node_count": 1},
+        "model": {"name": "Qwen2.5-VL-7B-Instruct", "precision": "float16"},
+        "same_spec_identity": (
+            "resolved_spec_hash matched between base and head (per issue #151); "
+            "spec_id=official-ascend-jan-2026-v0.18.0-"
+            "visionarena-online-qwen25-vl-7b-910b2"
+        ),
+        "server_config": {
+            "official_target_expected": {
+                "max_model_len": 32768,
+                "gpu_memory_utilization": 0.6,
+                "dtype": "float16",
+                "enforce_eager": False,
+            },
+            "historical_captured": "unknown/config-unverified",
+            "note": (
+                "official-target expected config; the config actually captured "
+                "at original run time was not recorded, and a matched "
+                "resolved_spec_hash does not prove config identity (issue #151)"
+            ),
+        },
+        "client_config": {
+            "protocol": "online serving",
+            "workload_source": "standard benchmark workload",
+        },
+        "provenance": {
+            "engine_repo": "vLLM-HUST/vllm-hust",
+            "plugin_repo": "vLLM-HUST/vllm-ascend-hust",
+            "base_backend_version": (
+                "N/A (historical record, not captured at original run time)"
+            ),
+            "head_backend_version": (
+                "N/A (historical record, not captured at original run time)"
+            ),
+            "note": (
+                "Original leaderboard records have backend_version=N/A; retest "
+                "required to capture full provenance"
+            ),
+        },
+        "reps_completed": 0,
+        "reps_required": 3,
+        "verdict": "incomplete_evidence",
+        "disposition": "rerun",
+        "disposition_reason": (
+            "No retest performed yet; original records lack backend version "
+            "provenance. Must rerun with 3 interleaved reps per side using the "
+            "same metric/config contract as #165 before concluding."
+        ),
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/191",
+        "related_prs": "#165 (methodology), #69/#77 (target commits)",
+    },
+]
+
 # Acceptance thresholds
 TTFT_INCREASE_THRESHOLD = 0.20  # 20%
 TPOT_INCREASE_THRESHOLD = 0.20  # 20%
@@ -501,6 +781,91 @@ def compare_interval(
     }
 
 
+def generate_remaining_jumps_report(
+    output_path: str | None = None,
+) -> dict[str, Any]:
+    """Build the issue #177 machine-readable report for the remaining jumps.
+
+    Assembles the tracking report for the 4 unexplained single-card leaderboard
+    jumps that PR #165 did not re-test. Every interval is marked
+    ``incomplete_evidence`` with disposition ``rerun`` because no interleaved
+    retest has been performed yet and the original records lack backend-version
+    provenance.
+
+    Args:
+        output_path: Optional path to write the JSON report to. When omitted the
+            assembled report dict is returned without writing to disk.
+
+    Returns:
+        The assembled issue #177 report dict.
+    """
+    intervals: list[dict[str, Any]] = []
+    for iv in REMAINING_INTERVALS:
+        intervals.append(
+            {
+                "interval_id": iv["interval_id"],
+                "workload": iv["workload"],
+                "base_commit": iv["base_commit"],
+                "head_commit": iv["head_commit"],
+                "retest_status": iv["retest_status"],
+                "reported_jump": iv["reported_jump"],
+                "original_leaderboard": iv["original_leaderboard"],
+                "metric_definitions": dict(METRIC_DEFINITIONS),
+                "hardware": dict(iv["hardware"]),
+                "model": dict(iv["model"]),
+                "same_spec_identity": iv["same_spec_identity"],
+                "server_config": dict(iv["server_config"]),
+                "client_config": dict(iv["client_config"]),
+                "provenance": dict(iv["provenance"]),
+                "reps_completed": iv["reps_completed"],
+                "reps_required": iv["reps_required"],
+                "verdict": iv["verdict"],
+                "disposition": iv["disposition"],
+                "disposition_reason": iv["disposition_reason"],
+                "tracking_issue": iv["tracking_issue"],
+                "related_prs": iv["related_prs"],
+            }
+        )
+
+    report: dict[str, Any] = {
+        "issue": "#177",
+        "follow_up_for": "#165",
+        "parent_issue": "vLLM-HUST/vllm-hust#151",
+        "description": (
+            "Tracking report for the 4 remaining unexplained single-card "
+            "leaderboard jumps not covered by PR #165"
+        ),
+        "intervals": intervals,
+        "summary": {
+            "total_remaining_intervals": len(intervals),
+            "reproducible_regressions": 0,
+            "not_reproducible": 0,
+            "incomplete_evidence": len(intervals),
+            "overall_verdict": "incomplete_evidence",
+            "disposition_summary": {
+                "retain": 0,
+                "quarantine": 0,
+                "supersede": 0,
+                "rerun": len(intervals),
+            },
+            "metric_config_contract_note": (
+                "All 4 remaining intervals must use the same metric/config "
+                "contract as #165: median-based comparison, 3 interleaved reps "
+                "per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/"
+                "concurrency/RPS. Original mean_ttft_ms vs original ttft_ms "
+                "are not directly comparable (per #165 report)."
+            ),
+        },
+    }
+
+    if output_path:
+        out = Path(output_path)
+        out.write_text(json.dumps(report, indent=2) + "\n")
+        log(f"Issue #177 remaining-jumps report saved to {out}")
+
+    return report
+
+
 def main() -> int:
     """Main entry point for the analysis script.
 
@@ -530,7 +895,19 @@ def main() -> int:
         default=None,
         help="Output JSON file path (default: print to stdout)",
     )
+    parser.add_argument(
+        "--remaining-report",
+        default=None,
+        help=(
+            "Generate the issue #177 remaining-jumps machine-readable report "
+            "to the given path and exit (no retest data required)."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.remaining_report:
+        generate_remaining_jumps_report(args.remaining_report)
+        return 0
 
     result_dir = Path(args.result_dir)
     if not result_dir.is_dir():
