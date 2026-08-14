@@ -2897,6 +2897,18 @@ def submit_artifact(
     if engine_version is None:
         engine_version = _derive_engine_version(HUST_REPO, hust_commit)
 
+    # Record the backend component version (vllm-ascend-hust) instead of the
+    # CLI default "N/A" (PR #172 review round 2). The installed plugin version
+    # matches env-manifest runtime_packages and honestly carries .dirty when
+    # the worktree has uncommitted build patches.
+    backend_version = "N/A"
+    try:
+        import importlib.metadata
+
+        backend_version = importlib.metadata.version("vllm-ascend-hust")
+    except Exception:
+        pass
+
     output_dir = REPO_ROOT / "submissions" / run_id
     output_dir.mkdir(parents=True, exist_ok=True)
     # Declared-only constraint claims (utilization/ratio/reduction targets) must
@@ -2937,6 +2949,8 @@ def submit_artifact(
         "vllm-hust",
         "--engine-version",
         engine_version,
+        "--backend-version",
+        backend_version,
         "--core-version",
         engine_version,
         "--model-name",

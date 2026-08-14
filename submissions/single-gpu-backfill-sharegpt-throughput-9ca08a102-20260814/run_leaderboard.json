@@ -70,7 +70,7 @@
   "cluster": null,
   "versions": {
     "protocol": "N/A",
-    "backend": "N/A",
+    "backend": "0.19.1.post1.dev461+gc9560ce76.dirty",
     "core": "0.17.2.post1-3680-g9ca08a102",
     "benchmark": "0.1.0"
   },
@@ -99,7 +99,7 @@
     "github_pr_url": null,
     "release_date": null,
     "changelog_url": null,
-    "notes": "Clean rerun on 2026-08-14 after reviewer-required rebuild: vllm-hust @ 9ca08a102 + vllm-ascend-hust @ c9560ce76 rebuilt from source with torch 2.10.0 / torch-npu 2.10.0 on CANN 8.5.1; git describe == vllm.__version__ == pip metadata == server banner. Ascend-950 upstream additions isolated with a local uncommitted patch (910B-semantics-equivalent); model revision frozen (cf98f3b3bbb4); constraints.metrics contains only measured/derived values (declared-target claims removed).",
+    "notes": "Clean-rerun rebuild on 2026-08-14: vllm-hust @ 9ca08a102 + vllm-ascend-hust @ c9560ce76, torch 2.10.0 / torch-npu 2.10.0 on CANN 8.5.1. WORKTREE IS NOT CLEAN: the plugin carries local, uncommitted compile-time patches required by CANN 8.5.1 (upstream c9560ce76 added Ascend-950 support that 8.5.1 lacks): (a) AddConfig('ascend950') removed and SocVersion::ASCEND950 -> ASCEND910 in tiling code (910B-semantics-equivalent), (b) #include <platform/soc_spec.h> added for NpuArch enum members, plus runner-applied runtime compatibility patches. The pip version suffix .dirty and env-manifest frozen_inputs_required=false reflect this honestly. Model weights revision frozen (cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8); campaign repetitions=1. constraints.metrics contains only measured/derived values. raw benchmark result only exposes the p99 percentile (metric_percentiles=99), so long_context_ttft_p95_ms/tpot_p95_ms and their *_stable flags are null by design while p99 values are measured. metadata.verified=false is the runner's post-process convention (record not auto-verified), not a statement about measurement quality; local validation: aggregate/validate/validate_public_leaderboard_snapshots all pass, checksums verified.",
     "verified": false,
     "idempotency_key": "8733a6a9300597ed07111b67acd6881969a53ccfbe4a16dd308c2ea402ee1533",
     "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",

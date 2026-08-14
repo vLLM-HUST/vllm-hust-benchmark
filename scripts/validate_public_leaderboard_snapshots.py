@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import re
 import sys
@@ -55,6 +56,7 @@ SNAPSHOT_FILES = (
 PUBLIC_COMMIT_SCAN_FILES = SNAPSHOT_FILES + ("leaderboard_compare.json",)
 
 
+@functools.lru_cache(maxsize=1)
 def specialty_spec_ids() -> frozenset[str]:
     """Registry-verified specialty spec ids (issue #178).
 
@@ -63,7 +65,8 @@ def specialty_spec_ids() -> frozenset[str]:
     the spec is actually registered with intended_use=specialty via the official
     targets registry — a bare ``specialty-`` string prefix is not trusted
     (PR #172 review round 2: arbitrary unregistered ``specialty-foo`` ids must
-    not bypass the gate).
+    not bypass the gate). Cached: validate_entry is called per entry and the
+    registry is identical for the whole run.
     """
     try:
         registry = build_registry(REPO_ROOT)
