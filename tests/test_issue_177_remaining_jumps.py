@@ -33,7 +33,7 @@ REQUIRED_INTERVAL_FIELDS = [
     "hardware",
     "model",
     "same_spec_identity",
-    "server_config",
+    "config",
     "client_config",
     "provenance",
     "reps_completed",
@@ -154,6 +154,31 @@ class TestGenerateRemainingJumpsReport:
             assert iv["reps_completed"] == 0
             assert iv["reps_required"] == 3
 
+    def test_config_distinguishes_expected_vs_actual(self, analyze_mod):
+        report = analyze_mod.generate_remaining_jumps_report()
+        for iv in report["intervals"]:
+            cfg = iv["config"]
+            expected = cfg["expected_config"]
+            assert expected["max_model_len"] == 32768
+            assert expected["gpu_memory_utilization"] == 0.6
+            assert expected["dtype"] == "float16"
+            assert expected["enforce_eager"] is False
+            assert expected["source"]
+            actual = cfg["actual_captured_config"]
+            assert actual["status"] == "config-unverified"
+            assert actual["note"]
+
+    def test_tracking_issue_is_real_url(self, analyze_mod):
+        report = analyze_mod.generate_remaining_jumps_report()
+        expected = {
+            "agent-research-online": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/192",
+            "instructcoder-online": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/193",
+            "random-online": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/194",
+            "visionarena-online": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/195",
+        }
+        for iv in report["intervals"]:
+            assert iv["tracking_issue"] == expected[iv["workload"]]
+
     def test_summary_stats(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
         s = report["summary"]
@@ -223,6 +248,20 @@ class TestCommittedReportFile:
         s = data["summary"]
         assert s["incomplete_evidence"] == 4
         assert s["disposition_summary"]["rerun"] == 4
+
+    def test_file_config_marks_actual_as_unverified(self):
+        data = json.loads(REPORT_PATH.read_text())
+        for iv in data["intervals"]:
+            cfg = iv["config"]
+            assert cfg["expected_config"]["source"]
+            assert cfg["actual_captured_config"]["status"] == "config-unverified"
+
+    def test_file_tracking_issues_are_real_urls(self):
+        data = json.loads(REPORT_PATH.read_text())
+        for iv in data["intervals"]:
+            assert iv["tracking_issue"].startswith(
+                "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/"
+            )
 
     def test_file_matches_generator(self, analyze_mod):
         on_disk = json.loads(REPORT_PATH.read_text())
