@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import re
 import sys
@@ -21,6 +22,7 @@ from vllm_hust_benchmark.workload_config_contract import (  # noqa: E402
     requires_workload_config_contract,
     validate_explicit_workload_config,
 )
+from vllm_hust_benchmark.official_targets import build_registry  # noqa: E402
 
 
 PUBLIC_BASELINE_ENGINE = "vllm"
@@ -52,6 +54,31 @@ SNAPSHOT_FILES = (
 # leaderboard_compare.json — a dict payload that is likewise synced to the public
 # website and must never surface a suspect commit.
 PUBLIC_COMMIT_SCAN_FILES = SNAPSHOT_FILES + ("leaderboard_compare.json",)
+
+
+@functools.lru_cache(maxsize=1)
+def specialty_spec_ids() -> frozenset[str]:
+    """Registry-verified specialty spec ids (issue #178).
+
+    Specialty series (e.g. the 910B3 full-graph-parallel dual-stream records)
+    are exempt from the official v0.18.0 same-spec pairing check, but only when
+    the spec is actually registered with intended_use=specialty via the official
+    targets registry — a bare ``specialty-`` string prefix is not trusted
+    (PR #172 review round 2: arbitrary unregistered ``specialty-foo`` ids must
+    not bypass the gate). Cached: validate_entry is called per entry and the
+    registry is identical for the whole run.
+    """
+    try:
+        registry = build_registry(REPO_ROOT)
+    except Exception as exc:  # fail closed: no exemption if registry unusable
+        print(f"WARNING: official targets registry unavailable: {exc}")
+        return frozenset()
+    return frozenset(
+        target["target_id"]
+        for target in registry.get("targets", [])
+        if target.get("intended_use") == "specialty"
+    )
+
 
 # Issue #79 P0a: explicit entry-level quarantine gate.
 # These random-latency records have invalid metrics or mismatched
@@ -189,6 +216,7 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         and workload in OFFICIAL_PUBLIC_WORKLOADS
         and spec_id
         and not spec_id.startswith(OFFICIAL_V0180_SPEC_PREFIX)
+        and spec_id not in specialty_spec_ids()
     ):
         errors.append(
             f"{source.name}:{entry_id}: public vllm-hust official workload "
