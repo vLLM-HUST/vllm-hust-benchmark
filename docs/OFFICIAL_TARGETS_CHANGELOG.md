@@ -2,6 +2,16 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.3 — 2026-08-13
+
+- English: Derive unified-comm-online 1chip and 4chip single-node non-executable draft specs from
+  the existing 2chip draft as provisional specialty profiles for the Issue #136
+  communication-sensitive Dense matrix cells.
+- 中文：从现有 2chip 草案派生 unified-comm-online 1chip 和 4chip 单节点不可执行草案 spec，作为 provisional specialty
+  profile，用于 Issue #136 通信敏感Dense 矩阵的 cell。
+- Source set: `b27e7d5b6d8f8e77edf6fff003f15fb1d1396c803ba5ddae8d729a66d6371a43`
+- Supersedes: `1.3.2`
+
 ## 1.3.2 — 2026-08-11
 
 - English: Add 7 Ascend 910B3 full-graph-parallel inplace specialty specs

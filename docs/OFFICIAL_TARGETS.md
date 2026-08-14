@@ -2,8 +2,8 @@
 
 > This file is generated from the official specs. Do not edit it manually.
 
-- Registry version: `1.3.2`
-- Effective from: `2026-08-11`
+- Registry version: `1.3.3`
+- Effective from: `2026-08-13`
 
 Public leaderboard targets and 3B perfgate profiles are separate contracts. Provisional entries are
 not valid public-result comparison targets.
@@ -111,6 +111,9 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 4 | FP16 | — | — |
 | | specialty | provisional | multi-chip | unified-comm-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
 2 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-910b2.json)
+| | specialty | provisional | multi-chip | unified-comm-online-4chip | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 4 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-4chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-4chip-910b2.json)
 | | specialty | provisional | specialty | kv-tiering-prefix-online | Qwen/Qwen2.5-7B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-kv-tiering-prefix-online-qwen25-7b-910b2.json)
@@ -162,6 +165,9 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 | | specialty | provisional | specialty-text | spec-decode-online | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 1 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-spec-decode-online-qwen25-14b-910b2.json)
+| | specialty | provisional | specialty-text | unified-comm-online-1chip | Qwen/Qwen2.5-14B-Instruct
+| 910B2 × 1 | FP16 | — | — |
+[`official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-1chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-1chip-910b2.json)
 |
 
 Machine-readable snapshot:
