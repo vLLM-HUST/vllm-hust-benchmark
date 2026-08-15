@@ -303,7 +303,7 @@ REMAINING_INTERVALS = [
         "workload": "visionarena-online",
         "base_commit": "ec4847981f",
         "head_commit": "ceec19abb0",
-        "retest_status": "pending",
+        "retest_status": "completed",
         "reported_jump": {
             "ttft_ms": {"base": 369, "head": 387, "change_pct": 5.0},
             "tpot_ms": {"base": 35.2, "head": 60.3, "change_pct": 71.4},
@@ -348,21 +348,77 @@ REMAINING_INTERVALS = [
                 "N/A (historical record, not captured at original run time)"
             ),
             "note": (
-                "Original leaderboard records have backend_version=N/A; retest "
-                "required to capture full provenance"
+                "Original leaderboard records have backend_version=N/A; "
+                "retest captured full provenance (see retest block below)."
             ),
         },
-        "reps_completed": 0,
+        "retest": {
+            "method": (
+                "median-based comparison, 3 interleaved reps per side, fixed "
+                "NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS "
+                "(same contract as #165)"
+            ),
+            "engine_base_sha": "ec4847981f2d4dda8343b3c4c90eeb173f8f8eb7",  # pragma: allowlist secret
+            "engine_head_sha": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",  # pragma: allowlist secret
+            "plugin_sha": "312ca80a90cbd28438bce3b59e3fbaad749451f3",  # pragma: allowlist secret
+            "hardware": {"chip_model": "910B2", "chip_count": 1, "node_count": 1},
+            "model": {
+                "name": "Qwen2.5-VL-7B-Instruct",
+                "path": "/data/shared_datasets/strict-models/Qwen2.5-VL-7B-Instruct",
+            },
+            "client": {
+                "workload": "visionarena-online",
+                "num_prompts": 1000,
+                "request_rate": 1,
+                "dataset": "lmarena-ai/VisionArena-Chat",
+                "enable_multimodal_chat": True,
+            },
+            "medians": {
+                "base": {
+                    "mean_ttft_ms": 3593.34,
+                    "mean_tpot_ms": 66.35,
+                    "output_throughput": 33.78,
+                },
+                "head": {
+                    "mean_ttft_ms": 3574.74,
+                    "mean_tpot_ms": 65.86,
+                    "output_throughput": 33.77,
+                },
+            },
+            "relative_changes": {
+                "ttft_pct": -0.5,
+                "tpot_pct": -0.7,
+                "throughput_pct": 0.0,
+            },
+            "completion_rate": {
+                "requested_prompts": 1000,
+                "completed": 287,
+                "failed": 713,
+                "failure_reason": (
+                    "HTTP 400 Bad Request from the old-commit serving client "
+                    "for multimodal prompts; the 287/713 count is identical on "
+                    "both base and head, so the base/head comparison over the "
+                    "287 completed requests remains apples-to-apples."
+                ),
+            },
+            "raw_result_dir": (
+                "reports/issue_151_retest_raw_results/"
+                "{ec4847981f,ceec19abb0}/visionarena-online/rep-{1,2,3}"
+            ),
+        },
+        "reps_completed": 3,
         "reps_required": 3,
-        "verdict": "incomplete_evidence",
-        "disposition": "rerun",
+        "verdict": "not_reproducible",
+        "disposition": "supersede",
         "disposition_reason": (
-            "No retest performed yet; original records lack backend version "
-            "provenance. Must rerun with 3 interleaved reps per side using the "
-            "same metric/config contract as #165 before concluding."
+            "Interleaved 3x3 retest shows TTFT -0.5%, TPOT -0.7%, throughput "
+            "0.0% (all within #165 thresholds). The reported 71.4% TPOT jump "
+            "(35.2ms -> 60.3ms) is not reproducible; the original leaderboard "
+            "values are superseded by the median-of-medians evidence from this "
+            "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/191",
-        "related_prs": "#165 (methodology), #69/#77 (target commits)",
+        "related_prs": "#165 (methodology), #69/#77 (target commits), this PR",
     },
 ]
 
@@ -781,6 +837,50 @@ def compare_interval(
     }
 
 
+def remaining_summary(intervals: list[dict[str, Any]]) -> dict[str, Any]:
+    """Derive the issue #177 summary from the per-interval verdicts/dispositions."""
+    reproducible = sum(
+        1 for iv in intervals if iv["verdict"] == "reproducible_regression"
+    )
+    not_reproducible = sum(1 for iv in intervals if iv["verdict"] == "not_reproducible")
+    incomplete = sum(1 for iv in intervals if iv["verdict"] == "incomplete_evidence")
+
+    dispositions = {
+        "retain": 0,
+        "quarantine": 0,
+        "supersede": 0,
+        "rerun": 0,
+    }
+    for iv in intervals:
+        d = iv.get("disposition", "rerun")
+        dispositions[d] = dispositions.get(d, 0) + 1
+
+    if reproducible:
+        overall = "regression_reproduced"
+    elif incomplete == 0:
+        overall = "all_within_thresholds"
+    elif not_reproducible:
+        overall = f"{not_reproducible}_superseded_{incomplete}_pending"
+    else:
+        overall = "incomplete_evidence"
+
+    return {
+        "total_remaining_intervals": len(intervals),
+        "reproducible_regressions": reproducible,
+        "not_reproducible": not_reproducible,
+        "incomplete_evidence": incomplete,
+        "overall_verdict": overall,
+        "disposition_summary": dispositions,
+        "metric_config_contract_note": (
+            "All remaining intervals must use the same metric/config "
+            "contract as #165: median-based comparison, 3 interleaved reps "
+            "per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/"
+            "concurrency/RPS. Original mean_ttft_ms vs original ttft_ms "
+            "are not directly comparable (per #165 report)."
+        ),
+    }
+
+
 def generate_remaining_jumps_report(
     output_path: str | None = None,
 ) -> dict[str, Any]:
@@ -826,6 +926,8 @@ def generate_remaining_jumps_report(
                 "related_prs": iv["related_prs"],
             }
         )
+        if iv.get("retest") is not None:
+            intervals[-1]["retest"] = iv["retest"]
 
     report: dict[str, Any] = {
         "issue": "#177",
@@ -836,26 +938,7 @@ def generate_remaining_jumps_report(
             "leaderboard jumps not covered by PR #165"
         ),
         "intervals": intervals,
-        "summary": {
-            "total_remaining_intervals": len(intervals),
-            "reproducible_regressions": 0,
-            "not_reproducible": 0,
-            "incomplete_evidence": len(intervals),
-            "overall_verdict": "incomplete_evidence",
-            "disposition_summary": {
-                "retain": 0,
-                "quarantine": 0,
-                "supersede": 0,
-                "rerun": len(intervals),
-            },
-            "metric_config_contract_note": (
-                "All 4 remaining intervals must use the same metric/config "
-                "contract as #165: median-based comparison, 3 interleaved reps "
-                "per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/"
-                "concurrency/RPS. Original mean_ttft_ms vs original ttft_ms "
-                "are not directly comparable (per #165 report)."
-            ),
-        },
+        "summary": remaining_summary(intervals),
     }
 
     if output_path:

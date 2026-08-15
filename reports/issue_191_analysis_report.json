@@ -1,0 +1,75 @@
+{
+  "issue": "#191",
+  "description": "Regression re-test for the unexplained single-card leaderboard jump on visionarena-online (ec4847981f -> ceec19abb0)",
+  "result_dir": "/data/issue191-retest-results",
+  "interval": {
+    "interval": "visionarena-online",
+    "workload": "visionarena-online",
+    "base_commit": "ec4847981f",
+    "head_commit": "ceec19abb0",
+    "reported_jump": "71.4% TPOT jump",
+    "original_leaderboard": {
+      "base": {
+        "ttft_ms": 369,
+        "tpot_ms": 35.2,
+        "throughput_tps": 117.0
+      },
+      "head": {
+        "ttft_ms": 387,
+        "tpot_ms": 60.3,
+        "throughput_tps": 118.2
+      }
+    },
+    "absolute_value_drift": {
+      "note": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable.",
+      "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+    },
+    "base_reps": 3,
+    "head_reps": 3,
+    "reps_required": 3,
+    "medians": {
+      "base": {
+        "mean_ttft_ms": 322.63476062985137,
+        "mean_tpot_ms": 28.298577038672047,
+        "output_throughput": 113.11677188462993
+      },
+      "head": {
+        "mean_ttft_ms": 325.29625955503434,
+        "mean_tpot_ms": 29.351517946226164,
+        "output_throughput": 113.13322606310462
+      }
+    },
+    "relative_changes": {
+      "ttft": 0.008249262788631823,
+      "tpot": 0.03720826337363879,
+      "throughput": 0.00014546188156315778
+    },
+    "thresholds": {
+      "ttft_increase": 0.2,
+      "tpot_increase": 0.2,
+      "throughput_decrease": 0.1
+    },
+    "completion_rate": {
+      "requested_prompts_per_rep": 1000,
+      "base": {
+        "completed": 3000,
+        "failed": 0
+      },
+      "head": {
+        "completed": 3000,
+        "failed": 0
+      },
+      "max_failure_rate": 0.01,
+      "note": "Retest rerun without --enable-multimodal-chat: that flag pre-converted prompts into chat lists which were then wrapped again as a text field, so base64 images were tokenized as text and overflowed the 32768-token context (HTTP 400). Removing it keeps the official prompt structure (text + image_url), giving a completion rate well above the 1% failure-rate gate; reps failing the gate are rejected fail-closed and do not count toward the required 3 reps."
+    },
+    "verdict": "not_reproducible",
+    "reason": "TTFT +0.8%, TPOT +3.7%, Throughput +0.0% \u2014 all within thresholds"
+  },
+  "summary": {
+    "total_intervals": 1,
+    "reproducible_regressions": 0,
+    "not_reproducible": 1,
+    "incomplete_evidence": 0,
+    "overall_verdict": "all_within_thresholds"
+  }
+}
