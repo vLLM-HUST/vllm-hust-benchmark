@@ -1,0 +1,73 @@
+{
+  "issue": "#191",
+  "description": "Regression re-test for the unexplained single-card leaderboard jump on visionarena-online (ec4847981f -> ceec19abb0)",
+  "result_dir": "/data/issue191-retest-results",
+  "interval": {
+    "interval": "visionarena-online",
+    "workload": "visionarena-online",
+    "base_commit": "ec4847981f",
+    "head_commit": "ceec19abb0",
+    "reported_jump": "71.4% TPOT jump",
+    "original_leaderboard": {
+      "base": {
+        "ttft_ms": 369,
+        "tpot_ms": 35.2,
+        "throughput_tps": 117.0
+      },
+      "head": {
+        "ttft_ms": 387,
+        "tpot_ms": 60.3,
+        "throughput_tps": 118.2
+      }
+    },
+    "absolute_value_drift": {
+      "note": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable.",
+      "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+    },
+    "base_reps": 3,
+    "head_reps": 3,
+    "medians": {
+      "base": {
+        "mean_ttft_ms": 3593.3410996613366,
+        "mean_tpot_ms": 66.34928266349864,
+        "output_throughput": 33.78091326264477
+      },
+      "head": {
+        "mean_ttft_ms": 3574.7419885921095,
+        "mean_tpot_ms": 65.86127642994828,
+        "output_throughput": 33.768291978115464
+      }
+    },
+    "relative_changes": {
+      "ttft": -0.005175993748820565,
+      "tpot": -0.007355109414300219,
+      "throughput": -0.00037362176774736246
+    },
+    "thresholds": {
+      "ttft_increase": 0.2,
+      "tpot_increase": 0.2,
+      "throughput_decrease": 0.1
+    },
+    "completion_rate": {
+      "requested_prompts_per_rep": 1000,
+      "base": {
+        "completed": 861,
+        "failed": 2139
+      },
+      "head": {
+        "completed": 861,
+        "failed": 2139
+      },
+      "note": "HTTP 400 Bad Request from the old-commit serving client for multimodal prompts; completed/failed counts are identical on both sides, so the base/head comparison over completed requests remains apples-to-apples."
+    },
+    "verdict": "not_reproducible",
+    "reason": "TTFT -0.5%, TPOT -0.7%, Throughput -0.0% \u2014 all within thresholds"
+  },
+  "summary": {
+    "total_intervals": 1,
+    "reproducible_regressions": 0,
+    "not_reproducible": 1,
+    "incomplete_evidence": 0,
+    "overall_verdict": "all_within_thresholds"
+  }
+}
