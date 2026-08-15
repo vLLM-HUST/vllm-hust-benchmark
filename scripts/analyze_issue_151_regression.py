@@ -350,19 +350,6 @@ REMAINING_INTERVALS = [
                 "required to capture full provenance"
             ),
         },
-        "reps_completed": 3,
-        "reps_required": 3,
-        "verdict": "not_reproducible",
-        "disposition": "supersede",
-        "disposition_reason": (
-            "Interleaved 3x3 retest shows TTFT +1.4%, TPOT +2.8%, throughput "
-            "-0.2% (all within #165 thresholds). The reported 21.7% TTFT jump "
-            "(1261ms -> 1535ms) is not reproducible; the original leaderboard "
-            "values are superseded by the median-of-medians evidence from this "
-            "retest."
-        ),
-        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/190",
-        "related_prs": "#165 (methodology), #66/#69 (target commits), this PR",
         "retest": {
             "method": (
                 "median-based comparison, 3 interleaved reps per side, fixed "
@@ -392,7 +379,7 @@ REMAINING_INTERVALS = [
                 },
                 "head": {
                     "mean_ttft_ms": 245.03,
-                    "mean_tpot_ms": 46.6,
+                    "mean_tpot_ms": 46.60,
                     "output_throughput": 243.14,
                 },
             },
@@ -406,6 +393,19 @@ REMAINING_INTERVALS = [
                 "{7a63f81e86,ec4847981f}/random-online/rep-{1,2,3}"
             ),
         },
+        "reps_completed": 3,
+        "reps_required": 3,
+        "verdict": "not_reproducible",
+        "disposition": "supersede",
+        "disposition_reason": (
+            "Interleaved 3x3 retest shows TTFT +1.4%, TPOT +2.8%, throughput "
+            "-0.2% (all within #165 thresholds). The reported 21.7% TTFT jump "
+            "(1261ms -> 1535ms) is not reproducible; the original leaderboard "
+            "values are superseded by the median-of-medians evidence from this "
+            "retest."
+        ),
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/190",
+        "related_prs": "#165 (methodology), #66/#69 (target commits), this PR",
     },
     {
         "interval_id": "visionarena-online-ec4847981f-ceec19abb0",
