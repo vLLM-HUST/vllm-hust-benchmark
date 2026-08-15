@@ -35,7 +35,7 @@ EXPECTED_TRACKING_ISSUES = {
 }
 
 # Workloads whose retests are complete and verdict=not_reproducible (supersede).
-RESOLVED_WORKLOADS = {"visionarena-online"}
+RESOLVED_WORKLOADS = {"random-online", "visionarena-online"}
 
 REQUIRED_INTERVAL_FIELDS = [
     "interval_id",
@@ -84,8 +84,8 @@ class TestRemainingIntervalsConfig:
         assert len(analyze_mod.REMAINING_INTERVALS) == 4
 
     def test_remaining_intervals_status(self, analyze_mod):
-        # visionarena-online (issue #191) was retested and superseded;
-        # the other 3 intervals remain pending.
+        # random-online (issue #190) and visionarena-online (issue #191)
+        # were retested and superseded; the other 2 intervals remain pending.
         for iv in analyze_mod.REMAINING_INTERVALS:
             if iv["workload"] in RESOLVED_WORKLOADS:
                 assert iv["retest_status"] == "completed"
@@ -189,13 +189,13 @@ class TestGenerateRemainingJumpsReport:
         s = report["summary"]
         assert s["total_remaining_intervals"] == 4
         assert s["reproducible_regressions"] == 0
-        assert s["not_reproducible"] == 1
-        assert s["incomplete_evidence"] == 3
-        assert s["overall_verdict"] == "1_superseded_3_pending"
-        assert s["disposition_summary"]["rerun"] == 3
+        assert s["not_reproducible"] == 2
+        assert s["incomplete_evidence"] == 2
+        assert s["overall_verdict"] == "2_superseded_2_pending"
+        assert s["disposition_summary"]["rerun"] == 2
         assert s["disposition_summary"]["retain"] == 0
         assert s["disposition_summary"]["quarantine"] == 0
-        assert s["disposition_summary"]["supersede"] == 1
+        assert s["disposition_summary"]["supersede"] == 2
 
     def test_reported_jump_first_interval(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
@@ -231,11 +231,17 @@ class TestGenerateRemainingJumpsReport:
         for iv in report["intervals"]:
             if iv["workload"] in RESOLVED_WORKLOADS:
                 rt = iv["retest"]
-                assert rt["completion_rate"]["completed"] == 287
-                assert rt["completion_rate"]["failed"] == 713
-                assert rt["medians"]["base"]["mean_tpot_ms"] == 66.35
-                assert rt["medians"]["head"]["mean_tpot_ms"] == 65.86
-                assert rt["relative_changes"]["tpot_pct"] == -0.7
+                if iv["workload"] == "visionarena-online":
+                    assert rt["completion_rate"]["completed"] == 287
+                    assert rt["completion_rate"]["failed"] == 713
+                    assert rt["medians"]["base"]["mean_tpot_ms"] == 66.35
+                    assert rt["medians"]["head"]["mean_tpot_ms"] == 65.86
+                    assert rt["relative_changes"]["tpot_pct"] == -0.7
+                else:
+                    assert "completion_rate" not in rt
+                    assert rt["medians"]["base"]["mean_tpot_ms"] == 45.32
+                    assert rt["medians"]["head"]["mean_tpot_ms"] == 46.60
+                    assert rt["relative_changes"]["tpot_pct"] == 2.8
             else:
                 assert "retest" not in iv
 
@@ -269,10 +275,10 @@ class TestCommittedReportFile:
     def test_file_summary(self):
         data = json.loads(REPORT_PATH.read_text())
         s = data["summary"]
-        assert s["incomplete_evidence"] == 3
-        assert s["not_reproducible"] == 1
-        assert s["disposition_summary"]["rerun"] == 3
-        assert s["disposition_summary"]["supersede"] == 1
+        assert s["incomplete_evidence"] == 2
+        assert s["not_reproducible"] == 2
+        assert s["disposition_summary"]["rerun"] == 2
+        assert s["disposition_summary"]["supersede"] == 2
 
     def test_file_matches_generator(self, analyze_mod):
         on_disk = json.loads(REPORT_PATH.read_text())
@@ -328,3 +334,111 @@ class TestServerConfigAndTracking:
             assert "official_target_expected" in sc
             assert sc["historical_captured"] == "unknown/config-unverified"
             assert iv["tracking_issue"] == EXPECTED_TRACKING_ISSUES[iv["workload"]]
+
+
+# ---------------------------------------------------------------------------
+# compare_interval fail-closed rep contract (PR #196 review)
+# ---------------------------------------------------------------------------
+
+
+class TestCompareIntervalFailClosed:
+    """compare_interval must not emit a verdict with fewer than reps_required
+    valid reps per side (regression test for PR #196 review)."""
+
+    @staticmethod
+    def _interval() -> dict:
+        return {
+            "name": "test-interval",
+            "base_commit": "a1b2c3d4e5",  # pragma: allowlist secret
+            "head_commit": "f6a7b8c9d0",  # pragma: allowlist secret
+            "workload": "random-online",
+            "reported_jump": "test jump",
+            "reps_required": 3,
+            "absolute_value_drift_note": "",
+            "original_leaderboard": {},
+        }
+
+    @staticmethod
+    def _write_rep(
+        rep_dir: Path,
+        *,
+        completed: bool = True,
+        valid_manifest: bool = True,
+    ) -> None:
+        rep_dir.mkdir(parents=True, exist_ok=True)
+        if completed:
+            (rep_dir / ".completed").write_text("ok\n")
+        manifest = {
+            "engine_commit_observed": "e" * 40,
+            "plugin_commit_observed": "f" * 40,
+        }
+        (rep_dir / "env-manifest.json").write_text(
+            json.dumps(manifest) if valid_manifest else "{not json\n"
+        )
+        (rep_dir / "raw.json").write_text(
+            json.dumps(
+                {
+                    "mean_ttft_ms": 100.0,
+                    "mean_tpot_ms": 10.0,
+                    "output_throughput": 100.0,
+                }
+            )
+            + "\n"
+        )
+
+    @classmethod
+    def _write_side(
+        cls,
+        result_dir: Path,
+        commit: str,
+        workload: str,
+        n: int,
+        **kwargs,
+    ) -> None:
+        for rep in range(1, n + 1):
+            cls._write_rep(result_dir / commit / workload / f"rep-{rep}", **kwargs)
+
+    def test_one_rep_per_side_fails_closed(self, analyze_mod, tmp_path) -> None:
+        iv = self._interval()
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 1)
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 1)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] == "incomplete_evidence"
+        assert result["base_reps"] == 1
+        assert result["head_reps"] == 1
+        assert result["reps_required"] == 3
+
+    def test_missing_side_fails_closed(self, analyze_mod, tmp_path) -> None:
+        iv = self._interval()
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] == "incomplete_evidence"
+        assert result["base_reps"] == 3
+        assert result["head_reps"] == 0
+
+    def test_invalid_rep_does_not_count_toward_contract(
+        self, analyze_mod, tmp_path
+    ) -> None:
+        iv = self._interval()
+        # rep-3 lacks the .completed marker -> only 2 valid base reps.
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 2)
+        self._write_rep(
+            tmp_path / iv["base_commit"] / iv["workload"] / "rep-3",
+            completed=False,
+        )
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] == "incomplete_evidence"
+        assert result["base_reps"] == 2
+        assert result["head_reps"] == 3
+
+    def test_full_three_reps_per_side_emits_verdict(
+        self, analyze_mod, tmp_path
+    ) -> None:
+        iv = self._interval()
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 3)
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] in ("not_reproducible", "reproducible_regression")
+        assert result["base_reps"] == 3
+        assert result["head_reps"] == 3

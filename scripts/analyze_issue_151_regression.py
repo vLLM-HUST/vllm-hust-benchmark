@@ -29,6 +29,26 @@ import sys
 from pathlib import Path
 from typing import Any
 
+
+def format_reported_jump(jump: dict[str, Any]) -> str:
+    """Pretty-print a post-#177 ``reported_jump`` dict for compare_interval()."""
+    parts = []
+    for metric in ("ttft_ms", "tpot_ms", "throughput_tps"):
+        v = jump.get(metric)
+        if not v:
+            continue
+        pct = v.get("change_pct")
+        if pct is None:
+            continue
+        label = {
+            "ttft_ms": "TTFT",
+            "tpot_ms": "TPOT",
+            "throughput_tps": "TPS",
+        }[metric]
+        parts.append(f"{pct:+.1f}% {label}")
+    return ", ".join(parts) or "reported_jump (see REMAINING_INTERVALS)"
+
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -237,7 +257,7 @@ REMAINING_INTERVALS = [
         "workload": "random-online",
         "base_commit": "7a63f81e86",
         "head_commit": "ec4847981f",
-        "retest_status": "pending",
+        "retest_status": "completed",
         "reported_jump": {
             "ttft_ms": {"base": 1261, "head": 1535, "change_pct": 21.7},
             "tpot_ms": {"base": 52.1, "head": 54.0, "change_pct": 3.6},
@@ -286,17 +306,62 @@ REMAINING_INTERVALS = [
                 "required to capture full provenance"
             ),
         },
-        "reps_completed": 0,
+        "retest": {
+            "method": (
+                "median-based comparison, 3 interleaved reps per side, fixed "
+                "NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS "
+                "(same contract as #165)"
+            ),
+            "engine_base_sha": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
+            "engine_head_sha": "ec4847981f2d4dda8343b3c4c90eeb173f8f8eb7",  # pragma: allowlist secret
+            "plugin_sha": "312ca80a90cbd28438bce3b59e3fbaad749451f3",  # pragma: allowlist secret
+            "hardware": {"chip_model": "910B2", "chip_count": 1, "node_count": 1},
+            "model": {
+                "name": "Qwen2.5-14B-Instruct",
+                "path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct",
+            },
+            "client": {
+                "workload": "random-online",
+                "num_prompts": 200,
+                "request_rate": 1,
+                "random_input_len": 1024,
+                "random_output_len": 256,
+            },
+            "medians": {
+                "base": {
+                    "mean_ttft_ms": 241.72,
+                    "mean_tpot_ms": 45.32,
+                    "output_throughput": 243.54,
+                },
+                "head": {
+                    "mean_ttft_ms": 245.03,
+                    "mean_tpot_ms": 46.60,
+                    "output_throughput": 243.14,
+                },
+            },
+            "relative_changes": {
+                "ttft_pct": 1.4,
+                "tpot_pct": 2.8,
+                "throughput_pct": -0.2,
+            },
+            "raw_result_dir": (
+                "reports/issue_151_retest_raw_results/"
+                "{7a63f81e86,ec4847981f}/random-online/rep-{1,2,3}"
+            ),
+        },
+        "reps_completed": 3,
         "reps_required": 3,
-        "verdict": "incomplete_evidence",
-        "disposition": "rerun",
+        "verdict": "not_reproducible",
+        "disposition": "supersede",
         "disposition_reason": (
-            "No retest performed yet; original records lack backend version "
-            "provenance. Must rerun with 3 interleaved reps per side using the "
-            "same metric/config contract as #165 before concluding."
+            "Interleaved 3x3 retest shows TTFT +1.4%, TPOT +2.8%, throughput "
+            "-0.2% (all within #165 thresholds). The reported 21.7% TTFT jump "
+            "(1261ms -> 1535ms) is not reproducible; the original leaderboard "
+            "values are superseded by the median-of-medians evidence from this "
+            "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/190",
-        "related_prs": "#165 (methodology), #66/#69 (target commits)",
+        "related_prs": "#165 (methodology), #66/#69 (target commits), this PR",
     },
     {
         "interval_id": "visionarena-online-ec4847981f-ceec19abb0",
@@ -698,13 +763,17 @@ def compare_interval(
         result_dir, head_commit, workload, engine_repo, plugin_repo
     )
 
-    # Need at least 1 valid rep on each side
-    if not base_results:
-        log(f"  ERROR: no valid base results for {name}")
-    if not head_results:
-        log(f"  ERROR: no valid head results for {name}")
+    reps_required = interval.get("reps_required", 3)
 
-    if not base_results or not head_results:
+    # Fail-closed: the retest contract requires exactly reps_required valid
+    # reps per side. A partial or single-rep run cannot support superseding
+    # historical evidence.
+    if len(base_results) != reps_required:
+        log(f"  FAIL-CLOSED: base has {len(base_results)}/{reps_required} valid reps")
+    if len(head_results) != reps_required:
+        log(f"  FAIL-CLOSED: head has {len(head_results)}/{reps_required} valid reps")
+
+    if len(base_results) != reps_required or len(head_results) != reps_required:
         return {
             "interval": name,
             "workload": workload,
@@ -722,8 +791,12 @@ def compare_interval(
             },
             "base_reps": len(base_results),
             "head_reps": len(head_results),
+            "reps_required": reps_required,
             "verdict": "incomplete_evidence",
-            "reason": "Insufficient valid reps on one or both sides",
+            "reason": (
+                f"Expected {reps_required} valid reps per side, "
+                f"got {len(base_results)} base / {len(head_results)} head"
+            ),
         }
 
     # Compute medians
@@ -810,6 +883,7 @@ def compare_interval(
         },
         "base_reps": len(base_results),
         "head_reps": len(head_results),
+        "reps_required": reps_required,
         "medians": {
             "base": {
                 "mean_ttft_ms": base_ttft,
@@ -986,11 +1060,57 @@ def main() -> int:
             "to the given path and exit (no retest data required)."
         ),
     )
+    parser.add_argument(
+        "--interval",
+        action="append",
+        default=[],
+        metavar="ID",
+        help=(
+            "Only analyze the given interval_id (e.g. "
+            "random-online-7a63f81e86-ec4847981f). May be passed multiple "
+            "times. If absent, all legacy INTERVALS are analyzed (matches the "
+            "original pre-#177 script contract)."
+        ),
+    )
     args = parser.parse_args()
 
     if args.remaining_report:
         generate_remaining_jumps_report(args.remaining_report)
         return 0
+
+    # Resolve the analysis set.
+    # - Legacy INTERVALS use `name` as the display key and carry `reported_jump`
+    #   as a short string.
+    # - REMAINING_INTERVALS (post-#177) use `interval_id` as the stable id and
+    #   carry `reported_jump` as a nested {"metric": {"base", "head", "change_pct"}}
+    #   dict. Normalize them to a uniform shape compare_interval() expects.
+    legacy = [iv for iv in INTERVALS]
+    remaining = []
+    for iv in REMAINING_INTERVALS:
+        flat = dict(iv)
+        flat.setdefault("name", iv["interval_id"])
+        # compare_interval prints interval["reported_jump"] as str.
+        if isinstance(iv.get("reported_jump"), dict):
+            flat["reported_jump"] = format_reported_jump(iv["reported_jump"])
+        remaining.append(flat)
+    all_intervals: list[dict[str, Any]] = legacy + remaining
+
+    selected: list[dict[str, Any]]
+    if args.interval:
+        by_id = {iv.get("interval_id", iv.get("name", "")): iv for iv in all_intervals}
+        by_name = {iv.get("name", ""): iv for iv in all_intervals}
+        selected = []
+        for key in args.interval:
+            iv = by_id.get(key) or by_name.get(key)
+            if iv is None:
+                log(
+                    "ERROR: unknown --interval %s. Known ids: %s"
+                    % (key, ", ".join(sorted(by_id)))
+                )
+                return 1
+            selected.append(iv)
+    else:
+        selected = legacy
 
     result_dir = Path(args.result_dir)
     if not result_dir.is_dir():
@@ -1000,9 +1120,13 @@ def main() -> int:
     log(f"Analyzing results in {result_dir}")
     log(f"Engine repo: {args.engine_repo or '(not provided)'}")
     log(f"Plugin repo: {args.plugin_repo or '(not provided)'}")
+    if args.interval:
+        log(
+            f"Selected intervals: {[iv.get('interval_id', iv['name']) for iv in selected]}"
+        )
 
     interval_results = []
-    for interval in INTERVALS:
+    for interval in selected:
         result = compare_interval(
             interval,
             result_dir,

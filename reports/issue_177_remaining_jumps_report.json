@@ -167,7 +167,7 @@
       "workload": "random-online",
       "base_commit": "7a63f81e86",
       "head_commit": "ec4847981f",
-      "retest_status": "pending",
+      "retest_status": "completed",
       "reported_jump": {
         "ttft_ms": {
           "base": 1261,
@@ -233,13 +233,53 @@
         "head_backend_version": "N/A (historical record, not captured at original run time)",
         "note": "Original leaderboard records have backend_version=N/A; retest required to capture full provenance"
       },
-      "reps_completed": 0,
+      "retest": {
+        "method": "median-based comparison, 3 interleaved reps per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS (same contract as #165)",
+        "engine_base_sha": "7a63f81e86bd71e980adb635870ff56c9e23b545",
+        "engine_head_sha": "ec4847981f2d4dda8343b3c4c90eeb173f8f8eb7",
+        "plugin_sha": "312ca80a90cbd28438bce3b59e3fbaad749451f3",
+        "hardware": {
+          "chip_model": "910B2",
+          "chip_count": 1,
+          "node_count": 1
+        },
+        "model": {
+          "name": "Qwen2.5-14B-Instruct",
+          "path": "/data/shared_models/Qwen--Qwen2.5-14B-Instruct"
+        },
+        "client": {
+          "workload": "random-online",
+          "num_prompts": 200,
+          "request_rate": 1,
+          "random_input_len": 1024,
+          "random_output_len": 256
+        },
+        "medians": {
+          "base": {
+            "mean_ttft_ms": 241.72,
+            "mean_tpot_ms": 45.32,
+            "output_throughput": 243.54
+          },
+          "head": {
+            "mean_ttft_ms": 245.03,
+            "mean_tpot_ms": 46.60,
+            "output_throughput": 243.14
+          }
+        },
+        "relative_changes": {
+          "ttft_pct": 1.4,
+          "tpot_pct": 2.8,
+          "throughput_pct": -0.2
+        },
+        "raw_result_dir": "reports/issue_151_retest_raw_results/{7a63f81e86,ec4847981f}/random-online/rep-{1,2,3}"
+      },
+      "reps_completed": 3,
       "reps_required": 3,
-      "verdict": "incomplete_evidence",
-      "disposition": "rerun",
-      "disposition_reason": "No retest performed yet; original records lack backend version provenance. Must rerun with 3 interleaved reps per side using the same metric/config contract as #165 before concluding.",
+      "verdict": "not_reproducible",
+      "disposition": "supersede",
+      "disposition_reason": "Interleaved 3x3 retest shows TTFT +1.4%, TPOT +2.8%, throughput -0.2% (all within #165 thresholds). The reported 21.7% TTFT jump (1261ms -> 1535ms) is not reproducible; the original leaderboard values are superseded by the median-of-medians evidence from this retest.",
       "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/190",
-      "related_prs": "#165 (methodology), #66/#69 (target commits)"
+      "related_prs": "#165 (methodology), #66/#69 (target commits), this PR"
     },
     {
       "interval_id": "visionarena-online-ec4847981f-ceec19abb0",
@@ -370,15 +410,16 @@
   "summary": {
     "total_remaining_intervals": 4,
     "reproducible_regressions": 0,
-    "not_reproducible": 1,
-    "incomplete_evidence": 3,
-    "overall_verdict": "1_superseded_3_pending",
+    "not_reproducible": 2,
+    "incomplete_evidence": 2,
+    "overall_verdict": "2_superseded_2_pending",
     "disposition_summary": {
       "retain": 0,
       "quarantine": 0,
-      "supersede": 1,
-      "rerun": 3
+      "supersede": 2,
+      "rerun": 2
     },
-    "metric_config_contract_note": "All remaining intervals must use the same metric/config contract as #165: median-based comparison, 3 interleaved reps per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS. Original mean_ttft_ms vs original ttft_ms are not directly comparable (per #165 report)."
+    "metric_config_contract_note": "All remaining intervals must use the same metric/config contract as #165: median-based comparison, 3 interleaved reps per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS. Original mean_ttft_ms vs original ttft_ms are not directly comparable (per #165 report).",
+    "updated_interval": "random-online-7a63f81e86-ec4847981f (issue #190) and visionarena-online-ec4847981f-ceec19abb0 (issue #191) -> verdict=not_reproducible, disposition=supersede"
   }
 }
