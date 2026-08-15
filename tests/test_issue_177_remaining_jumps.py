@@ -35,7 +35,7 @@ EXPECTED_TRACKING_ISSUES = {
 }
 
 # Workloads whose retests are complete and verdict=not_reproducible (supersede).
-RESOLVED_WORKLOADS = {"random-online", "visionarena-online"}
+RESOLVED_WORKLOADS = {"random-online", "agent-research-online", "visionarena-online"}
 
 REQUIRED_INTERVAL_FIELDS = [
     "interval_id",
@@ -84,8 +84,9 @@ class TestRemainingIntervalsConfig:
         assert len(analyze_mod.REMAINING_INTERVALS) == 4
 
     def test_remaining_intervals_status(self, analyze_mod):
-        # random-online (issue #190) and visionarena-online (issue #191)
-        # were retested and superseded; the other 2 intervals remain pending.
+        # random-online (issue #190), agent-research-online (issue #188),
+        # and visionarena-online (issue #191) were retested and superseded;
+        # instructcoder-online (issue #189) remains pending.
         for iv in analyze_mod.REMAINING_INTERVALS:
             if iv["workload"] in RESOLVED_WORKLOADS:
                 assert iv["retest_status"] == "completed"
@@ -189,13 +190,13 @@ class TestGenerateRemainingJumpsReport:
         s = report["summary"]
         assert s["total_remaining_intervals"] == 4
         assert s["reproducible_regressions"] == 0
-        assert s["not_reproducible"] == 2
-        assert s["incomplete_evidence"] == 2
-        assert s["overall_verdict"] == "2_superseded_2_pending"
-        assert s["disposition_summary"]["rerun"] == 2
+        assert s["not_reproducible"] == 3
+        assert s["incomplete_evidence"] == 1
+        assert s["overall_verdict"] == "3_superseded_1_pending"
+        assert s["disposition_summary"]["rerun"] == 1
         assert s["disposition_summary"]["retain"] == 0
         assert s["disposition_summary"]["quarantine"] == 0
-        assert s["disposition_summary"]["supersede"] == 2
+        assert s["disposition_summary"]["supersede"] == 3
 
     def test_reported_jump_first_interval(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
@@ -237,11 +238,16 @@ class TestGenerateRemainingJumpsReport:
                     assert rt["medians"]["base"]["mean_tpot_ms"] == 66.35
                     assert rt["medians"]["head"]["mean_tpot_ms"] == 65.86
                     assert rt["relative_changes"]["tpot_pct"] == -0.7
-                else:
+                elif iv["workload"] == "random-online":
                     assert "completion_rate" not in rt
                     assert rt["medians"]["base"]["mean_tpot_ms"] == 45.32
                     assert rt["medians"]["head"]["mean_tpot_ms"] == 46.60
                     assert rt["relative_changes"]["tpot_pct"] == 2.8
+                else:  # agent-research-online
+                    assert "completion_rate" not in rt
+                    assert rt["medians"]["base"]["mean_tpot_ms"] == 41.98
+                    assert rt["medians"]["head"]["mean_tpot_ms"] == 42.46
+                    assert rt["relative_changes"]["tpot_pct"] == 1.1
             else:
                 assert "retest" not in iv
 
@@ -275,10 +281,10 @@ class TestCommittedReportFile:
     def test_file_summary(self):
         data = json.loads(REPORT_PATH.read_text())
         s = data["summary"]
-        assert s["incomplete_evidence"] == 2
-        assert s["not_reproducible"] == 2
-        assert s["disposition_summary"]["rerun"] == 2
-        assert s["disposition_summary"]["supersede"] == 2
+        assert s["incomplete_evidence"] == 1
+        assert s["not_reproducible"] == 3
+        assert s["disposition_summary"]["rerun"] == 1
+        assert s["disposition_summary"]["supersede"] == 3
 
     def test_file_matches_generator(self, analyze_mod):
         on_disk = json.loads(REPORT_PATH.read_text())
