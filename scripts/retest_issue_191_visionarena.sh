@@ -637,7 +637,9 @@ stop_server() {
 # 18. visionarena-online: backend=openai-chat,
 #     endpoint=/v1/chat/completions, dataset=hf (VisionArena-Chat)
 #     params: num_prompts=1000, request_rate=1, hf_split=train,
-#             enable_multimodal_chat (official target client params)
+#             matches the official client_parameters in
+#             official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2
+#             (no enable_multimodal_chat, no explicit output_len -> default 128)
 run_visionarena_online() {
     local commit="$1"
     local rep="$2"
@@ -670,7 +672,6 @@ run_visionarena_online() {
             --hf-split train \
             --num-prompts 1000 \
             --request-rate 1 \
-            --enable-multimodal-chat \
             --save-result \
             --result-dir "$outdir" \
             --result-filename raw.json \

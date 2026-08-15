@@ -103,6 +103,8 @@ INTERVAL = {
 TTFT_INCREASE_THRESHOLD = 0.20  # 20%
 TPOT_INCREASE_THRESHOLD = 0.20  # 20%
 THROUGHPUT_DECREASE_THRESHOLD = 0.10  # 10%
+REPS_REQUIRED = 3  # exactly 3 valid reps per side (fail-closed)
+MAX_FAILURE_RATE = 0.01  # reject a rep whose failure rate exceeds 1%
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
@@ -244,11 +246,18 @@ def load_raw_metrics(rep_dir: Path) -> dict[str, Any] | None:
             return None
         metrics[field] = float(val)
 
-    # Optional request-completion counters (not part of required metric fields).
+    # Request-completion counters are REQUIRED (fail-closed): a rep that
+    # does not report how many requests completed/failed cannot be
+    # adjudicated and is rejected.
     for field in ("completed", "failed"):
         val = data.get(field)
-        if isinstance(val, (int, float)):
-            metrics[field] = float(val)
+        if val is None:
+            log(f"  WARNING: {field} missing in {raw_file}")
+            return None
+        if not isinstance(val, (int, float)):
+            log(f"  WARNING: {field} is not numeric in {raw_file}: {val!r}")
+            return None
+        metrics[field] = float(val)
 
     return metrics
 
@@ -305,6 +314,18 @@ def collect_rep_results(
 
         metrics = load_raw_metrics(rep_dir)
         if metrics is None:
+            continue
+
+        # Failure-rate policy (fail-closed): a rep whose failure rate exceeds
+        # MAX_FAILURE_RATE is not representative of the workload and is
+        # rejected, so it does not count toward the reps_required quota.
+        attempted = metrics["completed"] + metrics["failed"]
+        failed = metrics["failed"]
+        if attempted > 0 and failed / attempted > MAX_FAILURE_RATE:
+            log(
+                f"  SKIP {rep_name}: failure rate {int(failed)}/"
+                f"{int(attempted)} exceeds {MAX_FAILURE_RATE:.0%}"
+            )
             continue
 
         rep_num = int(rep_name.removeprefix("rep-"))
@@ -381,13 +402,20 @@ def compare_interval(
         result_dir, head_commit, workload, engine_repo, plugin_repo
     )
 
-    # Need at least 1 valid rep on each side
-    if not base_results:
-        log(f"  ERROR: no valid base results for {name}")
-    if not head_results:
-        log(f"  ERROR: no valid head results for {name}")
+    # Fail-closed: exactly REPS_REQUIRED valid reps are required on each
+    # side. A side with fewer (or more) valid reps cannot be adjudicated.
+    if len(base_results) != REPS_REQUIRED:
+        log(
+            f"  ERROR: base has {len(base_results)} valid reps, "
+            f"expected exactly {REPS_REQUIRED}"
+        )
+    if len(head_results) != REPS_REQUIRED:
+        log(
+            f"  ERROR: head has {len(head_results)} valid reps, "
+            f"expected exactly {REPS_REQUIRED}"
+        )
 
-    if not base_results or not head_results:
+    if len(base_results) != REPS_REQUIRED or len(head_results) != REPS_REQUIRED:
         return {
             "interval": name,
             "workload": workload,
@@ -406,8 +434,12 @@ def compare_interval(
             },
             "base_reps": len(base_results),
             "head_reps": len(head_results),
+            "reps_required": REPS_REQUIRED,
             "verdict": "incomplete_evidence",
-            "reason": "Insufficient valid reps on one or both sides",
+            "reason": (
+                f"Need exactly {REPS_REQUIRED} valid reps per side "
+                f"(base={len(base_results)}, head={len(head_results)})"
+            ),
         }
 
     # Compute medians
@@ -496,6 +528,7 @@ def compare_interval(
         },
         "base_reps": len(base_results),
         "head_reps": len(head_results),
+        "reps_required": REPS_REQUIRED,
         "medians": {
             "base": {
                 "mean_ttft_ms": base_ttft,
@@ -521,22 +554,23 @@ def compare_interval(
         "completion_rate": {
             "requested_prompts_per_rep": 1000,
             "base": {
-                "completed": int(
-                    sum(r["metrics"].get("completed", 0) for r in base_results)
-                ),
-                "failed": int(sum(r["metrics"].get("failed", 0) for r in base_results)),
+                "completed": int(sum(r["metrics"]["completed"] for r in base_results)),
+                "failed": int(sum(r["metrics"]["failed"] for r in base_results)),
             },
             "head": {
-                "completed": int(
-                    sum(r["metrics"].get("completed", 0) for r in head_results)
-                ),
-                "failed": int(sum(r["metrics"].get("failed", 0) for r in head_results)),
+                "completed": int(sum(r["metrics"]["completed"] for r in head_results)),
+                "failed": int(sum(r["metrics"]["failed"] for r in head_results)),
             },
+            "max_failure_rate": MAX_FAILURE_RATE,
             "note": (
-                "HTTP 400 Bad Request from the old-commit serving client for "
-                "multimodal prompts; completed/failed counts are identical on "
-                "both sides, so the base/head comparison over completed "
-                "requests remains apples-to-apples."
+                "Retest rerun without --enable-multimodal-chat: that flag "
+                "pre-converted prompts into chat lists which were then wrapped "
+                "again as a text field, so base64 images were tokenized as text "
+                "and overflowed the 32768-token context (HTTP 400). Removing it "
+                "keeps the official prompt structure (text + image_url), giving "
+                "a completion rate well above the 1% failure-rate gate; reps "
+                "failing the gate are rejected fail-closed and do not count "
+                "toward the required 3 reps."
             ),
         },
         "verdict": verdict,

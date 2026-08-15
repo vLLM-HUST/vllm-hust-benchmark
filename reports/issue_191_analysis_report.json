@@ -26,22 +26,23 @@
     },
     "base_reps": 3,
     "head_reps": 3,
+    "reps_required": 3,
     "medians": {
       "base": {
-        "mean_ttft_ms": 3593.3410996613366,
-        "mean_tpot_ms": 66.34928266349864,
-        "output_throughput": 33.78091326264477
+        "mean_ttft_ms": 322.63476062985137,
+        "mean_tpot_ms": 28.298577038672047,
+        "output_throughput": 113.11677188462993
       },
       "head": {
-        "mean_ttft_ms": 3574.7419885921095,
-        "mean_tpot_ms": 65.86127642994828,
-        "output_throughput": 33.768291978115464
+        "mean_ttft_ms": 325.29625955503434,
+        "mean_tpot_ms": 29.351517946226164,
+        "output_throughput": 113.13322606310462
       }
     },
     "relative_changes": {
-      "ttft": -0.005175993748820565,
-      "tpot": -0.007355109414300219,
-      "throughput": -0.00037362176774736246
+      "ttft": 0.008249262788631823,
+      "tpot": 0.03720826337363879,
+      "throughput": 0.00014546188156315778
     },
     "thresholds": {
       "ttft_increase": 0.2,
@@ -51,17 +52,18 @@
     "completion_rate": {
       "requested_prompts_per_rep": 1000,
       "base": {
-        "completed": 861,
-        "failed": 2139
+        "completed": 3000,
+        "failed": 0
       },
       "head": {
-        "completed": 861,
-        "failed": 2139
+        "completed": 3000,
+        "failed": 0
       },
-      "note": "HTTP 400 Bad Request from the old-commit serving client for multimodal prompts; completed/failed counts are identical on both sides, so the base/head comparison over completed requests remains apples-to-apples."
+      "max_failure_rate": 0.01,
+      "note": "Retest rerun without --enable-multimodal-chat: that flag pre-converted prompts into chat lists which were then wrapped again as a text field, so base64 images were tokenized as text and overflowed the 32768-token context (HTTP 400). Removing it keeps the official prompt structure (text + image_url), giving a completion rate well above the 1% failure-rate gate; reps failing the gate are rejected fail-closed and do not count toward the required 3 reps."
     },
     "verdict": "not_reproducible",
-    "reason": "TTFT -0.5%, TPOT -0.7%, Throughput -0.0% \u2014 all within thresholds"
+    "reason": "TTFT +0.8%, TPOT +3.7%, Throughput +0.0% \u2014 all within thresholds"
   },
   "summary": {
     "total_intervals": 1,
