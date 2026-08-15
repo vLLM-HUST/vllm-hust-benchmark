@@ -34,6 +34,11 @@ EXPECTED_TRACKING_ISSUES = {
     ),
 }
 
+# Workloads whose retests are complete and verdict=not_reproducible (supersede).
+# Instructcoder-online (issue #189) is resolved in this change; the other 3
+# intervals remain pending (addressed by issue #188/#190/#191).
+RESOLVED_WORKLOADS = {"instructcoder-online"}
+
 REQUIRED_INTERVAL_FIELDS = [
     "interval_id",
     "workload",
@@ -80,9 +85,14 @@ class TestRemainingIntervalsConfig:
     def test_remaining_intervals_count(self, analyze_mod):
         assert len(analyze_mod.REMAINING_INTERVALS) == 4
 
-    def test_all_pending(self, analyze_mod):
+    def test_remaining_intervals_status(self, analyze_mod):
+        # instructcoder-online (issue #189) was retested and superseded; the
+        # other 3 intervals remain pending.
         for iv in analyze_mod.REMAINING_INTERVALS:
-            assert iv["retest_status"] == "pending"
+            if iv["workload"] in RESOLVED_WORKLOADS:
+                assert iv["retest_status"] == "completed"
+            else:
+                assert iv["retest_status"] == "pending"
 
     def test_intervals_list_unchanged(self, analyze_mod):
         # The 2 retested intervals must remain untouched (compare logic intact).
@@ -136,15 +146,21 @@ class TestGenerateRemainingJumpsReport:
             assert iv["base_commit"] == base
             assert iv["head_commit"] == head
 
-    def test_verdicts_all_incomplete(self, analyze_mod):
+    def test_verdicts_by_status(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
         for iv in report["intervals"]:
-            assert iv["verdict"] == "incomplete_evidence"
+            if iv["workload"] in RESOLVED_WORKLOADS:
+                assert iv["verdict"] == "not_reproducible"
+            else:
+                assert iv["verdict"] == "incomplete_evidence"
 
-    def test_dispositions_all_rerun(self, analyze_mod):
+    def test_dispositions_by_status(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
         for iv in report["intervals"]:
-            assert iv["disposition"] == "rerun"
+            if iv["workload"] in RESOLVED_WORKLOADS:
+                assert iv["disposition"] == "supersede"
+            else:
+                assert iv["disposition"] == "rerun"
 
     def test_metric_definitions_complete(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
@@ -164,21 +180,24 @@ class TestGenerateRemainingJumpsReport:
     def test_reps_counts(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
         for iv in report["intervals"]:
-            assert iv["reps_completed"] == 0
             assert iv["reps_required"] == 3
+            if iv["workload"] in RESOLVED_WORKLOADS:
+                assert iv["reps_completed"] == 3
+            else:
+                assert iv["reps_completed"] == 0
 
     def test_summary_stats(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
         s = report["summary"]
         assert s["total_remaining_intervals"] == 4
         assert s["reproducible_regressions"] == 0
-        assert s["not_reproducible"] == 0
-        assert s["incomplete_evidence"] == 4
-        assert s["overall_verdict"] == "incomplete_evidence"
-        assert s["disposition_summary"]["rerun"] == 4
+        assert s["not_reproducible"] == 1
+        assert s["incomplete_evidence"] == 3
+        assert s["overall_verdict"] == "1_superseded_3_pending"
+        assert s["disposition_summary"]["rerun"] == 3
         assert s["disposition_summary"]["retain"] == 0
         assert s["disposition_summary"]["quarantine"] == 0
-        assert s["disposition_summary"]["supersede"] == 0
+        assert s["disposition_summary"]["supersede"] == 1
 
     def test_reported_jump_first_interval(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
@@ -226,16 +245,23 @@ class TestCommittedReportFile:
     def test_file_verdicts_and_dispositions(self):
         data = json.loads(REPORT_PATH.read_text())
         for iv in data["intervals"]:
-            assert iv["verdict"] == "incomplete_evidence"
-            assert iv["disposition"] == "rerun"
-            assert iv["reps_completed"] == 0
             assert iv["reps_required"] == 3
+            if iv["workload"] in RESOLVED_WORKLOADS:
+                assert iv["verdict"] == "not_reproducible"
+                assert iv["disposition"] == "supersede"
+                assert iv["reps_completed"] == 3
+            else:
+                assert iv["verdict"] == "incomplete_evidence"
+                assert iv["disposition"] == "rerun"
+                assert iv["reps_completed"] == 0
 
     def test_file_summary(self):
         data = json.loads(REPORT_PATH.read_text())
         s = data["summary"]
-        assert s["incomplete_evidence"] == 4
-        assert s["disposition_summary"]["rerun"] == 4
+        assert s["incomplete_evidence"] == 3
+        assert s["not_reproducible"] == 1
+        assert s["disposition_summary"]["rerun"] == 3
+        assert s["disposition_summary"]["supersede"] == 1
 
     def test_file_matches_generator(self, analyze_mod):
         on_disk = json.loads(REPORT_PATH.read_text())
