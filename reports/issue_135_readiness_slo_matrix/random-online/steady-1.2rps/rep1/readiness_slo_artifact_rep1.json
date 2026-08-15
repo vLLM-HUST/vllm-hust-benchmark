@@ -1,0 +1,207 @@
+{
+  "schema_version": "readiness-slo/v1",
+  "artifact_class": "readiness-slo",
+  "report_type": "fixed-qps",
+  "entry_id": "random-online-steady-1.2rps-rep1-e4ce33646f2e",
+  "engine": "vllm-hust",
+  "engine_version": "INFO 08-15 16:51:27 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 08-15 16:51:27 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 08-15 16:51:27 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 08-15 16:51:27 [__init__.py:246] Platform plugin ascend is activated\nINFO 08-15 16:51:27 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\ndev",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "interconnect": "unknown"
+  },
+  "cluster": null,
+  "model": {
+    "name": "Qwen/Qwen2.5-14B-Instruct",
+    "parameters": "14B",
+    "precision": "BF16",
+    "quantization": null,
+    "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+    "short_name": "Qwen2.5-14B-Instruct",
+    "display_name": "Qwen2.5-14B-Instruct"
+  },
+  "workload": {
+    "name": "random-online",
+    "dataset": "random",
+    "input_length": 1024,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null
+  },
+  "load_profile": {
+    "kind": "steady-1.2rps",
+    "request_rate": 1.2,
+    "burst_config": null
+  },
+  "repetition": {
+    "index": 1,
+    "total": 3,
+    "independent_process": true,
+    "server_pid": null,
+    "started_at": "2026-08-15T17:03:31+00:00"
+  },
+  "same_spec": {
+    "spec_id": "issue-135-readiness-slo-random-online-steady-1.2rps",
+    "spec_label": "Issue #135 readiness SLO matrix",
+    "scenario": "random-online",
+    "resolved_spec_hash": null,
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "gpu_memory_utilization": 0.6,
+      "enforce_eager": true,
+      "max_model_len": 32768,
+      "port": 8011
+    },
+    "resolved_client_parameters": {
+      "num_prompts": 50,
+      "input_len": 1024,
+      "output_len": 256,
+      "request_rate": 1.2
+    }
+  },
+  "metadata": {
+    "submitted_at": "2026-08-15T17:03:31+00:00",
+    "submitter": "issue-135-npu-runner",
+    "data_source": "issue-135-readiness-slo-matrix-npu-real",
+    "engine": "vllm-hust",
+    "engine_version": "INFO 08-15 16:51:27 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 08-15 16:51:27 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 08-15 16:51:27 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 08-15 16:51:27 [__init__.py:246] Platform plugin ascend is activated\nINFO 08-15 16:51:27 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\ndev",
+    "git_commit": "e4ce33646f2ef1781289e6dc651fad0d00177c55",
+    "github_repository": "vLLM-HUST/vllm-hust",
+    "github_ref": "main",
+    "verified": true,
+    "idempotency_key": "e4ce33646f2ef1781289e6dc651fad0d00177c55-random-online-steady-1.2rps-rep1",
+    "runtime_provenance": {
+      "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+      "engine": {
+        "repository": "vLLM-HUST/vllm-hust",
+        "ref": "main",
+        "commit": "e4ce33646f2ef1781289e6dc651fad0d00177c55"
+      },
+      "plugin": {
+        "engine": "vllm-ascend-hust",
+        "repository": "vLLM-HUST/vllm-ascend-hust",
+        "ref": "main",
+        "commit": "2d73e6d86eefd5d61acc33f13c2671ed2e99b3c2"
+      }
+    }
+  },
+  "versions": {
+    "protocol": "N/A",
+    "backend": "0.1.0",
+    "core": "INFO 08-15 16:51:27 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 08-15 16:51:27 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 08-15 16:51:27 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 08-15 16:51:27 [__init__.py:246] Platform plugin ascend is activated\nINFO 08-15 16:51:27 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\ndev",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.11.15",
+    "pytorch_version": "2.10.0+cpu",
+    "cuda_version": null,
+    "cann_version": "9.0.0",
+    "driver_version": "26.0.rc1"
+  },
+  "startup_metrics": {
+    "cold_readiness_s": 133.0,
+    "warm_restart_readiness_s": 133.0,
+    "weight_load_s": 18.73,
+    "torch_compile_s": 0.0,
+    "compile_cache": {
+      "hit": false,
+      "identity": "enforce_eager:no_compile_cache"
+    },
+    "acl_graph_capture": {
+      "time_s": 0.0,
+      "capture_count": 0,
+      "extra_memory_mb": 0.0
+    },
+    "engine_profile_warmup_s": 2.0,
+    "first_request_ttft_ms": 326.88508121296763,
+    "second_request_ttft_ms": 326.88508121296763,
+    "warm_vs_cold_improvement_pct": 0.0
+  },
+  "slo_metrics": {
+    "output_throughput_tps": 199.78772552573182,
+    "success_rate": 1.0,
+    "failure_breakdown": {
+      "timeout": 0,
+      "error": 0,
+      "aborted": 0
+    },
+    "ttft_ms": {
+      "mean": 326.88508121296763,
+      "p50": 315.56594208814204,
+      "p95": 488.3207759121432,
+      "p99": 555.4121645959093
+    },
+    "tpot_ms": {
+      "mean": 91.97786566757543,
+      "p50": 92.48905967482749,
+      "p95": 94.71232412821229,
+      "p99": 94.94530329440593
+    },
+    "itl_ms": {
+      "mean": 91.97786671467418,
+      "p50": 87.2444009874016,
+      "p95": 145.6602182472124,
+      "p99": 148.4652573429048
+    },
+    "prefix_cache_hit_rate": 0.0,
+    "burst_recovery_s": null,
+    "slo_miss": {
+      "count": 0,
+      "reasons": []
+    }
+  },
+  "queue_metrics": {
+    "queue_wait_ms": {
+      "mean": 326.88508121296763,
+      "p50": 315.56594208814204,
+      "p95": 488.3207759121432,
+      "p99": 555.4121645959093
+    },
+    "scheduler_admission_wait_ms": {
+      "mean": 0.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0
+    },
+    "prefill_wait_ms": {
+      "mean": 0.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0
+    },
+    "running_waiting_timeseries": [],
+    "first_request_separated": {
+      "ttft_ms": 326.88508121296763,
+      "queue_wait_ms": 0.0
+    }
+  },
+  "kv_state_metrics": {
+    "kv_usage": {
+      "peak_pct": 0.0,
+      "mean_pct": 0.0,
+      "timeseries": []
+    },
+    "preemption_count": 0,
+    "eviction_count": 0,
+    "restore_count": 0
+  },
+  "cache_boundary": {
+    "cold_start": true,
+    "cleared_paths": [
+      "/root/vllm/vllm-hust-benchmark/reports/issue_135_readiness_slo_matrix/.cache"
+    ],
+    "preserved_paths": [],
+    "residual_services": []
+  },
+  "raw_evidence": {
+    "server_log_sha256": "84a8905cfc55cf3a98cbcb2ef50a765fce7185927e29d40beb26527bed8f4a9d",
+    "client_result_sha256": "c2b6150164b3072926b8dc2b5e5e311828dd701aff75310c867df72731dce4f7",
+    "metrics_log_sha256": "dc17f546b53aeadbe0d3f037603c1733e146283e43cc41df2f2ee1394deba9b1",
+    "server_log_path": "/root/vllm/vllm-hust-benchmark/reports/issue_135_readiness_slo_matrix/random-online/steady-1.2rps/rep1/server.log",
+    "client_result_path": "/root/vllm/vllm-hust-benchmark/reports/issue_135_readiness_slo_matrix/random-online/steady-1.2rps/rep1/client_result.json",
+    "metrics_log_path": "/root/vllm/vllm-hust-benchmark/reports/issue_135_readiness_slo_matrix/random-online/steady-1.2rps/rep1/metrics.txt"
+  }
+}
