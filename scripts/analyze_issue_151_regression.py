@@ -664,13 +664,17 @@ def compare_interval(
         result_dir, head_commit, workload, engine_repo, plugin_repo
     )
 
-    # Need at least 1 valid rep on each side
-    if not base_results:
-        log(f"  ERROR: no valid base results for {name}")
-    if not head_results:
-        log(f"  ERROR: no valid head results for {name}")
+    reps_required = interval.get("reps_required", 3)
 
-    if not base_results or not head_results:
+    # Fail-closed: the retest contract requires exactly reps_required valid
+    # reps per side. A partial or single-rep run cannot support superseding
+    # historical evidence.
+    if len(base_results) != reps_required:
+        log(f"  FAIL-CLOSED: base has {len(base_results)}/{reps_required} valid reps")
+    if len(head_results) != reps_required:
+        log(f"  FAIL-CLOSED: head has {len(head_results)}/{reps_required} valid reps")
+
+    if len(base_results) != reps_required or len(head_results) != reps_required:
         return {
             "interval": name,
             "workload": workload,
@@ -688,8 +692,12 @@ def compare_interval(
             },
             "base_reps": len(base_results),
             "head_reps": len(head_results),
+            "reps_required": reps_required,
             "verdict": "incomplete_evidence",
-            "reason": "Insufficient valid reps on one or both sides",
+            "reason": (
+                f"Expected {reps_required} valid reps per side, "
+                f"got {len(base_results)} base / {len(head_results)} head"
+            ),
         }
 
     # Compute medians
@@ -776,6 +784,7 @@ def compare_interval(
         },
         "base_reps": len(base_results),
         "head_reps": len(head_results),
+        "reps_required": reps_required,
         "medians": {
             "base": {
                 "mean_ttft_ms": base_ttft,
