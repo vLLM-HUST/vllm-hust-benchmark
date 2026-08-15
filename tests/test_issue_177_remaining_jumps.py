@@ -34,6 +34,9 @@ EXPECTED_TRACKING_ISSUES = {
     ),
 }
 
+# Workloads whose retests are complete and verdict=not_reproducible (supersede).
+RESOLVED_WORKLOADS = {"random-online", "visionarena-online"}
+
 REQUIRED_INTERVAL_FIELDS = [
     "interval_id",
     "workload",
@@ -81,16 +84,16 @@ class TestRemainingIntervalsConfig:
         assert len(analyze_mod.REMAINING_INTERVALS) == 4
 
     def test_remaining_intervals_status(self, analyze_mod):
-        # random-online was retested (issue #190) and superseded; the other 3
-        # intervals have not been retested yet and remain pending.
+        # random-online (issue #190) and visionarena-online (issue #191)
+        # were retested and superseded; the other 2 intervals remain pending.
         for iv in analyze_mod.REMAINING_INTERVALS:
-            if iv["workload"] == "random-online":
+            if iv["workload"] in RESOLVED_WORKLOADS:
                 assert iv["retest_status"] == "completed"
             else:
                 assert iv["retest_status"] == "pending"
 
     def test_intervals_list_unchanged(self, analyze_mod):
-        # The 2 retested intervals must remain untouched (compare logic intact).
+        # The 1 retested interval must remain untouched (compare logic intact).
         assert len(analyze_mod.INTERVALS) == 2
 
     def test_commits_and_models(self, analyze_mod):
@@ -144,7 +147,7 @@ class TestGenerateRemainingJumpsReport:
     def test_verdicts_by_status(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
         for iv in report["intervals"]:
-            if iv["workload"] == "random-online":
+            if iv["workload"] in RESOLVED_WORKLOADS:
                 assert iv["verdict"] == "not_reproducible"
             else:
                 assert iv["verdict"] == "incomplete_evidence"
@@ -152,7 +155,7 @@ class TestGenerateRemainingJumpsReport:
     def test_dispositions_by_status(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
         for iv in report["intervals"]:
-            if iv["workload"] == "random-online":
+            if iv["workload"] in RESOLVED_WORKLOADS:
                 assert iv["disposition"] == "supersede"
             else:
                 assert iv["disposition"] == "rerun"
@@ -176,7 +179,7 @@ class TestGenerateRemainingJumpsReport:
         report = analyze_mod.generate_remaining_jumps_report()
         for iv in report["intervals"]:
             assert iv["reps_required"] == 3
-            if iv["workload"] == "random-online":
+            if iv["workload"] in RESOLVED_WORKLOADS:
                 assert iv["reps_completed"] == 3
             else:
                 assert iv["reps_completed"] == 0
@@ -186,13 +189,13 @@ class TestGenerateRemainingJumpsReport:
         s = report["summary"]
         assert s["total_remaining_intervals"] == 4
         assert s["reproducible_regressions"] == 0
-        assert s["not_reproducible"] == 1
-        assert s["incomplete_evidence"] == 3
-        assert s["overall_verdict"] == "one_interval_superseded_three_pending"
-        assert s["disposition_summary"]["rerun"] == 3
+        assert s["not_reproducible"] == 2
+        assert s["incomplete_evidence"] == 2
+        assert s["overall_verdict"] == "2_superseded_2_pending"
+        assert s["disposition_summary"]["rerun"] == 2
         assert s["disposition_summary"]["retain"] == 0
         assert s["disposition_summary"]["quarantine"] == 0
-        assert s["disposition_summary"]["supersede"] == 1
+        assert s["disposition_summary"]["supersede"] == 2
 
     def test_reported_jump_first_interval(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
@@ -223,6 +226,25 @@ class TestGenerateRemainingJumpsReport:
         assert data["issue"] == "#177"
         assert len(data["intervals"]) == 4
 
+    def test_retest_block_present_for_resolved(self, analyze_mod):
+        report = analyze_mod.generate_remaining_jumps_report()
+        for iv in report["intervals"]:
+            if iv["workload"] in RESOLVED_WORKLOADS:
+                rt = iv["retest"]
+                if iv["workload"] == "visionarena-online":
+                    assert rt["completion_rate"]["completed"] == 287
+                    assert rt["completion_rate"]["failed"] == 713
+                    assert rt["medians"]["base"]["mean_tpot_ms"] == 66.35
+                    assert rt["medians"]["head"]["mean_tpot_ms"] == 65.86
+                    assert rt["relative_changes"]["tpot_pct"] == -0.7
+                else:
+                    assert "completion_rate" not in rt
+                    assert rt["medians"]["base"]["mean_tpot_ms"] == 45.32
+                    assert rt["medians"]["head"]["mean_tpot_ms"] == 46.60
+                    assert rt["relative_changes"]["tpot_pct"] == 2.8
+            else:
+                assert "retest" not in iv
+
 
 # ---------------------------------------------------------------------------
 # Committed report file on disk
@@ -241,7 +263,7 @@ class TestCommittedReportFile:
         data = json.loads(REPORT_PATH.read_text())
         for iv in data["intervals"]:
             assert iv["reps_required"] == 3
-            if iv["workload"] == "random-online":
+            if iv["workload"] in RESOLVED_WORKLOADS:
                 assert iv["verdict"] == "not_reproducible"
                 assert iv["disposition"] == "supersede"
                 assert iv["reps_completed"] == 3
@@ -253,10 +275,10 @@ class TestCommittedReportFile:
     def test_file_summary(self):
         data = json.loads(REPORT_PATH.read_text())
         s = data["summary"]
-        assert s["incomplete_evidence"] == 3
-        assert s["not_reproducible"] == 1
-        assert s["disposition_summary"]["rerun"] == 3
-        assert s["disposition_summary"]["supersede"] == 1
+        assert s["incomplete_evidence"] == 2
+        assert s["not_reproducible"] == 2
+        assert s["disposition_summary"]["rerun"] == 2
+        assert s["disposition_summary"]["supersede"] == 2
 
     def test_file_matches_generator(self, analyze_mod):
         on_disk = json.loads(REPORT_PATH.read_text())
@@ -268,6 +290,9 @@ class TestCommittedReportFile:
             assert a["verdict"] == b["verdict"]
             assert a["disposition"] == b["disposition"]
             assert a["reported_jump"] == b["reported_jump"]
+            assert ("retest" in a) == ("retest" in b)
+            if "retest" in a:
+                assert a["retest"] == b["retest"]
 
 
 # ---------------------------------------------------------------------------
