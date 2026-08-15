@@ -1,6 +1,6 @@
 {
   "issue": "#151",
-  "description": "Regression re-test for two unexplained performance jumps in single-card leaderboard (random-online, agent-research-online). The remaining four jumps from issue #151 are tracked separately.",
+  "description": "Regression re-test for unexplained performance jumps in single-card leaderboard",
   "result_dir": "reports/issue_151_retest_raw_results",
   "intervals": [
     {
@@ -9,8 +9,23 @@
       "base_commit": "2206f1f7b7",
       "head_commit": "f273f9c5e2",
       "reported_jump": "173% TTFT jump",
+      "original_leaderboard": {
+        "base": {
+          "ttft_ms": 302.776655042544,
+          "throughput_tps": 238.4099656585595
+        },
+        "head": {
+          "ttft_ms": 2243.397351723397,
+          "throughput_tps": 236.86996143257514
+        }
+      },
+      "absolute_value_drift": {
+        "note": "Retest mean_ttft_ms (~131s base, ~128s head) is far above the original leaderboard ttft_ms (~0.3s base, ~2.2s head). The retest did NOT reproduce the original absolute magnitude; the original jump was a single-run outlier and the retest environment operates at a different absolute load profile. Conclusion is 'original data noise' rather than a reproducible regression.",
+        "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+      },
       "base_reps": 3,
       "head_reps": 3,
+      "reps_required": 3,
       "medians": {
         "base": {
           "mean_ttft_ms": 131800.8389255727,
@@ -28,27 +43,13 @@
         "tpot": -0.02413960809147019,
         "throughput": 0.024912177168264552
       },
-      "original_leaderboard": {
-        "base": {
-          "ttft_ms": 302.776655042544,
-          "throughput_tps": 238.4099656585595
-        },
-        "head": {
-          "ttft_ms": 2243.397351723397,
-          "throughput_tps": 236.86996143257514
-        }
-      },
-      "absolute_value_drift": {
-        "note": "Retest mean_ttft_ms (~131s base, ~128s head) is far above the original leaderboard ttft_ms (~0.3s base, ~2.2s head). The retest did NOT reproduce the original absolute magnitude; the original jump was a single-run outlier, and the retest environment operates at a different absolute load profile. Conclusion is therefore 'original data noise' rather than a reproducible regression; the observed absolute drift is environmental, not a code regression.",
-        "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
-      },
       "thresholds": {
         "ttft_increase": 0.2,
         "tpot_increase": 0.2,
         "throughput_decrease": 0.1
       },
       "verdict": "not_reproducible",
-      "reason": "TTFT -2.6%, TPOT -2.4%, Throughput +2.5% \u2014 all within thresholds. Absolute values did not reproduce original magnitude (see absolute_value_drift).",
+      "reason": "TTFT -2.6%, TPOT -2.4%, Throughput +2.5% \u2014 all within thresholds. Absolute values did not reproduce original magnitude (see absolute_value_drift)",
       "per_rep_notes": [
         {
           "commit": "2206f1f7b7",
@@ -63,8 +64,23 @@
       "base_commit": "7a63f81e86",
       "head_commit": "ec4847981f",
       "reported_jump": "7.8x TTFT jump",
+      "original_leaderboard": {
+        "base": {
+          "ttft_ms": 330.0492724083597,
+          "throughput_tps": 184.71806876637058
+        },
+        "head": {
+          "ttft_ms": 3443.249249634391,
+          "throughput_tps": 138.39660869279373
+        }
+      },
+      "absolute_value_drift": {
+        "note": "Retest mean_ttft_ms (~2.3s base, ~2.3s head) sits between the original leaderboard ttft_ms (~0.3s base, ~3.4s head). The original 7.8x jump was driven by the head single-run outlier; the retest does not reproduce it, placing the conclusion as 'original data noise' rather than a reproducible regression.",
+        "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+      },
       "base_reps": 3,
       "head_reps": 3,
+      "reps_required": 3,
       "medians": {
         "base": {
           "mean_ttft_ms": 2258.8050708000083,
@@ -82,19 +98,55 @@
         "tpot": -0.019959844757424187,
         "throughput": 0.013872356404981736
       },
+      "thresholds": {
+        "ttft_increase": 0.2,
+        "tpot_increase": 0.2,
+        "throughput_decrease": 0.1
+      },
+      "verdict": "not_reproducible",
+      "reason": "TTFT +3.1%, TPOT -2.0%, Throughput +1.4% \u2014 all within thresholds. Absolute values did not reproduce original magnitude (see absolute_value_drift)"
+    },
+    {
+      "interval": "agent-research-online-f273f9c5e2-51621c35bc",
+      "workload": "agent-research-online",
+      "base_commit": "f273f9c5e2",
+      "head_commit": "51621c35bc",
+      "reported_jump": "+54.2% TTFT, +13.4% TPOT, -3.7% TPS",
       "original_leaderboard": {
         "base": {
-          "ttft_ms": 330.0492724083597,
-          "throughput_tps": 184.71806876637058
+          "ttft_ms": 281,
+          "tpot_ms": 49.1,
+          "throughput_tps": 187.9
         },
         "head": {
-          "ttft_ms": 3443.249249634391,
-          "throughput_tps": 138.39660869279373
+          "ttft_ms": 434,
+          "tpot_ms": 55.7,
+          "throughput_tps": 180.8
         }
       },
       "absolute_value_drift": {
-        "note": "Retest mean_ttft_ms (~2.3s base, ~2.3s head) sits between the original leaderboard ttft_ms (~0.3s base, ~3.4s head). The original 7.8x jump was driven by the head single-run outlier; the retest does not reproduce it, placing the conclusion as 'original data noise' rather than a reproducible regression.",
+        "note": "",
         "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+      },
+      "base_reps": 3,
+      "head_reps": 3,
+      "reps_required": 3,
+      "medians": {
+        "base": {
+          "mean_ttft_ms": 168.51254300854634,
+          "mean_tpot_ms": 41.9844425804388,
+          "output_throughput": 193.69289434596496
+        },
+        "head": {
+          "mean_ttft_ms": 171.95241000445094,
+          "mean_tpot_ms": 42.45511218894036,
+          "output_throughput": 192.63252795980335
+        }
+      },
+      "relative_changes": {
+        "ttft": 0.020413121388418765,
+        "tpot": 0.011210571811208268,
+        "throughput": -0.005474472307010027
       },
       "thresholds": {
         "ttft_increase": 0.2,
@@ -102,13 +154,163 @@
         "throughput_decrease": 0.1
       },
       "verdict": "not_reproducible",
-      "reason": "TTFT +3.1%, TPOT -2.0%, Throughput +1.4% \u2014 all within thresholds. Absolute values did not reproduce original magnitude (see absolute_value_drift)."
+      "reason": "TTFT +2.0%, TPOT +1.1%, Throughput -0.5% \u2014 all within thresholds"
+    },
+    {
+      "interval": "instructcoder-online-51621c35bc-7a63f81e86",
+      "workload": "instructcoder-online",
+      "base_commit": "51621c35bc",
+      "head_commit": "7a63f81e86",
+      "reported_jump": "+21.4% TTFT, +9.9% TPOT, +0.2% TPS",
+      "original_leaderboard": {
+        "base": {
+          "ttft_ms": 244,
+          "tpot_ms": 49.8,
+          "throughput_tps": 167.3
+        },
+        "head": {
+          "ttft_ms": 297,
+          "tpot_ms": 54.7,
+          "throughput_tps": 167.7
+        }
+      },
+      "absolute_value_drift": {
+        "note": "",
+        "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+      },
+      "base_reps": 3,
+      "head_reps": 3,
+      "reps_required": 3,
+      "medians": {
+        "base": {
+          "mean_ttft_ms": 153.99303262506692,
+          "mean_tpot_ms": 41.31706190319215,
+          "output_throughput": 125.69943817766683
+        },
+        "head": {
+          "mean_ttft_ms": 154.99942574751913,
+          "mean_tpot_ms": 41.5166009990552,
+          "output_throughput": 125.7490113865709
+        }
+      },
+      "relative_changes": {
+        "ttft": 0.006535315950965882,
+        "tpot": 0.004829459953628405,
+        "throughput": 0.000394378921837314
+      },
+      "thresholds": {
+        "ttft_increase": 0.2,
+        "tpot_increase": 0.2,
+        "throughput_decrease": 0.1
+      },
+      "verdict": "not_reproducible",
+      "reason": "TTFT +0.7%, TPOT +0.5%, Throughput +0.0% \u2014 all within thresholds"
+    },
+    {
+      "interval": "random-online-7a63f81e86-ec4847981f",
+      "workload": "random-online",
+      "base_commit": "7a63f81e86",
+      "head_commit": "ec4847981f",
+      "reported_jump": "+21.7% TTFT, +3.6% TPOT, -0.7% TPS",
+      "original_leaderboard": {
+        "base": {
+          "ttft_ms": 1261,
+          "tpot_ms": 52.1,
+          "throughput_tps": 238.9
+        },
+        "head": {
+          "ttft_ms": 1535,
+          "tpot_ms": 54.0,
+          "throughput_tps": 237.4
+        }
+      },
+      "absolute_value_drift": {
+        "note": "",
+        "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+      },
+      "base_reps": 3,
+      "head_reps": 3,
+      "reps_required": 3,
+      "medians": {
+        "base": {
+          "mean_ttft_ms": 241.7231784784235,
+          "mean_tpot_ms": 45.3209121507209,
+          "output_throughput": 243.53694239489332
+        },
+        "head": {
+          "mean_ttft_ms": 245.028261563275,
+          "mean_tpot_ms": 46.59553121377294,
+          "output_throughput": 243.14107072520622
+        }
+      },
+      "relative_changes": {
+        "ttft": 0.013673008544964664,
+        "tpot": 0.028124302944590254,
+        "throughput": -0.0016255097308612572
+      },
+      "thresholds": {
+        "ttft_increase": 0.2,
+        "tpot_increase": 0.2,
+        "throughput_decrease": 0.1
+      },
+      "verdict": "not_reproducible",
+      "reason": "TTFT +1.4%, TPOT +2.8%, Throughput -0.2% \u2014 all within thresholds"
+    },
+    {
+      "interval": "visionarena-online-ec4847981f-ceec19abb0",
+      "workload": "visionarena-online",
+      "base_commit": "ec4847981f",
+      "head_commit": "ceec19abb0",
+      "reported_jump": "+5.0% TTFT, +71.4% TPOT, +1.0% TPS",
+      "original_leaderboard": {
+        "base": {
+          "ttft_ms": 369,
+          "tpot_ms": 35.2,
+          "throughput_tps": 117.0
+        },
+        "head": {
+          "ttft_ms": 387,
+          "tpot_ms": 60.3,
+          "throughput_tps": 118.2
+        }
+      },
+      "absolute_value_drift": {
+        "note": "",
+        "caveat": "Retest and original leaderboard use different metric definitions (mean_ttft_ms vs ttft_ms) under different load profiles, so absolute values are not directly comparable."
+      },
+      "base_reps": 3,
+      "head_reps": 3,
+      "reps_required": 3,
+      "medians": {
+        "base": {
+          "mean_ttft_ms": 322.63476062985137,
+          "mean_tpot_ms": 28.298577038672047,
+          "output_throughput": 113.11677188462993
+        },
+        "head": {
+          "mean_ttft_ms": 325.29625955503434,
+          "mean_tpot_ms": 29.351517946226164,
+          "output_throughput": 113.13322606310462
+        }
+      },
+      "relative_changes": {
+        "ttft": 0.008249262788631823,
+        "tpot": 0.03720826337363879,
+        "throughput": 0.00014546188156315778
+      },
+      "thresholds": {
+        "ttft_increase": 0.2,
+        "tpot_increase": 0.2,
+        "throughput_decrease": 0.1
+      },
+      "verdict": "not_reproducible",
+      "reason": "TTFT +0.8%, TPOT +3.7%, Throughput +0.0% \u2014 all within thresholds"
     }
   ],
   "summary": {
-    "total_intervals": 2,
+    "total_intervals": 6,
     "reproducible_regressions": 0,
-    "not_reproducible": 2,
+    "not_reproducible": 6,
     "incomplete_evidence": 0,
     "overall_verdict": "all_within_thresholds"
   }
