@@ -33,6 +33,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.metric_semantics import generate_metric_definitions_strings
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -51,11 +53,9 @@ INTERVAL = {
         "base": {"ttft_ms": 369, "tpot_ms": 35.2, "throughput_tps": 117.0},
         "head": {"ttft_ms": 387, "tpot_ms": 60.3, "throughput_tps": 118.2},
     },
-    "metric_definitions": {
-        "ttft_ms": "Time To First Token in milliseconds (lower is better)",
-        "tpot_ms": "Time Per Output Token in milliseconds (lower is better)",
-        "throughput_tps": "Output throughput in tokens per second (higher is better)",
-    },
+    "metric_definitions": generate_metric_definitions_strings(
+        ["ttft_ms", "tpot_ms", "throughput_tps"]
+    ),
     "hardware": {"chip_model": "910B2", "chip_count": 1, "node_count": 1},
     "model": {"name": "Qwen2.5-VL-7B-Instruct", "precision": "float16"},
     "same_spec_identity": (

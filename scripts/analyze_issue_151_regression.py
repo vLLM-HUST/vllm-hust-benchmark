@@ -29,6 +29,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.metric_semantics import generate_metric_definitions_strings
+
 
 def format_reported_jump(jump: dict[str, Any]) -> str:
     """Pretty-print a post-#177 ``reported_jump`` dict for compare_interval()."""
@@ -106,12 +108,12 @@ INTERVALS = [
     },
 ]
 
-# Metric definitions shared across all remaining intervals.
-METRIC_DEFINITIONS = {
-    "ttft_ms": "Time To First Token in milliseconds (lower is better)",
-    "tpot_ms": "Time Per Output Token in milliseconds (lower is better)",
-    "throughput_tps": "Output throughput in tokens per second (higher is better)",
-}
+# Metric definitions shared across all remaining intervals.  Generated from the
+# unified metric semantics catalog so the description + direction phrase can
+# never drift out of sync with the contract.
+METRIC_DEFINITIONS = generate_metric_definitions_strings(
+    ["ttft_ms", "tpot_ms", "throughput_tps"]
+)
 
 # Remaining intervals from issue #151 that PR #165 did not re-test. Tracked by
 # issue #177. Each entry carries the full provenance contract but marks
