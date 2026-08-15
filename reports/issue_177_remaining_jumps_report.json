@@ -85,8 +85,8 @@
       "retest": {
         "method": "median-based comparison, 3 interleaved reps per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS (same contract as #165)",
         "engine_base_sha": "f273f9c5e2669b6e8aeee61823c895e2399cf609",
-        "engine_head_sha": "51621c35bc",
-        "plugin_sha": "312ca80a",
+        "engine_head_sha": "51621c35bcce749cc34539bc1a48d32f264924a0",
+        "plugin_sha": "312ca80a90cbd28438bce3b59e3fbaad749451f3",
         "hardware": {
           "chip_model": "910B2",
           "chip_count": 1,
@@ -98,9 +98,8 @@
         },
         "client": {
           "workload": "agent-research-online",
-          "num_prompts": 200,
-          "request_rate": 1,
-          "max_concurrency": 1
+          "num_prompts": 32,
+          "request_rate": 1
         },
         "medians": {
           "base": {
@@ -355,7 +354,7 @@
       "retest": {
         "method": "median-based comparison, 3 interleaved reps per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS (same contract as #165)",
         "engine_base_sha": "7a63f81e86bd71e980adb635870ff56c9e23b545",
-        "engine_head_sha": "ec4847981f",
+        "engine_head_sha": "ec4847981f2d4dda8343b3c4c90eeb173f8f8eb7",
         "plugin_sha": "312ca80a90cbd28438bce3b59e3fbaad749451f3",
         "hardware": {
           "chip_model": "910B2",
@@ -405,7 +404,7 @@
       "workload": "visionarena-online",
       "base_commit": "ec4847981f",
       "head_commit": "ceec19abb0",
-      "retest_status": "pending",
+      "retest_status": "completed",
       "reported_jump": {
         "ttft_ms": {
           "base": 369,
@@ -469,31 +468,76 @@
         "plugin_repo": "vLLM-HUST/vllm-ascend-hust",
         "base_backend_version": "N/A (historical record, not captured at original run time)",
         "head_backend_version": "N/A (historical record, not captured at original run time)",
-        "note": "Original leaderboard records have backend_version=N/A; retest required to capture full provenance"
+        "note": "Original leaderboard records have backend_version=N/A; retest captured full provenance (see retest block below)."
       },
-      "reps_completed": 0,
+      "reps_completed": 3,
       "reps_required": 3,
-      "verdict": "incomplete_evidence",
-      "disposition": "rerun",
-      "disposition_reason": "No retest performed yet; original records lack backend version provenance. Must rerun with 3 interleaved reps per side using the same metric/config contract as #165 before concluding.",
+      "verdict": "not_reproducible",
+      "disposition": "supersede",
+      "disposition_reason": "Interleaved 3x3 retest shows TTFT -0.5%, TPOT -0.7%, throughput 0.0% (all within #165 thresholds). The reported 71.4% TPOT jump (35.2ms -> 60.3ms) is not reproducible; the original leaderboard values are superseded by the median-of-medians evidence from this retest.",
       "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/191",
-      "related_prs": "#165 (methodology), #69/#77 (target commits)",
-      "retest": null
+      "related_prs": "#165 (methodology), #69/#77 (target commits), this PR",
+      "retest": {
+        "method": "median-based comparison, 3 interleaved reps per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS (same contract as #165)",
+        "engine_base_sha": "ec4847981f2d4dda8343b3c4c90eeb173f8f8eb7",
+        "engine_head_sha": "ceec19abb0ba590f536d32c8fea6fd569a8ce7ad",
+        "plugin_sha": "312ca80a90cbd28438bce3b59e3fbaad749451f3",
+        "hardware": {
+          "chip_model": "910B2",
+          "chip_count": 1,
+          "node_count": 1
+        },
+        "model": {
+          "name": "Qwen2.5-VL-7B-Instruct",
+          "path": "/data/shared_datasets/strict-models/Qwen2.5-VL-7B-Instruct"
+        },
+        "client": {
+          "workload": "visionarena-online",
+          "num_prompts": 1000,
+          "request_rate": 1,
+          "dataset": "lmarena-ai/VisionArena-Chat",
+          "enable_multimodal_chat": true
+        },
+        "medians": {
+          "base": {
+            "mean_ttft_ms": 3593.34,
+            "mean_tpot_ms": 66.35,
+            "output_throughput": 33.78
+          },
+          "head": {
+            "mean_ttft_ms": 3574.74,
+            "mean_tpot_ms": 65.86,
+            "output_throughput": 33.77
+          }
+        },
+        "relative_changes": {
+          "ttft_pct": -0.5,
+          "tpot_pct": -0.7,
+          "throughput_pct": 0.0
+        },
+        "completion_rate": {
+          "requested_prompts": 1000,
+          "completed": 287,
+          "failed": 713,
+          "failure_reason": "HTTP 400 Bad Request from the old-commit serving client for multimodal prompts; the 287/713 count is identical on both base and head, so the base/head comparison over the 287 completed requests remains apples-to-apples."
+        },
+        "raw_result_dir": "reports/issue_151_retest_raw_results/{ec4847981f,ceec19abb0}/visionarena-online/rep-{1,2,3}"
+      }
     }
   ],
   "summary": {
     "total_remaining_intervals": 4,
     "reproducible_regressions": 0,
-    "not_reproducible": 3,
-    "incomplete_evidence": 1,
-    "overall_verdict": "3_superseded_1_pending",
+    "not_reproducible": 4,
+    "incomplete_evidence": 0,
+    "overall_verdict": "all_within_thresholds",
     "disposition_summary": {
       "retain": 0,
       "quarantine": 0,
-      "supersede": 3,
-      "rerun": 1
+      "supersede": 4,
+      "rerun": 0
     },
     "metric_config_contract_note": "All remaining intervals must use the same metric/config contract as #165: median-based comparison, 3 interleaved reps per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS. Original mean_ttft_ms vs original ttft_ms are not directly comparable (per #165 report).",
-    "updated_interval": "agent-research-online-f273f9c5e2-51621c35bc -> verdict=not_reproducible, disposition=supersede (issue #188 resolved, PR #197); random-online-7a63f81e86-ec4847981f -> verdict=not_reproducible, disposition=supersede (issue #190 resolved, PR #196); instructcoder-online-51621c35bc-7a63f81e86 -> verdict=not_reproducible, disposition=supersede (issue #189 resolved, PR #198)"
+    "updated_interval": "agent-research-online-f273f9c5e2-51621c35bc -> verdict=not_reproducible, disposition=supersede (issue #188 resolved, PR #197); random-online-7a63f81e86-ec4847981f -> verdict=not_reproducible, disposition=supersede (issue #190 resolved, PR #196); instructcoder-online-51621c35bc-7a63f81e86 -> verdict=not_reproducible, disposition=supersede (issue #189 resolved, PR #198); visionarena-online-ec4847981f-ceec19abb0 -> verdict=not_reproducible, disposition=supersede (issue #191 resolved)"
   }
 }
