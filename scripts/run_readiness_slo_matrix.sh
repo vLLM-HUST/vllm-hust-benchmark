@@ -537,7 +537,11 @@ run_recovery_probe() {
     probe_dir="$(dirname "${probe_result}")"
     local probe_client="${probe_dir}/probe_client_result.json"
 
-    echo "INFO: recovery probe: sending 1 request (rate=0, immediate)"
+    # serve.py asserts current_request_rate > 0.0, so rate 0 is rejected.
+    # With a single probe prompt the first request is still dispatched at
+    # t=0, so rate=1 preserves the 'immediate single request' semantics
+    # while passing the assert.
+    echo "INFO: recovery probe: sending 1 request (rate=1, immediate)"
 
     NO_PROXY="127.0.0.1,localhost" no_proxy="127.0.0.1,localhost" \
     "${PYTHON_BIN}" "${CLI_COMPAT}" bench serve \
@@ -553,7 +557,7 @@ run_recovery_probe() {
         --num-prompts 1 \
         --input-len "${INPUT_LEN}" \
         --output-len "${OUTPUT_LEN}" \
-        --request-rate 0 \
+        --request-rate 1 \
         --metric-percentiles '50,95,99'
 
     if [[ ! -f "${probe_client}" ]]; then
