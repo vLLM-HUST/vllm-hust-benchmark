@@ -485,9 +485,16 @@ run_workload() {
     local client_result="$3"
     local metrics_file="$4"
 
-    local dataset request_rate
+    local dataset request_rate dataset_path
     dataset="$(workload_dataset "${workload}")"
     request_rate="$(profile_request_rate "${profile}")"
+    # Resolve the dataset file for datasets that require an explicit path
+    # (sharegpt-online / burstgpt). random-online uses vllm script defaults.
+    case "${dataset}" in
+        sharegpt) dataset_path="/data/shared_datasets/strict-inputs/ShareGPT_V3_unfiltered_cleaned_split.json" ;;
+        burstgpt) dataset_path="/data/shared_datasets/strict-inputs/BurstGPT_3.csv" ;;
+        *) dataset_path="" ;;
+    esac
 
     echo "INFO: running bench serve (dataset=${dataset}, num_prompts=${NUM_PROMPTS}, rate=${request_rate})"
 
@@ -500,6 +507,7 @@ run_workload() {
         --endpoint /v1/completions \
         --base-url "http://127.0.0.1:${PORT}" \
         --dataset-name "${dataset}" \
+        ${dataset_path:+--dataset-path "${dataset_path}"} \
         --model "${SERVED_MODEL_NAME}" \
         --tokenizer "${MODEL_PATH}" \
         --num-prompts "${NUM_PROMPTS}" \
