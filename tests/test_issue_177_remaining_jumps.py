@@ -248,7 +248,7 @@ class TestGenerateRemainingJumpsReport:
                 elif iv["workload"] == "random-online":
                     assert "completion_rate" not in rt
                     assert rt["medians"]["base"]["mean_tpot_ms"] == 45.32
-                    assert rt["medians"]["head"]["mean_tpot_ms"] == 46.6
+                    assert rt["medians"]["head"]["mean_tpot_ms"] == 46.60
                     assert rt["relative_changes"]["tpot_pct"] == 2.8
                 elif iv["workload"] == "instructcoder-online":
                     assert "completion_rate" not in rt

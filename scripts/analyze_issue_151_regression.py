@@ -444,7 +444,7 @@ REMAINING_INTERVALS = [
                 },
                 "head": {
                     "mean_ttft_ms": 245.03,
-                    "mean_tpot_ms": 46.6,
+                    "mean_tpot_ms": 46.60,
                     "output_throughput": 243.14,
                 },
             },
@@ -592,7 +592,7 @@ REMAINING_INTERVALS = [
             "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/191",
-        "related_prs": "#165 (methodology), #69/#77 (target commits), this PR",
+        "related_prs": "#165 (methodology), #69/#77 (target commits), #199",
     },
 ]
 
@@ -1066,50 +1066,6 @@ def compare_interval(
     }
 
 
-def remaining_summary(intervals: list[dict[str, Any]]) -> dict[str, Any]:
-    """Derive the issue #177 summary from the per-interval verdicts/dispositions."""
-    reproducible = sum(
-        1 for iv in intervals if iv["verdict"] == "reproducible_regression"
-    )
-    not_reproducible = sum(1 for iv in intervals if iv["verdict"] == "not_reproducible")
-    incomplete = sum(1 for iv in intervals if iv["verdict"] == "incomplete_evidence")
-
-    dispositions = {
-        "retain": 0,
-        "quarantine": 0,
-        "supersede": 0,
-        "rerun": 0,
-    }
-    for iv in intervals:
-        d = iv.get("disposition", "rerun")
-        dispositions[d] = dispositions.get(d, 0) + 1
-
-    if reproducible:
-        overall = "regression_reproduced"
-    elif incomplete == 0:
-        overall = "all_within_thresholds"
-    elif not_reproducible:
-        overall = f"{not_reproducible}_superseded_{incomplete}_pending"
-    else:
-        overall = "incomplete_evidence"
-
-    return {
-        "total_remaining_intervals": len(intervals),
-        "reproducible_regressions": reproducible,
-        "not_reproducible": not_reproducible,
-        "incomplete_evidence": incomplete,
-        "overall_verdict": overall,
-        "disposition_summary": dispositions,
-        "metric_config_contract_note": (
-            "All remaining intervals must use the same metric/config "
-            "contract as #165: median-based comparison, 3 interleaved reps "
-            "per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/"
-            "concurrency/RPS. Original mean_ttft_ms vs original ttft_ms "
-            "are not directly comparable (per #165 report)."
-        ),
-    }
-
-
 def generate_remaining_jumps_report(
     output_path: str | None = None,
 ) -> dict[str, Any]:
@@ -1177,6 +1133,50 @@ def generate_remaining_jumps_report(
         log(f"Issue #177 remaining-jumps report saved to {out}")
 
     return report
+
+
+def remaining_summary(intervals: list[dict[str, Any]]) -> dict[str, Any]:
+    """Derive the issue #177 summary from the per-interval verdicts/dispositions."""
+    reproducible = sum(
+        1 for iv in intervals if iv["verdict"] == "reproducible_regression"
+    )
+    not_reproducible = sum(1 for iv in intervals if iv["verdict"] == "not_reproducible")
+    incomplete = sum(1 for iv in intervals if iv["verdict"] == "incomplete_evidence")
+
+    dispositions = {
+        "retain": 0,
+        "quarantine": 0,
+        "supersede": 0,
+        "rerun": 0,
+    }
+    for iv in intervals:
+        d = iv.get("disposition", "rerun")
+        dispositions[d] = dispositions.get(d, 0) + 1
+
+    if reproducible:
+        overall = "regression_reproduced"
+    elif incomplete == 0:
+        overall = "all_within_thresholds"
+    elif not_reproducible:
+        overall = f"{not_reproducible}_superseded_{incomplete}_pending"
+    else:
+        overall = "incomplete_evidence"
+
+    return {
+        "total_remaining_intervals": len(intervals),
+        "reproducible_regressions": reproducible,
+        "not_reproducible": not_reproducible,
+        "incomplete_evidence": incomplete,
+        "overall_verdict": overall,
+        "disposition_summary": dispositions,
+        "metric_config_contract_note": (
+            "All remaining intervals must use the same metric/config "
+            "contract as #165: median-based comparison, 3 interleaved reps "
+            "per side, fixed NPU/model/CANN/torch_npu/dtype/graph mode/"
+            "concurrency/RPS. Original mean_ttft_ms vs original ttft_ms "
+            "are not directly comparable (per #165 report)."
+        ),
+    }
 
 
 def main() -> int:
