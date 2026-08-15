@@ -312,3 +312,111 @@ class TestServerConfigAndTracking:
             assert "official_target_expected" in sc
             assert sc["historical_captured"] == "unknown/config-unverified"
             assert iv["tracking_issue"] == EXPECTED_TRACKING_ISSUES[iv["workload"]]
+
+
+# ---------------------------------------------------------------------------
+# compare_interval fail-closed rep contract (PR #196 review)
+# ---------------------------------------------------------------------------
+
+
+class TestCompareIntervalFailClosed:
+    """compare_interval must not emit a verdict with fewer than reps_required
+    valid reps per side (regression test for PR #196 review)."""
+
+    @staticmethod
+    def _interval() -> dict:
+        return {
+            "name": "test-interval",
+            "base_commit": "a1b2c3d4e5",  # pragma: allowlist secret
+            "head_commit": "f6a7b8c9d0",  # pragma: allowlist secret
+            "workload": "random-online",
+            "reported_jump": "test jump",
+            "reps_required": 3,
+            "absolute_value_drift_note": "",
+            "original_leaderboard": {},
+        }
+
+    @staticmethod
+    def _write_rep(
+        rep_dir: Path,
+        *,
+        completed: bool = True,
+        valid_manifest: bool = True,
+    ) -> None:
+        rep_dir.mkdir(parents=True, exist_ok=True)
+        if completed:
+            (rep_dir / ".completed").write_text("ok\n")
+        manifest = {
+            "engine_commit_observed": "e" * 40,
+            "plugin_commit_observed": "f" * 40,
+        }
+        (rep_dir / "env-manifest.json").write_text(
+            json.dumps(manifest) if valid_manifest else "{not json\n"
+        )
+        (rep_dir / "raw.json").write_text(
+            json.dumps(
+                {
+                    "mean_ttft_ms": 100.0,
+                    "mean_tpot_ms": 10.0,
+                    "output_throughput": 100.0,
+                }
+            )
+            + "\n"
+        )
+
+    @classmethod
+    def _write_side(
+        cls,
+        result_dir: Path,
+        commit: str,
+        workload: str,
+        n: int,
+        **kwargs,
+    ) -> None:
+        for rep in range(1, n + 1):
+            cls._write_rep(result_dir / commit / workload / f"rep-{rep}", **kwargs)
+
+    def test_one_rep_per_side_fails_closed(self, analyze_mod, tmp_path) -> None:
+        iv = self._interval()
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 1)
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 1)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] == "incomplete_evidence"
+        assert result["base_reps"] == 1
+        assert result["head_reps"] == 1
+        assert result["reps_required"] == 3
+
+    def test_missing_side_fails_closed(self, analyze_mod, tmp_path) -> None:
+        iv = self._interval()
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] == "incomplete_evidence"
+        assert result["base_reps"] == 3
+        assert result["head_reps"] == 0
+
+    def test_invalid_rep_does_not_count_toward_contract(
+        self, analyze_mod, tmp_path
+    ) -> None:
+        iv = self._interval()
+        # rep-3 lacks the .completed marker -> only 2 valid base reps.
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 2)
+        self._write_rep(
+            tmp_path / iv["base_commit"] / iv["workload"] / "rep-3",
+            completed=False,
+        )
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] == "incomplete_evidence"
+        assert result["base_reps"] == 2
+        assert result["head_reps"] == 3
+
+    def test_full_three_reps_per_side_emits_verdict(
+        self, analyze_mod, tmp_path
+    ) -> None:
+        iv = self._interval()
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 3)
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] in ("not_reproducible", "reproducible_regression")
+        assert result["base_reps"] == 3
+        assert result["head_reps"] == 3
