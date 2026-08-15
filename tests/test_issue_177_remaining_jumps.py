@@ -35,7 +35,14 @@ EXPECTED_TRACKING_ISSUES = {
 }
 
 # Workloads whose retests are complete and verdict=not_reproducible (supersede).
-RESOLVED_WORKLOADS = {"random-online", "agent-research-online", "visionarena-online"}
+# random-online (#190), agent-research-online (#188), instructcoder-online
+# (#189) and visionarena-online (#191) were retested and superseded.
+RESOLVED_WORKLOADS = {
+    "random-online",
+    "agent-research-online",
+    "instructcoder-online",
+    "visionarena-online",
+}
 
 REQUIRED_INTERVAL_FIELDS = [
     "interval_id",
@@ -84,9 +91,9 @@ class TestRemainingIntervalsConfig:
         assert len(analyze_mod.REMAINING_INTERVALS) == 4
 
     def test_remaining_intervals_status(self, analyze_mod):
-        # random-online (issue #190), agent-research-online (issue #188),
-        # and visionarena-online (issue #191) were retested and superseded;
-        # instructcoder-online (issue #189) remains pending.
+        # random-online (#190), agent-research-online (#188),
+        # instructcoder-online (#189) and visionarena-online (#191)
+        # were retested and superseded.
         for iv in analyze_mod.REMAINING_INTERVALS:
             if iv["workload"] in RESOLVED_WORKLOADS:
                 assert iv["retest_status"] == "completed"
@@ -190,13 +197,13 @@ class TestGenerateRemainingJumpsReport:
         s = report["summary"]
         assert s["total_remaining_intervals"] == 4
         assert s["reproducible_regressions"] == 0
-        assert s["not_reproducible"] == 3
-        assert s["incomplete_evidence"] == 1
-        assert s["overall_verdict"] == "3_superseded_1_pending"
-        assert s["disposition_summary"]["rerun"] == 1
+        assert s["not_reproducible"] == 4
+        assert s["incomplete_evidence"] == 0
+        assert s["overall_verdict"] == "all_within_thresholds"
+        assert s["disposition_summary"]["rerun"] == 0
         assert s["disposition_summary"]["retain"] == 0
         assert s["disposition_summary"]["quarantine"] == 0
-        assert s["disposition_summary"]["supersede"] == 3
+        assert s["disposition_summary"]["supersede"] == 4
 
     def test_reported_jump_first_interval(self, analyze_mod):
         report = analyze_mod.generate_remaining_jumps_report()
@@ -243,6 +250,11 @@ class TestGenerateRemainingJumpsReport:
                     assert rt["medians"]["base"]["mean_tpot_ms"] == 45.32
                     assert rt["medians"]["head"]["mean_tpot_ms"] == 46.60
                     assert rt["relative_changes"]["tpot_pct"] == 2.8
+                elif iv["workload"] == "instructcoder-online":
+                    assert "completion_rate" not in rt
+                    assert rt["medians"]["base"]["mean_tpot_ms"] == 41.32
+                    assert rt["medians"]["head"]["mean_tpot_ms"] == 41.52
+                    assert rt["relative_changes"]["tpot_pct"] == 0.5
                 else:  # agent-research-online
                     assert "completion_rate" not in rt
                     assert rt["medians"]["base"]["mean_tpot_ms"] == 41.98
@@ -281,10 +293,10 @@ class TestCommittedReportFile:
     def test_file_summary(self):
         data = json.loads(REPORT_PATH.read_text())
         s = data["summary"]
-        assert s["incomplete_evidence"] == 1
-        assert s["not_reproducible"] == 3
-        assert s["disposition_summary"]["rerun"] == 1
-        assert s["disposition_summary"]["supersede"] == 3
+        assert s["incomplete_evidence"] == 0
+        assert s["not_reproducible"] == 4
+        assert s["disposition_summary"]["rerun"] == 0
+        assert s["disposition_summary"]["supersede"] == 4
 
     def test_file_matches_generator(self, analyze_mod):
         on_disk = json.loads(REPORT_PATH.read_text())
@@ -299,6 +311,16 @@ class TestCommittedReportFile:
             assert ("retest" in a) == ("retest" in b)
             if "retest" in a:
                 assert a["retest"] == b["retest"]
+
+    def test_file_failure_policy_recorded(self):
+        data = json.loads(REPORT_PATH.read_text())
+        iv = next(
+            iv for iv in data["intervals"] if iv["workload"] == "instructcoder-online"
+        )
+        fp = iv["retest"]["failure_policy"]
+        assert fp["accepted_max_failure_rate"] == 0.01
+        # base rep-3 partial failure (2047/2048) must be adjudicated, not dropped
+        assert fp["observed"]["base"][2] == {"rep": 3, "completed": 2047, "failed": 1}
 
 
 # ---------------------------------------------------------------------------
@@ -343,13 +365,12 @@ class TestServerConfigAndTracking:
 
 
 # ---------------------------------------------------------------------------
-# compare_interval fail-closed rep contract (PR #196 review)
+# Shared helpers for the fail-closed rep-contract and failure-rate tests
 # ---------------------------------------------------------------------------
 
 
-class TestCompareIntervalFailClosed:
-    """compare_interval must not emit a verdict with fewer than reps_required
-    valid reps per side (regression test for PR #196 review)."""
+class _IntervalHelpers:
+    """Build a minimal interval + synthetic rep tree for analyzer unit tests."""
 
     @staticmethod
     def _interval() -> dict:
@@ -370,6 +391,9 @@ class TestCompareIntervalFailClosed:
         *,
         completed: bool = True,
         valid_manifest: bool = True,
+        failed: int = 0,
+        num_prompts: int = 100,
+        include_failure_fields: bool = True,
     ) -> None:
         rep_dir.mkdir(parents=True, exist_ok=True)
         if completed:
@@ -381,16 +405,15 @@ class TestCompareIntervalFailClosed:
         (rep_dir / "env-manifest.json").write_text(
             json.dumps(manifest) if valid_manifest else "{not json\n"
         )
-        (rep_dir / "raw.json").write_text(
-            json.dumps(
-                {
-                    "mean_ttft_ms": 100.0,
-                    "mean_tpot_ms": 10.0,
-                    "output_throughput": 100.0,
-                }
-            )
-            + "\n"
-        )
+        raw = {
+            "mean_ttft_ms": 100.0,
+            "mean_tpot_ms": 10.0,
+            "output_throughput": 100.0,
+        }
+        if include_failure_fields:
+            raw["failed"] = failed
+            raw["num_prompts"] = num_prompts
+        (rep_dir / "raw.json").write_text(json.dumps(raw) + "\n")
 
     @classmethod
     def _write_side(
@@ -403,6 +426,16 @@ class TestCompareIntervalFailClosed:
     ) -> None:
         for rep in range(1, n + 1):
             cls._write_rep(result_dir / commit / workload / f"rep-{rep}", **kwargs)
+
+
+# ---------------------------------------------------------------------------
+# compare_interval fail-closed rep contract (PR #196 review)
+# ---------------------------------------------------------------------------
+
+
+class TestCompareIntervalFailClosed(_IntervalHelpers):
+    """compare_interval must not emit a verdict with fewer than reps_required
+    valid reps per side (regression test for PR #196 review)."""
 
     def test_one_rep_per_side_fails_closed(self, analyze_mod, tmp_path) -> None:
         iv = self._interval()
@@ -448,3 +481,68 @@ class TestCompareIntervalFailClosed:
         assert result["verdict"] in ("not_reproducible", "reproducible_regression")
         assert result["base_reps"] == 3
         assert result["head_reps"] == 3
+
+
+# ---------------------------------------------------------------------------
+# failure-rate policy (PR #198 review)
+# ---------------------------------------------------------------------------
+
+
+class TestFailureRatePolicy(_IntervalHelpers):
+    """collect_rep_results must reject reps whose request failure rate exceeds
+    the accepted threshold, and record in-range partial failures (PR #198)."""
+
+    def test_excess_failure_rate_rejects_rep(self, analyze_mod, tmp_path) -> None:
+        iv = self._interval()
+        # base rep-3 exceeds the 1% threshold (50/100) -> only 2 valid base reps.
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 2)
+        self._write_rep(
+            tmp_path / iv["base_commit"] / iv["workload"] / "rep-3",
+            failed=50,
+            num_prompts=100,
+        )
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] == "incomplete_evidence"
+        assert result["base_reps"] == 2
+        assert result["head_reps"] == 3
+
+    def test_missing_failure_fields_rejects_rep(self, analyze_mod, tmp_path) -> None:
+        iv = self._interval()
+        # base rep-3 raw.json lacks failed/num_prompts -> cannot adjudicate.
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 2)
+        self._write_rep(
+            tmp_path / iv["base_commit"] / iv["workload"] / "rep-3",
+            include_failure_fields=False,
+        )
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] == "incomplete_evidence"
+        assert result["base_reps"] == 2
+        assert result["head_reps"] == 3
+
+    def test_in_range_failure_accepted_and_recorded(
+        self, analyze_mod, tmp_path
+    ) -> None:
+        iv = self._interval()
+        # base rep-3 has 1/100 failure (1% == threshold) -> accepted.
+        self._write_side(tmp_path, iv["base_commit"], iv["workload"], 2)
+        self._write_rep(
+            tmp_path / iv["base_commit"] / iv["workload"] / "rep-3",
+            failed=1,
+            num_prompts=100,
+        )
+        self._write_side(tmp_path, iv["head_commit"], iv["workload"], 3)
+        result = analyze_mod.compare_interval(iv, tmp_path, None, None)
+        assert result["verdict"] in ("not_reproducible", "reproducible_regression")
+        assert result["base_reps"] == 3
+        assert result["head_reps"] == 3
+
+    def test_generated_report_records_failure_policy(self, analyze_mod) -> None:
+        report = analyze_mod.generate_remaining_jumps_report()
+        iv_ic = next(
+            iv for iv in report["intervals"] if iv["workload"] == "instructcoder-online"
+        )
+        fp = iv_ic["retest"]["failure_policy"]
+        assert fp["accepted_max_failure_rate"] == 0.01
+        assert fp["observed"]["base"][2] == {"rep": 3, "completed": 2047, "failed": 1}

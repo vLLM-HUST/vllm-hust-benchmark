@@ -26,11 +26,17 @@ def analyze_mod():
 def _write_raw_json(
     rep_dir: Path, ttft: float = 100.0, tpot: float = 50.0, throughput: float = 200.0
 ) -> None:
-    """Write a valid raw.json with the given metrics."""
+    """Write a valid raw.json with the given metrics and default failure counts.
+
+    failed/num_prompts are required by the analyzer's failure-rate
+    policy (MAX_FAILURE_RATE); default to a clean run so reps pass.
+    """
     data = {
         "mean_ttft_ms": ttft,
         "mean_tpot_ms": tpot,
         "output_throughput": throughput,
+        "failed": 0,
+        "num_prompts": 100,
     }
     (rep_dir / "raw.json").write_text(json.dumps(data))
 

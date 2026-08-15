@@ -22,10 +22,13 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-MODEL_PATH="/data/shared_models/Qwen--Qwen2.5-14B-Instruct"
+# Model path / result dir are overridable via env so the same harness can
+# retest a different workload (e.g. issue #189 instructcoder-online) without
+# editing the script. Defaults target the original issue #151 Qwen2.5-14B run.
+MODEL_PATH="${RETEST_MODEL_PATH:-/data/shared_models/Qwen--Qwen2.5-14B-Instruct}"
 VLLM_HUST_REPO="/root/vllm/vllm-hust"
 ASCEND_REPO="/root/vllm/vllm-ascend-hust"
-RESULT_DIR="/data/issue151-retest-results"
+RESULT_DIR="${RETEST_RESULT_DIR:-/data/issue151-retest-results}"
 PYTHON="/root/miniconda3/envs/vllm-hust-dev/bin/python"
 AGENT_DATASET="/root/vllm/vllm-hust-benchmark/scripts/traces/evoscientist-workload-custom.jsonl"
 
@@ -38,7 +41,7 @@ GPU_MEM_UTIL=0.6
 DTYPE="float16"
 
 # Server port (reused across runs with stop_server between them)
-PORT=8000
+PORT=8001
 
 # Server startup timeout (seconds)
 SERVER_TIMEOUT=1200
@@ -47,12 +50,19 @@ SERVER_TIMEOUT=1200
 # Each pair maps to a specific workload — NOT a full cross-product.
 #   random-online:           2206f1f7b7 -> f273f9c5e2  (173% TTFT jump)
 #   agent-research-online:   7a63f81e86 -> ec4847981f  (7.8x TTFT jump)
-COMMIT_WORKLOAD_PAIRS=(
-    "2206f1f7b7:random-online"
-    "f273f9c5e2:random-online"
-    "7a63f81e86:agent-research-online"
-    "ec4847981f:agent-research-online"
-)
+# Override via RETEST_PAIRS (space-separated "commit:workload"), e.g.
+#   RETEST_PAIRS="51621c35bc:instructcoder-online 7a63f81e86:instructcoder-online"
+# for the issue #189 instructcoder-online retest.
+if [[ -n "${RETEST_PAIRS:-}" ]]; then
+    read -r -a COMMIT_WORKLOAD_PAIRS <<< "${RETEST_PAIRS}"
+else
+    COMMIT_WORKLOAD_PAIRS=(
+        "2206f1f7b7:random-online"
+        "f273f9c5e2:random-online"
+        "7a63f81e86:agent-research-online"
+        "ec4847981f:agent-research-online"
+    )
+fi
 
 # ---------------------------------------------------------------------------
 # Globals for PID tracking (triple verification: PID + starttime + cmdline)
@@ -683,6 +693,58 @@ run_agent_research_online() {
     return "$bench_exit"
 }
 
+# 19b. instructcoder-online: backend=vllm, endpoint=/v1/completions,
+#     dataset=hf (likaixin/InstructCoder), num_prompts=2048, request_rate=1,
+#     no_stream=true. Mirrors official baseline
+#     official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2.
+run_instructcoder_online() {
+    local commit="$1"
+    local rep="$2"
+    local outdir="$3"
+    local port="$4"
+
+    local server_log="$outdir/server.log"
+    local bench_log="$outdir/benchmark.log"
+
+    log "=== instructcoder-online: commit=$commit rep=$rep ==="
+
+    # Start server
+    if ! start_server "$commit" "$port" "$server_log"; then
+        log "ERROR: failed to start server for instructcoder-online"
+        return 1
+    fi
+
+    # Run benchmark client
+    local bench_exit=0
+    run_bench_tracked "$bench_log" \
+        "$PYTHON" -m vllm.entrypoints.cli.main bench serve \
+            --backend vllm \
+            --endpoint /v1/completions \
+            --host 127.0.0.1 \
+            --port "$port" \
+            --model "$MODEL_PATH" \
+            --dataset-name hf \
+            --dataset-path likaixin/InstructCoder \
+            --num-prompts 2048 \
+            --request-rate 1 \
+            --no-stream \
+            --save-result \
+            --result-dir "$outdir" \
+            --result-filename raw.json \
+        || bench_exit=$?
+
+    if [[ $bench_exit -ne 0 ]]; then
+        log "ERROR: instructcoder-online benchmark failed (exit $bench_exit)"
+        log "=== Last 30 lines of bench log ==="
+        tail -30 "$bench_log" 2>/dev/null || true
+    fi
+
+    # Stop server
+    stop_server
+
+    return "$bench_exit"
+}
+
 # =============================================================================
 # Orchestration
 # =============================================================================
@@ -746,6 +808,9 @@ run_single_benchmark() {
             || workload_exit=$?
     elif [[ "$workload" == "agent-research-online" ]]; then
         run_agent_research_online "$commit" "$rep" "$outdir" "$PORT" \
+            || workload_exit=$?
+    elif [[ "$workload" == "instructcoder-online" ]]; then
+        run_instructcoder_online "$commit" "$rep" "$outdir" "$PORT" \
             || workload_exit=$?
     else
         log "ERROR: unknown workload '$workload'"

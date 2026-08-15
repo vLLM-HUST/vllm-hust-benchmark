@@ -119,6 +119,13 @@ METRIC_DEFINITIONS = {
 # verdict is ``incomplete_evidence`` with disposition ``rerun``. The original
 # leaderboard values below are taken verbatim from the issue #151 table; backend
 # version provenance was not captured at original run time.
+# Accepted failure-rate policy for retest evidence (recorded in the issue #177
+# report retest blocks): a rep is accepted only if failed / num_prompts is at
+# or below this threshold. Reps exceeding it are rejected and do not count
+# toward reps_required, which fail-closed to ``incomplete_evidence``.
+MAX_FAILURE_RATE = 0.01
+
+
 REMAINING_INTERVALS = [
     {
         "interval_id": "agent-research-online-f273f9c5e2-51621c35bc",
@@ -169,24 +176,7 @@ REMAINING_INTERVALS = [
             "head_backend_version": (
                 "N/A (historical record, not captured at original run time)"
             ),
-            "note": (
-                "Original leaderboard records have backend_version=N/A; retest "
-                "required to capture full provenance"
-            ),
         },
-        "reps_completed": 3,
-        "reps_required": 3,
-        "verdict": "not_reproducible",
-        "disposition": "supersede",
-        "disposition_reason": (
-            "Interleaved 3x3 retest shows TTFT +2.0%, TPOT +1.1%, throughput "
-            "-0.5% (all within #165 thresholds). The reported 54.2% TTFT jump "
-            "(281ms -> 434ms) is not reproducible; the original leaderboard "
-            "values are superseded by the median-of-medians evidence from this "
-            "retest."
-        ),
-        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/188",
-        "related_prs": "#165 (methodology), #49/#41 (target commits), this PR",
         "retest": {
             "method": (
                 "median-based comparison, 3 interleaved reps per side, fixed "
@@ -203,9 +193,8 @@ REMAINING_INTERVALS = [
             },
             "client": {
                 "workload": "agent-research-online",
-                "num_prompts": 200,
+                "num_prompts": 32,
                 "request_rate": 1,
-                "max_concurrency": 1,
             },
             "medians": {
                 "base": {
@@ -229,13 +218,26 @@ REMAINING_INTERVALS = [
                 "{f273f9c5e2,51621c35bc}/agent-research-online/rep-{1,2,3}"
             ),
         },
+        "reps_completed": 3,
+        "reps_required": 3,
+        "verdict": "not_reproducible",
+        "disposition": "supersede",
+        "disposition_reason": (
+            "Interleaved 3x3 retest shows TTFT +2.0%, TPOT +1.1%, throughput "
+            "-0.5% (all within #165 thresholds). The reported 54.2% TTFT jump "
+            "(281ms -> 434ms) is not reproducible; the original leaderboard "
+            "values are superseded by the median-of-medians evidence from this "
+            "retest."
+        ),
+        "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/188",
+        "related_prs": "#165 (methodology), #49/#41 (target commits), #197",
     },
     {
         "interval_id": "instructcoder-online-51621c35bc-7a63f81e86",
         "workload": "instructcoder-online",
         "base_commit": "51621c35bc",
         "head_commit": "7a63f81e86",
-        "retest_status": "pending",
+        "retest_status": "completed",
         "reported_jump": {
             "ttft_ms": {"base": 244, "head": 297, "change_pct": 21.4},
             "tpot_ms": {"base": 49.8, "head": 54.7, "change_pct": 9.9},
@@ -281,20 +283,87 @@ REMAINING_INTERVALS = [
             ),
             "note": (
                 "Original leaderboard records have backend_version=N/A; retest "
-                "required to capture full provenance"
+                "captured full provenance (see retest block below)."
             ),
         },
-        "reps_completed": 0,
+        "retest": {
+            "method": (
+                "median-based comparison, 3 interleaved reps per side, fixed "
+                "NPU/model/CANN/torch_npu/dtype/graph mode/concurrency/RPS "
+                "(same contract as #165)"
+            ),
+            "engine_base_sha": "51621c35bcce749cc34539bc1a48d32f264924a0",  # pragma: allowlist secret
+            "engine_head_sha": "7a63f81e86bd71e980adb635870ff56c9e23b545",  # pragma: allowlist secret
+            "plugin_sha": "312ca80a90cbd28438bce3b59e3fbaad749451f3",  # pragma: allowlist secret
+            "hardware": {"chip_model": "910B2", "chip_count": 1, "node_count": 1},
+            "model": {
+                "name": "Qwen2.5-Coder-14B-Instruct",
+                "path": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct",
+            },
+            "client": {
+                "workload": "instructcoder-online",
+                "num_prompts": 2048,
+                "request_rate": 1,
+                "dataset": "likaixin/InstructCoder",
+                "no_stream": True,
+            },
+            "medians": {
+                "base": {
+                    "mean_ttft_ms": 153.99,
+                    "mean_tpot_ms": 41.32,
+                    "output_throughput": 125.70,
+                },
+                "head": {
+                    "mean_ttft_ms": 155.00,
+                    "mean_tpot_ms": 41.52,
+                    "output_throughput": 125.75,
+                },
+            },
+            "relative_changes": {
+                "ttft_pct": 0.7,
+                "tpot_pct": 0.5,
+                "throughput_pct": 0.0,
+            },
+            "raw_result_dir": (
+                "reports/issue_151_retest_raw_results/"
+                "{51621c35bc,7a63f81e86}/instructcoder-online/rep-{1,2,3}"
+            ),
+            "failure_policy": {
+                "accepted_max_failure_rate": MAX_FAILURE_RATE,
+                "rationale": (
+                    "A rep is accepted only if failed/num_prompts <= 1%; "
+                    "otherwise it is rejected and does not count toward "
+                    "reps_required (fail-closed to incomplete_evidence). "
+                    "Partial failures within the threshold are recorded, not "
+                    "silently dropped."
+                ),
+                "observed": {
+                    "base": [
+                        {"rep": 1, "completed": 2048, "failed": 0},
+                        {"rep": 2, "completed": 2048, "failed": 0},
+                        {"rep": 3, "completed": 2047, "failed": 1},
+                    ],
+                    "head": [
+                        {"rep": 1, "completed": 2048, "failed": 0},
+                        {"rep": 2, "completed": 2048, "failed": 0},
+                        {"rep": 3, "completed": 2048, "failed": 0},
+                    ],
+                },
+            },
+        },
+        "reps_completed": 3,
         "reps_required": 3,
-        "verdict": "incomplete_evidence",
-        "disposition": "rerun",
+        "verdict": "not_reproducible",
+        "disposition": "supersede",
         "disposition_reason": (
-            "No retest performed yet; original records lack backend version "
-            "provenance. Must rerun with 3 interleaved reps per side using the "
-            "same metric/config contract as #165 before concluding."
+            "Interleaved 3x3 retest shows TTFT +0.7%, TPOT +0.5%, throughput "
+            "+0.0% (all within #165 thresholds). The reported 21.4% TTFT jump "
+            "(244ms -> 297ms) is not reproducible; the original leaderboard "
+            "values are superseded by the median-of-medians evidence from this "
+            "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/189",
-        "related_prs": "#165 (methodology), #41/#66 (target commits)",
+        "related_prs": "#165 (methodology), #41/#66 (target commits), #198",
     },
     {
         "interval_id": "random-online-7a63f81e86-ec4847981f",
@@ -344,10 +413,6 @@ REMAINING_INTERVALS = [
             ),
             "head_backend_version": (
                 "N/A (historical record, not captured at original run time)"
-            ),
-            "note": (
-                "Original leaderboard records have backend_version=N/A; retest "
-                "required to capture full provenance"
             ),
         },
         "retest": {
@@ -405,7 +470,7 @@ REMAINING_INTERVALS = [
             "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/190",
-        "related_prs": "#165 (methodology), #66/#69 (target commits), this PR",
+        "related_prs": "#165 (methodology), #66/#69 (target commits), #196",
     },
     {
         "interval_id": "visionarena-online-ec4847981f-ceec19abb0",
@@ -527,7 +592,7 @@ REMAINING_INTERVALS = [
             "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/191",
-        "related_prs": "#165 (methodology), #69/#77 (target commits), this PR",
+        "related_prs": "#165 (methodology), #69/#77 (target commits), #199",
     },
 ]
 
@@ -679,6 +744,28 @@ def load_raw_metrics(rep_dir: Path) -> dict[str, Any] | None:
     return metrics
 
 
+def load_failure_counts(rep_dir: Path) -> dict[str, Any] | None:
+    """Read the request failure counts from a rep's raw.json.
+
+    Returns a dict with ``failed`` and ``num_prompts``, or None when the fields
+    are missing or non-numeric (the rep is then rejected fail-closed because
+    its failure rate cannot be adjudicated).
+    """
+    raw_file = rep_dir / "raw.json"
+    if not raw_file.is_file():
+        return None
+    try:
+        with open(raw_file) as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+    failed = data.get("failed")
+    num_prompts = data.get("num_prompts")
+    if not isinstance(failed, int) or not isinstance(num_prompts, int):
+        return None
+    return {"failed": failed, "num_prompts": num_prompts}
+
+
 def collect_rep_results(
     result_dir: Path,
     commit: str,
@@ -733,12 +820,36 @@ def collect_rep_results(
         if metrics is None:
             continue
 
+        # Failure-rate policy: reject reps with an excessive number of failed
+        # requests instead of silently counting them as valid evidence. Reps
+        # within the accepted threshold are retained, but their failure counts
+        # are recorded so the report can adjudicate partial failures.
+        failure = load_failure_counts(rep_dir)
+        if failure is None:
+            log(
+                f"  SKIP {rep_name}: cannot adjudicate failure counts (missing raw fields)"
+            )
+            continue
+        num_prompts = failure["num_prompts"]
+        failed = failure["failed"]
+        if num_prompts and failed / num_prompts > MAX_FAILURE_RATE:
+            log(
+                f"  SKIP {rep_name}: failure rate {failed}/{num_prompts} "
+                f"exceeds {MAX_FAILURE_RATE:.0%}"
+            )
+            continue
+        log(
+            f"  FAILURE-POLICY {rep_name}: {failed}/{num_prompts} failed "
+            f"(<= {MAX_FAILURE_RATE:.0%})"
+        )
+
         rep_num = int(rep_name.removeprefix("rep-"))
         results.append(
             {
                 "rep": rep_num,
                 "metrics": metrics,
                 "manifest": manifest,
+                "failure": failure,
             }
         )
         log(
@@ -998,6 +1109,7 @@ def generate_remaining_jumps_report(
                 "disposition_reason": iv["disposition_reason"],
                 "tracking_issue": iv["tracking_issue"],
                 "related_prs": iv["related_prs"],
+                "retest": iv.get("retest"),
             }
         )
         if iv.get("retest") is not None:
