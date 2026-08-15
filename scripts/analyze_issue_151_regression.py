@@ -29,6 +29,26 @@ import sys
 from pathlib import Path
 from typing import Any
 
+
+def format_reported_jump(jump: dict[str, Any]) -> str:
+    """Pretty-print a post-#177 ``reported_jump`` dict for compare_interval()."""
+    parts = []
+    for metric in ("ttft_ms", "tpot_ms", "throughput_tps"):
+        v = jump.get(metric)
+        if not v:
+            continue
+        pct = v.get("change_pct")
+        if pct is None:
+            continue
+        label = {
+            "ttft_ms": "TTFT",
+            "tpot_ms": "TPOT",
+            "throughput_tps": "TPS",
+        }[metric]
+        parts.append(f"{pct:+.1f}% {label}")
+    return ", ".join(parts) or "reported_jump (see REMAINING_INTERVALS)"
+
+
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -99,13 +119,20 @@ METRIC_DEFINITIONS = {
 # verdict is ``incomplete_evidence`` with disposition ``rerun``. The original
 # leaderboard values below are taken verbatim from the issue #151 table; backend
 # version provenance was not captured at original run time.
+# Accepted failure-rate policy for retest evidence (recorded in the issue #177
+# report retest blocks): a rep is accepted only if failed / num_prompts is at
+# or below this threshold. Reps exceeding it are rejected and do not count
+# toward reps_required, which fail-closed to ``incomplete_evidence``.
+MAX_FAILURE_RATE = 0.01
+
+
 REMAINING_INTERVALS = [
     {
         "interval_id": "agent-research-online-f273f9c5e2-51621c35bc",
         "workload": "agent-research-online",
         "base_commit": "f273f9c5e2",
         "head_commit": "51621c35bc",
-        "retest_status": "pending",
+        "retest_status": "completed",
         "reported_jump": {
             "ttft_ms": {"base": 281, "head": 434, "change_pct": 54.2},
             "tpot_ms": {"base": 49.1, "head": 55.7, "change_pct": 13.4},
@@ -154,17 +181,19 @@ REMAINING_INTERVALS = [
                 "required to capture full provenance"
             ),
         },
-        "reps_completed": 0,
+        "reps_completed": 3,
         "reps_required": 3,
-        "verdict": "incomplete_evidence",
-        "disposition": "rerun",
+        "verdict": "not_reproducible",
+        "disposition": "supersede",
         "disposition_reason": (
-            "No retest performed yet; original records lack backend version "
-            "provenance. Must rerun with 3 interleaved reps per side using the "
-            "same metric/config contract as #165 before concluding."
+            "Interleaved 3x3 retest shows TTFT +2.0%, TPOT +1.1%, throughput "
+            "-0.5% (all within #165 thresholds). The reported 54.2% TTFT jump "
+            "(281ms -> 434ms) is not reproducible; the original leaderboard "
+            "values are superseded by the median-of-medians evidence from this "
+            "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/188",
-        "related_prs": "#165 (methodology), #49/#41 (target commits)",
+        "related_prs": "#165 (methodology), #49/#41 (target commits), #197",
     },
     {
         "interval_id": "instructcoder-online-51621c35bc-7a63f81e86",
@@ -262,6 +291,28 @@ REMAINING_INTERVALS = [
                 "reports/issue_151_retest_raw_results/"
                 "{51621c35bc,7a63f81e86}/instructcoder-online/rep-{1,2,3}"
             ),
+            "failure_policy": {
+                "accepted_max_failure_rate": MAX_FAILURE_RATE,
+                "rationale": (
+                    "A rep is accepted only if failed/num_prompts <= 1%; "
+                    "otherwise it is rejected and does not count toward "
+                    "reps_required (fail-closed to incomplete_evidence). "
+                    "Partial failures within the threshold are recorded, not "
+                    "silently dropped."
+                ),
+                "observed": {
+                    "base": [
+                        {"rep": 1, "completed": 2048, "failed": 0},
+                        {"rep": 2, "completed": 2048, "failed": 0},
+                        {"rep": 3, "completed": 2047, "failed": 1},
+                    ],
+                    "head": [
+                        {"rep": 1, "completed": 2048, "failed": 0},
+                        {"rep": 2, "completed": 2048, "failed": 0},
+                        {"rep": 3, "completed": 2048, "failed": 0},
+                    ],
+                },
+            },
         },
         "reps_completed": 3,
         "reps_required": 3,
@@ -275,14 +326,14 @@ REMAINING_INTERVALS = [
             "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/189",
-        "related_prs": "#165 (methodology), #41/#66 (target commits), this PR",
+        "related_prs": "#165 (methodology), #41/#66 (target commits), #198",
     },
     {
         "interval_id": "random-online-7a63f81e86-ec4847981f",
         "workload": "random-online",
         "base_commit": "7a63f81e86",
         "head_commit": "ec4847981f",
-        "retest_status": "pending",
+        "retest_status": "completed",
         "reported_jump": {
             "ttft_ms": {"base": 1261, "head": 1535, "change_pct": 21.7},
             "tpot_ms": {"base": 52.1, "head": 54.0, "change_pct": 3.6},
@@ -331,17 +382,19 @@ REMAINING_INTERVALS = [
                 "required to capture full provenance"
             ),
         },
-        "reps_completed": 0,
+        "reps_completed": 3,
         "reps_required": 3,
-        "verdict": "incomplete_evidence",
-        "disposition": "rerun",
+        "verdict": "not_reproducible",
+        "disposition": "supersede",
         "disposition_reason": (
-            "No retest performed yet; original records lack backend version "
-            "provenance. Must rerun with 3 interleaved reps per side using the "
-            "same metric/config contract as #165 before concluding."
+            "Interleaved 3x3 retest shows TTFT +1.4%, TPOT +2.8%, throughput "
+            "-0.2% (all within #165 thresholds). The reported 21.7% TTFT jump "
+            "(1261ms -> 1535ms) is not reproducible; the original leaderboard "
+            "values are superseded by the median-of-medians evidence from this "
+            "retest."
         ),
         "tracking_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/190",
-        "related_prs": "#165 (methodology), #66/#69 (target commits)",
+        "related_prs": "#165 (methodology), #66/#69 (target commits), #196",
     },
     {
         "interval_id": "visionarena-online-ec4847981f-ceec19abb0",
@@ -559,6 +612,28 @@ def load_raw_metrics(rep_dir: Path) -> dict[str, Any] | None:
     return metrics
 
 
+def load_failure_counts(rep_dir: Path) -> dict[str, Any] | None:
+    """Read the request failure counts from a rep's raw.json.
+
+    Returns a dict with ``failed`` and ``num_prompts``, or None when the fields
+    are missing or non-numeric (the rep is then rejected fail-closed because
+    its failure rate cannot be adjudicated).
+    """
+    raw_file = rep_dir / "raw.json"
+    if not raw_file.is_file():
+        return None
+    try:
+        with open(raw_file) as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+    failed = data.get("failed")
+    num_prompts = data.get("num_prompts")
+    if not isinstance(failed, int) or not isinstance(num_prompts, int):
+        return None
+    return {"failed": failed, "num_prompts": num_prompts}
+
+
 def collect_rep_results(
     result_dir: Path,
     commit: str,
@@ -613,12 +688,36 @@ def collect_rep_results(
         if metrics is None:
             continue
 
+        # Failure-rate policy: reject reps with an excessive number of failed
+        # requests instead of silently counting them as valid evidence. Reps
+        # within the accepted threshold are retained, but their failure counts
+        # are recorded so the report can adjudicate partial failures.
+        failure = load_failure_counts(rep_dir)
+        if failure is None:
+            log(
+                f"  SKIP {rep_name}: cannot adjudicate failure counts (missing raw fields)"
+            )
+            continue
+        num_prompts = failure["num_prompts"]
+        failed = failure["failed"]
+        if num_prompts and failed / num_prompts > MAX_FAILURE_RATE:
+            log(
+                f"  SKIP {rep_name}: failure rate {failed}/{num_prompts} "
+                f"exceeds {MAX_FAILURE_RATE:.0%}"
+            )
+            continue
+        log(
+            f"  FAILURE-POLICY {rep_name}: {failed}/{num_prompts} failed "
+            f"(<= {MAX_FAILURE_RATE:.0%})"
+        )
+
         rep_num = int(rep_name.removeprefix("rep-"))
         results.append(
             {
                 "rep": rep_num,
                 "metrics": metrics,
                 "manifest": manifest,
+                "failure": failure,
             }
         )
         log(
@@ -687,13 +786,17 @@ def compare_interval(
         result_dir, head_commit, workload, engine_repo, plugin_repo
     )
 
-    # Need at least 1 valid rep on each side
-    if not base_results:
-        log(f"  ERROR: no valid base results for {name}")
-    if not head_results:
-        log(f"  ERROR: no valid head results for {name}")
+    reps_required = interval.get("reps_required", 3)
 
-    if not base_results or not head_results:
+    # Fail-closed: the retest contract requires exactly reps_required valid
+    # reps per side. A partial or single-rep run cannot support superseding
+    # historical evidence.
+    if len(base_results) != reps_required:
+        log(f"  FAIL-CLOSED: base has {len(base_results)}/{reps_required} valid reps")
+    if len(head_results) != reps_required:
+        log(f"  FAIL-CLOSED: head has {len(head_results)}/{reps_required} valid reps")
+
+    if len(base_results) != reps_required or len(head_results) != reps_required:
         return {
             "interval": name,
             "workload": workload,
@@ -711,8 +814,12 @@ def compare_interval(
             },
             "base_reps": len(base_results),
             "head_reps": len(head_results),
+            "reps_required": reps_required,
             "verdict": "incomplete_evidence",
-            "reason": "Insufficient valid reps on one or both sides",
+            "reason": (
+                f"Expected {reps_required} valid reps per side, "
+                f"got {len(base_results)} base / {len(head_results)} head"
+            ),
         }
 
     # Compute medians
@@ -799,6 +906,7 @@ def compare_interval(
         },
         "base_reps": len(base_results),
         "head_reps": len(head_results),
+        "reps_required": reps_required,
         "medians": {
             "base": {
                 "mean_ttft_ms": base_ttft,
@@ -974,11 +1082,57 @@ def main() -> int:
             "to the given path and exit (no retest data required)."
         ),
     )
+    parser.add_argument(
+        "--interval",
+        action="append",
+        default=[],
+        metavar="ID",
+        help=(
+            "Only analyze the given interval_id (e.g. "
+            "random-online-7a63f81e86-ec4847981f). May be passed multiple "
+            "times. If absent, all legacy INTERVALS are analyzed (matches the "
+            "original pre-#177 script contract)."
+        ),
+    )
     args = parser.parse_args()
 
     if args.remaining_report:
         generate_remaining_jumps_report(args.remaining_report)
         return 0
+
+    # Resolve the analysis set.
+    # - Legacy INTERVALS use `name` as the display key and carry `reported_jump`
+    #   as a short string.
+    # - REMAINING_INTERVALS (post-#177) use `interval_id` as the stable id and
+    #   carry `reported_jump` as a nested {"metric": {"base", "head", "change_pct"}}
+    #   dict. Normalize them to a uniform shape compare_interval() expects.
+    legacy = [iv for iv in INTERVALS]
+    remaining = []
+    for iv in REMAINING_INTERVALS:
+        flat = dict(iv)
+        flat.setdefault("name", iv["interval_id"])
+        # compare_interval prints interval["reported_jump"] as str.
+        if isinstance(iv.get("reported_jump"), dict):
+            flat["reported_jump"] = format_reported_jump(iv["reported_jump"])
+        remaining.append(flat)
+    all_intervals: list[dict[str, Any]] = legacy + remaining
+
+    selected: list[dict[str, Any]]
+    if args.interval:
+        by_id = {iv.get("interval_id", iv.get("name", "")): iv for iv in all_intervals}
+        by_name = {iv.get("name", ""): iv for iv in all_intervals}
+        selected = []
+        for key in args.interval:
+            iv = by_id.get(key) or by_name.get(key)
+            if iv is None:
+                log(
+                    "ERROR: unknown --interval %s. Known ids: %s"
+                    % (key, ", ".join(sorted(by_id)))
+                )
+                return 1
+            selected.append(iv)
+    else:
+        selected = legacy
 
     result_dir = Path(args.result_dir)
     if not result_dir.is_dir():
@@ -988,9 +1142,13 @@ def main() -> int:
     log(f"Analyzing results in {result_dir}")
     log(f"Engine repo: {args.engine_repo or '(not provided)'}")
     log(f"Plugin repo: {args.plugin_repo or '(not provided)'}")
+    if args.interval:
+        log(
+            f"Selected intervals: {[iv.get('interval_id', iv['name']) for iv in selected]}"
+        )
 
     interval_results = []
-    for interval in INTERVALS:
+    for interval in selected:
         result = compare_interval(
             interval,
             result_dir,
