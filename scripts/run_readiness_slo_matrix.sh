@@ -476,6 +476,61 @@ stop_server() {
 }
 
 # ---------------------------------------------------------------------------
+# BurstGPT input preparation.
+#
+# The engine's BurstGPTDataset.load_data() keeps ALL original columns of the
+# raw BurstGPT_3.csv (Timestamp, Session ID, Elapsed time, Model, Request
+# tokens, Response tokens, Total tokens, Log Type), but
+# BurstGPTDataset.sample() reads input/output lengths POSITIONALLY at columns
+# [2] and [3]. In the raw CSV, column [3] is the Model name (e.g. "GPT-4"),
+# so ``int(data[i][3])`` raises ``ValueError: invalid literal for int()`` and
+# the bench run produces no client_result.json (observed on burstgpt/burst/rep1).
+# We cannot patch the engine (it is pinned to a fixed commit for
+# reproducibility), so we pre-process the raw CSV into a layout the engine's
+# positional access expects: Request tokens at column [2] and Response tokens
+# at column [3], while keeping the "Model" and "Response tokens" column names
+# that load_data() filters on. Only GPT-4 rows with positive Response tokens
+# are kept (the exact filter load_data() applies), so the random_state
+# sampling semantics are unchanged.
+# ---------------------------------------------------------------------------
+BURGPT_RAW_CSV="/data/shared_datasets/strict-inputs/BurstGPT_3.csv"
+BURGPT_INPUT_DIR="${OUTPUT_DIR}/inputs"
+BURGPT_INPUT_CSV="${BURGPT_INPUT_DIR}/BurstGPT_processed.csv"
+
+prepare_burstgpt_dataset() {
+    if [[ -f "${BURGPT_INPUT_CSV}" ]]; then
+        return 0
+    fi
+    if [[ ! -f "${BURGPT_RAW_CSV}" ]]; then
+        echo "ERROR: BurstGPT raw CSV not found: ${BURGPT_RAW_CSV}" >&2
+        return 1
+    fi
+    mkdir -p "${BURGPT_INPUT_DIR}"
+    echo "INFO: preparing BurstGPT dataset for engine positional parser"
+    "${PYTHON_BIN}" - "${BURGPT_RAW_CSV}" "${BURGPT_INPUT_CSV}" <<'PYEOF'
+import pandas as pd
+import sys
+raw, out = sys.argv[1], sys.argv[2]
+df = pd.read_csv(raw)
+# Same GPT-4 / positive-response filter the engine's load_data() applies.
+df = df[df["Model"] == "GPT-4"]
+df = df[df["Response tokens"] > 0]
+# Reorder so the engine's sample() positional access works: [2]=input_len
+# (Request tokens), [3]=output_len (Response tokens), while keeping the
+# "Model" / "Response tokens" named columns the filter references.
+df = df[["Timestamp", "Session ID", "Request tokens", "Response tokens",
+         "Model", "Total tokens", "Log Type"]]
+df.to_csv(out, index=False)
+PYEOF
+    if [[ ! -f "${BURGPT_INPUT_CSV}" ]]; then
+        echo "ERROR: failed to prepare BurstGPT dataset" >&2
+        return 1
+    fi
+    echo "INFO: prepared BurstGPT dataset at ${BURGPT_INPUT_CSV}"
+    return 0
+}
+
+# ---------------------------------------------------------------------------
 # Run bench serve workload against the live server + capture /metrics.
 # Mirrors the proven _smoke_readiness_slo.sh bench serve invocation.
 # ---------------------------------------------------------------------------
@@ -490,9 +545,15 @@ run_workload() {
     request_rate="$(profile_request_rate "${profile}")"
     # Resolve the dataset file for datasets that require an explicit path
     # (sharegpt-online / burstgpt). random-online uses vllm script defaults.
+    # BurstGPT uses the pre-processed CSV (see prepare_burstgpt_dataset).
     case "${dataset}" in
         sharegpt) dataset_path="/data/shared_datasets/strict-inputs/ShareGPT_V3_unfiltered_cleaned_split.json" ;;
-        burstgpt) dataset_path="/data/shared_datasets/strict-inputs/BurstGPT_3.csv" ;;
+        burstgpt)
+            if ! prepare_burstgpt_dataset; then
+                return 1
+            fi
+            dataset_path="${BURGPT_INPUT_CSV}"
+            ;;
         *) dataset_path="" ;;
     esac
 
