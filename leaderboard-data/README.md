@@ -15,11 +15,22 @@ baseline. Older `vllm 0.11.0` / `v0110` baseline runs are retired and must not a
 - `snapshots/leaderboard_single.json`
 - `snapshots/leaderboard_multi.json`
 - `snapshots/leaderboard_compare.json`
+- `snapshots/leaderboard_historical.json` (recoverable historical trend entries; not a formal
+  admission snapshot)
+- `snapshots/historical_recovery_report.json` (inferences, exclusions, and required reruns)
 - `snapshots/last_updated.json`
 - `../submissions/` (raw run exports, each run has `run_leaderboard.json` and
   `leaderboard_manifest.json`)
 - `../archive/` (archived submissions not included in aggregation, see
   `archive/pre-v0.18.0/README.md`)
+
+Historical trend recovery is deliberately separate from formal admission. It fills deterministic
+spec/revision metadata, never invents measurements, and does not require legacy runs to carry newer
+`verified`, peak-memory, checksum, or environment-manifest fields. Rebuild it with:
+
+```bash
+python scripts/recover_historical_leaderboard.py
+```
 
 ## Refresh snapshots from submissions
 

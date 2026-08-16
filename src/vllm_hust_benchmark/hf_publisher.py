@@ -20,7 +20,11 @@ _LEADERBOARD_FILES = [
     "leaderboard_compare.json",
     "last_updated.json",
 ]
-_OPTIONAL_FILES = ["hard_constraints.json"]
+_OPTIONAL_FILES = [
+    "hard_constraints.json",
+    "leaderboard_historical.json",
+    "historical_recovery_report.json",
+]
 
 
 def _require_huggingface_hub() -> object:
