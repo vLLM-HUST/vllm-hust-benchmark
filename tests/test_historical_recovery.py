@@ -153,3 +153,91 @@ def test_only_non_inferable_measurement_is_scheduled_for_rerun(
     assert report["required_experiments"][0]["missing_or_invalid"] == [
         "invalid-error-rate"
     ]
+
+
+def test_derives_zero_error_rate_from_atomic_offline_latency_success(
+    tmp_path: Path,
+) -> None:
+    entry = _entry()
+    entry["workload"]["name"] = "random-latency"
+    entry["same_spec"]["scenario"] = "random-latency"
+    entry["same_spec"]["resolved_client_parameters"] = {
+        "model": "/runtime/model",
+        "input_len": 1024,
+        "output_len": 128,
+        "batch_size": 8,
+        "num_iters_warmup": 10,
+        "num_iters": 30,
+    }
+    entry["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        entry["same_spec"]
+    )
+    entry["metadata"]["data_source"] = "real-online-historical-pr-backfill"
+    entry["metadata"]["idempotency_key"] = "original-artifact-key"
+    entry["metrics"]["error_rate"] = None
+    registry, aliases = _write_inputs(tmp_path, [("atomic-latency", entry)])
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert recovered[0]["metrics"]["error_rate"] == 0.0
+    recovery = recovered[0]["historical_recovery"]
+    assert "metrics.error_rate" in recovery["inferred_fields"]
+    derivation = recovery["measurement_derivations"][0]
+    assert derivation["rule_id"] == "atomic-offline-latency-success/v1"
+    assert derivation["evidence"]["num_iters_warmup"] == 10
+    assert derivation["evidence"]["num_iters"] == 30
+    assert len(derivation["evidence"]["original_artifact_identity"]["sha256"]) == 64
+    assert report["summary"]["required_experiments"] == 0
+    assert report["summary"]["satisfied_experiments"] == 1
+    assert report["satisfied_experiments"][0]["evidence_kind"] == "derived-success"
+
+
+def test_real_rerun_satisfies_matching_invalid_measurement(tmp_path: Path) -> None:
+    invalid = _entry()
+    invalid["workload"]["name"] = "random-latency"
+    invalid["same_spec"]["scenario"] = "random-latency"
+    invalid["same_spec"]["resolved_client_parameters"].update(
+        {"num_iters_warmup": 10, "num_iters": 30}
+    )
+    invalid["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        invalid["same_spec"]
+    )
+    invalid["metadata"]["data_source"] = "real-online-historical-pr-backfill"
+    invalid["metrics"]["error_rate"] = None
+    rerun = _entry(throughput=101.0)
+    rerun["workload"]["name"] = "random-latency"
+    rerun["same_spec"]["scenario"] = "random-latency"
+    rerun["metadata"]["submitted_at"] = "2026-08-16T00:00:00Z"
+    rerun["same_spec"]["resolved_server_parameters"]["max_model_len"] = 32768
+    rerun["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        rerun["same_spec"]
+    )
+    registry, aliases = _write_inputs(
+        tmp_path, [("historical-invalid", invalid), ("real-rerun", rerun)]
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert len(recovered) == 1
+    assert recovered[0]["metrics"]["error_rate"] == 0.0
+    assert report["summary"]["required_experiments"] == 0
+    assert report["summary"]["satisfied_experiments"] == 1
+    assert report["satisfied_experiments"][0]["source_path"].endswith(
+        "historical-invalid/run_leaderboard.json"
+    )
+    assert report["satisfied_experiments"][0]["replacement_source_path"].endswith(
+        "real-rerun/run_leaderboard.json"
+    )
+    assert report["satisfied_experiments"][0]["evidence_kind"] == "fresh-rerun"
+    assert (
+        len(report["satisfied_experiments"][0]["original_artifact_identity"]["sha256"])
+        == 64
+    )
