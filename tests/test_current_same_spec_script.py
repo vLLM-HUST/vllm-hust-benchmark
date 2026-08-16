@@ -2,7 +2,6 @@ import json
 import subprocess
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RUNNER = REPO_ROOT / "scripts/run-current-ascend-same-spec.sh"
 
@@ -150,7 +149,11 @@ def test_current_runner_supports_audited_runtime_only_dataset_path() -> None:
     assert 'parameters["dataset_path"] = runtime_dataset_path' in normalize
     assert 'ensure_runtime_dataset_available "$CURRENT_RUNTIME_DATASET_PATH"' in script
     assert "CURRENT_INPUT_PROVENANCE_FILE=${CURRENT_INPUT_PROVENANCE_FILE:-}" in script
-    assert 'cp -f "$CURRENT_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"' in script
+    assert (
+        'cp -f "$CURRENT_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"'
+        in script
+    )
+    assert 'chmod 0644 "$ARTIFACT_DIR/input_provenance.json"' in script
 
 
 def test_prefix_repetition_official_spec_freezes_material_server_defaults() -> None:
@@ -417,7 +420,12 @@ def test_current_same_spec_runner_aggregates_measured_runs_after_export() -> Non
 
 def test_current_same_spec_runner_supports_export_only_without_rerun() -> None:
     script = RUNNER.read_text(encoding="utf-8")
-    assert 'CURRENT_EXPORT_ONLY=${CURRENT_EXPORT_ONLY:-0}' in script
-    assert 'CURRENT_EXPORT_ONLY requires an existing raw result' in script
-    assert '[same-spec-current] export-only: preserving existing raw measurement' in script
-    assert 'if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" != "serve" ]]' in script
+    assert "CURRENT_EXPORT_ONLY=${CURRENT_EXPORT_ONLY:-0}" in script
+    assert "CURRENT_EXPORT_ONLY requires an existing raw result" in script
+    assert (
+        "[same-spec-current] export-only: preserving existing raw measurement" in script
+    )
+    assert (
+        'if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" != "serve" ]]'
+        in script
+    )

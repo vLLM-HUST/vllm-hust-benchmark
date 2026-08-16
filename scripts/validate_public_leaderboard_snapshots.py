@@ -11,19 +11,18 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
+from vllm_hust_benchmark.official_targets import build_registry  # noqa: E402
 from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash  # noqa: E402
 from vllm_hust_benchmark.workload_config_contract import (  # noqa: E402
     WORKLOAD_CONFIG_CONTRACT_VERSION,
     requires_workload_config_contract,
+    uses_frozen_prefix_repetition_contract,
     validate_explicit_workload_config,
 )
-from vllm_hust_benchmark.official_targets import build_registry  # noqa: E402
-
 
 PUBLIC_BASELINE_ENGINE = "vllm"
 PUBLIC_BASELINE_VERSION = "0.18.0"
@@ -70,7 +69,7 @@ def specialty_spec_ids() -> frozenset[str]:
     """
     try:
         registry = build_registry(REPO_ROOT)
-    except Exception as exc:  # fail closed: no exemption if registry unusable
+    except (KeyError, OSError, TypeError, ValueError) as exc:
         print(f"WARNING: official targets registry unavailable: {exc}")
         return frozenset()
     return frozenset(
@@ -227,15 +226,20 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         gpu_memory_utilization = parse_optional_float(
             resolved_server_parameters.get("gpu_memory_utilization")
         )
+        expected_gpu_memory_utilization = (
+            0.9
+            if uses_frozen_prefix_repetition_contract(entry)
+            else DEFAULT_PUBLIC_GPU_MEMORY_UTILIZATION
+        )
         if (
             gpu_memory_utilization is not None
-            and gpu_memory_utilization != DEFAULT_PUBLIC_GPU_MEMORY_UTILIZATION
+            and gpu_memory_utilization != expected_gpu_memory_utilization
         ):
             errors.append(
                 f"{source.name}:{entry_id}: official public snapshot must not "
                 f"publish non-default gpu_memory_utilization="
                 f"{resolved_server_parameters.get('gpu_memory_utilization')!r}; "
-                f"rerun with {DEFAULT_PUBLIC_GPU_MEMORY_UTILIZATION} or mark the "
+                f"rerun with {expected_gpu_memory_utilization} or mark the "
                 "record outside the default public snapshot"
             )
 

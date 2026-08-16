@@ -28,6 +28,14 @@ RETIRED_PATH_PREFIX = "archive/pre-v0.18.0/"
 PRIMARY_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
 ATOMIC_OFFLINE_LATENCY_RULE = "atomic-offline-latency-success/v1"
 ONLINE_NO_STREAM_DEFAULT_RULE = "legacy-online-no-stream-default/v1"
+EXECUTION_CONTRACT_KEYS = (
+    "enable_prefix_caching",
+    "gpu_memory_utilization",
+    "max_model_len",
+    "max_num_batched_tokens",
+    "max_num_seqs",
+    "tensor_parallel_size",
+)
 
 
 def _infer_same_spec_defaults(same_spec: dict[str, Any]) -> list[dict[str, Any]]:
@@ -263,6 +271,74 @@ def _load_input_contract(artifact_path: Path) -> dict[str, str] | None:
     }
 
 
+def _contract_scalar(value: Any) -> tuple[str, Any]:
+    """Normalize JSON scalars for execution-vs-target comparisons."""
+
+    if isinstance(value, bool):
+        return ("bool", value)
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return ("number", float(value))
+    text = str(value).strip()
+    lowered = text.lower()
+    if lowered == "true":
+        return ("bool", True)
+    if lowered == "false":
+        return ("bool", False)
+    try:
+        return ("number", float(text))
+    except ValueError:
+        return ("text", text)
+
+
+def _execution_contract_conflicts(
+    artifact_path: Path,
+    target: dict[str, Any] | None,
+    same_spec: dict[str, Any],
+) -> tuple[str, ...]:
+    """Reject explicit repeat execution evidence that contradicts its target.
+
+    Historical artifacts can omit effective server parameters.  An adjacent
+    repeat suite is stronger evidence about what actually ran; when it states a
+    value that conflicts with the registered official target, the record is a
+    diagnostic run rather than an admissible point for that target.
+    """
+
+    if target is None:
+        return ()
+    registered = target.get("server_parameters")
+    if not isinstance(registered, dict):
+        return ()
+
+    evidence: list[dict[str, Any]] = []
+    resolved_server = same_spec.get("resolved_server_parameters")
+    if isinstance(resolved_server, dict):
+        evidence.append(resolved_server)
+    repeat_suite_path = artifact_path.parent / "repeat_suite.json"
+    if repeat_suite_path.is_file():
+        try:
+            repeat_suite = json.loads(repeat_suite_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            repeat_suite = {}
+        execution = repeat_suite.get("execution")
+        if isinstance(execution, dict):
+            evidence.append(execution)
+
+    conflicts = []
+    for execution in evidence:
+        for field in EXECUTION_CONTRACT_KEYS:
+            if field not in execution or field not in registered:
+                continue
+            actual = execution[field]
+            expected = registered[field]
+            reason = f"execution-contract-conflict:{field}:{actual}!={expected}"
+            if (
+                _contract_scalar(actual) != _contract_scalar(expected)
+                and reason not in conflicts
+            ):
+                conflicts.append(reason)
+    return tuple(conflicts)
+
+
 def _quality_score(
     *,
     method: str,
@@ -285,14 +361,31 @@ def _quality_score(
 
 
 def _selection_key(
-    entry: dict[str, Any], *, engine_commit: str, plugin_commit: str, spec_hash: str
+    entry: dict[str, Any],
+    *,
+    engine_commit: str,
+    plugin_commit: str,
+    spec_hash: str,
+    spec_id: str,
+    registered_target: bool,
+    input_contract: dict[str, str] | None,
 ) -> str:
     identity = {
         "engine_commit": engine_commit,
         "plugin_commit": plugin_commit,
-        "resolved_spec_hash": spec_hash,
         "config_type": str(entry.get("config_type") or ""),
     }
+    if registered_target:
+        identity["spec_id"] = spec_id
+        scenario = str(entry.get("same_spec", {}).get("scenario") or "")
+        if "visionarena" in scenario.lower():
+            identity["input_contract"] = (
+                input_contract["content_sha256"]
+                if input_contract is not None
+                else "unrecorded"
+            )
+    else:
+        identity["resolved_spec_hash"] = spec_hash
     canonical = json.dumps(identity, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
@@ -457,6 +550,11 @@ def recover_entry(
     plugin_provenance["commit"] = plugin_commit
     spec_id = str(recovered_spec.get("spec_id") or "")
     target = registry_by_id.get(spec_id)
+    execution_conflicts = _execution_contract_conflicts(
+        artifact_path, target, recovered_spec
+    )
+    if execution_conflicts:
+        return RecoveryDecision(source_path, "rejected", execution_conflicts)
     if target is not None:
         if not metadata.get("target_id"):
             metadata["target_id"] = spec_id
@@ -467,11 +565,15 @@ def recover_entry(
             )
             inferred_fields.append("metadata.target_version")
 
+    input_contract = _load_input_contract(artifact_path)
     key = _selection_key(
         recovered,
         engine_commit=engine_commit,
         plugin_commit=plugin_commit,
         spec_hash=recomputed_hash,
+        spec_id=spec_id,
+        registered_target=target is not None,
+        input_contract=input_contract,
     )
     recovery_record = {
         "schema_version": SCHEMA_VERSION,
@@ -488,7 +590,6 @@ def recover_entry(
         recovery_record["measurement_derivations"] = measurement_derivations
     if spec_derivations:
         recovery_record["spec_derivations"] = spec_derivations
-    input_contract = _load_input_contract(artifact_path)
     if input_contract is not None:
         recovery_record["input_contract"] = input_contract
     recovered["historical_recovery"] = recovery_record
@@ -754,6 +855,11 @@ def build_recovery(
             "deduplication_uses_metrics": False,
             "physical_machine_partitions_trend_identity": False,
             "same_chip_cross_machine_comparable": True,
+            "explicit_execution_contract_conflicts_rejected": True,
+            "registered_target_selection_identity": (
+                "spec_id+engine_commit+plugin_commit+config_type"
+            ),
+            "vision_input_contract_partitions_selection_identity": True,
             "formal_admission_gate_unchanged": True,
         },
         "rejected": rejected,

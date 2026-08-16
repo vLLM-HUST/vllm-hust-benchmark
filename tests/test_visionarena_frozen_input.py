@@ -33,11 +33,17 @@ def test_seed_zero_selection_is_canonical_and_stable() -> None:
     assert len(selected) == 1000
     assert len(set(selected)) == 1000
     assert max(selected) == 1973
-    assert module._compact_json_sha256(shard_order) == (
-        "c2121f82122d83bc005730dab935defc9175af24013d10b868d97b64917306b2"
+    assert (
+        module._compact_json_sha256(shard_order)
+        == (
+            "c2121f82122d83bc005730dab935defc9175af24013d10b868d97b64917306b2"  # pragma: allowlist secret
+        )
     )
-    assert module._compact_json_sha256(selected) == (
-        "6e1b1d169e836663328c6f9a38145ed093192f93f36656b26327f2244eb583bc"
+    assert (
+        module._compact_json_sha256(selected)
+        == (
+            "6e1b1d169e836663328c6f9a38145ed093192f93f36656b26327f2244eb583bc"  # pragma: allowlist secret
+        )
     )
 
 

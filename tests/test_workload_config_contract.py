@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from copy import deepcopy
 import json
+from copy import deepcopy
 from pathlib import Path
-
 
 from vllm_hust_benchmark.aggregate_results import VALID_AGG_METHODS
 from vllm_hust_benchmark.workload_config_contract import (
@@ -87,11 +86,77 @@ def official_visionarena_online_entry() -> dict:
     }
 
 
+def official_prefix_repetition_entry(submitted_at: str) -> dict:
+    frozen = submitted_at >= "2026-08-16T00:00:00Z"
+    server = {
+        "gpu_memory_utilization": 0.9 if frozen else 0.6,
+        "max_model_len": 32768,
+    }
+    client = {
+        "dataset_name": "prefix_repetition",
+        "prefix_repetition_prefix_len": 3840,
+        "prefix_repetition_suffix_len": 256,
+        "prefix_repetition_output_len": 256,
+        "no_stream": False,
+    }
+    if frozen:
+        server.update(
+            {
+                "enable_prefix_caching": True,
+                "no_enable_chunked_prefill": True,
+                "max_num_seqs": 16,
+                "max_num_batched_tokens": 32768,
+            }
+        )
+        client["ignore_eos"] = True
+    return {
+        "engine": "vllm-hust",
+        "workload": {
+            "name": "prefix-repetition-online",
+            "input_length": 4096,
+            "output_length": 256,
+            "batch_size": None,
+            "concurrent_requests": None,
+            "dataset": "prefix_repetition",
+        },
+        "metadata": {
+            "submitted_at": submitted_at,
+            "workload_config_contract": WORKLOAD_CONFIG_CONTRACT_VERSION,
+            "target_id": "official-ascend-jan-2026-v0.18.0",
+            "target_version": "Official Ascend Jan 2026",
+        },
+        "same_spec": {
+            "spec_id": (
+                "official-ascend-jan-2026-v0.18.0-"
+                "prefix-repetition-online-qwen25-14b-910b2"
+            ),
+            "scenario": "prefix-repetition-online",
+            "resolved_server_parameters": server,
+            "resolved_client_parameters": client,
+        },
+    }
+
+
 def test_complete_effective_config_passes_contract() -> None:
     entry = official_random_online_entry()
 
     assert requires_workload_config_contract(entry)
     assert validate_explicit_workload_config(entry) == []
+
+
+def test_prefix_contract_grandfathers_pre_freeze_public_result() -> None:
+    entry = official_prefix_repetition_entry("2026-08-15T23:59:59Z")
+
+    assert validate_explicit_workload_config(entry) == []
+
+
+def test_prefix_contract_requires_frozen_parameters_after_activation() -> None:
+    entry = official_prefix_repetition_entry("2026-08-16T00:00:00Z")
+
+    assert validate_explicit_workload_config(entry) == []
+    entry["same_spec"]["resolved_server_parameters"]["gpu_memory_utilization"] = 0.6
+    errors = validate_explicit_workload_config(entry)
+    assert any("gpu_memory_utilization must be 0.9" in error for error in errors)
 
 
 def test_contract_rejects_missing_defaults_and_workload_fields() -> None:

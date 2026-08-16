@@ -1350,6 +1350,7 @@ run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RU
 
 if [[ -n "$CURRENT_INPUT_PROVENANCE_FILE" ]]; then
   cp -f "$CURRENT_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"
+  chmod 0644 "$ARTIFACT_DIR/input_provenance.json"
   echo "[same-spec-current] copied frozen input provenance to $ARTIFACT_DIR/input_provenance.json"
 fi
 
