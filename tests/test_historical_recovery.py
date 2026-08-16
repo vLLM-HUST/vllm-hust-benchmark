@@ -76,9 +76,7 @@ def _write_inputs(tmp_path: Path, entries: list[tuple[str, dict]]) -> tuple[Path
         json.dumps(
             {
                 "registry_version": "1.0.0",
-                "targets": [
-                    {"target_id": SPEC_ID, "target_version": "1.0.0"}
-                ],
+                "targets": [{"target_id": SPEC_ID, "target_version": "1.0.0"}],
             }
         ),
         encoding="utf-8",
@@ -111,10 +109,7 @@ def test_recovers_inferable_fields_without_requiring_verified(tmp_path: Path) ->
     assert result["metadata"]["verified"] is None
     assert result["metadata"]["target_id"] == SPEC_ID
     assert result["metadata"]["target_version"] == "1.0.0"
-    assert (
-        result["metadata"]["runtime_provenance"]["plugin"]["commit"]
-        == PLUGIN_COMMIT
-    )
+    assert result["metadata"]["runtime_provenance"]["plugin"]["commit"] == PLUGIN_COMMIT
     assert result["same_spec"]["resolved_spec_hash"] == compute_resolved_spec_hash(
         result["same_spec"]
     )

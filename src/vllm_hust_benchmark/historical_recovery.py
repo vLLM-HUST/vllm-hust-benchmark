@@ -37,7 +37,11 @@ class RecoveryDecision:
 
 
 def _is_finite_number(value: Any) -> bool:
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+    )
 
 
 def _sha40(value: Any) -> str | None:
@@ -79,8 +83,12 @@ def _runtime_commits(
         if isinstance(metadata.get("runtime_provenance"), dict)
         else {}
     )
-    engine = provenance.get("engine") if isinstance(provenance.get("engine"), dict) else {}
-    plugin = provenance.get("plugin") if isinstance(provenance.get("plugin"), dict) else {}
+    engine = (
+        provenance.get("engine") if isinstance(provenance.get("engine"), dict) else {}
+    )
+    plugin = (
+        provenance.get("plugin") if isinstance(provenance.get("plugin"), dict) else {}
+    )
     engine_commit, engine_inferred = _resolve_sha(
         engine.get("commit") or metadata.get("git_commit"), revision_aliases
     )
@@ -262,9 +270,7 @@ def recover_entry(
         else None,
         "admitted_for_historical_trend": True,
     }
-    score = _quality_score(
-        method=method, entry=recovered, artifact_path=artifact_path
-    )
+    score = _quality_score(method=method, entry=recovered, artifact_path=artifact_path)
     return RecoveryDecision(
         source_path,
         "candidate",
@@ -299,9 +305,15 @@ def build_recovery(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     registry_by_id, registry_version = _load_registry(registry_path)
     revision_aliases = _load_revision_aliases(revision_aliases_path)
-    paths = list(artifact_paths) if artifact_paths is not None else discover_artifacts(repo_root)
+    paths = (
+        list(artifact_paths)
+        if artifact_paths is not None
+        else discover_artifacts(repo_root)
+    )
     decisions: list[RecoveryDecision] = []
-    for path in sorted(paths, key=lambda value: value.relative_to(repo_root).as_posix()):
+    for path in sorted(
+        paths, key=lambda value: value.relative_to(repo_root).as_posix()
+    ):
         try:
             entries = _load_entries(path)
         except (OSError, json.JSONDecodeError) as error:
@@ -336,7 +348,9 @@ def build_recovery(
     selected_paths = {decision.source_path for decision in selected_by_key.values()}
     entries = [
         decision.entry
-        for decision in sorted(selected_by_key.values(), key=lambda item: item.source_path)
+        for decision in sorted(
+            selected_by_key.values(), key=lambda item: item.source_path
+        )
         if decision.entry is not None
     ]
     rejected = [
@@ -376,22 +390,24 @@ def build_recovery(
             if decision.source_path == item["source_path"]
             and decision.disposition == "rejected"
         )
-        source_entry = next(
-            iter(_load_entries(repo_root / decision.source_path)), {}
-        )
+        source_entry = next(iter(_load_entries(repo_root / decision.source_path)), {})
         metadata = source_entry.get("metadata") or {}
         provenance = metadata.get("runtime_provenance") or {}
         required_experiments.append(
             {
                 "source_path": decision.source_path,
                 "workload": str((source_entry.get("workload") or {}).get("name") or ""),
-                "spec_id": str((source_entry.get("same_spec") or {}).get("spec_id") or ""),
+                "spec_id": str(
+                    (source_entry.get("same_spec") or {}).get("spec_id") or ""
+                ),
                 "engine_commit": str(
                     (provenance.get("engine") or {}).get("commit")
                     or metadata.get("git_commit")
                     or ""
                 ),
-                "plugin_commit": str((provenance.get("plugin") or {}).get("commit") or ""),
+                "plugin_commit": str(
+                    (provenance.get("plugin") or {}).get("commit") or ""
+                ),
                 "missing_or_invalid": item["reasons"],
             }
         )
