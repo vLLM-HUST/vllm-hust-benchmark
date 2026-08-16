@@ -13,6 +13,7 @@ import copy
 import hashlib
 import json
 import math
+import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -234,6 +235,34 @@ def _load_entries(path: Path) -> list[dict[str, Any]]:
     return [value for value in values if isinstance(value, dict)]
 
 
+def _load_input_contract(artifact_path: Path) -> dict[str, str] | None:
+    """Load a valid frozen-input identity without making its host path material."""
+    path = artifact_path.parent / "input_provenance.json"
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if payload.get("schema_version") != "visionarena-frozen-input/v1":
+        return None
+    dataset = payload.get("dataset")
+    selection = payload.get("selection")
+    if not isinstance(dataset, dict) or not isinstance(selection, dict):
+        return None
+    revision = str(dataset.get("revision") or "").strip().lower()
+    content_sha256 = str(selection.get("content_sha256") or "").strip().lower()
+    if not re.fullmatch(r"[0-9a-f]{40}", revision):
+        return None
+    if not re.fullmatch(r"[0-9a-f]{64}", content_sha256):
+        return None
+    return {
+        "schema_version": str(payload["schema_version"]),
+        "dataset_revision": revision,
+        "content_sha256": content_sha256,
+    }
+
+
 def _quality_score(
     *,
     method: str,
@@ -246,6 +275,10 @@ def _quality_score(
     }[method]
     return (
         method_score,
+        int(
+            (artifact_path.parent / "repeat_suite.json").is_file()
+            or int(entry.get("metadata", {}).get("repetitions") or 0) >= 3
+        ),
         int((artifact_path.parent / "env-manifest.json").is_file()),
         int((artifact_path.parent / "checksums.sha256").is_file()),
     )
@@ -455,6 +488,9 @@ def recover_entry(
         recovery_record["measurement_derivations"] = measurement_derivations
     if spec_derivations:
         recovery_record["spec_derivations"] = spec_derivations
+    input_contract = _load_input_contract(artifact_path)
+    if input_contract is not None:
+        recovery_record["input_contract"] = input_contract
     recovered["historical_recovery"] = recovery_record
     score = _quality_score(method=method, entry=recovered, artifact_path=artifact_path)
     return RecoveryDecision(

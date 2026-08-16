@@ -169,6 +169,43 @@ def test_deduplication_prefers_evidence_not_best_metric(tmp_path: Path) -> None:
     assert report["policy"]["deduplication_uses_metrics"] is False
 
 
+def test_recovery_carries_frozen_input_identity_and_prefers_repeat_suite(
+    tmp_path: Path,
+) -> None:
+    newer_single = _entry(throughput=999.0)
+    newer_single["metadata"]["submitted_at"] = "2026-07-03T00:00:00Z"
+    repeated = _entry(throughput=100.0)
+    registry, aliases = _write_inputs(
+        tmp_path, [("newer-single", newer_single), ("repeated", repeated)]
+    )
+    repeated_dir = tmp_path / "submissions" / "repeated"
+    (repeated_dir / "repeat_suite.json").write_text("{}", encoding="utf-8")
+    (repeated_dir / "input_provenance.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "visionarena-frozen-input/v1",
+                "dataset": {"revision": "c" * 40},
+                "selection": {"content_sha256": "d" * 64},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert [entry["metrics"]["throughput_tps"] for entry in recovered] == [100.0]
+    assert recovered[0]["historical_recovery"]["input_contract"] == {
+        "schema_version": "visionarena-frozen-input/v1",
+        "dataset_revision": "c" * 40,
+        "content_sha256": "d" * 64,
+    }
+    assert report["summary"]["superseded_entries"] == 1
+
+
 def test_same_910b2_contract_is_comparable_across_physical_machines(
     tmp_path: Path,
 ) -> None:
