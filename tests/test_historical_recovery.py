@@ -116,6 +116,40 @@ def test_recovers_inferable_fields_without_requiring_verified(tmp_path: Path) ->
     assert report["summary"]["required_experiments"] == 0
 
 
+def test_repairs_outer_model_identity_from_resolved_same_spec(tmp_path: Path) -> None:
+    entry = _entry()
+    entry["model"] = {
+        "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+        "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+        "short_name": "Qwen2.5-14B-Instruct",
+        "display_name": "Qwen2.5-14B-Instruct",
+        "name": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16",
+        "quantization": None,
+    }
+    entry["same_spec"]["model"] = "Qwen/Qwen2.5-Coder-14B-Instruct"
+    entry["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        entry["same_spec"]
+    )
+    registry, aliases = _write_inputs(tmp_path, [("coder", entry)])
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert report["summary"]["required_experiments"] == 0
+    assert recovered[0]["model"]["repo_id"] == "Qwen/Qwen2.5-Coder-14B-Instruct"
+    assert recovered[0]["model"]["canonical_id"] == (
+        "hf:Qwen/Qwen2.5-Coder-14B-Instruct"
+    )
+    inferred = recovered[0]["historical_recovery"]["inferred_fields"]
+    assert "model.repo_id" in inferred
+    assert "model.canonical_id" in inferred
+
+
 def test_deduplication_prefers_evidence_not_best_metric(tmp_path: Path) -> None:
     older_high = _entry(throughput=999.0)
     newer_lower = _entry(throughput=100.0)
@@ -133,6 +167,62 @@ def test_deduplication_prefers_evidence_not_best_metric(tmp_path: Path) -> None:
     assert [entry["metrics"]["throughput_tps"] for entry in recovered] == [100.0]
     assert report["summary"]["superseded_entries"] == 1
     assert report["policy"]["deduplication_uses_metrics"] is False
+
+
+def test_same_910b2_contract_is_comparable_across_physical_machines(
+    tmp_path: Path,
+) -> None:
+    machine_a = _entry(throughput=100.0)
+    machine_a["cluster"] = {"hostname": "server-112", "rack": "rack-a"}
+    machine_b = _entry(throughput=101.0)
+    machine_b["cluster"] = {"hostname": "server-207", "rack": "rack-b"}
+    machine_b["metadata"]["submitted_at"] = "2026-07-02T00:00:00Z"
+    registry, aliases = _write_inputs(
+        tmp_path, [("machine-a", machine_a), ("machine-b", machine_b)]
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert len(recovered) == 1
+    assert recovered[0]["cluster"]["hostname"] == "server-207"
+    assert report["summary"]["superseded_entries"] == 1
+    assert report["policy"]["same_chip_cross_machine_comparable"] is True
+    assert report["policy"]["physical_machine_partitions_trend_identity"] is False
+
+
+def test_missing_legacy_no_stream_default_does_not_split_same_contract(
+    tmp_path: Path,
+) -> None:
+    implicit = _entry(throughput=100.0)
+    implicit["cluster"] = {"hostname": "server-112"}
+    explicit = _entry(throughput=101.0)
+    explicit["cluster"] = {"hostname": "server-207"}
+    explicit["same_spec"]["resolved_client_parameters"]["no_stream"] = False
+    explicit["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        explicit["same_spec"]
+    )
+    explicit["metadata"]["submitted_at"] = "2026-07-02T00:00:00Z"
+    registry, aliases = _write_inputs(
+        tmp_path, [("implicit", implicit), ("explicit", explicit)]
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert len(recovered) == 1
+    assert recovered[0]["same_spec"]["resolved_client_parameters"]["no_stream"] is False
+    assert recovered[0]["cluster"]["hostname"] == "server-207"
+    assert report["summary"]["superseded_entries"] == 1
+    assert report["superseded"][0]["source_path"].endswith(
+        "implicit/run_leaderboard.json"
+    )
 
 
 def test_only_non_inferable_measurement_is_scheduled_for_rerun(

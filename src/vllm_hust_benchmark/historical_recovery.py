@@ -18,6 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.model_registry import resolve_model_identity
 from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
 
 SCHEMA_VERSION = "historical-leaderboard-recovery/v1"
@@ -25,6 +26,36 @@ SHA40_LENGTH = 40
 RETIRED_PATH_PREFIX = "archive/pre-v0.18.0/"
 PRIMARY_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
 ATOMIC_OFFLINE_LATENCY_RULE = "atomic-offline-latency-success/v1"
+ONLINE_NO_STREAM_DEFAULT_RULE = "legacy-online-no-stream-default/v1"
+
+
+def _infer_same_spec_defaults(same_spec: dict[str, Any]) -> list[dict[str, Any]]:
+    """Materialize deterministic legacy CLI defaults in recovered contracts.
+
+    Older ``vllm bench serve`` artifacts omitted ``no_stream`` when the flag was
+    not supplied.  The effective value is nevertheless unambiguous: the CLI
+    default is ``False``.  Leaving it absent fragments identical experiments
+    (including runs from different physical machines) into different hashes.
+    """
+
+    client = same_spec.get("resolved_client_parameters")
+    if not isinstance(client, dict):
+        return []
+    scenario = str(same_spec.get("scenario") or "")
+    if not scenario.endswith("-online") or "no_stream" in client:
+        return []
+    client["no_stream"] = False
+    return [
+        {
+            "field": "same_spec.resolved_client_parameters.no_stream",
+            "value": False,
+            "rule_id": ONLINE_NO_STREAM_DEFAULT_RULE,
+            "evidence": {
+                "benchmark": "vllm bench serve",
+                "cli_semantics": "omitted --no-stream flag resolves to false",
+            },
+        }
+    ]
 
 
 @dataclass(frozen=True)
@@ -312,15 +343,6 @@ def recover_entry(
     same_spec = entry.get("same_spec")
     if not isinstance(same_spec, dict) or not same_spec:
         return RecoveryDecision(source_path, "rejected", ("same-spec-missing",))
-    try:
-        recomputed_hash = compute_resolved_spec_hash(same_spec)
-    except (TypeError, ValueError) as error:
-        return RecoveryDecision(
-            source_path,
-            "rejected",
-            (f"same-spec-incomplete:{error}",),
-        )
-
     recovered = copy.deepcopy(entry)
     if derived_atomic_success:
         recovered["metrics"]["error_rate"] = 0.0
@@ -328,6 +350,40 @@ def recover_entry(
     original_hash = str(recovered_spec.get("resolved_spec_hash") or "")
     inferred_fields: list[str] = list(revision_inferences)
     measurement_derivations = []
+    spec_derivations = _infer_same_spec_defaults(recovered_spec)
+    inferred_fields.extend(item["field"] for item in spec_derivations)
+    try:
+        recomputed_hash = compute_resolved_spec_hash(recovered_spec)
+    except (TypeError, ValueError) as error:
+        return RecoveryDecision(
+            source_path,
+            "rejected",
+            (f"same-spec-incomplete:{error}",),
+        )
+
+    # The resolved same-spec contract is stronger evidence than legacy outer
+    # display metadata.  Historical exporters occasionally copied the default
+    # 14B Instruct identity into Coder/VL entries even though both the server
+    # and client were resolved against the correct target model.  Repair that
+    # deterministic metadata mismatch instead of scheduling another experiment.
+    spec_model = str(recovered_spec.get("model") or "").strip()
+    if spec_model:
+        identity = resolve_model_identity(spec_model)
+        recovered_model = recovered.setdefault("model", {})
+        authoritative_model_fields: dict[str, Any] = {
+            "canonical_id": identity.canonical_id,
+            "repo_id": identity.repo_id,
+            "short_name": identity.short_name,
+            "display_name": identity.display_name,
+            "name": identity.repo_id,
+            "parameters": recovered_spec.get("model_parameters"),
+            "precision": recovered_spec.get("model_precision"),
+            "quantization": recovered_spec.get("model_quantization") or None,
+        }
+        for field, value in authoritative_model_fields.items():
+            if recovered_model.get(field) != value:
+                recovered_model[field] = value
+                inferred_fields.append(f"model.{field}")
     if derived_atomic_success:
         inferred_fields.append("metrics.error_rate")
         measurement_derivations.append(
@@ -397,6 +453,8 @@ def recover_entry(
     }
     if measurement_derivations:
         recovery_record["measurement_derivations"] = measurement_derivations
+    if spec_derivations:
+        recovery_record["spec_derivations"] = spec_derivations
     recovered["historical_recovery"] = recovery_record
     score = _quality_score(method=method, entry=recovered, artifact_path=artifact_path)
     return RecoveryDecision(
@@ -658,6 +716,8 @@ def build_recovery(
             "raw_artifacts_modified": False,
             "missing_measurements_invented": False,
             "deduplication_uses_metrics": False,
+            "physical_machine_partitions_trend_identity": False,
+            "same_chip_cross_machine_comparable": True,
             "formal_admission_gate_unchanged": True,
         },
         "rejected": rejected,

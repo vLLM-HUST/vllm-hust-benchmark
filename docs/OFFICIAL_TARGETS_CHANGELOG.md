@@ -2,6 +2,14 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.4 — 2026-08-16
+
+- English: Make ignore_eos explicit for the public agent-research workload so every run measures the
+  declared 256-token generation contract instead of depending on model EOS behavior.
+- 中文：为公开 agent-research workload 显式固定 ignore_eos，确保每次实验都测量声明的 256-token 生成契约，而不是依赖模型 EOS 行为。
+- Source set: `31e044d878d6432df797227f6b563c535dbdd9a4c90def95453b1ff00bc196a5`
+- Supersedes: `1.3.3`
+
 ## 1.3.3 — 2026-08-13
 
 - English: Derive unified-comm-online 1chip and 4chip single-node non-executable draft specs from

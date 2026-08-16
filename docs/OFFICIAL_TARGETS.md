@@ -2,8 +2,8 @@
 
 > This file is generated from the official specs. Do not edit it manually.
 
-- Registry version: `1.3.3`
-- Effective from: `2026-08-13`
+- Registry version: `1.3.4`
+- Effective from: `2026-08-16`
 
 Public leaderboard targets and 3B perfgate profiles are separate contracts. Provisional entries are
 not valid public-result comparison targets.

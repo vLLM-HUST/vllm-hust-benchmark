@@ -55,6 +55,11 @@ CURRENT_BACKEND_VERSION=${CURRENT_BACKEND_VERSION:-}
 CURRENT_SUBMITTER=${CURRENT_SUBMITTER:-"same-spec-current"}
 CURRENT_BASELINE_ENGINE=${CURRENT_BASELINE_ENGINE:-"vllm"}
 CURRENT_DATA_SOURCE=${CURRENT_DATA_SOURCE:-"vllm-hust-benchmark"}
+CURRENT_EXPORT_ONLY=${CURRENT_EXPORT_ONLY:-0}
+if [[ "$CURRENT_EXPORT_ONLY" != "0" && "$CURRENT_EXPORT_ONLY" != "1" ]]; then
+  echo "CURRENT_EXPORT_ONLY must be 0 or 1: $CURRENT_EXPORT_ONLY" >&2
+  exit 2
+fi
 CURRENT_DTYPE=${CURRENT_DTYPE:-}
 CURRENT_MODEL_NAME=${CURRENT_MODEL_NAME:-}
 CURRENT_MODEL_PARAMETERS=${CURRENT_MODEL_PARAMETERS:-}
@@ -1149,7 +1154,13 @@ SERVER_ATTEMPT_LOG_DIR="$RESULT_DIR/server-attempt-logs"
 OFFLINE_GRAPH_PROOF_FILE="$RESULT_DIR/offline_graph_proof.json"
 mkdir -p "$SERVER_ATTEMPT_LOG_DIR"
 
-if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
+if [[ "$CURRENT_EXPORT_ONLY" == "1" ]]; then
+  if [[ ! -s "$RAW_RESULT_FILE" ]]; then
+    echo "CURRENT_EXPORT_ONLY requires an existing raw result: $RAW_RESULT_FILE" >&2
+    exit 2
+  fi
+  echo "[same-spec-current] export-only: preserving existing raw measurement"
+elif [[ "$BENCHMARK_TYPE" == "serve" ]]; then
   SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
   SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
   CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
@@ -1166,7 +1177,7 @@ echo "[same-spec-current] vllm cache root: $CURRENT_VLLM_CACHE_ROOT"
 echo "[same-spec-current] runtime model source: $RUNTIME_MODEL"
 echo "[same-spec-current] resolved spec file: $SAME_SPEC_FILE"
 echo "[same-spec-current] benchmark type: $BENCHMARK_TYPE"
-if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
+if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" == "serve" ]]; then
   echo "[same-spec-current] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
   if [[ "$CURRENT_USE_MANAGED_SERVER" == "1" ]]; then
     echo "[same-spec-current] using externally managed server"
@@ -1214,7 +1225,9 @@ PERFGATE_RUNS_DIR="$RESULT_DIR/runs"
 WARMUP_RAW_RESULT_FILES=()
 MEASURED_RAW_RESULT_FILES=()
 
-if [[ "$PERFGATE_WARMUP_RUNS" -eq 0 && "$PERFGATE_MEASURED_RUNS" -eq 1 ]]; then
+if [[ "$CURRENT_EXPORT_ONLY" == "1" ]]; then
+  MEASURED_RAW_RESULT_FILES+=("$RAW_RESULT_FILE")
+elif [[ "$PERFGATE_WARMUP_RUNS" -eq 0 && "$PERFGATE_MEASURED_RUNS" -eq 1 ]]; then
   # Historical single-run behavior (non-perfgate callers).
   set +e
   run_client_command_with_server_monitor
@@ -1264,7 +1277,7 @@ else
   cp -f "$RAW_RESULT_FILE" "$RESULT_DIR/raw_benchmark_result.json"
 fi
 
-if [[ "$BENCHMARK_TYPE" != "serve" ]]; then
+if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" != "serve" ]]; then
   if [[ ! -f "$OFFLINE_GRAPH_PROOF_FILE" ]] || ! jq -e '
     .schema_version == "vllm-hust-offline-graph-proof/v1" and
     .graph_mode_verified == true and

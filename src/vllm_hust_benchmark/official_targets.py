@@ -9,8 +9,8 @@ from typing import Any
 from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.3.3"
-EFFECTIVE_FROM = "2026-08-13"
+REGISTRY_VERSION = "1.3.4"
+EFFECTIVE_FROM = "2026-08-16"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
@@ -135,6 +135,15 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
         raise ValueError(f"public target must be single-node/single-chip: {path}")
     if str(spec["model_precision"]) != "FP16":
         raise ValueError(f"public target must use FP16: {path}")
+
+    if (
+        spec.get("scenario") == "agent-research-online"
+        and spec["client_parameters"].get("ignore_eos") is not True
+    ):
+        raise ValueError(
+            f"agent-research public target {path} must set ignore_eos=true so "
+            "the declared output length is an executable measurement contract"
+        )
 
     baseline = spec["baseline_target"]
     if baseline.get("vllm_ref") != "v0.18.0":

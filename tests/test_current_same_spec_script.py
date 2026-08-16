@@ -380,3 +380,11 @@ def test_current_same_spec_runner_aggregates_measured_runs_after_export() -> Non
     assert (
         'AGGREGATE_ARGS+=(--run-raw-result "$measured_raw_result")' in aggregate_block
     )
+
+
+def test_current_same_spec_runner_supports_export_only_without_rerun() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    assert 'CURRENT_EXPORT_ONLY=${CURRENT_EXPORT_ONLY:-0}' in script
+    assert 'CURRENT_EXPORT_ONLY requires an existing raw result' in script
+    assert '[same-spec-current] export-only: preserving existing raw measurement' in script
+    assert 'if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" != "serve" ]]' in script
