@@ -18,8 +18,15 @@ REQUIRED_EFFECTIVE_PARAMETERS: dict[str, dict[str, tuple[str, ...]]] = {
         "client": ("no_stream",),
     },
     "prefix-repetition-online": {
-        "server": ("gpu_memory_utilization", "max_model_len"),
-        "client": ("no_stream",),
+        "server": (
+            "gpu_memory_utilization",
+            "max_model_len",
+            "enable_prefix_caching",
+            "no_enable_chunked_prefill",
+            "max_num_seqs",
+            "max_num_batched_tokens",
+        ),
+        "client": ("no_stream", "ignore_eos"),
     },
     "random-latency": {
         "server": ("gpu_memory_utilization", "max_model_len"),
@@ -55,7 +62,15 @@ OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
         "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
     },
     "prefix-repetition-online": {
-        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+        "server": {
+            "gpu_memory_utilization": 0.9,
+            "max_model_len": 32768,
+            "enable_prefix_caching": True,
+            "no_enable_chunked_prefill": True,
+            "max_num_seqs": 16,
+            "max_num_batched_tokens": 32768,
+        },
+        "client": {"no_stream": False, "ignore_eos": True},
     },
     "random-latency": {
         "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},

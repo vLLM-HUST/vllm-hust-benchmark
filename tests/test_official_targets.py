@@ -50,7 +50,13 @@ def test_public_target_matrix_is_exact() -> None:
         assert target["hardware"]["chip_count"] == 1
         assert target["model"]["precision"] == "FP16"
         assert target["server_parameters"]["tensor_parallel_size"] == 1
-        assert target["server_parameters"]["gpu_memory_utilization"] == 0.6
+        expected_memory_utilization = (
+            0.9 if target["workload"]["name"] == "prefix-repetition-online" else 0.6
+        )
+        assert (
+            target["server_parameters"]["gpu_memory_utilization"]
+            == expected_memory_utilization
+        )
         assert target["server_parameters"]["max_model_len"] == 32768
 
 

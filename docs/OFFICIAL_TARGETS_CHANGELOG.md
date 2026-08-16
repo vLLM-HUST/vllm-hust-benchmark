@@ -2,6 +2,16 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.5 — 2026-08-16
+
+- English: Freeze the executable prefix-repetition contract, including fixed-length generation and
+  the required 0.9 memory utilization, prefix caching, chunked prefill, scheduler concurrency, and
+  batched-token limits, so milestones do not inherit version-dependent defaults.
+- 中文：为公开 prefix-repetition workload 显式冻结可执行契约，包括固定长度生成、必需的 0.9 显存比例、前缀缓存、分块预填充、调度并发数和批处理 token
+  上限，避免不同 milestone 继承版本相关的默认值。
+- Source set: `3f4d3f8be663095014e40d900cb8e675b41b2e2f35b4081ca0f0597c54362e6f`
+- Supersedes: `1.3.4`
+
 ## 1.3.4 — 2026-08-16
 
 - English: Make ignore_eos explicit for the public agent-research workload so every run measures the

@@ -9,7 +9,7 @@ from typing import Any
 from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.3.4"
+REGISTRY_VERSION = "1.3.5"
 EFFECTIVE_FROM = "2026-08-16"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
@@ -122,7 +122,9 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
         )
     expected = {
         "tensor_parallel_size": 1,
-        "gpu_memory_utilization": 0.6,
+        "gpu_memory_utilization": (
+            0.9 if spec.get("scenario") == "prefix-repetition-online" else 0.6
+        ),
         "max_model_len": 32768,
     }
     for name, value in expected.items():
@@ -136,12 +138,13 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
     if str(spec["model_precision"]) != "FP16":
         raise ValueError(f"public target must use FP16: {path}")
 
+    fixed_output_scenarios = {"agent-research-online", "prefix-repetition-online"}
     if (
-        spec.get("scenario") == "agent-research-online"
+        spec.get("scenario") in fixed_output_scenarios
         and spec["client_parameters"].get("ignore_eos") is not True
     ):
         raise ValueError(
-            f"agent-research public target {path} must set ignore_eos=true so "
+            f"fixed-output public target {path} must set ignore_eos=true so "
             "the declared output length is an executable measurement contract"
         )
 

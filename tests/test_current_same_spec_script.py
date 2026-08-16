@@ -1,3 +1,4 @@
+import json
 import subprocess
 from pathlib import Path
 
@@ -150,6 +151,27 @@ def test_current_runner_supports_audited_runtime_only_dataset_path() -> None:
     assert 'ensure_runtime_dataset_available "$CURRENT_RUNTIME_DATASET_PATH"' in script
     assert "CURRENT_INPUT_PROVENANCE_FILE=${CURRENT_INPUT_PROVENANCE_FILE:-}" in script
     assert 'cp -f "$CURRENT_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"' in script
+
+
+def test_prefix_repetition_official_spec_freezes_material_server_defaults() -> None:
+    root = Path(__file__).resolve().parents[1]
+    payload = json.loads(
+        (
+            root
+            / "docs"
+            / "official-baselines"
+            / "official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json"
+        ).read_text(encoding="utf-8")
+    )
+    server = payload["server_parameters"]
+    client = payload["client_parameters"]
+
+    assert server["gpu_memory_utilization"] == 0.9
+    assert server["enable_prefix_caching"] is True
+    assert server["no_enable_chunked_prefill"] is True
+    assert server["max_num_seqs"] == 16
+    assert server["max_num_batched_tokens"] == 32768
+    assert client["ignore_eos"] is True
 
 
 def test_wait_for_server_fails_while_live_server_logs_npu_oom(
