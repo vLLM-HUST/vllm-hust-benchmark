@@ -187,7 +187,11 @@ def discover_artifacts(repo_root: Path) -> list[Path]:
     """Return stable, unique raw artifact paths from submissions and archives."""
 
     paths: set[Path] = set()
-    for directory in (repo_root / "submissions", repo_root / "archive"):
+    for directory in (
+        repo_root / "submissions",
+        repo_root / "reports" / "historical-recovery-evidence",
+        repo_root / "archive",
+    ):
         if directory.is_dir():
             paths.update(directory.rglob("run_leaderboard.json"))
     return sorted(paths, key=lambda path: path.relative_to(repo_root).as_posix())
