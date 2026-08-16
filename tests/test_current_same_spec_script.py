@@ -141,6 +141,17 @@ def test_current_same_spec_runner_requires_offline_graph_proof() -> None:
     assert "CURRENT_ALLOW_OFFLINE_EAGER_BENCHMARK" not in script
 
 
+def test_current_runner_supports_audited_runtime_only_dataset_path() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    normalize = _function_text(script, "normalized_client_parameters_json")
+
+    assert "CURRENT_RUNTIME_DATASET_PATH=${CURRENT_RUNTIME_DATASET_PATH:-}" in script
+    assert 'parameters["dataset_path"] = runtime_dataset_path' in normalize
+    assert 'ensure_runtime_dataset_available "$CURRENT_RUNTIME_DATASET_PATH"' in script
+    assert "CURRENT_INPUT_PROVENANCE_FILE=${CURRENT_INPUT_PROVENANCE_FILE:-}" in script
+    assert 'cp -f "$CURRENT_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"' in script
+
+
 def test_wait_for_server_fails_while_live_server_logs_npu_oom(
     tmp_path: Path,
 ) -> None:
