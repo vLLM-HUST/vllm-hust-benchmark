@@ -73,7 +73,7 @@ def official_visionarena_online_entry() -> dict:
             "scenario": "visionarena-online",
             "resolved_server_parameters": {
                 "gpu_memory_utilization": 0.6,
-                "max_model_len": 30720,
+                "max_model_len": 32768,
             },
             "resolved_client_parameters": {
                 "dataset_name": "visionarena",
@@ -282,16 +282,15 @@ def test_contract_rejects_max_as_aggregate_method() -> None:
     assert "max" not in VALID_AGG_METHODS
 
 
-def test_visionarena_rejects_text_default_max_model_len() -> None:
-    """visionarena-online must use the vision default (30720), not the text
-    default (32768)."""
+def test_visionarena_rejects_stale_max_model_len() -> None:
+    """VisionArena follows the official registry's 32768 context contract."""
     entry = official_visionarena_online_entry()
-    entry["same_spec"]["resolved_server_parameters"]["max_model_len"] = 32768
+    entry["same_spec"]["resolved_server_parameters"]["max_model_len"] = 30720
 
     errors = validate_explicit_workload_config(entry)
 
-    assert any("max_model_len must be 30720" in error for error in errors)
-    assert not any("must be 32768" in error for error in errors)
+    assert any("max_model_len must be 32768" in error for error in errors)
+    assert not any("must be 30720" in error for error in errors)
 
 
 def test_visionarena_accepts_correct_vision_defaults() -> None:
