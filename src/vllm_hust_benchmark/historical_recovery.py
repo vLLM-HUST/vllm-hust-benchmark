@@ -24,6 +24,7 @@ SCHEMA_VERSION = "historical-leaderboard-recovery/v1"
 SHA40_LENGTH = 40
 RETIRED_PATH_PREFIX = "archive/pre-v0.18.0/"
 PRIMARY_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
+ATOMIC_OFFLINE_LATENCY_RULE = "atomic-offline-latency-success/v1"
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,56 @@ def _is_finite_number(value: Any) -> bool:
         isinstance(value, (int, float))
         and not isinstance(value, bool)
         and math.isfinite(value)
+    )
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _artifact_identity(entry: dict[str, Any], path: Path) -> dict[str, str]:
+    metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+    return {
+        "entry_id": str(entry.get("entry_id") or ""),
+        "idempotency_key": str(metadata.get("idempotency_key") or ""),
+        "sha256": _file_sha256(path),
+    }
+
+
+def _is_atomic_offline_latency_success(entry: dict[str, Any]) -> bool:
+    """Return whether a successful artifact proves a zero request error rate.
+
+    ``vllm bench latency`` is an in-process, atomic offline benchmark: it emits
+    the aggregate latency artifact only after every warmup and measured
+    ``LLM.generate`` call returns. Any request failure raises and the command
+    exits non-zero instead of publishing the artifact. This rule deliberately
+    excludes online workloads and non-historical data sources.
+    """
+
+    workload = entry.get("workload") if isinstance(entry.get("workload"), dict) else {}
+    metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
+    same_spec = (
+        entry.get("same_spec") if isinstance(entry.get("same_spec"), dict) else {}
+    )
+    client = (
+        same_spec.get("resolved_client_parameters")
+        if isinstance(same_spec.get("resolved_client_parameters"), dict)
+        else {}
+    )
+    return (
+        workload.get("name") == "random-latency"
+        and same_spec.get("scenario") == "random-latency"
+        and metadata.get("data_source") == "real-online-historical-pr-backfill"
+        and isinstance(client.get("num_iters"), int)
+        and not isinstance(client.get("num_iters"), bool)
+        and client["num_iters"] > 0
+        and isinstance(client.get("num_iters_warmup"), int)
+        and not isinstance(client.get("num_iters_warmup"), bool)
+        and client["num_iters_warmup"] >= 0
     )
 
 
@@ -178,6 +229,43 @@ def _selection_key(
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
+def _experiment_key(
+    entry: dict[str, Any],
+    *,
+    revision_aliases: dict[str, str],
+    source_hint: str,
+) -> str | None:
+    """Return the rerun identity even when a measurement is invalid.
+
+    The registered spec may have gained explicit effective defaults since the
+    historical run. A real rerun therefore matches on the registered target
+    and exact runtime revisions, while its own resolved spec hash remains the
+    source of truth for the newly measured point.
+    """
+
+    engine_commit, plugin_commit, _ = _runtime_commits(
+        entry, revision_aliases, source_hint=source_hint
+    )
+    same_spec = entry.get("same_spec")
+    if (
+        engine_commit is None
+        or plugin_commit is None
+        or not isinstance(same_spec, dict)
+    ):
+        return None
+    spec_id = str(same_spec.get("spec_id") or "")
+    if not spec_id:
+        return None
+    identity = {
+        "engine_commit": engine_commit,
+        "plugin_commit": plugin_commit,
+        "spec_id": spec_id,
+        "config_type": str(entry.get("config_type") or ""),
+    }
+    canonical = json.dumps(identity, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 def recover_entry(
     entry: dict[str, Any],
     *,
@@ -198,7 +286,12 @@ def recover_entry(
     ):
         return RecoveryDecision(source_path, "rejected", ("invalid-primary-metrics",))
     error_rate = metrics.get("error_rate")
-    if not _is_finite_number(error_rate) or not 0 <= float(error_rate) <= 1:
+    derived_atomic_success = (
+        not _is_finite_number(error_rate) or not 0 <= float(error_rate) <= 1
+    ) and _is_atomic_offline_latency_success(entry)
+    if not derived_atomic_success and (
+        not _is_finite_number(error_rate) or not 0 <= float(error_rate) <= 1
+    ):
         return RecoveryDecision(source_path, "rejected", ("invalid-error-rate",))
 
     engine_commit, plugin_commit, revision_inferences = _runtime_commits(
@@ -225,9 +318,37 @@ def recover_entry(
         )
 
     recovered = copy.deepcopy(entry)
+    if derived_atomic_success:
+        recovered["metrics"]["error_rate"] = 0.0
     recovered_spec = recovered["same_spec"]
     original_hash = str(recovered_spec.get("resolved_spec_hash") or "")
     inferred_fields: list[str] = list(revision_inferences)
+    measurement_derivations = []
+    if derived_atomic_success:
+        inferred_fields.append("metrics.error_rate")
+        measurement_derivations.append(
+            {
+                "field": "metrics.error_rate",
+                "value": 0.0,
+                "rule_id": ATOMIC_OFFLINE_LATENCY_RULE,
+                "evidence": {
+                    "benchmark": "vllm bench latency",
+                    "success_semantics": (
+                        "artifact emitted only after all warmup and measured "
+                        "LLM.generate calls return; request failures exit non-zero"
+                    ),
+                    "num_iters_warmup": recovered_spec["resolved_client_parameters"][
+                        "num_iters_warmup"
+                    ],
+                    "num_iters": recovered_spec["resolved_client_parameters"][
+                        "num_iters"
+                    ],
+                    "original_artifact_identity": _artifact_identity(
+                        entry, artifact_path
+                    ),
+                },
+            }
+        )
     if original_hash == recomputed_hash:
         method = "historical-exact-spec"
     else:
@@ -259,7 +380,7 @@ def recover_entry(
         plugin_commit=plugin_commit,
         spec_hash=recomputed_hash,
     )
-    recovered["historical_recovery"] = {
+    recovery_record = {
         "schema_version": SCHEMA_VERSION,
         "recovery_method": method,
         "source_path": source_path,
@@ -270,6 +391,9 @@ def recover_entry(
         else None,
         "admitted_for_historical_trend": True,
     }
+    if measurement_derivations:
+        recovery_record["measurement_derivations"] = measurement_derivations
+    recovered["historical_recovery"] = recovery_record
     score = _quality_score(method=method, entry=recovered, artifact_path=artifact_path)
     return RecoveryDecision(
         source_path,
@@ -337,6 +461,45 @@ def build_recovery(
                 )
             )
 
+    # Prefer a genuine valid replacement over a derivation from its invalid
+    # predecessor. Derivation is the fallback for an otherwise unsatisfied
+    # experiment, not an extra trend point beside a fresh rerun.
+    nonderived_experiments = {
+        experiment_key
+        for decision in decisions
+        if decision.disposition == "candidate"
+        and decision.entry is not None
+        and not decision.entry.get("historical_recovery", {}).get(
+            "measurement_derivations"
+        )
+        and (
+            experiment_key := _experiment_key(
+                decision.entry,
+                revision_aliases=revision_aliases,
+                source_hint=decision.source_path,
+            )
+        )
+        is not None
+    }
+    for index, decision in enumerate(decisions):
+        if decision.disposition != "candidate" or decision.entry is None:
+            continue
+        if not decision.entry.get("historical_recovery", {}).get(
+            "measurement_derivations"
+        ):
+            continue
+        experiment_key = _experiment_key(
+            decision.entry,
+            revision_aliases=revision_aliases,
+            source_hint=decision.source_path,
+        )
+        if experiment_key in nonderived_experiments:
+            decisions[index] = RecoveryDecision(
+                decision.source_path,
+                "rejected",
+                ("invalid-error-rate",),
+            )
+
     selected_by_key: dict[str, RecoveryDecision] = {}
     for decision in decisions:
         if decision.disposition != "candidate" or decision.selection_key is None:
@@ -346,6 +509,19 @@ def build_recovery(
             selected_by_key[decision.selection_key] = decision
 
     selected_paths = {decision.source_path for decision in selected_by_key.values()}
+    selected_by_experiment_key = {
+        experiment_key: decision
+        for decision in selected_by_key.values()
+        if decision.entry is not None
+        and (
+            experiment_key := _experiment_key(
+                decision.entry,
+                revision_aliases=revision_aliases,
+                source_hint=decision.source_path,
+            )
+        )
+        is not None
+    }
     entries = [
         decision.entry
         for decision in sorted(
@@ -381,6 +557,26 @@ def build_recovery(
         for field in recovery["inferred_fields"]:
             inferred_field_counts[field] = inferred_field_counts.get(field, 0) + 1
     required_experiments = []
+    satisfied_experiments = [
+        {
+            "source_path": decision.source_path,
+            "replacement_source_path": None,
+            "selection_key": decision.selection_key,
+            "evidence_kind": "derived-success",
+            "derivation_rule": derivations[0]["rule_id"],
+            "original_artifact_identity": derivations[0]["evidence"][
+                "original_artifact_identity"
+            ],
+            "replacement_artifact_identity": None,
+        }
+        for decision in selected_by_key.values()
+        if decision.entry is not None
+        and (
+            derivations := decision.entry.get("historical_recovery", {}).get(
+                "measurement_derivations", []
+            )
+        )
+    ]
     for item in rejected:
         if item["reasons"] == ["retired-pre-v0.18.0"]:
             continue
@@ -391,6 +587,35 @@ def build_recovery(
             and decision.disposition == "rejected"
         )
         source_entry = next(iter(_load_entries(repo_root / decision.source_path)), {})
+        evidence_key = _experiment_key(
+            source_entry,
+            revision_aliases=revision_aliases,
+            source_hint=decision.source_path,
+        )
+        if evidence_key is not None and evidence_key in selected_by_experiment_key:
+            replacement = selected_by_experiment_key[evidence_key]
+            assert replacement.entry is not None
+            replacement_path = repo_root / replacement.source_path
+            repeat_suite_path = replacement_path.parent / "repeat_suite.json"
+            satisfied_experiments.append(
+                {
+                    "source_path": decision.source_path,
+                    "replacement_source_path": replacement.source_path,
+                    "selection_key": replacement.selection_key,
+                    "evidence_kind": (
+                        "existing-strict-repeat-suite"
+                        if repeat_suite_path.is_file()
+                        else "fresh-rerun"
+                    ),
+                    "original_artifact_identity": _artifact_identity(
+                        source_entry, repo_root / decision.source_path
+                    ),
+                    "replacement_artifact_identity": _artifact_identity(
+                        replacement.entry, replacement_path
+                    ),
+                }
+            )
+            continue
         metadata = source_entry.get("metadata") or {}
         provenance = metadata.get("runtime_provenance") or {}
         required_experiments.append(
@@ -423,6 +648,7 @@ def build_recovery(
             "spec_recovery_methods": dict(sorted(method_counts.items())),
             "inferred_fields": dict(sorted(inferred_field_counts.items())),
             "required_experiments": len(required_experiments),
+            "satisfied_experiments": len(satisfied_experiments),
         },
         "policy": {
             "raw_artifacts_modified": False,
@@ -432,6 +658,7 @@ def build_recovery(
         },
         "rejected": rejected,
         "superseded": superseded,
+        "satisfied_experiments": satisfied_experiments,
         "required_experiments": required_experiments,
     }
     return entries, report
