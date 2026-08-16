@@ -1,0 +1,105 @@
+/out/result/resolved_same_spec.json
+[same-spec-current] neutral cwd: /out/tmp
+[same-spec-current] vllm cache root: /out/vllm-cache
+[same-spec-current] runtime model source: /data/shared_models/Qwen2.5-14B-Instruct
+[same-spec-current] resolved spec file: /out/result/resolved_same_spec.json
+[same-spec-current] benchmark type: serve
+[same-spec-current] benchmark endpoint: 127.0.0.1:28403
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:28403 (0s/900s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:28403 (30s/900s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:28403 (60s/900s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:28403 (90s/900s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:28403 (120s/900s)
+[same-spec-current] readiness probe failed: http://127.0.0.1:28403/health (ConnectionRefusedError: [Errno 111] Connection refused)
+[same-spec-current] readiness probe failed: http://127.0.0.1:28403/ping (ConnectionRefusedError: [Errno 111] Connection refused)
+[same-spec-current] readiness probe failed: http://127.0.0.1:28403/v1/models (ConnectionRefusedError: [Errno 111] Connection refused)
+---- same-spec server log progress at 120s: /out/result/server-attempt-logs/server-attempt-1.stdout.log (last 40 lines) ----
+(EngineCore pid=1142) 2026-08-16 12:57:41,120 - 1142 - ServiceProfiler - INFO - VLLM_USE_V1 not set, auto-detected via vLLM 0.21.0+empty: default 1
+(EngineCore pid=1142) INFO 08-16 12:57:41 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+(EngineCore pid=1142) INFO 08-16 12:57:41 [__init__.py:112] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+(EngineCore pid=1142) INFO 08-16 12:57:41 [core.py:114] Initializing a V1 LLM engine (v0.21.0) with config: model='/data/shared_models/Qwen2.5-14B-Instruct', speculative_config=None, tokenizer='/data/shared_models/Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.float16, max_seq_len=32768, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/data/shared_models/Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::linear_attention', 'vllm::plamo2_mamba_mixer', 'vllm::qwen_gdn_attention_core', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::kda_attention', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update', 'vllm::mla_forward', 'vllm::dsa_forward'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 256, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=1142) INFO 08-16 12:57:43 [ascend_config.py:914] Dynamic EPLB is False
+(EngineCore pid=1142) INFO 08-16 12:57:43 [ascend_config.py:915] The number of redundant experts is 0
+(EngineCore pid=1142) INFO 08-16 12:57:46 [parallel_state.py:1692] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://192.168.0.84:40409 backend=hccl
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+(EngineCore pid=1142) INFO 08-16 12:57:48 [parallel_state.py:2027] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+(EngineCore pid=1142) INFO 08-16 12:57:48 [model_runner_v1.py:3757] Starting to load model /data/shared_models/Qwen2.5-14B-Instruct...
+(EngineCore pid=1142) INFO 08-16 12:57:50 [compilation.py:1068] Using OOT custom backend for compilation.
+(EngineCore pid=1142) WARNING 08-16 12:57:50 [utils.py:381] Disable npu_add_rms_norm_bias custom op because libopapi.so misses required symbol(s): aclnnAddRmsNormBias, aclnnAddRmsNormBiasGetWorkspaceSize
+(EngineCore pid=1142) INFO 08-16 12:57:51 [backends.py:888] Post-grad pass configuration time: 0.30 s
+(EngineCore pid=1142) INFO 08-16 12:57:51 [weight_utils.py:854] Filesystem type for checkpoints: EXT4. Checkpoint size: 27.51 GiB. Available RAM: 1885.16 GiB.
+(EngineCore pid=1142) INFO 08-16 12:57:51 [weight_utils.py:877] Auto-prefetch is disabled because the filesystem (EXT4) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=1142) Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=1142) Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:05<00:37,  5.29s/it]
+(EngineCore pid=1142) Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:12<00:39,  6.51s/it]
+(EngineCore pid=1142) Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:20<00:34,  6.93s/it]
+(EngineCore pid=1142) Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:27<00:27,  6.98s/it]
+(EngineCore pid=1142) Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:33<00:20,  6.88s/it]
+(EngineCore pid=1142) Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:41<00:14,  7.04s/it]
+(EngineCore pid=1142) Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:48<00:07,  7.15s/it]
+(EngineCore pid=1142) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:50<00:00,  5.64s/it]
+(EngineCore pid=1142) Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:50<00:00,  6.37s/it]
+(EngineCore pid=1142) 
+(EngineCore pid=1142) INFO 08-16 12:58:42 [default_loader.py:430] Loading weights took 51.06 seconds
+(EngineCore pid=1142) INFO 08-16 12:58:43 [model_runner_v1.py:3833] Loading model weights took 27.5350 GB
+(EngineCore pid=1142) INFO 08-16 12:58:43 [model_runner_v1.py:3860] Model runner load_model total time: 54.51 seconds
+(EngineCore pid=1142) INFO 08-16 12:58:43 [interface.py:620] Setting kv cache block size to 128 for CUSTOM backend.
+(EngineCore pid=1142) INFO 08-16 12:58:46 [backends.py:888] Post-grad pass configuration time: 0.00 s
+(EngineCore pid=1142) INFO 08-16 12:58:46 [compiler_interface.py:248] AscendCompiler hash factors: {'torch_npu_version': '2.10.0', 'enable_npugraph_ex': False, 'enable_static_kernel': False}
+(EngineCore pid=1142) INFO 08-16 12:58:46 [backends.py:1116] Using cache directory: /out/vllm-cache/torch_compile_cache/070b585647/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=1142) INFO 08-16 12:58:46 [backends.py:1175] Dynamo bytecode transform time: 2.42 s
+---- end same-spec server log progress ----
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:28403 (150s/900s)
+[same-spec-current] current same-spec server became ready after 175s
+INFO 08-16 13:00:04 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 08-16 13:00:04 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 08-16 13:00:04 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 08-16 13:00:04 [__init__.py:246] Platform plugin ascend is activated
+INFO 08-16 13:00:04 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.
+Namespace(trust_remote_code=False, seed=0, num_prompts=32, dataset_name='custom', no_stream=False, dataset_path='/bench/scripts/traces/evoscientist-workload-custom.jsonl', no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=28403, endpoint='/v1/chat/completions', header=None, max_concurrency=None, model='/data/shared_models/Qwen2.5-14B-Instruct', input_len=None, output_len=None, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=1.0, burstiness=1.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=False, append_result=False, metadata=None, result_dir='/out/result', result_filename='raw_benchmark_result.json', ignore_eos=True, self_timed=None, percentile_metrics=None, metric_percentiles='99', goodput=None, request_id_prefix='bench-2511d3e4-', top_p=None, top_k=None, min_p=None, temperature=None, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=900, chat_template_kwargs=None, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False)
+WARNING: vllm bench serve no longer sets temperature==0 (greedy) in requests by default. The default will be determined on the server side and can be model/API specific. For the old behavior, include --temperature=0.
+Starting initial single prompt test run...
+Waiting for endpoint to become up in 900 seconds
+ |          | 00:00 elapsed, ? remaining |          | 00:00 elapsed, 00:16 remaining |          | 00:33 elapsed, 6632:59:33 remaining
+Initial test run completed.
+Starting main benchmark run...
+Traffic request rate: 1.0
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: None
+  0%|          | 0/32 [00:00<?, ?it/s]  3%|▎         | 1/32 [00:24<12:38, 24.48s/it]  6%|▋         | 2/32 [00:25<05:25, 10.85s/it] 44%|████▍     | 14/32 [00:26<00:18,  1.02s/it] 59%|█████▉    | 19/32 [00:26<00:09,  1.43it/s] 66%|██████▌   | 21/32 [00:31<00:10,  1.03it/s] 69%|██████▉   | 22/32 [00:32<00:09,  1.01it/s] 72%|███████▏  | 23/32 [00:33<00:08,  1.09it/s] 75%|███████▌  | 24/32 [00:34<00:07,  1.06it/s] 81%|████████▏ | 26/32 [00:35<00:04,  1.27it/s] 88%|████████▊ | 28/32 [00:37<00:03,  1.08it/s] 91%|█████████ | 29/32 [00:38<00:02,  1.16it/s] 94%|█████████▍| 30/32 [00:38<00:01,  1.30it/s] 97%|█████████▋| 31/32 [00:38<00:00,  1.56it/s]100%|██████████| 32/32 [00:39<00:00,  1.34it/s]100%|██████████| 32/32 [00:39<00:00,  1.24s/it]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     32        
+Failed requests:                         0         
+Request rate configured (RPS):           1.00      
+Benchmark duration (s):                  39.81     
+Total input tokens:                      7484      
+Total generated tokens:                  8192      
+Request throughput (req/s):              0.80      
+Output token throughput (tok/s):         205.77    
+Peak output token throughput (tok/s):    600.00    
+Peak concurrent requests:                24.00     
+Total token throughput (tok/s):          393.75    
+---------------Time to First Token----------------
+Mean TTFT (ms):                          3109.84   
+Median TTFT (ms):                        1160.22   
+P99 TTFT (ms):                           12112.96  
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          39.58     
+Median TPOT (ms):                        35.23     
+P99 TPOT (ms):                           78.49     
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           39.42     
+Median ITL (ms):                         33.34     
+P99 ITL (ms):                            85.73     
+==================================================
+artifact: /out/result/submission/run_leaderboard.json
+manifest: /out/result/submission/leaderboard_manifest.json
+[same-spec-current] exported leaderboard artifact to /out/result/submission
+[same-spec-current] stopping managed current same-spec wrapper: 1141 1142 640 641 947 948 

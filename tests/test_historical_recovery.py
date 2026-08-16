@@ -116,6 +116,40 @@ def test_recovers_inferable_fields_without_requiring_verified(tmp_path: Path) ->
     assert report["summary"]["required_experiments"] == 0
 
 
+def test_repairs_outer_model_identity_from_resolved_same_spec(tmp_path: Path) -> None:
+    entry = _entry()
+    entry["model"] = {
+        "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+        "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+        "short_name": "Qwen2.5-14B-Instruct",
+        "display_name": "Qwen2.5-14B-Instruct",
+        "name": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16",
+        "quantization": None,
+    }
+    entry["same_spec"]["model"] = "Qwen/Qwen2.5-Coder-14B-Instruct"
+    entry["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        entry["same_spec"]
+    )
+    registry, aliases = _write_inputs(tmp_path, [("coder", entry)])
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert report["summary"]["required_experiments"] == 0
+    assert recovered[0]["model"]["repo_id"] == "Qwen/Qwen2.5-Coder-14B-Instruct"
+    assert recovered[0]["model"]["canonical_id"] == (
+        "hf:Qwen/Qwen2.5-Coder-14B-Instruct"
+    )
+    inferred = recovered[0]["historical_recovery"]["inferred_fields"]
+    assert "model.repo_id" in inferred
+    assert "model.canonical_id" in inferred
+
+
 def test_deduplication_prefers_evidence_not_best_metric(tmp_path: Path) -> None:
     older_high = _entry(throughput=999.0)
     newer_lower = _entry(throughput=100.0)
@@ -133,6 +167,301 @@ def test_deduplication_prefers_evidence_not_best_metric(tmp_path: Path) -> None:
     assert [entry["metrics"]["throughput_tps"] for entry in recovered] == [100.0]
     assert report["summary"]["superseded_entries"] == 1
     assert report["policy"]["deduplication_uses_metrics"] is False
+
+
+def test_registered_target_formal_exact_supersedes_old_incomplete_contract(
+    tmp_path: Path,
+) -> None:
+    old_incomplete = _entry(throughput=999.0)
+    formal_exact = _entry(throughput=100.0)
+    formal_exact["same_spec"]["resolved_server_parameters"][
+        "gpu_memory_utilization"
+    ] = 0.6
+    formal_exact["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        formal_exact["same_spec"]
+    )
+    registry, aliases = _write_inputs(
+        tmp_path, [("old-incomplete", old_incomplete), ("formal-exact", formal_exact)]
+    )
+    formal_dir = tmp_path / "submissions" / "formal-exact"
+    (formal_dir / "env-manifest.json").write_text("{}", encoding="utf-8")
+    (formal_dir / "checksums.sha256").write_text("", encoding="utf-8")
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert [entry["metrics"]["throughput_tps"] for entry in recovered] == [100.0]
+    assert report["summary"]["superseded_entries"] == 1
+    assert report["superseded"][0]["source_path"].endswith(
+        "old-incomplete/run_leaderboard.json"
+    )
+
+
+def test_vision_input_contracts_are_distinct_selection_groups(tmp_path: Path) -> None:
+    entries = []
+    for name, digest in (
+        ("unknown", None),
+        ("frozen-a", "d" * 64),
+        ("frozen-b", "e" * 64),
+    ):
+        entry = _entry()
+        entry["same_spec"]["scenario"] = "visionarena-online"
+        entry["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+            entry["same_spec"]
+        )
+        entries.append((name, entry))
+    registry, aliases = _write_inputs(tmp_path, entries)
+    for name, digest in (("frozen-a", "d" * 64), ("frozen-b", "e" * 64)):
+        directory = tmp_path / "submissions" / name
+        (directory / "input_provenance.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "visionarena-frozen-input/v1",
+                    "dataset": {"revision": "c" * 40},
+                    "selection": {"content_sha256": digest},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert len(recovered) == 3
+    assert report["summary"]["superseded_entries"] == 0
+    contracts = [
+        entry["historical_recovery"].get("input_contract") for entry in recovered
+    ]
+    assert None in contracts
+    assert {contract["content_sha256"] for contract in contracts if contract} == {
+        "d" * 64,
+        "e" * 64,
+    }
+
+
+def test_recovery_carries_frozen_input_identity_and_prefers_repeat_suite(
+    tmp_path: Path,
+) -> None:
+    newer_single = _entry(throughput=999.0)
+    newer_single["metadata"]["submitted_at"] = "2026-07-03T00:00:00Z"
+    repeated = _entry(throughput=100.0)
+    registry, aliases = _write_inputs(
+        tmp_path, [("newer-single", newer_single), ("repeated", repeated)]
+    )
+    repeated_dir = tmp_path / "submissions" / "repeated"
+    (repeated_dir / "repeat_suite.json").write_text("{}", encoding="utf-8")
+    (repeated_dir / "input_provenance.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "visionarena-frozen-input/v1",
+                "dataset": {"revision": "c" * 40},
+                "selection": {"content_sha256": "d" * 64},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert [entry["metrics"]["throughput_tps"] for entry in recovered] == [100.0]
+    assert recovered[0]["historical_recovery"]["input_contract"] == {
+        "schema_version": "visionarena-frozen-input/v1",
+        "dataset_revision": "c" * 40,
+        "content_sha256": "d" * 64,
+    }
+    assert report["summary"]["superseded_entries"] == 1
+
+
+def test_explicit_repeat_execution_conflict_is_rejected_and_rerun_satisfies_it(
+    tmp_path: Path,
+) -> None:
+    conflicting = _entry(throughput=90.0)
+    replacement = _entry(throughput=100.0)
+    replacement["same_spec"]["resolved_server_parameters"]["gpu_memory_utilization"] = (
+        0.6
+    )
+    replacement["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        replacement["same_spec"]
+    )
+    replacement["metadata"]["submitted_at"] = "2026-07-02T00:00:00Z"
+    registry, aliases = _write_inputs(
+        tmp_path, [("conflicting", conflicting), ("replacement", replacement)]
+    )
+    registry.write_text(
+        json.dumps(
+            {
+                "registry_version": "1.0.0",
+                "targets": [
+                    {
+                        "target_id": SPEC_ID,
+                        "target_version": "1.0.0",
+                        "server_parameters": {"gpu_memory_utilization": 0.6},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    conflicting_dir = tmp_path / "submissions" / "conflicting"
+    (conflicting_dir / "repeat_suite.json").write_text(
+        json.dumps({"execution": {"gpu_memory_utilization": "0.90"}}),
+        encoding="utf-8",
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert [entry["metrics"]["throughput_tps"] for entry in recovered] == [100.0]
+    assert report["summary"]["required_experiments"] == 0
+    assert report["summary"]["satisfied_experiments"] == 1
+    assert report["policy"]["explicit_execution_contract_conflicts_rejected"] is True
+    rejected = next(
+        item
+        for item in report["rejected"]
+        if item["source_path"].endswith("conflicting/run_leaderboard.json")
+    )
+    assert rejected["reasons"] == [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+    ]
+
+
+def test_explicit_same_spec_execution_conflict_is_rejected(tmp_path: Path) -> None:
+    conflicting = _entry()
+    conflicting["same_spec"]["resolved_server_parameters"]["gpu_memory_utilization"] = (
+        0.9
+    )
+    conflicting["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        conflicting["same_spec"]
+    )
+    registry, aliases = _write_inputs(tmp_path, [("conflicting", conflicting)])
+    registry.write_text(
+        json.dumps(
+            {
+                "registry_version": "1.0.0",
+                "targets": [
+                    {
+                        "target_id": SPEC_ID,
+                        "target_version": "1.0.0",
+                        "server_parameters": {"gpu_memory_utilization": 0.6},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert recovered == []
+    assert report["rejected"][0]["reasons"] == [
+        "execution-contract-conflict:gpu_memory_utilization:0.9!=0.6"
+    ]
+
+
+def test_execution_contract_normalizes_string_boolean(tmp_path: Path) -> None:
+    entry = _entry()
+    entry["same_spec"]["resolved_server_parameters"]["enable_prefix_caching"] = "true"
+    entry["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        entry["same_spec"]
+    )
+    registry, aliases = _write_inputs(tmp_path, [("matching", entry)])
+    registry.write_text(
+        json.dumps(
+            {
+                "registry_version": "1.0.0",
+                "targets": [
+                    {
+                        "target_id": SPEC_ID,
+                        "target_version": "1.0.0",
+                        "server_parameters": {"enable_prefix_caching": True},
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert len(recovered) == 1
+    assert report["rejected"] == []
+
+
+def test_same_910b2_contract_is_comparable_across_physical_machines(
+    tmp_path: Path,
+) -> None:
+    machine_a = _entry(throughput=100.0)
+    machine_a["cluster"] = {"hostname": "server-112", "rack": "rack-a"}
+    machine_b = _entry(throughput=101.0)
+    machine_b["cluster"] = {"hostname": "server-207", "rack": "rack-b"}
+    machine_b["metadata"]["submitted_at"] = "2026-07-02T00:00:00Z"
+    registry, aliases = _write_inputs(
+        tmp_path, [("machine-a", machine_a), ("machine-b", machine_b)]
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert len(recovered) == 1
+    assert recovered[0]["cluster"]["hostname"] == "server-207"
+    assert report["summary"]["superseded_entries"] == 1
+    assert report["policy"]["same_chip_cross_machine_comparable"] is True
+    assert report["policy"]["physical_machine_partitions_trend_identity"] is False
+
+
+def test_missing_legacy_no_stream_default_does_not_split_same_contract(
+    tmp_path: Path,
+) -> None:
+    implicit = _entry(throughput=100.0)
+    implicit["cluster"] = {"hostname": "server-112"}
+    explicit = _entry(throughput=101.0)
+    explicit["cluster"] = {"hostname": "server-207"}
+    explicit["same_spec"]["resolved_client_parameters"]["no_stream"] = False
+    explicit["same_spec"]["resolved_spec_hash"] = compute_resolved_spec_hash(
+        explicit["same_spec"]
+    )
+    explicit["metadata"]["submitted_at"] = "2026-07-02T00:00:00Z"
+    registry, aliases = _write_inputs(
+        tmp_path, [("implicit", implicit), ("explicit", explicit)]
+    )
+
+    recovered, report = build_recovery(
+        repo_root=tmp_path,
+        registry_path=registry,
+        revision_aliases_path=aliases,
+    )
+
+    assert len(recovered) == 1
+    assert recovered[0]["same_spec"]["resolved_client_parameters"]["no_stream"] is False
+    assert recovered[0]["cluster"]["hostname"] == "server-207"
+    assert report["summary"]["superseded_entries"] == 1
+    assert report["superseded"][0]["source_path"].endswith(
+        "implicit/run_leaderboard.json"
+    )
 
 
 def test_only_non_inferable_measurement_is_scheduled_for_rerun(

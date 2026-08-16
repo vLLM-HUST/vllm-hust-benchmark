@@ -20,20 +20,25 @@
   "node_count": 1,
   "server_parameters": {
     "tensor_parallel_size": 1,
-    "gpu_memory_utilization": 0.6,
+    "gpu_memory_utilization": 0.9,
     "enforce_eager": "",
     "trust_remote_code": "",
     "disable_log_stats": "",
     "disable_log_requests": "",
     "host": "0.0.0.0",
     "port": 8000,
-    "max_model_len": 32768
+    "max_model_len": 32768,
+    "enable_prefix_caching": true,
+    "no_enable_chunked_prefill": true,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 32768
   },
   "client_parameters": {
     "backend": "vllm",
     "endpoint": "/v1/completions",
     "dataset_name": "prefix_repetition",
     "no_stream": false,
+    "ignore_eos": true,
     "num_prompts": 200,
     "input_len": 4096,
     "output_len": 256,

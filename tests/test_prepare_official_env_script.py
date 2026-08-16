@@ -42,6 +42,14 @@ PREPARE_SCRIPT = REPO_ROOT / "scripts/prepare-official-ascend-baseline-env.sh"
 RUN_OFFICIAL_SCRIPT = REPO_ROOT / "scripts/run-official-ascend-goal-baseline.sh"
 
 
+def test_official_runner_binds_export_to_source_spec() -> None:
+    script = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+    export_args_index = script.index("EXPORT_ARGS=(")
+    export_call_index = script.index("run_in_official_runtime", export_args_index)
+    export_block = script[export_args_index:export_call_index]
+    assert '--spec-path "$SPEC_FILE"' in export_block
+
+
 def _source_prepare_functions(snippet: str) -> str:
     script_path = shlex.quote(str(PREPARE_SCRIPT))
     return (

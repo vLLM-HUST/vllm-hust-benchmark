@@ -13,11 +13,13 @@ import copy
 import hashlib
 import json
 import math
+import re
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.model_registry import resolve_model_identity
 from vllm_hust_benchmark.same_spec import compute_resolved_spec_hash
 
 SCHEMA_VERSION = "historical-leaderboard-recovery/v1"
@@ -25,6 +27,44 @@ SHA40_LENGTH = 40
 RETIRED_PATH_PREFIX = "archive/pre-v0.18.0/"
 PRIMARY_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
 ATOMIC_OFFLINE_LATENCY_RULE = "atomic-offline-latency-success/v1"
+ONLINE_NO_STREAM_DEFAULT_RULE = "legacy-online-no-stream-default/v1"
+EXECUTION_CONTRACT_KEYS = (
+    "enable_prefix_caching",
+    "gpu_memory_utilization",
+    "max_model_len",
+    "max_num_batched_tokens",
+    "max_num_seqs",
+    "tensor_parallel_size",
+)
+
+
+def _infer_same_spec_defaults(same_spec: dict[str, Any]) -> list[dict[str, Any]]:
+    """Materialize deterministic legacy CLI defaults in recovered contracts.
+
+    Older ``vllm bench serve`` artifacts omitted ``no_stream`` when the flag was
+    not supplied.  The effective value is nevertheless unambiguous: the CLI
+    default is ``False``.  Leaving it absent fragments identical experiments
+    (including runs from different physical machines) into different hashes.
+    """
+
+    client = same_spec.get("resolved_client_parameters")
+    if not isinstance(client, dict):
+        return []
+    scenario = str(same_spec.get("scenario") or "")
+    if not scenario.endswith("-online") or "no_stream" in client:
+        return []
+    client["no_stream"] = False
+    return [
+        {
+            "field": "same_spec.resolved_client_parameters.no_stream",
+            "value": False,
+            "rule_id": ONLINE_NO_STREAM_DEFAULT_RULE,
+            "evidence": {
+                "benchmark": "vllm bench serve",
+                "cli_semantics": "omitted --no-stream flag resolves to false",
+            },
+        }
+    ]
 
 
 @dataclass(frozen=True)
@@ -203,6 +243,102 @@ def _load_entries(path: Path) -> list[dict[str, Any]]:
     return [value for value in values if isinstance(value, dict)]
 
 
+def _load_input_contract(artifact_path: Path) -> dict[str, str] | None:
+    """Load a valid frozen-input identity without making its host path material."""
+    path = artifact_path.parent / "input_provenance.json"
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if payload.get("schema_version") != "visionarena-frozen-input/v1":
+        return None
+    dataset = payload.get("dataset")
+    selection = payload.get("selection")
+    if not isinstance(dataset, dict) or not isinstance(selection, dict):
+        return None
+    revision = str(dataset.get("revision") or "").strip().lower()
+    content_sha256 = str(selection.get("content_sha256") or "").strip().lower()
+    if not re.fullmatch(r"[0-9a-f]{40}", revision):
+        return None
+    if not re.fullmatch(r"[0-9a-f]{64}", content_sha256):
+        return None
+    return {
+        "schema_version": str(payload["schema_version"]),
+        "dataset_revision": revision,
+        "content_sha256": content_sha256,
+    }
+
+
+def _contract_scalar(value: Any) -> tuple[str, Any]:
+    """Normalize JSON scalars for execution-vs-target comparisons."""
+
+    if isinstance(value, bool):
+        return ("bool", value)
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return ("number", float(value))
+    text = str(value).strip()
+    lowered = text.lower()
+    if lowered == "true":
+        return ("bool", True)
+    if lowered == "false":
+        return ("bool", False)
+    try:
+        return ("number", float(text))
+    except ValueError:
+        return ("text", text)
+
+
+def _execution_contract_conflicts(
+    artifact_path: Path,
+    target: dict[str, Any] | None,
+    same_spec: dict[str, Any],
+) -> tuple[str, ...]:
+    """Reject explicit repeat execution evidence that contradicts its target.
+
+    Historical artifacts can omit effective server parameters.  An adjacent
+    repeat suite is stronger evidence about what actually ran; when it states a
+    value that conflicts with the registered official target, the record is a
+    diagnostic run rather than an admissible point for that target.
+    """
+
+    if target is None:
+        return ()
+    registered = target.get("server_parameters")
+    if not isinstance(registered, dict):
+        return ()
+
+    evidence: list[dict[str, Any]] = []
+    resolved_server = same_spec.get("resolved_server_parameters")
+    if isinstance(resolved_server, dict):
+        evidence.append(resolved_server)
+    repeat_suite_path = artifact_path.parent / "repeat_suite.json"
+    if repeat_suite_path.is_file():
+        try:
+            repeat_suite = json.loads(repeat_suite_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            repeat_suite = {}
+        execution = repeat_suite.get("execution")
+        if isinstance(execution, dict):
+            evidence.append(execution)
+
+    conflicts = []
+    for execution in evidence:
+        for field in EXECUTION_CONTRACT_KEYS:
+            if field not in execution or field not in registered:
+                continue
+            actual = execution[field]
+            expected = registered[field]
+            reason = f"execution-contract-conflict:{field}:{actual}!={expected}"
+            if (
+                _contract_scalar(actual) != _contract_scalar(expected)
+                and reason not in conflicts
+            ):
+                conflicts.append(reason)
+    return tuple(conflicts)
+
+
 def _quality_score(
     *,
     method: str,
@@ -215,20 +351,41 @@ def _quality_score(
     }[method]
     return (
         method_score,
+        int(
+            (artifact_path.parent / "repeat_suite.json").is_file()
+            or int(entry.get("metadata", {}).get("repetitions") or 0) >= 3
+        ),
         int((artifact_path.parent / "env-manifest.json").is_file()),
         int((artifact_path.parent / "checksums.sha256").is_file()),
     )
 
 
 def _selection_key(
-    entry: dict[str, Any], *, engine_commit: str, plugin_commit: str, spec_hash: str
+    entry: dict[str, Any],
+    *,
+    engine_commit: str,
+    plugin_commit: str,
+    spec_hash: str,
+    spec_id: str,
+    registered_target: bool,
+    input_contract: dict[str, str] | None,
 ) -> str:
     identity = {
         "engine_commit": engine_commit,
         "plugin_commit": plugin_commit,
-        "resolved_spec_hash": spec_hash,
         "config_type": str(entry.get("config_type") or ""),
     }
+    if registered_target:
+        identity["spec_id"] = spec_id
+        scenario = str(entry.get("same_spec", {}).get("scenario") or "")
+        if "visionarena" in scenario.lower():
+            identity["input_contract"] = (
+                input_contract["content_sha256"]
+                if input_contract is not None
+                else "unrecorded"
+            )
+    else:
+        identity["resolved_spec_hash"] = spec_hash
     canonical = json.dumps(identity, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
@@ -312,15 +469,6 @@ def recover_entry(
     same_spec = entry.get("same_spec")
     if not isinstance(same_spec, dict) or not same_spec:
         return RecoveryDecision(source_path, "rejected", ("same-spec-missing",))
-    try:
-        recomputed_hash = compute_resolved_spec_hash(same_spec)
-    except (TypeError, ValueError) as error:
-        return RecoveryDecision(
-            source_path,
-            "rejected",
-            (f"same-spec-incomplete:{error}",),
-        )
-
     recovered = copy.deepcopy(entry)
     if derived_atomic_success:
         recovered["metrics"]["error_rate"] = 0.0
@@ -328,6 +476,40 @@ def recover_entry(
     original_hash = str(recovered_spec.get("resolved_spec_hash") or "")
     inferred_fields: list[str] = list(revision_inferences)
     measurement_derivations = []
+    spec_derivations = _infer_same_spec_defaults(recovered_spec)
+    inferred_fields.extend(item["field"] for item in spec_derivations)
+    try:
+        recomputed_hash = compute_resolved_spec_hash(recovered_spec)
+    except (TypeError, ValueError) as error:
+        return RecoveryDecision(
+            source_path,
+            "rejected",
+            (f"same-spec-incomplete:{error}",),
+        )
+
+    # The resolved same-spec contract is stronger evidence than legacy outer
+    # display metadata.  Historical exporters occasionally copied the default
+    # 14B Instruct identity into Coder/VL entries even though both the server
+    # and client were resolved against the correct target model.  Repair that
+    # deterministic metadata mismatch instead of scheduling another experiment.
+    spec_model = str(recovered_spec.get("model") or "").strip()
+    if spec_model:
+        identity = resolve_model_identity(spec_model)
+        recovered_model = recovered.setdefault("model", {})
+        authoritative_model_fields: dict[str, Any] = {
+            "canonical_id": identity.canonical_id,
+            "repo_id": identity.repo_id,
+            "short_name": identity.short_name,
+            "display_name": identity.display_name,
+            "name": identity.repo_id,
+            "parameters": recovered_spec.get("model_parameters"),
+            "precision": recovered_spec.get("model_precision"),
+            "quantization": recovered_spec.get("model_quantization") or None,
+        }
+        for field, value in authoritative_model_fields.items():
+            if recovered_model.get(field) != value:
+                recovered_model[field] = value
+                inferred_fields.append(f"model.{field}")
     if derived_atomic_success:
         inferred_fields.append("metrics.error_rate")
         measurement_derivations.append(
@@ -368,6 +550,11 @@ def recover_entry(
     plugin_provenance["commit"] = plugin_commit
     spec_id = str(recovered_spec.get("spec_id") or "")
     target = registry_by_id.get(spec_id)
+    execution_conflicts = _execution_contract_conflicts(
+        artifact_path, target, recovered_spec
+    )
+    if execution_conflicts:
+        return RecoveryDecision(source_path, "rejected", execution_conflicts)
     if target is not None:
         if not metadata.get("target_id"):
             metadata["target_id"] = spec_id
@@ -378,11 +565,15 @@ def recover_entry(
             )
             inferred_fields.append("metadata.target_version")
 
+    input_contract = _load_input_contract(artifact_path)
     key = _selection_key(
         recovered,
         engine_commit=engine_commit,
         plugin_commit=plugin_commit,
         spec_hash=recomputed_hash,
+        spec_id=spec_id,
+        registered_target=target is not None,
+        input_contract=input_contract,
     )
     recovery_record = {
         "schema_version": SCHEMA_VERSION,
@@ -397,6 +588,10 @@ def recover_entry(
     }
     if measurement_derivations:
         recovery_record["measurement_derivations"] = measurement_derivations
+    if spec_derivations:
+        recovery_record["spec_derivations"] = spec_derivations
+    if input_contract is not None:
+        recovery_record["input_contract"] = input_contract
     recovered["historical_recovery"] = recovery_record
     score = _quality_score(method=method, entry=recovered, artifact_path=artifact_path)
     return RecoveryDecision(
@@ -658,6 +853,13 @@ def build_recovery(
             "raw_artifacts_modified": False,
             "missing_measurements_invented": False,
             "deduplication_uses_metrics": False,
+            "physical_machine_partitions_trend_identity": False,
+            "same_chip_cross_machine_comparable": True,
+            "explicit_execution_contract_conflicts_rejected": True,
+            "registered_target_selection_identity": (
+                "spec_id+engine_commit+plugin_commit+config_type"
+            ),
+            "vision_input_contract_partitions_selection_identity": True,
             "formal_admission_gate_unchanged": True,
         },
         "rejected": rejected,

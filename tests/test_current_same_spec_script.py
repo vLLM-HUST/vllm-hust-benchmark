@@ -1,6 +1,6 @@
+import json
 import subprocess
 from pathlib import Path
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RUNNER = REPO_ROOT / "scripts/run-current-ascend-same-spec.sh"
@@ -139,6 +139,42 @@ def test_current_same_spec_runner_requires_offline_graph_proof() -> None:
     assert "graph_mode_verified == true" in script
     assert "enforce_eager == false" in script
     assert "CURRENT_ALLOW_OFFLINE_EAGER_BENCHMARK" not in script
+
+
+def test_current_runner_supports_audited_runtime_only_dataset_path() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    normalize = _function_text(script, "normalized_client_parameters_json")
+
+    assert "CURRENT_RUNTIME_DATASET_PATH=${CURRENT_RUNTIME_DATASET_PATH:-}" in script
+    assert 'parameters["dataset_path"] = runtime_dataset_path' in normalize
+    assert 'ensure_runtime_dataset_available "$CURRENT_RUNTIME_DATASET_PATH"' in script
+    assert "CURRENT_INPUT_PROVENANCE_FILE=${CURRENT_INPUT_PROVENANCE_FILE:-}" in script
+    assert (
+        'cp -f "$CURRENT_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"'
+        in script
+    )
+    assert 'chmod 0644 "$ARTIFACT_DIR/input_provenance.json"' in script
+
+
+def test_prefix_repetition_official_spec_freezes_material_server_defaults() -> None:
+    root = Path(__file__).resolve().parents[1]
+    payload = json.loads(
+        (
+            root
+            / "docs"
+            / "official-baselines"
+            / "official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json"
+        ).read_text(encoding="utf-8")
+    )
+    server = payload["server_parameters"]
+    client = payload["client_parameters"]
+
+    assert server["gpu_memory_utilization"] == 0.9
+    assert server["enable_prefix_caching"] is True
+    assert server["no_enable_chunked_prefill"] is True
+    assert server["max_num_seqs"] == 16
+    assert server["max_num_batched_tokens"] == 32768
+    assert client["ignore_eos"] is True
 
 
 def test_wait_for_server_fails_while_live_server_logs_npu_oom(
@@ -379,4 +415,17 @@ def test_current_same_spec_runner_aggregates_measured_runs_after_export() -> Non
     )
     assert (
         'AGGREGATE_ARGS+=(--run-raw-result "$measured_raw_result")' in aggregate_block
+    )
+
+
+def test_current_same_spec_runner_supports_export_only_without_rerun() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    assert "CURRENT_EXPORT_ONLY=${CURRENT_EXPORT_ONLY:-0}" in script
+    assert "CURRENT_EXPORT_ONLY requires an existing raw result" in script
+    assert (
+        "[same-spec-current] export-only: preserving existing raw measurement" in script
+    )
+    assert (
+        'if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" != "serve" ]]'
+        in script
     )

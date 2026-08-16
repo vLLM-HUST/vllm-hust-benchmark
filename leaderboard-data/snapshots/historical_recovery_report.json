@@ -1,43 +1,381 @@
 {
   "schema_version": "historical-leaderboard-recovery/v1",
-  "registry_version": "1.3.3",
+  "registry_version": "1.3.5",
   "summary": {
-    "source_artifacts": 349,
-    "evaluated_entries": 349,
-    "selected_entries": 282,
-    "rejected_entries": 49,
-    "superseded_entries": 18,
+    "source_artifacts": 405,
+    "evaluated_entries": 405,
+    "selected_entries": 235,
+    "rejected_entries": 105,
+    "superseded_entries": 65,
     "spec_recovery_methods": {
-      "historical-exact-spec": 189,
-      "historical-reconstructed-hash": 93
+      "historical-exact-spec": 100,
+      "historical-reconstructed-hash": 135
     },
     "inferred_fields": {
-      "metadata.runtime_provenance.plugin.commit": 4,
-      "metadata.target_id": 276,
-      "metadata.target_version": 276,
+      "metadata.runtime_provenance.plugin.commit": 3,
+      "metadata.target_id": 196,
+      "metadata.target_version": 196,
       "metrics.error_rate": 4,
-      "same_spec.resolved_spec_hash": 93
+      "model.canonical_id": 2,
+      "model.display_name": 2,
+      "model.name": 2,
+      "model.repo_id": 2,
+      "model.short_name": 2,
+      "same_spec.resolved_client_parameters.no_stream": 101,
+      "same_spec.resolved_spec_hash": 135
     },
-    "required_experiments": 0,
-    "satisfied_experiments": 6
+    "required_experiments": 47,
+    "satisfied_experiments": 15
   },
   "policy": {
     "raw_artifacts_modified": false,
     "missing_measurements_invented": false,
     "deduplication_uses_metrics": false,
+    "physical_machine_partitions_trend_identity": false,
+    "same_chip_cross_machine_comparable": true,
+    "explicit_execution_contract_conflicts_rejected": true,
+    "registered_target_selection_identity": "spec_id+engine_commit+plugin_commit+config_type",
+    "vision_input_contract_partitions_selection_identity": true,
     "formal_admission_gate_unchanged": true
   },
   "rejected": [
     {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-backend-pr-131-base-config-sync-random-online-1aa7cd10b7-cd29480d96/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-backend-pr-131-head-config-sync-random-online-1aa7cd10b7-e26ffd9063/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-offline-graph-random-latency-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
       "reasons": [
-        "invalid-error-rate"
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-offline-graph-sonnet-throughput-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-online-remainder-sharegpt-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-smoke-agent-research-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-smoke-instructcoder-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-smoke-random-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
       ]
     },
     {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2/run_leaderboard.json",
       "reasons": [
         "invalid-error-rate"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-instructcoder-online-0e84e42c7-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-instructcoder-online-103d3aa34-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-instructcoder-online-39fef6206-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-instructcoder-online-a46abb7ae-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-39fef6206-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9",
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-3b8e5cff0-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9",
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-6f612fbed-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9",
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-73187bc8b-20260722/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-a46abb7ae-20260722/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-0e84e42c7-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-103d3aa34-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-2206f1f7b-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-3b8e5cff0-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-51621c35b-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-611bcabeb-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-6f612fbed-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-online-0e84e42c7-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-online-103d3aa34-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-online-3b8e5cff0-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-online-6f612fbed-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-online-0e84e42c7-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-online-103d3aa34-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-online-39fef6206-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-online-3b8e5cff0-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-0e84e42c7-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-103d3aa34-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-2206f1f7b-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-2fb7859dd-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-39fef6206-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-3b8e5cff0-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-611bcabeb-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-6f612fbed-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-0e84e42c7-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-103d3aa34-20260724/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-2206f1f7b-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-39fef6206-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-3b8e5cff0-20260725/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-51621c35b-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-611bcabeb-20260726/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/missing-target-id/2026-08-07/historical-pr-pr115-base-prefix-repetition-online-prefix-repetition-online-87f2a3480f-52f923884b/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/missing-target-id/2026-08-07/historical-pr-pr115-head-prefix-repetition-online-prefix-repetition-online-0e84e42c71-52f923884b/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/missing-target-id/2026-08-07/historical-pr-pr116-head-prefix-repetition-online-prefix-repetition-online-ab0a8e87d5-52f923884b/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
       ]
     },
     {
@@ -321,105 +659,352 @@
       "reasons": [
         "retired-pre-v0.18.0"
       ]
+    },
+    {
+      "source_path": "archive/suspect/7fa0e3ed4b-c56ccf1e/qwen25-14b-910b2-prefix-repetition-online-1npu-20260506-corrected/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "submissions/codex-latest-main-tf5-prefix-prefix-repetition-online-1chip-20260726T075441Z/run_leaderboard.json",
+      "reasons": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
     }
   ],
   "superseded": [
     {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr66-simllm-kv-manager-agent-research-online-ceec19abb0-e0686f12d1/run_leaderboard.json",
+      "selected_source_path": "submissions/codex-direct-rerun-pr66-agent-r3-agent-research-online-1chip-20260726T154740Z/run_leaderboard.json",
+      "selection_key": "7f8a9f513111f67a9e4334fe555c83b8212d03e81b1dee9d3c46efd9d92e273e"
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr70-simllm-baseline-validation-agent-research-online-ceec19abb0-312ca80a90/run_leaderboard.json",
+      "selected_source_path": "submissions/codex-direct-rerun-pr70-agent-r3-agent-research-online-1chip-20260726T154740Z/run_leaderboard.json",
+      "selection_key": "e2d23a0fea3ae11050ce79a019ba4ab05294f850022a25b132f7543de48c591d"
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-prefix-clean-prefix-repetition-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m3-prefix-repetition-online-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "eb1816eebc8e37600e12632c2c4a8fec5e17bf7f945f1ccf1b878e806ca2d6d0"
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr-77-ceec19abb0-agent-research-online-ceec19abb0-51e577b17b/run_leaderboard.json",
+      "selected_source_path": "submissions/codex-direct-rerun-pr77-agent-foreground-agent-research-online-1chip-20260726T160046Z/run_leaderboard.json",
+      "selection_key": "2dc2eddab52db93f75d952556fdbad4c690ff17867589686fdc35f68a541ee1a"
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr69-perfgate-l2-targeted-verification-agent-research-online-ec4847981f-51e577b17b/run_leaderboard.json",
+      "selected_source_path": "submissions/codex-direct-rerun-pr69-agent-r5-agent-research-online-1chip-20260726T155633Z/run_leaderboard.json",
+      "selection_key": "65034277047edecaf159236b8554c60c9eb93766b086b4fe6473d993120932d9"
+    },
+    {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr77-perfgate-l2-scenario-registry-prefix-cache-fix-prefix-repetition-online-ceec19abb0-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr-77-ceec19abb0-prefix-cache-fix-prefix-repetition-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "9f45d3aa61db4505f434203ad82b8f81172a1124f4757951a528afb2a0e8e4e8"
+      "selection_key": "5b0914b5e3c53485d1f8423934ad47463c0213b64a4658b6cf0e60fa81bcdd44"
     },
     {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr77-perfgate-l2-scenario-registry-sharegpt-throughput-ceec19abb0-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/suspect/sharegpt-throughput-pr77-duplicate/historical-pr-pr-77-ceec19abb0-sharegpt-throughput-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "13d8a2e65606cff41554b4b29f5575e30ae9b33b01ed799c008172f8b923f099"
+      "selection_key": "841dd775f8ecd84a5f12392bedf90f3962f952fd05ca56bd9382e3a3765e17f7"
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-73187bc8b-20260722/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-random-latency-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "1281f3b385fe958fb2c34b28127284e967629afccbfa386f9e9c4e8cfcbed762"
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-73187bc8b-20260722/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-sharegpt-throughput-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "a27cd0e6221d160f6052667c3120da88f1fe0070cbdb857b5f91b437339af24c"
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-73187bc8b-20260722/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-sonnet-throughput-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "69e452387e6ae2407cac498aec1a764c72e90fa48d0bc7e6cdf74222c4772ba7"
     },
     {
       "source_path": "archive/legacy/superseded-coexistence/2026-08-07/historical-pr-pr130-latest-logprobs-online-logprobs-online-e4ce33646f-52f923884b/run_leaderboard.json",
       "selected_source_path": "submissions/historical-pr-pr46-latest-logprobs-online-e4ce33646f-7bce23cc05/run_leaderboard.json",
-      "selection_key": "850f668817175c83cf08e75da8aede5a485b8bc37e575448b561d4e38308b6c7"
+      "selection_key": "95186e7b1967765884bf2e8b0dcc84110940a3a15dffbcf78eef7eda98dfb669"
+    },
+    {
+      "source_path": "archive/suspect/7a63-main-random-superseded/ci-27661615497-1-d40e28c3/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-main-7a63-d40e-gapfill-random-online-7a63f81e86-d40e28c348/run_leaderboard.json",
+      "selection_key": "9b206e77ae8014585f31fe8074c4017da13e7ad07d94cb2a555a64d377205cb3"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-align-ascend-benchmark-perfgate-defaults-prefix-repetition-online-2fb7859dd0-51e577b17b/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-align-ascend-benchmark-perfgate-defaults-prefix-cache-fix-prefix-repetition-online-2fb7859dd0-51e577b17b/run_leaderboard.json",
+      "selection_key": "101ba36b55c6336c4027bb1f35a4d7ec0b6e95e8efe7118cca404b6376a7afb3"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-align-perfgate-baseline-spec-source-prefix-repetition-online-dcc06b18f3-51e577b17b/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-align-perfgate-baseline-spec-source-prefix-cache-fix-prefix-repetition-online-dcc06b18f3-51e577b17b/run_leaderboard.json",
+      "selection_key": "fafc4b928c8f8824f046c450fca0de407d978ce13c31f0a9c8204d6cc606f9d0"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-ascend-pr66-simllm-kv-manager-prefix-repetition-online-ceec19abb0-e0686f12d1/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr66-simllm-kv-manager-prefix-cache-fix-prefix-repetition-online-ceec19abb0-e0686f12d1/run_leaderboard.json",
+      "selection_key": "1943a5d10fdabd4a641e172bb070bd103ed41394f7cda2266c5c8edb08742363"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-ascend-pr70-simllm-baseline-validation-prefix-repetition-online-ceec19abb0-312ca80a90/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr70-simllm-baseline-validation-prefix-cache-fix-prefix-repetition-online-ceec19abb0-312ca80a90/run_leaderboard.json",
+      "selection_key": "ea00caeefa5f777622e01ab849a370dd20f38913fa77fff6e06730ecc7cab5bd"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-main-7a63-d40e-gapfill-prefix-repetition-online-7a63f81e86-d40e28c348/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-main-7a63-d40e-prefix-cache-fix-prefix-repetition-online-7a63f81e86-d40e28c348/run_leaderboard.json",
+      "selection_key": "b2847ca3d76dd7db6ce70f12a657dbcc988b0f180455e10a170eb6f56560560e"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-main-current-prefix-repetition-online-83cf83ff20-7803bc8d0f/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-main-current-prefix-cache-fix-prefix-repetition-online-83cf83ff20-7803bc8d0f/run_leaderboard.json",
+      "selection_key": "17fad28b23b2b21d54c2abeb4b7eea7a82759085157f0ca99d1541ba65e794a7"
     },
     {
       "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-pr-77-ceec19abb0-prefix-repetition-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selected_source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-pr77-perfgate-l2-scenario-registry-prefix-repetition-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "35453f093365430ca9c197c3e27623ba9d8667012c79da7bac163d1b66f7f02e"
+      "selected_source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr-77-ceec19abb0-prefix-cache-fix-prefix-repetition-online-ceec19abb0-51e577b17b/run_leaderboard.json",
+      "selection_key": "5b0914b5e3c53485d1f8423934ad47463c0213b64a4658b6cf0e60fa81bcdd44"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-pr41-v1-attention-boundary-prefix-repetition-online-51621c35bc-d40e28c348/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr41-v1-attention-boundary-prefix-cache-fix-prefix-repetition-online-51621c35bc-d40e28c348/run_leaderboard.json",
+      "selection_key": "c2519454ceb2a74fe6ab85b8036cc16647fae75eb0863be3a1592ca8ff7b9dac"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-pr49-kv-offload-worker-prefix-repetition-online-f273f9c5e2-d40e28c348/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr49-kv-offload-worker-prefix-cache-fix-prefix-repetition-online-f273f9c5e2-d40e28c348/run_leaderboard.json",
+      "selection_key": "5ad628c61a1ee8489cf49bbb3003e90b0a571c0f6ee9ca21eb10b0ac9398adba"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-pr69-perfgate-l2-targeted-verification-prefix-repetition-online-ec4847981f-51e577b17b/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr69-perfgate-l2-targeted-verification-prefix-cache-fix-prefix-repetition-online-ec4847981f-51e577b17b/run_leaderboard.json",
+      "selection_key": "659feda5fe027f0358acb61494fdb8edc4ff0817f25311b6a5a71bb99296322f"
+    },
+    {
+      "source_path": "archive/suspect/prefix-repetition-single-no-prefix-cache-20260705/historical-pr-pr77-perfgate-l2-scenario-registry-prefix-repetition-online-ceec19abb0-51e577b17b/run_leaderboard.json",
+      "selected_source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr-77-ceec19abb0-prefix-cache-fix-prefix-repetition-online-ceec19abb0-51e577b17b/run_leaderboard.json",
+      "selection_key": "5b0914b5e3c53485d1f8423934ad47463c0213b64a4658b6cf0e60fa81bcdd44"
+    },
+    {
+      "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-align-ascend-benchmark-perfgate-defaults-instructcoder-online-2fb7859dd0-51e577b17b/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-align-ascend-benchmark-perfgate-defaults-ttft-fix-instructcoder-online-2fb7859dd0-51e577b17b/run_leaderboard.json",
+      "selection_key": "837a027d1a05acbab99115bfde3e57d4f826d9198924eebf96a709936d2f1819"
     },
     {
       "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-align-ascend-benchmark-perfgate-defaults-sharegpt-online-2fb7859dd0-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-align-ascend-benchmark-perfgate-defaults-ttft-fix-sharegpt-online-2fb7859dd0-51e577b17b/run_leaderboard.json",
-      "selection_key": "88d32672b13198d2facf0bf2b0270de07536fd0d24268cdac8c68a116e3583b1"
+      "selection_key": "8f979596b3262de3d1a5b565120e7718c2a941564142145086669c4ee50387d6"
     },
     {
       "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-align-perfgate-baseline-spec-source-sharegpt-online-dcc06b18f3-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-align-perfgate-baseline-spec-source-ttft-fix-sharegpt-online-dcc06b18f3-51e577b17b/run_leaderboard.json",
-      "selection_key": "03c78d94d8da2d48c1b7c496793ac9a617b889e5e7c92822c0461830219fa454"
+      "selection_key": "6d1070b53206b87c7a02246c490423172abd7cca99f3492aad53f57e53d070e7"
+    },
+    {
+      "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-ascend-pr66-simllm-kv-manager-instructcoder-online-ceec19abb0-e0686f12d1/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr66-simllm-kv-manager-instructcoder-online-ceec19abb0-e0686f12d1/run_leaderboard.json",
+      "selection_key": "fff47b05f65e5027898b6f6aea4e83abbff1aac7a700efe2571092ff8ded7e31"
     },
     {
       "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-ascend-pr66-simllm-kv-manager-sharegpt-online-ceec19abb0-e0686f12d1/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr66-simllm-kv-manager-ttft-fix-sharegpt-online-ceec19abb0-e0686f12d1/run_leaderboard.json",
-      "selection_key": "0563fd0a89fd808743790e963daae27c3524301b6f85e7f5fc926b8dd2fdf3a0"
+      "selection_key": "455d7ff4c052be58ef5713eb218563a9d57375a9f9c9c83ab27693a974556c73"
+    },
+    {
+      "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-ascend-pr70-simllm-baseline-validation-instructcoder-online-ceec19abb0-312ca80a90/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr70-simllm-baseline-validation-ttft-fix-instructcoder-online-ceec19abb0-312ca80a90/run_leaderboard.json",
+      "selection_key": "1fe0f179f376cbebdeefdb25b3004ea1ddf18d53b7bd4f9becc2a16d9ac7188b"
     },
     {
       "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-ascend-pr70-simllm-baseline-validation-sharegpt-online-ceec19abb0-312ca80a90/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr70-simllm-baseline-validation-ttft-fix-sharegpt-online-ceec19abb0-312ca80a90/run_leaderboard.json",
-      "selection_key": "4b382bffe1e444f32ef6277a5306917181d1c6f1ff0230d79906ece4597ba68c"
+      "selection_key": "1f57ec3f5647dbf4592a935d43d45b97a85ba581e002427931a49d8cc6f2e252"
     },
     {
       "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-pr-77-ceec19abb0-instructcoder-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selected_source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr77-perfgate-l2-scenario-registry-instructcoder-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "9126b1c54e4c9e05ce69191035d9a0f52749969ce565945f2df144a22b92e69b"
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr77-perfgate-l2-scenario-registry-ttft-fix-instructcoder-online-ceec19abb0-51e577b17b/run_leaderboard.json",
+      "selection_key": "a7b159ad474e52ef9ebd1437c61ebb5363cbb95cf62c13abecec9e49e8a3794d"
     },
     {
       "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-pr69-perfgate-l2-targeted-verification-sharegpt-online-ec4847981f-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr69-perfgate-l2-targeted-verification-ttft-fix-sharegpt-online-ec4847981f-51e577b17b/run_leaderboard.json",
-      "selection_key": "6a81b0e8582e22cef9b6f21c016fecfd828c7b67eaed3dfa99c1c283124ef534"
+      "selection_key": "0f84edb364555503b376dc015a74dc80f4b9696bac9c23cf28a7a7a4a82e7973"
     },
     {
       "source_path": "archive/suspect/single-card-high-ttft-outliers-20260705/historical-pr-pr77-perfgate-l2-scenario-registry-sharegpt-online-ceec19abb0-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr77-perfgate-l2-scenario-registry-ttft-fix-sharegpt-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "5515a95bc68dcbd3f655b72a90f952a9af385649af05b2c3e9178c6a828a18f3"
+      "selection_key": "a130bf9ac60cf78c313be047a318c825d5fcbd238cdd9aa17004c99b67e3e370"
     },
     {
       "source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr-77-ceec19abb0-sharegpt-online-ceec19abb0-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr77-perfgate-l2-scenario-registry-ttft-fix-sharegpt-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "5515a95bc68dcbd3f655b72a90f952a9af385649af05b2c3e9178c6a828a18f3"
+      "selection_key": "a130bf9ac60cf78c313be047a318c825d5fcbd238cdd9aa17004c99b67e3e370"
     },
     {
       "source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr-77-ceec19abb0-visionarena-online-ceec19abb0-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr77-perfgate-l2-scenario-registry-visionarena-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "63d608bcb29742c36b14e290f9dd05dd869bd93f4ba83a033a16d8a205e47a4c"
+      "selection_key": "3fd7ecff7a1bacaeb9fa5018d9aa8b960e2c95a1bdc82e9ed8821737d0cfe91a"
     },
     {
       "source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr77-perfgate-l2-scenario-registry-agent-research-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr-77-ceec19abb0-agent-research-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "5b301fd888fa8240e553a78ed66bb223e0d2af0206bf914fb47a8cbcdbf2c405"
+      "selected_source_path": "submissions/codex-direct-rerun-pr77-agent-foreground-agent-research-online-1chip-20260726T160046Z/run_leaderboard.json",
+      "selection_key": "2dc2eddab52db93f75d952556fdbad4c690ff17867589686fdc35f68a541ee1a"
+    },
+    {
+      "source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr77-perfgate-l2-scenario-registry-instructcoder-online-ceec19abb0-51e577b17b/run_leaderboard.json",
+      "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr77-perfgate-l2-scenario-registry-ttft-fix-instructcoder-online-ceec19abb0-51e577b17b/run_leaderboard.json",
+      "selection_key": "a7b159ad474e52ef9ebd1437c61ebb5363cbb95cf62c13abecec9e49e8a3794d"
     },
     {
       "source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr77-perfgate-l2-scenario-registry-random-online-ceec19abb0-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr-77-ceec19abb0-random-online-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "7adddb77e9c449819b9e335d98b9c4ddea96b3027ddb3b453783a5e8a704ff4c"
+      "selection_key": "9300b044c183f84da4bf7ef28b93ce157ed0526bb21f65baef7f552abaa8cbad"
     },
     {
       "source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260727/historical-pr-pr77-perfgate-l2-scenario-registry-sonnet-throughput-ceec19abb0-51e577b17b/run_leaderboard.json",
       "selected_source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr-77-ceec19abb0-sonnet-throughput-ceec19abb0-51e577b17b/run_leaderboard.json",
-      "selection_key": "7bf31422d92dad497ce4bec1395e2001d24868a5572b2030cbfae9b2ce17e8a8"
+      "selection_key": "5f2f7dbb74b92303ac4956c158765d134f743720539cfc6041b7c55fed6058aa"
     },
     {
       "source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260811/codex-direct-rerun-pr69-agent-foreground-agent-research-online-1chip-20260726T155751Z/run_leaderboard.json",
       "selected_source_path": "submissions/codex-direct-rerun-pr69-agent-r5-agent-research-online-1chip-20260726T155633Z/run_leaderboard.json",
-      "selection_key": "b7780f51589ec529f8b3eca04c666c4991d9058a69817864c30db96c392feab0"
+      "selection_key": "65034277047edecaf159236b8554c60c9eb93766b086b4fe6473d993120932d9"
+    },
+    {
+      "source_path": "archive/suspect/superseded-coexistence-historical-pr-backfill-20260811/codex-direct-rerun-pr77-agent-r4-agent-research-online-1chip-20260726T155651Z/run_leaderboard.json",
+      "selected_source_path": "submissions/codex-direct-rerun-pr77-agent-foreground-agent-research-online-1chip-20260726T160046Z/run_leaderboard.json",
+      "selection_key": "2dc2eddab52db93f75d952556fdbad4c690ff17867589686fdc35f68a541ee1a"
     },
     {
       "source_path": "submissions/codex-hotpath-restore-after-logprobs-online-1chip-20260726T092000Z/submission/run_leaderboard.json",
       "selected_source_path": "submissions/codex-hotpath-restore-after-logprobs-online-1chip-20260726T092000Z/run_leaderboard.json",
-      "selection_key": "cffde5ea255e37a9ff20276540c6cf434481523a36d1b03aceda1f994aeff548"
+      "selection_key": "40af79665a5eb54988dd3c18b904b0ef0ed894aa135f915df863be5e7d7732f7"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1-visionarena-0e84e42c71-03a12f9bdd-20260816/repeats/npu1/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1-visionarena-0e84e42c71-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "5ca77662f97b7dd3e9e9dc18b13a4dd24ad5ed8c565d931b1258dc4e46de988c"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1-visionarena-0e84e42c71-03a12f9bdd-20260816/repeats/npu3/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1-visionarena-0e84e42c71-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "5ca77662f97b7dd3e9e9dc18b13a4dd24ad5ed8c565d931b1258dc4e46de988c"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1-visionarena-0e84e42c71-03a12f9bdd-20260816/repeats/npu5/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1-visionarena-0e84e42c71-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "5ca77662f97b7dd3e9e9dc18b13a4dd24ad5ed8c565d931b1258dc4e46de988c"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1c-sonnet-throughput-0657f3f2a6-03a12f9bdd-20260816/diagnostics/npu3-repeat/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1c-sonnet-throughput-0657f3f2a6-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "0922477c7e7d69e40ef30c8b6b284bea7a1909bd817bee51126684551ee51f24"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1c-sonnet-throughput-0657f3f2a6-03a12f9bdd-20260816/repeats/npu2/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1c-sonnet-throughput-0657f3f2a6-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "0922477c7e7d69e40ef30c8b6b284bea7a1909bd817bee51126684551ee51f24"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1c-sonnet-throughput-0657f3f2a6-03a12f9bdd-20260816/repeats/npu3/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1c-sonnet-throughput-0657f3f2a6-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "0922477c7e7d69e40ef30c8b6b284bea7a1909bd817bee51126684551ee51f24"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1c-sonnet-throughput-0657f3f2a6-03a12f9bdd-20260816/repeats/npu7/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1c-sonnet-throughput-0657f3f2a6-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "0922477c7e7d69e40ef30c8b6b284bea7a1909bd817bee51126684551ee51f24"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1c-visionarena-0657f3f2a6-03a12f9bdd-20260817/repeats/npu2/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1c-visionarena-0657f3f2a6-03a12f9bdd-20260817/run_leaderboard.json",
+      "selection_key": "8a8bc4f15cfe59f01f48d53b1b70ce317af428d62b60605b544486a0dbed47f3"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1c-visionarena-0657f3f2a6-03a12f9bdd-20260817/repeats/npu4/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1c-visionarena-0657f3f2a6-03a12f9bdd-20260817/run_leaderboard.json",
+      "selection_key": "8a8bc4f15cfe59f01f48d53b1b70ce317af428d62b60605b544486a0dbed47f3"
+    },
+    {
+      "source_path": "submissions/stable-trend-m1c-visionarena-0657f3f2a6-03a12f9bdd-20260817/repeats/npu6/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m1c-visionarena-0657f3f2a6-03a12f9bdd-20260817/run_leaderboard.json",
+      "selection_key": "8a8bc4f15cfe59f01f48d53b1b70ce317af428d62b60605b544486a0dbed47f3"
+    },
+    {
+      "source_path": "submissions/stable-trend-m2-sonnet-throughput-73187bc8ba-03a12f9bdd-20260816/repeats/npu2/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-sonnet-throughput-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "69e452387e6ae2407cac498aec1a764c72e90fa48d0bc7e6cdf74222c4772ba7"
+    },
+    {
+      "source_path": "submissions/stable-trend-m2-sonnet-throughput-73187bc8ba-03a12f9bdd-20260816/repeats/npu3/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-sonnet-throughput-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "69e452387e6ae2407cac498aec1a764c72e90fa48d0bc7e6cdf74222c4772ba7"
+    },
+    {
+      "source_path": "submissions/stable-trend-m2-sonnet-throughput-73187bc8ba-03a12f9bdd-20260816/repeats/npu7/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-sonnet-throughput-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "69e452387e6ae2407cac498aec1a764c72e90fa48d0bc7e6cdf74222c4772ba7"
+    },
+    {
+      "source_path": "submissions/stable-trend-m2-visionarena-73187bc8ba-03a12f9bdd-20260816/repeats/npu1/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-visionarena-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "2077dc00b714038eb9eeed353dc9da79bf26e149fcda5023fd30d6119407cfba"
+    },
+    {
+      "source_path": "submissions/stable-trend-m2-visionarena-73187bc8ba-03a12f9bdd-20260816/repeats/npu3/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-visionarena-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "2077dc00b714038eb9eeed353dc9da79bf26e149fcda5023fd30d6119407cfba"
+    },
+    {
+      "source_path": "submissions/stable-trend-m2-visionarena-73187bc8ba-03a12f9bdd-20260816/repeats/npu5/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m2-visionarena-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "2077dc00b714038eb9eeed353dc9da79bf26e149fcda5023fd30d6119407cfba"
+    },
+    {
+      "source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/diagnostics/npu5/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "879a6eb1b4d262d7bbab66ef6ce54b304269352e365439f6d71580b077377b68"
+    },
+    {
+      "source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/repeats/npu2/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "879a6eb1b4d262d7bbab66ef6ce54b304269352e365439f6d71580b077377b68"
+    },
+    {
+      "source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/repeats/npu3/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "879a6eb1b4d262d7bbab66ef6ce54b304269352e365439f6d71580b077377b68"
+    },
+    {
+      "source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/repeats/npu7/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "879a6eb1b4d262d7bbab66ef6ce54b304269352e365439f6d71580b077377b68"
+    },
+    {
+      "source_path": "submissions/stable-trend-m3-visionarena-1aa7cd10b7-03ae1d03db-20260816/repeats/npu1/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m3-visionarena-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "eae0907466030acc68cb6beb552ecabcf7e2d118aca75947c43e75c15366f541"
+    },
+    {
+      "source_path": "submissions/stable-trend-m3-visionarena-1aa7cd10b7-03ae1d03db-20260816/repeats/npu3/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m3-visionarena-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "eae0907466030acc68cb6beb552ecabcf7e2d118aca75947c43e75c15366f541"
+    },
+    {
+      "source_path": "submissions/stable-trend-m3-visionarena-1aa7cd10b7-03ae1d03db-20260816/repeats/npu5/run_leaderboard.json",
+      "selected_source_path": "submissions/stable-trend-m3-visionarena-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "eae0907466030acc68cb6beb552ecabcf7e2d118aca75947c43e75c15366f541"
     }
   ],
   "satisfied_experiments": [
     {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr66-simllm-kv-manager-random-latency-ceec19abb0-e0686f12d1/run_leaderboard.json",
       "replacement_source_path": null,
-      "selection_key": "4e3e379e190b6a4ceee7ffb6c908419058352120855557775bfe948d01f103ed",
+      "selection_key": "346b1f8138523772d19f36804572f6ddf97a0ef2cb3d944c2740223c247b0ff3",
       "evidence_kind": "derived-success",
       "derivation_rule": "atomic-offline-latency-success/v1",
       "original_artifact_identity": {
@@ -432,7 +1017,7 @@
     {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-ascend-pr70-simllm-baseline-validation-random-latency-ceec19abb0-312ca80a90/run_leaderboard.json",
       "replacement_source_path": null,
-      "selection_key": "3e54d84d04345f335421c84b497273ec63f4515fa23d8e50ceecd520a71e0fdd",
+      "selection_key": "4d7096020749ff0cc38c16cd0757142e233ee02c89a81832f141ebb124aecd5d",
       "evidence_kind": "derived-success",
       "derivation_rule": "atomic-offline-latency-success/v1",
       "original_artifact_identity": {
@@ -445,7 +1030,7 @@
     {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr69-perfgate-l2-targeted-verification-random-latency-ec4847981f-51e577b17b/run_leaderboard.json",
       "replacement_source_path": null,
-      "selection_key": "873945e033578499d01a093f1b78acd0f81e3ddbccf3ec03b4e1a5343e78f580",
+      "selection_key": "949562cc3dd70697ecf2f7a8c9f01f3c52a59bc11666c94b45e828c9672cbf28",
       "evidence_kind": "derived-success",
       "derivation_rule": "atomic-offline-latency-success/v1",
       "original_artifact_identity": {
@@ -458,7 +1043,7 @@
     {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-pr77-perfgate-l2-scenario-registry-random-latency-ceec19abb0-51e577b17b/run_leaderboard.json",
       "replacement_source_path": null,
-      "selection_key": "55503ec7a175d48a3fc200700efb7355607ce06fb9068fd11402fafb27556bac",
+      "selection_key": "3aba043aa7815dbcd3c045c852d70cb20e033162867b9aedac6619e08078752b",
       "evidence_kind": "derived-success",
       "derivation_rule": "atomic-offline-latency-success/v1",
       "original_artifact_identity": {
@@ -471,7 +1056,7 @@
     {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-offline-graph-random-latency-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
       "replacement_source_path": "reports/historical-recovery-evidence/reruns/1aa7cd10b7-03ae1d03db-random-latency/run_leaderboard.json",
-      "selection_key": "a75bd363289f7d4dc9d788755ad5d37d62c6c8606433ab74eb2f11e4bb8568ca",
+      "selection_key": "1cbe7a88bf4725821bf6df92981c7989a548f6658fce4a2a333b5b157aa5a6ce",
       "evidence_kind": "fresh-rerun",
       "original_artifact_identity": {
         "entry_id": "a02d99ce-60dd-4603-820b-e805d07ab170",
@@ -485,9 +1070,121 @@
       }
     },
     {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-offline-graph-sharegpt-throughput-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m3-sharegpt-throughput-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "97101629107ff1912501fedbd0a6a12cbd5f5d7e28ed4aa99b3d4cd606b7b764",
+      "evidence_kind": "fresh-rerun",
+      "original_artifact_identity": {
+        "entry_id": "42218f5a-b3c0-42a3-a8d1-d1c53ab733c8",
+        "idempotency_key": "4183526131aa1f4e678a5d35fbe2e0a8e876f420ebad11cdff66511a474055f8",
+        "sha256": "35f7904284d4081847277a4990073c83b83aeb8e53441ee66d79a70b2369501c"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "861a2f9a-c7aa-45bf-960c-664094cf05fb",
+        "idempotency_key": "572b7db0ff3bbabf68fb6c04e6dfaf265e7ca58e05d840a1f68a66eb0d53cd26",
+        "sha256": "68637d949ff6d116b2018c2cec8c571d198226cb9321d69c89de968517995e2f"
+      }
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-offline-graph-sonnet-throughput-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m3-sonnet-throughput-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "879a6eb1b4d262d7bbab66ef6ce54b304269352e365439f6d71580b077377b68",
+      "evidence_kind": "existing-strict-repeat-suite",
+      "original_artifact_identity": {
+        "entry_id": "5527330f-bcf1-4b3e-82e3-56af4218d66d",
+        "idempotency_key": "577d327aa0647c63aeee11bf7c7133a23aaf7805d91bfde9d393e907fc8f04a4",
+        "sha256": "5486b21588b608373f48a59e47335833c050662b7e6b931b1da7002298d0aa56"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "0d3cd89b-b657-42c8-950e-2f7582ecf626",
+        "idempotency_key": "3e544769f3fccd906d8c51a47234ccb2f8186ad27aeab376b563e5412e7e0082",
+        "sha256": "e58d3f9c4cffd7555455d5a5ba40eb90cae44d7b1511fbbd8302dfe982c9ea0b"
+      }
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-online-remainder-sharegpt-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m3-sharegpt-online-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "7bc791e73720233bd0dc179bccd3e136d6a97a0b4ecb23076460535b2dd4a2fc",
+      "evidence_kind": "fresh-rerun",
+      "original_artifact_identity": {
+        "entry_id": "a932eb01-04dd-4599-98c8-25ab6cf58d75",
+        "idempotency_key": "885bf985bf2b7834968eaef10e4070a2956b406141aeef209058f2c75d6b6ff3",
+        "sha256": "f340ed9f63b9522b6180357693a808ce77d113dd7532c076ba23409a269f9064"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "7c8fccc8-373e-497f-a0b0-d00cff92bf14",
+        "idempotency_key": "76cc30f069231c5a4c42412f0e647a11fa94635143f0f287c876ab3c782e9dc1",
+        "sha256": "75ac0aed2634a6697a1551a01a518aae126389a22b9033dfb1d7e754166c3c0c"
+      }
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-online-remainder-visionarena-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m3-visionarena-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "eae0907466030acc68cb6beb552ecabcf7e2d118aca75947c43e75c15366f541",
+      "evidence_kind": "existing-strict-repeat-suite",
+      "original_artifact_identity": {
+        "entry_id": "babdd30e-9569-4d0a-bc11-c96c180c4e3e",
+        "idempotency_key": "02aac5a3aa03765b369a99b3dc084e07d0b0377ddb56e9bb149995abe93d71c8",
+        "sha256": "8c7375c90a02447d424ef74ba50498b2830e2eb590c8ba0b26931a81a53b5d43"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "773c7eca-16f7-4db7-a7d6-10e89919d4f1",
+        "idempotency_key": "c91b67b61a1939164d0990fbd1dfa4a6980e47ddae4f4ce00359c196f7887ea6",
+        "sha256": "72cba20d32f6d5da1ad445c1157515357981ff45187a3d1e80f8eafc160ae0f2"
+      }
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-smoke-agent-research-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m3-agent-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "f5899fd5e6bc43b874d4d671bdf28689911cefd4041388853fc41f3efd5c2df8",
+      "evidence_kind": "fresh-rerun",
+      "original_artifact_identity": {
+        "entry_id": "7973333c-787e-439b-85ec-964ebef9aa42",
+        "idempotency_key": "776d29d22f582acd523b4b1a1937355bb011a47217b74cf357fbbcdcf41c859e",
+        "sha256": "e70bda9a68597c1ab3eee952f06a897ea71bf1440358e01798adcba061980e30"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "eabf7bc3-7c67-43ef-a248-aeea2bb8189f",
+        "idempotency_key": "9c40d3805a9b0ef5253c988009f59857cc9f0a38547af924dc5a2145a4956294",
+        "sha256": "106a8c1b65afe932392d34cf58ac1fc338f2febafbed02204aa305d5fd4e67aa"
+      }
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-smoke-instructcoder-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m3-instructcoder-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "ef0802ae72271a44048b08f8f250efe4132e3208955a98121ee44a7a5a797c48",
+      "evidence_kind": "fresh-rerun",
+      "original_artifact_identity": {
+        "entry_id": "03625641-fa9a-4325-999f-caf6d1478df2",
+        "idempotency_key": "43ddb0296bdeb2442dd0abdb0f780c33db75c7fc01afaa71836711aa4e41027e",
+        "sha256": "805577316122cf89be50b4ef9b61375c0d6bdecb57e30e36230290112e91b347"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "dcc55fb8-c88f-45ad-8dbe-50a7df2399e0",
+        "idempotency_key": "c5813d150efdbfd9818d9cb5a4635f7cbc4ce6b55915311e70882a3bce0e5269",
+        "sha256": "d2595fdce012fd742a27f2da05d3b2daaf6423e9f336813a2af0488b2bcb8f0f"
+      }
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-current-main-single-npu-smoke-random-online-1aa7cd10b7-03ae1d03db/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m3-random-online-1aa7cd10b7-03ae1d03db-20260816/run_leaderboard.json",
+      "selection_key": "2472d95b6d8839b9d1fef2d3bed3bcfbeebc7614af3e4ba9f54c98b4db0265fa",
+      "evidence_kind": "fresh-rerun",
+      "original_artifact_identity": {
+        "entry_id": "22e3473a-49d5-4798-95ce-9126ab402401",
+        "idempotency_key": "688fc946ebc7de76b686f6251c26ae8a2f3f6d44cbb19cc3aa79ac0b6926d526",
+        "sha256": "77505b278de7201878291342cfafb755feb2c011ac3e06f7bf0fcda26ea8127f"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "ed113a14-c67f-4ff4-be47-aa150574bc95",
+        "idempotency_key": "2001d20c4f998b36d917c3af01fba5509051880b77ed7171bcd579ebf207e0b0",
+        "sha256": "435a82116aa28d7c8b688f2caa31ad57a82e8a388283ecad90e194ea01eef8c9"
+      }
+    },
+    {
       "source_path": "archive/legacy/incomplete-evidence/2026-08-07/official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2/run_leaderboard.json",
       "replacement_source_path": "reports/historical-recovery-evidence/reruns/bcf2be9612-e18643f8a4-random-latency/run_leaderboard.json",
-      "selection_key": "77673d686c9a12b1cbeac1a80790167bf76bbfbf558f4b34dd162aeaaf4ce889",
+      "selection_key": "bacfc0a5aedda8508fa64dcc856ab2fa407f7c437add7b5f8255bfca96a12944",
       "evidence_kind": "existing-strict-repeat-suite",
       "original_artifact_identity": {
         "entry_id": "2c09c8a7-0a4f-43ce-9986-505318a3813d",
@@ -499,7 +1196,513 @@
         "idempotency_key": "e597f6cd44c779c9c88f56f72a150eb2b6d2f9ab6df56ac66cc1ae13d3872b3a",
         "sha256": "4c987593785a2bc8ae87a272c6b3ccd5f4ed19864ed3331bf122f515dcec1834"
       }
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-instructcoder-online-0e84e42c7-20260724/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m1-instructcoder-0e84e42c71-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "40fd777590de4369a52aa92e303275a6de5ac79b409189ec9196156079be997f",
+      "evidence_kind": "fresh-rerun",
+      "original_artifact_identity": {
+        "entry_id": "0536ec03-7f08-4533-b017-3389f0b7cb06",
+        "idempotency_key": "4033d922bf01e76fdba98498fef0d4524db60bb510155a9d8f3250fccb4fe882",
+        "sha256": "1858c69d7ab2959c97823c5441c2d94409e0a1fd41395200f8b9c2367030d556"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "f7714b49-f0e6-4531-81e9-79e1e8e5f995",
+        "idempotency_key": "af0e11a570c34bb771f4bae36dedfc8d6dc622b966642ac19f53f436a29549b2",
+        "sha256": "b2584482b2fbbadfefac695251c44aaf879283e9449cfc62230d9b5614057444"
+      }
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-73187bc8b-20260722/run_leaderboard.json",
+      "replacement_source_path": "submissions/stable-trend-m2-prefix-repetition-online-73187bc8ba-03a12f9bdd-20260816/run_leaderboard.json",
+      "selection_key": "a1678f66dc70dc6b15096e3f116846490aeaa4c1088738157ff2f87a88977d3e",
+      "evidence_kind": "fresh-rerun",
+      "original_artifact_identity": {
+        "entry_id": "885047bf-7308-434f-add1-1e1174a0184c",
+        "idempotency_key": "e5e7512b33d52c5857d8c5263bf81d8b4996107cb9f46a922cb539826e8936e2",
+        "sha256": "766f3500dc6cfb685f6919aaf294b3f8cf0c16126fc1215f1ffdc8b1a32f69cb"
+      },
+      "replacement_artifact_identity": {
+        "entry_id": "399aa7c4-ece5-4e50-a492-c78c8ddcc373",
+        "idempotency_key": "11a04e4492f8dd4c4c667d326c5de884f423c315de6f84b9544af90c88caa41b",
+        "sha256": "efca1695153f09cf171f86e29f1fcb02967f77397ccb249797d979a1c86d189f"
+      }
     }
   ],
-  "required_experiments": []
+  "required_experiments": [
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-backend-pr-131-base-config-sync-random-online-1aa7cd10b7-cd29480d96/run_leaderboard.json",
+      "workload": "random-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "engine_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+      "plugin_commit": "cd29480d9699616adf6808fb6ccc3107bc9f1384",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-backend-pr-131-head-config-sync-random-online-1aa7cd10b7-e26ffd9063/run_leaderboard.json",
+      "workload": "random-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "engine_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+      "plugin_commit": "e26ffd90635ccd00bf7b34d82d1df7b80d12bcf0",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/historical-pr-backend-pr-80-merge-random-online-ae16d09435-a05a9efe54/run_leaderboard.json",
+      "workload": "random-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "engine_commit": "ae16d09435abd978417a1b5ab7af352c8dcd180a",
+      "plugin_commit": "a05a9efe54c783cd4030d9aae8c8341b8c5e0d4b",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.90!=0.6"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "plugin_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2/run_leaderboard.json",
+      "workload": "visionarena-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-visionarena-online-qwen25-vl-7b-910b2",
+      "engine_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "plugin_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-instructcoder-online-103d3aa34-20260724/run_leaderboard.json",
+      "workload": "instructcoder-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "engine_commit": "103d3aa34483933ae55245b2bdfa8bed43f149c1",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-instructcoder-online-39fef6206-20260725/run_leaderboard.json",
+      "workload": "instructcoder-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "engine_commit": "39fef6206bf8fff0974c5783f13b4b8dd8193fc5",
+      "plugin_commit": "21924bbab029f15b0dfa2950180d9abaf2476c17",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-instructcoder-online-a46abb7ae-20260725/run_leaderboard.json",
+      "workload": "instructcoder-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-instructcoder-online-qwen25-coder-14b-910b2",
+      "engine_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
+      "plugin_commit": "f430530ada2c0c2ec2f925606494bc95a474d9c8",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-39fef6206-20260725/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "39fef6206bf8fff0974c5783f13b4b8dd8193fc5",
+      "plugin_commit": "21924bbab029f15b0dfa2950180d9abaf2476c17",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9",
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-3b8e5cff0-20260725/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "3b8e5cff01e8a54f067d261db07ba1940a363b96",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9",
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-6f612fbed-20260726/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "6f612fbedff718af2dabb93692f00044e66a9b4b",
+      "plugin_commit": "f430530ada2c0c2ec2f925606494bc95a474d9c8",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9",
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-prefix-repetition-online-a46abb7ae-20260722/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "a46abb7ae68acc13a4fc5870db98619b3f97c6e0",
+      "plugin_commit": "f430530ada2c0c2ec2f925606494bc95a474d9c8",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-0e84e42c7-20260724/run_leaderboard.json",
+      "workload": "random-latency",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "engine_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-103d3aa34-20260724/run_leaderboard.json",
+      "workload": "random-latency",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "engine_commit": "103d3aa34483933ae55245b2bdfa8bed43f149c1",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-2206f1f7b-20260725/run_leaderboard.json",
+      "workload": "random-latency",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "engine_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",
+      "plugin_commit": "b2328661bd54079ce95eee78037ed9166d52e983",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-3b8e5cff0-20260725/run_leaderboard.json",
+      "workload": "random-latency",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "engine_commit": "3b8e5cff01e8a54f067d261db07ba1940a363b96",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-51621c35b-20260726/run_leaderboard.json",
+      "workload": "random-latency",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "engine_commit": "51621c35bcce749cc34539bc1a48d32f264924a0",
+      "plugin_commit": "d40e28c3482588b86beef3612212320d4b23d4c7",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-611bcabeb-20260726/run_leaderboard.json",
+      "workload": "random-latency",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "engine_commit": "611bcabeb730ebcd0a44881236bfead67830625a",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-latency-6f612fbed-20260726/run_leaderboard.json",
+      "workload": "random-latency",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "engine_commit": "6f612fbedff718af2dabb93692f00044e66a9b4b",
+      "plugin_commit": "f430530ada2c0c2ec2f925606494bc95a474d9c8",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-online-0e84e42c7-20260724/run_leaderboard.json",
+      "workload": "random-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "engine_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-online-103d3aa34-20260724/run_leaderboard.json",
+      "workload": "random-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "engine_commit": "103d3aa34483933ae55245b2bdfa8bed43f149c1",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-online-3b8e5cff0-20260725/run_leaderboard.json",
+      "workload": "random-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "engine_commit": "3b8e5cff01e8a54f067d261db07ba1940a363b96",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-random-online-6f612fbed-20260726/run_leaderboard.json",
+      "workload": "random-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
+      "engine_commit": "6f612fbedff718af2dabb93692f00044e66a9b4b",
+      "plugin_commit": "f430530ada2c0c2ec2f925606494bc95a474d9c8",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-online-0e84e42c7-20260724/run_leaderboard.json",
+      "workload": "sharegpt-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "engine_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-online-103d3aa34-20260724/run_leaderboard.json",
+      "workload": "sharegpt-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "engine_commit": "103d3aa34483933ae55245b2bdfa8bed43f149c1",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-online-39fef6206-20260725/run_leaderboard.json",
+      "workload": "sharegpt-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "engine_commit": "39fef6206bf8fff0974c5783f13b4b8dd8193fc5",
+      "plugin_commit": "21924bbab029f15b0dfa2950180d9abaf2476c17",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-online-3b8e5cff0-20260725/run_leaderboard.json",
+      "workload": "sharegpt-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-online-qwen25-14b-910b2",
+      "engine_commit": "3b8e5cff01e8a54f067d261db07ba1940a363b96",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-0e84e42c7-20260724/run_leaderboard.json",
+      "workload": "sharegpt-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "engine_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-103d3aa34-20260724/run_leaderboard.json",
+      "workload": "sharegpt-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "engine_commit": "103d3aa34483933ae55245b2bdfa8bed43f149c1",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-2206f1f7b-20260726/run_leaderboard.json",
+      "workload": "sharegpt-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "engine_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",
+      "plugin_commit": "b2328661bd54079ce95eee78037ed9166d52e983",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-2fb7859dd-20260726/run_leaderboard.json",
+      "workload": "sharegpt-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "engine_commit": "2fb7859dd024b51c7bd09b0c9b5cc701898090bb",
+      "plugin_commit": "51e577b17b46babba210858686d577161296a420",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-39fef6206-20260725/run_leaderboard.json",
+      "workload": "sharegpt-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "engine_commit": "39fef6206bf8fff0974c5783f13b4b8dd8193fc5",
+      "plugin_commit": "21924bbab029f15b0dfa2950180d9abaf2476c17",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-3b8e5cff0-20260725/run_leaderboard.json",
+      "workload": "sharegpt-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "engine_commit": "3b8e5cff01e8a54f067d261db07ba1940a363b96",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-611bcabeb-20260726/run_leaderboard.json",
+      "workload": "sharegpt-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "engine_commit": "611bcabeb730ebcd0a44881236bfead67830625a",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sharegpt-throughput-6f612fbed-20260726/run_leaderboard.json",
+      "workload": "sharegpt-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "engine_commit": "6f612fbedff718af2dabb93692f00044e66a9b4b",
+      "plugin_commit": "f430530ada2c0c2ec2f925606494bc95a474d9c8",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-0e84e42c7-20260724/run_leaderboard.json",
+      "workload": "sonnet-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "engine_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-103d3aa34-20260724/run_leaderboard.json",
+      "workload": "sonnet-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "engine_commit": "103d3aa34483933ae55245b2bdfa8bed43f149c1",
+      "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-2206f1f7b-20260726/run_leaderboard.json",
+      "workload": "sonnet-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "engine_commit": "2206f1f7b7212801187bc001c5f6cb86b2289214",
+      "plugin_commit": "b2328661bd54079ce95eee78037ed9166d52e983",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-39fef6206-20260725/run_leaderboard.json",
+      "workload": "sonnet-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "engine_commit": "39fef6206bf8fff0974c5783f13b4b8dd8193fc5",
+      "plugin_commit": "21924bbab029f15b0dfa2950180d9abaf2476c17",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-3b8e5cff0-20260725/run_leaderboard.json",
+      "workload": "sonnet-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "engine_commit": "3b8e5cff01e8a54f067d261db07ba1940a363b96",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-51621c35b-20260726/run_leaderboard.json",
+      "workload": "sonnet-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "engine_commit": "51621c35bcce749cc34539bc1a48d32f264924a0",
+      "plugin_commit": "d40e28c3482588b86beef3612212320d4b23d4c7",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/incomplete-evidence/2026-08-07/single-gpu-backfill-sonnet-throughput-611bcabeb-20260726/run_leaderboard.json",
+      "workload": "sonnet-throughput",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+      "engine_commit": "611bcabeb730ebcd0a44881236bfead67830625a",
+      "plugin_commit": "844c2310550829bfb5f4648f5b74dbdf34b83bda",
+      "missing_or_invalid": [
+        "execution-contract-conflict:max_model_len:30720!=32768"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/missing-target-id/2026-08-07/historical-pr-pr115-base-prefix-repetition-online-prefix-repetition-online-87f2a3480f-52f923884b/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "87f2a3480f0d06dd3576f94c532562ec7b8280dd",
+      "plugin_commit": "52f923884b9adaedfc2e764428207d0448227549",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/missing-target-id/2026-08-07/historical-pr-pr115-head-prefix-repetition-online-prefix-repetition-online-0e84e42c71-52f923884b/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "0e84e42c7168fdb2ba340a053d50d07c64832b40",
+      "plugin_commit": "52f923884b9adaedfc2e764428207d0448227549",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/legacy/missing-target-id/2026-08-07/historical-pr-pr116-head-prefix-repetition-online-prefix-repetition-online-ab0a8e87d5-52f923884b/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "ab0a8e87d5b8a361e4c26d83c400d440b1c85f87",
+      "plugin_commit": "52f923884b9adaedfc2e764428207d0448227549",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "archive/suspect/7fa0e3ed4b-c56ccf1e/qwen25-14b-910b2-prefix-repetition-online-1npu-20260506-corrected/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "7fa0e3ed4b8166e14f42c97951e33ca9f06e2d2b",
+      "plugin_commit": "",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    },
+    {
+      "source_path": "submissions/codex-latest-main-tf5-prefix-prefix-repetition-online-1chip-20260726T075441Z/run_leaderboard.json",
+      "workload": "prefix-repetition-online",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+      "engine_commit": "e4ce33646f2ef1781289e6dc651fad0d00177c55",
+      "plugin_commit": "0f38988f47b55e2e896551bc6125fda27fae5392",
+      "missing_or_invalid": [
+        "execution-contract-conflict:gpu_memory_utilization:0.6!=0.9"
+      ]
+    }
+  ]
 }

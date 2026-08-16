@@ -55,6 +55,13 @@ CURRENT_BACKEND_VERSION=${CURRENT_BACKEND_VERSION:-}
 CURRENT_SUBMITTER=${CURRENT_SUBMITTER:-"same-spec-current"}
 CURRENT_BASELINE_ENGINE=${CURRENT_BASELINE_ENGINE:-"vllm"}
 CURRENT_DATA_SOURCE=${CURRENT_DATA_SOURCE:-"vllm-hust-benchmark"}
+CURRENT_EXPORT_ONLY=${CURRENT_EXPORT_ONLY:-0}
+CURRENT_RUNTIME_DATASET_PATH=${CURRENT_RUNTIME_DATASET_PATH:-}
+CURRENT_INPUT_PROVENANCE_FILE=${CURRENT_INPUT_PROVENANCE_FILE:-}
+if [[ "$CURRENT_EXPORT_ONLY" != "0" && "$CURRENT_EXPORT_ONLY" != "1" ]]; then
+  echo "CURRENT_EXPORT_ONLY must be 0 or 1: $CURRENT_EXPORT_ONLY" >&2
+  exit 2
+fi
 CURRENT_DTYPE=${CURRENT_DTYPE:-}
 CURRENT_MODEL_NAME=${CURRENT_MODEL_NAME:-}
 CURRENT_MODEL_PARAMETERS=${CURRENT_MODEL_PARAMETERS:-}
@@ -619,7 +626,7 @@ ensure_runtime_dataset_available() {
 
   case "$dataset_path" in
     /*)
-      if [[ ! -f "$dataset_path" ]]; then
+      if [[ ! -e "$dataset_path" ]]; then
         echo "runtime dataset path not found: $dataset_path" >&2
         return 2
       fi
@@ -650,6 +657,7 @@ normalized_client_parameters_json() {
     CURRENT_VLLM_WORKTREE="$CURRENT_VLLM_HUST_REPO" \
     BENCHMARK_REPO_ROOT="$REPO_ROOT" \
     CURRENT_BENCHMARK_DATASET_ROOT="$CURRENT_BENCHMARK_DATASET_ROOT" \
+    CURRENT_RUNTIME_DATASET_PATH="$CURRENT_RUNTIME_DATASET_PATH" \
     "$CURRENT_RUNTIME_PYTHON" - <<'PY'
 import json
 import os
@@ -691,6 +699,9 @@ if client_tokenizer:
 client_temperature = os.environ.get("CURRENT_CLIENT_TEMPERATURE", "").strip()
 if benchmark_type == "serve" and client_temperature:
     parameters["temperature"] = client_temperature
+runtime_dataset_path = os.environ.get("CURRENT_RUNTIME_DATASET_PATH", "").strip()
+if runtime_dataset_path:
+    parameters["dataset_path"] = runtime_dataset_path
 print(
     json.dumps(
         parameters,
@@ -1133,6 +1144,13 @@ resolve_same_spec
 
 resolved_dataset_path=$(jq -r '.resolved_client_parameters.dataset_path // empty' "$SAME_SPEC_FILE")
 ensure_runtime_dataset_available "$resolved_dataset_path"
+if [[ -n "$CURRENT_RUNTIME_DATASET_PATH" ]]; then
+  ensure_runtime_dataset_available "$CURRENT_RUNTIME_DATASET_PATH"
+fi
+if [[ -n "$CURRENT_INPUT_PROVENANCE_FILE" ]] && ! jq -e 'type == "object"' "$CURRENT_INPUT_PROVENANCE_FILE" >/dev/null; then
+  echo "CURRENT_INPUT_PROVENANCE_FILE must be a readable JSON object: $CURRENT_INPUT_PROVENANCE_FILE" >&2
+  exit 2
+fi
 
 SERVER_HOST=""
 SERVER_PORT=""
@@ -1149,7 +1167,13 @@ SERVER_ATTEMPT_LOG_DIR="$RESULT_DIR/server-attempt-logs"
 OFFLINE_GRAPH_PROOF_FILE="$RESULT_DIR/offline_graph_proof.json"
 mkdir -p "$SERVER_ATTEMPT_LOG_DIR"
 
-if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
+if [[ "$CURRENT_EXPORT_ONLY" == "1" ]]; then
+  if [[ ! -s "$RAW_RESULT_FILE" ]]; then
+    echo "CURRENT_EXPORT_ONLY requires an existing raw result: $RAW_RESULT_FILE" >&2
+    exit 2
+  fi
+  echo "[same-spec-current] export-only: preserving existing raw measurement"
+elif [[ "$BENCHMARK_TYPE" == "serve" ]]; then
   SERVER_HOST=$(jq -r '.resolved_server_parameters.host' "$SAME_SPEC_FILE")
   SERVER_PORT=$(jq -r '.resolved_server_parameters.port' "$SAME_SPEC_FILE")
   CLIENT_HOST=$(jq -r '.resolved_client_parameters.host' "$SAME_SPEC_FILE")
@@ -1166,7 +1190,7 @@ echo "[same-spec-current] vllm cache root: $CURRENT_VLLM_CACHE_ROOT"
 echo "[same-spec-current] runtime model source: $RUNTIME_MODEL"
 echo "[same-spec-current] resolved spec file: $SAME_SPEC_FILE"
 echo "[same-spec-current] benchmark type: $BENCHMARK_TYPE"
-if [[ "$BENCHMARK_TYPE" == "serve" ]]; then
+if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" == "serve" ]]; then
   echo "[same-spec-current] benchmark endpoint: ${CLIENT_HOST}:${CLIENT_PORT}"
   if [[ "$CURRENT_USE_MANAGED_SERVER" == "1" ]]; then
     echo "[same-spec-current] using externally managed server"
@@ -1214,7 +1238,9 @@ PERFGATE_RUNS_DIR="$RESULT_DIR/runs"
 WARMUP_RAW_RESULT_FILES=()
 MEASURED_RAW_RESULT_FILES=()
 
-if [[ "$PERFGATE_WARMUP_RUNS" -eq 0 && "$PERFGATE_MEASURED_RUNS" -eq 1 ]]; then
+if [[ "$CURRENT_EXPORT_ONLY" == "1" ]]; then
+  MEASURED_RAW_RESULT_FILES+=("$RAW_RESULT_FILE")
+elif [[ "$PERFGATE_WARMUP_RUNS" -eq 0 && "$PERFGATE_MEASURED_RUNS" -eq 1 ]]; then
   # Historical single-run behavior (non-perfgate callers).
   set +e
   run_client_command_with_server_monitor
@@ -1264,7 +1290,7 @@ else
   cp -f "$RAW_RESULT_FILE" "$RESULT_DIR/raw_benchmark_result.json"
 fi
 
-if [[ "$BENCHMARK_TYPE" != "serve" ]]; then
+if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" != "serve" ]]; then
   if [[ ! -f "$OFFLINE_GRAPH_PROOF_FILE" ]] || ! jq -e '
     .schema_version == "vllm-hust-offline-graph-proof/v1" and
     .graph_mode_verified == true and
@@ -1321,6 +1347,12 @@ append_export_arg_if_present --concurrent-requests "$CONCURRENT_REQUESTS"
 run_in_current_runtime "$REPO_ROOT/src${CURRENT_RUNTIME_PYTHONPATH:+:$CURRENT_RUNTIME_PYTHONPATH}" \
 "$CURRENT_RUNTIME_PYTHON" -m vllm_hust_benchmark.cli export-leaderboard-artifact \
   "${EXPORT_ARGS[@]}"
+
+if [[ -n "$CURRENT_INPUT_PROVENANCE_FILE" ]]; then
+  cp -f "$CURRENT_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"
+  chmod 0644 "$ARTIFACT_DIR/input_provenance.json"
+  echo "[same-spec-current] copied frozen input provenance to $ARTIFACT_DIR/input_provenance.json"
+fi
 
 if [[ "$PERFGATE_WARMUP_RUNS" -gt 0 || "$PERFGATE_MEASURED_RUNS" -gt 1 ]]; then
   AGGREGATE_ARGS=(
