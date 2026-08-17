@@ -569,6 +569,95 @@ def test_validator_reports_frozen_input_parser_failure_and_continues(
     assert "validation error(s)" in result.stderr
 
 
+def test_validator_rejects_mismatched_official_runtime_provenance(
+    tmp_path: Path,
+) -> None:
+    artifact = tmp_path / "artifact"
+    artifact.mkdir()
+    runtime = {
+        "schema_version": "official-runtime-provenance/v1",
+        "python_executable": "/runtime/bin/python",
+        "python_version": "3.12.0",
+        "sources": {
+            role: {
+                "module": module,
+                "module_path": f"/prepared/{module}/__init__.py",
+                "module_version": "1.2.3",
+                "distribution": distribution,
+                "distribution_version": "1.2.3",
+                "prepared_worktree": f"/prepared/{module}",
+                "prepared_commit": commit * 40,
+                "source_version": "v1.2.3",
+                "extension_policy": "none-discovered",
+                "source_patch_sha256": "d" * 64,
+                "source_tree_sha256": "e" * 64,
+                "source_status": "clean",
+                "extensions": [],
+            }
+            for role, module, distribution, commit in (
+                ("engine", "vllm", "vllm", "a"),
+                ("plugin", "vllm_ascend", "vllm-ascend", "b"),
+            )
+        },
+    }
+    (artifact / "STATUS").write_text("OK\n", encoding="utf-8")
+    (artifact / "run_leaderboard.json").write_text(
+        json.dumps({"metadata": {"official_runtime_provenance": runtime}}) + "\n",
+        encoding="utf-8",
+    )
+    stale_runtime = json.loads(json.dumps(runtime))
+    stale_runtime["sources"]["engine"]["prepared_commit"] = "c" * 40
+    (artifact / "leaderboard_manifest.json").write_text(
+        json.dumps(
+            {
+                "entries": [{"leaderboard_artifact": "run_leaderboard.json"}],
+                "official_runtime_provenance": stale_runtime,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (artifact / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "os": "test",
+                "python_version": "test",
+                "collected_at": "2026-08-13T00:00:00Z",
+                "frozen_inputs_required": False,
+                "official_runtime_provenance": runtime,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    checksums = subprocess.run(
+        [
+            "sha256sum",
+            "run_leaderboard.json",
+            "leaderboard_manifest.json",
+            "env-manifest.json",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=artifact,
+    ).stdout
+    (artifact / "checksums.sha256").write_text(checksums, encoding="utf-8")
+
+    result = subprocess.run(
+        [bash_executable(), str(VALIDATOR), str(artifact)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode > 0
+    assert "official_runtime_provenance differs across artifact and manifests" in (
+        result.stderr
+    )
+    assert "official runtime provenance is complete and consistent" in result.stderr
+
+
 def test_validator_resolves_repo_before_changing_to_artifact_dir(
     tmp_path: Path,
 ) -> None:

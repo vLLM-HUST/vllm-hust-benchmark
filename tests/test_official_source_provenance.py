@@ -76,3 +76,36 @@ def test_capture_includes_ignored_generated_runtime_inputs(tmp_path: Path) -> No
     )
     second = json.loads(second_output.read_text(encoding="utf-8"))
     assert second["working_tree_sha256"] != first["working_tree_sha256"]
+
+
+def test_capture_includes_ignored_compiled_extensions(tmp_path: Path) -> None:
+    repo = tmp_path / "source"
+    repo.mkdir()
+    _git(repo, "init", "--initial-branch=main")
+    _git(repo, "config", "user.name", "Test User")
+    _git(repo, "config", "user.email", "test@example.com")
+    (repo / ".gitignore").write_text("*.so\n", encoding="utf-8")
+    (repo / "tracked.txt").write_text("stable\n", encoding="utf-8")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "initial")
+    extension = repo / "vllm_ascend" / "vllm_ascend_C.test.so"
+    extension.parent.mkdir()
+    extension.write_bytes(b"first-build")
+
+    first_output = tmp_path / "first-extension.json"
+    subprocess.run(
+        [str(HELPER), str(repo), "main", "example/source", str(first_output)],
+        check=True,
+    )
+    first = json.loads(first_output.read_text(encoding="utf-8"))
+    assert first["status"] == "modified"
+    assert first["generated_file_count"] == 1
+
+    extension.write_bytes(b"stale-or-replaced-build")
+    second_output = tmp_path / "second-extension.json"
+    subprocess.run(
+        [str(HELPER), str(repo), "main", "example/source", str(second_output)],
+        check=True,
+    )
+    second = json.loads(second_output.read_text(encoding="utf-8"))
+    assert second["working_tree_sha256"] != first["working_tree_sha256"]

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.machinery
 import json
 import os
 import subprocess
@@ -34,12 +35,24 @@ def _tree_digest(repo: Path) -> tuple[str, int, int, int]:
         if path
     )
     tracked_paths = set(paths)
-    generated_paths = {b"vllm_ascend/_build_info.py"}
+    generated_paths = {
+        b"vllm/_version.py",
+        b"vllm_ascend/_build_info.py",
+        b"vllm_ascend/_version.py",
+    }
     generated_paths.update(
         os.fsencode(path.relative_to(repo))
         for pattern in ("vllm-*.dist-info/*", "vllm_ascend-*.dist-info/*")
         for path in repo.glob(pattern)
         if path.is_file()
+    )
+    generated_paths.update(
+        os.fsencode(path.relative_to(repo))
+        for package_dir in (repo / "vllm", repo / "vllm_ascend")
+        if package_dir.is_dir()
+        for path in package_dir.rglob("*")
+        if path.is_file()
+        and path.name.endswith(tuple(importlib.machinery.EXTENSION_SUFFIXES))
     )
     paths.update(
         path for path in generated_paths if (repo / os.fsdecode(path)).is_file()

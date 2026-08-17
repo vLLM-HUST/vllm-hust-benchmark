@@ -8,6 +8,7 @@ VLLM_CLI_COMPAT=${VLLM_CLI_COMPAT:-"$REPO_ROOT/scripts/run_vllm_cli_compat.py"}
 COLLECT_ARTIFACT_SCRIPT=${COLLECT_ARTIFACT_SCRIPT:-"$REPO_ROOT/scripts/collect-run-artifact.sh"}
 VALIDATE_ARTIFACT_SCRIPT=${VALIDATE_ARTIFACT_SCRIPT:-"$REPO_ROOT/scripts/validate-run-artifact.sh"}
 CAPTURE_SOURCE_PROVENANCE_SCRIPT=${CAPTURE_SOURCE_PROVENANCE_SCRIPT:-"$REPO_ROOT/scripts/capture-official-source-provenance.py"}
+CAPTURE_RUNTIME_PROVENANCE_SCRIPT=${CAPTURE_RUNTIME_PROVENANCE_SCRIPT:-"$REPO_ROOT/scripts/capture-official-runtime-provenance.py"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 WORKSPACE_ROOT=${VLLM_HUST_WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}
@@ -100,6 +101,11 @@ fi
 
 if [[ ! -f "$CAPTURE_SOURCE_PROVENANCE_SCRIPT" ]]; then
   echo "Official source provenance helper not found: $CAPTURE_SOURCE_PROVENANCE_SCRIPT" >&2
+  exit 2
+fi
+
+if [[ ! -f "$CAPTURE_RUNTIME_PROVENANCE_SCRIPT" ]]; then
+  echo "Official runtime provenance helper not found: $CAPTURE_RUNTIME_PROVENANCE_SCRIPT" >&2
   exit 2
 fi
 
@@ -1612,6 +1618,8 @@ ensure_worktree "$OFFICIAL_VLLM_ASCEND_REPO" "$OFFICIAL_VLLM_ASCEND_WORKTREE" "$
 
 SOURCE_PROVENANCE_DIR="$RESULT_DIR/source-provenance"
 SOURCE_PROVENANCE_FILE="$SOURCE_PROVENANCE_DIR/official-source-provenance.json"
+RUNTIME_PROVENANCE_FILE="$SOURCE_PROVENANCE_DIR/official-runtime-provenance.json"
+RUNTIME_PROVENANCE_AFTER_FILE="$SOURCE_PROVENANCE_DIR/official-runtime-provenance-after.json"
 mkdir -p "$SOURCE_PROVENANCE_DIR"
 "$HOST_PYTHON_BIN" - "$CAPTURE_SOURCE_PROVENANCE_SCRIPT" \
   "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_CORE_SOURCE_REF" \
@@ -1701,6 +1709,22 @@ fi
 if ! is_valid_engine_version "$OFFICIAL_BACKEND_VERSION"; then
   OFFICIAL_BACKEND_VERSION="$ENGINE_VERSION"
 fi
+
+capture_official_runtime_provenance() {
+  local output_file=$1
+  run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" \
+    "$OFFICIAL_RUNTIME_PYTHON" "$CAPTURE_RUNTIME_PROVENANCE_SCRIPT" \
+      --engine-worktree "$OFFICIAL_VLLM_WORKTREE" \
+      --engine-commit "$OFFICIAL_CORE_SOURCE_COMMIT" \
+      --plugin-worktree "$OFFICIAL_VLLM_ASCEND_WORKTREE" \
+      --plugin-commit "$OFFICIAL_BACKEND_SOURCE_COMMIT" \
+      --source-provenance "$SOURCE_PROVENANCE_FILE" \
+      --output "$output_file"
+}
+
+# Fail before model loading when Python or compiled extensions resolve outside
+# the immutable worktrees prepared for this official run.
+capture_official_runtime_provenance "$RUNTIME_PROVENANCE_FILE"
 
 RUNTIME_MODEL="$MODEL"
 cached_model_status=0
@@ -1849,6 +1873,12 @@ esac
 echo "[goal-baseline] client command: $CLIENT_COMMAND"
 run_client_command
 
+capture_official_runtime_provenance "$RUNTIME_PROVENANCE_AFTER_FILE"
+if ! cmp -s "$RUNTIME_PROVENANCE_FILE" "$RUNTIME_PROVENANCE_AFTER_FILE"; then
+  echo "official runtime provenance changed during benchmark" >&2
+  exit 2
+fi
+
 "$HOST_PYTHON_BIN" "$CAPTURE_SOURCE_PROVENANCE_SCRIPT" \
   "$OFFICIAL_VLLM_WORKTREE" "$OFFICIAL_CORE_SOURCE_REF" \
   "$OFFICIAL_CORE_SOURCE_REPOSITORY" "$SOURCE_PROVENANCE_DIR/engine-after.json"
@@ -1913,17 +1943,38 @@ append_export_arg_from_spec --batch-size '.client_parameters.batch_size'
 
 run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" "${EXPORT_ARGS[@]}"
 
-"$HOST_PYTHON_BIN" - "$ARTIFACT_DIR/run_leaderboard.json" "$SOURCE_PROVENANCE_FILE" <<'PY'
+"$HOST_PYTHON_BIN" - \
+  "$ARTIFACT_DIR/run_leaderboard.json" \
+  "$ARTIFACT_DIR/leaderboard_manifest.json" \
+  "$SOURCE_PROVENANCE_FILE" \
+  "$RUNTIME_PROVENANCE_FILE" <<'PY'
 import json
 import sys
 from pathlib import Path
 
-artifact_path, provenance_path = map(Path, sys.argv[1:])
+artifact_path, manifest_path, source_path, runtime_path = map(Path, sys.argv[1:])
 artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
-provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+source = json.loads(source_path.read_text(encoding="utf-8"))
+runtime = json.loads(runtime_path.read_text(encoding="utf-8"))
 metadata = artifact.setdefault("metadata", {})
-metadata["official_source_provenance"] = provenance
+runtime_engine = (runtime.get("sources") or {}).get("engine") or {}
+runtime_versions = {
+    runtime_engine.get("module_version"),
+    runtime_engine.get("distribution_version"),
+}
+recorded_versions = {artifact.get("engine_version"), metadata.get("engine_version")}
+if None in runtime_versions or "" in runtime_versions or recorded_versions != runtime_versions:
+    raise SystemExit(
+        "recorded engine_version does not match imported runtime package: "
+        f"recorded={sorted(str(value) for value in recorded_versions)}, "
+        f"runtime={sorted(str(value) for value in runtime_versions)}"
+    )
+metadata["official_source_provenance"] = source
+metadata["official_runtime_provenance"] = runtime
+manifest["official_runtime_provenance"] = runtime
 artifact_path.write_text(json.dumps(artifact, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 PY
 
 CURRENT_RUNTIME_PYTHON="$OFFICIAL_RUNTIME_PYTHON" \
@@ -1932,22 +1983,34 @@ CURRENT_VLLM_ASCEND_HUST_REPO="$OFFICIAL_VLLM_ASCEND_WORKTREE" \
 CURRENT_GIT_COMMIT="$OFFICIAL_CORE_SOURCE_COMMIT" \
 CURRENT_PLUGIN_GIT_COMMIT="$OFFICIAL_BACKEND_SOURCE_COMMIT" \
 OFFICIAL_SOURCE_PROVENANCE_FILE="$SOURCE_PROVENANCE_FILE" \
+OFFICIAL_RUNTIME_PROVENANCE_FILE="$RUNTIME_PROVENANCE_FILE" \
 bash "$COLLECT_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"
 
-"$HOST_PYTHON_BIN" - "$ARTIFACT_DIR" "$SOURCE_PROVENANCE_FILE" <<'PY'
+"$HOST_PYTHON_BIN" - \
+  "$ARTIFACT_DIR" "$SOURCE_PROVENANCE_FILE" "$RUNTIME_PROVENANCE_FILE" <<'PY'
 import json
 import sys
 from pathlib import Path
 
-artifact_dir, provenance_path = map(Path, sys.argv[1:])
-expected = json.loads(provenance_path.read_text(encoding="utf-8"))
+artifact_dir, source_path, runtime_path = map(Path, sys.argv[1:])
+expected_source = json.loads(source_path.read_text(encoding="utf-8"))
+expected_runtime = json.loads(runtime_path.read_text(encoding="utf-8"))
 artifact = json.loads((artifact_dir / "run_leaderboard.json").read_text(encoding="utf-8"))
-manifest = json.loads((artifact_dir / "env-manifest.json").read_text(encoding="utf-8"))
-artifact_value = (artifact.get("metadata") or {}).get("official_source_provenance")
-manifest_value = manifest.get("official_source_provenance")
-if artifact_value != expected or manifest_value != expected:
+leaderboard_manifest = json.loads((artifact_dir / "leaderboard_manifest.json").read_text(encoding="utf-8"))
+env_manifest = json.loads((artifact_dir / "env-manifest.json").read_text(encoding="utf-8"))
+metadata = artifact.get("metadata") or {}
+if metadata.get("official_source_provenance") != expected_source or env_manifest.get("official_source_provenance") != expected_source:
     raise SystemExit("official source provenance mismatch between artifact, manifest, and capture")
-for role, source in expected.get("sources", {}).items():
+if any(
+    value != expected_runtime
+    for value in (
+        metadata.get("official_runtime_provenance"),
+        leaderboard_manifest.get("official_runtime_provenance"),
+        env_manifest.get("official_runtime_provenance"),
+    )
+):
+    raise SystemExit("official runtime provenance mismatch between artifact, manifests, and capture")
+for role, source in expected_source.get("sources", {}).items():
     if source.get("status") == "modified" and not source.get("tracked_patch_sha256"):
         raise SystemExit(f"{role} source is modified without tracked patch provenance")
 PY
