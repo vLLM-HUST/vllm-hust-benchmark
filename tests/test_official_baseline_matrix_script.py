@@ -419,8 +419,14 @@ def test_official_workflow_uses_pinned_v018_runtime_on_112() -> None:
     workflow_text = WORKFLOW.read_text(encoding="utf-8")
     assert "self-hosted" not in workflow_text
     assert "evaluation-request.yml@main" in workflow_text
-    assert "bcf2be96120005e9aea171927f85055a6a5c0cf6" in workflow_text
-    assert "e18643f8a4d5bd9990727654318ad069ea0b56e2" in workflow_text
+    assert (
+        "bcf2be96120005e9aea171927f85055a6a5c0cf6"  # pragma: allowlist secret
+        in workflow_text
+    )
+    assert (
+        "e18643f8a4d5bd9990727654318ad069ea0b56e2"  # pragma: allowlist secret
+        in workflow_text
+    )
     assert "target_registry_version: 1.3.5" in workflow_text
     assert "publish_results" not in workflow_text
 
