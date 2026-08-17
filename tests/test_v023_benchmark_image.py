@@ -10,6 +10,12 @@ def test_v023_benchmark_image_only_adds_frozen_benchmark_clients() -> None:
     assert "quay.io/ascend/vllm-ascend:v0.23.0-openeuler" in dockerfile
     assert '"datasets==3.3.0"' in dockerfile
     assert '"xxhash==3.6.0"' in dockerfile
+    assert "ARG VLLM_CORE_COMMIT" in dockerfile
+    assert "ARG VLLM_ASCEND_COMMIT" in dockerfile
+    assert "org.opencontainers.image.vllm-core-commit" in dockerfile
+    assert "org.opencontainers.image.vllm-ascend-commit" in dockerfile
+    assert 'test -n "${VLLM_CORE_COMMIT}"' in dockerfile
+    assert 'test -n "${VLLM_ASCEND_COMMIT}"' in dockerfile
     assert "pip install --no-cache-dir" in dockerfile
     assert "vllm-ascend" not in dockerfile.split("RUN", maxsplit=1)[1]
     assert "torch-npu" not in dockerfile.split("RUN", maxsplit=1)[1]

@@ -17,7 +17,6 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
-
 SCHEMA_VERSION = "official-runtime-provenance/v1"
 ROLE_CONFIG = {
     "engine": {
@@ -121,7 +120,15 @@ def _extension_evidence(
     ]
 
 
-def capture_role(role: str, worktree: Path, expected_commit: str) -> dict[str, Any]:
+def capture_role(
+    role: str,
+    worktree: Path,
+    expected_commit: str,
+    *,
+    runtime_root: Path | None = None,
+    image_commit: str = "",
+    image_id: str = "",
+) -> dict[str, Any]:
     config = ROLE_CONFIG[role]
     worktree = worktree.resolve()
     observed_commit = _run_git(worktree, "rev-parse", "--verify", "HEAD^{commit}")
@@ -134,10 +141,26 @@ def capture_role(role: str, worktree: Path, expected_commit: str) -> dict[str, A
 
     module = importlib.import_module(config["module"])
     module_path = _module_path(module)
-    if not _is_relative_to(module_path, worktree):
+    runtime_root = (runtime_root or worktree).resolve()
+    if not _is_relative_to(module_path, runtime_root):
         raise ValueError(
-            f"{role} module path mismatch: {module_path} is outside prepared worktree {worktree}"
+            f"{role} module path mismatch: {module_path} is outside runtime root "
+            f"{runtime_root}"
         )
+
+    image_commit = image_commit.strip().lower()
+    image_id = image_id.strip()
+    image_native = runtime_root != worktree
+    if image_native:
+        if not image_id:
+            raise ValueError(
+                f"{role} image-native runtime is missing immutable image id"
+            )
+        if image_commit != expected_commit:
+            raise ValueError(
+                f"{role} image commit mismatch: expected {expected_commit}, "
+                f"observed {image_commit or '<empty>'}"
+            )
 
     module_version = str(getattr(module, "__version__", "") or "").strip()
     module_commit = str(getattr(module, "__commit_id__", "") or "").strip()
@@ -169,21 +192,23 @@ def capture_role(role: str, worktree: Path, expected_commit: str) -> dict[str, A
                 f"{role} runtime build commit mismatch: source={source_version!r}, "
                 f"module={module_version!r}, commit={observed_commit}"
             )
-    elif _canonical_version(source_version) != _canonical_version(module_version):
+    elif not image_native and _canonical_version(source_version) != _canonical_version(
+        module_version
+    ):
         raise ValueError(
             f"{role} runtime version does not identify prepared source: "
             f"source={source_version!r}, module={module_version!r}"
         )
 
     extensions = _extension_evidence(
-        config["module"], config["extension_modules"], worktree
+        config["module"], config["extension_modules"], runtime_root
     )
     for extension in extensions:
         extension_path = Path(extension["path"])
-        if not _is_relative_to(extension_path, worktree):
+        if not _is_relative_to(extension_path, runtime_root):
             raise ValueError(
                 f"{role} extension path mismatch: {extension_path} is outside "
-                f"prepared worktree {worktree}"
+                f"runtime root {runtime_root}"
             )
 
     return {
@@ -196,6 +221,10 @@ def capture_role(role: str, worktree: Path, expected_commit: str) -> dict[str, A
         "distribution_version": distribution_version,
         "prepared_worktree": str(worktree),
         "prepared_commit": observed_commit,
+        "runtime_root": str(runtime_root),
+        "runtime_binding": "image-native-oci" if image_native else "prepared-worktree",
+        "runtime_image_id": image_id,
+        "runtime_image_commit": image_commit,
         "source_version": source_version,
         "extension_policy": "present" if extensions else "none-discovered",
         "extensions": extensions,
@@ -215,14 +244,33 @@ def capture(
     plugin_worktree: Path,
     plugin_commit: str,
     source_provenance: dict[str, Any] | None = None,
+    engine_runtime_root: Path | None = None,
+    plugin_runtime_root: Path | None = None,
+    runtime_image_id: str = "",
+    engine_image_commit: str = "",
+    plugin_image_commit: str = "",
 ) -> dict[str, Any]:
     payload = {
         "schema_version": SCHEMA_VERSION,
         "python_executable": str(Path(sys.executable).resolve()),
         "python_version": sys.version.split()[0],
         "sources": {
-            "engine": capture_role("engine", engine_worktree, engine_commit),
-            "plugin": capture_role("plugin", plugin_worktree, plugin_commit),
+            "engine": capture_role(
+                "engine",
+                engine_worktree,
+                engine_commit,
+                runtime_root=engine_runtime_root,
+                image_commit=engine_image_commit,
+                image_id=runtime_image_id,
+            ),
+            "plugin": capture_role(
+                "plugin",
+                plugin_worktree,
+                plugin_commit,
+                runtime_root=plugin_runtime_root,
+                image_commit=plugin_image_commit,
+                image_id=runtime_image_id,
+            ),
         },
     }
     if source_provenance is not None:
@@ -256,6 +304,11 @@ def main() -> int:
     parser.add_argument("--plugin-worktree", type=Path, required=True)
     parser.add_argument("--plugin-commit", required=True)
     parser.add_argument("--source-provenance", type=Path)
+    parser.add_argument("--engine-runtime-root", type=Path)
+    parser.add_argument("--plugin-runtime-root", type=Path)
+    parser.add_argument("--runtime-image-id", default="")
+    parser.add_argument("--engine-image-commit", default="")
+    parser.add_argument("--plugin-image-commit", default="")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
@@ -270,6 +323,11 @@ def main() -> int:
             args.plugin_worktree,
             args.plugin_commit,
             source_provenance,
+            args.engine_runtime_root,
+            args.plugin_runtime_root,
+            args.runtime_image_id,
+            args.engine_image_commit,
+            args.plugin_image_commit,
         )
     except (ImportError, OSError, subprocess.SubprocessError, ValueError) as error:
         print(

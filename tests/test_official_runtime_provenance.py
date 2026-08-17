@@ -5,7 +5,6 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 HELPER = REPO_ROOT / "scripts/capture-official-runtime-provenance.py"
 
@@ -138,6 +137,68 @@ def test_stale_editable_module_path_is_rejected(tmp_path: Path, monkeypatch) -> 
         assert str(stale_repo) in str(error)
     else:
         raise AssertionError("stale editable module path was accepted")
+
+
+def test_image_native_runtime_is_bound_by_immutable_image_identity(
+    tmp_path: Path, monkeypatch
+) -> None:
+    helper = _load_helper()
+    prepared_repo, prepared_commit = _source_repo(
+        tmp_path / "prepared", "vllm", "1.2.3"
+    )
+    runtime_root = tmp_path / "image-root"
+    runtime_package = runtime_root / "vllm"
+    runtime_package.mkdir(parents=True)
+    (runtime_package / "__init__.py").write_text(
+        "__version__ = '1.2.3'\n", encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(runtime_root))
+    monkeypatch.setattr(
+        helper, "_distribution_version", lambda names: (names[0], "1.2.3")
+    )
+
+    payload = helper.capture_role(
+        "engine",
+        prepared_repo,
+        prepared_commit,
+        runtime_root=runtime_root,
+        image_commit=prepared_commit,
+        image_id="sha256:" + "a" * 64,
+    )
+
+    assert payload["runtime_binding"] == "image-native-oci"
+    assert payload["runtime_root"] == str(runtime_root)
+    assert payload["runtime_image_commit"] == prepared_commit
+    assert payload["runtime_image_id"] == "sha256:" + "a" * 64
+
+
+@pytest.mark.parametrize("field", ["image_commit", "image_id"])
+def test_image_native_runtime_rejects_missing_or_mismatched_image_identity(
+    tmp_path: Path, monkeypatch, field: str
+) -> None:
+    helper = _load_helper()
+    prepared_repo, prepared_commit = _source_repo(
+        tmp_path / "prepared", "vllm", "1.2.3"
+    )
+    runtime_root = tmp_path / "image-root"
+    runtime_package = runtime_root / "vllm"
+    runtime_package.mkdir(parents=True)
+    (runtime_package / "__init__.py").write_text(
+        "__version__ = '1.2.3'\n", encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(runtime_root))
+    monkeypatch.setattr(
+        helper, "_distribution_version", lambda names: (names[0], "1.2.3")
+    )
+    kwargs = {
+        "runtime_root": runtime_root,
+        "image_commit": prepared_commit,
+        "image_id": "sha256:" + "a" * 64,
+    }
+    kwargs[field] = "" if field == "image_id" else "f" * 40
+
+    with pytest.raises(ValueError, match="image (commit mismatch|id)"):
+        helper.capture_role("engine", prepared_repo, prepared_commit, **kwargs)
 
 
 def test_module_and_distribution_version_mismatch_is_rejected(

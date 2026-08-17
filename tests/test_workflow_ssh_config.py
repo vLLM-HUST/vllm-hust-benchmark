@@ -1,12 +1,6 @@
 from pathlib import Path
 
-import pytest
-
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PUBLISH_WORKFLOW_PATHS = [
-    ".github/workflows/run-official-ascend-baselines.yml",
-]
 
 
 def test_pull_request_ci_uses_public_checkout_without_ssh_secret() -> None:
@@ -50,25 +44,13 @@ def test_hf_upload_uses_public_checkout_without_ssh_secret() -> None:
     assert "ssh-key:" not in workflow_text
 
 
-@pytest.mark.parametrize("workflow_path", PUBLISH_WORKFLOW_PATHS)
-def test_workflows_use_standard_github_ssh_without_overwriting_config(
-    workflow_path: str,
-) -> None:
-    workflow_text = (REPO_ROOT / workflow_path).read_text(encoding="utf-8")
+def test_official_baseline_workflow_submits_to_112_without_writer_credentials() -> None:
+    workflow_text = (
+        REPO_ROOT / ".github/workflows/run-official-ascend-baselines.yml"
+    ).read_text(encoding="utf-8")
 
-    assert "BENCHMARK_CHECKOUT_USE_SSH_443" not in workflow_text
-    assert "Configure GitHub SSH over 443" not in workflow_text
-    assert "ssh.github.com" not in workflow_text
-    assert (
-        'git config --global url."ssh://git@ssh.github.com:443/".insteadOf https://github.com/'
-        not in workflow_text
-    )
-
-    assert "BENCHMARK_CHECKOUT_USE_SSH" in workflow_text
-    assert "Configure GitHub SSH" in workflow_text
-    assert 'if [[ ! -d "$ssh_dir" ]]; then' in workflow_text
-    assert 'if [[ ! -f "$config_file" ]]; then' in workflow_text
-    assert "Host github.com" in workflow_text
-    assert "HostName github.com" in workflow_text
-    assert "IdentityFile ~/.ssh/github_actions" in workflow_text
-    assert 'printf \'\\n%s\\n\' "$config_block" >> "$config_file"' in workflow_text
+    assert "self-hosted" not in workflow_text
+    assert "evaluation-request.yml@main" in workflow_text
+    assert "VLLM_ASCEND_HUST_BENCHMARK_SSH_KEY" not in workflow_text
+    assert "BENCHMARK_CHECKOUT_USE_SSH" not in workflow_text
+    assert "ssh-key:" not in workflow_text

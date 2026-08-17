@@ -32,6 +32,11 @@ OFFICIAL_CLIENT_HOST=${OFFICIAL_CLIENT_HOST:-}
 OFFICIAL_CLIENT_PORT=${OFFICIAL_CLIENT_PORT:-$OFFICIAL_SERVER_PORT}
 OFFICIAL_CORE_VERSION=${OFFICIAL_CORE_VERSION:-}
 OFFICIAL_BACKEND_VERSION=${OFFICIAL_BACKEND_VERSION:-}
+OFFICIAL_ENGINE_RUNTIME_ROOT=${OFFICIAL_ENGINE_RUNTIME_ROOT:-}
+OFFICIAL_PLUGIN_RUNTIME_ROOT=${OFFICIAL_PLUGIN_RUNTIME_ROOT:-}
+OFFICIAL_RUNTIME_IMAGE_ID=${OFFICIAL_RUNTIME_IMAGE_ID:-}
+OFFICIAL_ENGINE_IMAGE_COMMIT=${OFFICIAL_ENGINE_IMAGE_COMMIT:-}
+OFFICIAL_PLUGIN_IMAGE_COMMIT=${OFFICIAL_PLUGIN_IMAGE_COMMIT:-}
 ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
 ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-"/usr/local/Ascend/nnal/atb/set_env.sh"}
 ASCEND_ATB_CXX_ABI=${ASCEND_ATB_CXX_ABI:-"1"}
@@ -1712,6 +1717,16 @@ fi
 
 capture_official_runtime_provenance() {
   local output_file=$1
+  local -a image_native_args=()
+  if [[ -n "$OFFICIAL_ENGINE_RUNTIME_ROOT" || -n "$OFFICIAL_PLUGIN_RUNTIME_ROOT" ]]; then
+    image_native_args=(
+      --engine-runtime-root "$OFFICIAL_ENGINE_RUNTIME_ROOT"
+      --plugin-runtime-root "$OFFICIAL_PLUGIN_RUNTIME_ROOT"
+      --runtime-image-id "$OFFICIAL_RUNTIME_IMAGE_ID"
+      --engine-image-commit "$OFFICIAL_ENGINE_IMAGE_COMMIT"
+      --plugin-image-commit "$OFFICIAL_PLUGIN_IMAGE_COMMIT"
+    )
+  fi
   run_in_official_runtime "$REPO_ROOT/src:$OFFICIAL_RUNTIME_PYTHONPATH" \
     "$OFFICIAL_RUNTIME_PYTHON" "$CAPTURE_RUNTIME_PROVENANCE_SCRIPT" \
       --engine-worktree "$OFFICIAL_VLLM_WORKTREE" \
@@ -1719,6 +1734,7 @@ capture_official_runtime_provenance() {
       --plugin-worktree "$OFFICIAL_VLLM_ASCEND_WORKTREE" \
       --plugin-commit "$OFFICIAL_BACKEND_SOURCE_COMMIT" \
       --source-provenance "$SOURCE_PROVENANCE_FILE" \
+      "${image_native_args[@]}" \
       --output "$output_file"
 }
 

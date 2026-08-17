@@ -1,0 +1,38 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+ARG VLLM_CORE_COMMIT
+ARG VLLM_ASCEND_COMMIT
+
+LABEL org.opencontainers.image.description="Clean HUST source overlay on an Ascend runtime image"
+LABEL org.opencontainers.image.vllm-core-commit="${VLLM_CORE_COMMIT}"
+LABEL org.opencontainers.image.vllm-ascend-commit="${VLLM_ASCEND_COMMIT}"
+
+# Preserve only generated native artifacts from the compatible base image.
+# Both Python source trees are removed before COPY so a newer base cannot leave
+# untracked modules behind and silently produce a mixed runtime.
+RUN test -n "${VLLM_CORE_COMMIT}" && test -n "${VLLM_ASCEND_COMMIT}" && \
+    mkdir -p /tmp/vllm-hust-build/core /tmp/vllm-hust-build/plugin && \
+    cp /vllm-workspace/vllm/vllm/_version.py /tmp/vllm-hust-build/core/ && \
+    cp /vllm-workspace/vllm-ascend/vllm_ascend/_version.py /tmp/vllm-hust-build/plugin/ && \
+    cp /vllm-workspace/vllm-ascend/vllm_ascend/_build_info.py /tmp/vllm-hust-build/plugin/ && \
+    cp -a /vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom/vendors /tmp/vllm-hust-build/plugin/ && \
+    cp -a /vllm-workspace/vllm-ascend/vllm_ascend/include /tmp/vllm-hust-build/plugin/ && \
+    cp -a /vllm-workspace/vllm-ascend/vllm_ascend/lib64 /tmp/vllm-hust-build/plugin/ && \
+    cp /vllm-workspace/vllm-ascend/vllm_ascend/libvllm_ascend_kernels.so /tmp/vllm-hust-build/plugin/ && \
+    cp /vllm-workspace/vllm-ascend/vllm_ascend/vllm_ascend_C*.so /tmp/vllm-hust-build/plugin/ && \
+    rm -rf /vllm-workspace/vllm/vllm /vllm-workspace/vllm-ascend/vllm_ascend
+
+COPY core/vllm /vllm-workspace/vllm/vllm
+COPY plugin/vllm_ascend /vllm-workspace/vllm-ascend/vllm_ascend
+
+RUN cp /tmp/vllm-hust-build/core/_version.py /vllm-workspace/vllm/vllm/ && \
+    cp /tmp/vllm-hust-build/plugin/_version.py /vllm-workspace/vllm-ascend/vllm_ascend/ && \
+    cp /tmp/vllm-hust-build/plugin/_build_info.py /vllm-workspace/vllm-ascend/vllm_ascend/ && \
+    mkdir -p /vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom && \
+    cp -a /tmp/vllm-hust-build/plugin/vendors /vllm-workspace/vllm-ascend/vllm_ascend/_cann_ops_custom/ && \
+    cp -a /tmp/vllm-hust-build/plugin/include /vllm-workspace/vllm-ascend/vllm_ascend/ && \
+    cp -a /tmp/vllm-hust-build/plugin/lib64 /vllm-workspace/vllm-ascend/vllm_ascend/ && \
+    cp /tmp/vllm-hust-build/plugin/libvllm_ascend_kernels.so /vllm-workspace/vllm-ascend/vllm_ascend/ && \
+    cp /tmp/vllm-hust-build/plugin/vllm_ascend_C*.so /vllm-workspace/vllm-ascend/vllm_ascend/ && \
+    rm -rf /tmp/vllm-hust-build
