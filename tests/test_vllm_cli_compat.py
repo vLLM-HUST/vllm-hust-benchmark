@@ -1,8 +1,13 @@
+import inspect
 from types import SimpleNamespace
 
 import pytest
 
-from scripts.run_vllm_cli_compat import offline_graph_proof, require_offline_graph
+from scripts.run_vllm_cli_compat import (
+    install_offline_graph_guard,
+    offline_graph_proof,
+    require_offline_graph,
+)
 
 
 def _fake_llm(*, enforce_eager: bool, mode: str, cudagraph_mode: str) -> object:
@@ -52,3 +57,11 @@ def test_offline_graph_proof_rejects_eager_or_disabled_graph(
 
     with pytest.raises(RuntimeError, match="eager/non-graph"):
         require_offline_graph(proof)
+
+
+def test_offline_graph_guard_supports_pre_from_engine_args_llm_api() -> None:
+    source = inspect.getsource(install_offline_graph_guard)
+
+    assert 'hasattr(LLM, "from_engine_args")' in source
+    assert "original_init = LLM.__init__" in source
+    assert "record_proof(self)" in source
