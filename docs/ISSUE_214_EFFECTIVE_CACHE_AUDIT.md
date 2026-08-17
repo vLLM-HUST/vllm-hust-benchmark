@@ -22,4 +22,3 @@ not disabled and those failures remain diagnostic evidence.
 The completed A1-A6 audit found no actionable regression. Prefix mean TTFT had
 a high-variance, below-threshold shift: same-card six-run medians were 373.461
 ms (C3) and 392.090 ms (current), +4.988%; output throughput was flat (-0.073%).
-
