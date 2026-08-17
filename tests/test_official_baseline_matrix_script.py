@@ -7,7 +7,6 @@ from pathlib import Path
 
 from tests._bash_utils import bash_executable
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MATRIX_SCRIPT = REPO_ROOT / "scripts" / "run-official-ascend-goal-baseline-matrix.sh"
 ONE_CLICK_SCRIPT = REPO_ROOT / "scripts" / "run-official-v0180-baselines.sh"
@@ -403,6 +402,12 @@ def test_official_runner_finalizes_and_validates_exported_artifact() -> None:
         'capture_official_runtime_provenance "$RUNTIME_PROVENANCE_AFTER_FILE"'
         in runner_text
     )
+    assert (
+        "OFFICIAL_ENGINE_RUNTIME_ROOT=${OFFICIAL_ENGINE_RUNTIME_ROOT:-}" in runner_text
+    )
+    assert '--runtime-image-id "$OFFICIAL_RUNTIME_IMAGE_ID"' in runner_text
+    assert '--engine-image-commit "$OFFICIAL_ENGINE_IMAGE_COMMIT"' in runner_text
+    assert '--plugin-image-commit "$OFFICIAL_PLUGIN_IMAGE_COMMIT"' in runner_text
     assert 'metadata["official_runtime_provenance"] = runtime' in runner_text
     assert 'manifest["official_runtime_provenance"] = runtime' in runner_text
     assert (
@@ -410,12 +415,14 @@ def test_official_runner_finalizes_and_validates_exported_artifact() -> None:
     )
 
 
-def test_official_workflow_defaults_live_publication_off() -> None:
+def test_official_workflow_uses_pinned_v018_runtime_on_112() -> None:
     workflow_text = WORKFLOW.read_text(encoding="utf-8")
-    publish_input = workflow_text.split("      publish_results:", maxsplit=1)[1].split(
-        "      force_repair_official_env:", maxsplit=1
-    )[0]
-    assert "        default: false" in publish_input
+    assert "self-hosted" not in workflow_text
+    assert "evaluation-request.yml@main" in workflow_text
+    assert "bcf2be96120005e9aea171927f85055a6a5c0cf6" in workflow_text
+    assert "e18643f8a4d5bd9990727654318ad069ea0b56e2" in workflow_text
+    assert "target_registry_version: 1.3.5" in workflow_text
+    assert "publish_results" not in workflow_text
 
 
 def test_official_runner_rejects_stale_source_worktree(tmp_path: Path) -> None:
