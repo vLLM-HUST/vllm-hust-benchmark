@@ -2,6 +2,18 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.6 — 2026-08-18
+
+- English: Add a plain (non-full-graph-parallel) Ascend 910B3 random-online specialty spec for the
+  issue #179 clean rerun of the closed PR #7 single-card record. Served in graph mode (enforce_eager
+  disabled, PIECEWISE cudagraph) with temperature 0.0 (aclnnApplyTopKTopPCustom workaround). 910B3
+  remains an isolated specialty hardware series.
+- 中文：为 issue #179 关闭的 PR #7 单卡记录新增一个普通（非 full-graph-parallel）Ascend 910B3 random-online 专用
+  spec。以图模式（enforce_eager 关闭、PIECEWISE cudagraph）+ temperature 0.0（aclnnApplyTopKTopPCustom
+  workaround）运行。910B3 仍作为独立的 specialty 硬件系列。
+- Source set: `07421d4a80f75dfdacf1ab06373a7b985bf4dcafad4f62dab9191006516e939d`
+- Supersedes: `1.3.5`
+
 ## 1.3.5 — 2026-08-16
 
 - English: Freeze the executable prefix-repetition contract, including fixed-length generation and

@@ -1,0 +1,45 @@
+{
+  "schema_version": "closed-pr-audit-disposition/v1",
+  "archive_date": "2026-08-14",
+  "entry_id": "6a6b8250-e8de-4eb6-86b5-a611b3211bc0",
+  "source_pr": 7,
+  "source_pr_title": "chore(leaderboard): add singlecard default official submission 20260520",
+  "source_commit": "68bfc69f4468e34f370a534f392c7f133e72a709",
+  "disposition": "quarantine",
+  "publication_status": "non-public",
+  "reason": "closed-unmerged PR; metadata.verified null; retired v0.11.0 same-spec target with 0.17.2 engine; server ran enforce_eager=True; missing env-manifest/pip-packages/original checksums",
+  "hardware_chip_model": "910B3",
+  "hardware_verified": false,
+  "engine": "vllm-hust",
+  "engine_version": "0.17.2rc1.dev450+g289b51ab2.d20260511",
+  "core_commit": "cee0aff18d987ba6fdd86d5e5fec80a20cfc97eb",
+  "plugin_commit": "f16e2c1a419430e4f018ad41a5cdd5e6b48d0702",
+  "same_spec_id": "official-ascend-jan-2026-v0.11.0-random-online-qwen25-14b-910b3",
+  "reported_throughput_tok_s": 225.30805722662924,
+  "retained_files": {
+    "run_leaderboard.json": {
+      "sha256": "51ec0c801220e8ddd39ca1a1ed47abcb82923c35f5b6d869db8fdac7e38fe93c"
+    },
+    "leaderboard_manifest.json": {
+      "sha256": "041a07a17bd3539f697800c2cab46228fc9c3b7ba706fb00630d7f6dc2522a22"
+    },
+    "raw_benchmark_result.json": {
+      "sha256": "ec3eb642511c5157a7df512d746a305cd6e57c4d9129afec0d99f14250807a6d"
+    },
+    "resolved_same_spec.json": {
+      "sha256": "4cfe6db66125cda2ccf9e2245be69187edaec8dd6cfb98980a67721caf9a67fb"
+    },
+    "server.stdout.log": {
+      "sha256": "7116e9b90db2157c32f430b0fd304a7451ee27c1fdb1480f92c56d183093cda0"
+    }
+  },
+  "missing_evidence": ["env-manifest.json", "pip-packages.json", "checksums.sha256"],
+  "comparison_isolation": "910B2 and 910B3 remain separate comparison/trend identities; never compare this record against 910B2 or the retired v0.11.0 target",
+  "rerun_requires": [
+    "910B3 hardware",
+    "current clean runtime",
+    "exact source/package provenance",
+    "explicit 910B3 spec",
+    "full evidence set with verified hardware identity"
+  ]
+}

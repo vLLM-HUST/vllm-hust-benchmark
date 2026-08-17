@@ -2,8 +2,8 @@
 
 > This file is generated from the official specs. Do not edit it manually.
 
-- Registry version: `1.3.5`
-- Effective from: `2026-08-16`
+- Registry version: `1.3.6`
+- Effective from: `2026-08-18`
 
 `registry_version` identifies this generated registry snapshot. Each target's `target_version` is
 the immutable execution-contract version for that target; an unrelated target update must not change
@@ -149,6 +149,9 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 | | specialty | provisional | specialty-text | random-latency | Qwen/Qwen2.5-14B-Instruct | 910B3 ×
 1 | FP16 | 0.6 | 32768 |
 [`specialty-ascend-full-graph-parallel-inplace-random-latency-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-random-latency-qwen25-14b-910b3.json)
+| | specialty | provisional | specialty-text | random-online | Qwen/Qwen2.5-14B-Instruct | 910B3 × 1
+| FP16 | 0.6 | 32768 |
+[`specialty-ascend-current-random-online-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-current-random-online-qwen25-14b-910b3.json)
 | | specialty | provisional | specialty-text | random-online | Qwen/Qwen2.5-14B-Instruct | 910B3 × 1
 | FP16 | 0.6 | 32768 |
 [`specialty-ascend-full-graph-parallel-inplace-random-online-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-random-online-qwen25-14b-910b3.json)
