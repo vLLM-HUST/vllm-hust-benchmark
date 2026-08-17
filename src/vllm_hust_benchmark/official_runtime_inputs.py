@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
-from typing import Mapping
-
 
 SHAREGPT_DATASET_FILENAME = "ShareGPT_V3_unfiltered_cleaned_split.json"
 OFFLINE_SERVER_PARAMETER_KEYS = {
@@ -15,6 +14,7 @@ OFFLINE_SERVER_PARAMETER_KEYS = {
     "max_num_batched_tokens",
     "max_num_seqs",
     "model",
+    "no_enable_prefix_caching",
     "quantization",
     "tensor_parallel_size",
     "tokenizer",
