@@ -35,7 +35,9 @@ def validate_effective_cache_contract(
     for key, value in expected["environment"].items():
         if str(environment.get(key, "")) != value:
             errors.append(f"environment.{key} must be {value!r}")
-    if scenario != PREFIX_SCENARIO and server_parameters.get("enable_prefix_caching") is True:
+    if (
+        scenario != PREFIX_SCENARIO
+        and server_parameters.get("enable_prefix_caching") is True
+    ):
         errors.append("non-prefix workloads must not enable prefix caching")
     return errors
-
