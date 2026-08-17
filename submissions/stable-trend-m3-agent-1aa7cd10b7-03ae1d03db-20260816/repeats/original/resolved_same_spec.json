@@ -1,0 +1,41 @@
+{
+  "schema_version": "benchmark-same-spec/v1",
+  "spec_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+  "spec_label": "Official Ascend Jan 2026 agent-research online baseline for vllm-hust goal tracking",
+  "spec_source": "/trend-spec.json",
+  "scenario": "agent-research-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "model_quantization": "",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 1,
+  "node_count": 1,
+  "resolved_server_parameters": {
+    "tensor_parallel_size": 1,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 28301,
+    "gpu_memory_utilization": 0.6,
+    "max_model_len": 32768,
+    "model": "/data/shared_models/Qwen2.5-14B-Instruct",
+    "dtype": "float16"
+  },
+  "resolved_client_parameters": {
+    "backend": "openai-chat",
+    "endpoint": "/v1/chat/completions",
+    "dataset_name": "custom",
+    "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
+    "num_prompts": 32,
+    "request_rate": 1,
+    "ignore_eos": true,
+    "host": "127.0.0.1",
+    "port": 28301,
+    "model": "/data/shared_models/Qwen2.5-14B-Instruct"
+  },
+  "resolved_spec_hash": "236424e8f572a279ffb6bdb612cd47b6df3dcd146d1e661ee7ab17986734cb1c"
+}

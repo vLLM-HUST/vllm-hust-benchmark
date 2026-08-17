@@ -24,3 +24,9 @@ improved.
 
 The frozen aggregates, presentation-safe table, evidence suite locator, and checksums are in
 `reports/issue-214-p2-closure-20260817/`.
+
+The P1 historical hardening is also complete. All nine workloads at all three historical checkpoints
+now retain strict three-invocation median suites: 27 of 27 cells are grade A, with no
+single-invocation cells remaining. Every primary-metric transition stays within the 1% throughput or
+5% latency noise band. The internal table, 21 newly hardened cell records, failed-invocation
+diagnostic provenance, and checksums are in `reports/issue-214-p1-hardening-20260817/`.
