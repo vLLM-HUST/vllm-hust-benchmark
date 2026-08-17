@@ -31856,174 +31856,6 @@
     }
   },
   {
-    "entry_id": "31a048b8-30dd-4483-b8d0-6be5d0e08b7e",
-    "engine": "vllm-hust",
-    "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
-    "config_type": "single_gpu",
-    "hardware": {
-      "vendor": "Huawei",
-      "chip_model": "910B2",
-      "chip_count": 1,
-      "interconnect": "unknown",
-      "memory_per_chip_gb": 64.0,
-      "total_memory_gb": 64.0
-    },
-    "model": {
-      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
-      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
-      "short_name": "Qwen2.5-14B-Instruct",
-      "display_name": "Qwen2.5-14B-Instruct",
-      "name": "Qwen/Qwen2.5-14B-Instruct",
-      "parameters": "14B",
-      "precision": "FP16",
-      "quantization": null
-    },
-    "workload": {
-      "name": "random-latency",
-      "input_length": 1024,
-      "output_length": 128,
-      "batch_size": 8,
-      "concurrent_requests": null,
-      "dataset": null
-    },
-    "metrics": {
-      "ttft_ms": 4887.08614447775,
-      "tbt_ms": null,
-      "throughput_tps": null,
-      "peak_mem_mb": 0,
-      "error_rate": 0.0
-    },
-    "constraints": {
-      "scenario_source": "vllm-benchmark",
-      "accountable_scope": {
-        "domestic_chip_class": "Ascend-class",
-        "representative_model_band": "7B-13B",
-        "representative_business_scenario": "latency-slo",
-        "baseline_engine": "",
-        "declared_baseline_engine": "vllm",
-        "baseline_status": "pending-baseline",
-        "owner_confirmed": null,
-        "notes": null
-      },
-      "metrics": {
-        "single_chip_effective_utilization_pct": null,
-        "typical_throughput_ratio_vs_baseline": null,
-        "typical_ttft_reduction_pct_vs_baseline": null,
-        "typical_tpot_reduction_pct_vs_baseline": null,
-        "long_context_length": 32768,
-        "long_context_throughput_stable": false,
-        "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": null,
-        "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": null,
-        "long_context_ttft_p95_stable": null,
-        "long_context_ttft_p99_stable": null,
-        "long_context_tpot_p95_stable": null,
-        "long_context_tpot_p99_stable": null,
-        "unit_token_cost_reduction_pct": null,
-        "multi_tenant_high_utilization": null
-      }
-    },
-    "cluster": null,
-    "versions": {
-      "protocol": "N/A",
-      "backend": "N/A",
-      "core": "0.17.2.post1-3532-g1aa7cd10b",
-      "benchmark": "0.1.0"
-    },
-    "environment": {
-      "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
-      "python_version": "3.12.13",
-      "pytorch_version": null,
-      "cuda_version": null,
-      "cann_version": null,
-      "driver_version": null
-    },
-    "metadata": {
-      "submitted_at": "2026-08-16T10:05:25Z",
-      "submitter": "historical-pr-backfill",
-      "data_source": "real-online-historical-pr-backfill",
-      "engine": "vllm-hust",
-      "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
-      "reproducible_cmd": null,
-      "git_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
-      "github_user": null,
-      "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
-      "github_repository": "vLLM-HUST/vllm-hust",
-      "github_ref": "current-main-single-npu-offline-graph",
-      "github_event_name": null,
-      "github_pr_number": null,
-      "github_pr_url": null,
-      "release_date": null,
-      "changelog_url": null,
-      "notes": null,
-      "verified": null,
-      "idempotency_key": "f22cb9d655b98a6fafe4edf8a8c1489dbb6af7905b1476996cc5cf77b14601fd",
-      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
-      "runtime_provenance": {
-        "python": "/usr/local/python3.12.13/bin/python3",
-        "engine": {
-          "repository": "vLLM-HUST/vllm-hust",
-          "ref": "current-main-single-npu-offline-graph",
-          "commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc"
-        },
-        "plugin": {
-          "engine": "vllm-ascend-hust",
-          "repository": "vLLM-HUST/vllm-ascend-hust",
-          "ref": "03ae1d03db8049cd2a5c3f824039814459542e25",
-          "commit": "03ae1d03db8049cd2a5c3f824039814459542e25"
-        }
-      },
-      "target_id": "official-ascend-jan-2026-v0.18.0",
-      "target_version": "Official Ascend Jan 2026",
-      "workload_config_contract": "explicit-effective/v1"
-    },
-    "same_spec": {
-      "schema_version": "benchmark-same-spec/v1",
-      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
-      "spec_label": "Official Ascend Jan 2026 random latency baseline for vllm-hust goal tracking",
-      "spec_source": "/tmp/vllm-hust-required-reruns.eLD7Nz/docs/official-baselines/official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2.json",
-      "scenario": "random-latency",
-      "model": "Qwen/Qwen2.5-14B-Instruct",
-      "model_parameters": "14B",
-      "model_precision": "FP16",
-      "model_quantization": "",
-      "hardware_vendor": "Huawei",
-      "hardware_chip_model": "910B2",
-      "chip_count": 1,
-      "node_count": 1,
-      "resolved_server_parameters": {
-        "tensor_parallel_size": 1,
-        "gpu_memory_utilization": 0.6,
-        "enforce_eager": "",
-        "trust_remote_code": "",
-        "disable_log_stats": "",
-        "max_model_len": 32768,
-        "model": "/data/shared_models/Qwen2.5-14B-Instruct",
-        "dtype": "float16"
-      },
-      "resolved_client_parameters": {
-        "gpu_memory_utilization": 0.6,
-        "input_len": 1024,
-        "output_len": 128,
-        "batch_size": 8,
-        "num_iters_warmup": 10,
-        "num_iters": 30,
-        "model": "/data/shared_models/Qwen2.5-14B-Instruct"
-      },
-      "resolved_spec_hash": "3e81e3e00639f882933d45f5420a8e0813225bc6d7370a6f318cb207417c8f6a"
-    },
-    "historical_recovery": {
-      "schema_version": "historical-leaderboard-recovery/v1",
-      "recovery_method": "historical-exact-spec",
-      "source_path": "reports/historical-recovery-evidence/reruns/1aa7cd10b7-03ae1d03db-random-latency/run_leaderboard.json",
-      "selection_key": "1cbe7a88bf4725821bf6df92981c7989a548f6658fce4a2a333b5b157aa5a6ce",
-      "inferred_fields": [],
-      "original_resolved_spec_hash": null,
-      "admitted_for_historical_trend": true
-    }
-  },
-  {
     "entry_id": "cd850c8b-7743-413a-ad5f-e4924d883e2c",
     "engine": "vllm",
     "engine_version": "0.18.0",
@@ -38391,7 +38223,7 @@
     }
   },
   {
-    "entry_id": "3879e17a-2837-41dc-8f15-f58da38ab622",
+    "entry_id": "5c5fefd8-786c-439b-aa61-32b0afed754a",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3510-g0657f3f2a",
     "config_type": "single_gpu",
@@ -38422,9 +38254,9 @@
       "dataset": "custom"
     },
     "metrics": {
-      "ttft_ms": 3265.631332367775,
-      "tbt_ms": 39.697678576054635,
-      "throughput_tps": 205.52210120900952,
+      "ttft_ms": 3147.5261638115626,
+      "tbt_ms": 39.190706319470124,
+      "throughput_tps": 205.7332217536722,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -38448,9 +38280,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 12361.95923171472,
+        "long_context_ttft_p99_ms": 12192.035874770954,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 79.61069014359856,
+        "long_context_tpot_p99_ms": 78.17790177966675,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -38475,9 +38307,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T15:35:03Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T07:52:23Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3510-g0657f3f2a",
       "reproducible_cmd": null,
@@ -38493,7 +38325,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "53a82986c0747013d20c181e8d4a878be777f2f24da8e678d1756e86d410726b",
+      "idempotency_key": "2429fc5f32075900ec8094714f2895fa1f44859b59252c60c40aef40da3fa186",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -38534,7 +38366,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28673,
+        "port": 30002,
         "gpu_memory_utilization": 0.6,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
@@ -38549,7 +38381,7 @@
         "request_rate": 1,
         "ignore_eos": true,
         "host": "127.0.0.1",
-        "port": 28673,
+        "port": 30002,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "no_stream": false
       },
@@ -38580,7 +38412,7 @@
     }
   },
   {
-    "entry_id": "924791f2-1d29-4048-bf34-f084c0c5f139",
+    "entry_id": "0df3bc57-8e1e-48ed-9091-3eefa3536c2f",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3510-g0657f3f2a",
     "config_type": "single_gpu",
@@ -38611,9 +38443,9 @@
       "dataset": "hf"
     },
     "metrics": {
-      "ttft_ms": 114.3323772103031,
-      "tbt_ms": 30.742240279433826,
-      "throughput_tps": 125.88042210379894,
+      "ttft_ms": 114.89282208867735,
+      "tbt_ms": 30.743367457251033,
+      "throughput_tps": 126.09747243515905,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -38637,9 +38469,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 206.0446724016219,
+        "long_context_ttft_p99_ms": 213.57730999588966,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 34.07661283622063,
+        "long_context_tpot_p99_ms": 34.24819330589823,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -38664,9 +38496,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T16:09:59Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T07:44:11Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3510-g0657f3f2a",
       "reproducible_cmd": null,
@@ -38682,7 +38514,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "9a663f72f578f5bae41a7d44e793c6da7462d30c831ebfb752e5f244fbd61d2b",
+      "idempotency_key": "f94e72e2dc6e9e4125225fc1af0cb695baf3946a8edbcd177e19081721e94cc7",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -38724,7 +38556,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28671,
+        "port": 30001,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-Coder-14B-Instruct",
         "dtype": "float16"
@@ -38738,7 +38570,7 @@
         "num_prompts": 2048,
         "request_rate": 1,
         "host": "127.0.0.1",
-        "port": 28671,
+        "port": 30001,
         "model": "/data/shared_models/Qwen2.5-Coder-14B-Instruct"
       },
       "resolved_spec_hash": "8b0eda0c27055ec8449469dde022d9b37bd7efb201622c811e1add76dd9ffc10"
@@ -39104,7 +38936,7 @@
     }
   },
   {
-    "entry_id": "44e935bf-3d4f-43b6-8ec8-19dc9c8a3927",
+    "entry_id": "78751ace-8eaf-4fa2-aac1-85249b346a6d",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3510-g0657f3f2a",
     "config_type": "single_gpu",
@@ -39135,9 +38967,9 @@
       "dataset": "random"
     },
     "metrics": {
-      "ttft_ms": 230.24161354638636,
-      "tbt_ms": 37.450749963385,
-      "throughput_tps": 245.50489916010972,
+      "ttft_ms": 234.51388899469748,
+      "tbt_ms": 37.405154350825455,
+      "throughput_tps": 245.54045549215775,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -39161,9 +38993,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 408.3611192461096,
+        "long_context_ttft_p99_ms": 409.23062667716215,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 41.81859257782572,
+        "long_context_tpot_p99_ms": 41.8253273636687,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -39188,9 +39020,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T15:37:26Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T08:03:27Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3510-g0657f3f2a",
       "reproducible_cmd": null,
@@ -39206,7 +39038,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "e11093104b9f4829447451526268b70ca51d062e2d29b239c1d56d2ac39261c2",
+      "idempotency_key": "83e29738d26b11ed4cbe52d8d069505ecffe08bf81a54ad5c93e9ad1eb8a7655",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -39248,7 +39080,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28674,
+        "port": 30004,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "dtype": "float16"
@@ -39261,7 +39093,7 @@
         "num_prompts": 200,
         "request_rate": 1,
         "host": "127.0.0.1",
-        "port": 28674,
+        "port": 30004,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "random_input_len": 1024,
         "random_output_len": 256
@@ -39453,7 +39285,7 @@
     }
   },
   {
-    "entry_id": "e3017c35-208f-468d-a231-fd8ff43eca3f",
+    "entry_id": "9d69d2f1-e7bf-4817-85a7-af44e8ef5148",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3510-g0657f3f2a",
     "config_type": "single_gpu",
@@ -39486,7 +39318,7 @@
     "metrics": {
       "ttft_ms": null,
       "tbt_ms": null,
-      "throughput_tps": 2039.2917962163522,
+      "throughput_tps": 2054.4978509324433,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -39537,9 +39369,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T15:41:21Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T08:22:50Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-offline-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3510-g0657f3f2a",
       "reproducible_cmd": null,
@@ -39555,7 +39387,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "45465fa1cf144d83f9062c2c298f9959769f8ef92a284c82629eb97e8fe3a9f7",
+      "idempotency_key": "354c6e51388752237324206035f98ca422f8d8bc23a4b61a383c568a1b150011",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -40161,7 +39993,7 @@
     }
   },
   {
-    "entry_id": "c1dea057-579a-4e61-bdf2-a8b815e247af",
+    "entry_id": "8175d386-1fef-419e-a910-139986ff4ed2",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3523-g73187bc8b",
     "config_type": "single_gpu",
@@ -40192,9 +40024,9 @@
       "dataset": "hf"
     },
     "metrics": {
-      "ttft_ms": 115.12858135233728,
-      "tbt_ms": 30.746060971217272,
-      "throughput_tps": 126.13275218193205,
+      "ttft_ms": 114.99439624253682,
+      "tbt_ms": 30.821760766804662,
+      "throughput_tps": 125.8961877903328,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -40218,9 +40050,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 208.58892548829317,
+        "long_context_ttft_p99_ms": 205.24883810430762,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 34.25628714532205,
+        "long_context_tpot_p99_ms": 34.37719042464578,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -40245,9 +40077,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T13:36:24Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T07:44:36Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3523-g73187bc8b",
       "reproducible_cmd": null,
@@ -40263,7 +40095,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "e650e090dbbd50785f9eec4aaf1e4bea99cfaa2c2f5297f4ebb7528d58089e4f",
+      "idempotency_key": "a60587b5a177ddaa7dcc67422985b4eacb1597719a0b16545911ae6e5c5489b2",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -40305,7 +40137,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28404,
+        "port": 30003,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-Coder-14B-Instruct",
         "dtype": "float16"
@@ -40319,7 +40151,7 @@
         "num_prompts": 2048,
         "request_rate": 1,
         "host": "127.0.0.1",
-        "port": 28404,
+        "port": 30003,
         "model": "/data/shared_models/Qwen2.5-Coder-14B-Instruct"
       },
       "resolved_spec_hash": "8b0eda0c27055ec8449469dde022d9b37bd7efb201622c811e1add76dd9ffc10"
@@ -40685,7 +40517,7 @@
     }
   },
   {
-    "entry_id": "ae828c6d-feb5-4583-bec6-d0b80ef718ef",
+    "entry_id": "3c093877-1e8d-4926-a982-7b1cf5907ce1",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3523-g73187bc8b",
     "config_type": "single_gpu",
@@ -40716,9 +40548,9 @@
       "dataset": "random"
     },
     "metrics": {
-      "ttft_ms": 230.2889873716049,
-      "tbt_ms": 37.29726531117351,
-      "throughput_tps": 245.57336895405402,
+      "ttft_ms": 230.5571901006624,
+      "tbt_ms": 37.331037934549954,
+      "throughput_tps": 245.59559904218415,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -40742,9 +40574,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 414.9338235706084,
+        "long_context_ttft_p99_ms": 393.6028246255584,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 41.64803755197527,
+        "long_context_tpot_p99_ms": 41.83181127436532,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -40769,9 +40601,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T13:04:32Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T08:03:43Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3523-g73187bc8b",
       "reproducible_cmd": null,
@@ -40787,7 +40619,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "aa9301e490aae2068c3225a7f99ed54de15b5d69de997f0f80792d8b9a89c5bc",
+      "idempotency_key": "0088b42b65fadbb0ece4f450c9ea2763128b3a3034cea7fae597d07f0c444093",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -40829,7 +40661,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28406,
+        "port": 30007,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "dtype": "float16"
@@ -40842,7 +40674,7 @@
         "num_prompts": 200,
         "request_rate": 1,
         "host": "127.0.0.1",
-        "port": 28406,
+        "port": 30007,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "random_input_len": 1024,
         "random_output_len": 256
@@ -40860,7 +40692,7 @@
     }
   },
   {
-    "entry_id": "409d5fd4-a651-442e-bfc7-5689e7dbdaec",
+    "entry_id": "35948242-7bab-49e6-9d3f-e455ea7b2420",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3523-g73187bc8b",
     "config_type": "single_gpu",
@@ -40891,9 +40723,9 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": 128.41859467327595,
-      "tbt_ms": 31.98477615792452,
-      "throughput_tps": 204.62477099110689,
+      "ttft_ms": 131.9419607310556,
+      "tbt_ms": 31.878160844868198,
+      "throughput_tps": 205.43528923626846,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -40917,9 +40749,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 235.75420353095978,
+        "long_context_ttft_p99_ms": 242.48578093945957,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 37.98500324269601,
+        "long_context_tpot_p99_ms": 38.09129258779446,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -40944,9 +40776,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T13:04:11Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T08:16:09Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3523-g73187bc8b",
       "reproducible_cmd": null,
@@ -40962,7 +40794,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "cf53bea5c74b675900c898d64f475f0463139cdac48b7bc06ca6f3faf2c59cca",
+      "idempotency_key": "e0eae5b0fe14f06922067aa2e99fa8df47e065f52ac37c9a8a1bf0888866c8a1",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -41004,7 +40836,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28407,
+        "port": 30005,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "dtype": "float16"
@@ -41018,7 +40850,7 @@
         "num_prompts": 200,
         "request_rate": 1,
         "host": "127.0.0.1",
-        "port": 28407,
+        "port": 30005,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct"
       },
       "resolved_spec_hash": "66100e24033a9724a65e6e245d1e33a0e933fbfdcd850558428ac095ae5b4ded"
@@ -41553,7 +41385,7 @@
     }
   },
   {
-    "entry_id": "eabf7bc3-7c67-43ef-a248-aeea2bb8189f",
+    "entry_id": "7198e490-7612-469f-897b-ade049981733",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
     "config_type": "single_gpu",
@@ -41584,9 +41416,9 @@
       "dataset": "custom"
     },
     "metrics": {
-      "ttft_ms": 2903.261681407457,
-      "tbt_ms": 39.40216052858388,
-      "throughput_tps": 205.2308873973968,
+      "ttft_ms": 3031.6757673281245,
+      "tbt_ms": 39.29260184477065,
+      "throughput_tps": 205.5184226379993,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -41610,9 +41442,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 11719.157562768087,
+        "long_context_ttft_p99_ms": 11961.561828390697,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 77.1594999671969,
+        "long_context_tpot_p99_ms": 77.83922908330962,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -41637,9 +41469,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T12:48:54Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T07:52:00Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
       "reproducible_cmd": null,
@@ -41655,7 +41487,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "9c40d3805a9b0ef5253c988009f59857cc9f0a38547af924dc5a2145a4956294",
+      "idempotency_key": "45ac50ebe788aefa7342be6d5aa8d0106b0e59a83e8f07424f012bb559d79024",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -41696,7 +41528,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28301,
+        "port": 30005,
         "gpu_memory_utilization": 0.6,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
@@ -41711,7 +41543,7 @@
         "request_rate": 1,
         "ignore_eos": true,
         "host": "127.0.0.1",
-        "port": 28301,
+        "port": 30005,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "no_stream": false
       },
@@ -41742,7 +41574,7 @@
     }
   },
   {
-    "entry_id": "dcc55fb8-c88f-45ad-8dbe-50a7df2399e0",
+    "entry_id": "8eb03b88-b1ee-4e87-a705-d9df2455699a",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
     "config_type": "single_gpu",
@@ -41773,9 +41605,9 @@
       "dataset": "hf"
     },
     "metrics": {
-      "ttft_ms": 113.72123360843034,
-      "tbt_ms": 30.669113374356154,
-      "throughput_tps": 126.27384476459227,
+      "ttft_ms": 114.14431241701095,
+      "tbt_ms": 30.797216299080297,
+      "throughput_tps": 126.19183951040728,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -41799,9 +41631,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 202.6058154553175,
+        "long_context_ttft_p99_ms": 204.78934953454876,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 33.90773709943387,
+        "long_context_tpot_p99_ms": 34.218373421581134,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -41826,9 +41658,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T14:20:25Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T07:44:40Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
       "reproducible_cmd": null,
@@ -41844,7 +41676,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "c5813d150efdbfd9818d9cb5a4635f7cbc4ce6b55915311e70882a3bce0e5269",
+      "idempotency_key": "9093da128b93d1c1ab2c44b7c99a93c538d58b4a03d6b93086e872fbbb92716f",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -41886,7 +41718,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28514,
+        "port": 30007,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-Coder-14B-Instruct",
         "dtype": "float16"
@@ -41900,7 +41732,7 @@
         "num_prompts": 2048,
         "request_rate": 1,
         "host": "127.0.0.1",
-        "port": 28514,
+        "port": 30007,
         "model": "/data/shared_models/Qwen2.5-Coder-14B-Instruct"
       },
       "resolved_spec_hash": "8b0eda0c27055ec8449469dde022d9b37bd7efb201622c811e1add76dd9ffc10"
@@ -42098,7 +41930,175 @@
     }
   },
   {
-    "entry_id": "ed113a14-c67f-4ff4-be47-aa150574bc95",
+    "entry_id": "4a3912c7-39f4-4d09-8542-42553c9d97f3",
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
+    "config_type": "single_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 1,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 64.0
+    },
+    "model": {
+      "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+      "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+      "short_name": "Qwen2.5-14B-Instruct",
+      "display_name": "Qwen2.5-14B-Instruct",
+      "name": "Qwen/Qwen2.5-14B-Instruct",
+      "parameters": "14B",
+      "precision": "FP16",
+      "quantization": null
+    },
+    "workload": {
+      "name": "random-latency",
+      "input_length": 1024,
+      "output_length": 128,
+      "batch_size": 8,
+      "concurrent_requests": null,
+      "dataset": null
+    },
+    "metrics": {
+      "ttft_ms": 4946.432918542996,
+      "tbt_ms": null,
+      "throughput_tps": null,
+      "peak_mem_mb": 0,
+      "error_rate": 0.0
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Ascend-class",
+        "representative_model_band": "7B-13B",
+        "representative_business_scenario": "latency-slo",
+        "baseline_engine": "",
+        "declared_baseline_engine": "vllm",
+        "baseline_status": "pending-baseline",
+        "owner_confirmed": null,
+        "notes": null
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": 32768,
+        "long_context_throughput_stable": false,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "N/A",
+      "backend": "N/A",
+      "core": "0.17.2.post1-3532-g1aa7cd10b",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+      "python_version": "3.12.13",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-08-17T07:50:40Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
+      "engine": "vllm-hust",
+      "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
+      "reproducible_cmd": null,
+      "git_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+      "github_user": null,
+      "github_commit_url": "https://github.com/vLLM-HUST/vllm-hust/commit/1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+      "github_repository": "vLLM-HUST/vllm-hust",
+      "github_ref": "main",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": null,
+      "verified": null,
+      "idempotency_key": "b89de65fcc1bd0caed294a5cea0c2ace8424cb4efcc88540894f59fdc454c062",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "/usr/local/python3.12.13/bin/python",
+        "engine": {
+          "repository": "vLLM-HUST/vllm-hust",
+          "ref": "main",
+          "commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc"
+        },
+        "plugin": {
+          "engine": "vllm-ascend-hust",
+          "repository": "vLLM-HUST/vllm-ascend-hust",
+          "ref": "main",
+          "commit": "03ae1d03db8049cd2a5c3f824039814459542e25"
+        }
+      },
+      "target_id": "official-ascend-jan-2026-v0.18.0",
+      "target_version": "Official Ascend Jan 2026",
+      "workload_config_contract": "explicit-effective/v1"
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "official-ascend-jan-2026-v0.18.0-random-latency-qwen25-14b-910b2",
+      "spec_label": "Official Ascend Jan 2026 random latency baseline for vllm-hust goal tracking",
+      "spec_source": "/trend-spec.json",
+      "scenario": "random-latency",
+      "model": "Qwen/Qwen2.5-14B-Instruct",
+      "model_parameters": "14B",
+      "model_precision": "FP16",
+      "model_quantization": "",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B2",
+      "chip_count": 1,
+      "node_count": 1,
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 1,
+        "gpu_memory_utilization": 0.6,
+        "enforce_eager": "",
+        "trust_remote_code": "",
+        "disable_log_stats": "",
+        "max_model_len": 32768,
+        "model": "/data/shared_models/Qwen2.5-14B-Instruct",
+        "dtype": "float16"
+      },
+      "resolved_client_parameters": {
+        "gpu_memory_utilization": 0.6,
+        "input_len": 1024,
+        "output_len": 128,
+        "batch_size": 8,
+        "num_iters_warmup": 10,
+        "num_iters": 30,
+        "model": "/data/shared_models/Qwen2.5-14B-Instruct"
+      },
+      "resolved_spec_hash": "3e81e3e00639f882933d45f5420a8e0813225bc6d7370a6f318cb207417c8f6a"
+    },
+    "historical_recovery": {
+      "schema_version": "historical-leaderboard-recovery/v1",
+      "recovery_method": "historical-exact-spec",
+      "source_path": "submissions/stable-trend-m3-random-latency-1aa7cd10b7-03ae1d03db-20260817/run_leaderboard.json",
+      "selection_key": "1cbe7a88bf4725821bf6df92981c7989a548f6658fce4a2a333b5b157aa5a6ce",
+      "inferred_fields": [],
+      "original_resolved_spec_hash": null,
+      "admitted_for_historical_trend": true
+    }
+  },
+  {
+    "entry_id": "8d542591-7c78-4c64-9427-a9c773189eac",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
     "config_type": "single_gpu",
@@ -42129,9 +42129,9 @@
       "dataset": "random"
     },
     "metrics": {
-      "ttft_ms": 231.9717248622328,
-      "tbt_ms": 37.194689120412534,
-      "throughput_tps": 245.58824916290104,
+      "ttft_ms": 231.66372674750164,
+      "tbt_ms": 37.307491130506,
+      "throughput_tps": 245.54131599298816,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -42155,9 +42155,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 419.96374534442936,
+        "long_context_ttft_p99_ms": 423.00784602295556,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 41.52018154710165,
+        "long_context_tpot_p99_ms": 41.639408620530915,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -42182,9 +42182,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T15:12:49Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T08:12:25Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
       "reproducible_cmd": null,
@@ -42200,7 +42200,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "2001d20c4f998b36d917c3af01fba5509051880b77ed7171bcd579ebf207e0b0",
+      "idempotency_key": "c1290c50213b1024ce6717b66ab25d56d14dac703c7103b19555121b9d4f0d4f",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -42242,7 +42242,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28631,
+        "port": 30002,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "dtype": "float16"
@@ -42255,7 +42255,7 @@
         "num_prompts": 200,
         "request_rate": 1,
         "host": "127.0.0.1",
-        "port": 28631,
+        "port": 30002,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "random_input_len": 1024,
         "random_output_len": 256
@@ -42273,7 +42273,7 @@
     }
   },
   {
-    "entry_id": "7c8fccc8-373e-497f-a0b0-d00cff92bf14",
+    "entry_id": "d1b050ba-4e5e-49d3-ac40-a382c8ef127d",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
     "config_type": "single_gpu",
@@ -42304,9 +42304,9 @@
       "dataset": "sharegpt"
     },
     "metrics": {
-      "ttft_ms": 126.98828803841025,
-      "tbt_ms": 31.767201005524498,
-      "throughput_tps": 208.77785007681646,
+      "ttft_ms": 128.02863141754642,
+      "tbt_ms": 31.946164392210026,
+      "throughput_tps": 204.74221569814853,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -42330,9 +42330,9 @@
         "long_context_length": 32768,
         "long_context_throughput_stable": true,
         "long_context_ttft_p95_ms": null,
-        "long_context_ttft_p99_ms": 224.3449752358719,
+        "long_context_ttft_p99_ms": 227.77084110770366,
         "long_context_tpot_p95_ms": null,
-        "long_context_tpot_p99_ms": 38.1153831006183,
+        "long_context_tpot_p99_ms": 37.96147722888484,
         "long_context_ttft_p95_stable": null,
         "long_context_ttft_p99_stable": true,
         "long_context_tpot_p95_stable": null,
@@ -42357,9 +42357,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T13:41:23Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T08:22:53Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-online-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
       "reproducible_cmd": null,
@@ -42375,7 +42375,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "76cc30f069231c5a4c42412f0e647a11fa94635143f0f287c876ab3c782e9dc1",
+      "idempotency_key": "3ec086389a36d47213abd6f7eb77f527f15765e7c3a2051e6592d2b382995d21",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",
@@ -42417,7 +42417,7 @@
         "disable_log_stats": "",
         "disable_log_requests": "",
         "host": "0.0.0.0",
-        "port": 28512,
+        "port": 30001,
         "max_model_len": 32768,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct",
         "dtype": "float16"
@@ -42431,7 +42431,7 @@
         "num_prompts": 200,
         "request_rate": 1,
         "host": "127.0.0.1",
-        "port": 28512,
+        "port": 30001,
         "model": "/data/shared_models/Qwen2.5-14B-Instruct"
       },
       "resolved_spec_hash": "66100e24033a9724a65e6e245d1e33a0e933fbfdcd850558428ac095ae5b4ded"
@@ -42447,7 +42447,7 @@
     }
   },
   {
-    "entry_id": "861a2f9a-c7aa-45bf-960c-664094cf05fb",
+    "entry_id": "3be9191b-834f-44e4-8d8f-6d1a8b0f7460",
     "engine": "vllm-hust",
     "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
     "config_type": "single_gpu",
@@ -42480,7 +42480,7 @@
     "metrics": {
       "ttft_ms": null,
       "tbt_ms": null,
-      "throughput_tps": 2055.4723746727404,
+      "throughput_tps": 2042.3482986951472,
       "peak_mem_mb": 0,
       "error_rate": 0.0
     },
@@ -42531,9 +42531,9 @@
       "driver_version": null
     },
     "metadata": {
-      "submitted_at": "2026-08-16T15:09:13Z",
-      "submitter": "codex-stable-trend-delta",
-      "data_source": "real-online-stable-trend-delta",
+      "submitted_at": "2026-08-17T08:26:39Z",
+      "submitter": "codex-issue214-p0",
+      "data_source": "real-offline-issue214-p0",
       "engine": "vllm-hust",
       "engine_version": "v0.17.2.post1-3532-g1aa7cd10b",
       "reproducible_cmd": null,
@@ -42549,7 +42549,7 @@
       "changelog_url": null,
       "notes": null,
       "verified": null,
-      "idempotency_key": "572b7db0ff3bbabf68fb6c04e6dfaf265e7ca58e05d840a1f68a66eb0d53cd26",
+      "idempotency_key": "75f40b3045d61507afab2e9f10ca01239b64c9b4c0a2590477b0e2ab06e61437",
       "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
       "runtime_provenance": {
         "python": "/usr/local/python3.12.13/bin/python",

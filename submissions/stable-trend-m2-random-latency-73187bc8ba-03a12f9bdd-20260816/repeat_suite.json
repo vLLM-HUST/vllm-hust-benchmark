@@ -1,0 +1,59 @@
+{
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "generated_at": "2026-08-17T08:37:34.202150+00:00",
+  "benchmark_type": "latency",
+  "evidence_label": "real-offline-issue214-p1",
+  "hardware": {
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "physical_machine_partitions_identity": false
+  },
+  "repeat_policy": {
+    "target_successes": 3,
+    "minimum_successes": 3,
+    "required_error_rate": 0,
+    "selection_rule": "median of the predeclared primary metric"
+  },
+  "repeat_result_dirs": [
+    "repeats/original",
+    "repeats/repeat2-npu2",
+    "repeats/repeat3-npu3"
+  ],
+  "resolved_refs": {
+    "core_commit": "73187bc8ba89b8f83652cbc24042433fb7032add",
+    "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e"
+  },
+  "selection": {
+    "benchmark_type": "latency",
+    "primary_metric_name": "ttft_ms",
+    "median_value": 4907.897825663288,
+    "selected_result_dir": "repeats/original",
+    "candidates": [
+      {
+        "index": 0,
+        "result_dir": "repeats/original",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 4907.897825663288,
+        "error_rate": 0,
+        "distance_to_median": 0.0
+      },
+      {
+        "index": 1,
+        "result_dir": "repeats/repeat2-npu2",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 4916.353536707659,
+        "error_rate": 0,
+        "distance_to_median": 8.455711044371128
+      },
+      {
+        "index": 2,
+        "result_dir": "repeats/repeat3-npu3",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 4895.928226597607,
+        "error_rate": 0,
+        "distance_to_median": 11.969599065680995
+      }
+    ]
+  }
+}

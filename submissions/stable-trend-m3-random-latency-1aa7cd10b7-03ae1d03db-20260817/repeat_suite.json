@@ -1,0 +1,60 @@
+{
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "generated_at": "2026-08-17T08:37:34.216962+00:00",
+  "benchmark_type": "latency",
+  "evidence_label": "real-offline-issue214-p1",
+  "hardware": {
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "physical_machine_partitions_identity": false
+  },
+  "repeat_policy": {
+    "target_successes": 3,
+    "minimum_successes": 3,
+    "required_error_rate": 0,
+    "selection_rule": "median of the predeclared primary metric"
+  },
+  "repeat_result_dirs": [
+    "repeats/repeat1-npu6",
+    "repeats/repeat2-npu6",
+    "repeats/repeat3-npu6"
+  ],
+  "resolved_refs": {
+    "core_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "plugin_commit": "03ae1d03db8049cd2a5c3f824039814459542e25"
+  },
+  "selection": {
+    "benchmark_type": "latency",
+    "primary_metric_name": "ttft_ms",
+    "median_value": 4946.432918542996,
+    "selected_result_dir": "repeats/repeat3-npu6",
+    "candidates": [
+      {
+        "index": 0,
+        "result_dir": "repeats/repeat1-npu6",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 4962.698119304453,
+        "error_rate": 0,
+        "distance_to_median": 16.26520076145698
+      },
+      {
+        "index": 1,
+        "result_dir": "repeats/repeat2-npu6",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 4931.059595228484,
+        "error_rate": 0,
+        "distance_to_median": 15.373323314512163
+      },
+      {
+        "index": 2,
+        "result_dir": "repeats/repeat3-npu6",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 4946.432918542996,
+        "error_rate": 0,
+        "distance_to_median": 0.0
+      }
+    ]
+  },
+  "diagnostic_note": "the prior incomplete C3 artifact is excluded; all three candidates are fresh complete offline artifacts"
+}

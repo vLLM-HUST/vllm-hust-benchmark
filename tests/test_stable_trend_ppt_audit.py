@@ -15,8 +15,9 @@ def test_ppt_audit_matrix_is_exact_and_does_not_overstate_repeats() -> None:
     assert audit["summary"]["cells"] == 27
     assert audit["summary"]["online_cells"] == 18
     assert audit["summary"]["offline_cells"] == 9
-    assert audit["summary"]["independent_3_repeat_median_cells"] == 6
-    assert audit["summary"]["single_invocation_cells"] == 21
+    assert audit["summary"]["independent_3_repeat_median_cells"] == 27
+    assert audit["summary"]["single_invocation_cells"] == 0
+    assert audit["summary"]["evidence_grade_counts"] == {"A": 27}
     assert len({(cell["checkpoint"], cell["workload"]) for cell in cells}) == 27
     assert all(not cell["repeat_group_present"] for cell in cells)
     assert all(not cell["canonical_aggregate_present"] for cell in cells)
@@ -47,7 +48,8 @@ def test_ppt_audit_csv_and_report_use_historical_health_boundary() -> None:
     report = (AUDIT_DIR / "README.md").read_text(encoding="utf-8")
 
     assert len(rows) == 27
-    assert sum(row["independent_3_repeat_median"] == "True" for row in rows) == 6
+    assert all(row["independent_3_repeat_median"] == "True" for row in rows)
+    assert all(row["repeat_suite_path"] for row in rows)
     assert "历史版本健康检查点" in report
     assert "不支持“9 类性能持续提升”" in report
     assert "不代表 current latest" in report

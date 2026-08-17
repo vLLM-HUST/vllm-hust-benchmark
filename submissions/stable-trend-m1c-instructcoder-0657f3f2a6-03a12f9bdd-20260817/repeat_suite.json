@@ -1,0 +1,59 @@
+{
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "generated_at": "2026-08-17T08:37:34.100058+00:00",
+  "benchmark_type": "online",
+  "evidence_label": "real-online-issue214-p1",
+  "hardware": {
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "physical_machine_partitions_identity": false
+  },
+  "repeat_policy": {
+    "target_successes": 3,
+    "minimum_successes": 3,
+    "required_error_rate": 0,
+    "selection_rule": "median of the predeclared primary metric"
+  },
+  "repeat_result_dirs": [
+    "repeats/original",
+    "repeats/repeat2-npu1",
+    "repeats/repeat3-npu2"
+  ],
+  "resolved_refs": {
+    "core_commit": "0657f3f2a6867c0ad33de6227b137ddc49a0c638",
+    "plugin_commit": "03a12f9bddd944952bd029c6b62e23d68fa3a28e"
+  },
+  "selection": {
+    "benchmark_type": "online",
+    "primary_metric_name": "ttft_ms",
+    "median_value": 114.89282208867735,
+    "selected_result_dir": "repeats/repeat2-npu1",
+    "candidates": [
+      {
+        "index": 0,
+        "result_dir": "repeats/original",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 114.3323772103031,
+        "error_rate": 0,
+        "distance_to_median": 0.5604448783742555
+      },
+      {
+        "index": 1,
+        "result_dir": "repeats/repeat2-npu1",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 114.89282208867735,
+        "error_rate": 0,
+        "distance_to_median": 0.0
+      },
+      {
+        "index": 2,
+        "result_dir": "repeats/repeat3-npu2",
+        "primary_metric_name": "ttft_ms",
+        "primary_metric_value": 115.39285751018724,
+        "error_rate": 0,
+        "distance_to_median": 0.5000354215098923
+      }
+    ]
+  }
+}
