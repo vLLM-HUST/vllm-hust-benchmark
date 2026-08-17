@@ -17,9 +17,9 @@ host because `aclnnAddRmsNormBias` is absent. Fusion was not disabled and those 
 diagnostic evidence.
 
 The completed A1-A6 audit and P2 9-by-2 matrix found no actionable regression. Prefix mean TTFT had
-a high-variance, below-threshold shift: same-card six-run medians were 373.461 ms (C3) and
-392.090 ms (current), +4.988%; output throughput was flat (-0.073%). ShareGPT online TTFT shifted
-by +1.606%, also below the 5% latency threshold. The remaining seven primary metrics were flat or
+a high-variance, below-threshold shift: same-card six-run medians were 373.461 ms (C3) and 392.090
+ms (current), +4.988%; output throughput was flat (-0.073%). ShareGPT online TTFT shifted by
++1.606%, also below the 5% latency threshold. The remaining seven primary metrics were flat or
 improved.
 
 The frozen aggregates, presentation-safe table, evidence suite locator, and checksums are in
