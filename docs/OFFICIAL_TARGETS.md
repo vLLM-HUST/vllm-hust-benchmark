@@ -5,6 +5,11 @@
 - Registry version: `1.3.5`
 - Effective from: `2026-08-16`
 
+`registry_version` identifies this generated registry snapshot. Each target's `target_version` is
+the immutable execution-contract version for that target; an unrelated target update must not change
+it. Producers should record the canonical `target_contract_id` and `target_contract_version`
+metadata fields.
+
 Public leaderboard targets and 3B perfgate profiles are separate contracts. Provisional entries are
 not valid public-result comparison targets.
 

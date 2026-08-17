@@ -5,6 +5,9 @@
 - Registry version: `1.3.5`
 - Effective from: `2026-08-16`
 
+`registry_version` 表示本次生成的 registry 快照版本；每个 target 的 `target_version` 表示该 target 不可变的执行契约版本。无关
+target 的更新不应 改变它。生产端应记录 canonical 的 `target_contract_id` 和 `target_contract_version` 字段。
+
 公开排行榜固定靶与 3B 快速门禁是不同契约；provisional 记录不得作为公开成果对比。
 
 | 用途 | 状态 | Profile | Workload | 模型 | 硬件 | 精度 | 显存比例 | 最大长度 | Spec | | --- | --- | --- | --- | --- |
