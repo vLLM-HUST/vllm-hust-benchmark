@@ -1,0 +1,9 @@
+ARG BASE_IMAGE=quay.io/ascend/vllm-ascend:v0.23.0-openeuler
+FROM ${BASE_IMAGE}
+
+# Preserve the engine, CANN, torch-npu, and packaged custom operators from the
+# selected runtime image. Add only the versioned clients required by official
+# HF-backed and prefix-caching benchmark contracts.
+RUN python -m pip install --no-cache-dir \
+    "datasets==3.3.0" \
+    "xxhash==3.6.0"

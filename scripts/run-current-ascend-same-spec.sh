@@ -33,6 +33,10 @@ CURRENT_RUNTIME_CWD=${CURRENT_RUNTIME_CWD:-"/data/shared_datasets/vllm-hust-benc
 CURRENT_VLLM_HUST_REPO=${CURRENT_VLLM_HUST_REPO:-"$WORKSPACE_ROOT/vllm-hust"}
 CURRENT_VLLM_ASCEND_HUST_REPO=${CURRENT_VLLM_ASCEND_HUST_REPO:-"$WORKSPACE_ROOT/vllm-ascend-hust"}
 CURRENT_RUNTIME_PYTHONPATH=${CURRENT_RUNTIME_PYTHONPATH:-}
+CURRENT_RUNTIME_SOURCE_MODE=${CURRENT_RUNTIME_SOURCE_MODE:-worktree}
+CURRENT_RUNTIME_EXPECT_CUSTOM_OP_VENDOR=${CURRENT_RUNTIME_EXPECT_CUSTOM_OP_VENDOR:-0}
+CURRENT_RUNTIME_CUSTOM_OP_VENDOR_NAME=${CURRENT_RUNTIME_CUSTOM_OP_VENDOR_NAME:-custom_transformer}
+export CURRENT_RUNTIME_CUSTOM_OP_VENDOR_NAME
 CURRENT_ENV_PREFIX=${CURRENT_ENV_PREFIX:-"/root/miniconda3/envs/vllm-hust-dev"}
 CURRENT_RUNTIME_PYTHON=${CURRENT_RUNTIME_PYTHON:-"$CURRENT_ENV_PREFIX/bin/python"}
 CURRENT_VLLM_CACHE_ROOT=${CURRENT_VLLM_CACHE_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/current-ascend-same-spec-cache"}
@@ -100,16 +104,29 @@ NPU_OOM_EXIT_CODE=87
 SERVER_PID=""
 RUNNER_LOCK_FD=""
 
-if [[ "$CURRENT_USE_MANAGED_SERVER" == "1" ]]; then
-  CURRENT_RUNTIME_SOURCE_PYTHONPATH="$CURRENT_VLLM_HUST_REPO"
-else
-  CURRENT_RUNTIME_SOURCE_PYTHONPATH="$CURRENT_VLLM_ASCEND_HUST_REPO:$CURRENT_VLLM_HUST_REPO"
-fi
-if [[ -n "$CURRENT_RUNTIME_PYTHONPATH" ]]; then
-  CURRENT_RUNTIME_PYTHONPATH="$CURRENT_RUNTIME_SOURCE_PYTHONPATH:$CURRENT_RUNTIME_PYTHONPATH"
-else
-  CURRENT_RUNTIME_PYTHONPATH="$CURRENT_RUNTIME_SOURCE_PYTHONPATH"
-fi
+case "$CURRENT_RUNTIME_SOURCE_MODE" in
+  worktree)
+    if [[ "$CURRENT_USE_MANAGED_SERVER" == "1" ]]; then
+      CURRENT_RUNTIME_SOURCE_PYTHONPATH="$CURRENT_VLLM_HUST_REPO"
+    else
+      CURRENT_RUNTIME_SOURCE_PYTHONPATH="$CURRENT_VLLM_ASCEND_HUST_REPO:$CURRENT_VLLM_HUST_REPO"
+    fi
+    if [[ -n "$CURRENT_RUNTIME_PYTHONPATH" ]]; then
+      CURRENT_RUNTIME_PYTHONPATH="$CURRENT_RUNTIME_SOURCE_PYTHONPATH:$CURRENT_RUNTIME_PYTHONPATH"
+    else
+      CURRENT_RUNTIME_PYTHONPATH="$CURRENT_RUNTIME_SOURCE_PYTHONPATH"
+    fi
+    ;;
+  image-native)
+    # Release images may contain generated custom-operator payloads that are
+    # deliberately absent from a Git source checkout. Do not shadow those
+    # installed packages with raw worktrees.
+    ;;
+  *)
+    echo "Unsupported CURRENT_RUNTIME_SOURCE_MODE: $CURRENT_RUNTIME_SOURCE_MODE" >&2
+    exit 2
+    ;;
+esac
 
 if [[ ! -x "$CURRENT_RUNTIME_PYTHON" ]]; then
   echo "CURRENT_RUNTIME_PYTHON is not executable: $CURRENT_RUNTIME_PYTHON" >&2
@@ -494,6 +511,42 @@ run_in_current_runtime() {
     PYTHONPATH="$pythonpath_prefix${PYTHONPATH:+:$PYTHONPATH}" \
       "$@"
   )
+}
+
+validate_runtime_packaging() {
+  if [[ "$CURRENT_RUNTIME_EXPECT_CUSTOM_OP_VENDOR" != "1" ]]; then
+    return 0
+  fi
+
+  run_in_current_runtime "$CURRENT_RUNTIME_PYTHONPATH" \
+    "$CURRENT_RUNTIME_PYTHON" - <<'PY'
+from importlib.util import find_spec
+import os
+from pathlib import Path
+
+spec = find_spec("vllm_ascend")
+if spec is None or not spec.submodule_search_locations:
+    raise SystemExit("vllm_ascend package is unavailable in the selected runtime")
+
+package_root = Path(next(iter(spec.submodule_search_locations))).resolve()
+vendor_root = (
+    package_root
+    / "_cann_ops_custom"
+    / "vendors"
+    / os.environ["CURRENT_RUNTIME_CUSTOM_OP_VENDOR_NAME"]
+)
+required = (
+    vendor_root / "op_api" / "lib" / "libcust_opapi.so",
+    vendor_root / "op_proto" / "inc" / "add_rms_norm_bias_proto.h",
+)
+missing = [str(path) for path in required if not path.is_file()]
+if missing:
+    raise SystemExit(
+        "selected runtime shadows or omits packaged Ascend custom operators: "
+        + ", ".join(missing)
+    )
+print(f"[same-spec-current] verified packaged Ascend custom operators: {vendor_root}")
+PY
 }
 
 run_server_command() {
@@ -1072,6 +1125,8 @@ kill_server() {
 }
 
 trap kill_server EXIT
+
+validate_runtime_packaging
 
 mkdir -p "$RESULT_DIR"
 mkdir -p "$CURRENT_VLLM_CACHE_ROOT"

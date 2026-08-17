@@ -131,6 +131,42 @@ def test_current_same_spec_runner_defaults_to_one_start_attempt() -> None:
     assert "SERVER_START_RETRIES=${SERVER_START_RETRIES:-1}" in script
 
 
+def test_current_same_spec_runner_supports_image_native_runtime() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    assert (
+        "CURRENT_RUNTIME_SOURCE_MODE=${CURRENT_RUNTIME_SOURCE_MODE:-worktree}" in script
+    )
+    assert "image-native)" in script
+    assert "Do not shadow those" in script
+    image_native_block = script[script.index("  image-native)") :]
+    image_native_block = image_native_block[: image_native_block.index("  *)")]
+    assert "CURRENT_RUNTIME_SOURCE_PYTHONPATH=" not in image_native_block
+    assert "CURRENT_VLLM_ASCEND_HUST_REPO:" not in image_native_block
+
+
+def test_current_same_spec_runner_can_require_packaged_ascend_custom_ops() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    validator = _function_text(script, "validate_runtime_packaging")
+
+    assert "CURRENT_RUNTIME_EXPECT_CUSTOM_OP_VENDOR" in validator
+    assert 'find_spec("vllm_ascend")' in validator
+    assert '"libcust_opapi.so"' in validator
+    assert '"add_rms_norm_bias_proto.h"' in validator
+    assert "shadows or omits packaged Ascend custom operators" in validator
+    assert script.index("validate_runtime_packaging\n") < script.index(
+        'mkdir -p "$RESULT_DIR"'
+    )
+
+
+def test_current_same_spec_runner_accepts_versioned_custom_op_vendor_name() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    validator = _function_text(script, "validate_runtime_packaging")
+
+    assert "CURRENT_RUNTIME_CUSTOM_OP_VENDOR_NAME" in script
+    assert "CURRENT_RUNTIME_CUSTOM_OP_VENDOR_NAME" in validator
+
+
 def test_current_same_spec_runner_requires_offline_graph_proof() -> None:
     script = RUNNER.read_text(encoding="utf-8")
 

@@ -65,11 +65,7 @@ def install_offline_graph_guard() -> None:
 
     from vllm import LLM
 
-    original_from_engine_args = LLM.from_engine_args
-
-    @classmethod
-    def guarded_from_engine_args(_cls, engine_args):
-        llm = original_from_engine_args(engine_args)
+    def record_proof(llm: object) -> None:
         proof = offline_graph_proof(llm)
         require_offline_graph(proof)
         output_path = Path(proof_file)
@@ -78,9 +74,26 @@ def install_offline_graph_guard() -> None:
             json.dumps(proof, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-        return llm
 
-    LLM.from_engine_args = guarded_from_engine_args
+    if hasattr(LLM, "from_engine_args"):
+        original_from_engine_args = LLM.from_engine_args
+
+        @classmethod
+        def guarded_from_engine_args(_cls, engine_args):
+            llm = original_from_engine_args(engine_args)
+            record_proof(llm)
+            return llm
+
+        LLM.from_engine_args = guarded_from_engine_args
+        return
+
+    original_init = LLM.__init__
+
+    def guarded_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        record_proof(self)
+
+    LLM.__init__ = guarded_init
 
 
 def run_single_benchmark(argv: list[str]) -> int | None:
