@@ -11,29 +11,31 @@ import sys
 import tempfile
 import time
 import urllib.error
-from collections.abc import Sequence
 import urllib.request
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Mapping
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from vllm_hust_benchmark.fixed_target_registry import FixedTargetProfile
 
 from vllm_hust_benchmark.aggregate_results import build_series_signature
-from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.leaderboard_exclusions import (
     LeaderboardExclusion,
     load_leaderboard_exclusions,
     match_leaderboard_exclusion,
 )
+from vllm_hust_benchmark.models import render_parameter_flags
 from vllm_hust_benchmark.registry import get_scenario
+from vllm_hust_benchmark.snapshot_target_binding import (
+    bind_snapshot_set,
+    load_official_target_registry,
+)
 from vllm_hust_benchmark.submission_artifacts import (
     iter_manifest_artifact_paths,
     iter_submission_artifact_paths,
-)
-from vllm_hust_benchmark.submission_artifacts import (
     normalize_submission_artifacts_in_tree,
 )
 from vllm_hust_benchmark.workload_config_contract import (
@@ -616,6 +618,20 @@ def aggregate_to_website(
     ]
     rc = run_external_command(command, cwd=layout.website_repo, execute=execute)
 
+    if execute and rc == 0:
+        try:
+            registry = load_official_target_registry(layout.benchmark_repo)
+            binding_report = bind_snapshot_set(destination, registry)
+            print(
+                "strict target binding: "
+                f"verified={binding_report['verified']} "
+                "historical_unverified="
+                f"{binding_report['historical_unverified']}"
+            )
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            print(f"strict target binding failed closed: {exc}", file=sys.stderr)
+            return 2
+
     # Fixed-target admission gate: after the external aggregation has written
     # the snapshot, scan for entries that misalign with the fixed-target
     # registry and quarantine them out of the official snapshot.
@@ -821,7 +837,7 @@ def _build_baseline_coverage_key(
     workload: str,
     config_type: str,
 ) -> str:
-    return "|".join([engine, model, hardware, workload, config_type])
+    return f"{engine}|{model}|{hardware}|{workload}|{config_type}"
 
 
 def _classify_config_type(*, chip_count: int, node_count: int) -> str:
@@ -1101,16 +1117,16 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
             + " | ".join(
                 [
                     f"engine={_normalize_engine(entry)}",
-                    f"engine_version={str(entry.get('engine_version') or metadata.get('engine_version') or '')}",
-                    f"model={str((entry.get('model') or {}).get('name') or '')}",
+                    f"engine_version={entry.get('engine_version') or metadata.get('engine_version') or ''!s}",
+                    f"model={(entry.get('model') or {}).get('name') or ''!s}",
                     f"workload={_extract_workload_name(entry)}",
-                    f"config_type={str(entry.get('config_type') or '')}",
+                    f"config_type={entry.get('config_type') or ''!s}",
                     f"chip_count={int((entry.get('hardware') or {}).get('chip_count') or 0)}",
                     f"node_count={int((entry.get('cluster') or {}).get('node_count') or 1)}",
-                    f"baseline_engine={str(accountable.get('baseline_engine') or '')}",
+                    f"baseline_engine={accountable.get('baseline_engine') or ''!s}",
                     f"spec_id={_get_same_spec_id(entry) or ''}",
                     f"spec_hash={_get_same_spec_hash(entry) or ''}",
-                    f"github_repository={str(metadata.get('github_repository') or '')}",
+                    f"github_repository={metadata.get('github_repository') or ''!s}",
                 ]
             ),
             file=sys.stderr,
@@ -1136,9 +1152,9 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
                 + " | ".join(
                     [
                         f"engine={_normalize_engine(entry)}",
-                        f"model={str((entry.get('model') or {}).get('name') or '')}",
+                        f"model={(entry.get('model') or {}).get('name') or ''!s}",
                         f"spec_hash={_get_same_spec_hash(entry) or ''}",
-                        f"submitted_at={str((entry.get('metadata') or {}).get('submitted_at') or '')}",
+                        f"submitted_at={(entry.get('metadata') or {}).get('submitted_at') or ''!s}",
                     ]
                 ),
                 file=sys.stderr,
@@ -1164,9 +1180,9 @@ def _print_aggregated_compare_diagnostics(data_dir: Path) -> None:
                 + " | ".join(
                     [
                         f"engine={_normalize_engine(entry)}",
-                        f"model={str((entry.get('model') or {}).get('name') or '')}",
+                        f"model={(entry.get('model') or {}).get('name') or ''!s}",
                         f"spec_hash={_get_same_spec_hash(entry) or ''}",
-                        f"github_repository={str((entry.get('metadata') or {}).get('github_repository') or '')}",
+                        f"github_repository={(entry.get('metadata') or {}).get('github_repository') or ''!s}",
                     ]
                 ),
                 file=sys.stderr,
@@ -1352,6 +1368,7 @@ def _upload_existing_snapshots(
     """
     try:
         from huggingface_hub import CommitOperationAdd
+
         from vllm_hust_benchmark.hf_publisher import _create_commit_on_branch
     except ImportError:
         print(
@@ -1402,7 +1419,7 @@ def _upload_existing_snapshots(
 
     try:
         api.repo_info(repo_id=repo_id, repo_type="dataset")
-    except Exception:
+    except Exception:  # noqa: BLE001
         api.create_repo(
             repo_id=repo_id, repo_type="dataset", private=True, exist_ok=True
         )
@@ -1843,8 +1860,10 @@ def _verify_admission_checksums(submission_dir: Path) -> list[str]:
     checksums_path = submission_dir / "checksums.sha256"
     if not checksums_path.is_file():
         return [
-            f"{checksums_path}: missing checksum manifest "
-            f"(required for admission scope)"
+            (
+                f"{checksums_path}: missing checksum manifest "
+                f"(required for admission scope)"
+            )
         ]
 
     failures: list[str] = []
@@ -1863,8 +1882,7 @@ def _verify_admission_checksums(submission_dir: Path) -> list[str]:
             continue
         expected_hex = match.group("hex").lower()
         rel_path = match.group("path")
-        if rel_path.startswith("./"):
-            rel_path = rel_path[2:]
+        rel_path = rel_path.removeprefix("./")
         covered.add(rel_path)
         target = submission_dir / rel_path
         if not target.is_file():
@@ -1996,7 +2014,7 @@ def _find_superseded_coexistence_conflicts(source_dir: Path) -> list[dict]:
                     "code_combo": code_combo,
                 }
             )
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001, S112
             # Defensive: one bad dir must not crash the whole scan.
             continue
 
@@ -2576,9 +2594,12 @@ def _validate_entry_workload_contract(
     # whose ``submitted_at`` predates the contract activation date are no
     # longer grandfathered: any official-spec entry must pass the contract
     # regardless of submission time.
-    if not must_validate and require_official:
-        if is_official_workload_contract_entry(payload):
-            must_validate = True
+    if (
+        not must_validate
+        and require_official
+        and is_official_workload_contract_entry(payload)
+    ):
+        must_validate = True
 
     if not must_validate:
         return True
@@ -2715,6 +2736,7 @@ def sync_submission_to_huggingface(
 
     try:
         from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
+
         from vllm_hust_benchmark.hf_publisher import _create_commit_on_branch
     except ImportError:
         print(
@@ -2761,7 +2783,7 @@ def sync_submission_to_huggingface(
                 repo_type="dataset",
                 revision=branch,
             )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             print(
                 f"failed to list dataset files from {repo_id}@{branch}: {exc}",
                 file=sys.stderr,
@@ -2980,7 +3002,7 @@ def sync_submission_to_huggingface(
 
         try:
             api.repo_info(repo_id=repo_id, repo_type="dataset")
-        except Exception:
+        except Exception:  # noqa: BLE001
             api.create_repo(
                 repo_id=repo_id, repo_type="dataset", private=True, exist_ok=True
             )

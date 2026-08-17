@@ -237,7 +237,9 @@ def _validate_target_metadata(metadata: Mapping[str, Any]) -> list[str]:
     return errors
 
 
-def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
+def validate_explicit_workload_config(
+    entry: Mapping[str, Any], *, validate_target_metadata: bool = True
+) -> list[str]:
     if not is_official_workload_contract_entry(entry):
         return []
 
@@ -253,7 +255,7 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
     submitted_at = str(metadata.get("submitted_at") or "").strip()
     if not submitted_at:
         errors.append("metadata.submitted_at must be explicitly recorded")
-    elif submitted_at >= TARGET_ID_REQUIRED_AFTER:
+    elif validate_target_metadata and submitted_at >= TARGET_ID_REQUIRED_AFTER:
         errors.extend(_validate_target_metadata(metadata))
 
     workload = entry.get("workload")

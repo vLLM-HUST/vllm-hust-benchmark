@@ -276,8 +276,40 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
             )
 
     contract_version = str(metadata.get("workload_config_contract") or "")
+    historical_unverified = (
+        metadata.get("official_admission_status") == "historical-unverified"
+    )
+    if historical_unverified:
+        if metadata.get("verified") is not False:
+            errors.append(
+                f"{source.name}:{entry_id}: historical-unverified entry must set "
+                "metadata.verified=false"
+            )
+        claimed_fields = [
+            field
+            for field in (
+                "target_id",
+                "target_version",
+                "profile_id",
+                "target_registry_sha256",
+            )
+            if metadata.get(field)
+        ]
+        if claimed_fields:
+            errors.append(
+                f"{source.name}:{entry_id}: historical-unverified entry cannot "
+                "claim " + ", ".join(claimed_fields)
+            )
+        if not str(metadata.get("official_admission_reason") or "").strip():
+            errors.append(
+                f"{source.name}:{entry_id}: historical-unverified entry requires "
+                "metadata.official_admission_reason"
+            )
+
     if requires_workload_config_contract(entry) or contract_version:
-        for message in validate_explicit_workload_config(entry):
+        for message in validate_explicit_workload_config(
+            entry, validate_target_metadata=not historical_unverified
+        ):
             errors.append(
                 f"{source.name}:{entry_id}: workload config contract "
                 f"{WORKLOAD_CONFIG_CONTRACT_VERSION}: {message}"
