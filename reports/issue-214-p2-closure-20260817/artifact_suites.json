@@ -1,0 +1,80 @@
+{
+  "schema_version": "issue214-p2-artifact-suites/v1",
+  "contract": "p2-explicit-cache/v1",
+  "evidence_root": "/tmp/issue214-p0-20260817/runs",
+  "aggregation": "median of the declared primary metric across all listed successful invocations",
+  "pairs": {
+    "c3": {
+      "core": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+      "plugin": "03ae1d03db8049cd2a5c3f824039814459542e25"
+    },
+    "current": {
+      "core": "43341b177dbaa8c7f04662f71e885ee7dfe22704",
+      "plugin": "0a46364814eedd3314f04eff3490c3ab422438bd"
+    }
+  },
+  "workloads": {
+    "agent-research-online": {
+      "primary_metric": "ttft_ms",
+      "c3_values": [3245.601508751861, 3181.180585816037, 3289.9271771748317],
+      "current_values": [2867.210210853955, 3187.2485411004163, 3111.066892481176],
+      "evidence_glob": "{c3,current}-agent-research-online-ignore-eos-no-prefix-repeat*-ab-agent-no-prefix/result/submission/run_leaderboard.json"
+    },
+    "instructcoder-online": {
+      "primary_metric": "ttft_ms",
+      "c3_values": [115.55737122489518, 114.28928712030029, 114.80740195020189],
+      "current_values": [114.60617898956116, 115.27481575240017, 113.25630023634403],
+      "evidence_glob": "{c3,current}-official-ascend-jan-2026-v0180-instructcoder-online-qwen25-coder-14b-910b2-repeat*-p2-instruct-no-prefix/result/submission/run_leaderboard.json"
+    },
+    "prefix-repetition-online": {
+      "primary_metric": "ttft_ms",
+      "c3_values": [358.3546025096439, 408.2018951512873, 360.24620382115245, 358.8523040525615, 399.2484699632041, 386.6757712326944],
+      "current_values": [427.2499468596652, 384.06993267824873, 393.3142483397387, 360.70254458347335, 427.7773219323717, 390.8665301837027],
+      "evidence_globs": [
+        "{c3,current}-official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2-repeat*-ab-prefix-safe/result/submission/run_leaderboard.json",
+        "{c3,current}-official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2-repeat*-card-crossover2-cc7166/result/submission/run_leaderboard.json"
+      ]
+    },
+    "random-latency": {
+      "primary_metric": "ttft_ms",
+      "c3_values": [4940.8690175352, 4920.444898850595, 4915.303338893379],
+      "current_values": [4904.096141954264, 4913.77806176121, 4919.793262224023],
+      "evidence_glob": "{c3,current}-official-ascend-jan-2026-v0180-random-latency-qwen25-14b-910b2-repeat*-p2-random-latency-no-prefix/result/submission/run_leaderboard.json"
+    },
+    "random-online": {
+      "primary_metric": "ttft_ms",
+      "c3_values": [229.80844399193302, 229.59323168266565, 230.58756661135703],
+      "current_values": [229.68502367148176, 228.47401247592643, 229.82966804178432],
+      "evidence_glob": "{c3,current}-random-online-no-prefix-repeat*-ab-random-no-prefix/result/submission/run_leaderboard.json"
+    },
+    "sharegpt-online": {
+      "primary_metric": "ttft_ms",
+      "c3_values": [125.81563660642131, 125.95244816504419, 128.27138346852735],
+      "current_values": [127.97524687135592, 125.917899615597, 134.26785849500448],
+      "evidence_glob": "{c3,current}-official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2-repeat*-p2-share-online-no-prefix/result/submission/run_leaderboard.json"
+    },
+    "sharegpt-throughput": {
+      "primary_metric": "throughput_tps",
+      "c3_values": [2042.9486265897126, 2031.2412631058542, 2054.9486795549183],
+      "current_values": [2066.3135875574776, 2038.954139338247, 2048.152959232967],
+      "evidence_glob": "{c3,current}-sharegpt-throughput-no-prefix-repeat*-ab-share-no-prefix/result/submission/run_leaderboard.json"
+    },
+    "sonnet-throughput": {
+      "primary_metric": "throughput_tps",
+      "c3_values": [3649.0295150755674, 3611.2847102482265, 3595.7442614581796],
+      "current_values": [3626.749496459258, 3591.1540650893967, 3614.039871632891],
+      "evidence_glob": "{c3,current}-sonnet-throughput-no-prefix-repeat*-ab-sonnet-no-prefix/result/submission/run_leaderboard.json"
+    },
+    "visionarena-online": {
+      "primary_metric": "ttft_ms",
+      "c3_values": [427.7051306418143, 425.62256489507854, 423.95494001125917, 458.4120106995106, 450.4990190239623, 450.1385052748956],
+      "current_values": [440.5764604774304, 448.3808410721831, 456.2576252957806, 435.32211213745177, 419.9846773506142, 419.30543774273247],
+      "input_content_sha256": "2b41a850b78bc901caedf7e4d86ce52fc1804edc584f5f4da53a070df2a34b41",
+      "evidence_globs": [
+        "{c3,current}-official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2-repeat[1-6]-p2-vision-canonical-no-prefix*/result/submission/run_leaderboard.json",
+        "c3-official-ascend-jan-2026-v0180-visionarena-online-qwen25-vl-7b-910b2-repeat7-npu6-p2-vision-canonical-no-prefix-crossover-retry-success/result/submission/run_leaderboard.json"
+      ],
+      "excluded_diagnostic": "c3 repeat6 failed 1/1000; retained locally and excluded from successful-invocation aggregation"
+    }
+  }
+}
