@@ -14,20 +14,26 @@ def test_non_prefix_contract_requires_explicit_cache_disable() -> None:
         "server": {"no_enable_prefix_caching": True},
         "environment": {},
     }
-    assert validate_effective_cache_contract(
-        "random-online", {"no_enable_prefix_caching": True}
-    ) == []
+    assert (
+        validate_effective_cache_contract(
+            "random-online", {"no_enable_prefix_caching": True}
+        )
+        == []
+    )
     assert validate_effective_cache_contract("random-online", {}) == [
         "server.no_enable_prefix_caching must be True"
     ]
 
 
 def test_prefix_contract_requires_cache_and_safe_knorm() -> None:
-    assert validate_effective_cache_contract(
-        "prefix-repetition-online",
-        {"enable_prefix_caching": True},
-        {"VLLM_KNORM_ENABLED": "0"},
-    ) == []
+    assert (
+        validate_effective_cache_contract(
+            "prefix-repetition-online",
+            {"enable_prefix_caching": True},
+            {"VLLM_KNORM_ENABLED": "0"},
+        )
+        == []
+    )
     errors = validate_effective_cache_contract(
         "prefix-repetition-online", {"enable_prefix_caching": True}
     )
@@ -40,4 +46,3 @@ def test_non_prefix_contract_rejects_conflicting_enable() -> None:
         {"no_enable_prefix_caching": True, "enable_prefix_caching": True},
     )
     assert errors == ["non-prefix workloads must not enable prefix caching"]
-
