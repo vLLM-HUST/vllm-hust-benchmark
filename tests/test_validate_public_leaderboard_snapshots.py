@@ -7,7 +7,6 @@ from pathlib import Path
 
 from vllm_hust_benchmark.same_spec import build_same_spec_payload
 
-
 SCRIPT_PATH = (
     Path(__file__).resolve().parents[1]
     / "scripts"
@@ -111,6 +110,60 @@ def test_future_official_entry_requires_effective_config_contract() -> None:
 
     assert any("workload config contract" in error for error in errors)
     assert any("workload_config_contract" in error for error in errors)
+
+
+def _historical_unverified_official_entry() -> dict:
+    payload = same_spec()
+    payload["spec_id"] = (
+        "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
+    )
+    payload["scenario"] = "random-online"
+    payload["resolved_server_parameters"].update(
+        gpu_memory_utilization=0.6,
+        max_model_len=32768,
+    )
+    payload["resolved_client_parameters"]["no_stream"] = False
+    candidate = entry("historical-unverified", payload)
+    candidate["engine"] = "vllm-hust"
+    candidate["workload"] = {
+        "name": "random-online",
+        "input_length": 16,
+        "output_length": 8,
+        "batch_size": None,
+        "concurrent_requests": None,
+        "dataset": "random",
+    }
+    candidate["model"]["name"] = "Qwen/Qwen2.5-14B-Instruct"
+    candidate["metadata"] = {
+        "submitted_at": "2026-08-17T00:00:00Z",
+        "workload_config_contract": "explicit-effective/v1",
+        "verified": False,
+        "official_admission_status": "historical-unverified",
+        "official_admission_reason": "engine does not match target baseline runtime",
+    }
+    return candidate
+
+
+def test_historical_unverified_marker_preserves_config_validation_without_target_claim() -> (
+    None
+):
+    module = load_module()
+    errors = module.validate_entry(
+        _historical_unverified_official_entry(),
+        source=Path("leaderboard_single.json"),
+    )
+    assert errors == []
+
+
+def test_historical_unverified_marker_cannot_claim_target_metadata() -> None:
+    module = load_module()
+    candidate = _historical_unverified_official_entry()
+    candidate["metadata"]["target_id"] = candidate["same_spec"]["spec_id"]
+    errors = module.validate_entry(
+        candidate,
+        source=Path("leaderboard_single.json"),
+    )
+    assert any("cannot claim target_id" in error for error in errors)
 
 
 def test_quarantined_entry_ids_are_rejected() -> None:
