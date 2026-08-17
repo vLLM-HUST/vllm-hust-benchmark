@@ -24,29 +24,35 @@ def load_module():
 
 SINGLE_DATA = [{"entry_id": "single-1", "engine": "vllm-hust"}]
 MULTI_DATA: list[dict] = []
+COMPARE_DATA = {
+    "schema_version": "leaderboard-compare-snapshot/v1",
+    "generated_at": "2026-08-17T00:00:00Z",
+    "group_count": 0,
+    "groups": [],
+}
+LAST_UPDATED_DATA = {"last_updated": "2026-08-17T00:00:00Z"}
+
+SNAPSHOT_PAYLOADS = {
+    "leaderboard_single.json": SINGLE_DATA,
+    "leaderboard_multi.json": MULTI_DATA,
+    "leaderboard_compare.json": COMPARE_DATA,
+    "last_updated.json": LAST_UPDATED_DATA,
+}
 
 
 def write_local_snapshots(tmp_path: Path) -> Path:
     snapshot_dir = tmp_path / "leaderboard-data" / "snapshots"
     snapshot_dir.mkdir(parents=True, exist_ok=True)
-    (snapshot_dir / "leaderboard_single.json").write_text(
-        json.dumps(SINGLE_DATA), encoding="utf-8"
-    )
-    (snapshot_dir / "leaderboard_multi.json").write_text(
-        json.dumps(MULTI_DATA), encoding="utf-8"
-    )
+    for file_name, payload in SNAPSHOT_PAYLOADS.items():
+        (snapshot_dir / file_name).write_text(json.dumps(payload), encoding="utf-8")
     return snapshot_dir
 
 
 def write_website_snapshots(website_repo: Path) -> Path:
     data_dir = website_repo / "public" / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
-    (data_dir / "leaderboard_single.json").write_text(
-        json.dumps(SINGLE_DATA), encoding="utf-8"
-    )
-    (data_dir / "leaderboard_multi.json").write_text(
-        json.dumps(MULTI_DATA), encoding="utf-8"
-    )
+    for file_name, payload in SNAPSHOT_PAYLOADS.items():
+        (data_dir / file_name).write_text(json.dumps(payload), encoding="utf-8")
     return data_dir
 
 
@@ -66,8 +72,7 @@ def test_three_repos_in_sync(tmp_path: Path, monkeypatch, capsys) -> None:
         cache_dir = tmp_path / "hf_cache"
         cache_dir.mkdir(parents=True, exist_ok=True)
         path = cache_dir / filename
-        data = SINGLE_DATA if filename == "leaderboard_single.json" else MULTI_DATA
-        path.write_text(json.dumps(data), encoding="utf-8")
+        path.write_text(json.dumps(SNAPSHOT_PAYLOADS[filename]), encoding="utf-8")
         return str(path)
 
     install_fake_hf(monkeypatch, fake_download)
@@ -89,6 +94,44 @@ def test_three_repos_in_sync(tmp_path: Path, monkeypatch, capsys) -> None:
     captured = capsys.readouterr()
     assert "all repos in sync" in captured.out
     assert captured.err == ""
+
+
+def test_default_snapshot_set_covers_all_public_files() -> None:
+    module = load_module()
+
+    assert module.DEFAULT_SNAPSHOT_FILES == (
+        "leaderboard_single.json",
+        "leaderboard_multi.json",
+        "leaderboard_compare.json",
+        "last_updated.json",
+    )
+
+
+def test_missing_compare_or_last_updated_is_a_hard_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    module = load_module()
+    write_local_snapshots(tmp_path)
+    (tmp_path / "leaderboard-data" / "snapshots" / "leaderboard_compare.json").unlink()
+    (tmp_path / "leaderboard-data" / "snapshots" / "last_updated.json").unlink()
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "validate_snapshot_consistency.py",
+            "--benchmark-repo",
+            str(tmp_path),
+            "--hf-repo-id",
+            "none",
+            "--skip-website",
+        ],
+    )
+    assert module.main() == 1
+    captured = capsys.readouterr()
+    assert "missing local snapshot" in captured.err
+    assert "leaderboard_compare.json" in captured.err
+    assert "last_updated.json" in captured.err
 
 
 def test_hf_mismatch_returns_error(tmp_path: Path, monkeypatch, capsys) -> None:

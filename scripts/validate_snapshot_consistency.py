@@ -17,7 +17,12 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SNAPSHOT_FILES = ("leaderboard_single.json", "leaderboard_multi.json")
+DEFAULT_SNAPSHOT_FILES = (
+    "leaderboard_single.json",
+    "leaderboard_multi.json",
+    "leaderboard_compare.json",
+    "last_updated.json",
+)
 SNAPSHOT_SUBDIR = Path("leaderboard-data") / "snapshots"
 WEBSITE_DATA_CANDIDATES = (
     Path("public") / "data",
