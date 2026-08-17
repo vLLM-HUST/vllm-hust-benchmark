@@ -14,6 +14,7 @@ from vllm_hust_benchmark.model_registry import normalize_model_identity_payload
 from vllm_hust_benchmark.model_registry import resolve_model_identity
 from vllm_hust_benchmark.model_registry import validate_model_identity_payload
 from vllm_hust_benchmark.models import ScenarioDefinition
+from vllm_hust_benchmark.official_targets import load_packaged_registry
 from vllm_hust_benchmark.workload_config_contract import (
     WORKLOAD_CONFIG_CONTRACT_VERSION,
     is_official_workload_contract_entry,
@@ -753,6 +754,29 @@ def export_leaderboard_artifacts(
             )
         artifact["metadata"]["target_id"] = target_id
         artifact["metadata"]["target_version"] = target_version
+        canonical_target_id = str(spec_payload.get("id") or "").strip()
+        official_registry = load_packaged_registry()
+        canonical_targets = [
+            target
+            for target in official_registry.get("targets", [])
+            if isinstance(target, dict)
+            and target.get("target_id") == canonical_target_id
+        ]
+        if not canonical_targets:
+            raise ValueError(
+                f"spec_path {spec_path} target id {canonical_target_id!r} is not "
+                "present in the packaged official target registry"
+            )
+        canonical_versions = {
+            str(target.get("target_version")) for target in canonical_targets
+        }
+        if len(canonical_versions) != 1:
+            raise ValueError(
+                f"official target {canonical_target_id!r} has ambiguous contract versions: "
+                f"{sorted(canonical_versions)}"
+            )
+        artifact["metadata"]["target_contract_id"] = canonical_target_id
+        artifact["metadata"]["target_contract_version"] = canonical_versions.pop()
         artifact["metadata"]["workload_config_contract"] = (
             WORKLOAD_CONFIG_CONTRACT_VERSION
         )

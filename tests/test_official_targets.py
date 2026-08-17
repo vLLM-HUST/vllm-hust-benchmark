@@ -15,6 +15,7 @@ from vllm_hust_benchmark.official_targets import (
     generated_outputs,
     render_active_targets,
 )
+from vllm_hust_benchmark.official_targets import _target_contract_metadata
 from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 from vllm_hust_benchmark.workload_config_contract import (
     _official_defaults_for_scenario,
@@ -36,6 +37,54 @@ def test_registry_matches_schema() -> None:
         )
     )
     jsonschema.Draft202012Validator(schema).validate(registry)
+
+
+def test_registry_generation_is_distinct_from_target_contract_version() -> None:
+    registry = build_registry(REPO_ROOT)
+    assert registry["registry_generation"]["version"] == registry["registry_version"]
+    assert (
+        registry["registry_generation"]["source_set_sha256"]
+        == registry["source_set_sha256"]
+    )
+    assert {target["target_version"] for target in registry["targets"]} == {"1.3.5"}
+
+
+def test_one_target_update_inherits_unchanged_contracts() -> None:
+    history = {
+        "versions": [
+            {
+                "version": "1.3.5",
+                "effective_from": "2026-08-16",
+                "target_contracts": {
+                    "default": {
+                        "version": "1.3.5",
+                        "effective_from": "2026-08-16",
+                        "supersedes": [],
+                    }
+                },
+            },
+            {
+                "version": "1.3.6",
+                "effective_from": "2026-08-17",
+                "target_contracts": {
+                    "changed-target": {
+                        "version": "1.3.6",
+                        "effective_from": "2026-08-17",
+                        "supersedes": ["1.3.5"],
+                    }
+                },
+            },
+        ]
+    }
+
+    unchanged = _target_contract_metadata(history, "unchanged-target")
+    changed = _target_contract_metadata(history, "changed-target")
+    assert unchanged["version"] == "1.3.5"
+    assert unchanged["effective_from"] == "2026-08-16"
+    assert unchanged["supersedes"] == []
+    assert changed["version"] == "1.3.6"
+    assert changed["effective_from"] == "2026-08-17"
+    assert changed["supersedes"] == ["1.3.5"]
 
 
 def test_public_target_matrix_is_exact() -> None:

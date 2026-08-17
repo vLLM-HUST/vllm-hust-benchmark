@@ -237,6 +237,57 @@ def _validate_target_metadata(metadata: Mapping[str, Any]) -> list[str]:
     return errors
 
 
+def _validate_target_contract_metadata(metadata: Mapping[str, Any]) -> list[str]:
+    """Validate the canonical per-profile target contract binding.
+
+    ``target_id``/``target_version`` remain the legacy baseline label used by
+    existing producers.  The canonical fields resolve against the generated
+    official-target registry and therefore remain stable when the registry
+    generation itself is bumped for an unrelated profile.
+    """
+    contract_id = str(metadata.get("target_contract_id") or "").strip()
+    contract_version = str(metadata.get("target_contract_version") or "").strip()
+    if not contract_id and not contract_version:
+        return []
+    errors: list[str] = []
+    if not contract_id:
+        errors.append(
+            "metadata.target_contract_id must be recorded with target_contract_version"
+        )
+        return errors
+    if not contract_version:
+        errors.append(
+            "metadata.target_contract_version must be recorded with target_contract_id"
+        )
+        return errors
+
+    from vllm_hust_benchmark.official_targets import load_packaged_registry
+
+    try:
+        registry = load_packaged_registry()
+    except (OSError, TypeError, ValueError) as exc:
+        return [f"metadata target contract validation failed to load registry: {exc}"]
+
+    matching = [
+        target
+        for target in registry.get("targets", [])
+        if isinstance(target, Mapping) and target.get("target_id") == contract_id
+    ]
+    if not matching:
+        errors.append(
+            f"metadata.target_contract_id {contract_id!r} does not match the official target registry"
+        )
+        return errors
+    valid_versions = {str(target.get("target_version")) for target in matching}
+    if contract_version not in valid_versions:
+        errors.append(
+            f"metadata.target_contract_version {contract_version!r} does not match "
+            f"the official target contract for {contract_id!r} "
+            f"(expected one of {sorted(valid_versions)})"
+        )
+    return errors
+
+
 def validate_explicit_workload_config(
     entry: Mapping[str, Any], *, validate_target_metadata: bool = True
 ) -> list[str]:
@@ -257,6 +308,7 @@ def validate_explicit_workload_config(
         errors.append("metadata.submitted_at must be explicitly recorded")
     elif validate_target_metadata and submitted_at >= TARGET_ID_REQUIRED_AFTER:
         errors.extend(_validate_target_metadata(metadata))
+        errors.extend(_validate_target_contract_metadata(metadata))
 
     workload = entry.get("workload")
     if not isinstance(workload, Mapping):

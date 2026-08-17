@@ -402,6 +402,27 @@ def test_contract_rejects_mismatched_target_version() -> None:
     )
 
 
+def test_canonical_target_contract_round_trip_resolves_exact_version() -> None:
+    entry = official_random_online_entry()
+    entry["metadata"].update(
+        {
+            "submitted_at": TARGET_ID_REQUIRED_AFTER,
+            "target_id": "official-ascend-jan-2026-v0.18.0",
+            "target_version": "Official Ascend Jan 2026",
+            "target_contract_id": (
+                "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
+            ),
+            "target_contract_version": "1.3.5",
+        }
+    )
+
+    assert validate_explicit_workload_config(entry) == []
+
+    entry["metadata"]["target_contract_version"] = "1.3.4"
+    errors = validate_explicit_workload_config(entry)
+    assert any("target_contract_version" in error for error in errors)
+
+
 def test_contract_skips_target_id_requirement_before_activation() -> None:
     """Official entries submitted before TARGET_ID_REQUIRED_AFTER are not
     required to record ``metadata.target_id``."""
