@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from vllm_hust_benchmark import __version__ as benchmark_version
+from vllm_hust_benchmark.metric_semantics import METRIC_CATALOG
 from vllm_hust_benchmark.model_registry import normalize_model_identity_payload
 from vllm_hust_benchmark.model_registry import resolve_model_identity
 from vllm_hust_benchmark.model_registry import validate_model_identity_payload
@@ -21,43 +22,31 @@ from vllm_hust_benchmark.workload_config_contract import (
     validate_explicit_workload_config,
 )
 
-REQUIRED_METRIC_KEYS = (
-    "ttft_ms",
-    "throughput_tps",
-    "peak_mem_mb",
-    "error_rate",
+# Required keys for the leaderboard ``metrics`` object: the two client-measured
+# primary performance metrics plus the two per-run constraint metrics.  Names
+# are resolved through the metric catalog (the single source of truth) so any
+# rename or misspelling fails loudly at import time instead of silently
+# shipping a malformed leaderboard entry.
+REQUIRED_METRIC_KEYS = tuple(
+    METRIC_CATALOG.resolve(name).name
+    for name in ("ttft_ms", "throughput_tps", "peak_mem_mb", "error_rate")
 )
 
-REQUIRED_CONSTRAINT_METRIC_KEYS = (
-    "single_chip_effective_utilization_pct",
-    "typical_throughput_ratio_vs_baseline",
-    "typical_ttft_reduction_pct_vs_baseline",
-    "typical_tpot_reduction_pct_vs_baseline",
-    "long_context_length",
-    "long_context_throughput_stable",
-    "long_context_ttft_p95_ms",
-    "long_context_ttft_p99_ms",
-    "long_context_tpot_p95_ms",
-    "long_context_tpot_p99_ms",
-    "long_context_ttft_p95_stable",
-    "long_context_ttft_p99_stable",
-    "long_context_tpot_p95_stable",
-    "long_context_tpot_p99_stable",
-    "unit_token_cost_reduction_pct",
-    "multi_tenant_high_utilization",
+# Required constraint metrics: every constraint registered in the catalog
+# except the two that are already part of the ``metrics`` object.  Derived from
+# the catalog by role so the set can never drift from what is actually
+# registered.
+REQUIRED_CONSTRAINT_METRIC_KEYS = tuple(
+    m.name
+    for m in METRIC_CATALOG.constraint_metrics
+    if m.name not in REQUIRED_METRIC_KEYS
 )
 
-DERIVABLE_LONG_CONTEXT_METRIC_KEYS = (
-    "long_context_length",
-    "long_context_throughput_stable",
-    "long_context_ttft_p95_ms",
-    "long_context_ttft_p99_ms",
-    "long_context_tpot_p95_ms",
-    "long_context_tpot_p99_ms",
-    "long_context_ttft_p95_stable",
-    "long_context_ttft_p99_stable",
-    "long_context_tpot_p95_stable",
-    "long_context_tpot_p99_stable",
+# Long-context constraint keys that can be derived from a benchmark result
+# payload.  Kept as the ``long_context_``-prefixed subset (in the same order)
+# of the required constraint keys.
+DERIVABLE_LONG_CONTEXT_METRIC_KEYS = tuple(
+    name for name in REQUIRED_CONSTRAINT_METRIC_KEYS if name.startswith("long_context_")
 )
 
 REQUIRED_SAME_SPEC_KEYS = (

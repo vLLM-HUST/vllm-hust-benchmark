@@ -25,15 +25,24 @@ import re
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.metric_semantics import METRIC_CATALOG
+
 MEASUREMENT_SCHEMA_VERSION = "perfgate-measurement/v2"
 MEASUREMENT_STRATEGY = "warmup+primary-median-run"
 PRIMARY_METRIC = "throughput_tps"
 SORT_DIRECTION = "ascending"
 SECONDARY_SORT_KEY = "run_index"
 SUPPORTED_AGGREGATIONS = frozenset({"primary-median-run"})
-SELECTED_RUN_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms", "error_rate")
-PERFORMANCE_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms")
-PER_RUN_METRICS = ("throughput_tps", "ttft_ms", "tbt_ms", "error_rate", "peak_mem_mb")
+# Catalog-derived metric lists.  The canonical client performance metrics come
+# from the metric catalog (the single source of truth for their direction,
+# unit, display name and precision) so the names here can never drift out of
+# sync with the contract.
+_CLIENT_PERF_METRIC_NAMES = tuple(
+    m.name for m in METRIC_CATALOG.client_performance_metrics
+)
+SELECTED_RUN_METRICS = (*_CLIENT_PERF_METRIC_NAMES, "error_rate")
+PERFORMANCE_METRICS = _CLIENT_PERF_METRIC_NAMES
+PER_RUN_METRICS = (*SELECTED_RUN_METRICS, "peak_mem_mb")
 MIN_PUBLICATION_WARMUP_RUNS = 1
 MIN_PUBLICATION_MEASURED_RUNS = 3
 

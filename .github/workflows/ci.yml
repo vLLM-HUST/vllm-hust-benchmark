@@ -56,6 +56,9 @@ jobs:
       - name: Verify generated official target registry
         run: python -m vllm_hust_benchmark.official_targets --check --repo-root .
 
+      - name: Validate unified metric semantics catalog (R1-R5)
+        run: python -m vllm_hust_benchmark.metric_semantics --check
+
       - name: Validate trend admission fixtures (valid entries must pass)
         run: python scripts/validate_trend_entries.py --input tests/fixtures/trend_coverage/valid
 
