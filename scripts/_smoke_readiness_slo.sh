@@ -30,6 +30,18 @@ export HF_HOME=/data/shared_datasets/vllm-hust-benchmark/huggingface
 export VLLM_CACHE_ROOT=/tmp/readiness_smoke_cache
 rm -rf "${VLLM_CACHE_ROOT}"
 mkdir -p "${VLLM_CACHE_ROOT}"
+# Bypass proxy for local server health checks and bench serve requests.
+# The shared login shell exports http_proxy/https_proxy/all_proxy; --noproxy on
+# curl does not reliably bypass all_proxy (SOCKS), so force the env var too.
+export NO_PROXY="127.0.0.1,localhost,${NO_PROXY:-}"
+export no_proxy="127.0.0.1,localhost,${no_proxy:-}"
+
+# The conda lib dir prepended to LD_LIBRARY_PATH below breaks system curl
+# (libldap.so.2 -> OpenSSL symbol mismatch). Health/metrics checks must run with
+# the system library path, so wrap curl to drop the conda override.
+sys_curl() {
+    env LD_LIBRARY_PATH= curl --noproxy "*" "$@"
+}
 
 echo "INFO: starting server (model=${MODEL_PATH}, port=${PORT})"
 date -u +%Y-%m-%dT%H:%M:%SZ > "${STARTUP_TS}"
@@ -59,7 +71,7 @@ trap cleanup EXIT TERM INT
 echo "INFO: waiting for readiness (pgid=${SERVER_PGID})"
 READY=0
 for i in $(seq 1 600); do
-  if curl --noproxy "*" -sf "http://127.0.0.1:${PORT}/health" >/dev/null 2>&1; then
+  if sys_curl -sf "http://127.0.0.1:${PORT}/health" >/dev/null 2>&1; then
     READY=1
     echo "INFO: server ready after ${i}s"
     break
@@ -86,13 +98,14 @@ NO_PROXY="127.0.0.1,localhost" no_proxy="127.0.0.1,localhost" \
   --base-url "http://127.0.0.1:${PORT}" \
   --dataset-name random \
   --model Qwen2.5-14B-Instruct \
+  --tokenizer "${MODEL_PATH}" \
   --num-prompts 50 \
   --input-len 1024 \
   --output-len 256 \
   --request-rate 1
 
 echo "INFO: fetching /metrics"
-curl --noproxy "*" -sf "http://127.0.0.1:${PORT}/metrics" > "${METRICS_OUT}" || echo "WARN: /metrics unavailable" >&2
+sys_curl -sf "http://127.0.0.1:${PORT}/metrics" > "${METRICS_OUT}" || echo "WARN: /metrics unavailable" >&2
 
 echo "INFO: smoke test complete"
 echo "SERVER_LOG=${SERVER_LOG}"
