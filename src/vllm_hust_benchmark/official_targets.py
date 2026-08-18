@@ -9,8 +9,8 @@ from typing import Any
 from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.3.3"
-EFFECTIVE_FROM = "2026-08-13"
+REGISTRY_VERSION = "1.3.5"
+EFFECTIVE_FROM = "2026-08-16"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
@@ -122,7 +122,9 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
         )
     expected = {
         "tensor_parallel_size": 1,
-        "gpu_memory_utilization": 0.6,
+        "gpu_memory_utilization": (
+            0.9 if spec.get("scenario") == "prefix-repetition-online" else 0.6
+        ),
         "max_model_len": 32768,
     }
     for name, value in expected.items():
@@ -135,6 +137,16 @@ def _validate_public_target(spec: dict[str, Any], path: Path) -> None:
         raise ValueError(f"public target must be single-node/single-chip: {path}")
     if str(spec["model_precision"]) != "FP16":
         raise ValueError(f"public target must use FP16: {path}")
+
+    fixed_output_scenarios = {"agent-research-online", "prefix-repetition-online"}
+    if (
+        spec.get("scenario") in fixed_output_scenarios
+        and spec["client_parameters"].get("ignore_eos") is not True
+    ):
+        raise ValueError(
+            f"fixed-output public target {path} must set ignore_eos=true so "
+            "the declared output length is an executable measurement contract"
+        )
 
     baseline = spec["baseline_target"]
     if baseline.get("vllm_ref") != "v0.18.0":
@@ -198,6 +210,44 @@ def _validate_version_history(
     return history
 
 
+def _target_contract_metadata(
+    history: dict[str, Any], target_id: str
+) -> dict[str, Any]:
+    """Resolve the immutable contract metadata for one target.
+
+    ``official_target_versions.json`` historically versioned the whole source
+    set.  New entries may add a ``target_contracts`` mapping containing only
+    changed targets plus an optional ``default`` migration entry. Walking the
+    history backwards lets unchanged targets inherit their previous contract
+    while a changed target records its own version and supersession.
+    """
+    for version in reversed(history["versions"]):
+        contracts = version.get("target_contracts")
+        if not isinstance(contracts, dict):
+            continue
+        metadata = contracts.get(target_id) or contracts.get("default")
+        if not isinstance(metadata, dict):
+            continue
+        resolved = dict(metadata)
+        resolved.setdefault("version", version["version"])
+        resolved.setdefault("effective_from", version["effective_from"])
+        supersedes = resolved.get("supersedes")
+        if supersedes is None:
+            resolved["supersedes"] = []
+        elif isinstance(supersedes, str):
+            resolved["supersedes"] = [supersedes]
+        elif not isinstance(supersedes, list) or not all(
+            isinstance(item, str) for item in supersedes
+        ):
+            raise ValueError(f"invalid supersedes metadata for target {target_id!r}")
+        return resolved
+    return {
+        "version": REGISTRY_VERSION,
+        "effective_from": EFFECTIVE_FROM,
+        "supersedes": [],
+    }
+
+
 def build_registry(repo_root: Path) -> dict[str, Any]:
     spec_root = repo_root / "docs" / "official-baselines"
     spec_paths = sorted(
@@ -209,6 +259,10 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
         raise ValueError(f"no official target specs found under {spec_root}")
 
     targets: list[dict[str, Any]] = []
+    history_path = repo_root / VERSION_HISTORY_RELATIVE_PATH
+    history = (
+        _load_version_history(repo_root) if history_path.exists() else {"versions": []}
+    )
     for path in spec_paths:
         spec = _load_spec(path)
         _validate_prefix_repetition_workload(spec, path)
@@ -219,13 +273,15 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
         baseline = spec["baseline_target"]
         export = spec["export"]
         relative_path = path.relative_to(repo_root).as_posix()
+        source_sha256 = _sha256_bytes(path.read_bytes())
+        contract = _target_contract_metadata(history, str(spec["id"]))
         targets.append(
             {
                 "target_id": spec["id"],
-                "target_version": REGISTRY_VERSION,
+                "target_version": str(contract["version"]),
                 "status": status,
-                "effective_from": EFFECTIVE_FROM,
-                "supersedes": [],
+                "effective_from": str(contract["effective_from"]),
+                "supersedes": contract["supersedes"],
                 "profile": profile,
                 "intended_use": intended_use,
                 "baseline_runtime": {
@@ -254,7 +310,7 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
                 },
                 "source_spec": {
                     "path": relative_path,
-                    "sha256": _sha256_bytes(path.read_bytes()),
+                    "sha256": source_sha256,
                 },
                 "compatibility_policy": {
                     "model": "exact",
@@ -282,6 +338,11 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
         "registry_version": REGISTRY_VERSION,
         "effective_from": EFFECTIVE_FROM,
         "source_set_sha256": source_set_sha256,
+        "registry_generation": {
+            "version": REGISTRY_VERSION,
+            "effective_from": EFFECTIVE_FROM,
+            "source_set_sha256": source_set_sha256,
+        },
         "targets": targets,
     }
 
@@ -344,6 +405,18 @@ def render_document(registry: dict[str, Any], *, language: str) -> str:
         "",
         f"- Registry version: `{registry['registry_version']}`",
         f"- Effective from: `{registry['effective_from']}`",
+        "",
+        (
+            "`registry_version` identifies this generated registry snapshot. Each target's "
+            "`target_version` is the immutable execution-contract version for that target; "
+            "an unrelated target update must not change it. Producers should record the "
+            "canonical `target_contract_id` and `target_contract_version` metadata fields."
+            if not chinese
+            else "`registry_version` 表示本次生成的 registry 快照版本；每个 target 的 "
+            "`target_version` 表示该 target 不可变的执行契约版本。无关 target 的更新不应 "
+            "改变它。生产端应记录 canonical 的 `target_contract_id` 和 "
+            "`target_contract_version` 字段。"
+        ),
         "",
         public_note,
         "",

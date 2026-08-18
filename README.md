@@ -390,6 +390,13 @@ Notes:
   back to index-based resolution unless you also provide explicit wheel URLs.
 - The runner executes against the pinned worktrees through `PYTHONPATH` and defaults
   `VLLM_CACHE_ROOT` to `.cache/official-ascend-goal-baseline/` in this repository.
+- Before model loading, the runner now proves that imported `vllm` and `vllm_ascend` modules,
+  package versions, generated build commit IDs, and discovered compiled extensions correspond to
+  those pinned worktrees. It repeats the capture after the benchmark and fails closed if the runtime
+  changes. The resulting `official_runtime_provenance` is stored identically in
+  `run_leaderboard.json`, `leaderboard_manifest.json`, and `env-manifest.json`; publication rejects
+  a missing or mismatched copy before snapshots are generated. Historical artifacts without this new
+  field remain readable, but newly captured official evidence cannot omit it.
 - The runner calls the same prepare script in admission-only mode immediately before benchmark
   startup, so residual-process cleanup is a hard precondition rather than a manual step.
 - The runner prefers a locally cached Hugging Face snapshot for the target model when one already

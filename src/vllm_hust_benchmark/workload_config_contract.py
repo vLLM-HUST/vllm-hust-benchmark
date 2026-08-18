@@ -3,9 +3,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-
 WORKLOAD_CONFIG_CONTRACT_VERSION = "explicit-effective/v1"
 WORKLOAD_CONFIG_CONTRACT_REQUIRED_AFTER = "2026-07-24T00:00:00Z"
+PREFIX_REPETITION_FROZEN_CONTRACT_EFFECTIVE_FROM = "2026-08-16T00:00:00Z"
 OFFICIAL_SPEC_PREFIX = "official-ascend-jan-2026-v0.18.0-"
 
 REQUIRED_EFFECTIVE_PARAMETERS: dict[str, dict[str, tuple[str, ...]]] = {
@@ -18,8 +18,15 @@ REQUIRED_EFFECTIVE_PARAMETERS: dict[str, dict[str, tuple[str, ...]]] = {
         "client": ("no_stream",),
     },
     "prefix-repetition-online": {
-        "server": ("gpu_memory_utilization", "max_model_len"),
-        "client": ("no_stream",),
+        "server": (
+            "gpu_memory_utilization",
+            "max_model_len",
+            "enable_prefix_caching",
+            "no_enable_chunked_prefill",
+            "max_num_seqs",
+            "max_num_batched_tokens",
+        ),
+        "client": ("no_stream", "ignore_eos"),
     },
     "random-latency": {
         "server": ("gpu_memory_utilization", "max_model_len"),
@@ -55,7 +62,15 @@ OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
         "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
     },
     "prefix-repetition-online": {
-        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+        "server": {
+            "gpu_memory_utilization": 0.9,
+            "max_model_len": 32768,
+            "enable_prefix_caching": True,
+            "no_enable_chunked_prefill": True,
+            "max_num_seqs": 16,
+            "max_num_batched_tokens": 32768,
+        },
+        "client": {"no_stream": False, "ignore_eos": True},
     },
     "random-latency": {
         "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
@@ -79,7 +94,7 @@ OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS: dict[str, dict[str, Any]] = {
 
 OFFICIAL_VISION_DEFAULTS: dict[str, dict[str, Any]] = {
     "visionarena-online": {
-        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 30720},
+        "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
     },
 }
 
@@ -154,6 +169,25 @@ def _official_defaults_for_scenario(scenario: str) -> dict[str, Any]:
     return OFFICIAL_SINGLE_CHIP_TEXT_DEFAULTS.get(scenario, {})
 
 
+def uses_frozen_prefix_repetition_contract(entry: Mapping[str, Any]) -> bool:
+    """Return whether the entry was produced under the frozen prefix contract.
+
+    The public target changed on 2026-08-16.  Older, already-published results
+    remain valid historical records, but must not be retroactively judged
+    against parameters that did not exist when they ran.
+    """
+    same_spec = entry.get("same_spec")
+    metadata = entry.get("metadata")
+    if not isinstance(same_spec, Mapping) or not isinstance(metadata, Mapping):
+        return False
+    scenario = str(same_spec.get("scenario") or "")
+    submitted_at = str(metadata.get("submitted_at") or "").strip()
+    return (
+        scenario == "prefix-repetition-online"
+        and submitted_at >= PREFIX_REPETITION_FROZEN_CONTRACT_EFFECTIVE_FROM
+    )
+
+
 def _validate_target_metadata(metadata: Mapping[str, Any]) -> list[str]:
     """Validate ``metadata.target_id`` / ``metadata.target_version``.
 
@@ -169,7 +203,7 @@ def _validate_target_metadata(metadata: Mapping[str, Any]) -> list[str]:
         errors.append("metadata.target_id must be explicitly recorded")
         return errors
 
-    from vllm_hust_benchmark.fixed_target_registry import (  # noqa: E402
+    from vllm_hust_benchmark.fixed_target_registry import (
         get_active_profiles,
         load_fixed_target_registry,
     )
@@ -203,7 +237,60 @@ def _validate_target_metadata(metadata: Mapping[str, Any]) -> list[str]:
     return errors
 
 
-def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
+def _validate_target_contract_metadata(metadata: Mapping[str, Any]) -> list[str]:
+    """Validate the canonical per-profile target contract binding.
+
+    ``target_id``/``target_version`` remain the legacy baseline label used by
+    existing producers.  The canonical fields resolve against the generated
+    official-target registry and therefore remain stable when the registry
+    generation itself is bumped for an unrelated profile.
+    """
+    contract_id = str(metadata.get("target_contract_id") or "").strip()
+    contract_version = str(metadata.get("target_contract_version") or "").strip()
+    if not contract_id and not contract_version:
+        return []
+    errors: list[str] = []
+    if not contract_id:
+        errors.append(
+            "metadata.target_contract_id must be recorded with target_contract_version"
+        )
+        return errors
+    if not contract_version:
+        errors.append(
+            "metadata.target_contract_version must be recorded with target_contract_id"
+        )
+        return errors
+
+    from vllm_hust_benchmark.official_targets import load_packaged_registry
+
+    try:
+        registry = load_packaged_registry()
+    except (OSError, TypeError, ValueError) as exc:
+        return [f"metadata target contract validation failed to load registry: {exc}"]
+
+    matching = [
+        target
+        for target in registry.get("targets", [])
+        if isinstance(target, Mapping) and target.get("target_id") == contract_id
+    ]
+    if not matching:
+        errors.append(
+            f"metadata.target_contract_id {contract_id!r} does not match the official target registry"
+        )
+        return errors
+    valid_versions = {str(target.get("target_version")) for target in matching}
+    if contract_version not in valid_versions:
+        errors.append(
+            f"metadata.target_contract_version {contract_version!r} does not match "
+            f"the official target contract for {contract_id!r} "
+            f"(expected one of {sorted(valid_versions)})"
+        )
+    return errors
+
+
+def validate_explicit_workload_config(
+    entry: Mapping[str, Any], *, validate_target_metadata: bool = True
+) -> list[str]:
     if not is_official_workload_contract_entry(entry):
         return []
 
@@ -219,8 +306,9 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
     submitted_at = str(metadata.get("submitted_at") or "").strip()
     if not submitted_at:
         errors.append("metadata.submitted_at must be explicitly recorded")
-    elif submitted_at >= TARGET_ID_REQUIRED_AFTER:
+    elif validate_target_metadata and submitted_at >= TARGET_ID_REQUIRED_AFTER:
         errors.extend(_validate_target_metadata(metadata))
+        errors.extend(_validate_target_contract_metadata(metadata))
 
     workload = entry.get("workload")
     if not isinstance(workload, Mapping):
@@ -252,6 +340,14 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
     scenario = str(same_spec.get("scenario") or workload.get("name") or "")
 
     required = REQUIRED_EFFECTIVE_PARAMETERS.get(scenario, {})
+    if (
+        scenario == "prefix-repetition-online"
+        and not uses_frozen_prefix_repetition_contract(entry)
+    ):
+        required = {
+            "server": ("gpu_memory_utilization", "max_model_len"),
+            "client": ("no_stream",),
+        }
     for key in required.get("server", ()):
         if key not in server:
             errors.append(
@@ -264,6 +360,14 @@ def validate_explicit_workload_config(entry: Mapping[str, Any]) -> list[str]:
             )
 
     official_defaults = _official_defaults_for_scenario(scenario)
+    if (
+        scenario == "prefix-repetition-online"
+        and not uses_frozen_prefix_repetition_contract(entry)
+    ):
+        official_defaults = {
+            "server": {"gpu_memory_utilization": 0.6, "max_model_len": 32768},
+            "client": {"no_stream": False},
+        }
     default_label = (
         "official vision default"
         if scenario in OFFICIAL_VISION_DEFAULTS

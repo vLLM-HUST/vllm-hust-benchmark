@@ -1,0 +1,16 @@
+ARG BASE_IMAGE=quay.io/ascend/vllm-ascend:v0.23.0-openeuler
+FROM ${BASE_IMAGE}
+
+ARG VLLM_CORE_COMMIT
+ARG VLLM_ASCEND_COMMIT
+
+LABEL org.opencontainers.image.vllm-core-commit="${VLLM_CORE_COMMIT}"
+LABEL org.opencontainers.image.vllm-ascend-commit="${VLLM_ASCEND_COMMIT}"
+
+# Preserve the engine, CANN, torch-npu, and packaged custom operators from the
+# selected runtime image. Add only the versioned clients required by official
+# HF-backed and prefix-caching benchmark contracts.
+RUN test -n "${VLLM_CORE_COMMIT}" && test -n "${VLLM_ASCEND_COMMIT}" && \
+    python -m pip install --no-cache-dir \
+    "datasets==3.3.0" \
+    "xxhash==3.6.0"

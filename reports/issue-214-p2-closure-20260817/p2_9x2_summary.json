@@ -1,0 +1,21 @@
+{
+  "schema_version": "issue214-p2-summary/v1",
+  "contract": "p2-explicit-cache/v1",
+  "status": "complete",
+  "thresholds": {"throughput_regression_percent": 1.0, "latency_regression_percent": 5.0},
+  "artifact_suite": {
+    "path": "reports/issue-214-p2-closure-20260817/artifact_suites.json",
+    "sha256": "db4a212eda2a56fa4e5736663e9d299a4e278d04a811ffddb60cba30c5c8ed95"
+  },
+  "rows": [
+    {"workload":"agent-research-online","primary_metric":"ttft","unit":"ms","c3":3245.602,"current":3111.067,"delta_percent":-4.145,"direction":"lower_is_better","classification":"stable-no-regression"},
+    {"workload":"instructcoder-online","primary_metric":"ttft","unit":"ms","c3":114.807,"current":114.606,"delta_percent":-0.175,"direction":"lower_is_better","classification":"stable-no-regression"},
+    {"workload":"prefix-repetition-online","primary_metric":"ttft","unit":"ms","c3":373.461,"current":392.090,"delta_percent":4.988,"direction":"lower_is_better","classification":"stable-sub-threshold-latency-shift"},
+    {"workload":"random-latency","primary_metric":"mean_latency","unit":"ms","c3":4920.445,"current":4913.778,"delta_percent":-0.135,"direction":"lower_is_better","classification":"stable-no-regression"},
+    {"workload":"random-online","primary_metric":"ttft","unit":"ms","c3":229.808,"current":229.685,"delta_percent":-0.054,"direction":"lower_is_better","classification":"stable-no-regression"},
+    {"workload":"sharegpt-online","primary_metric":"ttft","unit":"ms","c3":125.952,"current":127.975,"delta_percent":1.606,"direction":"lower_is_better","classification":"stable-sub-threshold-latency-shift"},
+    {"workload":"sharegpt-throughput","primary_metric":"total_throughput","unit":"TPS","c3":2042.949,"current":2048.153,"delta_percent":0.255,"direction":"higher_is_better","classification":"stable-no-regression"},
+    {"workload":"sonnet-throughput","primary_metric":"total_throughput","unit":"TPS","c3":3611.285,"current":3614.040,"delta_percent":0.076,"direction":"higher_is_better","classification":"stable-no-regression"},
+    {"workload":"visionarena-online","primary_metric":"ttft","unit":"ms","c3":438.922,"current":437.949,"delta_percent":-0.222,"direction":"lower_is_better","classification":"stable-no-regression"}
+  ]
+}

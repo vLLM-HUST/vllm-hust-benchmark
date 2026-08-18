@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from vllm_hust_benchmark.official_runtime_inputs import SHAREGPT_DATASET_FILENAME
-from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
 from vllm_hust_benchmark.official_runtime_inputs import (
+    SHAREGPT_DATASET_FILENAME,
+    normalize_client_parameters,
     normalize_offline_benchmark_parameters,
+    normalize_server_parameters,
+    resolve_runtime_dataset_path,
 )
-from vllm_hust_benchmark.official_runtime_inputs import normalize_server_parameters
-from vllm_hust_benchmark.official_runtime_inputs import resolve_runtime_dataset_path
 
 
 def test_normalize_client_parameters_strips_unsupported_offline_flags(
@@ -122,6 +122,7 @@ def test_normalize_offline_benchmark_parameters_carries_engine_runtime_knobs(
             "trust_remote_code": "",
             "enforce_eager": "",
             "disable_log_stats": "",
+            "no_enable_prefix_caching": True,
         },
         benchmark_type="throughput",
         vllm_worktree=str(worktree),
@@ -132,6 +133,7 @@ def test_normalize_offline_benchmark_parameters_carries_engine_runtime_knobs(
     assert normalized["tensor_parallel_size"] == 1
     assert normalized["trust_remote_code"] == ""
     assert normalized["enforce_eager"] == ""
+    assert normalized["no_enable_prefix_caching"] is True
     assert "host" not in normalized
     assert "port" not in normalized
     assert "disable_log_stats" not in normalized

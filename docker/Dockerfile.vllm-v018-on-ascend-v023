@@ -1,0 +1,40 @@
+FROM codex/vllm-ascend-strict-baseline:0.18.0-xxhash3.6.0-datasets3.3.0 AS v018-python
+
+FROM quay.io/ascend/vllm-ascend:v0.23.0-openeuler
+
+ARG VLLM_CORE_COMMIT
+ARG VLLM_ASCEND_COMMIT
+
+LABEL org.opencontainers.image.description="vLLM v0.18 source rebuilt against the official Ascend v0.23 runtime"
+LABEL org.opencontainers.image.vllm-core-commit="${VLLM_CORE_COMMIT}"
+LABEL org.opencontainers.image.vllm-ascend-commit="${VLLM_ASCEND_COMMIT}"
+
+COPY vllm-core /opt/vllm-v018
+COPY vllm-ascend /opt/vllm-ascend-v018
+COPY driver-build-libs/libascend_hal.so /usr/local/Ascend/driver/lib64/driver/libascend_hal.so
+COPY --from=v018-python /usr/local/python3.11.14 /usr/local/python3.11.14
+
+# CANN 9.1 renamed this runtime enum. Keep the v0.18 Triton implementation
+# unchanged apart from the required SDK spelling update, and fail if the
+# expected old spelling is not present exactly once.
+RUN test "$(grep -c 'RT_LIMIT_TYPE_SIMT_WARP_STACK_SIZE' /usr/local/python3.11.14/lib/python3.11/site-packages/triton/backends/ascend/npu_utils.cpp)" = 1 && \
+    sed -i 's/RT_LIMIT_TYPE_SIMT_WARP_STACK_SIZE/RT_LIMIT_TYPE_SIMT_DVG_WARP_STACK_SIZE/' /usr/local/python3.11.14/lib/python3.11/site-packages/triton/backends/ascend/npu_utils.cpp
+
+ENV VLLM_VERSION_OVERRIDE=0.18.0 \
+    SETUPTOOLS_SCM_PRETEND_VERSION=0.18.0 \
+    VLLM_TARGET_DEVICE=empty \
+    COMPILE_CUSTOM_KERNELS=1 \
+    SOC_VERSION=ascend910b2 \
+    Torch_DIR=/usr/local/python3.11.14/lib/python3.11/site-packages/torch/share/cmake/Torch \
+    PATH=/usr/local/python3.11.14/bin:${PATH}
+
+RUN TORCH_DEVICE_BACKEND_AUTOLOAD=0 /usr/local/python3.11.14/bin/python -m pip install --no-build-isolation --no-deps /opt/vllm-v018 && \
+    /usr/local/python3.11.14/bin/python -m pip install --no-build-isolation --no-deps /opt/vllm-ascend-v018 && \
+    /usr/local/python3.11.14/bin/python -c "import importlib.metadata as m, sys; assert sys.version_info[:2] == (3, 11); assert m.version('vllm') == '0.18.0'; assert m.version('vllm-ascend') == '0.18.0'; assert m.version('torch').startswith('2.9.0'); assert m.version('torch-npu').startswith('2.9.0')"
+
+# The v0.18 OPAPI wrapper resolves custom symbols from the process-global
+# namespace. CANN 9.1 correctly ships them in the plugin vendor library rather
+# than the system libopapi, so preload the exact rebuilt v0.18 vendor library.
+ENV LD_PRELOAD=/usr/local/python3.11.14/lib/python3.11/site-packages/vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/lib/libcust_opapi.so
+
+WORKDIR /vllm-workspace

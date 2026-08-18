@@ -154,6 +154,40 @@ resolve_ascend_device_type() {
   esac
 }
 
+write_source_version_metadata() {
+  local worktree=$1
+  local package_dir=$2
+  local version=$3
+  local commit
+  local version_file="$worktree/$package_dir/_version.py"
+
+  commit=$(git -C "$worktree" rev-parse --verify HEAD^{commit})
+  mkdir -p "$(dirname "$version_file")"
+  python3 - "$version_file" "$version" "$commit" "$worktree/upstream_version.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+version_file = Path(sys.argv[1])
+version = sys.argv[2]
+commit = sys.argv[3]
+upstream_path = Path(sys.argv[4])
+try:
+    upstream = json.loads(upstream_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError):
+    upstream = {}
+parts = tuple(int(part) if part.isdigit() else part for part in version.split("."))
+content = f'''# Auto-generated for the pinned official benchmark worktree.
+__version__ = version = {version!r}
+__version_tuple__ = version_tuple = {parts!r}
+__upstream_version__ = upstream_version = {upstream.get("upstream_version")!r}
+__upstream_commit__ = upstream_commit = {upstream.get("upstream_commit")!r}
+__commit_id__ = commit_id = {commit[:8]!r}
+'''
+version_file.write_text(content, encoding="utf-8")
+PY
+}
+
 ensure_vllm_source_metadata() {
   local version=${OFFICIAL_VLLM_REF#v}
   local dist_info_dir
@@ -174,6 +208,8 @@ EOF
   cat > "$dist_info_dir/top_level.txt" <<'EOF'
 vllm
 EOF
+
+  write_source_version_metadata "$OFFICIAL_VLLM_WORKTREE" vllm "$version"
 }
 
 ensure_vllm_ascend_plugin_metadata() {
@@ -265,6 +301,8 @@ __soc_version__ = '$OFFICIAL_SOC_VERSION'
 __sleep_mode_enabled__ = $sleep_mode_enabled_literal
 __device_type__ = '$device_type'
 EOF
+
+  write_source_version_metadata "$OFFICIAL_VLLM_ASCEND_WORKTREE" vllm_ascend "$version"
 
   OFFICIAL_EXPECTED_PLATFORM_PLUGINS=$(printf '%s\n' "${platform_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)
   OFFICIAL_EXPECTED_GENERAL_PLUGINS=$(printf '%s\n' "${general_entries[@]}" | sed 's/[[:space:]]*=.*$//' | paste -sd, -)

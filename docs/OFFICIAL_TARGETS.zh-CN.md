@@ -2,8 +2,11 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.3.3`
-- Effective from: `2026-08-13`
+- Registry version: `1.3.5`
+- Effective from: `2026-08-16`
+
+`registry_version` 表示本次生成的 registry 快照版本；每个 target 的 `target_version` 表示该 target 不可变的执行契约版本。无关
+target 的更新不应 改变它。生产端应记录 canonical 的 `target_contract_id` 和 `target_contract_version` 字段。
 
 公开排行榜固定靶与 3B 快速门禁是不同契约；provisional 记录不得作为公开成果对比。
 
@@ -15,7 +18,7 @@ Qwen/Qwen2.5-Coder-14B-Instruct | 910B2 × 1 | FP16 | 0.6 | 32768 |
 910B2 × 1 | FP16 | 0.6 | 32768 |
 [`official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json)
 | | public-leaderboard | active | core-text | prefix-repetition-online | Qwen/Qwen2.5-14B-Instruct |
-910B2 × 1 | FP16 | 0.6 | 32768 |
+910B2 × 1 | FP16 | 0.9 | 32768 |
 [`official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json)
 | | public-leaderboard | active | core-text | random-latency | Qwen/Qwen2.5-14B-Instruct | 910B2 × 1
 | FP16 | 0.6 | 32768 |

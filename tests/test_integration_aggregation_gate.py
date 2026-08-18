@@ -1168,6 +1168,11 @@ def _make_minimal_layout(tmp_path: Path) -> RepoLayout:
     )
     benchmark_repo = tmp_path / "vllm-hust-benchmark"
     benchmark_repo.mkdir()
+    registry_dir = benchmark_repo / "leaderboard-data"
+    registry_dir.mkdir()
+    source_registry_dir = Path(__file__).resolve().parents[1] / "leaderboard-data"
+    for name in ("official-targets.json", "official-targets.sha256"):
+        (registry_dir / name).write_bytes((source_registry_dir / name).read_bytes())
     return RepoLayout(
         workspace_root=tmp_path,
         benchmark_repo=benchmark_repo,

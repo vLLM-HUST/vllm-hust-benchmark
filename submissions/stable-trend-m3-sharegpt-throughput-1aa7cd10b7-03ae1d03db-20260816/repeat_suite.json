@@ -1,0 +1,59 @@
+{
+  "schema_version": "historical-pr-repeat-suite/v1",
+  "generated_at": "2026-08-17T08:37:34.346300+00:00",
+  "benchmark_type": "throughput",
+  "evidence_label": "real-offline-issue214-p1",
+  "hardware": {
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "physical_machine_partitions_identity": false
+  },
+  "repeat_policy": {
+    "target_successes": 3,
+    "minimum_successes": 3,
+    "required_error_rate": 0,
+    "selection_rule": "median of the predeclared primary metric"
+  },
+  "repeat_result_dirs": [
+    "repeats/original",
+    "repeats/repeat2-npu3",
+    "repeats/repeat3-npu6"
+  ],
+  "resolved_refs": {
+    "core_commit": "1aa7cd10b7b16e82fdb29fcc47d3a3cd93bd01dc",
+    "plugin_commit": "03ae1d03db8049cd2a5c3f824039814459542e25"
+  },
+  "selection": {
+    "benchmark_type": "throughput",
+    "primary_metric_name": "throughput_tps",
+    "median_value": 2042.3482986951472,
+    "selected_result_dir": "repeats/repeat2-npu3",
+    "candidates": [
+      {
+        "index": 0,
+        "result_dir": "repeats/original",
+        "primary_metric_name": "throughput_tps",
+        "primary_metric_value": 2055.4723746727404,
+        "error_rate": 0,
+        "distance_to_median": 13.124075977593293
+      },
+      {
+        "index": 1,
+        "result_dir": "repeats/repeat2-npu3",
+        "primary_metric_name": "throughput_tps",
+        "primary_metric_value": 2042.3482986951472,
+        "error_rate": 0,
+        "distance_to_median": 0.0
+      },
+      {
+        "index": 2,
+        "result_dir": "repeats/repeat3-npu6",
+        "primary_metric_name": "throughput_tps",
+        "primary_metric_value": 2041.2528660739144,
+        "error_rate": 0,
+        "distance_to_median": 1.0954326212327032
+      }
+    ]
+  }
+}

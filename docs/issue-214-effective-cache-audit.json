@@ -1,0 +1,35 @@
+{
+  "schema_version": "issue214-effective-cache-audit/v1",
+  "effective_cache_contract": {
+    "version": "p2-explicit-cache/v1",
+    "historical_target_mutated": false,
+    "non_prefix": {"server": {"no_enable_prefix_caching": true}},
+    "prefix_repetition": {
+      "server": {"enable_prefix_caching": true},
+      "environment": {"VLLM_KNORM_ENABLED": "0"}
+    }
+  },
+  "p2_matrix": {
+    "completed": [
+      "agent-research-online",
+      "instructcoder-online",
+      "prefix-repetition-online",
+      "random-latency",
+      "random-online",
+      "sharegpt-online",
+      "sharegpt-throughput",
+      "sonnet-throughput",
+      "visionarena-online"
+    ],
+    "running_or_required": [],
+    "status": "complete",
+    "repetitions_per_pair": 3
+  },
+  "closure_report": "reports/issue-214-p2-closure-20260817/p2_9x2_summary.json",
+  "upstream_baseline": {
+    "status": "environment-feature-unavailable",
+    "cann": "8.5.1",
+    "failure": "aclnnAddRmsNormBias unavailable in libopapi.so",
+    "fusion_disabled": false
+  }
+}

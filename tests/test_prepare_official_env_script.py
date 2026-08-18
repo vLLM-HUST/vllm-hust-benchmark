@@ -42,6 +42,14 @@ PREPARE_SCRIPT = REPO_ROOT / "scripts/prepare-official-ascend-baseline-env.sh"
 RUN_OFFICIAL_SCRIPT = REPO_ROOT / "scripts/run-official-ascend-goal-baseline.sh"
 
 
+def test_official_runner_binds_export_to_source_spec() -> None:
+    script = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+    export_args_index = script.index("EXPORT_ARGS=(")
+    export_call_index = script.index("run_in_official_runtime", export_args_index)
+    export_block = script[export_args_index:export_call_index]
+    assert '--spec-path "$SPEC_FILE"' in export_block
+
+
 def _source_prepare_functions(snippet: str) -> str:
     script_path = shlex.quote(str(PREPARE_SCRIPT))
     return (
@@ -1057,6 +1065,33 @@ def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) 
         "}\n",
         encoding="utf-8",
     )
+    subprocess.run(
+        ["git", "init", "--initial-branch=main", str(worktree_dir)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(worktree_dir), "config", "user.name", "Test User"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(worktree_dir), "config", "user.email", "test@example.com"],
+        check=True,
+    )
+    subprocess.run(["git", "-C", str(worktree_dir), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(worktree_dir), "commit", "-m", "initial"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    commit = subprocess.run(
+        ["git", "-C", str(worktree_dir), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
 
     result = _run_bash(
         _source_prepare_functions(
@@ -1076,6 +1111,56 @@ def test_ensure_vllm_ascend_plugin_metadata_writes_entry_points(tmp_path: Path) 
             grep -Fq 'vllm_ascend' "$dist_info_dir/top_level.txt"
             grep -Fq "__soc_version__ = 'ascend910b3'" {shlex.quote(str(worktree_dir))}/vllm_ascend/_build_info.py
             grep -Fq '__sleep_mode_enabled__ = False' {shlex.quote(str(worktree_dir))}/vllm_ascend/_build_info.py
+            grep -Fq "__version__ = version = '0.11.0'" {shlex.quote(str(worktree_dir))}/vllm_ascend/_version.py
+            grep -Fq "__commit_id__ = commit_id = '{commit[:8]}'" {shlex.quote(str(worktree_dir))}/vllm_ascend/_version.py
+            """
+        )
+    )
+
+    assert result.returncode == 0
+
+
+def test_ensure_vllm_source_metadata_writes_version_and_commit(tmp_path: Path) -> None:
+    worktree_dir = tmp_path / "vllm-worktree"
+    (worktree_dir / "vllm").mkdir(parents=True)
+    subprocess.run(
+        ["git", "init", "--initial-branch=main", str(worktree_dir)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(worktree_dir), "config", "user.name", "Test User"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(worktree_dir), "config", "user.email", "test@example.com"],
+        check=True,
+    )
+    (worktree_dir / "vllm" / "__init__.py").write_text("", encoding="utf-8")
+    subprocess.run(["git", "-C", str(worktree_dir), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(worktree_dir), "commit", "-m", "initial"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    commit = subprocess.run(
+        ["git", "-C", str(worktree_dir), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    result = _run_bash(
+        _source_prepare_functions(
+            f"""
+            OFFICIAL_VLLM_WORKTREE={shlex.quote(str(worktree_dir))}
+            OFFICIAL_VLLM_REF=v0.18.0
+            ensure_vllm_source_metadata
+            grep -Fq 'Version: 0.18.0' {shlex.quote(str(worktree_dir))}/vllm-0.18.0.dist-info/METADATA
+            grep -Fq "__version__ = version = '0.18.0'" {shlex.quote(str(worktree_dir))}/vllm/_version.py
+            grep -Fq "__commit_id__ = commit_id = '{commit[:8]}'" {shlex.quote(str(worktree_dir))}/vllm/_version.py
             """
         )
     )
