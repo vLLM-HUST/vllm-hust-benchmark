@@ -46,7 +46,12 @@ def test_registry_generation_is_distinct_from_target_contract_version() -> None:
         registry["registry_generation"]["source_set_sha256"]
         == registry["source_set_sha256"]
     )
-    assert {target["target_version"] for target in registry["targets"]} == {"1.3.5"}
+    # Unchanged targets inherit the 1.3.5 contract; the new issue #179 910B3
+    # specialty spec carries its own 1.3.6 contract.
+    assert {target["target_version"] for target in registry["targets"]} == {
+        "1.3.5",
+        "1.3.6",
+    }
 
 
 def test_one_target_update_inherits_unchanged_contracts() -> None:

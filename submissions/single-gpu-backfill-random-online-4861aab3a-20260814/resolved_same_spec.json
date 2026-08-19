@@ -1,0 +1,42 @@
+{
+  "schema_version": "benchmark-same-spec/v1",
+  "spec_id": "specialty-ascend-current-random-online-qwen25-14b-910b3",
+  "spec_label": "Specialty Ascend current-runtime baseline (random-online, 910B3, isolated series)",
+  "spec_source": "/home/cyb/vllm-hust-benchmark/docs/official-baselines/specialty-ascend-current-random-online-qwen25-14b-910b3.json",
+  "scenario": "random-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B3",
+  "chip_count": 1,
+  "node_count": 1,
+  "resolved_spec_hash": "10e32ac8d09246274ebddced4c00382cbb680e4918fafc6da939f7b9ebb951c6",
+  "resolved_server_parameters": {
+    "tensor_parallel_size": 1,
+    "gpu_memory_utilization": 0.6,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 8000,
+    "max_model_len": 32768,
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "dtype": "float16",
+    "enable_prefix_caching": true
+  },
+  "resolved_client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "random",
+    "no_stream": false,
+    "num_prompts": 200,
+    "request_rate": 1,
+    "host": "127.0.0.1",
+    "port": 8000,
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "random_input_len": 1024,
+    "random_output_len": 256
+  }
+}

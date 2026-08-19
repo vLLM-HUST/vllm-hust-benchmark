@@ -2144,7 +2144,15 @@ def _build_env(npu_id: int = 0) -> dict[str, str]:
     env.setdefault("NO_PROXY", "127.0.0.1,localhost")
     env.setdefault("no_proxy", "127.0.0.1,localhost")
 
-    atb_home = "/usr/local/Ascend/nnal/atb/9.0.0/atb"
+    # Resolve ATB/CANN through the ``latest`` symlink so the environment works
+    # across toolkit versions (e.g. CANN 8.5.0 and 9.0.0) instead of pinning a
+    # single version that may not be installed on the host.
+    _atb_latest = "/usr/local/Ascend/nnal/atb/latest/atb"
+    atb_home = (
+        _atb_latest
+        if os.path.isdir(_atb_latest)
+        else "/usr/local/Ascend/nnal/atb/9.0.0/atb"
+    )
     torch_cxx_abi = subprocess.run(
         [str(PYTHON_BIN), "-c", "import torch; print(torch.compiled_with_cxx11_abi())"],
         capture_output=True,
@@ -2160,11 +2168,9 @@ def _build_env(npu_id: int = 0) -> dict[str, str]:
     _conda_lib = str(Path(PYTHON_BIN).resolve().parent.parent / "lib")
     env["LD_LIBRARY_PATH"] = f"{_conda_lib}:{atb_lib_path}:{env['LD_LIBRARY_PATH']}"
     env["LD_LIBRARY_PATH"] = (
-        "/usr/local/Ascend/ascend-toolkit/lib64:" + env["LD_LIBRARY_PATH"]
+        "/usr/local/Ascend/ascend-toolkit/latest/lib64:" + env["LD_LIBRARY_PATH"]
     )
-    env["LD_LIBRARY_PATH"] = (
-        "/usr/local/Ascend/cann-9.0.0/lib64:" + env["LD_LIBRARY_PATH"]
-    )
+    env["LD_LIBRARY_PATH"] = "/usr/local/Ascend/cann/lib64:" + env["LD_LIBRARY_PATH"]
     env["ATB_HOME_PATH"] = f"{atb_home}/{cxx_abi_dir}"
 
     # Set VLLM_VERSION so the ascend plugin can parse the vllm version.
@@ -3202,12 +3208,11 @@ def validate_submission(sub_dir: Path) -> list[str]:
     if not workload.get("name"):
         errors.append(f"{rid}: workload.name is missing")
 
-    # Check hardware
+    # Check hardware. The authoritative chip model is the one bound through the
+    # same-spec (e.g. a 910B3 specialty spec); legacy dirs without a same-spec
+    # fall back to the historical 910B2 default.
     hw = run.get("hardware", {})
     chip = str(hw.get("chip_model", "") or "").upper()
-    # The authoritative chip model is the one bound through the same-spec
-    # (e.g. a 910B3 specialty spec); legacy dirs without a same-spec fall back
-    # to the historical 910B2 default.
     expected_chip = "910B2"
     spec_chip = str((run.get("same_spec") or {}).get("hardware_chip_model", "") or "")
     if spec_chip:

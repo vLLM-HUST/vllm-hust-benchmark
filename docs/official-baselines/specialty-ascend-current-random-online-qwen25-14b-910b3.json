@@ -1,0 +1,57 @@
+{
+  "id": "specialty-ascend-current-random-online-qwen25-14b-910b3",
+  "label": "Specialty Ascend current-runtime baseline (random-online, 910B3, isolated series)",
+  "baseline_target": {
+    "id": "specialty-ascend-current-910b3",
+    "label": "Specialty Ascend current 910B3",
+    "engine": "vllm",
+    "engine_version": "0.17.2",
+    "github_repository": "vllm-hust/vllm-hust",
+    "vllm_ref": "4861aab3af39e721c1b5a8b27b72c4f6bebda888",
+    "vllm_ascend_ref": "03adecc4de8c3752df3ce687558a8774fb7b84cd"
+  },
+  "scenario": "random-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B3",
+  "chip_count": 1,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 1,
+    "gpu_memory_utilization": 0.6,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 8000,
+    "max_model_len": 32768
+  },
+  "client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "random",
+    "no_stream": false,
+    "num_prompts": 200,
+    "input_len": 1024,
+    "output_len": 256,
+    "request_rate": 1,
+    "host": "127.0.0.1",
+    "port": 8000
+  },
+  "export": {
+    "engine": "vllm-hust",
+    "engine_version": "v0.17.2.post1-3700-g4861aab3a",
+    "submitter": "vllm-hust-org-member",
+    "baseline_engine": "vllm",
+    "github_repository": "vllm-hust/vllm-hust",
+    "github_ref": "4861aab3af",
+    "git_commit": "4861aab3af39e721c1b5a8b27b72c4f6bebda888",
+    "ascend_commit": "03adecc4de8c3752df3ce687558a8774fb7b84cd",
+    "data_source": "issue-179-910b3-clean-rerun"
+  },
+  "status": "provisional",
+  "notes": "Clean graph-mode rerun of the closed PR #7 single-card 910B3 random-online record (issue #179). Plain random-online workload (no full-graph-parallel split_batch_config, no temperature override), served with enforce_eager disabled. Hardware is Huawei Ascend 910B3 (verified via npu-smi on the host). This profile does NOT participate in the default public official target (official-ascend-jan-2026-v0.18.0 / 910B2); it is an isolated 910B3 hardware series and must never be compared against 910B2 or the retired v0.11.0 target."
+}
