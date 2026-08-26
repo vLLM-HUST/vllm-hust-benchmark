@@ -23,8 +23,8 @@ therefore separate from the V4.6 acceptance declaration.
   remain available for local analysis, but no GitHub Actions request path is active.
 - Ordinary pull requests use hosted correctness CI only; they do not occupy NPU resources or submit
   performance evaluations.
-- Performance labels and release/formal requests may enter the independent evaluator only after
-  its authentication, idempotency, contract, resource, and evidence preflight is implemented and
+- Performance labels and release/formal requests may enter the independent evaluator only after its
+  authentication, idempotency, contract, resource, and evidence preflight is implemented and
   admitted. Until then, no automated performance-request path is active.
 - The old performance `Merge Gate` workflow is removed. Its CLI and tests remain available for
   developer analysis, but it is not a required check.
