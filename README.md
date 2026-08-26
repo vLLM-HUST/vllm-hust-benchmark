@@ -421,8 +421,8 @@ Notes:
   if you need a stricter bar.
 - The matrix runner uses `MAX_REPEAT_ATTEMPTS` (default `REPEAT_COUNT + 1`) to absorb transient
   engine or runtime crashes without throwing away earlier successful repeats.
-- The former `.github/workflows/run-official-ascend-baselines.yml` entrypoint is removed.
-  Use the local matrix scripts for historical engineering analysis; publication requires a separately
+- The former `.github/workflows/run-official-ascend-baselines.yml` entrypoint is removed. Use the
+  local matrix scripts for historical engineering analysis; publication requires a separately
   reviewed external path.
 
 This produces:
@@ -497,8 +497,9 @@ Outputs:
 
 ### Retired GitHub Workflow
 
-The former `run-official-ascend-baselines.yml` workflow has been removed. Historical `gh workflow run` examples are no longer valid. Run the local matrix scripts above for engineering analysis;
-automated publication must use a separately reviewed external service and contract.
+The former `run-official-ascend-baselines.yml` workflow has been removed. Historical
+`gh workflow run` examples are no longer valid. Run the local matrix scripts above for engineering
+analysis; automated publication must use a separately reviewed external service and contract.
 
 ## Ascend msprof Profiling
 
