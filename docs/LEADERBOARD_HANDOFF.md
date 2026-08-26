@@ -1,7 +1,7 @@
 # Leaderboard 工作交接文档
 
-> Legacy handoff: the GitHub Actions benchmark/baseline/HF publication workflows described here
-> have been removed. New PR results come from the external fixed-machine dataset validator.
+> Legacy handoff: the GitHub Actions benchmark/baseline/HF publication workflows described here have
+> been removed. New PR results come from the external fixed-machine dataset validator.
 
 ## 文档定位
 

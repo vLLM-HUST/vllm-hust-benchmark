@@ -266,9 +266,9 @@ alone is not sufficient to refresh the live site. The production chain therefore
 1. `vllm-hust` benchmark CI writes the exported `submissions/<run-id>/` payload and refreshed
    `leaderboard-data/snapshots/` files directly into `vllm-hust-benchmark@main` in one
    bot-authenticated commit.
-1. The legacy `push-to-hf.yml` publication path is retired. Results are now supplied by the
-   external fixed-machine dataset validator and will be consumed by the website result path after
-   its input schema and synchronization contract are finalized.
+1. The legacy `push-to-hf.yml` publication path is retired. Results are now supplied by the external
+   fixed-machine dataset validator and will be consumed by the website result path after its input
+   schema and synchronization contract are finalized.
 
 The older snapshot-PR and auto-merge workflows are obsolete under this model. The benchmark
 repository submission directories and generated snapshots are the authoritative source for public

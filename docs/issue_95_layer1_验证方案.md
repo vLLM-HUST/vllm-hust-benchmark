@@ -1,7 +1,7 @@
 # issue #95 Layer 1 + Layer 2 (mock) + Layer 3 (跨仓库) — 验证方案
 
-> **历史方案，已停止实施。** V4.6 不允许把正式性能验收配置为普通 PR required check；
-> `.github/workflows/merge-gate.yml` 已删除。本文只保留设计历史，不能作为当前操作手册。
+> **历史方案，已停止实施。** V4.6 不允许把正式性能验收配置为普通 PR required check； `.github/workflows/merge-gate.yml`
+> 已删除。本文只保留设计历史，不能作为当前操作手册。
 
 > 本文档记录 `feat/pr_95` 已交付的三层验证方法：
 >

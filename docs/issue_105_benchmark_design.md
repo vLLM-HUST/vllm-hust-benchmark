@@ -1,7 +1,7 @@
 # issue #105 配套：Benchmark 设计与实现说明
 
-> Legacy design: the GitHub Actions benchmark and publication chain described here is retired.
-> New PR validation is performed by the external fixed-machine dataset service.
+> Legacy design: the GitHub Actions benchmark and publication chain described here is retired. New
+> PR validation is performed by the external fixed-machine dataset service.
 
 > 这份文档配套 [issue #105 需求分析](../.trae/documents/issue_105_%E9%9C%80%E6%B1%82%E5%88%86%E6%9E%90.md) 阅读。
 >
