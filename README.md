@@ -497,8 +497,7 @@ Outputs:
 
 ### Retired GitHub Workflow
 
-The former `run-official-ascend-baselines.yml` workflow has been removed. Historical `gh workflow
-run` examples are no longer valid. Run the local matrix scripts above for engineering analysis;
+The former `run-official-ascend-baselines.yml` workflow has been removed. Historical `gh workflow run` examples are no longer valid. Run the local matrix scripts above for engineering analysis;
 automated publication must use a separately reviewed external service and contract.
 
 ## Ascend msprof Profiling
