@@ -19,15 +19,17 @@ therefore separate from the V4.6 acceptance declaration.
 
 ## CI policy
 
-- Core and Plugin legacy performance requests are manual engineering-health workflows.
+- The legacy Core and Plugin performance-request workflows are removed. Engineering-health scripts
+  remain available for local analysis, but no GitHub Actions request path is active.
 - Ordinary pull requests use hosted correctness CI only; they do not occupy NPU resources or submit
   performance evaluations.
-- Performance labels and release/formal requests enter the independent evaluator after
-  authentication, idempotency, contract, resource, and evidence preflight.
+- Performance labels and release/formal requests may enter the independent evaluator only after
+  its authentication, idempotency, contract, resource, and evidence preflight is implemented and
+  admitted. Until then, no automated performance-request path is active.
 - The old performance `Merge Gate` workflow is removed. Its CLI and tests remain available for
   developer analysis, but it is not a required check.
-- Hugging Face publication is manual and defaults to dry-run. Publication requires prior admission
-  and cross-repository snapshot verification.
+- The legacy Hugging Face publication workflow is removed. Any future publication path requires
+  prior admission and cross-repository snapshot verification.
 - Existing Smoke/Regression request workflows were removed because they submitted legacy 14B
   performance targets rather than running correctness checks.
 
