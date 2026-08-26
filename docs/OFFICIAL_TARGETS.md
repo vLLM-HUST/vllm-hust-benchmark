@@ -10,8 +10,8 @@ the immutable execution-contract version for that target; an unrelated target up
 it. Producers should record the canonical `target_contract_id` and `target_contract_version`
 metadata fields.
 
-Public leaderboard targets and 3B perfgate profiles are separate contracts. Provisional entries are
-not valid public-result comparison targets.
+This registry covers engineering health, public leaderboard, and specialty runs. It does not define
+formal V4.6 A1-A4 acceptance.
 
 | Use | Status | Profile | Workload | Model | Hardware | Precision | Memory util. | Max length |
 Spec | | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | | public-leaderboard | active |

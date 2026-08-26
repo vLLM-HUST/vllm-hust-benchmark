@@ -1,0 +1,149 @@
+{
+  "schema_version": "acceptance-v4.6/v1",
+  "document_revision": "V4.6",
+  "source_document": "vLLM-HUST标准交付测试方案_V4.6.pdf",
+  "source_sha256": "ab2ceacf25f9ba82da39dfd7bd457d6b620b6ad33d121aee46fa5c044f58c370",
+  "lifecycle_status": "declared_pending_independent_evaluator_and_owner_review",
+  "mandatory_target": {
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "precision": "FP16",
+    "hardware": "Ascend 910B2",
+    "chip_count": 1,
+    "node_count": 1
+  },
+  "additional_targets": [
+    {"model": "Qwen3.6-27B", "topology": "dual-card", "required": false},
+    {"model": "DeepSeek V4 Flash", "topology": "single-node-8-card", "required": false},
+    {"model": "Kimi K2.6", "topology": "multi-node", "required": false}
+  ],
+  "baselines": {
+    "B0": {
+      "core": "upstream vLLM 0.18",
+      "plugin": "same-generation vLLM-Ascend",
+      "cann": "9.1"
+    },
+    "B1": {
+      "description": "exact optimized candidate",
+      "frozen_fields": [
+        "core_commit",
+        "plugin_commit",
+        "oci_digest",
+        "model_revision",
+        "tokenizer_revision",
+        "hardware",
+        "dataset_revision",
+        "request_parameters",
+        "slo",
+        "startup_parameters"
+      ],
+      "difference_policy": "predeclared_whitelist_only"
+    }
+  },
+  "formal_execution": {
+    "minimum_independent_service_lifecycles": 3,
+    "lifecycle_steps": ["start", "warm", "measure", "stop"],
+    "primary_metric_aggregation": "predeclared_metric_median",
+    "preserve_failures_timeouts_and_retries": true,
+    "ordinary_pr_policy": "correctness_only",
+    "ci_execution_policy": "hosted_no_npu",
+    "performance_request_trigger": "performance_label_or_release_request",
+    "evaluation_boundary": "independent_signed_evaluation_service",
+    "resource_policy": "exclusive",
+    "evidence_policy": "immutable_and_signed"
+  },
+  "acceptance_units": [
+    {
+      "id": "A1",
+      "name": "single_chip_effective_compute",
+      "primary_shape": "4096x8",
+      "minimum_theoretical_peak_percent": 90.0,
+      "maximum_msprof_calibration_error_percent": 3.0
+    },
+    {
+      "id": "A2",
+      "name": "typical_scenario_performance",
+      "independent_quality_units": [
+        "dialogue_multiturn",
+        "tool_calling",
+        "reasoning",
+        "structured_output",
+        "long_context",
+        "code"
+      ],
+      "minimum_general_and_tool_throughput_ratio_vs_B0": 2.0,
+      "minimum_common_load_ttft_improvement_percent": 20.0,
+      "minimum_common_load_tpot_improvement_percent": 20.0,
+      "quality_gate_required": true
+    },
+    {
+      "id": "A3",
+      "name": "long_context_stability",
+      "input_tokens": 30720,
+      "output_tokens": 2048,
+      "total_context_tokens": 32768,
+      "duration_minutes": 30,
+      "forbidden_outcomes": ["oom", "deadlock", "truncation"],
+      "maximum_throughput_cv_percent": 5.0,
+      "maximum_median_drift_percent": 10.0,
+      "maximum_p99_drift_percent": 20.0
+    },
+    {
+      "id": "A4",
+      "name": "multi_tenant_cost_and_fairness",
+      "tenant_count": 5,
+      "minimum_cost_per_token_reduction_percent": 30.0,
+      "minimum_jain_fairness_index": 0.9,
+      "maximum_share_deviation_percent": 10.0,
+      "maximum_p99_ratio_vs_B0": 1.25,
+      "minimum_average_utilization_percent": 60.0
+    }
+  ],
+  "legacy_engineering_health": {
+    "acceptance_eligible": false,
+    "failure_policy": "block_snapshot_and_website_promotion",
+    "thresholds": {
+      "throughput_regression_percent": 1.0,
+      "ttft_regression_percent": 10.0,
+      "tbt_regression_percent": 5.0
+    },
+    "workloads": [
+      "random-online",
+      "sharegpt-online",
+      "prefix-repetition-online",
+      "instructcoder-online",
+      "visionarena-online",
+      "agent-research-online",
+      "sharegpt-throughput",
+      "sonnet-throughput",
+      "random-latency"
+    ]
+  },
+  "p0": {
+    "id": "P0-DIALOGUE-FP16",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "precision": "FP16",
+    "requests": 20000,
+    "rps": 4.0,
+    "max_concurrency": 32,
+    "max_tokens": 128,
+    "repeats": 3
+  },
+  "p2": {
+    "name": "W8A8_system_delivery_extension",
+    "acceptance_eligible": false,
+    "requires_immutable_artifact_and_quality_receipt": true
+  },
+  "fixed_versions": {
+    "b0": {
+      "core_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "plugin_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+      "container_generation": "v0.23",
+      "cann": "9.1"
+    },
+    "b1": {
+      "core_commit": "1a06c55468966de8ef471ecb7612c199e15a153a",
+      "plugin_commit": "ac2b94f1536090e2cd0d6c2f8bc8087e336193d5"
+    }
+  },
+  "appendix_policy": "missing_mismatched_or_non_whitelisted_values_fail_closed"
+}

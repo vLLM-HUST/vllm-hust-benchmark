@@ -2,16 +2,19 @@
      core/Ascend 仓库的 PR 模板通过 include 引用此文件，单点维护避免漂移。
      源文件：vllm-hust-benchmark/.github/perf-evidence-checklist.md -->
 
-## Performance Evidence (issue #95 merge gate)
+> **Superseded for merge gating.** V4.6 formal performance acceptance is not a pull-request required
+> check. This checklist is retained only as historical paired-comparison guidance.
 
-> 性能相关 PR 合并前必须提供一组可比的 real-online paired 性能证据。 纯文档/测试/网站 PR 可用受控 label 跳过（见下方例外）。
+## Historical Performance Evidence (issue #95)
 
-### Target Declaration（必填）
+> 以下内容仅供历史 paired-comparison 复核，不是 V4.6 普通 PR 的合并门禁，也不会触发性能评测。
+
+### Target Declaration（历史记录）
 
 - [ ] `official-fixed-target` — 跑官方固定靶（14B 单卡主线默认）
 - [ ] `specialty-target` — 跑 specialty 靶（须填下方理由）
 
-### Official Fixed-Target Evidence（选 official-fixed-target 时必填）
+### Official Fixed-Target Evidence（历史记录）
 
 - target_id: `<!-- 从 #104 registry 读取，如 official-ascend-jan-2026-v0.18.0 -->`
 - target_version:
@@ -25,18 +28,18 @@
 - gpu_memory_utilization: `<!-- 14B 文本线=0.6, vision 线见 registry -->`
 - max_model_len: `<!-- 14B 文本线=32768, vision 线=32768（见 registry） -->`
 
-### Specialty Target Evidence（选 specialty-target 时必填）
+### Specialty Target Evidence（历史记录）
 
 - specialty spec: `<!-- 独立 spec 名称，必须能在 registry 匹配到 specialty profile -->`
 - specialty reason: `<!-- 为什么不跑主线，跑这个 specialty 的理由 -->`
 - paired base/head artifact: `<!-- 同上 -->`
 
-### Docs/Test/Website-only Exception（跳过性能证据时必填）
+### Docs/Test/Website-only Exception（历史记录）
 
 - [ ] 已添加受控 label：`perf-skip:docs-only` / `perf-skip:test-only` / `perf-skip:website-only`
 - 审批人: `<!-- @reviewer -->`
 
-### Checklist
+### Historical Checklist
 
 - [ ] data_source 以 `real-online` 开头（不接受 smoke/replay/derived/截图）
 - [ ] base/head 的 CI 状态均为 accepted（missing/cancelled/skipped/resource_busy 一律 fail closed）

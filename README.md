@@ -1,5 +1,9 @@
 # vllm-hust-benchmark
 
+> The legacy Ascend benchmark, baseline, HF publication, and website-dispatch workflows have been
+> removed. The execution scripts and historical design notes below are retained for reference only;
+> new PR validation is performed by the external fixed-machine dataset service.
+
 Wrapper benchmark repository for vllm-hust.
 
 The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while
@@ -262,9 +266,9 @@ alone is not sufficient to refresh the live site. The production chain therefore
 1. `vllm-hust` benchmark CI writes the exported `submissions/<run-id>/` payload and refreshed
    `leaderboard-data/snapshots/` files directly into `vllm-hust-benchmark@main` in one
    bot-authenticated commit.
-1. The `push-to-hf.yml` workflow in this repository reacts to that `submissions/**` change, syncs
-   the merged raw submission plus refreshed snapshots to the HF dataset, and keeps the GitHub
-   repository itself as the website's first freshness source.
+1. The legacy `push-to-hf.yml` publication path is retired. Results are now supplied by the
+   external fixed-machine dataset validator and will be consumed by the website result path after
+   its input schema and synchronization contract are finalized.
 
 The older snapshot-PR and auto-merge workflows are obsolete under this model. The benchmark
 repository submission directories and generated snapshots are the authoritative source for public
