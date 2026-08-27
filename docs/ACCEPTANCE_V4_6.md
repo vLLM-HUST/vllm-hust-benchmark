@@ -1,9 +1,21 @@
 # V4.6 Acceptance Boundary
 
-The local `vLLM-HUST标准交付测试方案_V4.6.pdf` is the authority for project delivery acceptance. The
-machine-readable declaration is `src/vllm_hust_benchmark/data/acceptance_v4_6.json`. The PDF
-identity is pinned by SHA-256 in that declaration so a replacement document cannot be silently
-treated as the same acceptance version.
+The repository-controlled `docs/assets/vLLM-HUST标准交付测试方案_V4.6.pdf` is the authority for project
+delivery acceptance. The machine-readable declaration is
+`src/vllm_hust_benchmark/data/acceptance_v4_6.json`. The PDF identity is pinned by SHA-256 in that
+declaration so a replacement document cannot be silently treated as the same acceptance version.
+
+The benchmark repository maintainers are the custodian of this controlled copy. Any document update
+must be submitted as a reviewed pull request that changes the PDF and the declaration together.
+Reviewers can verify the pinned identity from a clean checkout with:
+
+```bash
+sha256sum docs/assets/vLLM-HUST标准交付测试方案_V4.6.pdf
+```
+
+The output must equal `source_sha256` in the declaration. The acceptance declaration remains
+`declared_pending_independent_evaluator_and_owner_review` until the independent evaluator contract
+is reviewed; storing the PDF here does not claim that A1-A4 has passed.
 
 ## Test tracks
 
