@@ -1,5 +1,8 @@
 # Leaderboard 工作交接文档
 
+> Legacy handoff: the GitHub Actions benchmark/baseline/HF publication workflows described here have
+> been removed. New PR results come from the external fixed-machine dataset validator.
+
 ## 文档定位
 
 本交接文档面向接手 leaderboard 相关工作的团队，目标不是单纯描述“现在有哪些代码”，而是明确下面几件事：

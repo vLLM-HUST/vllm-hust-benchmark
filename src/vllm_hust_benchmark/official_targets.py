@@ -366,10 +366,10 @@ def render_document(registry: dict[str, Any], *, language: str) -> str:
         else "This file is generated from the official specs. Do not edit it manually."
     )
     public_note = (
-        "公开排行榜固定靶与 3B 快速门禁是不同契约；provisional 记录不得作为公开成果对比。"
+        "本 registry 只描述工程健康、公开排行榜和专项覆盖，不定义 V4.6 A1-A4 正式验收。"
         if chinese
-        else "Public leaderboard targets and 3B perfgate profiles are separate contracts. "
-        "Provisional entries are not valid public-result comparison targets."
+        else "This registry covers engineering health, public leaderboard, and specialty runs. "
+        "It does not define formal V4.6 A1-A4 acceptance."
     )
     headers = (
         [

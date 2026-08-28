@@ -1,5 +1,9 @@
 # vllm-hust-benchmark
 
+> The legacy Ascend benchmark, baseline, HF publication, and website-dispatch workflows have been
+> removed. The execution scripts and historical design notes below are retained for reference only;
+> new PR validation is performed by the external fixed-machine dataset service.
+
 Wrapper benchmark repository for vllm-hust.
 
 The goal is to keep `vllm-hust-benchmark` as the stable entrypoint for running experiments, while
@@ -262,9 +266,9 @@ alone is not sufficient to refresh the live site. The production chain therefore
 1. `vllm-hust` benchmark CI writes the exported `submissions/<run-id>/` payload and refreshed
    `leaderboard-data/snapshots/` files directly into `vllm-hust-benchmark@main` in one
    bot-authenticated commit.
-1. The `push-to-hf.yml` workflow in this repository reacts to that `submissions/**` change, syncs
-   the merged raw submission plus refreshed snapshots to the HF dataset, and keeps the GitHub
-   repository itself as the website's first freshness source.
+1. The legacy `push-to-hf.yml` publication path is retired. Results are now supplied by the external
+   fixed-machine dataset validator and will be consumed by the website result path after its input
+   schema and synchronization contract are finalized.
 
 The older snapshot-PR and auto-merge workflows are obsolete under this model. The benchmark
 repository submission directories and generated snapshots are the authoritative source for public
@@ -417,11 +421,9 @@ Notes:
   if you need a stricter bar.
 - The matrix runner uses `MAX_REPEAT_ATTEMPTS` (default `REPEAT_COUNT + 1`) to absorb transient
   engine or runtime crashes without throwing away earlier successful repeats.
-- For official baseline workflow dispatch in GitHub Actions, use
-  `.github/workflows/run-official-ascend-baselines.yml`. It runs the same matrix trigger on the
-  self-hosted Ascend runner, promotes missing canonical `submissions/official-ascend-*`, and now
-  publishes those canonical directories plus refreshed `leaderboard-data/snapshots/` to
-  `vllm-hust-benchmark@main` by default so the website can see the result.
+- The former `.github/workflows/run-official-ascend-baselines.yml` entrypoint is removed. Use the
+  local matrix scripts for historical engineering analysis; publication requires a separately
+  reviewed external path.
 
 This produces:
 
@@ -493,88 +495,11 @@ Outputs:
 - The batch summary goes to `.benchmarks/<matrix-run-id>/summary.md` unless `MATRIX_SUMMARY_FILE` is
   overridden.
 
-### Triggering The Workflow
+### Retired GitHub Workflow
 
-The manual workflow entrypoint is `.github/workflows/run-official-ascend-baselines.yml` and is
-intended for a self-hosted Ascend runner.
-
-Recommended `workflow_dispatch` inputs for the first full establishment run:
-
-- `spec_paths`: leave blank to cover `docs/official-baselines`
-- `repeat_count`: `3`
-- `min_successful_repeats`: `0` (workflow default; resolves to `2` when `repeat_count >= 2`)
-- `max_repeat_attempts`: `0` (workflow default; resolves to `repeat_count + 1`)
-- `force_run_existing`: `false`
-- `prepare_official_env`: `true`
-- `force_repair_official_env`: `false`
-- `publish_results`: `true`
-- `publish_website`: `false`
-- `publication_target_branch`: `main`
-- `website_ref`: `main`
-- `goal_baseline_env_prefix`: leave blank unless the runner must use a non-default conda base; blank
-  resolves to `$(conda info --base)/envs/vllm-ascend-official-v0180` on the runner
-
-Workflow visibility note:
-
-- GitHub can only dispatch workflows that already exist on the remote repository. Before using
-  `gh workflow run`, commit and push `.github/workflows/run-official-ascend-baselines.yml` to the
-  branch you want to dispatch.
-- If you are validating from a feature branch before merge, pass `--ref <branch>` so GitHub
-  dispatches the workflow definition from that remote branch.
-
-Trigger from GitHub UI:
-
-1. Open the Actions page for this repository.
-1. Select `Run Official Ascend Baselines`.
-1. Click `Run workflow`.
-1. Fill `spec_paths` only when you want a subset. Leave it blank for the full official set.
-
-Trigger from `gh` CLI:
-
-```bash
-cd /path/to/vllm-hust-benchmark
-gh workflow run run-official-ascend-baselines.yml \
-	--ref ws/official-baseline-v2 \
-	-f repeat_count=3 \
-	-f min_successful_repeats=0 \
-	-f max_repeat_attempts=0 \
-	-f force_run_existing=false \
-	-f prepare_official_env=true \
-	-f force_repair_official_env=false \
-	-f publish_results=true \
-	-f publish_website=false \
-	-f publication_target_branch=main \
-	-f website_ref=main
-```
-
-Trigger a subset from `gh` CLI by passing newline-separated `spec_paths`:
-
-```bash
-cd /path/to/vllm-hust-benchmark
-gh workflow run run-official-ascend-baselines.yml \
-	--ref ws/official-baseline-v2 \
-	-f spec_paths='docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-online-qwen25-14b-910b2.json
-docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json' \
-	-f repeat_count=3 \
-	-f force_repair_official_env=false \
-	-f force_run_existing=false
-```
-
-Workflow artifacts:
-
-- `official-baseline-summary-<run_id>-<attempt>`: the batch summary markdown.
-- `official-baseline-results-<run_id>-<attempt>`: `.benchmarks/...` results and any promoted
-  `submissions/official-ascend-*` directories.
-
-`publish_results=true` is the formal publication path. It now checks `vllm-hust-benchmark@main` for
-already-published canonical submissions before launching a missing spec, publishes each newly
-promoted spec immediately, regenerates `leaderboard-data/snapshots/`, and still runs a final safety
-sync at the end. This means a later spec failure no longer forces you to rerun already-published
-official baselines.
-
-`publish_website=true` remains a local-only convenience switch. It refreshes the checked-out
-`vllm-hust-website/data/` workspace copy after the batch, but by itself it does not update the live
-benchmark data source.
+The former `run-official-ascend-baselines.yml` workflow has been removed. Historical
+`gh workflow run` examples are no longer valid. Run the local matrix scripts above for engineering
+analysis; automated publication must use a separately reviewed external service and contract.
 
 ## Ascend msprof Profiling
 
