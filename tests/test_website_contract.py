@@ -1,5 +1,7 @@
 """Contract tests for website fixture consumption.
 
+CI canary: verify the current main branch protection test job.
+
 These tests verify that:
 1. Each fixture category produces the expected trend_status classification
 2. The website can stably distinguish all six fixture categories
