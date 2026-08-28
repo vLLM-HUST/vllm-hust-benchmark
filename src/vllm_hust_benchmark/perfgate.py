@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from vllm_hust_benchmark.metric_semantics import METRIC_CATALOG
+
 
 @dataclass(frozen=True)
 class MetricComparison:
@@ -33,17 +35,10 @@ class TwoStageReport:
     stage2: StageComparison | None = None
 
 
-METRICS: tuple[tuple[str, str], ...] = (
-    ("throughput_tps", "higher_is_better"),
-    ("ttft_ms", "lower_is_better"),
-    ("tbt_ms", "lower_is_better"),
-)
-
-DISPLAY_NAMES = {
-    "throughput_tps": "Throughput (tok/s)",
-    "ttft_ms": "TTFT (ms)",
-    "tbt_ms": "TBT (ms)",
-}
+# Metrics compared by the perfgate.  Their direction, display name and
+# precision come from the unified metric semantics catalog (the single source
+# of truth) rather than per-module hardcoded strings.
+PERFGATE_METRICS: tuple[str, ...] = ("throughput_tps", "ttft_ms", "tbt_ms")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -61,7 +56,7 @@ def _extract_metrics(path: Path) -> dict[str, float]:
 
     metrics: dict[str, float] = {}
     missing: list[str] = []
-    for name, _direction in METRICS:
+    for name in PERFGATE_METRICS:
         if name not in raw_metrics or raw_metrics[name] is None:
             missing.append(name)
             continue
@@ -164,9 +159,9 @@ def compare_benchmark_results(
             name=name,
             current=current_metrics[name],
             baseline=baseline_metrics[name],
-            direction=direction,
+            direction=METRIC_CATALOG.resolve(name).direction.value,
         )
-        for name, direction in METRICS
+        for name in PERFGATE_METRICS
     }
     return StageComparison(
         passed=all(metric.passed for metric in comparisons.values()),
@@ -179,15 +174,17 @@ def _format_metric_table(comparison: StageComparison) -> str:
         "| Metric | Baseline | Current | Delta | Status |",
         "|--------|----------|---------|-------|--------|",
     ]
-    for name, _direction in METRICS:
+    for name in PERFGATE_METRICS:
         metric = comparison.metrics[name]
+        semantics = METRIC_CATALOG.resolve(name)
         if math.isinf(metric.delta_percent):
             delta = "+∞%"
         else:
             delta = f"{metric.delta_percent:+.2f}%"
         status = "PASS" if metric.passed else "FAIL"
         lines.append(
-            f"| {DISPLAY_NAMES[name]} | {metric.baseline:.2f} | {metric.current:.2f} | {delta} | {status} |"
+            f"| {semantics.display_name} | {metric.baseline:.{semantics.precision}f} | "
+            f"{metric.current:.{semantics.precision}f} | {delta} | {status} |"
         )
     return "\n".join(lines)
 

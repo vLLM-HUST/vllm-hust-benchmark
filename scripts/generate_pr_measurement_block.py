@@ -11,6 +11,8 @@ import json
 import sys
 from pathlib import Path
 
+from vllm_hust_benchmark.metric_semantics import METRIC_CATALOG
+
 
 def sha256_str(s: str) -> str:
     return hashlib.sha256(s.encode()).hexdigest()
@@ -26,10 +28,11 @@ def generate_measurement_block(repeat_suite_path: Path, leaderboard_path: Path) 
     primary_metric = selection.get("primary_metric_name", "ttft_ms")
     selected_dir = selection.get("selected_result_dir", "")
 
-    # Map primary metric to sort direction
-    # For ttft_ms, lower is better -> ascending
-    # For throughput_tps, higher is better -> descending
-    if primary_metric == "throughput_tps":
+    # Sort direction comes from the metric semantics contract (the single
+    # source of truth) instead of a hardcoded name -> direction mapping:
+    # higher-is-better sorts descending, lower-is-better sorts ascending.
+    primary_semantics = METRIC_CATALOG.resolve(primary_metric)
+    if primary_semantics.direction.value == "higher_is_better":
         sort_direction = "descending"
     else:
         sort_direction = "ascending"
