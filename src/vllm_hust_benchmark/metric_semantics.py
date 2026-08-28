@@ -326,7 +326,6 @@ class MetricCatalog:
             },
             "throughput": {
                 "throughput_tps",
-                "long_context_throughput_stable",
             },
         }
         family_expectation = {
@@ -588,10 +587,10 @@ class MetricCatalog:
                 name="long_context_throughput_stable",
                 role=MetricRole.CONSTRAINT,
                 direction=MetricDirection.HIGHER_IS_BETTER,
-                unit="tokens/s",
+                unit="boolean",
                 display_name="Long Context Throughput (stable)",
-                description="Stable throughput under long-context load",
-                precision=2,
+                description="Whether throughput is stable under long-context load",
+                precision=0,
             )
         )
         self._register(
@@ -646,7 +645,7 @@ class MetricCatalog:
             MetricSemantics(
                 name="long_context_ttft_p95_stable",
                 role=MetricRole.CONSTRAINT,
-                direction=MetricDirection.LOWER_IS_BETTER,
+                direction=MetricDirection.HIGHER_IS_BETTER,
                 unit="boolean",
                 display_name="Long Context TTFT P95 Stable",
                 description="Whether long-context TTFT P95 is stable",
@@ -657,7 +656,7 @@ class MetricCatalog:
             MetricSemantics(
                 name="long_context_ttft_p99_stable",
                 role=MetricRole.CONSTRAINT,
-                direction=MetricDirection.LOWER_IS_BETTER,
+                direction=MetricDirection.HIGHER_IS_BETTER,
                 unit="boolean",
                 display_name="Long Context TTFT P99 Stable",
                 description="Whether long-context TTFT P99 is stable",
@@ -668,7 +667,7 @@ class MetricCatalog:
             MetricSemantics(
                 name="long_context_tpot_p95_stable",
                 role=MetricRole.CONSTRAINT,
-                direction=MetricDirection.LOWER_IS_BETTER,
+                direction=MetricDirection.HIGHER_IS_BETTER,
                 unit="boolean",
                 display_name="Long Context TPOT P95 Stable",
                 description="Whether long-context TPOT P95 is stable",
@@ -679,7 +678,7 @@ class MetricCatalog:
             MetricSemantics(
                 name="long_context_tpot_p99_stable",
                 role=MetricRole.CONSTRAINT,
-                direction=MetricDirection.LOWER_IS_BETTER,
+                direction=MetricDirection.HIGHER_IS_BETTER,
                 unit="boolean",
                 display_name="Long Context TPOT P99 Stable",
                 description="Whether long-context TPOT P99 is stable",

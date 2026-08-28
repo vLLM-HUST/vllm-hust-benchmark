@@ -111,6 +111,22 @@ class TestSemantics:
         assert s.is_applicable_for("throughput") is False
         assert s.is_applicable_for("latency") is True
 
+    @pytest.mark.parametrize(
+        "name",
+        (
+            "long_context_throughput_stable",
+            "long_context_ttft_p95_stable",
+            "long_context_ttft_p99_stable",
+            "long_context_tpot_p95_stable",
+            "long_context_tpot_p99_stable",
+        ),
+    )
+    def test_boolean_stability_flags_prefer_true(self, name: str) -> None:
+        semantics = METRIC_CATALOG.resolve(name)
+        assert semantics.unit == "boolean"
+        assert semantics.direction is MetricDirection.HIGHER_IS_BETTER
+        assert semantics.precision == 0
+
 
 class TestValidation:
     def test_r1_r5_pass(self) -> None:
