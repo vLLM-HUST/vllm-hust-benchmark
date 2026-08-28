@@ -2,8 +2,8 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.3.5`
-- Effective from: `2026-08-16`
+- Registry version: `1.3.6`
+- Effective from: `2026-08-18`
 
 `registry_version` 表示本次生成的 registry 快照版本；每个 target 的 `target_version` 表示该 target 不可变的执行契约版本。无关
 target 的更新不应 改变它。生产端应记录 canonical 的 `target_contract_id` 和 `target_contract_version` 字段。
@@ -146,6 +146,9 @@ Qwen/Qwen2.5-14B-Instruct | 910B2 × 1 | FP16 | — | — |
 | | specialty | provisional | specialty-text | random-latency | Qwen/Qwen2.5-14B-Instruct | 910B3 ×
 1 | FP16 | 0.6 | 32768 |
 [`specialty-ascend-full-graph-parallel-inplace-random-latency-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-random-latency-qwen25-14b-910b3.json)
+| | specialty | provisional | specialty-text | random-online | Qwen/Qwen2.5-14B-Instruct | 910B3 × 1
+| FP16 | 0.6 | 32768 |
+[`specialty-ascend-current-random-online-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-current-random-online-qwen25-14b-910b3.json)
 | | specialty | provisional | specialty-text | random-online | Qwen/Qwen2.5-14B-Instruct | 910B3 × 1
 | FP16 | 0.6 | 32768 |
 [`specialty-ascend-full-graph-parallel-inplace-random-online-qwen25-14b-910b3.json`](../docs/official-baselines/specialty-ascend-full-graph-parallel-inplace-random-online-qwen25-14b-910b3.json)
