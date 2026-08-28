@@ -1,0 +1,212 @@
+{
+  "schema_version": "readiness-slo/v1",
+  "artifact_class": "readiness-slo",
+  "report_type": "burst",
+  "entry_id": "sharegpt-online-burst-rep3-e4ce33646f2e",
+  "engine": "vllm-hust",
+  "engine_version": "INFO 08-15 17:43:44 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 08-15 17:43:44 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 08-15 17:43:44 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 08-15 17:43:44 [__init__.py:246] Platform plugin ascend is activated\nINFO 08-15 17:43:44 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\ndev",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "interconnect": "unknown"
+  },
+  "cluster": null,
+  "model": {
+    "name": "Qwen/Qwen2.5-14B-Instruct",
+    "parameters": "14B",
+    "precision": "BF16",
+    "quantization": null,
+    "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+    "short_name": "Qwen2.5-14B-Instruct",
+    "display_name": "Qwen2.5-14B-Instruct"
+  },
+  "workload": {
+    "name": "sharegpt-online",
+    "dataset": "sharegpt",
+    "input_length": 1024,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null
+  },
+  "load_profile": {
+    "kind": "burst",
+    "request_rate": 10.0,
+    "burst_config": {
+      "size": 50,
+      "duration_s": 27.367865955922753,
+      "interval_s": 0.1,
+      "mean_arrival_rate": 10.0
+    }
+  },
+  "repetition": {
+    "index": 3,
+    "total": 3,
+    "independent_process": true,
+    "server_pid": null,
+    "started_at": "2026-08-15T17:51:49+00:00"
+  },
+  "same_spec": {
+    "spec_id": "issue-135-readiness-slo-sharegpt-online-burst",
+    "spec_label": "Issue #135 readiness SLO matrix",
+    "scenario": "sharegpt-online",
+    "resolved_spec_hash": null,
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "gpu_memory_utilization": 0.6,
+      "enforce_eager": true,
+      "max_model_len": 32768,
+      "port": 8011
+    },
+    "resolved_client_parameters": {
+      "num_prompts": 50,
+      "input_len": 1024,
+      "output_len": 256,
+      "request_rate": 10.0
+    }
+  },
+  "metadata": {
+    "submitted_at": "2026-08-15T17:51:49+00:00",
+    "submitter": "issue-135-npu-runner",
+    "data_source": "issue-135-readiness-slo-matrix-npu-real",
+    "engine": "vllm-hust",
+    "engine_version": "INFO 08-15 17:43:44 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 08-15 17:43:44 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 08-15 17:43:44 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 08-15 17:43:44 [__init__.py:246] Platform plugin ascend is activated\nINFO 08-15 17:43:44 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\ndev",
+    "git_commit": "e4ce33646f2ef1781289e6dc651fad0d00177c55",
+    "github_repository": "vLLM-HUST/vllm-hust",
+    "github_ref": "main",
+    "verified": true,
+    "idempotency_key": "e4ce33646f2ef1781289e6dc651fad0d00177c55-sharegpt-online-burst-rep3",
+    "runtime_provenance": {
+      "python": "/root/miniconda3/envs/vllm-hust-dev/bin/python",
+      "engine": {
+        "repository": "vLLM-HUST/vllm-hust",
+        "ref": "main",
+        "commit": "e4ce33646f2ef1781289e6dc651fad0d00177c55"
+      },
+      "plugin": {
+        "engine": "vllm-ascend-hust",
+        "repository": "vLLM-HUST/vllm-ascend-hust",
+        "ref": "main",
+        "commit": "2d73e6d86eefd5d61acc33f13c2671ed2e99b3c2"
+      }
+    }
+  },
+  "versions": {
+    "protocol": "N/A",
+    "backend": "0.1.0",
+    "core": "INFO 08-15 17:43:44 [__init__.py:44] Available plugins for group vllm.platform_plugins:\nINFO 08-15 17:43:44 [__init__.py:46] - ascend -> vllm_ascend:register\nINFO 08-15 17:43:44 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.\nINFO 08-15 17:43:44 [__init__.py:246] Platform plugin ascend is activated\nINFO 08-15 17:43:44 [platform.py:60] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.\ndev",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.11.15",
+    "pytorch_version": "2.10.0+cpu",
+    "cuda_version": null,
+    "cann_version": "9.0.0",
+    "driver_version": "26.0.rc1"
+  },
+  "startup_metrics": {
+    "cold_readiness_s": 138.0,
+    "warm_restart_readiness_s": 138.0,
+    "weight_load_s": 26.54,
+    "torch_compile_s": 0.0,
+    "compile_cache": {
+      "hit": false,
+      "identity": "enforce_eager:no_compile_cache"
+    },
+    "acl_graph_capture": {
+      "time_s": 0.0,
+      "capture_count": 0,
+      "extra_memory_mb": 0.0
+    },
+    "engine_profile_warmup_s": 2.0,
+    "first_request_ttft_ms": 267.02928028069437,
+    "second_request_ttft_ms": 267.02928028069437,
+    "warm_vs_cold_improvement_pct": 0.0
+  },
+  "slo_metrics": {
+    "output_throughput_tps": 463.499785494046,
+    "success_rate": 1.0,
+    "failure_breakdown": {
+      "timeout": 0,
+      "error": 0,
+      "aborted": 0
+    },
+    "ttft_ms": {
+      "mean": 267.02928028069437,
+      "p50": 262.4148861505091,
+      "p95": 350.63966647721827,
+      "p99": 446.18764915503556
+    },
+    "tpot_ms": {
+      "mean": 87.8860850629556,
+      "p50": 87.87432935673233,
+      "p95": 88.42767002280144,
+      "p99": 89.18234646283952
+    },
+    "itl_ms": {
+      "mean": 87.86789335676796,
+      "p50": 86.45301591604948,
+      "p95": 94.06987261027098,
+      "p99": 106.29177909344435
+    },
+    "prefix_cache_hit_rate": 0.0,
+    "burst_recovery_s": 0.23109201295301318,
+    "slo_miss": {
+      "count": 0,
+      "reasons": []
+    }
+  },
+  "queue_metrics": {
+    "queue_wait_ms": {
+      "mean": 267.02928028069437,
+      "p50": 262.4148861505091,
+      "p95": 350.63966647721827,
+      "p99": 446.18764915503556
+    },
+    "scheduler_admission_wait_ms": {
+      "mean": 0.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0
+    },
+    "prefill_wait_ms": {
+      "mean": 0.0,
+      "p50": 0.0,
+      "p95": 0.0,
+      "p99": 0.0
+    },
+    "running_waiting_timeseries": [],
+    "first_request_separated": {
+      "ttft_ms": 267.02928028069437,
+      "queue_wait_ms": 0.0
+    }
+  },
+  "kv_state_metrics": {
+    "kv_usage": {
+      "peak_pct": 0.0,
+      "mean_pct": 0.0,
+      "timeseries": []
+    },
+    "preemption_count": 0,
+    "eviction_count": 0,
+    "restore_count": 0
+  },
+  "cache_boundary": {
+    "cold_start": true,
+    "cleared_paths": [
+      "/root/vllm/vllm-hust-benchmark/reports/issue_135_readiness_slo_matrix/.cache"
+    ],
+    "preserved_paths": [],
+    "residual_services": []
+  },
+  "raw_evidence": {
+    "server_log_sha256": "551b9c58587134bff71e00b4fa78bba8afe83cffd80b11ca3999f3fb29d09a50",
+    "client_result_sha256": "2fd66806ed40838f17315824259d807685a8b39b8b49a08b8b8e4591525f3005",
+    "metrics_log_sha256": "79aa189fcfea48e87efcd72a9a91eb73fccbe4e77db56840f064e8eb200c5adf",
+    "server_log_path": "/root/vllm/vllm-hust-benchmark/reports/issue_135_readiness_slo_matrix/sharegpt-online/burst/rep3/server.log",
+    "client_result_path": "/root/vllm/vllm-hust-benchmark/reports/issue_135_readiness_slo_matrix/sharegpt-online/burst/rep3/client_result.json",
+    "metrics_log_path": "/root/vllm/vllm-hust-benchmark/reports/issue_135_readiness_slo_matrix/sharegpt-online/burst/rep3/metrics.txt"
+  }
+}

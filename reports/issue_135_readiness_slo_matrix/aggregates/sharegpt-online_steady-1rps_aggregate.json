@@ -1,0 +1,207 @@
+{
+  "schema_version": "readiness-slo-aggregate/v1",
+  "strategy": "median+iqr-across-repetitions",
+  "primary_metric": "output_throughput_tps",
+  "workload": "sharegpt-online",
+  "load_profile": "steady-1rps",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "hardware_chip_model": "910B2",
+  "chip_count": 1,
+  "repetition_count": 3,
+  "repetition_total": 3,
+  "repetition_indices": [
+    1,
+    2,
+    3
+  ],
+  "overall_status": "admitted",
+  "metrics": {
+    "output_throughput_tps": {
+      "median": 173.51191940537998,
+      "q1": 172.68796025672543,
+      "q3": 175.2749710970726,
+      "iqr": 2.587010840347176,
+      "raw_values": [
+        171.86400110807088,
+        177.03802278876523,
+        173.51191940537998
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    },
+    "success_rate": {
+      "median": 1.0,
+      "q1": 1.0,
+      "q3": 1.0,
+      "iqr": 0.0,
+      "raw_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    },
+    "ttft_ms_mean": {
+      "median": 238.40472020208836,
+      "q1": 238.15472525078803,
+      "q3": 239.18712326791137,
+      "iqr": 1.0323980171233416,
+      "raw_values": [
+        238.40472020208836,
+        237.9047302994877,
+        239.9695263337344
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    },
+    "ttft_ms_p99": {
+      "median": 374.29720878601046,
+      "q1": 369.4032188132402,
+      "q3": 374.38129005487986,
+      "iqr": 4.978071241639668,
+      "raw_values": [
+        364.50922884047,
+        374.29720878601046,
+        374.4653713237492
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    },
+    "tpot_ms_mean": {
+      "median": 87.37585945557333,
+      "q1": 86.35205057606294,
+      "q3": 87.81083600090602,
+      "iqr": 1.4587854248430858,
+      "raw_values": [
+        88.24581254623872,
+        85.32824169655255,
+        87.37585945557333
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    },
+    "tpot_ms_p99": {
+      "median": 88.22330582598482,
+      "q1": 87.02534876537419,
+      "q3": 89.38224981611121,
+      "iqr": 2.3569010507370223,
+      "raw_values": [
+        90.5411938062376,
+        85.82739170476357,
+        88.22330582598482
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    },
+    "itl_ms_p99": {
+      "median": 96.5387670416385,
+      "q1": 96.42464546021074,
+      "q3": 97.86427431274205,
+      "iqr": 1.439628852531314,
+      "raw_values": [
+        99.18978158384562,
+        96.5387670416385,
+        96.31052387878299
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    },
+    "queue_wait_ms_p99": {
+      "median": 374.29720878601046,
+      "q1": 369.4032188132402,
+      "q3": 374.38129005487986,
+      "iqr": 4.978071241639668,
+      "raw_values": [
+        364.50922884047,
+        374.29720878601046,
+        374.4653713237492
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    },
+    "prefix_cache_hit_rate": {
+      "median": 0.0,
+      "q1": 0.0,
+      "q3": 0.0,
+      "iqr": 0.0,
+      "raw_values": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "outlier_mask": [
+        false,
+        false,
+        false
+      ],
+      "outlier_count": 0
+    }
+  },
+  "counters": {
+    "preemption_count": {
+      "total": 0,
+      "raw_values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "eviction_count": {
+      "total": 0,
+      "raw_values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "restore_count": {
+      "total": 0,
+      "raw_values": [
+        0,
+        0,
+        0
+      ]
+    },
+    "slo_miss_count": {
+      "total": 0,
+      "raw_values": [
+        0,
+        0,
+        0
+      ]
+    }
+  }
+}

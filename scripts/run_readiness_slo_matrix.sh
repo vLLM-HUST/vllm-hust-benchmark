@@ -164,6 +164,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# CLI_COMPAT is defaulted from BENCHMARK_REPO above, but BENCHMARK_REPO is only
+# finalized by --benchmark-repo during arg parsing. If the user passed
+# --benchmark-repo (or VLLM_HUST_BENCHMARK_REPO env) without an explicit
+# --cli-compat / VLLM_HUST_CLI_COMPAT, recompute CLI_COMPAT so it points at the
+# resolved benchmark repo instead of the pre-parse default (e.g. $(pwd)).
+if [[ -z "${VLLM_HUST_CLI_COMPAT:-}" ]]; then
+    CLI_COMPAT="${BENCHMARK_REPO}/scripts/run_vllm_cli_compat.py"
+fi
+
 # ---------------------------------------------------------------------------
 # Validate inputs (fail-closed).
 # ---------------------------------------------------------------------------
@@ -442,6 +451,83 @@ stop_server() {
         sleep 1
         wait_attempts=$((wait_attempts + 1))
     done
+    # Precise residual cleanup. vllm's multiprocessing spawn can re-launch the
+    # `-m vllm.entrypoints.openai.api_server` launcher (and its engine children)
+    # into a NEW process group, so `kill -- -PGID` above may not reach them.
+    # The smoke run for issue #135 observed exactly this: a launcher process
+    # survived the process-group kill and kept HBM allocated on the chip.
+    # Clean up any remaining vllm server process bound to OUR ${PORT}. The
+    # pattern is anchored on `api_server`, NOT a bare `vllm`, so this does NOT
+    # match this runner script itself (its cmdline contains a `vllm` path and
+    # `--port ${PORT}` but no `api_server`). Scoping on `--port ${PORT}` keeps
+    # this precise to this server and avoids killing other tenants' servers on
+    # other ports (per project memory: use precise cleanup, never broad pkill).
+    local residual_pids
+    residual_pids="$(pgrep -f "api_server.*--port ${PORT}" 2>/dev/null || true)"
+    if [[ -n "${residual_pids}" ]]; then
+        echo "WARN: killing residual vllm processes on port ${PORT}: ${residual_pids}" >&2
+        # shellcheck disable=SC2086
+        for pid in ${residual_pids}; do
+            kill -9 "${pid}" 2>/dev/null || true
+        done
+        # Give the killed processes a moment to release HBM.
+        sleep 3
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# BurstGPT input preparation.
+#
+# The engine's BurstGPTDataset.load_data() keeps ALL original columns of the
+# raw BurstGPT_3.csv (Timestamp, Session ID, Elapsed time, Model, Request
+# tokens, Response tokens, Total tokens, Log Type), but
+# BurstGPTDataset.sample() reads input/output lengths POSITIONALLY at columns
+# [2] and [3]. In the raw CSV, column [3] is the Model name (e.g. "GPT-4"),
+# so ``int(data[i][3])`` raises ``ValueError: invalid literal for int()`` and
+# the bench run produces no client_result.json (observed on burstgpt/burst/rep1).
+# We cannot patch the engine (it is pinned to a fixed commit for
+# reproducibility), so we pre-process the raw CSV into a layout the engine's
+# positional access expects: Request tokens at column [2] and Response tokens
+# at column [3], while keeping the "Model" and "Response tokens" column names
+# that load_data() filters on. Only GPT-4 rows with positive Response tokens
+# are kept (the exact filter load_data() applies), so the random_state
+# sampling semantics are unchanged.
+# ---------------------------------------------------------------------------
+BURGPT_RAW_CSV="/data/shared_datasets/strict-inputs/BurstGPT_3.csv"
+BURGPT_INPUT_DIR="${OUTPUT_DIR}/inputs"
+BURGPT_INPUT_CSV="${BURGPT_INPUT_DIR}/BurstGPT_processed.csv"
+
+prepare_burstgpt_dataset() {
+    if [[ -f "${BURGPT_INPUT_CSV}" ]]; then
+        return 0
+    fi
+    if [[ ! -f "${BURGPT_RAW_CSV}" ]]; then
+        echo "ERROR: BurstGPT raw CSV not found: ${BURGPT_RAW_CSV}" >&2
+        return 1
+    fi
+    mkdir -p "${BURGPT_INPUT_DIR}"
+    echo "INFO: preparing BurstGPT dataset for engine positional parser"
+    "${PYTHON_BIN}" - "${BURGPT_RAW_CSV}" "${BURGPT_INPUT_CSV}" <<'PYEOF'
+import pandas as pd
+import sys
+raw, out = sys.argv[1], sys.argv[2]
+df = pd.read_csv(raw)
+# Same GPT-4 / positive-response filter the engine's load_data() applies.
+df = df[df["Model"] == "GPT-4"]
+df = df[df["Response tokens"] > 0]
+# Reorder so the engine's sample() positional access works: [2]=input_len
+# (Request tokens), [3]=output_len (Response tokens), while keeping the
+# "Model" / "Response tokens" named columns the filter references.
+df = df[["Timestamp", "Session ID", "Request tokens", "Response tokens",
+         "Model", "Total tokens", "Log Type"]]
+df.to_csv(out, index=False)
+PYEOF
+    if [[ ! -f "${BURGPT_INPUT_CSV}" ]]; then
+        echo "ERROR: failed to prepare BurstGPT dataset" >&2
+        return 1
+    fi
+    echo "INFO: prepared BurstGPT dataset at ${BURGPT_INPUT_CSV}"
+    return 0
 }
 
 # ---------------------------------------------------------------------------
@@ -454,9 +540,22 @@ run_workload() {
     local client_result="$3"
     local metrics_file="$4"
 
-    local dataset request_rate
+    local dataset request_rate dataset_path
     dataset="$(workload_dataset "${workload}")"
     request_rate="$(profile_request_rate "${profile}")"
+    # Resolve the dataset file for datasets that require an explicit path
+    # (sharegpt-online / burstgpt). random-online uses vllm script defaults.
+    # BurstGPT uses the pre-processed CSV (see prepare_burstgpt_dataset).
+    case "${dataset}" in
+        sharegpt) dataset_path="/data/shared_datasets/strict-inputs/ShareGPT_V3_unfiltered_cleaned_split.json" ;;
+        burstgpt)
+            if ! prepare_burstgpt_dataset; then
+                return 1
+            fi
+            dataset_path="${BURGPT_INPUT_CSV}"
+            ;;
+        *) dataset_path="" ;;
+    esac
 
     echo "INFO: running bench serve (dataset=${dataset}, num_prompts=${NUM_PROMPTS}, rate=${request_rate})"
 
@@ -469,6 +568,7 @@ run_workload() {
         --endpoint /v1/completions \
         --base-url "http://127.0.0.1:${PORT}" \
         --dataset-name "${dataset}" \
+        ${dataset_path:+--dataset-path "${dataset_path}"} \
         --model "${SERVED_MODEL_NAME}" \
         --tokenizer "${MODEL_PATH}" \
         --num-prompts "${NUM_PROMPTS}" \
@@ -498,7 +598,11 @@ run_recovery_probe() {
     probe_dir="$(dirname "${probe_result}")"
     local probe_client="${probe_dir}/probe_client_result.json"
 
-    echo "INFO: recovery probe: sending 1 request (rate=0, immediate)"
+    # serve.py asserts current_request_rate > 0.0, so rate 0 is rejected.
+    # With a single probe prompt the first request is still dispatched at
+    # t=0, so rate=1 preserves the 'immediate single request' semantics
+    # while passing the assert.
+    echo "INFO: recovery probe: sending 1 request (rate=1, immediate)"
 
     NO_PROXY="127.0.0.1,localhost" no_proxy="127.0.0.1,localhost" \
     "${PYTHON_BIN}" "${CLI_COMPAT}" bench serve \
@@ -514,7 +618,7 @@ run_recovery_probe() {
         --num-prompts 1 \
         --input-len "${INPUT_LEN}" \
         --output-len "${OUTPUT_LEN}" \
-        --request-rate 0 \
+        --request-rate 1 \
         --metric-percentiles '50,95,99'
 
     if [[ ! -f "${probe_client}" ]]; then
