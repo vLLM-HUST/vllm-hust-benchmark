@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "canonical_registry": "https://github.com/vLLM-HUST/vllm-hust-docs/tree/codex/ecosystem-architecture-reorganization/registry",
+  "repository": "https://github.com/vLLM-HUST/vllm-hust-benchmark",
+  "repository_role": "benchmark_tool",
+  "relation_to_runtime": "produces_runtime_evidence",
+  "lifecycle": "supported",
+  "artifacts": [
+    {
+      "id": "vllm-hust-benchmark",
+      "artifact_type": "tool",
+      "system_role": "benchmark_evidence",
+      "delivery_model": "python_distribution",
+      "execution_planes": ["offline"],
+      "integration_contracts": [],
+      "integration_surfaces": [
+        "vllm.benchmark_cli",
+        "vllm-hust.website_result_schema"
+      ]
+    }
+  ],
+  "system_boundaries": {
+    "is": [
+      "a stable orchestration entry point for runtime benchmarks",
+      "an owner of scenario registries, run manifests, result shaping, and publication handoff"
+    ],
+    "is_not": [
+      "the inference runtime or benchmark hot-path implementation",
+      "a source of performance claims without exact run provenance",
+      "the public website or canonical ecosystem registry"
+    ]
+  },
+  "validation": [
+    "python -m pytest -q",
+    "validate run manifests and result schemas before publication",
+    "run matched runtime/baseline scenarios before publishing comparisons"
+  ],
+  "compatibility_document": "README.md#what-this-repo-wraps"
+}

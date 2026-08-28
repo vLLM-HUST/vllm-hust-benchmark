@@ -7,6 +7,17 @@ the real benchmark implementations stay in `vllm-hust`. This repo resolves the s
 and `vllm-hust-website` repositories, invokes the benchmark entrypoints from there, and keeps result
 export and website publication flows in one place.
 
+## Ecosystem classification
+
+This repository is an offline benchmark and evidence orchestration tool. It
+wraps runtime-owned benchmark implementations, owns scenario/run/result
+metadata, and hands validated artifacts to the website publication flow. It is
+not the inference runtime, a runtime plugin, or the canonical public catalog.
+Repository presence and a successful run do not by themselves establish a
+performance claim; every published comparison still requires exact runtime,
+platform, workload, configuration, and result provenance. The machine-readable
+boundary is [`.vllm-hust/repository-profile.json`](./.vllm-hust/repository-profile.json).
+
 For runtime comparisons, the wrapper now understands two execution targets:
 
 - `vllm-hust` (default): the sibling workspace checkout at `../vllm-hust`
