@@ -1,0 +1,295 @@
+{
+  "entry_id": "abc6f9be-cdf2-4626-8e1a-453758e5c47f",
+  "engine": "vllm",
+  "engine_version": "0.25.1+mtp2.abi",
+  "config_type": "multi_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B2",
+    "chip_count": 2,
+    "interconnect": "unknown",
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 128.0
+  },
+  "model": {
+    "canonical_id": "local:Qwen3.8-27B",
+    "repo_id": "Qwen3.8-27B",
+    "short_name": "Qwen3.8-27B",
+    "display_name": "Qwen3.8-27B",
+    "name": "Qwen3.8-27B",
+    "parameters": "27B",
+    "precision": "BF16",
+    "quantization": "None"
+  },
+  "workload": {
+    "name": "prefix-repetition-online",
+    "input_length": null,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": 8,
+    "dataset": "prefix_repetition"
+  },
+  "metrics": {
+    "ttft_ms": 2134.72487168754,
+    "tbt_ms": 53.68246180150905,
+    "throughput_tps": 129.01083821643445,
+    "peak_mem_mb": null,
+    "error_rate": 0.0
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Huawei Ascend 910B",
+      "representative_model_band": "27B",
+      "representative_business_scenario": "long-context-chat",
+      "baseline_engine": "",
+      "declared_baseline_engine": "",
+      "baseline_status": "no-baseline-declared",
+      "owner_confirmed": null,
+      "notes": "27B/TP2 dataset-matched comparison; does not claim official 14B/TP1 goal coverage."
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": null,
+      "long_context_throughput_stable": null,
+      "long_context_ttft_p95_ms": null,
+      "long_context_ttft_p99_ms": null,
+      "long_context_tpot_p95_ms": null,
+      "long_context_tpot_p99_ms": null,
+      "long_context_ttft_p95_stable": null,
+      "long_context_ttft_p99_stable": null,
+      "long_context_tpot_p95_stable": null,
+      "long_context_tpot_p99_stable": null,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "1.0",
+    "backend": "0.25.1rc1",
+    "core": "0.25.1",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.13.6",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null
+  },
+  "metadata": {
+    "submitted_at": "2026-09-22T15:02:34Z",
+    "submitter": "vLLM-HUST/BetterScale",
+    "data_source": "official-dataset-tp2-abba-comparison",
+    "engine": "vllm",
+    "engine_version": "0.25.1+mtp2.abi",
+    "reproducible_cmd": null,
+    "git_commit": "752a3a504485790a2e8491cacbb35c137339ad34",
+    "github_user": null,
+    "github_commit_url": "https://github.com/vllm-project/vllm/commit/752a3a504485790a2e8491cacbb35c137339ad34",
+    "github_repository": "vllm-project/vllm",
+    "github_ref": "752a3a504485790a2e8491cacbb35c137339ad34",
+    "github_event_name": null,
+    "github_pr_number": null,
+    "github_pr_url": null,
+    "release_date": null,
+    "changelog_url": null,
+    "notes": "Same official dataset, not the historical fixed-target deployment. Graph/APC/AIV; actual per-arm configuration and both ABBA repeats retained. MTP2 on both arms. Frozen experimental sources,32K context; not a released wheel. Native uses required SD/V1 Mamba ABI bridge. APC-off random-latency unsupported. See source-identity.json.",
+    "verified": null,
+    "idempotency_key": "5c58712dc8c48750279bea24e7348de2b121503659d851c2e4e3c345d117b94b",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "runtime_provenance": {
+      "python": "3.12.11",
+      "engine": {
+        "repository": "vllm-project/vllm",
+        "ref": "v0.25.1",
+        "commit": "752a3a504485790a2e8491cacbb35c137339ad34"
+      },
+      "plugin": {
+        "engine": "vllm-ascend",
+        "repository": "vllm-project/vllm-ascend",
+        "ref": "v0.25.1rc1",
+        "commit": "9bf964cb4b87c8cd0d6852c41a55b3c29711fa95"
+      }
+    },
+    "measurement_scope": "dataset-matched",
+    "official_workload_source": {
+      "path": "docs/official-baselines/official-ascend-jan-2026-v0180-prefix-repetition-online-qwen25-14b-910b2.json",
+      "sha256": "2073a8590647aa993ca69c8a7d75fce6ff64591519e1e9a34d30fa7ae7f3dfcc"
+    },
+    "inherited_target_id": "official-ascend-jan-2026-v0.18.0-prefix-repetition-online-qwen25-14b-910b2",
+    "client_overrides": {
+      "request_rate": {
+        "official": 1,
+        "measured": "inf"
+      },
+      "max_concurrency": {
+        "official": null,
+        "measured": 8
+      },
+      "seed": {
+        "official": null,
+        "measured": 0
+      }
+    },
+    "raw_result": "repeat-3.json.gz",
+    "dataset_manifest": "dataset-manifest.json",
+    "candidate_source_commit": null,
+    "experimental_source_identity": {
+      "scope": "Frozen experimental MTP2 source, not unchanged released wheel",
+      "candidate_qualified_source": "hw3:/workspace/my-ascend-workspace/runs/qwen27-partition-serving/mtp-gdn-fusion-service-20260921-v2",
+      "candidate_qualification": "mtp-gdn-fusion-final-20260921 PASS",
+      "native_qualified_source": "hw3:/workspace/my-ascend-workspace/runs/qwen27-partition-serving/mtp-count-service-20260920-v2/native-k2",
+      "candidate_source_archive_sha256": "c7ad2b9110cfb107db6171375c25f721d513acbc1723bc0cd1446c3390028cd3",
+      "native_source_archive_sha256": "856e6d1d5777ef5c7a083af513639db98303e6414bc89adcf639142ec1a0e291",
+      "model": "local:Qwen3.8-27B",
+      "physical_devices": [
+        6,
+        7
+      ],
+      "source_checkout_preserved": "/workspace/strengthen-dsv4 (dirty; never edited)",
+      "mtp_tokens": 2,
+      "context": 32768,
+      "both_graph": true,
+      "native_compatibility": "SD/V1 Mamba ABI bridge only; native FULL_AND_PIECEWISE",
+      "candidate": "FULL + device continuation + lookahead APC + qualified mixed GDN layout fusion",
+      "lease": "/root/tp8.lock retained, plus existing selected-device locks6/7 to cooperate with newer partial-card callers"
+    },
+    "throughput_token_basis": "output",
+    "repeat_artifacts": [
+      "repeat-0.json.gz",
+      "repeat-0.metrics-before.txt.gz",
+      "repeat-0.metrics-after.txt.gz",
+      "repeat-3.json.gz",
+      "repeat-3.metrics-before.txt.gz",
+      "repeat-3.metrics-after.txt.gz"
+    ],
+    "repetitions": 2,
+    "evidence_artifact": "repeats.json"
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "qwen27-tp2-mtp2-20260922-prefix-repetition-online",
+    "scenario": "prefix-repetition-online",
+    "model": "Qwen3.8-27B",
+    "model_parameters": "27B",
+    "model_precision": "BF16",
+    "model_quantization": "None",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B2",
+    "chip_count": 2,
+    "node_count": 1,
+    "resolved_server_parameters": {
+      "host": "127.0.0.1",
+      "port": 32261,
+      "served_model_name": "qwen27",
+      "tensor_parallel_size": 2,
+      "distributed_executor_backend": "mp",
+      "worker_cls": "betterscale.worker.Worker",
+      "dtype": "bfloat16",
+      "max_model_len": 32768,
+      "max_num_seqs": 8,
+      "max_num_batched_tokens": 2048,
+      "kv_cache_memory_bytes": 6442450944,
+      "seed": 17,
+      "enable_prefix_caching": true,
+      "mamba_cache_mode": "align",
+      "enable_prompt_tokens_details": true,
+      "async_scheduling": true,
+      "shutdown_timeout": 60,
+      "additional_config": {
+        "enable_cpu_binding": false
+      },
+      "limit_mm_per_prompt": {
+        "image": 0,
+        "video": 0
+      },
+      "compilation_config": {
+        "cudagraph_mode": "FULL_AND_PIECEWISE",
+        "cudagraph_capture_sizes": [
+          3,
+          6,
+          12,
+          24
+        ],
+        "max_cudagraph_capture_size": 24
+      },
+      "speculative_config": {
+        "method": "mtp",
+        "num_speculative_tokens": 2
+      },
+      "enforce_eager": false,
+      "TASK_QUEUE_ENABLE": "1",
+      "HCCL_OP_EXPANSION_MODE": "AIV"
+    },
+    "resolved_client_parameters": {
+      "backend": "vllm",
+      "endpoint": "/v1/completions",
+      "dataset_name": "prefix_repetition",
+      "ignore_eos": true,
+      "num_prompts": 200,
+      "request_rate": "inf",
+      "host": "127.0.0.1",
+      "port": 32261,
+      "model": "/models/vllm-ascend-models/Qwen3.8-27B",
+      "prefix_repetition_output_len": 256,
+      "prefix_repetition_num_prefixes": 10,
+      "prefix_repetition_suffix_len": 256,
+      "prefix_repetition_prefix_len": 3840,
+      "max_concurrency": 8,
+      "seed": 0,
+      "served_model_name": "qwen27",
+      "tokenizer": "/models/vllm-ascend-models/Qwen3.8-27B",
+      "save_result": true,
+      "save_detailed": true,
+      "percentile_metrics": "ttft,tpot,itl,e2el",
+      "metric_percentiles": "50,95,99",
+      "temperature": 0
+    },
+    "resolved_spec_hash": "a2d2d83d2ed060dfaceb74387468b9686794d9664cdbfe523a5527926d57b913"
+  },
+  "coverage_class": "targeted-pair",
+  "campaign_id": "betterscale-official-datasets-tp2-mtp2-20260922",
+  "comparison_id": "qwen27-tp2-mtp2-prefix-repetition-online",
+  "point_role": "baseline",
+  "repeat_group": "prefix-repetition-online-native",
+  "repeat_index": 3,
+  "canonical_aggregate": {
+    "method": "mean",
+    "count": 2,
+    "metrics": {
+      "throughput_tps": {
+        "min": 125.43427983114198,
+        "max": 132.5873966017269,
+        "std": 5.058017375099822,
+        "value": 129.01083821643445
+      },
+      "ttft_ms": {
+        "min": 2096.147527535177,
+        "max": 2173.3022158399035,
+        "std": 54.55660330060668,
+        "value": 2134.72487168754
+      },
+      "error_rate": {
+        "min": 0.0,
+        "max": 0.0,
+        "std": 0.0,
+        "value": 0.0
+      },
+      "tbt_ms": {
+        "min": 52.11621575784118,
+        "max": 55.24870784517692,
+        "std": 2.2150063969683007,
+        "value": 53.68246180150905
+      }
+    },
+    "outlier_handling": "none",
+    "outlier_details": null,
+    "note": "Aggregated from 2 independent run(s) using mean."
+  }
+}
