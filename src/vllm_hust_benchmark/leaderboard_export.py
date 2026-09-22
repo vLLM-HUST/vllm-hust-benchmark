@@ -11,6 +11,10 @@ from typing import Any
 
 from vllm_hust_benchmark import __version__ as benchmark_version
 from vllm_hust_benchmark.metric_semantics import METRIC_CATALOG
+from vllm_hust_benchmark.benchmark_metrics import (
+    derive_metrics_from_benchmark_result as _derive_metrics_from_benchmark_result,
+    safe_float as _safe_float,
+)
 from vllm_hust_benchmark.model_registry import normalize_model_identity_payload
 from vllm_hust_benchmark.model_registry import resolve_model_identity
 from vllm_hust_benchmark.model_registry import validate_model_identity_payload
@@ -307,88 +311,6 @@ def _load_same_spec_payload(same_spec_file: Path) -> dict[str, Any]:
     if not isinstance(payload.get("resolved_client_parameters"), dict):
         raise ValueError("same spec resolved_client_parameters must be an object")
     return payload
-
-
-def _safe_float(value: Any) -> float | None:
-    try:
-        if value is None:
-            return None
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _derive_metrics_from_benchmark_result(
-    benchmark_result_payload: dict[str, Any],
-    *,
-    peak_mem_mb: float | None,
-    benchmark_type: str = "serve",
-) -> dict[str, Any]:
-    completed = int(benchmark_result_payload.get("completed") or 0)
-    failed = int(benchmark_result_payload.get("failed") or 0)
-    total = completed + failed
-    errors = benchmark_result_payload.get("errors") or []
-    if total == 0 and isinstance(errors, list) and errors:
-        failed = sum(1 for item in errors if item)
-        completed = len(errors) - failed
-        total = len(errors)
-
-    mean_ttft_ms = _safe_float(benchmark_result_payload.get("mean_ttft_ms"))
-    if mean_ttft_ms is None:
-        avg_latency_seconds = _safe_float(benchmark_result_payload.get("avg_latency"))
-        if avg_latency_seconds is not None:
-            mean_ttft_ms = avg_latency_seconds * 1000.0
-
-    mean_tbt_ms = (
-        _safe_float(benchmark_result_payload.get("mean_tpot_ms"))
-        or _safe_float(benchmark_result_payload.get("mean_tbt_ms"))
-        or _safe_float(benchmark_result_payload.get("tpot_ms"))
-        or _safe_float(benchmark_result_payload.get("tbt_ms"))
-    )
-
-    throughput_tps = (
-        _safe_float(benchmark_result_payload.get("output_throughput"))
-        or _safe_float(benchmark_result_payload.get("tokens_per_second"))
-        or _safe_float(benchmark_result_payload.get("total_token_throughput"))
-        or _safe_float(benchmark_result_payload.get("requests_per_second"))
-        or _safe_float(benchmark_result_payload.get("request_throughput"))
-        or 0.0
-    )
-
-    if total > 0:
-        error_rate = failed / total
-    else:
-        error_rate = 0.0
-
-    metrics = {
-        "ttft_ms": float(mean_ttft_ms) if mean_ttft_ms is not None else None,
-        "tbt_ms": float(mean_tbt_ms) if mean_tbt_ms is not None else None,
-        "throughput_tps": float(throughput_tps),
-        "peak_mem_mb": int(
-            peak_mem_mb or benchmark_result_payload.get("peak_mem_mb") or 0.0
-        )
-        if (peak_mem_mb or benchmark_result_payload.get("peak_mem_mb") or 0.0)
-        is not None
-        else None,
-        "error_rate": float(error_rate),
-    }
-
-    # 根据 benchmark_type 覆盖不适用指标
-    if benchmark_type == "throughput":
-        # throughput 不测量 TTFT 和 TBT/TPOT
-        metrics["ttft_ms"] = None
-        # tbt_ms 已由上面的解析逻辑处理为 None，无需重复
-    elif benchmark_type == "latency":
-        # latency 不测吞吐，错误率置为 0.0（保持字段完整性）
-        metrics["throughput_tps"] = None
-        metrics["error_rate"] = 0.0
-
-    missing_metrics = [key for key in REQUIRED_METRIC_KEYS if key not in metrics]
-    if missing_metrics:
-        raise ValueError(
-            f"derived metrics missing required keys: {', '.join(missing_metrics)}"
-        )
-    return metrics
 
 
 def load_export_payload(

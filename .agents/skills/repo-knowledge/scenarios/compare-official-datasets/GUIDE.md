@@ -75,3 +75,17 @@ The standard producer still owns exports. New entries marked
 `metadata.measurement_scope=dataset-matched` with an unregistered, non-official spec ID retain
 `verified=false` and are labeled `outside-fixed-target`, not invented historical backfills. This
 status is a scope declaration, not validation of performance or dataset equality.
+
+Upstream metric translation now lives in `benchmark_metrics.py`: offline `avg_latency` becomes
+`batch_latency_ms`, never TTFT; request/s cannot fill `throughput_tps`; missing peak memory and
+error observations remain null. Existing published artifacts are not retroactively rewritten. The
+current catalog aliases `tpot_ms` to `tbt_ms`; this field is a per-request average TPOT, not the raw
+ITL distribution. Keep that definition explicit in new comparison methods.
+
+The v0.25.1 offline throughput JSON reports total input+output tokens/s, while its stdout separately
+reports actual output-token count. If presenting output tokens/s consistently with HTTP results,
+derive it from that count and measured elapsed seconds, retain both raw files, and disclose the
+basis. Never substitute requests/s. Use existing
+`aggregate_results.aggregate_entries(method="mean", outlier_handling="none")` for two-repeat
+producer aggregates and retain both raw entries; a latest/best front-end selection is not a repeat
+mean.
