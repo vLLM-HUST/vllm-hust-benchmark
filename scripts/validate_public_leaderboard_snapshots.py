@@ -171,13 +171,47 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
     spec_id = str(same_spec.get("spec_id") or "")
     metadata = entry.get("metadata") if isinstance(entry.get("metadata"), dict) else {}
 
+    outside_fixed_target = (
+        metadata.get("official_admission_status") == "outside-fixed-target"
+    )
+    valid_dataset_scope = False
+    if outside_fixed_target:
+        registered_ids = {
+            target["target_id"] for target in build_registry(REPO_ROOT)["targets"]
+        }
+        valid_dataset_scope = (
+            metadata.get("measurement_scope") == "dataset-matched"
+            and metadata.get("verified") is False
+            and bool(str(metadata.get("official_admission_reason") or "").strip())
+            and bool(spec_id)
+            and not spec_id.startswith("official-")
+            and spec_id not in registered_ids
+            and not any(
+                metadata.get(field)
+                for field in (
+                    "target_id",
+                    "target_version",
+                    "profile_id",
+                    "target_registry_sha256",
+                )
+            )
+        )
+        if not valid_dataset_scope:
+            errors.append(
+                f"{source.name}:{entry_id}: invalid outside-fixed-target scope or official target claim"
+            )
+
     if entry_id in QUARANTINED_ENTRY_IDS:
         errors.append(
             f"{source.name}:{entry_id}: quarantined entry must not appear in "
             f"public snapshot (issue #79: invalid random-latency record)"
         )
 
-    if engine == PUBLIC_BASELINE_ENGINE and engine_version != PUBLIC_BASELINE_VERSION:
+    if (
+        not valid_dataset_scope
+        and engine == PUBLIC_BASELINE_ENGINE
+        and engine_version != PUBLIC_BASELINE_VERSION
+    ):
         errors.append(
             f"{source.name}:{entry_id}: public vllm baseline must be "
             f"{PUBLIC_BASELINE_VERSION}, got {engine_version!r}"
@@ -198,20 +232,26 @@ def validate_entry(entry: dict[str, Any], *, source: Path) -> list[str]:
         errors.append(
             f"{source.name}:{entry_id}: retired public model {entry_model_name!r}"
         )
-    if entry_precision_value in RETIRED_PUBLIC_PRECISIONS:
+    if not valid_dataset_scope and entry_precision_value in RETIRED_PUBLIC_PRECISIONS:
         errors.append(
             f"{source.name}:{entry_id}: retired public precision "
             f"{entry_precision_value!r}"
         )
 
-    if engine == "vllm-hust" and workload in OFFICIAL_PUBLIC_WORKLOADS and not spec_id:
+    if (
+        not valid_dataset_scope
+        and engine == "vllm-hust"
+        and workload in OFFICIAL_PUBLIC_WORKLOADS
+        and not spec_id
+    ):
         errors.append(
             f"{source.name}:{entry_id}: public vllm-hust official workload "
             f"{workload!r} must include same_spec"
         )
 
     if (
-        engine == "vllm-hust"
+        not valid_dataset_scope
+        and engine == "vllm-hust"
         and workload in OFFICIAL_PUBLIC_WORKLOADS
         and spec_id
         and not spec_id.startswith(OFFICIAL_V0180_SPEC_PREFIX)

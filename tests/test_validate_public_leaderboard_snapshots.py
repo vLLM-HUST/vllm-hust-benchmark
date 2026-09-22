@@ -379,3 +379,58 @@ class TestQuarantineSuspectEntriesValidation:
         module = load_module()
         errors = module.validate_quarantine_suspect_entries(snapshot_dir)
         assert not any("must stay excluded" in e for e in errors)
+
+
+def dataset_matched_entry():
+    return {
+        "entry_id": "new-deployment",
+        "engine": "vllm",
+        "engine_version": "0.25.1",
+        "model": {"name": "local:Qwen3.8-27B", "precision": "BF16"},
+        "same_spec": {"spec_id": "qwen27-tp2-new"},
+        "metadata": {
+            "measurement_scope": "dataset-matched",
+            "verified": False,
+            "official_admission_status": "outside-fixed-target",
+            "official_admission_reason": "No official target equivalence claimed.",
+        },
+    }
+
+
+def test_dataset_matched_scope_allows_actual_runtime_and_precision():
+    assert (
+        load_module().validate_entry(dataset_matched_entry(), source=Path("test.json"))
+        == []
+    )
+
+
+def test_dataset_matched_scope_rejects_false_attestation():
+    module = load_module()
+    for mutation in (
+        {"verified": True},
+        {"target_id": "claimed"},
+        {"measurement_scope": "official"},
+        {"official_admission_reason": ""},
+    ):
+        entry = dataset_matched_entry()
+        entry["metadata"].update(mutation)
+        assert module.validate_entry(entry, source=Path("test.json"))
+
+
+def test_dataset_matched_scope_cannot_bypass_registered_or_official_targets():
+    module = load_module()
+    ids = [
+        target["target_id"]
+        for target in module.build_registry(module.REPO_ROOT)["targets"]
+    ]
+    for spec_id in ids + ["official-unregistered", ""]:
+        entry = dataset_matched_entry()
+        entry["same_spec"]["spec_id"] = spec_id
+        assert module.validate_entry(entry, source=Path("test.json"))
+
+
+def test_dataset_matched_scope_still_rejects_quarantined_entry():
+    module = load_module()
+    entry = dataset_matched_entry()
+    entry["entry_id"] = next(iter(module.QUARANTINED_ENTRY_IDS))
+    assert module.validate_entry(entry, source=Path("test.json"))
