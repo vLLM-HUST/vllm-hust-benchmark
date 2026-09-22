@@ -165,3 +165,29 @@ def test_snapshot_binding_writes_report_and_is_idempotent(tmp_path: Path) -> Non
     )
     assert report == first
     assert hashlib.sha256(first_bytes).hexdigest()
+
+
+def test_dataset_matched_deployment_is_not_mislabeled_historical(
+    tmp_path: Path,
+) -> None:
+    entry = _entry()
+    entry["same_spec"]["spec_id"] = "qwen27-tp2-random-online"
+    entry["metadata"].update(measurement_scope="dataset-matched", target_id="stale")
+    admitted, errors = bind_entry_to_official_target(entry, _registry(_target()))
+    assert not admitted and errors
+    assert entry["metadata"]["verified"] is False
+    assert entry["metadata"]["official_admission_status"] == "outside-fixed-target"
+    assert "target_id" not in entry["metadata"]
+    (tmp_path / "leaderboard_multi.json").write_text(json.dumps([entry]))
+    report = bind_snapshot_set(tmp_path, _registry(_target()))
+    assert report["outside_fixed_target"] == 1
+    assert report["historical_unverified"] == report["verified"] == 0
+
+
+def test_dataset_marker_does_not_bypass_registered_target_validation() -> None:
+    entry = _entry()
+    entry["metadata"]["measurement_scope"] = "dataset-matched"
+    entry["engine_version"] = "0.25.1"
+    admitted, errors = bind_entry_to_official_target(entry, _registry(_target()))
+    assert not admitted and errors
+    assert entry["metadata"]["official_admission_status"] == "historical-unverified"

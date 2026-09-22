@@ -238,10 +238,22 @@ def bind_entry_to_official_target(
             "target_registry_sha256",
         ):
             metadata.pop(field, None)
-        metadata["official_admission_status"] = "historical-unverified"
-        metadata["official_admission_reason"] = (
-            f"{HISTORICAL_UNVERIFIED_PREFIX}: " + "; ".join(errors)
+        # New dataset-matched deployments are not historical backfills. This
+        # label does not verify them or weaken any registered target contract.
+        outside_fixed_target = (
+            target is None
+            and not target_id.startswith("official-")
+            and metadata.get("measurement_scope") == "dataset-matched"
         )
+        metadata["official_admission_status"] = (
+            "outside-fixed-target" if outside_fixed_target else "historical-unverified"
+        )
+        prefix = (
+            "dataset-matched deployment; no official fixed-target admission claimed"
+            if outside_fixed_target
+            else HISTORICAL_UNVERIFIED_PREFIX
+        )
+        metadata["official_admission_reason"] = prefix + ": " + "; ".join(errors)
         return False, errors
 
     assert target is not None
@@ -269,6 +281,7 @@ def bind_snapshot_set(
         "files": {},
         "verified": 0,
         "historical_unverified": 0,
+        "outside_fixed_target": 0,
         "reason_counts": {},
     }
     for file_name in SNAPSHOT_FILES:
@@ -280,6 +293,7 @@ def bind_snapshot_set(
             raise TypeError(f"{path} must contain a JSON array")
         verified = 0
         historical_unverified = 0
+        outside_fixed_target = 0
         reason_counts: dict[str, int] = {}
         for entry in payload:
             if not isinstance(entry, dict):
@@ -288,7 +302,13 @@ def bind_snapshot_set(
             if is_verified:
                 verified += 1
             else:
-                historical_unverified += 1
+                if (
+                    entry["metadata"]["official_admission_status"]
+                    == "outside-fixed-target"
+                ):
+                    outside_fixed_target += 1
+                else:
+                    historical_unverified += 1
                 for error in errors:
                     reason = error.split(": actual=", 1)[0]
                     reason_counts[reason] = reason_counts.get(reason, 0) + 1
@@ -300,10 +320,12 @@ def bind_snapshot_set(
             "entries": len(payload),
             "verified": verified,
             "historical_unverified": historical_unverified,
+            "outside_fixed_target": outside_fixed_target,
             "reason_counts": dict(sorted(reason_counts.items())),
         }
         report["verified"] += verified
         report["historical_unverified"] += historical_unverified
+        report["outside_fixed_target"] += outside_fixed_target
         for reason, count in reason_counts.items():
             report["reason_counts"][reason] = (
                 report["reason_counts"].get(reason, 0) + count
