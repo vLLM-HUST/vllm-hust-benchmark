@@ -1,0 +1,270 @@
+{
+  "entry_id": "5f6589df-26b9-4cac-979b-57e08f939fa4",
+  "engine": "betterscale",
+  "engine_version": "0.5.1+g13d43da7",
+  "config_type": "multi_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B2",
+    "chip_count": 2,
+    "interconnect": "unknown",
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 128.0
+  },
+  "model": {
+    "canonical_id": "local:Qwen3.8-27B",
+    "repo_id": "Qwen3.8-27B",
+    "short_name": "Qwen3.8-27B",
+    "display_name": "Qwen3.8-27B",
+    "name": "Qwen3.8-27B",
+    "parameters": "27B",
+    "precision": "BF16",
+    "quantization": "None"
+  },
+  "workload": {
+    "name": "sonnet-throughput",
+    "input_length": null,
+    "output_length": null,
+    "batch_size": null,
+    "concurrent_requests": null,
+    "dataset": "sonnet"
+  },
+  "metrics": {
+    "ttft_ms": null,
+    "tbt_ms": null,
+    "throughput_tps": 199.0037957157397,
+    "peak_mem_mb": null,
+    "error_rate": null
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Huawei Ascend 910B",
+      "representative_model_band": "27B",
+      "representative_business_scenario": "offline-batch-serving",
+      "baseline_engine": "",
+      "declared_baseline_engine": "",
+      "baseline_status": "no-baseline-declared",
+      "owner_confirmed": null,
+      "notes": "27B/TP2 dataset-matched comparison; does not claim official 14B/TP1 goal coverage."
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": null,
+      "long_context_throughput_stable": null,
+      "long_context_ttft_p95_ms": null,
+      "long_context_ttft_p99_ms": null,
+      "long_context_tpot_p95_ms": null,
+      "long_context_tpot_p99_ms": null,
+      "long_context_ttft_p95_stable": null,
+      "long_context_ttft_p99_stable": null,
+      "long_context_tpot_p95_stable": null,
+      "long_context_tpot_p99_stable": null,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "1.0",
+    "backend": "0.25.1rc1",
+    "core": "0.25.1",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+    "python_version": "3.13.6",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null
+  },
+  "metadata": {
+    "submitted_at": "2026-09-22T10:45:26Z",
+    "submitter": "vLLM-HUST/BetterScale",
+    "data_source": "official-dataset-tp2-abba-comparison",
+    "engine": "betterscale",
+    "engine_version": "0.5.1+g13d43da7",
+    "reproducible_cmd": null,
+    "git_commit": "13d43da74d2a99abd0957414a9ed4ea45a0ce4f1",
+    "github_user": null,
+    "github_commit_url": "https://github.com/vLLM-HUST/BetterScale/commit/13d43da74d2a99abd0957414a9ed4ea45a0ce4f1",
+    "github_repository": "vLLM-HUST/BetterScale",
+    "github_ref": "13d43da74d2a99abd0957414a9ed4ea45a0ce4f1",
+    "github_event_name": null,
+    "github_pr_number": null,
+    "github_pr_url": null,
+    "release_date": null,
+    "changelog_url": null,
+    "notes": "Same official dataset, not the historical fixed-target deployment. Graph/APC/AIV; actual per-arm configuration and both ABBA repeats retained. No MTP. Source-qualified 32K context, not an unchanged PyPI wheel measurement.",
+    "verified": null,
+    "idempotency_key": "6f8946f2ef27f7d95691ae16a7fcc51c0e2865c9ea2eb7531c0ecd48271432db",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "runtime_provenance": {
+      "python": "3.12.11",
+      "engine": {
+        "repository": "vllm-project/vllm",
+        "ref": "v0.25.1",
+        "commit": "752a3a504485790a2e8491cacbb35c137339ad34"
+      },
+      "plugin": {
+        "engine": "vllm-ascend",
+        "repository": "vllm-project/vllm-ascend",
+        "ref": "v0.25.1rc1",
+        "commit": "9bf964cb4b87c8cd0d6852c41a55b3c29711fa95"
+      }
+    },
+    "measurement_scope": "dataset-matched",
+    "official_workload_source": {
+      "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sonnet-throughput-qwen25-14b-910b2.json",
+      "sha256": "a9905ce7c45fab8c3dd186ec5b7ccb1a0dd6efbc1a8f89afef7f47c9cd596858"
+    },
+    "inherited_target_id": "official-ascend-jan-2026-v0.18.0-sonnet-throughput-qwen25-14b-910b2",
+    "client_overrides": {},
+    "raw_result": "repeat-2.json.gz",
+    "dataset_manifest": "dataset-manifest.json",
+    "candidate_source_commit": "13d43da74d2a99abd0957414a9ed4ea45a0ce4f1",
+    "throughput_token_basis": "output",
+    "repeat_artifacts": [
+      "repeat-1.json.gz",
+      "repeat-1.log.gz",
+      "repeat-2.json.gz",
+      "repeat-2.log.gz"
+    ],
+    "repetitions": 2,
+    "evidence_artifact": "repeats.json"
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "qwen27-tp2-20260922-sonnet-throughput",
+    "scenario": "sonnet-throughput",
+    "model": "Qwen3.8-27B",
+    "model_parameters": "27B",
+    "model_precision": "BF16",
+    "model_quantization": "None",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B2",
+    "chip_count": 2,
+    "node_count": 1,
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 2,
+      "distributed_executor_backend": "mp",
+      "worker_cls": "betterscale.worker.Worker",
+      "dtype": "bfloat16",
+      "max_model_len": 32768,
+      "max_num_seqs": 8,
+      "max_num_batched_tokens": 2048,
+      "kv_cache_memory_bytes": 6442450944,
+      "seed": 17,
+      "enable_prefix_caching": true,
+      "mamba_cache_mode": "align",
+      "async_scheduling": true,
+      "additional_config": {
+        "enable_cpu_binding": false
+      },
+      "limit_mm_per_prompt": {
+        "image": 0,
+        "video": 0
+      },
+      "compilation_config": {
+        "cudagraph_mode": "FULL",
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          512,
+          1024,
+          1536,
+          2048
+        ],
+        "max_cudagraph_capture_size": 2048
+      },
+      "backend": "vllm",
+      "dataset_name": "sonnet",
+      "dataset_path": "/root/my-ascend-workspace/runs/betterscale-leaderboard/20260922-official-tp2/datasets/sonnet.txt",
+      "num_prompts": 200,
+      "num_warmups": 0,
+      "model": "/models/vllm-ascend-models/Qwen3.8-27B",
+      "enforce_eager": false,
+      "TASK_QUEUE_ENABLE": "0",
+      "HCCL_OP_EXPANSION_MODE": "AIV"
+    },
+    "resolved_client_parameters": {
+      "tensor_parallel_size": 2,
+      "distributed_executor_backend": "mp",
+      "worker_cls": "betterscale.worker.Worker",
+      "dtype": "bfloat16",
+      "max_model_len": 32768,
+      "max_num_seqs": 8,
+      "max_num_batched_tokens": 2048,
+      "kv_cache_memory_bytes": 6442450944,
+      "seed": 17,
+      "enable_prefix_caching": true,
+      "mamba_cache_mode": "align",
+      "async_scheduling": true,
+      "additional_config": {
+        "enable_cpu_binding": false
+      },
+      "limit_mm_per_prompt": {
+        "image": 0,
+        "video": 0
+      },
+      "compilation_config": {
+        "cudagraph_mode": "FULL",
+        "cudagraph_capture_sizes": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          32,
+          64,
+          128,
+          256,
+          512,
+          1024,
+          1536,
+          2048
+        ],
+        "max_cudagraph_capture_size": 2048
+      },
+      "backend": "vllm",
+      "dataset_name": "sonnet",
+      "dataset_path": "/root/my-ascend-workspace/runs/betterscale-leaderboard/20260922-official-tp2/datasets/sonnet.txt",
+      "num_prompts": 200,
+      "num_warmups": 0,
+      "model": "/models/vllm-ascend-models/Qwen3.8-27B"
+    },
+    "resolved_spec_hash": "22306f12855f89ceb1d5236c866e65662009810095529bdbe161902a6f137933"
+  },
+  "coverage_class": "targeted-pair",
+  "campaign_id": "betterscale-official-datasets-tp2-20260922",
+  "comparison_id": "qwen27-tp2-sonnet-throughput",
+  "point_role": "head",
+  "repeat_group": "sonnet-throughput-betterscale",
+  "repeat_index": 2,
+  "canonical_aggregate": {
+    "method": "mean",
+    "count": 2,
+    "metrics": {
+      "throughput_tps": {
+        "min": 197.42710383687205,
+        "max": 200.58048759460735,
+        "std": 2.2297790387781466,
+        "value": 199.0037957157397
+      }
+    },
+    "outlier_handling": "none",
+    "outlier_details": null,
+    "note": "Aggregated from 2 independent run(s) using mean."
+  }
+}
