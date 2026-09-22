@@ -1,0 +1,516 @@
+[
+  {
+    "entry_id": "07b54fbb-80dc-4cdc-a2be-2636f01e3f4d",
+    "engine": "vllm",
+    "engine_version": "0.25.1+mtp2.abi",
+    "config_type": "multi_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 2,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 128.0
+    },
+    "model": {
+      "canonical_id": "local:Qwen3.8-27B",
+      "repo_id": "Qwen3.8-27B",
+      "short_name": "Qwen3.8-27B",
+      "display_name": "Qwen3.8-27B",
+      "name": "Qwen3.8-27B",
+      "parameters": "27B",
+      "precision": "BF16",
+      "quantization": "None"
+    },
+    "workload": {
+      "name": "sharegpt-throughput",
+      "input_length": null,
+      "output_length": null,
+      "batch_size": null,
+      "concurrent_requests": null,
+      "dataset": "sharegpt"
+    },
+    "metrics": {
+      "ttft_ms": null,
+      "tbt_ms": null,
+      "throughput_tps": 175.04785009536812,
+      "peak_mem_mb": null,
+      "error_rate": null
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Huawei Ascend 910B",
+        "representative_model_band": "27B",
+        "representative_business_scenario": "offline-batch-serving",
+        "baseline_engine": "",
+        "declared_baseline_engine": "",
+        "baseline_status": "no-baseline-declared",
+        "owner_confirmed": null,
+        "notes": "27B/TP2 dataset-matched comparison; does not claim official 14B/TP1 goal coverage."
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "1.0",
+      "backend": "0.25.1rc1",
+      "core": "0.25.1",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+      "python_version": "3.13.6",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-09-22T15:02:34Z",
+      "submitter": "vLLM-HUST/BetterScale",
+      "data_source": "official-dataset-tp2-abba-comparison",
+      "engine": "vllm",
+      "engine_version": "0.25.1+mtp2.abi",
+      "reproducible_cmd": null,
+      "git_commit": "752a3a504485790a2e8491cacbb35c137339ad34",
+      "github_user": null,
+      "github_commit_url": null,
+      "github_repository": "vllm-project/vllm",
+      "github_ref": "752a3a504485790a2e8491cacbb35c137339ad34",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": "Same official dataset, not the historical fixed-target deployment. Graph/APC/AIV; actual per-arm configuration and both ABBA repeats retained. MTP2 on both arms. Frozen experimental sources,32K context; not a released wheel. Native uses required SD/V1 Mamba ABI bridge. APC-off random-latency unsupported. See source-identity.json.",
+      "verified": null,
+      "idempotency_key": "5fc22d5d6aa0919eea24ee8b8027d69cdb31d00d81b1f5a452c29d611c3232f6",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "3.12.11",
+        "engine": {
+          "repository": "vllm-project/vllm",
+          "ref": "v0.25.1",
+          "commit": "752a3a504485790a2e8491cacbb35c137339ad34"
+        },
+        "plugin": {
+          "engine": "vllm-ascend",
+          "repository": "vllm-project/vllm-ascend",
+          "ref": "v0.25.1rc1",
+          "commit": "9bf964cb4b87c8cd0d6852c41a55b3c29711fa95"
+        }
+      },
+      "measurement_scope": "dataset-matched",
+      "official_workload_source": {
+        "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+        "sha256": "d5c4b7fa9d0911b04e69deeafbec5cc56386732dec8113074850ac7daa7a9a29"
+      },
+      "inherited_target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "client_overrides": {},
+      "raw_result": "repeat-0.json.gz",
+      "dataset_manifest": "dataset-manifest.json",
+      "candidate_source_commit": null,
+      "experimental_source_identity": {
+        "scope": "Frozen experimental MTP2 source, not unchanged released wheel",
+        "candidate_qualified_source": "hw3:/workspace/my-ascend-workspace/runs/qwen27-partition-serving/mtp-gdn-fusion-service-20260921-v2",
+        "candidate_qualification": "mtp-gdn-fusion-final-20260921 PASS",
+        "native_qualified_source": "hw3:/workspace/my-ascend-workspace/runs/qwen27-partition-serving/mtp-count-service-20260920-v2/native-k2",
+        "candidate_source_archive_sha256": "c7ad2b9110cfb107db6171375c25f721d513acbc1723bc0cd1446c3390028cd3",
+        "native_source_archive_sha256": "856e6d1d5777ef5c7a083af513639db98303e6414bc89adcf639142ec1a0e291",
+        "model": "local:Qwen3.8-27B",
+        "physical_devices": [
+          6,
+          7
+        ],
+        "source_checkout_preserved": "/workspace/strengthen-dsv4 (dirty; never edited)",
+        "mtp_tokens": 2,
+        "context": 32768,
+        "both_graph": true,
+        "native_compatibility": "SD/V1 Mamba ABI bridge only; native FULL_AND_PIECEWISE",
+        "candidate": "FULL + device continuation + lookahead APC + qualified mixed GDN layout fusion",
+        "lease": "/root/tp8.lock retained, plus existing selected-device locks6/7 to cooperate with newer partial-card callers"
+      },
+      "throughput_token_basis": "output"
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "qwen27-tp2-mtp2-20260922-sharegpt-throughput",
+      "scenario": "sharegpt-throughput",
+      "model": "Qwen3.8-27B",
+      "model_parameters": "27B",
+      "model_precision": "BF16",
+      "model_quantization": "None",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B2",
+      "chip_count": 2,
+      "node_count": 1,
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 2,
+        "distributed_executor_backend": "mp",
+        "worker_cls": "betterscale.worker.Worker",
+        "dtype": "bfloat16",
+        "max_model_len": 32768,
+        "max_num_seqs": 8,
+        "max_num_batched_tokens": 2048,
+        "kv_cache_memory_bytes": 6442450944,
+        "seed": 17,
+        "enable_prefix_caching": true,
+        "mamba_cache_mode": "align",
+        "async_scheduling": true,
+        "additional_config": {
+          "enable_cpu_binding": false
+        },
+        "limit_mm_per_prompt": {
+          "image": 0,
+          "video": 0
+        },
+        "compilation_config": {
+          "cudagraph_mode": "FULL_AND_PIECEWISE",
+          "cudagraph_capture_sizes": [
+            3,
+            6,
+            12,
+            24
+          ],
+          "max_cudagraph_capture_size": 24
+        },
+        "speculative_config": {
+          "method": "mtp",
+          "num_speculative_tokens": 2
+        },
+        "backend": "vllm",
+        "dataset_name": "sharegpt",
+        "dataset_path": "/root/my-ascend-workspace/runs/betterscale-leaderboard/20260922-official-tp2/datasets/ShareGPT_V3_unfiltered_cleaned_split.json",
+        "num_prompts": 200,
+        "num_warmups": 0,
+        "model": "/models/vllm-ascend-models/Qwen3.8-27B",
+        "enforce_eager": false,
+        "TASK_QUEUE_ENABLE": "1",
+        "HCCL_OP_EXPANSION_MODE": "AIV"
+      },
+      "resolved_client_parameters": {
+        "tensor_parallel_size": 2,
+        "distributed_executor_backend": "mp",
+        "worker_cls": "betterscale.worker.Worker",
+        "dtype": "bfloat16",
+        "max_model_len": 32768,
+        "max_num_seqs": 8,
+        "max_num_batched_tokens": 2048,
+        "kv_cache_memory_bytes": 6442450944,
+        "seed": 17,
+        "enable_prefix_caching": true,
+        "mamba_cache_mode": "align",
+        "async_scheduling": true,
+        "additional_config": {
+          "enable_cpu_binding": false
+        },
+        "limit_mm_per_prompt": {
+          "image": 0,
+          "video": 0
+        },
+        "compilation_config": {
+          "cudagraph_mode": "FULL_AND_PIECEWISE",
+          "cudagraph_capture_sizes": [
+            3,
+            6,
+            12,
+            24
+          ],
+          "max_cudagraph_capture_size": 24
+        },
+        "speculative_config": {
+          "method": "mtp",
+          "num_speculative_tokens": 2
+        },
+        "backend": "vllm",
+        "dataset_name": "sharegpt",
+        "dataset_path": "/root/my-ascend-workspace/runs/betterscale-leaderboard/20260922-official-tp2/datasets/ShareGPT_V3_unfiltered_cleaned_split.json",
+        "num_prompts": 200,
+        "num_warmups": 0,
+        "model": "/models/vllm-ascend-models/Qwen3.8-27B"
+      },
+      "resolved_spec_hash": "48265aaf65b4f89a768c1805b7ee9b0962de3ed36ad32a02efb0ab7fb3729928"
+    },
+    "coverage_class": "targeted-pair",
+    "campaign_id": "betterscale-official-datasets-tp2-mtp2-20260922",
+    "comparison_id": "qwen27-tp2-mtp2-sharegpt-throughput",
+    "point_role": "baseline",
+    "repeat_group": "sharegpt-throughput-native",
+    "repeat_index": 0
+  },
+  {
+    "entry_id": "5175b4fd-811a-4f48-aa69-7e8ebc661368",
+    "engine": "vllm",
+    "engine_version": "0.25.1+mtp2.abi",
+    "config_type": "multi_gpu",
+    "hardware": {
+      "vendor": "Huawei",
+      "chip_model": "910B2",
+      "chip_count": 2,
+      "interconnect": "unknown",
+      "memory_per_chip_gb": 64.0,
+      "total_memory_gb": 128.0
+    },
+    "model": {
+      "canonical_id": "local:Qwen3.8-27B",
+      "repo_id": "Qwen3.8-27B",
+      "short_name": "Qwen3.8-27B",
+      "display_name": "Qwen3.8-27B",
+      "name": "Qwen3.8-27B",
+      "parameters": "27B",
+      "precision": "BF16",
+      "quantization": "None"
+    },
+    "workload": {
+      "name": "sharegpt-throughput",
+      "input_length": null,
+      "output_length": null,
+      "batch_size": null,
+      "concurrent_requests": null,
+      "dataset": "sharegpt"
+    },
+    "metrics": {
+      "ttft_ms": null,
+      "tbt_ms": null,
+      "throughput_tps": 190.59775103527,
+      "peak_mem_mb": null,
+      "error_rate": null
+    },
+    "constraints": {
+      "scenario_source": "vllm-benchmark",
+      "accountable_scope": {
+        "domestic_chip_class": "Huawei Ascend 910B",
+        "representative_model_band": "27B",
+        "representative_business_scenario": "offline-batch-serving",
+        "baseline_engine": "",
+        "declared_baseline_engine": "",
+        "baseline_status": "no-baseline-declared",
+        "owner_confirmed": null,
+        "notes": "27B/TP2 dataset-matched comparison; does not claim official 14B/TP1 goal coverage."
+      },
+      "metrics": {
+        "single_chip_effective_utilization_pct": null,
+        "typical_throughput_ratio_vs_baseline": null,
+        "typical_ttft_reduction_pct_vs_baseline": null,
+        "typical_tpot_reduction_pct_vs_baseline": null,
+        "long_context_length": null,
+        "long_context_throughput_stable": null,
+        "long_context_ttft_p95_ms": null,
+        "long_context_ttft_p99_ms": null,
+        "long_context_tpot_p95_ms": null,
+        "long_context_tpot_p99_ms": null,
+        "long_context_ttft_p95_stable": null,
+        "long_context_ttft_p99_stable": null,
+        "long_context_tpot_p95_stable": null,
+        "long_context_tpot_p99_stable": null,
+        "unit_token_cost_reduction_pct": null,
+        "multi_tenant_high_utilization": null
+      }
+    },
+    "cluster": null,
+    "versions": {
+      "protocol": "1.0",
+      "backend": "0.25.1rc1",
+      "core": "0.25.1",
+      "benchmark": "0.1.0"
+    },
+    "environment": {
+      "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.38",
+      "python_version": "3.13.6",
+      "pytorch_version": null,
+      "cuda_version": null,
+      "cann_version": null,
+      "driver_version": null
+    },
+    "metadata": {
+      "submitted_at": "2026-09-22T15:02:34Z",
+      "submitter": "vLLM-HUST/BetterScale",
+      "data_source": "official-dataset-tp2-abba-comparison",
+      "engine": "vllm",
+      "engine_version": "0.25.1+mtp2.abi",
+      "reproducible_cmd": null,
+      "git_commit": "752a3a504485790a2e8491cacbb35c137339ad34",
+      "github_user": null,
+      "github_commit_url": null,
+      "github_repository": "vllm-project/vllm",
+      "github_ref": "752a3a504485790a2e8491cacbb35c137339ad34",
+      "github_event_name": null,
+      "github_pr_number": null,
+      "github_pr_url": null,
+      "release_date": null,
+      "changelog_url": null,
+      "notes": "Same official dataset, not the historical fixed-target deployment. Graph/APC/AIV; actual per-arm configuration and both ABBA repeats retained. MTP2 on both arms. Frozen experimental sources,32K context; not a released wheel. Native uses required SD/V1 Mamba ABI bridge. APC-off random-latency unsupported. See source-identity.json.",
+      "verified": null,
+      "idempotency_key": "ee21dafc439dea06bdbfe0dc375646d9e2a0d7e1181292491770dd68b7897290",
+      "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+      "runtime_provenance": {
+        "python": "3.12.11",
+        "engine": {
+          "repository": "vllm-project/vllm",
+          "ref": "v0.25.1",
+          "commit": "752a3a504485790a2e8491cacbb35c137339ad34"
+        },
+        "plugin": {
+          "engine": "vllm-ascend",
+          "repository": "vllm-project/vllm-ascend",
+          "ref": "v0.25.1rc1",
+          "commit": "9bf964cb4b87c8cd0d6852c41a55b3c29711fa95"
+        }
+      },
+      "measurement_scope": "dataset-matched",
+      "official_workload_source": {
+        "path": "docs/official-baselines/official-ascend-jan-2026-v0180-sharegpt-throughput-qwen25-14b-910b2.json",
+        "sha256": "d5c4b7fa9d0911b04e69deeafbec5cc56386732dec8113074850ac7daa7a9a29"
+      },
+      "inherited_target_id": "official-ascend-jan-2026-v0.18.0-sharegpt-throughput-qwen25-14b-910b2",
+      "client_overrides": {},
+      "raw_result": "repeat-3.json.gz",
+      "dataset_manifest": "dataset-manifest.json",
+      "candidate_source_commit": null,
+      "experimental_source_identity": {
+        "scope": "Frozen experimental MTP2 source, not unchanged released wheel",
+        "candidate_qualified_source": "hw3:/workspace/my-ascend-workspace/runs/qwen27-partition-serving/mtp-gdn-fusion-service-20260921-v2",
+        "candidate_qualification": "mtp-gdn-fusion-final-20260921 PASS",
+        "native_qualified_source": "hw3:/workspace/my-ascend-workspace/runs/qwen27-partition-serving/mtp-count-service-20260920-v2/native-k2",
+        "candidate_source_archive_sha256": "c7ad2b9110cfb107db6171375c25f721d513acbc1723bc0cd1446c3390028cd3",
+        "native_source_archive_sha256": "856e6d1d5777ef5c7a083af513639db98303e6414bc89adcf639142ec1a0e291",
+        "model": "local:Qwen3.8-27B",
+        "physical_devices": [
+          6,
+          7
+        ],
+        "source_checkout_preserved": "/workspace/strengthen-dsv4 (dirty; never edited)",
+        "mtp_tokens": 2,
+        "context": 32768,
+        "both_graph": true,
+        "native_compatibility": "SD/V1 Mamba ABI bridge only; native FULL_AND_PIECEWISE",
+        "candidate": "FULL + device continuation + lookahead APC + qualified mixed GDN layout fusion",
+        "lease": "/root/tp8.lock retained, plus existing selected-device locks6/7 to cooperate with newer partial-card callers"
+      },
+      "throughput_token_basis": "output"
+    },
+    "same_spec": {
+      "schema_version": "benchmark-same-spec/v1",
+      "spec_id": "qwen27-tp2-mtp2-20260922-sharegpt-throughput",
+      "scenario": "sharegpt-throughput",
+      "model": "Qwen3.8-27B",
+      "model_parameters": "27B",
+      "model_precision": "BF16",
+      "model_quantization": "None",
+      "hardware_vendor": "Huawei",
+      "hardware_chip_model": "910B2",
+      "chip_count": 2,
+      "node_count": 1,
+      "resolved_server_parameters": {
+        "tensor_parallel_size": 2,
+        "distributed_executor_backend": "mp",
+        "worker_cls": "betterscale.worker.Worker",
+        "dtype": "bfloat16",
+        "max_model_len": 32768,
+        "max_num_seqs": 8,
+        "max_num_batched_tokens": 2048,
+        "kv_cache_memory_bytes": 6442450944,
+        "seed": 17,
+        "enable_prefix_caching": true,
+        "mamba_cache_mode": "align",
+        "async_scheduling": true,
+        "additional_config": {
+          "enable_cpu_binding": false
+        },
+        "limit_mm_per_prompt": {
+          "image": 0,
+          "video": 0
+        },
+        "compilation_config": {
+          "cudagraph_mode": "FULL_AND_PIECEWISE",
+          "cudagraph_capture_sizes": [
+            3,
+            6,
+            12,
+            24
+          ],
+          "max_cudagraph_capture_size": 24
+        },
+        "speculative_config": {
+          "method": "mtp",
+          "num_speculative_tokens": 2
+        },
+        "backend": "vllm",
+        "dataset_name": "sharegpt",
+        "dataset_path": "/root/my-ascend-workspace/runs/betterscale-leaderboard/20260922-official-tp2/datasets/ShareGPT_V3_unfiltered_cleaned_split.json",
+        "num_prompts": 200,
+        "num_warmups": 0,
+        "model": "/models/vllm-ascend-models/Qwen3.8-27B",
+        "enforce_eager": false,
+        "TASK_QUEUE_ENABLE": "1",
+        "HCCL_OP_EXPANSION_MODE": "AIV"
+      },
+      "resolved_client_parameters": {
+        "tensor_parallel_size": 2,
+        "distributed_executor_backend": "mp",
+        "worker_cls": "betterscale.worker.Worker",
+        "dtype": "bfloat16",
+        "max_model_len": 32768,
+        "max_num_seqs": 8,
+        "max_num_batched_tokens": 2048,
+        "kv_cache_memory_bytes": 6442450944,
+        "seed": 17,
+        "enable_prefix_caching": true,
+        "mamba_cache_mode": "align",
+        "async_scheduling": true,
+        "additional_config": {
+          "enable_cpu_binding": false
+        },
+        "limit_mm_per_prompt": {
+          "image": 0,
+          "video": 0
+        },
+        "compilation_config": {
+          "cudagraph_mode": "FULL_AND_PIECEWISE",
+          "cudagraph_capture_sizes": [
+            3,
+            6,
+            12,
+            24
+          ],
+          "max_cudagraph_capture_size": 24
+        },
+        "speculative_config": {
+          "method": "mtp",
+          "num_speculative_tokens": 2
+        },
+        "backend": "vllm",
+        "dataset_name": "sharegpt",
+        "dataset_path": "/root/my-ascend-workspace/runs/betterscale-leaderboard/20260922-official-tp2/datasets/ShareGPT_V3_unfiltered_cleaned_split.json",
+        "num_prompts": 200,
+        "num_warmups": 0,
+        "model": "/models/vllm-ascend-models/Qwen3.8-27B"
+      },
+      "resolved_spec_hash": "48265aaf65b4f89a768c1805b7ee9b0962de3ed36ad32a02efb0ab7fb3729928"
+    },
+    "coverage_class": "targeted-pair",
+    "campaign_id": "betterscale-official-datasets-tp2-mtp2-20260922",
+    "comparison_id": "qwen27-tp2-mtp2-sharegpt-throughput",
+    "point_role": "baseline",
+    "repeat_group": "sharegpt-throughput-native",
+    "repeat_index": 3
+  }
+]
