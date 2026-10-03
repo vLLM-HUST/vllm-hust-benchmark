@@ -84,8 +84,25 @@ def validate_artifact(payload: dict[str, Any], *, expected_scenario_id: str) -> 
             f"artifact scenario does not match index: expected {expected_scenario_id}"
         )
 
-    dataset_ids = _unique_ids(payload.get("datasets"), field="id", context="dataset")
+    datasets = payload.get("datasets")
+    dataset_ids = _unique_ids(datasets, field="id", context="dataset")
     metric_ids = _unique_ids(payload.get("metrics"), field="id", context="metric")
+    applicability: dict[str, set[str]] = {}
+    for dataset in datasets:
+        dataset_id = dataset["id"]
+        applicable = dataset.get("applicable_metric_ids")
+        if not isinstance(applicable, list) or any(
+            not isinstance(metric_id, str) for metric_id in applicable
+        ):
+            raise DatasetValidationError(
+                f"dataset lacks explicit applicable_metric_ids: {dataset_id}"
+            )
+        applicable_set = set(applicable)
+        if len(applicable_set) != len(applicable) or not applicable_set <= metric_ids:
+            raise DatasetValidationError(
+                f"dataset has invalid applicable_metric_ids: {dataset_id}"
+            )
+        applicability[dataset_id] = applicable_set
     results = payload.get("results")
     if not isinstance(results, list):
         raise DatasetValidationError("results must be an array")
@@ -106,10 +123,25 @@ def validate_artifact(payload: dict[str, Any], *, expected_scenario_id: str) -> 
         cells.add(cell)
         if result.get("status") not in RESULT_STATUSES:
             raise DatasetValidationError(f"unsupported result status in {cell}")
+        status = result["status"]
+        is_applicable = metric_id in applicability[dataset_id]
+        if is_applicable == (status == "not_applicable"):
+            raise DatasetValidationError(
+                f"result status contradicts declared applicability: {cell}"
+            )
+        if status in {"not_tested", "queued", "running", "not_applicable"}:
+            if not isinstance(result.get("reason"), str) or not result["reason"]:
+                raise DatasetValidationError(
+                    f"non-measured result lacks reason: {cell}"
+                )
         value = result.get("current_value")
         if value is None:
             value = result.get("value")
         if value is not None:
+            if result.get("baseline_value") is None:
+                raise DatasetValidationError(
+                    f"populated B1 cell lacks matched B0: {cell}"
+                )
             provenance = result.get("provenance")
             if not isinstance(provenance, dict) or not provenance.get("repository"):
                 raise DatasetValidationError(
@@ -119,6 +151,18 @@ def validate_artifact(payload: dict[str, Any], *, expected_scenario_id: str) -> 
                 raise DatasetValidationError(
                     f"populated B1 cell lacks evidence URL: {cell}"
                 )
+    expected_cells = {
+        (dataset_id, metric_id)
+        for dataset_id in dataset_ids
+        for metric_id in metric_ids
+    }
+    if cells != expected_cells:
+        missing = sorted(expected_cells - cells)
+        extra = sorted(cells - expected_cells)
+        raise DatasetValidationError(
+            f"artifact must explicitly cover every declared cell: "
+            f"missing={missing} extra={extra}"
+        )
 
 
 def _sha256(path: Path) -> str:

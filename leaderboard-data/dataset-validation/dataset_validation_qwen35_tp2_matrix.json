@@ -1,0 +1,3167 @@
+{
+  "contract_version": "dataset-validation-v1",
+  "generated_at": "2026-10-03T08:00:00Z",
+  "status": "campaign_defined_no_aggregate_measurements",
+  "source": {
+    "service": "vLLM-HUST Dataset Matrix campaign",
+    "run_id": "qwen35-tp2-dataset-matrix-v1",
+    "repository": "vLLM-HUST/vllm-hust-benchmark",
+    "tracking_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/231"
+  },
+  "baseline": {
+    "id": "native-qwen35-tp2-bf16-dataset-matrix",
+    "label": "Native Qwen3.5 TP2 BF16",
+    "commit": null,
+    "generated_at": null
+  },
+  "candidate_policy": {
+    "id": "best-per-cell",
+    "label": "Best compliant measured result per cell",
+    "single_version_required": false,
+    "rule": "Admit B1 only with a same-spec B0 and exact per-cell runtime, workload, artifact, and revision provenance."
+  },
+  "coverage_contract": {
+    "mode": "explicit-dataset-metric-applicability",
+    "complete_cell_states_required": true,
+    "non_measured_reason_required": true,
+    "matched_b0_required_for_b1": true
+  },
+  "scenario": {
+    "id": "qwen35-35b-a3b-bf16-tp2-dataset-matrix-v1",
+    "label": "Qwen3.5-35B-A3B · BF16 · TP2 · Dataset Matrix",
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+    "hardware": "2× Ascend 910B2",
+    "precision": "BF16",
+    "tensor_parallel_size": 2
+  },
+  "datasets": [
+    {
+      "id": "ai2-arc",
+      "label": "AI2-ARC",
+      "group": "A2",
+      "description": "ARC reasoning evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "aime-2024",
+      "label": "AIME-2024",
+      "group": "A2",
+      "description": "AIME 2024 problems",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "bbh",
+      "label": "BBH",
+      "group": "A2",
+      "description": "Big-Bench Hard tasks",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "bfcl-v3",
+      "label": "BFCL-V3",
+      "group": "A2/A3",
+      "description": "BFCL v3 tool and structured-call data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "bfcl-v4",
+      "label": "BFCL-V4",
+      "group": "A2/A3",
+      "description": "BFCL v4 extracted data; wheel/source copies are not separate datasets",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "burstgpt-trace",
+      "label": "BURSTGPT-TRACE",
+      "group": "A4",
+      "description": "Arrival trace rather than semantic prompt dataset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "evoscientist",
+      "label": "EVOSCIENTIST",
+      "group": "A2",
+      "description": "Two symlinked representations of one workload family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "gpqa",
+      "label": "GPQA",
+      "group": "A2",
+      "description": "gpqa and gpqa-github are source/cache copies of this family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "gsm8k",
+      "label": "GSM8K",
+      "group": "A2",
+      "description": "Main and Socratic configurations share this physical dataset family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "hotpot-qa",
+      "label": "HOTPOT-QA",
+      "group": "A2",
+      "description": "Full HotpotQA data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "hotpotqa-react-100",
+      "label": "HOTPOTQA-REACT-100",
+      "group": "A2",
+      "description": "Frozen ReAct-formatted 100-case derivative",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "humaneval",
+      "label": "HUMANEVAL",
+      "group": "A2",
+      "description": "Code evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "infinitebench",
+      "label": "INFINITEBENCH",
+      "group": "A3",
+      "description": "infinitebench is the source repository and is not a second dataset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "instructcoder",
+      "label": "INSTRUCTCODER",
+      "group": "A2",
+      "description": "Code instruction data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "jsonschemabench",
+      "label": "JSONSCHEMABENCH",
+      "group": "A2",
+      "description": "JSON Schema evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "livecodebench-code-generation",
+      "label": "LIVECODEBENCH-CODE-GENERATION",
+      "group": "A2",
+      "description": "LiveCodeBench code-generation split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "livecodebench-execution",
+      "label": "LIVECODEBENCH-EXECUTION",
+      "group": "A2",
+      "description": "LiveCodeBench execution split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "livecodebench-test-generation",
+      "label": "LIVECODEBENCH-TEST-GENERATION",
+      "group": "A2",
+      "description": "LiveCodeBench test-generation split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "longbench",
+      "label": "LONGBENCH",
+      "group": "A3",
+      "description": "LongBench data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "longbench-v2",
+      "label": "LONGBENCH-V2",
+      "group": "A2/A3",
+      "description": "LongBench-v2 data referenced by multiple configurations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "math-500",
+      "label": "MATH-500",
+      "group": "A2",
+      "description": "MATH-500 reasoning data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "mbpp",
+      "label": "MBPP",
+      "group": "A2",
+      "description": "Mostly Basic Python Problems",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "mmlu-pro",
+      "label": "MMLU-PRO",
+      "group": "A2",
+      "description": "MMLU-Pro data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "oasst1",
+      "label": "OASST1",
+      "group": "A2/A3",
+      "description": "OpenAssistant conversations referenced by multiple configurations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-chat-1000",
+      "label": "PAIO-CHAT-1000",
+      "group": "A2",
+      "description": "Enterprise chat asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-code-eval-1000",
+      "label": "PAIO-CODE-EVAL-1000",
+      "group": "A2",
+      "description": "Enterprise code-evaluation asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-json-500",
+      "label": "PAIO-JSON-500",
+      "group": "A2",
+      "description": "Enterprise structured-output asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-long-prefill-5000",
+      "label": "PAIO-LONG-PREFILL-5000",
+      "group": "A1/A3",
+      "description": "Enterprise long-prefill asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-longtext-4000",
+      "label": "PAIO-LONGTEXT-4000",
+      "group": "A3",
+      "description": "Enterprise long-text asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-prefix-shared-5000",
+      "label": "PAIO-PREFIX-SHARED-5000",
+      "group": "A1/A3",
+      "description": "Enterprise shared-prefix asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-reuse-conv-5000",
+      "label": "PAIO-REUSE-CONV-5000",
+      "group": "A2/A4",
+      "description": "Enterprise conversation-reuse asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-semantic-similar-5000",
+      "label": "PAIO-SEMANTIC-SIMILAR-5000",
+      "group": "A2/A4",
+      "description": "Enterprise semantic-similarity asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "schemastore",
+      "label": "SCHEMASTORE",
+      "group": "A2",
+      "description": "SchemaStore schemas",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "sharegpt-v3",
+      "label": "SHAREGPT-V3",
+      "group": "A2/A4",
+      "description": "One physical conversation corpus used by several online profiles",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "sonnet",
+      "label": "SONNET",
+      "group": "A1/A3",
+      "description": "Fixed benchmark text corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "structeval",
+      "label": "STRUCTEVAL",
+      "group": "A2",
+      "description": "Code and zip assets are source/package copies and not separate datasets",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "szyn-opencode-swebench-verified-500",
+      "label": "SZYN-OPENCODE-SWEBENCH-VERIFIED-500",
+      "group": "A2",
+      "description": "SWE-bench Verified task pool and associated local metadata",
+      "applicable_metric_ids": [
+        "agent_resolve_rate"
+      ]
+    },
+    {
+      "id": "syfi-coding-trace",
+      "label": "SYFI-CODING-TRACE",
+      "group": "A2/A3",
+      "description": "One physical trace referenced by tool coding and long-context profiles",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "tau2-bench",
+      "label": "TAU2-BENCH",
+      "group": "A2",
+      "description": "Domain data under the tau2 repository are one benchmark family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "toolbench",
+      "label": "TOOLBENCH",
+      "group": "A2",
+      "description": "Official full data.zip with G1 G2 G3 instructions test splits tool environment and answers",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "ultrachat-200k",
+      "label": "ULTRACHAT-200K",
+      "group": "A2",
+      "description": "UltraChat 200K conversations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "visionarena",
+      "label": "VISIONARENA",
+      "group": "A2",
+      "description": "Physical parquet is present via symlink; requires a supported multimodal model",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "wildchat",
+      "label": "WILDCHAT",
+      "group": "A2/A4",
+      "description": "WildChat corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "wildchat-4.8m",
+      "label": "WILDCHAT-4.8M",
+      "group": "A2/A4",
+      "description": "WildChat 4.8M corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "request_throughput",
+      "label": "Request throughput",
+      "unit": "request/s",
+      "direction": "higher"
+    },
+    {
+      "id": "output_token_throughput",
+      "label": "Output token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    },
+    {
+      "id": "total_token_throughput",
+      "label": "Total token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    },
+    {
+      "id": "ttft_mean",
+      "label": "Mean TTFT",
+      "unit": "ms",
+      "direction": "lower"
+    },
+    {
+      "id": "tpot_mean",
+      "label": "Mean TPOT",
+      "unit": "ms/token",
+      "direction": "lower"
+    },
+    {
+      "id": "request_success_rate",
+      "label": "Request success rate",
+      "unit": "%",
+      "direction": "higher"
+    },
+    {
+      "id": "agent_resolve_rate",
+      "label": "Agent resolve rate",
+      "unit": "%",
+      "direction": "higher"
+    }
+  ],
+  "results": [
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "request_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "output_token_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "total_token_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "ttft_mean",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "tpot_mean",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "request_success_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "agent_resolve_rate",
+      "status": "queued",
+      "baseline_value": null,
+      "value": null,
+      "reason": "The 1/500 collector qualification is not an aggregate. The remaining 499 tasks are tracked by dev-hub issue #87.",
+      "tracking_url": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/issues/87"
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "agent_resolve_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "Agent resolve rate applies only to the SZYN OpenCode issue-resolution dataset."
+    }
+  ],
+  "limitations": [
+    "This campaign is separate from the TP4/C12 BidKV specialty cell.",
+    "The existing SZYN 1/500 record remains a qualification, not an aggregate.",
+    "No empty or queued cell is a performance or coverage claim."
+  ]
+}

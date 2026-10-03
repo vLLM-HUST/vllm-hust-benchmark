@@ -1,7 +1,7 @@
 {
   "contract_version": "dataset-validation-v1",
   "generated_at": "2026-10-03T03:42:16Z",
-  "status": "partial_comparison",
+  "status": "explicit_partial_comparison",
   "source": {
     "service": "Home archive import",
     "run_id": "b0-home-20260904-07",
@@ -24,7 +24,7 @@
   },
   "candidate_search": {
     "audited_at": "2026-10-03",
-    "eligible_cells": 12,
+    "eligible_cells": 6,
     "sources": [
       {
         "repository": "vLLM-HUST/vllm-hust-benchmark",
@@ -70,6 +70,171 @@
         "candidate_workload": "instructcoder-online",
         "reason": "Candidate uses Qwen2.5-Coder-14B-Instruct, request_rate=1, and the completions endpoint; B0 uses Qwen2.5-14B-Instruct, request_rate=inf, and chat completions."
       }
+    ],
+    "unadmitted_candidates": [
+      {
+        "id": "gsm8k-vspec-b16-eagle-adaptive-unmatched-b0",
+        "dataset_id": "gsm8k",
+        "reason": "The measured candidate has no same-spec B0 observation; retain its raw provenance without publishing a B1 comparison.",
+        "results": [
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "request_throughput",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 2.892546842694908,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "output_token_throughput",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 611.2674615325014,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "total_token_throughput",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 956.594166347633,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "ttft_mean",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 30740.689778965898,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "tpot_mean",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 22.13804264180199,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "request_success_rate",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 100.0,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          }
+        ]
+      }
     ]
   },
   "scenario": {
@@ -84,265 +249,610 @@
       "id": "ai2-arc",
       "label": "AI2-ARC",
       "group": "A2",
-      "description": "ARC reasoning evaluation data"
+      "description": "ARC reasoning evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "aime-2024",
       "label": "AIME-2024",
       "group": "A2",
-      "description": "AIME 2024 problems"
+      "description": "AIME 2024 problems",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "bbh",
       "label": "BBH",
       "group": "A2",
-      "description": "Big-Bench Hard tasks"
+      "description": "Big-Bench Hard tasks",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "bfcl-v3",
       "label": "BFCL-V3",
       "group": "A2/A3",
-      "description": "BFCL v3 tool and structured-call data"
+      "description": "BFCL v3 tool and structured-call data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "bfcl-v4",
       "label": "BFCL-V4",
       "group": "A2/A3",
-      "description": "BFCL v4 extracted data; wheel/source copies are not separate datasets"
+      "description": "BFCL v4 extracted data; wheel/source copies are not separate datasets",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "burstgpt-trace",
       "label": "BURSTGPT-TRACE",
       "group": "A4",
-      "description": "Arrival trace rather than semantic prompt dataset"
+      "description": "Arrival trace rather than semantic prompt dataset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "evoscientist",
       "label": "EVOSCIENTIST",
       "group": "A2",
-      "description": "Two symlinked representations of one workload family"
+      "description": "Two symlinked representations of one workload family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "gpqa",
       "label": "GPQA",
       "group": "A2",
-      "description": "gpqa and gpqa-github are source/cache copies of this family"
+      "description": "gpqa and gpqa-github are source/cache copies of this family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "gsm8k",
       "label": "GSM8K",
       "group": "A2",
-      "description": "Main and Socratic configurations share this physical dataset family"
+      "description": "Main and Socratic configurations share this physical dataset family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "hotpot-qa",
       "label": "HOTPOT-QA",
       "group": "A2",
-      "description": "Full HotpotQA data"
+      "description": "Full HotpotQA data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "hotpotqa-react-100",
       "label": "HOTPOTQA-REACT-100",
       "group": "A2",
-      "description": "Frozen ReAct-formatted 100-case derivative"
+      "description": "Frozen ReAct-formatted 100-case derivative",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "humaneval",
       "label": "HUMANEVAL",
       "group": "A2",
-      "description": "Code evaluation data"
+      "description": "Code evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "infinitebench",
       "label": "INFINITEBENCH",
       "group": "A3",
-      "description": "infinitebench is the source repository and is not a second dataset"
+      "description": "infinitebench is the source repository and is not a second dataset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "instructcoder",
       "label": "INSTRUCTCODER",
       "group": "A2",
-      "description": "Code instruction data"
+      "description": "Code instruction data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "jsonschemabench",
       "label": "JSONSCHEMABENCH",
       "group": "A2",
-      "description": "JSON Schema evaluation data"
+      "description": "JSON Schema evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "livecodebench-code-generation",
       "label": "LIVECODEBENCH-CODE-GENERATION",
       "group": "A2",
-      "description": "LiveCodeBench code-generation split"
+      "description": "LiveCodeBench code-generation split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "livecodebench-execution",
       "label": "LIVECODEBENCH-EXECUTION",
       "group": "A2",
-      "description": "LiveCodeBench execution split"
+      "description": "LiveCodeBench execution split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "livecodebench-test-generation",
       "label": "LIVECODEBENCH-TEST-GENERATION",
       "group": "A2",
-      "description": "LiveCodeBench test-generation split"
+      "description": "LiveCodeBench test-generation split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "longbench",
       "label": "LONGBENCH",
       "group": "A3",
-      "description": "LongBench data"
+      "description": "LongBench data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "longbench-v2",
       "label": "LONGBENCH-V2",
       "group": "A2/A3",
-      "description": "LongBench-v2 data referenced by multiple configurations"
+      "description": "LongBench-v2 data referenced by multiple configurations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "math-500",
       "label": "MATH-500",
       "group": "A2",
-      "description": "MATH-500 reasoning data"
+      "description": "MATH-500 reasoning data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "mbpp",
       "label": "MBPP",
       "group": "A2",
-      "description": "Mostly Basic Python Problems"
+      "description": "Mostly Basic Python Problems",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "mmlu-pro",
       "label": "MMLU-PRO",
       "group": "A2",
-      "description": "MMLU-Pro data"
+      "description": "MMLU-Pro data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "oasst1",
       "label": "OASST1",
       "group": "A2/A3",
-      "description": "OpenAssistant conversations referenced by multiple configurations"
+      "description": "OpenAssistant conversations referenced by multiple configurations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "paio-chat-1000",
       "label": "PAIO-CHAT-1000",
       "group": "A2",
-      "description": "Enterprise chat asset"
+      "description": "Enterprise chat asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "paio-code-eval-1000",
       "label": "PAIO-CODE-EVAL-1000",
       "group": "A2",
-      "description": "Enterprise code-evaluation asset"
+      "description": "Enterprise code-evaluation asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "paio-json-500",
       "label": "PAIO-JSON-500",
       "group": "A2",
-      "description": "Enterprise structured-output asset"
+      "description": "Enterprise structured-output asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "paio-long-prefill-5000",
       "label": "PAIO-LONG-PREFILL-5000",
       "group": "A1/A3",
-      "description": "Enterprise long-prefill asset"
+      "description": "Enterprise long-prefill asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "paio-longtext-4000",
       "label": "PAIO-LONGTEXT-4000",
       "group": "A3",
-      "description": "Enterprise long-text asset"
+      "description": "Enterprise long-text asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "paio-prefix-shared-5000",
       "label": "PAIO-PREFIX-SHARED-5000",
       "group": "A1/A3",
-      "description": "Enterprise shared-prefix asset"
+      "description": "Enterprise shared-prefix asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "paio-reuse-conv-5000",
       "label": "PAIO-REUSE-CONV-5000",
       "group": "A2/A4",
-      "description": "Enterprise conversation-reuse asset"
+      "description": "Enterprise conversation-reuse asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "paio-semantic-similar-5000",
       "label": "PAIO-SEMANTIC-SIMILAR-5000",
       "group": "A2/A4",
-      "description": "Enterprise semantic-similarity asset"
+      "description": "Enterprise semantic-similarity asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "schemastore",
       "label": "SCHEMASTORE",
       "group": "A2",
-      "description": "SchemaStore schemas"
+      "description": "SchemaStore schemas",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "sharegpt-v3",
       "label": "SHAREGPT-V3",
       "group": "A2/A4",
-      "description": "One physical conversation corpus used by several online profiles"
+      "description": "One physical conversation corpus used by several online profiles",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "sonnet",
       "label": "SONNET",
       "group": "A1/A3",
-      "description": "Fixed benchmark text corpus"
+      "description": "Fixed benchmark text corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "structeval",
       "label": "STRUCTEVAL",
       "group": "A2",
-      "description": "Code and zip assets are source/package copies and not separate datasets"
+      "description": "Code and zip assets are source/package copies and not separate datasets",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "szyn-opencode-swebench-verified-500",
       "label": "SZYN-OPENCODE-SWEBENCH-VERIFIED-500",
       "group": "A2",
-      "description": "SWE-bench Verified task pool and associated local metadata"
+      "description": "SWE-bench Verified task pool and associated local metadata",
+      "applicable_metric_ids": []
     },
     {
       "id": "syfi-coding-trace",
       "label": "SYFI-CODING-TRACE",
       "group": "A2/A3",
-      "description": "One physical trace referenced by tool coding and long-context profiles"
+      "description": "One physical trace referenced by tool coding and long-context profiles",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "tau2-bench",
       "label": "TAU2-BENCH",
       "group": "A2",
-      "description": "Domain data under the tau2 repository are one benchmark family"
+      "description": "Domain data under the tau2 repository are one benchmark family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "toolbench",
       "label": "TOOLBENCH",
       "group": "A2",
-      "description": "Official full data.zip with G1 G2 G3 instructions test splits tool environment and answers"
+      "description": "Official full data.zip with G1 G2 G3 instructions test splits tool environment and answers",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "ultrachat-200k",
       "label": "ULTRACHAT-200K",
       "group": "A2",
-      "description": "UltraChat 200K conversations"
+      "description": "UltraChat 200K conversations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "visionarena",
       "label": "VISIONARENA",
       "group": "A2",
-      "description": "Physical parquet is present via symlink; requires a supported multimodal model"
+      "description": "Physical parquet is present via symlink; requires a supported multimodal model",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "wildchat",
       "label": "WILDCHAT",
       "group": "A2/A4",
-      "description": "WildChat corpus"
+      "description": "WildChat corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     },
     {
       "id": "wildchat-4.8m",
       "label": "WILDCHAT-4.8M",
       "group": "A2/A4",
-      "description": "WildChat 4.8M corpus"
+      "description": "WildChat 4.8M corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
     }
   ],
   "metrics": [
@@ -820,6 +1330,102 @@
       }
     },
     {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
       "dataset_id": "evoscientist",
       "metric_id": "request_throughput",
       "status": "baseline_only",
@@ -913,160 +1519,100 @@
       }
     },
     {
+      "dataset_id": "gpqa",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
       "dataset_id": "gsm8k",
       "metric_id": "request_throughput",
-      "status": "passed",
+      "status": "not_tested",
       "baseline_value": null,
-      "value": 2.892546842694908,
-      "updated_at": "2026-09-13T22:27:01+08:00",
-      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
-      "hardware": "Ascend 910B2 · single NPU",
-      "provenance": {
-        "repository": "vLLM-HUST/vllm-hust-vSpec",
-        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
-        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
-        "cann_version": "9.1",
-        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
-        "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "endpoint_type": "openai-chat",
-        "num_prompts": 200,
-        "request_rate": "inf",
-        "completed": 200,
-        "failed": 0,
-        "precision": "FP16",
-        "method": "EAGLE Adaptive gamma=1..4"
-      }
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
     },
     {
       "dataset_id": "gsm8k",
       "metric_id": "output_token_throughput",
-      "status": "passed",
+      "status": "not_tested",
       "baseline_value": null,
-      "value": 611.2674615325014,
-      "updated_at": "2026-09-13T22:27:01+08:00",
-      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
-      "hardware": "Ascend 910B2 · single NPU",
-      "provenance": {
-        "repository": "vLLM-HUST/vllm-hust-vSpec",
-        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
-        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
-        "cann_version": "9.1",
-        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
-        "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "endpoint_type": "openai-chat",
-        "num_prompts": 200,
-        "request_rate": "inf",
-        "completed": 200,
-        "failed": 0,
-        "precision": "FP16",
-        "method": "EAGLE Adaptive gamma=1..4"
-      }
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
     },
     {
       "dataset_id": "gsm8k",
       "metric_id": "total_token_throughput",
-      "status": "passed",
+      "status": "not_tested",
       "baseline_value": null,
-      "value": 956.594166347633,
-      "updated_at": "2026-09-13T22:27:01+08:00",
-      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
-      "hardware": "Ascend 910B2 · single NPU",
-      "provenance": {
-        "repository": "vLLM-HUST/vllm-hust-vSpec",
-        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
-        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
-        "cann_version": "9.1",
-        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
-        "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "endpoint_type": "openai-chat",
-        "num_prompts": 200,
-        "request_rate": "inf",
-        "completed": 200,
-        "failed": 0,
-        "precision": "FP16",
-        "method": "EAGLE Adaptive gamma=1..4"
-      }
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
     },
     {
       "dataset_id": "gsm8k",
       "metric_id": "ttft_mean",
-      "status": "passed",
+      "status": "not_tested",
       "baseline_value": null,
-      "value": 30740.689778965898,
-      "updated_at": "2026-09-13T22:27:01+08:00",
-      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
-      "hardware": "Ascend 910B2 · single NPU",
-      "provenance": {
-        "repository": "vLLM-HUST/vllm-hust-vSpec",
-        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
-        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
-        "cann_version": "9.1",
-        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
-        "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "endpoint_type": "openai-chat",
-        "num_prompts": 200,
-        "request_rate": "inf",
-        "completed": 200,
-        "failed": 0,
-        "precision": "FP16",
-        "method": "EAGLE Adaptive gamma=1..4"
-      }
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
     },
     {
       "dataset_id": "gsm8k",
       "metric_id": "tpot_mean",
-      "status": "passed",
+      "status": "not_tested",
       "baseline_value": null,
-      "value": 22.13804264180199,
-      "updated_at": "2026-09-13T22:27:01+08:00",
-      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
-      "hardware": "Ascend 910B2 · single NPU",
-      "provenance": {
-        "repository": "vLLM-HUST/vllm-hust-vSpec",
-        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
-        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
-        "cann_version": "9.1",
-        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
-        "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "endpoint_type": "openai-chat",
-        "num_prompts": 200,
-        "request_rate": "inf",
-        "completed": 200,
-        "failed": 0,
-        "precision": "FP16",
-        "method": "EAGLE Adaptive gamma=1..4"
-      }
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
     },
     {
       "dataset_id": "gsm8k",
       "metric_id": "request_success_rate",
-      "status": "passed",
+      "status": "not_tested",
       "baseline_value": null,
-      "value": 100.0,
-      "updated_at": "2026-09-13T22:27:01+08:00",
-      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
-      "hardware": "Ascend 910B2 · single NPU",
-      "provenance": {
-        "repository": "vLLM-HUST/vllm-hust-vSpec",
-        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
-        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
-        "cann_version": "9.1",
-        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
-        "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
-        "endpoint_type": "openai-chat",
-        "num_prompts": 200,
-        "request_rate": "inf",
-        "completed": 200,
-        "failed": 0,
-        "precision": "FP16",
-        "method": "EAGLE Adaptive gamma=1..4"
-      }
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
     },
     {
       "dataset_id": "hotpot-qa",
@@ -1162,6 +1708,54 @@
       }
     },
     {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
       "dataset_id": "humaneval",
       "metric_id": "request_throughput",
       "status": "baseline_only",
@@ -1253,6 +1847,54 @@
         "successful_requests": 164,
         "failed_requests": 0
       }
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
     },
     {
       "dataset_id": "instructcoder",
@@ -2650,6 +3292,54 @@
       }
     },
     {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
       "dataset_id": "paio-prefix-shared-5000",
       "metric_id": "request_throughput",
       "status": "baseline_only",
@@ -2929,6 +3619,54 @@
       }
     },
     {
+      "dataset_id": "schemastore",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
       "dataset_id": "sharegpt-v3",
       "metric_id": "request_throughput",
       "status": "baseline_only",
@@ -3206,6 +3944,390 @@
         "successful_requests": 200,
         "failed_requests": 0
       }
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "request_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "output_token_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "total_token_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "ttft_mean",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "tpot_mean",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "request_success_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
     }
   ],
   "limitations": [
@@ -3214,5 +4336,11 @@
     "The screenshots report mean and P99 latency, not P95; this publication uses only the explicitly reported mean latency fields.",
     "The 2026-10-03 candidate audit populated 12 B1 cells from vSpec raw artifacts; remaining B1 cells require matching measured evidence.",
     "The Qwen3.5 BidKV EvoScientist result uses a different model and TP4 configuration, so it is published through a separate model scenario."
-  ]
+  ],
+  "coverage_contract": {
+    "mode": "explicit-dataset-metric-applicability",
+    "complete_cell_states_required": true,
+    "non_measured_reason_required": true,
+    "matched_b0_required_for_b1": true
+  }
 }

@@ -16,6 +16,13 @@ mirrors.
 The index deliberately uses `data_file`, not a website URL. A website mirror may render it as
 `./data/<data_file>`, but that path is a consumer concern.
 
+Every dataset declares `applicable_metric_ids`. Every dataset/metric cell is present in the
+artifact: inapplicable cells use `not_applicable`, while applicable cells without an admitted
+measurement use `not_tested`, `queued`, or `running` with a reason. This prevents a blank cell from
+silently meaning either unsupported or unfinished. A populated B1 is valid only when the same cell
+also has a matched B0; unmatched candidate evidence stays under `candidate_search` and is not
+rendered as a comparison.
+
 ## Validation
 
 Run from the repository root:
@@ -23,6 +30,12 @@ Run from the repository root:
 ```bash
 python -m vllm_hust_benchmark.dataset_validation \
   --root leaderboard-data/dataset-validation
+```
+
+The checked-in coverage expansion is reproducible and idempotent:
+
+```bash
+python scripts/build_dataset_matrix_coverage.py
 ```
 
 The validator checks scenario identity, unique dimensions and cells, result references, provenance
