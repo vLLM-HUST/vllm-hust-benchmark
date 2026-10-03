@@ -43,7 +43,9 @@ def _unique_ids(items: object, *, field: str, context: str) -> set[str]:
     for item in items:
         value = item.get(field) if isinstance(item, dict) else None
         if not isinstance(value, str) or not value or value in values:
-            raise DatasetValidationError(f"invalid or duplicate {context} {field}: {value}")
+            raise DatasetValidationError(
+                f"invalid or duplicate {context} {field}: {value}"
+            )
         values.add(value)
     return values
 
@@ -66,7 +68,9 @@ def validate_index(index: dict[str, Any]) -> list[dict[str, Any]]:
             or data_file == INDEX_FILE
             or data_file in files
         ):
-            raise DatasetValidationError(f"invalid or duplicate scenario data_file: {data_file}")
+            raise DatasetValidationError(
+                f"invalid or duplicate scenario data_file: {data_file}"
+            )
         files.add(data_file)
     return scenarios
 
@@ -94,7 +98,9 @@ def validate_artifact(payload: dict[str, Any], *, expected_scenario_id: str) -> 
         metric_id = result.get("metric_id")
         cell = (dataset_id, metric_id)
         if dataset_id not in dataset_ids or metric_id not in metric_ids:
-            raise DatasetValidationError(f"result references an undeclared dimension: {cell}")
+            raise DatasetValidationError(
+                f"result references an undeclared dimension: {cell}"
+            )
         if cell in cells:
             raise DatasetValidationError(f"duplicate result cell: {cell}")
         cells.add(cell)
@@ -106,9 +112,13 @@ def validate_artifact(payload: dict[str, Any], *, expected_scenario_id: str) -> 
         if value is not None:
             provenance = result.get("provenance")
             if not isinstance(provenance, dict) or not provenance.get("repository"):
-                raise DatasetValidationError(f"populated B1 cell lacks provenance: {cell}")
+                raise DatasetValidationError(
+                    f"populated B1 cell lacks provenance: {cell}"
+                )
             if not (provenance.get("artifact") or provenance.get("report_url")):
-                raise DatasetValidationError(f"populated B1 cell lacks evidence URL: {cell}")
+                raise DatasetValidationError(
+                    f"populated B1 cell lacks evidence URL: {cell}"
+                )
 
 
 def _sha256(path: Path) -> str:
@@ -136,7 +146,9 @@ def verify_checksums(root: Path, expected_files: set[str]) -> None:
             raise DatasetValidationError(f"invalid checksum entry: {line}")
         recorded[name] = digest
     if set(recorded) != expected_files:
-        raise DatasetValidationError("SHA256SUMS does not cover the exact JSON publication set")
+        raise DatasetValidationError(
+            "SHA256SUMS does not cover the exact JSON publication set"
+        )
     for name, digest in recorded.items():
         if _sha256(root / name) != digest:
             raise DatasetValidationError(f"checksum mismatch: {name}")

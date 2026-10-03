@@ -28,7 +28,9 @@ def test_checked_in_publication_is_valid_and_complete() -> None:
 
 
 def test_publication_documents_match_json_schemas() -> None:
-    index_schema = load_json(ROOT / "schemas" / "dataset_validation_index_v1.schema.json")
+    index_schema = load_json(
+        ROOT / "schemas" / "dataset_validation_index_v1.schema.json"
+    )
     artifact_schema = load_json(ROOT / "schemas" / "dataset_validation_v1.schema.json")
     index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
     jsonschema.Draft202012Validator(index_schema).validate(index)
