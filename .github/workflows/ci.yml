@@ -50,6 +50,11 @@ jobs:
       - name: Validate independent optimization repo result card registry
         run: python scripts/validate_independent_repo_result_cards.py
 
+      - name: Validate dataset-validation publication
+        run: >-
+          python -m vllm_hust_benchmark.dataset_validation
+          --root leaderboard-data/dataset-validation
+
       - name: Verify submission checksums (sha256sum -c per directory)
         run: python scripts/verify_submission_checksums.py --root submissions
 

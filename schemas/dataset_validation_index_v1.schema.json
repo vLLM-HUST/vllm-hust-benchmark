@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/dataset_validation_index_v1.schema.json",
+  "title": "Dataset validation publication index v1",
+  "type": "object",
+  "required": ["contract_version", "default_scenario_id", "scenarios"],
+  "properties": {
+    "contract_version": { "const": "dataset-validation-index-v1" },
+    "default_scenario_id": { "type": "string", "minLength": 1 },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "model", "hardware", "precision", "data_file"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "model": { "type": "string", "minLength": 1 },
+          "hardware": { "type": "string", "minLength": 1 },
+          "precision": { "type": "string", "minLength": 1 },
+          "data_file": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*\\.json$"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

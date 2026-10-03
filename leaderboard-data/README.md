@@ -12,6 +12,7 @@ baseline. Older `vllm 0.11.0` / `v0110` baseline runs are retired and must not a
 
 ## Layout
 
+- `dataset-validation/` (canonical model/configuration index and Dataset Matrix result artifacts)
 - `snapshots/leaderboard_single.json`
 - `snapshots/leaderboard_multi.json`
 - `snapshots/leaderboard_compare.json`
@@ -52,6 +53,11 @@ python scripts/validate_public_leaderboard_snapshots.py \
 
 python ../vllm-hust-website/scripts/sync_leaderboard_snapshots.py \
   --source-dir leaderboard-data/snapshots \
+  --target-dir ../vllm-hust-website/data \
+  --check
+
+python ../vllm-hust-website/scripts/sync_dataset_validation_snapshots.py \
+  --source-dir leaderboard-data/dataset-validation \
   --target-dir ../vllm-hust-website/data \
   --check
 ```
