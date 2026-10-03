@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/dataset_validation_v1.schema.json",
+  "title": "Dataset validation artifact v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "generated_at",
+    "status",
+    "source",
+    "baseline",
+    "scenario",
+    "datasets",
+    "metrics",
+    "results"
+  ],
+  "properties": {
+    "contract_version": { "const": "dataset-validation-v1" },
+    "generated_at": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "minLength": 1 },
+    "source": { "type": "object" },
+    "baseline": { "type": "object" },
+    "candidate_policy": { "type": "object" },
+    "candidate_search": { "type": "object" },
+    "scenario": {
+      "type": "object",
+      "required": ["id", "label", "model", "hardware", "precision"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "hardware": { "type": "string", "minLength": 1 },
+        "precision": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    },
+    "datasets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "group"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "group": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "unit", "direction"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "unit": { "type": "string" },
+          "direction": { "enum": ["higher", "lower"] }
+        },
+        "additionalProperties": true
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["dataset_id", "metric_id", "status"],
+        "properties": {
+          "dataset_id": { "type": "string", "minLength": 1 },
+          "metric_id": { "type": "string", "minLength": 1 },
+          "status": {
+            "enum": [
+              "not_tested",
+              "baseline_only",
+              "queued",
+              "running",
+              "passed",
+              "failed",
+              "not_applicable"
+            ]
+          },
+          "baseline_value": { "type": ["number", "null"] },
+          "value": { "type": ["number", "null"] },
+          "current_value": { "type": ["number", "null"] },
+          "delta_pct": { "type": ["number", "null"] },
+          "provenance": { "type": "object" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}
