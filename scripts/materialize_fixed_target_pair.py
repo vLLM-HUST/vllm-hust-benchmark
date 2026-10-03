@@ -142,12 +142,8 @@ def materialize(
                 "typical_throughput_ratio_vs_baseline": throughput_ratio,
                 "typical_ttft_reduction_pct_vs_baseline": ttft_reduction,
                 "typical_tpot_reduction_pct_vs_baseline": tpot_reduction,
-                "long_context_ttft_p95_ms": metrics.get(
-                    "long_context_ttft_p95_ms"
-                ),
-                "long_context_tpot_p95_ms": metrics.get(
-                    "long_context_tpot_p95_ms"
-                ),
+                "long_context_ttft_p95_ms": metrics.get("long_context_ttft_p95_ms"),
+                "long_context_tpot_p95_ms": metrics.get("long_context_tpot_p95_ms"),
             },
             "unknown": {
                 name: {
