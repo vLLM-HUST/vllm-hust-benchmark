@@ -1,13 +1,13 @@
 {
-  "effective_from": "2026-08-18",
+  "effective_from": "2026-10-03",
   "registry_generation": {
-    "effective_from": "2026-08-18",
-    "source_set_sha256": "07421d4a80f75dfdacf1ab06373a7b985bf4dcafad4f62dab9191006516e939d",
-    "version": "1.3.6"
+    "effective_from": "2026-10-03",
+    "source_set_sha256": "1644b73c1fb6cde80ba6c23135388075c99946a31a65a60a3ce156faa20cf0a3",
+    "version": "1.3.7"
   },
-  "registry_version": "1.3.6",
+  "registry_version": "1.3.7",
   "schema_version": "official-target-registry/v1",
-  "source_set_sha256": "07421d4a80f75dfdacf1ab06373a7b985bf4dcafad4f62dab9191006516e939d",
+  "source_set_sha256": "1644b73c1fb6cde80ba6c23135388075c99946a31a65a60a3ce156faa20cf0a3",
   "targets": [
     {
       "baseline_runtime": {
@@ -281,7 +281,7 @@
         "server_parameters": "exact",
         "workload_parameters": "exact"
       },
-      "effective_from": "2026-08-16",
+      "effective_from": "2026-10-03",
       "hardware": {
         "chip_count": 1,
         "chip_model": "910B2",
@@ -302,18 +302,22 @@
         "gpu_memory_utilization": 0.6,
         "host": "0.0.0.0",
         "max_model_len": 32768,
+        "max_num_batched_tokens": 2048,
+        "max_num_seqs": 256,
         "port": 8000,
         "tensor_parallel_size": 1,
         "trust_remote_code": ""
       },
       "source_spec": {
         "path": "docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json",
-        "sha256": "446744f2790968015a933aff7cf84fc096438ba5246eb3db155d808e7010527b"
+        "sha256": "666ece6ee5c21ed37f9bb46e39326b8e83b56dc18d6eaf4d24343b0fac03a322"
       },
       "status": "active",
-      "supersedes": [],
+      "supersedes": [
+        "1.3.5"
+      ],
       "target_id": "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2",
-      "target_version": "1.3.5",
+      "target_version": "1.3.7",
       "workload": {
         "client_parameters": {
           "backend": "vllm",
@@ -321,11 +325,13 @@
           "endpoint": "/v1/completions",
           "host": "127.0.0.1",
           "input_len": 1024,
+          "metric_percentiles": "95,99",
           "no_stream": false,
           "num_prompts": 200,
           "output_len": 256,
           "port": 8000,
-          "request_rate": 1
+          "request_rate": 1,
+          "save_detailed": true
         },
         "name": "random-online"
       }

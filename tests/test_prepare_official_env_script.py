@@ -1,9 +1,11 @@
+import hashlib
 import os
 import shlex
 import signal
 import subprocess
 import sys
 import time
+import zipfile
 from pathlib import Path
 
 from tests._bash_utils import bash_executable
@@ -40,6 +42,7 @@ def _spawn_process_tree(tmp_path: Path) -> tuple[subprocess.Popen[str], int]:
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PREPARE_SCRIPT = REPO_ROOT / "scripts/prepare-official-ascend-baseline-env.sh"
 RUN_OFFICIAL_SCRIPT = REPO_ROOT / "scripts/run-official-ascend-goal-baseline.sh"
+EXTRACT_WHEEL_SCRIPT = REPO_ROOT / "scripts/extract-official-vllm-ascend-wheel.py"
 
 
 def test_official_runner_binds_export_to_source_spec() -> None:
@@ -48,6 +51,13 @@ def test_official_runner_binds_export_to_source_spec() -> None:
     export_call_index = script.index("run_in_official_runtime", export_args_index)
     export_block = script[export_args_index:export_call_index]
     assert '--spec-path "$SPEC_FILE"' in export_block
+
+
+def test_official_runner_releases_server_before_export() -> None:
+    script = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+    cleanup_index = script.rindex("cleanup_managed_server\n")
+    export_index = script.index("EXPORT_ARGS=(", cleanup_index)
+    assert cleanup_index < export_index
 
 
 def _source_prepare_functions(snippet: str) -> str:
@@ -92,11 +102,90 @@ def _source_run_official_runtime_model_functions(snippet: str) -> str:
 
 def _run_bash(command: str, *, check: bool = True) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [bash_executable(), "-lc", command],
+        [bash_executable(), "--noprofile", "--norc", "-c", command],
         check=check,
         capture_output=True,
         text=True,
     )
+
+
+def test_extract_official_wheel_restores_extensions_and_custom_ops(
+    tmp_path: Path,
+) -> None:
+    wheel = tmp_path / "vllm_ascend-0.18.0-cp311-cp311-manylinux_aarch64.whl"
+    worktree = tmp_path / "worktree"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        archive.writestr(
+            "vllm_ascend-0.18.0.dist-info/METADATA",
+            "Metadata-Version: 2.1\nName: vllm-ascend\nVersion: 0.18.0\n",
+        )
+        archive.writestr("vllm_ascend/vllm_ascend_C.cpython-311.so", b"extension")
+        archive.writestr("vllm_ascend/libvllm_ascend_kernels.so", b"kernels")
+        archive.writestr(
+            "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/"
+            "op_impl/ai_core/tbe/kernel/config/ascend910b/binary_info_config.json",
+            b"{}",
+        )
+
+    digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+    subprocess.run(
+        [
+            sys.executable,
+            str(EXTRACT_WHEEL_SCRIPT),
+            "--wheel",
+            str(wheel),
+            "--worktree",
+            str(worktree),
+            "--expected-version",
+            "0.18.0",
+            "--expected-sha256",
+            digest,
+        ],
+        check=True,
+    )
+
+    manifest = worktree / "vllm_ascend" / "_official_wheel_artifacts.json"
+    assert manifest.is_file()
+    assert (worktree / "vllm_ascend" / "vllm_ascend_C.cpython-311.so").is_file()
+    assert (
+        worktree
+        / "vllm_ascend"
+        / "_cann_ops_custom"
+        / "vendors"
+        / "vllm-ascend"
+        / "op_impl"
+        / "ai_core"
+        / "tbe"
+        / "kernel"
+        / "config"
+        / "ascend910b"
+        / "binary_info_config.json"
+    ).is_file()
+
+
+def test_extract_official_wheel_rejects_sha_mismatch(tmp_path: Path) -> None:
+    wheel = tmp_path / "vllm_ascend-0.18.0.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        archive.writestr("vllm_ascend-0.18.0.dist-info/METADATA", "Version: 0.18.0\n")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(EXTRACT_WHEEL_SCRIPT),
+            "--wheel",
+            str(wheel),
+            "--worktree",
+            str(tmp_path / "worktree"),
+            "--expected-version",
+            "0.18.0",
+            "--expected-sha256",
+            "0" * 64,
+        ],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "wheel SHA256 mismatch" in result.stderr
 
 
 def _pid_exists(pid: int) -> bool:
@@ -912,6 +1001,28 @@ def test_wait_for_server_exits_when_server_process_is_gone(tmp_path: Path) -> No
     )
 
     assert result.returncode == 0
+
+
+def test_official_runner_preserves_wait_for_server_failure_status() -> None:
+    script = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+    wait_call = 'if wait_for_server "$CLIENT_HOST" "$CLIENT_PORT"; then'
+    start = script.index(wait_call)
+    block = script[start : script.index('if [[ "$server_ready" != "1" ]]', start)]
+
+    assert "else\n        server_wait_status=$?" in block
+    assert 'exit "$server_wait_status"' in block
+
+
+def test_official_runner_does_not_retry_generic_engine_startup_failure() -> None:
+    script = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+    detector = script[script.index("server_log_indicates_resource_busy()") :]
+    detector = detector[: detector.index("wait_for_ascend_runtime_ready()")]
+
+    assert "Engine core initialization failed" not in detector
+    assert "ERR99999 UNKNOWN applicaiton exception" not in detector
+    assert "ERR99999 UNKNOWN application exception" not in detector
+    assert "rtGetDeviceCount" in detector
+    assert "Resource_Busy" in detector
 
 
 def test_wait_for_server_returns_resource_busy_status_when_log_matches(

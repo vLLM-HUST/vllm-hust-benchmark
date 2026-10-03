@@ -21,6 +21,7 @@ SKIP_BENCHMARK_RESIDUAL_CLEANUP=${SKIP_BENCHMARK_RESIDUAL_CLEANUP:-"0"}
 ASCEND_TOOLKIT_SET_ENV=${ASCEND_TOOLKIT_SET_ENV:-"/usr/local/Ascend/ascend-toolkit/set_env.sh"}
 ASCEND_ATB_SET_ENV=${ASCEND_ATB_SET_ENV:-"/usr/local/Ascend/nnal/atb/set_env.sh"}
 ASCEND_ATB_CXX_ABI=${ASCEND_ATB_CXX_ABI:-"1"}
+HOST_PYTHON_BIN=${HOST_PYTHON_BIN:-$(command -v python3 || command -v python || true)}
 EXTRA_PYPI_INDEX=${EXTRA_PYPI_INDEX:-"https://mirrors.huaweicloud.com/ascend/repos/pypi"}
 PYTORCH_CPU_INDEX_URL=${PYTORCH_CPU_INDEX_URL:-"https://download.pytorch.org/whl/cpu"}
 DEFAULT_OFFICIAL_TORCH_VERSION="2.9.0"
@@ -37,6 +38,8 @@ OFFICIAL_TORCH_WHEEL_URL=${OFFICIAL_TORCH_WHEEL_URL:-""}
 OFFICIAL_TORCH_NPU_WHEEL_URL=${OFFICIAL_TORCH_NPU_WHEEL_URL:-""}
 OFFICIAL_TORCHVISION_WHEEL_URL=${OFFICIAL_TORCHVISION_WHEEL_URL:-""}
 OFFICIAL_TORCHAUDIO_WHEEL_URL=${OFFICIAL_TORCHAUDIO_WHEEL_URL:-""}
+OFFICIAL_VLLM_ASCEND_WHEEL=${OFFICIAL_VLLM_ASCEND_WHEEL:-""}
+OFFICIAL_VLLM_ASCEND_WHEEL_SHA256=${OFFICIAL_VLLM_ASCEND_WHEEL_SHA256:-""}
 FORCE_REPAIR_OFFICIAL_ENV=${FORCE_REPAIR_OFFICIAL_ENV:-"0"}
 BENCHMARK_RUNTIME_STATE_ROOT=${BENCHMARK_RUNTIME_STATE_ROOT:-"$REPO_ROOT/.benchmarks"}
 MANAGED_BENCHMARK_RUNNER_BASENAME=${MANAGED_BENCHMARK_RUNNER_BASENAME:-"run-official-ascend-goal-baseline.sh"}
@@ -1287,6 +1290,28 @@ run_with_ascend_env conda run -p "$ENV_PREFIX" python -m pip install --upgrade -
   xgrammar==0.1.32 \
   fastapi==0.123.10 \
   numba==0.61.2
+
+hydrate_vllm_ascend_runtime_artifacts() {
+  if [[ -z "$OFFICIAL_VLLM_ASCEND_WHEEL" ]]; then
+    return 0
+  fi
+  if [[ -z "$OFFICIAL_VLLM_ASCEND_WHEEL_SHA256" ]]; then
+    echo "OFFICIAL_VLLM_ASCEND_WHEEL_SHA256 is required when OFFICIAL_VLLM_ASCEND_WHEEL is set" >&2
+    return 2
+  fi
+  if [[ ! -f "$OFFICIAL_VLLM_ASCEND_WHEEL" ]]; then
+    echo "Official vLLM Ascend wheel not found: $OFFICIAL_VLLM_ASCEND_WHEEL" >&2
+    return 2
+  fi
+
+  "$HOST_PYTHON_BIN" "$REPO_ROOT/scripts/extract-official-vllm-ascend-wheel.py" \
+    --wheel "$OFFICIAL_VLLM_ASCEND_WHEEL" \
+    --worktree "$OFFICIAL_VLLM_ASCEND_WORKTREE" \
+    --expected-version "${OFFICIAL_VLLM_ASCEND_REF#v}" \
+    --expected-sha256 "$OFFICIAL_VLLM_ASCEND_WHEEL_SHA256"
+}
+
+hydrate_vllm_ascend_runtime_artifacts
 
 # ---------- Build vllm-ascend C extension (with LTO disabled) ----------
 # LTO (-flto=auto) strips TORCH_LIBRARY static constructors used for op

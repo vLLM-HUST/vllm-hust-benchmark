@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 VLLM_CLI_COMPAT=${VLLM_CLI_COMPAT:-"$REPO_ROOT/scripts/run_vllm_cli_compat.py"}
+COLLECT_ARTIFACT_SCRIPT=${COLLECT_ARTIFACT_SCRIPT:-"$REPO_ROOT/scripts/collect-run-artifact.sh"}
+VALIDATE_ARTIFACT_SCRIPT=${VALIDATE_ARTIFACT_SCRIPT:-"$REPO_ROOT/scripts/validate-run-artifact.sh"}
 SPEC_FILE=${1:-"$REPO_ROOT/docs/official-baselines/official-ascend-jan-2026-v0180-random-online-qwen25-14b-910b2.json"}
 CONSTRAINTS_FILE=${CONSTRAINTS_FILE:-"$REPO_ROOT/docs/official-baselines/official-ascend-constraints.stub.json"}
 # Perfgate measurement strategy (P0-7): warmup runs are executed against the
@@ -140,6 +142,16 @@ fi
 
 if [[ ! -f "$CONSTRAINTS_FILE" ]]; then
   echo "Constraints stub not found: $CONSTRAINTS_FILE" >&2
+  exit 2
+fi
+
+if [[ ! -f "$COLLECT_ARTIFACT_SCRIPT" ]]; then
+  echo "Artifact collector not found: $COLLECT_ARTIFACT_SCRIPT" >&2
+  exit 2
+fi
+
+if [[ ! -f "$VALIDATE_ARTIFACT_SCRIPT" ]]; then
+  echo "Artifact validator not found: $VALIDATE_ARTIFACT_SCRIPT" >&2
   exit 2
 fi
 
@@ -442,6 +454,12 @@ cleanup_managed_server() {
   local managed_port=""
   local candidate_pids=""
   local pid
+
+  # Packaging and source validation run before result-state paths are
+  # initialized. The EXIT trap must remain harmless when either gate fails.
+  if [[ -z "${MANAGED_SERVER_PORT_FILE:-}" ]]; then
+    return 0
+  fi
 
   if [[ -f "$MANAGED_SERVER_PORT_FILE" ]]; then
     managed_port=$(tr -d '[:space:]' < "$MANAGED_SERVER_PORT_FILE")
@@ -1358,6 +1376,11 @@ if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" != "serve" ]]; then
   fi
 fi
 
+# The benchmark and raw evidence are complete. Release the managed runtime
+# before host-side export and validation so the final artifact also proves that
+# the measurement did not leave NPU resources allocated.
+cleanup_managed_server
+
 EXPORT_ARGS=(
   "$SCENARIO"
   --benchmark-result-file "$RAW_RESULT_FILE"
@@ -1429,4 +1452,13 @@ if [[ "$PERFGATE_WARMUP_RUNS" -gt 0 || "$PERFGATE_MEASURED_RUNS" -gt 1 ]]; then
   echo "[same-spec-current] selected one complete measured run from $PERFGATE_MEASURED_RUNS candidates ($PERFGATE_AGGREGATION) into $ARTIFACT_DIR/run_leaderboard.json"
 fi
 
-echo "[same-spec-current] exported leaderboard artifact to $ARTIFACT_DIR"
+CURRENT_RUNTIME_PYTHON="$CURRENT_RUNTIME_PYTHON" \
+CURRENT_VLLM_HUST_REPO="$CURRENT_VLLM_HUST_REPO" \
+CURRENT_VLLM_ASCEND_HUST_REPO="$CURRENT_VLLM_ASCEND_HUST_REPO" \
+CURRENT_GIT_COMMIT="$CURRENT_GIT_COMMIT" \
+CURRENT_PLUGIN_GIT_COMMIT="$CURRENT_PLUGIN_GIT_COMMIT" \
+bash "$COLLECT_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"
+
+bash "$VALIDATE_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"
+
+echo "[same-spec-current] exported leaderboard artifact and validated it at $ARTIFACT_DIR"

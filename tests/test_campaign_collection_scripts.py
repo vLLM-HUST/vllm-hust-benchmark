@@ -676,3 +676,11 @@ def test_validator_resolves_repo_before_changing_to_artifact_dir(
     assert result.returncode > 0
     assert "cd: scripts: No such file or directory" not in result.stderr
     assert "artifact contract normalization passes" in result.stderr
+
+
+def test_validator_uses_explicit_host_python() -> None:
+    script = VALIDATOR.read_text(encoding="utf-8")
+    assert "resolve_validation_python()" in script
+    assert 'candidates+=("$HOST_PYTHON_BIN")' in script
+    assert "python3 -m json.tool" not in script
+    assert "if python3 -c" not in script

@@ -2,8 +2,8 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.3.6`
-- Effective from: `2026-08-18`
+- Registry version: `1.3.7`
+- Effective from: `2026-10-03`
 
 `registry_version` 表示本次生成的 registry 快照版本；每个 target 的 `target_version` 表示该 target 不可变的执行契约版本。无关
 target 的更新不应 改变它。生产端应记录 canonical 的 `target_contract_id` 和 `target_contract_version` 字段。

@@ -2,6 +2,14 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.7 — 2026-10-03
+
+- English: Freeze scheduler capacity and detailed P95/P99 request-distribution capture for the
+  executable random-online fixed-target contract.
+- 中文：为可执行 random-online 固定靶契约冻结调度容量，并要求保存请求级分布与 P95/P99。
+- Source set: `1644b73c1fb6cde80ba6c23135388075c99946a31a65a60a3ce156faa20cf0a3`
+- Supersedes: `1.3.6`
+
 ## 1.3.6 — 2026-08-18
 
 - English: Add a plain (non-full-graph-parallel) Ascend 910B3 random-online specialty spec for the

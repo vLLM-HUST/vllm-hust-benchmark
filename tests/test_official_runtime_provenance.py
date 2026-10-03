@@ -1,4 +1,6 @@
+import hashlib
 import importlib.util
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -13,9 +15,11 @@ HELPER = REPO_ROOT / "scripts/capture-official-runtime-provenance.py"
 def _clear_fake_runtime_modules():
     for name in ("vllm", "vllm_ascend"):
         sys.modules.pop(name, None)
+        sys.modules.pop(f"{name}._version", None)
     yield
     for name in ("vllm", "vllm_ascend"):
         sys.modules.pop(name, None)
+        sys.modules.pop(f"{name}._version", None)
 
 
 def _load_helper():
@@ -217,6 +221,106 @@ def test_module_and_distribution_version_mismatch_is_rejected(
         assert "runtime version mismatch" in str(error)
     else:
         raise AssertionError("mismatched runtime package versions were accepted")
+
+
+def test_generated_version_module_proves_package_without_top_level_version(
+    tmp_path: Path, monkeypatch
+) -> None:
+    helper = _load_helper()
+    plugin_repo, plugin_commit = _source_repo(tmp_path, "vllm_ascend", "4.5.6")
+    package = plugin_repo / "vllm_ascend"
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "_version.py").write_text(
+        "__version__ = '4.5.6'\n"
+        f"__commit_id__ = {plugin_commit[:8]!r}\n"
+        "__upstream_commit__ = None\n",
+        encoding="utf-8",
+    )
+    _git(plugin_repo, "add", ".")
+    _git(plugin_repo, "commit", "-m", "move version metadata")
+    plugin_commit = _git(plugin_repo, "rev-parse", "HEAD")
+    (package / "_version.py").write_text(
+        "__version__ = '4.5.6'\n"
+        f"__commit_id__ = {plugin_commit[:8]!r}\n"
+        "__upstream_commit__ = None\n",
+        encoding="utf-8",
+    )
+    monkeypatch.syspath_prepend(str(plugin_repo))
+    monkeypatch.setattr(
+        helper, "_distribution_version", lambda names: (names[0], "4.5.6")
+    )
+
+    payload = helper.capture_role("plugin", plugin_repo, plugin_commit)
+
+    assert payload["module_version"] == "4.5.6"
+    assert payload["module_commit"] == plugin_commit[:8]
+
+
+def test_plugin_runtime_proves_official_wheel_artifacts(
+    tmp_path: Path, monkeypatch
+) -> None:
+    helper = _load_helper()
+    plugin_repo, plugin_commit = _source_repo(tmp_path, "vllm_ascend", "4.5.6")
+    artifact = plugin_repo / "vllm_ascend" / "_cann_ops_custom" / "kernel.o"
+    artifact.parent.mkdir(parents=True)
+    artifact.write_bytes(b"official-kernel")
+    digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+    manifest = {
+        "schema_version": "official-vllm-ascend-wheel-extraction/v1",
+        "wheel": "/cache/vllm_ascend-4.5.6.whl",
+        "wheel_version": "4.5.6",
+        "wheel_sha256": "a" * 64,
+        "artifact_count": 1,
+        "artifacts": [
+            {
+                "path": "vllm_ascend/_cann_ops_custom/kernel.o",
+                "size_bytes": artifact.stat().st_size,
+                "sha256": digest,
+            }
+        ],
+    }
+    (plugin_repo / "vllm_ascend" / "_official_wheel_artifacts.json").write_text(
+        json.dumps(manifest), encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(plugin_repo))
+    monkeypatch.setattr(
+        helper, "_distribution_version", lambda names: (names[0], "4.5.6")
+    )
+
+    payload = helper.capture_role("plugin", plugin_repo, plugin_commit)
+
+    evidence = payload["official_wheel_artifacts"]
+    assert evidence["wheel_sha256"] == "a" * 64
+    assert evidence["artifact_count"] == 1
+
+
+def test_plugin_runtime_rejects_changed_official_wheel_artifact(
+    tmp_path: Path, monkeypatch
+) -> None:
+    helper = _load_helper()
+    plugin_repo, plugin_commit = _source_repo(tmp_path, "vllm_ascend", "4.5.6")
+    artifact = plugin_repo / "vllm_ascend" / "_cann_ops_custom" / "kernel.o"
+    artifact.parent.mkdir(parents=True)
+    artifact.write_bytes(b"changed")
+    manifest = {
+        "schema_version": "official-vllm-ascend-wheel-extraction/v1",
+        "artifacts": [
+            {
+                "path": "vllm_ascend/_cann_ops_custom/kernel.o",
+                "sha256": "0" * 64,
+            }
+        ],
+    }
+    (plugin_repo / "vllm_ascend" / "_official_wheel_artifacts.json").write_text(
+        json.dumps(manifest), encoding="utf-8"
+    )
+    monkeypatch.syspath_prepend(str(plugin_repo))
+    monkeypatch.setattr(
+        helper, "_distribution_version", lambda names: (names[0], "4.5.6")
+    )
+
+    with pytest.raises(ValueError, match="artifact SHA256 mismatch"):
+        helper.capture_role("plugin", plugin_repo, plugin_commit)
 
 
 def test_generated_module_commit_mismatch_is_rejected(
