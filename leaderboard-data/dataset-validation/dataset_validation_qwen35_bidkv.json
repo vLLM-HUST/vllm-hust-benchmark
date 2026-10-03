@@ -33,7 +33,10 @@
       "id": "evoscientist",
       "label": "EVOSCIENTIST",
       "group": "A2",
-      "description": "First 12 requests from the EvoScientist trace"
+      "description": "First 12 requests from the EvoScientist trace",
+      "applicable_metric_ids": [
+        "output_token_throughput"
+      ]
     }
   ],
   "metrics": [
@@ -81,11 +84,26 @@
         "output_tokens_per_arm": 24148,
         "precision": "BF16",
         "method": "BidKV utility preemption weight 5.0",
-        "baseline_repeats": [35.37035637779263, 35.96565121399601],
-        "candidate_repeats": [41.42218456909079, 39.795148276368685],
-        "policy_calls": [786, 711],
-        "policy_selections": [10, 7],
-        "policy_failures": [0, 0]
+        "baseline_repeats": [
+          35.37035637779263,
+          35.96565121399601
+        ],
+        "candidate_repeats": [
+          41.42218456909079,
+          39.795148276368685
+        ],
+        "policy_calls": [
+          786,
+          711
+        ],
+        "policy_selections": [
+          10,
+          7
+        ],
+        "policy_failures": [
+          0,
+          0
+        ]
       }
     }
   ],
@@ -93,5 +111,11 @@
     "This is one measured TP4/C12 cell, not a complete Qwen3.5 dataset matrix.",
     "The displayed values are geometric means across two order-reversed paired repeats; individual repeats remain in provenance.",
     "The result must not be pooled with the separate TP2 SWE Prefix Reuse series."
-  ]
+  ],
+  "coverage_contract": {
+    "mode": "explicit-dataset-metric-applicability",
+    "complete_cell_states_required": true,
+    "non_measured_reason_required": true,
+    "matched_b0_required_for_b1": true
+  }
 }

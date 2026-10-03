@@ -24,7 +24,7 @@ def load_json(path: Path) -> dict:
 
 
 def test_checked_in_publication_is_valid_and_complete() -> None:
-    assert validate_publication(PUBLICATION) == {"scenarios": 2, "results": 175}
+    assert validate_publication(PUBLICATION) == {"scenarios": 3, "results": 573}
 
 
 def test_publication_documents_match_json_schemas() -> None:
@@ -79,3 +79,25 @@ def test_artifact_rejects_scenario_drift_duplicate_cells_and_missing_evidence() 
             nullable_current_value,
             expected_scenario_id=artifact["scenario"]["id"],
         )
+
+
+def test_artifact_requires_explicit_applicability_states_and_matched_b0() -> None:
+    artifact = load_json(PUBLICATION / "dataset_validation_qwen35_bidkv.json")
+
+    missing_applicability = copy.deepcopy(artifact)
+    missing_applicability["datasets"][0].pop("applicable_metric_ids")
+    with pytest.raises(DatasetValidationError, match="applicable_metric_ids"):
+        validate_artifact(
+            missing_applicability,
+            expected_scenario_id=artifact["scenario"]["id"],
+        )
+
+    unmatched_b1 = copy.deepcopy(artifact)
+    unmatched_b1["results"][0]["baseline_value"] = None
+    with pytest.raises(DatasetValidationError, match="matched B0"):
+        validate_artifact(unmatched_b1, expected_scenario_id=artifact["scenario"]["id"])
+
+    missing_cell = copy.deepcopy(artifact)
+    missing_cell["results"].clear()
+    with pytest.raises(DatasetValidationError, match="explicitly cover"):
+        validate_artifact(missing_cell, expected_scenario_id=artifact["scenario"]["id"])
