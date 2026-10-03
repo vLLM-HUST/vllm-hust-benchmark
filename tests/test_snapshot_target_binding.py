@@ -94,14 +94,22 @@ def _registry(target: dict) -> OfficialTargetRegistry:
 
 def test_exact_active_public_contract_derives_admission_metadata() -> None:
     entry = _entry()
+    entry["metadata"].update(
+        {
+            "target_id": "legacy-baseline-family",
+            "target_version": "Legacy baseline label",
+        }
+    )
     target = _target()
     verified, errors = bind_entry_to_official_target(entry, _registry(target))
     assert verified is True
     assert errors == []
     assert entry["metadata"] == {
         "verified": True,
-        "target_id": "official-target",
-        "target_version": "7",
+        "target_id": "legacy-baseline-family",
+        "target_version": "Legacy baseline label",
+        "target_contract_id": "official-target",
+        "target_contract_version": "7",
         "profile_id": "core-text",
         "target_registry_sha256": "a" * 64,
     }

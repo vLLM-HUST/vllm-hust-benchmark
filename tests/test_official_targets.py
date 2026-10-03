@@ -8,6 +8,7 @@ import jsonschema
 import pytest
 
 from vllm_hust_benchmark.official_targets import (
+    _resolved_target_client_parameters,
     PUBLIC_CODE_MODEL,
     PUBLIC_TEXT_MODEL,
     PUBLIC_VISION_MODEL,
@@ -53,6 +54,24 @@ def test_registry_generation_is_distinct_from_target_contract_version() -> None:
         "1.3.6",
         "1.3.7",
     }
+
+
+def test_random_target_client_parameters_use_executable_names() -> None:
+    resolved = _resolved_target_client_parameters(
+        {
+            "client_parameters": {
+                "dataset_name": "random",
+                "input_len": 1024,
+                "output_len": 256,
+                "num_prompts": 200,
+            }
+        }
+    )
+
+    assert resolved["random_input_len"] == 1024
+    assert resolved["random_output_len"] == 256
+    assert "input_len" not in resolved
+    assert "output_len" not in resolved
 
 
 def test_one_target_update_inherits_unchanged_contracts() -> None:

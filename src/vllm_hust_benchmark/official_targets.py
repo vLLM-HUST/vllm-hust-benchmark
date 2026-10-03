@@ -182,6 +182,17 @@ def _source_set_sha256(targets: list[dict[str, Any]]) -> str:
     return _sha256_bytes(canonical.encode("utf-8"))
 
 
+def _resolved_target_client_parameters(spec: dict[str, Any]) -> dict[str, Any]:
+    """Use the same parameter names emitted by same-spec resolution."""
+    resolved = dict(spec["client_parameters"])
+    if resolved.get("dataset_name") == "random":
+        if "input_len" in resolved and "random_input_len" not in resolved:
+            resolved["random_input_len"] = resolved.pop("input_len")
+        if "output_len" in resolved and "random_output_len" not in resolved:
+            resolved["random_output_len"] = resolved.pop("output_len")
+    return resolved
+
+
 def _load_version_history(repo_root: Path) -> dict[str, Any]:
     path = repo_root / VERSION_HISTORY_RELATIVE_PATH
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -306,7 +317,7 @@ def build_registry(repo_root: Path) -> dict[str, Any]:
                 "server_parameters": spec["server_parameters"],
                 "workload": {
                     "name": spec["scenario"],
-                    "client_parameters": spec["client_parameters"],
+                    "client_parameters": _resolved_target_client_parameters(spec),
                 },
                 "source_spec": {
                     "path": relative_path,

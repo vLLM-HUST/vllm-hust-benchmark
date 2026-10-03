@@ -260,8 +260,8 @@ def bind_entry_to_official_target(
     metadata.update(
         {
             "verified": True,
-            "target_id": target_id,
-            "target_version": str(target["target_version"]),
+            "target_contract_id": target_id,
+            "target_contract_version": str(target["target_version"]),
             "profile_id": str(target["profile"]),
             "target_registry_sha256": registry.sha256,
         }
