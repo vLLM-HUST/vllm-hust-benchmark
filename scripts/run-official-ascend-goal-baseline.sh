@@ -1466,7 +1466,7 @@ server_log_indicates_resource_busy() {
 
   [[ -f "$log_file" ]] || return 1
 
-  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy|ERR99999 UNKNOWN applicaiton exception|ERR99999 UNKNOWN application exception|Engine core initialization failed" "$log_file"
+  grep -Eq "DrvMngGetConsoleLogLevel failed|dcmi model initialized failed|ret is -8020|drvRet=87|drvRetCode=87|ErrCode=507899|error code is 507899|rtGetDeviceCount|Can't get ascend_hal device count|driver error:internal error|Resource_Busy\(EL0005\)|The resources are busy" "$log_file"
 }
 
 wait_for_ascend_runtime_ready() {
@@ -1859,9 +1859,10 @@ case "$BENCHMARK_TYPE" in
         persist_managed_server_state
         server_ready=1
         break
+      else
+        server_wait_status=$?
       fi
 
-      server_wait_status=$?
       if [[ "$server_wait_status" -eq "$RESOURCE_BUSY_EXIT_CODE" && "$start_attempt" -lt "$SERVER_START_RETRIES" ]]; then
         echo "[goal-baseline] Detected transient Ascend resource busy state; retrying server start in ${SERVER_START_RETRY_DELAY_SECONDS}s (attempt ${start_attempt}/${SERVER_START_RETRIES})" >&2
         cleanup_managed_server || true
@@ -1916,6 +1917,11 @@ for before_path, after_path in zip(paths[::2], paths[1::2]):
     if any(before.get(field) != after.get(field) for field in fields):
         raise SystemExit(f"official source changed during benchmark: {before_path.stem}")
 PY
+
+# Measurement and provenance capture are complete. Release the model before
+# host-side export and validation so those gates do not compete for memory or
+# inherit a live runtime that can still mutate logs.
+cleanup_managed_server
 
 EXPORT_ARGS=(
   python -m vllm_hust_benchmark.cli export-leaderboard-artifact

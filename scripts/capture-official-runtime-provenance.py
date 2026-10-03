@@ -79,6 +79,22 @@ def _module_path(module: ModuleType) -> Path:
     return Path(raw_path).resolve()
 
 
+def _runtime_version_fields(module: ModuleType) -> tuple[str, str, str]:
+    version_module = None
+    if not getattr(module, "__version__", ""):
+        try:
+            version_module = importlib.import_module(f"{module.__name__}._version")
+        except ModuleNotFoundError as error:
+            if error.name != f"{module.__name__}._version":
+                raise
+    source = version_module or module
+    return (
+        str(getattr(source, "__version__", "") or "").strip(),
+        str(getattr(source, "__commit_id__", "") or "").strip(),
+        str(getattr(source, "__upstream_commit__", "") or "").strip(),
+    )
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -118,6 +134,37 @@ def _extension_evidence(
         }
         for name, (status, path) in sorted(paths.items())
     ]
+
+
+def _official_wheel_evidence(
+    worktree: Path, runtime_root: Path
+) -> dict[str, Any] | None:
+    manifest_path = worktree / "vllm_ascend" / "_official_wheel_artifacts.json"
+    if not manifest_path.is_file():
+        return None
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if payload.get("schema_version") != "official-vllm-ascend-wheel-extraction/v1":
+        raise ValueError(
+            f"unsupported official wheel artifact manifest: {manifest_path}"
+        )
+    artifacts = payload.get("artifacts")
+    if not isinstance(artifacts, list) or not artifacts:
+        raise ValueError("official wheel artifact manifest has no artifacts")
+    for artifact in artifacts:
+        relative = Path(str(artifact.get("path") or ""))
+        if relative.is_absolute() or ".." in relative.parts:
+            raise ValueError(f"unsafe official wheel artifact path: {relative}")
+        artifact_path = runtime_root / relative
+        if not artifact_path.is_file():
+            raise ValueError(f"official wheel artifact is missing: {artifact_path}")
+        observed_sha256 = _sha256(artifact_path)
+        if observed_sha256 != artifact.get("sha256"):
+            raise ValueError(
+                f"official wheel artifact SHA256 mismatch: {artifact_path}"
+            )
+    evidence = dict(payload)
+    evidence["manifest_path"] = str(manifest_path.resolve())
+    return evidence
 
 
 def capture_role(
@@ -162,9 +209,7 @@ def capture_role(
                 f"observed {image_commit or '<empty>'}"
             )
 
-    module_version = str(getattr(module, "__version__", "") or "").strip()
-    module_commit = str(getattr(module, "__commit_id__", "") or "").strip()
-    upstream_commit = str(getattr(module, "__upstream_commit__", "") or "").strip()
+    module_version, module_commit, upstream_commit = _runtime_version_fields(module)
     distribution, distribution_version = _distribution_version(config["distributions"])
     if not module_version or not distribution_version:
         raise ValueError(f"{role} runtime package version cannot be proven")
@@ -211,7 +256,7 @@ def capture_role(
                 f"runtime root {runtime_root}"
             )
 
-    return {
+    result = {
         "module": config["module"],
         "module_path": str(module_path),
         "module_version": module_version,
@@ -229,6 +274,11 @@ def capture_role(
         "extension_policy": "present" if extensions else "none-discovered",
         "extensions": extensions,
     }
+    if role == "plugin":
+        wheel_evidence = _official_wheel_evidence(worktree, runtime_root)
+        if wheel_evidence is not None:
+            result["official_wheel_artifacts"] = wheel_evidence
+    return result
 
 
 def _load_source_provenance(path: Path) -> dict[str, Any]:

@@ -131,6 +131,27 @@ def test_current_same_spec_runner_defaults_to_one_start_attempt() -> None:
     assert "SERVER_START_RETRIES=${SERVER_START_RETRIES:-1}" in script
 
 
+def test_current_same_spec_cleanup_is_safe_before_state_initialization() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+    cleanup = _function_text(script, "cleanup_managed_server")
+
+    assert "${MANAGED_SERVER_PORT_FILE:-}" in cleanup
+
+
+def test_current_same_spec_runner_collects_and_validates_after_cleanup() -> None:
+    script = RUNNER.read_text(encoding="utf-8")
+
+    proof_gate = script.index(
+        'if [[ "$CURRENT_EXPORT_ONLY" != "1" && "$BENCHMARK_TYPE" != "serve" ]]'
+    )
+    cleanup = script.index("cleanup_managed_server", proof_gate)
+    export = script.index("export-leaderboard-artifact", cleanup)
+    collect = script.index('bash "$COLLECT_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"', export)
+    validate = script.index('bash "$VALIDATE_ARTIFACT_SCRIPT" "$ARTIFACT_DIR"', collect)
+
+    assert cleanup < export < collect < validate
+
+
 def test_current_same_spec_runner_supports_image_native_runtime() -> None:
     script = RUNNER.read_text(encoding="utf-8")
 

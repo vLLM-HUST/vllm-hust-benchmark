@@ -1,0 +1,96 @@
+{
+  "schema_version": "fixed-target-pair-evidence/v1",
+  "pair_status": "matched",
+  "resolved_spec_hash": "39e107c37d332adc16967a4ecf826fc6bbc3a72672c5d1b6a24ab1e72c8ed52b",
+  "baseline": {
+    "entry_id": "d32e44d8-8b15-4bac-ae8c-6a3ba93e8508",
+    "engine": "vllm",
+    "engine_version": "0.18.0",
+    "metrics": {
+      "ttft_ms": 249.66158255003393,
+      "tbt_ms": 56.337938387093004,
+      "throughput_tps": 240.88050700425697,
+      "peak_mem_mb": null,
+      "error_rate": 0.0
+    },
+    "p95": {
+      "ttft_ms": 352.9803388752043,
+      "tpot_ms": 60.41478908639036
+    },
+    "raw_sha256": "e37bda6d0e59d0228285aa1511ed70ba4b23662f84eb9cf9cc31f7c94f3fd116"
+  },
+  "current": {
+    "entry_id": "53d38793-2dbd-4f8e-a94a-08fd45df4922",
+    "engine": "vllm-hust",
+    "engine_version": "0.25.1+d0f22d2bd",
+    "metrics": {
+      "ttft_ms": 217.00813966803253,
+      "tbt_ms": 35.76321088687023,
+      "throughput_tps": 245.97107453559525,
+      "peak_mem_mb": null,
+      "error_rate": 0.0
+    },
+    "p95": {
+      "ttft_ms": 307.0847138762471,
+      "tpot_ms": 39.472664116571345
+    },
+    "raw_sha256": "5148b943b2b35174b52336601b7104dcba6760ce2ffa22e680a966c47993806a"
+  },
+  "derived": {
+    "throughput_ratio": {
+      "value": 1.02113316513091,
+      "formula": "current.throughput_tps / baseline.throughput_tps"
+    },
+    "ttft_reduction_pct": {
+      "value": 13.079081910993429,
+      "formula": "(1 - current.mean_ttft_ms / baseline.mean_ttft_ms) * 100"
+    },
+    "tpot_reduction_pct": {
+      "value": 36.52019951254807,
+      "formula": "(1 - current.mean_tpot_ms / baseline.mean_tpot_ms) * 100"
+    }
+  },
+  "hard_constraint_inputs": {
+    "measured": {
+      "typical_throughput_ratio_vs_baseline": 1.02113316513091,
+      "typical_ttft_reduction_pct_vs_baseline": 13.079081910993429,
+      "typical_tpot_reduction_pct_vs_baseline": 36.52019951254807,
+      "long_context_ttft_p95_ms": 307.0847138762471,
+      "long_context_tpot_p95_ms": 39.472664116571345
+    },
+    "unknown": {
+      "single_chip_effective_utilization_pct": {
+        "value": null,
+        "status": "not-measured",
+        "reason": "the matched run did not collect the required denominator or telemetry"
+      },
+      "unit_token_cost_reduction_pct": {
+        "value": null,
+        "status": "not-measured",
+        "reason": "the matched run did not collect the required denominator or telemetry"
+      },
+      "multi_tenant_high_utilization": {
+        "value": null,
+        "status": "not-measured",
+        "reason": "the matched run did not collect the required denominator or telemetry"
+      }
+    }
+  },
+  "raw_request_array_lengths": {
+    "baseline": {
+      "input_lens": 200,
+      "output_lens": 200,
+      "ttfts": 200,
+      "itls": 200,
+      "errors": 200
+    },
+    "current": {
+      "input_lens": 200,
+      "output_lens": 200,
+      "ttfts": 200,
+      "itls": 200,
+      "errors": 200
+    }
+  },
+  "p95_source": "vllm bench serve raw request distributions; metric_percentiles=95,99"
+}

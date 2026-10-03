@@ -1075,7 +1075,7 @@ def _is_goal_baseline_entry_debug(entry: Mapping[str, Any]) -> bool:
     github_repository = str(metadata.get("github_repository") or "").strip().lower()
     return (
         engine == "vllm"
-        and engine_version.startswith("0.11.0")
+        and engine_version.startswith("0.18.0")
         and github_repository == "vllm-project/vllm-ascend"
     )
 

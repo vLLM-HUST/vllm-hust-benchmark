@@ -19,6 +19,38 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+resolve_validation_python() {
+  local candidate
+  local candidates=()
+  [[ -n "${HOST_PYTHON_BIN:-}" ]] && candidates+=("$HOST_PYTHON_BIN")
+  while IFS= read -r candidate; do
+    [[ -n "$candidate" ]] && candidates+=("$candidate")
+  done < <(type -a -p python3 python 2>/dev/null | awk '!seen[$0]++')
+
+  for candidate in "${candidates[@]}"; do
+    [[ -x "$candidate" ]] || continue
+    if REPO_ROOT="$REPO_ROOT" "$candidate" - <<'PY' >/dev/null 2>&1
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.environ["REPO_ROOT"], "src"))
+from vllm_hust_benchmark.submission_artifacts import (  # noqa: F401
+    normalize_submission_artifact_contract,
+)
+PY
+    then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+PYTHON_BIN=$(resolve_validation_python || true)
+if [[ -z "$PYTHON_BIN" ]]; then
+  echo "Error: no Python interpreter can import the artifact contract validator" >&2
+  exit 2
+fi
 
 ARTIFACT_DIR="${1:?Usage: validate-run-artifact.sh <artifact-dir>}"
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -60,7 +92,7 @@ fi
 # ─── 2. run_leaderboard.json ────────────────────────────────────────────────
 
 if [[ -f "run_leaderboard.json" ]]; then
-  if python3 -m json.tool run_leaderboard.json >/dev/null 2>&1; then
+  if "$PYTHON_BIN" -m json.tool run_leaderboard.json >/dev/null 2>&1; then
     check "run_leaderboard.json is valid JSON" 0
   else
     check "run_leaderboard.json is valid JSON" 1
@@ -72,10 +104,10 @@ fi
 # ─── 3. leaderboard_manifest.json ───────────────────────────────────────────
 
 if [[ -f "leaderboard_manifest.json" ]]; then
-  if python3 -m json.tool leaderboard_manifest.json >/dev/null 2>&1; then
+  if "$PYTHON_BIN" -m json.tool leaderboard_manifest.json >/dev/null 2>&1; then
     check "leaderboard_manifest.json is valid JSON" 0
     # Check that it references the artifact
-    REFERENCED=$(python3 -c "
+    REFERENCED=$("$PYTHON_BIN" -c "
 import json
 m = json.load(open('leaderboard_manifest.json'))
 entries = m.get('entries', [])
@@ -99,10 +131,10 @@ fi
 # ─── 4. env-manifest.json ───────────────────────────────────────────────────
 
 if [[ -f "env-manifest.json" ]]; then
-  if python3 -m json.tool env-manifest.json >/dev/null 2>&1; then
+  if "$PYTHON_BIN" -m json.tool env-manifest.json >/dev/null 2>&1; then
     check "env-manifest.json is valid JSON" 0
     # Check required fields
-    MISSING=$(python3 -c "
+    MISSING=$("$PYTHON_BIN" -c "
 import json
 m = json.load(open('env-manifest.json'))
 required = ['os', 'python_version', 'collected_at']
@@ -116,7 +148,7 @@ if missing:
       echo "  missing env-manifest fields: $MISSING" >&2
       check "env-manifest.json has required fields" 1
     fi
-    FROZEN_INPUT_ERRORS=$(python3 - <<'PY' || echo "parse-error"
+    FROZEN_INPUT_ERRORS=$("$PYTHON_BIN" - <<'PY' || echo "parse-error"
 import json
 
 manifest = json.load(open("env-manifest.json", encoding="utf-8"))
@@ -181,7 +213,7 @@ PY
       check "formal campaign frozen provenance is complete" 1
     fi
 
-    OFFICIAL_SOURCE_ERRORS=$(python3 - <<'PY' || echo "parse-error"
+    OFFICIAL_SOURCE_ERRORS=$("$PYTHON_BIN" - <<'PY' || echo "parse-error"
 import json
 
 manifest = json.load(open("env-manifest.json", encoding="utf-8"))
@@ -213,7 +245,7 @@ PY
       check "official source provenance is complete" 1
     fi
 
-    OFFICIAL_RUNTIME_ERRORS=$(python3 - <<'PY' || echo "parse-error"
+    OFFICIAL_RUNTIME_ERRORS=$("$PYTHON_BIN" - <<'PY' || echo "parse-error"
 import json
 from pathlib import Path
 
@@ -315,7 +347,7 @@ fi
 # ─── 6. Schema normalization (if Python available) ──────────────────────────
 
 if [[ -f "run_leaderboard.json" ]] && [[ -d "$REPO_ROOT/src" ]]; then
-  if python3 -c "
+  if "$PYTHON_BIN" -c "
 import sys
 sys.path.insert(0, '$REPO_ROOT/src')
 from vllm_hust_benchmark.submission_artifacts import normalize_submission_artifact_contract
