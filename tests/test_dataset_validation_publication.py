@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import importlib.util
 import json
 from pathlib import Path
 
@@ -101,3 +102,46 @@ def test_artifact_requires_explicit_applicability_states_and_matched_b0() -> Non
     missing_cell["results"].clear()
     with pytest.raises(DatasetValidationError, match="explicitly cover"):
         validate_artifact(missing_cell, expected_scenario_id=artifact["scenario"]["id"])
+
+
+def test_matrix_rebuild_preserves_measured_szyn_baseline(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    script = ROOT / "scripts" / "build_dataset_matrix_coverage.py"
+    spec = importlib.util.spec_from_file_location("dataset_matrix_builder", script)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    existing = load_json(PUBLICATION / "dataset_validation_qwen35_tp2_matrix.json")
+    qwen25 = load_json(PUBLICATION / "dataset_validation_v1.b0.json")
+    cell = next(
+        result
+        for result in existing["results"]
+        if result["dataset_id"] == "szyn-opencode-swebench-verified-500"
+        and result["metric_id"] == "agent_resolve_rate"
+    )
+    cell.update(
+        status="baseline_only",
+        baseline_value=42.0,
+        value=None,
+        provenance={"repository": "vLLM-HUST/vllm-hust-dev-hub"},
+    )
+    existing["generated_at"] = "2026-10-06T00:00:00Z"
+    existing["status"] = "partial_measurements"
+    existing["baseline"]["commit"] = "measured-commit"
+
+    monkeypatch.setattr(
+        module, "load", lambda name: existing if name == module.QWEN35_FILE else None
+    )
+    rebuilt = module.build_qwen35(qwen25)
+    rebuilt_cell = next(
+        result
+        for result in rebuilt["results"]
+        if result["dataset_id"] == "szyn-opencode-swebench-verified-500"
+        and result["metric_id"] == "agent_resolve_rate"
+    )
+    assert rebuilt_cell == cell
+    assert rebuilt["generated_at"] == existing["generated_at"]
+    assert rebuilt["status"] == existing["status"]
+    assert rebuilt["baseline"] == existing["baseline"]

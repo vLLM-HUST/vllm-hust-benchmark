@@ -125,6 +125,12 @@ def build_qwen25() -> dict:
 
 
 def build_qwen35(qwen25: dict) -> dict:
+    existing = load(QWEN35_FILE)
+    measured = {
+        (result["dataset_id"], result["metric_id"]): result
+        for result in existing["results"]
+        if result["status"] in {"baseline_only", "passed", "failed"}
+    }
     online_metrics = copy.deepcopy(qwen25["metrics"])
     agent_metric = {
         "id": "agent_resolve_rate",
@@ -184,7 +190,11 @@ def build_qwen35(qwen25: dict) -> dict:
                     }
                 )
 
-    return {
+    results = [
+        copy.deepcopy(measured.get((cell["dataset_id"], cell["metric_id"]), cell))
+        for cell in results
+    ]
+    publication = {
         "contract_version": "dataset-validation-v1",
         "generated_at": "2026-10-03T08:00:00Z",
         "status": "campaign_defined_no_aggregate_measurements",
@@ -235,6 +245,10 @@ def build_qwen35(qwen25: dict) -> dict:
             "No empty or queued cell is a performance or coverage claim.",
         ],
     }
+    if measured:
+        for field in ("generated_at", "status", "baseline", "limitations"):
+            publication[field] = copy.deepcopy(existing[field])
+    return publication
 
 
 def update_index() -> dict:
