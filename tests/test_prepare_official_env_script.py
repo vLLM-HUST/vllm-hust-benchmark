@@ -61,6 +61,22 @@ def test_official_runner_releases_server_before_export() -> None:
     assert cleanup_index < export_index
 
 
+def test_official_runner_supports_audited_runtime_only_dataset_path() -> None:
+    script = RUN_OFFICIAL_SCRIPT.read_text(encoding="utf-8")
+
+    assert "OFFICIAL_RUNTIME_DATASET_PATH=${OFFICIAL_RUNTIME_DATASET_PATH:-}" in script
+    assert 'normalized["dataset_path"] = runtime_dataset_path' in script
+    assert 'ensure_runtime_dataset_available "$runtime_dataset_path"' in script
+    assert (
+        "OFFICIAL_INPUT_PROVENANCE_FILE=${OFFICIAL_INPUT_PROVENANCE_FILE:-}" in script
+    )
+    assert (
+        'cp -f "$OFFICIAL_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"'
+        in script
+    )
+    assert 'chmod 0644 "$ARTIFACT_DIR/input_provenance.json"' in script
+
+
 def _source_prepare_functions(snippet: str) -> str:
     script_path = shlex.quote(str(PREPARE_SCRIPT))
     return (
@@ -593,6 +609,7 @@ def test_official_runner_applies_resolved_server_parameters_to_offline_cli(
             CLIENT_READY_CHECK_TIMEOUT_SECONDS=900
             OFFICIAL_VLLM_WORKTREE=/tmp/vllm
             OFFICIAL_BENCHMARK_DATASET_ROOT=/tmp/datasets
+            OFFICIAL_RUNTIME_DATASET_PATH=/tmp/frozen-vision
             normalized_client_parameters_json
             """
         )
@@ -604,6 +621,7 @@ def test_official_runner_applies_resolved_server_parameters_to_offline_cli(
     assert normalized["tensor_parallel_size"] == 1
     assert normalized["gpu_memory_utilization"] == 0.6
     assert normalized["input_len"] == 1024
+    assert normalized["dataset_path"] == "/tmp/frozen-vision"
 
 
 def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> None:
