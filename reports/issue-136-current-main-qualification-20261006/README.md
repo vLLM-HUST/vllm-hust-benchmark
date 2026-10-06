@@ -24,11 +24,11 @@ merged.
 
 ## Result
 
-The service reached its health endpoint, completed graph compilation, allocated an 8.78 GiB KV
-cache for 47,872 tokens, and returned a valid HTTP 200 completion with eight output tokens. The
-response is retained in `completion.json`; this qualification checks service execution, not answer
-quality. `STATUS` is `OK`, and `npu-after.txt` confirms that the selected device released its
-process after shutdown.
+The service reached its health endpoint, completed graph compilation, allocated an 8.78 GiB KV cache
+for 47,872 tokens, and returned a valid HTTP 200 completion with eight output tokens. The response
+is retained in `completion.json`; this qualification checks service execution, not answer quality.
+`STATUS` is `OK`, and `npu-after.txt` confirms that the selected device released its process after
+shutdown.
 
 The `EngineDeadError` near the end of `server.log` occurs after the successful response, when the
 harness deliberately terminates the service process group. It is a shutdown artifact, not an
