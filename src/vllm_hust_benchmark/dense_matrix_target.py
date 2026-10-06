@@ -29,8 +29,12 @@ from pathlib import Path
 from typing import Any, Mapping
 
 
-SCHEMA_VERSION = "dense-matrix-issue-136/v1"
+SCHEMA_VERSION = "dense-matrix-issue-136/v2"
+LEGACY_SCHEMA_VERSION = "dense-matrix-issue-136/v1"
+SUPPORTED_SCHEMA_VERSIONS = (LEGACY_SCHEMA_VERSION, SCHEMA_VERSION)
 VALID_STATUS: tuple[str, ...] = ("spec-ready", "blocked")
+VALID_TARGET_STATUS: tuple[str, ...] = ("target-ready", "capacity-pilot-pending")
+LOAD_PROFILES: tuple[str, ...] = ("fixed-1-rps", "scaled-load")
 CHIP_KEYS: tuple[str, ...] = ("1chip", "2chip", "4chip")
 CORE_WORKLOADS: tuple[str, ...] = (
     "random-online",
@@ -115,6 +119,12 @@ def validate_dense_matrix_target(path: Path | None = None) -> DenseMatrixStatus:
             cell = cells.get(chip_key)
             if not isinstance(cell, Mapping):
                 continue
+            targets = cell.get("targets")
+            if isinstance(targets, Mapping):
+                fixed = targets.get("fixed-1-rps")
+                if isinstance(fixed, Mapping) and fixed.get("status") == "target-ready":
+                    spec_ready_count += 1
+                continue
             cell_status = str(cell.get("status") or "")
             if cell_status == "spec-ready":
                 spec_ready_count += 1
@@ -122,7 +132,7 @@ def validate_dense_matrix_target(path: Path | None = None) -> DenseMatrixStatus:
                 blocked_count += 1
 
         if workload_name in CORE_WORKLOADS:
-            _require_status(workload_name, cells, "spec-ready", errors)
+            _require_core_ready(workload_name, cells, errors)
         if workload_name == COMMUNICATION_WORKLOAD:
             _require_status(workload_name, cells, "blocked", errors)
 
@@ -151,10 +161,11 @@ def _load_matrix(path: Path) -> dict[str, Any]:
         raise ValueError(f"matrix file is not valid JSON: {path}") from exc
     if not isinstance(payload, Mapping):
         raise ValueError("matrix top-level payload must be a JSON object")
-    if str(payload.get("schema_version") or "") != SCHEMA_VERSION:
+    schema_version = str(payload.get("schema_version") or "")
+    if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise ValueError(
-            f"schema_version must be {SCHEMA_VERSION!r}, got "
-            f"{str(payload.get('schema_version') or '')!r}"
+            f"schema_version must be one of {SUPPORTED_SCHEMA_VERSIONS!r}, got "
+            f"{schema_version!r}"
         )
     if "workloads" not in payload:
         raise ValueError("matrix is missing required field 'workloads'")
@@ -191,6 +202,33 @@ def _validate_cell(
     repo_root: Path,
     errors: list[str],
 ) -> None:
+    targets = cell.get("targets")
+    if isinstance(targets, Mapping):
+        if set(targets) != set(LOAD_PROFILES):
+            _error(
+                f"workload {workload_name!r} {chip_key}: targets must be exactly "
+                f"{LOAD_PROFILES!r}",
+                errors,
+            )
+        for load_profile in LOAD_PROFILES:
+            target = targets.get(load_profile)
+            if not isinstance(target, Mapping):
+                _error(
+                    f"workload {workload_name!r} {chip_key}: target "
+                    f"{load_profile!r} must be a JSON object",
+                    errors,
+                )
+                continue
+            _validate_target(
+                workload_name,
+                chip_key,
+                load_profile,
+                target,
+                repo_root,
+                errors,
+            )
+        return
+
     cell_status = str(cell.get("status") or "")
     if cell_status not in VALID_STATUS:
         _error(
@@ -209,10 +247,52 @@ def _validate_cell(
             )
         return
 
-    spec_rel = cell.get("spec")
+    _validate_spec(workload_name, chip_key, cell.get("spec"), repo_root, errors)
+
+
+def _validate_target(
+    workload_name: str,
+    chip_key: str,
+    load_profile: str,
+    target: Mapping[str, Any],
+    repo_root: Path,
+    errors: list[str],
+) -> None:
+    status = str(target.get("status") or "")
+    if status not in VALID_TARGET_STATUS:
+        _error(
+            f"workload {workload_name!r} {chip_key} {load_profile}: invalid "
+            f"target status {status!r}, expected one of {VALID_TARGET_STATUS}",
+            errors,
+        )
+        return
+    if load_profile == "fixed-1-rps" and status != "target-ready":
+        _error(
+            f"workload {workload_name!r} {chip_key}: fixed-1-rps target must be "
+            "target-ready",
+            errors,
+        )
+    if status == "capacity-pilot-pending":
+        if target.get("spec") is not None or target.get("request_rate") is not None:
+            _error(
+                f"workload {workload_name!r} {chip_key} {load_profile}: pending "
+                "target must not declare a spec or request_rate",
+                errors,
+            )
+        return
+    _validate_spec(workload_name, chip_key, target.get("spec"), repo_root, errors)
+
+
+def _validate_spec(
+    workload_name: str,
+    chip_key: str,
+    spec_rel: Any,
+    repo_root: Path,
+    errors: list[str],
+) -> None:
     if not spec_rel:
         _error(
-            f"workload {workload_name!r} {chip_key}: spec-ready cell is missing 'spec'",
+            f"workload {workload_name!r} {chip_key}: ready target is missing 'spec'",
             errors,
         )
         return
@@ -331,6 +411,28 @@ def _require_status(
                 f"{expected!r}, got {cell_status!r}",
                 errors,
             )
+
+
+def _require_core_ready(
+    workload_name: str,
+    cells: Mapping[str, Any],
+    errors: list[str],
+) -> None:
+    for chip_key in CHIP_KEYS:
+        cell = cells.get(chip_key)
+        if not isinstance(cell, Mapping):
+            continue
+        targets = cell.get("targets")
+        if isinstance(targets, Mapping):
+            fixed = targets.get("fixed-1-rps")
+            if not isinstance(fixed, Mapping) or fixed.get("status") != "target-ready":
+                _error(
+                    f"workload {workload_name!r} {chip_key}: fixed-1-rps target "
+                    "must be target-ready",
+                    errors,
+                )
+            continue
+        _require_status(workload_name, {chip_key: cell}, "spec-ready", errors)
 
 
 def _check_declared_count(

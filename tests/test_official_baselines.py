@@ -449,10 +449,10 @@ def test_public_official_baseline_specs_are_v0180_910b2_fp16() -> None:
         payload = json.loads(path.read_text(encoding="utf-8"))
         spec_id = str(payload.get("id") or "")
         if spec_id.startswith("specialty-"):
-            # Specialty profiles (e.g. the 910B3 full-graph-parallel inplace
-            # specs) are deliberately outside the v0.18.0/910B2 public
-            # contract; the classifier hard-gates them to specialty/provisional.
-            assert payload.get("hardware_chip_model") == "910B3"
+            # Specialty profiles are deliberately outside the v0.18.0 public
+            # contract. They include isolated 910B3 studies and the directly
+            # named 910B2 issue #136 Dense scaling targets.
+            assert payload.get("hardware_chip_model") in {"910B2", "910B3"}
             assert payload.get("model_precision") == "FP16"
             continue
         assert "v0180" in path.name or "v0.18.0" in spec_id

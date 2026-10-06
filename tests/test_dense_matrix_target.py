@@ -16,6 +16,7 @@ from vllm_hust_benchmark.dense_matrix_target import (
     CHIP_KEYS,
     COMMUNICATION_WORKLOAD,
     CORE_WORKLOADS,
+    LEGACY_SCHEMA_VERSION,
     SCHEMA_VERSION,
     VALID_STATUS,
     validate_dense_matrix_target,
@@ -89,7 +90,7 @@ def _workload(
 
 def _base_matrix() -> dict:
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": LEGACY_SCHEMA_VERSION,
         "issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/136",
         "hardware": {"chip_model": "910B2", "node_count": 1},
         "model_revision_contract": "test contract",
@@ -154,8 +155,21 @@ def _setup(tmp_path: Path, mutate=None) -> Path:
 def test_matrix_schema_loads(tmp_path: Path) -> None:
     matrix_path = _setup(tmp_path)
     status = validate_dense_matrix_target(matrix_path)
-    assert status.schema_version == SCHEMA_VERSION
+    assert status.schema_version == LEGACY_SCHEMA_VERSION
     assert status.overall == "matrix-target-fixed"
+    assert list(status.errors) == []
+
+
+def test_repository_v2_matrix_loads() -> None:
+    matrix_path = (
+        Path(__file__).resolve().parents[1]
+        / "leaderboard-data"
+        / "dense-matrix-issue-136.json"
+    )
+    status = validate_dense_matrix_target(matrix_path)
+    assert status.schema_version == SCHEMA_VERSION
+    assert status.spec_ready_cells == 12
+    assert status.blocked_cells == 3
     assert list(status.errors) == []
 
 

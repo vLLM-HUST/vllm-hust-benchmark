@@ -48,11 +48,13 @@ def test_registry_generation_is_distinct_from_target_contract_version() -> None:
         == registry["source_set_sha256"]
     )
     # Unchanged targets inherit 1.3.5, the issue #179 910B3 specialty spec
-    # retains 1.3.6, and random-online carries the frozen 1.3.7 contract.
+    # retains 1.3.6, random-online carries 1.3.7, and the issue #136 Dense
+    # targets carry their new 1.3.8 contract.
     assert {target["target_version"] for target in registry["targets"]} == {
         "1.3.5",
         "1.3.6",
         "1.3.7",
+        "1.3.8",
     }
 
 

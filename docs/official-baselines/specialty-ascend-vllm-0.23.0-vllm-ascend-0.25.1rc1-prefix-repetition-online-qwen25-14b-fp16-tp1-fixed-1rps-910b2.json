@@ -1,0 +1,68 @@
+{
+  "id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2",
+  "label": "Official Ascend Jan 2026 prefix repetition online baseline for vllm-hust goal tracking",
+  "baseline_target": {
+    "id": "vllm-0.23.0-vllm-ascend-0.25.1rc1-7c8ec865a12f",
+    "label": "vLLM 0.23.0 + vLLM Ascend 0.25.1rc1",
+    "engine": "vllm",
+    "engine_version": "0.23.0",
+    "github_repository": "vLLM-HUST/vllm-ascend-hust",
+    "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7",
+    "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483"
+  },
+  "scenario": "prefix-repetition-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 1,
+  "node_count": 1,
+  "server_parameters": {
+    "tensor_parallel_size": 1,
+    "gpu_memory_utilization": 0.9,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "0.0.0.0",
+    "port": 8000,
+    "max_model_len": 32768,
+    "enable_prefix_caching": true,
+    "no_enable_chunked_prefill": true,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 32768
+  },
+  "client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "prefix_repetition",
+    "no_stream": false,
+    "ignore_eos": true,
+    "num_prompts": 200,
+    "input_len": 4096,
+    "output_len": 256,
+    "request_rate": 1.0,
+    "host": "127.0.0.1",
+    "port": 8000
+  },
+  "export": {
+    "engine": "vllm",
+    "engine_version": "0.23.0",
+    "submitter": "vllm-hust-issue-136",
+    "baseline_engine": "vllm",
+    "github_repository": "vLLM-HUST/vllm-ascend-hust",
+    "github_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+    "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+    "data_source": "issue-136-current-main-dense"
+  },
+  "title": "Ascend 910B2 vLLM 0.23.0 + vLLM Ascend 0.25.1rc1 prefix-repetition-online Qwen2.5-14B FP16 TP1 fixed-1rps",
+  "description": "Issue #136 Dense scaling target. The ID states the runtime versions, workload, precision, tensor parallel size, and load profile directly.",
+  "issue_136_contract": {
+    "core_commit": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7",
+    "plugin_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+    "load_profile": "fixed-1-rps",
+    "request_rate": 1.0,
+    "tensor_parallel_size": 1
+  }
+}

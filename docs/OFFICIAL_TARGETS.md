@@ -2,8 +2,8 @@
 
 > This file is generated from the official specs. Do not edit it manually.
 
-- Registry version: `1.3.7`
-- Effective from: `2026-10-03`
+- Registry version: `1.3.8`
+- Effective from: `2026-10-06`
 
 `registry_version` identifies this generated registry snapshot. Each target's `target_version` is
 the immutable execution-contract version for that target; an unrelated target update must not change
@@ -68,6 +68,42 @@ BF16 | — | 256 |
 | | perfgate | provisional | perfgate-text | sonnet-throughput | Qwen/Qwen2.5-3B-Instruct | 910B2 ×
 1 | BF16 | — | — |
 [`perfgate-ascend-sonnet-throughput-qwen25-3b-910b2.json`](../docs/official-baselines/perfgate-ascend-sonnet-throughput-qwen25-3b-910b2.json)
+| | specialty | provisional | dense-scaling | agent-research-online | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 1 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | agent-research-online | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 2 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | agent-research-online | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 4 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | prefix-repetition-online | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 1 | FP16 | 0.9 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | prefix-repetition-online | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 2 | FP16 | 0.9 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | prefix-repetition-online | Qwen/Qwen2.5-14B-Instruct |
+910B2 × 4 | FP16 | 0.9 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 1
+| FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 2
+| FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 4
+| FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | sharegpt-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
+1 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | sharegpt-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
+2 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | sharegpt-online | Qwen/Qwen2.5-14B-Instruct | 910B2 ×
+4 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json)
 | | specialty | provisional | multi-chip | agent-research-online-2chip | Qwen/Qwen2.5-14B-Instruct |
 910B2 × 2 | FP16 | — | — |
 [`official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-2chip-910b2.json`](../docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-2chip-910b2.json)

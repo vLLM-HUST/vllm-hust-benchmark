@@ -53,6 +53,7 @@ KNOWN_VLLM_SERVER_ARGS = frozenset(
         # caching
         "enable_prefix_caching",
         "enable_chunked_prefill",
+        "no_enable_chunked_prefill",
         "kv_cache_dtype",
         # quantization
         "quantization",

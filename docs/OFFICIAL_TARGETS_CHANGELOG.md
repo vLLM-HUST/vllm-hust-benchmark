@@ -2,6 +2,15 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.8 — 2026-10-06
+
+- English: Add directly named vLLM 0.23.0 + vLLM Ascend 0.25.1rc1 FP16 fixed-1RPS Dense scaling
+  targets for four workloads at TP1, TP2, and TP4, pinned to the merged issue #136 runtime pair.
+- 中文：新增直接标明 vLLM 0.23.0 + vLLM Ascend 0.25.1rc1、FP16、fixed-1RPS 的 Dense 扩展 target，覆盖四种 workload 的
+  TP1、TP2、TP4，并冻结到 issue #136 已合入的运行时组合。
+- Source set: `5f7d666718a5974512c66370258eb79d8ebb438559be9bb8d24a5b6e77154328`
+- Supersedes: `1.3.7`
+
 ## 1.3.7 — 2026-10-03
 
 - English: Freeze scheduler capacity and detailed P95/P99 request-distribution capture for the

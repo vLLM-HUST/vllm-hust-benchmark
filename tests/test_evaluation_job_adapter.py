@@ -13,6 +13,7 @@ from vllm_hust_benchmark.evaluation_job_adapter import (
     build_plan,
     run_plan,
 )
+from vllm_hust_benchmark.official_targets import REGISTRY_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGET_ID = "official-ascend-jan-2026-v0.18.0-random-online-qwen25-14b-910b2"
@@ -64,7 +65,7 @@ def inputs(tmp_path: Path) -> dict[str, Path]:
         "plugin_repository": "vLLM-HUST/vllm-ascend-hust",
         "plugin_commit": plugin_sha,
         "target_id": TARGET_ID,
-        "target_registry_version": "1.3.7",
+        "target_registry_version": REGISTRY_VERSION,
         "repeat_count": 3,
         "npu_count": 1,
         "priority": "required",
@@ -80,7 +81,7 @@ def inputs(tmp_path: Path) -> dict[str, Path]:
         "plugin_repo": str(plugin),
         "core_repository": request["repository"],
         "plugin_repository": request["plugin_repository"],
-        "registry_version": "1.3.7",
+        "registry_version": REGISTRY_VERSION,
         "runtime_python": sys.executable,
         "image_id": "a" * 64,
         "cann_version": "test-cann",
@@ -157,7 +158,7 @@ def test_plan_uses_approved_target_and_ignores_request_metadata(
         ("request", lambda x: x.update(npu_count=2), "assigned NPUs"),
         (
             "request",
-            lambda x: x.update(target_registry_version="1.3.6"),
+            lambda x: x.update(target_registry_version="1.3.7"),
             "registry version",
         ),
         (
