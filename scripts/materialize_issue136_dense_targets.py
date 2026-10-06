@@ -73,9 +73,7 @@ def _rate_matrix(load_profile: str, rates: RateMap | RateMatrix) -> RateMatrix:
             for tp, rate in workload_rates.items()
         ):
             raise ValueError(f"{workload} contains an invalid TP/rate entry")
-        matrix[workload] = {
-            tp: float(workload_rates[tp]) for tp in TPS
-        }
+        matrix[workload] = {tp: float(workload_rates[tp]) for tp in TPS}
     if load_profile == "fixed-1-rps" and {
         rate for workload_rates in matrix.values() for rate in workload_rates.values()
     } != {1.0}:
@@ -98,9 +96,7 @@ def _load_rate_matrix(path: Path) -> RateMatrix:
         workload_rates = raw[workload]
         if not isinstance(workload_rates, dict) or set(workload_rates) != expected_keys:
             raise ValueError(f"{workload} rates must define TP1, TP2, and TP4")
-        matrix[workload] = {
-            tp: float(workload_rates[str(tp)]) for tp in TPS
-        }
+        matrix[workload] = {tp: float(workload_rates[str(tp)]) for tp in TPS}
     return matrix
 
 

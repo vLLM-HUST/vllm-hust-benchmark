@@ -50,9 +50,9 @@ processes each:
 | communication-sensitive  | required | required | required | one explicitly named saturation profile |
 
 Determine each matched-load point with a capacity pilot on the frozen stack. Select the rate
-independently for every workload and tensor-parallel size; a rate selected with `random-online`
-must not be copied to ShareGPT, prefix repetition, or agent research. Record every pilot; do not
-silently substitute equal low QPS for the matched-load cells.
+independently for every workload and tensor-parallel size; a rate selected with `random-online` must
+not be copied to ShareGPT, prefix repetition, or agent research. Record every pilot; do not silently
+substitute equal low QPS for the matched-load cells.
 
 Materialize scaled targets with `scripts/materialize_issue136_dense_targets.py --rate-matrix` and a
 versioned matrix shaped as follows. The generator rejects a TP-only rate map for `scaled-load`.
