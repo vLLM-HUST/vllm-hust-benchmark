@@ -648,23 +648,13 @@ def export_leaderboard_artifacts(
     validate_model_identity_payload(artifact["model"])
     if same_spec_payload is not None:
         artifact["same_spec"] = same_spec_payload
-    if is_official_workload_contract_entry(artifact):
-        if spec_path is None:
-            raise ValueError(
-                "spec_path is required for official workload contract entries "
-                "so that target_id/target_version can be recorded in metadata."
-            )
-        spec_payload = json.loads(spec_path.read_text(encoding="utf-8"))
-        baseline_target = spec_payload.get("baseline_target") or {}
-        target_id = baseline_target.get("id")
-        target_version = baseline_target.get("label")
-        if not target_id or not target_version:
-            raise ValueError(
-                f"spec_path {spec_path} is missing baseline_target.id or "
-                f"baseline_target.label; cannot record target_id/target_version."
-            )
-        artifact["metadata"]["target_id"] = target_id
-        artifact["metadata"]["target_version"] = target_version
+    spec_payload: dict[str, Any] | None = None
+    canonical_targets: list[dict[str, Any]] = []
+    if spec_path is not None:
+        loaded_spec = json.loads(spec_path.read_text(encoding="utf-8"))
+        if not isinstance(loaded_spec, dict):
+            raise ValueError(f"spec_path {spec_path} must contain a JSON object")
+        spec_payload = loaded_spec
         canonical_target_id = str(spec_payload.get("id") or "").strip()
         official_registry = load_packaged_registry()
         canonical_targets = [
@@ -673,6 +663,15 @@ def export_leaderboard_artifacts(
             if isinstance(target, dict)
             and target.get("target_id") == canonical_target_id
         ]
+
+    official_workload_contract = is_official_workload_contract_entry(artifact)
+    if official_workload_contract or canonical_targets:
+        if spec_payload is None:
+            raise ValueError(
+                "spec_path is required for official workload contract entries "
+                "so that target_id/target_version can be recorded in metadata."
+            )
+        canonical_target_id = str(spec_payload.get("id") or "").strip()
         if not canonical_targets:
             raise ValueError(
                 f"spec_path {spec_path} target id {canonical_target_id!r} is not "
@@ -688,15 +687,26 @@ def export_leaderboard_artifacts(
             )
         artifact["metadata"]["target_contract_id"] = canonical_target_id
         artifact["metadata"]["target_contract_version"] = canonical_versions.pop()
-        artifact["metadata"]["workload_config_contract"] = (
-            WORKLOAD_CONFIG_CONTRACT_VERSION
-        )
-        workload_config_errors = validate_explicit_workload_config(artifact)
-        if workload_config_errors:
-            raise ValueError(
-                "official workload configuration contract failed: "
-                + "; ".join(workload_config_errors)
+        if official_workload_contract:
+            baseline_target = spec_payload.get("baseline_target") or {}
+            target_id = baseline_target.get("id")
+            target_version = baseline_target.get("label")
+            if not target_id or not target_version:
+                raise ValueError(
+                    f"spec_path {spec_path} is missing baseline_target.id or "
+                    f"baseline_target.label; cannot record target_id/target_version."
+                )
+            artifact["metadata"]["target_id"] = target_id
+            artifact["metadata"]["target_version"] = target_version
+            artifact["metadata"]["workload_config_contract"] = (
+                WORKLOAD_CONFIG_CONTRACT_VERSION
             )
+            workload_config_errors = validate_explicit_workload_config(artifact)
+            if workload_config_errors:
+                raise ValueError(
+                    "official workload configuration contract failed: "
+                    + "; ".join(workload_config_errors)
+                )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     artifact_path = output_dir / artifact_name
