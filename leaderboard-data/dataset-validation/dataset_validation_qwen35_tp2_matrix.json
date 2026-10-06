@@ -1,7 +1,7 @@
 {
   "contract_version": "dataset-validation-v1",
-  "generated_at": "2026-10-03T08:00:00Z",
-  "status": "campaign_defined_no_aggregate_measurements",
+  "generated_at": "2026-10-06T08:08:10Z",
+  "status": "partial_measurements",
   "source": {
     "service": "vLLM-HUST Dataset Matrix campaign",
     "run_id": "qwen35-tp2-dataset-matrix-v1",
@@ -11,8 +11,8 @@
   "baseline": {
     "id": "native-qwen35-tp2-bf16-dataset-matrix",
     "label": "Native Qwen3.5 TP2 BF16",
-    "commit": null,
-    "generated_at": null
+    "commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+    "generated_at": "2026-10-06T08:08:10Z"
   },
   "candidate_policy": {
     "id": "best-per-cell",
@@ -2760,11 +2760,41 @@
     {
       "dataset_id": "szyn-opencode-swebench-verified-500",
       "metric_id": "agent_resolve_rate",
-      "status": "queued",
-      "baseline_value": null,
+      "status": "baseline_only",
+      "baseline_value": 46.4,
       "value": null,
-      "reason": "The 1/500 collector qualification is not an aggregate. The remaining 499 tasks are tracked by dev-hub issue #87.",
-      "tracking_url": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/issues/87"
+      "tracking_url": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/issues/87",
+      "updated_at": "2026-10-06T08:08:10Z",
+      "note": "B0 is a 500-task agent resolve rate, not serving throughput. The pinned raw summary retains one grader_timeout and publishable=false; a separately verified causal adjudication counts that candidate-induced timeout as unresolved without changing 232/500. No B1 is measured.",
+      "note_zh": "B0 是 500 题代理解决率，不是服务吞吐。固定原始汇总仍有 1 个 grader_timeout 且 publishable=false；单独核验的因果归因将这个由候选补丁引发的超时计为未解决，不改变 232/500。没有 B1 实测。",
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-dev-hub",
+        "commit": "542e6297f9aa93e81471fc40ed00acde729192bc",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/blob/542e6297f9aa93e81471fc40ed00acde729192bc/results/szyn-swebench-qwen35-20261005/summary-adjudicated.json",
+        "report_sha256": "efa2be92e8c08738cacc551b166595810a8b4d3340dd4a6200cf9fd6dbdcc878",
+        "raw_report_url": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/blob/542e6297f9aa93e81471fc40ed00acde729192bc/results/szyn-swebench-qwen35-20261005/summary-raw.json",
+        "raw_report_sha256": "ee3e78dd9eafd82188af87d406e04e37729e5e05f488e656839e5845120c8fc9",
+        "adjudication_url": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/blob/542e6297f9aa93e81471fc40ed00acde729192bc/results/szyn-swebench-qwen35-20261005/timeout-adjudication.json",
+        "adjudication_sha256": "b5dee9bc5eb569f004fcf7d9ceee22cf5a10020e6b2742652e0207b2acc9d538",
+        "artifact": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/releases/download/szyn-swebench-qwen35-20261005-attempt3-evidence/szyn-attempt3-500-adjudication-addendum.tar.gz",
+        "artifact_sha256": "0cd8a2013dced4c9b05895ff893240e398a2fc4c124beb97a53eeb9360532ef1",
+        "release_url": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/releases/tag/szyn-swebench-qwen35-20261005-attempt3-evidence",
+        "execution_id": "szyn-qwen35-thinking-off-tp2-reference-separated-20261005",
+        "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+        "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+        "vllm_ascend_commit": "1cdb8c4db6e50f36f1fb3283b3e3dd618f6821e8",
+        "task_pool_sha256": "9b9ee6a71f19bd178ab07d68622478757fc36aadc3c1b9c50f5afe8fad28c0ed",
+        "dataset_revision": "c104f840cc67f8b6eec6f759ebc8b2693d585d4a",
+        "dataset_parquet_sha256": "a45b1fe4e2f0c8390b2b2938ac83e92ed5979000856808f3679c07812e9e6dcd",
+        "thinking": false,
+        "temperature": 0,
+        "tensor_parallel_size": 2,
+        "resolved_tasks": 232,
+        "attempted_tasks": 500,
+        "raw_publishable": false,
+        "adjudicated_publishable": true,
+        "candidate_induced_timeout_adjudications": 1
+      }
     },
     {
       "dataset_id": "syfi-coding-trace",
