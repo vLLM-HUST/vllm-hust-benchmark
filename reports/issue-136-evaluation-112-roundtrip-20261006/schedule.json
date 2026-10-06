@@ -1,0 +1,43 @@
+{
+  "schema_version": "evaluation-112-schedule/v1",
+  "schedule_version": "1.0.2",
+  "benchmark_root": "/root/vllm-hust-benchmark-issue214-136",
+  "core_repo": "/root/issue-214-136-formal-20261007/worktrees/vllm-hust-current",
+  "plugin_repo": "/root/issue-214-136-formal-20261007/worktrees/vllm-ascend-main-7c8ec865",
+  "core_repository": "vLLM-HUST/vllm-hust",
+  "plugin_repository": "vLLM-HUST/vllm-ascend-hust",
+  "registry_version": "1.3.8",
+  "runtime_python": "/usr/local/python3.12.13/bin/python",
+  "runtime_cwd": "/root/issue-214-136-formal-20261007/runtime-cwd",
+  "image_id": "sha256:cd3c36c1832d8b9dfd193405d52a73b22ca2699fbe95271015bc7932bef3e2ee",
+  "cann_version": "9.1.0",
+  "torch_npu_version": "2.10.0.post4",
+  "topology": "single-node-4x-Ascend-910B2-full-HCCS-visible-physical-0,1,2,7",
+  "environment": {
+    "PATH": "/usr/local/Ascend/cann-9.1.0/bin:/usr/local/Ascend/cann-9.1.0/tools/ccec_compiler/bin:/usr/local/python3.12.13/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "HOME": "/root/issue-214-136-formal-20261007/evaluation-112-v5/home",
+    "LANG": "C.UTF-8",
+    "TZ": "UTC",
+    "LD_LIBRARY_PATH": "/usr/local/Ascend/cann-9.1.0/lib64:/usr/local/Ascend/cann-9.1.0/lib64/plugin/opskernel:/usr/local/Ascend/cann-9.1.0/lib64/plugin/nnengine:/usr/local/Ascend/cann-9.1.0/opp/built-in/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64:/usr/local/Ascend/driver/lib64:/usr/local/Ascend/driver/lib64/common:/usr/local/Ascend/driver/lib64/driver:/usr/local/Ascend/nnal/atb/latest/atb/cxx_abi_1/lib:/usr/local/Ascend/ascend-toolkit/latest/lib64",
+    "ASCEND_HOME_PATH": "/usr/local/Ascend/cann-9.1.0",
+    "ASCEND_TOOLKIT_HOME": "/usr/local/Ascend/cann-9.1.0",
+    "ASCEND_OPP_PATH": "/usr/local/Ascend/cann-9.1.0/opp",
+    "ASCEND_AICPU_PATH": "/usr/local/Ascend/cann-9.1.0"
+  },
+  "targets": {
+    "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2": {
+      "approval": "approved",
+      "registry_status": "provisional",
+      "source_spec_sha256": "ab449741576edce5b9c5d5c9eeeedfc72fa643e3c0fa510f29263123ac0eb8aa",
+      "model_id": "Qwen/Qwen2.5-14B-Instruct",
+      "model_precision": "FP16",
+      "hardware_chip_model": "910B2",
+      "model_path": "/models/Qwen--Qwen2.5-14B-Instruct",
+      "model_revision": "4cebf06566bc02922cce8ec2e44368204024e56a6813c5139192b01b7ee956d3",
+      "load_profile": "fixed-1-rps",
+      "campaign_id": "issue-136-vllm-0.23.0-vllm-ascend-0.25.1rc1/v1",
+      "coverage_class": "full-matrix",
+      "point_role": "checkpoint"
+    }
+  }
+}
