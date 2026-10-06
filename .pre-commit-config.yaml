@@ -7,9 +7,9 @@ repos:
   hooks:
   - id: trailing-whitespace
     args: [--markdown-linebreak-ext=md]
-    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix)/.*$|^submissions/|^archive/)"
+    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006)/.*$|^submissions/|^archive/)"
   - id: end-of-file-fixer
-    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix)/.*$|^submissions/|^archive/)"
+    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006)/.*$|^submissions/|^archive/)"
   - id: check-yaml
     args: [--unsafe]
   - id: check-json
@@ -20,7 +20,7 @@ repos:
   - id: check-case-conflict
   - id: mixed-line-ending
     args: [--fix=lf]
-    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix)/.*$|^submissions/|^archive/)"
+    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006)/.*$|^submissions/|^archive/)"
   - id: detect-private-key
   - id: no-commit-to-branch
     name: block commits to main
@@ -49,7 +49,7 @@ repos:
     additional_dependencies:
     - mdformat-gfm
     args: [--wrap=100]
-    exclude: ^CHANGELOG\.md$
+    exclude: ^(CHANGELOG\.md|reports/(issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006)/.*)$
 
 - repo: https://github.com/Yelp/detect-secrets
   rev: v1.5.0
@@ -68,4 +68,4 @@ repos:
     #
     # Then audit any new entries with `detect-secrets audit .secrets.baseline`.
     args: [--baseline, .secrets.baseline]
-    exclude: ^(submissions/.*\.json|leaderboard-data/.*\.json|schemas/.*\.json|reports/.*\.(json|txt)|docs/.*\.jsonl?|src/vllm_hust_benchmark/data/(official_target.*|acceptance_v4_6)\.json|tests/fixtures/.*|archive/.*|agent\.md|CHANGELOG\.md)$
+    exclude: ^(submissions/.*\.json|leaderboard-data/.*\.json|schemas/.*\.json|reports/.*\.(json|txt|log)|docs/.*\.jsonl?|src/vllm_hust_benchmark/data/(official_target.*|acceptance_v4_6)\.json|tests/fixtures/.*|archive/.*|agent\.md|CHANGELOG\.md)$

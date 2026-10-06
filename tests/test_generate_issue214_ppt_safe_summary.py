@@ -245,8 +245,7 @@ def test_existing_reference_directory_remains_summary_only_grade_b(
 
 def test_generated_paths_are_manifest_portable(tmp_path, summary_module):
     repeats = [
-        _repeat(tmp_path / "runs", i, value)
-        for i, value in enumerate([9, 10, 11], 1)
+        _repeat(tmp_path / "runs", i, value) for i, value in enumerate([9, 10, 11], 1)
     ]
     manifest_path = _manifest(tmp_path, repeats)
     manifest = json.loads(manifest_path.read_text())
@@ -267,12 +266,9 @@ def test_generated_paths_are_manifest_portable(tmp_path, summary_module):
     ]
 
 
-def test_identity_projection_omits_container_absolute_paths(
-    tmp_path, summary_module
-):
+def test_identity_projection_omits_container_absolute_paths(tmp_path, summary_module):
     repeats = [
-        _repeat(tmp_path / "runs", i, value)
-        for i, value in enumerate([9, 10, 11], 1)
+        _repeat(tmp_path / "runs", i, value) for i, value in enumerate([9, 10, 11], 1)
     ]
     for repeat in repeats:
         submission = repeat / "submission"
