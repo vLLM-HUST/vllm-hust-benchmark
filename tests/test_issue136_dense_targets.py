@@ -76,3 +76,67 @@ def test_fixed_profile_rejects_scaled_rate(tmp_path: Path) -> None:
             load_profile="fixed-1-rps",
             rates={1: 1.0, 2: 2.0, 4: 4.0},
         )
+
+
+def test_scaled_profile_rejects_tp_only_rates(tmp_path: Path) -> None:
+    module = _load_script()
+    repo = _fixture_repo(tmp_path, module)
+
+    with pytest.raises(ValueError, match="workload-specific"):
+        module.materialize(
+            repo,
+            core_commit=CORE_COMMIT,
+            plugin_commit=PLUGIN_COMMIT,
+            load_profile="scaled-load",
+            rates={1: 1.5, 2: 3.0, 4: 6.0},
+        )
+
+
+def test_scaled_profile_uses_each_workloads_own_rates(tmp_path: Path) -> None:
+    module = _load_script()
+    repo = _fixture_repo(tmp_path, module)
+    matrix = {
+        workload: {
+            1: float(index + 1),
+            2: float(index + 2),
+            4: float(index + 4),
+        }
+        for index, workload in enumerate(module.WORKLOADS)
+    }
+
+    paths = module.materialize(
+        repo,
+        core_commit=CORE_COMMIT,
+        plugin_commit=PLUGIN_COMMIT,
+        load_profile="scaled-load",
+        rates=matrix,
+    )
+
+    assert len(paths) == 12
+    for path in paths:
+        payload = json.loads(path.read_text())
+        workload = payload["scenario"]
+        tp = payload["server_parameters"]["tensor_parallel_size"]
+        expected = matrix[workload][tp]
+        assert payload["client_parameters"]["request_rate"] == expected
+        assert payload["issue_136_contract"]["request_rate"] == expected
+
+
+def test_loads_versioned_workload_rate_matrix(tmp_path: Path) -> None:
+    module = _load_script()
+    path = tmp_path / "rates.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": "issue-136-workload-rate-matrix/v1",
+                "rates": {
+                    workload: {"1": 1.0, "2": 2.0, "4": 4.0}
+                    for workload in module.WORKLOADS
+                },
+            }
+        )
+    )
+
+    matrix = module._load_rate_matrix(path)
+
+    assert matrix["random-online"] == {1: 1.0, 2: 2.0, 4: 4.0}

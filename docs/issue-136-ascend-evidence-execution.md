@@ -49,8 +49,28 @@ processes each:
 | agent-research-online    | required | required | required | fixed 1 RPS, matched-load               |
 | communication-sensitive  | required | required | required | one explicitly named saturation profile |
 
-Determine each matched-load point with a capacity pilot on the frozen stack. Record the pilot; do
-not silently substitute equal low QPS for the matched-load cells.
+Determine each matched-load point with a capacity pilot on the frozen stack. Select the rate
+independently for every workload and tensor-parallel size; a rate selected with `random-online`
+must not be copied to ShareGPT, prefix repetition, or agent research. Record every pilot; do not
+silently substitute equal low QPS for the matched-load cells.
+
+Materialize scaled targets with `scripts/materialize_issue136_dense_targets.py --rate-matrix` and a
+versioned matrix shaped as follows. The generator rejects a TP-only rate map for `scaled-load`.
+
+```json
+{
+  "schema_version": "issue-136-workload-rate-matrix/v1",
+  "rates": {
+    "random-online": {"1": 1.5, "2": 3.0, "4": 6.0},
+    "sharegpt-online": {"1": 1.0, "2": 2.0, "4": 4.0},
+    "prefix-repetition-online": {"1": 2.0, "2": 4.0, "4": 8.0},
+    "agent-research-online": {"1": 0.5, "2": 1.0, "4": 2.0}
+  }
+}
+```
+
+The numbers above illustrate the schema only. Replace all twelve values with the frozen-stack pilot
+decisions and retain the pilot evidence and matrix checksum with the generated targets.
 
 After the dense anchors are complete, run the MoE specialty track on the same frozen stack:
 

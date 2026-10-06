@@ -21,10 +21,12 @@ STACK_ID = "vllm-0.23.0-vllm-ascend-0.25.1rc1"
 CORE_VERSION = "0.23.0"
 PLUGIN_VERSION = "0.25.1rc1"
 FULL_SHA = re.compile(r"[0-9a-f]{40}")
+RateMap = dict[int, float]
+RateMatrix = dict[str, RateMap]
 
 
-def _parse_rates(value: str) -> dict[int, float]:
-    rates: dict[int, float] = {}
+def _parse_rates(value: str) -> RateMap:
+    rates: RateMap = {}
     for item in value.split(","):
         key, separator, raw_rate = item.partition("=")
         if not separator:
@@ -40,6 +42,66 @@ def _parse_rates(value: str) -> dict[int, float]:
     if set(rates) != set(TPS):
         raise argparse.ArgumentTypeError("rates must define TP1, TP2, and TP4")
     return rates
+
+
+def _rate_matrix(load_profile: str, rates: RateMap | RateMatrix) -> RateMatrix:
+    if set(rates) == set(TPS):
+        flat = rates
+        if not all(isinstance(key, int) for key in flat):
+            raise ValueError("rate keys must be tensor-parallel sizes")
+        if load_profile != "fixed-1-rps":
+            raise ValueError(
+                "scaled-load requires workload-specific rates; a TP-only rate "
+                "cannot be applied to every workload"
+            )
+        if set(flat.values()) != {1.0}:
+            raise ValueError("fixed-1-rps requires TP1/2/4 request_rate=1")
+        return {workload: dict(flat) for workload in WORKLOADS}
+
+    if set(rates) != set(WORKLOADS):
+        raise ValueError("workload rate matrix must define every issue #136 workload")
+    matrix: RateMatrix = {}
+    for workload in WORKLOADS:
+        workload_rates = rates[workload]
+        if not isinstance(workload_rates, dict) or set(workload_rates) != set(TPS):
+            raise ValueError(f"{workload} rates must define TP1, TP2, and TP4")
+        if any(
+            not isinstance(tp, int)
+            or not isinstance(rate, (int, float))
+            or isinstance(rate, bool)
+            or rate <= 0
+            for tp, rate in workload_rates.items()
+        ):
+            raise ValueError(f"{workload} contains an invalid TP/rate entry")
+        matrix[workload] = {
+            tp: float(workload_rates[tp]) for tp in TPS
+        }
+    if load_profile == "fixed-1-rps" and {
+        rate for workload_rates in matrix.values() for rate in workload_rates.values()
+    } != {1.0}:
+        raise ValueError("fixed-1-rps requires every workload/TP request_rate=1")
+    return matrix
+
+
+def _load_rate_matrix(path: Path) -> RateMatrix:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict) or payload.get("schema_version") != (
+        "issue-136-workload-rate-matrix/v1"
+    ):
+        raise ValueError("rate matrix has an unsupported schema")
+    raw = payload.get("rates")
+    if not isinstance(raw, dict) or set(raw) != set(WORKLOADS):
+        raise ValueError("rate matrix must define every issue #136 workload")
+    matrix: RateMatrix = {}
+    expected_keys = {str(tp) for tp in TPS}
+    for workload in WORKLOADS:
+        workload_rates = raw[workload]
+        if not isinstance(workload_rates, dict) or set(workload_rates) != expected_keys:
+            raise ValueError(f"{workload} rates must define TP1, TP2, and TP4")
+        matrix[workload] = {
+            tp: float(workload_rates[str(tp)]) for tp in TPS
+        }
+    return matrix
 
 
 def _rate_token(rate: float) -> str:
@@ -143,14 +205,13 @@ def materialize(
     core_commit: str,
     plugin_commit: str,
     load_profile: str,
-    rates: dict[int, float],
+    rates: RateMap | RateMatrix,
 ) -> list[Path]:
     if not FULL_SHA.fullmatch(core_commit) or not FULL_SHA.fullmatch(plugin_commit):
         raise ValueError(
             "core and plugin commits must be full lowercase 40-character SHAs"
         )
-    if load_profile == "fixed-1-rps" and set(rates.values()) != {1.0}:
-        raise ValueError("fixed-1-rps requires TP1/2/4 request_rate=1")
+    matrix = _rate_matrix(load_profile, rates)
 
     written: list[Path] = []
     target_ids: set[str] = set()
@@ -159,7 +220,7 @@ def materialize(
             _template_path(repo, workload).read_text(encoding="utf-8")
         )
         for tp in TPS:
-            rate = rates[tp]
+            rate = matrix[workload][tp]
             load_token = (
                 "fixed-1rps"
                 if load_profile == "fixed-1-rps"
@@ -195,19 +256,32 @@ def main() -> int:
     parser.add_argument(
         "--load-profile", choices=("fixed-1-rps", "scaled-load"), required=True
     )
-    parser.add_argument(
+    rate_source = parser.add_mutually_exclusive_group(required=True)
+    rate_source.add_argument(
         "--rates",
         type=_parse_rates,
-        required=True,
         help="comma-separated TP=RPS entries, for example 1=1,2=1,4=1",
     )
+    rate_source.add_argument(
+        "--rate-matrix",
+        type=Path,
+        help=(
+            "JSON issue-136-workload-rate-matrix/v1 file with an independently "
+            "selected TP1/2/4 rate for every workload"
+        ),
+    )
     args = parser.parse_args()
+    rates = (
+        _load_rate_matrix(args.rate_matrix.resolve())
+        if args.rate_matrix is not None
+        else args.rates
+    )
     written = materialize(
         args.repo.resolve(),
         core_commit=args.core_commit,
         plugin_commit=args.plugin_commit,
         load_profile=args.load_profile,
-        rates=args.rates,
+        rates=rates,
     )
     for path in written:
         print(path)
