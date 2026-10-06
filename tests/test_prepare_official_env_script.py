@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 import shlex
 import signal
@@ -397,6 +398,53 @@ EOF
     assert result.stdout.splitlines() == ["101", "102"]
 
 
+def test_admission_residuals_only_conflict_on_overlapping_devices() -> None:
+    result = _run_bash(
+        _source_prepare_functions(
+            """
+            ASCEND_RT_VISIBLE_DEVICES='1,3'
+            list_benchmark_residual_pids() {
+                printf '101\n102\n103\n104\n'
+            }
+            process_visible_device_scope() {
+                case "$1" in
+                    101) printf '0\n' ;;
+                    102) printf '1\n' ;;
+                    103) printf '2\n3\n' ;;
+                    104) printf '' ;;
+                esac
+            }
+            list_admission_conflicting_benchmark_pids
+            """
+        )
+    )
+
+    # Device 0 is disjoint. Devices 1/3 overlap, and an unscoped process is
+    # conservatively treated as conflicting.
+    assert result.stdout.splitlines() == ["102", "103", "104"]
+
+
+def test_admission_without_requested_device_scope_conflicts_with_every_process() -> (
+    None
+):
+    result = _run_bash(
+        _source_prepare_functions(
+            """
+            unset ASCEND_RT_VISIBLE_DEVICES ASCEND_VISIBLE_DEVICES
+            list_benchmark_residual_pids() {
+                printf '201\n202\n'
+            }
+            process_visible_device_scope() {
+                printf '%s\n' "$1"
+            }
+            list_admission_conflicting_benchmark_pids
+            """
+        )
+    )
+
+    assert result.stdout.splitlines() == ["201", "202"]
+
+
 def test_run_in_official_env_python_uses_temp_script(tmp_path: Path) -> None:
     captured_args = tmp_path / "prepare-conda-args.txt"
     captured_script = tmp_path / "prepare-script-path.txt"
@@ -510,6 +558,52 @@ def test_run_in_official_runtime_exports_vllm_version(tmp_path: Path) -> None:
     assert "serve" in args
     assert "--model" in args
     assert "foo" in args
+
+
+def test_official_runner_applies_resolved_server_parameters_to_offline_cli(
+    tmp_path: Path,
+) -> None:
+    same_spec = tmp_path / "resolved_same_spec.json"
+    same_spec.write_text(
+        json.dumps(
+            {
+                "resolved_server_parameters": {
+                    "tensor_parallel_size": 1,
+                    "gpu_memory_utilization": 0.6,
+                    "max_model_len": 32768,
+                    "dtype": "float16",
+                    "model": "/models/frozen",
+                },
+                "resolved_client_parameters": {
+                    "input_len": 1024,
+                    "output_len": 128,
+                    "batch_size": 8,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
+            SAME_SPEC_FILE={shlex.quote(str(same_spec))}
+            BENCHMARK_TYPE=latency
+            CLIENT_READY_CHECK_TIMEOUT_SECONDS=900
+            OFFICIAL_VLLM_WORKTREE=/tmp/vllm
+            OFFICIAL_BENCHMARK_DATASET_ROOT=/tmp/datasets
+            normalized_client_parameters_json
+            """
+        )
+    )
+
+    normalized = json.loads(result.stdout)
+    assert normalized["dtype"] == "float16"
+    assert normalized["max_model_len"] == 32768
+    assert normalized["tensor_parallel_size"] == 1
+    assert normalized["gpu_memory_utilization"] == 0.6
+    assert normalized["input_len"] == 1024
 
 
 def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> None:

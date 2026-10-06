@@ -1179,20 +1179,36 @@ import json
 import os
 from pathlib import Path
 
-from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
+from vllm_hust_benchmark.official_runtime_inputs import (
+    normalize_client_parameters,
+    normalize_offline_benchmark_parameters,
+)
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
+benchmark_type = os.environ["BENCHMARK_TYPE"]
+if benchmark_type == "serve":
+    normalized = normalize_client_parameters(
+        payload["resolved_client_parameters"],
+        benchmark_type=benchmark_type,
+        ready_check_timeout_sec=ready_timeout,
+        vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
+        benchmark_repo=os.environ.get("BENCHMARK_REPO"),
+        dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
+    )
+else:
+    normalized = normalize_offline_benchmark_parameters(
+        payload["resolved_client_parameters"],
+        payload["resolved_server_parameters"],
+        benchmark_type=benchmark_type,
+        ready_check_timeout_sec=ready_timeout,
+        vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
+        benchmark_repo=os.environ.get("BENCHMARK_REPO"),
+        dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
+    )
 print(
     json.dumps(
-        normalize_client_parameters(
-            payload["resolved_client_parameters"],
-            benchmark_type=os.environ["BENCHMARK_TYPE"],
-            ready_check_timeout_sec=ready_timeout,
-            vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
-            benchmark_repo=os.environ.get("BENCHMARK_REPO"),
-            dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
-        ),
+        normalized,
         separators=(",", ":"),
         ensure_ascii=True,
     )

@@ -259,7 +259,34 @@ wait_for_port_free() {
   port="${port:-8001}"
 
   while (( waited < MAX_PORT_WAIT_SECONDS )); do
-    if ! ss -ltnH "( sport = :${port} )" 2>/dev/null | grep -q .; then
+    if command -v ss >/dev/null 2>&1; then
+      if ! ss -ltnH "( sport = :${port} )" 2>/dev/null | grep -q .; then
+        return 0
+      fi
+      sleep 5
+      waited=$((waited + 5))
+      continue
+    fi
+
+    # A formal campaign must not interpret a missing `ss` binary as an empty
+    # listener table. Binding 0.0.0.0 checks every local interface and fails
+    # closed on malformed ports or unexpected probe errors.
+    if python3 - "$port" <<'PY'
+import socket
+import sys
+
+try:
+    port = int(sys.argv[1])
+    if not 1 <= port <= 65535:
+        raise ValueError("port is outside 1..65535")
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+        probe.bind(("0.0.0.0", port))
+except OSError:
+    raise SystemExit(1)
+except (TypeError, ValueError):
+    raise SystemExit(2)
+PY
+    then
       return 0
     fi
     echo "[campaign] waiting for port ${port} to be released (${waited}s/${MAX_PORT_WAIT_SECONDS}s)"
