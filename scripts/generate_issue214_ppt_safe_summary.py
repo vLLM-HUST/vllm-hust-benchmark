@@ -19,7 +19,7 @@ OUTPUT_STEM = "issue214_ppt_safe_summary"
 FORBIDDEN_NAMES = ("historical", "frontier", "历史")
 MIN_REPEATS = 3
 HIGH_IQR_PERCENT = 10.0
-EPHEMERAL_PARAMETER_KEYS = {"host", "port", "model"}
+EPHEMERAL_PARAMETER_KEYS = {"host", "port", "model", "dataset_path"}
 
 
 def load_json(path: Path) -> Any:
@@ -155,6 +155,16 @@ def _normalized_parameters(value: Any) -> Any:
     return value
 
 
+def _portable_identity_value(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: _portable_identity_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_portable_identity_value(item) for item in value]
+    if isinstance(value, str) and Path(value).is_absolute():
+        return "<absolute-path-omitted>"
+    return value
+
+
 def identity_projection(
     run: dict[str, Any], input_provenance: dict[str, Any] | None = None
 ) -> dict[str, Any]:
@@ -203,7 +213,7 @@ def identity_projection(
                 same_spec.get("resolved_client_parameters", {})
             ),
         },
-        "input_provenance": input_provenance,
+        "input_provenance": _portable_identity_value(input_provenance),
     }
 
 
@@ -224,21 +234,24 @@ def _candidate_evidence(
     if len(repeat_values) < MIN_REPEATS:
         blockers.append(f"candidate has fewer than {MIN_REPEATS} repeat directories")
 
-    repeat_dirs: list[Path] = []
+    repeat_dirs: list[tuple[Path, str]] = []
     for index, value in enumerate(repeat_values):
         try:
             repeat_dirs.append(
-                _resolve_path(value, manifest_dir, f"repeat_dirs[{index}]")
+                (
+                    _resolve_path(value, manifest_dir, f"repeat_dirs[{index}]"),
+                    str(value),
+                )
             )
         except ValueError as error:
             blockers.append(str(error))
-    if len({str(path.resolve()) for path in repeat_dirs}) != len(repeat_dirs):
+    if len({str(path.resolve()) for path, _ in repeat_dirs}) != len(repeat_dirs):
         blockers.append("candidate repeat directories are not unique")
 
     raw_values: list[float] = []
     projections: list[dict[str, Any]] = []
     accepted_dirs: list[str] = []
-    for repeat_dir in repeat_dirs:
+    for repeat_dir, declared_repeat_dir in repeat_dirs:
         submission = _submission_dir(repeat_dir)
         if not submission.is_dir():
             blockers.append(f"repeat directory is missing: {repeat_dir}")
@@ -299,7 +312,7 @@ def _candidate_evidence(
             raw_values.pop()
             continue
         projections.append(identity_projection(run, input_provenance))
-        accepted_dirs.append(str(repeat_dir))
+        accepted_dirs.append(declared_repeat_dir)
 
     if projections and any(
         projection != projections[0] for projection in projections[1:]
@@ -600,8 +613,9 @@ def generate(manifest_path: Path, output_dir: Path) -> dict[str, Any]:
     reference_workloads = artifact_suites.get("workloads")
     if not isinstance(reference_workloads, dict):
         raise ValueError("reference artifact_suites.workloads must be an object")
+    declared_evidence_root = artifact_suites.get("evidence_root")
     evidence_root = _resolve_path(
-        artifact_suites.get("evidence_root"), artifact_path.parent, "evidence_root"
+        declared_evidence_root, artifact_path.parent, "evidence_root"
     )
     # artifact_suites contains derived arrays, not validated raw repetitions. Merely
     # finding its referenced directory is not enough to promote those arrays to A.
@@ -636,9 +650,11 @@ def generate(manifest_path: Path, output_dir: Path) -> dict[str, Any]:
         "reference": {
             "label": reference_label,
             "commits": reference_commits,
-            "source": str(artifact_path),
+            "source": str(reference_config.get("artifact_suites")),
             "values_key": values_key,
-            "evidence_root": str(evidence_root),
+            "evidence_root": (
+                str(declared_evidence_root) if reference_evidence_available else None
+            ),
             "evidence_grade": reference_grade,
             "referenced_evidence_directory_available": reference_evidence_available,
             "evidence_description": "summary arrays; raw repetitions are not validated",

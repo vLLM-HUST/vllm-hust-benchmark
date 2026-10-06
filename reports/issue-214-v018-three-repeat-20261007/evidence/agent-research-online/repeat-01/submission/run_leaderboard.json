@@ -1,0 +1,1524 @@
+{
+  "entry_id": "99ceea66-5d2d-4caf-b5af-e8664d486d24",
+  "engine": "vllm",
+  "engine_version": "0.18.0",
+  "config_type": "single_gpu",
+  "hardware": {
+    "vendor": "Huawei",
+    "chip_model": "910B2",
+    "chip_count": 1,
+    "interconnect": "unknown",
+    "memory_per_chip_gb": 64.0,
+    "total_memory_gb": 64.0
+  },
+  "model": {
+    "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+    "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+    "short_name": "Qwen2.5-14B-Instruct",
+    "display_name": "Qwen2.5-14B-Instruct",
+    "name": "Qwen/Qwen2.5-14B-Instruct",
+    "parameters": "14B",
+    "precision": "FP16",
+    "quantization": null
+  },
+  "workload": {
+    "name": "agent-research-online",
+    "input_length": 1024,
+    "output_length": 256,
+    "batch_size": null,
+    "concurrent_requests": null,
+    "dataset": "custom"
+  },
+  "metrics": {
+    "ttft_ms": 24360.36418908043,
+    "tbt_ms": 89.32367480273231,
+    "throughput_tps": 128.44291993796458,
+    "peak_mem_mb": null,
+    "error_rate": 0.0
+  },
+  "constraints": {
+    "scenario_source": "vllm-benchmark",
+    "accountable_scope": {
+      "domestic_chip_class": "Ascend-class",
+      "representative_model_band": "7B-13B",
+      "representative_business_scenario": "agent-workload",
+      "baseline_engine": "",
+      "declared_baseline_engine": "vllm",
+      "baseline_status": "pending-baseline",
+      "owner_confirmed": null,
+      "notes": null
+    },
+    "metrics": {
+      "single_chip_effective_utilization_pct": null,
+      "typical_throughput_ratio_vs_baseline": null,
+      "typical_ttft_reduction_pct_vs_baseline": null,
+      "typical_tpot_reduction_pct_vs_baseline": null,
+      "long_context_length": 32768,
+      "long_context_throughput_stable": true,
+      "long_context_ttft_p95_ms": null,
+      "long_context_ttft_p99_ms": 35979.06352369115,
+      "long_context_tpot_p95_ms": null,
+      "long_context_tpot_p99_ms": 190.1966312320941,
+      "long_context_ttft_p95_stable": null,
+      "long_context_ttft_p99_stable": true,
+      "long_context_tpot_p95_stable": null,
+      "long_context_tpot_p99_stable": true,
+      "unit_token_cost_reduction_pct": null,
+      "multi_tenant_high_utilization": null
+    }
+  },
+  "cluster": null,
+  "versions": {
+    "protocol": "N/A",
+    "backend": "N/A",
+    "core": "N/A",
+    "benchmark": "0.1.0"
+  },
+  "environment": {
+    "os": "Linux-5.15.0-25-generic-aarch64-with-glibc2.35",
+    "python_version": "3.11.16",
+    "pytorch_version": null,
+    "cuda_version": null,
+    "cann_version": null,
+    "driver_version": null
+  },
+  "metadata": {
+    "submitted_at": "2026-10-06T18:40:13Z",
+    "submitter": "official-ascend-baseline",
+    "data_source": "reference-vllm-ascend-benchmark",
+    "engine": "vllm",
+    "engine_version": "0.18.0",
+    "reproducible_cmd": null,
+    "git_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+    "github_user": "SWE-bench",
+    "github_commit_url": "https://github.com/vllm-project/vllm-ascend/commit/e18643f8a4d5bd9990727654318ad069ea0b56e2",
+    "github_repository": "vllm-project/vllm-ascend",
+    "github_ref": "v0.18.0",
+    "github_event_name": null,
+    "github_pr_number": null,
+    "github_pr_url": null,
+    "release_date": null,
+    "changelog_url": null,
+    "notes": null,
+    "verified": null,
+    "idempotency_key": "820c9c6efc3200f2bb3c326ea32851356565e2d5f7a40290c178138a329ffc71",
+    "manifest_source": "generated-by-vllm-hust-benchmark/0.1.0",
+    "runtime_provenance": {
+      "python": null,
+      "engine": {
+        "repository": "vllm-project/vllm",
+        "ref": "v0.18.0",
+        "commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6"
+      },
+      "plugin": {
+        "engine": "vllm-ascend",
+        "repository": "vllm-project/vllm-ascend",
+        "ref": "v0.18.0",
+        "commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
+      }
+    },
+    "target_id": "official-ascend-jan-2026-v0.18.0",
+    "target_version": "Official Ascend Jan 2026",
+    "target_contract_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+    "target_contract_version": "1.3.5",
+    "workload_config_contract": "explicit-effective/v1",
+    "official_source_provenance": {
+      "schema_version": "official-source-provenance/v1",
+      "sources": {
+        "engine": {
+          "generated_file_count": 1,
+          "observed_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+          "repository": "vllm-project/vllm",
+          "requested_ref": "v0.18.0",
+          "schema_version": "official-source-provenance/v1",
+          "status": "modified",
+          "tracked_file_count": 4287,
+          "tracked_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "untracked_file_count": 1,
+          "working_tree_sha256": "097517c2404f1e343daad338b5d951e09e919f8bddef9520a31bd3fc72819346"
+        },
+        "plugin": {
+          "generated_file_count": 9,
+          "observed_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+          "repository": "vllm-project/vllm-ascend",
+          "requested_ref": "v0.18.0",
+          "schema_version": "official-source-provenance/v1",
+          "status": "modified",
+          "tracked_file_count": 1537,
+          "tracked_patch_sha256": "a595440e7cfa0680510e3c703fecc66bf94b15f110530292b9161801e3efe5ca",
+          "untracked_file_count": 9,
+          "working_tree_sha256": "f97ead154bf7f053bec3995e6cbced7d7320eac24e2cf28d81aedfc097636cb7"
+        }
+      }
+    },
+    "official_runtime_provenance": {
+      "python_executable": "/root/miniforge3/envs/vllm-ascend-official-v0180/bin/python3.11",
+      "python_version": "3.11.16",
+      "schema_version": "official-runtime-provenance/v1",
+      "sources": {
+        "engine": {
+          "distribution": "vllm",
+          "distribution_version": "0.18.0",
+          "extension_policy": "none-discovered",
+          "extensions": [],
+          "module": "vllm",
+          "module_commit": "",
+          "module_path": "/tmp/vllm-v0180/vllm/__init__.py",
+          "module_version": "0.18.0",
+          "prepared_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+          "prepared_worktree": "/tmp/vllm-v0180",
+          "runtime_binding": "prepared-worktree",
+          "runtime_image_commit": "",
+          "runtime_image_id": "",
+          "runtime_root": "/tmp/vllm-v0180",
+          "source_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "source_status": "modified",
+          "source_tree_sha256": "097517c2404f1e343daad338b5d951e09e919f8bddef9520a31bd3fc72819346",
+          "source_version": "v0.18.0",
+          "upstream_commit": ""
+        },
+        "plugin": {
+          "distribution": "vllm-ascend",
+          "distribution_version": "0.18.0",
+          "extension_policy": "present",
+          "extensions": [
+            {
+              "module": "vllm_ascend.vllm_ascend_C",
+              "path": "/tmp/vllm-ascend-v0180/vllm_ascend/vllm_ascend_C.cpython-311-aarch64-linux-gnu.so",
+              "sha256": "ef6a5e7dfd836f3624115ab592fcbd2806761174def2c65b92b342701773e92f",
+              "status": "resolved"
+            },
+            {
+              "module": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/lib/libcust_opapi.so",
+              "path": "/tmp/vllm-ascend-v0180/vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/lib/libcust_opapi.so",
+              "sha256": "d93f3df998dfe6c843f680ac32a8e8fd08d2a422bc0319acf7a2afc3a47765ee",
+              "status": "discovered"
+            },
+            {
+              "module": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64/libcust_opmaster_rt2.0.so",
+              "path": "/tmp/vllm-ascend-v0180/vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64/libcust_opmaster_rt2.0.so",
+              "sha256": "7aac43423d52f2405d29e5b809418d85a99759981c8f3692115056f7b7949d89",
+              "status": "discovered"
+            },
+            {
+              "module": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/op_tiling/liboptiling.so",
+              "path": "/tmp/vllm-ascend-v0180/vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/op_tiling/liboptiling.so",
+              "sha256": "7aac43423d52f2405d29e5b809418d85a99759981c8f3692115056f7b7949d89",
+              "status": "discovered"
+            },
+            {
+              "module": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/lib/linux/aarch64/libcust_opsproto_rt2.0.so",
+              "path": "/tmp/vllm-ascend-v0180/vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/lib/linux/aarch64/libcust_opsproto_rt2.0.so",
+              "sha256": "7c233ec6f4b2ee29165c3fa8ad334df9c8148d268cf68d82c067866af8dc35cf",
+              "status": "discovered"
+            },
+            {
+              "module": "vllm_ascend/lib/libvllm_ascend_kernels.so",
+              "path": "/tmp/vllm-ascend-v0180/vllm_ascend/lib/libvllm_ascend_kernels.so",
+              "sha256": "f0191a9d4a52c74c15e2a8f94bd260878c490fc5d247efd654f0d111f7653d10",
+              "status": "discovered"
+            },
+            {
+              "module": "vllm_ascend/libvllm_ascend_kernels.so",
+              "path": "/tmp/vllm-ascend-v0180/vllm_ascend/libvllm_ascend_kernels.so",
+              "sha256": "c94fa8a7c077a1fe7dcc5c78f6c2fbc500ad57527888a3e30b014365fd692fb7",
+              "status": "discovered"
+            },
+            {
+              "module": "vllm_ascend/vllm_ascend_C.cpython-311-aarch64-linux-gnu.so",
+              "path": "/tmp/vllm-ascend-v0180/vllm_ascend/vllm_ascend_C.cpython-311-aarch64-linux-gnu.so",
+              "sha256": "ef6a5e7dfd836f3624115ab592fcbd2806761174def2c65b92b342701773e92f",
+              "status": "discovered"
+            }
+          ],
+          "module": "vllm_ascend",
+          "module_commit": "e18643f8",
+          "module_path": "/tmp/vllm-ascend-v0180/vllm_ascend/__init__.py",
+          "module_version": "0.18.0",
+          "official_wheel_artifacts": {
+            "artifact_count": 244,
+            "artifacts": [
+              {
+                "path": "vllm_ascend/_cann_ops_custom/.gitkeep",
+                "sha256": "b1535783dff910362e08d43eec28421d69dc6ffe19cfe6de403168f8b7345491",
+                "size_bytes": 273
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/bin/set_env.bash",
+                "sha256": "bc2a7243c86437055ff3702f9ab92664264b8a7cda20f9f8643b9fc948ed9448",
+                "size_bytes": 266
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_add_rms_norm_bias.h",
+                "sha256": "d19e72471f8905af6e7289c0ffe8c5952a69f2b07b2744b91bc7913bb0870d37",
+                "size_bytes": 1315
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_apply_top_k_top_p_custom.h",
+                "sha256": "e5033f59d48bdcb2c798b8bd6eeb1fa77b421d4ef2669c376bb5f505348a7a37",
+                "size_bytes": 2794
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_causal_conv1d.h",
+                "sha256": "105da37f0acdd7ae63b25646de1b0e0828de6a45ddaad29de3364b1bb451ab7a",
+                "size_bytes": 2214
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_copy_and_expand_eagle_inputs.h",
+                "sha256": "54812e2c066bd8064e9c16bb6221bd6cfb5b2b118d391fb8723e67835f27f8b5",
+                "size_bytes": 2113
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_grouped_matmul_swiglu_quant_weight_nz_tensor_list.h",
+                "sha256": "3e412d1350676ed0b0f2d0706302dd4a0725b5248211ffb1c40186a5c68a9755",
+                "size_bytes": 3551
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_lightning_indexer_quant.h",
+                "sha256": "9459490bad00ce2cfb91ee71aef4fce67af43e0f0ae2a8f1e262a9866087a4a7",
+                "size_bytes": 1901
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_lightning_indexer_vllm.h",
+                "sha256": "a4f78ebdd23107cbe8fa0114c0ba75c44fa615e6e1cc465b5daa2d7e42e47fec",
+                "size_bytes": 1645
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_matmul_allreduce_add_rmsnorm.h",
+                "sha256": "6d58aa9e6886735581030958f97fc8a08064d2fdce66baa6f01df7b56b2228ad",
+                "size_bytes": 1466
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_moe_gating_top_k.h",
+                "sha256": "e1ed19826112630caaf9e43baaafc2fa5c372c9f5bb547f6c8b85f07f30d2081",
+                "size_bytes": 1595
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_moe_grouped_matmul.h",
+                "sha256": "525bd837f0fdf6a718020948ebf5444abb5cf900fd749fc0b9369f64f766c2b5",
+                "size_bytes": 1338
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_moe_grouped_matmul_weight_nz.h",
+                "sha256": "cebb823660b8785864d681e149b758fc06e5690e78affb783b40bbcc64e76a1e",
+                "size_bytes": 1374
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_moe_init_routing_custom.h",
+                "sha256": "542f477cd39d08af970dc6c70a0c31d918c2540ef9932bfd5e0b62ccf1b4133d",
+                "size_bytes": 2877
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_sparse_flash_attention.h",
+                "sha256": "792d5846394e8f70a900a9682752b5a720238a0dc30fd203e9ba6c86d151b618",
+                "size_bytes": 1897
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/include/aclnn_transpose_kv_cache_by_block.h",
+                "sha256": "e0459fb2f93ce2b7f960fb03ce970ae6d8b54b2fcd53689ceee512ea1f7e7332",
+                "size_bytes": 1374
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_api/lib/libcust_opapi.so",
+                "sha256": "d93f3df998dfe6c843f680ac32a8e8fd08d2a422bc0319acf7a2afc3a47765ee",
+                "size_bytes": 8024384
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/config/ascend910b/aic-ascend910b-ops-info.json",
+                "sha256": "bba8bf97c82a1891a19c603bcd3d6d6bf328f923b13643ebb9c344c32fb0fb83",
+                "size_bytes": 39720
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/add_rms_norm_bias/AddRmsNormBias_19e35017264aa50680f35d13d8badd71.json",
+                "sha256": "bc1c6596862283bfea6de6a142ffeaa3408dff3e3e206f3b6e5e7dccb64b4330",
+                "size_bytes": 4013
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/add_rms_norm_bias/AddRmsNormBias_19e35017264aa50680f35d13d8badd71.o",
+                "sha256": "24ed361a7e6252eb38a1d1b52a82ca8fd0e825e8a943d3140d07438755e96ee4",
+                "size_bytes": 156944
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/add_rms_norm_bias/AddRmsNormBias_352d2859a07d64c080e8dfc836d9897f.json",
+                "sha256": "4470930ef13ae37dc0aa1ee875e1ee4cf64b67ae525c43d37ebfc6d9f6391b67",
+                "size_bytes": 4039
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/add_rms_norm_bias/AddRmsNormBias_352d2859a07d64c080e8dfc836d9897f.o",
+                "sha256": "6289b7714cd0baff9275512de71be00e250d0854854279f7e408352af1c856d2",
+                "size_bytes": 156944
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/add_rms_norm_bias/AddRmsNormBias_6dc9d65746f49267d3d534b1b9ba85f9.json",
+                "sha256": "3946e3a4b3f1002b5cb4ca075c44064cda7db7b0ce78beba442c927f0db29a39",
+                "size_bytes": 4013
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/add_rms_norm_bias/AddRmsNormBias_6dc9d65746f49267d3d534b1b9ba85f9.o",
+                "sha256": "5c0c64428561b8a20a6b6cbf42fee58123bb5aacbb6f0f60d9ec4a41580ef18e",
+                "size_bytes": 156944
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/apply_top_k_top_p_custom/ApplyTopKTopPCustom_43cebf9614fe7140744842c6d08fb8c3.json",
+                "sha256": "05889350ba7f49908982a90c81b8a09e11f3157cef6eae255abc7eb42c9baa85",
+                "size_bytes": 2675
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/apply_top_k_top_p_custom/ApplyTopKTopPCustom_43cebf9614fe7140744842c6d08fb8c3.o",
+                "sha256": "e8698eafd2535d21bdae069ef72edd4d85148b7c96241ba2a4782b03095e1dff",
+                "size_bytes": 28216
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/apply_top_k_top_p_custom/ApplyTopKTopPCustom_7dda2b5777eadccf83fa601ee81d4452.json",
+                "sha256": "50a8116160e5c7d4bfaa76a8a4b3105fd126f7a9c6b6adeb12045ff43f838d6f",
+                "size_bytes": 2664
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/apply_top_k_top_p_custom/ApplyTopKTopPCustom_7dda2b5777eadccf83fa601ee81d4452.o",
+                "sha256": "34a666706d1b59c4226fd4e44dccf4c715fd15d8c13e7504cd8c40900fa97243",
+                "size_bytes": 28216
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/apply_top_k_top_p_custom/ApplyTopKTopPCustom_ca5d5d3791bee23b52d166083657676f.json",
+                "sha256": "e861cf2c39e11fabac2e89f5410de9b86bee7829d6eed9b2e239d8c948faccf7",
+                "size_bytes": 2664
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/apply_top_k_top_p_custom/ApplyTopKTopPCustom_ca5d5d3791bee23b52d166083657676f.o",
+                "sha256": "0765d7fc887a72416d86d351f7f20ec34d721e83129e81cdd6e38726e0ea734d",
+                "size_bytes": 28216
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/causal_conv1d/CausalConv1d_53f973bce1ddf27adbe337d42992b7ca.json",
+                "sha256": "1288b842c4ced3f4cd65d292290c2a37d759de558dbb5d5950ac337d5637cbf9",
+                "size_bytes": 3522
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/causal_conv1d/CausalConv1d_53f973bce1ddf27adbe337d42992b7ca.o",
+                "sha256": "3dfa527376d877c13fd2e65fbe039b84682eeb2bd029f8a5beca9a5cb489c513",
+                "size_bytes": 18384
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/causal_conv1d/CausalConv1d_8420ec1cde4d0b716313089b6dda3605.json",
+                "sha256": "9a876ec95c207a21c540c6e9f0e233f799b3c8f26077816414ff67e3dd815857",
+                "size_bytes": 3543
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/causal_conv1d/CausalConv1d_8420ec1cde4d0b716313089b6dda3605.o",
+                "sha256": "0f01b0ba4c39f6e8484d56c9df1ef183284a41e4edf0177d29b1c53b325a2f3d",
+                "size_bytes": 18384
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/copy_and_expand_eagle_inputs/CopyAndExpandEagleInputs_a1c7dba6692aeefe97a362e92012ea35.json",
+                "sha256": "1c95ae6b20b2c2897ee3cf8d71d76487ed181d29110bf9a02ebe02d7979dd350",
+                "size_bytes": 4438
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/copy_and_expand_eagle_inputs/CopyAndExpandEagleInputs_a1c7dba6692aeefe97a362e92012ea35.o",
+                "sha256": "68cec213c759c3504f821d5e583bcb893161980a22cb4a5f73d1575fb470041e",
+                "size_bytes": 10360
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/grouped_matmul_swiglu_quant_weight_nz_tensor_list/GroupedMatmulSwigluQuantWeightNzTensorList_59a1b0c9ba0c8f4dbafbf76e78f36d3a.json",
+                "sha256": "1eb9aebf2b297575228d075493be2fc2d0f8abab469f37a8dc9db4eba4581e61",
+                "size_bytes": 3610
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/grouped_matmul_swiglu_quant_weight_nz_tensor_list/GroupedMatmulSwigluQuantWeightNzTensorList_59a1b0c9ba0c8f4dbafbf76e78f36d3a.o",
+                "sha256": "ec2b5f51153decfa997e8314b0d0071e42474e933049327550b21411fc150b24",
+                "size_bytes": 41368
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/grouped_matmul_swiglu_quant_weight_nz_tensor_list/GroupedMatmulSwigluQuantWeightNzTensorList_735bee94ebf43b20f682fe91d5acf025.json",
+                "sha256": "b1e3f680d0b61ec94d4b8a172b135358206526685a3b139a35ac4be9ba2f452a",
+                "size_bytes": 3605
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/grouped_matmul_swiglu_quant_weight_nz_tensor_list/GroupedMatmulSwigluQuantWeightNzTensorList_735bee94ebf43b20f682fe91d5acf025.o",
+                "sha256": "7a32bed41d2992bed76dc3831b1eade94aa1630df0ab04060bbfeccd3d09157d",
+                "size_bytes": 41368
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/grouped_matmul_swiglu_quant_weight_nz_tensor_list/GroupedMatmulSwigluQuantWeightNzTensorList_a736d6d385ece2c74b43e22e7dc52689.json",
+                "sha256": "b37c13f30c91695dd2bd4492a53ab503a2bc8bca7d125b345fed49d7cd04f4e6",
+                "size_bytes": 3605
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/grouped_matmul_swiglu_quant_weight_nz_tensor_list/GroupedMatmulSwigluQuantWeightNzTensorList_a736d6d385ece2c74b43e22e7dc52689.o",
+                "sha256": "18cb88049cd084b56370db1f678ca8ca3b897b6512eb62afca5ba29cdfce1114",
+                "size_bytes": 41368
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_quant/LightningIndexerQuant_b983416e9c1ab662b1023da974d989c1.json",
+                "sha256": "2eb301378aabf663148af532e77290714a61bcedb94091879586f41780d4f2b5",
+                "size_bytes": 4983
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_quant/LightningIndexerQuant_b983416e9c1ab662b1023da974d989c1.o",
+                "sha256": "ccac394e29b14387b2d793ae01c8dce7b4fea938280b2578cd019ee1c2eb1958",
+                "size_bytes": 174280
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_quant/LightningIndexerQuant_b983416e9c1ab662b1023da974d989c1_relocatable.json",
+                "sha256": "c72bfd7aa15fa4f081867523c7bddfcb152d4c97391eb853d51d413bc0a3b605",
+                "size_bytes": 7444
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_quant/LightningIndexerQuant_b983416e9c1ab662b1023da974d989c1_relocatable.o",
+                "sha256": "41423628efeef022c848e3b5eddf9ff956cdffd96a0a40da31d8d8dcd9bd8a8f",
+                "size_bytes": 167864
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_vllm/LightningIndexerVllm_762c3438483bd83358d493f45e153341.json",
+                "sha256": "69f5a24a7223e8b48ac25e01e17f5aed255e8c75bd6e792b8e5dfe246b17713b",
+                "size_bytes": 5540
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_vllm/LightningIndexerVllm_762c3438483bd83358d493f45e153341.o",
+                "sha256": "55736531c0920db7a3c1493efb3ccc50e304f95df2c19cb1e358ccdf30a94baa",
+                "size_bytes": 288696
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_vllm/LightningIndexerVllm_762c3438483bd83358d493f45e153341_relocatable.json",
+                "sha256": "1321bce198e5f9f778a8f41a3af2e8cde2ce6290e21864c44d3876d7e16fc7a0",
+                "size_bytes": 9707
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_vllm/LightningIndexerVllm_762c3438483bd83358d493f45e153341_relocatable.o",
+                "sha256": "7d747fe0d6817db945d9f59f4dcebb8d2998635361216fe6c34b98326e85c820",
+                "size_bytes": 280592
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_vllm/LightningIndexerVllm_b210a0899bc4f650f10b71ac9fb726b6.json",
+                "sha256": "cb5f7eec3b946da1fe51c6e04b508f19da9ee18dd4b72f5ad58e46375c6413d7",
+                "size_bytes": 5525
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_vllm/LightningIndexerVllm_b210a0899bc4f650f10b71ac9fb726b6.o",
+                "sha256": "185221497a4a22912d7498a3d1b438010bb2abaab44f00da32e35929d7615166",
+                "size_bytes": 288696
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_vllm/LightningIndexerVllm_b210a0899bc4f650f10b71ac9fb726b6_relocatable.json",
+                "sha256": "c7e28ed0255857f8095feca6fe99afc423f2d75bbc2297871b212ccb2b77eee8",
+                "size_bytes": 9692
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/lightning_indexer_vllm/LightningIndexerVllm_b210a0899bc4f650f10b71ac9fb726b6_relocatable.o",
+                "sha256": "af50ab48e06d98dd00a3527ab28090f980148b2923ce29f6da48f41985597921",
+                "size_bytes": 280592
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/matmul_allreduce_add_rmsnorm/MatmulAllreduceAddRmsnorm_bfef8aaa7a074dfc8ac343d3e6492497.json",
+                "sha256": "563033d5e9839a4d08873af073dc9bb626d1fee4fc5eb4995a1f8c58ce1f10a1",
+                "size_bytes": 3391
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/matmul_allreduce_add_rmsnorm/MatmulAllreduceAddRmsnorm_bfef8aaa7a074dfc8ac343d3e6492497.o",
+                "sha256": "f1e79d124dcc432725d673a766ae2fdf67587476d4e0dd5d543997133c3b5658",
+                "size_bytes": 39864
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/matmul_allreduce_add_rmsnorm/MatmulAllreduceAddRmsnorm_d690727640f624ffb9f66c44036234b8.json",
+                "sha256": "45a8e408993108467fdfcb185ebb63b663dc54a8d39fb1ce4421bfc925649d5e",
+                "size_bytes": 3361
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/matmul_allreduce_add_rmsnorm/MatmulAllreduceAddRmsnorm_d690727640f624ffb9f66c44036234b8.o",
+                "sha256": "7341bd23e32bfcfa3b5474e25f957c70ac9ebcf62686cbe2ff63287f7f68cf47",
+                "size_bytes": 39856
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_gating_top_k/MoeGatingTopK_600198027c25530951785e436a150069.json",
+                "sha256": "6f6d491a08b3faeed27936ea6b312acfd301210431b9df03c4d631593cc9aaab",
+                "size_bytes": 3286
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_gating_top_k/MoeGatingTopK_600198027c25530951785e436a150069.o",
+                "sha256": "7058f3cf98025a1919120e68cd5ed12fc73a95630c3f619bd4be785b8f99e15f",
+                "size_bytes": 40512
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_gating_top_k/MoeGatingTopK_81369a2fa0455f39b5d19d432d261f57.json",
+                "sha256": "53beba9c68415ea7aebeb54699d26a499dd0b7628513d4784ea7748c1e7ba067",
+                "size_bytes": 3286
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_gating_top_k/MoeGatingTopK_81369a2fa0455f39b5d19d432d261f57.o",
+                "sha256": "44ce989ee00c5b4419d2f058ff84b1ff161b219ee8e2c209780f01caeaa531ac",
+                "size_bytes": 40512
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_gating_top_k/MoeGatingTopK_85043434be9263d9775e83ed1918b0a1.json",
+                "sha256": "1fe3fcc6fb2aebe7b1cfeb4d3dbd040f79ba2a0f16b8515feacdcbc54fb2f1f4",
+                "size_bytes": 3297
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_gating_top_k/MoeGatingTopK_85043434be9263d9775e83ed1918b0a1.o",
+                "sha256": "75bbe5e5d4be6467cfdb16c657bcf362eb6cc92d603d07c7206294ac0479b884",
+                "size_bytes": 40512
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_3461fb7c82f702c45a7dc8574ee64859.json",
+                "sha256": "7d672a7e7913985ce81b0c00ebdabc24c413f42dea43e2e64fb0fbf4f39fbb85",
+                "size_bytes": 2612
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_3461fb7c82f702c45a7dc8574ee64859.o",
+                "sha256": "adaa027a3982406d2b6648ebddfaeb110621bf7aac689e8a19f58ed2f6945b1b",
+                "size_bytes": 35392
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_3a69da49b50a522c2b1ded9ba72e5af0.json",
+                "sha256": "003ce3ce3d191075ee43b4e2087404cef0c2949230c32193251b1c74cd0c53ef",
+                "size_bytes": 2612
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_3a69da49b50a522c2b1ded9ba72e5af0.o",
+                "sha256": "6f4a1e13b49944d15ee94f456bae12f5a257b23c31b2291e225bbf23f02b4ea2",
+                "size_bytes": 35392
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_3e5cf1f9f2a93f9a172b29b9595ba34b.json",
+                "sha256": "f68ff8e1ecbb1d9f01876c12ce04360422ff874bb0798ae582d752c397525c7a",
+                "size_bytes": 2624
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_3e5cf1f9f2a93f9a172b29b9595ba34b.o",
+                "sha256": "5d121da205f94db30dcd8b4f4272e8280eb8b86b77acba16caa25109ec903ccb",
+                "size_bytes": 35392
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_458e548937f65cda8992cb7bd8da726e.json",
+                "sha256": "46281ca619ebf0a2f53469b04e7e53113ae23170af76fe10b9dc6b38089cadd6",
+                "size_bytes": 2627
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_458e548937f65cda8992cb7bd8da726e.o",
+                "sha256": "c73466feb852efbcc6e8426677197d4abdddc19872f8619579be3104e079e74b",
+                "size_bytes": 35392
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_58681bafc526dcf5fcfa60dd9e71b15f.json",
+                "sha256": "e5efac80b1afbcf4b081755718162c80b4b85a0981c796c1908f80cd6523e163",
+                "size_bytes": 2639
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_58681bafc526dcf5fcfa60dd9e71b15f.o",
+                "sha256": "322e0745c5497331a6a656a3fc425a39553762fa339b7c9fcb97de5ff2eaf97e",
+                "size_bytes": 35392
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_861686f91a8eb0dfdf73348114b29943.json",
+                "sha256": "fd67c230c934e6837ccbf57b47c43eb0c899165d8bb56f59987cf11f16e63631",
+                "size_bytes": 2639
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_861686f91a8eb0dfdf73348114b29943.o",
+                "sha256": "9226316ff3999c8fe4c2d7f5eba3b6c75dbc6810123de28a23ab18a484215321",
+                "size_bytes": 35392
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_874ac10e095175029522168d9b95ee3c.json",
+                "sha256": "40cede1d84c007430f204fc8163fe3546f9d2b2143e716e263161761571e37b4",
+                "size_bytes": 2627
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_874ac10e095175029522168d9b95ee3c.o",
+                "sha256": "2f6894f15250a51c52922ca6a27c31335e1f7784cc4e8a587c2139eba904cbb0",
+                "size_bytes": 35392
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_9fdd125efee20777f55f129e1504bf88.json",
+                "sha256": "92804438ab18bee8f0764863cff264e2a386f16f0dbdf98d6a99acd494cd1af6",
+                "size_bytes": 2624
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_grouped_matmul/MoeGroupedMatmul_9fdd125efee20777f55f129e1504bf88.o",
+                "sha256": "debc3c5b0684a41a732a4d209b7d8eb043c93d374ff7b022514870b1cacb342d",
+                "size_bytes": 35392
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_103c6bf9757a4db3c1bbbfcf552f797b.json",
+                "sha256": "24508b1a8c3ae72ca796e80e894f4abf9b41180838ffc31543de562307afe172",
+                "size_bytes": 9728
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_103c6bf9757a4db3c1bbbfcf552f797b.o",
+                "sha256": "676feb40279776e05fadded1142cfdfd044bfd6984dbf36a4234ac8b19c426f7",
+                "size_bytes": 1385064
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_6f86ac41300a95d6b875df6144a1258d.json",
+                "sha256": "48dc4baf5ee7d6b2cd7d993e56b7262f402b514c538baff4c0dfa46bd8934124",
+                "size_bytes": 9725
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_6f86ac41300a95d6b875df6144a1258d.o",
+                "sha256": "ed740e0d2689baaacedfd999ededb1d3c9fdb38ac8f6570157264caf200e3c9a",
+                "size_bytes": 1055272
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_83ea20a79ec31274731fe9c3378ffc21.json",
+                "sha256": "a9d82fea42991204fb438beda3e6b978c7a18f2e19f52f70a6800285bcc916a5",
+                "size_bytes": 9731
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_83ea20a79ec31274731fe9c3378ffc21.o",
+                "sha256": "57661d386bf18a1ed5366b2041d8dfe45f347b9670efd9e966e6886cbcb3618b",
+                "size_bytes": 1385064
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_c16c6bc489e206f21949f807202f3cb0.json",
+                "sha256": "4afbf779de871e1865aab830cdd8a8f205b33d827c5c694ed2077ebe642cc64c",
+                "size_bytes": 9733
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_c16c6bc489e206f21949f807202f3cb0.o",
+                "sha256": "201b0bc4194301f8fdfcfed4e505760f3418b1c54cbabb1cbed89f5e0bb5c760",
+                "size_bytes": 1385064
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_dbb3315443e3bbcaf60545e29487f972.json",
+                "sha256": "302b4dd16405815c9ef380563bb91bf935ad8a355da48b06fc20968531c3d6a8",
+                "size_bytes": 9728
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_dbb3315443e3bbcaf60545e29487f972.o",
+                "sha256": "7369ec52fdc7313488774f1bef8e02a0423f9be9138330bf975668f9ee25c0f4",
+                "size_bytes": 1376848
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_f0cc9094cbc1179c081bfde0b95f6b1d.json",
+                "sha256": "de2ee48b831f227c6f2a478b5f7c8d1559ee3e6f27c4cbe41f61e10d67d175f5",
+                "size_bytes": 9731
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_f0cc9094cbc1179c081bfde0b95f6b1d.o",
+                "sha256": "09d89e2bfd1928084a52a798a4b50018f0abe6267d55f5c40f65bbd48fb69df8",
+                "size_bytes": 1376848
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_f4e5d4358d52376e96d5f6100c6fbfcd.json",
+                "sha256": "46e0687a772426d4e05797b8a8aac26065051b7f326951bd84acc2aef084b2df",
+                "size_bytes": 9741
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/moe_init_routing_custom/MoeInitRoutingCustom_f4e5d4358d52376e96d5f6100c6fbfcd.o",
+                "sha256": "8576328b83cb4da3da96ea0b4063453ae53b21b604dcc87ab5103de3f0c74012",
+                "size_bytes": 1385064
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/sparse_flash_attention/SparseFlashAttention_4da5fbfbea7101b99c367715f4b4a51e.json",
+                "sha256": "282e0803ea4bd60bf99bd698d42a417d45b1cd08689f359e55dbc71f9ec09d3b",
+                "size_bytes": 6101
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/sparse_flash_attention/SparseFlashAttention_4da5fbfbea7101b99c367715f4b4a51e.o",
+                "sha256": "b6e7dddffb5b516993fcf0748c302c99404fd710f440505992998708c21355bd",
+                "size_bytes": 379656
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/sparse_flash_attention/SparseFlashAttention_7f7ea6bc29bdc5fe2c90de44422a6e0e.json",
+                "sha256": "c201a5e13244f417952f8c15c0c37fc29ce7ef2c40adf2d32e289f67753aee76",
+                "size_bytes": 6079
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/sparse_flash_attention/SparseFlashAttention_7f7ea6bc29bdc5fe2c90de44422a6e0e.o",
+                "sha256": "67fbed46f46fa1a149fc14b29bae908c958e045758ca2e55c6dd14c050aebbfa",
+                "size_bytes": 379224
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/transpose_kv_cache_by_block/TransposeKvCacheByBlock_f57d0192c8d2552ec56e02af54cfc504.json",
+                "sha256": "7235d3a573a71d5f99160caca82258ac493b68a73474a66138d95ac48da8c1b2",
+                "size_bytes": 3368
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/transpose_kv_cache_by_block/TransposeKvCacheByBlock_f57d0192c8d2552ec56e02af54cfc504.o",
+                "sha256": "7cd97112b61e6286322ce5b77ad12158d3bfacae88123763a74672fe579711b6",
+                "size_bytes": 16616
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/transpose_kv_cache_by_block/TransposeKvCacheByBlock_f57d0192c8d2552ec56e02af54cfc504_relocatable.json",
+                "sha256": "e489ec08604e851d04c436d336546f8dd21d16e0dd7647b43daba9ac2890fd4f",
+                "size_bytes": 4749
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/transpose_kv_cache_by_block/TransposeKvCacheByBlock_f57d0192c8d2552ec56e02af54cfc504_relocatable.o",
+                "sha256": "19675e62b46648cb020ce8c4d761ffc07d1e09db05140567e23c51ae83647583",
+                "size_bytes": 14800
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/transpose_kv_cache_by_block/TransposeKvCacheByBlock_feefe007b5f0ab287bbced185c1648f6.json",
+                "sha256": "09aa08aa3fb7f6af08f1a00dcde6b5b5a52a9ad7f1cda5889f5026f7de3560f2",
+                "size_bytes": 3358
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/transpose_kv_cache_by_block/TransposeKvCacheByBlock_feefe007b5f0ab287bbced185c1648f6.o",
+                "sha256": "5746f0915ff82ce98764e6acbb3a4424ee7c35cfe4c3eedc323e9c9f9090a79d",
+                "size_bytes": 16616
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/transpose_kv_cache_by_block/TransposeKvCacheByBlock_feefe007b5f0ab287bbced185c1648f6_relocatable.json",
+                "sha256": "30f9ca30aeb2b00c09ad7ef66e29dcf3d4551654034434b377462a8a9d9dfc09",
+                "size_bytes": 4739
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/ascend910b/transpose_kv_cache_by_block/TransposeKvCacheByBlock_feefe007b5f0ab287bbced185c1648f6_relocatable.o",
+                "sha256": "4ad063ea65c755f02f933b16122097d815807527f430d67457f4e5733f1eaace",
+                "size_bytes": 14800
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/add_rms_norm_bias.json",
+                "sha256": "01e505e736562f5d92f9f116e360efbf19218e1d6d3770880cdc16104825e3c9",
+                "size_bytes": 8390
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/apply_top_k_top_p_custom.json",
+                "sha256": "62706a96836130ad3ce99bbf9a69bb9624795e77bf8c7afd2e005ba5a896d33e",
+                "size_bytes": 6455
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/binary_info_config.json",
+                "sha256": "ffe73d9c4f804e7606a90bb7e5d7a712e58a9d74a4f97a4dfae252227dbe194e",
+                "size_bytes": 43465
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/causal_conv1d.json",
+                "sha256": "5dbf80fec19c05418ccbf8291a2288869a349b95c2ee51a059572625de59493b",
+                "size_bytes": 7028
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/copy_and_expand_eagle_inputs.json",
+                "sha256": "68f89844f8de44c3c2906673632dd65f578eb6651af1a68eb529dda89b6be40b",
+                "size_bytes": 4565
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/grouped_matmul_swiglu_quant_weight_nz_tensor_list.json",
+                "sha256": "d20661ba781d6aaff885eb072ef017b4bdefb83c6742b0a06e8cadbdf75ff157",
+                "size_bytes": 9017
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/lightning_indexer_quant.json",
+                "sha256": "d019586479b760a66926fd5ac2035f76f082123a7eea1f0cab30f3df44a29d89",
+                "size_bytes": 3954
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/lightning_indexer_vllm.json",
+                "sha256": "65c437d3b8b7287df351a0e76425b0a52965d80e18106d50eed0f77f8923038f",
+                "size_bytes": 6334
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/matmul_allreduce_add_rmsnorm.json",
+                "sha256": "c8061ea1ef27274559a99451fa277916d7d1e8789cc7b60f3fd369293ca499c5",
+                "size_bytes": 6287
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/moe_gating_top_k.json",
+                "sha256": "dfb79bff7c87e2faa2f94f4a328625b251a519a075f9d113918d282b32850c36",
+                "size_bytes": 9152
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/moe_grouped_matmul.json",
+                "sha256": "6a720d0e0e669607f8f49d806321c0661d6d48f729ff7fa6bf7dc11344a0ede2",
+                "size_bytes": 17545
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/moe_init_routing_custom.json",
+                "sha256": "43a2a5f5cb9d1e0400529805e1b0c08670f6bc38bb6bc2ce5e481f532b028cb6",
+                "size_bytes": 27944
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/sparse_flash_attention.json",
+                "sha256": "9df0916ef95b549090e88430f1b77d178a34bef7bf76ed92fbabc274adf71f5d",
+                "size_bytes": 8165
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/kernel/config/ascend910b/transpose_kv_cache_by_block.json",
+                "sha256": "2169ade625cd3c21e53f521efa8284b6b555794323da7368ef1b1517f4c7d7b7",
+                "size_bytes": 4507
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/op_tiling/lib/linux/aarch64/libcust_opmaster_rt2.0.so",
+                "sha256": "7aac43423d52f2405d29e5b809418d85a99759981c8f3692115056f7b7949d89",
+                "size_bytes": 28604672
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/op_tiling/liboptiling.so",
+                "sha256": "7aac43423d52f2405d29e5b809418d85a99759981c8f3692115056f7b7949d89",
+                "size_bytes": 28604672
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/add_rms_norm_bias/add_rms_norm_bias.cpp",
+                "sha256": "b1bd7dfac1143bfe2161237a1f26253d0d938862e369ff3aa1aa4b54ecae32ce",
+                "size_bytes": 3090
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/add_rms_norm_bias/add_rms_norm_bias.h",
+                "sha256": "5ad66e31f5cdea5c7c61ddf3bde84743deca97965381f049fd197a272a281eed",
+                "size_bytes": 14849
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/add_rms_norm_bias/add_rms_norm_bias_merge_n.h",
+                "sha256": "35eecfc7a143d274e7712d2a217bab035a49ddb625bac30392d980717f44ec09",
+                "size_bytes": 21076
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/add_rms_norm_bias/add_rms_norm_bias_multi_n.h",
+                "sha256": "68e3d53bcc5697422a24e722065487f89eb0cca1671d821871ea55611b8cf229",
+                "size_bytes": 14786
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/add_rms_norm_bias/add_rms_norm_bias_single_n.h",
+                "sha256": "e42fccf0a3472e538b1e8da8402aba9dbbfc3af20f4489a5ddf668c72271641b",
+                "size_bytes": 17285
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/add_rms_norm_bias/add_rms_norm_bias_split_d.h",
+                "sha256": "2ee677260c20dec980afc425090f5083068623e4cf9bb65c63c5fcba5420ad3a",
+                "size_bytes": 16647
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/add_rms_norm_bias/reduce_common.h",
+                "sha256": "33cd7dc4bd23b645dc95067872362a619517d24f5cf51c602133d13e0334df88",
+                "size_bytes": 7509
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/add_rms_norm_bias/rms_norm_base.h",
+                "sha256": "79590de4611dbc9b5a3efe92c4ec066b8676c1b17a9c1c9400e9c4db93e8356e",
+                "size_bytes": 11429
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/apply_top_k_top_p_custom/apply_top_k_top_p_custom.cpp",
+                "sha256": "73edf980f10603456ee68fa3a6580b4230e80b8471c1858ec81a57f0ac17a4e9",
+                "size_bytes": 1882
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/apply_top_k_top_p_custom/apply_top_k_top_p_custom.h",
+                "sha256": "a4fa1decb426443a2e24dea7fd5b87b0d08c11d9010d2f9a1380af1dda93883a",
+                "size_bytes": 35348
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/apply_top_k_top_p_custom/apply_top_p_custom.h",
+                "sha256": "9f780fcdf4b64015d1cd4d43324971e200d75a93662bc7840430134ec307f26b",
+                "size_bytes": 22147
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/causal_conv1d/causal_conv1d.cpp",
+                "sha256": "5079496caa4b153e5588a4c773d4d563ad60f42e5de508c4da613a2bddcef602",
+                "size_bytes": 2771
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/causal_conv1d/causal_conv1d.h",
+                "sha256": "b3be31d43afd64bfb7070571177cc819299b6e786cc2307adbe80d438d5b109b",
+                "size_bytes": 22904
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/causal_conv1d/causal_conv1d_common.h",
+                "sha256": "280cf801f8e108e5669d9240cac61316a79cc3101a7d1b78359a4bcd2dd324ee",
+                "size_bytes": 1372
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/causal_conv1d/causal_conv1d_tiling_data.h",
+                "sha256": "786c1c10de3108e951bc091a282f616e4b41b9981eecaf7bb644e08f7a0863c6",
+                "size_bytes": 1342
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/causal_conv1d/causal_conv1d_tiling_key.h",
+                "sha256": "5244490812c57a6812988c559a89c0d9ceeef2b106a89690841bc329e45cc66f",
+                "size_bytes": 1290
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/common/comm_args.h",
+                "sha256": "ac4de6e4ad244d4dfd9c33c26cde54deffd329b73011750e0b85551649cd6340",
+                "size_bytes": 3082
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/common/data_copy.h",
+                "sha256": "883787b6e74b35062e4e9f7c8ff3e5ee9d7873592c8a2eb13144410d8c9329aa",
+                "size_bytes": 2191
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/common/dropmask.h",
+                "sha256": "f25ff1add68058a1d1d6e342d02cf21d1bcce60b233f52146725ebb4810e22b4",
+                "size_bytes": 5142
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/common/moe_distribute_base.h",
+                "sha256": "9e0689795a28c96e69e5fbeb88694d266004880f8633be39e4736b09119c8482",
+                "size_bytes": 8328
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/common/pse.h",
+                "sha256": "110d9503d897fc0bdcc18fd83fcb70eadce4954726f07f33df60828a839e5af4",
+                "size_bytes": 21505
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/common/sync_collectives.h",
+                "sha256": "b23b999f946a96a2249004e73f54ffc419b99d150c50ca1ac14f69c7336979c6",
+                "size_bytes": 19378
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/common/util.h",
+                "sha256": "fabb4f2ec198a41b47dc13c524bddb6a9d793da7b0ed58f35db9d2937bf40745",
+                "size_bytes": 5406
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/copy_and_expand_eagle_inputs/copy_and_expand_eagle_inputs.cpp",
+                "sha256": "aac1d6338e6a28859ec7b6bf5babc94376c6abda874d25381216d7e5cda9bfee",
+                "size_bytes": 17545
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/grouped_matmul_swiglu_quant_weight_nz_tensor_list/grouped_matmul_swiglu_quant_weight_nz_tensor_list.cpp",
+                "sha256": "a162a7735a541766e84e0bea4d078a2a3d9b10617f4bedd636e406103726e4b9",
+                "size_bytes": 4602
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/grouped_matmul_swiglu_quant_weight_nz_tensor_list/grouped_matmul_swiglu_quant_weight_nz_tensor_list.h",
+                "sha256": "6c40350a18fdefcfc1a2517a4250adcdb2c332af8785ee1ffeb3d8ffd1a848bd",
+                "size_bytes": 25270
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/grouped_matmul_swiglu_quant_weight_nz_tensor_list/grouped_matmul_swiglu_quant_weight_nz_tensor_list_split_ws.h",
+                "sha256": "8de43e93acaf3a1115061b5b71f2315998c5ffbd678c73e586d650093783d23e",
+                "size_bytes": 32185
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/grouped_matmul_swiglu_quant_weight_nz_tensor_list/grouped_matmul_swiglu_quant_weight_nz_tensor_list_utils.h",
+                "sha256": "d2a6f6f965f43cf2fa30c50991cd2a7efac57605a18b29fa95664476ef7cf6fe",
+                "size_bytes": 8964
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_quant/lightning_indexer_quant.cpp",
+                "sha256": "57608fb3498a489cdec096fba169b1570a94db70c9c804c65fd8f8032c7c4ed2",
+                "size_bytes": 2866
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_quant/lightning_indexer_quant_common.h",
+                "sha256": "66a48ae51246fa9a5d764a48dc5a0aa14a759899c4e5c8dd0c3f880d93be5882",
+                "size_bytes": 4746
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_quant/lightning_indexer_quant_kernel.h",
+                "sha256": "9a19d0ab433122e94e52a65af89367bea9cb7133cbe598078e3dcf76c06ecf4f",
+                "size_bytes": 32042
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_quant/lightning_indexer_quant_service_cube.h",
+                "sha256": "66603756c90355da5d08e327b9d8064ebb13e8cc52836d534c417715d297ec1f",
+                "size_bytes": 27638
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_quant/lightning_indexer_quant_service_vector.h",
+                "sha256": "d977d1a834240deddaf72fb2c010f02d272241a83faf1b0e432cb4b8945caf97",
+                "size_bytes": 31973
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_quant/lightning_indexer_quant_template_tiling_key.h",
+                "sha256": "55afa35d9f4b2a612b1b35df5932211b123788d0cba6de23a86d247cb900cdb2",
+                "size_bytes": 2797
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_quant/lightning_indexer_quant_vector.h",
+                "sha256": "70c6d2ae1236ef9d601aafcf483c223c5be75e7c79f770ee2d97b87198560fa4",
+                "size_bytes": 7783
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_vllm/lightning_indexer_common.h",
+                "sha256": "5b14de7d1d7e20a8f40eb91461274f2c4e43aa8f7373da1be328026e1cb55738",
+                "size_bytes": 3986
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_vllm/lightning_indexer_kernel.h",
+                "sha256": "b5e2780398d41f2de82c8c9637dca4d6240888afa6a33b9a7a9d404e038dd1a8",
+                "size_bytes": 26311
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_vllm/lightning_indexer_service_cube.h",
+                "sha256": "febac130b08f568ca0ce3f82804c13965d672a60da7752533cf8768d789e956e",
+                "size_bytes": 19588
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_vllm/lightning_indexer_service_vector.h",
+                "sha256": "f952aaa3d8df174303a92f1c3ebab35b8c90a080412b16f311dee97189da17f0",
+                "size_bytes": 26127
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_vllm/lightning_indexer_template_tiling_key.h",
+                "sha256": "e375c60662969d4f8817d4324a5e09ec5ea53f6fcd3d557b21607a435ba6e53e",
+                "size_bytes": 3627
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_vllm/lightning_indexer_vector.h",
+                "sha256": "6282deeb53fd0038261a8fd173915e9a08faf8ba40bee105b343703917088ccd",
+                "size_bytes": 13607
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/lightning_indexer_vllm/lightning_indexer_vllm.cpp",
+                "sha256": "702c8eff88c6c1b86c88b40c21782c683dfe87b50bc353bc386ce88a13a3861b",
+                "size_bytes": 3274
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/matmul_allreduce_add_rmsnorm/matmul_allreduce_add_rmsnorm.cpp",
+                "sha256": "722bded504018314c55bba1424b78111486128d71753cc21a35149f7a0575351",
+                "size_bytes": 2036
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/matmul_allreduce_add_rmsnorm/matmul_allreduce_add_rmsnorm_aic_kernel.h",
+                "sha256": "fb43844ef682342d3c5f0f0a55de146cbef953d19190a1ec2587f9e9063e3893",
+                "size_bytes": 13916
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/matmul_allreduce_add_rmsnorm/matmul_allreduce_add_rmsnorm_aiv_kernel.h",
+                "sha256": "2abd417d87eab8dfcb0d0f4e114604a86cddf81a23758b5feaa5d0419a3a6fe5",
+                "size_bytes": 27770
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/matmul_allreduce_add_rmsnorm/matmul_allreduce_add_rmsnorm_tiling.h",
+                "sha256": "d3579f8555a9813a3d57269435ed89bb72504025b8e63f3dfd324c8e067dd35c",
+                "size_bytes": 2705
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/matmul_allreduce_add_rmsnorm/matmul_allreduce_add_rmsnorm_utils.h",
+                "sha256": "64a1db717d3e8bbb86214faef9280cd205ecbcd0ceb2bf536b3150e80ce0a1ad",
+                "size_bytes": 14459
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_gating_top_k/common.h",
+                "sha256": "8a671274e8be968f5f3107954a608b8211ee3738adae32af90a300c3fe649dc4",
+                "size_bytes": 2542
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_gating_top_k/error_log.h",
+                "sha256": "48f35ee2103c19a7adc9566a6674a1c820704f2267d3f8d0002395be27197857",
+                "size_bytes": 1920
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_gating_top_k/moe_gating_top_k.cpp",
+                "sha256": "3b995e06d726b6c4f7b041d69f7f46a59feab5232c2ddbc6ba749cebdedff7eb",
+                "size_bytes": 2260
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_gating_top_k/moe_gating_top_k_apt.cpp",
+                "sha256": "e6a0eca768f1d3c162bd71e65036532ff9cd183fab4c30f568978addcb6e8d26",
+                "size_bytes": 1669
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_gating_top_k/moe_gating_top_k_e_k_fullload.h",
+                "sha256": "cdb9886c94e0c62cbdca9fcd8ecd0bc2af78c6244a3016b7c80e2b9cb34f6539",
+                "size_bytes": 18351
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_gating_top_k/moe_gating_top_k_generalized.h",
+                "sha256": "0325335be4aff34f26950a74c40ad65ade6037f8be0e89a4dd22310254d2088d",
+                "size_bytes": 32162
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_gating_top_k/moe_gating_top_k_without_group.h",
+                "sha256": "0a3ba990a9503c48129a03b28d178f0040fb73b34eb37b7dfdda25726e5845d6",
+                "size_bytes": 15400
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_grouped_matmul/moe_grouped_matmul.cpp",
+                "sha256": "e83f9d82435574fed85f6bc12b54e9cd4297073366f5706a73d7a60313fca917",
+                "size_bytes": 2389
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_grouped_matmul/moe_grouped_matmul.h",
+                "sha256": "622409b7f5ce03b0c23c018eb6e3a360018867eb764fa261ab83a25d39456c32",
+                "size_bytes": 7818
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_common.h",
+                "sha256": "fcad9e0aee2576187a6a1b3b81982316ece8bc4217febea770fb870e3f3c3121",
+                "size_bytes": 3859
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_expert_tokens_count.h",
+                "sha256": "78dbbbcb9fe7445593857d02e2caadfbb273840ccead1ffe4b37b4a9a511b5a3",
+                "size_bytes": 17375
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_full_load.h",
+                "sha256": "1b4db9ac69761ec136727bcdad3af2ad6cd504a08123a9ecac2e67fbbf6065ef",
+                "size_bytes": 13236
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_full_load_base.h",
+                "sha256": "34817bfd56d7dd4d9579069690c23a044d0bc15956935f7cb286809949f13343",
+                "size_bytes": 25287
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_full_load_dynamic_quant.h",
+                "sha256": "f886d1c800e35faee767f94568716dca707d3d9253f7f1a6800ba1956a8c9b72",
+                "size_bytes": 13299
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_full_load_static_quant.h",
+                "sha256": "0daecb22e3653ad1d8029b4f362fb401868b4eb6752760ddf01d217e7bcfaf11",
+                "size_bytes": 10339
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_full_load_unquantized.h",
+                "sha256": "2bce4c3116fc5b5a6ab2063dd6e25c002d364c3a862bd470eddf2893ff75ceae",
+                "size_bytes": 10825
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_gather_droppad_static_quant.h",
+                "sha256": "7fd576bbb4a1e1e7f7d1add0be1132b92e08249576dd92e940517615e9e09012",
+                "size_bytes": 10108
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_gather_dynamic_quant.h",
+                "sha256": "f082e7f1bacc68272004d50d1c6e5775c65688575aa9c008956219e26e1e4ad4",
+                "size_bytes": 26490
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_gather_out.h",
+                "sha256": "e887d83d3a682fe666cf8afe982693f70a392837e012b0b203bdca20cbc4a2d2",
+                "size_bytes": 14928
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_gather_out_droppad.h",
+                "sha256": "287f0cb0400cb1a275fffff56b91ceeccfee1a428cba9b747f95778df5f1b327",
+                "size_bytes": 9287
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_gather_sort_multi_core.h",
+                "sha256": "85eb7fb171884856b735bfaf9c5eaabd878e17ed76367975f31833460609eef8",
+                "size_bytes": 10781
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_gather_static_quant.h",
+                "sha256": "e2def0b24a7243396e3292b26a1dc46022d6c5204820f9dacbcf4d45e75b01aa",
+                "size_bytes": 14130
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_mrgsort.h",
+                "sha256": "9ed7c69e78401633fa01ad14d8a697c0e3b6af5aa2e347d8ce267c5b2120a822",
+                "size_bytes": 7288
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_mrgsort_out.h",
+                "sha256": "b0e63c744c662cc7b4414c9ac859478d0640c61550b1de5e7affa9e9816e6822",
+                "size_bytes": 8602
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_mrgsort_out_performance.h",
+                "sha256": "e5daa2d2dc9278c0332c8eaafb4ea6a1525915a486337b201b509b082b70f496",
+                "size_bytes": 9313
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_mrgsort_performance.h",
+                "sha256": "4cb2b2a4e44f5652fcfa441bbcc0e6864e043c6465e3262700fb0fb58de58695",
+                "size_bytes": 7648
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_row_idx_gather.h",
+                "sha256": "86c8ba99f66773b9e862cf65f909a9d530039ca1288b4b00c29888d8f6b24f0c",
+                "size_bytes": 8863
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_row_idx_gather_droppad.h",
+                "sha256": "09d67048e3fdbbc4ff2e646ff2d064ade2098f6aaf84dbd9d8da801b5f98cc1e",
+                "size_bytes": 13029
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_row_idx_gather_droppad_dynamic.h",
+                "sha256": "7a527cdebae8c327023759af4117e20ec844761bfbf551b3fce4aaf625ba99b8",
+                "size_bytes": 26355
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_sort_actual_expert.h",
+                "sha256": "da9d440e32ed02505938f1df7358027eeea3b748ef031413e953855cf261b142",
+                "size_bytes": 20625
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_sort_base.h",
+                "sha256": "1119c60ee3360185c9f5b22271792b614677a743809a79db3c2ed8136ff30d33",
+                "size_bytes": 2169
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_sort_multi_core.h",
+                "sha256": "b91ffb6fe5104614a787ce2c49c87ccc19cf7f636a0ae020593c4fc85c733547",
+                "size_bytes": 17145
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_sort_multi_core_performance.h",
+                "sha256": "7e9318ad59cbbe478ae5061822ec0bb9cdb7ef8692bd8b785571ad3acca5474a",
+                "size_bytes": 7722
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_custom_sort_one_core.h",
+                "sha256": "10c34e8b6046ece6c2ffd9ea01f652ff3bbcf71ee181ee066d249b7d376358c0",
+                "size_bytes": 7696
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/moe_init_routing_custom/moe_init_routing_custom.cpp",
+                "sha256": "8335bef8af1e90762451e9db6e5ce4012ca2fa755942a46622a4f4eeae9cc5c6",
+                "size_bytes": 20031
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/sparse_flash_attention/sparse_flash_attention.cpp",
+                "sha256": "263b4ad38ad3c8ff23b78be3203538274d49159f51cbacbc03c6b622d356933f",
+                "size_bytes": 3009
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/sparse_flash_attention/sparse_flash_attention_common.h",
+                "sha256": "ad1c8a58bcb3ec93e53ffffeca56473d7949fd1180025d0be58edb509233747a",
+                "size_bytes": 6075
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/sparse_flash_attention/sparse_flash_attention_kernel_mla.h",
+                "sha256": "9502abffe21c3d06fed9c197f2e5cfd7f0640d3e6a737c01c2d5ed881bc79fec",
+                "size_bytes": 42159
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/sparse_flash_attention/sparse_flash_attention_service_cube_mla.h",
+                "sha256": "3d4884f7337506078f58f4609f3ac781965d50c080596225f393dd11406b5557",
+                "size_bytes": 52297
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/sparse_flash_attention/sparse_flash_attention_service_vector_mla.h",
+                "sha256": "09f65b0cff19be69c782f3a26ff9ded593f0757dc8c7ea5b7b5f99434ca4250a",
+                "size_bytes": 66612
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/sparse_flash_attention/sparse_flash_attention_template_tiling_key.h",
+                "sha256": "942ec78b4f391e031a5b515a5cb1e8dfc294f09c5b8a91366b279f49f51ab8a8",
+                "size_bytes": 2295
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/transpose_kv_cache_by_block/common.h",
+                "sha256": "bf026c95ac94feecb3c42cc2159b7e28a7da4119d5920db87b0c5a291e77c07c",
+                "size_bytes": 628
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/transpose_kv_cache_by_block/full_load.h",
+                "sha256": "a426292c2d65051237fdfa1f5fffac6af1d2417642d54e3875d43dade994d676",
+                "size_bytes": 5037
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/transpose_kv_cache_by_block/general.h",
+                "sha256": "dc8db61f0cc6469bef67ece04b389d580a209c02f63e87bf48e22ab713707114",
+                "size_bytes": 7532
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/ascendc/transpose_kv_cache_by_block/transpose_kv_cache_by_block.cpp",
+                "sha256": "662e227e478d2293fdf194394fbeda0fb1785eb46c8a12badae4eb8696bde1d6",
+                "size_bytes": 1598
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/add_rms_norm_bias.py",
+                "sha256": "a4d68dea0ea8cf5287db0cd57cd5827dc40f2beee85a37c1e74e956205b79ce6",
+                "size_bytes": 11365
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/apply_top_k_top_p_custom.py",
+                "sha256": "7f3b2bee6da67e2e7af55c200ee670e616dfa01d234f371889b450855434e09d",
+                "size_bytes": 11027
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/causal_conv1d.py",
+                "sha256": "e4547dde3f8b705b7aa7c14c2704661f6b6b7ab531ef51c4dc1f3e7733fe9d45",
+                "size_bytes": 11584
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/copy_and_expand_eagle_inputs.py",
+                "sha256": "e214c2c041afc213f2eb08c0709e5dae4d36b34306807b831b189783cc563e43",
+                "size_bytes": 15333
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/grouped_matmul_swiglu_quant_weight_nz_tensor_list.py",
+                "sha256": "cc666018dd303c65dbfb8d319615f93dad53421dd301dcb3d43e2b5f519b34b9",
+                "size_bytes": 11596
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/lightning_indexer_quant.py",
+                "sha256": "c99e5d0a1ea36a7acab96936668ac1919e127df9e1c5edf802bb73e46495b3f5",
+                "size_bytes": 14393
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/lightning_indexer_vllm.py",
+                "sha256": "a51283282a4c71bb53141243e84e451b52645dfa7b96b7b13ae9cd04158a339c",
+                "size_bytes": 13120
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/matmul_allreduce_add_rmsnorm.py",
+                "sha256": "cd30ebb7672d744ca7e0611c383f4d47b11e2fd4ba3732431d3d70ff825e5821",
+                "size_bytes": 12865
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/moe_gating_top_k.py",
+                "sha256": "ebcc3951df75e9cea4e21bf561b4742e4e500a8ed130f0dca690c6ae699680ad",
+                "size_bytes": 13479
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/moe_grouped_matmul.py",
+                "sha256": "5c5f06400651def502b4c7f3371ecf5b0d92d6e3dbda6815d9916eaba1f2fed1",
+                "size_bytes": 10982
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/moe_init_routing_custom.py",
+                "sha256": "d78e10836f3ded293725539eca15ffc5eafaf15c373851cb21282ac7ed1b0ba3",
+                "size_bytes": 15134
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/sparse_flash_attention.py",
+                "sha256": "6c3ac4296ab07eccd419065d6fd76090949437f74dfba547e35128bec6a167b5",
+                "size_bytes": 14051
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/ai_core/tbe/vllm-ascend_impl/dynamic/transpose_kv_cache_by_block.py",
+                "sha256": "645b305f5431283894d16cd08db90e841a3043fc916c975b756738fd06834a05",
+                "size_bytes": 12080
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/add_rms_norm_bias_proto.h",
+                "sha256": "696d7947f31f99b2cd7b4d646a114485380278edf3e123a5b5e0efa6f4f54f73",
+                "size_bytes": 550
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/apply_top_k_top_p_custom_proto.h",
+                "sha256": "2466b9c710233c2ce120756dc4fb5b1a7975682fd0b2a0e0bd5e6abac08d798a",
+                "size_bytes": 488
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/causal_conv1d_proto.h",
+                "sha256": "defddf2a0c92721541e51763001d8c404873ad539519e952a1be5b807d46c8f8",
+                "size_bytes": 763
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/copy_and_expand_eagle_inputs_proto.h",
+                "sha256": "84f63f9e3dae431cbebc6f8feba6706b2a88e3c1f562d46c36aaf4183f54b029",
+                "size_bytes": 1108
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/grouped_matmul_swiglu_quant_weight_nz_tensor_list_proto.h",
+                "sha256": "98d32eecc993c5b6bff872980b3a5a1b451dc836290b70ce5095ea3c9568ef97",
+                "size_bytes": 668
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/lightning_indexer_quant_proto.h",
+                "sha256": "248ce0bc8f565242ef843a8e3f741a777e66cf99b57cb994cc9b7db06201b42a",
+                "size_bytes": 963
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/lightning_indexer_vllm_proto.h",
+                "sha256": "f53c9f8644b472eb1d650e9c72c8b402dc5124a83f5bb56f3beffd9be69a1fac",
+                "size_bytes": 769
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/matmul_allreduce_add_rmsnorm_proto.h",
+                "sha256": "2a462e4acb5c12da413489c8ed3c02113143079677f10e0107611bf87ded6ea9",
+                "size_bytes": 742
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/moe_gating_top_k_proto.h",
+                "sha256": "089b0e1fa55630f4026f5f051d98f34ac756510e35ee2815671b4b636e95ae69",
+                "size_bytes": 723
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/moe_grouped_matmul_proto.h",
+                "sha256": "cd535cf8bad6d57d265a698848c39251056f75746bc9488fd0c04b0234b1bb24",
+                "size_bytes": 468
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/moe_init_routing_custom_proto.h",
+                "sha256": "3c9ad9b4ab0f850b679d631c6ebc5ed59ce6cf74d70da9675d92605eaa5f7df4",
+                "size_bytes": 986
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/sparse_flash_attention_proto.h",
+                "sha256": "701c55ec35c601e9ef3a97248cb3bedf4f58f265fd2cdf1870c75679776bc3b3",
+                "size_bytes": 966
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/inc/transpose_kv_cache_by_block_proto.h",
+                "sha256": "60662bb9b2784abdc7931d37fb1fa8cebcbe59f1f465da620d29b4e52fa4cf0a",
+                "size_bytes": 585
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_proto/lib/linux/aarch64/libcust_opsproto_rt2.0.so",
+                "sha256": "7c233ec6f4b2ee29165c3fa8ad334df9c8148d268cf68d82c067866af8dc35cf",
+                "size_bytes": 10911144
+              },
+              {
+                "path": "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/version.info",
+                "sha256": "9cd14477fa5ef41b701380642e3a484e86fe4d794a90709e384879dccddb2f13",
+                "size_bytes": 34
+              },
+              {
+                "path": "vllm_ascend/libvllm_ascend_kernels.so",
+                "sha256": "c94fa8a7c077a1fe7dcc5c78f6c2fbc500ad57527888a3e30b014365fd692fb7",
+                "size_bytes": 521160
+              },
+              {
+                "path": "vllm_ascend/vllm_ascend_C.cpython-311-aarch64-linux-gnu.so",
+                "sha256": "ef6a5e7dfd836f3624115ab592fcbd2806761174def2c65b92b342701773e92f",
+                "size_bytes": 467288
+              }
+            ],
+            "manifest_path": "/tmp/vllm-ascend-v0180/vllm_ascend/_official_wheel_artifacts.json",
+            "schema_version": "official-vllm-ascend-wheel-extraction/v1",
+            "wheel": "/root/issue-214-136-formal-20261007/wheels/vllm_ascend-0.18.0-cp311-cp311-manylinux_2_24_aarch64.whl",
+            "wheel_sha256": "5395dc4065dea188d0fead4a01c20243a92101a27b4e79c23aeacda844a3f690",
+            "wheel_version": "0.18.0"
+          },
+          "prepared_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+          "prepared_worktree": "/tmp/vllm-ascend-v0180",
+          "runtime_binding": "prepared-worktree",
+          "runtime_image_commit": "",
+          "runtime_image_id": "",
+          "runtime_root": "/tmp/vllm-ascend-v0180",
+          "source_patch_sha256": "a595440e7cfa0680510e3c703fecc66bf94b15f110530292b9161801e3efe5ca",
+          "source_status": "modified",
+          "source_tree_sha256": "f97ead154bf7f053bec3995e6cbced7d7320eac24e2cf28d81aedfc097636cb7",
+          "source_version": "v0.18.0",
+          "upstream_commit": ""
+        }
+      }
+    }
+  },
+  "same_spec": {
+    "schema_version": "benchmark-same-spec/v1",
+    "spec_id": "official-ascend-jan-2026-v0.18.0-agent-research-online-qwen25-14b-910b2",
+    "spec_label": "Official Ascend Jan 2026 agent-research online baseline for vllm-hust goal tracking",
+    "spec_source": "/root/vllm-hust-benchmark-issue214-136/docs/official-baselines/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2.json",
+    "scenario": "agent-research-online",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "model_parameters": "14B",
+    "model_precision": "FP16",
+    "model_quantization": "",
+    "hardware_vendor": "Huawei",
+    "hardware_chip_model": "910B2",
+    "chip_count": 1,
+    "node_count": 1,
+    "resolved_server_parameters": {
+      "tensor_parallel_size": 1,
+      "enforce_eager": "",
+      "trust_remote_code": "",
+      "disable_log_stats": "",
+      "disable_log_requests": "",
+      "host": "0.0.0.0",
+      "port": 8101,
+      "gpu_memory_utilization": 0.6,
+      "max_model_len": 32768,
+      "model": "/models/Qwen--Qwen2.5-14B-Instruct",
+      "dtype": "float16"
+    },
+    "resolved_client_parameters": {
+      "backend": "openai-chat",
+      "endpoint": "/v1/chat/completions",
+      "dataset_name": "custom",
+      "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
+      "num_prompts": 32,
+      "request_rate": 1,
+      "ignore_eos": true,
+      "host": "127.0.0.1",
+      "port": 8101,
+      "model": "/models/Qwen--Qwen2.5-14B-Instruct"
+    },
+    "resolved_spec_hash": "236424e8f572a279ffb6bdb612cd47b6df3dcd146d1e661ee7ab17986734cb1c"
+  }
+}

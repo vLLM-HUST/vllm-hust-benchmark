@@ -243,6 +243,65 @@ def test_existing_reference_directory_remains_summary_only_grade_b(
     assert "reference raw evidence is not verified" in row["comparison_blockers"]
 
 
+def test_generated_paths_are_manifest_portable(tmp_path, summary_module):
+    repeats = [
+        _repeat(tmp_path / "runs", i, value)
+        for i, value in enumerate([9, 10, 11], 1)
+    ]
+    manifest_path = _manifest(tmp_path, repeats)
+    manifest = json.loads(manifest_path.read_text())
+    manifest["reference"]["artifact_suites"] = "artifact_suites.json"
+    manifest["candidate"]["workloads"]["agent-research-online"]["repeat_dirs"] = [
+        path.relative_to(tmp_path).as_posix() for path in repeats
+    ]
+    _write_json(manifest_path, manifest)
+
+    result = summary_module.generate(manifest_path, tmp_path / "out")
+
+    assert result["reference"]["source"] == "artifact_suites.json"
+    assert result["reference"]["evidence_root"] is None
+    assert result["workloads"][0]["candidate"]["repeat_dirs"] == [
+        "runs/repeat-01",
+        "runs/repeat-02",
+        "runs/repeat-03",
+    ]
+
+
+def test_identity_projection_omits_container_absolute_paths(
+    tmp_path, summary_module
+):
+    repeats = [
+        _repeat(tmp_path / "runs", i, value)
+        for i, value in enumerate([9, 10, 11], 1)
+    ]
+    for repeat in repeats:
+        submission = repeat / "submission"
+        provenance_path = submission / "input_provenance.json"
+        _write_json(
+            provenance_path,
+            {
+                "dataset_sha256": "a" * 64,
+                "frozen_dataset_path": "/root/container-only/dataset",
+            },
+        )
+        run_path = submission / "run_leaderboard.json"
+        (submission / "checksums.sha256").write_text(
+            "".join(
+                [
+                    f"{hashlib.sha256(provenance_path.read_bytes()).hexdigest()}  ./input_provenance.json\n",
+                    f"{hashlib.sha256(run_path.read_bytes()).hexdigest()}  ./run_leaderboard.json\n",
+                ]
+            ),
+            encoding="utf-8",
+        )
+
+    result = summary_module.generate(_manifest(tmp_path, repeats), tmp_path / "out")
+    rendered = json.dumps(result)
+
+    assert "/root/container-only/dataset" not in rendered
+    assert "<absolute-path-omitted>" in rendered
+
+
 @pytest.mark.parametrize(
     "failure", ["too_few", "bad_status", "bad_checksum", "identity"]
 )

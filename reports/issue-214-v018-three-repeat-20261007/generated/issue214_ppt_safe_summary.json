@@ -1,0 +1,1091 @@
+{
+  "candidate": {
+    "commits": {
+      "core": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "plugin": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
+    },
+    "label": "vLLM 0.18.0 @ bcf2be96120005e9aea171927f85055a6a5c0cf6 + vLLM Ascend 0.18.0 @ e18643f8a4d5bd9990727654318ad069ea0b56e2"
+  },
+  "minimum_valid_repeats": 3,
+  "quartile_method": "linear interpolation at 25% and 75%",
+  "reference": {
+    "commits": {
+      "core": "43341b177dbaa8c7f04662f71e885ee7dfe22704",
+      "plugin": "0a46364814eedd3314f04eff3490c3ab422438bd"
+    },
+    "evidence_description": "summary arrays; raw repetitions are not validated",
+    "evidence_grade": "B",
+    "evidence_root": null,
+    "label": "vLLM-HUST @ 43341b177dbaa8c7f04662f71e885ee7dfe22704 + vLLM Ascend @ 0a46364814eedd3314f04eff3490c3ab422438bd",
+    "referenced_evidence_directory_available": false,
+    "source": "../issue-214-p2-closure-20260817/artifact_suites.json",
+    "values_key": "current_values"
+  },
+  "schema_version": "issue214-ppt-safe-summary/v1",
+  "workloads": [
+    {
+      "blockers": [],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": null,
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+            "parameters": "14B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-14B-Instruct",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "backend": "openai-chat",
+              "dataset_name": "custom",
+              "endpoint": "/v1/chat/completions",
+              "ignore_eos": true,
+              "num_prompts": 32,
+              "request_rate": 1
+            },
+            "resolved_server_parameters": {
+              "disable_log_requests": "",
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.6,
+              "max_model_len": 32768,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "agent-research-online"
+          },
+          "workload": {
+            "batch_size": null,
+            "concurrent_requests": null,
+            "dataset": "custom",
+            "input_length": 1024,
+            "name": "agent-research-online",
+            "output_length": 256
+          }
+        },
+        "raw_values": [
+          24360.36418908043,
+          173.78106713294983,
+          165.0052485638298
+        ],
+        "repeat_dirs": [
+          "evidence/agent-research-online/repeat-01",
+          "evidence/agent-research-online/repeat-02",
+          "evidence/agent-research-online/repeat-03"
+        ],
+        "stats": {
+          "iqr": 12097.6794702583,
+          "median": 173.78106713294983,
+          "n": 3,
+          "q1": 169.39315784838982,
+          "q3": 12267.072628106689
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified"
+      ],
+      "delta_percent": null,
+      "direction": "lower_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "ttft_ms",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 160.01916512323078,
+          "median": 3111.066892481176,
+          "n": 3,
+          "q1": 2989.1385516675655,
+          "q3": 3149.1577167907963
+        },
+        "summary_values": [
+          2867.210210853955,
+          3187.2485411004163,
+          3111.066892481176
+        ]
+      },
+      "stability_notice": "High IQR requires cautious stability interpretation: candidate",
+      "status": "ready",
+      "unit": "ms",
+      "variability": {
+        "candidate": "high",
+        "candidate_iqr_percent": 6961.448487943204,
+        "reference": "normal",
+        "reference_iqr_percent": 5.143546270572482
+      },
+      "workload": "agent-research-online"
+    },
+    {
+      "blockers": [],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": {
+            "columns": [
+              "instruction",
+              "input",
+              "output"
+            ],
+            "dataset": "likaixin/InstructCoder",
+            "datasets_fingerprint": "53cc11327db6d2ef",
+            "files": {
+              "README.md": {
+                "bytes": 9869,
+                "sha256": "3c46b8f81e194a6ba11db838e3c58eda993f93e6e69a579e16346cd3fe9ecf7b"
+              },
+              "instruct_coder-train.arrow": {
+                "bytes": 126887640,
+                "sha256": "e9073b3fd3917349ee29964a92e852913af77ea281b0df1446dfbfa302f26777"
+              },
+              "instruct_coder-validation.arrow": {
+                "bytes": 6627984,
+                "sha256": "d466b58005dfaa0e67950fb3e89d36759b59de9604f8cbd3035ffce7458f4d21"
+              },
+              "train.json": {
+                "bytes": 139662010,
+                "sha256": "2a2157045c254968382b28561623d3fc26d36818fac81ea726e0d67452582ef2"
+              },
+              "valid.json": {
+                "bytes": 7299209,
+                "sha256": "22e82c0fd4188083f287412d0f7f9f9f8f50919d04f9af9f4f3c439f6c55447b"
+              }
+            },
+            "loaded_split": "train",
+            "revision": "6a778a720284d6520b56bd03d5c3070930d41071",
+            "rows": 108391,
+            "schema": "vllm-hust-dataset-receipt/v1"
+          },
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-Coder-14B-Instruct",
+            "parameters": "14B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-Coder-14B-Instruct",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "backend": "vllm",
+              "dataset_name": "hf",
+              "endpoint": "/v1/completions",
+              "no_stream": true,
+              "num_prompts": 2048,
+              "request_rate": 1
+            },
+            "resolved_server_parameters": {
+              "disable_log_requests": "",
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.6,
+              "max_model_len": 32768,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "instructcoder-online"
+          },
+          "workload": {
+            "batch_size": null,
+            "concurrent_requests": null,
+            "dataset": "hf",
+            "input_length": 1024,
+            "name": "instructcoder-online",
+            "output_length": 256
+          }
+        },
+        "raw_values": [
+          164.17096158511413,
+          157.50590062907577,
+          156.94450654063985
+        ],
+        "repeat_dirs": [
+          "evidence/instructcoder-online/repeat-01",
+          "evidence/instructcoder-online/repeat-02",
+          "evidence/instructcoder-online/repeat-03"
+        ],
+        "stats": {
+          "iqr": 3.613227522237139,
+          "median": 157.50590062907577,
+          "n": 3,
+          "q1": 157.2252035848578,
+          "q3": 160.83843110709495
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified"
+      ],
+      "delta_percent": null,
+      "direction": "lower_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "ttft_ms",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 1.0092577580280704,
+          "median": 114.60617898956116,
+          "n": 3,
+          "q1": 113.9312396129526,
+          "q3": 114.94049737098067
+        },
+        "summary_values": [
+          114.60617898956116,
+          115.27481575240017,
+          113.25630023634403
+        ]
+      },
+      "stability_notice": null,
+      "status": "ready",
+      "unit": "ms",
+      "variability": {
+        "candidate": "normal",
+        "candidate_iqr_percent": 2.294026768397865,
+        "reference": "normal",
+        "reference_iqr_percent": 0.8806311901559847
+      },
+      "workload": "instructcoder-online"
+    },
+    {
+      "blockers": [],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": null,
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+            "parameters": "14B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-14B-Instruct",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "backend": "vllm",
+              "dataset_name": "prefix_repetition",
+              "endpoint": "/v1/completions",
+              "ignore_eos": true,
+              "no_stream": false,
+              "num_prompts": 200,
+              "prefix_repetition_num_prefixes": 10,
+              "prefix_repetition_output_len": 256,
+              "prefix_repetition_prefix_len": 3840,
+              "prefix_repetition_suffix_len": 256,
+              "request_rate": 1
+            },
+            "resolved_server_parameters": {
+              "disable_log_requests": "",
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enable_prefix_caching": true,
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.9,
+              "max_model_len": 32768,
+              "max_num_batched_tokens": 32768,
+              "max_num_seqs": 16,
+              "no_enable_chunked_prefill": true,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "prefix-repetition-online"
+          },
+          "workload": {
+            "batch_size": null,
+            "concurrent_requests": null,
+            "dataset": "prefix_repetition",
+            "input_length": 4096,
+            "name": "prefix-repetition-online",
+            "output_length": 256
+          }
+        },
+        "raw_values": [
+          548.0777548160404,
+          674.8692390695214,
+          605.1870459597558
+        ],
+        "repeat_dirs": [
+          "evidence/prefix-repetition-online/repeat-01",
+          "evidence/prefix-repetition-online/repeat-02",
+          "evidence/prefix-repetition-online/repeat-03"
+        ],
+        "stats": {
+          "iqr": 63.395742126740515,
+          "median": 605.1870459597558,
+          "n": 3,
+          "q1": 576.6324003878981,
+          "q3": 640.0281425146386
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified"
+      ],
+      "delta_percent": null,
+      "direction": "lower_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "ttft_ms",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 32.99694017507136,
+          "median": 392.0903892617207,
+          "n": 6,
+          "q1": 385.7690820546122,
+          "q3": 418.7660222296836
+        },
+        "summary_values": [
+          427.2499468596652,
+          384.06993267824873,
+          393.3142483397387,
+          360.70254458347335,
+          427.7773219323717,
+          390.8665301837027
+        ]
+      },
+      "stability_notice": "High IQR requires cautious stability interpretation: candidate",
+      "status": "ready",
+      "unit": "ms",
+      "variability": {
+        "candidate": "high",
+        "candidate_iqr_percent": 10.475396416690032,
+        "reference": "normal",
+        "reference_iqr_percent": 8.415646258813519
+      },
+      "workload": "prefix-repetition-online"
+    },
+    {
+      "blockers": [
+        "primary metric conflict: reference='ttft_ms', candidate='batch_latency_ms'"
+      ],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": null,
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+            "parameters": "14B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-14B-Instruct",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "batch_size": 8,
+              "gpu_memory_utilization": 0.6,
+              "input_len": 1024,
+              "num_iters": 30,
+              "num_iters_warmup": 10,
+              "output_len": 128
+            },
+            "resolved_server_parameters": {
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.6,
+              "max_model_len": 32768,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "random-latency"
+          },
+          "workload": {
+            "batch_size": 8,
+            "concurrent_requests": null,
+            "dataset": null,
+            "input_length": 1024,
+            "name": "random-latency",
+            "output_length": 128
+          }
+        },
+        "raw_values": [
+          6999.5156718418,
+          7188.682898692787,
+          7263.87989812841
+        ],
+        "repeat_dirs": [
+          "evidence/random-latency/repeat-01",
+          "evidence/random-latency/repeat-02",
+          "evidence/random-latency/repeat-03"
+        ],
+        "stats": {
+          "iqr": 132.18211314330438,
+          "median": 7188.682898692787,
+          "n": 3,
+          "q1": 7094.099285267293,
+          "q3": 7226.281398410598
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified",
+        "workload evidence is blocked"
+      ],
+      "delta_percent": null,
+      "direction": "lower_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "batch_latency_ms",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 7.848560134880245,
+          "median": 4913.77806176121,
+          "n": 3,
+          "q1": 4908.937101857737,
+          "q3": 4916.785661992617
+        },
+        "summary_values": [
+          4904.096141954264,
+          4913.77806176121,
+          4919.793262224023
+        ]
+      },
+      "stability_notice": null,
+      "status": "blocked",
+      "unit": "ms",
+      "variability": {
+        "candidate": "normal",
+        "candidate_iqr_percent": 1.8387528703949483,
+        "reference": "normal",
+        "reference_iqr_percent": 0.15972557238507315
+      },
+      "workload": "random-latency"
+    },
+    {
+      "blockers": [],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": null,
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+            "parameters": "14B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-14B-Instruct",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "backend": "vllm",
+              "dataset_name": "random",
+              "endpoint": "/v1/completions",
+              "metric_percentiles": "95,99",
+              "no_stream": false,
+              "num_prompts": 200,
+              "random_input_len": 1024,
+              "random_output_len": 256,
+              "request_rate": 1,
+              "save_detailed": true
+            },
+            "resolved_server_parameters": {
+              "disable_log_requests": "",
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.6,
+              "max_model_len": 32768,
+              "max_num_batched_tokens": 2048,
+              "max_num_seqs": 256,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "random-online"
+          },
+          "workload": {
+            "batch_size": null,
+            "concurrent_requests": null,
+            "dataset": "random",
+            "input_length": 1024,
+            "name": "random-online",
+            "output_length": 256
+          }
+        },
+        "raw_values": [
+          254.44302909076217,
+          249.28222787566483,
+          254.21716653741893
+        ],
+        "repeat_dirs": [
+          "evidence/random-online/repeat-01",
+          "evidence/random-online/repeat-02",
+          "evidence/random-online/repeat-03"
+        ],
+        "stats": {
+          "iqr": 2.580400607548654,
+          "median": 254.21716653741893,
+          "n": 3,
+          "q1": 251.7496972065419,
+          "q3": 254.33009781409055
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified"
+      ],
+      "delta_percent": null,
+      "direction": "lower_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "ttft_ms",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 0.6778277829289436,
+          "median": 229.68502367148176,
+          "n": 3,
+          "q1": 229.0795180737041,
+          "q3": 229.75734585663304
+        },
+        "summary_values": [
+          229.68502367148176,
+          228.47401247592643,
+          229.82966804178432
+        ]
+      },
+      "stability_notice": null,
+      "status": "ready",
+      "unit": "ms",
+      "variability": {
+        "candidate": "normal",
+        "candidate_iqr_percent": 1.0150379074297635,
+        "reference": "normal",
+        "reference_iqr_percent": 0.29511187629648855
+      },
+      "workload": "random-online"
+    },
+    {
+      "blockers": [],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": null,
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+            "parameters": "14B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-14B-Instruct",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "backend": "vllm",
+              "dataset_name": "sharegpt",
+              "endpoint": "/v1/completions",
+              "no_stream": false,
+              "num_prompts": 200,
+              "request_rate": 1
+            },
+            "resolved_server_parameters": {
+              "disable_log_requests": "",
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.6,
+              "max_model_len": 32768,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "sharegpt-online"
+          },
+          "workload": {
+            "batch_size": null,
+            "concurrent_requests": null,
+            "dataset": "sharegpt",
+            "input_length": 1024,
+            "name": "sharegpt-online",
+            "output_length": 256
+          }
+        },
+        "raw_values": [
+          152.5572005752474,
+          151.57285124063492,
+          152.4462412018329
+        ],
+        "repeat_dirs": [
+          "evidence/sharegpt-online/repeat-01",
+          "evidence/sharegpt-online/repeat-02",
+          "evidence/sharegpt-online/repeat-03"
+        ],
+        "stats": {
+          "iqr": 0.4921746673062444,
+          "median": 152.4462412018329,
+          "n": 3,
+          "q1": 152.0095462212339,
+          "q3": 152.50172088854015
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified"
+      ],
+      "delta_percent": null,
+      "direction": "lower_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "ttft_ms",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 4.174979439703748,
+          "median": 127.97524687135592,
+          "n": 3,
+          "q1": 126.94657324347645,
+          "q3": 131.1215526831802
+        },
+        "summary_values": [
+          127.97524687135592,
+          125.917899615597,
+          134.26785849500448
+        ]
+      },
+      "stability_notice": null,
+      "status": "ready",
+      "unit": "ms",
+      "variability": {
+        "candidate": "normal",
+        "candidate_iqr_percent": 0.32285129723508516,
+        "reference": "normal",
+        "reference_iqr_percent": 3.262333569788341
+      },
+      "workload": "sharegpt-online"
+    },
+    {
+      "blockers": [],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": null,
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+            "parameters": "14B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-14B-Instruct",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "backend": "vllm",
+              "dataset_name": "sharegpt",
+              "gpu_memory_utilization": 0.6,
+              "num_prompts": 200,
+              "num_warmups": 0
+            },
+            "resolved_server_parameters": {
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.6,
+              "max_model_len": 32768,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "sharegpt-throughput"
+          },
+          "workload": {
+            "batch_size": null,
+            "concurrent_requests": null,
+            "dataset": "sharegpt",
+            "input_length": 1024,
+            "name": "sharegpt-throughput",
+            "output_length": 256
+          }
+        },
+        "raw_values": [
+          1686.8777040113725,
+          1691.5031160439933,
+          1638.6673519911747
+        ],
+        "repeat_dirs": [
+          "evidence/sharegpt-throughput/repeat-01",
+          "evidence/sharegpt-throughput/repeat-02",
+          "evidence/sharegpt-throughput/repeat-03"
+        ],
+        "stats": {
+          "iqr": 26.41788202640919,
+          "median": 1686.8777040113725,
+          "n": 3,
+          "q1": 1662.7725280012737,
+          "q3": 1689.190410027683
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified"
+      ],
+      "delta_percent": null,
+      "direction": "higher_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "throughput_tps",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 13.679724109615563,
+          "median": 2048.152959232967,
+          "n": 3,
+          "q1": 2043.553549285607,
+          "q3": 2057.2332733952226
+        },
+        "summary_values": [
+          2066.3135875574776,
+          2038.954139338247,
+          2048.152959232967
+        ]
+      },
+      "stability_notice": null,
+      "status": "ready",
+      "unit": "TPS",
+      "variability": {
+        "candidate": "normal",
+        "candidate_iqr_percent": 1.5660816408674925,
+        "reference": "normal",
+        "reference_iqr_percent": 0.6679053948557933
+      },
+      "workload": "sharegpt-throughput"
+    },
+    {
+      "blockers": [],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": null,
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+            "parameters": "14B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-14B-Instruct",
+            "model_parameters": "14B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "backend": "vllm",
+              "dataset_name": "sonnet",
+              "gpu_memory_utilization": 0.6,
+              "num_prompts": 200,
+              "num_warmups": 0
+            },
+            "resolved_server_parameters": {
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.6,
+              "max_model_len": 32768,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "sonnet-throughput"
+          },
+          "workload": {
+            "batch_size": null,
+            "concurrent_requests": null,
+            "dataset": "sonnet",
+            "input_length": 1024,
+            "name": "sonnet-throughput",
+            "output_length": 256
+          }
+        },
+        "raw_values": [
+          2837.543001706054,
+          2820.67128834616,
+          2844.7429600836103
+        ],
+        "repeat_dirs": [
+          "evidence/sonnet-throughput/repeat-01",
+          "evidence/sonnet-throughput/repeat-02",
+          "evidence/sonnet-throughput/repeat-03"
+        ],
+        "stats": {
+          "iqr": 12.035835868725371,
+          "median": 2837.543001706054,
+          "n": 3,
+          "q1": 2829.107145026107,
+          "q3": 2841.1429808948324
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified"
+      ],
+      "delta_percent": null,
+      "direction": "higher_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "throughput_tps",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 17.79771568493061,
+          "median": 3614.039871632891,
+          "n": 3,
+          "q1": 3602.596968361144,
+          "q3": 3620.3946840460744
+        },
+        "summary_values": [
+          3626.749496459258,
+          3591.1540650893967,
+          3614.039871632891
+        ]
+      },
+      "stability_notice": null,
+      "status": "ready",
+      "unit": "TPS",
+      "variability": {
+        "candidate": "normal",
+        "candidate_iqr_percent": 0.42416399897689316,
+        "reference": "normal",
+        "reference_iqr_percent": 0.49246041319652806
+      },
+      "workload": "sonnet-throughput"
+    },
+    {
+      "blockers": [],
+      "candidate": {
+        "evidence_grade": "A",
+        "identity_projection": {
+          "hardware": {
+            "chip_count": 1,
+            "chip_model": "910B2",
+            "vendor": "Huawei"
+          },
+          "input_provenance": {
+            "dataset": {
+              "canonical_shard_count": 43,
+              "repo_id": "lmarena-ai/VisionArena-Chat",
+              "revision": "1394b4f59ab6f1f2e5aff6bc15b448e15960e170",
+              "split": "train"
+            },
+            "frozen_layout": {
+              "dataset_relative_path": "data/train-00000-of-00001.parquet",
+              "logical_hf_name": "lmarena-ai/VisionArena-Chat"
+            },
+            "reference_loader": {
+              "library": "datasets",
+              "num_prompts": 1000,
+              "shuffle_buffer_size": 1000,
+              "shuffle_seed": 0,
+              "streaming": true,
+              "version": "3.3.0"
+            },
+            "runtime": {
+              "frozen_dataset_path": "<absolute-path-omitted>",
+              "frozen_parquet_path": "<absolute-path-omitted>",
+              "source_shard": "<absolute-path-omitted>",
+              "validated_datasets_version": "3.3.0"
+            },
+            "schema_version": "visionarena-frozen-input/v1",
+            "selection": {
+              "canonical_first_shard": 40,
+              "content_digest_encoding": "sha256(concat(sha256(u64be-len+conversation_id-utf8,u64be-len+prompt-utf8,u64be-len+first-image-bytes)))",
+              "content_sha256": "2b41a850b78bc901caedf7e4d86ce52fc1804edc584f5f4da53a070df2a34b41",
+              "maximum_selected_source_row": 1973,
+              "selected_rows": 1000,
+              "shard_order_sha256": "c2121f82122d83bc005730dab935defc9175af24013d10b868d97b64917306b2",
+              "source_index_encoding": "compact-json-array-of-zero-based-row-indices",
+              "source_index_sha256": "6e1b1d169e836663328c6f9a38145ed093192f93f36656b26327f2244eb583bc",
+              "source_rows_consumed": 2000
+            },
+            "source_shard": {
+              "canonical_index": 40,
+              "relative_path": "data/train-00040-of-00043.parquet",
+              "rows": 4628,
+              "sha256": "1433e9c328f817c4176b50ab080f9c85ae27c5c6060f546e020e384c1acb92c5",
+              "size_bytes": 1942220201
+            }
+          },
+          "model": {
+            "canonical_id": "hf:Qwen/Qwen2.5-VL-7B-Instruct",
+            "parameters": "7B",
+            "precision": "FP16",
+            "quantization": null
+          },
+          "same_spec": {
+            "chip_count": 1,
+            "hardware_chip_model": "910B2",
+            "hardware_vendor": "Huawei",
+            "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+            "model_parameters": "7B",
+            "model_precision": "FP16",
+            "model_quantization": "",
+            "node_count": 1,
+            "resolved_client_parameters": {
+              "backend": "openai-chat",
+              "dataset_name": "hf",
+              "endpoint": "/v1/chat/completions",
+              "hf_split": "train",
+              "no_stream": false,
+              "num_prompts": 1000,
+              "request_rate": 1
+            },
+            "resolved_server_parameters": {
+              "disable_log_requests": "",
+              "disable_log_stats": "",
+              "dtype": "float16",
+              "enforce_eager": "",
+              "gpu_memory_utilization": 0.6,
+              "limit_mm_per_prompt": {
+                "image": 1
+              },
+              "max_model_len": 32768,
+              "tensor_parallel_size": 1,
+              "trust_remote_code": ""
+            },
+            "scenario": "visionarena-online"
+          },
+          "workload": {
+            "batch_size": null,
+            "concurrent_requests": null,
+            "dataset": "hf",
+            "input_length": 1024,
+            "name": "visionarena-online",
+            "output_length": 256
+          }
+        },
+        "raw_values": [
+          647.0599274486303,
+          407.89059953019023,
+          403.81025174446404
+        ],
+        "repeat_dirs": [
+          "evidence/visionarena-online/repeat-01",
+          "evidence/visionarena-online/repeat-02",
+          "evidence/visionarena-online/repeat-03"
+        ],
+        "stats": {
+          "iqr": 121.62483785208315,
+          "median": 407.89059953019023,
+          "n": 3,
+          "q1": 405.85042563732713,
+          "q3": 527.4752634894103
+        }
+      },
+      "comparison_blockers": [
+        "input identity is not verified",
+        "reference raw evidence is not verified"
+      ],
+      "delta_percent": null,
+      "direction": "lower_is_better",
+      "input_identity_status": "candidate-verified-reference-raw-unavailable",
+      "primary_metric": "ttft_ms",
+      "reference": {
+        "evidence_grade": "B",
+        "stats": {
+          "iqr": 22.610709876171313,
+          "median": 437.94928630744107,
+          "n": 6,
+          "q1": 423.8190360473236,
+          "q3": 446.4297459234949
+        },
+        "summary_values": [
+          440.5764604774304,
+          448.3808410721831,
+          456.2576252957806,
+          435.32211213745177,
+          419.9846773506142,
+          419.30543774273247
+        ]
+      },
+      "stability_notice": "High IQR requires cautious stability interpretation: candidate",
+      "status": "ready",
+      "unit": "ms",
+      "variability": {
+        "candidate": "high",
+        "candidate_iqr_percent": 29.818004629714697,
+        "reference": "normal",
+        "reference_iqr_percent": 5.162860308967043
+      },
+      "workload": "visionarena-online"
+    }
+  ]
+}
