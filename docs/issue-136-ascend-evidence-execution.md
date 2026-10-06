@@ -18,6 +18,24 @@ Readiness logs, historical artifacts, and results from an integration branch rem
 correctness evidence, but they are not current-main performance points. If a comparable baseline is
 missing, mark the cell blocked and publish no delta.
 
+## Repository lineage and current anchor
+
+The earlier issue discussion cites Ascend PRs `#186`, `#187`, `#196`, and `#201`. Those numbers
+belong to the archived `intellistream/vllm-ascend-hust-legacy-20260831` repository, not the current
+`vLLM-HUST/vllm-ascend-hust` repository. In the archived repository, `#186`, `#196`, and `#201` were
+merged while `#187` was closed without merge. Their integration commit is not an ancestor of the
+current repository's main branch, so that readiness cannot qualify a current-main result.
+
+The campaign must freeze and requalify the current source pair directly. As of the 2026-10-06
+admission audit, the candidate pair is core `c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7` and Ascend
+backend `b47795c63a8e63e7aed4d311f951428d94e045ab`. The current backend contains EPLB and fused-MoE
+implementations and tests; their presence is not, by itself, end-to-end performance evidence.
+
+The existing official v0.18 JSON files remain workload templates only. Their embedded backend commit
+identifies the source spec and must not be relabeled as the current-main runtime. Every current-main
+artifact must record the observed import paths, exact commits, binary-extension provenance, model
+manifest, and runtime versions independently.
+
 ## Required matrix
 
 The dense track is complete only when the following cells have at least three independent service
@@ -43,6 +61,9 @@ After the dense anchors are complete, run the MoE specialty track on the same fr
 
 Keep eager and graph results in separate comparison scopes. Every targeted pair needs one stable
 `CAMPAIGN_COMPARISON_ID`, a `baseline` or `head` role, and three independent services per role.
+Qwen2.5-14B-Instruct is a dense model and cannot exercise EPLB or LatchMoE. Use a separately named
+MoE target, such as the locally available Qwen3-30B-A3B candidate, and never connect its points to
+the dense matrix.
 
 ## Strict repetition launch
 

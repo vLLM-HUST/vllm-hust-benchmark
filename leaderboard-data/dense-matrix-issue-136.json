@@ -1,6 +1,12 @@
 {
   "schema_version": "dense-matrix-issue-136/v1",
   "issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/136",
+  "current_main_candidate": {
+    "core_commit": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7",
+    "backend_commit": "b47795c63a8e63e7aed4d311f951428d94e045ab",
+    "status": "requires-clean-runtime-qualification",
+    "source_spec_boundary": "The per-workload engine_backend_commit fields identify the official v0.18 workload templates, not this current-main runtime."
+  },
   "hardware": {
     "chip_model": "910B2",
     "node_count": 1
@@ -204,7 +210,7 @@
     "blocked_cells": 3,
     "performance_percentages_published": false,
     "blockers": [
-      "Ascend PR #186/#196/#201 not merged; unique current-main commit pair not frozen",
+      "Archived-repository PR readiness is not inherited; the exact current-main source/binary pair still requires clean runtime qualification and matched evidence",
       "communication-sensitive single-node spec non-executable (custom comm path upstream support pending)"
     ]
   }
