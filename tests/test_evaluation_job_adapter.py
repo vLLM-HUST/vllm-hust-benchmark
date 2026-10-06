@@ -53,7 +53,9 @@ def inputs(tmp_path: Path) -> dict[str, Path]:
     core = tmp_path / "core"
     plugin = tmp_path / "plugin"
     model = tmp_path / "model"
+    runtime_cwd = tmp_path / "runtime-cwd"
     model.mkdir()
+    runtime_cwd.mkdir()
     (model / "refs").mkdir()
     (model / "refs/main").write_text("b" * 40 + "\n", encoding="utf-8")
     core_sha = _git_repo(core)
@@ -83,6 +85,7 @@ def inputs(tmp_path: Path) -> dict[str, Path]:
         "plugin_repository": request["plugin_repository"],
         "registry_version": REGISTRY_VERSION,
         "runtime_python": sys.executable,
+        "runtime_cwd": str(runtime_cwd),
         "image_id": "a" * 64,
         "cann_version": "test-cann",
         "torch_npu_version": "test-torch-npu",
@@ -140,6 +143,9 @@ def test_plan_uses_approved_target_and_ignores_request_metadata(
     assert plan.environment["CURRENT_EXPORT_ONLY"] == "0"
     assert plan.environment["CAMPAIGN_LOAD_PROFILE"] == "fixed-1-rps"
     assert plan.environment["ASCEND_RT_VISIBLE_DEVICES"] == "2"
+    assert plan.environment["CURRENT_RUNTIME_CWD"] == str(
+        (inputs["request"].parent / "runtime-cwd").resolve()
+    )
     assert "EVALUATION_REQUEST_FILE" not in plan.environment
     assert "SINGLE_REPETITION_RUNNER" not in plan.environment
 
@@ -211,6 +217,23 @@ def test_preflight_rejects_duplicate_devices(inputs: dict[str, Path]) -> None:
     _edit_json(inputs["request"], lambda x: x.update(npu_count=2))
     with pytest.raises(AdapterError, match="assigned NPUs"):
         _plan(inputs, "2,2")
+
+
+def test_preflight_rejects_missing_runtime_cwd(inputs: dict[str, Path]) -> None:
+    _edit_json(
+        inputs["schedule"],
+        lambda x: x.update(runtime_cwd=str(inputs["request"].parent / "missing")),
+    )
+    with pytest.raises(AdapterError, match="runtime_cwd does not exist"):
+        _plan(inputs)
+
+
+def test_preflight_rejects_symlink_runtime_cwd(inputs: dict[str, Path]) -> None:
+    link = inputs["request"].parent / "runtime-link"
+    link.symlink_to(inputs["request"].parent / "runtime-cwd", target_is_directory=True)
+    _edit_json(inputs["schedule"], lambda x: x.update(runtime_cwd=str(link)))
+    with pytest.raises(AdapterError, match="runtime_cwd must not be a symlink"):
+        _plan(inputs)
 
 
 def test_plan_accepts_local_model_manifest_digest(inputs: dict[str, Path]) -> None:

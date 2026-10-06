@@ -335,6 +335,7 @@ def build_plan(
         "torch_npu_version",
         "topology",
         "runtime_python",
+        "runtime_cwd",
     ):
         _required_string(schedule.get(name), name)
     image_id = schedule["image_id"].removeprefix("sha256:")
@@ -344,6 +345,12 @@ def build_plan(
         schedule["runtime_python"], os.X_OK
     ):
         raise AdapterError("scheduled runtime_python does not exist")
+    scheduled_runtime_cwd = Path(schedule["runtime_cwd"])
+    if scheduled_runtime_cwd.is_symlink():
+        raise AdapterError("scheduled runtime_cwd must not be a symlink")
+    runtime_cwd = scheduled_runtime_cwd.resolve()
+    if not runtime_cwd.is_dir():
+        raise AdapterError("scheduled runtime_cwd does not exist")
     configured_env = schedule.get("environment", {})
     if not isinstance(configured_env, dict) or any(
         not isinstance(k, str) or not isinstance(v, str) or k not in ALLOWED_ADMIN_ENV
@@ -371,6 +378,7 @@ def build_plan(
             "CURRENT_TORCH_NPU_VERSION": schedule["torch_npu_version"],
             "CURRENT_TOPOLOGY": schedule["topology"],
             "CURRENT_RUNTIME_PYTHON": schedule["runtime_python"],
+            "CURRENT_RUNTIME_CWD": str(runtime_cwd),
             "ASCEND_RT_VISIBLE_DEVICES": devices,
             "ASCEND_VISIBLE_DEVICES": devices,
             "PERFGATE_WARMUP_RUNS": "0",
