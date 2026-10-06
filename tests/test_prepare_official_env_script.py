@@ -609,7 +609,6 @@ def test_official_runner_applies_resolved_server_parameters_to_offline_cli(
             CLIENT_READY_CHECK_TIMEOUT_SECONDS=900
             OFFICIAL_VLLM_WORKTREE=/tmp/vllm
             OFFICIAL_BENCHMARK_DATASET_ROOT=/tmp/datasets
-            OFFICIAL_RUNTIME_DATASET_PATH=/tmp/frozen-vision
             normalized_client_parameters_json
             """
         )
@@ -621,7 +620,45 @@ def test_official_runner_applies_resolved_server_parameters_to_offline_cli(
     assert normalized["tensor_parallel_size"] == 1
     assert normalized["gpu_memory_utilization"] == 0.6
     assert normalized["input_len"] == 1024
+
+
+def test_official_runner_preserves_logical_hf_name_for_frozen_dataset(
+    tmp_path: Path,
+) -> None:
+    same_spec = tmp_path / "resolved_same_spec.json"
+    same_spec.write_text(
+        json.dumps(
+            {
+                "resolved_server_parameters": {},
+                "resolved_client_parameters": {
+                    "backend": "openai-chat",
+                    "dataset_name": "hf",
+                    "dataset_path": "lmarena-ai/VisionArena-Chat",
+                    "hf_split": "train",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    result = _run_bash(
+        _source_run_official_runtime_model_functions(
+            f"""
+            REPO_ROOT={shlex.quote(str(REPO_ROOT))}
+            HOST_PYTHON_BIN={shlex.quote(sys.executable)}
+            SAME_SPEC_FILE={shlex.quote(str(same_spec))}
+            BENCHMARK_TYPE=serve
+            CLIENT_READY_CHECK_TIMEOUT_SECONDS=900
+            OFFICIAL_VLLM_WORKTREE=/tmp/vllm
+            OFFICIAL_BENCHMARK_DATASET_ROOT=/tmp/datasets
+            OFFICIAL_RUNTIME_DATASET_PATH=/tmp/frozen-vision
+            normalized_client_parameters_json
+            """
+        )
+    )
+
+    normalized = json.loads(result.stdout)
     assert normalized["dataset_path"] == "/tmp/frozen-vision"
+    assert normalized["hf_name"] == "lmarena-ai/VisionArena-Chat"
 
 
 def test_run_client_command_uses_bench_cli_shape_for_serve(tmp_path: Path) -> None:

@@ -1211,7 +1211,10 @@ else:
     )
 runtime_dataset_path = os.environ.get("OFFICIAL_RUNTIME_DATASET_PATH", "").strip()
 if runtime_dataset_path:
+    logical_dataset_path = str(normalized.get("dataset_path") or "").strip()
     normalized["dataset_path"] = runtime_dataset_path
+    if logical_dataset_path and not normalized.get("hf_name"):
+        normalized["hf_name"] = logical_dataset_path
 print(
     json.dumps(
         normalized,
