@@ -26,9 +26,9 @@ merged.
 
 The service reached its health endpoint, completed graph compilation, allocated an 8.78 GiB KV
 cache for 47,872 tokens, and returned a valid HTTP 200 completion with eight output tokens. The
-response is retained verbatim in `completion.json`; this qualification checks service execution,
-not answer quality. `STATUS` is `OK`, and `npu-after.txt` confirms that the selected device released
-its process after shutdown.
+response is retained in `completion.json`; this qualification checks service execution, not answer
+quality. `STATUS` is `OK`, and `npu-after.txt` confirms that the selected device released its
+process after shutdown.
 
 The `EngineDeadError` near the end of `server.log` occurs after the successful response, when the
 harness deliberately terminates the service process group. It is a shutdown artifact, not an
@@ -40,7 +40,9 @@ inference failure.
 - `import-provenance.json`: observed Python modules, extension path, and distribution versions
 - `core-commit.txt` and `plugin-commit.txt`: checked source revisions
 - `extension.sha256` and `fla-wheel.sha256`: binary dependency identities
-- `server.log`, `health.txt`, and `completion.json`: raw service evidence
+- `source-evidence.tar.gz`: byte-preserving archive of the original evidence directory
+- `server.log`, `health.txt`, and `completion.json`: readable service evidence; text line endings
+  and final newlines are repository-normalized
 - `npu-before.txt` and `npu-after.txt`: device/process boundaries
 - `SHA256SUMS.source-absolute`: immutable original manifest with source-container paths
 - `SHA256SUMS`: portable manifest for this archived directory
