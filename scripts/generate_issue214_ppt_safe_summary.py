@@ -121,20 +121,29 @@ def _submission_dir(repeat_dir: Path) -> Path:
 
 
 def _verify_checksum_manifest(
-    base: Path, checksum_path: Path, required_coverage: set[str]
+    base: Path,
+    checksum_path: Path,
+    required_coverage: set[str],
+    *,
+    exact_coverage: set[str] | None = None,
 ) -> list[str]:
     if not checksum_path.is_file():
         return [f"{checksum_path.name} is missing"]
 
     errors: list[str] = []
     covered: set[str] = set()
+    resolved_base = base.resolve()
     for line_number, line in enumerate(
         checksum_path.read_text(encoding="utf-8").splitlines(), 1
     ):
         if not line.strip():
             continue
         parts = line.split(maxsplit=1)
-        if len(parts) != 2 or len(parts[0]) != 64:
+        if (
+            len(parts) != 2
+            or len(parts[0]) != 64
+            or any(character not in "0123456789abcdefABCDEF" for character in parts[0])
+        ):
             errors.append(f"invalid checksum line {line_number}")
             continue
         expected, relative_name = parts
@@ -143,16 +152,29 @@ def _verify_checksum_manifest(
         if relative_path.is_absolute() or ".." in relative_path.parts:
             errors.append(f"unsafe checksum path on line {line_number}")
             continue
+        normalized_name = relative_path.as_posix().removeprefix("./")
+        if normalized_name in covered:
+            errors.append(f"duplicate checksum path: {relative_name}")
+            continue
         target = base / relative_path
-        if not target.is_file():
+        if (
+            target.is_symlink()
+            or not target.resolve().is_relative_to(resolved_base)
+            or not target.is_file()
+        ):
             errors.append(f"checksummed file is missing: {relative_name}")
             continue
         actual = hashlib.sha256(target.read_bytes()).hexdigest()
         if actual != expected.casefold():
             errors.append(f"checksum mismatch: {relative_name}")
-        covered.add(relative_path.as_posix().removeprefix("./"))
+        covered.add(normalized_name)
     for required_name in sorted(required_coverage - covered):
         errors.append(f"{required_name} is not covered by checksums")
+    if exact_coverage is not None:
+        for extra_name in sorted(covered - exact_coverage):
+            errors.append(f"unexpected checksummed file: {extra_name}")
+        for missing_name in sorted(exact_coverage - covered):
+            errors.append(f"archive file is not covered by checksums: {missing_name}")
     return errors
 
 
@@ -169,8 +191,27 @@ def _verify_full_archive(repeat_dir: Path, *, online: bool) -> list[str]:
     required = set(FULL_ARCHIVE_REQUIRED_FILES)
     if online:
         required.add("server.stdout.log")
+    unsafe_files = [
+        path
+        for path in repeat_dir.rglob("*")
+        if path.is_symlink()
+        or (path.is_file() and not path.resolve().is_relative_to(repeat_dir.resolve()))
+    ]
+    if unsafe_files:
+        return [
+            f"unsafe archive path: {path.relative_to(repeat_dir)}"
+            for path in unsafe_files
+        ]
+    exact = {
+        path.relative_to(repeat_dir).as_posix()
+        for path in repeat_dir.rglob("*")
+        if path.is_file() and path.name != "EVIDENCE_SHA256SUMS"
+    }
     return _verify_checksum_manifest(
-        repeat_dir, repeat_dir / "EVIDENCE_SHA256SUMS", required
+        repeat_dir,
+        repeat_dir / "EVIDENCE_SHA256SUMS",
+        required,
+        exact_coverage=exact,
     )
 
 
@@ -194,6 +235,18 @@ def _portable_identity_value(value: Any) -> Any:
     if isinstance(value, str) and Path(value).is_absolute():
         return "<absolute-path-omitted>"
     return value
+
+
+def _runtime_environment(contract: Any) -> Any:
+    if not isinstance(contract, dict):
+        return contract
+    environment = {
+        key: contract.get(key)
+        for key in ("cann", "python", "torch", "torch_npu")
+        if key in contract
+    }
+    environment["image"] = contract.get("image_id") or contract.get("image_digest")
+    return environment
 
 
 def identity_projection(
@@ -601,10 +654,13 @@ def _analyze_raw_workload(
     for field, message in (
         ("identity_projection", "resolved workload/spec identity differs"),
         ("input_identity", "input identity differs"),
-        ("runtime_contract", "runtime contract differs"),
     ):
         if reference.get(field) != candidate.get(field):
             comparison_blockers.append(message)
+    if _runtime_environment(reference.get("runtime_contract")) != _runtime_environment(
+        candidate.get("runtime_contract")
+    ):
+        comparison_blockers.append("runtime environment differs")
     if blockers:
         comparison_blockers.append("workload evidence is blocked")
 
@@ -901,10 +957,11 @@ def generate(manifest_path: Path, output_dir: Path) -> dict[str, Any]:
         canonical_metric = overlay.get("canonical_metric")
         reason = overlay.get("reason")
         if (
-            normalized_reference_workloads[workload].get("primary_metric")
+            workload != "random-latency"
+            or source_metric != "ttft_ms"
+            or canonical_metric != "batch_latency_ms"
+            or normalized_reference_workloads[workload].get("primary_metric")
             != source_metric
-            or not isinstance(canonical_metric, str)
-            or not canonical_metric
             or not isinstance(reason, str)
             or not reason
         ):

@@ -38,15 +38,16 @@ def require_commit(repo: Path, expected: str) -> None:
 
 
 def file_manifest(root: Path, patterns: tuple[str, ...]) -> list[dict[str, Any]]:
+    resolved_root = root.resolve()
     paths = {
-        path.resolve()
-        for pattern in patterns
-        for path in root.glob(pattern)
-        if path.is_file()
+        path for pattern in patterns for path in root.glob(pattern) if path.is_file()
     }
+    for path in paths:
+        if path.is_symlink() or not path.resolve().is_relative_to(resolved_root):
+            raise ValueError(f"unsafe runtime artifact path: {path}")
     return [
         {
-            "path": path.relative_to(root.resolve()).as_posix(),
+            "path": path.relative_to(root).as_posix(),
             "sha256": sha256(path),
             "size_bytes": path.stat().st_size,
         }
@@ -54,12 +55,22 @@ def file_manifest(root: Path, patterns: tuple[str, ...]) -> list[dict[str, Any]]
     ]
 
 
+def untracked_manifest(repo: Path) -> list[dict[str, Any]]:
+    output = bytes(
+        git(repo, "ls-files", "--others", "--exclude-standard", "-z", text=False)
+    )
+    paths = [repo / item.decode() for item in output.split(b"\0") if item]
+    return file_manifest(
+        repo, tuple(path.relative_to(repo).as_posix() for path in paths)
+    )
+
+
 def package_version(python: Path, name: str) -> str:
     code = f"from importlib.metadata import version; print(version({name!r}))"
     return subprocess.check_output([str(python), "-c", code], text=True).strip()
 
 
-def runtime_lock(args: argparse.Namespace) -> None:
+def build_runtime_lock(args: argparse.Namespace) -> dict[str, Any]:
     require_commit(args.source_core, CORE_COMMIT)
     require_commit(args.source_plugin, PLUGIN_COMMIT)
     require_commit(args.runtime_core, CORE_COMMIT)
@@ -85,12 +96,30 @@ def runtime_lock(args: argparse.Namespace) -> None:
             "vllm_ascend-*.dist-info/*",
         ),
     )
+    custom_op_artifacts = file_manifest(
+        args.runtime_plugin,
+        ("vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/**/*",),
+    )
     if not artifacts or not any(item["path"].endswith(".so") for item in artifacts):
         raise ValueError("plugin runtime has no frozen compiled extension artifacts")
+    if not custom_op_artifacts:
+        raise ValueError("plugin runtime has no frozen custom-op artifacts")
+    core_untracked = untracked_manifest(args.runtime_core)
+    plugin_untracked = untracked_manifest(args.runtime_plugin)
     artifact_digest = hashlib.sha256(
-        json.dumps(artifacts, sort_keys=True, separators=(",", ":")).encode()
+        json.dumps(
+            {
+                "core_artifacts": core_artifacts,
+                "core_untracked_files": core_untracked,
+                "plugin_artifacts": artifacts,
+                "plugin_untracked_files": plugin_untracked,
+                "custom_op_artifacts": custom_op_artifacts,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
     ).hexdigest()
-    payload = {
+    return {
         "schema_version": "issue214-reference-runtime-lock/v1",
         "status": "ok",
         "image_id": IMAGE_ID,
@@ -125,11 +154,24 @@ def runtime_lock(args: argparse.Namespace) -> None:
             "plugin_tracked_patch_sha256": hashlib.sha256(plugin_patch).hexdigest(),
             "plugin_tracked_patch_bytes": len(plugin_patch),
             "core_artifacts": core_artifacts,
+            "core_untracked_files": core_untracked,
+            "plugin_untracked_files": plugin_untracked,
             "artifact_manifest_sha256": artifact_digest,
             "artifacts": artifacts,
+            "custom_op_artifacts": custom_op_artifacts,
         },
     }
-    write_json(args.output, payload)
+
+
+def runtime_lock(args: argparse.Namespace) -> None:
+    write_json(args.output, build_runtime_lock(args))
+
+
+def verify_runtime_lock(args: argparse.Namespace) -> None:
+    expected = json.loads(args.lock.read_text())
+    observed = build_runtime_lock(args)
+    if observed != expected:
+        raise ValueError("runtime sources, overlay, packages, or artifacts changed")
 
 
 def model_manifest(args: argparse.Namespace) -> None:
@@ -189,7 +231,11 @@ def normalized(value: Any) -> Any:
 
 def archive_cell(args: argparse.Namespace) -> None:
     runtime_lock_payload = json.loads(args.runtime_lock.read_text())
-    if runtime_lock_payload.get("status") != "ok":
+    if (
+        runtime_lock_payload.get("schema_version")
+        != "issue214-reference-runtime-lock/v1"
+        or runtime_lock_payload.get("status") != "ok"
+    ):
         raise ValueError("runtime lock is not qualified")
     resolved = json.loads((args.cell / "resolved_same_spec.json").read_text())
     run = json.loads((args.cell / "submission/run_leaderboard.json").read_text())
@@ -201,17 +247,41 @@ def archive_cell(args: argparse.Namespace) -> None:
         for key in ("image_id", "cann", "python", "torch", "torch_npu")
     }
     runtime_contract["schema_version"] = "issue214-runtime-contract/v1"
+    runtime_contract["runtime_lock_sha256"] = sha256(args.runtime_lock)
+    runtime_contract["sources"] = runtime_lock_payload.get("sources")
+    runtime_contract["compatibility_overlay"] = {
+        key: runtime_lock_payload["compatibility_overlay"].get(key)
+        for key in (
+            "core_tracked_patch_sha256",
+            "plugin_tracked_patch_sha256",
+            "artifact_manifest_sha256",
+        )
+    }
     write_json(args.cell / "runtime-contract.json", runtime_contract)
 
     provenance_path = args.cell / "submission/input_provenance.json"
     provenance = (
         json.loads(provenance_path.read_text()) if provenance_path.is_file() else None
     )
+    input_files: list[dict[str, Any]] = []
+    for declaration in args.input_file:
+        label, separator, raw_path = declaration.partition("=")
+        path = Path(raw_path)
+        if not separator or not label or not path.is_file() or path.is_symlink():
+            raise ValueError(f"invalid frozen input declaration: {declaration}")
+        input_files.append(
+            {"label": label, "sha256": sha256(path), "size_bytes": path.stat().st_size}
+        )
     input_identity = {
         "schema_version": "issue214-input-identity/v1",
         "spec_sha256": sha256(args.spec),
         "resolved_workload": normalized(resolved),
         "input_provenance": normalized(provenance),
+        "input_files": sorted(input_files, key=lambda item: item["label"]),
+        "synthetic_generation": {
+            "seed": resolved.get("resolved_client_parameters", {}).get("seed", 0),
+            "parameters": normalized(resolved.get("resolved_client_parameters", {})),
+        },
         "model_manifest": json.loads(args.model_manifest.read_text()),
     }
     write_json(args.cell / "input-identity.json", input_identity)
@@ -236,24 +306,49 @@ def archive_cell(args: argparse.Namespace) -> None:
     missing = sorted(name for name in required if not (args.cell / name).is_file())
     if missing:
         raise ValueError(f"cell archive is incomplete: {missing}")
-    lines = [f"{sha256(args.cell / name)}  {name}" for name in sorted(required)]
-    (args.cell / "EVIDENCE_SHA256SUMS").write_text("\n".join(lines) + "\n")
+    archived_files = {
+        path.relative_to(args.cell).as_posix()
+        for path in args.cell.rglob("*")
+        if path.is_file() and path.name != "EVIDENCE_SHA256SUMS"
+    }
+    unsafe = [
+        name
+        for name in archived_files
+        if (args.cell / name).is_symlink()
+        or not (args.cell / name).resolve().is_relative_to(args.cell.resolve())
+    ]
+    if unsafe:
+        raise ValueError(f"cell archive contains unsafe files: {sorted(unsafe)}")
+    lines = [f"{sha256(args.cell / name)}  {name}" for name in sorted(archived_files)]
+    evidence_manifest = args.cell / "EVIDENCE_SHA256SUMS"
+    temporary = evidence_manifest.with_suffix(".tmp")
+    temporary.write_text("\n".join(lines) + "\n")
+    temporary.replace(evidence_manifest)
 
 
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(description=__doc__)
     commands = root.add_subparsers(required=True)
+
+    def add_runtime_arguments(command: argparse.ArgumentParser) -> None:
+        command.add_argument("--source-core", required=True, type=Path)
+        command.add_argument("--source-plugin", required=True, type=Path)
+        command.add_argument("--runtime-core", required=True, type=Path)
+        command.add_argument("--runtime-plugin", required=True, type=Path)
+        command.add_argument("--python", required=True, type=Path)
+        command.add_argument("--cann", required=True)
+        command.add_argument("--core-remote", required=True)
+        command.add_argument("--plugin-remote", required=True)
+
     lock = commands.add_parser("runtime-lock")
-    lock.add_argument("--source-core", required=True, type=Path)
-    lock.add_argument("--source-plugin", required=True, type=Path)
-    lock.add_argument("--runtime-core", required=True, type=Path)
-    lock.add_argument("--runtime-plugin", required=True, type=Path)
-    lock.add_argument("--python", required=True, type=Path)
-    lock.add_argument("--cann", required=True)
-    lock.add_argument("--core-remote", required=True)
-    lock.add_argument("--plugin-remote", required=True)
+    add_runtime_arguments(lock)
     lock.add_argument("--output", required=True, type=Path)
     lock.set_defaults(handler=runtime_lock)
+
+    verify = commands.add_parser("verify-runtime-lock")
+    add_runtime_arguments(verify)
+    verify.add_argument("--lock", required=True, type=Path)
+    verify.set_defaults(handler=verify_runtime_lock)
 
     model = commands.add_parser("model-manifest")
     model.add_argument("--model", required=True, type=Path)
@@ -266,6 +361,7 @@ def parser() -> argparse.ArgumentParser:
     cell.add_argument("--spec", required=True, type=Path)
     cell.add_argument("--runtime-lock", required=True, type=Path)
     cell.add_argument("--model-manifest", required=True, type=Path)
+    cell.add_argument("--input-file", action="append", default=[])
     cell.set_defaults(handler=archive_cell)
     return root
 

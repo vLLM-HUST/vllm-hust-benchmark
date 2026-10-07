@@ -522,22 +522,46 @@ def test_raw_pair_computes_delta_only_from_symmetric_full_archives(
     assert row["delta_percent"] == 50.0
 
 
-@pytest.mark.parametrize("mismatch", ["runtime", "input"])
-def test_raw_pair_suppresses_delta_on_cross_side_identity_mismatch(
-    tmp_path, summary_module, mismatch
+def test_raw_pair_allows_software_identity_difference_between_configurations(
+    tmp_path, summary_module
 ):
     reference = [
         _full_repeat(tmp_path / "reference", i, value, commits=("a" * 40, "b" * 40))
         for i, value in enumerate([10, 20, 30], 1)
     ]
-    kwargs = {f"{mismatch}_suffix": "different"}
     candidate = [
         _full_repeat(
             tmp_path / "candidate",
             i,
             value,
             commits=("c" * 40, "d" * 40),
-            **kwargs,
+            runtime_suffix="different-software-build",
+        )
+        for i, value in enumerate([20, 30, 40], 1)
+    ]
+
+    row = summary_module.generate(
+        _raw_manifest(tmp_path, reference, candidate), tmp_path / "out"
+    )["workloads"][0]
+
+    assert row["delta_percent"] == 50.0
+    assert not row["comparison_blockers"]
+
+
+def test_raw_pair_suppresses_delta_on_cross_side_input_mismatch(
+    tmp_path, summary_module
+):
+    reference = [
+        _full_repeat(tmp_path / "reference", i, value, commits=("a" * 40, "b" * 40))
+        for i, value in enumerate([10, 20, 30], 1)
+    ]
+    candidate = [
+        _full_repeat(
+            tmp_path / "candidate",
+            i,
+            value,
+            commits=("c" * 40, "d" * 40),
+            input_suffix="different",
         )
         for i, value in enumerate([20, 30, 40], 1)
     ]
@@ -548,12 +572,47 @@ def test_raw_pair_suppresses_delta_on_cross_side_identity_mismatch(
 
     assert row["status"] == "ready"
     assert row["delta_percent"] is None
-    expected = (
-        "runtime contract differs"
-        if mismatch == "runtime"
-        else "input identity differs"
-    )
-    assert expected in " ".join(row["comparison_blockers"])
+    assert "input identity differs" in " ".join(row["comparison_blockers"])
+
+
+def test_raw_pair_blocks_uncovered_archive_file(tmp_path, summary_module):
+    reference = [
+        _full_repeat(tmp_path / "reference", i, value, commits=("a" * 40, "b" * 40))
+        for i, value in enumerate([10, 20, 30], 1)
+    ]
+    candidate = [
+        _full_repeat(tmp_path / "candidate", i, value, commits=("c" * 40, "d" * 40))
+        for i, value in enumerate([20, 30, 40], 1)
+    ]
+    (candidate[0] / "uncovered.log").write_text("not in evidence manifest\n")
+
+    row = summary_module.generate(
+        _raw_manifest(tmp_path, reference, candidate), tmp_path / "out"
+    )["workloads"][0]
+
+    assert row["status"] == "blocked"
+    assert "archive file is not covered" in " ".join(row["blockers"])
+
+
+def test_raw_pair_blocks_archive_symlink_escape(tmp_path, summary_module):
+    reference = [
+        _full_repeat(tmp_path / "reference", i, value, commits=("a" * 40, "b" * 40))
+        for i, value in enumerate([10, 20, 30], 1)
+    ]
+    candidate = [
+        _full_repeat(tmp_path / "candidate", i, value, commits=("c" * 40, "d" * 40))
+        for i, value in enumerate([20, 30, 40], 1)
+    ]
+    outside = tmp_path / "outside.log"
+    outside.write_text("outside archive\n")
+    (candidate[0] / "escape.log").symlink_to(outside)
+
+    row = summary_module.generate(
+        _raw_manifest(tmp_path, reference, candidate), tmp_path / "out"
+    )["workloads"][0]
+
+    assert row["status"] == "blocked"
+    assert "unsafe archive path" in " ".join(row["blockers"])
 
 
 def test_raw_pair_blocks_incomplete_archive(tmp_path, summary_module):
@@ -576,7 +635,7 @@ def test_raw_pair_blocks_incomplete_archive(tmp_path, summary_module):
     assert row["candidate"]["evidence_grade"] == "blocked"
 
 
-def test_legacy_metric_overlay_corrects_label_but_remains_fail_closed(
+def test_metric_overlay_is_restricted_to_random_latency_correction(
     tmp_path, summary_module
 ):
     repeats = [
@@ -599,11 +658,5 @@ def test_legacy_metric_overlay_corrects_label_but_remains_fail_closed(
     }
     _write_json(manifest_path, manifest)
 
-    result = summary_module.generate(manifest_path, tmp_path / "out")
-    row = result["workloads"][0]
-
-    assert row["status"] == "ready"
-    assert row["primary_metric"] == "batch_latency_ms"
-    assert row["delta_percent"] is None
-    assert "reference raw evidence is not verified" in row["comparison_blockers"]
-    assert result["reference"]["metric_overlays"]
+    with pytest.raises(ValueError, match="invalid metric overlay contract"):
+        summary_module.generate(manifest_path, tmp_path / "out")

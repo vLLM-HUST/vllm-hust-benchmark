@@ -60,6 +60,12 @@ def test_runtime_lock_binds_clean_sources_overlay_and_binary(tmp_path, helper):
     extension = runtime_plugin / "vllm_ascend/runtime.so"
     extension.parent.mkdir()
     extension.write_bytes(b"binary")
+    custom_op = (
+        runtime_plugin
+        / "vllm_ascend/_cann_ops_custom/vendors/vllm-ascend/op_impl/custom.py"
+    )
+    custom_op.parent.mkdir(parents=True)
+    custom_op.write_text("# frozen custom op\n")
     helper.CORE_COMMIT = core_commit
     helper.PLUGIN_COMMIT = plugin_commit
     output = tmp_path / "lock.json"
@@ -85,6 +91,36 @@ def test_runtime_lock_binds_clean_sources_overlay_and_binary(tmp_path, helper):
     assert payload["compatibility_overlay"]["artifacts"][0]["path"].endswith(
         "runtime.so"
     )
+    assert payload["compatibility_overlay"]["custom_op_artifacts"]
+
+    helper.verify_runtime_lock(
+        Namespace(
+            source_core=source_core,
+            source_plugin=source_plugin,
+            runtime_core=runtime_core,
+            runtime_plugin=runtime_plugin,
+            python=Path(sys.executable),
+            cann="9.1",
+            core_remote="core",
+            plugin_remote="plugin",
+            lock=output,
+        )
+    )
+    extension.write_bytes(b"changed")
+    with pytest.raises(ValueError, match="runtime sources"):
+        helper.verify_runtime_lock(
+            Namespace(
+                source_core=source_core,
+                source_plugin=source_plugin,
+                runtime_core=runtime_core,
+                runtime_plugin=runtime_plugin,
+                python=Path(sys.executable),
+                cann="9.1",
+                core_remote="core",
+                plugin_remote="plugin",
+                lock=output,
+            )
+        )
 
 
 def test_archive_cell_writes_identity_contract_and_complete_checksums(tmp_path, helper):
@@ -113,12 +149,19 @@ def test_archive_cell_writes_identity_contract_and_complete_checksums(tmp_path, 
     write_json(
         runtime_lock,
         {
+            "schema_version": "issue214-reference-runtime-lock/v1",
             "status": "ok",
             "image_id": "sha256:image",
             "cann": "9.1",
             "python": "3.11",
             "torch": "2.9.0",
             "torch_npu": "2.9.0",
+            "sources": {"core": {"commit": "a" * 40}, "plugin": {"commit": "b" * 40}},
+            "compatibility_overlay": {
+                "core_tracked_patch_sha256": "1" * 64,
+                "plugin_tracked_patch_sha256": "2" * 64,
+                "artifact_manifest_sha256": "3" * 64,
+            },
         },
     )
     spec = tmp_path / "spec.json"
@@ -132,6 +175,7 @@ def test_archive_cell_writes_identity_contract_and_complete_checksums(tmp_path, 
             spec=spec,
             runtime_lock=runtime_lock,
             model_manifest=model_manifest,
+            input_file=[],
         )
     )
 
@@ -139,4 +183,5 @@ def test_archive_cell_writes_identity_contract_and_complete_checksums(tmp_path, 
     assert json.loads((cell / "input-identity.json").read_text())["spec_sha256"]
     checksum_text = (cell / "EVIDENCE_SHA256SUMS").read_text()
     assert "server.stdout.log" in checksum_text
+    assert "runtime-ready.log" in checksum_text
     subprocess.run(["sha256sum", "-c", "EVIDENCE_SHA256SUMS"], cwd=cell, check=True)
