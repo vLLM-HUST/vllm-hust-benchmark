@@ -27,7 +27,21 @@
     "host": "0.0.0.0",
     "port": 8000,
     "gpu_memory_utilization": 0.6,
-    "max_model_len": 32768
+    "max_model_len": 32768,
+    "compilation_config": {
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ]
+    }
   },
   "client_parameters": {
     "backend": "openai-chat",
@@ -57,6 +71,17 @@
     "plugin_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
     "load_profile": "fixed-1-rps",
     "request_rate": 1.0,
-    "tensor_parallel_size": 1
+    "tensor_parallel_size": 1,
+    "graph_capture_sizes": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128,
+      256
+    ]
   }
 }

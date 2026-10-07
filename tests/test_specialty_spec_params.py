@@ -73,6 +73,7 @@ KNOWN_VLLM_SERVER_ARGS = frozenset(
         # vision
         "limit_mm_per_prompt",
         # compilation
+        "compilation_config",
         "enforce_compiled_graph",
         # additional config
         "additional_config",

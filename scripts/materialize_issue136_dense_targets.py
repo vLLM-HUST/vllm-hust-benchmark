@@ -21,6 +21,7 @@ STACK_ID = "vllm-0.23.0-vllm-ascend-0.25.1rc1"
 CORE_VERSION = "0.23.0"
 PLUGIN_VERSION = "0.25.1rc1"
 FULL_SHA = re.compile(r"[0-9a-f]{40}")
+GRAPH_CAPTURE_SIZES = (1, 2, 4, 8, 16, 32, 64, 128, 256)
 RateMap = dict[int, float]
 RateMatrix = dict[str, RateMap]
 
@@ -168,6 +169,10 @@ def _build_target(
     server = target["server_parameters"]
     assert isinstance(server, dict)
     server["tensor_parallel_size"] = tp
+    server["compilation_config"] = {
+        "cudagraph_mode": "FULL_AND_PIECEWISE",
+        "cudagraph_capture_sizes": list(GRAPH_CAPTURE_SIZES),
+    }
     client = target["client_parameters"]
     assert isinstance(client, dict)
     client["request_rate"] = request_rate
@@ -191,6 +196,7 @@ def _build_target(
         "load_profile": load_profile,
         "request_rate": request_rate,
         "tensor_parallel_size": tp,
+        "graph_capture_sizes": list(GRAPH_CAPTURE_SIZES),
     }
     return target
 

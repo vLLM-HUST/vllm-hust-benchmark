@@ -2,6 +2,16 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.9 — 2026-10-07
+
+- English: Pin a bounded nine-size FULL_AND_PIECEWISE graph capture contract for all issue #136
+  Dense TP1/TP2/TP4 targets after reproducible Ascend stream-resource exhaustion with the implicit
+  35-size default.
+- 中文：在隐式 35 档默认配置稳定触发 Ascend 流资源耗尽后，为 issue #136 全部 Dense TP1/TP2/TP4 target 冻结九档 FULL_AND_PIECEWISE
+  图捕获契约。
+- Source set: `8fc1d99da2835a071efbced195ca9180b12da8f9574fcf34cf1adcca0c9e449f`
+- Supersedes: `1.3.8`
+
 ## 1.3.8 — 2026-10-06
 
 - English: Add directly named vLLM 0.23.0 + vLLM Ascend 0.25.1rc1 FP16 fixed-1RPS Dense scaling

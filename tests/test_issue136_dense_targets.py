@@ -57,6 +57,21 @@ def test_materializes_directly_named_fixed_targets(tmp_path: Path) -> None:
         assert "vllm-0.23.0-vllm-ascend-0.25.1rc1" in payload["id"]
         assert payload["baseline_target"]["vllm_ref"] == CORE_COMMIT
         assert payload["baseline_target"]["vllm_ascend_ref"] == PLUGIN_COMMIT
+        assert payload["server_parameters"]["compilation_config"] == {
+            "cudagraph_mode": "FULL_AND_PIECEWISE",
+            "cudagraph_capture_sizes": [1, 2, 4, 8, 16, 32, 64, 128, 256],
+        }
+        assert payload["issue_136_contract"]["graph_capture_sizes"] == [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+        ]
         assert _classify_spec(path, payload) == (
             "specialty",
             "provisional",

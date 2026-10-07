@@ -31,7 +31,21 @@
     "enable_prefix_caching": true,
     "no_enable_chunked_prefill": true,
     "max_num_seqs": 16,
-    "max_num_batched_tokens": 32768
+    "max_num_batched_tokens": 32768,
+    "compilation_config": {
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ]
+    }
   },
   "client_parameters": {
     "backend": "vllm",
@@ -63,6 +77,17 @@
     "plugin_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
     "load_profile": "fixed-1-rps",
     "request_rate": 1.0,
-    "tensor_parallel_size": 4
+    "tensor_parallel_size": 4,
+    "graph_capture_sizes": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64,
+      128,
+      256
+    ]
   }
 }
