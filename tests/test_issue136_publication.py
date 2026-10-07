@@ -7,6 +7,9 @@ from pathlib import Path
 import pytest
 
 from vllm_hust_benchmark.issue136_publication import (
+    EXPECTED_GRAPH_CONFIG,
+    EXPECTED_RUNTIME_PROVENANCE,
+    EXPECTED_SOURCE_COMMITS,
     PublicationError,
     WORKLOADS,
     build_publication_bundle,
@@ -14,11 +17,7 @@ from vllm_hust_benchmark.issue136_publication import (
 )
 
 
-COMMITS = {
-    "core": "c" * 40,
-    "plugin": "d" * 40,
-    "benchmark": "e" * 40,
-}
+COMMITS = EXPECTED_SOURCE_COMMITS
 
 
 def _sha(path: Path) -> str:
@@ -59,6 +58,7 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                     "rate": rate,
                     "spec_id": spec_id,
                     "campaign_prefix": prefix,
+                    "spec_sha256": "a" * 64,
                 }
             )
             inventory_cells.append(f"cells/{prefix}")
@@ -75,9 +75,13 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                 (submission / "STATUS").write_text("OK\n", encoding="utf-8")
                 raw = {
                     "completed": 10,
+                    "num_prompts": 10,
                     "failed": 0,
                     "errors": [],
                     "output_throughput": output_throughput,
+                    "request_throughput": 1.0,
+                    "mean_ttft_ms": 100.0 + repeat_index + workload_index,
+                    "mean_itl_ms": 5.0 + repeat_index,
                 }
                 _write_json(submission / "raw_benchmark_result.json", raw)
                 _write_json(
@@ -87,24 +91,19 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                         "resolved_client_parameters": {
                             "request_rate": rate,
                             "temperature": 0,
+                            "num_prompts": 10,
                         },
-                        "resolved_server_parameters": {"tensor_parallel_size": tp},
+                        "resolved_server_parameters": {
+                            "tensor_parallel_size": tp,
+                            "compilation_config": EXPECTED_GRAPH_CONFIG,
+                        },
                     },
                 )
                 _write_json(
                     submission / "env-manifest.json",
                     {
                         "frozen_inputs_required": True,
-                        "frozen_inputs": {
-                            "image_id": "sha256:" + "1" * 64,
-                            "model_revision": "2" * 64,
-                            "cann": {"declared": "9.1.0", "detected": "9.1.0"},
-                            "torch_npu_version": {
-                                "declared": "2.10.0.post4",
-                                "detected": "2.10.0.post4",
-                            },
-                            "topology": "single-node-4x-910B2",
-                        },
+                        "frozen_inputs": EXPECTED_RUNTIME_PROVENANCE,
                         "campaign": {
                             "campaign_id": "issue-136-current-main/v1",
                             "coverage_class": "full-matrix",
@@ -145,9 +144,13 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                         "metrics": {
                             "throughput_tps": output_throughput,
                             "ttft_ms": 100.0 + repeat_index + workload_index,
+                            "tbt_ms": 5.0 + repeat_index,
                             "error_rate": 0.0,
                         },
-                        "metadata": {},
+                        "metadata": {
+                            "target_contract_id": spec_id,
+                            "git_commit": COMMITS["core"],
+                        },
                     },
                 )
                 (submission / "server.stdout.log").write_text(
@@ -166,6 +169,12 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                         "submission": submission_name,
                         "raw_sha256": _sha(submission / "raw_benchmark_result.json"),
                         "repeat_index": repeat_index,
+                        "metrics": {
+                            "request_throughput": 1.0,
+                            "output_throughput": output_throughput,
+                            "mean_ttft_ms": 100.0 + repeat_index + workload_index,
+                            "mean_itl_ms": 5.0 + repeat_index,
+                        },
                     }
                 )
             analysis_cells.append(
@@ -174,6 +183,8 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                     "tensor_parallel_size": tp,
                     "request_rate": rate,
                     "spec_id": spec_id,
+                    "spec_sha256": "a" * 64,
+                    "expected_prompts": 10,
                     "repeats": repeats,
                 }
             )
@@ -228,6 +239,20 @@ def _refresh_archive_manifest(root: Path) -> None:
     (root / "SHA256SUMS").unlink()
     _write_manifest(
         root, "SHA256SUMS", [path for path in root.rglob("*") if path.is_file()]
+    )
+
+
+def _refresh_submission_manifest(submission: Path) -> None:
+    _write_manifest(
+        submission,
+        "checksums.sha256",
+        [
+            submission / "env-manifest.json",
+            submission / "raw_benchmark_result.json",
+            submission / "resolved_same_spec.json",
+            submission / "run_leaderboard.json",
+            submission / "server.stdout.log",
+        ],
     )
 
 
@@ -327,5 +352,70 @@ def test_rejects_cross_profile_source_drift(tmp_path: Path) -> None:
         ]
         _write_manifest(submission, "checksums.sha256", covered)
     _refresh_archive_manifest(scaled)
-    with pytest.raises(PublicationError, match="different source commits"):
+    with pytest.raises(PublicationError, match="source commit provenance mismatch"):
         build_publication_bundle(fixed, scaled, tmp_path / "bundle")
+
+
+def test_rejects_raw_leaderboard_metric_drift(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    leaderboard = next(archive.glob("cells/*/submissions/*/run_leaderboard.json"))
+    payload = json.loads(leaderboard.read_text())
+    payload["metrics"]["throughput_tps"] += 1
+    _write_json(leaderboard, payload)
+    _refresh_submission_manifest(leaderboard.parent)
+    _refresh_archive_manifest(archive)
+    with pytest.raises(PublicationError, match="raw/leaderboard metric mismatch"):
+        validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_rejects_analysis_raw_metric_drift(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    analysis_path = archive / "analysis-summary.json"
+    analysis = json.loads(analysis_path.read_text())
+    analysis["cells"][0]["repeats"][0]["metrics"]["output_throughput"] += 1
+    _write_json(analysis_path, analysis)
+    _refresh_archive_manifest(archive)
+    with pytest.raises(PublicationError, match="analysis/raw metric mismatch"):
+        validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_rejects_runtime_provenance_drift(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    environment = next(archive.glob("cells/*/submissions/*/env-manifest.json"))
+    payload = json.loads(environment.read_text())
+    payload["frozen_inputs"]["model_revision"] = "f" * 64
+    _write_json(environment, payload)
+    _refresh_submission_manifest(environment.parent)
+    _refresh_archive_manifest(archive)
+    with pytest.raises(PublicationError, match="runtime provenance mismatch"):
+        validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_rejects_resolved_drift_across_repeats(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    resolved_paths = sorted(
+        archive.glob("cells/*/submissions/*/resolved_same_spec.json")
+    )
+    resolved = resolved_paths[0]
+    payload = json.loads(resolved.read_text())
+    payload["resolved_client_parameters"]["dataset_path"] = "/unexpected.json"
+    _write_json(resolved, payload)
+    _refresh_submission_manifest(resolved.parent)
+    _refresh_archive_manifest(archive)
+    with pytest.raises(PublicationError, match="resolved settings differ"):
+        validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_rejects_non_one_rps_fixed_contract(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    plan_path = archive / "matrix-plan.json"
+    analysis_path = archive / "analysis-summary.json"
+    plan = json.loads(plan_path.read_text())
+    analysis = json.loads(analysis_path.read_text())
+    plan["cells"][0]["rate"] = 2
+    analysis["cells"][0]["request_rate"] = 2
+    _write_json(plan_path, plan)
+    _write_json(analysis_path, analysis)
+    _refresh_archive_manifest(archive)
+    with pytest.raises(PublicationError, match="invalid frozen cell contract"):
+        validate_archive(archive, expected_load_profile="fixed-1-rps")

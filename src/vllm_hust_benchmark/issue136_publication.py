@@ -39,6 +39,46 @@ WORKLOADS = (
 TENSOR_PARALLEL_SIZES = (1, 2, 4)
 LOAD_PROFILES = ("fixed-1-rps", "scaled-load")
 REPEATS = (0, 1, 2)
+EXPECTED_SOURCE_COMMITS = {
+    "benchmark": "cc6e98b659a2a4f7c389108e7f13f5c4c4f8923f",  # pragma: allowlist secret
+    "core": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7",  # pragma: allowlist secret
+    "plugin": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",  # pragma: allowlist secret
+}
+EXPECTED_RUNTIME_PROVENANCE = {
+    "image_id": (
+        "sha256:cd3c36c1832d8b9dfd193405d52a73b22ca2699fbe95271015bc7932bef3e2ee"  # pragma: allowlist secret
+    ),
+    "model_revision": (
+        "4cebf06566bc02922cce8ec2e44368204024e56a6813c5139192b01b7ee956d3"  # pragma: allowlist secret
+    ),
+    "cann": {
+        "declared": "9.1.0",
+        "detected": "9.1.0",
+        "source": "/usr/local/Ascend/cann-9.1.0/opp/version.info",
+    },
+    "torch_npu_version": {
+        "declared": "2.10.0.post4",
+        "detected": "2.10.0.post4",
+    },
+    "topology": "single-node-4x-Ascend-910B2-full-HCCS-visible-physical-0,1,2,7",
+}
+EXPECTED_GRAPH_CONFIG = {
+    "cudagraph_mode": "FULL_AND_PIECEWISE",
+    "cudagraph_capture_sizes": [1, 2, 4, 8, 16, 32, 64, 128, 256],
+}
+ANALYSIS_METRICS = (
+    "duration",
+    "request_throughput",
+    "input_throughput",
+    "output_throughput",
+    "total_token_throughput",
+    "mean_ttft_ms",
+    "p99_ttft_ms",
+    "mean_tpot_ms",
+    "p99_tpot_ms",
+    "mean_itl_ms",
+    "p99_itl_ms",
+)
 REQUIRED_SUBMISSION_FILES = (
     "STATUS",
     "checksums.sha256",
@@ -152,6 +192,15 @@ def _numeric(value: Any, label: str) -> float:
     return result
 
 
+def _same_number(left: Any, right: Any) -> bool:
+    try:
+        left_number = _numeric(left, "left metric")
+        right_number = _numeric(right, "right metric")
+    except PublicationError:
+        return False
+    return math.isclose(left_number, right_number, rel_tol=0.0, abs_tol=1e-9)
+
+
 def _find_submission(root: Path, declared: str) -> Path:
     relative = Path(declared)
     if relative.is_absolute() or ".." in relative.parts:
@@ -170,7 +219,7 @@ def _validate_submission(
     repeat: Mapping[str, Any],
     load_profile: str,
     source_commits: Mapping[str, str],
-) -> tuple[dict[str, Any], float, int, dict[str, Any]]:
+) -> tuple[dict[str, Any], float, int, dict[str, Any], str]:
     if (submission / "STATUS").read_text(encoding="utf-8").strip() != "OK":
         raise PublicationError(f"submission is not OK: {submission}")
     checksums = _parse_checksums(submission, Path("checksums.sha256"))
@@ -229,8 +278,8 @@ def _validate_submission(
             "topology",
         )
     }
-    if any(value in (None, "", {}) for value in runtime_provenance.values()):
-        raise PublicationError(f"frozen runtime provenance incomplete: {submission}")
+    if runtime_provenance != EXPECTED_RUNTIME_PROVENANCE:
+        raise PublicationError(f"frozen runtime provenance mismatch: {submission}")
 
     workload, tp = _cell_key(cell)
     resolved_client = resolved.get("resolved_client_parameters")
@@ -242,13 +291,15 @@ def _validate_submission(
         or resolved_client.get("request_rate") != cell.get("request_rate")
         or resolved_server.get("tensor_parallel_size") != tp
         or resolved_client.get("temperature") != 0
+        or resolved_client.get("num_prompts") != cell.get("expected_prompts")
+        or resolved_server.get("compilation_config") != EXPECTED_GRAPH_CONFIG
     ):
         raise PublicationError(f"resolved setting mismatch: {submission}")
     errors = raw.get("errors")
     if (
         raw.get("failed") != 0
-        or not isinstance(raw.get("completed"), int)
-        or raw["completed"] <= 0
+        or raw.get("completed") != cell.get("expected_prompts")
+        or raw.get("num_prompts") != cell.get("expected_prompts")
         or not isinstance(errors, list)
         or any(error not in (None, "") for error in errors)
     ):
@@ -273,11 +324,42 @@ def _validate_submission(
     )
     if repeat.get("raw_sha256") != sha256(submission / "raw_benchmark_result.json"):
         raise PublicationError(f"analysis raw digest mismatch: {submission}")
+    expected_repeat_metrics = {
+        metric: float(raw[metric])
+        for metric in ANALYSIS_METRICS
+        if isinstance(raw.get(metric), (int, float))
+        and not isinstance(raw.get(metric), bool)
+        and math.isfinite(float(raw[metric]))
+    }
+    if repeat.get("metrics") != expected_repeat_metrics:
+        raise PublicationError(f"analysis/raw metric mismatch: {submission}")
+    expected_entry_metrics = {
+        "throughput_tps": raw.get("output_throughput"),
+        "ttft_ms": raw.get("mean_ttft_ms"),
+        "tbt_ms": raw.get("mean_itl_ms"),
+        "error_rate": 0.0,
+    }
+    if any(
+        not _same_number(metrics.get(name), value)
+        for name, value in expected_entry_metrics.items()
+    ):
+        raise PublicationError(f"raw/leaderboard metric mismatch: {submission}")
+    metadata = entry.get("metadata")
+    if (
+        not isinstance(metadata, dict)
+        or metadata.get("target_contract_id") != cell.get("spec_id")
+        or metadata.get("git_commit") != source_commits.get("core")
+    ):
+        raise PublicationError(f"leaderboard provenance mismatch: {submission}")
+    resolved_identity = hashlib.sha256(
+        json.dumps(resolved, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
     return (
         copy.deepcopy(entry),
         output_throughput,
         int(repeat_index),
         runtime_provenance,
+        resolved_identity,
     )
 
 
@@ -308,7 +390,7 @@ def _canonical_entry(
     *,
     load_profile: str,
     cell: Mapping[str, Any],
-    repeats: Sequence[tuple[dict[str, Any], float, int, dict[str, Any]]],
+    repeats: Sequence[tuple[dict[str, Any], float, int, dict[str, Any], str]],
     archive_sha256: str,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     ordered = sorted(repeats, key=lambda item: item[2])
@@ -330,7 +412,7 @@ def _canonical_entry(
         key=lambda item: item[2],
     )
     entries = []
-    for entry, _throughput, repeat_index, _provenance in ordered:
+    for entry, _throughput, repeat_index, _provenance, _resolved in ordered:
         candidate = copy.deepcopy(entry)
         candidate["repeat_index"] = repeat_index
         entries.append(candidate)
@@ -407,11 +489,16 @@ def validate_archive(path: Path, *, expected_load_profile: str) -> ValidatedArch
         raise PublicationError("fixed 1 RPS archive does not forbid scaling claims")
 
     source_commits = analysis.get("source_commits")
-    if not isinstance(source_commits, dict) or source_commits != {
-        "core": plan.get("core_commit"),
-        "plugin": plan.get("plugin_commit"),
-        "benchmark": plan.get("benchmark_commit"),
-    }:
+    if (
+        not isinstance(source_commits, dict)
+        or source_commits
+        != {
+            "core": plan.get("core_commit"),
+            "plugin": plan.get("plugin_commit"),
+            "benchmark": plan.get("benchmark_commit"),
+        }
+        or source_commits != EXPECTED_SOURCE_COMMITS
+    ):
         raise PublicationError("matrix source commit provenance mismatch")
     plan_cells = plan.get("cells")
     analysis_cells = analysis.get("cells")
@@ -454,6 +541,22 @@ def validate_archive(path: Path, *, expected_load_profile: str) -> ValidatedArch
             "request_rate"
         ) != planned.get("rate"):
             raise PublicationError(f"plan/analysis mismatch for {key}")
+        spec_sha = analyzed.get("spec_sha256")
+        expected_prompts = analyzed.get("expected_prompts")
+        if (
+            planned.get("spec_sha256") != spec_sha
+            or not isinstance(spec_sha, str)
+            or len(spec_sha) != 64
+            or any(character not in "0123456789abcdef" for character in spec_sha)
+            or not isinstance(expected_prompts, int)
+            or isinstance(expected_prompts, bool)
+            or expected_prompts <= 0
+            or (
+                expected_load_profile == "fixed-1-rps"
+                and analyzed.get("request_rate") != 1
+            )
+        ):
+            raise PublicationError(f"invalid frozen cell contract for {key}")
         repeats = analyzed.get("repeats")
         if not isinstance(repeats, list) or len(repeats) != 3:
             raise PublicationError(f"expected exactly three repeats for {key}")
@@ -495,7 +598,15 @@ def validate_archive(path: Path, *, expected_load_profile: str) -> ValidatedArch
             )
         if {item[2] for item in validated_repeats} != set(REPEATS):
             raise PublicationError(f"repeat indices must be exactly 0,1,2 for {key}")
-        for _entry, _throughput, _repeat_index, provenance in validated_repeats:
+        if len({item[4] for item in validated_repeats}) != 1:
+            raise PublicationError(f"resolved settings differ across repeats for {key}")
+        for (
+            _entry,
+            _throughput,
+            _repeat_index,
+            provenance,
+            _resolved,
+        ) in validated_repeats:
             if runtime_provenance is None:
                 runtime_provenance = provenance
             elif provenance != runtime_provenance:
