@@ -181,7 +181,7 @@ def test_registered_specialty_entry_records_canonical_target_contract(
 
     metadata = json.loads(artifact_path.read_text(encoding="utf-8"))["metadata"]
     assert metadata["target_contract_id"] == spec_path.stem
-    assert metadata["target_contract_version"] == "1.3.8"
+    assert metadata["target_contract_version"] == "1.3.9"
     assert "target_id" not in metadata
     assert "target_version" not in metadata
     assert "workload_config_contract" not in metadata
