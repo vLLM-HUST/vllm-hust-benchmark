@@ -81,7 +81,12 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                     "output_throughput": output_throughput,
                     "request_throughput": 1.0,
                     "mean_ttft_ms": 100.0 + repeat_index + workload_index,
-                    "mean_itl_ms": 5.0 + repeat_index,
+                    "mean_tpot_ms": 5.0 + repeat_index,
+                    "mean_itl_ms": 6.0 + repeat_index,
+                    "p95_ttft_ms": None,
+                    "p99_ttft_ms": 120.0 + repeat_index,
+                    "p95_tpot_ms": None,
+                    "p99_tpot_ms": 8.0 + repeat_index,
                 }
                 _write_json(submission / "raw_benchmark_result.json", raw)
                 _write_json(
@@ -95,6 +100,7 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                         },
                         "resolved_server_parameters": {
                             "tensor_parallel_size": tp,
+                            "max_model_len": 32768,
                             "compilation_config": EXPECTED_GRAPH_CONFIG,
                         },
                     },
@@ -129,15 +135,18 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                     submission / "run_leaderboard.json",
                     {
                         "entry_id": submission_name,
-                        "engine": "vllm",
+                        "engine": "vllm-hust",
                         "engine_version": "0.23.0",
                         "config_type": "single_gpu" if tp == 1 else "multi_gpu",
                         "hardware": {
+                            "vendor": "Huawei",
                             "chip_model": "910B2",
                             "chip_count": tp,
                         },
                         "model": {
                             "canonical_id": "hf:Qwen/Qwen2.5-14B-Instruct",
+                            "repo_id": "Qwen/Qwen2.5-14B-Instruct",
+                            "parameters": "14B",
                             "precision": "FP16",
                         },
                         "workload": {"name": workload},
@@ -146,6 +155,20 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                             "ttft_ms": 100.0 + repeat_index + workload_index,
                             "tbt_ms": 5.0 + repeat_index,
                             "error_rate": 0.0,
+                        },
+                        "constraints": {
+                            "metrics": {
+                                "long_context_length": 32768,
+                                "long_context_throughput_stable": True,
+                                "long_context_ttft_p95_ms": None,
+                                "long_context_ttft_p99_ms": 120.0 + repeat_index,
+                                "long_context_tpot_p95_ms": None,
+                                "long_context_tpot_p99_ms": 8.0 + repeat_index,
+                                "long_context_ttft_p95_stable": None,
+                                "long_context_ttft_p99_stable": True,
+                                "long_context_tpot_p95_stable": None,
+                                "long_context_tpot_p99_stable": True,
+                            }
                         },
                         "metadata": {
                             "target_contract_id": spec_id,
@@ -173,7 +196,10 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                             "request_throughput": 1.0,
                             "output_throughput": output_throughput,
                             "mean_ttft_ms": 100.0 + repeat_index + workload_index,
-                            "mean_itl_ms": 5.0 + repeat_index,
+                            "mean_tpot_ms": 5.0 + repeat_index,
+                            "mean_itl_ms": 6.0 + repeat_index,
+                            "p99_ttft_ms": 120.0 + repeat_index,
+                            "p99_tpot_ms": 8.0 + repeat_index,
                         },
                     }
                 )
@@ -284,6 +310,8 @@ def test_builds_promotion_bundle_only_from_two_complete_profiles(
         == 20.0
         for entry in single + multi
     )
+    # Public tbt_ms is TPOT by contract, not raw inter-token latency (ITL).
+    assert all(entry["metrics"]["tbt_ms"] == 6.0 for entry in single + multi)
     signatures = {
         entry["metadata"]["issue_136_publication"]["setting_signature"]
         for entry in single + multi
@@ -309,6 +337,27 @@ def test_rejects_submission_checksum_tamper(tmp_path: Path) -> None:
     _refresh_archive_manifest(archive)
     with pytest.raises(PublicationError, match="checksum mismatch"):
         validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_accepts_successful_upstream_raw_without_errors_key(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    analysis_path = archive / "analysis-summary.json"
+    analysis = json.loads(analysis_path.read_text())
+    repeats_by_submission = {
+        repeat["submission"]: repeat
+        for cell in analysis["cells"]
+        for repeat in cell["repeats"]
+    }
+    for raw_path in archive.glob("cells/*/submissions/*/raw_benchmark_result.json"):
+        raw = json.loads(raw_path.read_text())
+        raw.pop("errors")
+        _write_json(raw_path, raw)
+        repeats_by_submission[raw_path.parent.name]["raw_sha256"] = _sha(raw_path)
+        _refresh_submission_manifest(raw_path.parent)
+    _write_json(analysis_path, analysis)
+    _refresh_archive_manifest(archive)
+    result = validate_archive(archive, expected_load_profile="fixed-1-rps")
+    assert len(result.entries) == 12
 
 
 def test_rejects_fixed_archive_without_no_scaling_claim_boundary(
@@ -365,6 +414,44 @@ def test_rejects_raw_leaderboard_metric_drift(tmp_path: Path) -> None:
     _refresh_submission_manifest(leaderboard.parent)
     _refresh_archive_manifest(archive)
     with pytest.raises(PublicationError, match="raw/leaderboard metric mismatch"):
+        validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_rejects_itl_mislabeled_as_public_tbt(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    leaderboard = next(archive.glob("cells/*/submissions/*/run_leaderboard.json"))
+    raw = json.loads((leaderboard.parent / "raw_benchmark_result.json").read_text())
+    payload = json.loads(leaderboard.read_text())
+    assert raw["mean_itl_ms"] != raw["mean_tpot_ms"]
+    payload["metrics"]["tbt_ms"] = raw["mean_itl_ms"]
+    _write_json(leaderboard, payload)
+    _refresh_submission_manifest(leaderboard.parent)
+    _refresh_archive_manifest(archive)
+    with pytest.raises(PublicationError, match="raw/leaderboard metric mismatch"):
+        validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_rejects_raw_leaderboard_constraint_drift(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    leaderboard = next(archive.glob("cells/*/submissions/*/run_leaderboard.json"))
+    payload = json.loads(leaderboard.read_text())
+    payload["constraints"]["metrics"]["long_context_tpot_p99_ms"] += 1
+    _write_json(leaderboard, payload)
+    _refresh_submission_manifest(leaderboard.parent)
+    _refresh_archive_manifest(archive)
+    with pytest.raises(PublicationError, match="constraint mismatch"):
+        validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_rejects_public_model_identity_drift(tmp_path: Path) -> None:
+    archive = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    leaderboard = next(archive.glob("cells/*/submissions/*/run_leaderboard.json"))
+    payload = json.loads(leaderboard.read_text())
+    payload["model"]["repo_id"] = "Qwen/not-the-measured-model"
+    _write_json(leaderboard, payload)
+    _refresh_submission_manifest(leaderboard.parent)
+    _refresh_archive_manifest(archive)
+    with pytest.raises(PublicationError, match="leaderboard setting mismatch"):
         validate_archive(archive, expected_load_profile="fixed-1-rps")
 
 

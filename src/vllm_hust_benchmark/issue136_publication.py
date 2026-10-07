@@ -201,6 +201,62 @@ def _same_number(left: Any, right: Any) -> bool:
     return math.isclose(left_number, right_number, rel_tol=0.0, abs_tol=1e-9)
 
 
+def _same_optional_number(left: Any, right: Any) -> bool:
+    if left is None or right is None:
+        return left is None and right is None
+    return _same_number(left, right)
+
+
+def _validate_derived_constraints(
+    entry: Mapping[str, Any],
+    raw: Mapping[str, Any],
+    resolved_server: Mapping[str, Any],
+    submission: Path,
+) -> None:
+    constraints = entry.get("constraints")
+    constraint_metrics = (
+        constraints.get("metrics") if isinstance(constraints, Mapping) else None
+    )
+    if not isinstance(constraint_metrics, Mapping):
+        raise PublicationError(f"leaderboard constraints missing: {submission}")
+    stable = (
+        isinstance(raw.get("completed"), int)
+        and raw["completed"] > 0
+        and raw.get("failed") == 0
+        and _numeric(raw.get("output_throughput"), "output throughput") > 0
+    )
+    expected = {
+        "long_context_length": resolved_server.get("max_model_len"),
+        "long_context_throughput_stable": stable,
+        "long_context_ttft_p95_ms": raw.get("p95_ttft_ms"),
+        "long_context_ttft_p99_ms": raw.get("p99_ttft_ms"),
+        "long_context_tpot_p95_ms": raw.get("p95_tpot_ms"),
+        "long_context_tpot_p99_ms": raw.get("p99_tpot_ms"),
+        "long_context_ttft_p95_stable": (
+            stable if raw.get("p95_ttft_ms") is not None else None
+        ),
+        "long_context_ttft_p99_stable": (
+            stable if raw.get("p99_ttft_ms") is not None else None
+        ),
+        "long_context_tpot_p95_stable": (
+            stable if raw.get("p95_tpot_ms") is not None else None
+        ),
+        "long_context_tpot_p99_stable": (
+            stable if raw.get("p99_tpot_ms") is not None else None
+        ),
+    }
+    for name, expected_value in expected.items():
+        actual = constraint_metrics.get(name)
+        if isinstance(expected_value, bool) or expected_value is None:
+            matches = actual is expected_value
+        else:
+            matches = _same_optional_number(actual, expected_value)
+        if not matches:
+            raise PublicationError(
+                f"raw/leaderboard constraint mismatch ({name}): {submission}"
+            )
+
+
 def _find_submission(root: Path, declared: str) -> Path:
     relative = Path(declared)
     if relative.is_absolute() or ".." in relative.parts:
@@ -300,8 +356,13 @@ def _validate_submission(
         raw.get("failed") != 0
         or raw.get("completed") != cell.get("expected_prompts")
         or raw.get("num_prompts") != cell.get("expected_prompts")
-        or not isinstance(errors, list)
-        or any(error not in (None, "") for error in errors)
+        or (
+            errors is not None
+            and (
+                not isinstance(errors, list)
+                or any(error not in (None, "") for error in errors)
+            )
+        )
     ):
         raise PublicationError(f"failed or incomplete raw result: {submission}")
 
@@ -314,8 +375,15 @@ def _validate_submission(
         or entry_workload.get("name") != workload
         or not isinstance(hardware, dict)
         or hardware.get("chip_count") != tp
+        or hardware.get("vendor") != "Huawei"
+        or hardware.get("chip_model") != "910B2"
         or not isinstance(model, dict)
-        or not model.get("canonical_id")
+        or model.get("canonical_id") != "hf:Qwen/Qwen2.5-14B-Instruct"
+        or model.get("repo_id") != "Qwen/Qwen2.5-14B-Instruct"
+        or model.get("parameters") != "14B"
+        or model.get("precision") != "FP16"
+        or entry.get("engine") != "vllm-hust"
+        or entry.get("engine_version") != "0.23.0"
         or not isinstance(metrics, dict)
     ):
         raise PublicationError(f"leaderboard setting mismatch: {submission}")
@@ -336,7 +404,7 @@ def _validate_submission(
     expected_entry_metrics = {
         "throughput_tps": raw.get("output_throughput"),
         "ttft_ms": raw.get("mean_ttft_ms"),
-        "tbt_ms": raw.get("mean_itl_ms"),
+        "tbt_ms": raw.get("mean_tpot_ms"),
         "error_rate": 0.0,
     }
     if any(
@@ -344,6 +412,7 @@ def _validate_submission(
         for name, value in expected_entry_metrics.items()
     ):
         raise PublicationError(f"raw/leaderboard metric mismatch: {submission}")
+    _validate_derived_constraints(entry, raw, resolved_server, submission)
     metadata = entry.get("metadata")
     if (
         not isinstance(metadata, dict)
