@@ -159,6 +159,114 @@ def _manifest(
     return manifest_path
 
 
+def _full_repeat(
+    root: Path,
+    index: int,
+    value: float,
+    *,
+    commits: tuple[str, str],
+    runtime_suffix: str = "",
+    input_suffix: str = "",
+) -> Path:
+    repeat = _repeat(root, index, value)
+    submission = repeat / "submission"
+    run_path = submission / "run_leaderboard.json"
+    run = json.loads(run_path.read_text())
+    run["metadata"]["runtime_provenance"]["engine"]["commit"] = commits[0]
+    run["metadata"]["runtime_provenance"]["plugin"]["commit"] = commits[1]
+    _write_json(run_path, run)
+    for name, payload in {
+        "env-manifest.json": {"schema_version": "test-env/v1"},
+        "leaderboard_manifest.json": {"schema_version": "test-leaderboard/v1"},
+        "pip-packages.json": [],
+    }.items():
+        _write_json(submission / name, payload)
+    submission_files = [
+        "env-manifest.json",
+        "leaderboard_manifest.json",
+        "pip-packages.json",
+        "run_leaderboard.json",
+    ]
+    (submission / "checksums.sha256").write_text(
+        "".join(
+            f"{hashlib.sha256((submission / name).read_bytes()).hexdigest()}  ./{name}\n"
+            for name in submission_files
+        ),
+        encoding="utf-8",
+    )
+    _write_json(repeat / "raw_benchmark_result.json", {"measured": value})
+    _write_json(repeat / "resolved_same_spec.json", run["same_spec"])
+    (repeat / "runner.log").write_text("complete\n", encoding="utf-8")
+    (repeat / "server.stdout.log").write_text("ready\n", encoding="utf-8")
+    _write_json(
+        repeat / "runtime-contract.json",
+        {
+            "image_digest": "sha256:" + "1" * 64,
+            "cann": "9.1",
+            "torch_npu": "2.10.0.post4",
+            "suffix": runtime_suffix,
+        },
+    )
+    _write_json(
+        repeat / "input-identity.json",
+        {"prompt_set_sha256": "2" * 64, "suffix": input_suffix},
+    )
+    evidence_files = [
+        "raw_benchmark_result.json",
+        "resolved_same_spec.json",
+        "runner.log",
+        "server.stdout.log",
+        "runtime-contract.json",
+        "input-identity.json",
+        "submission/STATUS",
+        "submission/checksums.sha256",
+        *[f"submission/{name}" for name in submission_files],
+    ]
+    (repeat / "EVIDENCE_SHA256SUMS").write_text(
+        "".join(
+            f"{hashlib.sha256((repeat / name).read_bytes()).hexdigest()}  ./{name}\n"
+            for name in evidence_files
+        ),
+        encoding="utf-8",
+    )
+    return repeat
+
+
+def _raw_manifest(
+    tmp_path: Path,
+    reference_repeats: list[Path],
+    candidate_repeats: list[Path],
+) -> Path:
+    config = {
+        "primary_metric": "ttft_ms",
+        "unit": "ms",
+        "direction": "lower_is_better",
+        "execution_mode": "online",
+    }
+    manifest = {
+        "schema_version": "issue214-ppt-safe-manifest/v2",
+        "reference": {
+            "label": "current-main",
+            "commits": {"core": "a" * 40, "plugin": "b" * 40},
+            "workloads": {
+                "agent-research-online": config
+                | {"repeat_dirs": [str(path) for path in reference_repeats]}
+            },
+        },
+        "candidate": {
+            "label": "v0.18.0",
+            "commits": {"core": "c" * 40, "plugin": "d" * 40},
+            "workloads": {
+                "agent-research-online": config
+                | {"repeat_dirs": [str(path) for path in candidate_repeats]}
+            },
+        },
+    }
+    path = tmp_path / "raw-manifest.json"
+    _write_json(path, manifest)
+    return path
+
+
 def test_linear_quartiles(summary_module):
     assert summary_module.compute_stats([1.0, 2.0, 3.0]) == {
         "n": 3,
@@ -186,9 +294,10 @@ def test_generates_three_formats_and_marks_summary_only_reference_grade_b(
     assert "raw_values" not in row["reference"]
     assert row["reference"]["evidence_grade"] == "B"
     assert row["candidate"]["raw_values"] == [1.0, 2.0, 100.0]
-    assert row["candidate"]["evidence_grade"] == "A"
+    assert row["candidate"]["evidence_grade"] == "B"
     assert row["delta_percent"] is None
     assert "reference raw evidence is not verified" in row["comparison_blockers"]
+    assert "candidate full raw archive is not verified" in row["comparison_blockers"]
     assert row["variability"]["candidate"] == "high"
     assert row["stability_notice"] is not None
     assert {path.name for path in output_dir.iterdir()} == {
@@ -198,7 +307,7 @@ def test_generates_three_formats_and_marks_summary_only_reference_grade_b(
     }
     markdown = (output_dir / "issue214_ppt_safe_summary.md").read_text()
     assert "Reference summary values" in markdown
-    assert "Candidate raw values" in markdown
+    assert "Candidate exported values" in markdown
     assert not any(
         word in markdown.casefold() for word in summary_module.FORBIDDEN_NAMES
     )
@@ -388,3 +497,113 @@ def test_forbidden_label_is_rejected(tmp_path, summary_module, forbidden):
 
     with pytest.raises(ValueError, match="forbidden naming"):
         summary_module.generate(manifest_path, tmp_path / "out")
+
+
+def test_raw_pair_computes_delta_only_from_symmetric_full_archives(
+    tmp_path, summary_module
+):
+    reference = [
+        _full_repeat(tmp_path / "reference", i, value, commits=("a" * 40, "b" * 40))
+        for i, value in enumerate([10, 20, 30], 1)
+    ]
+    candidate = [
+        _full_repeat(tmp_path / "candidate", i, value, commits=("c" * 40, "d" * 40))
+        for i, value in enumerate([20, 30, 40], 1)
+    ]
+
+    row = summary_module.generate(
+        _raw_manifest(tmp_path, reference, candidate), tmp_path / "out"
+    )["workloads"][0]
+
+    assert row["status"] == "ready"
+    assert row["reference"]["evidence_grade"] == "A"
+    assert row["candidate"]["evidence_grade"] == "A"
+    assert row["input_identity_status"] == "verified"
+    assert row["delta_percent"] == 50.0
+
+
+@pytest.mark.parametrize("mismatch", ["runtime", "input"])
+def test_raw_pair_suppresses_delta_on_cross_side_identity_mismatch(
+    tmp_path, summary_module, mismatch
+):
+    reference = [
+        _full_repeat(tmp_path / "reference", i, value, commits=("a" * 40, "b" * 40))
+        for i, value in enumerate([10, 20, 30], 1)
+    ]
+    kwargs = {f"{mismatch}_suffix": "different"}
+    candidate = [
+        _full_repeat(
+            tmp_path / "candidate",
+            i,
+            value,
+            commits=("c" * 40, "d" * 40),
+            **kwargs,
+        )
+        for i, value in enumerate([20, 30, 40], 1)
+    ]
+
+    row = summary_module.generate(
+        _raw_manifest(tmp_path, reference, candidate), tmp_path / "out"
+    )["workloads"][0]
+
+    assert row["status"] == "ready"
+    assert row["delta_percent"] is None
+    expected = (
+        "runtime contract differs"
+        if mismatch == "runtime"
+        else "input identity differs"
+    )
+    assert expected in " ".join(row["comparison_blockers"])
+
+
+def test_raw_pair_blocks_incomplete_archive(tmp_path, summary_module):
+    reference = [
+        _full_repeat(tmp_path / "reference", i, value, commits=("a" * 40, "b" * 40))
+        for i, value in enumerate([10, 20, 30], 1)
+    ]
+    candidate = [
+        _full_repeat(tmp_path / "candidate", i, value, commits=("c" * 40, "d" * 40))
+        for i, value in enumerate([20, 30, 40], 1)
+    ]
+    (candidate[0] / "raw_benchmark_result.json").unlink()
+
+    row = summary_module.generate(
+        _raw_manifest(tmp_path, reference, candidate), tmp_path / "out"
+    )["workloads"][0]
+
+    assert row["status"] == "blocked"
+    assert row["delta_percent"] is None
+    assert row["candidate"]["evidence_grade"] == "blocked"
+
+
+def test_legacy_metric_overlay_corrects_label_but_remains_fail_closed(
+    tmp_path, summary_module
+):
+    repeats = [
+        _repeat(tmp_path / "runs", i, value, metric="batch_latency_ms")
+        for i, value in enumerate([9, 10, 11], 1)
+    ]
+    manifest_path = _manifest(
+        tmp_path,
+        repeats,
+        reference_metric="ttft_ms",
+        candidate_metric="batch_latency_ms",
+    )
+    manifest = json.loads(manifest_path.read_text())
+    manifest["reference"]["metric_overlays"] = {
+        "agent-research-online": {
+            "source_metric": "ttft_ms",
+            "canonical_metric": "batch_latency_ms",
+            "reason": "legacy offline latency arrays were mislabeled as TTFT",
+        }
+    }
+    _write_json(manifest_path, manifest)
+
+    result = summary_module.generate(manifest_path, tmp_path / "out")
+    row = result["workloads"][0]
+
+    assert row["status"] == "ready"
+    assert row["primary_metric"] == "batch_latency_ms"
+    assert row["delta_percent"] is None
+    assert "reference raw evidence is not verified" in row["comparison_blockers"]
+    assert result["reference"]["metric_overlays"]

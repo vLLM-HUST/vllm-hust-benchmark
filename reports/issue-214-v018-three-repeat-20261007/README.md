@@ -17,12 +17,15 @@ The reference source tuple is:
 The reference report retains only derived arrays and its raw evidence path is
 unavailable. Therefore the generated report must keep reference evidence at
 grade B, suppress all cross-side deltas, and state that input identity was not
-verified across the two sides. Candidate evidence remains independently
-checkable at grade A.
+verified across the two sides. The committed candidate copies contain validated
+submission exports but not the parent raw benchmark result, resolved spec, and
+runner/server logs, so they remain grade B until a full archive is added.
 
-`random-latency` deliberately uses `batch_latency_ms` because that is the
-candidate's valid offline batch metric. The reference array is labeled
-`ttft_ms`, so this row is blocked instead of comparing incompatible metrics.
+`random-latency` deliberately uses `batch_latency_ms` because that is the valid
+offline batch metric. The legacy reference array's `ttft_ms` label described the
+same offline `avg_latency * 1000` values and is normalized by an explicit
+manifest overlay. This fixes the metadata conflict but does not release a delta:
+both sides still require matched full raw archives.
 
 Agent research, prefix repetition, and VisionArena have high candidate IQR.
 Their stability notice must remain visible. The InstructCoder suite is the

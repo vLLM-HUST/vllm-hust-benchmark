@@ -7,6 +7,13 @@
     "commits": {
       "core": "43341b177dbaa8c7f04662f71e885ee7dfe22704",
       "plugin": "0a46364814eedd3314f04eff3490c3ab422438bd"
+    },
+    "metric_overlays": {
+      "random-latency": {
+        "source_metric": "ttft_ms",
+        "canonical_metric": "batch_latency_ms",
+        "reason": "The legacy P2 array records offline avg_latency in milliseconds; ttft_ms was a metadata label, not the measured quantity."
+      }
     }
   },
   "candidate": {
