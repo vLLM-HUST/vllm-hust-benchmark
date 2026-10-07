@@ -11,6 +11,15 @@ SNAPSHOT_FILES = ("leaderboard_single.json", "leaderboard_multi.json")
 HISTORICAL_UNVERIFIED_PREFIX = (
     "valid historical result; strict baseline target admission not completed"
 )
+ISSUE136_BINDING_POLICY_SCHEMA = "issue-136-binding-projection/v1"
+ISSUE136_EPHEMERAL_FIELDS = frozenset(
+    {
+        "server_parameters.host",
+        "server_parameters.port",
+        "client_parameters.host",
+        "client_parameters.port",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -63,16 +72,28 @@ def _mapping(value: Any) -> Mapping[str, Any]:
 
 
 def _require_values(
-    expected: Mapping[str, Any], actual: Any, *, prefix: str
+    expected: Mapping[str, Any],
+    actual: Any,
+    *,
+    prefix: str,
+    ignored_paths: frozenset[str] = frozenset(),
 ) -> list[str]:
     if not isinstance(actual, Mapping):
         return [f"{prefix} must be an object"]
     errors: list[str] = []
     for key, expected_value in expected.items():
+        path = f"{prefix}.{key}"
+        if path in ignored_paths:
+            continue
         actual_value = actual.get(key)
         if isinstance(expected_value, Mapping):
             errors.extend(
-                _require_values(expected_value, actual_value, prefix=f"{prefix}.{key}")
+                _require_values(
+                    expected_value,
+                    actual_value,
+                    prefix=path,
+                    ignored_paths=ignored_paths,
+                )
             )
         elif actual_value != expected_value:
             errors.append(
@@ -82,7 +103,12 @@ def _require_values(
     return errors
 
 
-def _require_client_values(expected: Mapping[str, Any], actual: Any) -> list[str]:
+def _require_client_values(
+    expected: Mapping[str, Any],
+    actual: Any,
+    *,
+    ignored_paths: frozenset[str] = frozenset(),
+) -> list[str]:
     if not isinstance(actual, Mapping):
         return ["same_spec.resolved_client_parameters must be an object"]
     remaining = dict(expected)
@@ -112,9 +138,64 @@ def _require_client_values(expected: Mapping[str, Any], actual: Any) -> list[str
             remaining,
             actual,
             prefix="same_spec.resolved_client_parameters",
+            ignored_paths=ignored_paths,
         )
     )
     return errors
+
+
+def _binding_projection_policy(
+    target: Mapping[str, Any],
+) -> tuple[dict[str, Any] | None, list[str]]:
+    compatibility = _mapping(target.get("compatibility_policy"))
+    raw = compatibility.get("evidence_backed_projection")
+    if raw is None:
+        return None, []
+    if not isinstance(raw, dict):
+        return None, ["evidence-backed binding projection policy must be an object"]
+    aliases = raw.get("engine_aliases")
+    ephemeral = raw.get("ephemeral_transport_fields")
+    digest = raw.get("evidence_bundle_sha256")
+    valid_aliases = (
+        isinstance(aliases, list)
+        and aliases == [{"observed": "vllm-hust", "target": "vllm"}]
+        and all(
+            isinstance(alias, dict)
+            and set(alias) == {"observed", "target"}
+            and all(isinstance(alias[key], str) and alias[key] for key in alias)
+            for alias in aliases
+        )
+    )
+    valid_ephemeral = (
+        isinstance(ephemeral, list)
+        and set(ephemeral) == ISSUE136_EPHEMERAL_FIELDS
+        and len(ephemeral) == len(ISSUE136_EPHEMERAL_FIELDS)
+    )
+    if (
+        raw.get("schema_version") != ISSUE136_BINDING_POLICY_SCHEMA
+        or not isinstance(digest, str)
+        or len(digest) != 64
+        or any(character not in "0123456789abcdef" for character in digest)
+        or not valid_aliases
+        or not valid_ephemeral
+        or raw.get("preserve_observed_values") is not True
+        or target.get("profile") != "dense-scaling"
+        or not str(target.get("target_id") or "").startswith("specialty-ascend-vllm-")
+    ):
+        return None, ["evidence-backed binding projection policy is malformed"]
+    return raw, []
+
+
+def _projection_ignored_paths(policy: Mapping[str, Any] | None) -> frozenset[str]:
+    if policy is None:
+        return frozenset()
+    translated = {
+        "server_parameters.host": "same_spec.resolved_server_parameters.host",
+        "server_parameters.port": "same_spec.resolved_server_parameters.port",
+        "client_parameters.host": "same_spec.resolved_client_parameters.host",
+        "client_parameters.port": "same_spec.resolved_client_parameters.port",
+    }
+    return frozenset(translated[path] for path in policy["ephemeral_transport_fields"])
 
 
 def official_target_binding_errors(
@@ -122,7 +203,35 @@ def official_target_binding_errors(
 ) -> list[str]:
     """Return every strict registry-contract mismatch for a snapshot entry."""
     errors: list[str] = []
+    projection, projection_errors = _binding_projection_policy(target)
+    errors.extend(projection_errors)
+    ignored_paths = _projection_ignored_paths(projection)
     same_spec = _mapping(entry.get("same_spec"))
+    if projection is not None:
+        server_transport = _mapping(same_spec.get("resolved_server_parameters"))
+        client_transport = _mapping(same_spec.get("resolved_client_parameters"))
+        server_host = server_transport.get("host")
+        client_host = client_transport.get("host")
+        server_port = server_transport.get("port")
+        client_port = client_transport.get("port")
+        if not isinstance(server_host, str) or not server_host:
+            errors.append("projected server transport host is missing")
+        if not isinstance(client_host, str) or not client_host:
+            errors.append("projected client transport host is missing")
+        if (
+            isinstance(server_port, bool)
+            or not isinstance(server_port, int)
+            or not 1 <= server_port <= 65535
+        ):
+            errors.append("projected server transport port is invalid")
+        if (
+            isinstance(client_port, bool)
+            or not isinstance(client_port, int)
+            or not 1 <= client_port <= 65535
+        ):
+            errors.append("projected client transport port is invalid")
+        if server_port != client_port:
+            errors.append("projected server/client transport ports do not match")
     target_id = str(target.get("target_id") or "")
     if str(same_spec.get("spec_id") or "") != target_id:
         errors.append("same_spec.spec_id does not equal registry target_id")
@@ -133,7 +242,14 @@ def official_target_binding_errors(
 
     baseline = _mapping(target.get("baseline_runtime"))
     if entry.get("engine") != baseline.get("engine"):
-        errors.append("engine does not match target baseline runtime")
+        aliases = projection.get("engine_aliases", []) if projection else []
+        authorized = any(
+            alias["observed"] == entry.get("engine")
+            and alias["target"] == baseline.get("engine")
+            for alias in aliases
+        )
+        if not authorized:
+            errors.append("engine does not match target baseline runtime")
     if entry.get("engine_version") != baseline.get("engine_version"):
         errors.append("engine_version does not match target baseline runtime")
 
@@ -191,6 +307,7 @@ def official_target_binding_errors(
             _mapping(target.get("server_parameters")),
             same_spec.get("resolved_server_parameters"),
             prefix="same_spec.resolved_server_parameters",
+            ignored_paths=ignored_paths,
         )
     )
     expected_client = _mapping(
@@ -200,6 +317,7 @@ def official_target_binding_errors(
         _require_client_values(
             expected_client,
             same_spec.get("resolved_client_parameters"),
+            ignored_paths=ignored_paths,
         )
     )
     return errors
@@ -257,6 +375,8 @@ def bind_entry_to_official_target(
         return False, errors
 
     assert target is not None
+    projection, projection_errors = _binding_projection_policy(target)
+    assert not projection_errors
     metadata.update(
         {
             "verified": True,
@@ -268,6 +388,29 @@ def bind_entry_to_official_target(
     )
     metadata.pop("official_admission_status", None)
     metadata.pop("official_admission_reason", None)
+    if projection is not None:
+        same_spec = _mapping(entry.get("same_spec"))
+        server = _mapping(same_spec.get("resolved_server_parameters"))
+        client = _mapping(same_spec.get("resolved_client_parameters"))
+        metadata["binding_projection_audit"] = {
+            "schema_version": ISSUE136_BINDING_POLICY_SCHEMA,
+            "evidence_bundle_sha256": projection["evidence_bundle_sha256"],
+            "engine": {
+                "observed": entry.get("engine"),
+                "target": _mapping(target.get("baseline_runtime")).get("engine"),
+                "alias_authorized": entry.get("engine")
+                != _mapping(target.get("baseline_runtime")).get("engine"),
+            },
+            "ephemeral_transport": {
+                "server_parameters.host": server.get("host"),
+                "server_parameters.port": server.get("port"),
+                "client_parameters.host": client.get("host"),
+                "client_parameters.port": client.get("port"),
+            },
+            "observed_values_preserved": True,
+        }
+    else:
+        metadata.pop("binding_projection_audit", None)
     return True, []
 
 

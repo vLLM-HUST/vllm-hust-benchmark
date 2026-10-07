@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -14,6 +15,16 @@ from vllm_hust_benchmark.issue136_publication import (
     WORKLOADS,
     build_publication_bundle,
     validate_archive,
+)
+from vllm_hust_benchmark.issue136_target_promotion import (
+    PromotionError,
+    project_registry_promotion,
+    write_promotion_projection,
+)
+from vllm_hust_benchmark.snapshot_target_binding import (
+    OfficialTargetRegistry,
+    bind_entry_to_official_target,
+    bind_snapshot_set,
 )
 
 
@@ -50,7 +61,8 @@ def _make_archive(root: Path, load_profile: str) -> Path:
         for tp in (1, 2, 4):
             prefix = f"issue136-{load_profile}-{workload}-tp{tp}"
             rate = 1.0 if load_profile == "fixed-1-rps" else float(tp * 2)
-            spec_id = f"issue136-{load_profile}-{workload}-tp{tp}"
+            spec_id = f"specialty-ascend-vllm-issue136-{load_profile}-{workload}-tp{tp}"
+            port = 8400 + workload_index * 10 + tp
             plan_cells.append(
                 {
                     "workload": workload,
@@ -97,10 +109,14 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                             "request_rate": rate,
                             "temperature": 0,
                             "num_prompts": 10,
+                            "host": "127.0.0.1",
+                            "port": port,
                         },
                         "resolved_server_parameters": {
                             "tensor_parallel_size": tp,
                             "max_model_len": 32768,
+                            "host": "127.0.0.1",
+                            "port": port,
                             "compilation_config": EXPECTED_GRAPH_CONFIG,
                         },
                     },
@@ -173,6 +189,33 @@ def _make_archive(root: Path, load_profile: str) -> Path:
                         "metadata": {
                             "target_contract_id": spec_id,
                             "git_commit": COMMITS["core"],
+                        },
+                        "same_spec": {
+                            "schema_version": "benchmark-same-spec/v1",
+                            "spec_id": spec_id,
+                            "scenario": workload,
+                            "model": "Qwen/Qwen2.5-14B-Instruct",
+                            "model_parameters": "14B",
+                            "model_precision": "FP16",
+                            "model_quantization": "",
+                            "hardware_vendor": "Huawei",
+                            "hardware_chip_model": "910B2",
+                            "chip_count": tp,
+                            "node_count": 1,
+                            "resolved_client_parameters": {
+                                "request_rate": rate,
+                                "temperature": 0,
+                                "num_prompts": 10,
+                                "host": "127.0.0.1",
+                                "port": port,
+                            },
+                            "resolved_server_parameters": {
+                                "tensor_parallel_size": tp,
+                                "max_model_len": 32768,
+                                "host": "127.0.0.1",
+                                "port": port,
+                                "compilation_config": EXPECTED_GRAPH_CONFIG,
+                            },
                         },
                     },
                 )
@@ -279,6 +322,75 @@ def _refresh_submission_manifest(submission: Path) -> None:
             submission / "run_leaderboard.json",
             submission / "server.stdout.log",
         ],
+    )
+
+
+def _registry_for_bundle(bundle: Path) -> OfficialTargetRegistry:
+    manifest = json.loads((bundle / "promotion-manifest.json").read_text())
+    cells = {
+        cell["spec_id"]: cell
+        for profile_cells in manifest["profiles"].values()
+        for cell in profile_cells
+    }
+    candidates = []
+    for name in (
+        "leaderboard_single.candidates.json",
+        "leaderboard_multi.candidates.json",
+    ):
+        candidates.extend(json.loads((bundle / name).read_text()))
+    targets = {}
+    for entry in candidates:
+        same_spec = entry["same_spec"]
+        target_id = same_spec["spec_id"]
+        server = copy.deepcopy(same_spec["resolved_server_parameters"])
+        client = copy.deepcopy(same_spec["resolved_client_parameters"])
+        server.update(host="0.0.0.0", port=8000)
+        client.update(host="127.0.0.1", port=8000)
+        targets[target_id] = {
+            "target_id": target_id,
+            "target_version": "test",
+            "status": "provisional",
+            "effective_from": "2026-10-07",
+            "supersedes": [],
+            "profile": "dense-scaling",
+            "intended_use": "specialty",
+            "baseline_runtime": {"engine": "vllm", "engine_version": "0.23.0"},
+            "model": {
+                "id": same_spec["model"],
+                "parameters": same_spec["model_parameters"],
+                "precision": same_spec["model_precision"],
+            },
+            "hardware": {
+                "vendor": same_spec["hardware_vendor"],
+                "chip_model": same_spec["hardware_chip_model"],
+                "chip_count": same_spec["chip_count"],
+                "node_count": same_spec["node_count"],
+            },
+            "server_parameters": server,
+            "workload": {
+                "name": same_spec["scenario"],
+                "client_parameters": client,
+            },
+            "source_spec": {
+                "path": f"docs/official-baselines/{target_id}.json",
+                "sha256": cells[target_id]["spec_sha256"],
+            },
+            "compatibility_policy": {
+                "model": "exact",
+                "hardware": "exact",
+                "server_parameters": "exact",
+                "workload_parameters": "exact",
+                "exceptions": "new-target-version-required",
+            },
+        }
+    return OfficialTargetRegistry(version="test", sha256="b" * 64, targets=targets)
+
+
+def _projected_registry(payload: dict) -> OfficialTargetRegistry:
+    return OfficialTargetRegistry(
+        version=payload["base_registry"]["version"],
+        sha256=payload["base_registry"]["sha256"],
+        targets={target["target_id"]: target for target in payload["targets"]},
     )
 
 
@@ -506,3 +618,157 @@ def test_rejects_non_one_rps_fixed_contract(tmp_path: Path) -> None:
     _refresh_archive_manifest(archive)
     with pytest.raises(PublicationError, match="invalid frozen cell contract"):
         validate_archive(archive, expected_load_profile="fixed-1-rps")
+
+
+def test_evidence_backed_projection_admits_without_mutating_observed_values(
+    tmp_path: Path,
+) -> None:
+    fixed = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    scaled = _make_archive(tmp_path / "scaled", "scaled-load")
+    bundle = build_publication_bundle(fixed, scaled, tmp_path / "bundle")
+    registry = _registry_for_bundle(bundle)
+    candidate = json.loads((bundle / "leaderboard_multi.candidates.json").read_text())[
+        0
+    ]
+    original_same_spec = copy.deepcopy(candidate["same_spec"])
+
+    admitted, errors = bind_entry_to_official_target(copy.deepcopy(candidate), registry)
+    assert admitted is False
+    assert "registry target is not active public-leaderboard" in errors[-1]
+
+    patch, projected_payload = project_registry_promotion(bundle, registry)
+    assert patch["status"] == "review-required"
+    assert len(patch["operations"]) == 24
+    projected = _projected_registry(projected_payload)
+    admitted, errors = bind_entry_to_official_target(candidate, projected)
+    assert admitted is True
+    assert errors == []
+    assert candidate["same_spec"] == original_same_spec
+    audit = candidate["metadata"]["binding_projection_audit"]
+    assert audit["engine"] == {
+        "observed": "vllm-hust",
+        "target": "vllm",
+        "alias_authorized": True,
+    }
+    assert audit["ephemeral_transport"]["server_parameters.port"] != 8000
+    assert audit["observed_values_preserved"] is True
+
+
+def test_projected_registry_binds_all_candidates_only_after_promotion(
+    tmp_path: Path,
+) -> None:
+    fixed = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    scaled = _make_archive(tmp_path / "scaled", "scaled-load")
+    bundle = build_publication_bundle(fixed, scaled, tmp_path / "bundle")
+    registry = _registry_for_bundle(bundle)
+    unpromoted = tmp_path / "unpromoted-snapshots"
+    unpromoted.mkdir()
+    (unpromoted / "leaderboard_single.json").write_bytes(
+        (bundle / "leaderboard_single.candidates.json").read_bytes()
+    )
+    (unpromoted / "leaderboard_multi.json").write_bytes(
+        (bundle / "leaderboard_multi.candidates.json").read_bytes()
+    )
+    unpromoted_report = bind_snapshot_set(unpromoted, registry)
+    assert unpromoted_report["verified"] == 0
+    assert unpromoted_report["historical_unverified"] == 24
+
+    _, projected_payload = project_registry_promotion(bundle, registry)
+    projected = _projected_registry(projected_payload)
+    snapshots = tmp_path / "snapshots"
+    snapshots.mkdir()
+    (snapshots / "leaderboard_single.json").write_bytes(
+        (bundle / "leaderboard_single.candidates.json").read_bytes()
+    )
+    (snapshots / "leaderboard_multi.json").write_bytes(
+        (bundle / "leaderboard_multi.candidates.json").read_bytes()
+    )
+    report = bind_snapshot_set(snapshots, projected)
+    assert report["verified"] == 24
+    assert report["historical_unverified"] == 0
+
+
+def test_projection_writer_emits_review_artifacts_not_snapshots(tmp_path: Path) -> None:
+    fixed = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    scaled = _make_archive(tmp_path / "scaled", "scaled-load")
+    bundle = build_publication_bundle(fixed, scaled, tmp_path / "bundle")
+    output = write_promotion_projection(
+        bundle, _registry_for_bundle(bundle), tmp_path / "projection"
+    )
+    assert {path.name for path in output.iterdir()} == {
+        "SHA256SUMS",
+        "registry-promotion.patch.json",
+        "projected-official-targets.json",
+    }
+    assert not list(output.glob("leaderboard_*.json"))
+
+
+def test_projection_does_not_authorize_non_transport_drift(tmp_path: Path) -> None:
+    fixed = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    scaled = _make_archive(tmp_path / "scaled", "scaled-load")
+    bundle = build_publication_bundle(fixed, scaled, tmp_path / "bundle")
+    registry = _registry_for_bundle(bundle)
+    _, projected_payload = project_registry_promotion(bundle, registry)
+    projected = _projected_registry(projected_payload)
+    candidate = json.loads((bundle / "leaderboard_multi.candidates.json").read_text())[
+        0
+    ]
+    candidate["same_spec"]["resolved_server_parameters"]["max_model_len"] = 1
+    admitted, errors = bind_entry_to_official_target(candidate, projected)
+    assert admitted is False
+    assert any("max_model_len mismatch" in error for error in errors)
+
+
+def test_malformed_projection_policy_does_not_authorize_alias(tmp_path: Path) -> None:
+    fixed = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    scaled = _make_archive(tmp_path / "scaled", "scaled-load")
+    bundle = build_publication_bundle(fixed, scaled, tmp_path / "bundle")
+    registry = _registry_for_bundle(bundle)
+    _, projected_payload = project_registry_promotion(bundle, registry)
+    target = projected_payload["targets"][0]
+    target["compatibility_policy"]["evidence_backed_projection"][
+        "ephemeral_transport_fields"
+    ] = ["server_parameters.port"]
+    projected = _projected_registry(projected_payload)
+    candidate = next(
+        entry
+        for name in (
+            "leaderboard_single.candidates.json",
+            "leaderboard_multi.candidates.json",
+        )
+        for entry in json.loads((bundle / name).read_text())
+        if entry["same_spec"]["spec_id"] == target["target_id"]
+    )
+    admitted, errors = bind_entry_to_official_target(candidate, projected)
+    assert admitted is False
+    assert "evidence-backed binding projection policy is malformed" in errors
+
+
+def test_incomplete_bundle_cannot_generate_registry_promotion(tmp_path: Path) -> None:
+    fixed = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    scaled = _make_archive(tmp_path / "scaled", "scaled-load")
+    bundle = build_publication_bundle(fixed, scaled, tmp_path / "bundle")
+    registry = _registry_for_bundle(bundle)
+    manifest_path = bundle / "promotion-manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["profiles"]["scaled-load"].pop()
+    _write_json(manifest_path, manifest)
+    _refresh_archive_manifest(bundle)
+    with pytest.raises(PromotionError, match="twelve cells"):
+        project_registry_promotion(bundle, registry)
+
+
+def test_projection_rejects_missing_or_source_drifted_registry_target(
+    tmp_path: Path,
+) -> None:
+    fixed = _make_archive(tmp_path / "fixed", "fixed-1-rps")
+    scaled = _make_archive(tmp_path / "scaled", "scaled-load")
+    bundle = build_publication_bundle(fixed, scaled, tmp_path / "bundle")
+    registry = _registry_for_bundle(bundle)
+    removed_id, removed = registry.targets.popitem()
+    with pytest.raises(PromotionError, match="missing promotion targets"):
+        project_registry_promotion(bundle, registry)
+    registry.targets[removed_id] = removed
+    removed["source_spec"]["sha256"] = "f" * 64
+    with pytest.raises(PromotionError, match="not an exact promotable Dense target"):
+        project_registry_promotion(bundle, registry)

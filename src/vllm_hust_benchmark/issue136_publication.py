@@ -512,6 +512,7 @@ def _canonical_entry(
         "tensor_parallel_size": cell["tensor_parallel_size"],
         "request_rate": cell["request_rate"],
         "spec_id": cell["spec_id"],
+        "spec_sha256": cell["spec_sha256"],
         "setting_signature": signature,
         "selected_repeat_index": selected[2],
         "raw_output_throughput_values": throughputs,

@@ -200,6 +200,28 @@ median raw output throughput (lowest repeat index breaks a tie), embeds a median
 bundle is an input to review and snapshot promotion; generating it does not mutate the registry or
 the committed public snapshots.
 
+Before any candidate is admitted, project the evidence-backed target promotion against a prepared
+registry that contains all fixed and scaled target specs:
+
+```bash
+python scripts/project_issue136_target_promotion.py \
+  --bundle <promotion-bundle-directory> \
+  --repo-root <benchmark-repository> \
+  --output-dir <new-registry-projection-directory>
+```
+
+This second command also writes review artifacts only. It requires all 24 candidate targets to be
+present as `provisional` / `specialty` Dense targets and binds each target's source-spec SHA to the
+completed evidence bundle. The patch explicitly authorizes `vllm-hust` as the observed alias for the
+target's `vllm` engine label. Server/client host and port are treated only as ephemeral transport
+coordinates: binding retains and audits their observed values, but excludes them from the target
+identity. No other server, client, model, hardware, workload, metric, or provenance field is
+relaxed.
+
+Without the projected per-target policy, candidates remain historical-unverified. Applying a
+projection requires a separate registry version/history update and normal generated-output review;
+the projection tool does not edit the registry and does not generate final public snapshots.
+
 Fixed 1 RPS is an offered-load latency checkpoint. Its entries explicitly forbid scaling-efficiency
 claims. Only the separately identified scaled-load profile may support those claims. Communication,
 MoE/EPLB, and profiler results remain separate specialty observations and are not accepted by this
