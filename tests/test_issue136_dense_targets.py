@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import math
 import shutil
 from pathlib import Path
 
@@ -46,8 +47,8 @@ def test_materializes_directly_named_fixed_targets(tmp_path: Path) -> None:
         rates={1: 1.0, 2: 1.0, 4: 1.0},
     )
 
-    assert len(paths) == 12
-    assert len({json.loads(path.read_text())["id"] for path in paths}) == 12
+    assert len(paths) == 15
+    assert len({json.loads(path.read_text())["id"] for path in paths}) == 15
     for path in paths:
         payload = json.loads(path.read_text())
         tp = payload["server_parameters"]["tensor_parallel_size"]
@@ -129,10 +130,12 @@ def test_scaled_profile_uses_each_workloads_own_rates(tmp_path: Path) -> None:
         rates=matrix,
     )
 
-    assert len(paths) == 12
+    assert len(paths) == 15
     for path in paths:
         payload = json.loads(path.read_text())
-        workload = payload["scenario"]
+        workload = next(
+            workload for workload in module.WORKLOADS if f"-{workload}-" in path.name
+        )
         tp = payload["server_parameters"]["tensor_parallel_size"]
         expected = matrix[workload][tp]
         assert payload["client_parameters"]["request_rate"] == expected
@@ -147,7 +150,7 @@ def test_loads_versioned_workload_rate_matrix(tmp_path: Path) -> None:
     path.write_text(
         json.dumps(
             {
-                "schema_version": "issue-136-workload-rate-matrix/v1",
+                "schema_version": "issue-136-workload-rate-matrix/v2",
                 "rates": {
                     workload: {"1": 1.0, "2": 2.0, "4": 4.0}
                     for workload in module.WORKLOADS
@@ -159,3 +162,83 @@ def test_loads_versioned_workload_rate_matrix(tmp_path: Path) -> None:
     matrix = module._load_rate_matrix(path)
 
     assert matrix["random-online"] == {1: 1.0, 2: 2.0, 4: 4.0}
+
+
+def test_communication_profile_uses_standard_decode_heavy_random_workload(
+    tmp_path: Path,
+) -> None:
+    module = _load_script()
+    repo = _fixture_repo(tmp_path, module)
+
+    paths = module.materialize(
+        repo,
+        core_commit=CORE_COMMIT,
+        plugin_commit=PLUGIN_COMMIT,
+        load_profile="fixed-1-rps",
+        rates={1: 1.0, 2: 1.0, 4: 1.0},
+    )
+
+    communication_paths = [
+        path for path in paths if "communication-sensitive" in path.name
+    ]
+    assert len(communication_paths) == 3
+    for path in communication_paths:
+        payload = json.loads(path.read_text())
+        tp = payload["server_parameters"]["tensor_parallel_size"]
+        client = payload["client_parameters"]
+        contract = payload["issue_136_contract"]
+        assert payload["scenario"] == "random-online"
+        assert client["dataset_name"] == "random"
+        assert client["input_len"] == 128
+        assert client["output_len"] == 1024
+        assert client["random_range_ratio"] == 0.0
+        assert client["ignore_eos"] is True
+        assert client["temperature"] == 0
+        assert client["seed"] == 0
+        assert contract["workload_class"] == "decode-heavy-tp-collective-proxy/v1"
+        assert contract["tp_role"] == (
+            "no-cross-rank-control" if tp == 1 else "tp-collective"
+        )
+
+
+@pytest.mark.parametrize("invalid_rate", [math.nan, math.inf, -math.inf, 0.0, -1.0])
+def test_rate_matrix_rejects_non_finite_or_non_positive_rates(
+    tmp_path: Path, invalid_rate: float
+) -> None:
+    module = _load_script()
+    repo = _fixture_repo(tmp_path, module)
+    matrix = {workload: {1: 1.0, 2: 2.0, 4: 4.0} for workload in module.WORKLOADS}
+    matrix[module.COMMUNICATION_WORKLOAD][2] = invalid_rate
+
+    with pytest.raises(ValueError, match="invalid|finite|greater than zero"):
+        module.materialize(
+            repo,
+            core_commit=CORE_COMMIT,
+            plugin_commit=PLUGIN_COMMIT,
+            load_profile="scaled-load",
+            rates=matrix,
+        )
+
+
+@pytest.mark.parametrize("invalid_rate", ["NaN", "Infinity", "-Infinity", "0"])
+def test_cli_rate_parser_rejects_invalid_rates(invalid_rate: str) -> None:
+    module = _load_script()
+
+    with pytest.raises(Exception, match="invalid TP/rate"):
+        module._parse_rates(f"1=1,2={invalid_rate},4=4")
+
+
+@pytest.mark.parametrize("invalid_rate", [math.nan, math.inf, -math.inf])
+def test_json_rate_matrix_rejects_non_finite_rates(
+    tmp_path: Path, invalid_rate: float
+) -> None:
+    module = _load_script()
+    path = tmp_path / "rates.json"
+    rates = {workload: {"1": 1.0, "2": 2.0, "4": 4.0} for workload in module.WORKLOADS}
+    rates[module.COMMUNICATION_WORKLOAD]["2"] = invalid_rate
+    path.write_text(
+        json.dumps({"schema_version": module.RATE_MATRIX_SCHEMA, "rates": rates})
+    )
+
+    with pytest.raises(ValueError, match="finite and greater than zero"):
+        module._load_rate_matrix(path)

@@ -6,16 +6,19 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import math
 import re
 from pathlib import Path
 
 
-WORKLOADS = (
+CORE_WORKLOADS = (
     "random-online",
     "sharegpt-online",
     "prefix-repetition-online",
     "agent-research-online",
 )
+COMMUNICATION_WORKLOAD = "communication-sensitive"
+WORKLOADS = CORE_WORKLOADS + (COMMUNICATION_WORKLOAD,)
 TPS = (1, 2, 4)
 STACK_ID = "vllm-0.23.0-vllm-ascend-0.25.1rc1"
 CORE_VERSION = "0.23.0"
@@ -23,8 +26,22 @@ PLUGIN_VERSION = "0.25.1rc1"
 FULL_SHA = re.compile(r"[0-9a-f]{40}")
 GRAPH_CAPTURE_SIZES = (1, 2, 4, 8, 16, 32, 64, 128, 256)
 SAMPLING_TEMPERATURE = 0
+RATE_MATRIX_SCHEMA = "issue-136-workload-rate-matrix/v2"
+COMMUNICATION_INPUT_LEN = 128
+COMMUNICATION_OUTPUT_LEN = 1024
+COMMUNICATION_NUM_PROMPTS = 200
+COMMUNICATION_PROFILE = "decode-heavy-tp-collective-proxy/v1"
 RateMap = dict[int, float]
 RateMatrix = dict[str, RateMap]
+
+
+def _is_valid_rate(value: object) -> bool:
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(float(value))
+        and float(value) > 0
+    )
 
 
 def _parse_rates(value: str) -> RateMap:
@@ -38,7 +55,7 @@ def _parse_rates(value: str) -> RateMap:
             rate = float(raw_rate)
         except ValueError as exc:
             raise argparse.ArgumentTypeError("rates must be numeric") from exc
-        if tp not in TPS or rate <= 0:
+        if tp not in TPS or not _is_valid_rate(rate):
             raise argparse.ArgumentTypeError(f"invalid TP/rate entry: {item}")
         rates[tp] = rate
     if set(rates) != set(TPS):
@@ -56,6 +73,8 @@ def _rate_matrix(load_profile: str, rates: RateMap | RateMatrix) -> RateMatrix:
                 "scaled-load requires workload-specific rates; a TP-only rate "
                 "cannot be applied to every workload"
             )
+        if any(not _is_valid_rate(rate) for rate in flat.values()):
+            raise ValueError("rates must be finite and greater than zero")
         if set(flat.values()) != {1.0}:
             raise ValueError("fixed-1-rps requires TP1/2/4 request_rate=1")
         return {workload: dict(flat) for workload in WORKLOADS}
@@ -68,10 +87,7 @@ def _rate_matrix(load_profile: str, rates: RateMap | RateMatrix) -> RateMatrix:
         if not isinstance(workload_rates, dict) or set(workload_rates) != set(TPS):
             raise ValueError(f"{workload} rates must define TP1, TP2, and TP4")
         if any(
-            not isinstance(tp, int)
-            or not isinstance(rate, (int, float))
-            or isinstance(rate, bool)
-            or rate <= 0
+            not isinstance(tp, int) or not _is_valid_rate(rate)
             for tp, rate in workload_rates.items()
         ):
             raise ValueError(f"{workload} contains an invalid TP/rate entry")
@@ -86,7 +102,7 @@ def _rate_matrix(load_profile: str, rates: RateMap | RateMatrix) -> RateMatrix:
 def _load_rate_matrix(path: Path) -> RateMatrix:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or payload.get("schema_version") != (
-        "issue-136-workload-rate-matrix/v1"
+        RATE_MATRIX_SCHEMA
     ):
         raise ValueError("rate matrix has an unsupported schema")
     raw = payload.get("rates")
@@ -98,20 +114,33 @@ def _load_rate_matrix(path: Path) -> RateMatrix:
         workload_rates = raw[workload]
         if not isinstance(workload_rates, dict) or set(workload_rates) != expected_keys:
             raise ValueError(f"{workload} rates must define TP1, TP2, and TP4")
-        matrix[workload] = {tp: float(workload_rates[str(tp)]) for tp in TPS}
+        converted: RateMap = {}
+        for tp in TPS:
+            value = workload_rates[str(tp)]
+            if not _is_valid_rate(value):
+                raise ValueError(
+                    f"{workload} TP{tp} rate must be finite and greater than zero"
+                )
+            converted[tp] = float(value)
+        matrix[workload] = converted
     return matrix
 
 
 def _rate_token(rate: float) -> str:
+    if not _is_valid_rate(rate):
+        raise ValueError("rate must be finite and greater than zero")
     return f"{rate:g}".replace(".", "p") + "rps"
 
 
 def _template_path(repo: Path, workload: str) -> Path:
+    template_workload = (
+        "random-online" if workload == COMMUNICATION_WORKLOAD else workload
+    )
     return (
         repo
         / "docs"
         / "official-baselines"
-        / f"official-ascend-jan-2026-v0180-{workload}-qwen25-14b-910b2.json"
+        / f"official-ascend-jan-2026-v0180-{template_workload}-qwen25-14b-910b2.json"
     )
 
 
@@ -176,6 +205,37 @@ def _build_target(
     }
     client = target["client_parameters"]
     assert isinstance(client, dict)
+    if workload == COMMUNICATION_WORKLOAD:
+        target["label"] = (
+            f"Issue #136 communication-sensitive decode-heavy profile "
+            f"(Qwen2.5-14B FP16 TP{tp}, {load_token})"
+        )
+        target["scenario"] = "random-online"
+        target["description"] = (
+            "Issue #136 standard vllm bench serve random workload with short "
+            "inputs and forced long outputs. TP2/TP4 exercise repeated tensor-"
+            "parallel collectives during decode; TP1 is the no-cross-rank control."
+        )
+        client.clear()
+        client.update(
+            {
+                "backend": "vllm",
+                "endpoint": "/v1/completions",
+                "dataset_name": "random",
+                "no_stream": False,
+                "save_detailed": True,
+                "metric_percentiles": "95,99",
+                "num_prompts": COMMUNICATION_NUM_PROMPTS,
+                "input_len": COMMUNICATION_INPUT_LEN,
+                "output_len": COMMUNICATION_OUTPUT_LEN,
+                "random_range_ratio": 0.0,
+                "ignore_eos": True,
+                "seed": 0,
+                "burstiness": 1.0,
+                "host": "127.0.0.1",
+                "port": 8000,
+            }
+        )
     client["request_rate"] = request_rate
     client["temperature"] = SAMPLING_TEMPERATURE
     export = target["export"]
@@ -201,6 +261,20 @@ def _build_target(
         "graph_capture_sizes": list(GRAPH_CAPTURE_SIZES),
         "temperature": SAMPLING_TEMPERATURE,
     }
+    if workload == COMMUNICATION_WORKLOAD:
+        contract = target["issue_136_contract"]
+        assert isinstance(contract, dict)
+        contract.update(
+            {
+                "workload_class": COMMUNICATION_PROFILE,
+                "input_len": COMMUNICATION_INPUT_LEN,
+                "output_len": COMMUNICATION_OUTPUT_LEN,
+                "ignore_eos": True,
+                "random_range_ratio": 0.0,
+                "seed": 0,
+                "tp_role": "no-cross-rank-control" if tp == 1 else "tp-collective",
+            }
+        )
     return target
 
 
@@ -271,7 +345,7 @@ def main() -> int:
         "--rate-matrix",
         type=Path,
         help=(
-            "JSON issue-136-workload-rate-matrix/v1 file with an independently "
+            f"JSON {RATE_MATRIX_SCHEMA} file with an independently "
             "selected TP1/2/4 rate for every workload"
         ),
     )

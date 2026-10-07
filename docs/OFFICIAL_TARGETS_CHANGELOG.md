@@ -2,6 +2,15 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.11 — 2026-10-07
+
+- English: Add executable issue #136 communication-sensitive TP1/TP2/TP4 targets using a standard
+  decode-heavy random serving profile; TP1 is the no-cross-rank control.
+- 中文：新增可执行的 issue #136 通信敏感 TP1/TP2/TP4 target，采用标准 decode-heavy random serving profile；TP1 作为无跨
+  rank 通信对照。
+- Source set: `55166dd74ebec54bf231deacdcd9015b211dd632c916d0b4665f609ad6ce2348`
+- Supersedes: `1.3.10`
+
 ## 1.3.10 — 2026-10-07
 
 - English: Pin client temperature=0 for all issue #136 Dense TP1/TP2/TP4 targets so formal scaling

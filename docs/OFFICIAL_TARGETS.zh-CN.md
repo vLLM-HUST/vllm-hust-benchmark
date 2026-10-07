@@ -2,7 +2,7 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.3.10`
+- Registry version: `1.3.11`
 - Effective from: `2026-10-07`
 
 `registry_version` 表示本次生成的 registry 快照版本；每个 target 的 `target_version` 表示该 target 不可变的执行契约版本。无关
@@ -85,10 +85,19 @@ BF16 | — | 256 |
 [`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json)
 | | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 1
 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 1
+| FP16 | 0.6 | 32768 |
 [`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json)
 | | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 2
 | FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 2
+| FP16 | 0.6 | 32768 |
 [`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json)
+| | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 4
+| FP16 | 0.6 | 32768 |
+[`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json)
 | | specialty | provisional | dense-scaling | random-online | Qwen/Qwen2.5-14B-Instruct | 910B2 × 4
 | FP16 | 0.6 | 32768 |
 [`specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json`](../docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json)

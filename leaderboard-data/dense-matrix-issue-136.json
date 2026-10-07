@@ -1,5 +1,5 @@
 {
-  "schema_version": "dense-matrix-issue-136/v2",
+  "schema_version": "dense-matrix-issue-136/v3",
   "issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/136",
   "current_main_candidate": {
     "core_commit": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7",
@@ -228,28 +228,43 @@
       "node_topology": "single-node",
       "cells": {
         "1chip": {
-          "spec": "docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-1chip-910b2.json",
-          "status": "blocked",
-          "load_profiles": [
-            "scaled-load"
-          ],
-          "blocker_reason": "unified-comm custom comm path not supported upstream; single-node 1-chip comm spec is non-executable"
+          "targets": {
+            "fixed-1-rps": {
+              "spec": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json",
+              "status": "target-ready"
+            },
+            "scaled-load": {
+              "spec": null,
+              "status": "capacity-pilot-pending",
+              "request_rate": null
+            }
+          }
         },
         "2chip": {
-          "spec": "docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-910b2.json",
-          "status": "blocked",
-          "load_profiles": [
-            "scaled-load"
-          ],
-          "blocker_reason": "unified-comm custom comm path not supported upstream (existing spec is non-executable draft)"
+          "targets": {
+            "fixed-1-rps": {
+              "spec": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json",
+              "status": "target-ready"
+            },
+            "scaled-load": {
+              "spec": null,
+              "status": "capacity-pilot-pending",
+              "request_rate": null
+            }
+          }
         },
         "4chip": {
-          "spec": "docs/official-baselines/official-ascend-jan-2026-v0180-unified-comm-online-qwen25-14b-4chip-910b2.json",
-          "status": "blocked",
-          "load_profiles": [
-            "scaled-load"
-          ],
-          "blocker_reason": "unified-comm custom comm path not supported upstream; single-node 4-chip comm spec is non-executable"
+          "targets": {
+            "fixed-1-rps": {
+              "spec": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json",
+              "status": "target-ready"
+            },
+            "scaled-load": {
+              "spec": null,
+              "status": "capacity-pilot-pending",
+              "request_rate": null
+            }
+          }
         }
       }
     }
@@ -257,7 +272,7 @@
   "profiler": {
     "required": true,
     "profiler_script": "run-current-ascend-same-spec-msprof.sh",
-    "note": "Collect an unprofiled three-service series first; never mix profiler-affected metrics. Per-rank AI Core/Vector, copy, communication, visible-idle, HCCL collectives, compute/comm overlap, scheduler/pipeline waits."
+    "note": "Collect an unprofiled three-service series first; never mix profiler-affected metrics. TP1 is the no-cross-rank control; TP2/TP4 require per-rank HCCL collective count, bytes, wait, and compute/communication overlap evidence."
   },
   "evidence_rules": {
     "reps_per_cell": 3,
@@ -268,12 +283,11 @@
   },
   "status": {
     "overall": "fixed-targets-ready-capacity-pilots-in-progress",
-    "spec_ready_cells": 12,
-    "blocked_cells": 3,
+    "spec_ready_cells": 15,
+    "blocked_cells": 0,
     "performance_percentages_published": false,
     "blockers": [
-      "Scaled-load rates and target specs remain gated on TP1/TP2/TP4 capacity pilots.",
-      "communication-sensitive single-node spec remains non-executable until a supported custom communication contract exists."
+      "Scaled-load rates and target specs remain gated on per-workload TP1/TP2/TP4 capacity pilots."
     ]
   }
 }
