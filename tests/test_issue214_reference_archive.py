@@ -80,6 +80,12 @@ def test_runtime_lock_binds_clean_sources_overlay_and_binary(tmp_path, helper):
             cann="9.1",
             core_remote="core",
             plugin_remote="plugin",
+            role="reference",
+            core_commit=core_commit,
+            plugin_commit=plugin_commit,
+            core_ref=core_commit,
+            plugin_ref=plugin_commit,
+            image_id="sha256:image",
             output=output,
         )
     )
@@ -103,6 +109,12 @@ def test_runtime_lock_binds_clean_sources_overlay_and_binary(tmp_path, helper):
             cann="9.1",
             core_remote="core",
             plugin_remote="plugin",
+            role="reference",
+            core_commit=core_commit,
+            plugin_commit=plugin_commit,
+            core_ref=core_commit,
+            plugin_ref=plugin_commit,
+            image_id="sha256:image",
             lock=output,
         )
     )
@@ -118,6 +130,12 @@ def test_runtime_lock_binds_clean_sources_overlay_and_binary(tmp_path, helper):
                 cann="9.1",
                 core_remote="core",
                 plugin_remote="plugin",
+                role="reference",
+                core_commit=core_commit,
+                plugin_commit=plugin_commit,
+                core_ref=core_commit,
+                plugin_ref=plugin_commit,
+                image_id="sha256:image",
                 lock=output,
             )
         )
@@ -149,7 +167,7 @@ def test_archive_cell_writes_identity_contract_and_complete_checksums(tmp_path, 
     write_json(
         runtime_lock,
         {
-            "schema_version": "issue214-reference-runtime-lock/v1",
+            "schema_version": "issue214-runtime-lock/v2",
             "status": "ok",
             "image_id": "sha256:image",
             "cann": "9.1",

@@ -71,10 +71,10 @@ def package_version(python: Path, name: str) -> str:
 
 
 def build_runtime_lock(args: argparse.Namespace) -> dict[str, Any]:
-    require_commit(args.source_core, CORE_COMMIT)
-    require_commit(args.source_plugin, PLUGIN_COMMIT)
-    require_commit(args.runtime_core, CORE_COMMIT)
-    require_commit(args.runtime_plugin, PLUGIN_COMMIT)
+    require_commit(args.source_core, args.core_commit)
+    require_commit(args.source_plugin, args.plugin_commit)
+    require_commit(args.runtime_core, args.core_commit)
+    require_commit(args.runtime_plugin, args.plugin_commit)
     for repo in (args.source_core, args.source_plugin):
         if str(git(repo, "status", "--porcelain")).strip():
             raise ValueError(f"frozen source worktree is dirty: {repo}")
@@ -120,9 +120,10 @@ def build_runtime_lock(args: argparse.Namespace) -> dict[str, Any]:
         ).encode()
     ).hexdigest()
     return {
-        "schema_version": "issue214-reference-runtime-lock/v1",
+        "schema_version": "issue214-runtime-lock/v2",
         "status": "ok",
-        "image_id": IMAGE_ID,
+        "role": args.role,
+        "image_id": args.image_id,
         "cann": args.cann,
         "python": subprocess.check_output(
             [
@@ -136,12 +137,14 @@ def build_runtime_lock(args: argparse.Namespace) -> dict[str, Any]:
         "torch_npu": package_version(args.python, "torch-npu"),
         "sources": {
             "core": {
-                "commit": CORE_COMMIT,
+                "commit": args.core_commit,
+                "ref": args.core_ref,
                 "tree": str(git(args.source_core, "rev-parse", "HEAD^{tree}")).strip(),
                 "remote": args.core_remote,
             },
             "plugin": {
-                "commit": PLUGIN_COMMIT,
+                "commit": args.plugin_commit,
+                "ref": args.plugin_ref,
                 "tree": str(
                     git(args.source_plugin, "rev-parse", "HEAD^{tree}")
                 ).strip(),
@@ -232,8 +235,7 @@ def normalized(value: Any) -> Any:
 def archive_cell(args: argparse.Namespace) -> None:
     runtime_lock_payload = json.loads(args.runtime_lock.read_text())
     if (
-        runtime_lock_payload.get("schema_version")
-        != "issue214-reference-runtime-lock/v1"
+        runtime_lock_payload.get("schema_version") != "issue214-runtime-lock/v2"
         or runtime_lock_payload.get("status") != "ok"
     ):
         raise ValueError("runtime lock is not qualified")
@@ -246,7 +248,8 @@ def archive_cell(args: argparse.Namespace) -> None:
         key: runtime_lock_payload[key]
         for key in ("image_id", "cann", "python", "torch", "torch_npu")
     }
-    runtime_contract["schema_version"] = "issue214-runtime-contract/v1"
+    runtime_contract["schema_version"] = "issue214-runtime-contract/v2"
+    runtime_contract["role"] = runtime_lock_payload.get("role")
     runtime_contract["runtime_lock_sha256"] = sha256(args.runtime_lock)
     runtime_contract["sources"] = runtime_lock_payload.get("sources")
     runtime_contract["compatibility_overlay"] = {
@@ -339,6 +342,14 @@ def parser() -> argparse.ArgumentParser:
         command.add_argument("--cann", required=True)
         command.add_argument("--core-remote", required=True)
         command.add_argument("--plugin-remote", required=True)
+        command.add_argument(
+            "--role", choices=("reference", "candidate"), default="reference"
+        )
+        command.add_argument("--core-commit", default=CORE_COMMIT)
+        command.add_argument("--plugin-commit", default=PLUGIN_COMMIT)
+        command.add_argument("--core-ref", default=CORE_COMMIT)
+        command.add_argument("--plugin-ref", default=PLUGIN_COMMIT)
+        command.add_argument("--image-id", default=IMAGE_ID)
 
     lock = commands.add_parser("runtime-lock")
     add_runtime_arguments(lock)
