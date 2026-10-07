@@ -245,10 +245,11 @@ def archive_cell(args: argparse.Namespace) -> None:
         raise ValueError("spec is missing or unsafe")
     spec_payload = json.loads(args.spec.read_text())
     model_payload = json.loads(args.model_manifest.read_text())
-    if (
-        model_payload.get("schema_version") != "issue214-model-manifest/v1"
-        or model_payload.get("canonical_id") != spec_payload.get("model")
-    ):
+    if model_payload.get(
+        "schema_version"
+    ) != "issue214-model-manifest/v1" or model_payload.get(
+        "canonical_id"
+    ) != spec_payload.get("model"):
         raise ValueError("model manifest does not match spec model identity")
     resolved = json.loads((args.cell / "resolved_same_spec.json").read_text())
     run = json.loads((args.cell / "submission/run_leaderboard.json").read_text())
