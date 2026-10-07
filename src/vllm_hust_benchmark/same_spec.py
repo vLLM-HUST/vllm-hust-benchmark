@@ -236,6 +236,13 @@ def resolve_client_parameters(
         if "output_len" in resolved and "random_output_len" not in resolved:
             resolved["random_output_len"] = resolved.pop("output_len")
 
+    if resolved.get("dataset_name") == "custom":
+        resolved.pop("input_len", None)
+        if "output_len" in resolved:
+            if "custom_output_len" not in resolved:
+                resolved["custom_output_len"] = resolved["output_len"]
+            resolved.pop("output_len")
+
     if resolved.get("dataset_name") == "prefix_repetition":
         total_input_len = resolved.pop("input_len", None)
 
