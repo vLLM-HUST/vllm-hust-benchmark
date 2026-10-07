@@ -13,9 +13,10 @@
     "topology": "single-node-4x-Ascend-910B2-full-HCCS-visible-physical-0,1,2,7"
   },
   "model_revision_contract": "All Dense cells use local Qwen2.5-14B-Instruct weight manifest 4cebf06566bc02922cce8ec2e44368204024e56a6813c5139192b01b7ee956d3, FP16, core c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7, backend 7c8ec865a12f7b6a14d53b61e7f61b5e811dd483, the same image, node and HCCS topology.",
+  "sampling_contract": "All Dense fixed-load and scaled-load cells explicitly use client temperature=0; model-side generation defaults are not accepted as equivalent evidence.",
   "load_profiles": {
     "fixed-1-rps": {
-      "description": "fixed 1 RPS low-load latency checkpoint; not for capacity scaling conclusions"
+      "description": "fixed 1 RPS offered-load latency checkpoint; not for capacity scaling conclusions"
     },
     "scaled-load": {
       "description": "capacity-matched load determined by a capacity pilot on the frozen stack; required for scaling efficiency"

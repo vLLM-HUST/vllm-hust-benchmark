@@ -2,6 +2,14 @@
 
 > Generated from `official_target_versions.json`. Do not edit manually.
 
+## 1.3.10 — 2026-10-07
+
+- English: Pin client temperature=0 for all issue #136 Dense TP1/TP2/TP4 targets so formal scaling
+  evidence cannot inherit a mutable model-side sampling default.
+- 中文：为 issue #136 全部 Dense TP1/TP2/TP4 target 显式冻结客户端 temperature=0，避免正式扩展证据继承可变的模型侧采样默认值。
+- Source set: `59761c7e83b69b887a9592dd38c7ca7d2b267bd56c0dcba5695fc4f30db0e3a1`
+- Supersedes: `1.3.9`
+
 ## 1.3.9 — 2026-10-07
 
 - English: Pin a bounded nine-size FULL_AND_PIECEWISE graph capture contract for all issue #136

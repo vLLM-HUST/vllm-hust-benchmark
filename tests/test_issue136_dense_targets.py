@@ -53,6 +53,7 @@ def test_materializes_directly_named_fixed_targets(tmp_path: Path) -> None:
         tp = payload["server_parameters"]["tensor_parallel_size"]
         assert payload["chip_count"] == tp
         assert payload["client_parameters"]["request_rate"] == 1.0
+        assert payload["client_parameters"]["temperature"] == 0
         assert f"-tp{tp}-fixed-1rps-" in payload["id"]
         assert "vllm-0.23.0-vllm-ascend-0.25.1rc1" in payload["id"]
         assert payload["baseline_target"]["vllm_ref"] == CORE_COMMIT
@@ -72,6 +73,7 @@ def test_materializes_directly_named_fixed_targets(tmp_path: Path) -> None:
             128,
             256,
         ]
+        assert payload["issue_136_contract"]["temperature"] == 0
         assert _classify_spec(path, payload) == (
             "specialty",
             "provisional",
@@ -134,7 +136,9 @@ def test_scaled_profile_uses_each_workloads_own_rates(tmp_path: Path) -> None:
         tp = payload["server_parameters"]["tensor_parallel_size"]
         expected = matrix[workload][tp]
         assert payload["client_parameters"]["request_rate"] == expected
+        assert payload["client_parameters"]["temperature"] == 0
         assert payload["issue_136_contract"]["request_rate"] == expected
+        assert payload["issue_136_contract"]["temperature"] == 0
 
 
 def test_loads_versioned_workload_rate_matrix(tmp_path: Path) -> None:

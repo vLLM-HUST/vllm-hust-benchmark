@@ -2,7 +2,7 @@
 
 > 本文件由 official specs 自动生成，请勿手工修改。
 
-- Registry version: `1.3.9`
+- Registry version: `1.3.10`
 - Effective from: `2026-10-07`
 
 `registry_version` 表示本次生成的 registry 快照版本；每个 target 的 `target_version` 表示该 target 不可变的执行契约版本。无关

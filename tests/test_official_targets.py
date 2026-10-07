@@ -49,12 +49,12 @@ def test_registry_generation_is_distinct_from_target_contract_version() -> None:
     )
     # Unchanged targets inherit 1.3.5, the issue #179 910B3 specialty spec
     # retains 1.3.6, random-online carries 1.3.7, and the issue #136 Dense
-    # targets carry the bounded graph-capture 1.3.9 contract.
+    # targets carry the explicit temperature-zero 1.3.10 contract.
     assert {target["target_version"] for target in registry["targets"]} == {
         "1.3.5",
         "1.3.6",
         "1.3.7",
-        "1.3.9",
+        "1.3.10",
     }
 
 

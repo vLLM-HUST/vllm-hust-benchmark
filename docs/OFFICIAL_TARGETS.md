@@ -2,7 +2,7 @@
 
 > This file is generated from the official specs. Do not edit it manually.
 
-- Registry version: `1.3.9`
+- Registry version: `1.3.10`
 - Effective from: `2026-10-07`
 
 `registry_version` identifies this generated registry snapshot. Each target's `target_version` is

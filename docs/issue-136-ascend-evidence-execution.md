@@ -14,6 +14,10 @@ frozen inputs:
 - image ID, CANN version, torch-npu version, node type, and HCCS/network topology;
 - model precision, graph/eager mode, TP/DP/PP/EP, server arguments, and workload arguments.
 
+All issue #136 Dense targets explicitly set client `temperature=0`. Formal runners must reject a
+target or resolved artifact that omits or changes this value; inheriting the model-side generation
+configuration is not an equivalent contract.
+
 Readiness logs, historical artifacts, and results from an integration branch remain useful
 correctness evidence, but they are not current-main performance points. If a comparable baseline is
 missing, mark the cell blocked and publish no delta.
