@@ -169,6 +169,7 @@ def test_archive_cell_writes_identity_contract_and_complete_checksums(tmp_path, 
         {
             "schema_version": "issue214-runtime-lock/v2",
             "status": "ok",
+            "role": "reference",
             "image_id": "sha256:image",
             "cann": "9.1",
             "python": "3.11",
@@ -183,12 +184,16 @@ def test_archive_cell_writes_identity_contract_and_complete_checksums(tmp_path, 
         },
     )
     spec = tmp_path / "spec.json"
-    write_json(spec, {"scenario": "random-online"})
+    write_json(spec, {"scenario": "random-online", "model": "model/x"})
     model_manifest = tmp_path / "model.json"
-    write_json(model_manifest, {"schema_version": "issue214-model-manifest/v1"})
+    write_json(
+        model_manifest,
+        {"schema_version": "issue214-model-manifest/v1", "canonical_id": "model/x"},
+    )
 
     helper.archive_cell(
         Namespace(
+            role="reference",
             cell=cell,
             spec=spec,
             runtime_lock=runtime_lock,
@@ -203,3 +208,26 @@ def test_archive_cell_writes_identity_contract_and_complete_checksums(tmp_path, 
     assert "server.stdout.log" in checksum_text
     assert "runtime-ready.log" in checksum_text
     subprocess.run(["sha256sum", "-c", "EVIDENCE_SHA256SUMS"], cwd=cell, check=True)
+
+
+def test_archive_cell_rejects_runtime_lock_for_other_role(tmp_path, helper):
+    runtime_lock = tmp_path / "runtime-lock.json"
+    write_json(
+        runtime_lock,
+        {
+            "schema_version": "issue214-runtime-lock/v2",
+            "status": "ok",
+            "role": "reference",
+        },
+    )
+    with pytest.raises(ValueError, match="role does not match"):
+        helper.archive_cell(
+            Namespace(
+                role="candidate",
+                runtime_lock=runtime_lock,
+                cell=tmp_path / "cell",
+                spec=tmp_path / "spec.json",
+                model_manifest=tmp_path / "model.json",
+                input_file=[],
+            )
+        )

@@ -239,6 +239,17 @@ def archive_cell(args: argparse.Namespace) -> None:
         or runtime_lock_payload.get("status") != "ok"
     ):
         raise ValueError("runtime lock is not qualified")
+    if runtime_lock_payload.get("role") != args.role:
+        raise ValueError("runtime lock role does not match archive role")
+    if not args.spec.is_file() or args.spec.is_symlink():
+        raise ValueError("spec is missing or unsafe")
+    spec_payload = json.loads(args.spec.read_text())
+    model_payload = json.loads(args.model_manifest.read_text())
+    if (
+        model_payload.get("schema_version") != "issue214-model-manifest/v1"
+        or model_payload.get("canonical_id") != spec_payload.get("model")
+    ):
+        raise ValueError("model manifest does not match spec model identity")
     resolved = json.loads((args.cell / "resolved_same_spec.json").read_text())
     run = json.loads((args.cell / "submission/run_leaderboard.json").read_text())
     if normalized(resolved) != normalized(run.get("same_spec", {})):
@@ -267,11 +278,15 @@ def archive_cell(args: argparse.Namespace) -> None:
         json.loads(provenance_path.read_text()) if provenance_path.is_file() else None
     )
     input_files: list[dict[str, Any]] = []
+    input_labels: set[str] = set()
     for declaration in args.input_file:
         label, separator, raw_path = declaration.partition("=")
         path = Path(raw_path)
         if not separator or not label or not path.is_file() or path.is_symlink():
             raise ValueError(f"invalid frozen input declaration: {declaration}")
+        if label in input_labels:
+            raise ValueError(f"duplicate frozen input label: {label}")
+        input_labels.add(label)
         input_files.append(
             {"label": label, "sha256": sha256(path), "size_bytes": path.stat().st_size}
         )
@@ -285,7 +300,7 @@ def archive_cell(args: argparse.Namespace) -> None:
             "seed": resolved.get("resolved_client_parameters", {}).get("seed", 0),
             "parameters": normalized(resolved.get("resolved_client_parameters", {})),
         },
-        "model_manifest": json.loads(args.model_manifest.read_text()),
+        "model_manifest": model_payload,
     }
     write_json(args.cell / "input-identity.json", input_identity)
 
@@ -368,6 +383,7 @@ def parser() -> argparse.ArgumentParser:
     model.set_defaults(handler=model_manifest)
 
     cell = commands.add_parser("archive-cell")
+    cell.add_argument("--role", required=True, choices=("reference", "candidate"))
     cell.add_argument("--cell", required=True, type=Path)
     cell.add_argument("--spec", required=True, type=Path)
     cell.add_argument("--runtime-lock", required=True, type=Path)
