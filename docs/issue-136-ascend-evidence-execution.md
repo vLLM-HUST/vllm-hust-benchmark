@@ -181,7 +181,31 @@ summary and raw profile from the issue.
 
 ## Publication gate
 
-Before publishing:
+The public Dense rows must be built from completed, checksum-covered evidence archives, never from
+the live matrix working directory. Once both load profiles have been archived, build a reviewable
+promotion bundle:
+
+```bash
+python scripts/build_issue136_publication.py \
+  --fixed-archive <fixed-1-rps-archive> \
+  --scaled-archive <scaled-load-archive> \
+  --output-dir <new-promotion-bundle-directory>
+```
+
+The command fails closed unless each profile contains exactly four workloads by TP1/TP2/TP4 and
+three independent repetitions per cell. It verifies archive and submission checksums, source
+commits, resolved settings, repeat indices, and setting signatures. It selects the actual run at the
+median raw output throughput (lowest repeat index breaks a tie), embeds a median
+`canonical_aggregate`, and emits separate single- and multi-chip snapshot candidate files. The
+bundle is an input to review and snapshot promotion; generating it does not mutate the registry or
+the committed public snapshots.
+
+Fixed 1 RPS is an offered-load latency checkpoint. Its entries explicitly forbid scaling-efficiency
+claims. Only the separately identified scaled-load profile may support those claims. Communication,
+MoE/EPLB, and profiler results remain separate specialty observations and are not accepted by this
+Dense importer.
+
+Before promoting the candidate rows:
 
 1. validate every artifact with `scripts/validate-run-artifact.sh`;
 1. confirm three contiguous independent-service repeat indices for every required series;
