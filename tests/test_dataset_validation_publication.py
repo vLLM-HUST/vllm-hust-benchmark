@@ -28,6 +28,25 @@ def test_checked_in_publication_is_valid_and_complete() -> None:
     assert validate_publication(PUBLICATION) == {"scenarios": 7, "results": 729}
 
 
+def test_default_scenario_is_paired_qwen35_frontier_data() -> None:
+    index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
+    scenario = next(
+        item
+        for item in index["scenarios"]
+        if item["id"] == index["default_scenario_id"]
+    )
+    assert scenario["data_file"] == (
+        "dataset_validation_qwen35_frontier_unified_900s.json"
+    )
+
+    artifact = load_json(PUBLICATION / scenario["data_file"])
+    assert len(artifact["results"]) == 10
+    assert all(result["status"] == "passed" for result in artifact["results"])
+    assert all(result["baseline_value"] is not None for result in artifact["results"])
+    assert all(result["value"] is not None for result in artifact["results"])
+    assert all(result["candidate_values"] for result in artifact["results"])
+
+
 def test_qwen35_frontier_b1_retains_all_admitted_candidates() -> None:
     artifact = load_json(
         PUBLICATION / "dataset_validation_qwen35_frontier_unified_900s.json"
