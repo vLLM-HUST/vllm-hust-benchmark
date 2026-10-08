@@ -42,7 +42,9 @@ def git_repo(path: Path) -> str:
     ).strip()
 
 
-def test_runtime_lock_binds_clean_sources_overlay_and_binary(tmp_path, helper):
+def test_runtime_lock_binds_clean_sources_overlay_and_binary(
+    tmp_path, helper, monkeypatch
+):
     source_core = tmp_path / "source-core"
     source_plugin = tmp_path / "source-plugin"
     runtime_core = tmp_path / "runtime-core"
@@ -68,6 +70,14 @@ def test_runtime_lock_binds_clean_sources_overlay_and_binary(tmp_path, helper):
     custom_op.write_text("# frozen custom op\n")
     helper.CORE_COMMIT = core_commit
     helper.PLUGIN_COMMIT = plugin_commit
+    monkeypatch.setattr(
+        helper,
+        "package_version",
+        lambda _python, name: {
+            "torch": "2.10.0",
+            "torch-npu": "2.10.0.post2",
+        }[name],
+    )
     output = tmp_path / "lock.json"
 
     helper.runtime_lock(
@@ -92,6 +102,8 @@ def test_runtime_lock_binds_clean_sources_overlay_and_binary(tmp_path, helper):
 
     payload = json.loads(output.read_text())
     assert payload["status"] == "ok"
+    assert payload["torch"] == "2.10.0"
+    assert payload["torch_npu"] == "2.10.0.post2"
     assert payload["compatibility_overlay"]["core_tracked_patch_bytes"] > 0
     assert payload["compatibility_overlay"]["plugin_tracked_patch_bytes"] > 0
     assert payload["compatibility_overlay"]["artifacts"][0]["path"].endswith(
