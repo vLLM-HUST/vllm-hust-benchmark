@@ -235,6 +235,115 @@ CANDIDATES = [
     },
 ]
 
+BETTERSCALE_NATIVE = {
+    "series_id": "swe-capacity16-native",
+    "output_tps": [
+        100.83333333333333,
+        157.51777777777778,
+        219.37,
+        307.79777777777775,
+        443.90777777777777,
+    ],
+    "decode_p90_tps": [
+        121.05405353222709,
+        104.2267345441546,
+        77.62100602322748,
+        55.76883889577,
+        38.93415177865642,
+    ],
+    "run_ids": [
+        "17daf5bdbc6540b1af34a08bdc595466",
+        "06b07f7e09d84815a69c9f5e2d1381b0",
+        "a9287c3d4d674849983c2ba394624aaf",
+        "a6205fecc90147318e8e7fe1c9570004",
+        "e52aadd2f98746d2b7da71ccd235ebb9",
+    ],
+}
+BETTERSCALE_CANDIDATE = {
+    "id": "betterscale",
+    "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+    "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+    "repository": "vLLM-HUST/BetterScale",
+    "commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+    "report": f"{REPORT_BASE}/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+    "output_tps": [
+        133.0522222222222,
+        252.0611111111111,
+        424.00888888888886,
+        615.7244444444444,
+        885.9611111111111,
+    ],
+    "decode_p90_tps": [
+        146.16287529638393,
+        141.99636689128465,
+        123.19485196900348,
+        87.98440923210494,
+        62.906279664144115,
+    ],
+    "run_ids": [
+        "9d3f967ade4a45a1b3cc506033575436",
+        "3b7da246123544a893ef7abee7687f5d",
+        "749083df229c4384a45c257bdb16f4ec",
+        "5ebc6e929f2d46cc965e400c1ddc4ad0",
+        "fa0e01a32eef456bab4bebe51e4aa7dd",
+    ],
+}
+
+PIPELINE_NATIVE = {
+    "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+    "output_tps": [
+        41.465555555555554,
+        56.04333333333334,
+        75.88111111111111,
+        81.78222222222222,
+        99.19444444444444,
+    ],
+    "decode_p90_tps": [
+        60.02513728122424,
+        37.04104558636969,
+        26.865854340279313,
+        14.743465688873187,
+        8.796526956616184,
+    ],
+    "run_ids": [
+        "f3eaa00ae3fe4e5ab09700fcc96bd885",
+        "d153f678626245cea260877100322289",
+        "6e3c9ae738964f22acb16a0cb5ee3bc5",
+        "a57b59693e6f4843b13757dac4b7cad3",
+        "50596f6ebf4c44d29d42a3e1cb1cd442",
+    ],
+}
+PIPELINE_CANDIDATE = {
+    "id": "pipeline-microbatch-migration",
+    "label": "Pipeline microbatch migration",
+    "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+    "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+    "commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+    "report": f"{REPORT_BASE}/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+    "output_tps": [
+        60.98,
+        58.916666666666664,
+        78.63444444444444,
+        82.16444444444444,
+        98.25111111111111,
+    ],
+    "decode_p90_tps": [
+        69.38786023366178,
+        36.05431879732996,
+        28.371516890212515,
+        15.500230249184433,
+        8.553896428818245,
+    ],
+    "run_ids": [
+        "e909c165c53945b5b0d5e8164e4accb1",
+        "a1bd23668ece426fbb6fc326addf4bca",
+        "1c9de69d764a4d8e86ea7df6ff714dcc",
+        "4c172f62521c4dc88ef1a1011c4f7ba1",
+        "489c8ff4b25d4262a0e26504605c8c93",
+    ],
+    "runtime_effectiveness": "exercised",
+}
+
 
 def pct(value: float, baseline: float) -> float:
     return (value / baseline - 1) * 100
@@ -380,6 +489,176 @@ def build() -> dict:
     }
 
 
+def build_paired(
+    *,
+    scenario: dict,
+    native: dict,
+    candidate: dict,
+    report: str,
+    prepared_workload_sha256: str,
+    limitations: list[str],
+) -> dict:
+    results = []
+    for index, concurrency in enumerate(CONCURRENCIES):
+        for metric_id, metric in METRICS.items():
+            source_key = metric["source_key"]
+            baseline = native[source_key][index]
+            candidate_value = candidate_cell(candidate, source_key, index, baseline)
+            trend = (
+                "improved"
+                if candidate_value["value"] > baseline
+                else "regressed"
+                if candidate_value["value"] < baseline
+                else "unchanged"
+            )
+            results.append(
+                {
+                    "dataset_id": f"swe-prefix-reuse-c{concurrency}",
+                    "metric_id": metric_id,
+                    "status": "passed",
+                    "baseline_value": baseline,
+                    "value": candidate_value["value"],
+                    "delta_pct": candidate_value["delta_pct"],
+                    "updated_at": "2026-09-27",
+                    "selected_candidate_id": candidate["id"],
+                    "candidate_values": [candidate_value],
+                    "comparison": {
+                        "direction": "higher_is_better",
+                        "trend": trend,
+                        "selection": "declared matched Frontier comparison pair",
+                    },
+                    "provenance": candidate_value["provenance"],
+                    "baseline_provenance": {
+                        "repository": "vLLM-HUST/vllm-hust-website",
+                        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+                        "report_url": report,
+                        "series_id": native["series_id"],
+                        "run_id": native["run_ids"][index],
+                    },
+                }
+            )
+    return {
+        "contract_version": "dataset-validation-v1",
+        "generated_at": "2026-10-08T00:00:00Z",
+        "status": "complete_comparison",
+        "source": {
+            "service": "Qwen3.5 paired Frontier measurement",
+            "repository": "vLLM-HUST/vllm-hust-website",
+            "commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+            "frontier_data_sha256": "5913253b83455ce375d0252ed803beed76fb6a5a98348f60c103e6f44f246a7d",
+            "comparison_contract_sha256": "d174bd33ab9b4e1b9b02a836f3f24b0be8fbfd156ae33e19539d8f5984e1e4c2",
+            "tracking_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/247",
+        },
+        "baseline": {
+            "id": native["series_id"],
+            "label": "Matched Native 900s series",
+            "generated_at": "2026-09-27",
+        },
+        "candidate_policy": {
+            "id": "declared-matched-pair",
+            "label": "Declared matched Frontier comparison",
+            "single_version_required": True,
+            "rule": "Publish the complete declared Native/MOD pair, including regressions; do not select a different Native or drop losing cells.",
+        },
+        "scenario": {
+            **scenario,
+            "model": "Qwen3.5-35B-A3B",
+            "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+            "precision": "BF16",
+            "max_model_len": 262144,
+            "max_num_seqs": 16,
+            "max_num_batched_tokens": 4096,
+            "prefix_caching": True,
+            "async_scheduling": True,
+            "mamba_cache_mode": "align",
+            "mtp_draft_tokens": 2,
+            "thinking": True,
+            "temperature": 0,
+            "kv_cache_memory_bytes_per_chip": 26038239232,
+            "workload": "swe-prefix-reuse/v1",
+            "prepared_workload_sha256": prepared_workload_sha256,
+            "tokenizer_fingerprint": "3f9ca78537850303ee04bfa6640c020be89723c62f37121c0f27a4c0babc53e0",
+            "measurement_seconds": 900,
+        },
+        "datasets": [
+            {
+                "id": f"swe-prefix-reuse-c{concurrency}",
+                "label": f"SWE Prefix Reuse · C{concurrency}",
+                "group": "SWE Prefix Reuse",
+                "description": f"swe-prefix-reuse/v1 at closed-loop client concurrency {concurrency}",
+                "applicable_metric_ids": list(METRICS),
+            }
+            for concurrency in CONCURRENCIES
+        ],
+        "metrics": [
+            {
+                "id": metric_id,
+                "label": metric["label"],
+                "unit": metric["unit"],
+                "direction": metric["direction"],
+            }
+            for metric_id, metric in METRICS.items()
+        ],
+        "results": results,
+        "limitations": limitations,
+        "coverage_contract": {
+            "mode": "explicit-dataset-metric-applicability",
+            "complete_cell_states_required": True,
+            "non_measured_reason_required": True,
+            "matched_b0_required_for_b1": True,
+        },
+    }
+
+
+def build_betterscale() -> dict:
+    return build_paired(
+        scenario={
+            "id": "qwen35-35b-a3b-bf16-tp2-pp1-dp1-ep-off-ctx262k-apc-on-mtp2-native-full-piecewise-vs-betterscale-full-e16-r20-sweprefix-900s",
+            "label": "Qwen3.5-35B-A3B · BF16 · TP2/PP1/DP1 · Native FULL_AND_PIECEWISE vs BetterScale FULL/E16/R20 · SWE Prefix Reuse · 900s",
+            "hardware": "2× Ascend 910B2",
+            "tensor_parallel_size": 2,
+            "pipeline_parallel_size": 1,
+            "data_parallel_size": 1,
+            "expert_parallel": False,
+            "baseline_graph_mode": "FULL_AND_PIECEWISE",
+            "candidate_graph_mode": "FULL",
+            "candidate_execution_seats": 16,
+            "candidate_resident_seats": 20,
+        },
+        native=BETTERSCALE_NATIVE,
+        candidate=BETTERSCALE_CANDIDATE,
+        report=f"{REPORT_BASE}/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        prepared_workload_sha256="8044561ffa1bb430bea8f778ef814d96649321e1a92654b95f64263b996d5e85",
+        limitations=[
+            "The candidate graph mode, resident/execution seat policy, scheduler and memory-utilization setting are part of the BetterScale treatment; this is not an isolated attention-only ablation.",
+            "Every cell is one 900-second observation, not a repeatability estimate or answer-quality certification.",
+        ],
+    )
+
+
+def build_pipeline() -> dict:
+    return build_paired(
+        scenario={
+            "id": "qwen35-35b-a3b-bf16-tp2-pp2-dp1-ep-off-ctx262k-apc-on-mtp2-full-piecewise-pipeline-microbatch-sweprefix-900s",
+            "label": "Qwen3.5-35B-A3B · BF16 · TP2/PP2/DP1 · EP off · 262K · APC on · MTP2 · FULL_AND_PIECEWISE · Pipeline Microbatch · SWE Prefix Reuse · 900s",
+            "hardware": "4× Ascend 910B2",
+            "tensor_parallel_size": 2,
+            "pipeline_parallel_size": 2,
+            "data_parallel_size": 1,
+            "expert_parallel": False,
+            "graph_mode": "FULL_AND_PIECEWISE",
+        },
+        native=PIPELINE_NATIVE,
+        candidate=PIPELINE_CANDIDATE,
+        report=f"{REPORT_BASE}/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        prepared_workload_sha256="aa23f49e08a946d94eaab21307e9e015140cc8598adfbd5f7e244bdded7b17d0",
+        limitations=[
+            "The matched pair uses TP2×PP2 on four chips and must not be compared to the TP2/PP1 Native series.",
+            "The policy executed in every window but abstained on recorded admissions; measured positive and negative deltas are retained without claiming a policy-action gain.",
+        ],
+    )
+
+
 def write_json(path: Path, value: object) -> None:
     path.write_text(
         json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
@@ -387,16 +666,29 @@ def write_json(path: Path, value: object) -> None:
 
 
 def main() -> None:
-    write_json(OUTPUT, build())
-    index = json.loads(INDEX.read_text(encoding="utf-8"))
-    scenario = build()["scenario"]
-    entry = {
-        key: scenario[key] for key in ("id", "label", "model", "hardware", "precision")
+    artifacts = {
+        OUTPUT: build(),
+        PUBLICATION
+        / "dataset_validation_qwen35_frontier_betterscale_900s.json": build_betterscale(),
+        PUBLICATION
+        / "dataset_validation_qwen35_frontier_pipeline_pp2_900s.json": build_pipeline(),
     }
-    entry["data_file"] = OUTPUT.name
+    for path, artifact in artifacts.items():
+        write_json(path, artifact)
+    index = json.loads(INDEX.read_text(encoding="utf-8"))
+    entries = []
+    for path, artifact in artifacts.items():
+        scenario = artifact["scenario"]
+        entry = {
+            key: scenario[key]
+            for key in ("id", "label", "model", "hardware", "precision")
+        }
+        entry["data_file"] = path.name
+        entries.append(entry)
+    generated_ids = {entry["id"] for entry in entries}
     index["scenarios"] = [
-        item for item in index["scenarios"] if item["id"] != entry["id"]
-    ] + [entry]
+        item for item in index["scenarios"] if item["id"] not in generated_ids
+    ] + entries
     write_json(INDEX, index)
     names = sorted([INDEX.name, *(item["data_file"] for item in index["scenarios"])])
     CHECKSUMS.write_text(

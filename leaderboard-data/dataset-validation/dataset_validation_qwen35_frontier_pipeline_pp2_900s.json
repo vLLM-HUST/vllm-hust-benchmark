@@ -1,0 +1,569 @@
+{
+  "contract_version": "dataset-validation-v1",
+  "generated_at": "2026-10-08T00:00:00Z",
+  "status": "complete_comparison",
+  "source": {
+    "service": "Qwen3.5 paired Frontier measurement",
+    "repository": "vLLM-HUST/vllm-hust-website",
+    "commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+    "frontier_data_sha256": "5913253b83455ce375d0252ed803beed76fb6a5a98348f60c103e6f44f246a7d",
+    "comparison_contract_sha256": "d174bd33ab9b4e1b9b02a836f3f24b0be8fbfd156ae33e19539d8f5984e1e4c2",
+    "tracking_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/247"
+  },
+  "baseline": {
+    "id": "swe-k8s-pp2-20260925-nativepp-r1",
+    "label": "Matched Native 900s series",
+    "generated_at": "2026-09-27"
+  },
+  "candidate_policy": {
+    "id": "declared-matched-pair",
+    "label": "Declared matched Frontier comparison",
+    "single_version_required": true,
+    "rule": "Publish the complete declared Native/MOD pair, including regressions; do not select a different Native or drop losing cells."
+  },
+  "scenario": {
+    "id": "qwen35-35b-a3b-bf16-tp2-pp2-dp1-ep-off-ctx262k-apc-on-mtp2-full-piecewise-pipeline-microbatch-sweprefix-900s",
+    "label": "Qwen3.5-35B-A3B · BF16 · TP2/PP2/DP1 · EP off · 262K · APC on · MTP2 · FULL_AND_PIECEWISE · Pipeline Microbatch · SWE Prefix Reuse · 900s",
+    "hardware": "4× Ascend 910B2",
+    "tensor_parallel_size": 2,
+    "pipeline_parallel_size": 2,
+    "data_parallel_size": 1,
+    "expert_parallel": false,
+    "graph_mode": "FULL_AND_PIECEWISE",
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+    "precision": "BF16",
+    "max_model_len": 262144,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "prefix_caching": true,
+    "async_scheduling": true,
+    "mamba_cache_mode": "align",
+    "mtp_draft_tokens": 2,
+    "thinking": true,
+    "temperature": 0,
+    "kv_cache_memory_bytes_per_chip": 26038239232,
+    "workload": "swe-prefix-reuse/v1",
+    "prepared_workload_sha256": "aa23f49e08a946d94eaab21307e9e015140cc8598adfbd5f7e244bdded7b17d0",
+    "tokenizer_fingerprint": "3f9ca78537850303ee04bfa6640c020be89723c62f37121c0f27a4c0babc53e0",
+    "measurement_seconds": 900
+  },
+  "datasets": [
+    {
+      "id": "swe-prefix-reuse-c1",
+      "label": "SWE Prefix Reuse · C1",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 1",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c2",
+      "label": "SWE Prefix Reuse · C2",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 2",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c4",
+      "label": "SWE Prefix Reuse · C4",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 4",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c8",
+      "label": "SWE Prefix Reuse · C8",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 8",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c16",
+      "label": "SWE Prefix Reuse · C16",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 16",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "output_token_throughput",
+      "label": "Output token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    },
+    {
+      "id": "decode_p90_tps_per_user",
+      "label": "P90 decode throughput per user",
+      "unit": "token/s/user",
+      "direction": "higher"
+    }
+  ],
+  "results": [
+    {
+      "dataset_id": "swe-prefix-reuse-c1",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 41.465555555555554,
+      "value": 60.98,
+      "delta_pct": 47.061818376698206,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 60.98,
+          "delta_pct": 47.061818376698206,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "e909c165c53945b5b0d5e8164e4accb1"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "e909c165c53945b5b0d5e8164e4accb1"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "f3eaa00ae3fe4e5ab09700fcc96bd885"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c1",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 60.02513728122424,
+      "value": 69.38786023366178,
+      "delta_pct": 15.598003397430272,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 69.38786023366178,
+          "delta_pct": 15.598003397430272,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "e909c165c53945b5b0d5e8164e4accb1"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "e909c165c53945b5b0d5e8164e4accb1"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "f3eaa00ae3fe4e5ab09700fcc96bd885"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c2",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 56.04333333333334,
+      "value": 58.916666666666664,
+      "delta_pct": 5.12698507107594,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 58.916666666666664,
+          "delta_pct": 5.12698507107594,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "a1bd23668ece426fbb6fc326addf4bca"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "a1bd23668ece426fbb6fc326addf4bca"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "d153f678626245cea260877100322289"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c2",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 37.04104558636969,
+      "value": 36.05431879732996,
+      "delta_pct": -2.663874017106105,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 36.05431879732996,
+          "delta_pct": -2.663874017106105,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "a1bd23668ece426fbb6fc326addf4bca"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "regressed",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "a1bd23668ece426fbb6fc326addf4bca"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "d153f678626245cea260877100322289"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c4",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 75.88111111111111,
+      "value": 78.63444444444444,
+      "delta_pct": 3.6284831534710626,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 78.63444444444444,
+          "delta_pct": 3.6284831534710626,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "1c9de69d764a4d8e86ea7df6ff714dcc"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "1c9de69d764a4d8e86ea7df6ff714dcc"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "6e3c9ae738964f22acb16a0cb5ee3bc5"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c4",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 26.865854340279313,
+      "value": 28.371516890212515,
+      "delta_pct": 5.604372490309384,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 28.371516890212515,
+          "delta_pct": 5.604372490309384,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "1c9de69d764a4d8e86ea7df6ff714dcc"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "1c9de69d764a4d8e86ea7df6ff714dcc"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "6e3c9ae738964f22acb16a0cb5ee3bc5"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c8",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 81.78222222222222,
+      "value": 82.16444444444444,
+      "delta_pct": 0.46736590402696176,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 82.16444444444444,
+          "delta_pct": 0.46736590402696176,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "4c172f62521c4dc88ef1a1011c4f7ba1"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "4c172f62521c4dc88ef1a1011c4f7ba1"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "a57b59693e6f4843b13757dac4b7cad3"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c8",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 14.743465688873187,
+      "value": 15.500230249184433,
+      "delta_pct": 5.132881076139184,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 15.500230249184433,
+          "delta_pct": 5.132881076139184,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "4c172f62521c4dc88ef1a1011c4f7ba1"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "4c172f62521c4dc88ef1a1011c4f7ba1"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "a57b59693e6f4843b13757dac4b7cad3"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c16",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 99.19444444444444,
+      "value": 98.25111111111111,
+      "delta_pct": -0.9509941192943128,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 98.25111111111111,
+          "delta_pct": -0.9509941192943128,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "489c8ff4b25d4262a0e26504605c8c93"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "regressed",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "489c8ff4b25d4262a0e26504605c8c93"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "50596f6ebf4c44d29d42a3e1cb1cd442"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c16",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 8.796526956616184,
+      "value": 8.553896428818245,
+      "delta_pct": -2.758253672097799,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "pipeline-microbatch-migration",
+      "candidate_values": [
+        {
+          "candidate_id": "pipeline-microbatch-migration",
+          "label": "Pipeline microbatch migration",
+          "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1",
+          "value": 8.553896428818245,
+          "delta_pct": -2.758253672097799,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+            "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+            "run_id": "489c8ff4b25d4262a0e26504605c8c93"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "regressed",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-pipeline-microbatch",
+        "repository_commit": "a15a22961a0e4858da74a0ab806575c82cb254e6",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "run_id": "489c8ff4b25d4262a0e26504605c8c93"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-CURVE-COMPLETION.md",
+        "series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+        "run_id": "50596f6ebf4c44d29d42a3e1cb1cd442"
+      }
+    }
+  ],
+  "limitations": [
+    "The matched pair uses TP2×PP2 on four chips and must not be compared to the TP2/PP1 Native series.",
+    "The policy executed in every window but abstained on recorded admissions; measured positive and negative deltas are retained without claiming a policy-action gain."
+  ],
+  "coverage_contract": {
+    "mode": "explicit-dataset-metric-applicability",
+    "complete_cell_states_required": true,
+    "non_measured_reason_required": true,
+    "matched_b0_required_for_b1": true
+  }
+}

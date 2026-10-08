@@ -25,7 +25,7 @@ def load_json(path: Path) -> dict:
 
 
 def test_checked_in_publication_is_valid_and_complete() -> None:
-    assert validate_publication(PUBLICATION) == {"scenarios": 5, "results": 709}
+    assert validate_publication(PUBLICATION) == {"scenarios": 7, "results": 729}
 
 
 def test_qwen35_frontier_b1_retains_all_admitted_candidates() -> None:
@@ -79,6 +79,47 @@ def test_qwen35_frontier_b1_rebuild_is_reproducible() -> None:
         PUBLICATION / "dataset_validation_qwen35_frontier_unified_900s.json"
     )
     assert module.build() == checked_in
+    checked_in_betterscale = load_json(
+        PUBLICATION / "dataset_validation_qwen35_frontier_betterscale_900s.json"
+    )
+    assert module.build_betterscale() == checked_in_betterscale
+    checked_in_pipeline = load_json(
+        PUBLICATION / "dataset_validation_qwen35_frontier_pipeline_pp2_900s.json"
+    )
+    assert module.build_pipeline() == checked_in_pipeline
+
+
+def test_remaining_frontier_pairs_preserve_gains_and_regressions() -> None:
+    betterscale = load_json(
+        PUBLICATION / "dataset_validation_qwen35_frontier_betterscale_900s.json"
+    )
+    assert betterscale["baseline"]["id"] == "swe-capacity16-native"
+    assert betterscale["scenario"]["baseline_graph_mode"] == "FULL_AND_PIECEWISE"
+    assert betterscale["scenario"]["candidate_graph_mode"] == "FULL"
+    assert {cell["selected_candidate_id"] for cell in betterscale["results"]} == {
+        "betterscale"
+    }
+    assert {cell["comparison"]["trend"] for cell in betterscale["results"]} == {
+        "improved"
+    }
+
+    pipeline = load_json(
+        PUBLICATION / "dataset_validation_qwen35_frontier_pipeline_pp2_900s.json"
+    )
+    assert pipeline["baseline"]["id"] == "swe-k8s-pp2-20260925-nativepp-r1"
+    assert pipeline["scenario"]["pipeline_parallel_size"] == 2
+    assert pipeline["scenario"]["hardware"] == "4× Ascend 910B2"
+    assert {cell["selected_candidate_id"] for cell in pipeline["results"]} == {
+        "pipeline-microbatch-migration"
+    }
+    assert {cell["comparison"]["trend"] for cell in pipeline["results"]} == {
+        "improved",
+        "regressed",
+    }
+    assert all(
+        cell["candidate_values"][0]["runtime_effectiveness"] == "exercised"
+        for cell in pipeline["results"]
+    )
 
 
 def test_qwen35_workbook_b0_is_published_with_repaired_metadata() -> None:
