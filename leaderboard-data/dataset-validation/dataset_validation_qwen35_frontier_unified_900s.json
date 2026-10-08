@@ -1,0 +1,1270 @@
+{
+  "contract_version": "dataset-validation-v1",
+  "generated_at": "2026-10-08T00:00:00Z",
+  "status": "complete_comparison",
+  "source": {
+    "service": "Qwen3.5 unified Frontier paired measurements",
+    "repository": "vLLM-HUST/vllm-hust-website",
+    "commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+    "frontier_data_sha256": "5913253b83455ce375d0252ed803beed76fb6a5a98348f60c103e6f44f246a7d",
+    "comparison_contract_sha256": "d174bd33ab9b4e1b9b02a836f3f24b0be8fbfd156ae33e19539d8f5984e1e4c2",
+    "tracking_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/245"
+  },
+  "baseline": {
+    "id": "swe-unified-native-20260927",
+    "label": "Native unified 900s",
+    "generated_at": "2026-09-27"
+  },
+  "candidate_policy": {
+    "id": "best-per-cell-with-full-candidate-set",
+    "label": "Best compliant measured result per cell; retain every admitted candidate",
+    "single_version_required": false,
+    "rule": "Select the highest value for the cell from the six series admitted by the published comparison contract; retain every candidate and its provenance in candidate_values."
+  },
+  "scenario": {
+    "id": "qwen35-35b-a3b-bf16-tp2-pp1-dp1-ep-off-ctx262k-apc-on-mtp2-full-piecewise-sweprefix-900s",
+    "label": "Qwen3.5-35B-A3B · BF16 · TP2/PP1/DP1 · EP off · 262K · APC on · MTP2 · FULL_AND_PIECEWISE · SWE Prefix Reuse · 900s",
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+    "hardware": "2× Ascend 910B2",
+    "precision": "BF16",
+    "tensor_parallel_size": 2,
+    "pipeline_parallel_size": 1,
+    "data_parallel_size": 1,
+    "expert_parallel": false,
+    "max_model_len": 262144,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "prefix_caching": true,
+    "async_scheduling": true,
+    "mamba_cache_mode": "align",
+    "mtp_draft_tokens": 2,
+    "thinking": true,
+    "temperature": 0,
+    "graph_mode": "FULL_AND_PIECEWISE",
+    "kv_cache_memory_bytes_per_chip": 26038239232,
+    "workload": "swe-prefix-reuse/v1",
+    "prepared_workload_sha256": "8044561ffa1bb430bea8f778ef814d96649321e1a92654b95f64263b996d5e85",
+    "tokenizer_fingerprint": "3f9ca78537850303ee04bfa6640c020be89723c62f37121c0f27a4c0babc53e0",
+    "measurement_seconds": 900
+  },
+  "datasets": [
+    {
+      "id": "swe-prefix-reuse-c1",
+      "label": "SWE Prefix Reuse · C1",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 1",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c2",
+      "label": "SWE Prefix Reuse · C2",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 2",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c4",
+      "label": "SWE Prefix Reuse · C4",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 4",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c8",
+      "label": "SWE Prefix Reuse · C8",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 8",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c16",
+      "label": "SWE Prefix Reuse · C16",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 16",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "output_token_throughput",
+      "label": "Output token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    },
+    {
+      "id": "decode_p90_tps_per_user",
+      "label": "P90 decode throughput per user",
+      "unit": "token/s/user",
+      "direction": "higher"
+    }
+  ],
+  "results": [
+    {
+      "dataset_id": "swe-prefix-reuse-c1",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 91.54555555555555,
+      "value": 94.57222222222222,
+      "delta_pct": 3.3061863553057957,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "kvcompress-ascend",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 92.13333333333334,
+          "delta_pct": 0.642060419220547,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "9cd43584a1ab4a7085da2dec73ffb5ad"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 91.84666666666666,
+          "delta_pct": 0.32891942081052505,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "e4c11fa8ea304eb181c12192248a4070"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 90.5911111111111,
+          "delta_pct": -1.0425896032333681,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "ad9925f9329b4f87ad3da5285ebab36b"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 91.03222222222222,
+          "delta_pct": -0.5607408576179473,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "4f4aa33f2ab046ada0de34df16fbc6c3"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 94.57222222222222,
+          "delta_pct": 3.3061863553057957,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "b31b00379e034d7e813ae774a6ca41a2"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 65.52333333333333,
+          "delta_pct": -28.425434816909622,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "c01435f8e7a34e19aec12f2c24031d5c"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+        "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+        "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+        "run_id": "b31b00379e034d7e813ae774a6ca41a2"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "562a9f3349c04f69b9069f81d518a198"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c1",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 107.36076237098999,
+      "value": 113.9060417414391,
+      "delta_pct": 6.096528401904977,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 107.68752556522423,
+          "delta_pct": 0.3043599793983498,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "9cd43584a1ab4a7085da2dec73ffb5ad"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 106.95998116424124,
+          "delta_pct": -0.37330324216945376,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "e4c11fa8ea304eb181c12192248a4070"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 107.36876391861011,
+          "delta_pct": 0.007452953428632725,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "ad9925f9329b4f87ad3da5285ebab36b"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 106.13549438369412,
+          "delta_pct": -1.141262375784824,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "4f4aa33f2ab046ada0de34df16fbc6c3"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 110.35405668201226,
+          "delta_pct": 2.7880710279224674,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "b31b00379e034d7e813ae774a6ca41a2"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 113.9060417414391,
+          "delta_pct": 6.096528401904977,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "c01435f8e7a34e19aec12f2c24031d5c"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "c01435f8e7a34e19aec12f2c24031d5c"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "562a9f3349c04f69b9069f81d518a198"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c2",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 152.7211111111111,
+      "value": 167.14333333333335,
+      "delta_pct": 9.443502680994431,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 153.43,
+          "delta_pct": 0.4641721656760023,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "7d1281c1e2474bcdbf4e5fde3b8a6b1f"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 152.60666666666665,
+          "delta_pct": -0.07493688568123158,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "ef7efb2e134d480580de65f3102ce866"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 154.7288888888889,
+          "delta_pct": 1.3146694410290483,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "aa7b91b673fb4b1caf4adbc2134ed65b"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 150.45222222222222,
+          "delta_pct": -1.48564194719496,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "99370030aacb43918f0a3f3ad924ad5c"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 136.70555555555555,
+          "delta_pct": -10.486798739896253,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "7fe75902ced340b9b7b24abf1058794c"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 167.14333333333335,
+          "delta_pct": 9.443502680994431,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "9d697fe6af154fe785a626a10864c7f5"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "9d697fe6af154fe785a626a10864c7f5"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "edda8b45980944edb315abc2172910c9"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c2",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 97.81036014052084,
+      "value": 109.48681228877716,
+      "delta_pct": 11.937848027020003,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 98.83310399422402,
+          "delta_pct": 1.0456395950631858,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "7d1281c1e2474bcdbf4e5fde3b8a6b1f"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 98.15888496241027,
+          "delta_pct": 0.35632710214819063,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "ef7efb2e134d480580de65f3102ce866"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 98.92568495208843,
+          "delta_pct": 1.1402931243328807,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "aa7b91b673fb4b1caf4adbc2134ed65b"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 97.13844486718608,
+          "delta_pct": -0.6869571611529124,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "99370030aacb43918f0a3f3ad924ad5c"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 88.41768829712161,
+          "delta_pct": -9.60294168215422,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "7fe75902ced340b9b7b24abf1058794c"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 109.48681228877716,
+          "delta_pct": 11.937848027020003,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "9d697fe6af154fe785a626a10864c7f5"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "9d697fe6af154fe785a626a10864c7f5"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "edda8b45980944edb315abc2172910c9"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c4",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 217.47555555555556,
+      "value": 237.96777777777777,
+      "delta_pct": 9.422770375214572,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 216.70222222222222,
+          "delta_pct": -0.3555955203139116,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "b041218b96c3473bb50230ce679483a2"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 215.56222222222223,
+          "delta_pct": -0.8797923649145778,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "dfdb8d3893cb4292ad2a3bb7be291a00"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 237.52444444444444,
+          "delta_pct": 9.218916046758775,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "5a723cba6cf146379aee490dc398fc8b"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 215.9322222222222,
+          "delta_pct": -0.7096583013161184,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "9ed47b70f85549c09efdb9e115df2b3c"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 206.5988888888889,
+          "delta_pct": -5.001328374070136,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "2042394037de4949926f5ceea42b04ea"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 237.96777777777777,
+          "delta_pct": 9.422770375214572,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "d09d02d878be40d883d746c4ec660956"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "d09d02d878be40d883d746c4ec660956"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "2357194fcf6143ca9c78d65d8f7eca09"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c4",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 78.15060902600783,
+      "value": 87.30566240630844,
+      "delta_pct": 11.714628323950604,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 78.1774927481624,
+          "delta_pct": 0.03439988822815376,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "b041218b96c3473bb50230ce679483a2"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 77.57745642141361,
+          "delta_pct": -0.733394930298592,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "dfdb8d3893cb4292ad2a3bb7be291a00"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 84.76666140724171,
+          "delta_pct": 8.465772005733353,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "5a723cba6cf146379aee490dc398fc8b"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 77.40249120147915,
+          "delta_pct": -0.9572770242644024,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "9ed47b70f85549c09efdb9e115df2b3c"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 77.34354504472113,
+          "delta_pct": -1.0327033804920394,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "2042394037de4949926f5ceea42b04ea"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 87.30566240630844,
+          "delta_pct": 11.714628323950604,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "d09d02d878be40d883d746c4ec660956"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "d09d02d878be40d883d746c4ec660956"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "2357194fcf6143ca9c78d65d8f7eca09"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c8",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 291.1066666666667,
+      "value": 361.4411111111111,
+      "delta_pct": 24.161055893983118,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 293.44555555555553,
+          "delta_pct": 0.8034473808760323,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "eeb2c659cf2c434baa1daab4e3393728"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 288.1488888888889,
+          "delta_pct": -1.0160460465045262,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "2ab00cdf0a0a44159154c1a38b131f14"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 325.75111111111113,
+          "delta_pct": 11.900945052596224,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "5c9cd4af1452439f90d746ee86f4f843"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 286.12,
+          "delta_pct": -1.7130032519580451,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "d650f3a508814a5c8525631111a0238b"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 286.1011111111111,
+          "delta_pct": -1.7194919006397136,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "bda15187dacf4d4b994fb34aaf7bb310"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 361.4411111111111,
+          "delta_pct": 24.161055893983118,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "618a071154cb4b8e810c0d4f4efd5125"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "618a071154cb4b8e810c0d4f4efd5125"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "9f9dc7fa5e40427b8ef9fe99a95c737e"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c8",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 59.758209174967206,
+      "value": 73.03849278224763,
+      "delta_pct": 22.223362765769682,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 59.13227474995871,
+          "delta_pct": -1.0474450852029582,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "eeb2c659cf2c434baa1daab4e3393728"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 57.033470748952965,
+          "delta_pct": -4.5596052218305765,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "2ab00cdf0a0a44159154c1a38b131f14"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 59.8154350121774,
+          "delta_pct": 0.0957623027869614,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "5c9cd4af1452439f90d746ee86f4f843"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 56.49823410867081,
+          "delta_pct": -5.455275704048379,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "d650f3a508814a5c8525631111a0238b"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 61.13461820415613,
+          "delta_pct": 2.3032969832796013,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "bda15187dacf4d4b994fb34aaf7bb310"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 73.03849278224763,
+          "delta_pct": 22.223362765769682,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "618a071154cb4b8e810c0d4f4efd5125"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "618a071154cb4b8e810c0d4f4efd5125"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "9f9dc7fa5e40427b8ef9fe99a95c737e"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c16",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 359.75,
+      "value": 459.71555555555557,
+      "delta_pct": 27.787506756235047,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 358.70666666666665,
+          "delta_pct": -0.290016214964095,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "8b09ecc3847f4578a0b044e359400f04"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 358.1988888888889,
+          "delta_pct": -0.4311636167091293,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "5bf7b8ce60ba4b68864debbbf91bacb7"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 414.2922222222222,
+          "delta_pct": 15.161145857462754,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "1f9c022d2026433682cffd3d25211cbc"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 341.6333333333333,
+          "delta_pct": -5.035904563354188,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "2cd49521050b4aa8a756e6edb1327885"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 347.75333333333333,
+          "delta_pct": -3.3347231873986583,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "436f78f03dd24c9ea2dd462803db3d4b"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 459.71555555555557,
+          "delta_pct": 27.787506756235047,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "eed86dbce9f74fc583ef30f3073cfdec"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "eed86dbce9f74fc583ef30f3073cfdec"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "f7e5da90a1a243deb3e24b8c86f68303"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c16",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 33.54398219355827,
+      "value": 46.37622765934938,
+      "delta_pct": 38.25498532567011,
+      "updated_at": "2026-09-29",
+      "selected_candidate_id": "pegaflow-vllm-connectors",
+      "candidate_values": [
+        {
+          "candidate_id": "bidkv",
+          "label": "BidKV",
+          "series_id": "swe-unified-bidkv-20260927",
+          "value": 33.39448751175928,
+          "delta_pct": -0.44566766383420386,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-bidkv",
+            "repository_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "8b09ecc3847f4578a0b044e359400f04"
+          }
+        },
+        {
+          "candidate_id": "dla",
+          "label": "DLA",
+          "series_id": "swe-unified-dla-20260927",
+          "value": 34.83995993020349,
+          "delta_pct": 3.8635178410454163,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-dla",
+            "repository_commit": "dc20d0f8ea8d09106f77571e1947b9a2f8702545",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "5bf7b8ce60ba4b68864debbbf91bacb7"
+          }
+        },
+        {
+          "candidate_id": "kv-materialization-arrival-control",
+          "label": "KV materialization arrival control",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928",
+          "value": 36.79618457742906,
+          "delta_pct": 9.695337795926129,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-materialization-arrival-control",
+            "repository_commit": "53a6b1130cbff58925782eb62d7e88cd37e4e20a",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+            "run_id": "1f9c022d2026433682cffd3d25211cbc"
+          }
+        },
+        {
+          "candidate_id": "kv-tiering-migration",
+          "label": "KV tiering migration",
+          "series_id": "swe-unified-kv-tiering-migration-20260927",
+          "value": 33.25649016831222,
+          "delta_pct": -0.8570599149115399,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-kv-tiering",
+            "repository_commit": "7ba646a780c3bd0a8906309ea59719f5ccf6187e",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+            "run_id": "2cd49521050b4aa8a756e6edb1327885"
+          }
+        },
+        {
+          "candidate_id": "kvcompress-ascend",
+          "label": "KVCompress Ascend",
+          "series_id": "swe-unified-kvcompress-ascend-20260928",
+          "value": 34.93487505412306,
+          "delta_pct": 4.146475074244149,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-ascend-kvcompress-hust",
+            "repository_commit": "2ca0f9335399a698342285870df1514e9c519bd4",
+            "report_url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/a020c164ec68cf3a7c53a40c0129b37a14ed1a05/handoff/2026-09-28-qwen35-frontier-formal/README.md",
+            "run_id": "436f78f03dd24c9ea2dd462803db3d4b"
+          }
+        },
+        {
+          "candidate_id": "pegaflow-vllm-connectors",
+          "label": "PegaFlow vLLM connectors",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929",
+          "value": 46.37622765934938,
+          "delta_pct": 38.25498532567011,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/pegaflow-hust",
+            "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+            "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+            "run_id": "eed86dbce9f74fc583ef30f3073cfdec"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "best compliant measured candidate for this cell"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/pegaflow-hust",
+        "repository_commit": "cd64ecc283ff856a44437a9a25659929ef3a0653",
+        "report_url": "https://github.com/vLLM-HUST/pegaflow-hust/blob/64ef9d0b5c4f11589d296f8500dc1664ffc346dc/handoff/2026-09-29-qwen35-frontier-formal/README.md",
+        "run_id": "eed86dbce9f74fc583ef30f3073cfdec"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+        "series_id": "swe-unified-native-20260927",
+        "run_id": "f7e5da90a1a243deb3e24b8c86f68303"
+      }
+    }
+  ],
+  "limitations": [
+    "These cells cover only SWE Prefix Reuse at five closed-loop concurrency levels; they are not measurements for the other Dataset Matrix datasets.",
+    "The source Frontier projection labels its legacy campaign profile as smoke, but every admitted cell here is a full 900-second formal window.",
+    "runtime_effectiveness=not-recorded means this projection does not independently claim a control action; it does not rewrite the producing repository's evidence."
+  ],
+  "coverage_contract": {
+    "mode": "explicit-dataset-metric-applicability",
+    "complete_cell_states_required": true,
+    "non_measured_reason_required": true,
+    "matched_b0_required_for_b1": true
+  }
+}
