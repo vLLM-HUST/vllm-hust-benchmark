@@ -1,0 +1,1586 @@
+{
+  "schema_version": "qwen35-b0-xlsx-cross-validation/v1",
+  "status": "static-values-only-not-admissible-as-formal-b0",
+  "generated_at": "2026-10-08T08:00:06.318488Z",
+  "inputs": {
+    "xlsx": {
+      "path": "reports/qwen35-b0-xlsx-cross-validation-20261008/35B-B0-baseline.xlsx",
+      "size_bytes": 13343,
+      "sha256": "82e81a8dbe574cf7593c3d6f74eb3a835351c3279dc12e9f3581d6f91157b743",
+      "sheet": "a1-a4-metric-dataset-matrix",
+      "modified": false
+    },
+    "current_qwen35_registry": {
+      "path": "leaderboard-data/dataset-validation/dataset_validation_qwen35_tp2_matrix.json",
+      "sha256": "87de69f9f32aa129accd9a8e33539b9de2237b7e3a9c8e2d91711a4c2b45a8d3",
+      "git_commit": "935666f45eed5eda8b71bd88436e096168476d85",
+      "scenario": {
+        "id": "qwen35-35b-a3b-bf16-tp2-dataset-matrix-v1",
+        "label": "Qwen3.5-35B-A3B · BF16 · TP2 · Dataset Matrix",
+        "model": "Qwen3.5-35B-A3B",
+        "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+        "hardware": "2× Ascend 910B2",
+        "precision": "BF16",
+        "tensor_parallel_size": 2
+      }
+    },
+    "historical_qwen25_archive_registry": {
+      "path": "leaderboard-data/dataset-validation/dataset_validation_v1.b0.json",
+      "sha256": "806660ab87d26bd426bcaddacc30e9bc030028f57c0ea62b23c8560eb7298584",
+      "scenario": {
+        "id": "qwen25-14b-instruct-fp16-ascend-single",
+        "label": "V4.6 A1-A4 · B0 archive import",
+        "model": "Qwen2.5-14B-Instruct",
+        "hardware": "Ascend single NPU",
+        "precision": "FP16"
+      },
+      "comparison_valid": false
+    },
+    "historical_archive": {
+      "path": "not-committed-local-historical-reference",
+      "sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+      "comparison_valid": false
+    }
+  },
+  "summary": {
+    "populated_dataset_count": 21,
+    "populated_metric_count": 105,
+    "metric_units_matching_registry": 5,
+    "same_contract_values_available": 0,
+    "same_contract_numeric_matches": 0,
+    "unmatched_static_values": 105,
+    "near_256_output_tokens_per_request_dataset_count": 20,
+    "empty_dataset_columns": [
+      "BBH",
+      "BFCL-V4",
+      "BURSTGPT-TRACE",
+      "GPQA",
+      "HOTPOTQA-REACT-100",
+      "INFINITEBENCH",
+      "LIVECODEBENCH-TEST-GENERATION",
+      "PAIO-LONGTEXT-4000",
+      "PAIO-PREFIX-SHARED-5000",
+      "PAIO-REUSE-CONV-5000",
+      "PAIO-SEMANTIC-SIMILAR-5000",
+      "SCHEMASTORE",
+      "SHAREGPT-V3",
+      "SONNET",
+      "STRUCTEVAL",
+      "SZYN-OPENCODE-SWEBENCH-VERIFIED-500",
+      "SYFI-CODING-TRACE",
+      "TAU2-BENCH",
+      "TOOLBENCH",
+      "ULTRACHAT-200K",
+      "VISIONARENA",
+      "WILDCHAT",
+      "WILDCHAT-4.8M"
+    ]
+  },
+  "contract_assessment": {
+    "asserted_outside_workbook": {
+      "model": "Qwen3.5-35B-A3B",
+      "baseline_role": "B0"
+    },
+    "not_bound_by_workbook": [
+      "model revision",
+      "vLLM commit and version",
+      "vLLM-Ascend commit and version",
+      "hardware identity and exact topology",
+      "precision and KV-cache dtype",
+      "tensor/pipeline/data/expert parallel settings",
+      "concurrency and request rate",
+      "planned and successful request counts",
+      "input/output token shape and truncation policy",
+      "sampling parameters",
+      "warmup and measurement window",
+      "repetition count and aggregation statistic"
+    ],
+    "current_registry_expected_contract": {
+      "id": "qwen35-35b-a3b-bf16-tp2-dataset-matrix-v1",
+      "label": "Qwen3.5-35B-A3B · BF16 · TP2 · Dataset Matrix",
+      "model": "Qwen3.5-35B-A3B",
+      "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+      "hardware": "2× Ascend 910B2",
+      "precision": "BF16",
+      "tensor_parallel_size": 2
+    },
+    "historical_reference_contract": {
+      "id": "qwen25-14b-instruct-fp16-ascend-single",
+      "label": "V4.6 A1-A4 · B0 archive import",
+      "model": "Qwen2.5-14B-Instruct",
+      "hardware": "Ascend single NPU",
+      "precision": "FP16"
+    },
+    "historical_reference_is_not_comparable": true
+  },
+  "missing_v49_evidence": [
+    "success rate with planned/completed/failed request counts",
+    "task correctness or frozen official scorer output where applicable",
+    "OOM event count",
+    "silent truncation count and rate",
+    "three independent repetitions and per-metric aggregation/CV",
+    "config_id or canonical resolved spec",
+    "exact server and client commands",
+    "model/runtime/container/hardware immutable identities",
+    "request-level records and token timestamps",
+    "raw benchmark result JSON for every repetition",
+    "server/client/NPU logs and exit/resource-release evidence",
+    "artifact manifest plus SHA-256 coverage"
+  ],
+  "possible_difference_causes": [
+    "The only local screenshot-backed B0 is Qwen2.5-14B-Instruct on one Ascend NPU in FP16, while the target registry is Qwen3.5-35B-A3B on TP2 in BF16.",
+    "The workbook does not bind runtime revisions, concurrency, request count, token shapes, or window semantics.",
+    "Rounded aggregate values can make token-per-request ratios approximate; BFCL-V3 also differs materially from the 256-token pattern."
+  ],
+  "datasets": [
+    {
+      "dataset_id": "ai2-arc",
+      "dataset_label": "AI2-ARC",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.19,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.8,
+          "historical_percent_delta": 21.666666666666657,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 560.5,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 274.82,
+          "historical_percent_delta": 103.95167746161124,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 762.73,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 455.55,
+          "historical_percent_delta": 67.43057842168807,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 41656.44,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 69831.12,
+          "historical_percent_delta": -40.34688259331942,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 26.13,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 40.1,
+          "historical_percent_delta": -34.83790523690774,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.93607305936072,
+        "implied_input_token_throughput": 202.23000000000002,
+        "implied_input_tokens_per_request_ratio": 92.34246575342466,
+        "duration_seconds_if_request_count_were_200": 91.32420091324201,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "aime-2024",
+      "dataset_label": "AIME-2024",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.26,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.37,
+          "historical_percent_delta": 64.96350364963502,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 577.94,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 350.45,
+          "historical_percent_delta": 64.91368240833218,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 902.73,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 561.1,
+          "historical_percent_delta": 60.88576011406166,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 40646.3,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 86505.57,
+          "historical_percent_delta": -53.01308343497419,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.26,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 33.93,
+          "historical_percent_delta": -25.552608311228997,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.7256637168142,
+        "implied_input_token_throughput": 324.78999999999996,
+        "implied_input_tokens_per_request_ratio": 143.71238938053096,
+        "duration_seconds_if_request_count_were_200": 88.49557522123895,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "dataset_label": "BFCL-V3",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 1.57,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 3.03,
+          "historical_percent_delta": -48.18481848184818,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 365.3,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 95.05,
+          "historical_percent_delta": 284.32403997895847,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 688.27,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 725.83,
+          "historical_percent_delta": -5.1747654409434745,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 56726.94,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 42899.59,
+          "historical_percent_delta": 32.23189312531893,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 41.25,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 78.76,
+          "historical_percent_delta": -47.625698324022345,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 232.6751592356688,
+        "implied_input_token_throughput": 322.96999999999997,
+        "implied_input_tokens_per_request_ratio": 205.71337579617833,
+        "duration_seconds_if_request_count_were_200": 127.38853503184713,
+        "near_256_output_tokens_per_request": false,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "evoscientist",
+      "dataset_label": "EVOSCIENTIST",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.24,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.36,
+          "historical_percent_delta": 64.70588235294119,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 572.34,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 347.48,
+          "historical_percent_delta": 64.71163807988948,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 1011.81,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 621.97,
+          "historical_percent_delta": 62.67826422496261,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 40787.43,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 85692.98,
+          "historical_percent_delta": -52.402833931087464,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.47,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 33.8,
+          "historical_percent_delta": -24.644970414201183,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.50892857142856,
+        "implied_input_token_throughput": 439.4699999999999,
+        "implied_input_tokens_per_request_ratio": 196.19196428571422,
+        "duration_seconds_if_request_count_were_200": 89.28571428571428,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "gsm8k",
+      "dataset_label": "GSM8K",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.24,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": null,
+          "historical_percent_delta": null,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 574.65,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": null,
+          "historical_percent_delta": null,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 797.49,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": null,
+          "historical_percent_delta": null,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 40564.04,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": null,
+          "historical_percent_delta": null,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.44,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": null,
+          "historical_percent_delta": null,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 256.54017857142856,
+        "implied_input_token_throughput": 222.84000000000003,
+        "implied_input_tokens_per_request_ratio": 99.48214285714286,
+        "duration_seconds_if_request_count_were_200": 89.28571428571428,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "dataset_label": "HOTPOT-QA",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 1.94,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.71,
+          "historical_percent_delta": 13.450292397660824,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 495.51,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 168.67,
+          "historical_percent_delta": 193.77482658445487,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 3311.86,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 2665.76,
+          "historical_percent_delta": 24.236990576796114,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 47869.08,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 71563.59,
+          "historical_percent_delta": -33.10972800554024,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 28.63,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 65.54,
+          "historical_percent_delta": -56.31675312786085,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.41752577319588,
+        "implied_input_token_throughput": 2816.3500000000004,
+        "implied_input_tokens_per_request_ratio": 1451.7268041237116,
+        "duration_seconds_if_request_count_were_200": 103.09278350515464,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "humaneval",
+      "dataset_label": "HUMANEVAL",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.16,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.25,
+          "historical_percent_delta": 72.80000000000003,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 553.16,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 315.64,
+          "historical_percent_delta": 75.25028513496387,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 896.72,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 518.46,
+          "historical_percent_delta": 72.95837673108822,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 33340.32,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 76846.61,
+          "historical_percent_delta": -56.61445573200952,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.9,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 35.44,
+          "historical_percent_delta": -26.91873589164786,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 256.09259259259255,
+        "implied_input_token_throughput": 343.56000000000006,
+        "implied_input_tokens_per_request_ratio": 159.05555555555557,
+        "duration_seconds_if_request_count_were_200": 92.59259259259258,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "instructcoder",
+      "dataset_label": "INSTRUCTCODER",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.27,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.79,
+          "historical_percent_delta": 26.81564245810055,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 580.88,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 270.76,
+          "historical_percent_delta": 114.53685921110947,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 989.61,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 592.03,
+          "historical_percent_delta": 67.15538063949462,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 40002.96,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 69110.87,
+          "historical_percent_delta": -42.1177016003416,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.08,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 41.67,
+          "historical_percent_delta": -39.81281497480202,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.8942731277533,
+        "implied_input_token_throughput": 408.73,
+        "implied_input_tokens_per_request_ratio": 180.05726872246697,
+        "duration_seconds_if_request_count_were_200": 88.10572687224669,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "dataset_label": "JSONSCHEMABENCH",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 1.81,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 0.95,
+          "historical_percent_delta": 90.5263157894737,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 462.85,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 136.13,
+          "historical_percent_delta": 240.0058767354735,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 4488.37,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 2259.84,
+          "historical_percent_delta": 98.61450368167657,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 44070.49,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 76051.44,
+          "historical_percent_delta": -42.0517349835848,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 30.16,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 89.09,
+          "historical_percent_delta": -66.14659333258504,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.7182320441989,
+        "implied_input_token_throughput": 4025.52,
+        "implied_input_tokens_per_request_ratio": 2224.0441988950274,
+        "duration_seconds_if_request_count_were_200": 110.49723756906077,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "dataset_label": "LIVECODEBENCH-CODE-GENERATION",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.08,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.84,
+          "historical_percent_delta": 13.043478260869556,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 533.34,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 244.44,
+          "historical_percent_delta": 118.18851251840945,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 1579.05,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1156.25,
+          "historical_percent_delta": 36.56648648648648,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 43939.97,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 64792.66,
+          "historical_percent_delta": -32.183722662412684,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 27.17,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 44.05,
+          "historical_percent_delta": -38.320090805902375,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 256.41346153846155,
+        "implied_input_token_throughput": 1045.71,
+        "implied_input_tokens_per_request_ratio": 502.7451923076923,
+        "duration_seconds_if_request_count_were_200": 96.15384615384615,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "dataset_label": "LIVECODEBENCH-EXECUTION",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.26,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.38,
+          "historical_percent_delta": 63.76811594202898,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 579.4,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 316.23,
+          "historical_percent_delta": 83.22107326945576,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 952.05,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 548.91,
+          "historical_percent_delta": 73.44373394545553,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 40257.09,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 84200.96,
+          "historical_percent_delta": -52.189274326563506,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.18,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 36.8,
+          "historical_percent_delta": -31.57608695652173,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 256.37168141592923,
+        "implied_input_token_throughput": 372.65,
+        "implied_input_tokens_per_request_ratio": 164.88938053097345,
+        "duration_seconds_if_request_count_were_200": 88.49557522123895,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "longbench",
+      "dataset_label": "LONGBENCH",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 1.23,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 0.47,
+          "historical_percent_delta": 161.70212765957447,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 313.96,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 55.5,
+          "historical_percent_delta": 465.6936936936937,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 8049.71,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 3603.35,
+          "historical_percent_delta": 123.39517393536572,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 80210.74,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 228597.76,
+          "historical_percent_delta": -64.91184340563967,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 45.71,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 233.07,
+          "historical_percent_delta": -80.38786630625991,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.2520325203252,
+        "implied_input_token_throughput": 7735.75,
+        "implied_input_tokens_per_request_ratio": 6289.227642276423,
+        "duration_seconds_if_request_count_were_200": 162.60162601626016,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "dataset_label": "LONGBENCH-V2",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 0.46,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 0.02,
+          "historical_percent_delta": 2200.0,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 117.28,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 4.13,
+          "historical_percent_delta": 2739.709443099274,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 13907.76,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 733.89,
+          "historical_percent_delta": 1795.074193680252,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 207046.06,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 2029754.75,
+          "historical_percent_delta": -89.79945434294463,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 122.24,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 837.1,
+          "historical_percent_delta": -85.39720463504958,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 254.95652173913044,
+        "implied_input_token_throughput": 13790.48,
+        "implied_input_tokens_per_request_ratio": 29979.304347826084,
+        "duration_seconds_if_request_count_were_200": 434.78260869565213,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "math-500",
+      "dataset_label": "MATH-500",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.14,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.39,
+          "historical_percent_delta": 53.95683453237412,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 549.03,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 317.95,
+          "historical_percent_delta": 72.67809403994339,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 787.85,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 483.94,
+          "historical_percent_delta": 62.79910732735463,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 42617.57,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 83844.28,
+          "historical_percent_delta": -49.170569536765065,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 26.62,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 36.72,
+          "historical_percent_delta": -27.505446623093675,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 256.5560747663551,
+        "implied_input_token_throughput": 238.82000000000005,
+        "implied_input_tokens_per_request_ratio": 111.59813084112152,
+        "duration_seconds_if_request_count_were_200": 93.45794392523364,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "mbpp",
+      "dataset_label": "MBPP",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.2,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 2.63,
+          "historical_percent_delta": -16.349809885931542,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 563.04,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 159.86,
+          "historical_percent_delta": 252.20818215938942,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 773.25,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 437.38,
+          "historical_percent_delta": 76.79134848415565,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 41261.73,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 47228.36,
+          "historical_percent_delta": -12.633574403176395,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.92,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 57.02,
+          "historical_percent_delta": -54.54226587162398,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.92727272727268,
+        "implied_input_token_throughput": 210.21000000000004,
+        "implied_input_tokens_per_request_ratio": 95.55000000000001,
+        "duration_seconds_if_request_count_were_200": 90.9090909090909,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "dataset_label": "MMLU-PRO",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.18,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.47,
+          "historical_percent_delta": 48.29931972789117,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 557.03,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 309.95,
+          "historical_percent_delta": 79.71608323923213,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 1014.93,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 631.03,
+          "historical_percent_delta": 60.83704419758173,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 42069.07,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 79432.31,
+          "historical_percent_delta": -47.03783636658685,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 26.25,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 39.07,
+          "historical_percent_delta": -32.812899923214744,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.51834862385317,
+        "implied_input_token_throughput": 457.9,
+        "implied_input_tokens_per_request_ratio": 210.045871559633,
+        "duration_seconds_if_request_count_were_200": 91.74311926605503,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "oasst1",
+      "dataset_label": "OASST1",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.11,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.5,
+          "historical_percent_delta": 40.66666666666665,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 538.35,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 319.5,
+          "historical_percent_delta": 68.49765258215963,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 636.41,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 407.05,
+          "historical_percent_delta": 56.34688613192482,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 42907.1,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 81240.06,
+          "historical_percent_delta": -47.18480020817316,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 27.14,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 35.97,
+          "historical_percent_delta": -24.54823463997775,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.14218009478677,
+        "implied_input_token_throughput": 98.05999999999995,
+        "implied_input_tokens_per_request_ratio": 46.47393364928907,
+        "duration_seconds_if_request_count_were_200": 94.7867298578199,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "dataset_label": "PAIO-CHAT-1000",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.23,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.53,
+          "historical_percent_delta": 45.7516339869281,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 570.36,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 295.69,
+          "historical_percent_delta": 92.89120362541851,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 1119.55,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 681.7,
+          "historical_percent_delta": 64.22913304972859,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 40899.14,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 77722.77,
+          "historical_percent_delta": -47.3781750187236,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.57,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 38.06,
+          "historical_percent_delta": -32.81660535995796,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.76681614349778,
+        "implied_input_token_throughput": 549.1899999999999,
+        "implied_input_tokens_per_request_ratio": 246.27354260089683,
+        "duration_seconds_if_request_count_were_200": 89.68609865470852,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "dataset_label": "PAIO-CODE-EVAL-1000",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 2.19,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 2.46,
+          "historical_percent_delta": -10.97560975609756,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 560.58,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 79.92,
+          "historical_percent_delta": 601.4264264264265,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 2526.43,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 2254.43,
+          "historical_percent_delta": 12.065133980651432,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 41694.41,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 56675.81,
+          "historical_percent_delta": -26.433499582979046,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 25.26,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 589.46,
+          "historical_percent_delta": -95.71472194890238,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 255.97260273972606,
+        "implied_input_token_throughput": 1965.85,
+        "implied_input_tokens_per_request_ratio": 897.648401826484,
+        "duration_seconds_if_request_count_were_200": 91.32420091324201,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "dataset_label": "PAIO-JSON-500",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 1.95,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1.41,
+          "historical_percent_delta": 38.29787234042554,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 499.48,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 262.11,
+          "historical_percent_delta": 90.56121475716301,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 1933.48,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 1301.52,
+          "historical_percent_delta": 48.555535066691256,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 46029.12,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 84839.36,
+          "historical_percent_delta": -45.745559608181864,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 28.46,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 44.04,
+          "historical_percent_delta": -35.37693006357856,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 256.14358974358976,
+        "implied_input_token_throughput": 1434.0,
+        "implied_input_tokens_per_request_ratio": 735.3846153846154,
+        "duration_seconds_if_request_count_were_200": 102.56410256410257,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "dataset_label": "PAIO-LONG-PREFILL-5000",
+      "metrics": {
+        "request_throughput": {
+          "xlsx_value": 1.02,
+          "unit": "request/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 0.49,
+          "historical_percent_delta": 108.16326530612245,
+          "historical_comparison_valid": false
+        },
+        "output_token_throughput": {
+          "xlsx_value": 261.99,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 15.78,
+          "historical_percent_delta": 1560.2661596958176,
+          "historical_comparison_valid": false
+        },
+        "total_token_throughput": {
+          "xlsx_value": 10026.02,
+          "unit": "token/s",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 5105.14,
+          "historical_percent_delta": 96.3906964353573,
+          "historical_comparison_valid": false
+        },
+        "ttft_mean": {
+          "xlsx_value": 90372.97,
+          "unit": "ms",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 195027.85,
+          "historical_percent_delta": -53.661505267068264,
+          "historical_comparison_valid": false
+        },
+        "tpot_mean": {
+          "xlsx_value": 54.22,
+          "unit": "ms/token",
+          "unit_matches_registry": true,
+          "current_qwen35_registry_status": "not_tested",
+          "current_qwen35_registry_value": null,
+          "same_contract_numeric_match": null,
+          "historical_qwen25_single_npu_fp16_value": 580.21,
+          "historical_percent_delta": -90.65510763344307,
+          "historical_comparison_valid": false
+        }
+      },
+      "derived_checks": {
+        "output_tokens_per_request_ratio": 256.8529411764706,
+        "implied_input_token_throughput": 9764.03,
+        "implied_input_tokens_per_request_ratio": 9572.578431372549,
+        "duration_seconds_if_request_count_were_200": 196.078431372549,
+        "near_256_output_tokens_per_request": true,
+        "inference_only": true
+      }
+    }
+  ]
+}
