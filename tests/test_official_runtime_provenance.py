@@ -12,14 +12,34 @@ HELPER = REPO_ROOT / "scripts/capture-official-runtime-provenance.py"
 
 
 @pytest.fixture(autouse=True)
-def _clear_fake_runtime_modules():
-    for name in ("vllm", "vllm_ascend"):
-        sys.modules.pop(name, None)
-        sys.modules.pop(f"{name}._version", None)
+def _isolate_fake_runtime_modules(monkeypatch):
+    def clear_runtime_modules() -> None:
+        for module_name in tuple(sys.modules):
+            if module_name in {"vllm", "vllm_ascend"} or module_name.startswith(
+                ("vllm.", "vllm_ascend.")
+            ):
+                sys.modules.pop(module_name, None)
+
+    clear_runtime_modules()
+    real_find_spec = importlib.util.find_spec
+
+    def find_spec_without_installed_extensions(name, *args, **kwargs):
+        if name in {
+            "vllm._C",
+            "vllm._C_stable_libtorch",
+            "vllm_ascend.vllm_ascend_C",
+        }:
+            return None
+        return real_find_spec(name, *args, **kwargs)
+
+    # Editable-install meta path finders can resolve compiled modules outside the
+    # temporary fake packages. Hide those host artifacts so these unit tests
+    # exercise only the runtime tree they construct.
+    monkeypatch.setattr(
+        importlib.util, "find_spec", find_spec_without_installed_extensions
+    )
     yield
-    for name in ("vllm", "vllm_ascend"):
-        sys.modules.pop(name, None)
-        sys.modules.pop(f"{name}._version", None)
+    clear_runtime_modules()
 
 
 def _load_helper():

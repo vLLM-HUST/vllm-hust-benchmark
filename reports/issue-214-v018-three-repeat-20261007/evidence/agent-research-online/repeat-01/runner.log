@@ -1,0 +1,89 @@
+/root/issue-214-136-formal-20261007/formal/issue214-v018-three-repeats/lanes/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeats/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeat-01/resolved_same_spec.json
+[goal-baseline] using worktrees: /tmp/vllm-v0180 and /tmp/vllm-ascend-v0180
+[goal-baseline] neutral cwd: /root/issue-214-136-formal-20261007/runtime-cwd/issue214-formal/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2
+[goal-baseline] vllm cache root: /root/issue-214-136-formal-20261007/cache/issue214-formal/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2
+[goal-baseline] benchmark type: serve
+[goal-baseline] export model id: Qwen/Qwen2.5-14B-Instruct
+[goal-baseline] runtime model source: /models/Qwen--Qwen2.5-14B-Instruct
+[goal-baseline] vllm module: /tmp/vllm-v0180/vllm/__init__.py
+[goal-baseline] vllm version: 0.18.0 (dist=0.18.0)
+[goal-baseline] vllm_ascend module: /tmp/vllm-ascend-v0180/vllm_ascend/__init__.py
+[goal-baseline] vllm_ascend version: unknown (dist=0.18.0)
+[official-env] benchmark admission preflight passed: no residual benchmark processes
+[official-env] admission-only mode completed
+[goal-baseline] benchmark endpoint: 127.0.0.1:8101
+[goal-baseline] server command: PYTHONUNBUFFERED=1 VLLM_VERSION=0.18.0 PYTHONPATH=/tmp/vllm-ascend-v0180:/tmp/vllm-v0180${PYTHONPATH:+:$PYTHONPATH} /root/miniforge3/envs/vllm-ascend-official-v0180/bin/python -u -m vllm.entrypoints.openai.api_server --tensor-parallel-size 1 --host 0.0.0.0 --port 8101 --gpu-memory-utilization 0.6 --max-model-len 32768 --model /models/Qwen--Qwen2.5-14B-Instruct --dtype float16
+[goal-baseline] using explicit Ascend visible devices: 1
+[goal-baseline] Ascend visible devices: 1 (rt=1)
+[goal-baseline] waiting for official baseline server at 127.0.0.1:8101 (0s/900s)
+[goal-baseline] waiting for official baseline server at 127.0.0.1:8101 (30s/900s)
+[goal-baseline] waiting for official baseline server at 127.0.0.1:8101 (60s/900s)
+[goal-baseline] waiting for official baseline server at 127.0.0.1:8101 (90s/900s)
+[goal-baseline] waiting for official baseline server at 127.0.0.1:8101 (120s/900s)
+[goal-baseline] official baseline server became ready after 134s
+[goal-baseline] client command: VLLM_VERSION=0.18.0 PYTHONPATH=/tmp/vllm-ascend-v0180:/tmp/vllm-v0180${PYTHONPATH:+:$PYTHONPATH} /root/miniforge3/envs/vllm-ascend-official-v0180/bin/python /root/vllm-hust-benchmark-issue214-136/scripts/run_vllm_cli_compat.py bench serve --save-result --result-dir /root/issue-214-136-formal-20261007/formal/issue214-v018-three-repeats/lanes/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeats/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeat-01 --result-filename raw_benchmark_result.json --backend openai-chat --endpoint /v1/chat/completions --dataset-name custom --dataset-path /root/vllm-hust-benchmark-issue214-136/scripts/traces/evoscientist-workload-custom.jsonl --num-prompts 32 --request-rate 1 --ignore-eos --host 127.0.0.1 --port 8101 --model /models/Qwen--Qwen2.5-14B-Instruct --ready-check-timeout-sec 900
+/root/miniforge3/envs/vllm-ascend-official-v0180/lib/python3.11/site-packages/transformers/utils/hub.py:110: FutureWarning: Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.
+  warnings.warn(
+INFO 10-06 18:37:40 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 10-06 18:37:40 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 10-06 18:37:40 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 10-06 18:37:40 [__init__.py:239] Platform plugin ascend is activated
+Namespace(trust_remote_code=False, seed=0, num_prompts=32, dataset_name='custom', no_stream=False, dataset_path='/root/vllm-hust-benchmark-issue214-136/scripts/traces/evoscientist-workload-custom.jsonl', no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio=0.0, random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8101, endpoint='/v1/chat/completions', header=None, max_concurrency=None, model='/models/Qwen--Qwen2.5-14B-Instruct', input_len=None, output_len=None, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=1.0, burstiness=1.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=False, append_result=False, metadata=None, result_dir='/root/issue-214-136-formal-20261007/formal/issue214-v018-three-repeats/lanes/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeats/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeat-01', result_filename='raw_benchmark_result.json', ignore_eos=True, percentile_metrics=None, metric_percentiles='99', goodput=None, request_id_prefix='bench-09954ad7-', top_p=None, top_k=None, min_p=None, temperature=None, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=900, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds=[25.0, 50.0], plot_dataset_stats=False)
+WARNING: vllm bench serve no longer sets temperature==0 (greedy) in requests by default. The default will be determined on the server side and can be model/API specific. For the old behavior, include --temperature=0.
+Starting initial single prompt test run...
+Waiting for endpoint to become up in 900 seconds
+ |          | 00:00 elapsed, ? remaining |          | 00:00 elapsed, 00:11 remaining |          | 01:09 elapsed, 12924:07:37 remaining
+Initial test run completed.
+Starting main benchmark run...
+Traffic request rate: 1.0
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: None
+  0%|          | 0/32 [00:00<?, ?it/s]  3%|▎         | 1/32 [00:59<30:44, 59.49s/it]  6%|▋         | 2/32 [01:03<13:28, 26.95s/it] 38%|███▊      | 12/32 [01:03<00:57,  2.88s/it]100%|██████████| 32/32 [01:03<00:00,  1.99s/it]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     32        
+Failed requests:                         0         
+Request rate configured (RPS):           1.00      
+Benchmark duration (s):                  63.78     
+Total input tokens:                      6556      
+Total generated tokens:                  8192      
+Request throughput (req/s):              0.50      
+Output token throughput (tok/s):         128.44    
+Peak output token throughput (tok/s):    640.00    
+Peak concurrent requests:                32.00     
+Total token throughput (tok/s):          231.23    
+---------------Time to First Token----------------
+Mean TTFT (ms):                          24360.36  
+Median TTFT (ms):                        27104.59  
+P99 TTFT (ms):                           35979.06  
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          89.32     
+Median TPOT (ms):                        77.27     
+P99 TPOT (ms):                           190.20    
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           88.97     
+Median ITL (ms):                         54.80     
+P99 ITL (ms):                            68.01     
+==================================================
+[goal-baseline] stopping managed official baseline wrapper: 2981654 2981655 2981742 2983625 2983626 
+artifact: /root/issue-214-136-formal-20261007/formal/issue214-v018-three-repeats/lanes/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeats/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeat-01/submission/run_leaderboard.json
+manifest: /root/issue-214-136-formal-20261007/formal/issue214-v018-three-repeats/lanes/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeats/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeat-01/submission/leaderboard_manifest.json
+[collect] env-manifest.json written
+[collect] pip-packages.json written
+[collect] checksums.sha256 written
+[collect] STATUS = OK
+  ✅ STATUS file contains OK
+  ✅ run_leaderboard.json is valid JSON
+  ✅ leaderboard_manifest.json is valid JSON
+  ✅ leaderboard_manifest.json references run_leaderboard.json
+  ✅ env-manifest.json is valid JSON
+  ✅ env-manifest.json has required fields
+  ✅ formal campaign frozen provenance is complete
+  ✅ official source provenance is complete
+  ✅ official runtime provenance is complete and consistent
+  ✅ checksums.sha256 all pass
+valid
+  ✅ artifact contract normalization passes
+
+✅ All validations passed for: /root/issue-214-136-formal-20261007/formal/issue214-v018-three-repeats/lanes/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeats/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeat-01/submission
+[goal-baseline] exported and validated leaderboard artifact at /root/issue-214-136-formal-20261007/formal/issue214-v018-three-repeats/lanes/lane1-online-scoped-v2/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeats/official-ascend-jan-2026-v0180-agent-research-online-qwen25-14b-910b2/repeat-01/submission

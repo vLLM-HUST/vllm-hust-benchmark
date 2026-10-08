@@ -1,0 +1,35 @@
+{
+  "schema_version": "issue-136-current-main-qualification/v1",
+  "status": "OK",
+  "scope": "compatibility-readiness-only",
+  "publishable_performance_point": false,
+  "source": {
+    "vllm_hust_commit": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7",
+    "vllm_ascend_hust_commit": "b400fab66eb2d1cf2e69bca32e807f187d382965",
+    "vllm_ascend_hust_ref": "pull/41/head"
+  },
+  "model": {
+    "name": "Qwen2.5-14B-Instruct",
+    "dtype": "float16",
+    "tensor_parallel_size": 1,
+    "max_model_len": 32768
+  },
+  "runtime": {
+    "accelerator": "Ascend 910B2",
+    "vllm_distribution": "0.23.0+empty",
+    "vllm_module_version": "0.23.0",
+    "vllm_ascend_distribution": "0.23.0.post1",
+    "torch": "2.10.0+cpu",
+    "torch_npu": "2.10.0.post4",
+    "fla_npu": "26.9.1+deva4a7958"
+  },
+  "observations": {
+    "http_status": 200,
+    "completion_tokens": 8,
+    "kv_cache_tokens": 47872,
+    "kv_cache_gib": 8.78,
+    "torch_compile_seconds": 26.9,
+    "selected_device_released": true
+  },
+  "shutdown_note": "The post-response EngineDeadError was emitted after deliberate process-group termination."
+}

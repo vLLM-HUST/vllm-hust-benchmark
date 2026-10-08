@@ -1,0 +1,91 @@
+{
+  "schema_version": "issue214-ppt-safe-manifest/v1",
+  "reference": {
+    "artifact_suites": "../issue-214-p2-closure-20260817/artifact_suites.json",
+    "values_key": "current_values",
+    "label": "vLLM-HUST @ 43341b177dbaa8c7f04662f71e885ee7dfe22704 + vLLM Ascend @ 0a46364814eedd3314f04eff3490c3ab422438bd",
+    "commits": {
+      "core": "43341b177dbaa8c7f04662f71e885ee7dfe22704",
+      "plugin": "0a46364814eedd3314f04eff3490c3ab422438bd"
+    },
+    "metric_overlays": {
+      "random-latency": {
+        "source_metric": "ttft_ms",
+        "canonical_metric": "batch_latency_ms",
+        "reason": "The legacy P2 array records offline avg_latency in milliseconds; ttft_ms was a metadata label, not the measured quantity."
+      }
+    }
+  },
+  "candidate": {
+    "label": "vLLM 0.18.0 @ bcf2be96120005e9aea171927f85055a6a5c0cf6 + vLLM Ascend 0.18.0 @ e18643f8a4d5bd9990727654318ad069ea0b56e2",
+    "commits": {
+      "core": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+      "plugin": "e18643f8a4d5bd9990727654318ad069ea0b56e2"
+    },
+    "workloads": {
+      "agent-research-online": {
+        "repeat_dirs": ["evidence/agent-research-online/repeat-01", "evidence/agent-research-online/repeat-02", "evidence/agent-research-online/repeat-03"],
+        "primary_metric": "ttft_ms",
+        "unit": "ms",
+        "direction": "lower_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      },
+      "instructcoder-online": {
+        "repeat_dirs": ["evidence/instructcoder-online/repeat-01", "evidence/instructcoder-online/repeat-02", "evidence/instructcoder-online/repeat-03"],
+        "primary_metric": "ttft_ms",
+        "unit": "ms",
+        "direction": "lower_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      },
+      "prefix-repetition-online": {
+        "repeat_dirs": ["evidence/prefix-repetition-online/repeat-01", "evidence/prefix-repetition-online/repeat-02", "evidence/prefix-repetition-online/repeat-03"],
+        "primary_metric": "ttft_ms",
+        "unit": "ms",
+        "direction": "lower_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      },
+      "random-latency": {
+        "repeat_dirs": ["evidence/random-latency/repeat-01", "evidence/random-latency/repeat-02", "evidence/random-latency/repeat-03"],
+        "primary_metric": "batch_latency_ms",
+        "unit": "ms",
+        "direction": "lower_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      },
+      "random-online": {
+        "repeat_dirs": ["evidence/random-online/repeat-01", "evidence/random-online/repeat-02", "evidence/random-online/repeat-03"],
+        "primary_metric": "ttft_ms",
+        "unit": "ms",
+        "direction": "lower_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      },
+      "sharegpt-online": {
+        "repeat_dirs": ["evidence/sharegpt-online/repeat-01", "evidence/sharegpt-online/repeat-02", "evidence/sharegpt-online/repeat-03"],
+        "primary_metric": "ttft_ms",
+        "unit": "ms",
+        "direction": "lower_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      },
+      "sharegpt-throughput": {
+        "repeat_dirs": ["evidence/sharegpt-throughput/repeat-01", "evidence/sharegpt-throughput/repeat-02", "evidence/sharegpt-throughput/repeat-03"],
+        "primary_metric": "throughput_tps",
+        "unit": "TPS",
+        "direction": "higher_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      },
+      "sonnet-throughput": {
+        "repeat_dirs": ["evidence/sonnet-throughput/repeat-01", "evidence/sonnet-throughput/repeat-02", "evidence/sonnet-throughput/repeat-03"],
+        "primary_metric": "throughput_tps",
+        "unit": "TPS",
+        "direction": "higher_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      },
+      "visionarena-online": {
+        "repeat_dirs": ["evidence/visionarena-online/repeat-01", "evidence/visionarena-online/repeat-02", "evidence/visionarena-online/repeat-03"],
+        "primary_metric": "ttft_ms",
+        "unit": "ms",
+        "direction": "lower_is_better",
+        "input_identity_status": "candidate-verified-reference-raw-unavailable"
+      }
+    }
+  }
+}

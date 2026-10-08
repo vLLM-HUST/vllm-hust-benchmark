@@ -1,0 +1,21 @@
+    PID    PPID STAT ELAPSED CMD
+      1       0 Ssl   164173 ./coder agent
+     73       1 Ssl   164173 ./coder agent --no-reap
+    141       1 Ss    164173 sshd: /usr/sbin/sshd -e -o PermitRootLogin=prohibit-password -o PubkeyAuthentication=yes -o AuthorizedKeysFile=/etc/ssh/authorized_keys.generated %h/.ssh/authorized_keys -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no -o PermitUserEnvironment=yes [listener] 4 of 10-100 startups
+    143     141 Ss    164172 sshd: root@notty
+    209     143 Ss    164172 sleep infinity
+ 693227       1 Sl    132268 /root/.local/bin/codex.direct -c features.code_mode_host=true app-server --listen unix://
+ 693329     141 Ss    132268 sshd: root@notty
+ 693348  693329 Ssl   132267 /root/.local/bin/codex.direct app-server proxy
+ 694427  693227 Sl    132191 /root/.codex/packages/standalone/releases/0.157.1-aarch64-unknown-linux-musl/bin/codex-code-mode-host
+2614392  693227 Ss     48779 python3 -m http.server 8765 --bind 127.0.0.1
+3402663  693227 Ss         1 /bin/bash -lc npu-smi info > npu-after.txt ps -eo pid,ppid,stat,etimes,cmd > processes-after.txt {   for p in 9115 8001; do     printf 'port=%s\n' "$p"     lsof -nP -iTCP:$p -sTCP:LISTEN 2>/dev/null || true     fuser -v ${p}/tcp 2>/dev/null || true     if curl -fsS --max-time 1 http://127.0.0.1:$p/health >/dev/null 2>&1; then echo health=unexpected-success; else echo health=connection-refused; fi     python - "$p" <<'PY' import socket,sys p=int(sys.argv[1]); s=socket.socket(); s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1) try:  s.bind(('0.0.0.0',p)); s.listen(1); print('listen_probe=no-existing-listener') finally: s.close() PY   done } > ports-after.txt mkdir -p generated-source/submissions generated-source/runtime-state for id in 20261006T212501Z 20261006T213332Z 20261006T214117Z; do   name="eval112-93c13359a5cef54d0da0-random-online-1chip-$id"   mv "/root/vllm-hust-benchmark-issue214-136/submissions/$name" generated-source/submissions/   mv "/root/vllm-hust-benchmark-issue214-136/.benchmarks/eval112-93c13359a5cef54d0da0/$name" generated-source/runtime-state/ done rmdir /root/vllm-hust-benchmark-issue214-136/.benchmarks/eval112-93c13359a5cef54d0da0 find . -type f ! -name ARCHIVE_SHA256SUMS -printf '%P\0' | sort -z | xargs -0 sha256sum > ARCHIVE_SHA256SUMS sha256sum -c ARCHIVE_SHA256SUMS >/dev/null printf 'archive_files=%s\n' "$(wc -l < ARCHIVE_SHA256SUMS)" git -C /root/vllm-hust-benchmark-issue214-136 status --short
+3402733     141 Ss         0 sshd: [accepted]
+3402734 3402733 S          0 sshd: [net]
+3402737     141 Ss         0 sshd: [accepted]
+3402738 3402737 S          0 sshd: [net]
+3402739     141 Ss         0 sshd: [accepted]
+3402740 3402739 S          0 sshd: [net]
+3402741     141 Ss         0 sshd: [accepted]
+3402742 3402741 S          0 sshd: [net]
+3402743 3402663 R          0 ps -eo pid,ppid,stat,etimes,cmd

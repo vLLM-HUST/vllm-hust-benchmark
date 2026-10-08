@@ -20,6 +20,8 @@ OFFICIAL_RUNTIME_CWD=${OFFICIAL_RUNTIME_CWD:-"/tmp"}
 OFFICIAL_VLLM_CACHE_ROOT=${OFFICIAL_VLLM_CACHE_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/official-ascend-goal-baseline-cache"}
 OFFICIAL_BENCHMARK_DATASET_ROOT=${OFFICIAL_BENCHMARK_DATASET_ROOT:-"/data/shared_datasets/vllm-hust-benchmark/official-baseline-datasets"}
 OFFICIAL_SHAREGPT_DATASET_URL=${OFFICIAL_SHAREGPT_DATASET_URL:-"https://hf-mirror.com/datasets/anon8231489123/ShareGPT_Vicuna_unfiltered/resolve/main/ShareGPT_V3_unfiltered_cleaned_split.json"}
+OFFICIAL_RUNTIME_DATASET_PATH=${OFFICIAL_RUNTIME_DATASET_PATH:-}
+OFFICIAL_INPUT_PROVENANCE_FILE=${OFFICIAL_INPUT_PROVENANCE_FILE:-}
 HF_HOME=${HF_HOME:-"/data/shared_datasets/vllm-hust-benchmark/huggingface"}
 HF_HUB_CACHE=${HF_HUB_CACHE:-"$HF_HOME/hub"}
 TRANSFORMERS_CACHE=${TRANSFORMERS_CACHE:-"$HF_HOME/transformers"}
@@ -1119,7 +1121,7 @@ ensure_runtime_dataset_available() {
 
   case "$dataset_path" in
     /*)
-      if [[ ! -f "$dataset_path" ]]; then
+      if [[ ! -e "$dataset_path" ]]; then
         echo "runtime dataset path not found: $dataset_path" >&2
         return 2
       fi
@@ -1174,25 +1176,48 @@ normalized_client_parameters_json() {
     OFFICIAL_VLLM_WORKTREE="$OFFICIAL_VLLM_WORKTREE" \
     BENCHMARK_REPO="$REPO_ROOT" \
     OFFICIAL_BENCHMARK_DATASET_ROOT="$OFFICIAL_BENCHMARK_DATASET_ROOT" \
+    OFFICIAL_RUNTIME_DATASET_PATH="$OFFICIAL_RUNTIME_DATASET_PATH" \
     "$HOST_PYTHON_BIN" - <<'PY'
 import json
 import os
 from pathlib import Path
 
-from vllm_hust_benchmark.official_runtime_inputs import normalize_client_parameters
+from vllm_hust_benchmark.official_runtime_inputs import (
+    normalize_client_parameters,
+    normalize_offline_benchmark_parameters,
+)
 
 payload = json.loads(Path(os.environ["SAME_SPEC_FILE"]).read_text(encoding="utf-8"))
 ready_timeout = int(os.environ.get("CLIENT_READY_CHECK_TIMEOUT_SECONDS") or 0)
+benchmark_type = os.environ["BENCHMARK_TYPE"]
+if benchmark_type == "serve":
+    normalized = normalize_client_parameters(
+        payload["resolved_client_parameters"],
+        benchmark_type=benchmark_type,
+        ready_check_timeout_sec=ready_timeout,
+        vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
+        benchmark_repo=os.environ.get("BENCHMARK_REPO"),
+        dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
+    )
+else:
+    normalized = normalize_offline_benchmark_parameters(
+        payload["resolved_client_parameters"],
+        payload["resolved_server_parameters"],
+        benchmark_type=benchmark_type,
+        ready_check_timeout_sec=ready_timeout,
+        vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
+        benchmark_repo=os.environ.get("BENCHMARK_REPO"),
+        dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
+    )
+runtime_dataset_path = os.environ.get("OFFICIAL_RUNTIME_DATASET_PATH", "").strip()
+if runtime_dataset_path:
+    logical_dataset_path = str(normalized.get("dataset_path") or "").strip()
+    normalized["dataset_path"] = runtime_dataset_path
+    if logical_dataset_path and not normalized.get("hf_name"):
+        normalized["hf_name"] = logical_dataset_path
 print(
     json.dumps(
-        normalize_client_parameters(
-            payload["resolved_client_parameters"],
-            benchmark_type=os.environ["BENCHMARK_TYPE"],
-            ready_check_timeout_sec=ready_timeout,
-            vllm_worktree=os.environ.get("OFFICIAL_VLLM_WORKTREE"),
-            benchmark_repo=os.environ.get("BENCHMARK_REPO"),
-            dataset_cache_root=os.environ.get("OFFICIAL_BENCHMARK_DATASET_ROOT"),
-        ),
+        normalized,
         separators=(",", ":"),
         ensure_ascii=True,
     )
@@ -1757,7 +1782,12 @@ SAME_SPEC_FILE="$RESULT_DIR/resolved_same_spec.json"
 resolve_same_spec
 
 resolved_dataset_path=$(jq -r '.resolved_client_parameters.dataset_path // empty' "$SAME_SPEC_FILE")
-ensure_runtime_dataset_available "$resolved_dataset_path"
+runtime_dataset_path=${OFFICIAL_RUNTIME_DATASET_PATH:-$resolved_dataset_path}
+ensure_runtime_dataset_available "$runtime_dataset_path"
+if [[ -n "$OFFICIAL_INPUT_PROVENANCE_FILE" ]] && ! jq -e 'type == "object"' "$OFFICIAL_INPUT_PROVENANCE_FILE" >/dev/null; then
+  echo "OFFICIAL_INPUT_PROVENANCE_FILE must be a readable JSON object: $OFFICIAL_INPUT_PROVENANCE_FILE" >&2
+  exit 2
+fi
 
 CLIENT_ARGS=$(json2args "$(normalized_client_parameters_json)")
 
@@ -1998,6 +2028,12 @@ manifest["official_runtime_provenance"] = runtime
 artifact_path.write_text(json.dumps(artifact, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 PY
+
+if [[ -n "$OFFICIAL_INPUT_PROVENANCE_FILE" ]]; then
+  cp -f "$OFFICIAL_INPUT_PROVENANCE_FILE" "$ARTIFACT_DIR/input_provenance.json"
+  chmod 0644 "$ARTIFACT_DIR/input_provenance.json"
+  echo "[goal-baseline] copied frozen input provenance to $ARTIFACT_DIR/input_provenance.json"
+fi
 
 CURRENT_RUNTIME_PYTHON="$OFFICIAL_RUNTIME_PYTHON" \
 CURRENT_VLLM_HUST_REPO="$OFFICIAL_VLLM_WORKTREE" \

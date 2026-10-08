@@ -9,8 +9,8 @@ from typing import Any
 from vllm_hust_benchmark.same_spec import PREFIX_REPETITION_DEFAULT_NUM_PREFIXES
 
 SCHEMA_VERSION = "official-target-registry/v1"
-REGISTRY_VERSION = "1.3.7"
-EFFECTIVE_FROM = "2026-10-03"
+REGISTRY_VERSION = "1.3.11"
+EFFECTIVE_FROM = "2026-10-07"
 PUBLIC_TEXT_MODEL = "Qwen/Qwen2.5-14B-Instruct"
 PUBLIC_CODE_MODEL = "Qwen/Qwen2.5-Coder-14B-Instruct"
 PUBLIC_VISION_MODEL = "Qwen/Qwen2.5-VL-7B-Instruct"
@@ -72,6 +72,12 @@ def _classify_spec(path: Path, spec: dict[str, Any]) -> tuple[str, str, str]:
     scenario = str(spec["scenario"])
     model = str(spec["model"])
     chip_count = int(spec["chip_count"])
+
+    if (
+        path.name.startswith("specialty-ascend-vllm-")
+        and spec.get("export", {}).get("data_source") == "issue-136-current-main-dense"
+    ):
+        return "specialty", "provisional", "dense-scaling"
 
     if path.name.startswith("perfgate-"):
         if "Coder" in model:

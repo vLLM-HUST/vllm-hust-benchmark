@@ -162,6 +162,31 @@ def test_official_entry_records_target_id_and_target_version(tmp_path: Path) -> 
     assert metadata["workload_config_contract"] == "explicit-effective/v1"
 
 
+def test_registered_specialty_entry_records_canonical_target_contract(
+    tmp_path: Path,
+) -> None:
+    spec_path = (
+        REPO_ROOT
+        / "docs"
+        / "official-baselines"
+        / "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json"
+    )
+    same_spec_file = _write_same_spec_file(tmp_path, spec_path)
+
+    artifact_path, _ = export_leaderboard_artifacts(
+        **_common_export_kwargs(
+            tmp_path, same_spec_file=same_spec_file, spec_path=spec_path
+        )
+    )
+
+    metadata = json.loads(artifact_path.read_text(encoding="utf-8"))["metadata"]
+    assert metadata["target_contract_id"] == spec_path.stem
+    assert metadata["target_contract_version"] == "1.3.10"
+    assert "target_id" not in metadata
+    assert "target_version" not in metadata
+    assert "workload_config_contract" not in metadata
+
+
 def test_official_entry_fails_closed_when_spec_path_missing(tmp_path: Path) -> None:
     spec_path = (
         REPO_ROOT

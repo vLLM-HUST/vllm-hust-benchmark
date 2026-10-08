@@ -1,0 +1,25 @@
+{
+  "listen": "127.0.0.1:9115",
+  "state_dir": "/root/issue-214-136-formal-20261007/evaluation-112-v5/state",
+  "artifact_dir": "/root/issue-214-136-formal-20261007/evaluation-112-v5/artifacts",
+  "managed_npus": [2],
+  "allowed_repositories": [
+    "vLLM-HUST/vllm-hust",
+    "vLLM-HUST/vllm-ascend-hust"
+  ],
+  "token_env": "EVALUATION_API_TOKEN",
+  "hmac_secret_env": "EVALUATION_HMAC_SECRET",
+  "runner_command": [
+    "/usr/local/python3.12.13/bin/python",
+    "/root/vllm-hust-benchmark-issue214-136/scripts/run-112-evaluation-job.py",
+    "--schedule",
+      "/root/issue-214-136-formal-20261007/evaluation-112-v5/schedule.json"
+  ],
+  "admission_command": [
+    "/usr/local/python3.12.13/bin/python",
+    "/root/vllm-hust-benchmark-issue214-136/scripts/verify-112-evaluation-bundle.py",
+    "--schedule",
+      "/root/issue-214-136-formal-20261007/evaluation-112-v5/schedule.json"
+  ],
+  "admission_timeout_seconds": 900
+}

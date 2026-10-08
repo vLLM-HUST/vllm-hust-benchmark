@@ -1,0 +1,784 @@
+[W1007 05:15:35.205865735 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+/root/issue-214-136-formal-20261007/worktrees/vllm-hust-current/vllm/entrypoints/openai/api_server.py:24: DeprecationWarning: `vllm.entrypoints.openai.api_server` is deprecated and will likely beunsupported in a future version. Use the corresponding function from `vllm.entrypoints.launchers` instead.
+  warnings.warn(
+/root/issue-214-136-formal-20261007/worktrees/vllm-hust-current/vllm/entrypoints/openai/api_server.py:51: DeprecationWarning: The `python -m vllm.entrypoints.openai.api_server` command is deprecated and may be removed in a future release. Please use `vllm server` instead.
+  warnings.warn(
+2026-10-07 05:15:51,453 - 23242 - ServiceProfiler - INFO - VLLM_USE_V1 not set, auto-detected via vLLM 0.23.0+empty: default 1
+Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
+(APIServer pid=23242) INFO 10-07 05:15:54 [api_utils.py:347] 
+(APIServer pid=23242) INFO 10-07 05:15:54 [api_utils.py:347]        █     █     █▄   ▄█
+(APIServer pid=23242) INFO 10-07 05:15:54 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.23.0
+(APIServer pid=23242) INFO 10-07 05:15:54 [api_utils.py:347]   █▄█▀ █     █     █     █  model   /models/Qwen--Qwen2.5-14B-Instruct
+(APIServer pid=23242) INFO 10-07 05:15:54 [api_utils.py:347]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
+(APIServer pid=23242) INFO 10-07 05:15:54 [api_utils.py:347] 
+(APIServer pid=23242) INFO 10-07 05:15:54 [api_utils.py:286] non-default args: {'host': '127.0.0.1', 'port': 8400, 'model': '/models/Qwen--Qwen2.5-14B-Instruct', 'dtype': 'float16', 'max_model_len': 32768, 'gpu_memory_utilization': 0.6, 'max_num_batched_tokens': 2048, 'max_num_seqs': 256, 'compilation_config': {'mode': None, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': [], 'ir_enable_torch_wrap': None, 'splitting_ops': None, 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': None, 'compile_ranges_endpoints': None, 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 32, 64, 128, 256], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': None, 'pass_config': {}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': None, 'static_all_moe_layers': []}}
+(APIServer pid=23242) INFO 10-07 05:16:16 [model.py:730] Resolved architecture: Qwen2ForCausalLM
+(APIServer pid=23242) WARNING 10-07 05:16:16 [model.py:2487] Casting torch.bfloat16 to torch.float16.
+(APIServer pid=23242) INFO 10-07 05:16:16 [model.py:2141] Using max model len 32768
+(APIServer pid=23242) INFO 10-07 05:16:16 [kernel.py:459] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['native'])
+(APIServer pid=23242) INFO 10-07 05:16:16 [utils.py:224] No quantization signature detected from model files for "/models/Qwen--Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(APIServer pid=23242) WARNING 10-07 05:16:16 [platform.py:713] GPU-specific parameter is not supported on Ascend. parameter=disable_cascade_attn, value=True, action: resetting to False.
+(APIServer pid=23242) INFO 10-07 05:16:16 [platform.py:927] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(APIServer pid=23242) INFO 10-07 05:16:16 [ascend_config.py:334] Dynamic EPLB is False
+(APIServer pid=23242) INFO 10-07 05:16:16 [ascend_config.py:335] The number of redundant experts is 0
+(APIServer pid=23242) INFO 10-07 05:16:16 [ascend_config.py:739] FlashComm1 is disabled. Using flashinfer_all2allv as the all2all backend.
+(APIServer pid=23242) INFO 10-07 05:16:16 [utils.py:1357] Block size is set to 128 if prefix cache or chunked prefill is enabled.
+(APIServer pid=23242) INFO 10-07 05:16:16 [platform.py:1428] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(APIServer pid=23242) INFO 10-07 05:16:16 [compilation.py:331] Enabled custom fusions: norm_quant, act_quant
+[W1007 05:16:24.300482775 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+2026-10-07 05:16:44,369 - 24585 - ServiceProfiler - INFO - VLLM_USE_V1 not set, auto-detected via vLLM 0.23.0+empty: default 1
+(EngineCore pid=24585) INFO 10-07 05:16:44 [__init__.py:113] Registered model loader `<class 'vllm_ascend.model_loader.netloader.netloader.ModelNetLoaderElastic'>` with load format `netloader`
+(EngineCore pid=24585) INFO 10-07 05:16:44 [__init__.py:113] Registered model loader `<class 'vllm_ascend.model_loader.rfork.rfork_loader.RForkModelLoader'>` with load format `rfork`
+(EngineCore pid=24585) INFO 10-07 05:16:44 [core.py:129] Initializing a V1 LLM engine (v0.23.0) with config: model='/models/Qwen--Qwen2.5-14B-Instruct', speculative_config=None, tokenizer='/models/Qwen--Qwen2.5-14B-Instruct', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.float16, max_seq_len=32768, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=False, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=npu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, custom_histogram_buckets=None, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/models/Qwen--Qwen2.5-14B-Instruct, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'vllm_ascend.compilation.compiler_interface.AscendCompiler', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update', 'vllm::mla_forward', 'vllm::dsa_forward'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 32, 64, 128, 256], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 256, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': True, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=24585) WARNING 10-07 05:16:45 [indexer_topk.py:35] Failed to import the DeepSelect extension (vllm._deepselect_C): No module named 'vllm._deepselect_C'
+Accessing `fused_q_kv_rmsnorm` from `.models.aria.image_processing_aria`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.aria.image_processing_pil_aria`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.auto.image_processing_auto`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.beit.image_processing_beit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.beit.image_processing_pil_beit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.bit.image_processing_bit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.bit.image_processing_pil_bit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.blip.image_processing_blip`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.blip.image_processing_pil_blip`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.bridgetower.image_processing_bridgetower`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.bridgetower.image_processing_pil_bridgetower`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.chameleon.image_processing_chameleon`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.chameleon.image_processing_pil_chameleon`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.chinese_clip.image_processing_chinese_clip`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.chinese_clip.image_processing_chinese_pil_clip`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.chmv2.image_processing_chmv2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.clip.image_processing_clip`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.clip.image_processing_pil_clip`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.cohere2_vision.image_processing_cohere2_vision`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.conditional_detr.image_processing_conditional_detr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.conditional_detr.image_processing_pil_conditional_detr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.convnext.image_processing_convnext`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.convnext.image_processing_pil_convnext`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.deepseek_vl.image_processing_deepseek_vl`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.deepseek_vl.image_processing_pil_deepseek_vl`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.deepseek_vl_hybrid.image_processing_deepseek_vl_hybrid`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.deepseek_vl_hybrid.image_processing_pil_deepseek_vl_hybrid`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.deformable_detr.image_processing_deformable_detr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.deformable_detr.image_processing_pil_deformable_detr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.deit.image_processing_deit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.deit.image_processing_pil_deit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.depth_pro.image_processing_depth_pro`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.detr.image_processing_detr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.detr.image_processing_pil_detr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.dinov3_vit.image_processing_dinov3_vit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.donut.image_processing_donut`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.donut.image_processing_pil_donut`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.dpt.image_processing_dpt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.dpt.image_processing_pil_dpt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.efficientloftr.image_processing_efficientloftr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.efficientloftr.image_processing_pil_efficientloftr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.efficientnet.image_processing_efficientnet`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.efficientnet.image_processing_pil_efficientnet`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.emu3.image_processing_emu3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.eomt.image_processing_eomt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.eomt.image_processing_pil_eomt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.ernie4_5_vl_moe.image_processing_ernie4_5_vl_moe`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.ernie4_5_vl_moe.image_processing_pil_ernie4_5_vl_moe`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.flava.image_processing_flava`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.flava.image_processing_pil_flava`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.fuyu.image_processing_fuyu`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.fuyu.image_processing_pil_fuyu`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.gemma3.image_processing_gemma3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.gemma3.image_processing_pil_gemma3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.gemma4.image_processing_gemma4`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.gemma4.image_processing_pil_gemma4`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.glm46v.image_processing_glm46v`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.glm46v.image_processing_pil_glm46v`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.glm4v.image_processing_glm4v`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.glm4v.image_processing_pil_glm4v`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.glm_image.image_processing_glm_image`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.glm_image.image_processing_pil_glm_image`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.glpn.image_processing_glpn`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.glpn.image_processing_pil_glpn`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.got_ocr2.image_processing_got_ocr2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.got_ocr2.image_processing_pil_got_ocr2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.grounding_dino.image_processing_grounding_dino`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.grounding_dino.image_processing_pil_grounding_dino`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.idefics.image_processing_idefics`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.idefics.image_processing_pil_idefics`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.idefics2.image_processing_idefics2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.idefics2.image_processing_pil_idefics2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.idefics3.image_processing_idefics3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.idefics3.image_processing_pil_idefics3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.imagegpt.image_processing_imagegpt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.imagegpt.image_processing_pil_imagegpt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.janus.image_processing_janus`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.janus.image_processing_pil_janus`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.kosmos2_5.image_processing_kosmos2_5`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.kosmos2_5.image_processing_pil_kosmos2_5`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.layoutlmv2.image_processing_layoutlmv2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.layoutlmv2.image_processing_pil_layoutlmv2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.layoutlmv3.image_processing_layoutlmv3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.layoutlmv3.image_processing_pil_layoutlmv3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.levit.image_processing_levit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.levit.image_processing_pil_levit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.lfm2_vl.image_processing_lfm2_vl`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.lightglue.image_processing_lightglue`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.lightglue.image_processing_pil_lightglue`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.llama4.image_processing_llama4`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.llava.image_processing_llava`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.llava.image_processing_pil_llava`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.llava_next.image_processing_llava_next`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.llava_next.image_processing_pil_llava_next`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.llava_onevision.image_processing_llava_onevision`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.llava_onevision.image_processing_pil_llava_onevision`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mask2former.image_processing_mask2former`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mask2former.image_processing_pil_mask2former`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.maskformer.image_processing_maskformer`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.maskformer.image_processing_pil_maskformer`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mllama.image_processing_mllama`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mllama.image_processing_pil_mllama`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mobilenet_v1.image_processing_mobilenet_pil_v1`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mobilenet_v1.image_processing_mobilenet_v1`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mobilenet_v2.image_processing_mobilenet_v2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mobilenet_v2.image_processing_pil_mobilenet_v2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mobilevit.image_processing_mobilevit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.mobilevit.image_processing_pil_mobilevit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.nougat.image_processing_nougat`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.nougat.image_processing_pil_nougat`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.oneformer.image_processing_oneformer`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.oneformer.image_processing_pil_oneformer`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.ovis2.image_processing_ovis2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.ovis2.image_processing_pil_ovis2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.owlv2.image_processing_owlv2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.owlv2.image_processing_pil_owlv2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.owlvit.image_processing_owlvit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.owlvit.image_processing_pil_owlvit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.paddleocr_vl.image_processing_paddleocr_vl`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.paddleocr_vl.image_processing_pil_paddleocr_vl`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.perceiver.image_processing_perceiver`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.perceiver.image_processing_pil_perceiver`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.perception_lm.image_processing_perception_lm`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.phi4_multimodal.image_processing_phi4_multimodal`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pi0.image_processing_pi0`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pix2struct.image_processing_pil_pix2struct`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pix2struct.image_processing_pix2struct`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pixtral.image_processing_pil_pixtral`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pixtral.image_processing_pixtral`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.poolformer.image_processing_pil_poolformer`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.poolformer.image_processing_poolformer`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pp_chart2table.image_processing_pil_pp_chart2table`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pp_chart2table.image_processing_pp_chart2table`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pp_doclayout_v2.image_processing_pp_doclayout_v2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pp_doclayout_v3.image_processing_pp_doclayout_v3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pp_lcnet.image_processing_pp_lcnet`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pp_ocrv5_server_det.image_processing_pp_ocrv5_server_det`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pp_ocrv5_server_rec.image_processing_pp_ocrv5_server_rec`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.prompt_depth_anything.image_processing_pil_prompt_depth_anything`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.prompt_depth_anything.image_processing_prompt_depth_anything`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pvt.image_processing_pil_pvt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.pvt.image_processing_pvt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.qwen2_vl.image_processing_pil_qwen2_vl`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.qwen2_vl.image_processing_qwen2_vl`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.rt_detr.image_processing_pil_rt_detr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.rt_detr.image_processing_rt_detr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.sam.image_processing_pil_sam`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.sam.image_processing_sam`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.sam2.image_processing_sam2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.sam3.image_processing_sam3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.segformer.image_processing_pil_segformer`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.segformer.image_processing_segformer`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.seggpt.image_processing_pil_seggpt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.seggpt.image_processing_seggpt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.siglip.image_processing_pil_siglip`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.siglip.image_processing_siglip`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.siglip2.image_processing_pil_siglip2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.siglip2.image_processing_siglip2`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.slanext.image_processing_slanext`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.smolvlm.image_processing_pil_smolvlm`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.smolvlm.image_processing_smolvlm`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.superglue.image_processing_pil_superglue`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.superglue.image_processing_superglue`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.superpoint.image_processing_pil_superpoint`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.superpoint.image_processing_superpoint`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.swin2sr.image_processing_pil_swin2sr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.swin2sr.image_processing_swin2sr`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.textnet.image_processing_pil_textnet`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.textnet.image_processing_textnet`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.timm_wrapper.image_processing_timm_wrapper`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.tvp.image_processing_pil_tvp`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.tvp.image_processing_tvp`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.uvdoc.image_processing_uvdoc`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.video_llama_3.image_processing_pil_video_llama_3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.video_llama_3.image_processing_video_llama_3`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.video_llava.image_processing_video_llava`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.videomae.image_processing_pil_videomae`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.videomae.image_processing_videomae`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vilt.image_processing_pil_vilt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vilt.image_processing_vilt`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vit.image_processing_pil_vit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vit.image_processing_vit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vitmatte.image_processing_pil_vitmatte`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vitmatte.image_processing_vitmatte`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vitpose.image_processing_pil_vitpose`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vitpose.image_processing_vitpose`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.vivit.image_processing_vivit`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.yolos.image_processing_pil_yolos`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.yolos.image_processing_yolos`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.zoedepth.image_processing_pil_zoedepth`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+Accessing `fused_q_kv_rmsnorm` from `.models.zoedepth.image_processing_zoedepth`. Returning `fused_q_kv_rmsnorm` instead. Behavior may be different and this alias will be removed in future versions.
+(EngineCore pid=24585) WARNING 10-07 05:16:47 [patch_triton.py:332] NPU Triton causal_conv1d_update is unavailable (cannot import name 'causal_conv1d_update_npu' from 'vllm_ascend.ops.triton.mamba.causal_conv1d' (/root/issue-214-136-formal-20261007/worktrees/vllm-ascend-main-7c8ec865/vllm_ascend/ops/triton/mamba/causal_conv1d.py)); falling back to the PyTorch implementation, which syncs per request and therefore stalls ACL graph capture at decode-FULL.
+(EngineCore pid=24585) INFO 10-07 05:16:50 [parallel_state.py:1825] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_53a18b3c5dbb49f1930f5f96734a1da5 backend=hccl
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+(EngineCore pid=24585) INFO 10-07 05:16:50 [parallel_state.py:2269] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, ETP rank 0, EP rank N/A, EPLB rank N/A
+[Gloo] Rank 0 is connected to 0 peer ranks. Expected number of connected peer ranks is : 0
+[rank0]:[W1007 05:16:50.060557043 NPUCachingAllocator.cpp:202] Warning: The current CANN and HDK(driver) versions require processing for 32 padding size, with memory allocation. (function operator())
+(EngineCore pid=24585) INFO 10-07 05:16:51 [platform.py:1451] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=24585) INFO 10-07 05:16:51 [model_runner_v1.py:4391] Starting to load model /models/Qwen--Qwen2.5-14B-Instruct...
+(EngineCore pid=24585) INFO 10-07 05:16:51 [platform.py:1451] FA3 will not be enabled when rl_config.enable_training_consistency is false. Note that Ascend NPU will use its registered plugin backend instead.
+(EngineCore pid=24585) INFO 10-07 05:16:52 [compilation.py:1106] Using OOT custom backend for compilation.
+(EngineCore pid=24585) INFO 10-07 05:16:52 [base_loader.py:81] Initializing model took 0.557054 seconds
+(EngineCore pid=24585) INFO 10-07 05:16:52 [weight_utils.py:1063] Filesystem type for checkpoints: EXT4. Checkpoint size: 27.51 GiB. Available RAM: 706.11 GiB.
+(EngineCore pid=24585) INFO 10-07 05:16:52 [weight_utils.py:1086] Auto-prefetch is disabled because the filesystem (EXT4) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+Loading safetensors checkpoint shards:   0% Completed | 0/8 [00:00<?, ?it/s]
+(EngineCore pid=24585) WARNING 10-07 05:16:52 [utils.py:325] Attempted to load weight embed_tokens.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:53 [utils.py:325] Attempted to load weight layers.0.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:53 [utils.py:325] Attempted to load weight layers.0.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.0.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.0.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.1.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.1.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.1.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.1.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.2.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.2.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.2.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.2.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.3.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:54 [utils.py:325] Attempted to load weight layers.3.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:55 [utils.py:325] Attempted to load weight layers.3.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:55 [utils.py:325] Attempted to load weight layers.3.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:55 [utils.py:325] Attempted to load weight layers.4.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:55 [utils.py:325] Attempted to load weight layers.4.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:55 [utils.py:325] Attempted to load weight layers.4.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards:  12% Completed | 1/8 [00:03<00:22,  3.21s/it]
+(EngineCore pid=24585) WARNING 10-07 05:16:55 [utils.py:325] Attempted to load weight layers.10.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:55 [utils.py:325] Attempted to load weight layers.10.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:56 [utils.py:325] Attempted to load weight layers.10.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:56 [utils.py:325] Attempted to load weight layers.10.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:56 [utils.py:325] Attempted to load weight layers.11.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:56 [utils.py:325] Attempted to load weight layers.11.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:56 [utils.py:325] Attempted to load weight layers.11.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:56 [utils.py:325] Attempted to load weight layers.4.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:56 [utils.py:325] Attempted to load weight layers.5.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:56 [utils.py:325] Attempted to load weight layers.5.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:57 [utils.py:325] Attempted to load weight layers.5.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:57 [utils.py:325] Attempted to load weight layers.5.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:57 [utils.py:325] Attempted to load weight layers.6.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:57 [utils.py:325] Attempted to load weight layers.6.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:57 [utils.py:325] Attempted to load weight layers.6.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:57 [utils.py:325] Attempted to load weight layers.6.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:57 [utils.py:325] Attempted to load weight layers.7.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:57 [utils.py:325] Attempted to load weight layers.7.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.7.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.7.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.8.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.8.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.8.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.8.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.9.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.9.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.9.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:58 [utils.py:325] Attempted to load weight layers.9.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards:  25% Completed | 2/8 [00:06<00:20,  3.46s/it]
+(EngineCore pid=24585) WARNING 10-07 05:16:59 [utils.py:325] Attempted to load weight layers.11.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:59 [utils.py:325] Attempted to load weight layers.12.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:59 [utils.py:325] Attempted to load weight layers.12.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:59 [utils.py:325] Attempted to load weight layers.12.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:59 [utils.py:325] Attempted to load weight layers.12.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:59 [utils.py:325] Attempted to load weight layers.13.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:16:59 [utils.py:325] Attempted to load weight layers.13.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.13.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.13.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.14.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.14.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.14.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.14.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.15.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.15.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.15.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.15.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.16.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:00 [utils.py:325] Attempted to load weight layers.16.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.16.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.16.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.17.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.17.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.17.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.17.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.18.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.18.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.18.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards:  38% Completed | 3/8 [00:09<00:16,  3.23s/it]
+(EngineCore pid=24585) WARNING 10-07 05:17:01 [utils.py:325] Attempted to load weight layers.18.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.19.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.19.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.19.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.19.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.20.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.20.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.20.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.20.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.21.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:02 [utils.py:325] Attempted to load weight layers.21.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.21.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.21.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.22.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.22.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.22.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.22.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.23.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.23.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:03 [utils.py:325] Attempted to load weight layers.23.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.23.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.24.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.24.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.24.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.24.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.25.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.25.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.25.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.25.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.26.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards:  50% Completed | 4/8 [00:12<00:12,  3.05s/it]
+(EngineCore pid=24585) WARNING 10-07 05:17:04 [utils.py:325] Attempted to load weight layers.26.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.26.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.26.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.27.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.27.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.27.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.27.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.28.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.28.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.28.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:05 [utils.py:325] Attempted to load weight layers.28.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.29.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.29.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.29.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.29.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.30.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.30.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.30.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.30.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.31.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:06 [utils.py:325] Attempted to load weight layers.31.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.31.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.31.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.32.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.32.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.32.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.32.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.33.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.33.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.33.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards:  62% Completed | 5/8 [00:15<00:08,  2.97s/it]
+(EngineCore pid=24585) WARNING 10-07 05:17:07 [utils.py:325] Attempted to load weight layers.33.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.34.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.34.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.34.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.34.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.35.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.35.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.35.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.35.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.36.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:08 [utils.py:325] Attempted to load weight layers.36.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.36.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.36.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.37.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.37.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.37.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.37.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.38.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.38.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.38.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.38.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.39.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:09 [utils.py:325] Attempted to load weight layers.39.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.39.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.39.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.40.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.40.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.40.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards:  75% Completed | 6/8 [00:18<00:05,  2.91s/it]
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.40.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.41.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.41.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:10 [utils.py:325] Attempted to load weight layers.41.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.41.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.42.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.42.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.42.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.42.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.43.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.43.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.43.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.43.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.44.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:11 [utils.py:325] Attempted to load weight layers.44.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.44.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.44.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.45.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.45.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.45.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.45.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.46.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.46.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.46.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.46.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:12 [utils.py:325] Attempted to load weight layers.47.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:13 [utils.py:325] Attempted to load weight layers.47.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:13 [utils.py:325] Attempted to load weight layers.47.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards:  88% Completed | 7/8 [00:21<00:02,  2.91s/it]
+(EngineCore pid=24585) WARNING 10-07 05:17:13 [utils.py:325] Attempted to load weight lm_head.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:14 [utils.py:325] Attempted to load weight layers.47.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(EngineCore pid=24585) WARNING 10-07 05:17:15 [utils.py:325] Attempted to load weight norm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:22<00:00,  2.54s/it]
+Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:22<00:00,  2.86s/it]
+
+(EngineCore pid=24585) INFO 10-07 05:17:15 [default_loader.py:484] Loading weights took 22.94 seconds
+(EngineCore pid=24585) INFO 10-07 05:17:16 [model_runner_v1.py:4478] Loading model weights took 27.5350 GB
+(EngineCore pid=24585) INFO 10-07 05:17:16 [model_runner_v1.py:4565] Model runner load_model total time: 25.01 seconds
+(EngineCore pid=24585) INFO 10-07 05:17:16 [interface.py:692] Setting kv cache block size to 128 for CUSTOM backend(s).
+(EngineCore pid=24585) INFO 10-07 05:17:16 [utils.py:347] Using LHBNC KV cache layout.
+(EngineCore pid=24585) INFO 10-07 05:17:16 [monitor.py:40] [backbone] Starting torch.compile
+(EngineCore pid=24585) INFO 10-07 05:17:25 [compiler_interface.py:291] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False, 'enable_super_kernel': False}
+(EngineCore pid=24585) INFO 10-07 05:17:25 [backends.py:1101] [backbone] Using cache directory: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-random-online-tp1/cache/torch_compile_cache/39c919ddfe/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=24585) INFO 10-07 05:17:25 [backends.py:1163] [backbone] Dynamo bytecode transform time: 8.55 s
+(EngineCore pid=24585) INFO 10-07 05:17:39 [backends.py:398] [backbone] Compiling a graph for compile range (1, 2048) takes 14.14 s
+(EngineCore pid=24585) INFO 10-07 05:17:43 [decorators.py:743] [backbone] saved AOT compiled function to /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-random-online-tp1/cache/torch_compile_cache/torch_aot_compile/b78c741836d0604bb49c2c2289b59cc61fb77c35ea7af5d146f3870c37a6f4e6/rank_0_0/model
+(EngineCore pid=24585) INFO 10-07 05:17:43 [monitor.py:62] [backbone] torch.compile took 26.86 s in total
+(EngineCore pid=24585) INFO 10-07 05:17:44 [monitor.py:91] [backbone] Initial profiling/warmup run took 0.91 s
+(EngineCore pid=24585) INFO 10-07 05:17:45 [worker.py:649] Available KV cache memory: 8.78 GiB
+(EngineCore pid=24585) INFO 10-07 05:17:45 [kv_cache_utils.py:2507] NPU KV cache size: 47,872 tokens, Maximum concurrency for 32,768 tokens per request: 1.46x
+(EngineCore pid=24585) INFO 10-07 05:17:45 [kernel_warmup.py:44] Starting Triton kernel warmup.
+(EngineCore pid=24585) INFO 10-07 05:17:45 [kernel_warmup.py:36] rejection_sampler Triton warmup complete in 0.000s.
+(EngineCore pid=24585) INFO 10-07 05:17:46 [kernel_warmup.py:36] penalties Triton warmup complete in 0.035s.
+(EngineCore pid=24585) INFO 10-07 05:17:46 [kernel_warmup.py:36] rms Triton warmup complete in 0.000s.
+(EngineCore pid=24585) INFO 10-07 05:17:46 [kernel_warmup.py:36] indexer Triton warmup complete in 0.000s.
+(EngineCore pid=24585) INFO 10-07 05:17:46 [kernel_warmup.py:53] Triton kernel warmup finished in 0.036s.
+(EngineCore pid=24585) INFO 10-07 05:17:46 [gpu_model_runner.py:6815] Rank 0: Torch profiler disabled for CUDA graph capture
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/9 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  11%|█         | 1/9 [00:00<00:02,  2.73it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  22%|██▏       | 2/9 [00:00<00:02,  2.85it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  33%|███▎      | 3/9 [00:01<00:02,  2.92it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  44%|████▍     | 4/9 [00:01<00:01,  2.97it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  56%|█████▌    | 5/9 [00:01<00:01,  2.97it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  67%|██████▋   | 6/9 [00:02<00:01,  2.92it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  78%|███████▊  | 7/9 [00:02<00:00,  2.93it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  89%|████████▉ | 8/9 [00:02<00:00,  2.93it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 9/9 [00:03<00:00,  2.94it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 9/9 [00:03<00:00,  2.93it/s]
+Capturing CUDA graphs (decode, FULL):   0%|          | 0/9 [00:00<?, ?it/s]Capturing CUDA graphs (decode, FULL):  11%|█         | 1/9 [00:00<00:03,  2.37it/s]Capturing CUDA graphs (decode, FULL):  22%|██▏       | 2/9 [00:00<00:02,  2.97it/s]Capturing CUDA graphs (decode, FULL):  33%|███▎      | 3/9 [00:00<00:01,  3.26it/s]Capturing CUDA graphs (decode, FULL):  44%|████▍     | 4/9 [00:01<00:01,  3.47it/s]Capturing CUDA graphs (decode, FULL):  56%|█████▌    | 5/9 [00:01<00:01,  3.58it/s]Capturing CUDA graphs (decode, FULL):  67%|██████▋   | 6/9 [00:01<00:00,  3.66it/s]Capturing CUDA graphs (decode, FULL):  78%|███████▊  | 7/9 [00:02<00:00,  3.73it/s]Capturing CUDA graphs (decode, FULL):  89%|████████▉ | 8/9 [00:02<00:00,  3.79it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 9/9 [00:02<00:00,  3.83it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 9/9 [00:02<00:00,  3.57it/s]
+(EngineCore pid=24585) INFO 10-07 05:17:53 [gpu_model_runner.py:6861] Graph capturing finished in 7 secs, took 0.96 GiB
+(EngineCore pid=24585) INFO 10-07 05:17:53 [worker.py:928] Free memory on device (60.59/60.96 GiB) on startup. Desired GPU memory utilization is (0.6, 36.57 GiB). Actual usage: 27.54 GiB for weights, 0.23 GiB for peak activation, 0.03 GiB for non-torch memory, 0.96 GiB for NPU graph memory. Replace gpu_memory_utilization with `--kv-cache-memory=8241687552` (7.68 GiB) to fit into requested memory, or `--kv-cache-memory=34026531840` (31.69 GiB) to fully utilize NPU free memory. Current KV cache memory: 8.78 GiB. After warmup: torch reserved memory 37.2 GiB, torch allocated memory 36.33 GiB.
+(EngineCore pid=24585) INFO 10-07 05:17:54 [cpu_binding.py:539] [cpu_bind_mode] mode=topo_affinity rank=0 visible_npus=[0]
+(EngineCore pid=24585) INFO 10-07 05:17:54 [cpu_binding.py:623] The CPU allocation plan is as follows:
+(EngineCore pid=24585) INFO 10-07 05:17:54 [cpu_binding.py:637] NPU0: main=[146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165]  acl=[166]  release=[[167]]
+(EngineCore pid=24585) INFO 10-07 05:17:55 [cpu_binding.py:663] [migrate] NPU:0 -> NUMA [6]
+(EngineCore pid=24585) WARNING 10-07 05:17:59 [cpu_binding.py:699] /proc/irq is not writable. If running in Docker, start the container with '--privileged=true'.
+(EngineCore pid=24585) INFO 10-07 05:17:59 [core.py:381] init engine (profile, create kv cache, warmup model) took 43.75 s (compilation: 26.86 s)
+(EngineCore pid=24585) INFO 10-07 05:18:00 [preemption.py:175] Preemption policy initialized: policy=builtin enabled=False
+(EngineCore pid=24585) INFO 10-07 05:18:00 [batch_admission.py:144] Batch admission policy initialized: policy=builtin configured=False enabled=False
+(EngineCore pid=24585) INFO 10-07 05:18:01 [kernel.py:459] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['native'])
+(EngineCore pid=24585) INFO 10-07 05:18:01 [utils.py:224] No quantization signature detected from model files for "/models/Qwen--Qwen2.5-14B-Instruct". The model will be loaded as float. To force a quantization method, pass "--quantization <method>" explicitly.
+(EngineCore pid=24585) INFO 10-07 05:18:01 [platform.py:927] The timeout interval of the HCCL operator is 1836s. Timeout in seconds for execute_model RPC calls in multiprocessing must be greater than 1836s, Set VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=3000
+(EngineCore pid=24585) INFO 10-07 05:18:01 [platform.py:1428] Set PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+(EngineCore pid=24585) INFO 10-07 05:18:01 [compilation.py:331] Enabled custom fusions: norm_quant, act_quant
+(APIServer pid=23242) INFO 10-07 05:18:01 [entry.py:135] Supported tasks: ['generate']
+(APIServer pid=23242) INFO 10-07 05:18:01 [factories.py:76] Scale-out endpoints are disabled. Set --enable-scale-out to enable them.
+(APIServer pid=23242) INFO 10-07 05:18:02 [hf.py:648] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.
+(APIServer pid=23242) WARNING 10-07 05:18:02 [model.py:1882] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.05, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.
+(APIServer pid=23242) INFO 10-07 05:18:02 [entry.py:139] Starting vLLM server on http://127.0.0.1:8400
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:60] Available routes are:
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /openapi.json, Methods: GET, HEAD
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /docs, Methods: GET, HEAD
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /docs/oauth2-redirect, Methods: GET, HEAD
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /redoc, Methods: GET, HEAD
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /load, Methods: GET
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /version, Methods: GET
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /kv_event_sources, Methods: GET
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /health, Methods: GET
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /metrics, Methods: GET
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /tokenize, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /detokenize, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/models, Methods: GET
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /ping, Methods: GET
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /ping, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /invocations, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/chat/completions, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/chat/completions/batch, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/responses, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/responses/{response_id}, Methods: GET
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/responses/{response_id}/cancel, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/completions, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/messages, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /v1/messages/count_tokens, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /generative_scoring, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /scale_elastic_ep, Methods: POST
+(APIServer pid=23242) INFO 10-07 05:18:02 [launcher.py:69] Route: /is_scaling_elastic_ep, Methods: POST
+INFO:     Started server process [23242]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:56816 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56818 - "POST /tokenize HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56820 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) WARNING 10-07 05:18:27 [vllm.py:1327] Watermarking is enabled for this request, but the engine has no watermark configuration. This and subsequent requests will run without watermarking.
+(EngineCore pid=24585) INFO 10-07 05:18:27 [acl_graph.py:301] ACL graph replay is active (logged once).
+(APIServer pid=23242) INFO 10-07 05:18:32 [loggers.py:328] Engine 000: Avg prompt throughput: 102.4 tokens/s, Avg generation throughput: 10.9 tokens/s, Running: 1 reqs, Waiting: 0 reqs, NPU KV cache usage: 2.4%, Prefix cache hit rate: 0.0%
+INFO:     127.0.0.1:56820 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56820 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56824 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:18:42 [loggers.py:328] Engine 000: Avg prompt throughput: 217.6 tokens/s, Avg generation throughput: 22.9 tokens/s, Running: 3 reqs, Waiting: 0 reqs, NPU KV cache usage: 7.2%, Prefix cache hit rate: 21.9%
+INFO:     127.0.0.1:56828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56836 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56838 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56840 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:18:52 [loggers.py:328] Engine 000: Avg prompt throughput: 716.7 tokens/s, Avg generation throughput: 141.8 tokens/s, Running: 10 reqs, Waiting: 0 reqs, NPU KV cache usage: 26.0%, Prefix cache hit rate: 8.0%
+INFO:     127.0.0.1:56820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:19:02 [loggers.py:328] Engine 000: Avg prompt throughput: 921.5 tokens/s, Avg generation throughput: 196.1 tokens/s, Running: 11 reqs, Waiting: 0 reqs, NPU KV cache usage: 27.9%, Prefix cache hit rate: 4.4%
+INFO:     127.0.0.1:56836 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56838 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:19:12 [loggers.py:328] Engine 000: Avg prompt throughput: 819.1 tokens/s, Avg generation throughput: 190.7 tokens/s, Running: 9 reqs, Waiting: 0 reqs, NPU KV cache usage: 22.3%, Prefix cache hit rate: 3.1%
+INFO:     127.0.0.1:56830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56836 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56846 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56838 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56854 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:19:22 [loggers.py:328] Engine 000: Avg prompt throughput: 1126.3 tokens/s, Avg generation throughput: 215.0 tokens/s, Running: 16 reqs, Waiting: 0 reqs, NPU KV cache usage: 40.2%, Prefix cache hit rate: 2.2%
+INFO:     127.0.0.1:56840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56856 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56858 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:19:32 [loggers.py:328] Engine 000: Avg prompt throughput: 1228.5 tokens/s, Avg generation throughput: 262.7 tokens/s, Running: 18 reqs, Waiting: 0 reqs, NPU KV cache usage: 45.0%, Prefix cache hit rate: 1.7%
+INFO:     127.0.0.1:56836 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56846 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56838 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56854 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56862 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56864 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56866 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:19:42 [loggers.py:328] Engine 000: Avg prompt throughput: 1330.9 tokens/s, Avg generation throughput: 293.3 tokens/s, Running: 23 reqs, Waiting: 0 reqs, NPU KV cache usage: 58.2%, Prefix cache hit rate: 1.3%
+INFO:     127.0.0.1:56868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:19:52 [loggers.py:328] Engine 000: Avg prompt throughput: 921.5 tokens/s, Avg generation throughput: 360.7 tokens/s, Running: 20 reqs, Waiting: 0 reqs, NPU KV cache usage: 52.5%, Prefix cache hit rate: 1.2%
+INFO:     127.0.0.1:56848 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56838 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56854 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56862 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56864 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56866 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56824 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:20:02 [loggers.py:328] Engine 000: Avg prompt throughput: 1433.3 tokens/s, Avg generation throughput: 251.7 tokens/s, Running: 16 reqs, Waiting: 0 reqs, NPU KV cache usage: 39.1%, Prefix cache hit rate: 1.0%
+INFO:     127.0.0.1:56828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56870 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56876 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56878 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56880 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:20:12 [loggers.py:328] Engine 000: Avg prompt throughput: 1228.7 tokens/s, Avg generation throughput: 343.9 tokens/s, Running: 26 reqs, Waiting: 0 reqs, NPU KV cache usage: 66.2%, Prefix cache hit rate: 0.9%
+INFO:     127.0.0.1:56852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56838 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56854 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56866 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56822 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:20:22 [loggers.py:328] Engine 000: Avg prompt throughput: 1126.2 tokens/s, Avg generation throughput: 324.3 tokens/s, Running: 18 reqs, Waiting: 0 reqs, NPU KV cache usage: 46.6%, Prefix cache hit rate: 0.8%
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:20:32 [loggers.py:328] Engine 000: Avg prompt throughput: 716.8 tokens/s, Avg generation throughput: 242.4 tokens/s, Running: 13 reqs, Waiting: 0 reqs, NPU KV cache usage: 33.5%, Prefix cache hit rate: 0.7%
+INFO:     127.0.0.1:56854 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56866 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56868 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:20:42 [loggers.py:328] Engine 000: Avg prompt throughput: 614.4 tokens/s, Avg generation throughput: 200.6 tokens/s, Running: 8 reqs, Waiting: 0 reqs, NPU KV cache usage: 20.4%, Prefix cache hit rate: 0.7%
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56848 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56854 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56882 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56884 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56886 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56888 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56890 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:20:52 [loggers.py:328] Engine 000: Avg prompt throughput: 1535.9 tokens/s, Avg generation throughput: 220.3 tokens/s, Running: 17 reqs, Waiting: 0 reqs, NPU KV cache usage: 42.4%, Prefix cache hit rate: 0.6%
+INFO:     127.0.0.1:56866 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56892 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56896 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:21:02 [loggers.py:328] Engine 000: Avg prompt throughput: 819.0 tokens/s, Avg generation throughput: 316.0 tokens/s, Running: 15 reqs, Waiting: 0 reqs, NPU KV cache usage: 38.9%, Prefix cache hit rate: 0.6%
+INFO:     127.0.0.1:56872 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:21:12 [loggers.py:328] Engine 000: Avg prompt throughput: 409.5 tokens/s, Avg generation throughput: 201.5 tokens/s, Running: 6 reqs, Waiting: 0 reqs, NPU KV cache usage: 15.8%, Prefix cache hit rate: 0.6%
+INFO:     127.0.0.1:56892 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56896 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56898 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56900 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:21:22 [loggers.py:328] Engine 000: Avg prompt throughput: 1024.0 tokens/s, Avg generation throughput: 129.8 tokens/s, Running: 11 reqs, Waiting: 0 reqs, NPU KV cache usage: 26.8%, Prefix cache hit rate: 0.5%
+INFO:     127.0.0.1:56902 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56904 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56906 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56892 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56896 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:21:32 [loggers.py:328] Engine 000: Avg prompt throughput: 614.4 tokens/s, Avg generation throughput: 234.1 tokens/s, Running: 10 reqs, Waiting: 0 reqs, NPU KV cache usage: 26.3%, Prefix cache hit rate: 0.5%
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56898 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56900 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56902 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56904 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56908 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56906 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56892 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56910 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:21:42 [loggers.py:328] Engine 000: Avg prompt throughput: 1330.9 tokens/s, Avg generation throughput: 229.9 tokens/s, Running: 14 reqs, Waiting: 0 reqs, NPU KV cache usage: 35.4%, Prefix cache hit rate: 0.5%
+INFO:     127.0.0.1:56912 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56914 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56916 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56918 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56896 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56872 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56850 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:21:52 [loggers.py:328] Engine 000: Avg prompt throughput: 1228.7 tokens/s, Avg generation throughput: 305.0 tokens/s, Running: 15 reqs, Waiting: 0 reqs, NPU KV cache usage: 38.6%, Prefix cache hit rate: 0.5%
+INFO:     127.0.0.1:56860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56898 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56900 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56902 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56908 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56906 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56892 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56910 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56912 - "POST /v1/completions HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:22:02 [loggers.py:328] Engine 000: Avg prompt throughput: 1023.7 tokens/s, Avg generation throughput: 288.8 tokens/s, Running: 15 reqs, Waiting: 0 reqs, NPU KV cache usage: 38.3%, Prefix cache hit rate: 0.4%
+INFO:     127.0.0.1:56900 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56902 - "GET /metrics HTTP/1.1" 200 OK
+(APIServer pid=23242) INFO 10-07 05:22:12 [loggers.py:328] Engine 000: Avg prompt throughput: 0.0 tokens/s, Avg generation throughput: 162.4 tokens/s, Running: 0 reqs, Waiting: 0 reqs, NPU KV cache usage: 0.0%, Prefix cache hit rate: 0.4%
+(APIServer pid=23242) INFO 10-07 05:22:13 [launcher.py:128] [shutdown] API server: shutdown triggered
+(EngineCore pid=24585) INFO 10-07 05:22:13 [core.py:1460] [shutdown] EngineCore: trigger received signal=SIGTERM
+(APIServer pid=23242) INFO 10-07 05:22:13 [launcher.py:144] [shutdown] API server: stopping engine client mode=abort timeout=0s
+(EngineCore pid=24585) INFO 10-07 05:22:13 [core.py:1609] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=24585) INFO 10-07 05:22:13 [core.py:1640] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=24585) INFO 10-07 05:22:13 [core.py:1473] [shutdown] EngineCore: exiting busy loop
+(APIServer pid=23242) INFO 10-07 05:22:13 [core_client.py:762] [shutdown] MPClient: start timeout=0s
+(APIServer pid=23242) INFO 10-07 05:22:13 [core_client.py:764] [shutdown] MPClient: stopping engine manager
+(APIServer pid=23242) INFO 10-07 05:22:13 [utils.py:655] [shutdown] Process manager: send sigterm to process EngineCore
+(APIServer pid=23242) WARNING 10-07 05:22:13 [utils.py:675] [shutdown] Process manager: force killing remaining processes count=1
+(APIServer pid=23242) WARNING 10-07 05:22:13 [utils.py:680] [shutdown] Process manager: force killing remaining process EngineCore pid 24585
+(APIServer pid=23242) INFO 10-07 05:22:13 [core_client.py:766] [shutdown] MPClient: engine manager stopped
+(APIServer pid=23242) INFO 10-07 05:22:13 [core_client.py:767] [shutdown] MPClient: cleaning up background resources
+(APIServer pid=23242) INFO 10-07 05:22:13 [core_client.py:769] [shutdown] MPClient: complete
+(APIServer pid=23242) ERROR 10-07 05:22:13 [async_llm.py:885] AsyncLLM output_handler failed.
+(APIServer pid=23242) ERROR 10-07 05:22:13 [async_llm.py:885] Traceback (most recent call last):
+(APIServer pid=23242) ERROR 10-07 05:22:13 [async_llm.py:885]   File "/root/issue-214-136-formal-20261007/worktrees/vllm-hust-current/vllm/v1/engine/async_llm.py", line 831, in output_handler
+(APIServer pid=23242) ERROR 10-07 05:22:13 [async_llm.py:885]     outputs = await engine_core.get_output_async()
+(APIServer pid=23242) ERROR 10-07 05:22:13 [async_llm.py:885]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=23242) ERROR 10-07 05:22:13 [async_llm.py:885]   File "/root/issue-214-136-formal-20261007/worktrees/vllm-hust-current/vllm/v1/engine/core_client.py", line 1215, in get_output_async
+(APIServer pid=23242) ERROR 10-07 05:22:13 [async_llm.py:885]     raise self._format_exception(outputs) from None
+(APIServer pid=23242) ERROR 10-07 05:22:13 [async_llm.py:885] vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See stack trace (above) for the root cause.
+(APIServer pid=23242) INFO 10-07 05:22:13 [launcher.py:153] [shutdown] API server: engine client stopped
+(APIServer pid=23242) INFO 10-07 05:22:13 [launcher.py:156] [shutdown] API server: signalling HTTP server shutdown
+(APIServer pid=23242) INFO 10-07 05:22:13 [launcher.py:178] [shutdown] API server: shutting down FastAPI HTTP server
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+/usr/local/python3.12.13/lib/python3.12/multiprocessing/resource_tracker.py:279: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

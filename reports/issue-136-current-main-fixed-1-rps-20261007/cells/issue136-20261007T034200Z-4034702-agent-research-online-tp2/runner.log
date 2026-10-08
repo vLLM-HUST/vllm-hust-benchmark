@@ -1,0 +1,329 @@
+═══════════════════════════════════════════════════════════════════════
+  Campaign Repetition Loop
+  Spec:        /root/vllm-hust-benchmark-issue214-136/docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json
+  Workload:    agent-research-online
+  Chip count:  2
+  Prefix:      issue136-20261007T034200Z-4034702-agent-research-online-tp2
+  Repetitions: 3
+  Cooldown:    60s
+═══════════════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────────────
+  Repetition 1/3
+───────────────────────────────────────────────────────────────────────
+[run-single] RUN_ID:     issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z-r1
+[run-single] SPEC:       /root/vllm-hust-benchmark-issue214-136/docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json
+[run-single] ARTIFACT:   /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z
+[run-single] STATE:      /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z
+/root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z/resolved_same_spec.json
+[same-spec-current] neutral cwd: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/runtime-cwd
+[same-spec-current] vllm cache root: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/cache
+[same-spec-current] runtime model source: /models/Qwen--Qwen2.5-14B-Instruct
+[same-spec-current] resolved spec file: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z/resolved_same_spec.json
+[same-spec-current] benchmark type: serve
+[same-spec-current] benchmark endpoint: 127.0.0.1:8413
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (0s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (30s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (60s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (90s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (120s/600s)
+[same-spec-current] readiness probe failed: http://127.0.0.1:8413/health (ConnectionRefusedError: [Errno 111] Connection refused)
+[same-spec-current] readiness probe failed: http://127.0.0.1:8413/ping (ConnectionRefusedError: [Errno 111] Connection refused)
+[same-spec-current] readiness probe failed: http://127.0.0.1:8413/v1/models (ConnectionRefusedError: [Errno 111] Connection refused)
+---- same-spec server log progress at 120s: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z/server-attempt-logs/server-attempt-1.stdout.log (last 40 lines) ----
+(Worker_TP0 pid=4183542) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight lm_head.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.44.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.45.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.45.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.45.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.45.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.46.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.46.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP0 pid=4183542) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.47.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.46.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:01 [utils.py:325] Attempted to load weight layers.46.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP0 pid=4183542) WARNING 10-07 05:03:02 [utils.py:325] Attempted to load weight norm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:14<00:00,  1.69s/it]
+Loading safetensors checkpoint shards: 100% Completed | 8/8 [00:14<00:00,  1.81s/it]
+
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:02 [utils.py:325] Attempted to load weight layers.47.input_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:02 [default_loader.py:484] Loading weights took 14.54 seconds
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:02 [utils.py:325] Attempted to load weight layers.47.post_attention_layernorm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:02 [utils.py:325] Attempted to load weight layers.47.self_attn.o_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:02 [utils.py:325] Attempted to load weight lm_head.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:03 [model_runner_v1.py:4478] Loading model weights took 13.7798 GB
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:03 [model_runner_v1.py:4565] Model runner load_model total time: 16.68 seconds
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:03 [interface.py:692] Setting kv cache block size to 128 for CUSTOM backend(s).
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:03 [utils.py:325] Attempted to load weight layers.47.mlp.down_proj.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) WARNING 10-07 05:03:03 [utils.py:325] Attempted to load weight norm.weight with dtype torch.bfloat16 into parameter with dtype torch.float16
+(Worker_TP1 pid=4183543) INFO 10-07 05:03:04 [model_runner_v1.py:4478] Loading model weights took 13.7798 GB
+(Worker_TP1 pid=4183543) INFO 10-07 05:03:04 [model_runner_v1.py:4565] Model runner load_model total time: 17.82 seconds
+(Worker_TP1 pid=4183543) INFO 10-07 05:03:04 [interface.py:692] Setting kv cache block size to 128 for CUSTOM backend(s).
+(EngineCore pid=4182107) INFO 10-07 05:03:04 [torch_utils.py:286] Reducing Torch threads from 44 to 1 for serving. Set OMP_NUM_THREADS in the external environment to override.
+(EngineCore pid=4182107) INFO 10-07 05:03:04 [utils.py:347] Using LHBNC KV cache layout.
+(Worker_TP1 pid=4183543) INFO 10-07 05:03:04 [monitor.py:40] [backbone] Starting torch.compile
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:05 [monitor.py:40] [backbone] Starting torch.compile
+(Worker_TP1 pid=4183543) INFO 10-07 05:03:13 [compiler_interface.py:291] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False, 'enable_super_kernel': False}
+(Worker_TP1 pid=4183543) INFO 10-07 05:03:13 [backends.py:1101] [backbone] Using cache directory: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/cache/torch_compile_cache/c1f7a0fc06/rank_1_0/backbone for vLLM's torch.compile
+(Worker_TP1 pid=4183543) INFO 10-07 05:03:13 [backends.py:1163] [backbone] Dynamo bytecode transform time: 8.93 s
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:13 [compiler_interface.py:291] AscendCompiler hash factors: {'torch_npu_version': '2.10.0.post4', 'enable_npugraph_ex': False, 'enable_static_kernel': False, 'enable_super_kernel': False}
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:13 [backends.py:1101] [backbone] Using cache directory: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/cache/torch_compile_cache/c1f7a0fc06/rank_0_0/backbone for vLLM's torch.compile
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:13 [backends.py:1163] [backbone] Dynamo bytecode transform time: 8.94 s
+(Worker_TP0 pid=4183542) INFO 10-07 05:03:29 [backends.py:398] [backbone] Compiling a graph for compile range (1, 2048) takes 14.88 s
+(Worker_TP1 pid=4183543) INFO 10-07 05:03:29 [backends.py:398] [backbone] Compiling a graph for compile range (1, 2048) takes 15.18 s
+---- end same-spec server log progress ----
+[same-spec-current] current same-spec server became ready after 142s
+[W1007 05:04:00.044291039 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+Namespace(trust_remote_code=False, seed=0, num_prompts=32, dataset_name='custom', no_stream=False, dataset_path='/root/vllm-hust-benchmark-issue214-136/scripts/traces/evoscientist-workload-custom.jsonl', no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8413, endpoint='/v1/chat/completions', header=None, max_concurrency=None, model='/models/Qwen--Qwen2.5-14B-Instruct', input_len=None, output_len=None, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=1.0, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=False, append_result=False, metadata=None, result_dir='/root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z', result_filename='raw_benchmark_result.json', ignore_eos=True, self_timed=None, percentile_metrics=None, metric_percentiles='99', goodput=None, request_id_prefix='bench-e8faaaf8-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=600, chat_template_kwargs=None, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False)
+Starting initial single prompt test run...
+Waiting for endpoint to become up in 600 seconds
+ |          | 00:00 elapsed, ? remaining |          | 00:00 elapsed, 00:10 remaining |          | 00:14 elapsed, 1777:23:24 remaining
+Initial test run completed.
+Starting main benchmark run...
+Traffic request rate: 1.0
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: None
+  0%|          | 0/32 [00:00<?, ?it/s]  3%|▎         | 1/32 [00:16<08:35, 16.61s/it]  6%|▋         | 2/32 [00:17<03:48,  7.61s/it]  9%|▉         | 3/32 [00:18<02:11,  4.53s/it] 12%|█▎        | 4/32 [00:19<01:24,  3.01s/it] 16%|█▌        | 5/32 [00:19<00:56,  2.09s/it] 19%|█▉        | 6/32 [00:20<00:43,  1.68s/it] 22%|██▏       | 7/32 [00:21<00:32,  1.29s/it] 25%|██▌       | 8/32 [00:23<00:35,  1.48s/it] 28%|██▊       | 9/32 [00:26<00:44,  1.93s/it] 31%|███▏      | 10/32 [00:26<00:32,  1.48s/it] 34%|███▍      | 11/32 [00:27<00:29,  1.43s/it] 38%|███▊      | 12/32 [00:28<00:23,  1.18s/it] 41%|████      | 13/32 [00:29<00:19,  1.03s/it] 44%|████▍     | 14/32 [00:31<00:25,  1.42s/it] 50%|█████     | 16/32 [00:31<00:12,  1.27it/s] 56%|█████▋    | 18/32 [00:33<00:10,  1.31it/s] 59%|█████▉    | 19/32 [00:34<00:11,  1.17it/s] 62%|██████▎   | 20/32 [00:35<00:12,  1.04s/it] 66%|██████▌   | 21/32 [00:39<00:17,  1.59s/it] 69%|██████▉   | 22/32 [00:40<00:15,  1.51s/it] 72%|███████▏  | 23/32 [00:40<00:11,  1.23s/it] 75%|███████▌  | 24/32 [00:42<00:09,  1.25s/it] 81%|████████▏ | 26/32 [00:42<00:05,  1.14it/s] 84%|████████▍ | 27/32 [00:43<00:03,  1.44it/s] 88%|████████▊ | 28/32 [00:45<00:04,  1.10s/it] 91%|█████████ | 29/32 [00:45<00:02,  1.04it/s] 94%|█████████▍| 30/32 [00:46<00:01,  1.24it/s] 97%|█████████▋| 31/32 [00:46<00:00,  1.55it/s]100%|██████████| 32/32 [00:47<00:00,  1.29it/s]100%|██████████| 32/32 [00:47<00:00,  1.49s/it]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     32        
+Failed requests:                         0         
+Request rate configured (RPS):           1.00      
+Benchmark duration (s):                  47.69     
+Total input tokens:                      7484      
+Total generated tokens:                  8192      
+Request throughput (req/s):              0.67      
+Output token throughput (tok/s):         171.76    
+Peak output token throughput (tok/s):    272.00    
+Peak concurrent requests:                18.00     
+Total token throughput (tok/s):          328.68    
+---------------Time to First Token----------------
+Mean TTFT (ms):                          189.42    
+Median TTFT (ms):                        190.22    
+P99 TTFT (ms):                           231.57    
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          63.13     
+Median TPOT (ms):                        63.19     
+P99 TPOT (ms):                           64.39     
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           62.88     
+Median ITL (ms):                         61.94     
+P99 ITL (ms):                            87.48     
+==================================================
+[same-spec-current] stopping managed current same-spec wrapper: 4178986 4178987 4179066 4182106 4182107 4183542 4183543 
+artifact: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z/submission/run_leaderboard.json
+manifest: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z/submission/leaderboard_manifest.json
+[collect] env-manifest.json written
+[collect] pip-packages.json written
+[collect] checksums.sha256 written
+[collect] STATUS = OK
+  ✅ STATUS file contains OK
+  ✅ run_leaderboard.json is valid JSON
+  ✅ leaderboard_manifest.json is valid JSON
+  ✅ leaderboard_manifest.json references run_leaderboard.json
+  ✅ env-manifest.json is valid JSON
+  ✅ env-manifest.json has required fields
+  ✅ formal campaign frozen provenance is complete
+  ✅ official source provenance is complete
+  ✅ official runtime provenance is complete and consistent
+  ✅ checksums.sha256 all pass
+valid
+  ✅ artifact contract normalization passes
+
+✅ All validations passed for: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z/submission
+[same-spec-current] exported leaderboard artifact and validated it at /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z/submission
+[run-single] artifact files copied from submission/
+[collect] env-manifest.json written
+[collect] pip-packages.json written
+[collect] checksums.sha256 written
+[collect] STATUS = OK
+[run-single] ✅ Repetition 1 completed successfully
+[run-single] Artifact: /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z
+
+───────────────────────────────────────────────────────────────────────
+  Repetition 2/3
+───────────────────────────────────────────────────────────────────────
+[campaign] cooldown 60s before next repetition...
+[run-single] RUN_ID:     issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z-r2
+[run-single] SPEC:       /root/vllm-hust-benchmark-issue214-136/docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json
+[run-single] ARTIFACT:   /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z
+[run-single] STATE:      /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z
+/root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z/resolved_same_spec.json
+[same-spec-current] neutral cwd: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/runtime-cwd
+[same-spec-current] vllm cache root: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/cache
+[same-spec-current] runtime model source: /models/Qwen--Qwen2.5-14B-Instruct
+[same-spec-current] resolved spec file: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z/resolved_same_spec.json
+[same-spec-current] benchmark type: serve
+[same-spec-current] benchmark endpoint: 127.0.0.1:8413
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (0s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (30s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (60s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (90s/600s)
+[same-spec-current] current same-spec server became ready after 118s
+[W1007 05:08:59.344945876 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+Namespace(trust_remote_code=False, seed=0, num_prompts=32, dataset_name='custom', no_stream=False, dataset_path='/root/vllm-hust-benchmark-issue214-136/scripts/traces/evoscientist-workload-custom.jsonl', no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8413, endpoint='/v1/chat/completions', header=None, max_concurrency=None, model='/models/Qwen--Qwen2.5-14B-Instruct', input_len=None, output_len=None, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=1.0, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=False, append_result=False, metadata=None, result_dir='/root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z', result_filename='raw_benchmark_result.json', ignore_eos=True, self_timed=None, percentile_metrics=None, metric_percentiles='99', goodput=None, request_id_prefix='bench-34ec693e-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=600, chat_template_kwargs=None, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False)
+Starting initial single prompt test run...
+Waiting for endpoint to become up in 600 seconds
+ |          | 00:00 elapsed, ? remaining |          | 00:00 elapsed, 00:09 remaining |          | 00:14 elapsed, 1712:59:03 remaining
+Initial test run completed.
+Starting main benchmark run...
+Traffic request rate: 1.0
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: None
+  0%|          | 0/32 [00:00<?, ?it/s]  3%|▎         | 1/32 [00:16<08:34, 16.60s/it]  6%|▋         | 2/32 [00:17<03:48,  7.61s/it]  9%|▉         | 3/32 [00:18<02:11,  4.53s/it] 12%|█▎        | 4/32 [00:19<01:24,  3.01s/it] 16%|█▌        | 5/32 [00:19<00:56,  2.09s/it] 19%|█▉        | 6/32 [00:20<00:43,  1.68s/it] 22%|██▏       | 7/32 [00:21<00:32,  1.29s/it] 25%|██▌       | 8/32 [00:23<00:35,  1.48s/it] 28%|██▊       | 9/32 [00:26<00:44,  1.95s/it] 31%|███▏      | 10/32 [00:26<00:32,  1.47s/it] 34%|███▍      | 11/32 [00:27<00:30,  1.44s/it] 38%|███▊      | 12/32 [00:28<00:23,  1.19s/it] 41%|████      | 13/32 [00:29<00:19,  1.04s/it] 44%|████▍     | 14/32 [00:31<00:25,  1.40s/it] 50%|█████     | 16/32 [00:31<00:12,  1.28it/s] 56%|█████▋    | 18/32 [00:33<00:10,  1.32it/s] 59%|█████▉    | 19/32 [00:34<00:11,  1.15it/s] 62%|██████▎   | 20/32 [00:35<00:12,  1.04s/it] 66%|██████▌   | 21/32 [00:39<00:17,  1.58s/it] 69%|██████▉   | 22/32 [00:40<00:15,  1.53s/it] 72%|███████▏  | 23/32 [00:40<00:11,  1.24s/it] 75%|███████▌  | 24/32 [00:42<00:09,  1.24s/it] 78%|███████▊  | 25/32 [00:42<00:06,  1.09it/s] 81%|████████▏ | 26/32 [00:43<00:05,  1.14it/s] 84%|████████▍ | 27/32 [00:43<00:03,  1.53it/s] 88%|████████▊ | 28/32 [00:45<00:04,  1.13s/it] 91%|█████████ | 29/32 [00:45<00:02,  1.05it/s] 94%|█████████▍| 30/32 [00:46<00:01,  1.27it/s] 97%|█████████▋| 31/32 [00:46<00:00,  1.60it/s]100%|██████████| 32/32 [00:47<00:00,  1.31it/s]100%|██████████| 32/32 [00:47<00:00,  1.49s/it]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     32        
+Failed requests:                         0         
+Request rate configured (RPS):           1.00      
+Benchmark duration (s):                  47.72     
+Total input tokens:                      7484      
+Total generated tokens:                  8192      
+Request throughput (req/s):              0.67      
+Output token throughput (tok/s):         171.68    
+Peak output token throughput (tok/s):    271.00    
+Peak concurrent requests:                18.00     
+Total token throughput (tok/s):          328.52    
+---------------Time to First Token----------------
+Mean TTFT (ms):                          200.58    
+Median TTFT (ms):                        204.81    
+P99 TTFT (ms):                           253.62    
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          63.16     
+Median TPOT (ms):                        63.22     
+P99 TPOT (ms):                           64.38     
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           62.91     
+Median ITL (ms):                         61.93     
+P99 ITL (ms):                            87.25     
+==================================================
+[same-spec-current] stopping managed current same-spec wrapper: 1894 1895 1974 3235 3236 4721 4722 
+artifact: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z/submission/run_leaderboard.json
+manifest: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z/submission/leaderboard_manifest.json
+[collect] env-manifest.json written
+[collect] pip-packages.json written
+[collect] checksums.sha256 written
+[collect] STATUS = OK
+  ✅ STATUS file contains OK
+  ✅ run_leaderboard.json is valid JSON
+  ✅ leaderboard_manifest.json is valid JSON
+  ✅ leaderboard_manifest.json references run_leaderboard.json
+  ✅ env-manifest.json is valid JSON
+  ✅ env-manifest.json has required fields
+  ✅ formal campaign frozen provenance is complete
+  ✅ official source provenance is complete
+  ✅ official runtime provenance is complete and consistent
+  ✅ checksums.sha256 all pass
+valid
+  ✅ artifact contract normalization passes
+
+✅ All validations passed for: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z/submission
+[same-spec-current] exported leaderboard artifact and validated it at /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z/submission
+[run-single] artifact files copied from submission/
+[collect] env-manifest.json written
+[collect] pip-packages.json written
+[collect] checksums.sha256 written
+[collect] STATUS = OK
+[run-single] ✅ Repetition 2 completed successfully
+[run-single] Artifact: /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z
+
+───────────────────────────────────────────────────────────────────────
+  Repetition 3/3
+───────────────────────────────────────────────────────────────────────
+[campaign] cooldown 60s before next repetition...
+[run-single] RUN_ID:     issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z-r3
+[run-single] SPEC:       /root/vllm-hust-benchmark-issue214-136/docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json
+[run-single] ARTIFACT:   /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z
+[run-single] STATE:      /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z
+/root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z/resolved_same_spec.json
+[same-spec-current] neutral cwd: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/runtime-cwd
+[same-spec-current] vllm cache root: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/cache
+[same-spec-current] runtime model source: /models/Qwen--Qwen2.5-14B-Instruct
+[same-spec-current] resolved spec file: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z/resolved_same_spec.json
+[same-spec-current] benchmark type: serve
+[same-spec-current] benchmark endpoint: 127.0.0.1:8413
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (0s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (30s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (60s/600s)
+[same-spec-current] waiting for current same-spec server at 127.0.0.1:8413 (90s/600s)
+[same-spec-current] current same-spec server became ready after 116s
+[W1007 05:13:56.217078406 FunctionLoader.cpp:48] Warning: LD_PRELOAD detected, FunctionLoader prefers RTLD_DEFAULT for symbol resolution. (function operator())
+Namespace(trust_remote_code=False, seed=0, num_prompts=32, dataset_name='custom', no_stream=False, dataset_path='/root/vllm-hust-benchmark-issue214-136/scripts/traces/evoscientist-workload-custom.jsonl', no_oversample=False, skip_chat_template=False, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sonnet_input_len=550, sonnet_output_len=150, sonnet_prefix_len=200, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8413, endpoint='/v1/chat/completions', header=None, max_concurrency=None, model='/models/Qwen--Qwen2.5-14B-Instruct', input_len=None, output_len=None, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=1.0, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=False, num_warmups=0, profile=False, save_result=True, save_detailed=False, append_result=False, metadata=None, result_dir='/root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z', result_filename='raw_benchmark_result.json', ignore_eos=True, self_timed=None, percentile_metrics=None, metric_percentiles='99', goodput=None, request_id_prefix='bench-9095030e-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=600, chat_template_kwargs=None, extra_body=None, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False)
+Starting initial single prompt test run...
+Waiting for endpoint to become up in 600 seconds
+ |          | 00:00 elapsed, ? remaining |          | 00:00 elapsed, 00:07 remaining |          | 00:14 elapsed, 1508:05:14 remaining
+Initial test run completed.
+Starting main benchmark run...
+Traffic request rate: 1.0
+Burstiness factor: 1.0 (Poisson process)
+Maximum request concurrency: None
+  0%|          | 0/32 [00:00<?, ?it/s]  3%|▎         | 1/32 [00:16<08:35, 16.61s/it]  6%|▋         | 2/32 [00:17<03:48,  7.61s/it]  9%|▉         | 3/32 [00:18<02:11,  4.53s/it] 12%|█▎        | 4/32 [00:19<01:23,  2.99s/it] 16%|█▌        | 5/32 [00:19<00:56,  2.10s/it] 19%|█▉        | 6/32 [00:20<00:43,  1.68s/it] 22%|██▏       | 7/32 [00:21<00:32,  1.29s/it] 25%|██▌       | 8/32 [00:23<00:35,  1.48s/it] 28%|██▊       | 9/32 [00:26<00:44,  1.93s/it] 31%|███▏      | 10/32 [00:26<00:32,  1.48s/it] 34%|███▍      | 11/32 [00:27<00:30,  1.45s/it] 38%|███▊      | 12/32 [00:28<00:23,  1.18s/it] 41%|████      | 13/32 [00:29<00:19,  1.03s/it] 44%|████▍     | 14/32 [00:31<00:25,  1.41s/it] 50%|█████     | 16/32 [00:31<00:12,  1.27it/s] 56%|█████▋    | 18/32 [00:33<00:10,  1.31it/s] 59%|█████▉    | 19/32 [00:34<00:11,  1.17it/s] 62%|██████▎   | 20/32 [00:35<00:12,  1.05s/it] 66%|██████▌   | 21/32 [00:39<00:17,  1.59s/it] 69%|██████▉   | 22/32 [00:40<00:15,  1.53s/it] 72%|███████▏  | 23/32 [00:40<00:11,  1.24s/it] 75%|███████▌  | 24/32 [00:42<00:09,  1.24s/it] 78%|███████▊  | 25/32 [00:42<00:06,  1.09it/s] 81%|████████▏ | 26/32 [00:43<00:05,  1.14it/s] 84%|████████▍ | 27/32 [00:43<00:03,  1.53it/s] 88%|████████▊ | 28/32 [00:45<00:04,  1.13s/it] 91%|█████████ | 29/32 [00:45<00:02,  1.05it/s] 94%|█████████▍| 30/32 [00:46<00:01,  1.27it/s] 97%|█████████▋| 31/32 [00:46<00:00,  1.61it/s]100%|██████████| 32/32 [00:47<00:00,  1.31it/s]100%|██████████| 32/32 [00:47<00:00,  1.49s/it]
+tip: install termplotlib and gnuplot to plot the metrics
+============ Serving Benchmark Result ============
+Successful requests:                     32        
+Failed requests:                         0         
+Request rate configured (RPS):           1.00      
+Benchmark duration (s):                  47.67     
+Total input tokens:                      7484      
+Total generated tokens:                  8192      
+Request throughput (req/s):              0.67      
+Output token throughput (tok/s):         171.85    
+Peak output token throughput (tok/s):    279.00    
+Peak concurrent requests:                18.00     
+Total token throughput (tok/s):          328.86    
+---------------Time to First Token----------------
+Mean TTFT (ms):                          196.61    
+Median TTFT (ms):                        203.35    
+P99 TTFT (ms):                           239.71    
+-----Time per Output Token (excl. 1st token)------
+Mean TPOT (ms):                          63.08     
+Median TPOT (ms):                        63.14     
+P99 TPOT (ms):                           64.31     
+---------------Inter-token Latency----------------
+Mean ITL (ms):                           62.84     
+Median ITL (ms):                         61.88     
+P99 ITL (ms):                            87.58     
+==================================================
+[same-spec-current] stopping managed current same-spec wrapper: 16537 16538 16617 17321 17322 18288 18289 
+artifact: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z/submission/run_leaderboard.json
+manifest: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z/submission/leaderboard_manifest.json
+[collect] env-manifest.json written
+[collect] pip-packages.json written
+[collect] checksums.sha256 written
+[collect] STATUS = OK
+  ✅ STATUS file contains OK
+  ✅ run_leaderboard.json is valid JSON
+  ✅ leaderboard_manifest.json is valid JSON
+  ✅ leaderboard_manifest.json references run_leaderboard.json
+  ✅ env-manifest.json is valid JSON
+  ✅ env-manifest.json has required fields
+  ✅ formal campaign frozen provenance is complete
+  ✅ official source provenance is complete
+  ✅ official runtime provenance is complete and consistent
+  ✅ checksums.sha256 all pass
+valid
+  ✅ artifact contract normalization passes
+
+✅ All validations passed for: /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z/submission
+[same-spec-current] exported leaderboard artifact and validated it at /root/vllm-hust-benchmark-issue214-136/.benchmarks/issue136-20261007T034200Z-4034702-agent-research-online-tp2/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z/submission
+[run-single] artifact files copied from submission/
+[collect] env-manifest.json written
+[collect] pip-packages.json written
+[collect] checksums.sha256 written
+[collect] STATUS = OK
+[run-single] ✅ Repetition 3 completed successfully
+[run-single] Artifact: /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z
+[campaign] summary: /root/issue-214-136-formal-20261007/formal/issue136-matrix-fixed-1-rps-20261007T034200Z-4034702/cells/issue136-20261007T034200Z-4034702-agent-research-online-tp2/campaign-summary.json
+
+═══════════════════════════════════════════════════════════════════════
+  Campaign Repetition Summary
+  Spec:        /root/vllm-hust-benchmark-issue214-136/docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json
+  Repetitions: 3
+  Success:     3
+  Failed:      0
+═══════════════════════════════════════════════════════════════════════
+  [OK] /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050101Z
+  [OK] /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T050630Z
+  [OK] /root/vllm-hust-benchmark-issue214-136/submissions/issue136-20261007T034200Z-4034702-agent-research-online-tp2-agent-research-online-2chip-20261007T051130Z
+
+[campaign] ✅ All 3 repetitions completed successfully

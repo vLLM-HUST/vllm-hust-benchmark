@@ -494,6 +494,82 @@ def test_validator_rejects_missing_environment_manifest_fields(tmp_path: Path) -
     assert "validation error(s)" in result.stderr
 
 
+def test_validator_accepts_valid_full_matrix_campaign(tmp_path: Path) -> None:
+    artifact = tmp_path / "artifact"
+    artifact.mkdir()
+    (artifact / "STATUS").write_text("OK\n", encoding="utf-8")
+    (artifact / "run_leaderboard.json").write_text(
+        (REPO_ROOT / "tests/fixtures/trend_coverage/valid/full-matrix.json").read_text(
+            encoding="utf-8"
+        ),
+        encoding="utf-8",
+    )
+    (artifact / "leaderboard_manifest.json").write_text(
+        json.dumps({"entries": [{"leaderboard_artifact": "run_leaderboard.json"}]})
+        + "\n",
+        encoding="utf-8",
+    )
+    (artifact / "env-manifest.json").write_text(
+        json.dumps(
+            {
+                "os": "test",
+                "python_version": "test",
+                "collected_at": "2026-10-06T00:00:00Z",
+                "frozen_inputs_required": True,
+                "frozen_inputs": {
+                    "image_id": "a" * 64,
+                    "model_revision": "b" * 40,
+                    "topology": "single-node-hccs",
+                    "cann": {"declared": "9.1.0", "detected": "9.1.0"},
+                    "torch_npu_version": {
+                        "declared": "2.10.0",
+                        "detected": "2.10.0",
+                    },
+                },
+                "git_info": {
+                    "vllm_hust": {"declared": "c" * 40, "observed": "c" * 40},
+                    "vllm_ascend_hust": {
+                        "declared": "d" * 40,
+                        "observed": "d" * 40,
+                    },
+                },
+                "campaign": {
+                    "campaign_id": "issue-136/v1",
+                    "coverage_class": "full-matrix",
+                    "point_role": "checkpoint",
+                    "load_profile": "fixed-1-rps",
+                    "repetitions": 3,
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    checksums = subprocess.run(
+        [
+            "sha256sum",
+            "run_leaderboard.json",
+            "leaderboard_manifest.json",
+            "env-manifest.json",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        cwd=artifact,
+    ).stdout
+    (artifact / "checksums.sha256").write_text(checksums, encoding="utf-8")
+
+    result = subprocess.run(
+        [bash_executable(), str(VALIDATOR), str(artifact)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "formal campaign frozen provenance is complete" in result.stdout
+
+
 def test_validator_reports_frozen_input_parser_failure_and_continues(
     tmp_path: Path,
 ) -> None:

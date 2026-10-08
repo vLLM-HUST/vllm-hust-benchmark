@@ -338,6 +338,7 @@ def _write_result_artifact(
     ttft_ms: float | None,
     throughput_tps: float | None,
     error_rate: float = 0.0,
+    batch_latency_ms: float | None = None,
 ) -> None:
     submission_dir = result_dir / "submission"
     submission_dir.mkdir(parents=True)
@@ -348,6 +349,7 @@ def _write_result_artifact(
                     "ttft_ms": ttft_ms,
                     "throughput_tps": throughput_tps,
                     "error_rate": error_rate,
+                    "batch_latency_ms": batch_latency_ms,
                 }
             }
         ),
@@ -357,7 +359,7 @@ def _write_result_artifact(
 
 def test_get_primary_metric_name_for_benchmark_type() -> None:
     assert get_primary_metric_name_for_benchmark_type("serve") == "ttft_ms"
-    assert get_primary_metric_name_for_benchmark_type("latency") == "ttft_ms"
+    assert get_primary_metric_name_for_benchmark_type("latency") == "batch_latency_ms"
     assert get_primary_metric_name_for_benchmark_type("throughput") == "throughput_tps"
 
 
@@ -395,6 +397,29 @@ def test_select_canonical_candidate_uses_throughput_metric(tmp_path: Path) -> No
     assert Path(payload["selected_result_dir"]) == repeat_b.resolve()
 
 
+def test_select_canonical_candidate_uses_offline_batch_latency(tmp_path: Path) -> None:
+    repeat_a = tmp_path / "repeat-a"
+    repeat_b = tmp_path / "repeat-b"
+    repeat_c = tmp_path / "repeat-c"
+    _write_result_artifact(
+        repeat_a, ttft_ms=None, throughput_tps=None, batch_latency_ms=7000.0
+    )
+    _write_result_artifact(
+        repeat_b, ttft_ms=None, throughput_tps=None, batch_latency_ms=7200.0
+    )
+    _write_result_artifact(
+        repeat_c, ttft_ms=None, throughput_tps=None, batch_latency_ms=7100.0
+    )
+
+    payload = select_canonical_candidate(
+        [repeat_a, repeat_b, repeat_c], benchmark_type="latency"
+    )
+
+    assert payload["primary_metric_name"] == "batch_latency_ms"
+    assert payload["median_value"] == 7100.0
+    assert Path(payload["selected_result_dir"]) == repeat_c.resolve()
+
+
 def test_select_canonical_candidate_prefers_lower_error_rate(tmp_path: Path) -> None:
     repeat_a = tmp_path / "repeat-a"
     repeat_b = tmp_path / "repeat-b"
@@ -424,10 +449,10 @@ def test_public_official_baseline_specs_are_v0180_910b2_fp16() -> None:
         payload = json.loads(path.read_text(encoding="utf-8"))
         spec_id = str(payload.get("id") or "")
         if spec_id.startswith("specialty-"):
-            # Specialty profiles (e.g. the 910B3 full-graph-parallel inplace
-            # specs) are deliberately outside the v0.18.0/910B2 public
-            # contract; the classifier hard-gates them to specialty/provisional.
-            assert payload.get("hardware_chip_model") == "910B3"
+            # Specialty profiles are deliberately outside the v0.18.0 public
+            # contract. They include isolated 910B3 studies and the directly
+            # named 910B2 issue #136 Dense scaling targets.
+            assert payload.get("hardware_chip_model") in {"910B2", "910B3"}
             assert payload.get("model_precision") == "FP16"
             continue
         assert "v0180" in path.name or "v0.18.0" in spec_id

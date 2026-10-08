@@ -982,6 +982,65 @@ list_benchmark_residual_pids() {
   } | sort -u
 }
 
+normalize_device_scope() {
+  local raw=${1:-}
+  printf '%s' "$raw" | tr ',' '\n' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' \
+    | sed '/^$/d' | awk '/^[0-9]+$/ { print $1 + 0 }' | sort -n -u
+}
+
+process_visible_device_scope() {
+  local pid=$1
+  local value=""
+  local name
+
+  if [[ ! -r "/proc/$pid/environ" ]]; then
+    return 0
+  fi
+  for name in ASCEND_RT_VISIBLE_DEVICES ASCEND_VISIBLE_DEVICES; do
+    value=$(tr '\0' '\n' < "/proc/$pid/environ" 2>/dev/null \
+      | sed -n "s/^${name}=//p" | head -n 1)
+    if [[ -n "$value" ]]; then
+      normalize_device_scope "$value"
+      return 0
+    fi
+  done
+}
+
+admission_visible_device_scope() {
+  local value=${ASCEND_RT_VISIBLE_DEVICES:-${ASCEND_VISIBLE_DEVICES:-}}
+  normalize_device_scope "$value"
+}
+
+device_scopes_overlap() {
+  local left=$1
+  local right=$2
+  local device
+
+  [[ -n "$left" && -n "$right" ]] || return 0
+  while IFS= read -r device; do
+    [[ -z "$device" ]] && continue
+    if grep -Fxq "$device" <<< "$right"; then
+      return 0
+    fi
+  done <<< "$left"
+  return 1
+}
+
+list_admission_conflicting_benchmark_pids() {
+  local requested_scope
+  local process_scope
+  local pid
+
+  requested_scope=$(admission_visible_device_scope)
+  while IFS= read -r pid; do
+    [[ -z "$pid" ]] && continue
+    process_scope=$(process_visible_device_scope "$pid")
+    if device_scopes_overlap "$requested_scope" "$process_scope"; then
+      printf '%s\n' "$pid"
+    fi
+  done < <(list_benchmark_residual_pids)
+}
+
 list_benchmark_zombie_pids() {
   local pid
 
@@ -1063,7 +1122,7 @@ cleanup_benchmark_residual_processes() {
     fi
 
     local residual_pids
-    residual_pids=$(list_benchmark_residual_pids)
+    residual_pids=$(list_admission_conflicting_benchmark_pids)
     if [[ -n "$residual_pids" ]]; then
       log_process_snapshots "residual benchmark process during admission check" "$residual_pids"
       echo "Residual benchmark processes still exist during admission check: $residual_pids" >&2
@@ -1321,6 +1380,7 @@ build_vllm_ascend_c_extension() {
   local worktree="$OFFICIAL_VLLM_ASCEND_WORKTREE"
   local build_dir="$worktree/build/temp.linux-$(uname -m)-cpython-${PYTHON_VERSION//./}"
   local so_glob="$worktree/vllm_ascend/vllm_ascend_C*.so"
+  local kernels_library="$worktree/vllm_ascend/libvllm_ascend_kernels.so"
   local torch_npu_path
   local pybind11_cmake_dir
   local python_include
@@ -1329,7 +1389,7 @@ build_vllm_ascend_c_extension() {
   if compgen -G "$so_glob" >/dev/null 2>&1; then
     local existing_so
     existing_so=$(compgen -G "$so_glob" | head -1)
-    if [[ $(stat -c%s "$existing_so" 2>/dev/null || echo 0) -gt 500000 ]]; then
+    if [[ $(stat -c%s "$existing_so" 2>/dev/null || echo 0) -gt 500000 && -s "$kernels_library" ]]; then
       echo "[prepare] C extension already built ($(du -h "$existing_so" | cut -f1)), skipping." >&2
       return 0
     fi
@@ -1383,6 +1443,12 @@ build_vllm_ascend_c_extension() {
     return 1
   fi
   cp -f "$built_so" "$worktree/vllm_ascend/"
+  local built_kernels_library="$build_dir/lib/libvllm_ascend_kernels.so"
+  if [[ ! -s "$built_kernels_library" ]]; then
+    echo "[prepare] ERROR: C extension build produced no libvllm_ascend_kernels.so" >&2
+    return 1
+  fi
+  cp -f "$built_kernels_library" "$kernels_library"
   echo "[prepare] C extension built: $(du -h "$worktree/vllm_ascend/$(basename "$built_so")" | cut -f1)" >&2
 }
 

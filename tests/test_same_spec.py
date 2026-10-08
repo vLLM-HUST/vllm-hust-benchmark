@@ -64,6 +64,24 @@ def _prefix_repetition_spec() -> dict:
     return spec
 
 
+def _custom_spec() -> dict:
+    spec = _spec()
+    spec["scenario"] = "agent-research-online"
+    spec["client_parameters"] = {
+        "backend": "openai-chat",
+        "endpoint": "/v1/chat/completions",
+        "dataset_name": "custom",
+        "dataset_path": "trace.jsonl",
+        "num_prompts": 32,
+        "input_len": 512,
+        "output_len": 1024,
+        "request_rate": 1,
+        "host": "127.0.0.1",
+        "port": 8000,
+    }
+    return spec
+
+
 def test_build_same_spec_payload_injects_dtype() -> None:
     payload = build_same_spec_payload(_spec())
 
@@ -81,6 +99,40 @@ def test_build_same_spec_payload_maps_prefix_repetition_legacy_lengths() -> None
     assert payload["resolved_client_parameters"]["prefix_repetition_suffix_len"] == 256
     assert payload["resolved_client_parameters"]["prefix_repetition_num_prefixes"] == 10
     assert payload["resolved_client_parameters"]["prefix_repetition_output_len"] == 256
+    assert "input_len" not in payload["resolved_client_parameters"]
+    assert "output_len" not in payload["resolved_client_parameters"]
+
+
+def test_build_same_spec_payload_maps_custom_legacy_lengths() -> None:
+    spec = _custom_spec()
+
+    payload = build_same_spec_payload(spec)
+
+    assert payload["resolved_client_parameters"]["custom_output_len"] == 1024
+    assert "input_len" not in payload["resolved_client_parameters"]
+    assert "output_len" not in payload["resolved_client_parameters"]
+    assert spec["client_parameters"]["input_len"] == 512
+    assert spec["client_parameters"]["output_len"] == 1024
+
+
+def test_custom_length_mapping_does_not_invent_missing_output_length() -> None:
+    spec = _custom_spec()
+    del spec["client_parameters"]["output_len"]
+
+    payload = build_same_spec_payload(spec)
+
+    assert "input_len" not in payload["resolved_client_parameters"]
+    assert "output_len" not in payload["resolved_client_parameters"]
+    assert "custom_output_len" not in payload["resolved_client_parameters"]
+
+
+def test_custom_explicit_output_length_takes_priority() -> None:
+    spec = _custom_spec()
+    spec["client_parameters"]["custom_output_len"] = 2048
+
+    payload = build_same_spec_payload(spec)
+
+    assert payload["resolved_client_parameters"]["custom_output_len"] == 2048
     assert "input_len" not in payload["resolved_client_parameters"]
     assert "output_len" not in payload["resolved_client_parameters"]
 

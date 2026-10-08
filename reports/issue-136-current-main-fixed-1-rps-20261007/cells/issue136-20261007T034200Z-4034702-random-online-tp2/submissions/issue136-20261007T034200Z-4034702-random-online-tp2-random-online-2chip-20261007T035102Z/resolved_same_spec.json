@@ -1,0 +1,61 @@
+{
+  "schema_version": "benchmark-same-spec/v1",
+  "spec_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2",
+  "spec_label": "Official Ascend Jan 2026 baseline for vllm-hust goal tracking",
+  "spec_source": "/root/vllm-hust-benchmark-issue214-136/docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json",
+  "scenario": "random-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "model_quantization": "",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 2,
+  "node_count": 1,
+  "resolved_server_parameters": {
+    "tensor_parallel_size": 2,
+    "gpu_memory_utilization": 0.6,
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 2048,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "127.0.0.1",
+    "port": 8410,
+    "max_model_len": 32768,
+    "compilation_config": {
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ]
+    },
+    "model": "/models/Qwen--Qwen2.5-14B-Instruct",
+    "dtype": "float16"
+  },
+  "resolved_client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "random",
+    "no_stream": false,
+    "save_detailed": true,
+    "metric_percentiles": "95,99",
+    "num_prompts": 200,
+    "request_rate": 1.0,
+    "host": "127.0.0.1",
+    "port": 8410,
+    "temperature": 0,
+    "model": "/models/Qwen--Qwen2.5-14B-Instruct",
+    "random_input_len": 1024,
+    "random_output_len": 256
+  },
+  "resolved_spec_hash": "25abf57e0a423653b87d35cd0a7061042a122caa911301c2bc006db56ce1a2f8"
+}

@@ -188,8 +188,9 @@ for field in ("campaign_id", "coverage_class", "load_profile"):
     if not campaign.get(field):
         errors.append(f"campaign.{field} is empty")
 coverage_class = campaign.get("coverage_class")
-if coverage_class == "full-matrix" and campaign.get("point_role") != "checkpoint":
-    errors.append("campaign.point_role must be checkpoint for full-matrix")
+if coverage_class == "full-matrix":
+    if campaign.get("point_role") != "checkpoint":
+        errors.append("campaign.point_role must be checkpoint for full-matrix")
 elif coverage_class == "targeted-pair":
     if campaign.get("point_role") not in ("baseline", "head"):
         errors.append("campaign.point_role must be baseline or head for targeted-pair")

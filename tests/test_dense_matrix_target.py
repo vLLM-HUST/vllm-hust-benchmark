@@ -8,6 +8,8 @@ valid matrix and deliberately-broken variants.
 from __future__ import annotations
 
 import json
+import math
+import shutil
 from pathlib import Path
 
 import pytest
@@ -16,6 +18,8 @@ from vllm_hust_benchmark.dense_matrix_target import (
     CHIP_KEYS,
     COMMUNICATION_WORKLOAD,
     CORE_WORKLOADS,
+    LEGACY_SCHEMA_VERSION,
+    PREVIOUS_SCHEMA_VERSION,
     SCHEMA_VERSION,
     VALID_STATUS,
     validate_dense_matrix_target,
@@ -87,9 +91,9 @@ def _workload(
     }
 
 
-def _base_matrix() -> dict:
+def _base_matrix(schema_version: str = LEGACY_SCHEMA_VERSION) -> dict:
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": schema_version,
         "issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/136",
         "hardware": {"chip_model": "910B2", "node_count": 1},
         "model_revision_contract": "test contract",
@@ -139,8 +143,10 @@ def _write_specs(root: Path, matrix: dict) -> None:
             )
 
 
-def _setup(tmp_path: Path, mutate=None) -> Path:
-    matrix = _base_matrix()
+def _setup(
+    tmp_path: Path, mutate=None, *, schema_version=LEGACY_SCHEMA_VERSION
+) -> Path:
+    matrix = _base_matrix(schema_version)
     if mutate is not None:
         mutate(matrix)
     matrix_dir = tmp_path / "leaderboard-data"
@@ -154,8 +160,30 @@ def _setup(tmp_path: Path, mutate=None) -> Path:
 def test_matrix_schema_loads(tmp_path: Path) -> None:
     matrix_path = _setup(tmp_path)
     status = validate_dense_matrix_target(matrix_path)
-    assert status.schema_version == SCHEMA_VERSION
+    assert status.schema_version == LEGACY_SCHEMA_VERSION
     assert status.overall == "matrix-target-fixed"
+    assert list(status.errors) == []
+
+
+def test_v2_matrix_keeps_blocked_communication_semantics(tmp_path: Path) -> None:
+    matrix_path = _setup(tmp_path, schema_version=PREVIOUS_SCHEMA_VERSION)
+    status = validate_dense_matrix_target(matrix_path)
+    assert status.schema_version == PREVIOUS_SCHEMA_VERSION
+    assert status.spec_ready_cells == 12
+    assert status.blocked_cells == 3
+    assert list(status.errors) == []
+
+
+def test_repository_v3_matrix_loads() -> None:
+    matrix_path = (
+        Path(__file__).resolve().parents[1]
+        / "leaderboard-data"
+        / "dense-matrix-issue-136.json"
+    )
+    status = validate_dense_matrix_target(matrix_path)
+    assert status.schema_version == SCHEMA_VERSION
+    assert status.spec_ready_cells == 15
+    assert status.blocked_cells == 0
     assert list(status.errors) == []
 
 
@@ -180,13 +208,92 @@ def test_spec_files_exist_for_spec_ready_cells(tmp_path: Path) -> None:
     assert list(status.errors) == []
 
 
-def test_communication_cells_all_blocked(tmp_path: Path) -> None:
-    matrix_path = _setup(tmp_path)
+@pytest.mark.parametrize(
+    "schema_version", [LEGACY_SCHEMA_VERSION, PREVIOUS_SCHEMA_VERSION]
+)
+def test_legacy_communication_cells_all_blocked(
+    tmp_path: Path, schema_version: str
+) -> None:
+    matrix_path = _setup(tmp_path, schema_version=schema_version)
     matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
     for workload in matrix["workloads"]:
         if workload["workload"] == COMMUNICATION_WORKLOAD:
             for chip_key in CHIP_KEYS:
                 assert workload["cells"][chip_key]["status"] == "blocked"
+
+
+def _copy_repository_v3_matrix(tmp_path: Path) -> Path:
+    repo_root = Path(__file__).resolve().parents[1]
+    source = repo_root / "leaderboard-data" / "dense-matrix-issue-136.json"
+    matrix = json.loads(source.read_text(encoding="utf-8"))
+    destination = tmp_path / "leaderboard-data" / source.name
+    destination.parent.mkdir(parents=True)
+    destination.write_text(json.dumps(matrix), encoding="utf-8")
+    for workload in matrix["workloads"]:
+        for cell in workload["cells"].values():
+            fixed = cell["targets"]["fixed-1-rps"]
+            source_spec = repo_root / fixed["spec"]
+            destination_spec = tmp_path / fixed["spec"]
+            destination_spec.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source_spec, destination_spec)
+    return destination
+
+
+def test_v3_rejects_blocked_communication_cell(tmp_path: Path) -> None:
+    matrix_path = _copy_repository_v3_matrix(tmp_path)
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    communication = next(
+        item
+        for item in matrix["workloads"]
+        if item["workload"] == COMMUNICATION_WORKLOAD
+    )
+    communication["cells"]["1chip"] = {
+        "status": "blocked",
+        "blocker_reason": "legacy custom path",
+    }
+    matrix_path.write_text(json.dumps(matrix), encoding="utf-8")
+
+    status = validate_dense_matrix_target(matrix_path)
+    assert any("v3 requires fixed/scaled targets" in error for error in status.errors)
+
+
+@pytest.mark.parametrize("invalid_rate", [math.nan, math.inf, -math.inf])
+def test_v3_rejects_non_finite_spec_rates(tmp_path: Path, invalid_rate: float) -> None:
+    matrix_path = _copy_repository_v3_matrix(tmp_path)
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    communication = next(
+        item
+        for item in matrix["workloads"]
+        if item["workload"] == COMMUNICATION_WORKLOAD
+    )
+    spec_path = (
+        tmp_path / communication["cells"]["2chip"]["targets"]["fixed-1-rps"]["spec"]
+    )
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec["client_parameters"]["request_rate"] = invalid_rate
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+
+    status = validate_dense_matrix_target(matrix_path)
+    assert any("finite and greater than zero" in error for error in status.errors)
+
+
+def test_v3_rejects_communication_shape_drift(tmp_path: Path) -> None:
+    matrix_path = _copy_repository_v3_matrix(tmp_path)
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    communication = next(
+        item
+        for item in matrix["workloads"]
+        if item["workload"] == COMMUNICATION_WORKLOAD
+    )
+    spec_path = (
+        tmp_path / communication["cells"]["4chip"]["targets"]["fixed-1-rps"]["spec"]
+    )
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    spec["client_parameters"]["output_len"] = 256
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+
+    status = validate_dense_matrix_target(matrix_path)
+    assert any("client output_len must be 1024" in error for error in status.errors)
 
 
 def test_each_workload_has_three_cells(tmp_path: Path) -> None:

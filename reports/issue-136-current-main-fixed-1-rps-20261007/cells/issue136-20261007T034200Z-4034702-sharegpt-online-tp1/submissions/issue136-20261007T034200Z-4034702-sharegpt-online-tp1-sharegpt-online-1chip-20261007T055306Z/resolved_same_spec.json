@@ -1,0 +1,56 @@
+{
+  "schema_version": "benchmark-same-spec/v1",
+  "spec_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2",
+  "spec_label": "Official Ascend Jan 2026 ShareGPT online baseline for vllm-hust goal tracking",
+  "spec_source": "/root/vllm-hust-benchmark-issue214-136/docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json",
+  "scenario": "sharegpt-online",
+  "model": "Qwen/Qwen2.5-14B-Instruct",
+  "model_parameters": "14B",
+  "model_precision": "FP16",
+  "model_quantization": "",
+  "hardware_vendor": "Huawei",
+  "hardware_chip_model": "910B2",
+  "chip_count": 1,
+  "node_count": 1,
+  "resolved_server_parameters": {
+    "tensor_parallel_size": 1,
+    "gpu_memory_utilization": 0.6,
+    "enforce_eager": "",
+    "trust_remote_code": "",
+    "disable_log_stats": "",
+    "disable_log_requests": "",
+    "host": "127.0.0.1",
+    "port": 8401,
+    "max_model_len": 32768,
+    "compilation_config": {
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ]
+    },
+    "model": "/models/Qwen--Qwen2.5-14B-Instruct",
+    "dtype": "float16"
+  },
+  "resolved_client_parameters": {
+    "backend": "vllm",
+    "endpoint": "/v1/completions",
+    "dataset_name": "sharegpt",
+    "no_stream": false,
+    "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+    "num_prompts": 200,
+    "request_rate": 1.0,
+    "host": "127.0.0.1",
+    "port": 8401,
+    "temperature": 0,
+    "model": "/models/Qwen--Qwen2.5-14B-Instruct"
+  },
+  "resolved_spec_hash": "f5127a0f570beb778cc64e24940b093d7636fcfe63aa0257d313dc2947ad10c3"
+}

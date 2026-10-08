@@ -14,25 +14,75 @@ frozen inputs:
 - image ID, CANN version, torch-npu version, node type, and HCCS/network topology;
 - model precision, graph/eager mode, TP/DP/PP/EP, server arguments, and workload arguments.
 
+All issue #136 Dense targets explicitly set client `temperature=0`. Formal runners must reject a
+target or resolved artifact that omits or changes this value; inheriting the model-side generation
+configuration is not an equivalent contract.
+
 Readiness logs, historical artifacts, and results from an integration branch remain useful
 correctness evidence, but they are not current-main performance points. If a comparable baseline is
 missing, mark the cell blocked and publish no delta.
+
+## Repository lineage and current anchor
+
+The earlier issue discussion cites Ascend PRs `#186`, `#187`, `#196`, and `#201`. Those numbers
+belong to the archived `intellistream/vllm-ascend-hust-legacy-20260831` repository, not the current
+`vLLM-HUST/vllm-ascend-hust` repository. In the archived repository, `#186`, `#196`, and `#201` were
+merged while `#187` was closed without merge. Their integration commit is not an ancestor of the
+current repository's main branch, so that readiness cannot qualify a current-main result.
+
+The campaign must freeze and requalify the current source pair directly. As of the 2026-10-06
+admission audit, the candidate pair is core `c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7` and Ascend
+backend `b47795c63a8e63e7aed4d311f951428d94e045ab`. The current backend contains EPLB and fused-MoE
+implementations and tests; their presence is not, by itself, end-to-end performance evidence.
+
+The existing official v0.18 JSON files remain workload templates only. Their embedded backend commit
+identifies the source spec and must not be relabeled as the current-main runtime. Every current-main
+artifact must record the observed import paths, exact commits, binary-extension provenance, model
+manifest, and runtime versions independently.
 
 ## Required matrix
 
 The dense track is complete only when the following cells have at least three independent service
 processes each:
 
-| Workload                 | 1 chip   | 2 chips  | 4 chips  | Load profiles                           |
-| ------------------------ | -------- | -------- | -------- | --------------------------------------- |
-| random-online            | required | required | required | fixed 1 RPS, matched-load               |
-| sharegpt-online          | required | required | required | fixed 1 RPS, matched-load               |
-| prefix-repetition-online | required | required | required | fixed 1 RPS, matched-load               |
-| agent-research-online    | required | required | required | fixed 1 RPS, matched-load               |
-| communication-sensitive  | required | required | required | one explicitly named saturation profile |
+| Workload                 | 1 chip   | 2 chips  | 4 chips  | Load profiles             |
+| ------------------------ | -------- | -------- | -------- | ------------------------- |
+| random-online            | required | required | required | fixed 1 RPS, matched-load |
+| sharegpt-online          | required | required | required | fixed 1 RPS, matched-load |
+| prefix-repetition-online | required | required | required | fixed 1 RPS, matched-load |
+| agent-research-online    | required | required | required | fixed 1 RPS, matched-load |
+| communication-sensitive  | required | required | required | fixed 1 RPS, scaled-load  |
 
-Determine each matched-load point with a capacity pilot on the frozen stack. Record the pilot; do
-not silently substitute equal low QPS for the matched-load cells.
+Determine each matched-load point with a capacity pilot on the frozen stack. Select the rate
+independently for every workload and tensor-parallel size; a rate selected with `random-online` must
+not be copied to ShareGPT, prefix repetition, agent research, or communication-sensitive. Record
+every pilot; do not silently substitute equal low QPS for the matched-load cells.
+
+The communication-sensitive workload is an executable standard `vllm bench serve` random profile:
+128 input tokens, 1024 forced output tokens, zero range ratio, `ignore_eos=true`, seed 0, and
+temperature 0. Its long decode phase repeatedly exercises tensor-parallel collectives on TP2/TP4;
+TP1 is the same-shape no-cross-rank control. It does not claim to enable or validate a custom
+`unified_comm` implementation. Fixed 1 RPS is an equal offered-load stress point and must not be
+described as a low-load latency point when it queues.
+
+Materialize scaled targets with `scripts/materialize_issue136_dense_targets.py --rate-matrix` and a
+versioned matrix shaped as follows. The generator rejects a TP-only rate map for `scaled-load`.
+
+```json
+{
+  "schema_version": "issue-136-workload-rate-matrix/v2",
+  "rates": {
+    "random-online": {"1": 1.5, "2": 3.0, "4": 6.0},
+    "sharegpt-online": {"1": 1.0, "2": 2.0, "4": 4.0},
+    "prefix-repetition-online": {"1": 2.0, "2": 4.0, "4": 8.0},
+    "agent-research-online": {"1": 0.5, "2": 1.0, "4": 2.0},
+    "communication-sensitive": {"1": 0.1, "2": 0.2, "4": 0.4}
+  }
+}
+```
+
+The numbers above illustrate the schema only. Replace all fifteen values with the frozen-stack pilot
+decisions and retain the pilot evidence and matrix checksum with the generated targets.
 
 After the dense anchors are complete, run the MoE specialty track on the same frozen stack:
 
@@ -43,6 +93,9 @@ After the dense anchors are complete, run the MoE specialty track on the same fr
 
 Keep eager and graph results in separate comparison scopes. Every targeted pair needs one stable
 `CAMPAIGN_COMPARISON_ID`, a `baseline` or `head` role, and three independent services per role.
+Qwen2.5-14B-Instruct is a dense model and cannot exercise EPLB or LatchMoE. Use a separately named
+MoE target, such as the locally available Qwen3-30B-A3B candidate, and never connect its points to
+the dense matrix.
 
 ## Strict repetition launch
 
@@ -128,7 +181,53 @@ summary and raw profile from the issue.
 
 ## Publication gate
 
-Before publishing:
+The public Dense rows must be built from completed, checksum-covered evidence archives, never from
+the live matrix working directory. Once both load profiles have been archived, build a reviewable
+promotion bundle:
+
+```bash
+python scripts/build_issue136_publication.py \
+  --fixed-archive <fixed-1-rps-archive> \
+  --scaled-archive <scaled-load-archive> \
+  --output-dir <new-promotion-bundle-directory>
+```
+
+The command fails closed unless each profile contains exactly four workloads by TP1/TP2/TP4 and
+three independent repetitions per cell. It verifies archive and submission checksums, source
+commits, resolved settings, repeat indices, and setting signatures. It selects the actual run at the
+median raw output throughput (lowest repeat index breaks a tie), embeds a median
+`canonical_aggregate`, and emits separate single- and multi-chip snapshot candidate files. The
+bundle is an input to review and snapshot promotion; generating it does not mutate the registry or
+the committed public snapshots.
+
+Before any candidate is admitted, project the evidence-backed target promotion against a prepared
+registry that contains all fixed and scaled target specs:
+
+```bash
+python scripts/project_issue136_target_promotion.py \
+  --bundle <promotion-bundle-directory> \
+  --repo-root <benchmark-repository> \
+  --output-dir <new-registry-projection-directory>
+```
+
+This second command also writes review artifacts only. It requires all 24 candidate targets to be
+present as `provisional` / `specialty` Dense targets and binds each target's source-spec SHA to the
+completed evidence bundle. The patch explicitly authorizes `vllm-hust` as the observed alias for the
+target's `vllm` engine label. Server/client host and port are treated only as ephemeral transport
+coordinates: binding retains and audits their observed values, but excludes them from the target
+identity. No other server, client, model, hardware, workload, metric, or provenance field is
+relaxed.
+
+Without the projected per-target policy, candidates remain historical-unverified. Applying a
+projection requires a separate registry version/history update and normal generated-output review;
+the projection tool does not edit the registry and does not generate final public snapshots.
+
+Fixed 1 RPS is an offered-load latency checkpoint. Its entries explicitly forbid scaling-efficiency
+claims. Only the separately identified scaled-load profile may support those claims. Communication,
+MoE/EPLB, and profiler results remain separate specialty observations and are not accepted by this
+Dense importer.
+
+Before promoting the candidate rows:
 
 1. validate every artifact with `scripts/validate-run-artifact.sh`;
 1. confirm three contiguous independent-service repeat indices for every required series;

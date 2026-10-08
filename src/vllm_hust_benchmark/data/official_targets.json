@@ -1,13 +1,13 @@
 {
-  "effective_from": "2026-10-03",
+  "effective_from": "2026-10-07",
   "registry_generation": {
-    "effective_from": "2026-10-03",
-    "source_set_sha256": "1644b73c1fb6cde80ba6c23135388075c99946a31a65a60a3ce156faa20cf0a3",
-    "version": "1.3.7"
+    "effective_from": "2026-10-07",
+    "source_set_sha256": "55166dd74ebec54bf231deacdcd9015b211dd632c916d0b4665f609ad6ce2348",
+    "version": "1.3.11"
   },
-  "registry_version": "1.3.7",
+  "registry_version": "1.3.11",
   "schema_version": "official-target-registry/v1",
-  "source_set_sha256": "1644b73c1fb6cde80ba6c23135388075c99946a31a65a60a3ce156faa20cf0a3",
+  "source_set_sha256": "55166dd74ebec54bf231deacdcd9015b211dd632c916d0b4665f609ad6ce2348",
   "targets": [
     {
       "baseline_runtime": {
@@ -1149,6 +1149,1275 @@
           "num_warmups": 0
         },
         "name": "sonnet-throughput"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 1,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "port": 8000,
+        "tensor_parallel_size": 1,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json",
+        "sha256": "9430b7db2be687dc5cad133b1a818fdb26f03c6c860f703b41b2f8282835087d"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "openai-chat",
+          "dataset_name": "custom",
+          "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
+          "endpoint": "/v1/chat/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "num_prompts": 32,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "agent-research-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 2,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "port": 8000,
+        "tensor_parallel_size": 2,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json",
+        "sha256": "bb35ebffb67355b6047bfe7d29ae2191038edb9da40d9d886132e7fc23729123"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "openai-chat",
+          "dataset_name": "custom",
+          "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
+          "endpoint": "/v1/chat/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "num_prompts": 32,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "agent-research-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 4,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "port": 8000,
+        "tensor_parallel_size": 4,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json",
+        "sha256": "9fc64a36d1f9c628874c75fc93ed349c34c3305e2fbf2e9dcc6707e7ff73e04b"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-agent-research-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "openai-chat",
+          "dataset_name": "custom",
+          "dataset_path": "scripts/traces/evoscientist-workload-custom.jsonl",
+          "endpoint": "/v1/chat/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "num_prompts": 32,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "agent-research-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 1,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enable_prefix_caching": true,
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.9,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 32768,
+        "max_num_seqs": 16,
+        "no_enable_chunked_prefill": true,
+        "port": 8000,
+        "tensor_parallel_size": 1,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json",
+        "sha256": "346a7f546f269ae94d5bbb3f5831cfa5f5a2b4d21ba4f0f3d5d8bbb6a662b0cc"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "prefix_repetition",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "input_len": 4096,
+          "no_stream": false,
+          "num_prompts": 200,
+          "output_len": 256,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "prefix-repetition-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 2,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enable_prefix_caching": true,
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.9,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 32768,
+        "max_num_seqs": 16,
+        "no_enable_chunked_prefill": true,
+        "port": 8000,
+        "tensor_parallel_size": 2,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json",
+        "sha256": "d4691e0a9f85592f96785b5dfc103a593c7d1b6b0cd79155056c988cd0d5fe2a"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "prefix_repetition",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "input_len": 4096,
+          "no_stream": false,
+          "num_prompts": 200,
+          "output_len": 256,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "prefix-repetition-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 4,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enable_prefix_caching": true,
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.9,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 32768,
+        "max_num_seqs": 16,
+        "no_enable_chunked_prefill": true,
+        "port": 8000,
+        "tensor_parallel_size": 4,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json",
+        "sha256": "be2d90e7de4d09f1a2e9daa9eec558c84474bc6ef651e459f86466379366595e"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-prefix-repetition-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "prefix_repetition",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "input_len": 4096,
+          "no_stream": false,
+          "num_prompts": 200,
+          "output_len": 256,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "prefix-repetition-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 1,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 2048,
+        "max_num_seqs": 256,
+        "port": 8000,
+        "tensor_parallel_size": 1,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json",
+        "sha256": "dd4b83395b921bb2fa906d0bc24d99f6e53c5d14b973406492ea26aca24f492b"
+      },
+      "status": "provisional",
+      "supersedes": [],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp1-fixed-1rps-910b2",
+      "target_version": "1.3.11",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "burstiness": 1.0,
+          "dataset_name": "random",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "metric_percentiles": "95,99",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "random_input_len": 128,
+          "random_output_len": 1024,
+          "random_range_ratio": 0.0,
+          "request_rate": 1.0,
+          "save_detailed": true,
+          "seed": 0,
+          "temperature": 0
+        },
+        "name": "random-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 1,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 2048,
+        "max_num_seqs": 256,
+        "port": 8000,
+        "tensor_parallel_size": 1,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json",
+        "sha256": "2ac707fb9748fbae131bf84662d383db604d6b4a5c8a20420f0579bdfb643fc2"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "random",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "metric_percentiles": "95,99",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "random_input_len": 1024,
+          "random_output_len": 256,
+          "request_rate": 1.0,
+          "save_detailed": true,
+          "temperature": 0
+        },
+        "name": "random-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 2,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 2048,
+        "max_num_seqs": 256,
+        "port": 8000,
+        "tensor_parallel_size": 2,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json",
+        "sha256": "f2e9514ce70e2fe2320744477362f1cb0d1d0c8bc93c3a170de09df69cdd680f"
+      },
+      "status": "provisional",
+      "supersedes": [],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp2-fixed-1rps-910b2",
+      "target_version": "1.3.11",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "burstiness": 1.0,
+          "dataset_name": "random",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "metric_percentiles": "95,99",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "random_input_len": 128,
+          "random_output_len": 1024,
+          "random_range_ratio": 0.0,
+          "request_rate": 1.0,
+          "save_detailed": true,
+          "seed": 0,
+          "temperature": 0
+        },
+        "name": "random-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 2,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 2048,
+        "max_num_seqs": 256,
+        "port": 8000,
+        "tensor_parallel_size": 2,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json",
+        "sha256": "e705559201fd4158f27f2103da0d80ef881cd9e35216ed675906b394801d2cfb"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "random",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "metric_percentiles": "95,99",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "random_input_len": 1024,
+          "random_output_len": 256,
+          "request_rate": 1.0,
+          "save_detailed": true,
+          "temperature": 0
+        },
+        "name": "random-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 4,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 2048,
+        "max_num_seqs": 256,
+        "port": 8000,
+        "tensor_parallel_size": 4,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json",
+        "sha256": "40ebc4088bd0a81d53a0a0e1a67acb4db51ac761c44159b73c1db3e326ec28ef"
+      },
+      "status": "provisional",
+      "supersedes": [],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-communication-sensitive-qwen25-14b-fp16-tp4-fixed-1rps-910b2",
+      "target_version": "1.3.11",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "burstiness": 1.0,
+          "dataset_name": "random",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "ignore_eos": true,
+          "metric_percentiles": "95,99",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "random_input_len": 128,
+          "random_output_len": 1024,
+          "random_range_ratio": 0.0,
+          "request_rate": 1.0,
+          "save_detailed": true,
+          "seed": 0,
+          "temperature": 0
+        },
+        "name": "random-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 4,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "max_num_batched_tokens": 2048,
+        "max_num_seqs": 256,
+        "port": 8000,
+        "tensor_parallel_size": 4,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json",
+        "sha256": "c635388a4727b1841ed8cf6a15119bd6d472c87c18a8fba1229f1c1f3870a624"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-random-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "random",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "metric_percentiles": "95,99",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "random_input_len": 1024,
+          "random_output_len": 256,
+          "request_rate": 1.0,
+          "save_detailed": true,
+          "temperature": 0
+        },
+        "name": "random-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 1,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "port": 8000,
+        "tensor_parallel_size": 1,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2.json",
+        "sha256": "55910bf0456b6a3913fdcf90c101cd5577a6058bd2f8b9d639edc629672fd381"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp1-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "sharegpt",
+          "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "sharegpt-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 2,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "port": 8000,
+        "tensor_parallel_size": 2,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2.json",
+        "sha256": "e3cf5224babb942e0f03c4096738c0d3a40632d79bb37af1e293f99065a71b03"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp2-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "sharegpt",
+          "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "sharegpt-online"
+      }
+    },
+    {
+      "baseline_runtime": {
+        "engine": "vllm",
+        "engine_version": "0.23.0",
+        "git_commit": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "github_repository": "vLLM-HUST/vllm-ascend-hust",
+        "vllm_ascend_ref": "7c8ec865a12f7b6a14d53b61e7f61b5e811dd483",
+        "vllm_ref": "c696cc916ef30c7eb57c3e90a9f278e82e6e0bc7"
+      },
+      "compatibility_policy": {
+        "exceptions": "new-target-version-required",
+        "hardware": "exact",
+        "model": "exact",
+        "server_parameters": "exact",
+        "workload_parameters": "exact"
+      },
+      "effective_from": "2026-10-07",
+      "hardware": {
+        "chip_count": 4,
+        "chip_model": "910B2",
+        "node_count": 1,
+        "vendor": "Huawei"
+      },
+      "intended_use": "specialty",
+      "model": {
+        "id": "Qwen/Qwen2.5-14B-Instruct",
+        "parameters": "14B",
+        "precision": "FP16"
+      },
+      "profile": "dense-scaling",
+      "server_parameters": {
+        "compilation_config": {
+          "cudagraph_capture_sizes": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256
+          ],
+          "cudagraph_mode": "FULL_AND_PIECEWISE"
+        },
+        "disable_log_requests": "",
+        "disable_log_stats": "",
+        "enforce_eager": "",
+        "gpu_memory_utilization": 0.6,
+        "host": "0.0.0.0",
+        "max_model_len": 32768,
+        "port": 8000,
+        "tensor_parallel_size": 4,
+        "trust_remote_code": ""
+      },
+      "source_spec": {
+        "path": "docs/official-baselines/specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2.json",
+        "sha256": "7bdda1c4cc9d1dec426fe90f6cc1279cfd31cd9346eb14867ebb97c6c85d2f13"
+      },
+      "status": "provisional",
+      "supersedes": [
+        "1.3.9"
+      ],
+      "target_id": "specialty-ascend-vllm-0.23.0-vllm-ascend-0.25.1rc1-sharegpt-online-qwen25-14b-fp16-tp4-fixed-1rps-910b2",
+      "target_version": "1.3.10",
+      "workload": {
+        "client_parameters": {
+          "backend": "vllm",
+          "dataset_name": "sharegpt",
+          "dataset_path": "ShareGPT_V3_unfiltered_cleaned_split.json",
+          "endpoint": "/v1/completions",
+          "host": "127.0.0.1",
+          "no_stream": false,
+          "num_prompts": 200,
+          "port": 8000,
+          "request_rate": 1.0,
+          "temperature": 0
+        },
+        "name": "sharegpt-online"
       }
     },
     {

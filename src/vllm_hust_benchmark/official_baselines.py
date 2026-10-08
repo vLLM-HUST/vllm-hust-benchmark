@@ -11,7 +11,7 @@ OFFICIAL_BASELINE_SUBMITTER = "official-ascend-baseline"
 
 PRIMARY_METRIC_BY_BENCHMARK_TYPE = {
     "serve": "ttft_ms",
-    "latency": "ttft_ms",
+    "latency": "batch_latency_ms",
     "throughput": "throughput_tps",
 }
 
