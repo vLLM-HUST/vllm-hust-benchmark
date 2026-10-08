@@ -25,7 +25,49 @@ def load_json(path: Path) -> dict:
 
 
 def test_checked_in_publication_is_valid_and_complete() -> None:
-    assert validate_publication(PUBLICATION) == {"scenarios": 3, "results": 573}
+    assert validate_publication(PUBLICATION) == {"scenarios": 4, "results": 699}
+
+
+def test_qwen35_workbook_b0_is_published_with_repaired_metadata() -> None:
+    artifact = load_json(
+        PUBLICATION / "dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json"
+    )
+    assert len(artifact["datasets"]) == 21
+    assert len(artifact["metrics"]) == 6
+    assert len(artifact["results"]) == 126
+    assert {result["status"] for result in artifact["results"]} == {"baseline_only"}
+    assert all(result["baseline_value"] is not None for result in artifact["results"])
+    assert artifact["scenario"]["model"] == "Qwen3.5-35B-A3B"
+    assert artifact["scenario"]["expert_parallel"] is True
+    assert artifact["scenario"]["prefix_caching"] is False
+    assert artifact["scenario"]["request_rate"] == "inf"
+
+    cells = {
+        (result["dataset_id"], result["metric_id"]): result
+        for result in artifact["results"]
+    }
+    assert cells[("jsonschemabench", "request_throughput")]["baseline_value"] == 1.8
+    assert cells[("longbench", "request_throughput")]["baseline_value"] == 1.21
+    assert cells[("jsonschemabench", "request_success_rate")]["baseline_value"] == 99.5
+    assert cells[("longbench-v2", "request_success_rate")]["baseline_value"] == 99.0
+    assert all(
+        result["provenance"]["result_json_sha256"] for result in artifact["results"]
+    )
+
+
+def test_qwen35_workbook_b0_rebuild_is_reproducible() -> None:
+    script = ROOT / "scripts" / "build_dataset_matrix_coverage.py"
+    spec = importlib.util.spec_from_file_location(
+        "dataset_matrix_workbook_builder", script
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    checked_in = load_json(
+        PUBLICATION / "dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json"
+    )
+    assert module.build_qwen35_workbook() == checked_in
 
 
 def test_publication_documents_match_json_schemas() -> None:

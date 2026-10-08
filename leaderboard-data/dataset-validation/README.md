@@ -23,6 +23,11 @@ silently meaning either unsupported or unfinished. A populated B1 is valid only 
 also has a matched B0; unmatched candidate evidence stays under `candidate_search` and is not
 rendered as a comparison.
 
+Measured B0 values may be published with an explicit evidence grade even when later metadata repair
+cannot recreate a same-run cryptographic binding. Such a scenario must preserve the measured
+configuration as its own selectable setting, identify the repaired fields and their sources, and
+must not be pooled with a materially different configuration or used for an unmatched B1 gain.
+
 ## Validation
 
 Run from the repository root:
