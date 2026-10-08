@@ -151,6 +151,64 @@ def validate_artifact(payload: dict[str, Any], *, expected_scenario_id: str) -> 
                 raise DatasetValidationError(
                     f"populated B1 cell lacks evidence URL: {cell}"
                 )
+        candidate_values = result.get("candidate_values")
+        if candidate_values is not None:
+            if not isinstance(candidate_values, list) or not candidate_values:
+                raise DatasetValidationError(
+                    f"candidate_values must be a non-empty array: {cell}"
+                )
+            candidate_ids: set[str] = set()
+            for candidate in candidate_values:
+                candidate_id = (
+                    candidate.get("candidate_id")
+                    if isinstance(candidate, dict)
+                    else None
+                )
+                candidate_value = (
+                    candidate.get("value") if isinstance(candidate, dict) else None
+                )
+                candidate_provenance = (
+                    candidate.get("provenance") if isinstance(candidate, dict) else None
+                )
+                if (
+                    not isinstance(candidate_id, str)
+                    or not candidate_id
+                    or candidate_id in candidate_ids
+                ):
+                    raise DatasetValidationError(
+                        f"invalid or duplicate candidate_id in {cell}: {candidate_id}"
+                    )
+                if not isinstance(candidate_value, (int, float)):
+                    raise DatasetValidationError(
+                        f"candidate lacks numeric value in {cell}: {candidate_id}"
+                    )
+                if (
+                    not isinstance(candidate_provenance, dict)
+                    or not candidate_provenance.get("repository")
+                    or not (
+                        candidate_provenance.get("artifact")
+                        or candidate_provenance.get("report_url")
+                    )
+                ):
+                    raise DatasetValidationError(
+                        f"candidate lacks provenance in {cell}: {candidate_id}"
+                    )
+                candidate_ids.add(candidate_id)
+            selected_candidate_id = result.get("selected_candidate_id")
+            if selected_candidate_id not in candidate_ids:
+                raise DatasetValidationError(
+                    f"selected candidate is not declared in {cell}: "
+                    f"{selected_candidate_id}"
+                )
+            selected = next(
+                candidate
+                for candidate in candidate_values
+                if candidate["candidate_id"] == selected_candidate_id
+            )
+            if value != selected["value"]:
+                raise DatasetValidationError(
+                    f"B1 value differs from selected candidate in {cell}"
+                )
     expected_cells = {
         (dataset_id, metric_id)
         for dataset_id in dataset_ids

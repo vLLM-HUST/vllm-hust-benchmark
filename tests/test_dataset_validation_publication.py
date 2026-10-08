@@ -25,7 +25,60 @@ def load_json(path: Path) -> dict:
 
 
 def test_checked_in_publication_is_valid_and_complete() -> None:
-    assert validate_publication(PUBLICATION) == {"scenarios": 4, "results": 699}
+    assert validate_publication(PUBLICATION) == {"scenarios": 5, "results": 709}
+
+
+def test_qwen35_frontier_b1_retains_all_admitted_candidates() -> None:
+    artifact = load_json(
+        PUBLICATION / "dataset_validation_qwen35_frontier_unified_900s.json"
+    )
+    assert len(artifact["datasets"]) == 5
+    assert len(artifact["metrics"]) == 2
+    assert len(artifact["results"]) == 10
+    assert artifact["scenario"]["expert_parallel"] is False
+    assert artifact["scenario"]["prefix_caching"] is True
+    assert artifact["scenario"]["measurement_seconds"] == 900
+    assert artifact["baseline"]["id"] == "swe-unified-native-20260927"
+    assert all(len(result["candidate_values"]) == 6 for result in artifact["results"])
+    assert {
+        candidate["candidate_id"]
+        for candidate in artifact["results"][0]["candidate_values"]
+    } == {
+        "bidkv",
+        "dla",
+        "kv-materialization-arrival-control",
+        "kv-tiering-migration",
+        "kvcompress-ascend",
+        "pegaflow-vllm-connectors",
+    }
+    c1_output = next(
+        result
+        for result in artifact["results"]
+        if result["dataset_id"] == "swe-prefix-reuse-c1"
+        and result["metric_id"] == "output_token_throughput"
+    )
+    assert c1_output["selected_candidate_id"] == "kvcompress-ascend"
+    assert c1_output["value"] == 94.57222222222222
+    c16_output = next(
+        result
+        for result in artifact["results"]
+        if result["dataset_id"] == "swe-prefix-reuse-c16"
+        and result["metric_id"] == "output_token_throughput"
+    )
+    assert c16_output["selected_candidate_id"] == "pegaflow-vllm-connectors"
+    assert c16_output["value"] == 459.71555555555557
+
+
+def test_qwen35_frontier_b1_rebuild_is_reproducible() -> None:
+    script = ROOT / "scripts" / "build_qwen35_frontier_b1.py"
+    spec = importlib.util.spec_from_file_location("frontier_b1_builder", script)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    checked_in = load_json(
+        PUBLICATION / "dataset_validation_qwen35_frontier_unified_900s.json"
+    )
+    assert module.build() == checked_in
 
 
 def test_qwen35_workbook_b0_is_published_with_repaired_metadata() -> None:
@@ -144,6 +197,23 @@ def test_artifact_requires_explicit_applicability_states_and_matched_b0() -> Non
     missing_cell["results"].clear()
     with pytest.raises(DatasetValidationError, match="explicitly cover"):
         validate_artifact(missing_cell, expected_scenario_id=artifact["scenario"]["id"])
+
+
+def test_artifact_validates_full_candidate_sets() -> None:
+    artifact = load_json(
+        PUBLICATION / "dataset_validation_qwen35_frontier_unified_900s.json"
+    )
+    duplicate = copy.deepcopy(artifact)
+    duplicate["results"][0]["candidate_values"].append(
+        copy.deepcopy(duplicate["results"][0]["candidate_values"][0])
+    )
+    with pytest.raises(DatasetValidationError, match="duplicate candidate_id"):
+        validate_artifact(duplicate, expected_scenario_id=artifact["scenario"]["id"])
+
+    drift = copy.deepcopy(artifact)
+    drift["results"][0]["value"] += 1
+    with pytest.raises(DatasetValidationError, match="differs from selected candidate"):
+        validate_artifact(drift, expected_scenario_id=artifact["scenario"]["id"])
 
 
 def test_matrix_rebuild_preserves_measured_szyn_baseline(
