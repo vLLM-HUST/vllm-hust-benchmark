@@ -1,0 +1,34 @@
+{
+  "check": "Adapter extractor equivalence to the three actual pinned upstream AST functions, before random-guess fallback",
+  "source_revision": "f418b116db00b065c2aea046518d8fcf74d39872",
+  "source_sha256": "d0a4ae51b80efa8f99713a21253ad5542913ef2ac9915e95d40c8a62174e9401",
+  "cases": 1000,
+  "seed": 17,
+  "result": "passed",
+  "method": "Extract extract_answer/extract_again/extract_final AST definitions; compare deterministic generated text from listed forms and choices. This is scorer validation, not model benchmark evidence.",
+  "forms": [
+    "answer is ({})",
+    "answer is {}",
+    "Answer: {}",
+    "answer: {}",
+    "Thinking {} but no conclusion",
+    "The {}lternative",
+    "{}\nthen reasoning",
+    "({})"
+  ],
+  "choices": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "a",
+    "no choice"
+  ]
+}
