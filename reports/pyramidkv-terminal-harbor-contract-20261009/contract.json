@@ -1,0 +1,667 @@
+{
+  "agent": "terminus-2",
+  "agent_turn_limit": 100,
+  "agent_version": "2.0.0",
+  "attempts_per_task_per_arm": 1,
+  "concurrent_trials": 1,
+  "context_policy": "No summarization, prompt padding or silent truncation; overflow remains a task failure",
+  "execution_gates": [
+    "Task and third-party rights review",
+    "Supported AMD64 Docker/Harbor backend and effective resource limits",
+    "Reachable model endpoint and verified B0/B1 runtime activation",
+    "Pinned execution-environment image and dependency artifacts",
+    "Fresh-sandbox reference/failure verifier validation and canonical contract review"
+  ],
+  "file_mode_policy": "Staged task files restore executable bits from the verified Git tree",
+  "harbor_revision": "b53b8134e1241686dca7759af188f987ecc48e8b",
+  "harbor_version": "0.24.0",
+  "image_pin_changes": [
+    {
+      "original_image": "alexgshaw/adaptive-rejection-sampler:20251031",
+      "original_task_toml_sha256": "6ed7b37f74beb46e9d47b0f5fad53025667c9548baff4e96d467b56d429fab1a",
+      "pinned_image": "alexgshaw/adaptive-rejection-sampler@sha256:985bed39e8448bc95f138b5f766b59003a95c4be171c96af8e76448338f3dd8f",
+      "staged_task_toml_sha256": "0173c393fa24d697444a7b074ed28a2ad20ba2d0153abe04c1e4d3789d27631e",
+      "task_id": "adaptive-rejection-sampler"
+    },
+    {
+      "original_image": "alexgshaw/bn-fit-modify:20251031",
+      "original_task_toml_sha256": "6493f7162da424a4fd95da721bd3fd1ce7e5dd26e792132cb9c46db536b67090",
+      "pinned_image": "alexgshaw/bn-fit-modify@sha256:5aeb11ca6e802b83816c9a31f055ac9d028309a853509400c2e3139ac2d8380d",
+      "staged_task_toml_sha256": "7f3dd6af4ca53f40c47b2611f5d39bafac66df0e7110617c5fcdaae35697fa60",
+      "task_id": "bn-fit-modify"
+    },
+    {
+      "original_image": "alexgshaw/break-filter-js-from-html:20251031",
+      "original_task_toml_sha256": "f820eb1b47e4ccc548b87d9a418fef519137dcf975ad73d0fb5246df00a9669b",
+      "pinned_image": "alexgshaw/break-filter-js-from-html@sha256:d7bfb45e47cf10d2e21dc520239215498f4eba9c1ab2d0cd7d647985dddb4fa8",
+      "staged_task_toml_sha256": "162a801da8328f8cfcfa4c14ca5e13bbb196952c448112954064a5830d3add29",
+      "task_id": "break-filter-js-from-html"
+    },
+    {
+      "original_image": "alexgshaw/build-cython-ext:20251031",
+      "original_task_toml_sha256": "c472f0e7522c128fb7f03e00b50c8cdf2e5e6474daa1e094e7441f4b54e770b2",
+      "pinned_image": "alexgshaw/build-cython-ext@sha256:3612a38fadb89a96f74a1a951fb0b0af734198fd160571eeaba6401593234594",
+      "staged_task_toml_sha256": "3945ce24e6eabbed003f7a427b08f539c58fc838496fa99dc32a03df9620ec15",
+      "task_id": "build-cython-ext"
+    },
+    {
+      "original_image": "alexgshaw/build-pmars:20251031",
+      "original_task_toml_sha256": "7ee2eac27b99fd462e0760552a430454db693f86608af5bb570b020270e4c9cd",
+      "pinned_image": "alexgshaw/build-pmars@sha256:57a82706f7491e0b2d1ff7e927e97ae5339892dd09c47ac43290b4ba1f5abc6f",
+      "staged_task_toml_sha256": "07907ceeee832b791eacd9c3a15656b615dca22299aedb0d8b90615e17cb349a",
+      "task_id": "build-pmars"
+    },
+    {
+      "original_image": "alexgshaw/build-pov-ray:20251031",
+      "original_task_toml_sha256": "b90a47ec26c1191d3c523cc094ea96b170e42fbfe176ef1f814c57d05390c097",
+      "pinned_image": "alexgshaw/build-pov-ray@sha256:874baf49341e2853a15a9184e308c7eb632e97f434359fcff2891c6e5ca1b39b",
+      "staged_task_toml_sha256": "c9369bd3c7c19d0feeb1e2d67196abd20e89cabdf126d1a20708aa3b73e4d4ac",
+      "task_id": "build-pov-ray"
+    },
+    {
+      "original_image": "alexgshaw/caffe-cifar-10:20260403",
+      "original_task_toml_sha256": "2831165ad9d9e8bbc646e6d85c0a2290640dcc4f13749547a2937c7675012a8b",
+      "pinned_image": "alexgshaw/caffe-cifar-10@sha256:929a6d631b592c82e0d0f5d4a65cf03c946dc554cfc9bb09916e82076e7d3215",
+      "staged_task_toml_sha256": "d13379dc8d9f97c9865b8f129764c016435688b9ae2d9b4a81677fd763c93422",
+      "task_id": "caffe-cifar-10"
+    },
+    {
+      "original_image": "alexgshaw/cancel-async-tasks:20251031",
+      "original_task_toml_sha256": "14db0675e04408f2133b0067e8dbddf66a1d6e7baf6b8d38bef8ecccfc4e58a8",
+      "pinned_image": "alexgshaw/cancel-async-tasks@sha256:84c7fae6b256dcc56a350790e2a9715eefc7dad662a9d8e8a472363aa71ef18d",
+      "staged_task_toml_sha256": "f0ac4ccdf4683ea3afb87c3cb1595fdb720b83dac01ae0ef25f059a32522cf05",
+      "task_id": "cancel-async-tasks"
+    },
+    {
+      "original_image": "alexgshaw/chess-best-move:20251031",
+      "original_task_toml_sha256": "d8f01d3c84ed5836edbb49c6c3b3cc7b5b96d951cf01a0987467c9206fb22f9e",
+      "pinned_image": "alexgshaw/chess-best-move@sha256:bb447f94d9e2a8ed879f85c85a514b213b7418f9fe11fd7b2428a0b0e436e647",
+      "staged_task_toml_sha256": "5e9cf20a4b73af261aaaf2fd52949a02f96dac62a25262280ce0ceb96a50a4d9",
+      "task_id": "chess-best-move"
+    },
+    {
+      "original_image": "alexgshaw/circuit-fibsqrt:20251031",
+      "original_task_toml_sha256": "9f5aa1f7ebbbcec90fd109121e9bd509af3cfff6b4cec701bd91947988f40972",
+      "pinned_image": "alexgshaw/circuit-fibsqrt@sha256:29783439f529eaed2145592f15af7a2281161528860392a382c825489030ae3a",
+      "staged_task_toml_sha256": "ed5fbf32b4a89a455aff9f2f25473b66af856e608711faa1ada2e91d76a37991",
+      "task_id": "circuit-fibsqrt"
+    },
+    {
+      "original_image": "alexgshaw/cobol-modernization:20251031",
+      "original_task_toml_sha256": "4b620211dc3d6b1b989f0210c5ecd2f606974581c8bce27bd78659d48cf0cfbd",
+      "pinned_image": "alexgshaw/cobol-modernization@sha256:593ab9df3d83f771e927888b2d9436b380cdf7ec4d0af2a9f0802d541edebba0",
+      "staged_task_toml_sha256": "e9de6f73678017a1661df229bf8962fedde73adcbeb8d9e5d3e6acb3b8c6e429",
+      "task_id": "cobol-modernization"
+    },
+    {
+      "original_image": "alexgshaw/code-from-image:20251031",
+      "original_task_toml_sha256": "3a13c1e252bb8759f51215be0b2b2cb1b4c697f0dd570f2d7702cc28b28f08de",
+      "pinned_image": "alexgshaw/code-from-image@sha256:2be9cdb746ed18c1b2b1404032efae0b2235a1b8fc479ef17730c95409d89f76",
+      "staged_task_toml_sha256": "436ae639fec3439a0183afd31429ce9a808f0746dd86dbed7eb5f536f0982df0",
+      "task_id": "code-from-image"
+    },
+    {
+      "original_image": "alexgshaw/compile-compcert:20260403",
+      "original_task_toml_sha256": "1d9618d7178cfa15918a293da126b867f3a7db160e604d4fec369949884dac39",
+      "pinned_image": "alexgshaw/compile-compcert@sha256:f60236a4fe55bbb3c573210fe0fcd91551f4ee97c417453cd4985be074b35411",
+      "staged_task_toml_sha256": "cd29baba5e52e11bb319cfe7b71cce85b583f8fcf653fb4a4cdcc7f21405c03c",
+      "task_id": "compile-compcert"
+    },
+    {
+      "original_image": "alexgshaw/configure-git-webserver:20251031",
+      "original_task_toml_sha256": "ebb40d72f689512cbd90d865d88ef966b6665ab215544f9247b898b7fa94751b",
+      "pinned_image": "alexgshaw/configure-git-webserver@sha256:9e48389b917fd4650dda1f64406bd7198bbf20dc1c6b0e5c4d81a3c16369f88c",
+      "staged_task_toml_sha256": "19fa4442a8f399e0a01ee202f3c6a6695d90ca5aafe8211285ef079b88a2071e",
+      "task_id": "configure-git-webserver"
+    },
+    {
+      "original_image": "alexgshaw/constraints-scheduling:20251031",
+      "original_task_toml_sha256": "7b9842de16d74e8faf8c7c0aa03b0b81145941cb12dd322d81ae23fc48607250",
+      "pinned_image": "alexgshaw/constraints-scheduling@sha256:567ce5a189f8d11ac461790876e934cc7af38391baf89a78f95f4dafc1fec3b0",
+      "staged_task_toml_sha256": "7ed12f2a5eef7aa99f837f1b15ab62b20094cb21ca1fbda64c00e281d0a6e9b2",
+      "task_id": "constraints-scheduling"
+    },
+    {
+      "original_image": "alexgshaw/count-dataset-tokens:20251031",
+      "original_task_toml_sha256": "8220a1b8e6e08ecb95556920de358b6aa74b112d8a79625db6915f6b316ccd18",
+      "pinned_image": "alexgshaw/count-dataset-tokens@sha256:9c513c4ba342bd95be501f6f5eadd4806a2b18749c87c251615825100130232d",
+      "staged_task_toml_sha256": "be9851bf1f8a6897e25482fc7071766d8518d2e23ea44a963058ede038fcefc3",
+      "task_id": "count-dataset-tokens"
+    },
+    {
+      "original_image": "alexgshaw/crack-7z-hash:20251031",
+      "original_task_toml_sha256": "8e192bcbe00e817419bde7ff9b562a5fa0c1e24ec4f3384cba4a31eda0a7b013",
+      "pinned_image": "alexgshaw/crack-7z-hash@sha256:0f4453abd774c5a3d3d7e66ba28fae88ec2e49ada3a993b324ebc16c348666d3",
+      "staged_task_toml_sha256": "bfc0bb95f9a4c65d8f4efe2566ac32583a0d594126723b407d3698a8d900aae9",
+      "task_id": "crack-7z-hash"
+    },
+    {
+      "original_image": "alexgshaw/custom-memory-heap-crash:20251031",
+      "original_task_toml_sha256": "ed474be1983e212913aa8866ebb66216acbe36aef2339ac375d232aa46617481",
+      "pinned_image": "alexgshaw/custom-memory-heap-crash@sha256:1895d7d6240d5fb2ec774d6bfdd1057d170f8d199c15c582e4585d3c63802557",
+      "staged_task_toml_sha256": "f5f508f1e70c57c52a552ebfa3478d09bb85feea7f33bd4347fe703e458d43d5",
+      "task_id": "custom-memory-heap-crash"
+    },
+    {
+      "original_image": "alexgshaw/db-wal-recovery:20251031",
+      "original_task_toml_sha256": "1cdc2c615e259bc10265efbe71b518332070c1c002e226566399e9788f18d0aa",
+      "pinned_image": "alexgshaw/db-wal-recovery@sha256:0e33ea5ec823975d1bd6c3778395c9f94251dd88f571146057bff6adb7e4594e",
+      "staged_task_toml_sha256": "07db10191aeab05e895317d0225f5a73abee8cbd8589e58d487fb0b62874a0ff",
+      "task_id": "db-wal-recovery"
+    },
+    {
+      "original_image": "alexgshaw/distribution-search:20251031",
+      "original_task_toml_sha256": "70c8e73cafd0a75306375bec2c2e1e4d82e0cb969fd7e38a63e7c344de43b681",
+      "pinned_image": "alexgshaw/distribution-search@sha256:1448f7aa1c6080488251d00350e8e90477858989b1bec0accc866d7b3220738a",
+      "staged_task_toml_sha256": "2febd2933d32c6a2a2526b0941acf9407213e0745479cc025e2b1e9aae61bdac",
+      "task_id": "distribution-search"
+    },
+    {
+      "original_image": "alexgshaw/dna-assembly:20251031",
+      "original_task_toml_sha256": "7b571544b64d9be1c91526837e5d805c2181afe0e6fd57a7f0676bba36c868d7",
+      "pinned_image": "alexgshaw/dna-assembly@sha256:d1adf6835f1dd91205ba70e452c699d0aea601010038e5617f370716efb50569",
+      "staged_task_toml_sha256": "d6b3a2f0d85c209aea5715566dd6453e4a52658bed168bb6ce8cb1f87d5b6a2b",
+      "task_id": "dna-assembly"
+    },
+    {
+      "original_image": "alexgshaw/dna-insert:20251031",
+      "original_task_toml_sha256": "1a9efd5c826d64d31c4874b395f1f9c488b2f26581b0c752fc4619ff177f25eb",
+      "pinned_image": "alexgshaw/dna-insert@sha256:4dd8760694e355de85ecf03605cb487ccdb33322f6afad513d2920829baa33b2",
+      "staged_task_toml_sha256": "ff37198918a0a6797d8c556868c95b610a489782ffee718644963414b2e70e79",
+      "task_id": "dna-insert"
+    },
+    {
+      "original_image": "alexgshaw/extract-elf:20251031",
+      "original_task_toml_sha256": "14e2c28fd7cc1c9c7b64ab0db5565899fed538e38c55074824647cacc3f7a172",
+      "pinned_image": "alexgshaw/extract-elf@sha256:6932e4cb318464307eacd497ef8dc617eaf551b6a90231f815ec0b911895cfed",
+      "staged_task_toml_sha256": "b8f206e23e1d1b7ecea36f48ce6f3b94d71f2f8528c46559419a9b3dea8fb04e",
+      "task_id": "extract-elf"
+    },
+    {
+      "original_image": "alexgshaw/extract-moves-from-video:20260403",
+      "original_task_toml_sha256": "2c9e1b466871da3c3703ec3c6d9835f154b8f1cc34af1f1ba45d64fec56f3605",
+      "pinned_image": "alexgshaw/extract-moves-from-video@sha256:74ef87375ce2b6332ca9fe0180eb541b64cf4ef4188edd5b1be22c272e5a5b4b",
+      "staged_task_toml_sha256": "42df8f9e2af7795ceeb784ac1ceda170fbda3d74dff1318ad1d3df08858ed324",
+      "task_id": "extract-moves-from-video"
+    },
+    {
+      "original_image": "alexgshaw/feal-differential-cryptanalysis:20251031",
+      "original_task_toml_sha256": "dcb9f2f15047eee0be15ca18c39c357f89187a94aae6baeff276221e2383eecb",
+      "pinned_image": "alexgshaw/feal-differential-cryptanalysis@sha256:bea93bafe9eab601ca58729f5735a13f8339f52055322d1cf840e3742b54a287",
+      "staged_task_toml_sha256": "1686a6731a5ee783c3f09aa22be9593e8f366b1863e9d3d0ee12b4b4185d91cd",
+      "task_id": "feal-differential-cryptanalysis"
+    },
+    {
+      "original_image": "alexgshaw/feal-linear-cryptanalysis:20251031",
+      "original_task_toml_sha256": "a39ec2c427af534c96c719dc87f70eb536956b487ce909d04b6365160e7c9fc4",
+      "pinned_image": "alexgshaw/feal-linear-cryptanalysis@sha256:ea78749a8422c6228d26c8753f45906a6a2df089906764b7e3c3e27e8f718ee7",
+      "staged_task_toml_sha256": "be7ed0001d24392a4d0ab26f1b2059624f6c813cca5126f2f2b48ae8324fd212",
+      "task_id": "feal-linear-cryptanalysis"
+    },
+    {
+      "original_image": "alexgshaw/filter-js-from-html:20251031",
+      "original_task_toml_sha256": "f7f888951c97b8120371139bb78d39499c2d3cd7aa3836d57fd6d8b9e4199344",
+      "pinned_image": "alexgshaw/filter-js-from-html@sha256:92acda0f124b988036a6f426ce0bc47fac19f5efe9fc5e6ea3ea52ccb075d0a4",
+      "staged_task_toml_sha256": "b25d597f6b881ce5bca1e6c85c5e0f4663ab3f0b021db74aa6d6b810c4ade4cc",
+      "task_id": "filter-js-from-html"
+    },
+    {
+      "original_image": "alexgshaw/financial-document-processor:20251031",
+      "original_task_toml_sha256": "163ee252895c05d36ca37137dba4d6c24b46be28d56ce84ef8bb35bb5b894bda",
+      "pinned_image": "alexgshaw/financial-document-processor@sha256:ef6c9cfaaf14cdd200163008a188d5baa9f626f3bfb8d3e7d6f30c08518e6251",
+      "staged_task_toml_sha256": "07df273187d9dfba84471b84af3c854125c3ab72ed263ed2b071d20b8886e41e",
+      "task_id": "financial-document-processor"
+    },
+    {
+      "original_image": "alexgshaw/fix-code-vulnerability:20251031",
+      "original_task_toml_sha256": "9aa2bd14ce9408289d199d0608bc3fa65b8b5e23374c9641020de62197dbf1e2",
+      "pinned_image": "alexgshaw/fix-code-vulnerability@sha256:cac325252991f823713b2d0441502972901dd782bd67f66c03d9b1e410dac5c0",
+      "staged_task_toml_sha256": "698db78e6c8831ece046f075ce30ba24f48965e503c43b8d5a8ff17c585b74d3",
+      "task_id": "fix-code-vulnerability"
+    },
+    {
+      "original_image": "alexgshaw/fix-git:20260403",
+      "original_task_toml_sha256": "f59d711003b974e4ef8ed63556614e2ea9ea7d0e394af13b2071225e3fda7805",
+      "pinned_image": "alexgshaw/fix-git@sha256:389b9c8247610c2c5be080b1ac00429007c2c69bf57f7f26c79f0f75ba2d5c74",
+      "staged_task_toml_sha256": "ef09f356adfc52c10342ece35b7a937c9c798e1be6fe38a52a2bad99815bddde",
+      "task_id": "fix-git"
+    },
+    {
+      "original_image": "alexgshaw/fix-ocaml-gc:20251031",
+      "original_task_toml_sha256": "423aab8ce6f44ce9349dcde647ca3cbd09afd5ac023910c25699ed687a3c71b2",
+      "pinned_image": "alexgshaw/fix-ocaml-gc@sha256:66a1e2293076c9ef27a118611b3089a6284fdf467fd4675592d0cce7d11e5b0b",
+      "staged_task_toml_sha256": "487b87eb1b0d53e596fc000c96701083690dea1a062d47ba7c197d5c34e03bf7",
+      "task_id": "fix-ocaml-gc"
+    },
+    {
+      "original_image": "alexgshaw/gcode-to-text:20251031",
+      "original_task_toml_sha256": "3aa7a504fe5b3c6eaab16881b0e6dbbe8ac6d4f59084fa49b1e98ad9c71ea00c",
+      "pinned_image": "alexgshaw/gcode-to-text@sha256:0979ef40c6a3e8c4e7ab5b6c2524c74625a84799e15cd45dd98dcf83b11efd4d",
+      "staged_task_toml_sha256": "ddee0e893d7521f9000d1747eb96946fadfd5e86ab604a2b5b2bb72828476d96",
+      "task_id": "gcode-to-text"
+    },
+    {
+      "original_image": "alexgshaw/git-leak-recovery:20251031",
+      "original_task_toml_sha256": "d7f23fda4a6ba3fff902d2a475db8ff74feb5d328980696a77068c02c57d3044",
+      "pinned_image": "alexgshaw/git-leak-recovery@sha256:62160e522a4238b8bcd522411ea97b5b200f811e5899d34947e66809bef7e586",
+      "staged_task_toml_sha256": "b42fa39a4e54b696b81ce25dc85ac1b19481bee3c17a8d8fd0fb6e68993e7d90",
+      "task_id": "git-leak-recovery"
+    },
+    {
+      "original_image": "alexgshaw/git-multibranch:20251031",
+      "original_task_toml_sha256": "4b9981604578a31205257cca36a28d0c89c9d8d1058541330acd11d3f8d65f82",
+      "pinned_image": "alexgshaw/git-multibranch@sha256:5bc449921c138295f6ddd8dca2977319fee2ce523811dbe56cec4ca663385fb5",
+      "staged_task_toml_sha256": "6b626254ca51da00bb704cbc16ab78acbd7d5a06c5b747ade772806db6076ab3",
+      "task_id": "git-multibranch"
+    },
+    {
+      "original_image": "alexgshaw/gpt2-codegolf:20251031",
+      "original_task_toml_sha256": "a3fa186d438a42af5909384b8dc0dfdc2ab7a3a68af9159e9d00464988895af0",
+      "pinned_image": "alexgshaw/gpt2-codegolf@sha256:537e7bd26b02db5c761230515fa09dc05f89403c6737fbdae4b5793ebc2c7066",
+      "staged_task_toml_sha256": "f22f5b7ec55defa1e753ae575bd985601586a48ac5448bbb1796f97bd4e523ee",
+      "task_id": "gpt2-codegolf"
+    },
+    {
+      "original_image": "alexgshaw/headless-terminal:20251031",
+      "original_task_toml_sha256": "abe0de1ac3adff1fbf0e22e1765efbc061a412891fd255926ed92a5ccacf69e6",
+      "pinned_image": "alexgshaw/headless-terminal@sha256:eb7e209672bf6cef2785fafd9e13509b10626c327bcc2b37f5bf40ca83eaf3aa",
+      "staged_task_toml_sha256": "4ace4029b0e4360c1a221e0a6073822196a6bc60b0d49b037abc05564c7ab718",
+      "task_id": "headless-terminal"
+    },
+    {
+      "original_image": "alexgshaw/hf-model-inference:20260430",
+      "original_task_toml_sha256": "951ae476f4d078a25b7a487430148971e3a2222d93c4e0a932442440807eb3b7",
+      "pinned_image": "alexgshaw/hf-model-inference@sha256:a88d98a849e81bf42754973d1ed58f5971eb76315bf94d2b19cabedd7d7af9c7",
+      "staged_task_toml_sha256": "c1a42d02659cddc725c0c5d523bd03ff9ad211bbf92749734ed4e7abdd19e2f9",
+      "task_id": "hf-model-inference"
+    },
+    {
+      "original_image": "alexgshaw/install-windows-3.11:20251031",
+      "original_task_toml_sha256": "0485184bd16cc74883396115d93520bd25b36d23d61e248da88c0dceeab2eeac",
+      "pinned_image": "alexgshaw/install-windows-3.11@sha256:c6695097316ef8810abce0545e347e65354aef9d51d4f7f662c3242e742f6a3e",
+      "staged_task_toml_sha256": "dc44783ffde89571a2800a91b8a1d264745f2d429e269f9372f48c32e1de7660",
+      "task_id": "install-windows-3.11"
+    },
+    {
+      "original_image": "alexgshaw/kv-store-grpc:20251031",
+      "original_task_toml_sha256": "6ff0f30a526bfff86a67b0b53439b9965229c0f368167dc1a5d05f34d82299a3",
+      "pinned_image": "alexgshaw/kv-store-grpc@sha256:3399400800dcb207634daa42bc1b052e831e285cc9d221eea66c47bc0fc79791",
+      "staged_task_toml_sha256": "95242525dbd4786d44779a88b2146eee02930cbe182ca94e6082243d4aa692b8",
+      "task_id": "kv-store-grpc"
+    },
+    {
+      "original_image": "alexgshaw/large-scale-text-editing:20251031",
+      "original_task_toml_sha256": "5c9488e80c1186f72efb8193e6be13c74eadf334b3846db2e794d24513a88f5f",
+      "pinned_image": "alexgshaw/large-scale-text-editing@sha256:719adca3f1388220546ce6a155eee56eff3c4fe318183100320606a210f6b59c",
+      "staged_task_toml_sha256": "6276a2023cd97d3d9fc8baab0929184b2e0a49718506ef0d95620018b9fa23c3",
+      "task_id": "large-scale-text-editing"
+    },
+    {
+      "original_image": "alexgshaw/largest-eigenval:20251031",
+      "original_task_toml_sha256": "f7b9b7dda446f969a3ce88f61039d216f4d58b5fc5c10ff9faa24e2403bbd830",
+      "pinned_image": "alexgshaw/largest-eigenval@sha256:cb9e3e3b09d0783f3bbcfeec8d77bc32d3791204fb2be6650b19be4fbc082b2e",
+      "staged_task_toml_sha256": "59ccf0e067aad594d6cf5a9a0915b66303a051d910e942f27d7c0425b54a6013",
+      "task_id": "largest-eigenval"
+    },
+    {
+      "original_image": "alexgshaw/llm-inference-batching-scheduler:20251031",
+      "original_task_toml_sha256": "52aaac942f917e6a91ff658e0272195bd1cd842d41d71e302414c52603cc588b",
+      "pinned_image": "alexgshaw/llm-inference-batching-scheduler@sha256:19e79aa49be4e55dccca1dde966515ebe6852314b6010bcb9230afb48b996774",
+      "staged_task_toml_sha256": "19d4ea7fbe758c21816bc8f44e1d47491f5dd24de266b77a8423ccbd26e1edc3",
+      "task_id": "llm-inference-batching-scheduler"
+    },
+    {
+      "original_image": "alexgshaw/log-summary-date-ranges:20251031",
+      "original_task_toml_sha256": "9a9593673d6805ef3a301ea734e9c4dbaf80da1b37c0fe9d1f2ceea2a8c57e18",
+      "pinned_image": "alexgshaw/log-summary-date-ranges@sha256:cbeb6ba905c2fec294f16cd5e16e3ea7f2e04d38ac2484d51a11de262aa7dc51",
+      "staged_task_toml_sha256": "470a16daf500d7faf4bf915d64ef5c7d8e44e5defedb65d972c3bd03a9adb6b5",
+      "task_id": "log-summary-date-ranges"
+    },
+    {
+      "original_image": "alexgshaw/mailman:20251031",
+      "original_task_toml_sha256": "a04f4d0e9be25056d2cd79d6a018bc875b6e6fb51d429a9241f282272cc660d1",
+      "pinned_image": "alexgshaw/mailman@sha256:04fac73db7e2b4f49d43f09fbc2266a94d70131f07efa1393d370abc059f4094",
+      "staged_task_toml_sha256": "e838785833032a80e8e55063c78d7f85c81aeaeabb3383d4472c34e5d4400e22",
+      "task_id": "mailman"
+    },
+    {
+      "original_image": "alexgshaw/make-doom-for-mips:20251031",
+      "original_task_toml_sha256": "a7d7a498f0d3a992b384e5086ba2b411767c1c1a013d1b41f6a25cdaf6d05acc",
+      "pinned_image": "alexgshaw/make-doom-for-mips@sha256:80a9459f1b94b692ea8346f68e6b864f6c4d984fbdf6ffd68ad332308300c2ec",
+      "staged_task_toml_sha256": "9b97908776cbdf6ecb35bf09455989a0b3233eaffb4a1fc450cd2c9267042d13",
+      "task_id": "make-doom-for-mips"
+    },
+    {
+      "original_image": "alexgshaw/make-mips-interpreter:20251031",
+      "original_task_toml_sha256": "3fda43066642fd38516d07b2679f9813bdb3f1a42bc80b0c06151f60b9210e82",
+      "pinned_image": "alexgshaw/make-mips-interpreter@sha256:082fc8821b317f30fdfbf8d08d528874ce331c03e8083aef0406d48cdd7132a2",
+      "staged_task_toml_sha256": "5b0345b03a1f0706a86f21e43d5170e05414474ce581313c8906eeabb0ca5aa4",
+      "task_id": "make-mips-interpreter"
+    },
+    {
+      "original_image": "alexgshaw/mcmc-sampling-stan:20251031",
+      "original_task_toml_sha256": "c1c0351670499e15b3818f7394894e2789f74fc2a61ea76eccab826c1a951a94",
+      "pinned_image": "alexgshaw/mcmc-sampling-stan@sha256:073fc36a3347b4f6b43bd6e98339542c41ed531c771af8bee40ba10f00cfabaf",
+      "staged_task_toml_sha256": "851a44602ba6e5c3b0a5b9e8bae73c2655ad1ce91825d48453272e8d5d2f46a8",
+      "task_id": "mcmc-sampling-stan"
+    },
+    {
+      "original_image": "alexgshaw/merge-diff-arc-agi-task:20251031",
+      "original_task_toml_sha256": "6ced40e06b43b169857509765eb7f07791db558f9437cc7367d2536771c2ca5b",
+      "pinned_image": "alexgshaw/merge-diff-arc-agi-task@sha256:bfc2a235f2ceea64ffb1ffc5529c2acebf570bff61f3668f0e5669ef570c17d4",
+      "staged_task_toml_sha256": "3792bbd60aa3c797d865538b82c24c91b42721734a4cee1fd8b86fffdefe041b",
+      "task_id": "merge-diff-arc-agi-task"
+    },
+    {
+      "original_image": "alexgshaw/model-extraction-relu-logits:20251031",
+      "original_task_toml_sha256": "eb64dfaf8ae88868911ae28855cdc4f767de464001e2704919015b595be6dc29",
+      "pinned_image": "alexgshaw/model-extraction-relu-logits@sha256:52fe1f089f38650f0dc22d7531ee6e01ebd526de1b349aaa2ecb331dca9fabce",
+      "staged_task_toml_sha256": "02d86f8a927bb128c411d5c0e8aa3dcc70fe150bc285ff1fcd0e5348131f63d2",
+      "task_id": "model-extraction-relu-logits"
+    },
+    {
+      "original_image": "alexgshaw/modernize-scientific-stack:20251031",
+      "original_task_toml_sha256": "a3029f3d4caaa1f08bd1b45488247bf8cb586bf1ce69717acf1114d20f51eb48",
+      "pinned_image": "alexgshaw/modernize-scientific-stack@sha256:64e69cee13bf6b0b9016e735b51891bce996a60f1e2d1a005bf12c949e221d71",
+      "staged_task_toml_sha256": "122c85352499159a27f52ff8a5c14c6ff4132e8aec8c92300bfb6d01905be9dd",
+      "task_id": "modernize-scientific-stack"
+    },
+    {
+      "original_image": "alexgshaw/mteb-leaderboard:20260430",
+      "original_task_toml_sha256": "86574bd1c6c4fefd2e64eee9c2caa53d87c4bcf2e51547912440a0ddbd0badb8",
+      "pinned_image": "alexgshaw/mteb-leaderboard@sha256:3eb9e900bf0a5c865eb0da0252c78eba2777cbd790794ff978d41d8982a04f09",
+      "staged_task_toml_sha256": "33b9de4406739368292a1a297d87995085e0bb8c50c8dcaea7267533e65d479e",
+      "task_id": "mteb-leaderboard"
+    },
+    {
+      "original_image": "alexgshaw/mteb-retrieve:20260430",
+      "original_task_toml_sha256": "a2a4ded9824d296ce99bfba6aa2c9341dcc58f10e66de2e8f95dc8e07379c3aa",
+      "pinned_image": "alexgshaw/mteb-retrieve@sha256:8b3220cd25483014236076477603c7e02babfd670bf79150b5a1f0110ba662f9",
+      "staged_task_toml_sha256": "1728bc2d52add162e4cf44139a116d4c588de5b4f427453b0e7d7e651e0caaa3",
+      "task_id": "mteb-retrieve"
+    },
+    {
+      "original_image": "alexgshaw/multi-source-data-merger:20251031",
+      "original_task_toml_sha256": "ee3964c0ee040f0a0cb121cefefbc15443d127684acb003fa5b61dd42f31c694",
+      "pinned_image": "alexgshaw/multi-source-data-merger@sha256:8b32782078ff7383a1b4e5d3cecca8ce287e30f50bb4c0e5db009a18064e666e",
+      "staged_task_toml_sha256": "329752d2ae2eb907725e15207bab3828f50cd1ee86618c63846c26109c637183",
+      "task_id": "multi-source-data-merger"
+    },
+    {
+      "original_image": "alexgshaw/nginx-request-logging:20251031",
+      "original_task_toml_sha256": "b7a78d00be13656f75069197100b7b8c4fd268decf6f78929c853b3222a2729d",
+      "pinned_image": "alexgshaw/nginx-request-logging@sha256:693e64431a0dbf45952e8b91a298d54fd60247e501c6623fb8fa3ebc07fc3d3d",
+      "staged_task_toml_sha256": "a5bb56455a9ebc7050bd8303d426d5709c408258fba6eaa3860f640a74cd0ec5",
+      "task_id": "nginx-request-logging"
+    },
+    {
+      "original_image": "alexgshaw/openssl-selfsigned-cert:20251031",
+      "original_task_toml_sha256": "75c8913f0fa15890786c11999cde920b8bfc10d4ce8a14edf1e76985a2ac5800",
+      "pinned_image": "alexgshaw/openssl-selfsigned-cert@sha256:4c948a4e630af2435ae0a19108fc0814a946ac2fa29a512469e0fc77b38c8c12",
+      "staged_task_toml_sha256": "93932598a5d89511b4fa38b296ddad676e5376d043209a8519ca2c019662641b",
+      "task_id": "openssl-selfsigned-cert"
+    },
+    {
+      "original_image": "alexgshaw/overfull-hbox:20260403",
+      "original_task_toml_sha256": "64680925bd47043216bffb2c44eb3620f1730e111a89ffbcc5550e5ffc89e72b",
+      "pinned_image": "alexgshaw/overfull-hbox@sha256:7dca952bb6736194a736b5110945f48842eafa8551e24468f1dddeed0daee799",
+      "staged_task_toml_sha256": "83c88f37e405f404cbb06e2fc1e02c5d4ac3813163ae76f108fe6d6329b3f87c",
+      "task_id": "overfull-hbox"
+    },
+    {
+      "original_image": "alexgshaw/password-recovery:20251031",
+      "original_task_toml_sha256": "cfd0362d201b957796f9bf1c02cc75646250cb2bd107ec88c768bfcfd091b24b",
+      "pinned_image": "alexgshaw/password-recovery@sha256:15fcd84bf3b06270ee148211cc6da6599b13ec2f41ac1d0894cf75c2225872ee",
+      "staged_task_toml_sha256": "7d6fc4c87825d78df00a15ca32dc6ee2bf640f03d67f74ebc04dcc55a5dab55d",
+      "task_id": "password-recovery"
+    },
+    {
+      "original_image": "alexgshaw/path-tracing:20251031",
+      "original_task_toml_sha256": "cf47013f69bf1b43242da984f231d4daf364fdf44d3845f2eea2ca2cb9308c46",
+      "pinned_image": "alexgshaw/path-tracing@sha256:4b44725102cd627dfa895191a5a30d16dae3c5623bb43da6459f79135db6b482",
+      "staged_task_toml_sha256": "8c70595c81f056ce13f9f91a7c0b912090accb200c1a784fb181fd85a36ae012",
+      "task_id": "path-tracing"
+    },
+    {
+      "original_image": "alexgshaw/path-tracing-reverse:20251031",
+      "original_task_toml_sha256": "f609310c99bd5f379eea2711f4af8eca79b5bcd1178a034b2285b1171c031b5b",
+      "pinned_image": "alexgshaw/path-tracing-reverse@sha256:7911e42479d8f6d8af1248bc52442a0efbc5a33e3ecf535fdc20d252a2c64142",
+      "staged_task_toml_sha256": "4f19b1ae39d0eb00d7aa4ebd1104d8e7af443324368a9ba6b17d6c58a1e902f2",
+      "task_id": "path-tracing-reverse"
+    },
+    {
+      "original_image": "alexgshaw/polyglot-c-py:20251031",
+      "original_task_toml_sha256": "d31b9f60c47eed0d79e10d3be8fd56a23e50b3986606e3f2546863d44ac9a9ea",
+      "pinned_image": "alexgshaw/polyglot-c-py@sha256:0f1c3b7816d70cf5551573fd6aeef76893f2ae3000be2419997b6871b5d987ed",
+      "staged_task_toml_sha256": "6cf0fb2e2ba54a6b1448e84cd5c057b440be97b6b394d042ffb8626d4a40cd21",
+      "task_id": "polyglot-c-py"
+    },
+    {
+      "original_image": "alexgshaw/polyglot-rust-c:20251031",
+      "original_task_toml_sha256": "3c41e83437068c62a3fdff74641899146e34907aefd9e47346213f47caeb82de",
+      "pinned_image": "alexgshaw/polyglot-rust-c@sha256:3ba84f0e138a4b65e58c53f920a0fc852571e6402901c3bdbb876e9dab6e6c5e",
+      "staged_task_toml_sha256": "e68ec2b18cbc04ef4ff1aa91e56a25e122677f893486e49c1f0e28b129a129d2",
+      "task_id": "polyglot-rust-c"
+    },
+    {
+      "original_image": "alexgshaw/portfolio-optimization:20251031",
+      "original_task_toml_sha256": "4918687e4e261a9852e39e5a554156733c071c17dc89c5f544f15f2ef744ce0a",
+      "pinned_image": "alexgshaw/portfolio-optimization@sha256:93461db3cec697c31585941a3b9387c1398495aa1ff0aee2ac752c7230b50ef8",
+      "staged_task_toml_sha256": "c28a44bbc81c5a9db49230ee86f76229c942ff9925beba4dc81442470779b8eb",
+      "task_id": "portfolio-optimization"
+    },
+    {
+      "original_image": "alexgshaw/protein-assembly:20260403",
+      "original_task_toml_sha256": "9b91f32925035fba7b5a1db16c7d4ed650a117af145d3d3f8e514cb4b1e970ab",
+      "pinned_image": "alexgshaw/protein-assembly@sha256:602c467ae6b661a73441b960d9fa7130f068f4c6041d37ef8632611733d83f4a",
+      "staged_task_toml_sha256": "cc7f8080aecc44ea11c1ac2519b71624303ec959bb33bba2d437cb47a5df6b7d",
+      "task_id": "protein-assembly"
+    },
+    {
+      "original_image": "alexgshaw/prove-plus-comm:20251031",
+      "original_task_toml_sha256": "240f3ac0076e3362685c8598c4e56658e3882eb25a14ae6cc7e9ab3a4f6b09ea",
+      "pinned_image": "alexgshaw/prove-plus-comm@sha256:e26741d01681a9da1beeff8b7b7b65fe2b921b8b122a306a3707a81ebd051f73",
+      "staged_task_toml_sha256": "ca3d13e0d9c4648459a48cf8a7a6017f88aa8bd5a79972d64d184066f3dc02ee",
+      "task_id": "prove-plus-comm"
+    },
+    {
+      "original_image": "alexgshaw/pypi-server:20251031",
+      "original_task_toml_sha256": "07c39d7a733c89adadf74bb63a3e906c3694feb6c490d5fc85ac187c003fd447",
+      "pinned_image": "alexgshaw/pypi-server@sha256:d18bb30f47c7dcaa3acdbc31ac7413c98eadca2ea16540bbd380f2f063b95276",
+      "staged_task_toml_sha256": "0414bc7775491d224c5e6192fc4b3896be9a04ce83d65cec8b140daf4a025fe4",
+      "task_id": "pypi-server"
+    },
+    {
+      "original_image": "alexgshaw/pytorch-model-cli:20251031",
+      "original_task_toml_sha256": "fc1c018efbd5d0537ac0741d53d1ebad3886faa51d14cbde8ec953856411bc0d",
+      "pinned_image": "alexgshaw/pytorch-model-cli@sha256:c996884b5fb5fb2c0c07d67da2c4f974f271f07234ed28e1a868240375c57a67",
+      "staged_task_toml_sha256": "005d411c25ddd20a4d7cc1ca8ecdd7f0b1afcf3f286d97d9ff5b8bc2ce70dd29",
+      "task_id": "pytorch-model-cli"
+    },
+    {
+      "original_image": "alexgshaw/pytorch-model-recovery:20260430",
+      "original_task_toml_sha256": "851a51204f53482a31f47cdf8833128cf421113b0331011286940fc857c37dfd",
+      "pinned_image": "alexgshaw/pytorch-model-recovery@sha256:63c804250786f1450028e68f66efac1b0ab58718e6bc98686e62f3cd72b0f395",
+      "staged_task_toml_sha256": "c69143c9b253e0b76446452448ff1d1ae5bbf291b19f1421756f8ce36ac84d30",
+      "task_id": "pytorch-model-recovery"
+    },
+    {
+      "original_image": "alexgshaw/qemu-alpine-ssh:20251031",
+      "original_task_toml_sha256": "10a43ec6ee732eeba852c377f12e23178f7fa5a4868143f3699a15565ffb64c7",
+      "pinned_image": "alexgshaw/qemu-alpine-ssh@sha256:541e8214a8c4faa7b556531b899d45da21048fa2ca6dd328d8cb6c4cffa8e964",
+      "staged_task_toml_sha256": "7b1166581449c56eb3da91cbed7d132da8d3faf78b88de41129d62808682049a",
+      "task_id": "qemu-alpine-ssh"
+    },
+    {
+      "original_image": "alexgshaw/qemu-startup:20251031",
+      "original_task_toml_sha256": "dc46292fff83fba50192f4c30606a5f9c092a9fb82139686df7dabf6580937d4",
+      "pinned_image": "alexgshaw/qemu-startup@sha256:1a666e049db553c5e713830b1f5de1953210ab7c99212d006bb4e46cbc6b6d04",
+      "staged_task_toml_sha256": "cf7bcd2fe2caf75288cbe9332e72809ade9a83e1c541f18061ff0d6544cdfc43",
+      "task_id": "qemu-startup"
+    },
+    {
+      "original_image": "alexgshaw/query-optimize:20251031",
+      "original_task_toml_sha256": "6e88f2a86df699594bcb1bf81df4ed694505f79c9420f671335b02524bbe3868",
+      "pinned_image": "alexgshaw/query-optimize@sha256:28de7da87004eab5b29bd5eaf1823579bc5b73ccea4b80349a5623185770da14",
+      "staged_task_toml_sha256": "4549102519f2116346c4312aef8cef99fe6f685147f33a169045d3b3540ef7b5",
+      "task_id": "query-optimize"
+    },
+    {
+      "original_image": "alexgshaw/raman-fitting:20251031",
+      "original_task_toml_sha256": "0f3f6b580d7435954b3a114e77cdfb6cd0a856f15cc0ad83cd1b69c48492dfed",
+      "pinned_image": "alexgshaw/raman-fitting@sha256:401fa95d5d491f44a473eda9d2c52930f9565cc889c796eabcb6e20fec26852e",
+      "staged_task_toml_sha256": "388554cac0d539200e99429811165e120cfa1218d3dfd34fc9fb3f2955674085",
+      "task_id": "raman-fitting"
+    },
+    {
+      "original_image": "alexgshaw/regex-chess:20251031",
+      "original_task_toml_sha256": "07fe52636fcc4bc9fff25d5630af145b97a5331219d719cc8decb4ca67ea21d4",
+      "pinned_image": "alexgshaw/regex-chess@sha256:e3b6d61d2d3930fbbdc5f7bf091a7f8b7f6125e1951ef8a7dbe165b1ef62942c",
+      "staged_task_toml_sha256": "953e1f0810c51599f4c9fc547b1c0fbe508b5b64463f1289fa68916af237b06a",
+      "task_id": "regex-chess"
+    },
+    {
+      "original_image": "alexgshaw/regex-log:20251031",
+      "original_task_toml_sha256": "6bc98525852755caf1fe34c174c2f10f4328adb4ce6c1968dcafe1c877e4e160",
+      "pinned_image": "alexgshaw/regex-log@sha256:90101b2e815323a8da20528a1439bebc407eb9761c9c68a3d557730856c878e9",
+      "staged_task_toml_sha256": "f5c58a7979a0825122f21a862814f94710201166c6d411ccfc779ede7fd4bc12",
+      "task_id": "regex-log"
+    },
+    {
+      "original_image": "alexgshaw/reshard-c4-data:20251031",
+      "original_task_toml_sha256": "c2f146a1e00f798f7486ff60686ad52749bb73c7b71e984d52716d859e0f7dd8",
+      "pinned_image": "alexgshaw/reshard-c4-data@sha256:92d209e704785e17ad6b3f740e813dd72bc7ac33982ce435d197ab9d890eac2a",
+      "staged_task_toml_sha256": "89e28388ee3a7777d473a0cf94eb33287f6a92bfc0ffabc1d81c3a6345bd84ca",
+      "task_id": "reshard-c4-data"
+    },
+    {
+      "original_image": "alexgshaw/rstan-to-pystan:20251031",
+      "original_task_toml_sha256": "ed0cd4382cb353e73cb575aa7a20b624e35f09ddd8769c332f40f8986980e13f",
+      "pinned_image": "alexgshaw/rstan-to-pystan@sha256:b23d48839408524326095c15ada4145c772b87646cf299022ff1f58c97baba91",
+      "staged_task_toml_sha256": "1e8f1df76eec2064fb3aef130e52223cdd9982277c4e30eadbfb1cff4c81b5c2",
+      "task_id": "rstan-to-pystan"
+    },
+    {
+      "original_image": "alexgshaw/sam-cell-seg:20251031",
+      "original_task_toml_sha256": "f0eb6af2acb87cb6fee67d77e8fdd55e3b331baf48999260bc5b6c4ac466c128",
+      "pinned_image": "alexgshaw/sam-cell-seg@sha256:d76bdeef19d8113f4094013249c982eca93e62e46130484846269b2d378879d0",
+      "staged_task_toml_sha256": "ae2d55abcd3c56a01fbb7a44b8624eb3e6d7c1b1e9dbbed747943f6ae9056bbf",
+      "task_id": "sam-cell-seg"
+    },
+    {
+      "original_image": "alexgshaw/sanitize-git-repo:20251031",
+      "original_task_toml_sha256": "ff209feb7d07c68b8bd0d2e9abee96a1431c332095a1bbe0a532c44a833a264d",
+      "pinned_image": "alexgshaw/sanitize-git-repo@sha256:4b5234da5bb0d67f3b0bf8db40a2883c07a5219f62b64c2bf9ff1ac84cd0f672",
+      "staged_task_toml_sha256": "ef12b03a3288af4f6b72a0285e0561a3e38424063478d881bd7db1c1794f8569",
+      "task_id": "sanitize-git-repo"
+    },
+    {
+      "original_image": "alexgshaw/schemelike-metacircular-eval:20251031",
+      "original_task_toml_sha256": "8dae8eb226183b0ca92331c1106152a7abc93b03b4e5a95291b86a4ddc9b44e0",
+      "pinned_image": "alexgshaw/schemelike-metacircular-eval@sha256:b485be38bf80d56c1a4cd9da95bbf7ec129dc03f6786b86c0525518a96f6d1db",
+      "staged_task_toml_sha256": "2c7072328be09130abfdfe4dc190df15ca6ef3c590577d49d98bcd9b214c63a7",
+      "task_id": "schemelike-metacircular-eval"
+    },
+    {
+      "original_image": "alexgshaw/sparql-university:20251031",
+      "original_task_toml_sha256": "47a6f6dd9ce0fc7631ef607e900fcd039b2d064ea90545645b49c678cddc9585",
+      "pinned_image": "alexgshaw/sparql-university@sha256:92fa4304e51167f9fb4466144eba33ef9272a7df0ac1cab9fc3986bccd1ab708",
+      "staged_task_toml_sha256": "1482425b3735d4710f89200c6fe4319a2790bc759c6621ae046f5cefc85514e3",
+      "task_id": "sparql-university"
+    },
+    {
+      "original_image": "alexgshaw/sqlite-db-truncate:20251031",
+      "original_task_toml_sha256": "56061acd75d9933aa554aeb249b85d7d081227fca1b71a3da7e3dc97a675723e",
+      "pinned_image": "alexgshaw/sqlite-db-truncate@sha256:aabac93c93bd1f310e6a6fb893911d7735026ed18491c72133c9196a09092ca4",
+      "staged_task_toml_sha256": "1acd971d5b42a665fcd4f3d0c9a4e08d8cf312c36fef71230f5814568c029241",
+      "task_id": "sqlite-db-truncate"
+    },
+    {
+      "original_image": "alexgshaw/sqlite-with-gcov:20251031",
+      "original_task_toml_sha256": "9a0da96990ee2ecbf4d92682a4c5301a53db45fc6e2d46ac7d45d3b8ee7fe523",
+      "pinned_image": "alexgshaw/sqlite-with-gcov@sha256:f986820b00c74ce75db7288719d364df313fde7c7917bea6eb6352a08431a89f",
+      "staged_task_toml_sha256": "845b2114accc3ef135da3c80780185e9785a61520399926d7cdce792f88b4f05",
+      "task_id": "sqlite-with-gcov"
+    },
+    {
+      "original_image": "alexgshaw/torch-pipeline-parallelism:20251031",
+      "original_task_toml_sha256": "8b4f9f525c08afbbc4eca9168e46238a61ccb903486773e9ca4da64bb7ffe857",
+      "pinned_image": "alexgshaw/torch-pipeline-parallelism@sha256:3cb7b39d86f1704b20e668851da0b08b34b3270c01d583f136d65190984a8d1b",
+      "staged_task_toml_sha256": "720e70b37c5dba990c44bde79c215b2990e91a0ecb605e4bf34a927cefb0472e",
+      "task_id": "torch-pipeline-parallelism"
+    },
+    {
+      "original_image": "alexgshaw/torch-tensor-parallelism:20251031",
+      "original_task_toml_sha256": "72fd2a5500d1fe8795dcae76cccb1a29fb25894881a7475f2fa519c87d425a8d",
+      "pinned_image": "alexgshaw/torch-tensor-parallelism@sha256:c50ac169e11465f41b49749fe87e4487f24d31a0c39c0906cd3242cc5499c690",
+      "staged_task_toml_sha256": "7dc5a4ed91d38b5740aa49db6b347daa2ce82d50523891f1530bff74ba0d181b",
+      "task_id": "torch-tensor-parallelism"
+    },
+    {
+      "original_image": "alexgshaw/train-fasttext:20251031",
+      "original_task_toml_sha256": "994fda7c3081bbdd9f6d05d6279ef64faefa94c214d1e08fbcea656540e4fe91",
+      "pinned_image": "alexgshaw/train-fasttext@sha256:3c77da9617e7fa577de04aef73fb1ac3114be32d7ffef72609c83929d842b157",
+      "staged_task_toml_sha256": "b7b87eef942e7033f3d38b54e1124a5e0eba9f8be4304d0a543b1cf104f0f59e",
+      "task_id": "train-fasttext"
+    },
+    {
+      "original_image": "alexgshaw/tune-mjcf:20251031",
+      "original_task_toml_sha256": "27b6d4e5a23761cc1a24a695125d891be74a2930fb83a02a66221db0244b08b3",
+      "pinned_image": "alexgshaw/tune-mjcf@sha256:56c197739db2db79562384581fcc9d3d71e6c171bf052104b1a7ee0282e7c3cf",
+      "staged_task_toml_sha256": "07dcc75f986ca410b5aa7d2a63211ad3b29212ee7a14c2ef2956d6fbb5cafb44",
+      "task_id": "tune-mjcf"
+    },
+    {
+      "original_image": "alexgshaw/video-processing:20251031",
+      "original_task_toml_sha256": "be4fb42fccc5faa4862789cedd2c560eaa5758a2971989649a6dafeaeccc17aa",
+      "pinned_image": "alexgshaw/video-processing@sha256:a2c0f39e3ab04e67ac6e49cad9167bb0d987babe32511768c01aa0c6905a875f",
+      "staged_task_toml_sha256": "6fd53454b4ca1f88cd9e774c6455c422f9c193737b18b21f281d6d8c50c8fd1b",
+      "task_id": "video-processing"
+    },
+    {
+      "original_image": "alexgshaw/vulnerable-secret:20251031",
+      "original_task_toml_sha256": "51079626e4c76445e616eff8723efc53af7f1cf8d9c64d15aab2f4f0ecd6df3c",
+      "pinned_image": "alexgshaw/vulnerable-secret@sha256:61ebb40454dd103aa2f7e71ad6dafd91cf2b301e6bb07e69d5b472412d1ee15b",
+      "staged_task_toml_sha256": "3efd68fa2e29c2a27ea94f001f6b7bf50ba4f6e089a8c11b650f0a3ed429af1c",
+      "task_id": "vulnerable-secret"
+    },
+    {
+      "original_image": "alexgshaw/winning-avg-corewars:20251031",
+      "original_task_toml_sha256": "a9b48765d03a66d966f6a162be203bc31e1d9d6e4abe616a2f4b42bac5dc246f",
+      "pinned_image": "alexgshaw/winning-avg-corewars@sha256:ad7a6b1c53aed59e10916c692aa7e2ae00042a4283187430aee1e3e79f72d5c6",
+      "staged_task_toml_sha256": "7dd46bd562103966acdff63803da5c37c1260da701a5221b7c940228a21be161",
+      "task_id": "winning-avg-corewars"
+    },
+    {
+      "original_image": "alexgshaw/write-compressor:20251031",
+      "original_task_toml_sha256": "6066a509066433c97c417fea68c4e3e73996f698dcdcbabe07718835eea355a6",
+      "pinned_image": "alexgshaw/write-compressor@sha256:3618e1f8a997b437c09cd3dbaac736705809c05f6f12f584b65722175970ebe1",
+      "staged_task_toml_sha256": "70938832d32ca468a22e020f7f9e7d46a122388808097ef80e6a576edbbeb875",
+      "task_id": "write-compressor"
+    }
+  ],
+  "job_sha256": {
+    "b0": "101993d7825a4d0c964fed8feb5852d2aadb015ae728e6fb9560d9230097b2af",
+    "b1": "cff6732159f10e41b2da21672b5d5c6465cfbba53d6d52dce42063470b28905a"
+  },
+  "model_calls": 0,
+  "model_context_limit": 32768,
+  "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+  "output_token_limit_per_call": 4096,
+  "quality_policy": "Report all 89 attempted tasks and failures; validate binary verifier rewards in fresh sandboxes before defining resolved-rate aggregation",
+  "ready_for_scored_execution": false,
+  "retry_policy": {
+    "harbor_llm_layer_attempts": 3,
+    "litellm_sdk_retries": 0,
+    "note": "Nested upstream decorators remain; do not describe this as zero model-request retries. Rejected telemetry parameters can also trigger the upstream compatibility fallback.",
+    "terminus_query_layer_attempts": 3,
+    "whole_trial_retries": 0
+  },
+  "scope": "candidate Terminal-Bench 2.1 execution plan; not approved or executed",
+  "source_git_file_modes_sha256": "ed0fc50aff1a05e7c7005d13d4de75615db2c44c2d929bc9bf4781cbb5642832",
+  "source_inventory_sha256": "3c0bcedd655e7100ee8afbdf63b0276e80bc56f681ce92c106ea7ffba6cb78c0",
+  "source_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+  "task_count": 89,
+  "task_policy": "Keep upstream CPU/memory/storage/network and task-specific timeouts; no mounts, added instructions, skills or MCP tools",
+  "tasks_executed": 0
+}
