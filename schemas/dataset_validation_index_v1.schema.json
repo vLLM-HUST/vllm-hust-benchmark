@@ -3,9 +3,13 @@
   "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/dataset_validation_index_v1.schema.json",
   "title": "Dataset validation publication index v1",
   "type": "object",
-  "required": ["contract_version", "default_scenario_id", "scenarios"],
+  "required": ["contract_version", "program_file", "default_scenario_id", "scenarios"],
   "properties": {
     "contract_version": { "const": "dataset-validation-index-v1" },
+    "program_file": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*\\.json$"
+    },
     "default_scenario_id": { "type": "string", "minLength": 1 },
     "scenarios": {
       "type": "array",

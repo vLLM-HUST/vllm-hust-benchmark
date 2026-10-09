@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/dataset_program_v1.schema.json",
+  "title": "Dataset evaluation program v1",
+  "type": "object",
+  "required": ["contract_version", "updated_at", "primary_datasets", "supplementary_material"],
+  "properties": {
+    "contract_version": { "const": "dataset-program-v1" },
+    "updated_at": { "type": "string", "format": "date" },
+    "primary_datasets": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "evaluation_class", "primary_metric", "status", "source_url", "version_policy", "note", "note_zh"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "evaluation_class": { "enum": ["knowledge-reasoning", "agentic-engineering", "scientific-reasoning"] },
+          "primary_metric": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["serving-evidence-only", "contract-pending", "ready", "running", "measured"] },
+          "source_url": { "type": "string", "format": "uri", "pattern": "^https://" },
+          "version_policy": { "type": "string", "minLength": 1 },
+          "note": { "type": "string", "minLength": 1 },
+          "note_zh": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "supplementary_material": {
+      "type": "object",
+      "required": ["default_tier", "classification_rule", "rule", "rule_zh", "publication_rule", "publication_rule_zh"],
+      "properties": {
+        "default_tier": { "const": "supplementary" },
+        "classification_rule": { "const": "all-other-registered-or-planned-datasets" },
+        "rule": { "type": "string", "minLength": 1 },
+        "rule_zh": { "type": "string", "minLength": 1 },
+        "publication_rule": { "type": "string", "minLength": 1 },
+        "publication_rule_zh": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
