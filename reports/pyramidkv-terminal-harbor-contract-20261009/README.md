@@ -48,8 +48,10 @@ needs a verified route and separately configured authentication. No network serv
 Two complete preparations are byte-identical for contracts, job files, source inventories and schema
 receipts. Both job schemas and agent option schemas validate with installed Harbor 0.24.0. A real
 Terminus-2 constructor confirms the 32K context and 4K output limits without calling the model or
-setting up an environment. Fifteen targeted tests cover matched-arm equality, task membership,
-endpoint/credential handling and preservation of task semantics while pinning images.
+setting up an environment. The full benchmark suite passes with 1,837 tests and four skips; 40
+focused tests cover the preparer and source auditor. Fifteen new tests cover matched-arm equality,
+task membership, endpoint/credential handling and preservation of task semantics while pinning
+images.
 
 `schema-environment.json` records the exact dependency artifacts used for this **ARM64 local
 validation**. It must not be presented as an AMD64 task execution image or its lockfile. The
