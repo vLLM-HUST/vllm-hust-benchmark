@@ -1,0 +1,176 @@
+{
+  "contract_version": "pyramidkv-mmlu-pro-subset-v1",
+  "designation": "pujiang-specified-dataset-scope",
+  "dataset": "mmlu-pro",
+  "dataset_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+  "data_sha256": {
+    "test": "0e24a191921c2f453518a537a8b2117bd137e7714d4ef1565e9ba06c1ecb9ad8",
+    "validation": "139423c23722e480c807ac4a191409a710cfce4eba744c1d641cf88e730e2078"
+  },
+  "dataset_license": "MIT per pinned dataset card; raw questions are not republished",
+  "reference_revision": "f418b116db00b065c2aea046518d8fcf74d39872",
+  "reference_source_sha256": "d0a4ae51b80efa8f99713a21253ad5542913ef2ac9915e95d40c8a62174e9401",
+  "prompt_template_sha256": "d7337806b4d84eef7a86bcb20bf3d64b65e72736c1603e16d08cadebac436f0a",
+  "scorer": "reference three-stage A-J extraction; invalid/out-of-range/HTTP failures count incorrect; no random guessing",
+  "scorer_source_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+  "transport_source_sha256": "4b8f2e99bc9bd81ab3f934f4c2cb7a4fa575a7b73626a950e8fd0d10b5bfaaed",
+  "analyzer_source_sha256": "b35901ccf819f26694119636db79d7b9d8d7a133cb512b5eda9ab01cfe5bc3f0",
+  "full_test_count": 12032,
+  "validation_count": 70,
+  "selection": "First 5 test IDs per category, plus the first compression-eligible ID per category if not already selected; fixed before outputs",
+  "tasks": 70,
+  "eligible_tasks": 0,
+  "full_eligible_tasks": 0,
+  "generation": {
+    "temperature": 0,
+    "seed": 17,
+    "thinking": false,
+    "max_tokens": 2048,
+    "stop": null,
+    "retries": 0,
+    "concurrency": 1,
+    "tools": [],
+    "truncation": "reject"
+  },
+  "prompt_contract": "Reference five-shot CoT wrapped in Qwen chat template; thinking disabled; no reference 4096-context shot reduction or Question: stop",
+  "runtime": {
+    "command": [
+      "python",
+      "-m",
+      "vllm.entrypoints.cli.main",
+      "serve",
+      "/root/workspace/Qwen3.5-35B-A3B",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8000",
+      "--served-model-name",
+      "qwen35-pyramidkv",
+      "--tensor-parallel-size",
+      "2",
+      "--distributed-executor-backend",
+      "mp",
+      "--worker-cls",
+      "pipeline_worker.Worker",
+      "--dtype",
+      "bfloat16",
+      "--max-model-len",
+      "32768",
+      "--max-num-seqs",
+      "4",
+      "--max-num-batched-tokens",
+      "4096",
+      "--gpu-memory-utilization",
+      "0.9",
+      "--kv-cache-memory-bytes",
+      "8589934592",
+      "--seed",
+      "17",
+      "--enable-prefix-caching",
+      "--mamba-cache-mode",
+      "align",
+      "--enable-chunked-prefill",
+      "--async-scheduling",
+      "--enable-prompt-tokens-details",
+      "--additional-config",
+      "{\"enable_cpu_binding\":false}",
+      "--limit-mm-per-prompt",
+      "{\"image\":0,\"video\":0}",
+      "--compilation-config",
+      "{\"cudagraph_mode\":\"FULL_AND_PIECEWISE\",\"cudagraph_capture_sizes\":[3,6,12],\"max_cudagraph_capture_size\":12}",
+      "--speculative-config",
+      "{\"method\":\"mtp\",\"num_speculative_tokens\":2}",
+      "--generation-config",
+      "vllm"
+    ],
+    "environment": {
+      "VLLM_ASCEND_KVCOMPRESS_ENABLED": "1",
+      "ASCEND_RT_VISIBLE_DEVICES": "0,1",
+      "VLLM_PLUGINS": "ascend,ascend_model,ascend_model_loader,ascend_kv_connector,ascend_kvcompress",
+      "VLLM_VERSION": "0.25.1",
+      "VLLM_ASCEND_KVCOMPRESS_EXPERIMENTAL_MTP2": "1",
+      "VLLMHUST_EXT_ENABLED_BUNDLES": ""
+    },
+    "method_config_sha256": "0c617f9d817cec168b4abd6fadab9300bdf491168810539533c5f1049efd7846",
+    "sources": {
+      "core": "d0f22d2bda562156e4dbf433ce645e1769b4f804",
+      "ascend": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+      "adapter": "19f322130e1b3841da953b1b421bcf3259e9b8dc",
+      "pyramidkv": "5ee310696c033bd3160a9264c679dc30d7ccc1df",
+      "worker": "1265f52680a9530cfcf77a5de13a6bf7ef30dc2c"
+    },
+    "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "model": "Qwen/Qwen3.5-35B-A3B",
+    "python": "3.12.13",
+    "machine": "aarch64",
+    "container_image_digest": "192.168.0.2:5050/vllm-ascend@sha256:accc7dfc87b07670e9cadf0747cd9e3c5cbdf55cae4888b83ee06c38683fc09a",
+    "container_access": "Private registry: access/export required for independent replay; no public-image availability claim",
+    "packages": {
+      "vllm": "0.23.0+empty",
+      "vllm-ascend": "0.23.0.post1",
+      "torch": "2.10.0+cpu",
+      "torch-npu": "2.10.0.post4",
+      "transformers": "5.14.1",
+      "triton-ascend": "3.2.2",
+      "vllm-ascend-pyramidkv-hust": "0.2.0.dev0",
+      "vllm-ascend-kvcompress-hust": "0.9.0",
+      "vllm-hust-ext": "0.2.0.dev0",
+      "pyarrow": "19.0.1"
+    },
+    "hardware": {
+      "chip": "910B2",
+      "chip_count": 2,
+      "physical_devices": [
+        6,
+        7
+      ],
+      "logical_devices": [
+        0,
+        1
+      ],
+      "node_count": 1,
+      "receipt_sha256": "497c1c3ea8fe497c47473c01696a6cae9d4889d7119d3c9114131d6471df2997",
+      "CANN": "9.1.0",
+      "driver": "26.0.rc1"
+    },
+    "method_config": {
+      "schema_version": 1,
+      "provider": "ascend_kvcompress",
+      "method": "pyramidkv",
+      "method_config": {
+        "max_capacity_prompt": 1368,
+        "min_compression_prompt_tokens": 4096,
+        "window_size": 8,
+        "kernel_size": 7,
+        "pooling": "maxpool",
+        "beta": 2,
+        "kv_cache_granularity": "kv_head",
+        "gqa_score_aggregation": "mean",
+        "merge": null
+      }
+    },
+    "files_sha256": {
+      "/root/workspace/pyramidkv-runtime/serve.sh": "6111c7665fc0b164ad2390858a6a27e8f35df24fef1c6ee01b506209adeaa297",
+      "/root/workspace/pyramidkv-runtime/env.sh": "a91bf5857a0d8ee83d87208167a599e7ba03e50fa4945b5dc5237ca964f44cb6"
+    },
+    "profile": "BF16 experimental graph-mode direct activation; not v0.18 FP16 official baseline",
+    "preflight": {
+      "same_model_shards": "14 shard SHA-256 verified during issue #1; tokenizer/config additionally frozen here",
+      "B0": "fresh process, compression disabled",
+      "B1": "fresh process, compression enabled",
+      "startup_cache_policy": "If cgroup usage >48 GiB, POSIX_FADV_DONTNEED on local model shards during startup only; both arms; no measured-request cache advice"
+    }
+  },
+  "model_files_sha256": {
+    "config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+    "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "chat_template.jinja": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715"
+  },
+  "files_sha256": {
+    "cases.json": "2b492f9ed0da529a97d21f7845dfb3e4051463f735ab62a212a2cc1544edb6ef",
+    "tasks.json": "11a3fad439e34b5353687f2672754e9e491fe19e23a5caf1adcdcd3578e6e836",
+    "inventory.jsonl.gz": "c696840c58dcf2dcc7c284d92ab5ab43764bb329f69e89be55b6f781d5d98b4b"
+  },
+  "publication_status": "candidate contract and bounded subset evidence; review required, no full-dataset score or optimization claim"
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "mod": "pyramidkv-ascend-migration",
+  "date": "2026-10-09",
+  "mod_issue": "https://github.com/vLLM-HUST/vllm-ascend-pyramidkv-hust/issues/8",
+  "canonical_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/254",
+  "source_asset_audit_commit": "e3a7183206bd399447475b2d117fef897c0880b6",
+  "review_status": "candidate matrix and execution contract; maintainer review pending",
+  "optimization_claims": [],
+  "publication_scope": "Experimental BF16 v0.23 profile; outside official v0.18 FP16 leaderboard. Website synchronization follows canonical acceptance.",
+  "datasets": [
+    {
+      "id": "mmlu-pro",
+      "status": "not-exercised",
+      "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+      "primary_metric": "Strict extracted-answer accuracy, named 70-task subset",
+      "reason": "All 12032 test prompts with pinned five-shot Qwen rendering are 898–2910 tokens; none exceed the 4096-token compression threshold. B0/B1 task-quality compatibility is measured separately; no optimization claim.",
+      "next_step": "Review candidate subset contract and scores. Full-test accuracy remains unmeasured. Do not pad prompts or lower the threshold to manufacture applicability.",
+      "owner": "Irisuko (MOD owner named in PyramidKV #8); benchmark #254 maintainers review the contract"
+    },
+    {
+      "id": "hle-verified",
+      "status": "blocked",
+      "revision": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+      "primary_metric": "Pinned verified HLE score on explicitly named full or Gold subset",
+      "reason": "Canonical license-review gate remains open; Gold/Revision/Uncertain choice, judge model/prompt/scorer and image are not frozen. Snapshot is not mounted on this pod. Text-only server also cannot silently drop image-bearing questions.",
+      "next_step": "Record rights clearance, freeze full-vs-Gold immutable IDs and judge contract (including images), then audit real prompt lengths before selecting applicability.",
+      "owner": "Irisuko coordinates MOD integration; benchmark #254 maintainers own rights and scorer contract"
+    },
+    {
+      "id": "swe-bench-pro",
+      "status": "blocked",
+      "revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+      "primary_metric": "Fresh isolated-sandbox resolved task rate",
+      "reason": "Canonical license review and release/task-to-repository/image mapping are incomplete; this pod has no Docker executable/socket or Harbor executable. Scaffold, tools, budget and regrader are not frozen.",
+      "next_step": "Approve rights and task manifest, provision supported isolated execution backend with pinned image digests, freeze agent/regrader/tool budgets and validate fresh sandbox resets.",
+      "owner": "Irisuko coordinates MOD integration; benchmark #254 runtime/scaffold maintainers provision sandbox and task contract"
+    },
+    {
+      "id": "frontierscience",
+      "status": "blocked",
+      "revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+      "primary_metric": "Separate Olympiad (100 tasks) and Research (60 tasks) scores",
+      "reason": "Source snapshot is frozen in the canonical report, but task manifests, answer extraction and distinct track graders/judge environment are not frozen or available on this pod. A generic exact-match score would not satisfy the Research contract.",
+      "next_step": "Freeze both track manifests and independent grading contracts (judge revision/prompt if needed), then audit task/agent prompt lengths and run matched requests.",
+      "owner": "Irisuko coordinates MOD integration; benchmark #254 scorer maintainers review both track contracts"
+    },
+    {
+      "id": "terminal-bench-2.1",
+      "status": "blocked",
+      "revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+      "primary_metric": "Harbor task resolution on the pinned 2.1 release",
+      "reason": "Canonical snapshot has 89 task definitions but no frozen/prepulled execution-image set; this pod lacks Docker/socket and Harbor. Agent, tool policy, budgets, scorer and per-task third-party rights remain unfrozen.",
+      "next_step": "Provision Harbor-compatible sandbox backend, freeze 89-task IDs/image digests and rights, pin scaffold/tool/budget/scorer, verify reset and regrade before B0/B1.",
+      "owner": "Irisuko coordinates MOD integration; benchmark #254 runtime/scaffold maintainers provision and review Harbor contract"
+    }
+  ]
+}

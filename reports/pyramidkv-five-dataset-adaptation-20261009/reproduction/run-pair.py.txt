@@ -1,0 +1,85 @@
+"""Fresh-process paired MMLU-Pro subset evaluation; startup cache advice only."""
+import json
+import os
+import re
+import signal
+import subprocess
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+runtime = Path('/root/workspace/pyramidkv-runtime')
+root = runtime / 'dataset-program'
+pair = root / 'paired'
+pair.mkdir(exist_ok=False)
+client = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+python = str(runtime / 'venv/bin/python')
+repo = '/root/workspace/vllm-hust-benchmark'
+pyramid = '/root/workspace/vllm-ascend-pyramidkv-hust'
+config = runtime / 'evaluation/pyramidkv-aligned.json'
+
+def stop_current(label):
+    pid = int((runtime / 'server.pid').read_text())
+    cmd = Path(f'/proc/{pid}/cmdline').read_bytes()
+    assert b'vllm.entrypoints.cli.main' in cmd and b'/root/workspace/Qwen3.5-35B-A3B' in cmd
+    os.kill(pid, signal.SIGTERM)
+    for _ in range(120):
+        status = subprocess.check_output(['npu-smi', 'info'], text=True)
+        hbm = [int(x) for x in re.findall(r'(\d+)\s*/\s*65536', status)]
+        if 'VLLMWorker' not in status and hbm and max(hbm) < 5000:
+            (pair / f'{label}-npu-idle.txt').write_text(status)
+            return
+        time.sleep(1)
+    raise RuntimeError('Previous workers did not release HBM')
+
+assert (root / 'plan/contract.json').is_file()
+stop_current('before')
+for arm, enabled in [('B0', '0'), ('B1', '1')]:
+    env = dict(os.environ, PYRAMIDKV_ENABLED=enabled, PYRAMIDKV_CONFIG=str(config),
+               VLLMHUST_EXT_ENABLED_BUNDLES='', PYTHONPATH=repo + '/src')
+    log_path = pair / f'{arm}-server.log'
+    with log_path.open('w') as log:
+        server = subprocess.Popen(['bash', str(runtime / 'serve.sh')], env=env,
+                                  stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+    print('Started', arm, server.pid, flush=True)
+    reclaims = []
+    for _ in range(240):
+        if server.poll() is not None:
+            raise RuntimeError(f'{arm} server exited {server.returncode}')
+        try:
+            with client.open('http://127.0.0.1:8000/health', timeout=2) as response:
+                if response.status == 200:
+                    break
+        except (OSError, urllib.error.URLError):
+            pass
+        current = int(Path('/sys/fs/cgroup/memory.current').read_text())
+        if current > 48 * 1024**3:
+            row = {'time_unix': time.time(), 'memory_current_before': current}
+            for p in sorted(Path('/root/workspace/Qwen3.5-35B-A3B').glob('*.safetensors')):
+                fd = os.open(p, os.O_RDONLY)
+                try:
+                    os.posix_fadvise(fd, 0, 0, os.POSIX_FADV_DONTNEED)
+                finally:
+                    os.close(fd)
+            row['memory_current_after'] = int(Path('/sys/fs/cgroup/memory.current').read_text())
+            reclaims.append(row)
+            print(arm, 'startup-only cache advice', row, flush=True)
+        time.sleep(5)
+    else:
+        raise RuntimeError(f'{arm} startup timed out')
+    (pair / f'{arm}-startup-cache.json').write_text(json.dumps(reclaims, indent=2) + '\n')
+    print(arm, 'healthy; starting frozen 70-task subset', flush=True)
+    with (pair / f'{arm}-client.log').open('w') as output:
+        subprocess.run([python, '-m', 'vllm_hust_benchmark.mmlu_pro_pyramidkv', 'run',
+                        '--plan', str(root / 'plan'), '--pyramidkv-repo', pyramid,
+                        '--output', str(pair / arm), '--server-log', str(log_path),
+                        '--server-pid', str(server.pid), '--arm', arm], env=env,
+                       stdout=output, stderr=subprocess.STDOUT, check=True)
+    print(arm, 'complete', json.loads((pair / arm / 'score.json').read_text())['accuracy'], flush=True)
+    if arm == 'B0':
+        stop_current('between')
+subprocess.run([python, '-m', 'vllm_hust_benchmark.mmlu_pro_pyramidkv', 'analyze',
+                '--plan', str(root / 'plan'), '--pyramidkv-repo', pyramid,
+                '--root', str(pair), '--output', str(pair / 'comparison.json')], env=env, check=True)
+print('Pair completed; B1 service remains running', flush=True)
