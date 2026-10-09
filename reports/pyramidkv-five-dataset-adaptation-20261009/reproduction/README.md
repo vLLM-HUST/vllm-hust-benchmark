@@ -73,3 +73,14 @@ The inventory must contain 12,032 rows. `tasks.json` contains 70 selected task i
 choice letters. Raw results include every generated answer, per-task score, failure (if any), SSE,
 server logs, sampled metrics/NPU receipts and startup records. The raw archives are not edited to
 make model outputs, timing or failures look better.
+
+To check the published evidence without model/NPU access, run from the benchmark checkout:
+
+```bash
+PYTHONPATH=src python scripts/verify_pyramidkv_mmlu_evidence.py \
+  --root reports/pyramidkv-five-dataset-adaptation-20261009
+```
+
+This checks the frozen inventory and selection, archive hashes, server activation, per-task scoring
+and raw SSE/output correspondence. It re-scores recorded inference outputs; it does not execute a
+new model run or validate the original dataset/model weights on another machine.

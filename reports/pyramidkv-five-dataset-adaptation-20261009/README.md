@@ -95,6 +95,76 @@ The prior LongBench evidence remains supplementary and is linked from
 reduction must not be attributed to these five datasets. This report makes **no optimization
 claim**.
 
+## Measured result (2026-10-09)
+
+One fresh-process pair completed on the frozen 70-task subset. The primary result is task accuracy;
+the full 12,032-task inventory was tokenized but not scored. No compression-eligible tasks exist.
+
+| Measurement                            | B0 disabled | B1 enabled |
+| -------------------------------------- | ----------: | ---------: |
+| Correct / evaluated                    |     55 / 70 |    55 / 70 |
+| Strict subset accuracy                 |  78.571429% | 78.571429% |
+| Transport failures                     |           0 |          0 |
+| Invalid extracted answers              |           0 |          0 |
+| Output-limit terminations              |           6 |          6 |
+| Compression-eligible prompts           |           0 |          0 |
+| Observed scheduler compression commits |           0 |          0 |
+
+B1 minus B0 accuracy: **+0.000000 percentage points**. Extracted predictions match on 70/70 tasks;
+full output text matches on 70/70. There are 0 correct-to-incorrect and 0 incorrect-to-correct
+changes. These are compatibility observations under a non-exercised compression path, not
+optimization evidence.
+
+The per-category scores below are five-case compatibility checks, not reliable population estimates.
+
+| Category         | B0 correct / 5 | B1 correct / 5 |
+| ---------------- | -------------: | -------------: |
+| biology          |              4 |              4 |
+| business         |              4 |              4 |
+| chemistry        |              5 |              5 |
+| computer science |              4 |              4 |
+| economics        |              5 |              5 |
+| engineering      |              4 |              4 |
+| health           |              3 |              3 |
+| history          |              3 |              3 |
+| law              |              2 |              2 |
+| math             |              4 |              4 |
+| other            |              4 |              4 |
+| philosophy       |              4 |              4 |
+| physics          |              5 |              5 |
+| psychology       |              4 |              4 |
+
+[comparison.json](comparison.json) retains per-task predictions, accuracy, invalid/failure/length
+counts, paired compression verification and supporting resource/latency telemetry. Its
+`control_path_verified: true` means the expected zero commits were verified; it does **not** mean
+compression was exercised. [paired-outcome-audit.json](paired-outcome-audit.json) records output and
+correctness changes. All zero/negative outcomes and truncated generations are retained.
+
+Raw SSE, complete result records, server/telemetry/startup logs and their original hashes are in
+[raw/archives.json](raw/archives.json) and the adjacent ordered parts. See
+[reproduction instructions](reproduction/README.md) and [SHA256SUMS](SHA256SUMS).
+
+Validation: 1,729 pytest passed, 4 skipped; 13 focused adapter checks; 1,000 extraction comparisons
+against actual pinned upstream functions; full pre-commit and canonical publication/checksum/
+metric/trend/shell checks passed before this evidence publication. Final PR CI is tracked on
+[benchmark #258](https://github.com/vLLM-HUST/vllm-hust-benchmark/pull/258).
+
+### Supporting telemetry and observed costs
+
+| Measurement                      |     B0 disabled |      B1 enabled |
+| -------------------------------- | --------------: | --------------: |
+| Sampled peak KV usage            |       3.846154% |       3.846154% |
+| Peak HBM, device 6 / 7 (MiB)     | 47,479 / 47,478 | 47,739 / 47,738 |
+| Mean TTFT (ms)                   |         404.192 |         400.785 |
+| Mean TPOT (ms)                   |          10.116 |          10.642 |
+| Mean request completion time (s) |           6.004 |           6.299 |
+
+B1's sampled HBM peak is 260 MiB higher per device; its mean request completion time is about 4.9%
+higher in this pair. Both positive and negative telemetry changes are retained. There is no observed
+KV-usage reduction. This is one sequential pair with first-request costs included, so these numbers
+are descriptive observations, not a statistically established speedup or overhead estimate. Both
+arms have zero telemetry sampling errors (629 B0 / 661 B1 samples).
+
 ## Publication order
 
 Canonical artifacts and checksums are submitted here first. Website synchronization and global
