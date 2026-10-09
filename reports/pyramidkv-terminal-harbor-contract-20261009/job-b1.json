@@ -1,0 +1,326 @@
+{
+  "agents": [
+    {
+      "kwargs": {
+        "api_base": "http://127.0.0.1:8000/v1",
+        "enable_summarize": false,
+        "interleaved_thinking": false,
+        "llm_call_kwargs": {
+          "extra_body": {
+            "chat_template_kwargs": {
+              "enable_thinking": false
+            }
+          },
+          "max_tokens": 4096,
+          "seed": 17
+        },
+        "llm_kwargs": {
+          "num_retries": 0
+        },
+        "max_turns": 100,
+        "model_info": {
+          "input_cost_per_token": 0,
+          "max_input_tokens": 32768,
+          "max_output_tokens": 4096,
+          "max_tokens": 32768,
+          "output_cost_per_token": 0
+        },
+        "parser_name": "json",
+        "proactive_summarization_threshold": 0,
+        "record_terminal_session": true,
+        "store_all_messages": true,
+        "temperature": 0,
+        "use_responses_api": false
+      },
+      "model_name": "openai/qwen35-pyramidkv",
+      "name": "terminus-2"
+    }
+  ],
+  "environment": {
+    "cpu_enforcement_policy": "limit",
+    "delete": true,
+    "force_build": false,
+    "memory_enforcement_policy": "limit",
+    "type": "docker"
+  },
+  "job_name": "pyramidkv-terminal-b1",
+  "jobs_dir": "jobs-b1",
+  "n_attempts": 1,
+  "n_concurrent_trials": 1,
+  "retry": {
+    "max_retries": 0
+  },
+  "tasks": [
+    {
+      "path": "tasks/adaptive-rejection-sampler"
+    },
+    {
+      "path": "tasks/bn-fit-modify"
+    },
+    {
+      "path": "tasks/break-filter-js-from-html"
+    },
+    {
+      "path": "tasks/build-cython-ext"
+    },
+    {
+      "path": "tasks/build-pmars"
+    },
+    {
+      "path": "tasks/build-pov-ray"
+    },
+    {
+      "path": "tasks/caffe-cifar-10"
+    },
+    {
+      "path": "tasks/cancel-async-tasks"
+    },
+    {
+      "path": "tasks/chess-best-move"
+    },
+    {
+      "path": "tasks/circuit-fibsqrt"
+    },
+    {
+      "path": "tasks/cobol-modernization"
+    },
+    {
+      "path": "tasks/code-from-image"
+    },
+    {
+      "path": "tasks/compile-compcert"
+    },
+    {
+      "path": "tasks/configure-git-webserver"
+    },
+    {
+      "path": "tasks/constraints-scheduling"
+    },
+    {
+      "path": "tasks/count-dataset-tokens"
+    },
+    {
+      "path": "tasks/crack-7z-hash"
+    },
+    {
+      "path": "tasks/custom-memory-heap-crash"
+    },
+    {
+      "path": "tasks/db-wal-recovery"
+    },
+    {
+      "path": "tasks/distribution-search"
+    },
+    {
+      "path": "tasks/dna-assembly"
+    },
+    {
+      "path": "tasks/dna-insert"
+    },
+    {
+      "path": "tasks/extract-elf"
+    },
+    {
+      "path": "tasks/extract-moves-from-video"
+    },
+    {
+      "path": "tasks/feal-differential-cryptanalysis"
+    },
+    {
+      "path": "tasks/feal-linear-cryptanalysis"
+    },
+    {
+      "path": "tasks/filter-js-from-html"
+    },
+    {
+      "path": "tasks/financial-document-processor"
+    },
+    {
+      "path": "tasks/fix-code-vulnerability"
+    },
+    {
+      "path": "tasks/fix-git"
+    },
+    {
+      "path": "tasks/fix-ocaml-gc"
+    },
+    {
+      "path": "tasks/gcode-to-text"
+    },
+    {
+      "path": "tasks/git-leak-recovery"
+    },
+    {
+      "path": "tasks/git-multibranch"
+    },
+    {
+      "path": "tasks/gpt2-codegolf"
+    },
+    {
+      "path": "tasks/headless-terminal"
+    },
+    {
+      "path": "tasks/hf-model-inference"
+    },
+    {
+      "path": "tasks/install-windows-3.11"
+    },
+    {
+      "path": "tasks/kv-store-grpc"
+    },
+    {
+      "path": "tasks/large-scale-text-editing"
+    },
+    {
+      "path": "tasks/largest-eigenval"
+    },
+    {
+      "path": "tasks/llm-inference-batching-scheduler"
+    },
+    {
+      "path": "tasks/log-summary-date-ranges"
+    },
+    {
+      "path": "tasks/mailman"
+    },
+    {
+      "path": "tasks/make-doom-for-mips"
+    },
+    {
+      "path": "tasks/make-mips-interpreter"
+    },
+    {
+      "path": "tasks/mcmc-sampling-stan"
+    },
+    {
+      "path": "tasks/merge-diff-arc-agi-task"
+    },
+    {
+      "path": "tasks/model-extraction-relu-logits"
+    },
+    {
+      "path": "tasks/modernize-scientific-stack"
+    },
+    {
+      "path": "tasks/mteb-leaderboard"
+    },
+    {
+      "path": "tasks/mteb-retrieve"
+    },
+    {
+      "path": "tasks/multi-source-data-merger"
+    },
+    {
+      "path": "tasks/nginx-request-logging"
+    },
+    {
+      "path": "tasks/openssl-selfsigned-cert"
+    },
+    {
+      "path": "tasks/overfull-hbox"
+    },
+    {
+      "path": "tasks/password-recovery"
+    },
+    {
+      "path": "tasks/path-tracing"
+    },
+    {
+      "path": "tasks/path-tracing-reverse"
+    },
+    {
+      "path": "tasks/polyglot-c-py"
+    },
+    {
+      "path": "tasks/polyglot-rust-c"
+    },
+    {
+      "path": "tasks/portfolio-optimization"
+    },
+    {
+      "path": "tasks/protein-assembly"
+    },
+    {
+      "path": "tasks/prove-plus-comm"
+    },
+    {
+      "path": "tasks/pypi-server"
+    },
+    {
+      "path": "tasks/pytorch-model-cli"
+    },
+    {
+      "path": "tasks/pytorch-model-recovery"
+    },
+    {
+      "path": "tasks/qemu-alpine-ssh"
+    },
+    {
+      "path": "tasks/qemu-startup"
+    },
+    {
+      "path": "tasks/query-optimize"
+    },
+    {
+      "path": "tasks/raman-fitting"
+    },
+    {
+      "path": "tasks/regex-chess"
+    },
+    {
+      "path": "tasks/regex-log"
+    },
+    {
+      "path": "tasks/reshard-c4-data"
+    },
+    {
+      "path": "tasks/rstan-to-pystan"
+    },
+    {
+      "path": "tasks/sam-cell-seg"
+    },
+    {
+      "path": "tasks/sanitize-git-repo"
+    },
+    {
+      "path": "tasks/schemelike-metacircular-eval"
+    },
+    {
+      "path": "tasks/sparql-university"
+    },
+    {
+      "path": "tasks/sqlite-db-truncate"
+    },
+    {
+      "path": "tasks/sqlite-with-gcov"
+    },
+    {
+      "path": "tasks/torch-pipeline-parallelism"
+    },
+    {
+      "path": "tasks/torch-tensor-parallelism"
+    },
+    {
+      "path": "tasks/train-fasttext"
+    },
+    {
+      "path": "tasks/tune-mjcf"
+    },
+    {
+      "path": "tasks/video-processing"
+    },
+    {
+      "path": "tasks/vulnerable-secret"
+    },
+    {
+      "path": "tasks/winning-avg-corewars"
+    },
+    {
+      "path": "tasks/write-compressor"
+    }
+  ],
+  "timeout_multiplier": 1.0,
+  "verifier": {
+    "disable": false
+  }
+}
