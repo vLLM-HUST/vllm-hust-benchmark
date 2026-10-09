@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "status": "blocked",
+  "scope": "candidate input contract; no task quality or optimization result",
+  "source_revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+  "reference": "https://openai.com/index/frontierscience/",
+  "tracks": {
+    "olympiad": {
+      "tasks": 100,
+      "reference_field": "answer",
+      "grading_kind": "model-based short-answer equivalence",
+      "generic_exact_match_allowed": false
+    },
+    "research": {
+      "tasks": 60,
+      "reference_field": "answer (rubric)",
+      "grading_kind": "item-level rubric grading, total 0\u201310",
+      "correct_threshold": 7,
+      "generic_exact_match_allowed": false
+    }
+  },
+  "judge": {
+    "model_revision": null,
+    "prompt_sha256": null,
+    "parser_revision": null,
+    "execution_image_digest": null,
+    "calibration_receipt": null
+  },
+  "solver": {
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 2,
+    "prompt_candidate": "problem-only, thinking disabled",
+    "trials_per_task": null,
+    "max_output_tokens": null,
+    "tool_policy": null,
+    "timeout_and_retry_policy": null
+  },
+  "aggregation": null,
+  "unblock_conditions": [
+    "Review the separate track manifests without deduplicating task_group_id.",
+    "Pin judge model revision, prompt, parser, execution environment and calibration examples.",
+    "Pin trials, generation budget, tool policy, failures/retries and separate per-track aggregation before solver output.",
+    "Re-audit actual solver prompts if demonstrations, tools, thinking or prompt framing changes."
+  ],
+  "scores": null,
+  "optimization_claims": []
+}
