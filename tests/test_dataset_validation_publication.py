@@ -58,16 +58,29 @@ def test_dataset_program_separates_primary_plan_from_measured_scenarios() -> Non
         for dataset in program["primary_datasets"]
     }
     assert readiness == {
-        "mmlu-pro": "material-unfrozen",
-        "hle-verified": "missing",
-        "swe-bench-pro": "missing",
-        "frontierscience": "missing",
-        "terminal-bench-2.1": "missing",
+        "mmlu-pro": "asset-frozen",
+        "hle-verified": "asset-frozen",
+        "swe-bench-pro": "asset-frozen",
+        "frontierscience": "asset-frozen",
+        "terminal-bench-2.1": "asset-frozen",
     }
     mmlu = program["primary_datasets"][0]["readiness"]
-    assert mmlu["sample_count"] == 200
-    assert mmlu["manifest_sha256"] is None
+    assert mmlu["dataset_revision"] == ("b189ec765aa7ed75c8acfea42df31fdae71f97be")
+    assert mmlu["sample_count"] is None
+    assert mmlu["manifest_sha256"] == (
+        "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+    )
     assert mmlu["scorer"] is None
+    assert {
+        dataset["id"]: dataset["readiness"]["dataset_revision"]
+        for dataset in program["primary_datasets"]
+    } == {
+        "mmlu-pro": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+        "hle-verified": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+        "swe-bench-pro": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+        "frontierscience": "25ed67db7da8f4591484e764008ff585544f5a30",
+        "terminal-bench-2.1": "7131e4375048a0e408a8fb404b5f499d726b695b",
+    }
     assert program["supplementary_material"]["default_tier"] == "supplementary"
     assert program["supplementary_material"]["classification_rule"] == (
         "all-other-registered-or-planned-datasets"
