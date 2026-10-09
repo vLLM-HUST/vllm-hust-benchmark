@@ -65,22 +65,30 @@ def test_dataset_program_separates_primary_plan_from_measured_scenarios() -> Non
         "terminal-bench-2.1": "asset-frozen",
     }
     mmlu = program["primary_datasets"][0]["readiness"]
-    assert mmlu["dataset_revision"] == ("b189ec765aa7ed75c8acfea42df31fdae71f97be")
+    assert mmlu["dataset_revision"] == (
+        "b189ec765aa7ed75c8acfea42df31fdae71f97be"  # pragma: allowlist secret
+    )
     assert mmlu["sample_count"] is None
-    assert mmlu["manifest_sha256"] == (
-        "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+    assert (
+        mmlu["manifest_sha256"]
+        == (
+            "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"  # pragma: allowlist secret
+        )
     )
     assert mmlu["scorer"] is None
-    assert {
-        dataset["id"]: dataset["readiness"]["dataset_revision"]
-        for dataset in program["primary_datasets"]
-    } == {
-        "mmlu-pro": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
-        "hle-verified": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
-        "swe-bench-pro": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
-        "frontierscience": "25ed67db7da8f4591484e764008ff585544f5a30",
-        "terminal-bench-2.1": "7131e4375048a0e408a8fb404b5f499d726b695b",
-    }
+    assert (
+        {
+            dataset["id"]: dataset["readiness"]["dataset_revision"]
+            for dataset in program["primary_datasets"]
+        }
+        == {
+            "mmlu-pro": "b189ec765aa7ed75c8acfea42df31fdae71f97be",  # pragma: allowlist secret
+            "hle-verified": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",  # pragma: allowlist secret
+            "swe-bench-pro": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",  # pragma: allowlist secret
+            "frontierscience": "25ed67db7da8f4591484e764008ff585544f5a30",  # pragma: allowlist secret
+            "terminal-bench-2.1": "7131e4375048a0e408a8fb404b5f499d726b695b",  # pragma: allowlist secret
+        }
+    )
     assert program["supplementary_material"]["default_tier"] == "supplementary"
     assert program["supplementary_material"]["classification_rule"] == (
         "all-other-registered-or-planned-datasets"
