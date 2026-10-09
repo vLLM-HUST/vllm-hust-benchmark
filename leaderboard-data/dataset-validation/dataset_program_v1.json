@@ -6,8 +6,8 @@
     "label": "Pujiang-specified datasets",
     "label_zh": "浦江指定数据集",
     "scope_status": "names-only",
-    "scope_note": "The designation freezes only the five dataset names and scope. It does not freeze a release, revision, split, task manifest, sampling rule, scorer, execution image, license, or artifact hash.",
-    "scope_note_zh": "浦江指定仅冻结五个数据集的名称与范围，不等于已经冻结发布版本、revision、split、任务清单、抽样规则、scorer、执行镜像、许可证或制品哈希。",
+    "scope_note": "The designation freezes the five dataset names and scope. The source snapshots below are separately revision- and checksum-frozen; task manifests, sampling rules, scorers, execution images, and license gates remain part of each execution contract.",
+    "scope_note_zh": "浦江指定冻结五个数据集的名称与范围；下列源数据快照已另行按 revision 与校验和冻结，任务清单、抽样规则、scorer、执行镜像和许可门禁仍属于各自执行合同。",
     "historical_b0_boundary": {
       "workbook_dataset_count": 21,
       "covered_designated_dataset_ids": ["mmlu-pro"],
@@ -25,10 +25,20 @@
       "primary_metric_zh": "固定评分器下的任务准确率",
       "status": "serving-evidence-only",
       "source_url": "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro",
-      "version_policy": "Freeze the exact dataset revision and evaluator before publishing task-quality scores.",
+      "version_policy": "Use the frozen dataset snapshot and freeze the evaluator before publishing task-quality scores.",
       "readiness": {
-        "status": "material-unfrozen",
+        "status": "asset-frozen",
         "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          },
           {
             "path": "leaderboard-data/dataset-validation/dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json",
             "kind": "canonical-serving-artifact",
@@ -50,18 +60,18 @@
             "sha256": "84d4280e10c57bd9d588485b013d15099f96c20a804e3584f083f4cac8d77b09"
           }
         ],
-        "dataset_revision": null,
-        "split": null,
-        "sample_count": 200,
-        "sample_count_scope": "Historical serving command --num-prompts value; not the source dataset cardinality or a frozen task manifest.",
-        "manifest_path": null,
-        "manifest_sha256": null,
+        "dataset_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+        "split": "validation and test Parquet snapshots",
+        "sample_count": null,
+        "sample_count_scope": "Snapshot row counts and the formal evaluation task manifest still need to be extracted; the historical serving command used 200 prompts and is not the dataset cardinality.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
         "scorer": null,
         "runtime_dependencies": ["Parquet reader used by the preparation note", "vLLM bench serve for serving telemetry"],
-        "blockers": ["Freeze the exact dataset revision, split, task IDs, sampling rule, scorer, execution image, license, and manifest SHA-256.", "Produce task-accuracy evidence; the existing artifact contains serving telemetry only."]
+        "blockers": ["Extract and freeze the full task manifest, row counts, sampling rule, pinned scorer, and execution environment from the verified snapshot.", "Produce task-accuracy evidence; the existing artifact contains serving telemetry only."]
       },
-      "note": "Serving B0 evidence exists, but it is not a task-accuracy result.",
-      "note_zh": "已有服务侧 B0 证据，但不能将其当作任务准确率结果。"
+      "note": "The source snapshot is revision- and checksum-frozen; serving B0 evidence exists but is not a task-accuracy result.",
+      "note_zh": "源数据快照已按 revision 与校验和冻结；已有服务侧 B0 证据，但不能将其当作任务准确率结果。"
     },
     {
       "id": "hle-verified",
@@ -73,20 +83,31 @@
       "source_url": "https://huggingface.co/datasets/skylenage-ai/HLE-Verified",
       "version_policy": "Freeze the dataset revision and explicitly choose the full verified set or a named verified-gold subset.",
       "readiness": {
-        "status": "missing",
-        "observed_materials": [],
-        "dataset_revision": null,
-        "split": null,
-        "sample_count": null,
-        "sample_count_scope": null,
-        "manifest_path": null,
-        "manifest_sha256": null,
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          }
+        ],
+        "dataset_revision": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+        "split": "Gold, Revision, and Uncertain JSONL subsets",
+        "sample_count": 2500,
+        "sample_count_scope": "Gold 668, Revision 1143, and Uncertain 689; local objects match the upstream Git LFS SHA-256 values.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
         "scorer": null,
-        "runtime_dependencies": [],
-        "blockers": ["Acquire and license-review the exact dataset release.", "Freeze the full verified set or named verified-gold subset, task manifest, scorer, execution image, and hashes."]
+        "runtime_dependencies": ["Snapshot judge_round1.py and judge_round2.py", "Pinned judge model, prompts, and execution environment"],
+        "blockers": ["Upstream does not declare a dataset license; complete license review before formal execution.", "Choose and freeze the evaluated subset, task manifest, judge model and prompts, scorer, and execution image."]
       },
-      "note": "No measured result is admitted until the evaluated subset and grader are frozen.",
-      "note_zh": "在明确评测子集并冻结评分器之前，不接纳实测结果。"
+      "note": "The 2500-row source snapshot is revision- and checksum-frozen; no measured result is admitted until licensing, the evaluated subset, and the grader are frozen.",
+      "note_zh": "2500 条源数据快照已按 revision 与校验和冻结；在完成许可核验、明确评测子集并冻结评分器之前，不接纳实测结果。"
     },
     {
       "id": "swe-bench-pro",
@@ -98,20 +119,31 @@
       "source_url": "https://huggingface.co/datasets/ScaleAI/SWE-bench_Pro",
       "version_policy": "Freeze the validated release, task IDs, Harbor environment, agent scaffold, budget, and regrading protocol.",
       "readiness": {
-        "status": "missing",
-        "observed_materials": [],
-        "dataset_revision": null,
-        "split": null,
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          }
+        ],
+        "dataset_revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+        "split": "default, hard, and v1 test Parquet snapshots",
         "sample_count": null,
-        "sample_count_scope": null,
-        "manifest_path": null,
-        "manifest_sha256": null,
+        "sample_count_scope": "Snapshot files are frozen; task IDs and repository/image mapping must be extracted into the formal execution manifest.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
         "scorer": null,
-        "runtime_dependencies": [],
-        "blockers": ["Acquire and license-review the exact SWE-bench-Pro release; SWE-bench Verified is not a substitute.", "Freeze task IDs, fresh-sandbox images, agent scaffold, tool policy, budget, regrader, and hashes."]
+        "runtime_dependencies": ["Pinned task repositories and fresh-sandbox container images", "Agent scaffold, tool policy, budget, and isolated regrader"],
+        "blockers": ["Upstream does not declare a dataset-card license; complete license review before formal execution.", "Freeze task IDs, code repository revisions, fresh-sandbox image digests, agent scaffold, tool policy, budget, and regrader."]
       },
-      "note": "Agent execution and fresh-sandbox regrading are part of the measurement contract.",
-      "note_zh": "智能体执行与全新沙箱复判均属于测量合同。"
+      "note": "The dataset snapshot is revision- and checksum-frozen; agent execution and fresh-sandbox regrading remain part of the pending measurement contract.",
+      "note_zh": "数据快照已按 revision 与校验和冻结；智能体执行与全新沙箱复判仍属于待冻结的测量合同。"
     },
     {
       "id": "frontierscience",
@@ -123,20 +155,31 @@
       "source_url": "https://huggingface.co/datasets/openai/frontierscience",
       "version_policy": "Freeze the dataset revision and report Olympiad and Research tracks separately with their pinned graders.",
       "readiness": {
-        "status": "missing",
-        "observed_materials": [],
-        "dataset_revision": null,
-        "split": null,
-        "sample_count": null,
-        "sample_count_scope": null,
-        "manifest_path": null,
-        "manifest_sha256": null,
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          }
+        ],
+        "dataset_revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+        "split": "olympiad/test and research/test",
+        "sample_count": 160,
+        "sample_count_scope": "Olympiad 100 and Research 60; the tracks remain separate in formal reporting.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
         "scorer": null,
-        "runtime_dependencies": [],
-        "blockers": ["Acquire and license-review the exact FrontierScience release.", "Freeze separate Olympiad and Research manifests, scorers, execution environment, and hashes."]
+        "runtime_dependencies": ["Track-specific answer extraction and pinned graders"],
+        "blockers": ["Freeze separate Olympiad and Research task manifests, scorers, and execution environment."]
       },
-      "note": "The two tracks use different answer and scoring contracts and must not be pooled silently.",
-      "note_zh": "两个赛道的答案与评分合同不同，不得静默合并。"
+      "note": "The Apache-2.0 source snapshot is revision- and checksum-frozen; the two tracks use different answer and scoring contracts and must not be pooled silently.",
+      "note_zh": "Apache-2.0 源数据快照已按 revision 与校验和冻结；两个赛道的答案与评分合同不同，不得静默合并。"
     },
     {
       "id": "terminal-bench-2.1",
@@ -148,20 +191,31 @@
       "source_url": "https://www.tbench.ai/",
       "version_policy": "Pin the 2.1 task release, Harbor environment, agent scaffold, tool policy, and budget.",
       "readiness": {
-        "status": "missing",
-        "observed_materials": [],
-        "dataset_revision": null,
-        "split": null,
-        "sample_count": null,
-        "sample_count_scope": null,
-        "manifest_path": null,
-        "manifest_sha256": null,
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          }
+        ],
+        "dataset_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+        "split": "89 task definitions",
+        "sample_count": 89,
+        "sample_count_scope": "Task definitions and harness metadata are frozen; approximately 40 GB of runtime images were intentionally not pre-pulled.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
         "scorer": null,
-        "runtime_dependencies": [],
-        "blockers": ["Acquire and license-review the exact Terminal-Bench 2.1 task release; older Terminal-Bench releases are not substitutes.", "Freeze the Harbor images, task manifest, agent scaffold, tool policy, budget, scorer, and hashes."]
+        "runtime_dependencies": ["Pinned Harbor runtime image digests", "Agent scaffold, tool policy, budget, and task scorer"],
+        "blockers": ["Pull and freeze all required Harbor runtime image digests; the task snapshot alone is not executable.", "Freeze the agent scaffold, tool policy, budget, scorer, and task-level third-party rights review."]
       },
-      "note": "Task resolution is primary; token throughput is supporting telemetry only.",
-      "note_zh": "任务解决率是主指标，token 吞吐仅作为辅助遥测。"
+      "note": "The Apache-2.0 repository snapshot and 89 task definitions are revision- and checksum-frozen, but runtime images are not present. Task resolution is primary; token throughput is supporting telemetry only.",
+      "note_zh": "Apache-2.0 仓库快照与 89 个任务定义已按 revision 与校验和冻结，但运行镜像尚未落地。任务解决率是主指标，token 吞吐仅作为辅助遥测。"
     }
   ],
   "supplementary_material": {

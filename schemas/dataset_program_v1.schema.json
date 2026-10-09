@@ -54,7 +54,7 @@
             "type": "object",
             "required": ["status", "observed_materials", "dataset_revision", "split", "sample_count", "sample_count_scope", "manifest_path", "manifest_sha256", "scorer", "runtime_dependencies", "blockers"],
             "properties": {
-              "status": { "enum": ["executable", "material-unfrozen", "missing"] },
+              "status": { "enum": ["executable", "asset-frozen", "material-unfrozen", "missing"] },
               "observed_materials": {
                 "type": "array",
                 "items": {
@@ -62,7 +62,15 @@
                   "required": ["path", "kind", "sha256"],
                   "properties": {
                     "path": { "type": "string", "minLength": 1 },
-                    "kind": { "enum": ["canonical-serving-artifact", "preparation-note", "screenshot"] },
+                    "kind": {
+                      "enum": [
+                        "canonical-serving-artifact",
+                        "dataset-snapshot-manifest",
+                        "checksum-inventory",
+                        "preparation-note",
+                        "screenshot"
+                      ]
+                    },
                     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
                   },
                   "additionalProperties": false

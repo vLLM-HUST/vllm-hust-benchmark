@@ -129,13 +129,22 @@ def validate_program(program: dict[str, Any]) -> None:
         readiness = dataset["readiness"]
         if not isinstance(readiness, dict) or readiness.get("status") not in {
             "executable",
+            "asset-frozen",
             "material-unfrozen",
             "missing",
         }:
             raise DatasetValidationError(
                 f"primary dataset readiness is invalid: {dataset['id']}"
             )
-        if readiness.get("status") != "executable" and (
+        if readiness.get("status") == "asset-frozen" and (
+            not readiness.get("dataset_revision")
+            or not readiness.get("manifest_path")
+            or not readiness.get("manifest_sha256")
+        ):
+            raise DatasetValidationError(
+                f"frozen dataset asset lacks revision or checksum manifest: {dataset['id']}"
+            )
+        if readiness.get("status") in {"material-unfrozen", "missing"} and (
             readiness.get("manifest_path") is not None
             or readiness.get("manifest_sha256") is not None
             or readiness.get("scorer") is not None
