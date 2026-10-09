@@ -3,40 +3,8 @@
   "default_scenario_id": "qwen35-35b-a3b-bf16-tp2-pp1-dp1-ep-off-ctx262k-apc-on-mtp2-full-piecewise-sweprefix-900s",
   "scenarios": [
     {
-      "id": "qwen25-14b-instruct-fp16-ascend-single",
-      "label": "Qwen2.5-14B-Instruct · FP16 · 1× Ascend 910B2",
-      "model": "Qwen2.5-14B-Instruct",
-      "hardware": "1× Ascend 910B2",
-      "precision": "FP16",
-      "data_file": "dataset_validation_v1.b0.json"
-    },
-    {
-      "id": "qwen35-35b-a3b-bf16-tp2-dataset-matrix-v1",
-      "label": "Qwen3.5-35B-A3B · BF16 · TP2 · Dataset Matrix",
-      "model": "Qwen3.5-35B-A3B",
-      "hardware": "2× Ascend 910B2",
-      "precision": "BF16",
-      "data_file": "dataset_validation_qwen35_tp2_matrix.json"
-    },
-    {
-      "id": "qwen35-35b-a3b-bf16-tp2-ep-on-ctx32k-apc-off-full-decode-only-inf-out256",
-      "label": "Qwen3.5-35B-A3B · BF16 · TP2/EP on · 32K · APC off · FULL_DECODE_ONLY · inf · out256",
-      "model": "Qwen3.5-35B-A3B",
-      "hardware": "2× Ascend 910B2",
-      "precision": "BF16",
-      "data_file": "dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json"
-    },
-    {
-      "id": "qwen35-35b-a3b-bf16-tp4-c12-kv512m",
-      "label": "Qwen3.5-35B-A3B · BF16 · TP4/C12 · 512 MiB KV/NPU",
-      "model": "Qwen3.5-35B-A3B",
-      "hardware": "4× Ascend 910B2",
-      "precision": "BF16",
-      "data_file": "dataset_validation_qwen35_bidkv.json"
-    },
-    {
       "id": "qwen35-35b-a3b-bf16-tp2-pp1-dp1-ep-off-ctx262k-apc-on-mtp2-full-piecewise-sweprefix-900s",
-      "label": "Qwen3.5-35B-A3B · BF16 · TP2/PP1/DP1 · EP off · 262K · APC on · MTP2 · FULL_AND_PIECEWISE · SWE Prefix Reuse · 900s",
+      "label": "Paired B0/B1 · Qwen3.5-35B-A3B · TP2/PP1/DP1 · EP off · 262K · APC on · MTP2 · FULL_AND_PIECEWISE · SWE Prefix Reuse · 900s",
       "model": "Qwen3.5-35B-A3B",
       "hardware": "2× Ascend 910B2",
       "precision": "BF16",
@@ -44,7 +12,7 @@
     },
     {
       "id": "qwen35-35b-a3b-bf16-tp2-pp1-dp1-ep-off-ctx262k-apc-on-mtp2-native-full-piecewise-vs-betterscale-full-e16-r20-sweprefix-900s",
-      "label": "Qwen3.5-35B-A3B · BF16 · TP2/PP1/DP1 · Native FULL_AND_PIECEWISE vs BetterScale FULL/E16/R20 · SWE Prefix Reuse · 900s",
+      "label": "Paired B0/B1 · Qwen3.5-35B-A3B · TP2/PP1/DP1 · Native FULL_AND_PIECEWISE vs BetterScale FULL/E16/R20 · SWE Prefix Reuse · 900s",
       "model": "Qwen3.5-35B-A3B",
       "hardware": "2× Ascend 910B2",
       "precision": "BF16",
@@ -52,11 +20,44 @@
     },
     {
       "id": "qwen35-35b-a3b-bf16-tp2-pp2-dp1-ep-off-ctx262k-apc-on-mtp2-full-piecewise-pipeline-microbatch-sweprefix-900s",
-      "label": "Qwen3.5-35B-A3B · BF16 · TP2/PP2/DP1 · EP off · 262K · APC on · MTP2 · FULL_AND_PIECEWISE · Pipeline Microbatch · SWE Prefix Reuse · 900s",
+      "label": "Paired B0/B1 · Qwen3.5-35B-A3B · TP2/PP2/DP1 · EP off · 262K · APC on · MTP2 · FULL_AND_PIECEWISE · Pipeline Microbatch · SWE Prefix Reuse · 900s",
       "model": "Qwen3.5-35B-A3B",
       "hardware": "4× Ascend 910B2",
       "precision": "BF16",
       "data_file": "dataset_validation_qwen35_frontier_pipeline_pp2_900s.json"
+    },
+    {
+      "id": "qwen35-35b-a3b-bf16-tp4-c12-kv512m",
+      "label": "Paired B0/B1 · Qwen3.5-35B-A3B · TP4/C12 · 512 MiB KV/NPU · EvoScientist",
+      "model": "Qwen3.5-35B-A3B",
+      "hardware": "4× Ascend 910B2",
+      "precision": "BF16",
+      "data_file": "dataset_validation_qwen35_bidkv.json"
+    },
+    {
+      "id": "qwen35-35b-a3b-bf16-tp2-ep-on-ctx32k-apc-off-full-decode-only-inf-out256",
+      "label": "B0 only · Qwen3.5-35B-A3B · TP2/EP on · 32K · APC off · FULL_DECODE_ONLY · inf · out256",
+      "model": "Qwen3.5-35B-A3B",
+      "hardware": "2× Ascend 910B2",
+      "precision": "BF16",
+      "data_file": "dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json"
+    },
+    {
+      "id": "qwen25-14b-instruct-fp16-ascend-single",
+      "label": "Partial B0/B1 · Qwen2.5-14B-Instruct · FP16 · 1× Ascend 910B2",
+      "model": "Qwen2.5-14B-Instruct",
+      "hardware": "1× Ascend 910B2",
+      "precision": "FP16",
+      "data_file": "dataset_validation_v1.b0.json"
+    },
+    {
+      "id": "qwen35-35b-a3b-bf16-tp2-dataset-matrix-v1",
+      "label": "Coverage planning · Qwen3.5-35B-A3B · BF16 · TP2",
+      "model": "Qwen3.5-35B-A3B",
+      "hardware": "2× Ascend 910B2",
+      "precision": "BF16",
+      "data_file": "dataset_validation_qwen35_tp2_matrix.json",
+      "selector_visible": false
     }
   ]
 }

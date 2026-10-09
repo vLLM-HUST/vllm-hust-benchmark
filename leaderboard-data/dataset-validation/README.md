@@ -7,6 +7,8 @@ mirrors.
 ## Files
 
 - `dataset_validation_index_v1.json` lists every independently selectable model/configuration.
+- Planning-only artifacts remain in the index for direct evidence links but set
+  `selector_visible: false`; consumer selectors must omit them.
 - Each `data_file` is one `dataset-validation-v1` artifact. Different models or materially different
   hardware and serving configurations must use different artifacts.
 - `SHA256SUMS` seals the JSON publication set.
