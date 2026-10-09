@@ -38,6 +38,7 @@ def test_dataset_program_separates_primary_plan_from_measured_scenarios() -> Non
         "FrontierScience",
         "Terminal-Bench 2.1",
     ]
+    assert all(dataset["primary_metric_zh"] for dataset in program["primary_datasets"])
     assert program["supplementary_material"]["default_tier"] == "supplementary"
     assert program["supplementary_material"]["classification_rule"] == (
         "all-other-registered-or-planned-datasets"

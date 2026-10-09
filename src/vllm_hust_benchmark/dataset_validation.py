@@ -96,6 +96,7 @@ def validate_program(program: dict[str, Any]) -> None:
             "label",
             "evaluation_class",
             "primary_metric",
+            "primary_metric_zh",
             "status",
             "source_url",
             "version_policy",
