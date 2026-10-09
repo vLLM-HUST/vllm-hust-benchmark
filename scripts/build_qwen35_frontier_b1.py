@@ -665,6 +665,21 @@ def write_json(path: Path, value: object) -> None:
     )
 
 
+def merge_index_entry(item: dict, generated_by_id: dict[str, dict]) -> dict:
+    generated = generated_by_id.get(item["id"])
+    if generated is None:
+        return item
+    return {
+        **generated,
+        "label": item["label"],
+        **(
+            {"selector_visible": item["selector_visible"]}
+            if "selector_visible" in item
+            else {}
+        ),
+    }
+
+
 def main() -> None:
     artifacts = {
         OUTPUT: build(),
@@ -685,10 +700,11 @@ def main() -> None:
         }
         entry["data_file"] = path.name
         entries.append(entry)
-    generated_ids = {entry["id"] for entry in entries}
+    generated_by_id = {entry["id"]: entry for entry in entries}
+    existing_ids = {item["id"] for item in index["scenarios"]}
     index["scenarios"] = [
-        item for item in index["scenarios"] if item["id"] not in generated_ids
-    ] + entries
+        merge_index_entry(item, generated_by_id) for item in index["scenarios"]
+    ] + [entry for entry in entries if entry["id"] not in existing_ids]
     write_json(INDEX, index)
     names = sorted([INDEX.name, *(item["data_file"] for item in index["scenarios"])])
     CHECKSUMS.write_text(

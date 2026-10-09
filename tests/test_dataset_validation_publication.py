@@ -47,6 +47,28 @@ def test_default_scenario_is_paired_qwen35_frontier_data() -> None:
     assert all(result["candidate_values"] for result in artifact["results"])
 
 
+def test_selector_prioritizes_results_and_hides_coverage_planning() -> None:
+    index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
+    visible = [
+        scenario
+        for scenario in index["scenarios"]
+        if scenario.get("selector_visible", True)
+    ]
+    assert [scenario["id"] for scenario in visible[:4]] == [
+        "qwen35-35b-a3b-bf16-tp2-pp1-dp1-ep-off-ctx262k-apc-on-mtp2-full-piecewise-sweprefix-900s",
+        "qwen35-35b-a3b-bf16-tp2-pp1-dp1-ep-off-ctx262k-apc-on-mtp2-native-full-piecewise-vs-betterscale-full-e16-r20-sweprefix-900s",
+        "qwen35-35b-a3b-bf16-tp2-pp2-dp1-ep-off-ctx262k-apc-on-mtp2-full-piecewise-pipeline-microbatch-sweprefix-900s",
+        "qwen35-35b-a3b-bf16-tp4-c12-kv512m",
+    ]
+    assert all(scenario["label"].startswith("Paired B0/B1") for scenario in visible[:4])
+    planning = next(
+        scenario
+        for scenario in index["scenarios"]
+        if scenario["id"] == "qwen35-35b-a3b-bf16-tp2-dataset-matrix-v1"
+    )
+    assert planning["selector_visible"] is False
+
+
 def test_qwen35_frontier_b1_retains_all_admitted_candidates() -> None:
     artifact = load_json(
         PUBLICATION / "dataset_validation_qwen35_frontier_unified_900s.json"
