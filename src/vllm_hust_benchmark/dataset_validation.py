@@ -10,6 +10,7 @@ from typing import Any
 
 
 INDEX_FILE = "dataset_validation_index_v1.json"
+PROGRAM_FILE = "dataset_program_v1.json"
 CHECKSUM_FILE = "SHA256SUMS"
 RESULT_STATUSES = {
     "not_tested",
@@ -57,6 +58,8 @@ def validate_index(index: dict[str, Any]) -> list[dict[str, Any]]:
     scenario_ids = _unique_ids(scenarios, field="id", context="scenario")
     if index.get("default_scenario_id") not in scenario_ids:
         raise DatasetValidationError("default_scenario_id is not declared")
+    if index.get("program_file") != PROGRAM_FILE:
+        raise DatasetValidationError("dataset program file is not declared")
 
     files: set[str] = set()
     for scenario in scenarios:
@@ -73,6 +76,60 @@ def validate_index(index: dict[str, Any]) -> list[dict[str, Any]]:
             )
         files.add(data_file)
     return scenarios
+
+
+def validate_program(program: dict[str, Any]) -> None:
+    if program.get("contract_version") != "dataset-program-v1":
+        raise DatasetValidationError("unsupported dataset program contract")
+    datasets = program.get("primary_datasets")
+    dataset_ids = _unique_ids(datasets, field="id", context="primary dataset")
+    if list(dataset["id"] for dataset in datasets) != [
+        "mmlu-pro",
+        "hle-verified",
+        "swe-bench-pro",
+        "frontierscience",
+        "terminal-bench-2.1",
+    ]:
+        raise DatasetValidationError("primary dataset order or membership changed")
+    for dataset in datasets:
+        required = {
+            "label",
+            "evaluation_class",
+            "primary_metric",
+            "status",
+            "source_url",
+            "version_policy",
+            "note",
+            "note_zh",
+        }
+        if any(
+            not isinstance(dataset.get(field), str) or not dataset[field]
+            for field in required
+        ):
+            raise DatasetValidationError(
+                f"primary dataset metadata is incomplete: {dataset.get('id')}"
+            )
+        if not dataset["source_url"].startswith("https://"):
+            raise DatasetValidationError(
+                f"primary dataset source must use HTTPS: {dataset['id']}"
+            )
+    if len(dataset_ids) != 5:
+        raise DatasetValidationError(
+            "dataset program must declare five primary datasets"
+        )
+    supplementary = program.get("supplementary_material")
+    if (
+        not isinstance(supplementary, dict)
+        or supplementary.get("default_tier") != "supplementary"
+    ):
+        raise DatasetValidationError("dataset program lacks the supplementary default")
+    if (
+        supplementary.get("classification_rule")
+        != "all-other-registered-or-planned-datasets"
+    ):
+        raise DatasetValidationError(
+            "dataset program has an unsupported classification rule"
+        )
 
 
 def validate_artifact(payload: dict[str, Any], *, expected_scenario_id: str) -> None:
@@ -260,7 +317,9 @@ def validate_publication(root: Path) -> dict[str, int]:
     root = root.resolve()
     index = _load_json(root / INDEX_FILE)
     scenarios = validate_index(index)
-    expected_files = {INDEX_FILE}
+    program = _load_json(root / PROGRAM_FILE)
+    validate_program(program)
+    expected_files = {INDEX_FILE, PROGRAM_FILE}
     result_count = 0
     for scenario in scenarios:
         data_file = scenario["data_file"]

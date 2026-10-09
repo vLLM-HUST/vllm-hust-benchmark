@@ -28,6 +28,34 @@ def test_checked_in_publication_is_valid_and_complete() -> None:
     assert validate_publication(PUBLICATION) == {"scenarios": 7, "results": 729}
 
 
+def test_dataset_program_separates_primary_plan_from_measured_scenarios() -> None:
+    index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
+    program = load_json(PUBLICATION / index["program_file"])
+    assert [dataset["label"] for dataset in program["primary_datasets"]] == [
+        "MMLU-Pro",
+        "HLE-Verified",
+        "SWE-bench-Pro",
+        "FrontierScience",
+        "Terminal-Bench 2.1",
+    ]
+    assert program["supplementary_material"]["default_tier"] == "supplementary"
+    assert program["supplementary_material"]["classification_rule"] == (
+        "all-other-registered-or-planned-datasets"
+    )
+
+    scenario_datasets = set()
+    for scenario in index["scenarios"]:
+        artifact = load_json(PUBLICATION / scenario["data_file"])
+        scenario_datasets.update(dataset["id"] for dataset in artifact["datasets"])
+    assert "mmlu-pro" in scenario_datasets
+    assert {
+        "hle-verified",
+        "swe-bench-pro",
+        "frontierscience",
+        "terminal-bench-2.1",
+    }.isdisjoint(scenario_datasets)
+
+
 def test_default_scenario_is_paired_qwen35_frontier_data() -> None:
     index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
     scenario = next(
@@ -210,8 +238,12 @@ def test_publication_documents_match_json_schemas() -> None:
         ROOT / "schemas" / "dataset_validation_index_v1.schema.json"
     )
     artifact_schema = load_json(ROOT / "schemas" / "dataset_validation_v1.schema.json")
+    program_schema = load_json(ROOT / "schemas" / "dataset_program_v1.schema.json")
     index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
     jsonschema.Draft202012Validator(index_schema).validate(index)
+    jsonschema.Draft202012Validator(program_schema).validate(
+        load_json(PUBLICATION / index["program_file"])
+    )
     for scenario in index["scenarios"]:
         jsonschema.Draft202012Validator(artifact_schema).validate(
             load_json(PUBLICATION / scenario["data_file"])

@@ -7,6 +7,10 @@ mirrors.
 ## Files
 
 - `dataset_validation_index_v1.json` lists every independently selectable model/configuration.
+- `dataset_program_v1.json` defines the evaluation-program taxonomy independently of measured
+  scenarios. The five primary datasets are MMLU-Pro, HLE-Verified, SWE-bench-Pro, FrontierScience,
+  and Terminal-Bench 2.1. Every other registered or planned dataset is supplementary material by
+  default.
 - Planning-only artifacts remain in the index for direct evidence links but set
   `selector_visible: false`; consumer selectors must omit them.
 - Each `data_file` is one `dataset-validation-v1` artifact. Different models or materially different
@@ -24,6 +28,11 @@ measurement use `not_tested`, `queued`, or `running` with a reason. This prevent
 silently meaning either unsupported or unfinished. A populated B1 is valid only when the same cell
 also has a matched B0; unmatched candidate evidence stays under `candidate_search` and is not
 rendered as a comparison.
+
+Program registration is not measurement. A primary dataset with a pending contract or run must
+appear in the program view, not as invented rows or empty cells in a measured scenario. Existing
+supplementary measurements remain first-class evidence and keep their configuration-specific
+scenario; the taxonomy changes their presentation priority, not their facts.
 
 Measured B0 values may be published with an explicit evidence grade even when later metadata repair
 cannot recreate a same-run cryptographic binding. Such a scenario must preserve the measured
