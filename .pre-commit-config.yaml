@@ -67,5 +67,6 @@ repos:
     #     > .secrets.baseline
     #
     # Then audit any new entries with `detect-secrets audit .secrets.baseline`.
+    # Input-only FrontierScience inventories contain audited public row/prompt hashes.
     args: [--baseline, .secrets.baseline]
-    exclude: ^(submissions/.*\.json|leaderboard-data/.*\.json|schemas/.*\.json|reports/.*\.(json|txt|log)|reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\.md|docs/.*\.jsonl?|scripts/build_qwen35_frontier_b1\.py|src/vllm_hust_benchmark/data/(official_target.*|acceptance_v4_6)\.json|tests/fixtures/.*|archive/.*|agent\.md|CHANGELOG\.md)$
+    exclude: ^(submissions/.*\.json|leaderboard-data/.*\.json|schemas/.*\.json|reports/.*\.(json|txt|log)|reports/pyramidkv-frontierscience-inputs-20261009/(olympiad|research)-inventory\.jsonl|reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\.md|docs/.*\.jsonl?|scripts/build_qwen35_frontier_b1\.py|src/vllm_hust_benchmark/data/(official_target.*|acceptance_v4_6)\.json|tests/fixtures/.*|archive/.*|agent\.md|CHANGELOG\.md)$
