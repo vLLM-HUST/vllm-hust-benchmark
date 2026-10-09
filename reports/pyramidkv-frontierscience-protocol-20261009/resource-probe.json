@@ -1,0 +1,49 @@
+{
+  "checked_at": "2026-10-09T21:18:50.529078+00:00",
+  "executables": {
+    "docker": null,
+    "podman": null,
+    "harbor": null,
+    "kubectl": null
+  },
+  "paths_exist": {
+    "/var/run/docker.sock": false,
+    "/dev/fuse": false,
+    "/root/vllm-hust-eval-data/pujiang-five": false
+  },
+  "namespace_probes": [
+    {
+      "command": [
+        "unshare",
+        "-Ur",
+        "true"
+      ],
+      "returncode": 0,
+      "stderr": ""
+    },
+    {
+      "command": [
+        "unshare",
+        "-Urnm",
+        "true"
+      ],
+      "returncode": 1,
+      "stderr": "unshare: cannot change root filesystem propagation: Permission denied"
+    }
+  ],
+  "credential_environment_present": {
+    "OPENAI_API_KEY": false,
+    "ANTHROPIC_API_KEY": false,
+    "AZURE_OPENAI_API_KEY": false,
+    "MODAL_TOKEN_ID": false,
+    "MODAL_TOKEN_SECRET": false,
+    "FRONTIER_JUDGE_API_KEY": false
+  },
+  "swe_card": {
+    "url": "https://huggingface.co/datasets/ScaleAI/SWE-bench_Pro/raw/2d52cb3df914a3fcf80c7f66738b3a88ae37fc50/README.md",
+    "sha256": "243f51de326a4502f0e353eb3e25cb712c465e78d80e15cdaac4db70e5a9b83f",
+    "license_section_present": true,
+    "summary": "Harness/tooling MIT; task content subject to respective upstream repository licenses. Per-task audit remains incomplete."
+  },
+  "limits": "Environment-variable absence does not prove no organization-wide credentials or remote backend. User namespace success does not prove container execution."
+}
