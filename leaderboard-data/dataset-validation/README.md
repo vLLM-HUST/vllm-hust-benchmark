@@ -8,9 +8,11 @@ mirrors.
 
 - `dataset_validation_index_v1.json` lists every independently selectable model/configuration.
 - `dataset_program_v1.json` defines the evaluation-program taxonomy independently of measured
-  scenarios. The five primary datasets are MMLU-Pro, HLE-Verified, SWE-bench-Pro, FrontierScience,
-  and Terminal-Bench 2.1. Every other registered or planned dataset is supplementary material by
-  default.
+  scenarios. The five primary datasets are the **Pujiang-specified dataset scope**: MMLU-Pro,
+  HLE-Verified, SWE-bench-Pro, FrontierScience, and Terminal-Bench 2.1. This designation freezes
+  names only, not dataset revisions, splits, task manifests, sampling rules, scorers, execution
+  images, licenses, or hashes. Every other registered or planned dataset is supplementary material
+  by default.
 - Planning-only artifacts remain in the index for direct evidence links but set
   `selector_visible: false`; consumer selectors must omit them.
 - Each `data_file` is one `dataset-validation-v1` artifact. Different models or materially different
@@ -33,6 +35,11 @@ Program registration is not measurement. A primary dataset with a pending contra
 appear in the program view, not as invented rows or empty cells in a measured scenario. Existing
 supplementary measurements remain first-class evidence and keep their configuration-specific
 scenario; the taxonomy changes their presentation priority, not their facts.
+
+The historical 21-dataset B0 workbook is a separate serving-telemetry artifact. Among the five
+Pujiang-specified datasets it contains only MMLU-Pro, and that row is not a task-accuracy result. It
+must not be used to imply coverage of HLE-Verified, SWE-bench-Pro, FrontierScience, or
+Terminal-Bench 2.1.
 
 Measured B0 values may be published with an explicit evidence grade even when later metadata repair
 cannot recreate a same-run cryptographic binding. Such a scenario must preserve the measured

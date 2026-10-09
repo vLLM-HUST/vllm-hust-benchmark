@@ -3,17 +3,44 @@
   "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/dataset_program_v1.schema.json",
   "title": "Dataset evaluation program v1",
   "type": "object",
-  "required": ["contract_version", "updated_at", "primary_datasets", "supplementary_material"],
+  "required": ["contract_version", "updated_at", "designation", "primary_datasets", "supplementary_material"],
   "properties": {
     "contract_version": { "const": "dataset-program-v1" },
     "updated_at": { "type": "string", "format": "date" },
+    "designation": {
+      "type": "object",
+      "required": ["id", "label", "label_zh", "scope_status", "scope_note", "scope_note_zh", "historical_b0_boundary"],
+      "properties": {
+        "id": { "const": "pujiang-specified-dataset-scope" },
+        "label": { "const": "Pujiang-specified datasets" },
+        "label_zh": { "const": "浦江指定数据集" },
+        "scope_status": { "const": "names-only" },
+        "scope_note": { "type": "string", "minLength": 1 },
+        "scope_note_zh": { "type": "string", "minLength": 1 },
+        "historical_b0_boundary": {
+          "type": "object",
+          "required": ["workbook_dataset_count", "covered_designated_dataset_ids", "not_covered_designated_dataset_ids", "note", "note_zh"],
+          "properties": {
+            "workbook_dataset_count": { "const": 21 },
+            "covered_designated_dataset_ids": { "const": ["mmlu-pro"] },
+            "not_covered_designated_dataset_ids": {
+              "const": ["hle-verified", "swe-bench-pro", "frontierscience", "terminal-bench-2.1"]
+            },
+            "note": { "type": "string", "minLength": 1 },
+            "note_zh": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "primary_datasets": {
       "type": "array",
       "minItems": 5,
       "maxItems": 5,
       "items": {
         "type": "object",
-        "required": ["id", "label", "evaluation_class", "primary_metric", "primary_metric_zh", "status", "source_url", "version_policy", "note", "note_zh"],
+        "required": ["id", "label", "evaluation_class", "primary_metric", "primary_metric_zh", "status", "source_url", "version_policy", "readiness", "note", "note_zh"],
         "properties": {
           "id": { "type": "string", "minLength": 1 },
           "label": { "type": "string", "minLength": 1 },
@@ -23,6 +50,48 @@
           "status": { "enum": ["serving-evidence-only", "contract-pending", "ready", "running", "measured"] },
           "source_url": { "type": "string", "format": "uri", "pattern": "^https://" },
           "version_policy": { "type": "string", "minLength": 1 },
+          "readiness": {
+            "type": "object",
+            "required": ["status", "observed_materials", "dataset_revision", "split", "sample_count", "sample_count_scope", "manifest_path", "manifest_sha256", "scorer", "runtime_dependencies", "blockers"],
+            "properties": {
+              "status": { "enum": ["executable", "material-unfrozen", "missing"] },
+              "observed_materials": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["path", "kind", "sha256"],
+                  "properties": {
+                    "path": { "type": "string", "minLength": 1 },
+                    "kind": { "enum": ["canonical-serving-artifact", "preparation-note", "screenshot"] },
+                    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "dataset_revision": { "type": ["string", "null"] },
+              "split": { "type": ["string", "null"] },
+              "sample_count": { "type": ["integer", "null"], "minimum": 1 },
+              "sample_count_scope": { "type": ["string", "null"] },
+              "manifest_path": { "type": ["string", "null"] },
+              "manifest_sha256": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "scorer": { "type": ["string", "null"] },
+              "runtime_dependencies": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "blockers": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "additionalProperties": false
+          },
           "note": { "type": "string", "minLength": 1 },
           "note_zh": { "type": "string", "minLength": 1 }
         },
