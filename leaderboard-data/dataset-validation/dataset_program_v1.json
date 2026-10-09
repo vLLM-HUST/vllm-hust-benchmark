@@ -1,6 +1,21 @@
 {
   "contract_version": "dataset-program-v1",
   "updated_at": "2026-10-09",
+  "designation": {
+    "id": "pujiang-specified-dataset-scope",
+    "label": "Pujiang-specified datasets",
+    "label_zh": "浦江指定数据集",
+    "scope_status": "names-only",
+    "scope_note": "The designation freezes only the five dataset names and scope. It does not freeze a release, revision, split, task manifest, sampling rule, scorer, execution image, license, or artifact hash.",
+    "scope_note_zh": "浦江指定仅冻结五个数据集的名称与范围，不等于已经冻结发布版本、revision、split、任务清单、抽样规则、scorer、执行镜像、许可证或制品哈希。",
+    "historical_b0_boundary": {
+      "workbook_dataset_count": 21,
+      "covered_designated_dataset_ids": ["mmlu-pro"],
+      "not_covered_designated_dataset_ids": ["hle-verified", "swe-bench-pro", "frontierscience", "terminal-bench-2.1"],
+      "note": "The historical 21-dataset B0 workbook contains serving telemetry for MMLU-Pro only. It does not cover the other four designated datasets and does not provide a task-quality score for MMLU-Pro.",
+      "note_zh": "历史 21 数据集 B0 工作簿只包含 MMLU-Pro 的服务遥测；另外四项不在其中，且该 MMLU-Pro 单元也不是任务质量成绩。"
+    }
+  },
   "primary_datasets": [
     {
       "id": "mmlu-pro",
@@ -11,6 +26,40 @@
       "status": "serving-evidence-only",
       "source_url": "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro",
       "version_policy": "Freeze the exact dataset revision and evaluator before publishing task-quality scores.",
+      "readiness": {
+        "status": "material-unfrozen",
+        "observed_materials": [
+          {
+            "path": "leaderboard-data/dataset-validation/dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json",
+            "kind": "canonical-serving-artifact",
+            "sha256": "f75a86fb802d933e55ab12738fae198233b350f94d573bd16a5fbdcfb397f019"
+          },
+          {
+            "path": "/root/b0-validation-input/MMLU-PRO/准备操作.md",
+            "kind": "preparation-note",
+            "sha256": "b0984321c69037ca9d0645441f3c55c6c84eea49b0598d96b6c78b12f23a0a87"
+          },
+          {
+            "path": "/root/b0-validation-input/MMLU-PRO/截屏2026-09-06 23.59.39.png",
+            "kind": "screenshot",
+            "sha256": "1bb66c18688891f12a30a38a6379162eb27e0573d4ca5bb531675cef571fd1c7"
+          },
+          {
+            "path": "/root/b0-validation-input/MMLU-PRO/截屏2026-09-06 23.59.49.png",
+            "kind": "screenshot",
+            "sha256": "84d4280e10c57bd9d588485b013d15099f96c20a804e3584f083f4cac8d77b09"
+          }
+        ],
+        "dataset_revision": null,
+        "split": null,
+        "sample_count": 200,
+        "sample_count_scope": "Historical serving command --num-prompts value; not the source dataset cardinality or a frozen task manifest.",
+        "manifest_path": null,
+        "manifest_sha256": null,
+        "scorer": null,
+        "runtime_dependencies": ["Parquet reader used by the preparation note", "vLLM bench serve for serving telemetry"],
+        "blockers": ["Freeze the exact dataset revision, split, task IDs, sampling rule, scorer, execution image, license, and manifest SHA-256.", "Produce task-accuracy evidence; the existing artifact contains serving telemetry only."]
+      },
       "note": "Serving B0 evidence exists, but it is not a task-accuracy result.",
       "note_zh": "已有服务侧 B0 证据，但不能将其当作任务准确率结果。"
     },
@@ -23,6 +72,19 @@
       "status": "contract-pending",
       "source_url": "https://huggingface.co/datasets/skylenage-ai/HLE-Verified",
       "version_policy": "Freeze the dataset revision and explicitly choose the full verified set or a named verified-gold subset.",
+      "readiness": {
+        "status": "missing",
+        "observed_materials": [],
+        "dataset_revision": null,
+        "split": null,
+        "sample_count": null,
+        "sample_count_scope": null,
+        "manifest_path": null,
+        "manifest_sha256": null,
+        "scorer": null,
+        "runtime_dependencies": [],
+        "blockers": ["Acquire and license-review the exact dataset release.", "Freeze the full verified set or named verified-gold subset, task manifest, scorer, execution image, and hashes."]
+      },
       "note": "No measured result is admitted until the evaluated subset and grader are frozen.",
       "note_zh": "在明确评测子集并冻结评分器之前，不接纳实测结果。"
     },
@@ -35,6 +97,19 @@
       "status": "contract-pending",
       "source_url": "https://huggingface.co/datasets/ScaleAI/SWE-bench_Pro",
       "version_policy": "Freeze the validated release, task IDs, Harbor environment, agent scaffold, budget, and regrading protocol.",
+      "readiness": {
+        "status": "missing",
+        "observed_materials": [],
+        "dataset_revision": null,
+        "split": null,
+        "sample_count": null,
+        "sample_count_scope": null,
+        "manifest_path": null,
+        "manifest_sha256": null,
+        "scorer": null,
+        "runtime_dependencies": [],
+        "blockers": ["Acquire and license-review the exact SWE-bench-Pro release; SWE-bench Verified is not a substitute.", "Freeze task IDs, fresh-sandbox images, agent scaffold, tool policy, budget, regrader, and hashes."]
+      },
       "note": "Agent execution and fresh-sandbox regrading are part of the measurement contract.",
       "note_zh": "智能体执行与全新沙箱复判均属于测量合同。"
     },
@@ -47,6 +122,19 @@
       "status": "contract-pending",
       "source_url": "https://huggingface.co/datasets/openai/frontierscience",
       "version_policy": "Freeze the dataset revision and report Olympiad and Research tracks separately with their pinned graders.",
+      "readiness": {
+        "status": "missing",
+        "observed_materials": [],
+        "dataset_revision": null,
+        "split": null,
+        "sample_count": null,
+        "sample_count_scope": null,
+        "manifest_path": null,
+        "manifest_sha256": null,
+        "scorer": null,
+        "runtime_dependencies": [],
+        "blockers": ["Acquire and license-review the exact FrontierScience release.", "Freeze separate Olympiad and Research manifests, scorers, execution environment, and hashes."]
+      },
       "note": "The two tracks use different answer and scoring contracts and must not be pooled silently.",
       "note_zh": "两个赛道的答案与评分合同不同，不得静默合并。"
     },
@@ -59,6 +147,19 @@
       "status": "contract-pending",
       "source_url": "https://www.tbench.ai/",
       "version_policy": "Pin the 2.1 task release, Harbor environment, agent scaffold, tool policy, and budget.",
+      "readiness": {
+        "status": "missing",
+        "observed_materials": [],
+        "dataset_revision": null,
+        "split": null,
+        "sample_count": null,
+        "sample_count_scope": null,
+        "manifest_path": null,
+        "manifest_sha256": null,
+        "scorer": null,
+        "runtime_dependencies": [],
+        "blockers": ["Acquire and license-review the exact Terminal-Bench 2.1 task release; older Terminal-Bench releases are not substitutes.", "Freeze the Harbor images, task manifest, agent scaffold, tool policy, budget, scorer, and hashes."]
+      },
       "note": "Task resolution is primary; token throughput is supporting telemetry only.",
       "note_zh": "任务解决率是主指标，token 吞吐仅作为辅助遥测。"
     }

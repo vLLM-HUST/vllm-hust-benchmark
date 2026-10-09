@@ -83,6 +83,18 @@ def validate_program(program: dict[str, Any]) -> None:
         raise DatasetValidationError("unsupported dataset program contract")
     datasets = program.get("primary_datasets")
     dataset_ids = _unique_ids(datasets, field="id", context="primary dataset")
+    designation = program.get("designation")
+    if (
+        not isinstance(designation, dict)
+        or designation.get("id") != "pujiang-specified-dataset-scope"
+        or designation.get("scope_status") != "names-only"
+    ):
+        raise DatasetValidationError("dataset program lacks the Pujiang designation")
+    historical_boundary = designation.get("historical_b0_boundary")
+    if not isinstance(historical_boundary, dict) or historical_boundary.get(
+        "covered_designated_dataset_ids"
+    ) != ["mmlu-pro"]:
+        raise DatasetValidationError("invalid historical B0 coverage boundary")
     if list(dataset["id"] for dataset in datasets) != [
         "mmlu-pro",
         "hle-verified",
@@ -92,7 +104,7 @@ def validate_program(program: dict[str, Any]) -> None:
     ]:
         raise DatasetValidationError("primary dataset order or membership changed")
     for dataset in datasets:
-        required = {
+        required_strings = {
             "label",
             "evaluation_class",
             "primary_metric",
@@ -105,7 +117,7 @@ def validate_program(program: dict[str, Any]) -> None:
         }
         if any(
             not isinstance(dataset.get(field), str) or not dataset[field]
-            for field in required
+            for field in required_strings
         ):
             raise DatasetValidationError(
                 f"primary dataset metadata is incomplete: {dataset.get('id')}"
@@ -113,6 +125,24 @@ def validate_program(program: dict[str, Any]) -> None:
         if not dataset["source_url"].startswith("https://"):
             raise DatasetValidationError(
                 f"primary dataset source must use HTTPS: {dataset['id']}"
+            )
+        readiness = dataset["readiness"]
+        if not isinstance(readiness, dict) or readiness.get("status") not in {
+            "executable",
+            "material-unfrozen",
+            "missing",
+        }:
+            raise DatasetValidationError(
+                f"primary dataset readiness is invalid: {dataset['id']}"
+            )
+        if readiness.get("status") != "executable" and (
+            readiness.get("manifest_path") is not None
+            or readiness.get("manifest_sha256") is not None
+            or readiness.get("scorer") is not None
+        ):
+            raise DatasetValidationError(
+                "pending dataset must not claim frozen execution evidence: "
+                f"{dataset['id']}"
             )
     if len(dataset_ids) != 5:
         raise DatasetValidationError(

@@ -39,6 +39,35 @@ def test_dataset_program_separates_primary_plan_from_measured_scenarios() -> Non
         "Terminal-Bench 2.1",
     ]
     assert all(dataset["primary_metric_zh"] for dataset in program["primary_datasets"])
+    assert program["designation"]["label_zh"] == "浦江指定数据集"
+    assert program["designation"]["scope_status"] == "names-only"
+    assert program["designation"]["historical_b0_boundary"] == {
+        "workbook_dataset_count": 21,
+        "covered_designated_dataset_ids": ["mmlu-pro"],
+        "not_covered_designated_dataset_ids": [
+            "hle-verified",
+            "swe-bench-pro",
+            "frontierscience",
+            "terminal-bench-2.1",
+        ],
+        "note": "The historical 21-dataset B0 workbook contains serving telemetry for MMLU-Pro only. It does not cover the other four designated datasets and does not provide a task-quality score for MMLU-Pro.",
+        "note_zh": "历史 21 数据集 B0 工作簿只包含 MMLU-Pro 的服务遥测；另外四项不在其中，且该 MMLU-Pro 单元也不是任务质量成绩。",
+    }
+    readiness = {
+        dataset["id"]: dataset["readiness"]["status"]
+        for dataset in program["primary_datasets"]
+    }
+    assert readiness == {
+        "mmlu-pro": "material-unfrozen",
+        "hle-verified": "missing",
+        "swe-bench-pro": "missing",
+        "frontierscience": "missing",
+        "terminal-bench-2.1": "missing",
+    }
+    mmlu = program["primary_datasets"][0]["readiness"]
+    assert mmlu["sample_count"] == 200
+    assert mmlu["manifest_sha256"] is None
+    assert mmlu["scorer"] is None
     assert program["supplementary_material"]["default_tier"] == "supplementary"
     assert program["supplementary_material"]["classification_rule"] == (
         "all-other-registered-or-planned-datasets"
