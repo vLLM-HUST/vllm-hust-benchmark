@@ -1,0 +1,945 @@
+{
+  "benchmark_commit": "bc8f77e85c527f27d150c421ca9b9c7679417ca8",
+  "benchmark_repository": "vLLM-HUST/vllm-hust-benchmark",
+  "catalog": {
+    "path": "/root/stateaxis/mods/topic-mod-repositories.json",
+    "sha256": "ee53ad2f4475d4427813a39df07a60dcd8551a48afc3d306ea3ee05c3a773e7a",
+    "source_commit": "7562b5fa6f42e2e045a877b53ac934739e2cf230"
+  },
+  "generated_at": "2026-10-10T10:40:10+00:00",
+  "hardware_snapshot": null,
+  "protocol": {
+    "activation_telemetry_required": true,
+    "correctness_required": true,
+    "failure_recovery_required": true,
+    "fresh_service_repetitions_per_arm": 3,
+    "pair_order": [
+      "OFF/ON",
+      "ON/OFF",
+      "OFF/ON"
+    ],
+    "phase": "activation_admission",
+    "required_metrics": [
+      "request_throughput",
+      "output_token_throughput",
+      "ttft_p50_p95_p99",
+      "tpot_p50_p95_p99",
+      "e2e_p50_p95_p99",
+      "peak_hbm",
+      "error_rate"
+    ],
+    "resource_release_required": true,
+    "rule": "No OFF-only or inert-import run may be reported as an ON/OFF performance result.",
+    "same_spec_required": true
+  },
+  "results": [
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 0a5b7099730272332959b6dfc0c85e93c102439f, but audited checkout is 16de48260441aeaaee780795df63861c15e741b1"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "16de48260441aeaaee780795df63861c15e741b1",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_automatic_prefix_cache/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "7677d2d4ee4ff3c0582272f3dcd9936a3801c3338615c561c768ca29c2140c40"
+      },
+      "metadata_sha256": "b781fb9c8a217708d5ed17a9847ec9222f6ab3eb0cca54d5b4ddf921265dbda0",
+      "mod_id": "org.vllm-hust.stateaxis-automatic-prefix-cache",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "0a5b7099730272332959b6dfc0c85e93c102439f",
+      "provenance_sha256": "3b107ae08d614ff58c319c3f9af5db615680810ae724c3b30e2410d990971233",
+      "repository": "vLLM-HUST/stateaxis-automatic-prefix-cache"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 58ae1035d05be58c390fa60eb1eb9a42ab25a874, but audited checkout is b8ac40af16478414fd3e90af039b4e3d2d0a8041"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "b8ac40af16478414fd3e90af039b4e3d2d0a8041",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_async_kv_transfer/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "e1b969112cba38172c431ac5406aeaec8cf551b07902fc6d9d6f7b0f403ba0e1"
+      },
+      "metadata_sha256": "dd4b744786495f3894c0f636f65dcb1f7e6eeaa24a32a6f9a1ce6d45a3e7e27d",
+      "mod_id": "org.vllm-hust.stateaxis-async-kv-transfer",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "58ae1035d05be58c390fa60eb1eb9a42ab25a874",
+      "provenance_sha256": "8615d87815c630375f53b97a71f46284adb3bbc985c09530cf49af576b7a6520",
+      "repository": "vLLM-HUST/stateaxis-async-kv-transfer"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins db5d3280a04ae40c5dc839a257c3dac74bdd9011, but audited checkout is a1700e0e0375caa85193b7bc86a8831ba7850c64"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "a1700e0e0375caa85193b7bc86a8831ba7850c64",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_pipelined_weight_loading/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "247afe8346e47e4a87ed80645531537002e75a0fcb77be1a640be9903a46f784"
+      },
+      "metadata_sha256": "67bf7a0710742a8a35352a5dc005b12c1a1b224523b1a8f3270ed121f3fa0fc1",
+      "mod_id": "org.vllm-hust.stateaxis-pipelined-weight-loading",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "db5d3280a04ae40c5dc839a257c3dac74bdd9011",
+      "provenance_sha256": "bad7dfdbd911c982743100a0b3ea46ad5ad74910343de2b8ababb52839f1be48",
+      "repository": "vLLM-HUST/stateaxis-pipelined-weight-loading"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 58e762dcc3d7da3df75cc0e9d2eb29b1a4abe6ec, but audited checkout is e26fbcae3ddc43e16c9f12db8a24be41393f8b36"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "e26fbcae3ddc43e16c9f12db8a24be41393f8b36",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_host_tier_residency/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "55a42294fa2feef73379f02d51d187293cdd33f08e06f09c06a4a6badff5553e"
+      },
+      "metadata_sha256": "63acdf6f2ac7c40949141067b93f04d92a5b26fbdc49ed5f41e4de474768e316",
+      "mod_id": "org.vllm-hust.stateaxis-host-tier-residency",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "58e762dcc3d7da3df75cc0e9d2eb29b1a4abe6ec",
+      "provenance_sha256": "21cd6aec16b4a98ec637e31568bcf4b39a08442c0fa48115e79c85e828718504",
+      "repository": "intellistream/stateaxis-host-tier-residency"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 6362d151c8d088a7fd15b3b57bed8138053b24a7, but audited checkout is 73c0f0401023f66d7e007b099bb4f2f6d383a282"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "73c0f0401023f66d7e007b099bb4f2f6d383a282",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_session_lifecycle/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "785cb6710cfb0a8441e876e870a2648926af309fac29ba1e0fe48a97392df396"
+      },
+      "metadata_sha256": "243546c355133e72d5634b5dca509aaf42f18b4c2d223fc9c2e63764d6ebe7ef",
+      "mod_id": "org.vllm-hust.stateaxis-session-lifecycle",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "6362d151c8d088a7fd15b3b57bed8138053b24a7",
+      "provenance_sha256": "0d0f1ad31b5eb7c54c5ffd5f70efa6fb249f35f0ef78a8817616129ad85aa1d7",
+      "repository": "intellistream/stateaxis-session-lifecycle"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 89f083f98609eb8605adcd2d06d99fa88568fe6b, but audited checkout is 464d5a8039ecea316dee3418514b937a5bcbda08"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "464d5a8039ecea316dee3418514b937a5bcbda08",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_program_aware_scheduling/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "66703743cbc03e153f6180865fbd9d1daad7e00c7e7cefd0f3187caa9ba8d68f"
+      },
+      "metadata_sha256": "11a20914261e045cff783fa8e8f40c037210b1e0f944479d34497414ce3ad1b6",
+      "mod_id": "org.vllm-hust.stateaxis-program-aware-scheduling",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "89f083f98609eb8605adcd2d06d99fa88568fe6b",
+      "provenance_sha256": "940c514d2e77142963c95f845a8261f766af5def41f98cada984a50e8bacb275",
+      "repository": "intellistream/stateaxis-program-aware-scheduling"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 23bc4b6247c341fa049df1a6ed813039ae61e43d, but audited checkout is d6b9cfa07c92f82586fa958db27f454756eda4a5"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "d6b9cfa07c92f82586fa958db27f454756eda4a5",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_shared_prefix_attention/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "311d781189c73fc4875e3116c427e1b5d3667e308ab402636d7a132d31c42d05"
+      },
+      "metadata_sha256": "90ad69818c536c5ede9583dff36c95efb34420b6394995a84ff79d2fe211378d",
+      "mod_id": "org.vllm-hust.stateaxis-shared-prefix-attention",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "23bc4b6247c341fa049df1a6ed813039ae61e43d",
+      "provenance_sha256": "d32c3f97f7d89183ff003c7294e52c301b6c6227c19edcac7853d105ef41ff79",
+      "repository": "intellistream/stateaxis-shared-prefix-attention"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 27f85112b90574ff92b06ecc0cbd4bbbb08caa7c, but audited checkout is 1df4050388c02575c7d33563829b054bf05f6a2a"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "1df4050388c02575c7d33563829b054bf05f6a2a",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_identity_bound_int8_kv/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "a084695f8e673963ff65d251cf25ccfefe9cb0ecb8973b38f36bead05f589f26"
+      },
+      "metadata_sha256": "4c545f15a0f8e3df6619f077d73d6eb768d0832f643e796ba69218ff713ee97b",
+      "mod_id": "org.vllm-hust.stateaxis-identity-bound-int8-kv",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "27f85112b90574ff92b06ecc0cbd4bbbb08caa7c",
+      "provenance_sha256": "fcf52f025b606edc7c70e327afafa86a730167468d827dd4fb3c4d95647bf5b3",
+      "repository": "intellistream/stateaxis-identity-bound-int8-kv"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 174ef89c2eb769826589b00b999445c82e7466ce, but audited checkout is c6253982377a7ad9ebd03aa6eccb4c436f257728"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "c6253982377a7ad9ebd03aa6eccb4c436f257728",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_multi_lora_residency/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "116743bd70667a1fd75f69527588a3f27d049ecb0e53c02503a3eaf7f3bd8f17"
+      },
+      "metadata_sha256": "f23a2266553245a5e66c3e343dd1ce334ec27755543ba369dbc0199badcb99ee",
+      "mod_id": "org.vllm-hust.stateaxis-multi-lora-residency",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "174ef89c2eb769826589b00b999445c82e7466ce",
+      "provenance_sha256": "9ecac3b7c3a38299b32242101e872db92605b93329f013dea415efab87caa17d",
+      "repository": "intellistream/stateaxis-multi-lora-residency"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 967320f3e98013bceff0c62db85f1bfbab47c51e, but audited checkout is e72ddd53319e223b6424b676569e5fb2f9fdac2a"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "e72ddd53319e223b6424b676569e5fb2f9fdac2a",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_typed_hybrid_state_groups/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "6c1c660cd768b65b9b97254bb80cd14616ffd95dab2b19e4c3938e231c3508de"
+      },
+      "metadata_sha256": "2fe6654935f5a72e6d0a88120aa052a0585d04cf4fcbefe28564a6d2fd7b4607",
+      "mod_id": "org.vllm-hust.stateaxis-typed-hybrid-state-groups",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "967320f3e98013bceff0c62db85f1bfbab47c51e",
+      "provenance_sha256": "7d323f6d7ed44f2af993ae9d2de9dd05f986bb7473901b2fcc9d982e6f547db4",
+      "repository": "intellistream/stateaxis-typed-hybrid-state-groups"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 729a0dad80a3d25684e56830230034f705378261, but audited checkout is b1099de8b11fecd8a068ee2d74bbaa229d0c5ea6"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "b1099de8b11fecd8a068ee2d74bbaa229d0c5ea6",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_length_aware_queue/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "774fb62d2e38eb443716844dfcb362eb620ef6a3670001c46a3bae5ef3a42d7f"
+      },
+      "metadata_sha256": "c1d4ea906493015f2e64cedcfebc5341411c0e4ff8ed9475471a09b1fc630065",
+      "mod_id": "org.vllm-hust.stateaxis-length-aware-queue",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "729a0dad80a3d25684e56830230034f705378261",
+      "provenance_sha256": "f8b0fc2b8d05352000e2d325121be83c29d7b7a57a145f597190d9334863062a",
+      "repository": "intellistream/stateaxis-length-aware-queue"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins f1f51e9bf64b30942fff94d08eb899d5cb14b552, but audited checkout is 62d12640c9b1cb74d652722bfd5179c29fb1cba9"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "62d12640c9b1cb74d652722bfd5179c29fb1cba9",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_workflow_disaggregated_residency/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "c5c1e3d2772181dbd27ee5f8a5ab37762dc530b4116bd99ac85464c2d5ff666d"
+      },
+      "metadata_sha256": "50069ea0686a8b7e440afe24353975e005f366f90f9baa1ab38605244430f7f0",
+      "mod_id": "org.vllm-hust.stateaxis-workflow-disaggregated-residency",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "f1f51e9bf64b30942fff94d08eb899d5cb14b552",
+      "provenance_sha256": "f5e941a384af72746af1153cc301fb8432dcbf6f771f696e0da57cb18e77114e",
+      "repository": "intellistream/stateaxis-workflow-disaggregated-residency"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins a6a5303a3f486777529751fefd99f8ddb0413113, but audited checkout is f5dc7642ca400801ce186d690b0782f63f7ca626"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "f5dc7642ca400801ce186d690b0782f63f7ca626",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_one_step_scheduling/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "9e97a90ab3f6e548c927ea5572682c44c12cea1b84ed83e45955b6626393f6cb"
+      },
+      "metadata_sha256": "5b21f3595b9520cd61c274b6999d43cbd154a538aff9989db51789d6d32c1d13",
+      "mod_id": "org.vllm-hust.stateaxis-one-step-scheduling",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "a6a5303a3f486777529751fefd99f8ddb0413113",
+      "provenance_sha256": "7ee6849336d4d32e9bf5857b9d85a4aa08119caafe98108d3a20c81dacafc929",
+      "repository": "intellistream/stateaxis-one-step-scheduling"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 1f0095b009bcbf88bd21f58eacdb0c493df16bbd, but audited checkout is a7ace814a2b42d45cfac6e5047adbe51b55477dd"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "a7ace814a2b42d45cfac6e5047adbe51b55477dd",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_device_metadata_delta/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "810832105ee10a214372d9222e520d462c69b462f8f9b9e045c247f6528e06e8"
+      },
+      "metadata_sha256": "3777aa66a1f1fd35fc4a6e57df8d3415acd417b220ec43f0caf5ca82755cb9f4",
+      "mod_id": "org.vllm-hust.stateaxis-device-metadata-delta",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "1f0095b009bcbf88bd21f58eacdb0c493df16bbd",
+      "provenance_sha256": "ba0243e12d832db040916cd01b3b3b729f9120a20346ce83d28d3365c35bbeeb",
+      "repository": "intellistream/stateaxis-device-metadata-delta"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 8042b317785087ad31075ece17e882223784b110, but audited checkout is e1c59e537297fbb49da3f309f203cb31808d10ed"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "e1c59e537297fbb49da3f309f203cb31808d10ed",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_aclgraph_dispatcher/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "ed34f18ceb24f74fb09c190a1d073947294274dc2ffe56f63c29a7d64926afd0"
+      },
+      "metadata_sha256": "1d65163f5d64109f8d736e75685d48f52b65556af337b5adc422cca86c83853f",
+      "mod_id": "org.vllm-hust.stateaxis-aclgraph-dispatcher",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "8042b317785087ad31075ece17e882223784b110",
+      "provenance_sha256": "7906d24df888cd763583419c6c9e32479a8db4dc1ba0d5c457f3019f8a611358",
+      "repository": "intellistream/stateaxis-aclgraph-dispatcher"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins c86fa8977b77b190e0c227dd3076a159bbc828b6, but audited checkout is 74021f278ded2f4c0abc300301e2891a7534a7c2"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "74021f278ded2f4c0abc300301e2891a7534a7c2",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_speculative_decoding/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "f5f39a51dbcabfdb445960c7f36ab414e1ce72b84c706eae81d0e2e6fa797513"
+      },
+      "metadata_sha256": "6cf3064264ba284db4ff93eb7dc36746a09829f056a8a8df028cf15a2f72d147",
+      "mod_id": "org.vllm-hust.stateaxis-speculative-decoding",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "c86fa8977b77b190e0c227dd3076a159bbc828b6",
+      "provenance_sha256": "309dc1f892c603547230a75e358cbbe3fa129bc265d9866147b313a7414e29a3",
+      "repository": "intellistream/stateaxis-speculative-decoding"
+    },
+    {
+      "blockers": [],
+      "local_head": "cc71278d672cf91be3e7acadd0e775429f709348",
+      "manifest": {
+        "implementation_statuses": [
+          "active"
+        ],
+        "path": "src/stateaxis_chunked_prefill/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "5235865b7e4b4a9f781d3303278b096c571a5e1a8769e163a958f827c2b6e991"
+      },
+      "metadata_sha256": "6ea07472374d69cb1c83b49facdb7491c3cdaf3f1b9719f824b7b9b629baa4c0",
+      "mod_id": "org.vllm-hust.stateaxis-chunked-prefill",
+      "off_status": "PENDING_PAIRED_EXECUTION",
+      "on_status": "READY_FOR_MATCHED_ON_OFF",
+      "performance_result": null,
+      "pinned_commit": "cc71278d672cf91be3e7acadd0e775429f709348",
+      "provenance_sha256": "9d5f9357e5298329e0ba17f808c0e5435d17cea9a20e14639c6fb3a8fdc190f4",
+      "repository": "intellistream/stateaxis-chunked-prefill"
+    },
+    {
+      "blockers": [],
+      "local_head": "895c8e014291a70052ceff6debef91a3b8c6617b",
+      "manifest": {
+        "implementation_statuses": [
+          "active"
+        ],
+        "path": "src/stateaxis_incremental_eviction/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "6771dcb65952b9f0dc4c459237fe6b357ba1319742d72113230952db42067915"
+      },
+      "metadata_sha256": "0ae4dd640a9812592fb937b5836ba837cdb24c39f73505be878c85af3d84e615",
+      "mod_id": "org.vllm-hust.stateaxis-incremental-eviction",
+      "off_status": "PENDING_PAIRED_EXECUTION",
+      "on_status": "READY_FOR_MATCHED_ON_OFF",
+      "performance_result": null,
+      "pinned_commit": "895c8e014291a70052ceff6debef91a3b8c6617b",
+      "provenance_sha256": "5e908eefa076bff7c7ca41f6149559fc2dfdcb0e2936a9afd1a6c1ccd1ec7ed1",
+      "repository": "intellistream/stateaxis-incremental-eviction"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins db176e45dc4f42fc7b29daf4466e20f161531cae, but audited checkout is db36d104458d9751b9d293414d9943b44c25c2f3"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "db36d104458d9751b9d293414d9943b44c25c2f3",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_launch_fusion/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "22bc598b2bcb093b80a2d940dd2b7616d31c84a56266dc375bd942b05728711f"
+      },
+      "metadata_sha256": "bf89fa0456e254f36d1b5c0bbd90498f2140eaf7dc641a045dae1a46b24680d1",
+      "mod_id": "org.vllm-hust.stateaxis-launch-fusion",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "db176e45dc4f42fc7b29daf4466e20f161531cae",
+      "provenance_sha256": "79dd39be7dfdf011ff2bb3d2aa6b6fe01a8b7cb82b60ce804b7e93ee681b7329",
+      "repository": "intellistream/stateaxis-launch-fusion"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 88d0d43749844edf61e8f63477ecc0030562fe13, but audited checkout is 0261f595ea484dd8d8d94609f97d0b3bc4d71a83"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "0261f595ea484dd8d8d94609f97d0b3bc4d71a83",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_dynamic_microbatch/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "2a0ed82c27d23eb7dc80dc70e5dea0a157b279b6ac82b902347b39e8f16daadd"
+      },
+      "metadata_sha256": "faed13d1c7421d148aad4f37f435212fe1573f6770deb82ebd208c715b86f5d8",
+      "mod_id": "org.vllm-hust.stateaxis-dynamic-microbatch",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "88d0d43749844edf61e8f63477ecc0030562fe13",
+      "provenance_sha256": "a20b1e690d4dfad9c5ed4e4553703d0b7270f9d093bbb1fd05489f2145a42dfe",
+      "repository": "intellistream/stateaxis-dynamic-microbatch"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins f113bec8e1fd9f949a929984f30a59c98f11721a, but audited checkout is e4796e3336105896b8981fb51e1dee547ecbdcb6"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "e4796e3336105896b8981fb51e1dee547ecbdcb6",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_preemption_recompute/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "ef1569f4da56c363edeafc7d5d4d030e041f651b9cded13b4c5890c6b372743b"
+      },
+      "metadata_sha256": "2286a8d17520a783e0cd031082597470910ac08b5090d07b0dec407ba3983862",
+      "mod_id": "org.vllm-hust.stateaxis-preemption-recompute",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "f113bec8e1fd9f949a929984f30a59c98f11721a",
+      "provenance_sha256": "06c9bbe543040a896bad54ad6f9e92ca5006b15657b745dca57cd0077632cd9a",
+      "repository": "intellistream/stateaxis-preemption-recompute"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 282454ac0390bd8100e6a30edc5d0727cea5984d, but audited checkout is 502045072e9e46f06438f7d1703222dd2b0899aa"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "502045072e9e46f06438f7d1703222dd2b0899aa",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_sleep_wake/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "d286c87e8b827ae3ffe500156ac94bf289ad70adbc8af7cbce57c64a03a4ba35"
+      },
+      "metadata_sha256": "ec66d7fee2e4bc4536c517538e5dc13d0d05be544ce0afa46c3697b970516dee",
+      "mod_id": "org.vllm-hust.stateaxis-sleep-wake",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "282454ac0390bd8100e6a30edc5d0727cea5984d",
+      "provenance_sha256": "ace38616ca7363206ccd7bf3bfdec55e035458b83112db9e0060176153579632",
+      "repository": "intellistream/stateaxis-sleep-wake"
+    },
+    {
+      "blockers": [
+        {
+          "code": "PINNED_COMMIT_MISMATCH",
+          "detail": "catalog pins 7b4c09ddb85942c6436168e41429e3b50d4397db, but audited checkout is 053e7b4ae27959d157b7cb84de963b3fbd05a1a2"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_ACTIVE",
+          "detail": "implementation statuses are ['import_only']"
+        },
+        {
+          "code": "NO_ACTIVATION_ENTRY_POINT",
+          "detail": "Manifest activation.entry_points is empty"
+        },
+        {
+          "code": "IMPLEMENTATION_NOT_EXTRACTED",
+          "detail": "PROVENANCE.json implementation_extracted is not true"
+        },
+        {
+          "code": "ACTIVATION_CONTRACT_REFUSES_ON",
+          "detail": "Import-only research descriptor; activation is refused until the StateAxis host contract and independent implementation are reviewed."
+        }
+      ],
+      "local_head": "053e7b4ae27959d157b7cb84de963b3fbd05a1a2",
+      "manifest": {
+        "implementation_statuses": [
+          "import_only"
+        ],
+        "path": "src/stateaxis_on_device_sampling/vllm-hust-extension-v0.3.json",
+        "schema_version": "0.3-experimental",
+        "sha256": "78fe240dab0ee08a7adfd3b04dc59e0b28a4e3fc1d42921690e956dace8ae5fd"
+      },
+      "metadata_sha256": "1f2d41256bfe7b3413d93965e4160286bcad2d80b994016020df32f39d15976b",
+      "mod_id": "org.vllm-hust.stateaxis-on-device-sampling",
+      "off_status": "NOT_RUN_NO_PAIRED_ON_ARM",
+      "on_status": "ON_NOT_RUNNABLE",
+      "performance_result": null,
+      "pinned_commit": "7b4c09ddb85942c6436168e41429e3b50d4397db",
+      "provenance_sha256": "29f681d225613dac09a85f359cbdd9b34abb4edc703965ed910466addc30ec88",
+      "repository": "intellistream/stateaxis-on-device-sampling"
+    }
+  ],
+  "schema_version": "vllm-hust-benchmark/stateaxis-mod-on-off-preflight/v1",
+  "summary": {
+    "on_not_runnable": 21,
+    "performance_pairs_completed": 0,
+    "ready_for_matched_on_off": 2,
+    "total": 23
+  }
+}
