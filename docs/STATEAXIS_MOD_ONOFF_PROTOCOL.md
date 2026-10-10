@@ -13,15 +13,15 @@ Admitted comparisons require:
 
 1. one frozen parent runtime, backend, model revision, dataset/workload and
    request arrival sequence;
-2. three fresh service processes per arm in `OFF/ON`, `ON/OFF`, `OFF/ON`
+1. three fresh service processes per arm in `OFF/ON`, `ON/OFF`, `OFF/ON`
    order;
-3. activation telemetry proving that ON executed the intended mechanism and
+1. activation telemetry proving that ON executed the intended mechanism and
    OFF did not;
-4. correctness/exactness, lifecycle, resource-release and failure-recovery
+1. correctness/exactness, lifecycle, resource-release and failure-recovery
    checks;
-5. request and output-token throughput, TTFT/TPOT/E2E p50/p95/p99, peak HBM
+1. request and output-token throughput, TTFT/TPOT/E2E p50/p95/p99, peak HBM
    and error rate;
-6. preservation of failures, regressions and rejected cells.
+1. preservation of failures, regressions and rejected cells.
 
 The workload must exercise the mechanism. A result transfers only to the
 declared model, topology, graph mode, concurrency, input/output distribution

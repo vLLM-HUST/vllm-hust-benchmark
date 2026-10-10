@@ -190,6 +190,25 @@ def main() -> int:
     report_path.write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    table_rows = []
+    for row in rows:
+        codes = ", ".join(blocker["code"] for blocker in row["blockers"]) or "none"
+        table_rows.append((f"`{row['mod_id']}`", f"`{row['on_status']}`", codes))
+    table_headers = ("MOD", "ON status", "Blockers")
+    table_widths = tuple(
+        max(len(table_headers[index]), *(len(row[index]) for row in table_rows))
+        for index in range(len(table_headers))
+    )
+
+    def table_line(values: tuple[str, ...]) -> str:
+        return (
+            "| "
+            + " | ".join(
+                value.ljust(table_widths[index]) for index, value in enumerate(values)
+            )
+            + " |"
+        )
+
     lines = [
         "# StateAxis MOD ON/OFF benchmark admission",
         "",
@@ -202,12 +221,10 @@ def main() -> int:
         "No performance delta is emitted when the ON arm cannot be activated. This is a",
         "fail-closed benchmark result, not a zero-percent performance result.",
         "",
-        "| MOD | ON status | Blockers |",
-        "| --- | --- | --- |",
+        table_line(table_headers),
+        table_line(tuple("-" * width for width in table_widths)),
     ]
-    for row in rows:
-        codes = ", ".join(blocker["code"] for blocker in row["blockers"]) or "none"
-        lines.append(f"| `{row['mod_id']}` | `{row['on_status']}` | {codes} |")
+    lines.extend(table_line(row) for row in table_rows)
     (args.output_dir / "README.md").write_text(
         "\n".join(lines) + "\n", encoding="utf-8"
     )
