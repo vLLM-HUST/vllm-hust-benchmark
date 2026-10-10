@@ -1,0 +1,19 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______ test_effective_mod_boolean_is_not_equivalent_to_numeric_control _______
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-251/test_effective_mod_boolean_is_0')
+
+    def test_effective_mod_boolean_is_not_equivalent_to_numeric_control(tmp_path):
+        contract, arms, roots = pair(tmp_path)
+        contract["mod_config"].update(num_slots=1, offload_gb=1)
+        for label, arm in arms.items():
+            arm["contract_sha256"] = m.digest(contract)
+            arm["effective_mod"].update(num_slots=True, offload_gb=label == "B1")
+>       with pytest.raises(ValueError, match="activation"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:382: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_latchmoe_dataset_pair.py::test_effective_mod_boolean_is_not_equivalent_to_numeric_control
+1 failed, 40 deselected in 0.11s

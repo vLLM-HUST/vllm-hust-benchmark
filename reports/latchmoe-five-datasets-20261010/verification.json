@@ -1,0 +1,46 @@
+{
+  "kind": "diagnostic_and_source_regression_only",
+  "official_quality_scores": false,
+  "quality_results": null,
+  "model_services_launched": 0,
+  "matrix_review_state": "awaiting-maintainer-review",
+  "mod_commit": "ec0c21b76a3f12c64c659146b44efe0585b6d657",
+  "mod_pull_request": "https://github.com/vLLM-HUST/vllm-ascend-hust-LatchMoE/pull/101",
+  "source_hashes": {
+    "mod/autoconfig.py": "fede2012f8906b8dc4af3be54163467fae88d62bc6984a46755d54dd89d1fec8",
+    "mod/test_autoconfig.py": "1c0944505fc41ae9e4f030180fe66f3f6d2d4990bb8a8a05a02508c691bcb616",
+    "benchmark/latchmoe_dataset_pair.py": "8a0429710f7406bc18473f476415699147277aa8d3f545859d85396f79c9e4d3",
+    "benchmark/test_latchmoe_dataset_pair.py": "1059640803f4bcd18b25a4b17e470e622de8f5968a5648c9331ca8b4f955e113"
+  },
+  "final_regressions": {
+    "server_mod": {"passed": 70, "warnings": 17, "raw": "04-mod-final.log"},
+    "server_benchmark": {"passed": 152, "raw": "04-benchmark-final.log"},
+    "local_gate_and_mmlu": {"passed": 54},
+    "scope": "Selected logic/contract/scorer regressions; not a full-repository or model-inference qualification"
+  },
+  "actual_model_config_diagnostic": {
+    "original": "config-planning-failed",
+    "original_raw": "02-config-original-repro.log",
+    "candidate": "config-planning-passed-not-npu-qualified",
+    "candidate_raw": "04-config-final.log"
+  },
+  "full_model_integrity": {
+    "all_locked_files_verified": true,
+    "files": 24,
+    "weight_shards": 14,
+    "raw": "model-audit.json"
+  },
+  "protected_environments": {
+    "base_packages_unchanged": true,
+    "installed_mod_not_replaced": true,
+    "locked_hosts_clean": true,
+    "source_testing": "Task-owned source checkout with subprocess-local PYTHONPATH",
+    "raw": "04-postflight.log"
+  },
+  "independent_code_review": {
+    "findings_addressed": ["empty nested config/default fallback", "deep-copy immutability tests", "source/track binding", "raw outcome/request hash matching", "strict contract values", "hash/parse same bytes", "boolean scoring/activation controls"],
+    "scoped_recheck": "No remaining findings",
+    "limitations": "Read-only code review, not maintainer approval or NPU model qualification"
+  },
+  "remaining_gates": ["two-device BF16 TP2 allocation", "TP2 MOD and shared/GDN correctness", "verified local dataset assets", "reviewed rights and execution contracts", "real judges/calibration/budget", "fresh isolated AMD64 agent sandboxes", "live worker collector and full runner integration", "signed release/OCI identity", "canonical merge and website sync"]
+}

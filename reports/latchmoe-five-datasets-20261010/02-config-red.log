@@ -1,0 +1,134 @@
+FFFFFFF.                                                                 [100%]
+=================================== FAILURES ===================================
+______________ test_nested_text_config_drives_offload_plan[file] _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_nested_text_config_drives0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff92764950>
+source = 'file'
+
+    @pytest.mark.parametrize("source", ["file", "override"])
+    def test_nested_text_config_drives_offload_plan(tmp_path, monkeypatch, source):
+        text = {"hidden_size": 2048, "moe_intermediate_size": 512,
+                "num_experts": 256, "num_experts_per_tok": 8,
+                "num_hidden_layers": 40, "dtype": "bfloat16",
+                "shared_expert_intermediate_size": 512}
+        wrapper = {"model_type": "qwen3_5_moe", "text_config": text,
+                   "vision_config": {"hidden_size": 1152, "num_hidden_layers": 27}}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+        args = SimpleNamespace(model=str(tmp_path), cpu_offload_gb=0, offload_backend="auto")
+        if source == "override":
+            args._ascend_moe_offload_model_config = wrapper
+        monkeypatch.setenv(MOE_OFFLOAD_GB_ENV, "14")
+        loaded = _load_model_config_dict(args)
+>       assert loaded["num_hidden_layers"] == 40
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'num_hidden_layers'
+
+latchmoe-five-datasets-20261010/input/test_autoconfig.py:80: KeyError
+____________ test_nested_text_config_drives_offload_plan[override] _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_nested_text_config_drives1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0xffff91f67170>
+source = 'override'
+
+    @pytest.mark.parametrize("source", ["file", "override"])
+    def test_nested_text_config_drives_offload_plan(tmp_path, monkeypatch, source):
+        text = {"hidden_size": 2048, "moe_intermediate_size": 512,
+                "num_experts": 256, "num_experts_per_tok": 8,
+                "num_hidden_layers": 40, "dtype": "bfloat16",
+                "shared_expert_intermediate_size": 512}
+        wrapper = {"model_type": "qwen3_5_moe", "text_config": text,
+                   "vision_config": {"hidden_size": 1152, "num_hidden_layers": 27}}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+        args = SimpleNamespace(model=str(tmp_path), cpu_offload_gb=0, offload_backend="auto")
+        if source == "override":
+            args._ascend_moe_offload_model_config = wrapper
+        monkeypatch.setenv(MOE_OFFLOAD_GB_ENV, "14")
+        loaded = _load_model_config_dict(args)
+>       assert loaded["num_hidden_layers"] == 40
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'num_hidden_layers'
+
+latchmoe-five-datasets-20261010/input/test_autoconfig.py:80: KeyError
+___________ test_nested_config_preserves_outer_quantization_metadata ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_nested_config_preserves_o0')
+
+    def test_nested_config_preserves_outer_quantization_metadata(tmp_path):
+        wrapper = {"quantization_config": {"quant_method": "test-quantized"},
+                   "torch_dtype": "float32", "text_config": dict(QWEN3_MOE_CONFIG)}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+        loaded = _load_model_config_dict(SimpleNamespace(model=str(tmp_path)))
+        assert loaded["quantization_config"] == wrapper["quantization_config"]
+>       assert loaded["torch_dtype"] == "bfloat16"
+E       AssertionError: assert 'float32' == 'bfloat16'
+E         
+E         - bfloat16
+E         + float32
+
+latchmoe-five-datasets-20261010/input/test_autoconfig.py:95: AssertionError
+___ test_malformed_text_config_is_not_silently_treated_as_outer_model[None] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_malformed_text_config_is_0')
+invalid = None
+
+    @pytest.mark.parametrize("invalid", [None, [], "bad", 7])
+    def test_malformed_text_config_is_not_silently_treated_as_outer_model(tmp_path, invalid):
+        wrapper = {**QWEN3_MOE_CONFIG, "text_config": invalid}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+>       with pytest.raises(ValueError, match="text_config"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+latchmoe-five-datasets-20261010/input/test_autoconfig.py:103: Failed
+_ test_malformed_text_config_is_not_silently_treated_as_outer_model[invalid1] __
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_malformed_text_config_is_1')
+invalid = []
+
+    @pytest.mark.parametrize("invalid", [None, [], "bad", 7])
+    def test_malformed_text_config_is_not_silently_treated_as_outer_model(tmp_path, invalid):
+        wrapper = {**QWEN3_MOE_CONFIG, "text_config": invalid}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+>       with pytest.raises(ValueError, match="text_config"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+latchmoe-five-datasets-20261010/input/test_autoconfig.py:103: Failed
+____ test_malformed_text_config_is_not_silently_treated_as_outer_model[bad] ____
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_malformed_text_config_is_2')
+invalid = 'bad'
+
+    @pytest.mark.parametrize("invalid", [None, [], "bad", 7])
+    def test_malformed_text_config_is_not_silently_treated_as_outer_model(tmp_path, invalid):
+        wrapper = {**QWEN3_MOE_CONFIG, "text_config": invalid}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+>       with pytest.raises(ValueError, match="text_config"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+latchmoe-five-datasets-20261010/input/test_autoconfig.py:103: Failed
+_____ test_malformed_text_config_is_not_silently_treated_as_outer_model[7] _____
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_malformed_text_config_is_3')
+invalid = 7
+
+    @pytest.mark.parametrize("invalid", [None, [], "bad", 7])
+    def test_malformed_text_config_is_not_silently_treated_as_outer_model(tmp_path, invalid):
+        wrapper = {**QWEN3_MOE_CONFIG, "text_config": invalid}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+>       with pytest.raises(ValueError, match="text_config"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+latchmoe-five-datasets-20261010/input/test_autoconfig.py:103: Failed
+=========================== short test summary info ============================
+FAILED latchmoe-five-datasets-20261010/input/test_autoconfig.py::test_nested_text_config_drives_offload_plan[file]
+FAILED latchmoe-five-datasets-20261010/input/test_autoconfig.py::test_nested_text_config_drives_offload_plan[override]
+FAILED latchmoe-five-datasets-20261010/input/test_autoconfig.py::test_nested_config_preserves_outer_quantization_metadata
+FAILED latchmoe-five-datasets-20261010/input/test_autoconfig.py::test_malformed_text_config_is_not_silently_treated_as_outer_model[None]
+FAILED latchmoe-five-datasets-20261010/input/test_autoconfig.py::test_malformed_text_config_is_not_silently_treated_as_outer_model[invalid1]
+FAILED latchmoe-five-datasets-20261010/input/test_autoconfig.py::test_malformed_text_config_is_not_silently_treated_as_outer_model[bad]
+FAILED latchmoe-five-datasets-20261010/input/test_autoconfig.py::test_malformed_text_config_is_not_silently_treated_as_outer_model[7]
+7 failed, 1 passed, 27 deselected in 0.36s
