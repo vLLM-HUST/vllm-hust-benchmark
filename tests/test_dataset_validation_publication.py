@@ -397,6 +397,26 @@ def test_artifact_validates_full_candidate_sets() -> None:
     with pytest.raises(DatasetValidationError, match="differs from selected candidate"):
         validate_artifact(drift, expected_scenario_id=artifact["scenario"]["id"])
 
+    non_maximum = copy.deepcopy(artifact)
+    cell = non_maximum["results"][0]
+    lower_candidate = min(cell["candidate_values"], key=lambda item: item["value"])
+    cell["selected_candidate_id"] = lower_candidate["candidate_id"]
+    cell["value"] = lower_candidate["value"]
+    cell["provenance"] = copy.deepcopy(lower_candidate["provenance"])
+    with pytest.raises(DatasetValidationError, match="not the maximum candidate value"):
+        validate_artifact(
+            non_maximum,
+            expected_scenario_id=artifact["scenario"]["id"],
+        )
+
+    reversed_candidates = copy.deepcopy(artifact)
+    for result in reversed_candidates["results"]:
+        result["candidate_values"].reverse()
+    validate_artifact(
+        reversed_candidates,
+        expected_scenario_id=artifact["scenario"]["id"],
+    )
+
 
 def test_matrix_rebuild_preserves_measured_szyn_baseline(
     monkeypatch: pytest.MonkeyPatch,
