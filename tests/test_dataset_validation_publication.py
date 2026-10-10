@@ -439,3 +439,28 @@ def test_matrix_rebuild_preserves_measured_szyn_baseline(
     assert rebuilt["generated_at"] == existing["generated_at"]
     assert rebuilt["status"] == existing["status"]
     assert rebuilt["baseline"] == existing["baseline"]
+
+
+def test_szyn_publication_and_builder_do_not_revive_superseded_partial_progress() -> (
+    None
+):
+    publication = load_json(PUBLICATION / "dataset_validation_qwen35_tp2_matrix.json")
+    publication_text = json.dumps(publication, ensure_ascii=False)
+    builder_text = (ROOT / "scripts" / "build_dataset_matrix_coverage.py").read_text(
+        encoding="utf-8"
+    )
+
+    for stale_marker in ("1/500", "remaining 499", "其余 499"):
+        assert stale_marker not in publication_text
+        assert stale_marker not in builder_text
+
+    szyn = next(
+        result
+        for result in publication["results"]
+        if result["dataset_id"] == "szyn-opencode-swebench-verified-500"
+        and result["metric_id"] == "agent_resolve_rate"
+    )
+    assert szyn["status"] == "baseline_only"
+    assert szyn["baseline_value"] == 46.4
+    assert szyn["provenance"]["attempted_tasks"] == 500
+    assert szyn["provenance"]["resolved_tasks"] == 232

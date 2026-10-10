@@ -387,13 +387,10 @@ def build_qwen35(qwen25: dict) -> dict:
                     {
                         "dataset_id": dataset["id"],
                         "metric_id": metric_id,
-                        "status": "queued",
+                        "status": "not_tested",
                         "baseline_value": None,
                         "value": None,
-                        "reason": (
-                            "The 1/500 collector qualification is not an aggregate. "
-                            "The remaining 499 tasks are tracked by dev-hub issue #87."
-                        ),
+                        "reason": "No complete agent-evaluation result has been admitted for this exact configuration.",
                         "tracking_url": (
                             "https://github.com/vLLM-HUST/vllm-hust-dev-hub/issues/87"
                         ),
@@ -475,7 +472,6 @@ def build_qwen35(qwen25: dict) -> dict:
         "results": results,
         "limitations": [
             "This campaign is separate from the TP4/C12 BidKV specialty cell.",
-            "The existing SZYN 1/500 record remains a qualification, not an aggregate.",
             "No empty or queued cell is a performance or coverage claim.",
         ],
     }
