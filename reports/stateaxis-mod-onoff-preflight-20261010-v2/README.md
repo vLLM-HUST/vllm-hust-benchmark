@@ -6,10 +6,11 @@
 - ON not runnable: **21**
 - Performance pairs completed: **0**
 - Exact catalog-pinned checkouts are required; mismatches fail with `PINNED_COMMIT_MISMATCH`.
-- Hardware snapshot: `npu-smi.txt` (SHA-256 `42e5bdb6352129abb69d4ebb642e9b1f33500d8f1e9024a011babb109d5fee29`).
+- Hardware snapshot: `npu-smi.txt` (SHA-256
+  `42e5bdb6352129abb69d4ebb642e9b1f33500d8f1e9024a011babb109d5fee29`).
 
-No performance delta is emitted when the ON arm cannot be activated. This is a
-fail-closed benchmark result, not a zero-percent performance result.
+No performance delta is emitted when the ON arm cannot be activated. This is a fail-closed benchmark
+result, not a zero-percent performance result.
 
 | MOD                                                        | ON status                  | Blockers                                                                                                                                   |
 | ---------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
