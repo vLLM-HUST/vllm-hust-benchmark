@@ -1,5 +1,9 @@
 # Errors and interruptions retained in this campaign
 
+Raw pytest logs intentionally preserve trailing-space diagnostics and the original model lock
+preserves CRLF bytes. Narrow report attributes/hook exclusions prevent formatting from breaking
+their published checksums; source code and authored documentation keep normal checks.
+
 No real dataset-quality experiment was launched. The errors below are preflight, configuration,
 test-development or transport failures; they are not model task scores.
 
