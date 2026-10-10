@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 
 SCRIPT = (
@@ -40,10 +41,28 @@ def _repo(tmp_path: Path, *, active: bool) -> tuple[dict[str, object], Path]:
             }
         )
     )
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "add", "."], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "commit", "-qm", "fixture"],
+        check=True,
+        env={
+            "GIT_AUTHOR_NAME": "Test",
+            "GIT_AUTHOR_EMAIL": "test@example.com",
+            "GIT_COMMITTER_NAME": "Test",
+            "GIT_COMMITTER_EMAIL": "test@example.com",
+        },
+    )
+    commit = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
     entry = {
         "mod_id": "org.vllm-hust.stateaxis-example",
         "repository": f"intellistream/{slug}",
-        "commit": "0" * 40,
+        "commit": commit,
     }
     return entry, tmp_path
 
@@ -69,3 +88,11 @@ def test_active_implementation_is_admitted_to_next_phase(tmp_path: Path) -> None
     assert result["off_status"] == "PENDING_PAIRED_EXECUTION"
     assert result["performance_result"] is None
     assert result["blockers"] == []
+
+
+def test_checkout_must_match_the_catalog_pin(tmp_path: Path) -> None:
+    entry, root = _repo(tmp_path, active=True)
+    entry["commit"] = "0" * 40
+    result = MODULE.inspect_repo(entry, root)
+    assert result["on_status"] == "ON_NOT_RUNNABLE"
+    assert {row["code"] for row in result["blockers"]} == {"PINNED_COMMIT_MISMATCH"}

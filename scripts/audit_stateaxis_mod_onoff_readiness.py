@@ -77,6 +77,18 @@ def inspect_repo(entry: dict[str, Any], repos_root: Path) -> dict[str, Any]:
     metadata_path = repo / "MOD_METADATA.json"
     provenance = _load(provenance_path)
     metadata = _load(metadata_path)
+    local_head = _git_head(repo)
+
+    if local_head != entry["commit"]:
+        blockers.append(
+            {
+                "code": "PINNED_COMMIT_MISMATCH",
+                "detail": (
+                    f"catalog pins {entry['commit']}, but audited checkout is "
+                    f"{local_head or 'not a Git commit'}"
+                ),
+            }
+        )
 
     statuses = [row.get("status") for row in manifest.get("implementation", [])]
     if not statuses or any(status != "active" for status in statuses):
@@ -115,7 +127,7 @@ def inspect_repo(entry: dict[str, Any], repos_root: Path) -> dict[str, Any]:
         "mod_id": entry["mod_id"],
         "repository": entry["repository"],
         "pinned_commit": entry["commit"],
-        "local_head": _git_head(repo),
+        "local_head": local_head,
         "manifest": {
             "path": str(manifest_path.relative_to(repo)),
             "sha256": _sha256(manifest_path),
