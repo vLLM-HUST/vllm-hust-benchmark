@@ -3,10 +3,26 @@
   "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/dataset_program_v1.schema.json",
   "title": "Dataset evaluation program v1",
   "type": "object",
-  "required": ["contract_version", "updated_at", "designation", "primary_datasets", "supplementary_material"],
+  "required": ["contract_version", "updated_at", "test_plan", "designation", "primary_datasets", "supplementary_material"],
   "properties": {
     "contract_version": { "const": "dataset-program-v1" },
     "updated_at": { "type": "string", "format": "date" },
+    "test_plan": {
+      "type": "object",
+      "required": ["test_plan_version", "contract_url", "mandatory_model", "formal_precision", "baseline_roles", "optional_status", "optional_status_zh", "evidence_boundary", "evidence_boundary_zh"],
+      "properties": {
+        "test_plan_version": { "const": "V5.4" },
+        "contract_url": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "mandatory_model": { "const": "Qwen/Qwen3.5-35B-A3B" },
+        "formal_precision": { "const": "BF16" },
+        "baseline_roles": { "const": ["B0", "B1"] },
+        "optional_status": { "type": "string", "minLength": 1 },
+        "optional_status_zh": { "type": "string", "minLength": 1 },
+        "evidence_boundary": { "type": "string", "minLength": 1 },
+        "evidence_boundary_zh": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
     "designation": {
       "type": "object",
       "required": ["id", "label", "label_zh", "scope_status", "scope_note", "scope_note_zh", "historical_b0_boundary"],
