@@ -307,6 +307,17 @@ def test_publication_documents_match_json_schemas() -> None:
         )
 
 
+def test_dataset_program_never_publishes_host_absolute_paths() -> None:
+    program = load_json(PUBLICATION / "dataset_program_v1.json")
+    paths = [
+        material["path"]
+        for dataset in program["primary_datasets"]
+        for material in dataset["readiness"]["observed_materials"]
+    ]
+    assert paths
+    assert all(not path.startswith("/") for path in paths)
+
+
 def test_index_rejects_duplicate_scenarios_and_consumer_urls() -> None:
     index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
     duplicate = copy.deepcopy(index)
