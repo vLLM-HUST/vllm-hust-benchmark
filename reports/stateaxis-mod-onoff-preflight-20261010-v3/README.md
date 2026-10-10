@@ -6,8 +6,8 @@
 - ON not runnable: **21**
 - Performance pairs completed: **0**
 
-No performance delta is emitted when the ON arm cannot be activated. This is a
-fail-closed benchmark result, not a zero-percent performance result.
+No performance delta is emitted when the ON arm cannot be activated. This is a fail-closed benchmark
+result, not a zero-percent performance result.
 
 | MOD                                                        | ON status                  | Blockers                                                                                                                                   |
 | ---------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
