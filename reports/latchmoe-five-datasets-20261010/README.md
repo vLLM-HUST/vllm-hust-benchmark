@@ -29,6 +29,11 @@ maintainer review. LatchMoE #94 remains open.
   entered into dataset-validation or leaderboard data. See final logs for final counts and source
   hashes; intermediate `03-*` logs preserve the prior formatting-only candidate.
 
+Publication-only checks then moved public revision allowlist comments onto the literal lines. The
+exact final gate bytes were retested: `05-benchmark-final.log` passes 152 tests and
+`05-postflight.log` records final source hashes and unchanged protected environments. All configured
+pre-commit hooks passed on the changed-file scope; this is not full-repository CI.
+
 ## Five primary datasets
 
 The exact source identities and local blockers are in `applicability.json`; FrontierScience is split
@@ -90,10 +95,10 @@ Qwen3.5 benchmark scores. Final source-only MOD candidate commit is
 final Linux testing, so final committed Python blobs match the tested bytes.
 
 Server task root: `/root/latchmoe-five-datasets-20261010`. Commands/scripts and final source hashes
-are preserved here. `00-server-preflight.log` precedes restart; the final postflight inventory is
-authoritative for the last observed device allocation. `model-audit.json` records full independent
-file hashes and a static capability reproduction. Its checkpoint descriptor intentionally leaves
-router ownership unresolved until native layer construction.
+are preserved here. `00-server-preflight.log` precedes restart; `05-postflight.log` is the final
+inventory and is authoritative for the last observed device allocation. `model-audit.json` records
+full independent file hashes and a static capability reproduction. Its checkpoint descriptor
+intentionally leaves router ownership unresolved until native layer construction.
 
 For source-only tests use the already provisioned isolated Python; no installer is needed:
 

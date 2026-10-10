@@ -55,28 +55,28 @@ SOURCE_IDENTITIES = {
     "MMLU-Pro": (
         "huggingface",
         "TIGER-Lab/MMLU-Pro",
-        "b189ec765aa7ed75c8acfea42df31fdae71f97be",
-    ),  # pragma: allowlist secret
+        "b189ec765aa7ed75c8acfea42df31fdae71f97be",  # pragma: allowlist secret
+    ),
     "HLE-Verified": (
         "github",
         "SKYLENAGE-AI/HLE-Verified",
-        "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
-    ),  # pragma: allowlist secret
+        "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",  # pragma: allowlist secret
+    ),
     "SWE-bench-Pro": (
         "huggingface",
         "ScaleAI/SWE-bench_Pro",
-        "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
-    ),  # pragma: allowlist secret
+        "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",  # pragma: allowlist secret
+    ),
     "FrontierScience": (
         "huggingface",
         "openai/frontierscience",
-        "25ed67db7da8f4591484e764008ff585544f5a30",
-    ),  # pragma: allowlist secret
+        "25ed67db7da8f4591484e764008ff585544f5a30",  # pragma: allowlist secret
+    ),
     "Terminal-Bench 2.1": (
         "github",
         "harbor-framework/terminal-bench-2-1",
-        "7131e4375048a0e408a8fb404b5f499d726b695b",
-    ),  # pragma: allowlist secret
+        "7131e4375048a0e408a8fb404b5f499d726b695b",  # pragma: allowlist secret
+    ),
 }
 
 
