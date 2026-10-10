@@ -33,6 +33,7 @@ def load_and_validate(root: Path = REPO_ROOT) -> dict[str, Any]:
 
     if len({item["id"] for item in declaration["optional_deliveries"]}) != 3:
         raise ValueError("optional delivery IDs must be unique")
+
     def contains_b2(value: Any) -> bool:
         if isinstance(value, dict):
             return any(key == "B2" or contains_b2(item) for key, item in value.items())

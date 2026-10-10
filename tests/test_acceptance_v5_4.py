@@ -30,9 +30,10 @@ def test_v54_fixed_slo_cost_and_prompt_contract() -> None:
         "p95_max": 60,
         "p99_max": 80,
     }
-    assert contract["a3"]["prefill_throughput"][
-        "may_generate_acceptance_threshold"
-    ] is False
+    assert (
+        contract["a3"]["prefill_throughput"]["may_generate_acceptance_threshold"]
+        is False
+    )
     assert contract["a4"]["cost_formula"].startswith("complete_lifecycle_cost /")
     assert contract["prompt_contract"]["natural_language_prompts_embedded"] is False
 
