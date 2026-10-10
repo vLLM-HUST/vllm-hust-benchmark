@@ -1,0 +1,83 @@
+2026-10-10T09:13:57Z
+coder-user-vllm-hust-lcw-646d5bf577-skngp
+aarch64
++------------------------------------------------------------------------------------------------------------------+
+| npu-smi 26.0.rc1                            Version: 26.0.rc1                                                    |
++---------------------------+---------------+----------------------------------------------------------------------+
+| NPU   Name                | Health        | Power(W)             Temp(C)                 Hugepages-Usage(page)   |
+| Chip                      | Bus-Id        | AICore(%)            Memory-Usage(MB)        HBM-Usage(MB)           |
++===========================+===============+======================================================================+
+| 5     910B2               | OK            | 98.5                 43                      0    / 0                |
+| 0                         | 0000:41:00.0  | 0                    0    / 0                3424 / 65536            |
++===========================+===============+======================================================================+
++---------------------------+---------------+----------------------------------------------------------------------+
+| NPU     Chip              | Process id    | Process name       | Process memory(MB)    | Process id in container |
++===========================+===============+======================================================================+
+| No running processes found in NPU 5                                                                              |
++===========================+===============+======================================================================+
+Filesystem                                              Size  Used Avail Use% Mounted on
+/dev/longhorn/pvc-5172f173-7f12-4583-9187-f1fd65407056  196G   83G  114G  42% /root
+192.168.0.2:/data/shared_models                         5.9T  5.5T  420G  93% /models
+               total        used        free      shared  buff/cache   available
+Mem:           2.0Ti        42Gi       1.1Ti        15Mi       877Gi       1.9Ti
+Swap:             0B          0B          0B
+MODEL_CONFIGS
+/models/Qwen2.5-3B-Instruct/config.json
+/models/Qwen2.5-7B-Instruct/config.json
+/models/Meta-Llama-3.1-8B-Instruct/config.json
+/models/Qwen3.8-Flash-Next/config.json
+/models/GLM-5.3-Flash/config.json
+/models/DeepSeek-V4-Flash-0731-w8a8/config.json
+/models/Qwen3-Omni-30B-A3B-Instruct/config.json
+/models/Qwen2.5-14B-Instruct/config.json
+/models/Qwen3-0.6B/config.json
+/models/Qwen3-30B-A3B/config.json
+/models/DeepSeek-V4-Flash-W8A8/config.json
+/models/DeepSeek-V2-Lite/config.json
+/models/GLM-4.7-Flash/config.json
+/models/Qwen3-Next-80B-A3B-Instruct/config.json
+/models/Qwen3.8-Flash-Next-w8a8-mtp/config.json
+CAPABILITIES
+/usr/local/python3.12.13/bin/python
+/usr/local/python3.12.13/bin/python3
+/usr/bin/git
+/usr/bin/curl
+MISSING_COMMAND=docker
+MISSING_COMMAND=podman
+MISSING_COMMAND=harbor
+/usr/bin/jq
+MISSING_COMMAND=rg
+MISSING_COMMAND=rsync
+MISSING_PATH=/var/run/docker.sock
+MISSING_PATH=/run/podman/podman.sock
+MISSING_PATH=/root/vllm-hust-eval-data/pujiang-five
+drwxrwsr-x 6 root root 4096 Oct  8 07:51 /root/latchmoe-env
+drwxrwsr-x 15 root root 4096 Oct  8 11:37 /root/latchmoe-validation-20261008
+drwxrwsr-x 5 root root 4096 Oct  8 08:42 /root/latchmoe-stack
+MISSING_PATH=/root/.cache/huggingface/hub
+ROOT_TASK_DIRECTORIES
+/root/latchmoe/benchmark
+/root/latchmoe-transfer-partial-20261008/benchmark
+/root/qwen35-discovery-20261009
+/root/latchmoe-src-clean/benchmark
+/root/latchmoe-five-datasets-20261010
+SAFE_HF_CACHE_INVENTORY
+PROTECTED_PACKAGE_VERSIONS
+{
+  "torch": "2.10.0+cpu",
+  "torch-npu": "2.10.0.post4",
+  "vllm": "0.23.0+empty",
+  "vllm-ascend": "0.23.0"
+}
+LATCHMOE_PACKAGE_VERSIONS
+{
+  "torch": "2.13.0+cpu",
+  "torch-npu": "2.13.0rc1",
+  "vllm": "0.28.1rc1.dev319+g762f85b31.empty",
+  "vllm-ascend": "0.25.1rc2.dev1+hust.20260903.4.g2c8c72210",
+  "vllm-moe-offload-ascend": "0.3.0"
+}
+LOCKED_HOSTS
+762f85b311fbab0bcf8921dd216f5093cd58b9b8
+2c8c722107a54127999a64c4eb0ec86139df8c26
+PREFLIGHT_COMPLETE

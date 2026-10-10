@@ -1,0 +1,11 @@
+{
+  "diagnostic_only": true,
+  "official_quality_scores": false,
+  "no_model_constructed": true,
+  "source_path": "/root/latchmoe-env/lib/python3.12/site-packages/vllm_moe_offload_ascend/moe_offload/autoconfig.py",
+  "source_sha256": "903716b11ea57946c871a2f056a1aab73d8703dd91d9191de0755c46abf0530b",
+  "status": "config-planning-failed",
+  "error_type": "ValueError",
+  "error": "VLLM_ASCEND_MOE_OFFLOAD_GB requires a MoE model config with num_hidden_layers. Disable Ascend MoE offload for dense models, or provide a supported MoE model config.",
+  "traceback": "Traceback (most recent call last):\n  File \"/root/latchmoe-five-datasets-20261010/input/02-config-repro.py\", line 19, in <module>\n    result['applied'] = autoconfig.apply_moe_offload_defaults(args)\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/root/latchmoe-env/lib/python3.12/site-packages/vllm_moe_offload_ascend/moe_offload/autoconfig.py\", line 770, in apply_moe_offload_defaults\n    prefetch_defaults = derive_prefetch_defaults(\n                        ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/root/latchmoe-env/lib/python3.12/site-packages/vllm_moe_offload_ascend/moe_offload/autoconfig.py\", line 214, in derive_prefetch_defaults\n    num_layers = _get_int_config_value(model_config, \"num_hidden_layers\")\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/root/latchmoe-env/lib/python3.12/site-packages/vllm_moe_offload_ascend/moe_offload/autoconfig.py\", line 181, in _get_int_config_value\n    raise ValueError(\nValueError: VLLM_ASCEND_MOE_OFFLOAD_GB requires a MoE model config with num_hidden_layers. Disable Ascend MoE offload for dense models, or provide a supported MoE model config.\n"
+}

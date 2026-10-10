@@ -1,0 +1,168 @@
+........................FFFFFFF.FF                                       [100%]
+================================== FAILURES ===================================
+__ test_dataset_label_cannot_relabel_another_source[Terminal-Bench 2.1-None] __
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-243/test_dataset_label_cannot_rela0')
+dataset = 'Terminal-Bench 2.1', track = None
+
+    @pytest.mark.parametrize("dataset,track", [("Terminal-Bench 2.1", None), ("FrontierScience", "research")])
+    def test_dataset_label_cannot_relabel_another_source(tmp_path, dataset, track):
+        contract, arms, roots = pair(tmp_path)
+        contract.update(dataset=dataset, track=track)
+        for arm in arms.values():
+            arm["contract_sha256"] = m.digest(contract)
+>       with pytest.raises(ValueError, match="source|track"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:265: Failed
+_ test_dataset_label_cannot_relabel_another_source[FrontierScience-research] __
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-243/test_dataset_label_cannot_rela1')
+dataset = 'FrontierScience', track = 'research'
+
+    @pytest.mark.parametrize("dataset,track", [("Terminal-Bench 2.1", None), ("FrontierScience", "research")])
+    def test_dataset_label_cannot_relabel_another_source(tmp_path, dataset, track):
+        contract, arms, roots = pair(tmp_path)
+        contract.update(dataset=dataset, track=track)
+        for arm in arms.values():
+            arm["contract_sha256"] = m.digest(contract)
+>       with pytest.raises(ValueError, match="source|track"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:265: Failed
+____________ test_raw_outcomes_cannot_contradict_request_manifest _____________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-243/test_raw_outcomes_cannot_contr0')
+
+    def test_raw_outcomes_cannot_contradict_request_manifest(tmp_path):
+        contract, arms, roots = pair(tmp_path)
+        raw = json.loads((roots["B1"] / "outcomes.json").read_text())
+        raw[0].update(prompt_sha256="0" * 64, parameters_sha256="0" * 64)
+        rewrite(arms["B1"], roots["B1"], "outcomes.json", raw)
+>       with pytest.raises(ValueError, match="request"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:274: Failed
+_ test_invalid_common_values_do_not_freeze_unspecified_contract[runtime-packages-None] _
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-243/test_invalid_common_values_do_0')
+section = 'runtime', key = 'packages', value = None
+
+    @pytest.mark.parametrize("section,key,value", [("runtime", "packages", None),
+        ("budgets", "max_tokens", None), ("budgets", "tools", True),
+        ("server", "prefix_caching", 0), ("hardware", "tp", True)])
+    def test_invalid_common_values_do_not_freeze_unspecified_contract(tmp_path, section, key, value):
+        contract, arms, roots = pair(tmp_path)
+        contract["common"][section][key] = value
+        for arm in arms.values():
+            arm["common"] = copy.deepcopy(contract["common"])
+            arm["contract_sha256"] = m.digest(contract)
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:287: Failed
+_ test_invalid_common_values_do_not_freeze_unspecified_contract[budgets-max_tokens-None] _
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-243/test_invalid_common_values_do_1')
+section = 'budgets', key = 'max_tokens', value = None
+
+    @pytest.mark.parametrize("section,key,value", [("runtime", "packages", None),
+        ("budgets", "max_tokens", None), ("budgets", "tools", True),
+        ("server", "prefix_caching", 0), ("hardware", "tp", True)])
+    def test_invalid_common_values_do_not_freeze_unspecified_contract(tmp_path, section, key, value):
+        contract, arms, roots = pair(tmp_path)
+        contract["common"][section][key] = value
+        for arm in arms.values():
+            arm["common"] = copy.deepcopy(contract["common"])
+            arm["contract_sha256"] = m.digest(contract)
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:287: Failed
+_ test_invalid_common_values_do_not_freeze_unspecified_contract[budgets-tools-True] _
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-243/test_invalid_common_values_do_2')
+section = 'budgets', key = 'tools', value = True
+
+    @pytest.mark.parametrize("section,key,value", [("runtime", "packages", None),
+        ("budgets", "max_tokens", None), ("budgets", "tools", True),
+        ("server", "prefix_caching", 0), ("hardware", "tp", True)])
+    def test_invalid_common_values_do_not_freeze_unspecified_contract(tmp_path, section, key, value):
+        contract, arms, roots = pair(tmp_path)
+        contract["common"][section][key] = value
+        for arm in arms.values():
+            arm["common"] = copy.deepcopy(contract["common"])
+            arm["contract_sha256"] = m.digest(contract)
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:287: Failed
+_ test_invalid_common_values_do_not_freeze_unspecified_contract[server-prefix_caching-0] _
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-243/test_invalid_common_values_do_3')
+section = 'server', key = 'prefix_caching', value = 0
+
+    @pytest.mark.parametrize("section,key,value", [("runtime", "packages", None),
+        ("budgets", "max_tokens", None), ("budgets", "tools", True),
+        ("server", "prefix_caching", 0), ("hardware", "tp", True)])
+    def test_invalid_common_values_do_not_freeze_unspecified_contract(tmp_path, section, key, value):
+        contract, arms, roots = pair(tmp_path)
+        contract["common"][section][key] = value
+        for arm in arms.values():
+            arm["common"] = copy.deepcopy(contract["common"])
+            arm["contract_sha256"] = m.digest(contract)
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:287: Failed
+____________________ test_mmlu_boolean_success_is_required ____________________
+
+    def test_mmlu_boolean_success_is_required():
+        case = {"case_id": "fixture", "prompt_sha256": "hash", "prompt_tokens": 20,
+                "max_tokens": 32, "ignore_eos": False, "category": "math",
+                "answer": "B", "option_count": 2}
+        result = {**case, "success": "false", "error": "failure", "output": "answer is B"}
+>       with pytest.raises(ValueError, match="boolean"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_latchmoe_dataset_pair.py:296: Failed
+_________ test_hash_and_parse_cannot_consume_different_evidence_bytes _________
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-243/test_hash_and_parse_cannot_con0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002773346DA70>
+
+    def test_hash_and_parse_cannot_consume_different_evidence_bytes(tmp_path, monkeypatch):
+        contract, arms, roots = pair(tmp_path)
+        telemetry = json.loads((roots["B1"] / "telemetry.json").read_text())
+        telemetry["after"] = dict(telemetry["before"])
+        rewrite(arms["B1"], roots["B1"], "telemetry.json", telemetry)
+        original_digest = m.file_digest
+    
+        def mutate_after_hash(path):
+            result = original_digest(path)
+            if path == roots["B1"] / "telemetry.json":
+                changed = copy.deepcopy(telemetry)
+                for key in ("calls", "waves"):
+                    changed["after"][key] += 1
+                path.write_text(json.dumps(changed))
+            return result
+    
+        monkeypatch.setattr(m, "file_digest", mutate_after_hash)
+>       assert m.verify_pair(contract, arms, roots)["status"] == "not-exercised"
+E       AssertionError: assert 'matched-evidence' == 'not-exercised'
+E         
+E         - not-exercised
+E         + matched-evidence
+
+tests\test_latchmoe_dataset_pair.py:317: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_latchmoe_dataset_pair.py::test_dataset_label_cannot_relabel_another_source[Terminal-Bench 2.1-None]
+FAILED tests/test_latchmoe_dataset_pair.py::test_dataset_label_cannot_relabel_another_source[FrontierScience-research]
+FAILED tests/test_latchmoe_dataset_pair.py::test_raw_outcomes_cannot_contradict_request_manifest
+FAILED tests/test_latchmoe_dataset_pair.py::test_invalid_common_values_do_not_freeze_unspecified_contract[runtime-packages-None]
+FAILED tests/test_latchmoe_dataset_pair.py::test_invalid_common_values_do_not_freeze_unspecified_contract[budgets-max_tokens-None]
+FAILED tests/test_latchmoe_dataset_pair.py::test_invalid_common_values_do_not_freeze_unspecified_contract[budgets-tools-True]
+FAILED tests/test_latchmoe_dataset_pair.py::test_invalid_common_values_do_not_freeze_unspecified_contract[server-prefix_caching-0]
+FAILED tests/test_latchmoe_dataset_pair.py::test_mmlu_boolean_success_is_required
+FAILED tests/test_latchmoe_dataset_pair.py::test_hash_and_parse_cannot_consume_different_evidence_bytes
+9 failed, 25 passed in 0.34s
