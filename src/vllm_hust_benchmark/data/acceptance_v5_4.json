@@ -1,0 +1,131 @@
+{
+  "schema_version": "acceptance-v5.4/v1",
+  "test_plan_version": "V5.4",
+  "publication_date": "2026-10-10",
+  "source_document": "docs/assets/vLLM-HUST标准交付测试方案_V5.4.docx",
+  "source_sha256": "2423d611fce0cd74be47efcac8e3fb79a472e8304bbfe663dd2127974e1ddd46",
+  "source_size_bytes": 571064,
+  "source_fidelity": {
+    "status": "semantic-mirror",
+    "canonical_final_identity_status": "not-supplied-to-container",
+    "mirror_cached_page_count": 87,
+    "byte_identical_to_canonical_final": false,
+    "note": "Generated from the verified V5.3 semantic mirror with the deterministic V5.4 BF16 transformation. No canonical local V5.4 binary identity was supplied to this container, so this mirror must not be represented as byte-identical to the local final file."
+  },
+  "lifecycle_status": "active_contract_execution_fail_closed",
+  "mandatory_delivery": {
+    "model": "Qwen/Qwen3.5-35B-A3B",
+    "model_role": "Pujiang-mandated delivery model",
+    "hardware": "Ascend 910B2",
+    "chip_count": 2,
+    "tensor_parallel_size": 2,
+    "precision": "BF16",
+    "dtype": "bfloat16"
+  },
+  "baseline_roles": {
+    "allowed": ["B0", "B1"],
+    "B0": {
+      "description": "Native baseline under the same frozen execution contract",
+      "identity_policy": "exact runtime, model, topology, service, client, dataset, SLO, and evidence fields must be signed before execution"
+    },
+    "B1": {
+      "description": "Final delivery inference engine frozen at test start",
+      "identity_policy": "signed_release_manifest_and_oci_repo_digest_at_test_start",
+      "core_id": null,
+      "plugin_id": null,
+      "image_id": null,
+      "required_identity_fields": [
+        "signed_release_manifest",
+        "oci_repo_digest",
+        "core_commit",
+        "plugin_commit",
+        "model_revision",
+        "tokenizer_revision"
+      ]
+    }
+  },
+  "a3": {
+    "input_tokens": 30720,
+    "output_tokens": 2048,
+    "total_context_tokens": 32768,
+    "duration_minutes": 30,
+    "slo": {
+      "ttft_seconds": {"mean_max": 30, "p95_max": 45, "p99_max": 60},
+      "tpot_ms_per_token": {"mean_max": 40, "p95_max": 60, "p99_max": 80}
+    },
+    "prefill_throughput": {
+      "input_tokens": 30720,
+      "role": "diagnostic-only",
+      "may_generate_acceptance_threshold": false,
+      "may_change_verdict": false
+    }
+  },
+  "a4": {
+    "duration_minutes": 30,
+    "cost_formula": "complete_lifecycle_cost / successful_output_tokens_meeting_slo_in_measurement_window",
+    "lifecycle_boundary": "service_start_through_service_stop",
+    "measurement_denominator": "successful output tokens in the 30-minute measurement interval that meet the frozen SLO"
+  },
+  "optional_deliveries": [
+    {"id": "E1", "active": false, "verdict": "NOT_EXECUTED_OPTIONAL"},
+    {"id": "E2-G", "active": false, "verdict": "NOT_EXECUTED_OPTIONAL"},
+    {"id": "E2-D", "active": false, "verdict": "NOT_EXECUTED_OPTIONAL"}
+  ],
+  "optional_activation_policy": {
+    "requires_new_test_plan_version": true,
+    "required_frozen_fields": [
+      "platform",
+      "model",
+      "topology",
+      "B0_identity",
+      "B1_identity",
+      "slo",
+      "startup_parameters",
+      "client_parameters",
+      "evidence_rules"
+    ],
+    "register_formal_target": false,
+    "generate_config_id": false,
+    "enqueue_measurement": false
+  },
+  "primary_datasets": [
+    "MMLU-Pro",
+    "HLE-Verified",
+    "SWE-bench-Pro",
+    "FrontierScience",
+    "TerminalBench2.1"
+  ],
+  "prompt_contract": {
+    "natural_language_prompts_embedded": false,
+    "allowed_references": [
+      "immutable_prompt_asset_sha256",
+      "tokenizer_revision_and_sha256",
+      "chat_template_sha256",
+      "input_shape"
+    ]
+  },
+  "configuration_policy": {
+    "all_fields_explicit": true,
+    "on_site_tuning": false,
+    "automatic_fallback": false,
+    "best_of_parameter_search": false,
+    "post_hoc_verdict_change": false,
+    "fixed_before_config_id": true
+  },
+  "measured_precision_alignment": {
+    "required_precision": "BF16",
+    "dtype": "bfloat16",
+    "evidence": [
+      "leaderboard-data/dataset-validation/dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json",
+      "leaderboard-data/dataset-validation/dataset_validation_qwen35_frontier_unified_900s.json"
+    ],
+    "status": "aligned",
+    "remaining_unconfirmed_b0_fields": [
+      "signed_release_manifest",
+      "oci_repo_digest",
+      "complete_server_argv",
+      "complete_client_contract",
+      "effective_runtime_receipt"
+    ]
+  }
+}

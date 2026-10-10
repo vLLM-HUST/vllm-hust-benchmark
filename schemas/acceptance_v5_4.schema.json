@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/acceptance_v5_4.schema.json",
+  "title": "vLLM-HUST V5.4 acceptance contract",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "test_plan_version",
+    "publication_date",
+    "source_document",
+    "source_sha256",
+    "source_size_bytes",
+    "source_fidelity",
+    "lifecycle_status",
+    "mandatory_delivery",
+    "baseline_roles",
+    "a3",
+    "a4",
+    "optional_deliveries",
+    "optional_activation_policy",
+    "primary_datasets",
+    "prompt_contract",
+    "configuration_policy",
+    "measured_precision_alignment"
+  ],
+  "properties": {
+    "schema_version": {"const": "acceptance-v5.4/v1"},
+    "test_plan_version": {"const": "V5.4"},
+    "publication_date": {"const": "2026-10-10"},
+    "source_document": {"const": "docs/assets/vLLM-HUST标准交付测试方案_V5.4.docx"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_size_bytes": {"type": "integer", "minimum": 1},
+    "source_fidelity": {
+      "type": "object",
+      "required": ["status", "canonical_final_identity_status", "mirror_cached_page_count", "byte_identical_to_canonical_final", "note"],
+      "properties": {
+        "status": {"const": "semantic-mirror"},
+        "canonical_final_identity_status": {"const": "not-supplied-to-container"},
+        "mirror_cached_page_count": {"type": "integer", "minimum": 1},
+        "byte_identical_to_canonical_final": {"const": false},
+        "note": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "lifecycle_status": {"const": "active_contract_execution_fail_closed"},
+    "mandatory_delivery": {
+      "type": "object",
+      "required": ["model", "model_role", "hardware", "chip_count", "tensor_parallel_size", "precision", "dtype"],
+      "properties": {
+        "model": {"const": "Qwen/Qwen3.5-35B-A3B"},
+        "model_role": {"type": "string", "minLength": 1},
+        "hardware": {"const": "Ascend 910B2"},
+        "chip_count": {"const": 2},
+        "tensor_parallel_size": {"const": 2},
+        "precision": {"const": "BF16"},
+        "dtype": {"const": "bfloat16"}
+      },
+      "additionalProperties": false
+    },
+    "baseline_roles": {
+      "type": "object",
+      "required": ["allowed", "B0", "B1"],
+      "properties": {
+        "allowed": {"const": ["B0", "B1"]},
+        "B0": {"$ref": "#/$defs/baseline"},
+        "B1": {
+          "allOf": [
+            {"$ref": "#/$defs/baseline"},
+            {
+              "type": "object",
+              "required": ["core_id", "plugin_id", "image_id", "required_identity_fields"],
+              "properties": {
+                "identity_policy": {"const": "signed_release_manifest_and_oci_repo_digest_at_test_start"},
+                "core_id": {"type": "null"},
+                "plugin_id": {"type": "null"},
+                "image_id": {"type": "null"},
+                "required_identity_fields": {"type": "array", "minItems": 6, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "a3": {
+      "type": "object",
+      "required": ["input_tokens", "output_tokens", "total_context_tokens", "duration_minutes", "slo", "prefill_throughput"],
+      "properties": {
+        "input_tokens": {"const": 30720},
+        "output_tokens": {"const": 2048},
+        "total_context_tokens": {"const": 32768},
+        "duration_minutes": {"const": 30},
+        "slo": {
+          "type": "object",
+          "required": ["ttft_seconds", "tpot_ms_per_token"],
+          "properties": {
+            "ttft_seconds": {"const": {"mean_max": 30, "p95_max": 45, "p99_max": 60}},
+            "tpot_ms_per_token": {"const": {"mean_max": 40, "p95_max": 60, "p99_max": 80}}
+          },
+          "additionalProperties": false
+        },
+        "prefill_throughput": {
+          "type": "object",
+          "required": ["input_tokens", "role", "may_generate_acceptance_threshold", "may_change_verdict"],
+          "properties": {
+            "input_tokens": {"const": 30720},
+            "role": {"const": "diagnostic-only"},
+            "may_generate_acceptance_threshold": {"const": false},
+            "may_change_verdict": {"const": false}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "a4": {
+      "type": "object",
+      "required": ["duration_minutes", "cost_formula", "lifecycle_boundary", "measurement_denominator"],
+      "properties": {
+        "duration_minutes": {"const": 30},
+        "cost_formula": {"const": "complete_lifecycle_cost / successful_output_tokens_meeting_slo_in_measurement_window"},
+        "lifecycle_boundary": {"const": "service_start_through_service_stop"},
+        "measurement_denominator": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "optional_deliveries": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "active", "verdict"],
+        "properties": {
+          "id": {"enum": ["E1", "E2-G", "E2-D"]},
+          "active": {"const": false},
+          "verdict": {"const": "NOT_EXECUTED_OPTIONAL"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "optional_activation_policy": {
+      "type": "object",
+      "required": ["requires_new_test_plan_version", "required_frozen_fields", "register_formal_target", "generate_config_id", "enqueue_measurement"],
+      "properties": {
+        "requires_new_test_plan_version": {"const": true},
+        "required_frozen_fields": {"type": "array", "minItems": 9, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "register_formal_target": {"const": false},
+        "generate_config_id": {"const": false},
+        "enqueue_measurement": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "primary_datasets": {"const": ["MMLU-Pro", "HLE-Verified", "SWE-bench-Pro", "FrontierScience", "TerminalBench2.1"]},
+    "prompt_contract": {
+      "type": "object",
+      "required": ["natural_language_prompts_embedded", "allowed_references"],
+      "properties": {
+        "natural_language_prompts_embedded": {"const": false},
+        "allowed_references": {"type": "array", "minItems": 4, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    },
+    "configuration_policy": {
+      "type": "object",
+      "required": ["all_fields_explicit", "on_site_tuning", "automatic_fallback", "best_of_parameter_search", "post_hoc_verdict_change", "fixed_before_config_id"],
+      "properties": {
+        "all_fields_explicit": {"const": true},
+        "on_site_tuning": {"const": false},
+        "automatic_fallback": {"const": false},
+        "best_of_parameter_search": {"const": false},
+        "post_hoc_verdict_change": {"const": false},
+        "fixed_before_config_id": {"const": true}
+      },
+      "additionalProperties": false
+    },
+    "measured_precision_alignment": {
+      "type": "object",
+      "required": ["required_precision", "dtype", "evidence", "status", "remaining_unconfirmed_b0_fields"],
+      "properties": {
+        "required_precision": {"const": "BF16"},
+        "dtype": {"const": "bfloat16"},
+        "evidence": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "status": {"const": "aligned"},
+        "remaining_unconfirmed_b0_fields": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "baseline": {
+      "type": "object",
+      "required": ["description", "identity_policy"],
+      "properties": {
+        "description": {"type": "string", "minLength": 1},
+        "identity_policy": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "additionalProperties": false
+}

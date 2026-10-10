@@ -31,6 +31,12 @@ def test_checked_in_publication_is_valid_and_complete() -> None:
 def test_dataset_program_separates_primary_plan_from_measured_scenarios() -> None:
     index = load_json(PUBLICATION / "dataset_validation_index_v1.json")
     program = load_json(PUBLICATION / index["program_file"])
+    assert program["test_plan"]["test_plan_version"] == "V5.4"
+    assert program["test_plan"]["mandatory_model"] == "Qwen/Qwen3.5-35B-A3B"
+    assert program["test_plan"]["formal_precision"] == "BF16"
+    assert program["test_plan"]["baseline_roles"] == ["B0", "B1"]
+    assert "NOT_EXECUTED_OPTIONAL" in program["test_plan"]["optional_status"]
+    assert "BF16" in program["test_plan"]["evidence_boundary"]
     assert [dataset["label"] for dataset in program["primary_datasets"]] == [
         "MMLU-Pro",
         "HLE-Verified",

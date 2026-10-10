@@ -1,4 +1,9 @@
-# V4.6 Acceptance Boundary
+# Superseded V4.6 Acceptance Boundary
+
+> **Superseded by V5.4.** This document and its pinned PDF remain historical records only. Current
+> delivery acceptance is governed by `docs/ACCEPTANCE_V5_4.md` and
+> `src/vllm_hust_benchmark/data/acceptance_v5_4.json`; V4.6 must not generate a current target,
+> config ID, measurement queue or verdict.
 
 The repository-controlled `docs/assets/vLLM-HUST标准交付测试方案_V4.6.pdf` is the authority for project
 delivery acceptance. The machine-readable declaration is
