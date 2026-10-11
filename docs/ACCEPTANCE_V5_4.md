@@ -1,5 +1,9 @@
 # V5.4 Acceptance Boundary
 
+> **Superseded by V5.5.** This document and its pinned semantic mirror remain historical records.
+> Current delivery acceptance is governed by `docs/ACCEPTANCE_V5_5.md` and
+> `src/vllm_hust_benchmark/data/acceptance_v5_5.json`.
+
 V5.4 is the active delivery test plan. The repository-controlled
 `docs/assets/vLLM-HUST标准交付测试方案_V5.4.docx` is a **semantic mirror** generated with the deterministic
 V5.4 BF16 transformation. Its identity is pinned by

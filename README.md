@@ -13,15 +13,15 @@ export and website publication flows in one place.
 
 ## Current Delivery Contract
 
-The active delivery test plan is **V5.4**. Its machine-readable authority is
-`src/vllm_hust_benchmark/data/acceptance_v5_4.json`; see `docs/ACCEPTANCE_V5_4.md` for the human
+The active delivery test plan is **V5.5**. Its machine-readable authority is
+`src/vllm_hust_benchmark/data/acceptance_v5_5.json`; see `docs/ACCEPTANCE_V5_5.md` for the human
 boundary and semantic-mirror provenance. V4.x material is historical only and cannot generate a
 current target, config ID, measurement queue or verdict.
 
 Validate the contract with:
 
 ```bash
-PYTHONPATH=src python scripts/validate_acceptance_v5_4.py
+PYTHONPATH=src python scripts/validate_acceptance_v5_5.py
 ```
 
 For runtime comparisons, the wrapper now understands two execution targets:

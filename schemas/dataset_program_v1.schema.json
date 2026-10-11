@@ -9,9 +9,9 @@
     "updated_at": { "type": "string", "format": "date" },
     "test_plan": {
       "type": "object",
-      "required": ["test_plan_version", "contract_url", "mandatory_model", "formal_precision", "baseline_roles", "optional_status", "optional_status_zh", "evidence_boundary", "evidence_boundary_zh"],
+      "required": ["test_plan_version", "contract_url", "mandatory_model", "formal_precision", "baseline_roles", "optional_status", "optional_status_zh", "evidence_boundary", "evidence_boundary_zh", "b0_receipt_gate"],
       "properties": {
-        "test_plan_version": { "const": "V5.4" },
+        "test_plan_version": { "const": "V5.5" },
         "contract_url": { "type": "string", "format": "uri", "pattern": "^https://" },
         "mandatory_model": { "const": "Qwen/Qwen3.5-35B-A3B" },
         "formal_precision": { "const": "BF16" },
@@ -19,7 +19,21 @@
         "optional_status": { "type": "string", "minLength": 1 },
         "optional_status_zh": { "type": "string", "minLength": 1 },
         "evidence_boundary": { "type": "string", "minLength": 1 },
-        "evidence_boundary_zh": { "type": "string", "minLength": 1 }
+        "evidence_boundary_zh": { "type": "string", "minLength": 1 },
+        "b0_receipt_gate": {
+          "type": "object",
+          "required": ["owner", "owner_zh", "producer", "required_materials", "value_source", "prefill_actual_values", "infer_actual_values"],
+          "properties": {
+            "owner": { "const": "release-and-evaluation-engineering" },
+            "owner_zh": { "const": "课题组（发布与评测工程）" },
+            "producer": { "const": "release-and-evaluation-engineering-process" },
+            "required_materials": { "const": ["signed_release_manifest", "b0_oci_repo_digest", "b1_oci_repo_digest", "complete_server_argv", "complete_client_contract", "effective_runtime_receipt", "startup_receipt"] },
+            "value_source": { "const": "actual-release-artifacts-and-actual-runtime" },
+            "prefill_actual_values": { "const": false },
+            "infer_actual_values": { "const": false }
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },
