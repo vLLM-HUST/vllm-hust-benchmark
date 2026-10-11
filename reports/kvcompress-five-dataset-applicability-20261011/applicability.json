@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "mod": "kvcompress-ascend",
+  "date": "2026-10-11",
+  "review_status": "candidate; maintainer and benchmark contract review pending",
+  "mod_issue": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/issues/17",
+  "canonical_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/254",
+  "source_asset_audit_commit": "e3a7183206bd399447475b2d117fef897c0880b6",
+  "profile": {
+    "model": "Qwen/Qwen3.5-35B-A3B",
+    "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "method": "TriAttention V3",
+    "method_config": "vllm-ascend-kvcompress-hust/.benchmarks/config/qwen3.5-35b-a3b-v3-batched-stride2-min512.json",
+    "kv_budget_tokens": 8192,
+    "recompute_window_tokens": 1024,
+    "compression_threshold_tokens": 9216,
+    "minimum_output_budget_tokens": 512,
+    "rule": "A request can exercise compression only if max_tokens >= 512 and its live physical KV length reaches at least 9216 tokens. The total prompt plus generated-token budget is an upper bound, not proof of a commit. B1 server commit and worker acknowledgement logs are required to prove execution."
+  },
+  "optimization_claims": [],
+  "task_quality_results": null,
+  "datasets": [
+    {
+      "id": "mmlu-pro",
+      "status": "not-exercised",
+      "dataset_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+      "primary_metric": "Task accuracy under a pinned evaluator",
+      "reason": "The separately audited 12,032 test prompts in the reference five-shot, thinking-disabled Qwen rendering are 898-2910 tokens. With the candidate 2048-token output budget, even the maximum possible 4958 tokens is below this MOD profile's 9216-token threshold. This conclusion applies to that rendering and budget only; no KV compression benefit is claimed.",
+      "evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/b308da7eb2ecad86a9349d0dcc0f4867c197a73a/reports/pyramidkv-five-dataset-adaptation-20261009/length-audit.json",
+      "owner": "@Jiawan23 (MOD); benchmark #254 maintainers (task and scorer contract)",
+      "next_step": "Review the candidate prompt and output contract. If it changes, audit all exact tokenized requests against the active MOD configuration. Do not pad tasks or lower the threshold merely to create a compression claim."
+    },
+    {
+      "id": "hle-verified",
+      "status": "blocked",
+      "dataset_revision": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+      "primary_metric": "Pinned HLE-Verified accuracy on an explicitly named full or Gold set",
+      "reason": "Rights review, full-versus-Gold task selection, image handling, judge model/prompt/scorer, and execution image remain unfrozen. The verified source snapshot is not mounted in this environment, so exact solver prompt lengths and MOD activation cannot be audited.",
+      "owner": "@Jiawan23 (MOD); benchmark #254 maintainers (rights and evaluator)",
+      "next_step": "Clear rights and freeze task IDs, multimodal treatment, judge and execution contract; audit the final prompts and run matched B0/B1 only for requests reaching the compression path."
+    },
+    {
+      "id": "swe-bench-pro",
+      "status": "blocked",
+      "dataset_revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+      "primary_metric": "Fresh isolated-sandbox resolved task rate",
+      "reason": "Rights, validated task-to-repository/image mapping, fresh sandbox and regrader, agent scaffold, tool policy, and budgets are unfrozen. A prior SWE prefix-reuse telemetry workload is not SWE-bench-Pro task resolution.",
+      "owner": "@Jiawan23 (MOD); benchmark #254 maintainers (rights, sandbox and agent contract)",
+      "next_step": "Freeze rights, task manifest, repository and image digests, reset/regrade protocol and agent budget; audit actual model calls and then run matched B0/B1 with per-task outcomes."
+    },
+    {
+      "id": "frontierscience",
+      "status": "blocked",
+      "dataset_revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+      "primary_metric": "Separate Olympiad and Research scores",
+      "reason": "A candidate problem-only, thinking-disabled audit found 100 Olympiad prompts <=835 tokens and 60 Research prompts <=1660 tokens, but the two track-specific graders, solver output budgets, and final prompt contract are not frozen. Research requires rubric grading; the candidate input audit is not a task-quality result.",
+      "evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/d4021107ea523093bdbfc4d70473b551cc2dd08c/reports/pyramidkv-frontierscience-inputs-20261009/summary.json",
+      "owner": "@Jiawan23 (MOD); benchmark #254 maintainers (both track scorers)",
+      "next_step": "Freeze independent task/judge contracts and solver budgets, re-audit final prompts and maximum decode length, and retain separate track results."
+    },
+    {
+      "id": "terminal-bench-2.1",
+      "status": "blocked",
+      "dataset_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+      "primary_metric": "Harbor task resolution on the pinned 2.1 release",
+      "reason": "The 89 task definitions are frozen, but Harbor runtime image digests are not staged. This environment has no Docker/Harbor backend; agent scaffold, tools, budget, scorer, and per-task rights review remain unfrozen.",
+      "owner": "@Jiawan23 (MOD); benchmark #254 maintainers (Harbor and agent contract)",
+      "next_step": "Provision pinned images and fresh Harbor sandboxes, freeze rights and agent/scorer contract, audit model calls, then run matched B0/B1 with per-task resolution."
+    }
+  ]
+}
