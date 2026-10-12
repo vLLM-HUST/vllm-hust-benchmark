@@ -150,12 +150,13 @@ This report does **not** claim:
 
 ## Evidence grading
 
-| Grade          | Content                                                                                                                                                                                                                                                                                                   |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R (observed)   | Every raw request/response record (12,032) is hashed in `index/raw-request-files.sha256.gz`; the per-task table recomputes the totals; the throughput result JSON is hashed next to the command that produced it; the startup log snapshot and `/v1/models` response are in `receipt/` and the raw bundle |
-| D (documented) | Intended configuration: `reproduction/b0_35b.profile.json`                                                                                                                                                                                                                                                |
-| S (snapshot)   | Package versions, environment variables, `npu-smi` taken at launch (`raw/run-evidence.tar.gz`)                                                                                                                                                                                                            |
-| X (missing)    | Container image digest; full weight hashes; signed or sealed manifest (the run directory was not sealed when this report was written and the server was still running); B1                                                                                                                                |
+| Grade          | Content                                                                                                                                                                                                                                                                                                                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R (observed)   | Every raw request/response record (12,032) is hashed in `index/raw-request-files.sha256.gz`; the per-task table recomputes the totals; the throughput result JSON is hashed next to the command that produced it; the startup log snapshot and `/v1/models` response are in `receipt/` and the raw bundle                                                                                                 |
+| D (documented) | Intended configuration: `reproduction/b0_35b.profile.json`                                                                                                                                                                                                                                                                                                                                                |
+| S (snapshot)   | Package versions, environment variables, `npu-smi` taken at launch (`raw/run-evidence.tar.gz`)                                                                                                                                                                                                                                                                                                            |
+| R (sealed)     | After the server was stopped the run directory was sealed as a plain SHA-256 listing: 12,091 files, `evidence_bundle_sha256` `ee2005782b49a4b228cb64386c3fb94892f7d9aede2da0745e349e8680d78caf`. `index/evidence-bundle.json.gz` lists every file's SHA-256 and size; its entries for `receipt/host.txt` and `receipt/versions.txt` are the hashes of the unredacted originals. Not RFC 8785, not signed. |
+| X (missing)    | Container image digest; full weight hashes; a signed manifest, or a `MANIFEST.json` binding a results table (no results table exists, so only the evidence listing was sealed); B1                                                                                                                                                                                                                        |
 
 ## Open questions for maintainers
 
@@ -181,6 +182,7 @@ This report does **not** claim:
 | `raw/run-evidence.tar.gz`                                             | Byte-exact originals of the receipt, run records, logs and bench files (see Redactions)                                                                                     |
 | `index/raw-request-files.sha256.gz`                                   | SHA-256 of every raw request/response file (kept on the development container, not published: model text restates source questions)                                         |
 | `index/excluded-large-files.txt`                                      | SHA-256 and size of files too large for this repository                                                                                                                     |
+| `index/evidence-bundle.json.gz`                                       | The sealed listing of the whole run directory (12,091 files: path, SHA-256, size)                                                                                           |
 | `reproduction/`                                                       | Launcher, parser, accuracy client and summary script exactly as run (`.txt`), the intended-configuration profile, and the hashes of the modules used for the throughput run |
 
 ## Redactions
@@ -198,4 +200,6 @@ cd reports/mmlu-pro-qwen35-b0-precheck-20261012
 sha256sum -c SHA256SUMS
 gunzip -c results/per-case-outcomes.csv.gz | awk -F, 'NR>1{n++; c+=$6; i+=(1-$5); l+=($8=="length")} END{print n, c, i, l}'
 # expected: 12032 9609 56 1533
+gunzip -c index/evidence-bundle.json.gz | python3 -c "import json,sys,hashlib; b=json.load(sys.stdin); h=hashlib.sha256(); [h.update(('%s  %s\\n'%(b['files'][r]['sha256'],r)).encode()) for r in sorted(b['files'])]; print(len(b['files']), h.hexdigest())"
+# expected: 12091 ee2005782b49a4b228cb64386c3fb94892f7d9aede2da0745e349e8680d78caf
 ```
