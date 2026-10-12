@@ -1,0 +1,171 @@
+#!/usr/bin/env python3
+"""Run a frozen MMLU-Pro plan against a plain vLLM OpenAI-compatible server.
+
+Why this exists: the upstream `mmlu_pro_pyramidkv.py run` reads VLLM_ASCEND_KVCOMPRESS_* from the server
+process and validates PyramidKV activation, which a plain B0 server does not have. This runner reuses the
+upstream adapter's frozen plan loader and scorer UNCHANGED (same prompts, same extraction, same scoring),
+and replaces only the transport. Deviations from upstream, all recorded in run.json:
+  * concurrency (upstream: 1; default here: 16 to match max-num-seqs),
+  * no PyramidKV telemetry / activation checks.
+
+  python3 mmlu_pro_run.py --adapter /path/to/vllm-hust-benchmark/src/vllm_hust_benchmark/mmlu_pro_pyramidkv.py \
+      --plan /root/runs/mmlu-pro-plan --base-url http://127.0.0.1:18180 --served-model qwen3.5-35b \
+      --output $RUN/outputs/mmlu-pro-accuracy [--concurrency 16] [--limit 20] [--resume]
+"""
+import argparse
+import concurrent.futures as cf
+import hashlib
+import importlib.util
+import json
+import os
+import pathlib
+import sys
+import threading
+import time
+import urllib.request
+
+OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
+def load_adapter(path):
+    spec = importlib.util.spec_from_file_location("mmlu_adapter", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def one_request(base_url, model, case, gen, timeout):
+    body = {
+        "model": model, "prompt": case["prompt"], "max_tokens": case["max_tokens"],
+        "temperature": gen["temperature"], "seed": gen["seed"], "stream": True,
+        "stream_options": {"include_usage": True}, "ignore_eos": case["ignore_eos"],
+    }
+    req = urllib.request.Request(base_url.rstrip("/") + "/v1/completions", json.dumps(body).encode(),
+                                 {"Content-Type": "application/json"})
+    rec = {"case_id": case["case_id"], "prompt_sha256": case["prompt_sha256"], "prompt_tokens": case["prompt_tokens"],
+           "max_tokens": case["max_tokens"], "ignore_eos": case["ignore_eos"], "success": False,
+           "output": "", "finish_reason": None, "error": None}
+    t0 = time.monotonic()
+    t_first = None
+    parts = []
+    try:
+        with OPENER.open(req, timeout=timeout) as resp:
+            for raw in resp:
+                line = raw.decode("utf8", "replace").strip()
+                if not line.startswith("data:"):
+                    continue
+                payload = line[5:].strip()
+                if payload == "[DONE]":
+                    break
+                chunk = json.loads(payload)
+                if chunk.get("usage"):
+                    rec["usage"] = chunk["usage"]
+                for ch in chunk.get("choices", []):
+                    if ch.get("text"):
+                        if t_first is None:
+                            t_first = time.monotonic()
+                        parts.append(ch["text"])
+                    if ch.get("finish_reason"):
+                        rec["finish_reason"] = ch["finish_reason"]
+        rec["output"] = "".join(parts)
+        rec["success"] = rec["finish_reason"] is not None
+        if not rec["success"]:
+            rec["error"] = "stream ended without finish_reason"
+    except Exception as e:  # noqa: BLE001  (no retries by design: a failure is scored incorrect and kept)
+        rec["output"] = "".join(parts)
+        rec["error"] = repr(e)
+    t1 = time.monotonic()
+    rec["e2e_seconds"] = t1 - t0
+    rec["ttft_seconds"] = (t_first - t0) if t_first else None
+    return rec
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--adapter", required=True)
+    ap.add_argument("--plan", required=True)
+    ap.add_argument("--base-url", default="http://127.0.0.1:18180")
+    ap.add_argument("--served-model", default="qwen3.5-35b")
+    ap.add_argument("--output", required=True)
+    ap.add_argument("--concurrency", type=int, default=16)
+    ap.add_argument("--timeout", type=int, default=1800)
+    ap.add_argument("--limit", type=int, default=None, help="smoke test: first N cases only (result is NOT a score)")
+    ap.add_argument("--resume", action="store_true", help="reuse already-successful request files in --output")
+    a = ap.parse_args()
+
+    adapter = load_adapter(a.adapter)
+    contract, cases = adapter.load_plan(pathlib.Path(a.plan))  # verifies scorer hash, file hashes, prompt hashes
+    gen = contract["generation"]
+    if a.limit:
+        cases = cases[: a.limit]
+    out = pathlib.Path(a.output)
+    if out.exists() and not a.resume:
+        sys.exit("output exists; use a new directory (or --resume to continue the same run)")
+    (out / "requests").mkdir(parents=True, exist_ok=True)
+
+    run_meta = {
+        "runner": "mmlu_pro_run.py (plain-server transport)",
+        "runner_sha256": hashlib.sha256(open(__file__, "rb").read()).hexdigest(),
+        "adapter_sha256": hashlib.sha256(open(a.adapter, "rb").read()).hexdigest(),
+        "contract_sha256": hashlib.sha256((pathlib.Path(a.plan) / "contract.json").read_bytes()).hexdigest(),
+        "concurrency": a.concurrency, "upstream_concurrency": gen.get("concurrency"),
+        "generation": gen, "base_url": a.base_url, "served_model": a.served_model,
+        "n_cases": len(cases), "limit": a.limit, "resume": a.resume,
+        "started_unix": time.time(),
+        "deviations": ["concurrency differs from contract.generation.concurrency",
+                       "no PyramidKV activation check / telemetry"],
+    }
+    if a.limit:
+        run_meta["WARNING"] = "smoke test only - not a score"
+    (out / ("run.%d.json" % int(time.time()))).write_text(json.dumps(run_meta, indent=1))
+
+    done = {}
+    lock = threading.Lock()
+    todo = []
+    for c in cases:
+        f = out / "requests" / (c["case_id"] + ".json")
+        if a.resume and f.exists():
+            r = json.loads(f.read_text())
+            if r.get("success"):
+                done[c["case_id"]] = r
+                continue
+        todo.append(c)
+    print("cases=%d already_done=%d to_run=%d concurrency=%d" % (len(cases), len(done), len(todo), a.concurrency), flush=True)
+
+    t_start = time.monotonic()
+
+    def work(c):
+        r = one_request(a.base_url, a.served_model, c, gen, a.timeout)
+        (out / "requests" / (c["case_id"] + ".json")).write_text(json.dumps(r, ensure_ascii=False))
+        with lock:
+            done[c["case_id"]] = r
+            n = len(done)
+            if n % 100 == 0 or n == len(cases):
+                ok = sum(1 for x in done.values() if x["success"])
+                print("%d/%d ok=%d elapsed=%.0fs" % (n, len(cases), ok, time.monotonic() - t_start), flush=True)
+
+    with cf.ThreadPoolExecutor(max_workers=a.concurrency) as ex:
+        list(ex.map(work, todo))
+    wall = time.monotonic() - t_start
+
+    results = [done[c["case_id"]] for c in cases]  # plan order
+    (out / "results.json").write_text(json.dumps(results, ensure_ascii=False))
+    scores = adapter.score_results(results, cases)
+    (out / "score.json").write_text(json.dumps(scores, indent=1, ensure_ascii=False))
+    ok = [r for r in results if r["success"]]
+    summary = {
+        "cases": len(cases), "correct": scores["correct"], "accuracy": scores["accuracy"],
+        "invalid_answers": scores["invalid_answers"], "transport_failures": scores["transport_failures"],
+        "length_limited": scores["length_limited"], "wall_seconds_this_invocation": wall,
+        "mean_ttft_s": (sum(r["ttft_seconds"] for r in ok if r["ttft_seconds"]) / max(1, len(ok))),
+        "mean_e2e_s": (sum(r["e2e_seconds"] for r in ok) / max(1, len(ok))),
+        "smoke_only": bool(a.limit),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=1))
+    print(json.dumps(summary, indent=1))
+    if scores["transport_failures"]:
+        sys.exit("transport failures present (kept, scored incorrect) - inspect requests/*.json")
+
+
+if __name__ == "__main__":
+    main()

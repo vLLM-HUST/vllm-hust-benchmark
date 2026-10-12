@@ -1,0 +1,160 @@
+{
+ "ok": true,
+ "mismatches": [],
+ "argv_only_fields": [
+  "enable_expert_parallel",
+  "decode_context_parallel_size",
+  "gpu_memory_utilization",
+  "max_num_seqs",
+  "compilation_mode"
+ ],
+ "fields": {
+  "dtype": {
+   "expected": "bfloat16",
+   "argv": "bfloat16",
+   "log": "bfloat16",
+   "log_snippet": "dtype=torch.bfloat16",
+   "status": "verified"
+  },
+  "tensor_parallel_size": {
+   "expected": 2,
+   "argv": 2,
+   "log": 2,
+   "log_snippet": "tensor_parallel_size=2",
+   "status": "verified"
+  },
+  "pipeline_parallel_size": {
+   "expected": 1,
+   "argv": 1,
+   "log": 1,
+   "log_snippet": "pipeline_parallel_size=1",
+   "status": "verified"
+  },
+  "data_parallel_size": {
+   "expected": 1,
+   "argv": 1,
+   "log": 1,
+   "log_snippet": "data_parallel_size=1",
+   "status": "verified"
+  },
+  "enable_expert_parallel": {
+   "expected": true,
+   "argv": true,
+   "log": "not_found",
+   "status": "argv_only"
+  },
+  "decode_context_parallel_size": {
+   "expected": null,
+   "argv": null,
+   "log": "not_found",
+   "status": "argv_only"
+  },
+  "disable_custom_all_reduce": {
+   "expected": true,
+   "argv": true,
+   "log": true,
+   "log_snippet": "disable_custom_all_reduce=True",
+   "status": "verified"
+  },
+  "gpu_memory_utilization": {
+   "expected": 0.85,
+   "argv": 0.85,
+   "log": "not_found",
+   "status": "argv_only"
+  },
+  "max_model_len": {
+   "expected": 32768,
+   "argv": 32768,
+   "log": 32768,
+   "log_snippet": "max_seq_len=32768",
+   "status": "verified"
+  },
+  "max_num_seqs": {
+   "expected": 16,
+   "argv": 16,
+   "log": "not_found",
+   "status": "argv_only"
+  },
+  "max_num_batched_tokens": {
+   "expected": 8192,
+   "argv": 8192,
+   "log": 8192,
+   "log_snippet": "max_num_batched_tokens=8192",
+   "status": "verified"
+  },
+  "enable_prefix_caching": {
+   "expected": false,
+   "argv": false,
+   "log": false,
+   "log_snippet": "enable_prefix_caching=False",
+   "status": "verified"
+  },
+  "enable_chunked_prefill": {
+   "expected": true,
+   "argv": true,
+   "log": true,
+   "log_snippet": "enable_chunked_prefill=True",
+   "status": "verified"
+  },
+  "speculative_config": {
+   "expected": null,
+   "argv": null,
+   "log": null,
+   "log_snippet": "speculative_config=None,",
+   "status": "verified"
+  },
+  "enforce_eager": {
+   "expected": false,
+   "argv": false,
+   "log": false,
+   "log_snippet": "enforce_eager=False",
+   "status": "verified"
+  },
+  "compilation_mode": {
+   "expected": 3,
+   "argv": 3,
+   "log": "not_found",
+   "status": "argv_only"
+  },
+  "cudagraph_mode": {
+   "expected": "FULL_DECODE_ONLY",
+   "argv": "FULL_DECODE_ONLY",
+   "log": "FULL_DECODE_ONLY",
+   "log_snippet": "cudagraph_mode': <CUDAGraphMode.FULL_DECODE_ONLY",
+   "status": "verified"
+  },
+  "cudagraph_capture_sizes": {
+   "expected": [
+    1,
+    2,
+    4,
+    8,
+    16
+   ],
+   "argv": [
+    1,
+    2,
+    4,
+    8,
+    16
+   ],
+   "log": [
+    1,
+    2,
+    4,
+    8,
+    16
+   ],
+   "log_snippet": "cudagraph_capture_sizes': [1, 2, 4, 8, 16]",
+   "status": "verified"
+  }
+ },
+ "api_models": {
+  "served_model_name": "qwen3.5-35b",
+  "max_model_len": 32768,
+  "root": "/models/Qwen3.5-35B-A3B",
+  "max_model_len_matches": true,
+  "served_name_matches": true
+ },
+ "note": "argv_only means the startup log did not expose that field to the parser; it is a command-line fact, not proof of the engine's effective value."
+}

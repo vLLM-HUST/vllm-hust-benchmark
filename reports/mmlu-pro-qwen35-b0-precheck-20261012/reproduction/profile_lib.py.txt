@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""Shared helpers: parse a vllm serve argv into effective values, compare with a profile.
+
+Stdlib only. Import with the scripts directory on sys.path (the other scripts do this).
+"""
+import hashlib
+import json
+import re
+
+
+def sha256_file(path, chunk=1 << 20):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        while True:
+            b = f.read(chunk)
+            if not b:
+                break
+            h.update(b)
+    return h.hexdigest()
+
+
+def parse_flags(args):
+    """Turn ['--a','1','--b','--c','x','y'] into {'a':'1','b':True,'c':['x','y']}."""
+    d = {}
+    i = 0
+    while i < len(args):
+        t = args[i]
+        if t.startswith("--"):
+            k = t[2:]
+            if "=" in k:
+                k, v = k.split("=", 1)
+                d[k] = v
+                i += 1
+                continue
+            vals = []
+            j = i + 1
+            while j < len(args) and not args[j].startswith("--"):
+                vals.append(args[j])
+                j += 1
+            d[k] = True if not vals else (vals[0] if len(vals) == 1 else vals)
+            i = j
+        else:
+            i += 1
+    return d
+
+
+def _bool_flag(d, name):
+    """True/False when explicitly set via --name / --no-name, else None (engine default, unknown)."""
+    if ("no-" + name) in d:
+        return False
+    if name in d:
+        return True
+    return None
+
+
+def _int(v, default=None):
+    return int(v) if v not in (None, True) else default
+
+
+def effective_from_argv(args):
+    """Values implied by the command line alone. None means 'not set on the command line'."""
+    d = parse_flags(args)
+    comp = {}
+    if isinstance(d.get("compilation-config"), str):
+        comp = json.loads(d["compilation-config"])
+    sizes = d.get("cudagraph-capture-sizes")
+    if sizes is None:
+        sizes = comp.get("cudagraph_capture_sizes")
+    if isinstance(sizes, str):
+        sizes = [sizes]
+    sizes = [int(x) for x in sizes] if sizes is not None else None
+    return {
+        "dtype": d.get("dtype"),
+        "tensor_parallel_size": _int(d.get("tensor-parallel-size"), 1),
+        "pipeline_parallel_size": _int(d.get("pipeline-parallel-size"), 1),
+        "data_parallel_size": _int(d.get("data-parallel-size"), 1),
+        "enable_expert_parallel": bool(_bool_flag(d, "enable-expert-parallel")),
+        "decode_context_parallel_size": _int(d.get("decode-context-parallel-size")),
+        "disable_custom_all_reduce": bool(_bool_flag(d, "disable-custom-all-reduce")),
+        "gpu_memory_utilization": float(d["gpu-memory-utilization"]) if "gpu-memory-utilization" in d else None,
+        "max_model_len": _int(d.get("max-model-len")),
+        "max_num_seqs": _int(d.get("max-num-seqs")),
+        "max_num_batched_tokens": _int(d.get("max-num-batched-tokens")),
+        "enable_prefix_caching": _bool_flag(d, "enable-prefix-caching"),
+        "enable_chunked_prefill": _bool_flag(d, "enable-chunked-prefill"),
+        "speculative_config": json.loads(d["speculative-config"]) if isinstance(d.get("speculative-config"), str) else None,
+        "enforce_eager": _bool_flag(d, "enforce-eager"),
+        "compilation_mode": comp.get("mode"),
+        "cudagraph_mode": comp.get("cudagraph_mode"),
+        "cudagraph_capture_sizes": sizes,
+    }
+
+
+def get_port(args):
+    d = parse_flags(args)
+    return int(d.get("port", 8000))
+
+
+def get_host(args):
+    return str(parse_flags(args).get("host", "127.0.0.1"))
+
+
+def profile_problems(profile):
+    """Reasons a profile cannot be launched. Empty list = OK."""
+    bad = []
+    for i, a in enumerate(profile.get("serve_args", [])):
+        if a is None:
+            prev = profile["serve_args"][i - 1] if i else "?"
+            bad.append("serve_args[%d] is null (value of %s is undecided)" % (i, prev))
+    for k, v in profile.get("expect", {}).items():
+        if k in ("decode_context_parallel_size", "speculative_config"):
+            continue  # null legitimately means 'unset'
+        if v is None:
+            bad.append("expect.%s is null (undecided)" % k)
+    return bad
+
+
+# ---- startup-log parsing (best effort; the first real log must calibrate these) ----
+
+_LOG_PATTERNS = {
+    "dtype": r"\bdtype=(?:torch\.)?(\w+)",
+    "tensor_parallel_size": r"\btensor_parallel_size=(\d+)",
+    "pipeline_parallel_size": r"\bpipeline_parallel_size=(\d+)",
+    "data_parallel_size": r"\bdata_parallel_size=(\d+)",
+    "enable_expert_parallel": r"\benable_expert_parallel=(True|False)",
+    "disable_custom_all_reduce": r"\bdisable_custom_all_reduce=(True|False)",
+    "gpu_memory_utilization": r"\bgpu_memory_utilization=([\d.]+)",
+    "max_model_len": r"\b(?:max_seq_len|max_model_len)=(\d+)",
+    "max_num_seqs": r"\bmax_num_seqs=(\d+)",
+    "max_num_batched_tokens": r"\bmax_num_batched_tokens=(\d+)",
+    "enable_prefix_caching": r"\benable_prefix_caching=(True|False)",
+    "enable_chunked_prefill": r"\b(?:enable_chunked_prefill|chunked_prefill_enabled)=(True|False)",
+    "enforce_eager": r"\benforce_eager=(True|False)",
+    "cudagraph_mode": r"\bcudagraph_mode\W{1,4}(?:CUDAGraphMode\.)?([A-Z_]+)",
+    "cudagraph_capture_sizes": r"\bcudagraph_capture_sizes\W{1,4}\[([\d,\s]+)\]",
+    "speculative_config": r"\bspeculative_config=(\S+?)[,)]",
+}
+
+
+def _norm_log(key, raw):
+    if raw is None:
+        return None
+    if key in ("enable_expert_parallel", "disable_custom_all_reduce", "enable_prefix_caching",
+               "enable_chunked_prefill", "enforce_eager"):
+        return raw == "True"
+    if key in ("tensor_parallel_size", "pipeline_parallel_size", "data_parallel_size", "max_model_len",
+               "max_num_seqs", "max_num_batched_tokens"):
+        return int(raw)
+    if key == "gpu_memory_utilization":
+        return float(raw)
+    if key in ("decode_context_parallel_size", "compilation_mode"):
+        return int(raw)
+    if key == "cudagraph_capture_sizes":
+        return [int(x) for x in re.findall(r"\d+", raw)]
+    if key == "speculative_config":
+        return None if raw == "None" else raw
+    return raw
+
+
+# Fallbacks calibrated on a real vLLM 0.28.1.post1.dev143 / vllm-ascend startup log (2026-10-12):
+#  * the 'non-default args' line is a Python dict:   'max_num_seqs': 16
+#  * the engine config line has decode_context_parallel_size=1 (the effective DCP, i.e. default 1)
+#  * expert parallelism: "Expert parallelism is enabled"
+#  * memory: "Desired GPU memory utilization is (0.85, 51.81 GiB)"
+#  * compilation mode: 'mode': <CompilationMode.VLLM_COMPILE: 3>
+_LOG_FALLBACKS = {
+    "decode_context_parallel_size": r"\bdecode_context_parallel_size=(\d+)",
+    "gpu_memory_utilization": r"Desired GPU memory utilization is \(([\d.]+),",
+    "max_num_seqs": r"'max_num_seqs':\s*(\d+)",
+    "enable_expert_parallel": r"'enable_expert_parallel':\s*(True|False)",
+    "compilation_mode": r"'mode':\s*<CompilationMode\.\w+:\s*(\d+)>",
+}
+
+
+def effective_from_log(text):
+    """{key: (value, matched_snippet)} for every key found in the startup log; missing keys are absent."""
+    out = {}
+    for key, pat in {**_LOG_PATTERNS, **_LOG_FALLBACKS}.items():
+        m = re.search(pat, text)
+        if m:
+            out[key] = (_norm_log(key, m.group(1)), m.group(0)[:160])
+    if "enable_expert_parallel" not in out and re.search(r"Expert parallelism is enabled", text):
+        out["enable_expert_parallel"] = (True, "Expert parallelism is enabled")
+    return out
+
+
+def _eq(key, a, b):
+    if key == "decode_context_parallel_size":  # unset on the command line == engine default 1
+        return (1 if a is None else a) == (1 if b is None else b)
+    if key == "gpu_memory_utilization" and a is not None and b is not None:
+        return abs(float(a) - float(b)) < 1e-9
+    if key == "cudagraph_capture_sizes" and a is not None and b is not None:
+        return sorted(a) == sorted(b)
+    return a == b
+
+
+def verify(profile, argv_tail, startup_log_text, models_json=None):
+    """Compare profile.expect with argv-derived values and with the startup log.
+
+    Per key: status is one of
+      verified      argv and log both agree with expectation
+      argv_only     argv agrees; the log gave no value (NOT proof of the effective setting)
+      mismatch      argv or log disagrees with expectation
+    """
+    expect = profile["expect"]
+    argv_eff = effective_from_argv(argv_tail)
+    log_eff = effective_from_log(startup_log_text or "")
+    fields = {}
+    for key, exp in expect.items():
+        a = argv_eff.get(key)
+        entry = {"expected": exp, "argv": a}
+        ok_argv = _eq(key, a, exp)
+        if key in ("enable_prefix_caching", "enable_chunked_prefill", "enforce_eager") and a is None:
+            ok_argv = False  # engine default is not an explicit setting
+        if key in log_eff:
+            lv, snip = log_eff[key]
+            entry["log"] = lv
+            entry["log_snippet"] = snip
+            ok_log = _eq(key, lv, exp)
+        else:
+            entry["log"] = "not_found"
+            ok_log = None
+        if not ok_argv or ok_log is False:
+            entry["status"] = "mismatch"
+        elif ok_log is True:
+            entry["status"] = "verified"
+        else:
+            entry["status"] = "argv_only"
+        fields[key] = entry
+
+    api = {}
+    if models_json:
+        try:
+            m = models_json["data"][0]
+            api["served_model_name"] = m.get("id")
+            api["max_model_len"] = m.get("max_model_len")
+            api["root"] = m.get("root")
+            if profile["expect"].get("max_model_len") is not None and api["max_model_len"] is not None:
+                api["max_model_len_matches"] = api["max_model_len"] == profile["expect"]["max_model_len"]
+            sn = profile.get("model", {}).get("served_name")
+            if sn:
+                api["served_name_matches"] = api["served_model_name"] == sn
+        except Exception as e:  # noqa: BLE001
+            api["error"] = repr(e)
+
+    mism = [k for k, v in fields.items() if v["status"] == "mismatch"]
+    if api.get("max_model_len_matches") is False:
+        mism.append("api.max_model_len")
+    if api.get("served_name_matches") is False:
+        mism.append("api.served_name")
+    return {
+        "ok": not mism,
+        "mismatches": mism,
+        "argv_only_fields": [k for k, v in fields.items() if v["status"] == "argv_only"],
+        "fields": fields,
+        "api_models": api,
+        "note": "argv_only means the startup log did not expose that field to the parser; it is a command-line fact, not proof of the engine's effective value.",
+    }

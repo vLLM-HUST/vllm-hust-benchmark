@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""Summarise an MMLU-Pro accuracy run (and an optional bench run) into one readable report. Read-only.
+
+  python3 mmlu_pro_summary.py --adapter .../mmlu_pro_pyramidkv.py --plan /root/runs/mmlu-pro-plan \
+      --accuracy-dir $RUN/outputs/mmlu-pro-accuracy [--bench-json $RUN/outputs/mmlu-pro.json] [--out report.json]
+
+If the run is unfinished the report covers only the finished requests and says PARTIAL: plan order is
+sorted by category, so a partial run covers only the first categories and is not a score.
+Scoring uses the upstream adapter's own score_results, unchanged.
+"""
+import argparse
+import glob
+import importlib.util
+import json
+import os
+import statistics
+import sys
+
+
+def load_adapter(path):
+    spec = importlib.util.spec_from_file_location("mmlu_adapter", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def pct(xs, q):
+    if not xs:
+        return None
+    xs = sorted(xs)
+    return xs[min(len(xs) - 1, max(0, int(round(q / 100 * len(xs) + 0.5)) - 1))]  # nearest-rank
+
+
+def dist(xs):
+    xs = [x for x in xs if x is not None]
+    if not xs:
+        return None
+    return {"n": len(xs), "mean": statistics.mean(xs), "median": statistics.median(xs),
+            "p95": pct(xs, 95), "p99": pct(xs, 99), "max": max(xs)}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--adapter", required=True)
+    ap.add_argument("--plan", required=True)
+    ap.add_argument("--accuracy-dir", required=True)
+    ap.add_argument("--bench-json")
+    ap.add_argument("--out")
+    a = ap.parse_args()
+
+    ad = load_adapter(a.adapter)
+    tasks = json.load(open(os.path.join(a.plan, "tasks.json")))  # cases minus prompt token ids
+    by_id = {t["case_id"]: t for t in tasks}
+    files = sorted(glob.glob(os.path.join(a.accuracy_dir, "requests", "*.json")))
+    results = [json.load(open(f)) for f in files]
+    results = [r for r in results if r["case_id"] in by_id]
+    cases = [by_id[r["case_id"]] for r in results]
+    scores = ad.score_results(results, cases)
+
+    ok = [r for r in results if r["success"]]
+    out_tokens = [r["usage"]["completion_tokens"] for r in ok if r.get("usage")]
+    in_tokens = [r["usage"]["prompt_tokens"] for r in ok if r.get("usage")]
+    cats = {c: {"n": v["count"], "correct": v["correct"], "accuracy": v["accuracy"]}
+            for c, v in scores["categories"].items()}
+    outcomes = scores["outcomes"]
+    rep = {
+        "complete": len(results) == len(tasks),
+        "WARNING": None if len(results) == len(tasks) else
+        "PARTIAL: %d of %d finished; plan order is sorted by category, so this is NOT a score" % (len(results), len(tasks)),
+        "accuracy": {
+            "cases": scores["count"], "correct": scores["correct"], "accuracy": scores["accuracy"],
+            "invalid_answers": scores["invalid_answers"], "transport_failures": scores["transport_failures"],
+            "length_limited": scores["length_limited"],
+            "length_limited_but_correct": sum(1 for o in outcomes if o["length_limited"] and o["correct"]),
+            "finish_reasons": {k: sum(1 for r in results if r.get("finish_reason") == k)
+                               for k in {r.get("finish_reason") for r in results}},
+        },
+        "per_category": cats,
+        "tokens": {"prompt": dist(in_tokens), "completion": dist(out_tokens)},
+        "client_timing_seconds": {"ttft": dist([r.get("ttft_seconds") for r in ok]),
+                                  "e2e": dist([r.get("e2e_seconds") for r in ok])},
+    }
+    runs = sorted(glob.glob(os.path.join(a.accuracy_dir, "run.*.json")))
+    if runs:
+        rep["run_meta"] = {k: v for k, v in json.load(open(runs[0])).items() if k in
+                           ("concurrency", "upstream_concurrency", "generation", "n_cases", "runner_sha256",
+                            "adapter_sha256", "contract_sha256", "deviations")}
+    if a.bench_json and os.path.exists(a.bench_json):
+        b = json.load(open(a.bench_json))
+        keys = ["date", "num_prompts", "completed", "failed", "duration", "request_throughput", "output_throughput",
+                "total_token_throughput", "total_input_tokens", "total_output_tokens", "mean_ttft_ms",
+                "median_ttft_ms", "p99_ttft_ms", "mean_tpot_ms", "median_tpot_ms", "p99_tpot_ms", "mean_itl_ms",
+                "p99_itl_ms", "max_concurrent_requests"]
+        rep["bench"] = {k: b.get(k) for k in keys}
+    else:
+        rep["bench"] = "not run yet"
+
+    if a.out:
+        if os.path.exists(a.out):
+            sys.exit("refusing to overwrite " + a.out)
+        json.dump(rep, open(a.out, "w"), indent=1, ensure_ascii=False)
+    print(json.dumps(rep, indent=1, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

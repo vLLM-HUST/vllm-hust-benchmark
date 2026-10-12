@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""Launch `vllm serve` from a frozen profile and capture the startup receipt.
+
+The server keeps running after this script exits (own session); stop it with
+`kill -- -$(cat <run-dir>/server.pid)` when the run is finished.
+
+Usage:
+  python3 launch_serve.py --profile ../profiles/b0_35b.profile.json --run-dir /root/runs/<dataset>/<run_id>
+Optional:
+  --image-id sha256:...   container image digest taken from `kubectl get pod -o jsonpath=...imageID`
+                          (cannot be read from inside the pod; recorded as user-supplied)
+"""
+import argparse
+import datetime
+import json
+import os
+import pathlib
+import shutil
+import signal
+import subprocess
+import sys
+import time
+import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import profile_lib as pl  # noqa: E402
+
+ENV_PREFIXES = ("ASCEND", "VLLM", "HCCL", "PYTORCH", "TASK_QUEUE", "OMP_", "HF_", "TOKENIZERS",
+                "PYTHONHASHSEED", "ATB_", "LD_LIBRARY_PATH", "PYTHONPATH", "TORCH", "NPU", "RANK", "WORLD", "MASTER")
+
+
+def die(msg, code=1):
+    print("ERROR:", msg, file=sys.stderr)
+    sys.exit(code)
+
+
+def run_text(cmd, timeout=120):
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        return (r.stdout + r.stderr).strip()
+    except Exception as e:  # noqa: BLE001
+        return "FAILED: %r" % (e,)
+
+
+def children_of(root_pid):
+    out = run_text(["ps", "-eo", "pid,ppid,args"])
+    rows = []
+    for line in out.splitlines()[1:]:
+        parts = line.split(None, 2)
+        if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit():
+            rows.append((int(parts[0]), int(parts[1]), parts[2]))
+    seen = {root_pid}
+    changed = True
+    while changed:
+        changed = False
+        for pid, ppid, _ in rows:
+            if ppid in seen and pid not in seen:
+                seen.add(pid)
+                changed = True
+    return [(pid, ppid, a) for pid, ppid, a in rows if pid in seen]
+
+
+def apply_sourced_env(env, scripts, rc):
+    """Source each shell script (e.g. the Ascend ATB set_env.sh) and merge the resulting environment.
+
+    The scripts are environment bootstrap, not serving parameters, so they are NOT part of profile.json.
+    Their path, SHA-256 and every variable they added or changed are written to receipt/sourced_env.json.
+    """
+    record = []
+    for script in scripts:
+        if not os.path.isfile(script):
+            die("--source-env script not found: %s" % script)
+        r = subprocess.run(["bash", "-c", 'source "$1" >/dev/null 2>&1; env -0', "_", script],
+                           env=env, capture_output=True, timeout=120)
+        if r.returncode != 0:
+            die("sourcing %s failed: %s" % (script, r.stderr.decode("utf8", "replace")[:300]))
+        new = dict(x.split("=", 1) for x in r.stdout.decode("utf8", "replace").split("\0") if "=" in x)
+        changed = {k: v for k, v in new.items() if env.get(k) != v and not k.startswith("_") and k not in ("SHLVL", "PWD", "OLDPWD")}
+        record.append({"script": script, "sha256": pl.sha256_file(script), "set_or_changed": changed})
+        env.update(changed)
+    (rc / "sourced_env.json").write_text(json.dumps(record, indent=1, ensure_ascii=False))
+    return env
+
+
+def read_environ(pid):
+    try:
+        raw = pathlib.Path("/proc/%d/environ" % pid).read_bytes().split(b"\0")
+    except Exception as e:  # noqa: BLE001
+        return ["FAILED: %r" % (e,)]
+    items = [x.decode("utf8", "replace") for x in raw if x]
+    keep = [x for x in items if x.startswith(ENV_PREFIXES)]
+    return sorted(keep)
+
+
+def wait_ready(proc, host, port, timeout):
+    url = "http://%s:%d/v1/models" % (host, port)
+    t0 = time.time()
+    while time.time() - t0 < timeout:
+        if proc.poll() is not None:
+            return None, "server process exited with code %s" % proc.returncode
+        try:
+            with urllib.request.urlopen(url, timeout=5) as r:
+                if r.status == 200:
+                    return json.loads(r.read().decode()), None
+        except Exception:  # noqa: BLE001
+            pass
+        time.sleep(5)
+    return None, "timeout after %ds" % timeout
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--profile", required=True)
+    ap.add_argument("--run-dir", required=True)
+    ap.add_argument("--ready-timeout", type=int, default=3600)
+    ap.add_argument("--allow-draft", action="store_true")
+    ap.add_argument("--image-id", default=None)
+    ap.add_argument("--source-env", action="append", default=[],
+                    help="shell script to source before starting (repeatable), e.g. /usr/local/Ascend/nnal/atb/set_env.sh")
+    a = ap.parse_args()
+
+    profile = json.load(open(a.profile, encoding="utf8"))
+    if profile.get("status") != "frozen" and not a.allow_draft:
+        die("profile status is %r, not 'frozen' (use --allow-draft only for dry runs)" % profile.get("status"))
+    problems = pl.profile_problems(profile)
+    if problems:
+        die("profile has undecided fields:\n  " + "\n  ".join(problems))
+
+    run = pathlib.Path(a.run_dir)
+    if run.exists() and any(run.iterdir()):
+        die("run dir exists and is not empty (never reuse or overwrite a run): %s" % run)
+    rc = run / "receipt"
+    rc.mkdir(parents=True, exist_ok=True)
+
+    # 1. freeze the profile and its hash BEFORE anything starts
+    shutil.copy(a.profile, run / "profile.json")
+    prof_sha = pl.sha256_file(run / "profile.json")
+    (rc / "profile.sha256").write_text("%s  profile.json\n" % prof_sha)
+
+    launcher = profile["launcher"]
+    argv = launcher + [profile["model"]["path"]] + profile["serve_args"]
+    exe = shutil.which(launcher[0])
+    if not exe:
+        die("%s not found in PATH" % launcher[0])
+    env = os.environ.copy()
+    if a.source_env:
+        env = apply_sourced_env(env, a.source_env, rc)
+    env.update(profile.get("env", {}))
+    host, port = pl.get_host(profile["serve_args"]), pl.get_port(profile["serve_args"])
+
+    (rc / "planned_argv.json").write_text(json.dumps(argv, indent=1))
+    t_start = datetime.datetime.now(datetime.timezone.utc)
+
+    # 2. start, log straight to a file (no pipe, nothing to lose)
+    log_path = run / "serve.log"
+    logf = open(log_path, "wb")
+    proc = subprocess.Popen(argv, env=env, stdout=logf, stderr=subprocess.STDOUT, start_new_session=True)
+    (run / "server.pid").write_text(str(proc.pid))
+    print("started pid", proc.pid, "log", log_path)
+
+    models, err = wait_ready(proc, host, port, a.ready_timeout)
+    if err:
+        logf.flush()
+        (rc / "FAILED.txt").write_text(err + "\n")
+        die("server did not become ready: " + err, 3)
+    t_ready = datetime.datetime.now(datetime.timezone.utc)
+
+    # 3. snapshot everything that proves what actually started
+    logf.flush()
+    shutil.copy(log_path, rc / "startup.log")  # frozen copy; serve.log keeps growing
+    (rc / "models.json").write_text(json.dumps(models, indent=1))
+
+    kids = children_of(proc.pid)
+    (rc / "process_tree.txt").write_text("\n".join("%d %d %s" % k for k in kids) + "\n")
+    try:
+        cmdline = pathlib.Path("/proc/%d/cmdline" % proc.pid).read_bytes().split(b"\0")
+        (rc / "argv_actual.json").write_text(json.dumps([x.decode("utf8", "replace") for x in cmdline if x], indent=1))
+    except Exception as e:  # noqa: BLE001
+        (rc / "argv_actual.json").write_text(json.dumps({"error": repr(e)}))
+    (rc / "environ_main.txt").write_text("\n".join(read_environ(proc.pid)) + "\n")
+    (rc / "environ_shell.txt").write_text("\n".join(sorted(k + "=" + v for k, v in os.environ.items()
+                                                           if k.startswith(ENV_PREFIXES))) + "\n")
+    (rc / "versions.txt").write_text(
+        "vllm_path=%s\n" % exe
+        + run_text(["vllm", "--version"]) + "\n"
+        + run_text(["sh", "-c", "pip list 2>/dev/null | grep -i -E '^(vllm|vllm[-_]ascend|vllm[-_]hust|torch|torch[-_]npu|transformers|triton)'"]) + "\n"
+        + run_text(["python3", "--version"]) + "\n"
+        + run_text(["sh", "-c", "cat /usr/local/Ascend/ascend-toolkit/latest/version.cfg 2>/dev/null | head -3"]) + "\n"
+        + run_text(["uname", "-a"]) + "\n")
+    (rc / "npu_smi.txt").write_text(run_text(["npu-smi", "info"]) + "\n")
+    (rc / "host.txt").write_text("hostname=%s\nimage_id=%s\n(image_id is user-supplied, not read from inside the pod)\n"
+                                 % (run_text(["hostname"]), a.image_id))
+    (rc / "timing.json").write_text(json.dumps({"start_utc": t_start.isoformat(), "ready_utc": t_ready.isoformat(),
+                                                "startup_seconds": (t_ready - t_start).total_seconds()}, indent=1))
+
+    # 4. verify effective == frozen profile; refuse to continue otherwise
+    actual_tail = profile["serve_args"]
+    result = pl.verify(profile, actual_tail, (rc / "startup.log").read_text(errors="replace"), models)
+    (rc / "effective.json").write_text(json.dumps(result, indent=1, ensure_ascii=False))
+    print("verify ok=%s mismatches=%s argv_only=%s" % (result["ok"], result["mismatches"], result["argv_only_fields"]))
+    if not result["ok"]:
+        os.killpg(proc.pid, signal.SIGTERM)
+        (rc / "FAILED.txt").write_text("effective config mismatch: %s\n" % result["mismatches"])
+        die("effective configuration does not match the frozen profile: %s" % result["mismatches"], 2)
+    print("receipt written to", rc, "- server still running; stop with: kill -- -%d" % proc.pid)
+
+
+if __name__ == "__main__":
+    main()

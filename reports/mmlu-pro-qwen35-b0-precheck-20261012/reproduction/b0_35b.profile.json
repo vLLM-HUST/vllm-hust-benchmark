@@ -1,0 +1,66 @@
+{
+  "profile_id": "b0-35b-v1",
+  "status": "frozen",
+  "description": "35B B0 serving profile, taken verbatim from the per-dataset 准备操作.md serve block (22 docs identical). Evidence level of the source is D (documented command), not a runtime receipt.",
+  "created": "2026-10-12",
+  "source_note": "35B B0实验验证/*/准备操作.md; GSM8K devices 0,1 confirmed by user, not in doc.",
+  "model": {
+    "path": "/models/Qwen3.5-35B-A3B",
+    "served_name": "qwen3.5-35b",
+    "expected_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "expected_revision_note": "Revision used by vllm-hust-benchmark PyramidKV reports. NOT verified for the local copy; verify with scripts/hash_model.py --expected model-hashes.json before treating as equal.",
+    "expected_hashes_file": "model-hashes.json (from vllm-hust-benchmark reports/pyramidkv-five-dataset-adaptation-20261009/reproduction/)"
+  },
+  "launcher": ["vllm", "serve"],
+  "env": {
+    "ASCEND_RT_VISIBLE_DEVICES": "0,1"
+  },
+  "serve_args": [
+    "--served-model-name", "qwen3.5-35b",
+    "--host", "127.0.0.1", "--port", "18180",
+    "--dtype", "bfloat16",
+    "--kv-cache-dtype", "auto", "--block-size", "128",
+    "--tensor-parallel-size", "2", "--enable-expert-parallel",
+    "--pipeline-parallel-size", "1", "--data-parallel-size", "1",
+    "--max-model-len", "32768", "--gpu-memory-utilization", "0.85",
+    "--max-num-seqs", "16", "--max-num-batched-tokens", "8192",
+    "--no-enable-prefix-caching", "--enable-chunked-prefill", "--no-enforce-eager",
+    "--seed", "0", "--scheduling-policy", "fcfs",
+    "--distributed-executor-backend", "mp", "--disable-custom-all-reduce",
+    "--no-trust-remote-code", "--load-format", "auto",
+    "--no-enable-log-requests", "--uvicorn-log-level", "info",
+    "--compilation-config", "{\"mode\":3,\"cudagraph_mode\":\"FULL_DECODE_ONLY\"}",
+    "--cudagraph-capture-sizes", "1", "2", "4", "8", "16"
+  ],
+  "expect": {
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 2,
+    "pipeline_parallel_size": 1,
+    "data_parallel_size": 1,
+    "enable_expert_parallel": true,
+    "decode_context_parallel_size": null,
+    "disable_custom_all_reduce": true,
+    "gpu_memory_utilization": 0.85,
+    "max_model_len": 32768,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 8192,
+    "enable_prefix_caching": false,
+    "enable_chunked_prefill": true,
+    "speculative_config": null,
+    "enforce_eager": false,
+    "compilation_mode": 3,
+    "cudagraph_mode": "FULL_DECODE_ONLY",
+    "cudagraph_capture_sizes": [1, 2, 4, 8, 16]
+  },
+  "bench": {
+    "tool": "vllm bench serve",
+    "backend": "openai-chat",
+    "endpoint": "/v1/chat/completions",
+    "dataset_name": "custom",
+    "custom_output_len": 256,
+    "num_prompts_default": 200,
+    "request_rate": "inf",
+    "temperature": 0,
+    "seed": 0
+  }
+}
