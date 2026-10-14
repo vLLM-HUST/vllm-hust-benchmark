@@ -89,3 +89,12 @@ basis. Never substitute requests/s. Use existing
 `aggregate_results.aggregate_entries(method="mean", outlier_handling="none")` for two-repeat
 producer aggregates and retain both raw entries; a latest/best front-end selection is not a repeat
 mean.
+
+October 14 vLLM 0.25.1 random-input trap: `--random-range-ratio 1` is not a fixed-length request.
+This sampler interprets the ratio as variation around the requested length and rejects the
+zero-length lower bound with no prefix. Use `--random-range-ratio 0` for fixed 8192/1024, then
+verify actual input/output counts. The 910C DSpark diagnostic scan in
+`reports/deepseek-v4-flash-910c-20261014/` preserves this corrected client. Its random-token
+acceptance length is not evidence of natural-language speculation efficiency. Target graph with
+eager draft is explicitly diagnostic, not a workaround for the repository's formal leaderboard
+eager-mode prohibition.

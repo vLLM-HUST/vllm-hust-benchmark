@@ -1,0 +1,66 @@
+# DeepSeek V4-Flash W8A8：910C 单机部署基线
+
+2026-10-14。两台同规格机器分别运行独立的单机服务，以并行补齐并发扫描； **不是双机联合服务，也不能把两台吞吐直接当作 EP32 的实测结果。**
+
+## 范围与配置
+
+- 模型：`Eco-Tech/DeepSeek-V4-Flash-0731-w8a8`，固定 revision 见 `manifest.json`。
+- 每次服务：8 个物理 910C 封装、16 个逻辑 die，每 die 64 GiB HBM；TP4 / DP4 / EP16。
+- vLLM 0.25.1 + vLLM-Ascend 0.25.1rc1 官方 A3 wheel，CANN 9.0.0。 两台的 1,967 个 vLLM、480 个 vLLM-Ascend
+  Python 源文件均通过已安装 wheel RECORD 校验。 vLLM wheel 未提供 commit ID，保留 null，不把包版本猜成某个 Git commit。
+- Target 使用 FULL_DECODE_ONLY graph，DSpark 7 个 speculative tokens，draft 为 eager。 序列并行、DSA context
+  parallel 和 shared-expert overlap 开启；prefix cache 关闭。 indexer KV cache 使用默认 BF16；这是缓存类型，不改变 W8A8
+  权重精度。
+- 每 DP `max_num_seqs=64`，总执行槽上限 256；C512 是客户端并发压力， **不意味着设备同时执行 512 条序列**。
+
+完整启动参数、环境设置和两版压测脚本保存在 `configuration/`。 原先尝试的跨机 TP4 / DP8 / EP32 启动因任务改为两台独立单机而中止，未纳入结果。
+
+## 测量方法
+
+使用原生 `vllm bench serve`，随机 token 输入 8,192、输出 1,024， `random_range_ratio=0`、seed 42、ignore
+EOS、无限到达率，以 max concurrency 控制在途请求。 每点有 8 个预热请求；初始 C32–256 使用 `max(128, 4*C)` 个正式请求， 补点使用
+`max(8, 4*C)`，各点的实际样本数单独列出。 低并发点样本有限，不能据此声称可靠的尾延迟分布。
+
+服务先通过两条生成冒烟检查。每个完成点检查失败数为 0，输入和输出 token 总数 分别严格等于请求数乘以 8,192 和 1,024，再接纳结果。
+这是一次扫描，**不是多次独立重复的均值或置信区间**。
+
+## 结果与原始证据
+
+- `summary.csv` / `summary.json`：逐点吞吐、TTFT、TPOT、请求数及计时。
+- `raw/hostXX-cN/`：原生结果、客户端日志、精确命令、返回码与运行摘要，无损保存。
+- `manifest.json`：模型、硬件、运行时、负载与回传原始档案的身份。
+- `SHA256SUMS`：本目录交付文件校验。
+
+吞吐统一指 **输出 token/s**，不把输入 token 计入。每 die 除以 16， 每物理封装除以 8，不能混用。TTFT / TPOT 单位为毫秒；TPOT 是逐请求平均输出间隔，
+不是原始 inter-token latency 的分位数。
+
+## 使用边界
+
+这批是 **diagnostic deployment baseline**，不进入 `submissions/` 或正式排行榜快照， 不冒充现有 910B2 / v0.18 固定目标同规格结果。尤其
+draft eager 的执行方式必须披露， 不能用 target graph 掩盖它。
+
+随机 token 输入并不代表业务文本：本次 DSpark 接受长度低， 例如首个 C32 点仅约 1.22。因此这组结果可用于观察该固定合成负载的并发扩展， **不能直接解释为真实业务产能、API
+收益、模型效果或 DSpark 在自然语言上的收益**。 不同机器的点保留 host 标签，交叉点不择优合并；完整原始数据允许后续重新核验。
+
+## 读取完整原生结果
+
+仓库限制新增单文件小于 1,000 KiB。原生结果的逐 token 延迟和生成文本体积较大， 因此按每 32 个请求分片 gzip，而不是丢弃明细或提高全库文件大小上限。
+`result-index.json` 明确记录分片顺序、原文件哈希与重建 JSON 的语义哈希； 原生所有字段与数组均保留。重建后的缩进与键顺序不保证和原文件逐字节相同。
+
+```bash
+python reports/deepseek-v4-flash-910c-20261014/read_result.py \
+  reports/deepseek-v4-flash-910c-20261014/raw/host06-c32/result-index.json > /tmp/result.json
+```
+
+## 当前已回传结果（19:20 检查点）
+
+以下只列已回传并校验的点。C2 曾观测到完成但原始文件尚未回传， C4/C8/C16 和第二台的 C512/C32 也尚未取得完整结果，不填入表中。 约 18:58 接入 VPN
+中断；后台实验已独立运行，不能据此宣称它们已经失败或完成。
+
+| Host |   C | 请求数 | 输出 tok/s | tok/s/die | 平均 TTFT ms | 平均 TPOT ms |
+| ---- | --: | -----: | ---------: | --------: | -----------: | -----------: |
+| 06   |   1 |      8 |      18.78 |      1.17 |       908.64 |        52.42 |
+| 06   |  32 |    128 |     312.91 |     19.56 |      4962.38 |        89.92 |
+| 06   |  64 |    256 |     491.38 |     30.71 |      3904.67 |       116.73 |
+| 06   | 128 |    512 |     682.68 |     42.67 |      5540.14 |       170.57 |
+| 06   | 256 |   1024 |     906.82 |     56.68 |      9960.54 |       260.72 |

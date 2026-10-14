@@ -1,0 +1,73 @@
+{
+  "measurement_scope": "diagnostic-deployment-baseline",
+  "official_leaderboard_admitted": false,
+  "date": "2026-10-14",
+  "model": "Eco-Tech/DeepSeek-V4-Flash-0731-w8a8",
+  "model_revision": "5012d242bcbfb2686702c3fe0c1bfea83cc7d3fb",
+  "precision": "W8A8",
+  "hardware": {
+    "model": "Ascend 910C",
+    "nodes_per_run": 1,
+    "logical_dies": 16,
+    "physical_packages": 8,
+    "hbm_gib_per_die": 64
+  },
+  "deployment": {
+    "tp": 4,
+    "dp": 4,
+    "ep": 16,
+    "api_servers": 4,
+    "dspark_tokens": 7,
+    "target_graph": "FULL_DECODE_ONLY",
+    "draft_enforce_eager": true,
+    "indexer_cache_dtype": "BF16 (default)",
+    "prefix_cache": false,
+    "max_model_len": 32768,
+    "max_num_batched_tokens": 10240,
+    "max_num_seqs_per_dp": 64
+  },
+  "runtime": {
+    "vllm": "0.25.1",
+    "vllm_commit": null,
+    "vllm_ascend": "0.25.1rc1",
+    "vllm_ascend_wheel_commit": "g9bf964cb4",
+    "variant": "A3",
+    "torch": "2.10.0",
+    "torch_npu": "2.10.0",
+    "cann": "9.0.0"
+  },
+  "workload": {
+    "dataset": "vLLM random",
+    "input_tokens": 8192,
+    "output_tokens": 1024,
+    "random_range_ratio": 0,
+    "seed": 42,
+    "ignore_eos": true,
+    "request_rate": "inf",
+    "num_warmups": 8,
+    "request_count_initial": "max(128, 4*C)",
+    "request_count_extended": "max(8, 4*C)"
+  },
+  "source_archives": [
+    {
+      "name": "single-c32-evidence.tgz",
+      "sha256": "1dc72b72a993ba554d91b7468c056a687d6520e9b32a3d4b25e4c3bb779a5526"
+    },
+    {
+      "name": "single-c64-evidence.tgz",
+      "sha256": "0681d5acadc0fe69adf0f1f97af04ccb5541d68fb6fed8507a95ec4e1d2ebcea"
+    },
+    {
+      "name": "single-c128-evidence.tgz",
+      "sha256": "8f3cc14c7a761f36a95096906bbfe5e9c77c1332c96a845311754bffdddc1e4f"
+    },
+    {
+      "name": "single-final-evidence.tgz",
+      "sha256": "e5cb556f10dcf2acab2c66e81bd399b04d9b2a01b31ef36d3ac7303c5319b147"
+    },
+    {
+      "name": "low-c1-evidence.tgz",
+      "sha256": "7183ceb3bb0b3eaa430cdac034b8107c52e0830c6ac02d7f2e3c7686ec0c6b11"
+    }
+  ]
+}
