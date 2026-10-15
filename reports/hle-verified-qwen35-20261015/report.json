@@ -1,0 +1,595 @@
+{
+  "schema": 1,
+  "run_id": "hle-bench-20261015T013255Z",
+  "model": "Qwen3.5-35B-A3B",
+  "measurement_date_utc": "2026-10-14/15",
+  "formal_acceptance": false,
+  "paired_b1": null,
+  "trial_count": 1,
+  "summaries": {
+    "gold": {
+      "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+      "scoring_policy": "strict_json",
+      "selection": {
+        "subsets": [
+          "gold"
+        ],
+        "modality": "all",
+        "excluded": 0
+      },
+      "scope": "complete_selected_plan",
+      "judge_model": "qwen3.5-35b",
+      "solver_model": "qwen3.5-35b",
+      "contract_sha256": "ddef00f50918ced8ba6fcd85ed2e45374c6ae632e2a50e7a6d0fef91869035f3",
+      "solver_index_sha256": "4729d6e8d9bffdba4b2fdb7380ef8c52f02d64673802f6d426ccb432560e0b6a",
+      "judge_index_sha256": "2f676b9d7ebce4cd79e5c5baccd3f17fe46ef9215f4854cb7a3fc46d2324bf85",
+      "tracks": {
+        "gold": {
+          "total": 668,
+          "graded": 636,
+          "successes": 156,
+          "accuracy": 0.23353293413173654,
+          "unresolved": 32,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.03208401105484693,
+          "solver_failures": 0,
+          "judge_invalid": 32,
+          "judge_transport_failures": 0,
+          "solver_truncated": 383,
+          "judge_truncated": 32
+        }
+      },
+      "groups": {
+        "gold/text": {
+          "total": 575,
+          "graded": 546,
+          "successes": 137,
+          "accuracy": 0.2382608695652174,
+          "unresolved": 29,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.03482183418452217,
+          "solver_failures": 0,
+          "judge_invalid": 29,
+          "judge_transport_failures": 0,
+          "solver_truncated": 374,
+          "judge_truncated": 29
+        },
+        "gold/image": {
+          "total": 93,
+          "graded": 90,
+          "successes": 19,
+          "accuracy": 0.20430107526881722,
+          "unresolved": 3,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.08194534893600774,
+          "solver_failures": 0,
+          "judge_invalid": 3,
+          "judge_transport_failures": 0,
+          "solver_truncated": 9,
+          "judge_truncated": 3
+        }
+      },
+      "subjects": {
+        "gold/Biology/Medicine": {
+          "total": 97,
+          "graded": 96,
+          "successes": 15,
+          "accuracy": 0.15463917525773196,
+          "unresolved": 1,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.07195335117226712,
+          "solver_failures": 0,
+          "judge_invalid": 1,
+          "judge_transport_failures": 0,
+          "solver_truncated": 14,
+          "judge_truncated": 1
+        },
+        "gold/Chemistry": {
+          "total": 20,
+          "graded": 20,
+          "successes": 3,
+          "accuracy": 0.15,
+          "unresolved": 0,
+          "complete_grading": true,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.15649345034217885,
+          "solver_failures": 0,
+          "judge_invalid": 0,
+          "judge_transport_failures": 0,
+          "solver_truncated": 7,
+          "judge_truncated": 0
+        },
+        "gold/Computer Science/AI": {
+          "total": 86,
+          "graded": 80,
+          "successes": 15,
+          "accuracy": 0.1744186046511628,
+          "unresolved": 6,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.08020163064647347,
+          "solver_failures": 0,
+          "judge_invalid": 6,
+          "judge_transport_failures": 0,
+          "solver_truncated": 51,
+          "judge_truncated": 6
+        },
+        "gold/Engineering": {
+          "total": 25,
+          "graded": 25,
+          "successes": 7,
+          "accuracy": 0.28,
+          "unresolved": 0,
+          "complete_grading": true,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.17600756347384622,
+          "solver_failures": 0,
+          "judge_invalid": 0,
+          "judge_transport_failures": 0,
+          "solver_truncated": 11,
+          "judge_truncated": 0
+        },
+        "gold/Humanities/Social Science": {
+          "total": 57,
+          "graded": 57,
+          "successes": 11,
+          "accuracy": 0.19298245614035087,
+          "unresolved": 0,
+          "complete_grading": true,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.10245167101734096,
+          "solver_failures": 0,
+          "judge_invalid": 0,
+          "judge_transport_failures": 0,
+          "solver_truncated": 19,
+          "judge_truncated": 0
+        },
+        "gold/Math": {
+          "total": 271,
+          "graded": 255,
+          "successes": 89,
+          "accuracy": 0.3284132841328413,
+          "unresolved": 16,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.055915579776097644,
+          "solver_failures": 0,
+          "judge_invalid": 16,
+          "judge_transport_failures": 0,
+          "solver_truncated": 215,
+          "judge_truncated": 16
+        },
+        "gold/Other": {
+          "total": 62,
+          "graded": 54,
+          "successes": 10,
+          "accuracy": 0.16129032258064516,
+          "unresolved": 8,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.0915525002027645,
+          "solver_failures": 0,
+          "judge_invalid": 8,
+          "judge_transport_failures": 0,
+          "solver_truncated": 35,
+          "judge_truncated": 8
+        },
+        "gold/Physics": {
+          "total": 50,
+          "graded": 49,
+          "successes": 6,
+          "accuracy": 0.12,
+          "unresolved": 1,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.0900747422977163,
+          "solver_failures": 0,
+          "judge_invalid": 1,
+          "judge_transport_failures": 0,
+          "solver_truncated": 31,
+          "judge_truncated": 1
+        }
+      },
+      "calibration_error": null,
+      "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+    },
+    "revision": {
+      "protocol": "HLE original evaluation prompts/schema on HLE-Verified; Qwen substitute; single trial; not official leaderboard replication",
+      "scoring_policy": "strict_json",
+      "selection": {
+        "subsets": [
+          "revision"
+        ],
+        "modality": "all",
+        "excluded": 0
+      },
+      "scope": "complete_selected_plan",
+      "judge_model": "qwen3.5-35b",
+      "solver_model": "qwen3.5-35b",
+      "contract_sha256": "dde61103b4b064db6cd26e4bbff377682c1e4e5c2414e82926251fa7bb072a89",
+      "solver_index_sha256": "86fe9d90c8489eb8b5047dc5bb6609621dc7046ad7229e46da42ddeb32e89e20",
+      "judge_index_sha256": "e33cdedece1b78bf4bcec516e78c045773cc3de8f860a4c64dfa17c24fdbc291",
+      "tracks": {
+        "revision": {
+          "total": 1143,
+          "graded": 1103,
+          "successes": 313,
+          "accuracy": 0.27384076990376205,
+          "unresolved": 40,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.025852225812960747,
+          "solver_failures": 0,
+          "judge_invalid": 40,
+          "judge_transport_failures": 0,
+          "solver_truncated": 688,
+          "judge_truncated": 40
+        }
+      },
+      "groups": {
+        "revision/text": {
+          "total": 1025,
+          "graded": 986,
+          "successes": 292,
+          "accuracy": 0.2848780487804878,
+          "unresolved": 39,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.027632086917668795,
+          "solver_failures": 0,
+          "judge_invalid": 39,
+          "judge_transport_failures": 0,
+          "solver_truncated": 674,
+          "judge_truncated": 39
+        },
+        "revision/image": {
+          "total": 118,
+          "graded": 117,
+          "successes": 21,
+          "accuracy": 0.17796610169491525,
+          "unresolved": 1,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.0690126294695939,
+          "solver_failures": 0,
+          "judge_invalid": 1,
+          "judge_transport_failures": 0,
+          "solver_truncated": 14,
+          "judge_truncated": 1
+        }
+      },
+      "subjects": {
+        "revision/Biology/Medicine": {
+          "total": 174,
+          "graded": 174,
+          "successes": 74,
+          "accuracy": 0.42528735632183906,
+          "unresolved": 0,
+          "complete_grading": true,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.07345951535713673,
+          "solver_failures": 0,
+          "judge_invalid": 0,
+          "judge_transport_failures": 0,
+          "solver_truncated": 42,
+          "judge_truncated": 0
+        },
+        "revision/Chemistry": {
+          "total": 126,
+          "graded": 126,
+          "successes": 20,
+          "accuracy": 0.15873015873015872,
+          "unresolved": 0,
+          "complete_grading": true,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.0638069791625423,
+          "solver_failures": 0,
+          "judge_invalid": 0,
+          "judge_transport_failures": 0,
+          "solver_truncated": 45,
+          "judge_truncated": 0
+        },
+        "revision/Computer Science/AI": {
+          "total": 103,
+          "graded": 98,
+          "successes": 21,
+          "accuracy": 0.20388349514563106,
+          "unresolved": 5,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.0778066662821344,
+          "solver_failures": 0,
+          "judge_invalid": 5,
+          "judge_transport_failures": 0,
+          "solver_truncated": 66,
+          "judge_truncated": 5
+        },
+        "revision/Math": {
+          "total": 714,
+          "graded": 680,
+          "successes": 188,
+          "accuracy": 0.26330532212885155,
+          "unresolved": 34,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.0323058037418868,
+          "solver_failures": 0,
+          "judge_invalid": 34,
+          "judge_transport_failures": 0,
+          "solver_truncated": 524,
+          "judge_truncated": 34
+        },
+        "revision/Physics": {
+          "total": 26,
+          "graded": 25,
+          "successes": 10,
+          "accuracy": 0.38461538461538464,
+          "unresolved": 1,
+          "complete_grading": false,
+          "accuracy_note": "all selected cases in denominator; unresolved are nonsuccess, not confirmed incorrect",
+          "wald_95_half_width": 0.1870062152268066,
+          "solver_failures": 0,
+          "judge_invalid": 1,
+          "judge_transport_failures": 0,
+          "solver_truncated": 11,
+          "judge_truncated": 1
+        }
+      },
+      "calibration_error": null,
+      "calibration_note": "not implemented: pinned upstream binning omits final bin and crashes below 100 grades; raw confidence preserved; no silent replacement metric"
+    }
+  },
+  "performance": {
+    "gold-text": {
+      "completed": 200,
+      "failed": 0,
+      "duration": 127.83905478846282,
+      "request_throughput": 1.5644671366738667,
+      "output_throughput": 381.3232198928883,
+      "total_token_throughput": 787.7170256509753,
+      "mean_ttft_ms": 57848.60939637758,
+      "mean_tpot_ms": 38.7843622130921,
+      "total_input_tokens": 51953,
+      "total_output_tokens": 48748,
+      "n": 200,
+      "modality": "text",
+      "input_tokens_verified": true,
+      "result_sha256": "4138f9c3d988a5f90248a3429c1f64f8c3f8109def31041d7dca601a5c2e46bc"
+    },
+    "revision-text": {
+      "completed": 200,
+      "failed": 0,
+      "duration": 118.67140726279467,
+      "request_throughput": 1.685325931604614,
+      "output_throughput": 422.8988360175458,
+      "total_token_throughput": 1021.4929004048727,
+      "mean_ttft_ms": 52608.90130646527,
+      "mean_tpot_ms": 36.82196080541311,
+      "total_input_tokens": 71036,
+      "total_output_tokens": 50186,
+      "n": 200,
+      "modality": "text",
+      "input_tokens_verified": true,
+      "result_sha256": "2b9f4977abc3fedec0e94c3b1a1968eef0a127fae572b81718e27144e6ec7dfd"
+    },
+    "gold-image": {
+      "completed": 93,
+      "failed": 0,
+      "duration": 71.14836968295276,
+      "request_throughput": 1.3071276322201226,
+      "output_throughput": 314.48366420349726,
+      "total_token_throughput": 1700.4324981600762,
+      "mean_ttft_ms": 28900.694059228066,
+      "mean_tpot_ms": 52.212642470770064,
+      "total_input_tokens": 98608,
+      "total_output_tokens": 22375,
+      "n": 93,
+      "modality": "image",
+      "input_tokens_verified": true,
+      "result_sha256": "3b97e5756e888af23331d5771a703584c7b64950717379fc30209514c5d0f441"
+    },
+    "revision-image": {
+      "completed": 118,
+      "failed": 0,
+      "duration": 89.24074667040259,
+      "request_throughput": 1.3222659424378802,
+      "output_throughput": 330.82421541180963,
+      "total_token_throughput": 1913.3524356383527,
+      "mean_ttft_ms": 34361.77829950574,
+      "mean_tpot_ms": 42.60500427644276,
+      "total_input_tokens": 141226,
+      "total_output_tokens": 29523,
+      "n": 118,
+      "modality": "image",
+      "input_tokens_verified": true,
+      "result_sha256": "173dc3a8f31c4368a4f7b90d8d6b3701311c175dfe587d198fbb83edd8d9ca20"
+    }
+  },
+  "runtime": {
+    "fields": {
+      "dtype": {
+        "value": "bfloat16",
+        "status": "verified"
+      },
+      "tensor_parallel_size": {
+        "value": 2,
+        "status": "verified"
+      },
+      "pipeline_parallel_size": {
+        "value": 1,
+        "status": "verified"
+      },
+      "data_parallel_size": {
+        "value": 1,
+        "status": "verified"
+      },
+      "enable_expert_parallel": {
+        "value": true,
+        "status": "verified"
+      },
+      "decode_context_parallel_size": {
+        "value": 1,
+        "status": "verified"
+      },
+      "disable_custom_all_reduce": {
+        "value": true,
+        "status": "verified"
+      },
+      "gpu_memory_utilization": {
+        "value": 0.85,
+        "status": "verified"
+      },
+      "max_model_len": {
+        "value": 65536,
+        "status": "verified"
+      },
+      "max_num_seqs": {
+        "value": 16,
+        "status": "verified"
+      },
+      "max_num_batched_tokens": {
+        "value": 8192,
+        "status": "verified"
+      },
+      "enable_prefix_caching": {
+        "value": false,
+        "status": "verified"
+      },
+      "enable_chunked_prefill": {
+        "value": true,
+        "status": "verified"
+      },
+      "speculative_config": {
+        "value": null,
+        "status": "verified"
+      },
+      "enforce_eager": {
+        "value": false,
+        "status": "verified"
+      },
+      "compilation_mode": {
+        "value": 3,
+        "status": "verified"
+      },
+      "cudagraph_mode": {
+        "value": "FULL_DECODE_ONLY",
+        "status": "verified"
+      },
+      "cudagraph_capture_sizes": {
+        "value": [
+          1,
+          2,
+          4,
+          8,
+          16
+        ],
+        "status": "verified"
+      },
+      "structured_outputs_backend": {
+        "value": "xgrammar",
+        "status": "verified"
+      },
+      "structured_outputs_disable_any_whitespace": {
+        "value": true,
+        "status": "verified"
+      }
+    },
+    "effective_sha256": "a8e9f014d3a089298e618acea723482b55d46747d8f11f76db97b118935bf3f6",
+    "startup_log_sha256": "bec0e3d7cea0047538b4782f251a8139988ac3d80ccf47fc002de67ee10b0a90"
+  },
+  "bindings": {
+    "gold": {
+      "tool": "hust-eval-hle-verified 0.1.0",
+      "run_id": "full-gold",
+      "profile_sha256": "550272543246714dcb5c980c1c8a7058f4bd09551686ec3d6937033833493f26",
+      "evidence_bundle_sha256": "bcfe373bfd9abc7923fd78120abaf0147ed52585355efde1179661054e572b93",
+      "effective_json_sha256": "a8e9f014d3a089298e618acea723482b55d46747d8f11f76db97b118935bf3f6",
+      "startup_log_sha256": "bec0e3d7cea0047538b4782f251a8139988ac3d80ccf47fc002de67ee10b0a90",
+      "table_path": "hle-verified-results.md",
+      "table_sha256": "f74d701e038e94d93f73f9351c8d06fb8f913a6549d1a6c4eb32d12a3379f1ed",
+      "sealed_utc": "2026-10-14T12:49:01.862883+00:00",
+      "evidence_levels": "D=documented command; R=result files observed; S=environment snapshot",
+      "note": "plain SHA-256 listing; not RFC 8785 canonical, not signed",
+      "manifest_sha256": "e5fa4355cb4034c273fcd3c784e2a36bad66f5ceeb2af63717b3a38131252794"
+    },
+    "revision": {
+      "tool": "hust-eval-hle-verified 0.1.0",
+      "run_id": "full-revision",
+      "profile_sha256": "550272543246714dcb5c980c1c8a7058f4bd09551686ec3d6937033833493f26",
+      "evidence_bundle_sha256": "8b75c7d3dd9355cab6484e0cec82a779f0b4b905ff52db6a8cbfee641eacf1e6",
+      "effective_json_sha256": "a8e9f014d3a089298e618acea723482b55d46747d8f11f76db97b118935bf3f6",
+      "startup_log_sha256": "bec0e3d7cea0047538b4782f251a8139988ac3d80ccf47fc002de67ee10b0a90",
+      "table_path": "hle-verified-results.md",
+      "table_sha256": "ecfca315c3da1aec4c136a71f801176c5652bd25f1c814d3f48a6db6f8eef8aa",
+      "sealed_utc": "2026-10-14T20:10:44.647549+00:00",
+      "evidence_levels": "D=documented command; R=result files observed; S=environment snapshot",
+      "note": "plain SHA-256 listing; not RFC 8785 canonical, not signed",
+      "manifest_sha256": "83dde635173f5643ac278f4dd578d40b64c37ffb530fa8cd870881d46d3957c0"
+    },
+    "bench": {
+      "tool": "hust-eval-hle-verified 0.1.0",
+      "run_id": "hle-bench-20261015T013255Z",
+      "profile_sha256": "550272543246714dcb5c980c1c8a7058f4bd09551686ec3d6937033833493f26",
+      "evidence_bundle_sha256": "6a63587a6e5817c3532ced106dbab1f56832cf770c413ffcf720934d47f65193",
+      "effective_json_sha256": "a8e9f014d3a089298e618acea723482b55d46747d8f11f76db97b118935bf3f6",
+      "startup_log_sha256": "bec0e3d7cea0047538b4782f251a8139988ac3d80ccf47fc002de67ee10b0a90",
+      "table_path": "hle-bench-results.md",
+      "table_sha256": "4423fc50fa95c2ff3ab810f7a5fad9ea54a1f35fd37b5f81d4c128d703a43f1b",
+      "sealed_utc": "2026-10-15T01:42:43.307807+00:00",
+      "evidence_levels": "D=documented command; R=result files observed; S=environment snapshot",
+      "note": "plain SHA-256 listing; not RFC 8785 canonical, not signed",
+      "manifest_sha256": "238f8d90d7cc56cc2181425ff2cf3eca625a86b867886e03959c6e53c7803c3a"
+    }
+  },
+  "generation": {
+    "solver": {
+      "concurrency": 16,
+      "timeout": 1800,
+      "request": {
+        "temperature": 0,
+        "seed": 17,
+        "max_tokens": 16384,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      }
+    },
+    "judge": {
+      "concurrency": 16,
+      "timeout": 1800,
+      "request": {
+        "temperature": 0,
+        "seed": 17,
+        "max_tokens": 8192,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      }
+    }
+  },
+  "dataset": {
+    "dataset": "SKYLENAGE-AI/HLE-Verified",
+    "declared_revision": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0"
+  },
+  "client_versions": {
+    "gold": "a829660ca4d91a103ad77f7cc768bda140974723",
+    "revision": "a829660ca4d91a103ad77f7cc768bda140974723",
+    "bench": "6d0358cba5f7f136123efae90c3ffe6072183113"
+  },
+  "limitations": [
+    "Author HLE-Verified Gold 668 and Revision 1143; Uncertain 689 excluded. Not the original unmodified HLE dataset.",
+    "Original HLE system/judge prompts and schema; same Qwen solver and substitute judge, one trial. Not official leaderboard replication or V5.5 acceptance.",
+    "Strict JSON grading requires normal completion; all 72 length-ended judges remain unresolved in the full denominator. No partial JSON rescue or retry.",
+    "Solver length-ended outputs are sent to judge, not automatically marked incorrect. Gold 383 and Revision 688 solver truncations materially limit interpretation.",
+    "Bench: raw user question plus real images; no accuracy system prompt; template once, thinking=false, max output256, temperature0, request seed0, EOS allowed, rate inf, no client concurrency cap; server max_num_seqs16.",
+    "Text selection floor(i*N/200) from frozen modality-filtered order; images all93/all118, no repetitions. No correctness-based selection.",
+    "Per-request input token counts match same-server /tokenize including images. No separate visual token count claimed. TTFT includes burst queueing.",
+    "Reused service after accuracy, request validation and tokenization preflight; not a cold-cache run, not paired B1 and not three-repeat acceptance.",
+    "Full weights were inventoried but not hashed; model small files matched. Image digest and verified local model revision are unavailable.",
+    "Public evidence omits question/image/answer payloads and environment dumps. Original raw records remain private and cannot be independently regraded from this package."
+  ]
+}
