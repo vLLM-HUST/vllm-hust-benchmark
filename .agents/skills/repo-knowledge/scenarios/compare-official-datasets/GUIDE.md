@@ -98,3 +98,41 @@ verify actual input/output counts. The 910C DSpark diagnostic scan in
 acceptance length is not evidence of natural-language speculation efficiency. Target graph with
 eager draft is explicitly diagnostic, not a workaround for the repository's formal leaderboard
 eager-mode prohibition.
+
+## Repeat website task accuracy on BetterScale
+
+Before reusing dataset readiness, inspect the **current deployed handoff section and its manifest**.
+The dataset-program snapshot and a local website checkout can lag independent measured handoffs;
+October15 HLE Gold/Revision results existed while the older program still said contract-pending. Do
+not infer absence of measurements from that planning status.
+
+The archived MMLU report binds the original adapter and plain-server transport. Its full
+`cases.json` can be reconstructed from pinned Parquet/reference files plus the model tokenizer;
+verify exact byte identity `f77a7e5e6fd96fbbf46be7ab11f360309554105e97921805f02d1c93fc05fcf3` before
+claiming prompt parity. The200 bench IDs are published separately; re-encode each raw prompt against
+its accuracy IDs. Accuracy and bench use different wire contracts.
+
+Frontier's selected evidence contains its complete frozen0.3.0 client. Retain `mmlu_extract_first`,
+including length-ended complete VERDICT extraction. `invalid_judge` with HTTP200 is an unresolved
+grade, **not a transport failure**; keep it in the denominator, do not retry or stop the campaign as
+though the engine failed. Solver/grade clients use explicit thinking=false; the separate bench uses
+the server-default template.
+
+HLE's frozen b705e0f revision belongs to the GitHub source, not the similarly named HF revision.
+Gold/Revision source byte hashes and original scoring modules are in the public evidence; this is
+not a complete public client Git checkout. The original BetterScale31fe12b route rejected image
+admission with `Outside Qwen35 baseline qualification: text-only input`. This historical failure
+does not characterize later multimodal patches; do not silently drop images and report full-subset
+accuracy.
+
+Vendor ATB set_env.sh can read unset ZSH_VERSION: source the environment without shell nounset.
+Verify a completed request, not merely a background PID, before saying full evaluation is live. Use
+task-local dependency targets rather than changing the serving environment.
+
+The October15 BetterScale31fe12b BF16/TP2/MTP2 FULL E16/R36 observation is archived at
+`reports/betterscale-dataset-validation-20261015/`: public summaries, payload-free outcomes and
+integrity bindings to the private full-response archives. Its README records input reconstruction,
+reaggregation and deployment boundaries. MMLU9611/12032; Frontier Olympiad63/100, Research2/60,
+valid-grade mean2.62035. These are single-run same-client results, not isolated-optimization
+causality or proof of universal quality preservation. User deferred HLE to a separate multimodal
+workstream.
