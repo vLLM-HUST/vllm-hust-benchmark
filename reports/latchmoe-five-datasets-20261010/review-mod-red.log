@@ -1,0 +1,44 @@
+..FF......                                                               [100%]
+================================== FAILURES ===================================
+_ test_malformed_text_config_is_not_silently_treated_as_outer_model[invalid1-file] _
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-244/test_malformed_text_config_is_2')
+invalid = {}, source = 'file'
+
+    @pytest.mark.parametrize("source", ["file", "override"])
+    @pytest.mark.parametrize("invalid", [None, {}, [], "bad", 7])
+    def test_malformed_text_config_is_not_silently_treated_as_outer_model(
+        tmp_path, invalid, source
+    ):
+        wrapper = {**QWEN3_MOE_CONFIG, "text_config": invalid}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+        args = SimpleNamespace(model=str(tmp_path))
+        if source == "override":
+            args._ascend_moe_offload_model_config = wrapper
+>       with pytest.raises(ValueError, match="text_config"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_autoconfig.py:130: Failed
+_ test_malformed_text_config_is_not_silently_treated_as_outer_model[invalid1-override] _
+
+tmp_path = WindowsPath('C:/Users/Administrator/AppData/Local/Temp/pytest-of-Administrator/pytest-244/test_malformed_text_config_is_3')
+invalid = {}, source = 'override'
+
+    @pytest.mark.parametrize("source", ["file", "override"])
+    @pytest.mark.parametrize("invalid", [None, {}, [], "bad", 7])
+    def test_malformed_text_config_is_not_silently_treated_as_outer_model(
+        tmp_path, invalid, source
+    ):
+        wrapper = {**QWEN3_MOE_CONFIG, "text_config": invalid}
+        (tmp_path / "config.json").write_text(json.dumps(wrapper))
+        args = SimpleNamespace(model=str(tmp_path))
+        if source == "override":
+            args._ascend_moe_offload_model_config = wrapper
+>       with pytest.raises(ValueError, match="text_config"):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+tests\test_autoconfig.py:130: Failed
+=========================== short test summary info ===========================
+FAILED tests/test_autoconfig.py::test_malformed_text_config_is_not_silently_treated_as_outer_model[invalid1-file]
+FAILED tests/test_autoconfig.py::test_malformed_text_config_is_not_silently_treated_as_outer_model[invalid1-override]
+2 failed, 8 passed, 32 deselected in 0.10s

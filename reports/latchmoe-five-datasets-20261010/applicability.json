@@ -1,0 +1,154 @@
+{
+  "schema_version": "latchmoe-applicability-audit-v1",
+  "generated_date": "2026-10-10",
+  "review_state": "awaiting-maintainer-review",
+  "target_model": "Qwen/Qwen3.5-35B-A3B",
+  "model_revision": "b3a3339bdfee46ccfa27a6c576d12c8eacabfe85",
+  "benchmark_base": "b32fcbdaf8d3237936b35f9f4ba441bf2d64b361",
+  "mod_base": "f2cc19ca6d48a94d2da88378f7c1e2621c6f58b9",
+  "common_blockers": [
+    "Current container has one 64GiB 910B2; mandatory paired cell needs two devices/TP2.",
+    "Current LatchMoE capability/seam rejects TP2; indexed eager/graph is single-NPU only; real Qwen3.5 qualification absent.",
+    "Five-dataset canonical asset bundle is not mounted at the standard path in this workspace; source-frozen elsewhere is not local verification.",
+    "Signed final release/OCI digest, reviewed execution contract and live measured-window telemetry are not supplied."
+  ],
+  "owners": {
+    "runtime_and_resource_coordination": "Li-changwu",
+    "validation": "pluviophile-chen",
+    "judge_budget_and_rights": "Project owner and canonical evaluator maintainer (approval required)",
+    "sandbox": "Platform administrator and evaluator maintainer"
+  },
+  "rows": [
+    {
+      "dataset": "MMLU-Pro",
+      "track": null,
+      "applicability": "blocked",
+      "mod_state": "not_run",
+      "source": "TIGER-Lab/MMLU-Pro",
+      "revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+      "source_scope": "12,032 test / 70 validation",
+      "source_identity_basis": "canonical audit at benchmark_base; not independently verified data in this workspace",
+      "adapter_status": "MMLU scorer-only connector tested; full/named subset/prompt/sampling contract must be frozen before outputs",
+      "primary_metric": "accuracy",
+      "quality_score": null,
+      "blockers": [
+        "Full actual B0/B1 outputs absent."
+      ],
+      "dependencies": [
+        "LatchMoE#98",
+        "LatchMoE#99"
+      ],
+      "owner": "Li-changwu / pluviophile-chen"
+    },
+    {
+      "dataset": "HLE-Verified",
+      "track": null,
+      "applicability": "blocked",
+      "mod_state": "not_run",
+      "source": "SKYLENAGE-AI/HLE-Verified (GitHub)",
+      "revision": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+      "source_scope": "2,500 rows; Gold668/Revision1143/Uncertain689",
+      "source_identity_basis": "canonical audit at benchmark_base; not independently verified data in this workspace",
+      "adapter_status": "Source/modality audit reusable; no frozen runner/judge",
+      "primary_metric": "pinned verified task score",
+      "quality_score": null,
+      "blockers": [
+        "Rights and full vs Gold scope unresolved.",
+        "Gold includes93 image rows; image protocol and calibrated judge missing."
+      ],
+      "dependencies": [
+        "LatchMoE#98",
+        "LatchMoE#99"
+      ],
+      "owner": "Li-changwu / pluviophile-chen"
+    },
+    {
+      "dataset": "SWE-bench-Pro",
+      "track": null,
+      "applicability": "blocked",
+      "mod_state": "not_run",
+      "source": "ScaleAI/SWE-bench_Pro (HF)",
+      "revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+      "source_scope": "Pro V2 default642",
+      "source_identity_basis": "canonical audit at benchmark_base; not independently verified data in this workspace",
+      "adapter_status": "Frozen source/harness audit reusable",
+      "primary_metric": "fresh-sandbox resolved rate",
+      "quality_score": null,
+      "blockers": [
+        "No Docker/Podman/socket/Harbor in workspace.",
+        "AMD64 image backend, task rights, agent/tool budget and independent fresh-sandbox regrade missing."
+      ],
+      "dependencies": [
+        "LatchMoE#98",
+        "LatchMoE#99"
+      ],
+      "owner": "Li-changwu / pluviophile-chen"
+    },
+    {
+      "dataset": "FrontierScience",
+      "track": "olympiad",
+      "applicability": "blocked",
+      "mod_state": "not_run",
+      "source": "openai/frontierscience",
+      "revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+      "source_scope": "100 rows",
+      "source_identity_basis": "canonical audit at benchmark_base; not independently verified data in this workspace",
+      "adapter_status": "Candidate input/solver/judge primitives reusable",
+      "primary_metric": "separate Olympiad judged accuracy",
+      "quality_score": null,
+      "blockers": [
+        "Real pinned judge and calibration receipt/budget missing."
+      ],
+      "dependencies": [
+        "LatchMoE#98",
+        "LatchMoE#99"
+      ],
+      "owner": "Li-changwu / pluviophile-chen"
+    },
+    {
+      "dataset": "FrontierScience",
+      "track": "research",
+      "applicability": "blocked",
+      "mod_state": "not_run",
+      "source": "openai/frontierscience",
+      "revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+      "source_scope": "60 source rows/59 unique group IDs; keep all60",
+      "source_identity_basis": "canonical audit at benchmark_base; not independently verified data in this workspace",
+      "adapter_status": "Candidate input/solver/judge primitives reusable",
+      "primary_metric": "separate Research rubric/threshold score",
+      "quality_score": null,
+      "blockers": [
+        "Real pinned rubric judge/calibration/budget missing; candidate Research threshold7/10 is not automatically approved."
+      ],
+      "dependencies": [
+        "LatchMoE#98",
+        "LatchMoE#99"
+      ],
+      "owner": "Li-changwu / pluviophile-chen"
+    },
+    {
+      "dataset": "Terminal-Bench 2.1",
+      "track": null,
+      "applicability": "blocked",
+      "mod_state": "not_run",
+      "source": "harbor-framework/terminal-bench-2-1",
+      "revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+      "source_scope": "89 tasks",
+      "source_identity_basis": "canonical audit at benchmark_base; not independently verified data in this workspace",
+      "adapter_status": "Harbor0.24.0/Terminus-2 candidate builder/source audit reusable",
+      "primary_metric": "Harbor task resolution / verifier reward",
+      "quality_score": null,
+      "blockers": [
+        "No Docker/Podman/socket/Harbor in workspace.",
+        "AMD64 sandbox/image layers, task rights/resources, real verifier execution and Latch-specific model/job configuration missing."
+      ],
+      "dependencies": [
+        "LatchMoE#98",
+        "LatchMoE#99"
+      ],
+      "owner": "Li-changwu / pluviophile-chen"
+    }
+  ],
+  "optimization_claims": [],
+  "official_quality_scores": false
+}
