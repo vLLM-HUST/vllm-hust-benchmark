@@ -1,0 +1,26 @@
+# SWE-smith-tranjactory：离线三种子窗口结果
+
+目标：96条多轮Agent program在time0整批到达，客户端不限流，通过Controller准入、暂停/恢复改善KV竞争下的执行效率。每条program保留原始模型调用依赖、轮次长度和工具等待。
+
+| 配置维度 | 冻结值 |
+|---|---|
+| 模型/精度/设备 | Qwen3.5-35B-A3B / BF16 / Ascend910B2 / 单个TP2后端 |
+| 输入 | 96完整输入program、2318轮；仅arrival_time归零，其余历史兼容输入逐轮不变 |
+| 客户端 | time0整批到达；无客户端并发上限 |
+| 后端 | APC开启；KV配置512MiB；max_model_len16384；max_num_seqs16；batch tokens8192 |
+| Controller | 容量49152、每program buffer14335、周期0.5秒，固定官方核心 |
+| 测量 | seed11/17/23，每侧180秒；同代理路径调度开/关，分别重置prefix cache |
+| input SHA256 | 0d95fa124751067178645e561e5ec99b9442908242ded8da680c383f8bbdc256 |
+
+| run | seed | 顺序 | OFF tokens/s | ON tokens/s | 配对倍数 | OFF/ON完成调用 | OFF/ON抢占 |
+|---|---:|---|---:|---:|---:|---:|---:|
+| r15 | 11 | OFF→ON | 15.6576 | 27.7241 | 1.7706x | 48/72 | 246/0 |
+| r17 | 17 | OFF→ON | 15.7981 | 30.2828 | 1.9169x | 49/80 | 250/0 |
+| r18 | 23 | ON→OFF | 15.7828 | 34.9097 | 2.2119x | 47/68 | 248/0 |
+| r16 | 11 | ON→OFF | 15.7807 | 28.3378 | 1.7957x | 48/83 | 249/0 |
+
+结论：预定主点seed11/r15、seed17/r17、seed23/r18的配对输出吞吐比中位数为1.916861倍（提升91.69%）。r16仅为seed11顺序复测，单列且不重复计入中位数。各侧180秒，三seed主对照共18分钟测量，顺序复测额外6分钟；初始化/清理另计。全部Ray SUCCEEDED，四对公开副本独立verify.py PASS，各对共同5轮prompt/usage一致，零请求/token/history错误。OFF峰值KV100%、有抢占且无缓存命中；ON峰值75%、零抢占且有缓存复用，符合调度在容量压力下保留工作集、减少缓存丢失的机制解释。prefill完成请求计数不等于被丢弃的全部重算工作，未报告全程重算节省量。
+
+效力边界：窗口吞吐不是完整96条批次makespan，窗口结束取消的剩余调用不计完成。APC/512MiB为独立实验配置，不代表原矩阵APC关闭/大KV收益，也不是SWE-bench修复正确率。当前单后端，未证明多后端routing收益。低压力旧长实验、短任务负结果和历史C32结果均保留分组，不能混入当前三seed。
+
+证据：每个run独立report/config/输入SHA/round哈希/metrics/verify.py；汇总verify.py重新核验四对并复算，不依赖手写结果。容量和运行时审计见../offline-burst-protocol-20261017。r17错误采集包被隔离、未公开；正确包重新回收且通过run/job/root/report/seed身份检查，说明与修正工具见../collection-identity-v2-20261017。源码/配置冻结身份见measurement-bindings.json。网站与代码PR发布状态另列，不把本地生成当发布。
