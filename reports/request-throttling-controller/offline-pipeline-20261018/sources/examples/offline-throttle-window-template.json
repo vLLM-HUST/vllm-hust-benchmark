@@ -1,0 +1,20 @@
+{
+  "name": "SWE-smith-tranjactory",
+  "model": "YOUR_SERVED_MODEL_NAME",
+  "model_path": "/models/YOUR_MODEL_DIRECTORY",
+  "backend": "http://YOUR_MODEL_HOST:PORT",
+  "programs": 96,
+  "expected_sessions_sha256": "REPLACE_WITH_INPUT_SHA256",
+  "source_sessions_sha256": "REPLACE_WITH_PARENT_INPUT_SHA256",
+  "arrival_mode": "offline-burst",
+  "concurrency": 0,
+  "client_concurrency_limit": null,
+  "window_seconds": 180,
+  "outer_budget_seconds": 300,
+  "scheduler_interval_seconds": 0.5,
+  "finite_makespan_claim": false,
+  "points": [
+    {"label": "scheduler-off-offline-burst", "endpoint": "http://YOUR_OFF_PROXY_HOST:PORT", "scheduling_enabled": false},
+    {"label": "scheduler-on-offline-burst", "endpoint": "http://YOUR_ON_PROXY_HOST:PORT", "scheduling_enabled": true}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "deployment_plan": "../private/ready-deployment-plan.json",
+  "window_template": "offline-throttle-window-template.json",
+  "workload": "../data/workloads/offline-batch",
+  "output": "../results/offline-pipeline",
+  "ride_root": "../../ride",
+  "runtime_profile": "../private/public-runtime-profile.json",
+  "ssh_host": "YOUR_OPERATOR_SSH_ALIAS",
+  "wait_budget_seconds": 900,
+  "runs": [
+    {"run_id": "offline-batch-seed11-v1", "seed": 11, "order": "OFF_ON"},
+    {"run_id": "offline-batch-seed17-v1", "seed": 17, "order": "OFF_ON"},
+    {"run_id": "offline-batch-seed23-v1", "seed": 23, "order": "ON_OFF"}
+  ]
+}
