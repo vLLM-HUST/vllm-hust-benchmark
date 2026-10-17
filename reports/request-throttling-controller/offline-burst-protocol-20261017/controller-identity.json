@@ -1,0 +1,62 @@
+[
+  {
+    "implementation": "pinned-official-thin-adapter",
+    "upstream_commit": "7ddc8610270e56d3b109eed8796b3a4360fc67c9",
+    "router_class": "ThunderAgent.scheduler.router.MultiBackendRouter",
+    "scheduler_interval_seconds": 0.5,
+    "metrics_interval_seconds": 0.5,
+    "scheduling_enabled": true,
+    "acting_token_weight": 1.0,
+    "use_acting_token_decay": false,
+    "ordinary_request_policy": "untracked upstream forwarding; no Program entries",
+    "transport": {
+      "mode": "no-keepalive",
+      "timeout_seconds": 900,
+      "request_retries": 0,
+      "max_connections": null,
+      "max_keepalive_connections": 0
+    },
+    "capacity_evidence": {
+      "kind": "vllm-source-derived-hybrid-reservation",
+      "tokens": 49152,
+      "max_model_len": 16384,
+      "block_size": 2048,
+      "num_gpu_blocks": 25,
+      "source_sha256": "f360522459b5bf2bb6dec83f62488464e3b1da714d38c088b2404fcd6a12f216",
+      "audit_file": "hybrid-audit.json",
+      "per_program_buffer_tokens": 14335,
+      "raw_block_derived_tokens": 51200,
+      "scope": "Source-derived per-program upper reservation; approximate token estimation and cache sharing remain validation boundaries"
+    }
+  },
+  {
+    "implementation": "pinned-official-thin-adapter",
+    "upstream_commit": "7ddc8610270e56d3b109eed8796b3a4360fc67c9",
+    "router_class": "ThunderAgent.scheduler.router.MultiBackendRouter",
+    "scheduler_interval_seconds": 0.5,
+    "metrics_interval_seconds": 0.5,
+    "scheduling_enabled": false,
+    "acting_token_weight": 1.0,
+    "use_acting_token_decay": false,
+    "ordinary_request_policy": "untracked upstream forwarding; no Program entries",
+    "transport": {
+      "mode": "no-keepalive",
+      "timeout_seconds": 900,
+      "request_retries": 0,
+      "max_connections": null,
+      "max_keepalive_connections": 0
+    },
+    "capacity_evidence": {
+      "kind": "vllm-source-derived-hybrid-reservation",
+      "tokens": 49152,
+      "max_model_len": 16384,
+      "block_size": 2048,
+      "num_gpu_blocks": 25,
+      "source_sha256": "f360522459b5bf2bb6dec83f62488464e3b1da714d38c088b2404fcd6a12f216",
+      "audit_file": "hybrid-audit.json",
+      "per_program_buffer_tokens": 14335,
+      "raw_block_derived_tokens": 51200,
+      "scope": "Source-derived per-program upper reservation; approximate token estimation and cache sharing remain validation boundaries"
+    }
+  }
+]

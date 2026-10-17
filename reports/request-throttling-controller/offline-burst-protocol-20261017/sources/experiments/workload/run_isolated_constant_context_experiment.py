@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""One submitted Ray job owns engine, router, smoke, replay and final validation."""
+import json
+import os
+import subprocess
+import time
+import urllib.request
+from pathlib import Path
+
+root = Path(os.environ['REPO_ROOT'])
+name = os.environ['EXPERIMENT_NAME']
+growing = os.environ.get('GROWING_CONTEXT_PILOT') == '1'
+out = root/'data/results/workload'/name
+out.mkdir(parents=True, exist_ok=False)
+processes = []
+handles = []
+
+def start(arguments, filename):
+    handle = (out/filename).open('w')
+    handles.append(handle)
+    process = subprocess.Popen(arguments, stdout=handle, stderr=subprocess.STDOUT)
+    processes.append(process)
+    return process
+
+def wait_health(url, process, deadline):
+    start_time = time.monotonic()
+    while time.monotonic()-start_time < deadline:
+        if process.poll() is not None:
+            raise RuntimeError(f'process exited {process.returncode}: {url}')
+        try:
+            with urllib.request.urlopen(url, timeout=5) as response:
+                if response.status == 200:
+                    return
+        except Exception:
+            pass
+        time.sleep(5)
+    raise TimeoutError(f'startup deadline: {url}')
+
+def replay(workload, target, expected_programs, expected_steps):
+    arguments = ['python', str(root/'experiments/workload/replay_sessions.py'), '--workload', str(root/'data/workloads'/workload), '--base-url', 'http://127.0.0.1:8000/v1', '--model', 'qwen2.5-14b', '--api', 'chat', '--tokenizer', '/models/Qwen2.5-14B-Instruct', '--engine-url', 'http://127.0.0.1:8100/v1', '--timeout', '0', '--drain-timeout-seconds', '21600', '--fixed-program-content', '--evidence-type', 'live', '--out', str(target)]
+    print('[run] '+ ' '.join(arguments), flush=True)
+    subprocess.run(arguments, check=True)
+    summary = json.loads((target/'summary.json').read_text())
+    result = summary['result']
+    assert result['sessions_completed'] == expected_programs and result['rounds_succeeded'] == expected_steps and result['rounds_failed'] == 0, result
+    assert all(value['count'] == 0 for value in result['mismatches'].values())
+    rows = [json.loads(line) for line in (target/'rounds.jsonl').read_text().splitlines()]
+    if growing:
+        groups = {}
+        for row in rows:
+            step = row['round_idx']
+            assert row['prefix_len'] + row['input_len'] == 4096 + step*640
+            assert row['engine_prompt_tokens'] == 4096 + step*640 + summary['chat_template_tokens']
+            if step > 0:
+                assert row['previous_history_token_count'] == row['prefix_len']
+                assert row['previous_history_sha256'] == row['inherited_history_sha256']
+            groups.setdefault(row['session_id'], []).append(row)
+        (target/'history-validation.json').write_text(json.dumps({'valid':True,'programs':len(groups),'rounds':len(rows),'planned_input_lengths':[4096+i*640 for i in range(max(x['round_idx'] for x in rows)+1)]},indent=2))
+    else:
+        assert len({row['engine_prompt_tokens'] for row in rows}) == 1
+    assert all(row['engine_completion_tokens'] == 128 for row in rows)
+    print('[validated] '+target.name, flush=True)
+
+try:
+    import ray
+    ray.init(address='auto')
+    @ray.remote
+    def check_ascend_environment():
+        import acl
+        import os
+        return {'node': ray.get_runtime_context().get_node_id(), 'acl': acl.__file__, 'pythonpath': os.environ.get('PYTHONPATH')}
+    nodes = [node for node in ray.nodes() if node['Alive']]
+    checks = [check_ascend_environment.options(resources={'node:'+node['NodeManagerAddress']:0.001}).remote() for node in nodes]
+    evidence = ray.get(checks, timeout=120)
+    assert len(evidence) == 4, evidence
+    (out/'ascend-environment-validation.json').write_text(json.dumps(evidence, indent=2)+'\n')
+    print('[validated] acl imports on all four nodes', flush=True)
+    ray.shutdown()
+    (out/'effective-experiment-configuration.json').write_text(json.dumps({'growing_context':growing,'programs':100 if growing else 600,'rounds_per_program':20,'initial_input_tokens':4096 if growing else 16384,'growth_tokens_per_round':640 if growing else 0,'output_tokens':128,'arrival_rate':1,'tool_wait_seconds':3,'tensor_parallel_size':4,'router_acting_decay':False,'scheduler_interval_seconds':5,'warmup':'smoke then engine cache reset; router calibration retained','input_semantics':'synthetic history, real model output excluded','engine_scheduling_parameters':'resolved defaults preserved in engine logs; not changed from fixed-context control'},indent=2))
+    engine = start(['vllm', 'serve', '/models/Qwen2.5-14B-Instruct', '--served-model-name', 'qwen2.5-14b', '--host', '0.0.0.0', '--port', '8100', '--distributed-executor-backend', 'ray', '--tensor-parallel-size', '4', '--enforce-eager', '--enable-prefix-caching'], 'engine.log')
+    wait_health('http://127.0.0.1:8100/health', engine, 1800)
+    router = start(['python', str(root/'experiments/control_plane/thunderagent_router.py'), '--backends', 'http://127.0.0.1:8100', '--port', '8000', '--router', 'tr', '--disable-backend-connection-reuse', '--disable-request-timeouts', '--profile-dir', str(out/'thunderagent-profile')], 'thunderagent.log')
+    wait_health('http://127.0.0.1:8000/health', router, 120)
+    replay('four-card-growing-context-smoke-20261007' if growing else 'four-card-constant-context-smoke-20261007', out/'smoke', 2, 6 if growing else 4)
+    with urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8100/reset_prefix_cache', method='POST'), timeout=30) as response:
+        assert response.status == 200
+    # Calibration is intentionally retained after smoke; this is a warmed router.
+    replay('four-card-growing-context-pilot-20261007' if growing else 'four-card-constant-context-stream-20261007', out/'thunderagent-program-throttling', 100 if growing else 600, 2000 if growing else 12000)
+    (out/'validation.json').write_text(json.dumps({'valid': True, 'programs':100 if growing else 600, 'steps':2000 if growing else 12000, 'growing_context':growing})+'\n')
+finally:
+    for process in reversed(processes):
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+    for handle in handles:
+        handle.close()
