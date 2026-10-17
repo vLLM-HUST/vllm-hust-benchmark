@@ -1,0 +1,118 @@
+{
+  "completed_points_inputs_equal": true,
+  "status": "INTERRUPTED",
+  "ray_terminal": {
+    "job_id": "request-throttling-controller-short-20261017-r10--reference-short-v10",
+    "ray_status": "STOPPED"
+  },
+  "evidence_type": "complete-program-token-length-replay",
+  "points": [
+    {
+      "label": "scheduler-on-c4",
+      "status": "PASS",
+      "scheduling_enabled": true,
+      "makespan_seconds": 151.5334,
+      "max_waiting": 3,
+      "max_paused": 3,
+      "request_errors": 0,
+      "token_mismatches": {
+        "prompt_tokens": {
+          "count": 0,
+          "first": []
+        },
+        "completion_tokens": {
+          "count": 0,
+          "first": []
+        }
+      },
+      "concurrency": 4,
+      "kv_peak_percent": 79.16666666666666,
+      "cache_hit_tokens": 169984.0,
+      "preemptions": 0.0
+    },
+    {
+      "label": "scheduler-off-c4",
+      "status": "PASS",
+      "scheduling_enabled": false,
+      "makespan_seconds": 152.7812,
+      "max_waiting": 0,
+      "max_paused": 0,
+      "request_errors": 0,
+      "token_mismatches": {
+        "prompt_tokens": {
+          "count": 0,
+          "first": []
+        },
+        "completion_tokens": {
+          "count": 0,
+          "first": []
+        }
+      },
+      "concurrency": 4,
+      "kv_peak_percent": 100.0,
+      "cache_hit_tokens": 8192.0,
+      "preemptions": 104.0
+    },
+    {
+      "label": "scheduler-off-c2",
+      "status": "PASS",
+      "scheduling_enabled": false,
+      "makespan_seconds": 143.8509,
+      "max_waiting": 0,
+      "max_paused": 0,
+      "request_errors": 0,
+      "token_mismatches": {
+        "prompt_tokens": {
+          "count": 0,
+          "first": []
+        },
+        "completion_tokens": {
+          "count": 0,
+          "first": []
+        }
+      },
+      "concurrency": 2,
+      "kv_peak_percent": 87.5,
+      "cache_hit_tokens": 157696.0,
+      "preemptions": 0.0
+    },
+    {
+      "label": "scheduler-off-c1",
+      "status": "INTERRUPTED",
+      "scheduling_enabled": false,
+      "max_waiting": 0,
+      "max_paused": 0,
+      "concurrency": 1
+    }
+  ],
+  "paired_inputs_equal": null,
+  "comparisons": null,
+  "seeds": [
+    11
+  ],
+  "qualified_for_matrix": false,
+  "limitations": [
+    "Single seed; no stable gain claim.",
+    "Token-length replay does not measure task repair accuracy.",
+    "Explicit hybrid buffer adaptation; approximate token estimation, acting decay and inferred sharing remain boundaries.",
+    "Finished-request prefill statistics do not measure all recomputation work."
+  ],
+  "private_archive_sha256": "3cd4884c02bc2c9bc252491b131210723f887faac6ddaea2c45c3df177964710",
+  "source_file_sha256": {
+    "trial/trial.json": "3603d7199d1b4fde214ecdc0a1a5f8f2c5b495d3aaec22113878e38c07c1b6f2",
+    "collection-terminal.json": "76855963fd85f6a064489f8cf8a4d7fbf56b0cea8c9967ad2f90998c52b8ffe4",
+    "workload/sessions.csv": "ac8a85d012bdebb73b0d3b0c6ee40ab955e2b3d41de7f96f603f32d88cd960dc",
+    "workload/manifest.json": "1344712ea60bf17769ee0d7bb5b0835dc8352a4bf90b6c88ec8ecc2d1b28fcd5",
+    "capacity-evidence.json": "15618df99c231c253fb0caa5980e695d19cdf822f626f2db0e14e2611c33e090",
+    "hybrid-audit.json": "f360522459b5bf2bb6dec83f62488464e3b1da714d38c088b2404fcd6a12f216",
+    "trial/scheduler-on-c4/summary.json": "a554304eeb0e0514e97b6adb81e7d3e81f51d3b452be513a4354a7c8b24d6841",
+    "trial/scheduler-on-c4/rounds.jsonl": "4edb5190d91eb4a733018dbaa00b47c7087bb6e6b6e3949f4d9fd2f6771ed4b6",
+    "trial/scheduler-on-c4/metrics.jsonl": "90fbf0a7b4115dbf3576192a8de162f22b9975abea9b5efd8b0fb59254bfda7f",
+    "trial/scheduler-off-c4/summary.json": "e45e3d27cd9ddc718a3b901e5fa9dd8bc708bf41d67479d8d6f0f5d0a31b3c34",
+    "trial/scheduler-off-c4/rounds.jsonl": "a8df01619b4d47d826ac8aae28804e100d80adf017ee044487c16a220a837eb2",
+    "trial/scheduler-off-c4/metrics.jsonl": "0ef1fbb6ce3b120a685fa626cc50425b1f5b5082585840816512190df77829f1",
+    "trial/scheduler-off-c2/summary.json": "4b0fae9a89dd376a38edc9f818649a5ffc32e95d4c87715bc004bbd2e86534b9",
+    "trial/scheduler-off-c2/rounds.jsonl": "a4304d30707eda8bc1bf8cdae47ed1139ee358ea042e69c6bb0c230473b88bbf",
+    "trial/scheduler-off-c2/metrics.jsonl": "6a7d516bf0882b4573c40e15111614e370fc100f041ae49b217169573403ae72"
+  }
+}
