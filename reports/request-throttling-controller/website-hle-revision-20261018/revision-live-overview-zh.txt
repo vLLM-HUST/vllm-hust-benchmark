@@ -1,0 +1,493 @@
+Browser tab: 3, Title: "数据集矩阵 v1 - vLLM-HUST", URL: "https://vllm-hust.sage.org.ai/dataset-matrix-v1.html#overview".
+1 AXWebArea 数据集矩阵 v1 - vLLM-HUST, URL: vllm-hust.sage.org.ai/dataset-matrix-v1.html#overview
+	2 container
+		3 link Description: V vLLM-HUST 面向国产算力的推理引擎, Value: vllm-hust.sage.org.ai/index.html
+		4 container site-navigation
+			5 link Description: 产品, Value: vllm-hust.sage.org.ai/index.html#products
+			6 link Description: 引擎, Value: vllm-hust.sage.org.ai/index.html#stack
+			7 link Description: 项目, Value: vllm-hust.sage.org.ai/index.html#projects
+			8 link Description: 生态架构, Value: vllm-hust.sage.org.ai/plugins.html
+			9 button (collapsed) 论文与新闻, ID: nav-publications, Secondary Actions: Expand
+				10 text 论文与新闻
+			11 button (collapsed) 性能数据, ID: nav-performance, Secondary Actions: Expand
+				12 text 性能数据
+			13 button (collapsed) 社区, ID: nav-community, Secondary Actions: Expand
+				14 text 社区
+			15 button (collapsed) 资源, ID: nav-resources, Secondary Actions: Expand
+				16 text 资源
+		17 button Description: Switch to English, ID: langToggle
+			18 text EN
+	19 container
+		20 container Benchmark views
+			21 link Description: 性能曲线, Value: vllm-hust.sage.org.ai/leaderboard-runs.html
+			22 link Description: 固定目标注册表, Value: vllm-hust.sage.org.ai/leaderboard.html
+			23 link Description: 数据集矩阵, Value: vllm-hust.sage.org.ai/dataset-validation.html
+			24 link Description: 数据集矩阵 v1, Value: vllm-hust.sage.org.ai/dataset-matrix-v1.html
+			25 link Description: 能力与场景覆盖表, Value: vllm-hust.sage.org.ai/capability-coverage.html
+		56 container matrix-content
+			57 container
+				58 heading 数据集矩阵 v1, Value: 1, ID: matrix-title
+					59 text 数据集矩阵 v1
+				60 text 先看任务成绩，再看每个数据集上的服务性能。
+				61 text Qwen3.5-35B-A3B · BF16 · Ascend 910B2 · TP2
+			62 container Description: Dataset views, ID: matrix-breadcrumb
+				63 text 全部数据集
+				64 text 点击行标题查看性能 →
+			65 container 数据集成绩矩阵
+				66 table 各行按标注指标展示；点击数据集查看性能、配置与来源
+					67 text 各行按标注指标展示；点击数据集查看性能、配置与来源
+					68 row
+						69 cell
+							70 text 数据集 / 分项
+						71 cell
+							72 button Native vLLM · Ascend
+						73 cell
+							74 button BetterScale
+						75 cell
+							76 button BidKV
+						77 cell
+							78 button DLA
+						79 cell
+							80 button KV Tiering
+						81 cell
+							82 button KVCompress
+						83 cell
+							84 button KV Materialization
+						85 cell
+							86 button Ascend Attention Boundary
+						87 cell
+							88 button Mooncake
+						89 cell
+							90 button PegaFlow
+						91 cell
+							92 button Pipeline Microbatch
+						93 cell
+							94 button Utility Victim
+						95 cell
+							96 button A2A Buffer Reuse
+						97 cell
+							98 button Prefix Routing
+						99 cell
+							100 button Core Attention Boundary
+						101 cell
+							102 button request-throttling-controller
+					103 row
+						104 cell
+							105 link Description: MMLU-Pro , Value: vllm-hust.sage.org.ai/dataset-matrix-v1.html#mmlu-pro
+							106 text Test · 准确率
+						107 cell
+							108 text 79.86%
+							109 text 9,609 / 12,032
+						110 cell
+							111 text 79.70%
+							112 text 9,589 / 12,032
+						113 cell
+							114 container The installed host is vLLM 0.23.0+empty; this pinned package requires >=0.28.1rc1.dev319,<0.29. No host or policy patch was applied.
+								115 text 环境不兼容
+								116 text 无成绩，不记为零分
+						117 cell
+							118 container The declared-budget policy requires the preemption-policy host interface, which is absent from the available 0.23 and 0.25 scheduler configurations. Natural stopping tasks also cannot use the exact-output-budget assumption. Not launched.
+								119 text 环境不兼容
+								120 text 无成绩，不记为零分
+						121 cell
+							122 container The pinned provider could not load against the available host. No compatibility repair was attempted.
+								123 text 环境不兼容
+								124 text 无成绩，不记为零分
+						125 cell
+							126 container Automatic distributed calibration stopped because its Accelerate dependency was not installed in this capsule. No retries or dependency repair after this failure.
+								127 text 启动失败
+								128 text 无成绩，不记为零分
+						129 cell
+							130 container The plugin could not import its workload dependency. Native fallback was stopped rather than measured under the plugin label. No repair or retry.
+								131 text 未能启用
+								132 text 无成绩，不记为零分
+						133 cell
+							134 text 79.64%
+							135 text 9,582 / 12,032
+						136 cell
+							137 container The installed native MooncakeStoreConnector initialized its embedded store but failed while registering the hybrid model KV caches. This is not the historical patched 0.25 capsule. No repair or retry.
+								138 text 启动失败
+								139 text 无成绩，不记为零分
+						140 cell
+							141 container The original Ascend-feature wheel build stopped before installation because protoc was unavailable. No NPU deployment or dataset requests; no build repair or retry.
+								142 text 构建失败
+								143 text 无成绩，不记为零分
+						144 cell
+							145 container The pinned policy requires the batch-admission-policy host API, absent from the available 0.23 and 0.25 scheduler configurations. Its qualified deployment is PP2+TP2, not the TP2 matrix cohort. No host patch or substitute implementation.
+								146 text 环境不兼容
+								147 text 无成绩，不记为零分
+						148 cell
+							149 container Published curve evidence describes a locally modified scheduler and utility-victim 0.1.0.dev2, but does not identify a retrievable source revision or original wheel. The historical result is preserved; no replacement plugin was invented.
+								150 text 缺少运行材料
+								151 text 无成绩，不记为零分
+						152 cell
+							153 container Published evidence describes a standalone local plugin 0.1.0.dev0 without a publicly pinned runnable source artifact. No substitute implementation or Native fallback measurement.
+								154 text 缺少运行材料
+								155 text 无成绩，不记为零分
+						156 cell
+							157 container Published evidence describes two TP2+EP replicas behind a routing proxy. A pinned runnable proxy artifact is not supplied by the curve provenance; this four-card deployment is also distinct from the TP2 cohort. No replacement router was invented.
+								158 text 缺少运行材料
+								159 text 无成绩，不记为零分
+						160 cell
+							161 text 79.95%
+							162 text 9,619 / 12,032
+						163 cell
+							164 text 79.78%
+							165 text 9,599 / 12,032
+					166 row
+						167 cell
+							168 link Description: FrontierScience , Value: vllm-hust.sage.org.ai/dataset-matrix-v1.html#frontierscience
+							169 text Olympiad · 成功率
+						170 cell
+							171 text 57.00%
+							172 text 57 / 100
+							173 text 3 判分未决
+						174 cell
+							175 text 60.00%
+							176 text 60 / 100
+							177 text 3 判分未决
+						178 cell
+							179 container The installed host is vLLM 0.23.0+empty; this pinned package requires >=0.28.1rc1.dev319,<0.29. No host or policy patch was applied.
+								180 text 环境不兼容
+								181 text 无成绩，不记为零分
+						182 cell
+							183 container The declared-budget policy requires the preemption-policy host interface, which is absent from the available 0.23 and 0.25 scheduler configurations. Natural stopping tasks also cannot use the exact-output-budget assumption. Not launched.
+								184 text 环境不兼容
+								185 text 无成绩，不记为零分
+						186 cell
+							187 container The pinned provider could not load against the available host. No compatibility repair was attempted.
+								188 text 环境不兼容
+								189 text 无成绩，不记为零分
+						190 cell
+							191 container Automatic distributed calibration stopped because its Accelerate dependency was not installed in this capsule. No retries or dependency repair after this failure.
+								192 text 启动失败
+								193 text 无成绩，不记为零分
+						194 cell
+							195 container The plugin could not import its workload dependency. Native fallback was stopped rather than measured under the plugin label. No repair or retry.
+								196 text 未能启用
+								197 text 无成绩，不记为零分
+						198 cell
+							199 container The separate FrontierScience and HLE deployments rejected the available Ascend host commit. Both were stopped without bypassing the guard or changing host code. MMLU is running on the supported host and is not marked failed.
+								200 text 环境不兼容
+								201 text 无成绩，不记为零分
+						202 cell
+							203 container The installed native MooncakeStoreConnector initialized its embedded store but failed while registering the hybrid model KV caches. This is not the historical patched 0.25 capsule. No repair or retry.
+								204 text 启动失败
+								205 text 无成绩，不记为零分
+						206 cell
+							207 container The original Ascend-feature wheel build stopped before installation because protoc was unavailable. No NPU deployment or dataset requests; no build repair or retry.
+								208 text 构建失败
+								209 text 无成绩，不记为零分
+						210 cell
+							211 container The pinned policy requires the batch-admission-policy host API, absent from the available 0.23 and 0.25 scheduler configurations. Its qualified deployment is PP2+TP2, not the TP2 matrix cohort. No host patch or substitute implementation.
+								212 text 环境不兼容
+								213 text 无成绩，不记为零分
+						214 cell
+							215 container Published curve evidence describes a locally modified scheduler and utility-victim 0.1.0.dev2, but does not identify a retrievable source revision or original wheel. The historical result is preserved; no replacement plugin was invented.
+								216 text 缺少运行材料
+								217 text 无成绩，不记为零分
+						218 cell
+							219 container Published evidence describes a standalone local plugin 0.1.0.dev0 without a publicly pinned runnable source artifact. No substitute implementation or Native fallback measurement.
+								220 text 缺少运行材料
+								221 text 无成绩，不记为零分
+						222 cell
+							223 container Published evidence describes two TP2+EP replicas behind a routing proxy. A pinned runnable proxy artifact is not supplied by the curve provenance; this four-card deployment is also distinct from the TP2 cohort. No replacement router was invented.
+								224 text 缺少运行材料
+								225 text 无成绩，不记为零分
+						226 cell
+							227 text 62.00%
+							228 text 62 / 100
+							229 text 2 判分未决
+						230 cell
+							231 text 58.00%
+							232 text 58 / 100
+							233 text 2 判分未决
+					234 row
+						235 cell
+							236 link Description: FrontierScience , Value: vllm-hust.sage.org.ai/dataset-matrix-v1.html#frontierscience
+							237 text Research · 得分 ≥ 7 的比例
+						238 cell
+							239 text 8.33%
+							240 text 5 / 60
+							241 text 3 判分未决
+						242 cell
+							243 text 5.00%
+							244 text 3 / 60
+							245 text 3 判分未决
+						246 cell
+							247 container The installed host is vLLM 0.23.0+empty; this pinned package requires >=0.28.1rc1.dev319,<0.29. No host or policy patch was applied.
+								248 text 环境不兼容
+								249 text 无成绩，不记为零分
+						250 cell
+							251 container The declared-budget policy requires the preemption-policy host interface, which is absent from the available 0.23 and 0.25 scheduler configurations. Natural stopping tasks also cannot use the exact-output-budget assumption. Not launched.
+								252 text 环境不兼容
+								253 text 无成绩，不记为零分
+						254 cell
+							255 container The pinned provider could not load against the available host. No compatibility repair was attempted.
+								256 text 环境不兼容
+								257 text 无成绩，不记为零分
+						258 cell
+							259 container Automatic distributed calibration stopped because its Accelerate dependency was not installed in this capsule. No retries or dependency repair after this failure.
+								260 text 启动失败
+								261 text 无成绩，不记为零分
+						262 cell
+							263 container The plugin could not import its workload dependency. Native fallback was stopped rather than measured under the plugin label. No repair or retry.
+								264 text 未能启用
+								265 text 无成绩，不记为零分
+						266 cell
+							267 container The separate FrontierScience and HLE deployments rejected the available Ascend host commit. Both were stopped without bypassing the guard or changing host code. MMLU is running on the supported host and is not marked failed.
+								268 text 环境不兼容
+								269 text 无成绩，不记为零分
+						270 cell
+							271 container The installed native MooncakeStoreConnector initialized its embedded store but failed while registering the hybrid model KV caches. This is not the historical patched 0.25 capsule. No repair or retry.
+								272 text 启动失败
+								273 text 无成绩，不记为零分
+						274 cell
+							275 container The original Ascend-feature wheel build stopped before installation because protoc was unavailable. No NPU deployment or dataset requests; no build repair or retry.
+								276 text 构建失败
+								277 text 无成绩，不记为零分
+						278 cell
+							279 container The pinned policy requires the batch-admission-policy host API, absent from the available 0.23 and 0.25 scheduler configurations. Its qualified deployment is PP2+TP2, not the TP2 matrix cohort. No host patch or substitute implementation.
+								280 text 环境不兼容
+								281 text 无成绩，不记为零分
+						282 cell
+							283 container Published curve evidence describes a locally modified scheduler and utility-victim 0.1.0.dev2, but does not identify a retrievable source revision or original wheel. The historical result is preserved; no replacement plugin was invented.
+								284 text 缺少运行材料
+								285 text 无成绩，不记为零分
+						286 cell
+							287 container Published evidence describes a standalone local plugin 0.1.0.dev0 without a publicly pinned runnable source artifact. No substitute implementation or Native fallback measurement.
+								288 text 缺少运行材料
+								289 text 无成绩，不记为零分
+						290 cell
+							291 container Published evidence describes two TP2+EP replicas behind a routing proxy. A pinned runnable proxy artifact is not supplied by the curve provenance; this four-card deployment is also distinct from the TP2 cohort. No replacement router was invented.
+								292 text 缺少运行材料
+								293 text 无成绩，不记为零分
+						294 cell
+							295 text 6.67%
+							296 text 4 / 60
+							297 text 2 判分未决
+						298 cell
+							299 text 6.67%
+							300 text 4 / 60
+							301 text 1 判分未决
+					302 row
+						303 cell
+							304 link Description: HLE-Verified , Value: vllm-hust.sage.org.ai/dataset-matrix-v1.html#hle-verified
+							305 text Gold · 准确率
+						306 cell
+							307 text 23.35%
+							308 text 156 / 668
+							309 text 32 判分未决
+						310 cell
+							311 text 25.90%
+							312 text 173 / 668
+							313 text 18 判分未决
+						314 cell
+							315 container The installed host is vLLM 0.23.0+empty; this pinned package requires >=0.28.1rc1.dev319,<0.29. No host or policy patch was applied.
+								316 text 环境不兼容
+								317 text 无成绩，不记为零分
+						318 cell
+							319 container The declared-budget policy requires the preemption-policy host interface, which is absent from the available 0.23 and 0.25 scheduler configurations. Natural stopping tasks also cannot use the exact-output-budget assumption. Not launched.
+								320 text 环境不兼容
+								321 text 无成绩，不记为零分
+						322 cell
+							323 container The pinned provider could not load against the available host. No compatibility repair was attempted.
+								324 text 环境不兼容
+								325 text 无成绩，不记为零分
+						326 cell
+							327 container Automatic distributed calibration stopped because its Accelerate dependency was not installed in this capsule. No retries or dependency repair after this failure.
+								328 text 启动失败
+								329 text 无成绩，不记为零分
+						330 cell
+							331 container The plugin could not import its workload dependency. Native fallback was stopped rather than measured under the plugin label. No repair or retry.
+								332 text 未能启用
+								333 text 无成绩，不记为零分
+						334 cell
+							335 container The separate FrontierScience and HLE deployments rejected the available Ascend host commit. Both were stopped without bypassing the guard or changing host code. MMLU is running on the supported host and is not marked failed.
+								336 text 环境不兼容
+								337 text 无成绩，不记为零分
+						338 cell
+							339 container The installed native MooncakeStoreConnector initialized its embedded store but failed while registering the hybrid model KV caches. This is not the historical patched 0.25 capsule. No repair or retry.
+								340 text 启动失败
+								341 text 无成绩，不记为零分
+						342 cell
+							343 container The original Ascend-feature wheel build stopped before installation because protoc was unavailable. No NPU deployment or dataset requests; no build repair or retry.
+								344 text 构建失败
+								345 text 无成绩，不记为零分
+						346 cell
+							347 container The pinned policy requires the batch-admission-policy host API, absent from the available 0.23 and 0.25 scheduler configurations. Its qualified deployment is PP2+TP2, not the TP2 matrix cohort. No host patch or substitute implementation.
+								348 text 环境不兼容
+								349 text 无成绩，不记为零分
+						350 cell
+							351 container Published curve evidence describes a locally modified scheduler and utility-victim 0.1.0.dev2, but does not identify a retrievable source revision or original wheel. The historical result is preserved; no replacement plugin was invented.
+								352 text 缺少运行材料
+								353 text 无成绩，不记为零分
+						354 cell
+							355 container Published evidence describes a standalone local plugin 0.1.0.dev0 without a publicly pinned runnable source artifact. No substitute implementation or Native fallback measurement.
+								356 text 缺少运行材料
+								357 text 无成绩，不记为零分
+						358 cell
+							359 container Published evidence describes two TP2+EP replicas behind a routing proxy. A pinned runnable proxy artifact is not supplied by the curve provenance; this four-card deployment is also distinct from the TP2 cohort. No replacement router was invented.
+								360 text 缺少运行材料
+								361 text 无成绩，不记为零分
+						362 cell
+							363 text 11.53%
+							364 text 77 / 668
+							365 text 333 判分未决
+						366 cell
+							367 text 23.80%
+							368 text 159 / 668
+							369 text 25 判分未决
+					370 row
+						371 cell
+							372 link Description: HLE-Verified , Value: vllm-hust.sage.org.ai/dataset-matrix-v1.html#hle-verified
+							373 text Revision · 准确率
+						374 cell
+							375 text 27.38%
+							376 text 313 / 1,143
+							377 text 40 判分未决
+						378 cell
+							379 text 27.65%
+							380 text 316 / 1,143
+							381 text 28 判分未决
+						382 cell
+							383 container The installed host is vLLM 0.23.0+empty; this pinned package requires >=0.28.1rc1.dev319,<0.29. No host or policy patch was applied.
+								384 text 环境不兼容
+								385 text 无成绩，不记为零分
+						386 cell
+							387 container The declared-budget policy requires the preemption-policy host interface, which is absent from the available 0.23 and 0.25 scheduler configurations. Natural stopping tasks also cannot use the exact-output-budget assumption. Not launched.
+								388 text 环境不兼容
+								389 text 无成绩，不记为零分
+						390 cell
+							391 container The pinned provider could not load against the available host. No compatibility repair was attempted.
+								392 text 环境不兼容
+								393 text 无成绩，不记为零分
+						394 cell
+							395 container Automatic distributed calibration stopped because its Accelerate dependency was not installed in this capsule. No retries or dependency repair after this failure.
+								396 text 启动失败
+								397 text 无成绩，不记为零分
+						398 cell
+							399 container The plugin could not import its workload dependency. Native fallback was stopped rather than measured under the plugin label. No repair or retry.
+								400 text 未能启用
+								401 text 无成绩，不记为零分
+						402 cell
+							403 container The separate FrontierScience and HLE deployments rejected the available Ascend host commit. Both were stopped without bypassing the guard or changing host code. MMLU is running on the supported host and is not marked failed.
+								404 text 环境不兼容
+								405 text 无成绩，不记为零分
+						406 cell
+							407 container The installed native MooncakeStoreConnector initialized its embedded store but failed while registering the hybrid model KV caches. This is not the historical patched 0.25 capsule. No repair or retry.
+								408 text 启动失败
+								409 text 无成绩，不记为零分
+						410 cell
+							411 container The original Ascend-feature wheel build stopped before installation because protoc was unavailable. No NPU deployment or dataset requests; no build repair or retry.
+								412 text 构建失败
+								413 text 无成绩，不记为零分
+						414 cell
+							415 container The pinned policy requires the batch-admission-policy host API, absent from the available 0.23 and 0.25 scheduler configurations. Its qualified deployment is PP2+TP2, not the TP2 matrix cohort. No host patch or substitute implementation.
+								416 text 环境不兼容
+								417 text 无成绩，不记为零分
+						418 cell
+							419 container Published curve evidence describes a locally modified scheduler and utility-victim 0.1.0.dev2, but does not identify a retrievable source revision or original wheel. The historical result is preserved; no replacement plugin was invented.
+								420 text 缺少运行材料
+								421 text 无成绩，不记为零分
+						422 cell
+							423 container Published evidence describes a standalone local plugin 0.1.0.dev0 without a publicly pinned runnable source artifact. No substitute implementation or Native fallback measurement.
+								424 text 缺少运行材料
+								425 text 无成绩，不记为零分
+						426 cell
+							427 container Published evidence describes two TP2+EP replicas behind a routing proxy. A pinned runnable proxy artifact is not supplied by the curve provenance; this four-card deployment is also distinct from the TP2 cohort. No replacement router was invented.
+								428 text 缺少运行材料
+								429 text 无成绩，不记为零分
+						430 cell
+							431 text —
+							432 text 尚未测量
+						433 cell
+							434 text 26.95%
+							435 text 308 / 1,143
+							436 text 32 判分未决
+					437 row
+						438 cell
+							439 link Description: SWE-smith-tranjactory , Value: vllm-hust.sage.org.ai/dataset-matrix-v1.html#swe-smith-tranjactory-offline-window
+							440 text 离线批量回放 · 输出吞吐提升
+						441 cell
+							442 text 基线
+							443 text 相同转发路径
+						444 cell
+							445 text —
+							446 text 尚未测量
+						447 cell
+							448 text —
+							449 text 尚未测量
+						450 cell
+							451 text —
+							452 text 尚未测量
+						453 cell
+							454 text —
+							455 text 尚未测量
+						456 cell
+							457 text —
+							458 text 尚未测量
+						459 cell
+							460 text —
+							461 text 尚未测量
+						462 cell
+							463 text —
+							464 text 尚未测量
+						465 cell
+							466 text —
+							467 text 尚未测量
+						468 cell
+							469 text —
+							470 text 尚未测量
+						471 cell
+							472 text —
+							473 text 尚未测量
+						474 cell
+							475 text —
+							476 text 尚未测量
+						477 cell
+							478 text —
+							479 text 尚未测量
+						480 cell
+							481 text —
+							482 text 尚未测量
+						483 cell
+							484 text —
+							485 text 尚未测量
+						486 cell
+							487 text +91.7%
+							488 text 输出吞吐提升 · 3次重复
+			489 text 准确率与性能分开测试；各方案运行配置不同，单次实测，不作为单变量 A/B。
+			490 button (collapsed) 评测口径与数据来源, ID: matrix-method-label, Secondary Actions: Expand
+				491 text 评测口径与数据来源
+	27 container
+		28 text vLLM-HUST
+		29 text Evidence before rankings.
+		30 container Footer navigation
+			31 text 构建
+			32 link Description: 产品, Value: vllm-hust.sage.org.ai/index.html#products
+			33 link Description: 引擎, Value: vllm-hust.sage.org.ai/index.html#stack
+			34 link Description: 项目, Value: vllm-hust.sage.org.ai/index.html#projects
+			35 link Description: 生态架构, Value: vllm-hust.sage.org.ai/plugins.html
+			36 link Description: 版本, Value: vllm-hust.sage.org.ai/versions.html
+			37 text 性能数据
+			38 link Description: 性能曲线, Value: vllm-hust.sage.org.ai/leaderboard-runs.html
+			39 link Description: 固定目标注册表, Value: vllm-hust.sage.org.ai/leaderboard.html
+			40 link Description: 数据集矩阵, Value: vllm-hust.sage.org.ai/dataset-validation.html
+			41 link Description: 数据集矩阵 v1, Value: vllm-hust.sage.org.ai/dataset-matrix-v1.html
+			42 link Description: 产能与成本, Value: vllm-hust.sage.org.ai/serving-plan.html
+			43 text 论文与新闻
+			44 link Description: 论文与成果, Value: vllm-hust.sage.org.ai/achievements.html
+			45 link Description: 新闻, Value: vllm-hust.sage.org.ai/news.html
+			46 text 社区
+			47 link Description: 组织成员, Value: vllm-hust.sage.org.ai/members.html
+			48 link Description: 核心成员, Value: vllm-hust.sage.org.ai/contributors.html
+			49 link Description: 会议, Value: vllm-hust.sage.org.ai/conferences.html
+			50 link Description: 课程, Value: vllm-hust.sage.org.ai/courses.html
+			51 link Description: GitHub, Value: github.com/vLLM-HUST
+			52 text 资源
+			53 link Description: 910B2 算力集群, Value: vllm-hust.sage.org.ai/resources.html
+			54 link Description: 版本, Value: vllm-hust.sage.org.ai/versions.html
+			55 link Description: 议题, Value: vllm-hust.sage.org.ai/issues.html
+
+The focused UI element is 1 AXWebArea 数据集矩阵 v1 - vLLM-HUST, URL: vllm-hust.sage.org.ai/dataset-matrix-v1.html#overview
