@@ -1,0 +1,403 @@
+- navigation:
+  - link "V vLLM-HUST 面向国产算力的推理引擎":
+    - /url: ./index.html
+    - generic: V
+    - text: vLLM-HUST
+    - generic: 面向国产算力的推理引擎
+  - link "产品":
+    - /url: ./index.html#products
+  - link "引擎":
+    - /url: ./index.html#stack
+  - link "项目":
+    - /url: ./index.html#projects
+  - link "生态架构":
+    - /url: ./plugins.html
+  - generic "论文与新闻"
+  - generic "性能数据"
+  - generic "社区"
+  - generic "资源"
+  - button "Switch to English":
+    - generic: EN
+- main:
+  - navigation "Benchmark views":
+    - link "性能曲线":
+      - /url: ./leaderboard-runs.html
+    - link "固定目标注册表":
+      - /url: ./leaderboard.html
+    - link "数据集矩阵":
+      - /url: ./dataset-validation.html
+    - link "数据集矩阵 v1":
+      - /url: ./dataset-matrix-v1.html
+    - link "能力与场景覆盖表":
+      - /url: ./capability-coverage.html
+  - heading "数据集矩阵 v1" [level=1]
+  - paragraph: 先看任务成绩，再看每个数据集上的服务性能。
+  - generic: Qwen3.5-35B-A3B · BF16 · Ascend 910B2 · TP2
+  - navigation "Dataset views" [active]:
+    - link "← 全部数据集":
+      - /url: "#overview"
+    - generic: /
+    - strong: HLE-Verified
+  - group "方案":
+    - generic: 方案
+    - checkbox "Native vLLM · Ascend" [checked]
+    - text: Native vLLM · Ascend
+    - checkbox "BetterScale" [checked]
+    - text: BetterScale
+    - checkbox "BidKV" [checked]
+    - text: BidKV
+    - checkbox "DLA" [checked]
+    - text: DLA
+    - checkbox "KV Tiering" [checked]
+    - text: KV Tiering
+    - checkbox "KVCompress" [checked]
+    - text: KVCompress
+    - checkbox "KV Materialization" [checked]
+    - text: KV Materialization
+    - checkbox "Ascend Attention Boundary" [checked]
+    - text: Ascend Attention Boundary
+    - checkbox "Mooncake" [checked]
+    - text: Mooncake
+    - checkbox "PegaFlow" [checked]
+    - text: PegaFlow
+    - checkbox "Pipeline Microbatch" [checked]
+    - text: Pipeline Microbatch
+    - checkbox "Utility Victim" [checked]
+    - text: Utility Victim
+    - checkbox "A2A Buffer Reuse" [checked]
+    - text: A2A Buffer Reuse
+    - checkbox "Prefix Routing" [checked]
+    - text: Prefix Routing
+    - checkbox "Core Attention Boundary" [checked]
+    - text: Core Attention Boundary
+    - checkbox "request-throttling-controller" [checked]
+    - text: request-throttling-controller
+  - button "重置排序与筛选"
+  - region "HLE-Verified 性能对照":
+    - table "HLE-Verified · 每项性能来自独立压测，不是答题阶段延迟":
+      - caption: HLE-Verified · 每项性能来自独立压测，不是答题阶段延迟
+      - rowgroup:
+        - row "方案 评测成绩 压测范围 输出 tok/s 平均 TTFT · s 平均 TPOT · ms 配置与来源":
+          - columnheader "方案"
+          - columnheader "评测成绩"
+          - columnheader "压测范围"
+          - columnheader "输出 tok/s":
+            - button "输出 tok/s":
+              - text: 输出 tok/s
+              - generic: ↕
+          - columnheader "平均 TTFT · s":
+            - button "平均 TTFT · s":
+              - text: 平均 TTFT · s
+              - generic: ↕
+          - columnheader "平均 TPOT · ms":
+            - button "平均 TPOT · ms":
+              - text: 平均 TPOT · ms
+              - generic: ↕
+          - columnheader "配置与来源"
+      - rowgroup:
+        - row "Native vLLM · Ascend 2026-10-14/15 Gold · text 23.83% 137 / 575 29 判分未决 Gold · text 200/200 请求完成 381.32 57.85 38.78 展开":
+          - rowheader "Native vLLM · Ascend 2026-10-14/15":
+            - text: Native vLLM · Ascend
+            - generic: 2026-10-14/15
+          - cell "Gold · text 23.83% 137 / 575 29 判分未决":
+            - generic: Gold · text
+            - strong: 23.83%
+            - generic: 137 / 575
+            - generic: 29 判分未决
+          - cell "Gold · text 200/200 请求完成":
+            - text: Gold · text
+            - generic: 200/200 请求完成
+          - cell "381.32"
+          - cell "57.85"
+          - cell "38.78"
+          - cell "展开":
+            - button "展开"
+        - row "Native vLLM · Ascend 2026-10-14/15 Revision · text 28.49% 292 / 1,025 39 判分未决 Revision · text 200/200 请求完成 422.90 52.61 36.82 展开":
+          - rowheader "Native vLLM · Ascend 2026-10-14/15":
+            - text: Native vLLM · Ascend
+            - generic: 2026-10-14/15
+          - cell "Revision · text 28.49% 292 / 1,025 39 判分未决":
+            - generic: Revision · text
+            - strong: 28.49%
+            - generic: 292 / 1,025
+            - generic: 39 判分未决
+          - cell "Revision · text 200/200 请求完成":
+            - text: Revision · text
+            - generic: 200/200 请求完成
+          - cell "422.90"
+          - cell "52.61"
+          - cell "36.82"
+          - cell "展开":
+            - button "展开"
+        - row "Native vLLM · Ascend 2026-10-14/15 Gold · image 20.43% 19 / 93 3 判分未决 Gold · image 93/93 请求完成 314.48 28.90 52.21 展开":
+          - rowheader "Native vLLM · Ascend 2026-10-14/15":
+            - text: Native vLLM · Ascend
+            - generic: 2026-10-14/15
+          - cell "Gold · image 20.43% 19 / 93 3 判分未决":
+            - generic: Gold · image
+            - strong: 20.43%
+            - generic: 19 / 93
+            - generic: 3 判分未决
+          - cell "Gold · image 93/93 请求完成":
+            - text: Gold · image
+            - generic: 93/93 请求完成
+          - cell "314.48"
+          - cell "28.90"
+          - cell "52.21"
+          - cell "展开":
+            - button "展开"
+        - row "Native vLLM · Ascend 2026-10-14/15 Revision · image 17.80% 21 / 118 1 判分未决 Revision · image 118/118 请求完成 330.82 34.36 42.61 展开":
+          - rowheader "Native vLLM · Ascend 2026-10-14/15":
+            - text: Native vLLM · Ascend
+            - generic: 2026-10-14/15
+          - cell "Revision · image 17.80% 21 / 118 1 判分未决":
+            - generic: Revision · image
+            - strong: 17.80%
+            - generic: 21 / 118
+            - generic: 1 判分未决
+          - cell "Revision · image 118/118 请求完成":
+            - text: Revision · image
+            - generic: 118/118 请求完成
+          - cell "330.82"
+          - cell "34.36"
+          - cell "42.61"
+          - cell "展开":
+            - button "展开"
+        - row "Core Attention Boundary 2026-10-14/15 Gold · text 12.17% 70 / 575 297 判分未决 Gold · text 200/200 请求完成 375.83 59.18 40.21 展开":
+          - rowheader "Core Attention Boundary 2026-10-14/15":
+            - text: Core Attention Boundary
+            - generic: 2026-10-14/15
+          - cell "Gold · text 12.17% 70 / 575 297 判分未决":
+            - generic: Gold · text
+            - strong: 12.17%
+            - generic: 70 / 575
+            - generic: 297 判分未决
+          - cell "Gold · text 200/200 请求完成":
+            - text: Gold · text
+            - generic: 200/200 请求完成
+          - cell "375.83"
+          - cell "59.18"
+          - cell "40.21"
+          - cell "展开":
+            - button "展开"
+        - row "Core Attention Boundary 2026-10-14/15 Gold · image 7.53% 7 / 93 36 判分未决 Gold · image 93/93 请求完成 278.98 35.33 45.48 展开":
+          - rowheader "Core Attention Boundary 2026-10-14/15":
+            - text: Core Attention Boundary
+            - generic: 2026-10-14/15
+          - cell "Gold · image 7.53% 7 / 93 36 判分未决":
+            - generic: Gold · image
+            - strong: 7.53%
+            - generic: 7 / 93
+            - generic: 36 判分未决
+          - cell "Gold · image 93/93 请求完成":
+            - text: Gold · image
+            - generic: 93/93 请求完成
+          - cell "278.98"
+          - cell "35.33"
+          - cell "45.48"
+          - cell "展开":
+            - button "展开"
+        - row "BetterScale 2026-10-15 Gold · text 26.09% 150 / 575 16 判分未决 Gold · text 200/200 请求完成 875.67 25.69 17.84 展开":
+          - rowheader "BetterScale 2026-10-15":
+            - text: BetterScale
+            - generic: 2026-10-15
+          - cell "Gold · text 26.09% 150 / 575 16 判分未决":
+            - generic: Gold · text
+            - strong: 26.09%
+            - generic: 150 / 575
+            - generic: 16 判分未决
+          - cell "Gold · text 200/200 请求完成":
+            - text: Gold · text
+            - generic: 200/200 请求完成
+          - cell "875.67"
+          - cell "25.69"
+          - cell "17.84"
+          - cell "展开":
+            - button "展开"
+        - row "BetterScale 2026-10-15 Revision · text 29.17% 299 / 1,025 24 判分未决 Revision · text 200/200 请求完成 871.63 26.61 17.22 展开":
+          - rowheader "BetterScale 2026-10-15":
+            - text: BetterScale
+            - generic: 2026-10-15
+          - cell "Revision · text 29.17% 299 / 1,025 24 判分未决":
+            - generic: Revision · text
+            - strong: 29.17%
+            - generic: 299 / 1,025
+            - generic: 24 判分未决
+          - cell "Revision · text 200/200 请求完成":
+            - text: Revision · text
+            - generic: 200/200 请求完成
+          - cell "871.63"
+          - cell "26.61"
+          - cell "17.22"
+          - cell "展开":
+            - button "展开"
+        - row "BetterScale 2026-10-15 Gold · image 24.73% 23 / 93 2 判分未决 Gold · image 93/93 请求完成 489.94 19.68 29.07 展开":
+          - rowheader "BetterScale 2026-10-15":
+            - text: BetterScale
+            - generic: 2026-10-15
+          - cell "Gold · image 24.73% 23 / 93 2 判分未决":
+            - generic: Gold · image
+            - strong: 24.73%
+            - generic: 23 / 93
+            - generic: 2 判分未决
+          - cell "Gold · image 93/93 请求完成":
+            - text: Gold · image
+            - generic: 93/93 请求完成
+          - cell "489.94"
+          - cell "19.68"
+          - cell "29.07"
+          - cell "展开":
+            - button "展开"
+        - row "BetterScale 2026-10-15 Revision · image 14.41% 17 / 118 4 判分未决 Revision · image 118/118 请求完成 466.19 29.47 29.98 展开":
+          - rowheader "BetterScale 2026-10-15":
+            - text: BetterScale
+            - generic: 2026-10-15
+          - cell "Revision · image 14.41% 17 / 118 4 判分未决":
+            - generic: Revision · image
+            - strong: 14.41%
+            - generic: 17 / 118
+            - generic: 4 判分未决
+          - cell "Revision · image 118/118 请求完成":
+            - text: Revision · image
+            - generic: 118/118 请求完成
+          - cell "466.19"
+          - cell "29.47"
+          - cell "29.98"
+          - cell "展开":
+            - button "展开"
+        - row "Native vLLM · Ascend 2026-10-18 本轮配对基线 Gold · text 25.22% 145 / 575 24 判分未决 Gold · text 200/200 请求完成 346.86 61.73 42.37 展开":
+          - rowheader "Native vLLM · Ascend 2026-10-18 本轮配对基线":
+            - text: Native vLLM · Ascend
+            - generic: 2026-10-18
+            - generic: 本轮配对基线
+          - cell "Gold · text 25.22% 145 / 575 24 判分未决":
+            - generic: Gold · text
+            - strong: 25.22%
+            - generic: 145 / 575
+            - generic: 24 判分未决
+          - cell "Gold · text 200/200 请求完成":
+            - text: Gold · text
+            - generic: 200/200 请求完成
+          - cell "346.86"
+          - cell "61.73"
+          - cell "42.37"
+          - cell "展开":
+            - button "展开"
+        - row "Native vLLM · Ascend 2026-10-18 本轮配对基线 Gold · image 20.43% 19 / 93 1 判分未决 Gold · image 93/93 请求完成 272.04 33.39 56.02 展开":
+          - rowheader "Native vLLM · Ascend 2026-10-18 本轮配对基线":
+            - text: Native vLLM · Ascend
+            - generic: 2026-10-18
+            - generic: 本轮配对基线
+          - cell "Gold · image 20.43% 19 / 93 1 判分未决":
+            - generic: Gold · image
+            - strong: 20.43%
+            - generic: 19 / 93
+            - generic: 1 判分未决
+          - cell "Gold · image 93/93 请求完成":
+            - text: Gold · image
+            - generic: 93/93 请求完成
+          - cell "272.04"
+          - cell "33.39"
+          - cell "56.02"
+          - cell "展开":
+            - button "展开"
+        - row "request-throttling-controller 2026-10-18 本轮评测 Gold · text 24.35% 140 / 575 21 判分未决 Gold · text 200/200 请求完成 327.04 66.50 46.70 展开":
+          - rowheader "request-throttling-controller 2026-10-18 本轮评测":
+            - text: request-throttling-controller
+            - generic: 2026-10-18
+            - generic: 本轮评测
+          - cell "Gold · text 24.35% 140 / 575 21 判分未决":
+            - generic: Gold · text
+            - strong: 24.35%
+            - generic: 140 / 575
+            - generic: 21 判分未决
+          - cell "Gold · text 200/200 请求完成":
+            - text: Gold · text
+            - generic: 200/200 请求完成
+          - cell "327.04"
+          - cell "66.50"
+          - cell "46.70"
+          - cell "展开":
+            - button "展开"
+        - row "request-throttling-controller 2026-10-18 本轮评测 Gold · image 20.43% 19 / 93 4 判分未决 Gold · image 93/93 请求完成 277.11 32.80 53.19 展开":
+          - rowheader "request-throttling-controller 2026-10-18 本轮评测":
+            - text: request-throttling-controller
+            - generic: 2026-10-18
+            - generic: 本轮评测
+          - cell "Gold · image 20.43% 19 / 93 4 判分未决":
+            - generic: Gold · image
+            - strong: 20.43%
+            - generic: 19 / 93
+            - generic: 4 判分未决
+          - cell "Gold · image 93/93 请求完成":
+            - text: Gold · image
+            - generic: 93/93 请求完成
+          - cell "277.11"
+          - cell "32.80"
+          - cell "53.19"
+          - cell "展开":
+            - button "展开"
+  - generic "BidKV · 环境不兼容"
+  - generic "DLA · 环境不兼容"
+  - generic "KV Tiering · 环境不兼容"
+  - generic "KVCompress · 启动失败"
+  - generic "KV Materialization · 未能启用"
+  - generic "Ascend Attention Boundary · 环境不兼容"
+  - generic "Mooncake · 启动失败"
+  - generic "PegaFlow · 构建失败"
+  - generic "Pipeline Microbatch · 环境不兼容"
+  - generic "Utility Victim · 缺少运行材料"
+  - generic "A2A Buffer Reuse · 缺少运行材料"
+  - generic "Prefix Routing · 缺少运行材料"
+  - paragraph: Gold / Revision 的 text 与 image 分别压测，未合成吞吐。BetterScale 的未决判分分别为 20 / 27 条，保留在总分母中。
+  - paragraph: 准确率与性能分开测试；各方案运行配置不同，单次实测，不作为单变量 A/B。
+  - generic "评测口径与数据来源"
+- contentinfo:
+  - strong: vLLM-HUST
+  - generic: Evidence before rankings.
+  - navigation "Footer navigation":
+    - strong: 构建
+    - link "产品":
+      - /url: ./index.html#products
+    - link "引擎":
+      - /url: ./index.html#stack
+    - link "项目":
+      - /url: ./index.html#projects
+    - link "生态架构":
+      - /url: ./plugins.html
+    - link "版本":
+      - /url: ./versions.html
+    - strong: 性能数据
+    - link "性能曲线":
+      - /url: ./leaderboard-runs.html
+    - link "固定目标注册表":
+      - /url: ./leaderboard.html
+    - link "数据集矩阵":
+      - /url: ./dataset-validation.html
+    - link "数据集矩阵 v1":
+      - /url: ./dataset-matrix-v1.html
+    - link "产能与成本":
+      - /url: ./serving-plan.html
+    - strong: 论文与新闻
+    - link "论文与成果":
+      - /url: ./achievements.html
+    - link "新闻":
+      - /url: ./news.html
+    - strong: 社区
+    - link "组织成员":
+      - /url: ./members.html
+    - link "核心成员":
+      - /url: ./contributors.html
+    - link "会议":
+      - /url: ./conferences.html
+    - link "课程":
+      - /url: ./courses.html
+    - link "GitHub":
+      - /url: https://github.com/vLLM-HUST
+    - strong: 资源
+    - link "910B2 算力集群":
+      - /url: ./resources.html
+    - link "版本":
+      - /url: ./versions.html
+    - link "议题":
+      - /url: ./issues.html

@@ -1,15 +1,17 @@
 default_language_version:
   python: python3
 
+# Mutating hooks preserve byte-bound execution snapshots and measured CSV.
+# CI verifies exact immutable hashes, capsule SHA256SUMS, syntax and verifiers.
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0
   hooks:
   - id: trailing-whitespace
     args: [--markdown-linebreak-ext=md]
-    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006|issue-136-current-main-fixed-1-rps-20261007|issue-136-current-main-fixed-1-rps-20261007-review)/.*$|^reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\\.md$|^submissions/|^archive/)"
+    exclude: "(?:(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006|issue-136-current-main-fixed-1-rps-20261007|issue-136-current-main-fixed-1-rps-20261007-review)/.*$|^reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\\.md$|^submissions/|^archive/))|(?:^reports/request-throttling-controller/(?:[^/]+/sources/|collection-identity-v2-20261017/(?:scripts|tests)/|offline-burst-three-seed-20261017/summarize_throttle_windows[.]py$|[^/]+/sessions[.]csv$|website-frontier-20261018/frontier-live-detail-zh[.]txt$|website-mmlu-20261018/mmlu-live-[^/]+[.]txt$|website-single-matrix-20261018/single-matrix-live-check[.]json$))"
   - id: end-of-file-fixer
-    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006|issue-136-current-main-fixed-1-rps-20261007|issue-136-current-main-fixed-1-rps-20261007-review)/.*$|^reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\\.md$|^submissions/|^archive/)"
+    exclude: "(?:(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006|issue-136-current-main-fixed-1-rps-20261007|issue-136-current-main-fixed-1-rps-20261007-review)/.*$|^reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\\.md$|^submissions/|^archive/))|(?:^reports/request-throttling-controller/(?:[^/]+/sources/|collection-identity-v2-20261017/(?:scripts|tests)/|offline-burst-three-seed-20261017/summarize_throttle_windows[.]py$|[^/]+/sessions[.]csv$|website-frontier-20261018/frontier-live-detail-zh[.]txt$|website-mmlu-20261018/mmlu-live-[^/]+[.]txt$|website-single-matrix-20261018/single-matrix-live-check[.]json$))"
   - id: check-yaml
     args: [--unsafe]
   - id: check-json
@@ -20,7 +22,7 @@ repos:
   - id: check-case-conflict
   - id: mixed-line-ending
     args: [--fix=lf]
-    exclude: "(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006|issue-136-current-main-fixed-1-rps-20261007|issue-136-current-main-fixed-1-rps-20261007-review)/.*$|^reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\\.md$|^submissions/|^archive/)"
+    exclude: "(?:(^reports/(issue_134_raw_artifacts|historical-recovery-evidence|issue_135_readiness_slo_matrix|issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006|issue-136-current-main-fixed-1-rps-20261007|issue-136-current-main-fixed-1-rps-20261007-review)/.*$|^reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\\.md$|^submissions/|^archive/))|(?:^reports/request-throttling-controller/(?:[^/]+/sources/|collection-identity-v2-20261017/(?:scripts|tests)/|offline-burst-three-seed-20261017/summarize_throttle_windows[.]py$|[^/]+/sessions[.]csv$|website-frontier-20261018/frontier-live-detail-zh[.]txt$|website-mmlu-20261018/mmlu-live-[^/]+[.]txt$|website-single-matrix-20261018/single-matrix-live-check[.]json$))"
   - id: detect-private-key
   - id: no-commit-to-branch
     name: block commits to main
@@ -30,9 +32,11 @@ repos:
   rev: v0.15.2
   hooks:
   - id: ruff
+    exclude: "^reports/request-throttling-controller/(?:[^/]+/sources/|collection-identity-v2-20261017/(?:scripts|tests)/|offline-burst-three-seed-20261017/summarize_throttle_windows[.]py$|[^/]+/sessions[.]csv$|website-frontier-20261018/frontier-live-detail-zh[.]txt$|website-mmlu-20261018/mmlu-live-[^/]+[.]txt$|website-single-matrix-20261018/single-matrix-live-check[.]json$)"
     name: ruff check
     args: [--fix]
   - id: ruff-format
+    exclude: "^reports/request-throttling-controller/(?:[^/]+/sources/|collection-identity-v2-20261017/(?:scripts|tests)/|offline-burst-three-seed-20261017/summarize_throttle_windows[.]py$|[^/]+/sessions[.]csv$|website-frontier-20261018/frontier-live-detail-zh[.]txt$|website-mmlu-20261018/mmlu-live-[^/]+[.]txt$|website-single-matrix-20261018/single-matrix-live-check[.]json$)"
     name: ruff format
 
 - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
@@ -49,7 +53,7 @@ repos:
     additional_dependencies:
     - mdformat-gfm
     args: [--wrap=100]
-    exclude: ^(CHANGELOG\.md|reports/(issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006|issue-136-current-main-fixed-1-rps-20261007|issue-136-current-main-fixed-1-rps-20261007-review)/.*|reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\.md)$
+    exclude: "(?:^(CHANGELOG\\.md|reports/(issue-214-v018-three-repeat-20261007|issue-136-evaluation-112-roundtrip-20261006|issue-136-current-main-fixed-1-rps-20261007|issue-136-current-main-fixed-1-rps-20261007-review)/.*|reports/qwen35-b0-xlsx-cross-validation-20261008/MANIFEST-engineer-config-e1de9a4d\\.md)$)|(?:^reports/request-throttling-controller/(?:[^/]+/sources/|collection-identity-v2-20261017/(?:scripts|tests)/|offline-burst-three-seed-20261017/summarize_throttle_windows[.]py$|[^/]+/sessions[.]csv$|website-frontier-20261018/frontier-live-detail-zh[.]txt$|website-mmlu-20261018/mmlu-live-[^/]+[.]txt$|website-single-matrix-20261018/single-matrix-live-check[.]json$))"
 
 - repo: https://github.com/Yelp/detect-secrets
   rev: v1.5.0

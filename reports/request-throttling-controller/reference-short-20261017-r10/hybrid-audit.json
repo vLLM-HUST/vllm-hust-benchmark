@@ -1,0 +1,131 @@
+{
+  "status": "PASS",
+  "evidence_type": "source-derived-capacity-model",
+  "scope": "No inference or model allocation; derived layout validated by engine block count and startup estimate, not direct worker-layout introspection",
+  "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+  "model_layer_types": {
+    "linear_attention": 30,
+    "full_attention": 10
+  },
+  "resolved_groups": [
+    {
+      "type": "MambaSpec",
+      "layers": 10,
+      "block_size": 2048,
+      "page_size_bytes": 2121728
+    },
+    {
+      "type": "MambaSpec",
+      "layers": 10,
+      "block_size": 2048,
+      "page_size_bytes": 2121728
+    },
+    {
+      "type": "MambaSpec",
+      "layers": 10,
+      "block_size": 2048,
+      "page_size_bytes": 2121728
+    },
+    {
+      "type": "FullAttentionSpec",
+      "layers": 10,
+      "block_size": 2048,
+      "page_size_bytes": 2121728
+    }
+  ],
+  "engine_num_blocks": 25,
+  "reconstructed_num_blocks": 25,
+  "usable_blocks_after_source_block_pool_initialization": 24,
+  "reported_startup_tokens": 29257,
+  "source_startup_concurrency": 1.7857142857142858,
+  "raw_block_tokens": 51200,
+  "per_program_mamba_blocks_upper_bound": 6,
+  "full_attention_rounding_reserve_tokens": 2047,
+  "proposed_usable_token_budget": 49152,
+  "proposed_per_program_buffer_tokens": 14335,
+  "context_costs": [
+    {
+      "context_tokens": 512,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        1
+      ],
+      "blocks_per_program_upper_bound": 7,
+      "whole_programs_within_usable_pool": 3
+    },
+    {
+      "context_tokens": 2048,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        1
+      ],
+      "blocks_per_program_upper_bound": 7,
+      "whole_programs_within_usable_pool": 3
+    },
+    {
+      "context_tokens": 4096,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "blocks_per_program_upper_bound": 8,
+      "whole_programs_within_usable_pool": 3
+    },
+    {
+      "context_tokens": 8192,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        4
+      ],
+      "blocks_per_program_upper_bound": 10,
+      "whole_programs_within_usable_pool": 2
+    },
+    {
+      "context_tokens": 13242,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        7
+      ],
+      "blocks_per_program_upper_bound": 13,
+      "whole_programs_within_usable_pool": 1
+    },
+    {
+      "context_tokens": 14336,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        7
+      ],
+      "blocks_per_program_upper_bound": 13,
+      "whole_programs_within_usable_pool": 1
+    },
+    {
+      "context_tokens": 16384,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        8
+      ],
+      "blocks_per_program_upper_bound": 14,
+      "whole_programs_within_usable_pool": 1
+    }
+  ],
+  "source_sha256": {
+    "/vllm-workspace/vllm-ascend/vllm_ascend/worker/model_runner_v1.py": "94d75dbeb5d23ab5b383cdc69114167392b967994bb21342cf748b733ba9a968",
+    "/vllm-workspace/vllm/vllm/model_executor/models/qwen3_5.py": "04f3de5372973770d71c5c05f2e8a5e221ec52b62cca7a1e302d9201b61b8adc",
+    "/vllm-workspace/vllm/vllm/v1/core/block_pool.py": "84755b84c36ed6460ceefe2690c9484a9c31488c5da6daa6c918f497d8837dee",
+    "/vllm-workspace/vllm/vllm/v1/core/kv_cache_utils.py": "b89f9afa7f95fcc30412ae2031d5370a23e95f35d068fa14e5824dce1c900ee5"
+  }
+}

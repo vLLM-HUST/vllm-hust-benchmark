@@ -1,0 +1,70 @@
+{
+  "status": "MEASURED_WINDOWS",
+  "evidence_type": "fixed-window-replay",
+  "finite_makespan_claim": false,
+  "points": [
+    {
+      "label": "scheduler-on-c32",
+      "status": "MEASURED_WINDOW",
+      "scheduling_enabled": true,
+      "concurrency": 32,
+      "max_waiting": 31,
+      "max_paused": 31,
+      "latest_replay_seconds": 179.023,
+      "completed_calls_so_far": 72,
+      "programs_fully_completed_within_window": 1,
+      "completed_calls": 72,
+      "request_errors": 0,
+      "completed_output_tokens": 5442,
+      "kv_peak_percent": 75.0,
+      "engine_counter_interval_seconds": 179.019,
+      "actual_input_rounds": 2318,
+      "finite_makespan_claim": false,
+      "engine_output_tokens_per_second": 30.555415905574268,
+      "engine_input_tokens_per_second": 1757.249230528603,
+      "preemptions": 0.0,
+      "cache_hit_tokens": 180224.0,
+      "completed_output_tokens_per_second": 30.233333333333334,
+      "job_wall_seconds_including_initialization_and_cleanup": 201.82634171471
+    },
+    {
+      "label": "scheduler-off-c32",
+      "status": "MEASURED_WINDOW",
+      "scheduling_enabled": false,
+      "concurrency": 32,
+      "max_waiting": 0,
+      "max_paused": 0,
+      "latest_replay_seconds": 179.953,
+      "completed_calls_so_far": 63,
+      "programs_fully_completed_within_window": 0,
+      "completed_calls": 62,
+      "request_errors": 0,
+      "completed_output_tokens": 2857,
+      "kv_peak_percent": 100.0,
+      "engine_counter_interval_seconds": 179.952,
+      "actual_input_rounds": 2318,
+      "finite_makespan_claim": false,
+      "engine_output_tokens_per_second": 16.237663376900507,
+      "engine_input_tokens_per_second": 441.16208766782256,
+      "preemptions": 232.0,
+      "cache_hit_tokens": 0.0,
+      "completed_output_tokens_per_second": 15.872222222222222,
+      "job_wall_seconds_including_initialization_and_cleanup": 201.6197284506634
+    }
+  ],
+  "overlapping_input_rounds": 12,
+  "overlapping_inputs_equal": true,
+  "private_archive_sha256": "48da9a3a9b65b4941364a836d22481fe245c274006d46d0c0349b4b84d80987f",
+  "qualified_for_matrix": false,
+  "ray_terminal": {
+    "job_id": "request-throttling-controller-short-20261017-r12--window-c32-v12",
+    "ray_status": "SUCCEEDED"
+  },
+  "limitations": [
+    "Single pair, single seed; no stable gain or best-fixed-concurrency claim.",
+    "Completed-output throughput excludes unfinished requests; engine rates use their own recorded sample interval.",
+    "Window-boundary cancellations do not count as completed programs or as normal request errors.",
+    "Token-length replay is not task repair accuracy.",
+    "Source-audited experimental hybrid reservation, APCon/512MiB, not the original matrix runtime profile."
+  ]
+}

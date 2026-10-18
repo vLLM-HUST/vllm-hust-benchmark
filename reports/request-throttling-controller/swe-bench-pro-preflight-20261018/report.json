@@ -1,0 +1,182 @@
+{
+  "status": "CONDITIONAL_GO_REQUIRES_SANDBOX_AND_TOOL_CALL_PROFILE",
+  "evidence_type": "smoke",
+  "source": {
+    "repository": "https://github.com/scaleapi/SWE-bench_Pro-os",
+    "commit": "66f92766bba642462d4bbe5479e83f91f9211862",
+    "archive_sha256": "a459a929729c95d15cb7b4c5c599d36ea4e9a067bedc9d018cee6032b577e6cc",
+    "observed_at": "2026-10-18T14:28:21.117238+00:00"
+  },
+  "source_validation": {
+    "status": "PASS",
+    "files_verified": 6436,
+    "tasks": 642,
+    "task_ids_sha256": "d80145db938d9e14dd83aef515d45c83d4b99795c80d3bebea7526cad55017af",
+    "minimal_task_selection": "lexicographic first task, before model outcomes",
+    "minimal_task_id": "instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan",
+    "evaluated_tasks": 0
+  },
+  "cpu_validation": {
+    "status": "PASS",
+    "tasks_loaded": 642,
+    "failures": [],
+    "official_tool_imports": {
+      "locked_mini_swe": "PASS",
+      "patch_replay": "PASS",
+      "host_mini_swe": "PASS"
+    },
+    "versions": {
+      "harbor": "0.24.0",
+      "mini-swe-agent": "2.4.6"
+    },
+    "task_execution": false,
+    "model_calls": 0
+  },
+  "image": {
+    "image": "ghcr.io/scaleapi/swe-bench_pro-v2:instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan",
+    "digest": "sha256:59acd02e331ac2cd1fb9f3d4d72e8922b01b4e7c1dc1e9130c3cd2cf44c9786d",
+    "platforms": [
+      {
+        "os": "linux",
+        "architecture": "amd64"
+      }
+    ],
+    "anonymous_manifest_read": true,
+    "image_pulled": false,
+    "observed_at": "2026-10-18T14:33:48.724611+00:00"
+  },
+  "environment_attempts": [
+    {
+      "stage": "oracle",
+      "exit_code": 1,
+      "error": "Docker is not installed or not on PATH. Please install Docker and try again.",
+      "model_calls": 0
+    },
+    {
+      "stage": "empty",
+      "exit_code": 1,
+      "error": "Docker is not installed or not on PATH. Please install Docker and try again.",
+      "model_calls": 0
+    }
+  ],
+  "interface_proofs": [
+    {
+      "integrity": "PASS",
+      "interface_outcome": "REJECTED_BEFORE_GENERATION",
+      "evidence_type": "smoke",
+      "task_execution": false,
+      "run_id": "request-throttling-swe-pro-tool-preflight-20261018-r1",
+      "private_archive_sha256": "8a3e90e5ead3bdd5d8a90830b876e272746c37af5456e7cb4b92861e16b4777a",
+      "file_hashes": {
+        "run/controller-request.json": "94bf1425727226c4165a5ffe1e5215c8541cf5b6d540ed9b397a4c5bbb5d7bc6",
+        "run/controller-response.bin": "fa6b090e84a07959eee49f5e28e8211cd517844f3ecec0b9209cb1f68c57c69e",
+        "run/native-request.json": "0d73b2daf5d2dd3811542bffa881c0191230242b95120eab6dd12184846f45c7",
+        "run/native-response.bin": "fa6b090e84a07959eee49f5e28e8211cd517844f3ecec0b9209cb1f68c57c69e",
+        "run/plan.json": "0a50c17eb6f4b125ef9dbe5274d3a005adeea4b99cd3fe77310ba180b154408a",
+        "run/release.json": "dee75562a71ee945e873e9aa83745d4f4b2b6125c48b01099c910359c1805c54",
+        "run/report.json": "56bab0516cff5759781a3f74b4cef0b1fd085a3f3da323674dd6dafa3e7cfb7d"
+      },
+      "same_forwarded_request": true,
+      "release_verified": true,
+      "api_requests": 2,
+      "successful_tool_calls": 0,
+      "generation_usage": "not produced on HTTP400; not a measured token total",
+      "rows": [
+        {
+          "arm": "native",
+          "http_status": 400,
+          "elapsed_seconds": 0.03186007775366306,
+          "error": {
+            "message": "\"auto\" tool choice requires --enable-auto-tool-choice and --tool-call-parser to be set",
+            "type": "BadRequestError",
+            "param": null,
+            "code": 400
+          },
+          "usage": null,
+          "finish_reason": null
+        },
+        {
+          "arm": "controller",
+          "http_status": 400,
+          "elapsed_seconds": 0.006713571958243847,
+          "error": {
+            "message": "\"auto\" tool choice requires --enable-auto-tool-choice and --tool-call-parser to be set",
+            "type": "BadRequestError",
+            "param": null,
+            "code": 400
+          },
+          "usage": null,
+          "finish_reason": null
+        }
+      ]
+    },
+    {
+      "integrity": "PASS",
+      "interface_outcome": "REJECTED_BEFORE_GENERATION",
+      "evidence_type": "smoke",
+      "task_execution": false,
+      "run_id": "request-throttling-swe-pro-tool-preflight-20261018-r2",
+      "private_archive_sha256": "400bd0c72208e25e838266d41797c490f3a5572a11d68adff7d8c4053dc56487",
+      "file_hashes": {
+        "run/controller-request.json": "6f163a69df42c43e122c94f3d320b5e268a99afc8f865df186b0e8e836a8a080",
+        "run/controller-response.bin": "41bd0caca23640f826aefb40a35f050a0d35150a990c03f469aa4cbadd726e74",
+        "run/native-request.json": "1adf51200ca3d945cba9adb9d447dbff4d4d5f213c1f22a4a717c00bf19a7c68",
+        "run/native-response.bin": "41bd0caca23640f826aefb40a35f050a0d35150a990c03f469aa4cbadd726e74",
+        "run/plan.json": "41add0fe14ed712ed822419a8a46c84404fc947f7769c4c677d78db4b7e9012d",
+        "run/release.json": "6d2638a35b2781b28326ed1d2d252196f9edfdfc01d326fc442dca98df477b84",
+        "run/report.json": "710d87fa850d7ce609b122bc6c38636f68e45e7181f5d2b5ac9fddd2abc763cd"
+      },
+      "same_forwarded_request": true,
+      "release_verified": true,
+      "api_requests": 2,
+      "successful_tool_calls": 0,
+      "generation_usage": "not produced on HTTP400; not a measured token total",
+      "rows": [
+        {
+          "arm": "native",
+          "http_status": 400,
+          "elapsed_seconds": 0.030772946774959564,
+          "error": {
+            "message": "tool_choice=\"function=ChatCompletionNamedFunction(name='bash') type='function'\" requires --tool-call-parser to be set",
+            "type": "BadRequestError",
+            "param": null,
+            "code": 400
+          },
+          "usage": null,
+          "finish_reason": null
+        },
+        {
+          "arm": "controller",
+          "http_status": 400,
+          "elapsed_seconds": 0.006440415978431702,
+          "error": {
+            "message": "tool_choice=\"function=ChatCompletionNamedFunction(name='bash') type='function'\" requires --tool-call-parser to be set",
+            "type": "BadRequestError",
+            "param": null,
+            "code": 400
+          },
+          "usage": null,
+          "finish_reason": null
+        }
+      ]
+    }
+  ],
+  "actual_swe_tasks_evaluated": 0,
+  "resolved_tasks": null,
+  "repair_success_rate": null,
+  "official_agent_fix_patch_produced": false,
+  "probes_executed": false,
+  "next_requirements": [
+    "Owned amd64 Linux Docker sandbox host, sufficient CPU/memory/disk, then exact image digest oracle/empty and network/history probes",
+    "New frozen serving profile supporting official auto-tool calling; do not restart or mutate existing dataset engines",
+    "Official mini-swe-agent core unchanged; per-task program_id via existing model_kwargs extra_body; release in finally; verify identical actual forwarded requests",
+    "One real task patch plus clean-sandbox official regrade first; then fixed offline batch with measured actual arrival and same paired Agent/model/tools/budgets"
+  ],
+  "limitations": [
+    "No repair success, task runtime, task token cost, quality or scheduling performance conclusion",
+    "HTTP400 tool requests did not produce generation usage; not a measured zero-token workload",
+    "Named-bash alternative differs from official auto choice and also failed in actual installed runtime; not treated as a compatibility success",
+    "Single request per arm per profile; no repeated treatment or positive chasing"
+  ],
+  "observed_at": "2026-10-18T14:43:07.958470+00:00"
+}
