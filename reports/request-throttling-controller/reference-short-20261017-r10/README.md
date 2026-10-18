@@ -1,1 +1,4 @@
-SWE-smith-tranjactory: complete historical-source subset, Qwen3.5-35B-A3B BF16 Ascend910B2 TP2, experimental APC/512MiB hybrid-reservation profile. Three complete points: ON C4 151.5334s, OFF C4 152.7812s, fixed OFF C2 143.8509s; no strongest-baseline advantage. Remaining C1 deliberately interrupted. Verify with python verify.py. No task correctness or final matrix qualification.
+SWE-smith-tranjactory: complete historical-source subset, Qwen3.5-35B-A3B BF16 Ascend910B2 TP2,
+experimental APC/512MiB hybrid-reservation profile. Three complete points: ON C4 151.5334s, OFF C4
+152.7812s, fixed OFF C2 143.8509s; no strongest-baseline advantage. Remaining C1 deliberately
+interrupted. Verify with python verify.py. No task correctness or final matrix qualification.

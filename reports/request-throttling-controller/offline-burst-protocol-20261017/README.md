@@ -1,9 +1,28 @@
 # Frozen offline-burst protocol and source evidence
 
-Applies to offline r15/r16, and frozen seed17/r17 and seed23/r18. Completion of planned runs must be read from their own terminal reports. Default arrival contract:96 programs at time0, no client cap, retain each program's dependencies. Each side is a180s window; no finite-batch makespan claim.
+Applies to offline r15/r16, and frozen seed17/r17 and seed23/r18. Completion of planned runs must be
+read from their own terminal reports. Default arrival contract:96 programs at time0, no client cap,
+retain each program's dependencies. Each side is a180s window; no finite-batch makespan claim.
 
-Measurement source paths and SHA256 are checked against the r15 payload manifest. Ancillary collection/export tools are retained separately. Controller identity, capacity evidence, audit and runtime profile were inherited unchanged from the deployed r10 proxy/r2 model used by the r12 historical capsule. Their copies here are runtime evidence only; this does not convert r12 capped-client workload into offline evidence. The canonical pinned upstream core is unchanged; inspect controller-identity.json for loaded source hashes.
+Measurement source paths and SHA256 are checked against the r15 payload manifest. Ancillary
+collection/export tools are retained separately. Controller identity, capacity evidence, audit and
+runtime profile were inherited unchanged from the deployed r10 proxy/r2 model used by the r12
+historical capsule. Their copies here are runtime evidence only; this does not convert r12
+capped-client workload into offline evidence. The canonical pinned upstream core is unchanged;
+inspect controller-identity.json for loaded source hashes.
 
-Use sources/experiments/workload/run_throttle_window_trial.py --plan PLAN with an existing owned RIDE deployment. The plan must explicitly set arrival_mode=offline-burst, concurrency=0, client_concurrency_limit=null, input SHA, seed, window_seconds180, outer_budget_seconds300, model/path, backend and ON/OFF endpoints, output/workload/replayer paths. The measurement entrypoint verifies scheduler flag, live idle state and capacity evidence49152/14335; it resets prefix cache per side, uses the existing replayer, cleans only owned program IDs and drains before the next side. Use existing Ray Jobs with the deployment runtime environment; model provisioning is a separate platform step. All private addresses and environment-specific plan values must be supplied locally, never copied to public reports.
+Use sources/experiments/workload/run_throttle_window_trial.py --plan PLAN with an existing owned
+RIDE deployment. The plan must explicitly set arrival_mode=offline-burst, concurrency=0,
+client_concurrency_limit=null, input SHA, seed, window_seconds180, outer_budget_seconds300,
+model/path, backend and ON/OFF endpoints, output/workload/replayer paths. The measurement entrypoint
+verifies scheduler flag, live idle state and capacity evidence49152/14335; it resets prefix cache
+per side, uses the existing replayer, cleans only owned program IDs and drains before the next side.
+Use existing Ray Jobs with the deployment runtime environment; model provisioning is a separate
+platform step. All private addresses and environment-specific plan values must be supplied locally,
+never copied to public reports.
 
-After terminal/UID checks collect with collect_short_throttle_trial.py, export with export_short_throttle_trial.py, then run each public capsule's verify.py. Source scripts here are evidence snapshots, not a promise of a fully parameterized one-command deployment. Full reusable deployment integration and code review remain pending. The measured APC/512MiB hybrid KV profile differs from the original matrix.
+After terminal/UID checks collect with collect_short_throttle_trial.py, export with
+export_short_throttle_trial.py, then run each public capsule's verify.py. Source scripts here are
+evidence snapshots, not a promise of a fully parameterized one-command deployment. Full reusable
+deployment integration and code review remain pending. The measured APC/512MiB hybrid KV profile
+differs from the original matrix.

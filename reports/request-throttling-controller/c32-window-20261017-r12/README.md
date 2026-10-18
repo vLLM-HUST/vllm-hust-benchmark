@@ -1,1 +1,8 @@
-SWE-smith-tranjactory: concurrency32,180-second ON/OFF windows on96 context-compatible complete input programs from the historical128 dataset. Rows unchanged; window completion is not completion of the full input. Same seed11, ON then OFF. Engine output rates30.5554 vs16.2377 tokens/s (1.8818x); completed-output rates30.2333 vs15.8722 tokens/s (1.9048x);72 vs62 completed calls;1 vs0 fully completed programs;0 vs232 preemptions;0 request errors. Independently verify with python verify.py. Limited single pair, not stable gain or strongest-fixed-baseline qualification. Experimental APC/512MiB hybrid reservation profile differs from original matrix profile. Reverse-order repeat is pending. Private token payloads/endpoints are excluded.
+SWE-smith-tranjactory: concurrency32,180-second ON/OFF windows on96 context-compatible complete
+input programs from the historical128 dataset. Rows unchanged; window completion is not completion
+of the full input. Same seed11, ON then OFF. Engine output rates30.5554 vs16.2377 tokens/s
+(1.8818x); completed-output rates30.2333 vs15.8722 tokens/s (1.9048x);72 vs62 completed calls;1 vs0
+fully completed programs;0 vs232 preemptions;0 request errors. Independently verify with python
+verify.py. Limited single pair, not stable gain or strongest-fixed-baseline qualification.
+Experimental APC/512MiB hybrid reservation profile differs from original matrix profile.
+Reverse-order repeat is pending. Private token payloads/endpoints are excluded.
