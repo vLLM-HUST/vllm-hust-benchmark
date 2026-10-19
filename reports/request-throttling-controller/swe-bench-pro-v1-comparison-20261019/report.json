@@ -1,0 +1,582 @@
+{
+  "scope": "One shared model epoch, same 8 V1 tasks, NC/CN/NC bounded real-Agent workflow; not pure decode TPS or formal independent-start cost qualification. Saved response usage excludes failed calls without usage; do not assign these zero tokens. Grading outside Agent timing.",
+  "verification_archive_sha256": "8b31903ca1545e6d9e63c8fa38a09181cb004b7e55b3acf515114cd4e05356fb",
+  "summary": {
+    "native": {
+      "batches": 3,
+      "terminal_task_executions": 24,
+      "median_agent_batch_seconds": 365.013275956735,
+      "median_workflow_output_tokens_per_second": 149.2001299775411,
+      "saved_model_responses": 679,
+      "prompt_tokens": 8661204,
+      "output_tokens": 155294,
+      "terminal_statuses": {
+        "LimitsExceeded": 18,
+        "ContextWindowExceededError": 5,
+        "Submitted": 1
+      },
+      "resolved_task_executions": 2,
+      "unresolved_grading_task_executions": 0
+    },
+    "controller": {
+      "batches": 3,
+      "terminal_task_executions": 24,
+      "median_agent_batch_seconds": 351.5720283109695,
+      "median_workflow_output_tokens_per_second": 141.8372224877144,
+      "saved_model_responses": 682,
+      "prompt_tokens": 9113269,
+      "output_tokens": 159424,
+      "terminal_statuses": {
+        "Submitted": 4,
+        "ContextWindowExceededError": 5,
+        "LimitsExceeded": 15
+      },
+      "resolved_task_executions": 2,
+      "unresolved_grading_task_executions": 0
+    },
+    "elapsed_change_percent": -3.682399663556002
+  },
+  "batches": [
+    {
+      "pair": 1,
+      "arm": "native",
+      "observed_terminal_tasks": 8,
+      "terminal_statuses": {
+        "LimitsExceeded": 6,
+        "ContextWindowExceededError": 1,
+        "Submitted": 1
+      },
+      "model_responses": 232,
+      "usage": {
+        "prompt_tokens": 3119381,
+        "completion_tokens": 58158,
+        "total_tokens": 3177539
+      },
+      "agent_batch_elapsed_seconds": 367.85639567906037,
+      "resolved": 1,
+      "unresolved_grading": 0,
+      "original_grading_valid": false,
+      "distinct_fresh_grader_containers": 8,
+      "eligible_decode_graph_replays_by_rank": [
+        13578,
+        13578
+      ],
+      "response_finish_reasons": {
+        "stop": 232
+      },
+      "parsed_test_counts": {
+        "instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan": 0,
+        "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan": 300,
+        "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 173,
+        "instance_NodeBB__NodeBB-087e6020e490b4a1759f38c1ad03869511928263-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 195,
+        "instance_NodeBB__NodeBB-0c81642997ea1d827dbd02c311db9d4976112cd4-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 97,
+        "instance_NodeBB__NodeBB-0e07f3c9bace416cbab078a30eae972868c0a8a3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 149,
+        "instance_NodeBB__NodeBB-0f788b8eaa4bba3c142d171fd941d015c53b65fc-v0ec6d6c2baf3cb4797482ce4829bc25cd5716649": 35,
+        "instance_NodeBB__NodeBB-18c45b44613aecd53e9f60457b9812049ab2998d-v0495b863a912fbff5749c67e860612b91825407c": 424
+      },
+      "arrival_spread_seconds": 0.0002929139882326126,
+      "workflow_output_tokens_per_second": 158.09973860218125,
+      "npu_card_seconds_agent_window_only": 735.7127913581207,
+      "price": null,
+      "observer_samples_in_agent_window": 360,
+      "observer_errors": {},
+      "waiting_max": 0,
+      "remaining_capacity_min": 1521971,
+      "active_program_tokens_max": 134261,
+      "future_paused_tokens_max": 0,
+      "declared_capacities": [
+        1656832
+      ],
+      "observed_program_states": {
+        "reasoning/active": 1921,
+        "acting/active": 65
+      },
+      "engine_counter_deltas": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prompt_tokens_total": 3119381.0,
+        "vllm:generation_tokens_total": 58158.0
+      }
+    },
+    {
+      "pair": 1,
+      "arm": "controller",
+      "observed_terminal_tasks": 8,
+      "terminal_statuses": {
+        "Submitted": 1,
+        "ContextWindowExceededError": 2,
+        "LimitsExceeded": 5
+      },
+      "model_responses": 224,
+      "usage": {
+        "prompt_tokens": 2931048,
+        "completion_tokens": 47831,
+        "total_tokens": 2978879
+      },
+      "agent_batch_elapsed_seconds": 349.48342367401347,
+      "resolved": 1,
+      "unresolved_grading": 0,
+      "original_grading_valid": false,
+      "distinct_fresh_grader_containers": 8,
+      "eligible_decode_graph_replays_by_rank": [
+        13027,
+        13027
+      ],
+      "response_finish_reasons": {
+        "stop": 224
+      },
+      "parsed_test_counts": {
+        "instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan": 1,
+        "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan": 300,
+        "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 173,
+        "instance_NodeBB__NodeBB-087e6020e490b4a1759f38c1ad03869511928263-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 154,
+        "instance_NodeBB__NodeBB-0c81642997ea1d827dbd02c311db9d4976112cd4-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 0,
+        "instance_NodeBB__NodeBB-0e07f3c9bace416cbab078a30eae972868c0a8a3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 149,
+        "instance_NodeBB__NodeBB-0f788b8eaa4bba3c142d171fd941d015c53b65fc-v0ec6d6c2baf3cb4797482ce4829bc25cd5716649": 35,
+        "instance_NodeBB__NodeBB-18c45b44613aecd53e9f60457b9812049ab2998d-v0495b863a912fbff5749c67e860612b91825407c": 427
+      },
+      "arrival_spread_seconds": 0.00031858496367931366,
+      "workflow_output_tokens_per_second": 136.8619990532517,
+      "npu_card_seconds_agent_window_only": 698.9668473480269,
+      "price": null,
+      "observer_samples_in_agent_window": 343,
+      "observer_errors": {},
+      "waiting_max": 0,
+      "remaining_capacity_min": 1523571,
+      "active_program_tokens_max": 132461,
+      "future_paused_tokens_max": 0,
+      "declared_capacities": [
+        1656832
+      ],
+      "observed_program_states": {
+        "reasoning/active": 1635,
+        "acting/active": 76
+      },
+      "engine_counter_deltas": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prompt_tokens_total": 2931048.0,
+        "vllm:generation_tokens_total": 47831.0
+      }
+    },
+    {
+      "pair": 2,
+      "arm": "controller",
+      "observed_terminal_tasks": 8,
+      "terminal_statuses": {
+        "LimitsExceeded": 6,
+        "ContextWindowExceededError": 1,
+        "Submitted": 1
+      },
+      "model_responses": 235,
+      "usage": {
+        "prompt_tokens": 3201757,
+        "completion_tokens": 49866,
+        "total_tokens": 3251623
+      },
+      "agent_batch_elapsed_seconds": 351.5720283109695,
+      "resolved": 0,
+      "unresolved_grading": 0,
+      "original_grading_valid": false,
+      "distinct_fresh_grader_containers": 8,
+      "eligible_decode_graph_replays_by_rank": [
+        13032,
+        13032
+      ],
+      "response_finish_reasons": {
+        "stop": 234,
+        "length": 1
+      },
+      "parsed_test_counts": {
+        "instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan": 0,
+        "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan": 300,
+        "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 173,
+        "instance_NodeBB__NodeBB-087e6020e490b4a1759f38c1ad03869511928263-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 1,
+        "instance_NodeBB__NodeBB-0c81642997ea1d827dbd02c311db9d4976112cd4-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 97,
+        "instance_NodeBB__NodeBB-0e07f3c9bace416cbab078a30eae972868c0a8a3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 149,
+        "instance_NodeBB__NodeBB-0f788b8eaa4bba3c142d171fd941d015c53b65fc-v0ec6d6c2baf3cb4797482ce4829bc25cd5716649": 35,
+        "instance_NodeBB__NodeBB-18c45b44613aecd53e9f60457b9812049ab2998d-v0495b863a912fbff5749c67e860612b91825407c": 427
+      },
+      "arrival_spread_seconds": 0.0002830349840223789,
+      "workflow_output_tokens_per_second": 141.8372224877144,
+      "npu_card_seconds_agent_window_only": 703.144056621939,
+      "price": null,
+      "observer_samples_in_agent_window": 344,
+      "observer_errors": {},
+      "waiting_max": 0,
+      "remaining_capacity_min": 1513453,
+      "active_program_tokens_max": 142579,
+      "future_paused_tokens_max": 0,
+      "declared_capacities": [
+        1656832
+      ],
+      "observed_program_states": {
+        "reasoning/active": 1680,
+        "acting/active": 53
+      },
+      "engine_counter_deltas": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prompt_tokens_total": 3201757.0,
+        "vllm:generation_tokens_total": 49866.0
+      }
+    },
+    {
+      "pair": 2,
+      "arm": "native",
+      "observed_terminal_tasks": 8,
+      "terminal_statuses": {
+        "LimitsExceeded": 6,
+        "ContextWindowExceededError": 2
+      },
+      "model_responses": 220,
+      "usage": {
+        "prompt_tokens": 2732014,
+        "completion_tokens": 45595,
+        "total_tokens": 2777609
+      },
+      "agent_batch_elapsed_seconds": 365.013275956735,
+      "resolved": 0,
+      "unresolved_grading": 0,
+      "original_grading_valid": false,
+      "distinct_fresh_grader_containers": 8,
+      "eligible_decode_graph_replays_by_rank": [
+        14795,
+        14795
+      ],
+      "response_finish_reasons": {
+        "stop": 220
+      },
+      "parsed_test_counts": {
+        "instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan": 1,
+        "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan": 300,
+        "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 173,
+        "instance_NodeBB__NodeBB-087e6020e490b4a1759f38c1ad03869511928263-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 1,
+        "instance_NodeBB__NodeBB-0c81642997ea1d827dbd02c311db9d4976112cd4-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 97,
+        "instance_NodeBB__NodeBB-0e07f3c9bace416cbab078a30eae972868c0a8a3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 149,
+        "instance_NodeBB__NodeBB-0f788b8eaa4bba3c142d171fd941d015c53b65fc-v0ec6d6c2baf3cb4797482ce4829bc25cd5716649": 35,
+        "instance_NodeBB__NodeBB-18c45b44613aecd53e9f60457b9812049ab2998d-v0495b863a912fbff5749c67e860612b91825407c": 427
+      },
+      "arrival_spread_seconds": 0.00024219369515776634,
+      "workflow_output_tokens_per_second": 124.9132648134266,
+      "npu_card_seconds_agent_window_only": 730.02655191347,
+      "price": null,
+      "observer_samples_in_agent_window": 358,
+      "observer_errors": {},
+      "waiting_max": 0,
+      "remaining_capacity_min": 1514290,
+      "active_program_tokens_max": 141742,
+      "future_paused_tokens_max": 0,
+      "declared_capacities": [
+        1656832
+      ],
+      "observed_program_states": {
+        "reasoning/active": 1547,
+        "acting/active": 38
+      },
+      "engine_counter_deltas": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prompt_tokens_total": 2732014.0,
+        "vllm:generation_tokens_total": 45595.0
+      }
+    },
+    {
+      "pair": 3,
+      "arm": "native",
+      "observed_terminal_tasks": 8,
+      "terminal_statuses": {
+        "LimitsExceeded": 6,
+        "ContextWindowExceededError": 2
+      },
+      "model_responses": 227,
+      "usage": {
+        "prompt_tokens": 2809809,
+        "completion_tokens": 51541,
+        "total_tokens": 2861350
+      },
+      "agent_batch_elapsed_seconds": 345.44876071996987,
+      "resolved": 1,
+      "unresolved_grading": 0,
+      "original_grading_valid": false,
+      "distinct_fresh_grader_containers": 8,
+      "eligible_decode_graph_replays_by_rank": [
+        12610,
+        12610
+      ],
+      "response_finish_reasons": {
+        "stop": 227
+      },
+      "parsed_test_counts": {
+        "instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan": 1,
+        "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan": 300,
+        "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 173,
+        "instance_NodeBB__NodeBB-087e6020e490b4a1759f38c1ad03869511928263-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 195,
+        "instance_NodeBB__NodeBB-0c81642997ea1d827dbd02c311db9d4976112cd4-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 97,
+        "instance_NodeBB__NodeBB-0e07f3c9bace416cbab078a30eae972868c0a8a3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 149,
+        "instance_NodeBB__NodeBB-0f788b8eaa4bba3c142d171fd941d015c53b65fc-v0ec6d6c2baf3cb4797482ce4829bc25cd5716649": 35,
+        "instance_NodeBB__NodeBB-18c45b44613aecd53e9f60457b9812049ab2998d-v0495b863a912fbff5749c67e860612b91825407c": 427
+      },
+      "arrival_spread_seconds": 0.0003599957562983036,
+      "workflow_output_tokens_per_second": 149.2001299775411,
+      "npu_card_seconds_agent_window_only": 690.8975214399397,
+      "price": null,
+      "observer_samples_in_agent_window": 338,
+      "observer_errors": {},
+      "waiting_max": 0,
+      "remaining_capacity_min": 1533015,
+      "active_program_tokens_max": 123017,
+      "future_paused_tokens_max": 0,
+      "declared_capacities": [
+        1656832
+      ],
+      "observed_program_states": {
+        "reasoning/active": 1676,
+        "acting/active": 87
+      },
+      "engine_counter_deltas": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prompt_tokens_total": 2809809.0,
+        "vllm:generation_tokens_total": 51541.0
+      }
+    },
+    {
+      "pair": 3,
+      "arm": "controller",
+      "observed_terminal_tasks": 8,
+      "terminal_statuses": {
+        "Submitted": 2,
+        "ContextWindowExceededError": 2,
+        "LimitsExceeded": 4
+      },
+      "model_responses": 223,
+      "usage": {
+        "prompt_tokens": 2980464,
+        "completion_tokens": 61727,
+        "total_tokens": 3042191
+      },
+      "agent_batch_elapsed_seconds": 368.7500299019739,
+      "resolved": 1,
+      "unresolved_grading": 0,
+      "original_grading_valid": false,
+      "distinct_fresh_grader_containers": 8,
+      "eligible_decode_graph_replays_by_rank": [
+        13326,
+        13326
+      ],
+      "response_finish_reasons": {
+        "stop": 223
+      },
+      "parsed_test_counts": {
+        "instance_NodeBB__NodeBB-00c70ce7b0541cfc94afe567921d7668cdc8f4ac-vnan": 1,
+        "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan": 300,
+        "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 173,
+        "instance_NodeBB__NodeBB-087e6020e490b4a1759f38c1ad03869511928263-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 195,
+        "instance_NodeBB__NodeBB-0c81642997ea1d827dbd02c311db9d4976112cd4-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 97,
+        "instance_NodeBB__NodeBB-0e07f3c9bace416cbab078a30eae972868c0a8a3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e": 149,
+        "instance_NodeBB__NodeBB-0f788b8eaa4bba3c142d171fd941d015c53b65fc-v0ec6d6c2baf3cb4797482ce4829bc25cd5716649": 35,
+        "instance_NodeBB__NodeBB-18c45b44613aecd53e9f60457b9812049ab2998d-v0495b863a912fbff5749c67e860612b91825407c": 424
+      },
+      "arrival_spread_seconds": 0.00031405920162796974,
+      "workflow_output_tokens_per_second": 167.39524066319154,
+      "npu_card_seconds_agent_window_only": 737.5000598039478,
+      "price": null,
+      "observer_samples_in_agent_window": 361,
+      "observer_errors": {},
+      "waiting_max": 0,
+      "remaining_capacity_min": 1501296,
+      "active_program_tokens_max": 154836,
+      "future_paused_tokens_max": 0,
+      "declared_capacities": [
+        1656832
+      ],
+      "observed_program_states": {
+        "reasoning/active": 2037,
+        "acting/active": 49
+      },
+      "engine_counter_deltas": {
+        "vllm:num_preemptions_total": 0.0,
+        "vllm:prompt_tokens_total": 2980464.0,
+        "vllm:generation_tokens_total": 61727.0
+      }
+    }
+  ],
+  "logged_program_events": {
+    "native": {
+      "paused": 0,
+      "marked_for_pause": 0,
+      "resumed": 0,
+      "released": 24,
+      "forced_resume": 0
+    },
+    "controller": {
+      "paused": 0,
+      "marked_for_pause": 0,
+      "resumed": 0,
+      "released": 24,
+      "forced_resume": 0
+    }
+  },
+  "grading_window_model_token_counters": {
+    "before": {
+      "vllm:prompt_tokens_total": 23569510.0,
+      "vllm:generation_tokens_total": 411244.0
+    },
+    "after": {
+      "vllm:prompt_tokens_total": 23569510.0,
+      "vllm:generation_tokens_total": 411244.0
+    }
+  },
+  "no_model_generation_during_regrade": true,
+  "benefit_claim": false,
+  "diagnosis": "Assess all errors, work differences and actual mechanism. Report elapsed differences without assigning scheduling causality.",
+  "known_grader_boundary": "Retained first-task reference patch has four strict test-name mismatches. Official grading is unmodified; no full-quality leaderboard claim.",
+  "actual_source_git_verification": {
+    "status": "PASS",
+    "actual_snapshots_match_full_git_commits": true,
+    "files": [
+      {
+        "scope": "executor",
+        "file": "config/swe-bench-pro-v1-lock.json",
+        "commit": "0eb995d5a7948b4143491d231c1200aee1794f59",
+        "sha256": "1e6103750154f6049cc4780b4fcfd7419984752707ad84e63d5d981ced445729"
+      },
+      {
+        "scope": "executor",
+        "file": "config/unified-graph-profile-v1.json",
+        "commit": "0eb995d5a7948b4143491d231c1200aee1794f59",
+        "sha256": "5792631172af883cf247e05b214444c02a106831aa50162b8c6f3a0e63f24661"
+      },
+      {
+        "scope": "executor",
+        "file": "experiments/workload/run_swe_bench_pro.py",
+        "commit": "0eb995d5a7948b4143491d231c1200aee1794f59",
+        "sha256": "b71908e31870ae1c9fb90cf20ecb0426190cf7dbbffc2bf002370fd6206c8ea9"
+      },
+      {
+        "scope": "executor",
+        "file": "experiments/workload/swe_bench_pro_batch.py",
+        "commit": "0eb995d5a7948b4143491d231c1200aee1794f59",
+        "sha256": "f86b30b0fc374774548a8babe6a01826b918e426f5ef7459d5a149fca72ccecb"
+      },
+      {
+        "scope": "executor",
+        "file": "experiments/workload/swe_bench_pro_runtime.py",
+        "commit": "0eb995d5a7948b4143491d231c1200aee1794f59",
+        "sha256": "9c11861f7c969269aa061dd561bdeb20bbbd777fc527ffa09986a7db7fbde933"
+      },
+      {
+        "scope": "executor",
+        "file": "tools/shared_test_profile.py",
+        "commit": "0eb995d5a7948b4143491d231c1200aee1794f59",
+        "sha256": "62e9180ad8e1af5fa424c328d1e28325a8299e30b456967c51fe89c133f92acb"
+      },
+      {
+        "scope": "grading-executor",
+        "file": "config/swe-bench-pro-v1-lock.json",
+        "commit": "31fc95e33aa421a374ad30839524d7b39e1b541a",
+        "sha256": "7e388b51e32d36188b7e760f1b9cb0353ce7c67ba12d081864b5b5696e6e76e5"
+      },
+      {
+        "scope": "grading-executor",
+        "file": "config/unified-graph-profile-v1.json",
+        "commit": "31fc95e33aa421a374ad30839524d7b39e1b541a",
+        "sha256": "5792631172af883cf247e05b214444c02a106831aa50162b8c6f3a0e63f24661"
+      },
+      {
+        "scope": "grading-executor",
+        "file": "experiments/workload/run_swe_bench_pro.py",
+        "commit": "31fc95e33aa421a374ad30839524d7b39e1b541a",
+        "sha256": "bc9375aead2c7cab3348083e07edd1857d23f12d144dfa132f637140bff8e7d2"
+      },
+      {
+        "scope": "grading-executor",
+        "file": "experiments/workload/swe_bench_pro_batch.py",
+        "commit": "31fc95e33aa421a374ad30839524d7b39e1b541a",
+        "sha256": "8aba50eec1faf3e0eb8713e6326e7e1926c703b54013e7b65824d47bcde1a3f1"
+      },
+      {
+        "scope": "grading-executor",
+        "file": "experiments/workload/swe_bench_pro_runtime.py",
+        "commit": "31fc95e33aa421a374ad30839524d7b39e1b541a",
+        "sha256": "9c11861f7c969269aa061dd561bdeb20bbbd777fc527ffa09986a7db7fbde933"
+      },
+      {
+        "scope": "grading-executor",
+        "file": "tools/shared_test_profile.py",
+        "commit": "31fc95e33aa421a374ad30839524d7b39e1b541a",
+        "sha256": "62e9180ad8e1af5fa424c328d1e28325a8299e30b456967c51fe89c133f92acb"
+      }
+    ]
+  },
+  "evidence_verification": "PASS",
+  "private_archive": {
+    "sha256": "8b31903ca1545e6d9e63c8fa38a09181cb004b7e55b3acf515114cd4e05356fb",
+    "bytes": 27394403,
+    "files": 2043
+  },
+  "private_verification": {
+    "verification": "PASS",
+    "archive_sha256": "8b31903ca1545e6d9e63c8fa38a09181cb004b7e55b3acf515114cd4e05356fb",
+    "files_verified": 2043,
+    "source_and_selection_verified": true,
+    "all_48_task_usage_and_patch_checks": true,
+    "official_parser_byte_replay": {
+      "available_outputs": 48,
+      "unresolved_outputs": 0
+    },
+    "distinct_fresh_grader_containers": 48,
+    "actual_graph_replay": true,
+    "unique_released_programs": 48,
+    "qualification": "Bounded workload only. Errors, work differences and scheduling mechanism must be assessed before any MOD benefit or cost claim."
+  },
+  "retained_attempts": {
+    "model_r1": "FAILED aclInit107001: missing explicit Ray NPU reservation; actual NPU:2 reservation fixed in r2 only",
+    "graph_gate_r3": "Rejected by incorrect QKV-optimization eligibility gate despite actual decode replay; no Agent batch started. Raw failure kept.",
+    "suite_r4": "Interrupted by own CPU Coder autostop; Native8 and Controller7 terminal reports, one unresolved; not a complete pair. Original grading also invalid due missing official inputs/cwd.",
+    "original_r5_grading": "Official CLI returned false after missing Dockerfile error; not repair-failure scores. Raw outputs kept and superseded only by separate saved-patch grading interpretation.",
+    "regrade_r6": "Same saved patches, original official core plus required frozen Dockerfiles, explicit cwd, no Agent rerun."
+  },
+  "interruption_archive_sha256": "b2182f74e30522f2b153bdea83e7eba72a070f48218e481581e84ed74a6c905a",
+  "runtime_identity_archive_sha256": "8692614684831e0917cff09041651c6a22d6e4e131eed48c7dc796df1be500d0",
+  "runtime_loaded_sources": {
+    "checked": 78,
+    "matched": 78,
+    "mapped_libraries_observed": 147
+  },
+  "validation": {
+    "local_full_tests_passed": 130,
+    "local_full_tests_skipped": 4,
+    "grading_fix_ci": [
+      39253430577,
+      39253423635
+    ]
+  },
+  "sensitive_raw_content_published": false,
+  "official_true_patch_terminal_states": [
+    {
+      "pair": 1,
+      "arm": "native",
+      "status": "ContextWindowExceededError",
+      "patch_bytes": 2334,
+      "id": "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e"
+    },
+    {
+      "pair": 1,
+      "arm": "controller",
+      "status": "ContextWindowExceededError",
+      "patch_bytes": 1264,
+      "id": "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e"
+    },
+    {
+      "pair": 3,
+      "arm": "native",
+      "status": "LimitsExceeded",
+      "patch_bytes": 1018,
+      "id": "instance_NodeBB__NodeBB-05f2236193f407cf8e2072757fbd6bb170bc13f0-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e"
+    },
+    {
+      "pair": 3,
+      "arm": "controller",
+      "status": "ContextWindowExceededError",
+      "patch_bytes": 7875,
+      "id": "instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan"
+    }
+  ]
+}
