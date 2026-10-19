@@ -17,10 +17,12 @@ assert not p["new_model_or_tensor_execution"]
 assert len(p["loaded_source_files"]) == 4
 assert all(len(x["sha256"]) == 64 for x in p["loaded_source_files"].values())
 assert (
-    p["source_commits"][0]["commit"] == "ce5e49034a40d34fe88d78e4707c629449c3a5a2"
+    p["source_commits"][0]["commit"]
+    == "ce5e49034a40d34fe88d78e4707c629449c3a5a2"  # pragma: allowlist secret
 )  # pragma: allowlist secret
 assert (
-    p["source_commits"][1]["commit"] == "a9dd32033c5669ba28976c9d208a69d762796ba9"
+    p["source_commits"][1]["commit"]
+    == "a9dd32033c5669ba28976c9d208a69d762796ba9"  # pragma: allowlist secret
 )  # pragma: allowlist secret
 assert (
     p["central_validation"]["shared_profile_sha256"]
