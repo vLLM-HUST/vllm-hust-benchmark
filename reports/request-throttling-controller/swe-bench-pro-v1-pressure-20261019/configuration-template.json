@@ -1,0 +1,97 @@
+{
+  "schema": "swe-bench-pro-experiment-v1",
+  "run_id": "replace-with-new-pressure-run-id",
+  "paths": {
+    "dataset_parquet": "/absolute/private/v1.parquet",
+    "agent_source": "/absolute/mini-swe-agent",
+    "official_v1_source": "/absolute/SWE-bench_Pro-os",
+    "docker": "/absolute/docker",
+    "docker_host": "unix:///absolute/private/docker.sock",
+    "crane": "/absolute/crane",
+    "runtime_home": "/absolute/frozen-runtime",
+    "repository": "/absolute/request-throttling-controller",
+    "client_python": "/absolute/agent-venv/bin/python"
+  },
+  "batch": {
+    "repository": "NodeBB/NodeBB",
+    "selection": "lexicographic-first",
+    "size": 8,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "independent_agents_per_task": 32,
+    "program_instances": 256
+  },
+  "agent": {
+    "step_limit": 30,
+    "wall_budget_seconds": 1200,
+    "tool_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeout_seconds": 180,
+    "automatic_retries": 0
+  },
+  "container": {
+    "cpus": 2,
+    "memory": "4g",
+    "network": "bridge"
+  },
+  "protocol": {
+    "warmup_requests": 2,
+    "paired_repetitions": 3,
+    "pair_order": [
+      [
+        "native",
+        "controller"
+      ],
+      [
+        "controller",
+        "native"
+      ],
+      [
+        "native",
+        "controller"
+      ]
+    ],
+    "reset_prefix_cache_before_each_batch": true,
+    "grading_outside_model_timing": true,
+    "defer_grading": true
+  },
+  "endpoints": {
+    "model": "http://MODEL_HOST:MODEL_PORT",
+    "native": "http://CONTROLLER_HOST:NATIVE_PORT",
+    "controller": "http://CONTROLLER_HOST:CONTROLLER_PORT"
+  },
+  "deployment": {
+    "ride_one_click": "/absolute/ride/scripts/one-click.sh",
+    "ride_plan": "/absolute/private/ride-plan.json",
+    "ride_address": "http://HEAD:MANAGEMENT_PORT",
+    "model_service_id": "replace-with-owned-model-id"
+  },
+  "price": {
+    "npu_cards": 2,
+    "cny_per_card_hour": null
+  },
+  "image_mirror_prefix": "",
+  "keep_image_archives": false,
+  "model_deployment": {
+    "model_path": "/absolute/models/Qwen3.5-35B-A3B",
+    "port": 8113,
+    "cann_environment": "/absolute/cann/set_env.sh",
+    "atb_environment": "/absolute/atb/set_env.sh",
+    "manager_config": "/absolute/private/manager-native.json",
+    "receipt_directory": "/absolute/private/runtime-receipt",
+    "plugins": [
+      "ie_mamba_copy_map",
+      "ie_shared_probe"
+    ],
+    "bootstrap_python": "/usr/local/python3.12.13/bin/python3.12"
+  },
+  "workspace": {
+    "id": "REPLACE_OWN_CPU_WORKSPACE_UUID",
+    "deadline": null,
+    "no_deadline_confirmed": false,
+    "evidence": "Read back actual Coder deadline before suite. Extend only this owned running build if needed; keep global TTL unchanged."
+  }
+}

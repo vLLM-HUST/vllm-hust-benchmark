@@ -70,3 +70,11 @@ frozen HUST inputs and original official check pass in the owned NPU-visible wor
 source/support files independently verified. The earlier zero-NPU failure remains in the preceding
 capsule. Existing Qwen service remains healthy; no migration, dependency substitution, new model
 serving or performance claim.
+
+## Real-Agent pressure preparation and256-instance start
+
+[Pressure preparation and unfinished actual run](swe-bench-pro-v1-pressure-20261019/) retains the
+prior no-action diagnosis and verified model-free128-container preflight. The new256-instance Native
+batch has actually started after both-rank graph replay checks; the first Native/Controller pair is
+unfinished. No KV saturation or MOD benefit is claimed. Eight official tasks each have32 independent
+instances, time0 and no client slots; frozen model/KV/Agent budgets remain unchanged.

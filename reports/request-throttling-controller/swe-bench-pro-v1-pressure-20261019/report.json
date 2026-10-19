@@ -1,0 +1,172 @@
+{
+  "schema": "request-throttling-pressure-preparation-v1",
+  "status": "REAL_256_NATIVE_RUNNING_FIRST_NC_AT_OBSERVATION",
+  "benefit_claim": false,
+  "pressure_saturation_established": false,
+  "completed_256_pair": false,
+  "sensitive_raw_content_published": false,
+  "prior_read_only_diagnosis": {
+    "status": "READ_ONLY_DIAGNOSIS",
+    "archive_sha256": "8b31903ca1545e6d9e63c8fa38a09181cb004b7e55b3acf515114cd4e05356fb",
+    "batches": [
+      {
+        "batch": "pair-1-controller",
+        "programs": 8,
+        "observations": 343,
+        "declared_capacity": 1656832,
+        "engine_reported_cache_size_tokens": 1204968,
+        "raw_capacity_over_engine_report_percent": 37.50008298975573,
+        "active_estimated_tokens_max": 132461,
+        "charged_tokens_max": 133261,
+        "remaining_capacity_min": 1523571,
+        "sampled_overflow_count": 0,
+        "sampled_waiting_max": 0,
+        "sampled_engine_cache_usage_max": 0.1188118811881188,
+        "observer_error_samples": 0,
+        "required_replication_ignoring_sharing_and_timing": 13
+      },
+      {
+        "batch": "pair-1-native",
+        "programs": 8,
+        "observations": 360,
+        "declared_capacity": 1656832,
+        "engine_reported_cache_size_tokens": 1204968,
+        "raw_capacity_over_engine_report_percent": 37.50008298975573,
+        "active_estimated_tokens_max": 134261,
+        "charged_tokens_max": 134861,
+        "remaining_capacity_min": 1521971,
+        "sampled_overflow_count": 0,
+        "sampled_waiting_max": 0,
+        "sampled_engine_cache_usage_max": 0.12376237623762376,
+        "observer_error_samples": 0,
+        "required_replication_ignoring_sharing_and_timing": 13
+      },
+      {
+        "batch": "pair-2-controller",
+        "programs": 8,
+        "observations": 344,
+        "declared_capacity": 1656832,
+        "engine_reported_cache_size_tokens": 1204968,
+        "raw_capacity_over_engine_report_percent": 37.50008298975573,
+        "active_estimated_tokens_max": 142579,
+        "charged_tokens_max": 143379,
+        "remaining_capacity_min": 1513453,
+        "sampled_overflow_count": 0,
+        "sampled_waiting_max": 0,
+        "sampled_engine_cache_usage_max": 0.12747524752475248,
+        "observer_error_samples": 0,
+        "required_replication_ignoring_sharing_and_timing": 12
+      },
+      {
+        "batch": "pair-2-native",
+        "programs": 8,
+        "observations": 358,
+        "declared_capacity": 1656832,
+        "engine_reported_cache_size_tokens": 1204968,
+        "raw_capacity_over_engine_report_percent": 37.50008298975573,
+        "active_estimated_tokens_max": 141742,
+        "charged_tokens_max": 142542,
+        "remaining_capacity_min": 1514290,
+        "sampled_overflow_count": 0,
+        "sampled_waiting_max": 0,
+        "sampled_engine_cache_usage_max": 0.12747524752475248,
+        "observer_error_samples": 0,
+        "required_replication_ignoring_sharing_and_timing": 12
+      },
+      {
+        "batch": "pair-3-controller",
+        "programs": 8,
+        "observations": 361,
+        "declared_capacity": 1656832,
+        "engine_reported_cache_size_tokens": 1204968,
+        "raw_capacity_over_engine_report_percent": 37.50008298975573,
+        "active_estimated_tokens_max": 154836,
+        "charged_tokens_max": 155536,
+        "remaining_capacity_min": 1501296,
+        "sampled_overflow_count": 0,
+        "sampled_waiting_max": 0,
+        "sampled_engine_cache_usage_max": 0.1349009900990099,
+        "observer_error_samples": 0,
+        "required_replication_ignoring_sharing_and_timing": 11
+      },
+      {
+        "batch": "pair-3-native",
+        "programs": 8,
+        "observations": 338,
+        "declared_capacity": 1656832,
+        "engine_reported_cache_size_tokens": 1204968,
+        "raw_capacity_over_engine_report_percent": 37.50008298975573,
+        "active_estimated_tokens_max": 123017,
+        "charged_tokens_max": 123817,
+        "remaining_capacity_min": 1533015,
+        "sampled_overflow_count": 0,
+        "sampled_waiting_max": 0,
+        "sampled_engine_cache_usage_max": 0.11757425742574257,
+        "observer_error_samples": 0,
+        "required_replication_ignoring_sharing_and_timing": 14
+      }
+    ],
+    "reason": "Pinned scheduler pauses only when remaining_capacity < 0; no sampled overflow in original run",
+    "capacity_boundary": "Raw blocks times block size differs from hybrid engine-reported capacity; neither is silently changed",
+    "projection_boundary": "Replicas may share prefixes and change timing/work. Projection does not guarantee pause, memory pressure or benefit",
+    "new_model_calls": 0
+  },
+  "cpu_model_free_preflight": {
+    "verification": "PASS",
+    "archive_sha256": "4e869582d46fd434343472a3054353209d5b4f6d5896326024164d801940f2aa",
+    "bytes": 94915,
+    "checked_files": 266,
+    "independent_containers": 128,
+    "unique_official_tasks": 8,
+    "model_calls": 0,
+    "readiness_seconds": 57.944034955929965,
+    "dev_peak_GiB": 21.00847625732422,
+    "owned_preflight_containers_remaining": 0
+  },
+  "actual_start": {
+    "epoch": 1792424362.3180032,
+    "status": "RUNNING",
+    "batch_start": {
+      "epoch": 1792424238.0650022,
+      "monotonic": 3820497.442516673,
+      "batch_size": 256,
+      "client_concurrency_limit": null,
+      "arrival_time": 0
+    },
+    "containers": 256,
+    "unique_containers": 256,
+    "graph_gate": {
+      "status": "ACTUAL_REPLAY_OBSERVED",
+      "delta": {
+        "0": 4,
+        "1": 4
+      }
+    }
+  },
+  "boundary": "Current 256-Agent batch is unfinished. CPU preflight is model-free. Queueing is not KV saturation or MOD benefit. Original 8-task comparison is retained unchanged.",
+  "observability": {
+    "grafana_target_up": true,
+    "initial_running_requests": 15,
+    "initial_waiting_requests": 240,
+    "initial_kv_occupancy_ratio": 0.07797029702970293,
+    "private_screenshots_and_logs_in_original_feishu": true,
+    "time_window_utc": [
+      "2026-10-19T15:36:00Z",
+      "2026-10-19T15:40:00Z"
+    ]
+  },
+  "private_artifact_hashes": {
+    "native-256-start-grafana-live.jpg": {
+      "bytes": 107671,
+      "sha256": "621d28bcc466ecaf9198f926b0132bad8c92cee69f9c9a58db8da4b5fbd4709c"
+    },
+    "native-start-execution-private.json": {
+      "bytes": 203870,
+      "sha256": "f1ad65c2f6cae66fb1cf88956b35dc0547387e4963f44f125024894176bee5f6"
+    },
+    "native-start-prometheus-private.json": {
+      "bytes": 3249,
+      "sha256": "e341c6654ffcd16383e3aa04f5961ffcff9ac1847c34ad7efc2a4445fc579d52"
+    }
+  }
+}
