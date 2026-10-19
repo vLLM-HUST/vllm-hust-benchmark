@@ -5,6 +5,13 @@ certification or a claim about actual procurement expense.
 
 ## Scope And Gates
 
+B1 means "currently best measured vLLM-HUST optimization solution" （当前已实测最优的vLLM-HUST优化方案）, selected
+per workload and metric among eligible measured MODs or compatible combinations. Selection retains
+exact configuration and provenance; different optima are not a jointly measured configuration.
+Candidate screening and independent acceptance confirmation are separate stages. This clarification
+does not change frozen run inputs or retrospectively promote a screening result to acceptance
+evidence.
+
 Use Qwen3.5-35B-A3B BF16 on the available Ascend 910B2 hardware. Default to one TP2 instance per
 arm. Pin actual model revision, tokenizer, runtime versions, device IDs, workload manifest and
 request generation parameters in the run plan. Select the candidate using existing engineering

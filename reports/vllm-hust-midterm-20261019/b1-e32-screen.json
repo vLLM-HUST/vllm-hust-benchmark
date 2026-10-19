@@ -1,0 +1,144 @@
+{
+  "schema": "b1-candidate-screen/v1",
+  "project": "vLLM-HUST",
+  "candidate": "BetterScale E32/R36, school runtime, MTP2 FULL APC async",
+  "run_id": "mmlu-b1-e32-r36-screen-r1",
+  "status": "measured",
+  "selected_as_b1": false,
+  "quality_rescored": false,
+  "role": "Exploratory width screen; requires independent performance and quality confirmation",
+  "receipt": {
+    "arm": "b1",
+    "status": "measured",
+    "started": 1792412625.419165,
+    "allocated_cards": 2,
+    "reserved_cards": 4,
+    "simultaneous_other_services": 0,
+    "protocol": "original MMLU 200-request burst, output 256, infinite arrival rate",
+    "measurement_role": "exploratory E32/R36 candidate screen; not independent acceptance",
+    "input_hashes": {
+      "measure_candidate.py": "79edbb2b13e242345a1bb7b70c8941c197af9df84e8b017e5ec650b5df46930c",
+      "baseline.py": "dca1288652eb73e50766128288bafdace46af8a2bb9cb8bed33c1c8394e86688",
+      "baseline.sh": "6229595f155329ef0a05565f378d36e108b48827576f9dc7711cb495b4a73188",
+      "runtime-candidate.sh": "2ea954f05c17005075d2f92bb3e0c6e4737bb7b11d2c657021a25eb0af211046",
+      "launch_candidate.py": "f6b79402863ea4aa08b864434b3e6591bf78d968fe4cd6dc58f9d57584c7c9a8",
+      "bench.sh": "4ceaf51415c426c8f1d2157ca478a382ab6fd6028a2a34f81c89bff3a80cf2e9",
+      "materialized.200.jsonl": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+      "payload-receipt.json": "c2079ded7c2922c55a32e27af3eaed39e00432f7bfa39efe54a35cdfdbdfefa7",
+      "compat/sitecustomize.py": "7df78275495234eafd486e7a1fbb7b5ce7e030c4ff27f8806b05283cebec3cb4",
+      "compat/triton_compat.py": "49deb71d6db6b0c41de82e987c0a28b5ff0c942ec2a270f0dd5a7adc07c6ca28"
+    },
+    "service_pid": 2965267,
+    "bench_started_wall": 1792413463.4633517,
+    "bench_started_monotonic": 8129166.921038606,
+    "bench_exit_code": 0,
+    "bench_ended_wall": 1792413607.4969683,
+    "bench_ended_monotonic": 8129310.954656219,
+    "output_throughput": 478.5907985063779,
+    "child_exit_codes": [
+      0,
+      0
+    ],
+    "ended": 1792413621.220822,
+    "all_devices_released": true
+  },
+  "measured": {
+    "arm": "b1",
+    "requests": 200,
+    "failures": 0,
+    "benchmark_duration_s": 106.98074463568628,
+    "output_tokens": 51200,
+    "input_tokens": 282265,
+    "output_tps": 478.5907985063779,
+    "ttft_s": {
+      "n": 200,
+      "mean": 74.82919926522766,
+      "p95": 98.85871533304453,
+      "p99": 103.37068951968104,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 98.86300140344538,
+      "p99_linear": 103.37104292868636
+    },
+    "tpot_s": {
+      "n": 200,
+      "mean": 0.03286815800127007,
+      "p95": 0.04373451922746266,
+      "p99": 0.07308535358923322,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 0.04374679806459622,
+      "p99_linear": 0.07308738158383936
+    },
+    "timing": "Original vLLM bench SSE-chunk timing; reported P95/P99 use nearest rank; original linear estimates retained separately",
+    "allocated_card_seconds_per_output_token": 0.004178935337331495,
+    "reserved_card_seconds_per_output_token": 0.00835787067466299,
+    "lifecycle_allocated_card_seconds_per_output_token": 0.03889850223436952,
+    "request_span_s": 106.97772879898548,
+    "device_utilization": {
+      "4": {
+        "covered_seconds": 106.97772879898548,
+        "mean_ai_core_percent": 43.46307697201471,
+        "uncovered_seconds": 0.0
+      },
+      "5": {
+        "covered_seconds": 106.97772879898548,
+        "mean_ai_core_percent": 41.0543672026752,
+        "uncovered_seconds": 0.0
+      },
+      "6": {
+        "covered_seconds": 106.97772879898548,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      },
+      "7": {
+        "covered_seconds": 106.97772879898548,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      }
+    },
+    "speculative_decode": {
+      "spec_decode_acceptance_rate": 84.34089000839631,
+      "spec_decode_acceptance_length": 2.686817800167926,
+      "spec_decode_num_drafts": 19056,
+      "spec_decode_draft_tokens": 38112,
+      "spec_decode_accepted_tokens": 32144,
+      "spec_decode_per_position_acceptance_rates": [
+        0.9086901763224181,
+        0.7781276238455079
+      ]
+    }
+  },
+  "prior_candidate_run": "mmlu-b1-r2",
+  "prior_candidate_output_tps": 529.8082507533761,
+  "baseline_run": "mmlu-b0-r2",
+  "baseline_output_tps": 452.2929712200654,
+  "throughput_change_vs_prior_pct": -9.667167729866055,
+  "throughput_change_vs_baseline_pct": 5.8143347254267175,
+  "archive": {
+    "file": "b1-e32-screen-evidence.tar.gz",
+    "sha256": "1021157c6478cec1117cfaf307bf4d57a11361354a3029bf9362b534a6ec5650",
+    "files": {
+      "baseline.py": "dca1288652eb73e50766128288bafdace46af8a2bb9cb8bed33c1c8394e86688",
+      "baseline.sh": "6229595f155329ef0a05565f378d36e108b48827576f9dc7711cb495b4a73188",
+      "bench.sh": "4ceaf51415c426c8f1d2157ca478a382ab6fd6028a2a34f81c89bff3a80cf2e9",
+      "compat/sitecustomize.py": "7df78275495234eafd486e7a1fbb7b5ce7e030c4ff27f8806b05283cebec3cb4",
+      "compat/triton_compat.py": "49deb71d6db6b0c41de82e987c0a28b5ff0c942ec2a270f0dd5a7adc07c6ca28",
+      "launch-candidate-command.json": "611da5a747545318f1dd8824f12f60e52ef54a822363469c9b1e9a71f06c55f5",
+      "launch_candidate.py": "f6b79402863ea4aa08b864434b3e6591bf78d968fe4cd6dc58f9d57584c7c9a8",
+      "materialized.200.jsonl": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+      "measure_candidate.py": "79edbb2b13e242345a1bb7b70c8941c197af9df84e8b017e5ec650b5df46930c",
+      "mmlu-b1-e32-r36-screen-r1/SHA256SUMS": "a97fc263009f87d073b0728445292c35f12e59cd350b11646df29047f5f1f15d",
+      "mmlu-b1-e32-r36-screen-r1/bench.log": "b3875d278f4ee21b1302c0e7b9c596bed43bedcb92e4d9ec4cdb110eb058c1f7",
+      "mmlu-b1-e32-r36-screen-r1/device-samples.jsonl": "d69ca2317ddeca7dadb16f34df048131ce533823ebe09eb7d9ef1628eedd0b87",
+      "mmlu-b1-e32-r36-screen-r1/mmlu-pro.json": "71b3a2a20a1b5a1dda9d891dc381774df3633f96ae4be629c686b5a00d3c3854",
+      "mmlu-b1-e32-r36-screen-r1/npu-after.txt": "d16599d495ff1bff618c8a961b23b8ec1bca54be097e5513fbacf05561c8ba52",
+      "mmlu-b1-e32-r36-screen-r1/npu-before.txt": "f7328ad8a4e7c0c81bb0b7201fae0619a8b35116708d10c681f44e4598c1e07e",
+      "mmlu-b1-e32-r36-screen-r1/receipt.json": "9e5f26c52499cca4263951ed496e9f4c30d882a9792e7f9b9fd2462026186b35",
+      "mmlu-b1-e32-r36-screen-r1/service.log": "ee2c4f165cabba255f95bdc1fcb0173511ec7fefe89b23e3dec126b7ad08cd3c",
+      "mmlu-b1-e32-r36-screen-r1/startup-diagnostic.json": "a133ac19af28f1c2221bca5bb579a7dee28c2c4b9c86abf9879cf27a4bb8a753",
+      "payload-receipt.json": "c2079ded7c2922c55a32e27af3eaed39e00432f7bfa39efe54a35cdfdbdfefa7",
+      "runtime-candidate.sh": "2ea954f05c17005075d2f92bb3e0c6e4737bb7b11d2c657021a25eb0af211046"
+    }
+  }
+}

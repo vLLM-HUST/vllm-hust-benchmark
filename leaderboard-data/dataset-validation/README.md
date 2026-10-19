@@ -48,6 +48,15 @@ must not be pooled with a materially different configuration or used for an unma
 
 ## Validation
 
+B1 is the **currently best measured vLLM-HUST optimization solution** （当前已实测最优的vLLM-HUST优化方案）.
+Select independently for each workload and metric from measured eligible MODs or compatible
+combinations, not from a predetermined component. Hold model, precision, hardware resource budget,
+inputs, offered workload and quality constraints constant; record engine optimization settings as
+candidate variables. Preserve each selected configuration and evidence. Different cells' optima do
+not imply one jointly measured deployment. An unconfirmed candidate or an unmatched result must not
+replace a selected B1. This definition does not claim a theoretical upper bound or completion of the
+candidate search.
+
 Run from the repository root:
 
 ```bash
