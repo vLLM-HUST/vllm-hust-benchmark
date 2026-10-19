@@ -1,0 +1,27 @@
+{
+  "official_v1_parent": "66f92766bba642462d4bbe5479e83f91f9211862",
+  "official_agent": "d74716a3c8104a113f77cc9ab94cf407ecdcf1e9",
+  "community_arm_repository": "https://github.com/bdqnghi/swe_benchmark_arm",
+  "community_commit": "b2834f1b0cf94294f409e93c7dccc398b0a2699b",
+  "image_manifest_sha256": "64f3cd0e0159154cca35c1007b6d124b0c74b42bd1d790946dd5a8b239ebd512",
+  "image_config_sha256": "88620382594f6e8532a3ce3d6078a57b5a0f7f1df21d8c945f9225180b198002",
+  "dataset": "ScaleAI/SWE-bench_Pro",
+  "dataset_config": "v1",
+  "dataset_revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+  "case_sha256": "3ce2ce2b9bbcabd9914a7c060fbb3c8d4e3c170d47f21fb0601903668567a1b4",
+  "model": "Qwen3.5-35B-A3B",
+  "model_precision": "BF16",
+  "tensor_parallel": 2,
+  "agent_step_limit": 30,
+  "wall_budget_seconds": 1200,
+  "maximum_output_tokens_per_call": 4096,
+  "tool_timeout_seconds": 60,
+  "client_scope": "one functional task, no finite-batch performance comparison",
+  "official_core_modified": false,
+  "adaptations": [
+    "Agent cwd/template /testbed to /app matching ready V1 image",
+    "Official default 250 steps reduced to a frozen 30 for first bounded functional attempt",
+    "Unknown dollar price; official cost_tracking=ignore_errors, cost_limit=0, explicit call/wall/token limits"
+  ],
+  "existing_reference_result": "false; 4/681 required names do not precisely match. Preserved, not repaired."
+}

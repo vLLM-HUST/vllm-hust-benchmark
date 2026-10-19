@@ -53,3 +53,14 @@ per arm are retained. Current protocol and running status:
 Old C32, interrupted runs, negative short trials and earlier website receipts are retained as
 historical evidence, not rewritten into the current protocol. Each checkpoint README states whether
 its verifier checks public consistency only or also private raw evidence via `--archive`.
+
+## SWE-bench Pro V1 ARM actual Agent attempt, 2026-10-19
+
+[Single-task environment and real-Agent attempt](swe-bench-pro-v1-arm-20261019/) supersedes the old
+V2 preflight as the current deployment route. Official V1 Agent and ready community ARM image
+executed30 real Qwen calls, changed8 tracked files, exhausted the frozen budget and obtained
+official false in a fresh grader container. Environment workflow executed; repair unsuccessful; no
+MOD performance comparison. Private raw evidence independently verified and retained. New frozen
+HUST runtime inputs were separately prepared and all4695 source/support files verified; CPU-only
+bootstrap fails on device-architecture discovery and is not claimed qualified. Existing runs were
+not migrated.

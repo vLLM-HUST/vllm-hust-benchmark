@@ -1,0 +1,41 @@
+{
+  "status": "STAGED_AND_VERIFIED_BOOTSTRAP_BLOCKED_ON_CPU_ONLY_CODER",
+  "main_commit": "8c8e91adf588eef3e6d6ac4e2f79ae297f6529cf",
+  "installer_tag": "unified-runtime-installer-v1-20261019",
+  "installer_commit": "38fcfeb18c114673ca8e61947b1ddb0449b765ef",
+  "source_recheck": {
+    "verified_files": 4695,
+    "manifest_sha256": "1da3091eb521a93f2cfba9e6604e1aa56092c8834cec65d86c2431a35cfcb936"
+  },
+  "artifacts": {
+    "sdk213-r1-direct.tgz": {
+      "sha256": "c03e96929d7b061e5cd66aba22d02ba1cb2df270ddb7654f562f8c6202f2e805",
+      "bytes": 833333955
+    },
+    "runtime-build-support-v1.tar.gz": {
+      "sha256": "0da58f84b9cb3d81896672e1f2fb3b36070fef61197c605a5374dc766f72d88a",
+      "bytes": 20954207
+    }
+  },
+  "source_commits": [
+    {
+      "repository": "https://github.com/vLLM-HUST/vllm-hust",
+      "commit": "ce5e49034a40d34fe88d78e4707c629449c3a5a2",
+      "tag": "gennova-unified-graph-v1-20261019"
+    },
+    {
+      "repository": "https://github.com/vLLM-HUST/vllm-ascend-hust",
+      "commit": "a9dd32033c5669ba28976c9d208a69d762796ba9",
+      "tag": "gennova-unified-graph-v1-20261019"
+    }
+  ],
+  "preparation_elapsed_s": 120.33218142716214,
+  "private_github_authenticated": true,
+  "temporary_auth_file_removed": true,
+  "cpu_bootstrap": "FAILED",
+  "failure": "cann_get_soc_name failed; Triton Ascend get_arch returned NULL while importing frozen source in a zero-NPU container",
+  "dependencies_or_test_parameters_changed": false,
+  "existing_runs_migrated": false,
+  "no_new_model_or_npu_execution": true,
+  "qualification": "Byte preparation verified, import/bootstrap not qualified; do not substitute dependencies or force device detection"
+}
