@@ -1,0 +1,122 @@
+{
+  "status": "INDEPENDENT_PRIVATE_ARCHIVE_VERIFIED_FAILURE",
+  "archive_sha256": "42dee5e748425410f1bd5d3259a4c6ea487cab8f00f107901cdbd99e02377846",
+  "archive_bytes": 44846170,
+  "checked_files": 7603,
+  "arms": {
+    "native": {
+      "terminal_tasks": 256,
+      "terminal_statuses": {
+        "RetryError": 256
+      },
+      "agent_submitted": 0,
+      "timeout_tasks": 256,
+      "elapsed_until_error_seconds": 1138.7832844378427,
+      "saved_response_usage": {
+        "prompt_tokens": 7214386,
+        "completion_tokens": 109203,
+        "total_tokens": 7323589
+      },
+      "successful_model_responses": 1862,
+      "arrival_spread_seconds": 0.26239064196124673,
+      "observations": 1118,
+      "observer_error_samples": 0,
+      "kv_occupancy_max": 0.15594059405940597,
+      "kv_samples_at_or_above_90pct": 0,
+      "engine_waiting_max": 245.0,
+      "scheduler_remaining_min": -263354,
+      "sampled_scheduler_overflow_count": 192,
+      "preemptions_counter_delta": 0.0,
+      "prefix_cache_query_tokens_delta": 9004800.0,
+      "prefix_cache_hit_tokens_delta": 5292032.0,
+      "prefix_cache_hit_ratio": 0.5876901208244492,
+      "after_batch_running_requests": 15.0,
+      "after_batch_waiting_requests": 27.0,
+      "response_hash_groups": 64,
+      "groups_with_identical_responses_across_all_observed_replicas": 1,
+      "unresolved_grades": 256,
+      "program_release_receipts": 256,
+      "initial_running_requests": 0.0,
+      "initial_waiting_requests": 0.0,
+      "initial_kv_occupancy": 0.0
+    },
+    "controller": {
+      "terminal_tasks": 256,
+      "terminal_statuses": {
+        "RetryError": 256
+      },
+      "agent_submitted": 0,
+      "timeout_tasks": 256,
+      "elapsed_until_error_seconds": 1203.675442328211,
+      "saved_response_usage": {
+        "prompt_tokens": 8746466,
+        "completion_tokens": 114602,
+        "total_tokens": 8861068
+      },
+      "successful_model_responses": 2045,
+      "arrival_spread_seconds": 0.24120284104719758,
+      "observations": 1201,
+      "observer_error_samples": 0,
+      "kv_occupancy_max": 0.15965346534653468,
+      "kv_samples_at_or_above_90pct": 0,
+      "engine_waiting_max": 240.0,
+      "scheduler_remaining_min": -10059,
+      "sampled_scheduler_overflow_count": 13,
+      "preemptions_counter_delta": 0.0,
+      "prefix_cache_query_tokens_delta": 10667313.0,
+      "prefix_cache_hit_tokens_delta": 6426624.0,
+      "prefix_cache_hit_ratio": 0.6024594947199918,
+      "after_batch_running_requests": 16.0,
+      "after_batch_waiting_requests": 60.0,
+      "response_hash_groups": 72,
+      "groups_with_identical_responses_across_all_observed_replicas": 3,
+      "unresolved_grades": 256,
+      "program_release_receipts": 256,
+      "initial_running_requests": 16.0,
+      "initial_waiting_requests": 25.0,
+      "initial_kv_occupancy": 0.150990099009901
+    }
+  },
+  "benefit_claim": false,
+  "valid_successful_work_comparison": false,
+  "grading": "512 NOT_RUN_DEFERRED; not zero scores",
+  "observability_gap": "Start and terminal screenshots exist; not every intermediate 10-minute screenshot was captured. Raw per-second observations and logs retained.",
+  "logged_program_events": {
+    "native": {
+      "paused": {
+        "events": 0,
+        "unique_programs": 0
+      },
+      "marked_for_pause": {
+        "events": 0,
+        "unique_programs": 0
+      },
+      "resumed": {
+        "events": 0,
+        "unique_programs": 0
+      }
+    },
+    "controller": {
+      "paused": {
+        "events": 418,
+        "unique_programs": 252
+      },
+      "marked_for_pause": {
+        "events": 472,
+        "unique_programs": 256
+      },
+      "resumed": {
+        "events": 406,
+        "unique_programs": 244
+      }
+    }
+  },
+  "elapsed_error_window_change_percent": 5.698376396734872,
+  "cross_arm_isolation": "FAIL: Controller began with16 running and25 waiting engine requests after Native timeouts",
+  "measured_source_commit": "e84d77f",
+  "followup_engine_drain_gate_commit": "e98e3a9",
+  "followup_entry_tests_passed": 16,
+  "sensitive_raw_content_published": false,
+  "quality_result": "512 grades NOT_RUN, unresolved; not 0% success",
+  "evidence_scope": "Saved response usage, not all downstream orphan engine work; logs/observations retained; pair invalid for performance"
+}

@@ -78,3 +78,11 @@ prior no-action diagnosis and verified model-free128-container preflight. The ne
 batch has actually started after both-rank graph replay checks; the first Native/Controller pair is
 unfinished. No KV saturation or MOD benefit is claimed. Eight official tasks each have32 independent
 instances, time0 and no client slots; frozen model/KV/Agent budgets remain unchanged.
+
+## 256-Agent first-pair terminal failure
+
+[First-pair terminal audit](swe-bench-pro-v1-pressure-20261019/first-pair-terminal/) supersedes the
+earlier running snapshot:512/512 request timeouts, Controller418 actual pauses/406 resumes, KV
+peaks15.59%/15.97%, no preemptions. Cross-arm downstream request carryover invalidates performance;
+no MOD benefit claim or further repeats. All raw failures, saved usage, source hashes and standard
+figures retained; engine-idle gate added separately.
