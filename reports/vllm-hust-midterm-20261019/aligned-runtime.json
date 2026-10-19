@@ -1,0 +1,160 @@
+{
+  "project": "vLLM-HUST",
+  "packages": {
+    "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+    "transformers": "5.14.1",
+    "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+    "torch": "2.13.0+cpu",
+    "torch-npu": "2.13.0rc1",
+    "triton-ascend": "3.6.0"
+  },
+  "architecture": "aarch64",
+  "kernel": "5.15.0-25-generic",
+  "source_commit": "2c07ddd5eb04f2afeb77123ce066a3a70662a94c",
+  "admitted_source_files": [
+    {
+      "path": "vllm/config/compilation.py",
+      "sha256": "bae1a13054cfe318f62d0408161e90947e6aa7df325d6c08f89435fe3e149165"
+    },
+    {
+      "path": "vllm/v1/worker/worker_base.py",
+      "sha256": "4a1a5266b912fe97991d8dc89d92b923990da9f6cb4b817d00d52e9c0d26dd7c"
+    },
+    {
+      "path": "vllm/v1/worker/gpu_model_runner.py",
+      "sha256": "5c246e2c6c2178d98df69bc3b6a63b44cd815eb129547051816782bcd3cd00b4"
+    },
+    {
+      "path": "vllm_ascend/worker/worker.py",
+      "sha256": "a76507345101b416ecc2d34b61112a779e42c7b491405dfbbd3ec6487bfa5d43"
+    },
+    {
+      "path": "vllm_ascend/worker/model_runner_v1.py",
+      "sha256": "83da7d9c6c53f718322328bb43d80651a7cd62992a8d0e8d723d62769bd0b346"
+    },
+    {
+      "path": "vllm_ascend/compilation/acl_graph.py",
+      "sha256": "7fca3f89476390cfac9b61016cb12696bd9ab755a84e3be26b71843c9eb63c79"
+    },
+    {
+      "path": "vllm/v1/cudagraph_dispatcher.py",
+      "sha256": "51f632753af729aeee6ce4a802d9d74b64f22eef02a524f36e2a24b07ef0cf63"
+    },
+    {
+      "path": "vllm/model_executor/models/qwen3_5.py",
+      "sha256": "3abeac36180df7bd1bd96b1a7c698a8f212d92c063026420cbdd16d1980e90e6"
+    },
+    {
+      "path": "vllm_ascend/ops/gdn.py",
+      "sha256": "765eb27018f762e970301978af80a91d86ce4d7110ed7f2c48a3986b2eb78e85"
+    },
+    {
+      "path": "vllm_ascend/ops/gdn_attn_builder.py",
+      "sha256": "b50713c69ab65ee476a9d8a3ac15eb171faff0fea399e438cc7005e90a3dd57a"
+    },
+    {
+      "path": "vllm_ascend/ops/triton/fla/chunk.py",
+      "sha256": "00c953f57f75d93dfc3aae27adf3dca54169bab87053b2a9e6fbf2693d0183f4"
+    },
+    {
+      "path": "vllm_ascend/attention/attention_v1.py",
+      "sha256": "ab53725b841070e62fdae81e9651a8a0d926651ed0cb640606829975b87feda2"
+    },
+    {
+      "path": "vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py",
+      "sha256": "b80f8e6f3fff442fb880aebb3209c52f814f66490009f4ac4003de603576d10a"
+    },
+    {
+      "path": "vllm_ascend/patch/worker/patch_qwen3_5.py",
+      "sha256": "0ea5111173d5a02e4f8ab89130a1a1bd7d44ad86885a4c64bb3cb4649afbb48c"
+    },
+    {
+      "path": "vllm_ascend/spec_decode/llm_base_proposer.py",
+      "sha256": "d106cb3cc2e048734fa2986394c43c2177d04190715dc390d8a62d50830cb6e2"
+    },
+    {
+      "path": "vllm_ascend/ops/vocab_parallel_embedding.py",
+      "sha256": "c6aa66851d05881d90c66a045cd4321d95bfe94e944a759632276bb4a82bd066"
+    },
+    {
+      "path": "vllm/v1/attention/backends/utils.py",
+      "sha256": "63f58dd2b29543045109f40897ddc5f57e299bb4259f0e37a64b024cb1f20ddb"
+    },
+    {
+      "path": "vllm/model_executor/layers/mamba/mamba_utils.py",
+      "sha256": "ce9845b4a4ef4bc46577a33038ed69d59ceccb52f30e9c5bdaa36e48be3b2ca4"
+    },
+    {
+      "path": "vllm_ascend/ops/triton/fla/cumsum.py",
+      "sha256": "af45679800aa2c49f8587194f6744e3d9c7cabe7658eef9ec37f0a665a70c47d"
+    },
+    {
+      "path": "vllm_ascend/ops/triton/fla/chunk_scaled_dot_kkt.py",
+      "sha256": "624f5438d07c4dcf81fce9bb540b2bee63962ab9291aee9278eb1b7d3b7c6ac7"
+    },
+    {
+      "path": "vllm_ascend/ops/triton/fla/solve_tril.py",
+      "sha256": "2d8cd5d3bd365fa5894c7ee0cddc106d1d2b34dd3f3e05f4dbf15e8010d89fc0"
+    },
+    {
+      "path": "vllm_ascend/ops/triton/fla/wy_fast.py",
+      "sha256": "51e23f0876d91ae09b32ae70aa03318b2440b7bd3ba029c0d9838869359597ef"
+    },
+    {
+      "path": "vllm_ascend/ops/triton/fla/utils.py",
+      "sha256": "4dfc30c479f8a740a965174a4f56706c4c3a95362dd77d2e708cdbaf1c9873d4"
+    },
+    {
+      "path": "vllm_ascend/ops/triton/triton_utils.py",
+      "sha256": "f94d81f163f0076e8243990dd687f7ec8d42ce1ed30d67eea3155bf1c3a073a4"
+    },
+    {
+      "path": "vllm_ascend/device/device_op.py",
+      "sha256": "151f03a3344f2651317db0c9d5503a272dcdd61ff8b5712cbef4e112f6e4a013"
+    },
+    {
+      "path": "vllm/v1/worker/mamba_utils.py",
+      "sha256": "7382bcc8a7b070eaec44339379ebce485777fe23b97e05ee108088faa707c7e6"
+    },
+    {
+      "path": "vllm_ascend/patch/worker/patch_mamba_utils.py",
+      "sha256": "1151989477571c954905fa6d3da8da1ef26236905d202127b8ce2541ba1e0065"
+    },
+    {
+      "path": "vllm_ascend/patch/platform/patch_mamba_config.py",
+      "sha256": "ee38c68c27357a7d18f7e368e03a352bb312f79c3576431a64f688ce953716ac"
+    },
+    {
+      "path": "vllm/model_executor/layers/linear.py",
+      "sha256": "48fc44bbe81fe6673ccb028c2f1da7e8c3f2395bfb574e363c7d879a2ee1ef61"
+    },
+    {
+      "path": "vllm_ascend/ops/linear.py",
+      "sha256": "f3254a989347eabd03dad3f4a1e8abe541004c30929b803687f2d50cc495e820"
+    },
+    {
+      "path": "vllm_ascend/distributed/parallel_state.py",
+      "sha256": "40199b8d1be13c6665a3a31c4b0b4cfbe1996d0e16a8a8da8d8a5aec6930f4be"
+    },
+    {
+      "path": "vllm/v1/engine/core.py",
+      "sha256": "bc12ad6e1a03f242e322e0506462c456c584dd3346f1a11413a9f51094c2049e"
+    },
+    {
+      "path": "vllm_ascend/ascend_config.py",
+      "sha256": "1de2e80ec645c5513d2270678999a7808c4ba6a03363159b7802080d86b66245"
+    }
+  ],
+  "source_pin_count": 33,
+  "common_runtime_override": "compat/triton_compat.py: distribution-name detection only",
+  "candidate_host_rebuild": {
+    "artifact": "libbs_gdn_host_cann91.so",
+    "sha256": "f99b8e76381933592a8fea29fad6f88cd507f36c0a592400e8ea956e21c2390e",
+    "torch_npu": "2.13.0rc1",
+    "platform": "school CANN 9.1.0 / torch 2.13.0 / aarch64",
+    "source_sha256": "7efe5153f6fe7300246bd23f2114c837644eeb2dcaec0339e1982929111ef4ff",
+    "scope": "Unchanged 37-row graph-pool host adapter rebuilt against school headers",
+    "qualification": "Pending device qualification of unchanged source rebuilt locally; not the October 16 binary"
+  },
+  "weight_identity_scope": "Small model/tokenizer files checked against original contract; full weight hashes not collected"
+}

@@ -1,0 +1,137 @@
+{
+  "project": "vLLM-HUST",
+  "dataset": "MMLU-Pro",
+  "b0": {
+    "arm": "b0",
+    "requests": 200,
+    "failures": 0,
+    "benchmark_duration_s": 113.20096322055906,
+    "output_tokens": 51200,
+    "input_tokens": 282265,
+    "output_tps": 452.2929712200654,
+    "ttft_s": {
+      "n": 200,
+      "mean": 57.98316212631296,
+      "p95": 100.81715545617044,
+      "p99": 108.10276834387332,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 100.8171568476595,
+      "p99_linear": 108.1027922351472
+    },
+    "tpot_s": {
+      "n": 200,
+      "mean": 0.028187227176958877,
+      "p95": 0.03003920638458986,
+      "p99": 0.03014806384841601,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 0.030039680629384283,
+      "p99_linear": 0.030148070910105518
+    },
+    "timing": "Original vLLM bench SSE-chunk timing; reported P95/P99 use nearest rank; original linear estimates retained separately",
+    "allocated_card_seconds_per_output_token": 0.004421912625803088,
+    "reserved_card_seconds_per_output_token": 0.008843825251606176,
+    "lifecycle_allocated_card_seconds_per_output_token": 0.018895376520231367,
+    "request_span_s": 113.19790883455426,
+    "device_utilization": {
+      "4": {
+        "covered_seconds": 113.19790883455426,
+        "mean_ai_core_percent": 56.07916901008748,
+        "uncovered_seconds": 0.0
+      },
+      "5": {
+        "covered_seconds": 113.19790883455426,
+        "mean_ai_core_percent": 56.77072679254563,
+        "uncovered_seconds": 0.0
+      },
+      "6": {
+        "covered_seconds": 113.19790883455426,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      },
+      "7": {
+        "covered_seconds": 113.19790883455426,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      }
+    },
+    "speculative_decode": {}
+  },
+  "b1": {
+    "arm": "b1",
+    "requests": 200,
+    "failures": 0,
+    "benchmark_duration_s": 96.6387366130948,
+    "output_tokens": 51200,
+    "input_tokens": 282265,
+    "output_tps": 529.8082507533761,
+    "ttft_s": {
+      "n": 200,
+      "mean": 49.364674681429754,
+      "p95": 85.17658667359501,
+      "p99": 89.07037593051791,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 85.19040429955348,
+      "p99_linear": 89.07296137664467
+    },
+    "tpot_s": {
+      "n": 200,
+      "mean": 0.024054953587862353,
+      "p95": 0.030358658106449773,
+      "p99": 0.04735290693374825,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 0.030373497885451007,
+      "p99_linear": 0.0474004022352324
+    },
+    "timing": "Original vLLM bench SSE-chunk timing; reported P95/P99 use nearest rank; original linear estimates retained separately",
+    "allocated_card_seconds_per_output_token": 0.003774950648949016,
+    "reserved_card_seconds_per_output_token": 0.007549901297898032,
+    "lifecycle_allocated_card_seconds_per_output_token": 0.019402134669944643,
+    "request_span_s": 96.63545720465481,
+    "device_utilization": {
+      "4": {
+        "covered_seconds": 96.63545720465481,
+        "mean_ai_core_percent": 58.73707864153894,
+        "uncovered_seconds": 0.0
+      },
+      "5": {
+        "covered_seconds": 96.63545720465481,
+        "mean_ai_core_percent": 58.33384512267634,
+        "uncovered_seconds": 0.0
+      },
+      "6": {
+        "covered_seconds": 96.63545720465481,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      },
+      "7": {
+        "covered_seconds": 96.63545720465481,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      }
+    },
+    "speculative_decode": {
+      "spec_decode_acceptance_rate": 84.09388589092052,
+      "spec_decode_acceptance_length": 2.68187771781841,
+      "spec_decode_num_drafts": 19087,
+      "spec_decode_draft_tokens": 38174,
+      "spec_decode_accepted_tokens": 32102,
+      "spec_decode_per_position_acceptance_rates": [
+        0.9062188924398805,
+        0.7756588253785299
+      ]
+    }
+  },
+  "configuration": "Original dataset B0 and school E16/R36 B1; sequential single TP2 services on the same cards",
+  "repetitions": 1,
+  "accuracy_evaluated": false,
+  "output_throughput_change_percent": 17.13828966305011,
+  "mean_ttft_reduction_percent": 14.863776187487554,
+  "mean_tpot_reduction_percent": 14.660092541753711,
+  "resource_cost_reduction_percent": 14.630817738886769,
+  "lifecycle_resource_cost_change_percent": 2.681916124670436,
+  "p99_tpot_change_percent": 57.06782091161118
+}

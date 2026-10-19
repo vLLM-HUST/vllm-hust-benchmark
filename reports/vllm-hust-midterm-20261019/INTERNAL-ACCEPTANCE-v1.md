@@ -46,6 +46,32 @@ are unavailable. Keep whole-run aggregates separate from per-window observations
 initial internal test, not a statistically conclusive improvement estimate; diagnose borderline or
 unstable results with a predeclared follow-up rather than selecting windows.
 
+## Dataset-Aligned Supplement (2026-10-19)
+
+The dataset supplement uses the existing positive-result configuration and original workload, as
+requested before measurement. Its frozen `experiment-plan.json` is retained in
+`aligned-mmlu-common.tar.gz`. The C8 synthetic protocol above remains a separate diagnostic; it is
+not substituted for the dataset configuration.
+
+MMLU-Pro uses the original 200 selected prompts, unchanged materialized JSONL SHA-256, infinite
+arrival rate, 256 output-token cap, temperature 0 and request seed 0. B0 uses the original MMLU
+baseline profile; B1 uses the school runtime, BF16/TP2, E16/R36, context 65536, batch-token budget
+4096, FULL graphs, MTP2, 20 GiB State/rank and 8 GiB host cache/rank. The same two physical cards
+execute sequential B0 then B1 services. All four cards are reserved to exclude shared load; both
+two-card service and four-card reservation accounting are reported. Record the common Triton
+distribution-name correction and the unchanged-source host rebuild.
+
+Use the original vLLM bench streaming client and initial single-prompt test. Throughput uses
+whole-burst output divided by whole-burst duration. Mean TTFT and TPOT retain the client's SSE-chunk
+semantics; TPOT is `(latency - TTFT)/(output_tokens - 1)` for multi-token responses. Derived report
+P95/P99 use nearest rank with explicit sample count and rank. Keep the client's original linearly
+interpolated estimates in raw evidence and separate derived fields. Do not reinterpret this burst as
+a fixed-duration window or an actual 16K input test. The existing numeric thresholds are unchanged.
+Report request-interval and startup-to-release cost separately, including adverse results; do not
+generalize a single burst lifecycle to a long-lived deployment. Instrumented counter runs are not
+substituted for uninstrumented serving measurements. Preserve existing full-task quality evidence
+separately from 256-token performance outputs.
+
 ## Internal Cost Accounting
 
 The previously proposed CNY 3000/card/month is withdrawn before measurement: there is no evidence

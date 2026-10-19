@@ -4,6 +4,25 @@
 
 第五章列出数据集性能结果。下述合成长输入实验采用不同运行栈及缓存配置，作为独立诊断归档，不纳入第五章方案的验收判定。
 
+## 数据集配对补测
+
+新增MMLU-Pro同机配对沿用原200条输入及学校栈优化配置，B0/B1各200成功、0失败。吞吐、平均TTFT、平均TPOT及请求区间资源成本达到内部阈值；P99
+TPOT与完整生命周期成本未改善。完整配置、统计边界和结果见主报告5.2节，数值由`aligned-mmlu-results.json`生成。
+
+在本报告目录执行以下命令，可使用CPU在独立临时目录中复算：
+
+```bash
+work=$(mktemp -d)
+tar -xzf aligned-mmlu-common.tar.gz -C "$work"
+tar -xzf aligned-mmlu-b0.tar.gz -C "$work"
+tar -xzf aligned-mmlu-b1.tar.gz -C "$work"
+python verify_aligned_pair.py "$work/20261019-midterm-aligned" mmlu-b0-r2 mmlu-b1-r2
+```
+
+`aligned-profile-probes.tar.gz`保留计数探针原始轨迹；`aligned-profile-control.tar.gz`保留整模型补采的失败回执和离线恢复索引。双rank算子明细已恢复，覆盖见`aligned-profile-coverage.json`；自定义算子形状及物理流量计量仍不完整，未给出有效算力验收结论。整模型大轨迹保留于主报告列明的本机路径，未完整上传Git。
+
+## 合成长输入诊断
+
 2026年10月19日完成Qwen3.5-35B-A3B BF16、TP2、C8合成长输入B0补测： 每条实际输入16,384 token，60秒资格检查后测量300秒，窗口内输出79,437
 token， 264.79 token/秒。312条请求全部成功，其中304条在窗口内完成、8条在排空完成。 B1也已完成：窗口内57,585 token、191.95
 token/秒，230条请求全部成功。 本轮吞吐下降27.51%，平均TTFT、TPOT及资源系数均退化，如实保留。
