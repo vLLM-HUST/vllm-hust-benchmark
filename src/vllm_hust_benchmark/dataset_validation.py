@@ -306,12 +306,18 @@ def validate_artifact(payload: dict[str, Any], *, expected_scenario_id: str) -> 
                 raise DatasetValidationError(
                     f"B1 value differs from selected candidate in {cell}"
                 )
-            maximum_candidate_value = max(
+            metric = next(
+                item for item in payload["metrics"] if item["id"] == metric_id
+            )
+            direction = metric.get("direction", "higher")
+            if direction not in {"higher", "lower"}:
+                raise DatasetValidationError(f"unsupported metric direction in {cell}")
+            best_candidate_value = (max if direction == "higher" else min)(
                 candidate["value"] for candidate in candidate_values
             )
-            if value != maximum_candidate_value:
+            if value != best_candidate_value:
                 raise DatasetValidationError(
-                    f"B1 value is not the maximum candidate value in {cell}"
+                    f"B1 value is not the best candidate value for {direction} in {cell}"
                 )
     expected_cells = {
         (dataset_id, metric_id)

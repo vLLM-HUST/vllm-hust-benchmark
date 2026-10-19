@@ -82,6 +82,7 @@ def build(evidence_commit):
         candidates = [
             {
                 "candidate_id": ident,
+                "series_id": run,
                 "label": arm_label,
                 "value": read(measured),
                 "delta_pct": 100 * (read(measured) / baseline - 1),

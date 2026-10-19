@@ -5,7 +5,7 @@
   "source_files": [
     {
       "file": "dataset_validation_index_v1.json",
-      "sha256": "8710ffb601e9dd572ac555b7294100150c1092bcdf246be777cf501162ecffda"
+      "sha256": "88f5a4fcc7cc92630b7a783d8c2762fa31090d57a7546404b659a5f5bce5d175"
     },
     {
       "file": "dataset_validation_qwen35_bidkv.json",
@@ -22,6 +22,10 @@
     {
       "file": "dataset_validation_qwen35_frontier_unified_900s.json",
       "sha256": "105aee98b6bc5fe632cc4422f390c1e1738c89bbde2f4c8174cbbe943e3546fa"
+    },
+    {
+      "file": "dataset_validation_qwen35_mmlu_school028_inf_out256.json",
+      "sha256": "29254938532e9f789901e7fa9e2df7bd66eef54c40e2a53b11b8e1a7885852c3"
     },
     {
       "file": "dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json",
@@ -1276,9 +1280,177 @@
           }
         }
       ]
+    },
+    {
+      "file": "dataset_validation_qwen35_mmlu_school028_inf_out256.json",
+      "dataset_id": "mmlu-pro",
+      "metric_id": "output_token_throughput",
+      "direction": "higher_is_better",
+      "selected_candidate_id": "kvmat",
+      "selected_value": 695.2506219597219,
+      "best_value": 695.2506219597219,
+      "selection_is_best": true,
+      "candidates": [
+        {
+          "candidate_id": "e16-r36",
+          "value": 529.8082507533761,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-r2"
+          }
+        },
+        {
+          "candidate_id": "e32",
+          "value": 478.5907985063779,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e32-r36-screen-r1"
+          }
+        },
+        {
+          "candidate_id": "e24",
+          "value": 561.5090924988154,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e24-r36-screen-r2"
+          }
+        },
+        {
+          "candidate_id": "kvmat",
+          "value": 695.2506219597219,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+          }
+        }
+      ]
+    },
+    {
+      "file": "dataset_validation_qwen35_mmlu_school028_inf_out256.json",
+      "dataset_id": "mmlu-pro",
+      "metric_id": "ttft_mean",
+      "direction": "lower_is_better",
+      "selected_candidate_id": "kvmat",
+      "selected_value": 34578.14237816259,
+      "best_value": 34578.14237816259,
+      "selection_is_best": true,
+      "candidates": [
+        {
+          "candidate_id": "e16-r36",
+          "value": 49364.67468142975,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-r2"
+          }
+        },
+        {
+          "candidate_id": "e32",
+          "value": 74829.19926522765,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e32-r36-screen-r1"
+          }
+        },
+        {
+          "candidate_id": "e24",
+          "value": 54892.49345631339,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e24-r36-screen-r2"
+          }
+        },
+        {
+          "candidate_id": "kvmat",
+          "value": 34578.14237816259,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+          }
+        }
+      ]
+    },
+    {
+      "file": "dataset_validation_qwen35_mmlu_school028_inf_out256.json",
+      "dataset_id": "mmlu-pro",
+      "metric_id": "tpot_mean",
+      "direction": "lower_is_better",
+      "selected_candidate_id": "kvmat",
+      "selected_value": 21.017554329562127,
+      "best_value": 21.017554329562127,
+      "selection_is_best": true,
+      "candidates": [
+        {
+          "candidate_id": "e16-r36",
+          "value": 24.054953587862354,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-r2"
+          }
+        },
+        {
+          "candidate_id": "e32",
+          "value": 32.86815800127007,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e32-r36-screen-r1"
+          }
+        },
+        {
+          "candidate_id": "e24",
+          "value": 29.14320322091454,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e24-r36-screen-r2"
+          }
+        },
+        {
+          "candidate_id": "kvmat",
+          "value": 21.017554329562127,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+          }
+        }
+      ]
     }
   ],
-  "selected_cell_count": 30,
+  "selected_cell_count": 33,
   "non_best_selections": 0,
   "website_audit": {
     "source_files": [

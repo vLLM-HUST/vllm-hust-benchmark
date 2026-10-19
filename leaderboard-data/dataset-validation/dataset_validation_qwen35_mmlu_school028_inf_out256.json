@@ -1,0 +1,336 @@
+{
+  "contract_version": "dataset-validation-v1",
+  "generated_at": "2026-10-19T13:15:59.597600+00:00",
+  "status": "complete_comparison",
+  "source": {
+    "service": "vLLM-HUST MMLU-Pro same-workload measurements",
+    "commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+    "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+    "files": {
+      "aligned-mmlu-results.json": "50f9c28eb6188bdf0cd4730b0d9a3b34d8561171ff26cdf3120ffa3add148d80",
+      "b1-e32-screen.json": "bc0b42405fe3f046fc7e5319bc15e7938c218cce8988fe401c1ff35f3f3409a6",
+      "b1-e24-screen.json": "34265c3329f7b43f8b598535cc98be302825e9b6771085edf8cec12c4811241e",
+      "b1-kvmat-screen.json": "132e24871efe5346ccdb5c25ff32b1f37057cedc4e979eaceb52d4eda7568622"
+    }
+  },
+  "baseline": {
+    "id": "mmlu-b0-r2",
+    "label": "Native EP on / 32K / APC off / MTP off / FULL_DECODE_ONLY",
+    "generated_at": "2026-10-19"
+  },
+  "candidate_policy": {
+    "id": "best-per-cell",
+    "label": "当前已实测最优的vLLM-HUST优化方案",
+    "single_version_required": false,
+    "rule": "Same model revision, BF16, TP2, source-pinned runtime, prepared inputs, arrival and output contract; optimization configuration may differ and is retained per candidate. Service performance only; task quality not rescored."
+  },
+  "scenario": {
+    "id": "qwen35-35b-a3b-bf16-tp2-school028-mmlu-inf-out256",
+    "label": "Qwen3.5-35B-A3B · BF16 · TP2 · school 0.28 · MMLU-Pro · inf · out256",
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "hardware": "2× Ascend 910B2 (4 reserved)",
+    "precision": "BF16",
+    "prepared_workload_sha256": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+    "accuracy_evaluated": false,
+    "request_rate": "inf",
+    "num_prompts": 200,
+    "output_length": 256
+  },
+  "datasets": [
+    {
+      "id": "mmlu-pro",
+      "label": "MMLU-Pro",
+      "group": "MMLU-Pro",
+      "description": "200-request service-performance burst; not task accuracy",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "ttft_mean",
+        "tpot_mean"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "output_token_throughput",
+      "label": "Output token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    },
+    {
+      "id": "ttft_mean",
+      "label": "Mean TTFT",
+      "unit": "ms",
+      "direction": "lower"
+    },
+    {
+      "id": "tpot_mean",
+      "label": "Mean TPOT",
+      "unit": "ms",
+      "direction": "lower"
+    }
+  ],
+  "results": [
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 452.2929712200654,
+      "value": 695.2506219597219,
+      "delta_pct": 53.71687516705721,
+      "updated_at": "2026-10-19",
+      "selected_candidate_id": "kvmat",
+      "candidate_values": [
+        {
+          "candidate_id": "e16-r36",
+          "series_id": "mmlu-b1-r2",
+          "label": "vLLM-HUST EP off / 64K / APC on / MTP2 / FULL / E16/R36",
+          "value": 529.8082507533761,
+          "delta_pct": 17.13828966305011,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-r2"
+          }
+        },
+        {
+          "candidate_id": "e32",
+          "series_id": "mmlu-b1-e32-r36-screen-r1",
+          "label": "BetterScale E32/R36, school runtime, MTP2 FULL APC async",
+          "value": 478.5907985063779,
+          "delta_pct": 5.8143347254267175,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e32-r36-screen-r1"
+          }
+        },
+        {
+          "candidate_id": "e24",
+          "series_id": "mmlu-b1-e24-r36-screen-r2",
+          "label": "E24/R36, school runtime, MTP2 FULL APC async",
+          "value": 561.5090924988154,
+          "delta_pct": 24.14720728118731,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e24-r36-screen-r2"
+          }
+        },
+        {
+          "candidate_id": "kvmat",
+          "series_id": "mmlu-b1-kvmat-e16-r36-screen-r2",
+          "label": "E16/R36 plus KV materialization recompute, school runtime, MTP2 FULL APC async",
+          "value": 695.2506219597219,
+          "delta_pct": 53.71687516705721,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "Best measured service-performance value per metric; not a joint deployment result"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-benchmark",
+        "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+        "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-benchmark",
+        "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+        "run_id": "mmlu-b0-r2"
+      },
+      "note": "Sequential single-TP2 services on the same device: 200 requests, out256, infinite arrival rate. Service performance measured. Task accuracy was not rescored. Each metric selects its own configuration. The KV candidate tests request-scoped recompute only; partial reuse was not exercised.",
+      "note_zh": "同机单TP2服务，200请求、out256、无限到达率；B0与候选顺序运行。已完成服务性能测量，未重评任务正确率。各指标分别选择，配置见报告。KV候选仅验证逐请求重算，分段复用未执行。"
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "ttft_mean",
+      "status": "passed",
+      "baseline_value": 57983.162126312964,
+      "value": 34578.14237816259,
+      "delta_pct": -40.365200671815536,
+      "updated_at": "2026-10-19",
+      "selected_candidate_id": "kvmat",
+      "candidate_values": [
+        {
+          "candidate_id": "e16-r36",
+          "series_id": "mmlu-b1-r2",
+          "label": "vLLM-HUST EP off / 64K / APC on / MTP2 / FULL / E16/R36",
+          "value": 49364.67468142975,
+          "delta_pct": -14.863776187487565,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-r2"
+          }
+        },
+        {
+          "candidate_id": "e32",
+          "series_id": "mmlu-b1-e32-r36-screen-r1",
+          "label": "BetterScale E32/R36, school runtime, MTP2 FULL APC async",
+          "value": 74829.19926522765,
+          "delta_pct": 29.0533260366459,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e32-r36-screen-r1"
+          }
+        },
+        {
+          "candidate_id": "e24",
+          "series_id": "mmlu-b1-e24-r36-screen-r2",
+          "label": "E24/R36, school runtime, MTP2 FULL APC async",
+          "value": 54892.49345631339,
+          "delta_pct": -5.330286511913118,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e24-r36-screen-r2"
+          }
+        },
+        {
+          "candidate_id": "kvmat",
+          "series_id": "mmlu-b1-kvmat-e16-r36-screen-r2",
+          "label": "E16/R36 plus KV materialization recompute, school runtime, MTP2 FULL APC async",
+          "value": 34578.14237816259,
+          "delta_pct": -40.365200671815536,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "lower_is_better",
+        "trend": "improved",
+        "selection": "Best measured service-performance value per metric; not a joint deployment result"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-benchmark",
+        "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+        "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-benchmark",
+        "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+        "run_id": "mmlu-b0-r2"
+      },
+      "note": "Sequential single-TP2 services on the same device: 200 requests, out256, infinite arrival rate. Service performance measured. Task accuracy was not rescored. Each metric selects its own configuration. The KV candidate tests request-scoped recompute only; partial reuse was not exercised.",
+      "note_zh": "同机单TP2服务，200请求、out256、无限到达率；B0与候选顺序运行。已完成服务性能测量，未重评任务正确率。各指标分别选择，配置见报告。KV候选仅验证逐请求重算，分段复用未执行。"
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "tpot_mean",
+      "status": "passed",
+      "baseline_value": 28.187227176958878,
+      "value": 21.017554329562127,
+      "delta_pct": -25.43589265586743,
+      "updated_at": "2026-10-19",
+      "selected_candidate_id": "kvmat",
+      "candidate_values": [
+        {
+          "candidate_id": "e16-r36",
+          "series_id": "mmlu-b1-r2",
+          "label": "vLLM-HUST EP off / 64K / APC on / MTP2 / FULL / E16/R36",
+          "value": 24.054953587862354,
+          "delta_pct": -14.660092541753711,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-r2"
+          }
+        },
+        {
+          "candidate_id": "e32",
+          "series_id": "mmlu-b1-e32-r36-screen-r1",
+          "label": "BetterScale E32/R36, school runtime, MTP2 FULL APC async",
+          "value": 32.86815800127007,
+          "delta_pct": 16.606567204799518,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e32-r36-screen-r1"
+          }
+        },
+        {
+          "candidate_id": "e24",
+          "series_id": "mmlu-b1-e24-r36-screen-r2",
+          "label": "E24/R36, school runtime, MTP2 FULL APC async",
+          "value": 29.14320322091454,
+          "delta_pct": 3.3915221172840626,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-e24-r36-screen-r2"
+          }
+        },
+        {
+          "candidate_id": "kvmat",
+          "series_id": "mmlu-b1-kvmat-e16-r36-screen-r2",
+          "label": "E16/R36 plus KV materialization recompute, school runtime, MTP2 FULL APC async",
+          "value": 21.017554329562127,
+          "delta_pct": -25.43589265586743,
+          "runtime_effectiveness": "exercised",
+          "provenance": {
+            "repository": "vLLM-HUST/vllm-hust-benchmark",
+            "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+            "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "lower_is_better",
+        "trend": "improved",
+        "selection": "Best measured service-performance value per metric; not a joint deployment result"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-benchmark",
+        "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+        "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-benchmark",
+        "repository_commit": "84f0443be92c658bb658b281fcb4241eb5a9fb97",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/84f0443be92c658bb658b281fcb4241eb5a9fb97/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+        "run_id": "mmlu-b0-r2"
+      },
+      "note": "Sequential single-TP2 services on the same device: 200 requests, out256, infinite arrival rate. Service performance measured. Task accuracy was not rescored. Each metric selects its own configuration. The KV candidate tests request-scoped recompute only; partial reuse was not exercised.",
+      "note_zh": "同机单TP2服务，200请求、out256、无限到达率；B0与候选顺序运行。已完成服务性能测量，未重评任务正确率。各指标分别选择，配置见报告。KV候选仅验证逐请求重算，分段复用未执行。"
+    }
+  ]
+}

@@ -25,7 +25,7 @@ def load_json(path: Path) -> dict:
 
 
 def test_checked_in_publication_is_valid_and_complete() -> None:
-    assert validate_publication(PUBLICATION) == {"scenarios": 7, "results": 729}
+    assert validate_publication(PUBLICATION) == {"scenarios": 8, "results": 732}
 
 
 def test_dataset_program_separates_primary_plan_from_measured_scenarios() -> None:
@@ -409,7 +409,7 @@ def test_artifact_validates_full_candidate_sets() -> None:
     cell["selected_candidate_id"] = lower_candidate["candidate_id"]
     cell["value"] = lower_candidate["value"]
     cell["provenance"] = copy.deepcopy(lower_candidate["provenance"])
-    with pytest.raises(DatasetValidationError, match="not the maximum candidate value"):
+    with pytest.raises(DatasetValidationError, match="not the best candidate value"):
         validate_artifact(
             non_maximum,
             expected_scenario_id=artifact["scenario"]["id"],

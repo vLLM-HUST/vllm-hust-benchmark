@@ -18,7 +18,7 @@ def test_published_audit_is_reproducible():
     actual = MODULE.audit(ROOT / "leaderboard-data/dataset-validation")
     saved = json.loads((REPORT / "b1-selection-audit.json").read_text())
     assert actual == {k: v for k, v in saved.items() if k != "website_audit"}
-    assert actual["selected_cell_count"] == 30
+    assert actual["selected_cell_count"] == 33
     assert actual["non_best_selections"] == 0
 
 
