@@ -1,0 +1,73 @@
+{
+  "status": "FIXED_PROXY_DEPLOYMENT_AND_REQUEST_PATH_PASS",
+  "scope": "New RIDE proxies against retained original model; not Agent/performance acceptance",
+  "run_id": "swe-pro-v1-proxy-fixed-20261020-r2",
+  "fix_source": "aff94a7",
+  "one_click_status": "PASS",
+  "payload_files_checked": 42,
+  "official_source_files": 17,
+  "management_and_proxies_new": true,
+  "model_restarted": false,
+  "cards_retained": 2,
+  "valid_agent_performance_result": false,
+  "performance_benefit_claim": false,
+  "arms": {
+    "native": {
+      "output_tokens": 16,
+      "release": true,
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "scheduling_enabled": false
+    },
+    "controller": {
+      "output_tokens": 16,
+      "release": true,
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "scheduling_enabled": true
+    }
+  },
+  "failed_deployment_attempt": {
+    "run": "proxy-deployment-20261020-r1",
+    "reason": "Generated remote command SyntaxError before remote execution",
+    "management_submitted": false,
+    "model_calls": 0,
+    "preserved_sanitized_failure": true
+  },
+  "initial_prompt_diversity": {
+    "native": {
+      "trajectories": 256,
+      "unique_initial_message_hashes": 8,
+      "multiplicity_histogram": {
+        "32": 8
+      }
+    },
+    "controller": {
+      "trajectories": 256,
+      "unique_initial_message_hashes": 8,
+      "multiplicity_histogram": {
+        "32": 8
+      }
+    },
+    "limits": [
+      "Exact initial message identity is not a token-block residency measurement.",
+      "Prefix duplication is a workload property, not proof of sole causality for low KV.",
+      "Historical failed pair, not a new model run."
+    ]
+  },
+  "official_task_inventory": {
+    "v1_tasks": 731,
+    "nodebb_tasks": 44
+  },
+  "private_evidence_sha256": {
+    "deployment-plan-private.json": "6597eec8da8b8d952674147df7f78bb76017b71351f33fae23613506b40b0773",
+    "acceptance-contract.json": "2fcac335c9e59c79fbb609971d0470181db7ea123f096af8177b7e4233147768",
+    "deployment-receipt-private.json": "164c9e366d263dce78d525f5ce17b6b481482c70f2e50a01d29483edd2197c9e",
+    "runtime-verification-private.json": "9f2dd8b805caacf938a08c8f980a02af3e605d6c166e6974054974d366e1c29e",
+    "requests-result-private.json": "415715bdf4f1ca6b638e213c66bb4e60931d2131b8e60144b88519997ba594b3"
+  }
+}
