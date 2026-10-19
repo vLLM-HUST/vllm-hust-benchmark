@@ -1,0 +1,119 @@
+{
+  "status": "ISOLATED_NON_STREAMING_CANCELLATION_ACCEPTED",
+  "benefit_claim": false,
+  "real_agent_comparison_rerun": false,
+  "production_proxy_replaced": false,
+  "model_restarted": false,
+  "upstream_commit": "7ddc8610270e56d3b109eed8796b3a4360fc67c9",
+  "fixed_upstream_files_verified": 17,
+  "fix_commit": "c8486fc",
+  "followup_test_commit": "aff94a7",
+  "local_tests": {
+    "full_passed": 139,
+    "full_skipped": 4,
+    "additional_paused_semantics_tests_passed": 5
+  },
+  "diagnostic": {
+    "client_timeout_seconds": 0.5,
+    "max_tokens": 512,
+    "ignore_eos": true,
+    "requests_per_arm": {
+      "timeout": 1,
+      "normal_16_tokens": 1
+    },
+    "is_performance_measurement": false
+  },
+  "before": {
+    "direct": {
+      "running_first_sample_after_timeout": 0.0,
+      "waiting_first_sample_after_timeout": 0.0,
+      "first_idle_sample_seconds_after_timeout": 0.03689122200012207,
+      "release": null
+    },
+    "native": {
+      "running_first_sample_after_timeout": 1.0,
+      "waiting_first_sample_after_timeout": 0.0,
+      "first_idle_sample_seconds_after_timeout": 8.199528455734253,
+      "release": {
+        "program_id": "cancellation-probe-r1-native",
+        "released": true
+      }
+    },
+    "controller": {
+      "running_first_sample_after_timeout": 1.0,
+      "waiting_first_sample_after_timeout": 0.0,
+      "first_idle_sample_seconds_after_timeout": 8.2022545337677,
+      "release": {
+        "program_id": "cancellation-probe-r1-controller",
+        "released": true
+      }
+    }
+  },
+  "after": {
+    "native": {
+      "epoch": 1792435807.7431712,
+      "first_idle_sample_after_timeout_seconds": 0.1408061981201172,
+      "abort_delta": 0.0,
+      "generation_token_delta": 5.0,
+      "normal_response": {
+        "status": 200,
+        "usage": {
+          "prompt_tokens": 23,
+          "total_tokens": 39,
+          "completion_tokens": 16,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": null
+        },
+        "finish_reason": "length"
+      }
+    },
+    "controller": {
+      "epoch": 1792435809.414609,
+      "first_idle_sample_after_timeout_seconds": 0.13934636116027832,
+      "abort_delta": 0.0,
+      "generation_token_delta": 8.0,
+      "normal_response": {
+        "status": 200,
+        "usage": {
+          "prompt_tokens": 23,
+          "total_tokens": 39,
+          "completion_tokens": 16,
+          "prompt_tokens_details": null,
+          "completion_tokens_details": null
+        },
+        "finish_reason": "length"
+      }
+    }
+  },
+  "failed_attempts": [
+    {
+      "run": "r2",
+      "status": "FAILED",
+      "reason": "Incomplete package copy: missing _runtime; import failed",
+      "model_calls": 0
+    },
+    {
+      "run": "r3",
+      "status": "FAILED",
+      "reason": "Native drained in 0.139588s with 4 generated tokens, but exact abort-counter increment assertion failed; Controller not run",
+      "observed_abort_delta": 0,
+      "raw_retained": true
+    }
+  ],
+  "private_raw_sha256": {
+    "baseline_r1": "5752fd121d911cdd88ac336ef62595ef7fc115f0ead1be4007b2a9e22a64110f",
+    "fixed_r4": "de8afd21113637a23e790648bc020bcc7bd6294468ae7dd226dd218e97f96a1b"
+  },
+  "limitations": [
+    "Single requests, not saturation or successful Agent batch evidence.",
+    "abort metric remained zero; no runtime engine-abort call trace claimed.",
+    "CPU paused-state cancellation test is not a load-induced scheduling measurement.",
+    "Streaming and text forwarding unchanged.",
+    "Existing production proxies and model left running unchanged."
+  ],
+  "source_hashes": {
+    "upstream_adapter.py": "b9e5499d3c1530b98a5cb16556c343768d112e7e78f645ddf2977308abbf6ddc",
+    "upstream_disconnect.py": "8423cff38a71b59d844c1d205967107f36bf41de4e09a7b3a7c9604c3a951331",
+    "test_upstream_disconnect.py": "d65f6ef3cdafa95a7af2f9ca6aa6284deb93667f9712e04c0e12355915d09f03"
+  }
+}
