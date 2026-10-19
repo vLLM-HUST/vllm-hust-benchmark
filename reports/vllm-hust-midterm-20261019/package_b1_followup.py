@@ -10,12 +10,12 @@ from verify_aligned_pair import verify
 
 
 def package(root, run, output, candidate):
-    assert candidate in {"e24", "kvmat"}
+    assert candidate in {"e24", "kvmat", "kvmat-e24"}
     receipt = json.loads((root / run / "receipt.json").read_text())
     command_path = root / f"launch-{candidate}-command.json"
     command = json.loads(command_path.read_text())
     assert command[command.index("--max-num-seqs") + 1] == (
-        "24" if candidate == "e24" else "16"
+        "16" if candidate == "kvmat" else "24"
     )
     additional = json.loads(command[command.index("--additional-config") + 1])
     assert additional["state_resident_seats"] == 36
@@ -27,7 +27,8 @@ def package(root, run, output, candidate):
         "candidate": (
             "E24/R36"
             if candidate == "e24"
-            else "E16/R36 plus KV materialization recompute"
+            else ("E24" if candidate == "kvmat-e24" else "E16")
+            + "/R36 plus KV materialization recompute"
         )
         + ", school runtime, MTP2 FULL APC async",
         "run_id": run,
@@ -64,7 +65,12 @@ def package(root, run, output, candidate):
             throughput_change_vs_baseline_pct=100
             * (measured["output_tps"] / baseline["output_tps"] - 1),
         )
-        if candidate == "kvmat":
+        if candidate == "kvmat-e24":
+            current = verify(root, "mmlu-b1-kvmat-e16-r36-screen-r2")
+            result["throughput_change_vs_kvmat_e16_pct"] = 100 * (
+                measured["output_tps"] / current["output_tps"] - 1
+            )
+        if candidate.startswith("kvmat"):
             policy = [
                 json.loads(line)
                 for line in (root / run / "kvmat-policy.jsonl").read_text().splitlines()
@@ -132,7 +138,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
     parser.add_argument("run")
-    parser.add_argument("candidate", choices=["e24", "kvmat"])
+    parser.add_argument("candidate", choices=["e24", "kvmat", "kvmat-e24"])
     parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parent)
     args = parser.parse_args()
     package(args.root, args.run, args.output, args.candidate)

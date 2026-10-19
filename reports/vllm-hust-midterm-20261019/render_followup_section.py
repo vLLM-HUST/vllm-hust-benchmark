@@ -17,6 +17,7 @@ def render():
         ("e32", "E32/R36"),
         ("e24", "E24/R36"),
         ("kvmat", "E16/R36 + KV materialization"),
+        ("kvmat-e24", "E24/R36 + KV materialization"),
     ]:
         screen = json.loads((ROOT / f"b1-{key}-screen.json").read_text())
         screens[key] = screen
@@ -46,7 +47,7 @@ def render():
         f"本工况当前已测吞吐B1为{best['output_throughput']}；平均TTFT和平均TPOT的B1分别为{best['mean_ttft']}、{best['mean_tpot']}。各指标对应配置独立，不合并为单一部署的联合结果。",
         "",
     ]
-    for kind in ("e24", "kvmat"):
+    for kind in ("e24", "kvmat", "kvmat-e24"):
         screen = screens[kind]
         lines.append(
             f"运行`{screen['run_id']}`：状态`{screen['status']}`；原始证据见`b1-{kind}-screen-evidence.tar.gz`，复算结果见`b1-{kind}-screen.json`。"
@@ -55,21 +56,33 @@ def render():
             lines.append(
                 f"较E16/R36吞吐变化{screen['throughput_change_vs_prior_pct']:+.2f}%。256-token输出与E16/R36逐请求全文一致数为{screen['bounded_output_comparison']['exact_matches_vs_e16']}/200；该比较不是答案正确率。"
             )
+        if "throughput_change_vs_kvmat_e16_pct" in screen:
+            lines.append(
+                f"较E16/R36 + KV materialization吞吐变化{screen['throughput_change_vs_kvmat_e16_pct']:+.2f}%。"
+            )
         lines.append("")
-    if screens["kvmat"]["status"] == "measured":
-        control = screens["kvmat"]["control_evidence"]
+    for kind in ("kvmat", "kvmat-e24"):
+        if screens[kind]["status"] != "measured":
+            continue
+        control = screens[kind]["control_evidence"]
         lines += [
-            f"KV materialization采用固定源码的0.28受限适配；原请求未添加复用锚点。记录{control['policy_observations']}次策略观测、{control['engine_salt_admissions']}次引擎缓存盐接收，盐摘要逐一匹配，输入合计{control['engine_prompt_tokens']:,} token。控制范围为逐请求重算；分段复用为`not-exercised`，缓存盐接收不等于复用或节省计算。",
+            f"运行`{screens[kind]['run_id']}`采用固定源码的0.28受限适配；原请求未添加复用锚点。记录{control['policy_observations']}次策略观测、{control['engine_salt_admissions']}次引擎缓存盐接收，盐摘要逐一匹配，输入合计{control['engine_prompt_tokens']:,} token。控制范围为逐请求重算；分段复用为`not-exercised`，缓存盐接收不等于复用或节省计算。",
             "",
         ]
     lines += [
         "本轮为单次独立候选筛选，结果描述已测服务性能，不代表多次重复的统计显著性或任务质量等价。每轮输出均为51,200 token；原始SSE计时、MTP计数、设备采样、启动与释放回执及源码哈希随归档保留。任务正确率未重新评分。",
+        "",
+        "另完成9个MOD默认分支的源码准入审计，完整commit、合同与实现摘要见`B1-CANDIDATE-AUDIT.md`及`b1-mod-source-audit.json`。Prefill Microflow尚需学校0.28适配；PegaFlow与当前State调度器的connector约束冲突；本轮短输入/out256不满足所审查压缩配置的触发条件。上述未运行方案不计作实测候选。",
         END,
     ]
-    for key, label in [("e24", "E24/R36"), ("kvmat", "E16/R36 + KV materialization")]:
+    for key, label in [
+        ("e24", "E24/R36"),
+        ("kvmat", "E16/R36 + KV materialization"),
+        ("kvmat-e24", "E24/R36 + KV materialization"),
+    ]:
         screens[key]["selected_as_b1"] = best["output_throughput"] == label
         screens[key]["selection_scope"] = (
-            "Current measured output throughput among E16, E32, E24 and KV candidates; task accuracy not rescored"
+            "Current measured output throughput among E16, E32, E24, KV E16 and KV E24 candidates; task accuracy not rescored"
         )
         (ROOT / f"b1-{key}-screen.json").write_text(
             json.dumps(screens[key], indent=2) + "\n"
@@ -87,7 +100,7 @@ def render():
         + "\n"
     )
     report = ROOT / "中期测试报告.md"
-    text = report.read_text().replace("报告版本：V0.6", "报告版本：V0.7")
+    text = report.read_text().replace("报告版本：V0.7", "报告版本：V0.8")
     section = "\n".join(lines)
     if BEGIN in text:
         text = text[: text.index(BEGIN)] + section + text[text.index(END) + len(END) :]

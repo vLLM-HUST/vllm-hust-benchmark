@@ -1,8 +1,8 @@
 {
   "scope": "MMLU-Pro 200 inf out256 school 0.28 service performance",
   "selection": {
-    "output_throughput": "E16/R36 + KV materialization",
-    "mean_ttft": "E16/R36 + KV materialization",
+    "output_throughput": "E24/R36 + KV materialization",
+    "mean_ttft": "E24/R36 + KV materialization",
     "mean_tpot": "E16/R36 + KV materialization"
   },
   "measurements": {
@@ -271,6 +271,73 @@
         "spec_decode_per_position_acceptance_rates": [
           0.9055773762765121,
           0.7753862267609322
+        ]
+      }
+    },
+    "E24/R36 + KV materialization": {
+      "arm": "b1",
+      "requests": 200,
+      "failures": 0,
+      "benchmark_duration_s": 62.14495377615094,
+      "output_tokens": 51200,
+      "input_tokens": 282265,
+      "output_tps": 823.8802491417858,
+      "ttft_s": {
+        "n": 200,
+        "mean": 28.25748378312215,
+        "p95": 54.33100868947804,
+        "p99": 58.56596331298351,
+        "p95_rank": 190,
+        "p99_rank": 198,
+        "p95_linear": 54.3385696625337,
+        "p99_linear": 58.56815004806034
+      },
+      "tpot_s": {
+        "n": 200,
+        "mean": 0.02627448284580354,
+        "p95": 0.03241247272155449,
+        "p99": 0.03480014343399043,
+        "p95_rank": 190,
+        "p99_rank": 198,
+        "p95_linear": 0.03241730969947051,
+        "p99_linear": 0.03480127495428657
+      },
+      "timing": "Original vLLM bench SSE-chunk timing; reported P95/P99 use nearest rank; original linear estimates retained separately",
+      "allocated_card_seconds_per_output_token": 0.0024275372568808963,
+      "reserved_card_seconds_per_output_token": 0.004855074513761793,
+      "lifecycle_allocated_card_seconds_per_output_token": 0.017173757134005426,
+      "request_span_s": 62.1418815292418,
+      "device_utilization": {
+        "4": {
+          "covered_seconds": 62.1418815292418,
+          "mean_ai_core_percent": 77.80420619202368,
+          "uncovered_seconds": 0.0
+        },
+        "5": {
+          "covered_seconds": 62.1418815292418,
+          "mean_ai_core_percent": 79.25698047395306,
+          "uncovered_seconds": 0.0
+        },
+        "6": {
+          "covered_seconds": 62.1418815292418,
+          "mean_ai_core_percent": 0.0,
+          "uncovered_seconds": 0.0
+        },
+        "7": {
+          "covered_seconds": 62.1418815292418,
+          "mean_ai_core_percent": 0.0,
+          "uncovered_seconds": 0.0
+        }
+      },
+      "speculative_decode": {
+        "spec_decode_acceptance_rate": 84.2039018250472,
+        "spec_decode_acceptance_length": 2.684078036500944,
+        "spec_decode_num_drafts": 19068,
+        "spec_decode_draft_tokens": 38136,
+        "spec_decode_accepted_tokens": 32112,
+        "spec_decode_per_position_acceptance_rates": [
+          0.9100587371512482,
+          0.7740192993496958
         ]
       }
     }

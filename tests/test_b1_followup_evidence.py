@@ -12,7 +12,9 @@ import pytest
 REPORT = Path(__file__).resolve().parents[1] / "reports/vllm-hust-midterm-20261019"
 
 
-@pytest.mark.parametrize("candidate,seats", [("e24", "24"), ("kvmat", "16")])
+@pytest.mark.parametrize(
+    "candidate,seats", [("e24", "24"), ("kvmat", "16"), ("kvmat-e24", "24")]
+)
 def test_followup_evidence(candidate, seats, tmp_path):
     path = REPORT / f"b1-{candidate}-screen.json"
     result = json.loads(path.read_text())
@@ -47,7 +49,7 @@ def test_followup_evidence(candidate, seats, tmp_path):
     )
     if result["throughput_change_vs_prior_pct"] <= 0:
         assert not result["selected_as_b1"]
-    if candidate == "kvmat":
+    if candidate.startswith("kvmat"):
         control = result["control_evidence"]
         assert control["partial_reuse"] == "not-exercised"
         assert control["engine_salt_admissions"] >= 200
@@ -68,6 +70,7 @@ def test_publication_is_derived_from_evidence_and_selects_each_metric():
     assert not saved["scenario"]["accuracy_evaluated"]
     assert len(saved["results"]) == 3
     for cell in saved["results"]:
+        assert len(cell["candidate_values"]) == 5
         values = [row["value"] for row in cell["candidate_values"]]
         expected = (
             max if cell["comparison"]["direction"] == "higher_is_better" else min
@@ -97,3 +100,19 @@ def test_latency_validator_rejects_larger_selected_value():
         DatasetValidationError, match="not the best candidate value for lower"
     ):
         validate_artifact(saved, expected_scenario_id=saved["scenario"]["id"])
+
+
+def test_mod_source_audit_is_pinned_and_hashes_match():
+    audit = json.loads((REPORT / "b1-mod-source-audit.json").read_text())
+    assert len(audit["repositories"]) == 9
+    for repo in audit["repositories"]:
+        assert len(repo["commit"]) == 40
+        assert repo["default_branch"]
+        assert any(source["path"] == "README.md" for source in repo["sources"])
+        for source in repo["sources"]:
+            assert f"/blob/{repo['commit']}/" in source["url"]
+            assert (
+                hashlib.sha256(source["text"].encode()).hexdigest() == source["sha256"]
+            )
+    for source in audit["measured_host_sources"]:
+        assert hashlib.sha256(source["text"].encode()).hexdigest() == source["sha256"]

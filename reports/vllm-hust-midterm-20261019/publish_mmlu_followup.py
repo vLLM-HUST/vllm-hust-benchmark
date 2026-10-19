@@ -41,7 +41,7 @@ def build(evidence_commit):
         )
     ]
     ended = []
-    for kind in ("e32", "e24", "kvmat"):
+    for kind in ("e32", "e24", "kvmat", "kvmat-e24"):
         name = f"b1-{kind}-screen.json"
         result = json.loads((REPORT / name).read_text())
         sources.append(name)
@@ -64,7 +64,7 @@ def build(evidence_commit):
                     result["candidate"],
                     result["measured"],
                     result["run_id"],
-                    "exercised" if kind == "kvmat" else "not-recorded",
+                    "exercised" if kind.startswith("kvmat") else "not-recorded",
                 )
             )
 

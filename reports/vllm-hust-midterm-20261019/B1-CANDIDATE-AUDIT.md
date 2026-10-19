@@ -21,7 +21,7 @@ Throttling。登记来源固定于网站提交`89b351f343c6259c0bddb6c4e8ed752bb
 | BetterScale                        | Qwen3.5数据集性能、SWE宽度实验           | 优先补测同输入的执行宽度候选；旧631.6 tok/s与隔离529.8 tok/s分别保留              |
 | KVCompress                         | Qwen3.5统一SWE、Qwen2.5 Coder长上下文    | 有真实控制动作；须在MMLU及学校运行栈适配后测量，不能搬用SWE增益                   |
 | PegaFlow                           | Qwen3.5统一SWE                           | 多并发吞吐较高；与State缓存组合须先验证缓存所有权，不能直接叠加插件               |
-| KV materialization arrival control | Qwen3.5统一SWE、Qwen2.5控制实验          | 调度候选；须保持外部输入和到达负载，计入全部排队时间                              |
+| KV materialization arrival control | Qwen3.5统一SWE、Qwen2.5控制实验          | 缓存复用/重算控制；学校栈已测逐请求重算路径，不改变外部到达负载                   |
 | BidKV                              | Qwen3.5 TP2/SWE、TP4/EvoScientist        | KV压力控制候选；需匹配拓扑和压力，不能直接填MMLU                                  |
 | DLA、KV tiering                    | Qwen3.5统一SWE                           | 保留实测值；相关观察未记录控制动作，不作机制收益归因                              |
 | Pipeline microbatch                | Qwen3.5 PP2/SWE                          | 拓扑不同，保留独立工况                                                            |
@@ -45,8 +45,31 @@ State/rank、8 GiB host cache/rank、MTP2、APC、FULL、async及200条MMLU输�
 token/秒。相对原E16/R36的529.808250753
 token/秒下降9.667167730%，不选作吞吐B1。运行实际使用E32、R36、MTP2、FULL及APC；全部设备释放。原始证据和派生统计见`b1-e32-screen-evidence.tar.gz`、`b1-e32-screen.json`。
 
-本轮未发现可直接替换当前MMLU-Pro隔离配对方案的更高结果。后续候选为E24/R36的中间宽度，以及学校运行栈下KV
-materialization调度适配；后者需保留相同外部到达负载和完整排队计时。PegaFlow或KVCompress与State组合须先核验缓存所有权，不能仅拼接单MOD结果。本轮没有完成这些后续候选的测量。
+后续E24/R36和E16/R36 + KV materialization均已完成测量，分别为561.509092499和695.250621960
+token/秒。完整结果、各指标选择与控制证据见报告5.4节和`b1-current-best.json`。原输入没有复用锚点，KV路径的200次策略决策均为逐请求重算；不把该结果解释为分段复用收益。
+
+## 最新源码准入审计
+
+本次继续审查9个有明确实现或近期更新的仓库默认分支。`b1-mod-source-audit.json`保存审计时间、完整commit、README、相关manifest/宿主合同与部分实际实现的内容及SHA256。以下是当前MMLU-Pro工况的筛选结论，不是MOD的一般性有效性结论，也不是所有组织仓库的完整兼容认证。
+
+固定输入为200个独立单轮请求，实际输入925至2,502 token，输出均为256 token。保持既有每卡20 GiB状态、8 GiB
+host缓存、TP2和原始到达时序。不能通过增加program身份、重复前缀、缩减缓存或延长输出，把其他工作负载结果冒充本工况补测。
+
+| MOD                   | 最新实现/约束                                                                                      | 本工况决策                                                                             |
+| --------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Prefill Microflow     | 明确为BetterScale联合扩展；宿主按源文件字节固定，文档明确学校0.28须单独移植；FA分片有组件级收益    | 有潜力的后续算子候选；尚缺本栈适配和整模型质量验证，不绕过源码检查直接启用             |
+| Split-Batch / Cascade | Cascade和dual-pad在speculative_config存在时拒绝多查询行路径                                        | 当前MTP2组合不触发；需要支持MTP验证行后再作为同组合候选                                |
+| KVCompress            | 当前主线宿主范围0.29，另有精确0.23旧栈；推荐Qwen配置输出guard为2,048、KV预算4,608                  | 本栈需适配，且本轮短输入/out256不触发推荐压缩；不改负载或强压缩制造测点                |
+| PyramidKV             | 依赖KVCompress共享适配器；其MMLU五样本配置已明确低于4,096 gate                                     | 当前输入最长2,502，缺少该配置的控制机会；不作为预计提升候选                            |
+| PegaFlow              | 外部KV存储/connector；当前实测BetterScale `LiveStateScheduler.__init__`明确要求`connector is None` | 不能直接叠加；后续需协同缓存所有权或独立同预算部署验收                                 |
+| BidKV                 | 当前typed preemption API在学校宿主存在；只改变池满后的victim选择                                   | 既有KV测量日志页池占用约3%至4%，没有抢占瓶颈证据，暂缓设备补测；不是宣布其不兼容或无效 |
+| DLA                   | 当前README明确真实候选缺少predicted_length，策略弃权                                               | 需预测输入与候选传递真正接通后再验证控制；本轮不填优化值                               |
+| Request Throttling    | 默认实现普通无program身份请求直接旁路                                                              | 原请求未提供program身份，不能新增身份改变工作负载后比较；本轮不宣称调度收益            |
+| Hybrid Spec           | import_only，无serving patch，执行计划execution_ready=false                                        | 尚无NPU实现可测；保留研发候选，不作为已启用方案                                        |
+
+设备补测选择E24/R36 + KV
+materialization逐请求重算，原因是执行宽度与KV控制分别已有同输入的实测依据，且不引入缓存所有权冲突。该项是已适配MOD的组合补测，不代表上述9个MOD均完成运行测试。原E16 +
+KV结果保留，所有候选按指标独立比较；本轮实测结果以报告5.4及原始归档为准。
 
 在仓库根目录执行：
 
