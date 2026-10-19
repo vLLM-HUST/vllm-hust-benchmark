@@ -1,0 +1,65 @@
+{
+  "status": "SOURCE_AND_LIVE_CONFIG_BOUND_RECOMPUTED",
+  "hardware_saturation_test_run": false,
+  "baseline_profile_sha256": "5792631172af883cf247e05b214444c02a106831aa50162b8c6f3a0e63f24661",
+  "observed": {
+    "pool_blocks": 809,
+    "null_blocks": 1,
+    "usable_blocks": 808,
+    "group_aware_capacity_token_equivalent": 1204968,
+    "max_length_capacity_requests": 36.77272727272727,
+    "max_model_len": 32768,
+    "max_num_seqs": 16,
+    "kv_reserved_bytes": 17179869184,
+    "mamba_cache_mode": "align",
+    "speculative_config": null,
+    "kv_connector_default": "None; no launch flag; frozen config default None"
+  },
+  "derived": {
+    "unique_per_full_length_request_block_cost": 22,
+    "max_live_request_blocks_at_16": 352,
+    "reported_usage_bound_regular_standalone_percent": 43.56435643564357,
+    "minimum_full_length_unshared_requests_for_90pct": 34
+  },
+  "source_anchors": {
+    "vllm/v1/core/kv_cache_utils.py": "1051-1073;2294-2320",
+    "vllm/v1/core/sched/scheduler.py": "136;155-183;865-868;1313;1401-1406;2750-2789;2932",
+    "vllm/v1/core/kv_cache_manager.py": "210-216;474-509",
+    "vllm/v1/core/block_pool.py": "720-758;815-834",
+    "vllm/config/vllm.py": "405"
+  },
+  "conditions": [
+    "Regular standalone request accounting, no KV connector; launch/default source checked.",
+    "Upstream group-aware per-request maximum block cost; no speculative configuration.",
+    "Lookahead allocation capped at max_model_len in allocate_slots.",
+    "No connector means defer_block_free remains False; same-step CoW retentions released before reported scheduler stats.",
+    "Released cache blocks with reference count zero are on free queue and excluded from reported usage."
+  ],
+  "limits": [
+    "Analytic bound from frozen source and live configuration, not an empirical saturation maximum.",
+    "Transient internal allocator states, bugs, connectors or changed profiles are outside this bound.",
+    "Token-equivalent capacity is not exact resident attention token count.",
+    "16 GiB is already reserved; the Grafana percentage means non-reclaimable block fraction, not unallocated HBM.",
+    "8 repeated initial prefixes are an input property, not the sole proven cause of low occupancy."
+  ],
+  "source_hashes": {
+    "vllm/v1/core/kv_cache_manager.py": "ef312a280a1746ca4adc8516d87a05b3c8b331a18015e20758513a33efc7421f",
+    "vllm/v1/core/kv_cache_coordinator.py": "5a74c5eccbdf1b6d37d0611df989179b44b8be1ec2d50f13c013ac113d8ca00a",
+    "vllm/v1/core/kv_cache_utils.py": "70e289eb278f96bd4a49f63f7d96d533ec2f2728fbefb734ce6eb2a244c2569f",
+    "vllm/v1/core/block_pool.py": "709b67ebcd2ee393654c3a875f8ecb360b22bcd10f43503be078e692dd38fc20",
+    "vllm/v1/core/sched/scheduler.py": "50e7cea25eea05fa192bdd99f30e990f45c499eb327c42b247bf61220d7b64b7",
+    "vllm/v1/core/single_type_kv_cache_manager.py": "7f41ce5c32867bf76e7b6acf84b7f6b7f9cc8d75d036ce6a403bbf1953fb9e34",
+    "vllm/v1/kv_cache_interface.py": "2aeab89d2aefbe93924167c3ff877f2a50fc64611c4d7a590e8fa825bc43f154",
+    "vllm/v1/engine/core.py": "bc12ad6e1a03f242e322e0506462c456c584dd3346f1a11413a9f51094c2049e",
+    "vllm/v1/core/sched/async_scheduler.py": "e586a0ef3c6778be56a93e7f9bb712d4de9de6e7d7fe7e3e1d51dae83ecfc508",
+    "vllm/v1/executor/abstract.py": "97791426b549e4447c967f8b8e668c2e376c6a75fa7091fd9df11bc9dafb65f7",
+    "vllm/v1/executor/multiproc_executor.py": "3ed0149a8a8e1550c4f062af40e645d1b734e70f99981bc5bf15f0360507648a",
+    "vllm/config/vllm.py": "52c6479ac939eb99735d72dc6d47f89e8d17f17b5edf37cee70ff12ff18ddbd0"
+  },
+  "raw_evidence_sha256": {
+    "kv-live-health-private.json": "7466ea7ab3d8f700aa091d4b1e2fa653c961c827b6f85b74578c3151c6077cb8",
+    "kv-launch-and-default-source-private.json": "e71e8e06e49152aedfa457ad5a76bf8e16146564b5e0a3f843af44d2879c65cb",
+    "mixed-kv-capacity-source-private.json": "3d7c90bf4709fe2098bc87d99ccd2e5fcdbac889c00cc6d5265b7a9633729336",
+    "mixed-kv-capacity-extra-source-private.json": "11d9ff1d87be265fd987e7336114267c60059c29a362826797b025b7debd4fa0"
+  }
+}
