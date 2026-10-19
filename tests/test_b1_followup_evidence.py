@@ -55,7 +55,8 @@ def test_followup_evidence(candidate, seats, tmp_path):
         assert control["engine_salt_admissions"] >= 200
 
 
-def test_publication_is_derived_from_evidence_and_selects_each_metric():
+def test_publication_is_derived_from_evidence_and_selects_each_metric(monkeypatch):
+    monkeypatch.syspath_prepend(str(REPORT))
     path = (
         REPORT.parents[1]
         / "leaderboard-data/dataset-validation/dataset_validation_qwen35_mmlu_school028_inf_out256.json"
@@ -70,7 +71,7 @@ def test_publication_is_derived_from_evidence_and_selects_each_metric():
     assert not saved["scenario"]["accuracy_evaluated"]
     assert len(saved["results"]) == 3
     for cell in saved["results"]:
-        assert len(cell["candidate_values"]) == 5
+        assert len(cell["candidate_values"]) == 6
         values = [row["value"] for row in cell["candidate_values"]]
         expected = (
             max if cell["comparison"]["direction"] == "higher_is_better" else min

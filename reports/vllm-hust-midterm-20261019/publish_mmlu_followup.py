@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from microflow_candidate import RUN as MICROFLOW_RUN, load as load_microflow
+
 
 REPORT = Path(__file__).resolve().parent
 DEST = REPORT.parents[1] / "leaderboard-data/dataset-validation"
@@ -68,6 +70,19 @@ def build(evidence_commit):
                 )
             )
 
+    microflow, measured = load_microflow()
+    sources.append("microflow-school028/summary.json")
+    ended.extend(row["ended"] for row in microflow["runs"])
+    arms.append(
+        (
+            "microflow-fa-median",
+            "vLLM-HUST E24/R36 + KV recompute + FA Microflow (median of 3 starts)",
+            measured,
+            MICROFLOW_RUN,
+            "exercised",
+        )
+    )
+
     def provenance(run):
         return {
             "repository": "vLLM-HUST/vllm-hust-benchmark",
@@ -94,6 +109,13 @@ def build(evidence_commit):
         selected = (max if direction == "higher" else min)(
             candidates, key=lambda row: row["value"]
         )
+        if selected["candidate_id"] == "microflow-fa-median":
+            key = {
+                "output_token_throughput": "output_throughput",
+                "ttft_mean": "mean_ttft_ms",
+                "tpot_mean": "mean_tpot_ms",
+            }[metric]
+            assert microflow["improves_current_best_per_metric"][key]
         improved = (
             selected["value"] > baseline
             if direction == "higher"
@@ -113,12 +135,12 @@ def build(evidence_commit):
                 "comparison": {
                     "direction": f"{direction}_is_better",
                     "trend": "improved" if improved else "regressed",
-                    "selection": "Best measured service-performance value per metric; not a joint deployment result",
+                    "selection": "Best measured service-performance value per metric; FA Microflow uses the median of 3 independent starts; not a joint deployment result",
                 },
                 "provenance": selected["provenance"],
                 "baseline_provenance": provenance("mmlu-b0-r2"),
-                "note": "Sequential single-TP2 services on the same device: 200 requests, out256, infinite arrival rate. Service performance measured. Task accuracy was not rescored. Each metric selects its own configuration. The KV candidate tests request-scoped recompute only; partial reuse was not exercised.",
-                "note_zh": "同机单TP2服务，200请求、out256、无限到达率；B0与候选顺序运行。已完成服务性能测量，未重评任务正确率。各指标分别选择，配置见报告。KV候选仅验证逐请求重算，分段复用未执行。",
+                "note": "Sequential TP2 services: 200 requests per run, out256, infinite arrival. FA Microflow uses the median of 3 independent ON starts and matched OFF controls with the same initial compiler-cache snapshot; small differences are not claims of statistical significance. Task accuracy was not rescored. Each metric selects its own configuration. KV recompute only; partial reuse and GDN Microflow were not exercised.",
+                "note_zh": "同机单TP2服务，每轮200请求、out256、无限到达率。FA Microflow取3次独立ON运行的中位数，配对OFF使用相同初始编译缓存快照；小幅差异不代表统计显著性。未重评任务正确率，各指标分别选择配置。KV仅逐请求重算，分段复用和GDN Microflow未执行。",
             }
         )
     return {

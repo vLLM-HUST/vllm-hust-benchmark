@@ -55,17 +55,17 @@ token/秒。完整结果、各指标选择与控制证据见报告5.4节和`b1-c
 固定输入为200个独立单轮请求，实际输入925至2,502 token，输出均为256 token。保持既有每卡20 GiB状态、8 GiB
 host缓存、TP2和原始到达时序。不能通过增加program身份、重复前缀、缩减缓存或延长输出，把其他工作负载结果冒充本工况补测。
 
-| MOD                   | 最新实现/约束                                                                                      | 本工况决策                                                                             |
-| --------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Prefill Microflow     | 明确为BetterScale联合扩展；宿主按源文件字节固定，文档明确学校0.28须单独移植；FA分片有组件级收益    | 有潜力的后续算子候选；尚缺本栈适配和整模型质量验证，不绕过源码检查直接启用             |
-| Split-Batch / Cascade | Cascade和dual-pad在speculative_config存在时拒绝多查询行路径                                        | 当前MTP2组合不触发；需要支持MTP验证行后再作为同组合候选                                |
-| KVCompress            | 当前主线宿主范围0.29，另有精确0.23旧栈；推荐Qwen配置输出guard为2,048、KV预算4,608                  | 本栈需适配，且本轮短输入/out256不触发推荐压缩；不改负载或强压缩制造测点                |
-| PyramidKV             | 依赖KVCompress共享适配器；其MMLU五样本配置已明确低于4,096 gate                                     | 当前输入最长2,502，缺少该配置的控制机会；不作为预计提升候选                            |
-| PegaFlow              | 外部KV存储/connector；当前实测BetterScale `LiveStateScheduler.__init__`明确要求`connector is None` | 不能直接叠加；后续需协同缓存所有权或独立同预算部署验收                                 |
-| BidKV                 | 当前typed preemption API在学校宿主存在；只改变池满后的victim选择                                   | 既有KV测量日志页池占用约3%至4%，没有抢占瓶颈证据，暂缓设备补测；不是宣布其不兼容或无效 |
-| DLA                   | 当前README明确真实候选缺少predicted_length，策略弃权                                               | 需预测输入与候选传递真正接通后再验证控制；本轮不填优化值                               |
-| Request Throttling    | 默认实现普通无program身份请求直接旁路                                                              | 原请求未提供program身份，不能新增身份改变工作负载后比较；本轮不宣称调度收益            |
-| Hybrid Spec           | import_only，无serving patch，执行计划execution_ready=false                                        | 尚无NPU实现可测；保留研发候选，不作为已启用方案                                        |
+| MOD                   | 最新实现/约束                                                                                      | 本工况决策                                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Prefill Microflow     | 已完成学校0.28的FA-only适配、双rank同分片一致性与真实target图重放核验                              | 已完成三组同负载OFF/ON；中位数及完整证据见5.5节与`microflow-school028/summary.json`。GDN移植及任务质量评分未完成 |
+| Split-Batch / Cascade | Cascade和dual-pad在speculative_config存在时拒绝多查询行路径                                        | 当前MTP2组合不触发；需要支持MTP验证行后再作为同组合候选                                                          |
+| KVCompress            | 当前主线宿主范围0.29，另有精确0.23旧栈；推荐Qwen配置输出guard为2,048、KV预算4,608                  | 本栈需适配，且本轮短输入/out256不触发推荐压缩；不改负载或强压缩制造测点                                          |
+| PyramidKV             | 依赖KVCompress共享适配器；其MMLU五样本配置已明确低于4,096 gate                                     | 当前输入最长2,502，缺少该配置的控制机会；不作为预计提升候选                                                      |
+| PegaFlow              | 外部KV存储/connector；当前实测BetterScale `LiveStateScheduler.__init__`明确要求`connector is None` | 不能直接叠加；后续需协同缓存所有权或独立同预算部署验收                                                           |
+| BidKV                 | 当前typed preemption API在学校宿主存在；只改变池满后的victim选择                                   | 既有KV测量日志页池占用约3%至4%，没有抢占瓶颈证据，暂缓设备补测；不是宣布其不兼容或无效                           |
+| DLA                   | 当前README明确真实候选缺少predicted_length，策略弃权                                               | 需预测输入与候选传递真正接通后再验证控制；本轮不填优化值                                                         |
+| Request Throttling    | 默认实现普通无program身份请求直接旁路                                                              | 原请求未提供program身份，不能新增身份改变工作负载后比较；本轮不宣称调度收益                                      |
+| Hybrid Spec           | import_only，无serving patch，执行计划execution_ready=false                                        | 尚无NPU实现可测；保留研发候选，不作为已启用方案                                                                  |
 
 设备补测选择E24/R36 + KV
 materialization逐请求重算，原因是执行宽度与KV控制分别已有同输入的实测依据，且不引入缓存所有权冲突。该项是已适配MOD的组合补测，不代表上述9个MOD均完成运行测试。原E16 +

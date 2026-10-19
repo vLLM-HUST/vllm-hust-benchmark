@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from microflow_candidate import LABEL as MICROFLOW_LABEL, load as load_microflow
+
 
 ROOT = Path(__file__).resolve().parent
 BEGIN = "<!-- BEGIN B1_FOLLOWUP -->"
@@ -23,6 +25,8 @@ def render():
         screens[key] = screen
         if screen["status"] == "measured":
             arms[label] = screen["measured"]
+    microflow, measured = load_microflow()
+    arms[MICROFLOW_LABEL] = measured
     best = {
         "output_throughput": max(arms, key=lambda key: arms[key]["output_tps"]),
         "mean_ttft": min(arms, key=lambda key: arms[key]["ttft_s"]["mean"]),
@@ -70,9 +74,9 @@ def render():
             "",
         ]
     lines += [
-        "本轮为单次独立候选筛选，结果描述已测服务性能，不代表多次重复的统计显著性或任务质量等价。每轮输出均为51,200 token；原始SSE计时、MTP计数、设备采样、启动与释放回执及源码哈希随归档保留。任务正确率未重新评分。",
+        "E16/E32/E24与KV候选为单次独立筛选；FA Microflow行采用三次独立ON运行统计量的中位数，共600个成功请求，配对结果见5.5节。各轮均输出51,200 token；原始SSE计时、MTP计数、设备采样、启动与释放回执及源码哈希随归档保留。结果不代表统计显著性或任务质量等价，任务正确率未重新评分。",
         "",
-        "另完成9个MOD默认分支的源码准入审计，完整commit、合同与实现摘要见`B1-CANDIDATE-AUDIT.md`及`b1-mod-source-audit.json`。Prefill Microflow尚需学校0.28适配；PegaFlow与当前State调度器的connector约束冲突；本轮短输入/out256不满足所审查压缩配置的触发条件。上述未运行方案不计作实测候选。",
+        "另完成9个MOD默认分支的源码准入审计，完整commit、合同与实现摘要见`B1-CANDIDATE-AUDIT.md`及`b1-mod-source-audit.json`。Prefill Microflow的学校0.28 FA适配及补测见5.5节，未包含GDN移植；PegaFlow与当前State调度器的connector约束冲突；本轮短输入/out256不满足所审查压缩配置的触发条件。未运行方案不计作实测候选。",
         END,
     ]
     for key, label in [
@@ -82,7 +86,7 @@ def render():
     ]:
         screens[key]["selected_as_b1"] = best["output_throughput"] == label
         screens[key]["selection_scope"] = (
-            "Current measured output throughput among E16, E32, E24, KV E16 and KV E24 candidates; task accuracy not rescored"
+            "Current measured output throughput among E16, E32, E24, KV E16, KV E24 and repeated FA Microflow candidates; task accuracy not rescored"
         )
         (ROOT / f"b1-{key}-screen.json").write_text(
             json.dumps(screens[key], indent=2) + "\n"
@@ -100,7 +104,7 @@ def render():
         + "\n"
     )
     report = ROOT / "中期测试报告.md"
-    text = report.read_text().replace("报告版本：V0.7", "报告版本：V0.8")
+    text = report.read_text().replace("报告版本：V0.8", "报告版本：V0.9")
     section = "\n".join(lines)
     if BEGIN in text:
         text = text[: text.index(BEGIN)] + section + text[text.index(END) + len(END) :]

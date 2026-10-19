@@ -1,0 +1,354 @@
+{
+  "schema": "microflow-school028-pair-screen/v1",
+  "project": "vLLM-HUST",
+  "scope": "FA-only service performance screen",
+  "workload": "MMLU-Pro, original 200-request burst, infinite arrival, out256",
+  "input_sha256": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+  "configuration": "Qwen3.5-35B-A3B BF16 TP2 EP-off E24/R36 ctx64k APC MTP2 FULL async, 20GiB state and 8GiB host per rank",
+  "independent_pairs": 3,
+  "quality_rescored": false,
+  "aggregation": "Median and full range of all three starts per arm; geometric mean of paired ON/OFF throughput ratios",
+  "aggregates": {
+    "off": {
+      "output_throughput": {
+        "median": 812.3247666270136,
+        "min": 809.7579145570764,
+        "max": 818.2841237891909
+      },
+      "mean_ttft_ms": {
+        "median": 28838.1333584385,
+        "min": 28495.633663074113,
+        "max": 28887.776130829006
+      },
+      "mean_tpot_ms": {
+        "median": 26.65235412739875,
+        "min": 26.381150529665103,
+        "max": 26.774318246791758
+      },
+      "p99_tpot_ms": {
+        "median": 34.703898872522736,
+        "min": 33.64072227079932,
+        "max": 35.09407262007394
+      },
+      "p99_tpot_nearest_ms": {
+        "median": 34.696554936760776,
+        "min": 33.6393789516068,
+        "max": 35.07667973856716
+      }
+    },
+    "on": {
+      "output_throughput": {
+        "median": 824.8946090250279,
+        "min": 823.0883691142881,
+        "max": 825.8134064605133
+      },
+      "mean_ttft_ms": {
+        "median": 28129.14797556121,
+        "min": 28129.090266688727,
+        "max": 28300.552457463928
+      },
+      "mean_tpot_ms": {
+        "median": 26.103699724372554,
+        "min": 25.97199201578384,
+        "max": 26.111934023270127
+      },
+      "p99_tpot_ms": {
+        "median": 33.5185692715002,
+        "min": 33.1544173773305,
+        "max": 34.185092684137175
+      },
+      "p99_tpot_nearest_ms": {
+        "median": 33.50378743500686,
+        "min": 33.146280777074544,
+        "max": 34.17927837912359
+      }
+    }
+  },
+  "paired_throughput_ratios": [
+    1.0166049840995346,
+    1.0080784718212865,
+    1.0164622713993516
+  ],
+  "verifier_sha256": "5e87cf3689291def0f2299843e4256fee6a13ba5f5b1a795bfc5194c2ce9c775",
+  "current_throughput_b1_run": "mmlu-b1-kvmat-e24-r36-screen-r1",
+  "current_throughput_b1_metrics": {
+    "output_throughput": 823.8802491417858,
+    "mean_ttft_ms": 28257.483783122152,
+    "mean_tpot_ms": 26.27448284580354,
+    "p99_tpot_ms": 34.80127495428657,
+    "p99_tpot_nearest_ms": 34.800143433990435
+  },
+  "current_best_per_metric": {
+    "output_throughput": 823.8802491417858,
+    "mean_ttft_ms": 28257.483783122152,
+    "mean_tpot_ms": 21.017554329562127
+  },
+  "improves_current_best_per_metric": {
+    "output_throughput": true,
+    "mean_ttft_ms": true,
+    "mean_tpot_ms": false
+  },
+  "runs": [
+    {
+      "pair_index": 1,
+      "mode": "off",
+      "verification": {
+        "run_id": "mmlu-b1-microflow-fa-off-r4",
+        "active": false,
+        "scope": "FA-only service performance screen",
+        "quality_rescored": false,
+        "source_commit": "f7ab240381a0e10a4a13f4ee04598cb822db6fdd",
+        "requests": 200,
+        "failures": 0,
+        "kv_policy_engine_admissions": 200,
+        "shutdown_exit_code": 130,
+        "output_tps": 812.3247666270136,
+        "change_vs_current_b1_pct": -1.402568216292277,
+        "bounded_text_matches_vs_current_b1": 38,
+        "ranks": [
+          {
+            "rank": 0,
+            "split_shape_replays": 93,
+            "captured_target_layers": 0
+          },
+          {
+            "rank": 1,
+            "split_shape_replays": 93,
+            "captured_target_layers": 0
+          }
+        ]
+      },
+      "metrics": {
+        "output_throughput": 812.3247666270136,
+        "mean_ttft_ms": 28838.1333584385,
+        "mean_tpot_ms": 26.774318246791758,
+        "p99_tpot_ms": 33.64072227079932,
+        "p99_tpot_nearest_ms": 33.6393789516068
+      },
+      "duration_seconds": 63.02897819131613,
+      "ended": 1792424746.7762487,
+      "raw_sha256": "8f0fe083e0aaf92f4c0f469da70573accd47f9ee572ecc90f8654ec59201fcb7",
+      "archive": "mmlu-b1-microflow-fa-off-r4-evidence.tar.gz",
+      "archive_sha256": "275ddfdc463f6e740e5d54b4717f1e835910e096da2a18062060f32c023eff8a",
+      "startup_foreign_context_observations": []
+    },
+    {
+      "pair_index": 1,
+      "mode": "on",
+      "verification": {
+        "run_id": "mmlu-b1-microflow-fa-on-r9",
+        "active": true,
+        "scope": "FA-only service performance screen",
+        "quality_rescored": false,
+        "source_commit": "f7ab240381a0e10a4a13f4ee04598cb822db6fdd",
+        "requests": 200,
+        "failures": 0,
+        "kv_policy_engine_admissions": 200,
+        "shutdown_exit_code": 130,
+        "output_tps": 825.8134064605133,
+        "change_vs_current_b1_pct": 0.2346405707311483,
+        "bounded_text_matches_vs_current_b1": 32,
+        "ranks": [
+          {
+            "rank": 0,
+            "split_shape_replays": 85,
+            "captured_target_layers": 10
+          },
+          {
+            "rank": 1,
+            "split_shape_replays": 85,
+            "captured_target_layers": 10
+          }
+        ]
+      },
+      "metrics": {
+        "output_throughput": 825.8134064605133,
+        "mean_ttft_ms": 28129.14797556121,
+        "mean_tpot_ms": 25.97199201578384,
+        "p99_tpot_ms": 34.185092684137175,
+        "p99_tpot_nearest_ms": 34.17927837912359
+      },
+      "duration_seconds": 61.999477847479284,
+      "ended": 1792425219.5457065,
+      "raw_sha256": "a64fd63315227893a4bd48781a030dde3b23026d17cc0ef3c02fc2e10a4fb872",
+      "archive": "mmlu-b1-microflow-fa-on-r9-evidence.tar.gz",
+      "archive_sha256": "18b2e07bf07eb0ff98bcf824bb7bfc490330a6ddb17f2e347c6083b0c5a03f7c",
+      "startup_foreign_context_observations": []
+    },
+    {
+      "pair_index": 2,
+      "mode": "off",
+      "verification": {
+        "run_id": "mmlu-b1-microflow-fa-off-r5",
+        "active": false,
+        "scope": "FA-only service performance screen",
+        "quality_rescored": false,
+        "source_commit": "f7ab240381a0e10a4a13f4ee04598cb822db6fdd",
+        "requests": 200,
+        "failures": 0,
+        "kv_policy_engine_admissions": 200,
+        "shutdown_exit_code": 130,
+        "output_tps": 818.2841237891909,
+        "change_vs_current_b1_pct": -0.6792401393799996,
+        "bounded_text_matches_vs_current_b1": 29,
+        "ranks": [
+          {
+            "rank": 0,
+            "split_shape_replays": 85,
+            "captured_target_layers": 0
+          },
+          {
+            "rank": 1,
+            "split_shape_replays": 85,
+            "captured_target_layers": 0
+          }
+        ]
+      },
+      "metrics": {
+        "output_throughput": 818.2841237891909,
+        "mean_ttft_ms": 28495.633663074113,
+        "mean_tpot_ms": 26.381150529665103,
+        "p99_tpot_ms": 34.703898872522736,
+        "p99_tpot_nearest_ms": 34.696554936760776
+      },
+      "duration_seconds": 62.56995401903987,
+      "ended": 1792425743.2302113,
+      "raw_sha256": "95d6fa94a1014eb8abd326c8d2f8b1c2fc353d1f1d5f9a26a722d805d12e04a7",
+      "archive": "mmlu-b1-microflow-fa-off-r5-evidence.tar.gz",
+      "archive_sha256": "709413ac3c8470f3cf87de0b02fbdc2aff4f95212868e1c4528127a1e061aa8f",
+      "startup_foreign_context_observations": []
+    },
+    {
+      "pair_index": 2,
+      "mode": "on",
+      "verification": {
+        "run_id": "mmlu-b1-microflow-fa-on-r10",
+        "active": true,
+        "scope": "FA-only service performance screen",
+        "quality_rescored": false,
+        "source_commit": "f7ab240381a0e10a4a13f4ee04598cb822db6fdd",
+        "requests": 200,
+        "failures": 0,
+        "kv_policy_engine_admissions": 200,
+        "shutdown_exit_code": 130,
+        "output_tps": 824.8946090250279,
+        "change_vs_current_b1_pct": 0.12311982042276792,
+        "bounded_text_matches_vs_current_b1": 41,
+        "ranks": [
+          {
+            "rank": 0,
+            "split_shape_replays": 83,
+            "captured_target_layers": 10
+          },
+          {
+            "rank": 1,
+            "split_shape_replays": 83,
+            "captured_target_layers": 10
+          }
+        ]
+      },
+      "metrics": {
+        "output_throughput": 824.8946090250279,
+        "mean_ttft_ms": 28300.552457463928,
+        "mean_tpot_ms": 26.111934023270127,
+        "p99_tpot_ms": 33.5185692715002,
+        "p99_tpot_nearest_ms": 33.50378743500686
+      },
+      "duration_seconds": 62.06853510718793,
+      "ended": 1792426210.0131073,
+      "raw_sha256": "ba43b6fd407c13ec09c7a52c367344ff1560058a7edd88da41cbb37f9ce77e60",
+      "archive": "mmlu-b1-microflow-fa-on-r10-evidence.tar.gz",
+      "archive_sha256": "0f8616f4e2c64ccec86b42756713ea10b53da4f55812e0e2860519de5401b0c5",
+      "startup_foreign_context_observations": []
+    },
+    {
+      "pair_index": 3,
+      "mode": "off",
+      "verification": {
+        "run_id": "mmlu-b1-microflow-fa-off-r6",
+        "active": false,
+        "scope": "FA-only service performance screen",
+        "quality_rescored": false,
+        "source_commit": "f7ab240381a0e10a4a13f4ee04598cb822db6fdd",
+        "requests": 200,
+        "failures": 0,
+        "kv_policy_engine_admissions": 200,
+        "shutdown_exit_code": 130,
+        "output_tps": 809.7579145570764,
+        "change_vs_current_b1_pct": -1.714124667925987,
+        "bounded_text_matches_vs_current_b1": 30,
+        "ranks": [
+          {
+            "rank": 0,
+            "split_shape_replays": 81,
+            "captured_target_layers": 0
+          },
+          {
+            "rank": 1,
+            "split_shape_replays": 81,
+            "captured_target_layers": 0
+          }
+        ]
+      },
+      "metrics": {
+        "output_throughput": 809.7579145570764,
+        "mean_ttft_ms": 28887.776130829006,
+        "mean_tpot_ms": 26.65235412739875,
+        "p99_tpot_ms": 35.09407262007394,
+        "p99_tpot_nearest_ms": 35.07667973856716
+      },
+      "duration_seconds": 63.228773784823716,
+      "ended": 1792426674.7640839,
+      "raw_sha256": "36555d77a6a732ccaa13b7aca62d17b6a2d6951a46dc78171410d3c59f205e3d",
+      "archive": "mmlu-b1-microflow-fa-off-r6-evidence.tar.gz",
+      "archive_sha256": "fc61af04eea39d232a1d9e85a9b1040000c55d64096e1ae645ae00c21d0e3043",
+      "startup_foreign_context_observations": []
+    },
+    {
+      "pair_index": 3,
+      "mode": "on",
+      "verification": {
+        "run_id": "mmlu-b1-microflow-fa-on-r11",
+        "active": true,
+        "scope": "FA-only service performance screen",
+        "quality_rescored": false,
+        "source_commit": "f7ab240381a0e10a4a13f4ee04598cb822db6fdd",
+        "requests": 200,
+        "failures": 0,
+        "kv_policy_engine_admissions": 200,
+        "shutdown_exit_code": 130,
+        "output_tps": 823.0883691142881,
+        "change_vs_current_b1_pct": -0.09611591348653858,
+        "bounded_text_matches_vs_current_b1": 36,
+        "ranks": [
+          {
+            "rank": 0,
+            "split_shape_replays": 82,
+            "captured_target_layers": 10
+          },
+          {
+            "rank": 1,
+            "split_shape_replays": 82,
+            "captured_target_layers": 10
+          }
+        ]
+      },
+      "metrics": {
+        "output_throughput": 823.0883691142881,
+        "mean_ttft_ms": 28129.090266688727,
+        "mean_tpot_ms": 26.103699724372554,
+        "p99_tpot_ms": 33.1544173773305,
+        "p99_tpot_nearest_ms": 33.146280777074544
+      },
+      "duration_seconds": 62.20474243257195,
+      "ended": 1792427148.5377004,
+      "raw_sha256": "aa3acf9278e39d42828fc5ab1648f67a13fa2cc553c65505ecbaea45db002e19",
+      "archive": "mmlu-b1-microflow-fa-on-r11-evidence.tar.gz",
+      "archive_sha256": "d41b99de02b9d38b13b786edb8456768d307484fdc98bc0397bf8a616b779495",
+      "startup_foreign_context_observations": []
+    }
+  ],
+  "on_vs_off_throughput_pct": 1.370739036504065,
+  "on_vs_current_throughput_b1_pct": 0.12311982042276792,
+  "promote_throughput_candidate": true
+}

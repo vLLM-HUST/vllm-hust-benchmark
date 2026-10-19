@@ -1,0 +1,14 @@
+{
+  "scope": "Same-input MMLU-Pro FA-only service performance screen",
+  "planned_independent_pairs": 3,
+  "pairs": [
+    ["mmlu-b1-microflow-fa-off-r4", "mmlu-b1-microflow-fa-on-r9"],
+    ["mmlu-b1-microflow-fa-off-r5", "mmlu-b1-microflow-fa-on-r10"],
+    ["mmlu-b1-microflow-fa-off-r6", "mmlu-b1-microflow-fa-on-r11"]
+  ],
+  "source_and_configuration": "Frozen identical inputs and payload hashes, independent processes and caches, common B1 compiler seed",
+  "aggregation": "Median and full range of all three starts per arm; geometric mean of paired ON/OFF throughput ratios",
+  "selection": "No highest-run selection. Compare median ON against existing per-metric B1; require matching favorable paired direction. Publish all runs and uncertainty limits.",
+  "quality_rescored": false,
+  "excluded": "Earlier incomplete, cold-cache and activation-diagnostic attempts are retained separately, not mixed into this cohort"
+}
