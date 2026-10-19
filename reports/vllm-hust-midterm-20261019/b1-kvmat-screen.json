@@ -1,0 +1,188 @@
+{
+  "schema": "b1-candidate-screen/v1",
+  "project": "vLLM-HUST",
+  "candidate": "E16/R36 plus KV materialization recompute, school runtime, MTP2 FULL APC async",
+  "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2",
+  "status": "measured",
+  "selected_as_b1": true,
+  "quality_rescored": false,
+  "role": "Same-workload candidate screen; quality is not rescored",
+  "receipt": {
+    "arm": "b1",
+    "status": "measured",
+    "started": 1792415304.9891346,
+    "allocated_cards": 2,
+    "reserved_cards": 4,
+    "simultaneous_other_services": 0,
+    "protocol": "original MMLU 200-request burst, output 256, infinite arrival rate",
+    "measurement_role": "E16/R36 plus KV materialization recompute-only screen; same MMLU input and resource budget",
+    "input_hashes": {
+      "measure_kvmat.py": "1359202719635f7c81454770d9f2fbba4b83e4ea0e8c83f4fee9cdaeb0ad1dd4",
+      "baseline.py": "dca1288652eb73e50766128288bafdace46af8a2bb9cb8bed33c1c8394e86688",
+      "baseline.sh": "6229595f155329ef0a05565f378d36e108b48827576f9dc7711cb495b4a73188",
+      "runtime-kvmat.sh": "f31f1312ce4d8d2494b69fd86f8cf1f8f53d737a0f9571400a3e65be07ac8bb7",
+      "launch_kvmat.py": "efd51e3c42103570d97b3403255f86d32cdd02d7e96eea3c3c01cbc5b03faaf0",
+      "serve-kvmat.sh": "4f04f3ef210fb029fd888b909d1a99fdf85425a3755b64062491f90528f1d6e3",
+      "kvmat-source-receipt.json": "185630d1fad04291a9cf0b205bc126427758634cde8c63fadad2a2b50fe88906",
+      "seal_kvmat_payload.py": "4c4d0cf44a1c56e78d53b27e39c797a303763cbde62e8b01c2c70f17189c15be",
+      "kvmat-payload-r3/vllm_kv_materialization/school_vllm_028.py": "380569782d3dfd5e35c4872b54adba89cdfbbaaf8ad0dd80b231adaf2b804a41",
+      "kvmat-payload-r3/vllm_kv_materialization/plugin.py": "1f15df2cc82d1514a11611bb6b62516df1fe46b03f1ad0e5fa262a9edb300d73",
+      "kvmat-payload-r3/vllm_kv_materialization/live_control.py": "ed668d317072b33bc60cf597a3079767e57644e91c4929b1893c84ff327ff2cc",
+      "bench.sh": "4ceaf51415c426c8f1d2157ca478a382ab6fd6028a2a34f81c89bff3a80cf2e9",
+      "materialized.200.jsonl": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+      "payload-receipt.json": "c2079ded7c2922c55a32e27af3eaed39e00432f7bfa39efe54a35cdfdbdfefa7",
+      "compat/sitecustomize.py": "7df78275495234eafd486e7a1fbb7b5ce7e030c4ff27f8806b05283cebec3cb4",
+      "compat/triton_compat.py": "49deb71d6db6b0c41de82e987c0a28b5ff0c942ec2a270f0dd5a7adc07c6ca28",
+      "kvmat-payload-r3/vllm_kv_materialization/__init__.py": "6da2da4971f2f796cdbb726f918101780d7ef0da99c3334b1865d25f053c0a78",
+      "kvmat-payload-r3/vllm_kv_materialization/launcher.py": "ff266e65d546dbd7dd0aa96732bee7fdb3ad4b554993aef5b6122656b6928539",
+      "kvmat-payload-r3/vllm_kv_materialization/legacy_vllm_023.py": "a31c2901d321102aa3001aaefb6cb384e23609b98a3fbb97e3a9efc4b5974614",
+      "kvmat-payload-r3/vllm_kv_materialization/offline_experiment.py": "ecfe1b8f4d8e907217de1a1c726d9d0b46188671bf7235a63ca54856fbc78aa1",
+      "kvmat-payload-r3/vllm_kv_materialization/offline_traces.py": "f1e32a91404c5819190c7f9c93d67a0bdbd90463a57e1e94e73c513dd4870957",
+      "kvmat-payload-r3/vllm_kv_materialization/policy.py": "85384d6dddbcaf6d4c93dfdd18003e9b461ddeed3b566b9428ac86ac7b9dcb1b",
+      "kvmat-payload-r3/vllm_kv_materialization/shared_workloads.py": "1d51e4dc9eb22530da90e350cc25cc032ae412da42e83c3c5f77bbe8f78e6d26",
+      "kvmat-payload-r3/vllm_kv_materialization/wavemat_seam_gate.py": "5786ef3dc1122a1c2a4613b8452cead63d4cbb9041d011b5692905c4078e4f53"
+    },
+    "service_pid": 3059011,
+    "bench_started_wall": 1792415637.8565266,
+    "bench_started_monotonic": 8131341.31421387,
+    "bench_exit_code": 0,
+    "bench_ended_wall": 1792415741.882516,
+    "bench_ended_monotonic": 8131445.340202315,
+    "output_throughput": 695.2506219597219,
+    "child_exit_codes": [
+      0,
+      0
+    ],
+    "ended": 1792415759.5976,
+    "all_devices_released": true
+  },
+  "bounded_output_comparison": {
+    "exact_matches_vs_e16": 38,
+    "denominator": 200,
+    "scope": "256-token output equality, not MMLU answer accuracy or quality equivalence"
+  },
+  "measured": {
+    "arm": "b1",
+    "requests": 200,
+    "failures": 0,
+    "benchmark_duration_s": 73.64250873401761,
+    "output_tokens": 51200,
+    "input_tokens": 282265,
+    "output_tps": 695.2506219597219,
+    "ttft_s": {
+      "n": 200,
+      "mean": 34.578142378162596,
+      "p95": 66.09830527659506,
+      "p99": 70.0812914930284,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 66.11366048394702,
+      "p99_linear": 70.08433602700009
+    },
+    "tpot_s": {
+      "n": 200,
+      "mean": 0.02101755432956213,
+      "p95": 0.024691172342236136,
+      "p99": 0.026449773891591557,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 0.024698406165721366,
+      "p99_linear": 0.026458214666402215
+    },
+    "timing": "Original vLLM bench SSE-chunk timing; reported P95/P99 use nearest rank; original linear estimates retained separately",
+    "allocated_card_seconds_per_output_token": 0.002876660497422563,
+    "reserved_card_seconds_per_output_token": 0.005753320994845126,
+    "lifecycle_allocated_card_seconds_per_output_token": 0.01775814318098128,
+    "request_span_s": 73.63945255894214,
+    "device_utilization": {
+      "4": {
+        "covered_seconds": 73.63945255894214,
+        "mean_ai_core_percent": 74.97671137978082,
+        "uncovered_seconds": 0.0
+      },
+      "5": {
+        "covered_seconds": 73.63945255894214,
+        "mean_ai_core_percent": 76.12896577726988,
+        "uncovered_seconds": 0.0
+      },
+      "6": {
+        "covered_seconds": 73.63945255894214,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      },
+      "7": {
+        "covered_seconds": 73.63945255894214,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      }
+    },
+    "speculative_decode": {
+      "spec_decode_acceptance_rate": 84.04818015187222,
+      "spec_decode_acceptance_length": 2.680963603037444,
+      "spec_decode_num_drafts": 19095,
+      "spec_decode_draft_tokens": 38190,
+      "spec_decode_accepted_tokens": 32098,
+      "spec_decode_per_position_acceptance_rates": [
+        0.9055773762765121,
+        0.7753862267609322
+      ]
+    }
+  },
+  "prior_candidate_run": "mmlu-b1-r2",
+  "prior_candidate_output_tps": 529.8082507533761,
+  "baseline_run": "mmlu-b0-r2",
+  "baseline_output_tps": 452.2929712200654,
+  "throughput_change_vs_prior_pct": 31.22683932745296,
+  "throughput_change_vs_baseline_pct": 53.71687516705721,
+  "control_evidence": {
+    "policy_observations": 200,
+    "engine_salt_admissions": 200,
+    "partial_reuse": "not-exercised",
+    "policy_engine_salts_match": true,
+    "engine_prompt_tokens": 282265,
+    "scope": "Request salt admission is not evidence of cache reuse or avoided computation"
+  },
+  "archive": {
+    "file": "b1-kvmat-screen-evidence.tar.gz",
+    "sha256": "90650cc6f57472278d2109a0969dbcdc211661e6ecc57649bd2d25616d5459c4",
+    "files": {
+      "baseline.py": "dca1288652eb73e50766128288bafdace46af8a2bb9cb8bed33c1c8394e86688",
+      "baseline.sh": "6229595f155329ef0a05565f378d36e108b48827576f9dc7711cb495b4a73188",
+      "bench.sh": "4ceaf51415c426c8f1d2157ca478a382ab6fd6028a2a34f81c89bff3a80cf2e9",
+      "compat/sitecustomize.py": "7df78275495234eafd486e7a1fbb7b5ce7e030c4ff27f8806b05283cebec3cb4",
+      "compat/triton_compat.py": "49deb71d6db6b0c41de82e987c0a28b5ff0c942ec2a270f0dd5a7adc07c6ca28",
+      "kvmat-payload-r3/vllm_kv_materialization/__init__.py": "6da2da4971f2f796cdbb726f918101780d7ef0da99c3334b1865d25f053c0a78",
+      "kvmat-payload-r3/vllm_kv_materialization/launcher.py": "ff266e65d546dbd7dd0aa96732bee7fdb3ad4b554993aef5b6122656b6928539",
+      "kvmat-payload-r3/vllm_kv_materialization/legacy_vllm_023.py": "a31c2901d321102aa3001aaefb6cb384e23609b98a3fbb97e3a9efc4b5974614",
+      "kvmat-payload-r3/vllm_kv_materialization/live_control.py": "ed668d317072b33bc60cf597a3079767e57644e91c4929b1893c84ff327ff2cc",
+      "kvmat-payload-r3/vllm_kv_materialization/offline_experiment.py": "ecfe1b8f4d8e907217de1a1c726d9d0b46188671bf7235a63ca54856fbc78aa1",
+      "kvmat-payload-r3/vllm_kv_materialization/offline_traces.py": "f1e32a91404c5819190c7f9c93d67a0bdbd90463a57e1e94e73c513dd4870957",
+      "kvmat-payload-r3/vllm_kv_materialization/plugin.py": "1f15df2cc82d1514a11611bb6b62516df1fe46b03f1ad0e5fa262a9edb300d73",
+      "kvmat-payload-r3/vllm_kv_materialization/policy.py": "85384d6dddbcaf6d4c93dfdd18003e9b461ddeed3b566b9428ac86ac7b9dcb1b",
+      "kvmat-payload-r3/vllm_kv_materialization/school_vllm_028.py": "380569782d3dfd5e35c4872b54adba89cdfbbaaf8ad0dd80b231adaf2b804a41",
+      "kvmat-payload-r3/vllm_kv_materialization/shared_workloads.py": "1d51e4dc9eb22530da90e350cc25cc032ae412da42e83c3c5f77bbe8f78e6d26",
+      "kvmat-payload-r3/vllm_kv_materialization/wavemat_seam_gate.py": "5786ef3dc1122a1c2a4613b8452cead63d4cbb9041d011b5692905c4078e4f53",
+      "kvmat-source-receipt.json": "185630d1fad04291a9cf0b205bc126427758634cde8c63fadad2a2b50fe88906",
+      "launch-kvmat-command.json": "36c3bf47f2c027c7da4a9531e9fd0cf09d4796c08712f91121c79fd5b0844145",
+      "launch_kvmat.py": "efd51e3c42103570d97b3403255f86d32cdd02d7e96eea3c3c01cbc5b03faaf0",
+      "materialized.200.jsonl": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+      "measure_kvmat.py": "1359202719635f7c81454770d9f2fbba4b83e4ea0e8c83f4fee9cdaeb0ad1dd4",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/SHA256SUMS": "19d649e62300fe9a19507d658115d2309df36ad369c48de1a41d98971bed0d2a",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/bench.log": "b1d1f2aa4aa8dffd94ce9ebb178d03a78ac9e900ee6c4a08d7f03ef133879395",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/device-samples.jsonl": "f1b86ae853672630fe229da961362f017aca4a93eac7c7a6afa564df3c0bf482",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/kvmat-engine.jsonl": "04399de9e029a8059efaa10848b1f97fd64f9e675fd83d184918776134269d30",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/kvmat-import.json": "3d2145518e21f5fff5807306a9e4a667d46c7abd0ed6a27e9e43561d929a9e5b",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/kvmat-policy.jsonl": "f863847c9223e74cf4b7a6f1f7478e24a9f72744390f203001f35ecd6b3c781d",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/mmlu-pro.json": "0b558eb46f8d37697e6bb37e9ad1618cfc7a51e40e8ff74f7b1fbede42ad05e0",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/npu-after.txt": "2b9d05e592fa6b3977c6e933d1b79cdd7ae04cac02fd8a09d56e391a67eb12d6",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/npu-before.txt": "352db2939ab19c327755c859df846bfcec839b9eb6c2e2def91aa9b55518893c",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/receipt.json": "32a8b8018682f47c7e5cbdf509b9f48d6f3c5ce1b84dcdc95c56a13b4a045325",
+      "mmlu-b1-kvmat-e16-r36-screen-r2/service.log": "819b18c582ff7d3944403fdbc6f519f81b346dcd1afcb2fa4f055b37d3c60445",
+      "payload-receipt.json": "c2079ded7c2922c55a32e27af3eaed39e00432f7bfa39efe54a35cdfdbdfefa7",
+      "runtime-kvmat.sh": "f31f1312ce4d8d2494b69fd86f8cf1f8f53d737a0f9571400a3e65be07ac8bb7",
+      "seal_kvmat_payload.py": "4c4d0cf44a1c56e78d53b27e39c797a303763cbde62e8b01c2c70f17189c15be",
+      "serve-kvmat.sh": "4f04f3ef210fb029fd888b909d1a99fdf85425a3755b64062491f90528f1d6e3"
+    }
+  },
+  "selection_scope": "Current measured output throughput among E16, E32, E24 and KV candidates; task accuracy not rescored"
+}

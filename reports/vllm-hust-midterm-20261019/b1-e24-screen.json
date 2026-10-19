@@ -1,0 +1,149 @@
+{
+  "schema": "b1-candidate-screen/v1",
+  "project": "vLLM-HUST",
+  "candidate": "E24/R36, school runtime, MTP2 FULL APC async",
+  "run_id": "mmlu-b1-e24-r36-screen-r2",
+  "status": "measured",
+  "selected_as_b1": false,
+  "quality_rescored": false,
+  "role": "Same-workload candidate screen; quality is not rescored",
+  "receipt": {
+    "arm": "b1",
+    "status": "measured",
+    "started": 1792414725.9340537,
+    "allocated_cards": 2,
+    "reserved_cards": 4,
+    "simultaneous_other_services": 0,
+    "protocol": "original MMLU 200-request burst, output 256, infinite arrival rate",
+    "measurement_role": "E24/R36 candidate screen; same MMLU input and resource budget",
+    "input_hashes": {
+      "measure_e24.py": "3c589bcf57f65fc940765068d91ac210e057bc397b633cd85c04f56fa226084b",
+      "baseline.py": "dca1288652eb73e50766128288bafdace46af8a2bb9cb8bed33c1c8394e86688",
+      "baseline.sh": "6229595f155329ef0a05565f378d36e108b48827576f9dc7711cb495b4a73188",
+      "runtime-e24.sh": "283bb89ae50486480f2768b482d2c655a091c2334e8d56bb67679ab830a46b3d",
+      "launch_e24.py": "30f023f5702f6a3c494bbe5815c4d93644e8d88944c05e786284ce348d649c23",
+      "bench.sh": "4ceaf51415c426c8f1d2157ca478a382ab6fd6028a2a34f81c89bff3a80cf2e9",
+      "materialized.200.jsonl": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+      "payload-receipt.json": "c2079ded7c2922c55a32e27af3eaed39e00432f7bfa39efe54a35cdfdbdfefa7",
+      "compat/sitecustomize.py": "7df78275495234eafd486e7a1fbb7b5ce7e030c4ff27f8806b05283cebec3cb4",
+      "compat/triton_compat.py": "49deb71d6db6b0c41de82e987c0a28b5ff0c942ec2a270f0dd5a7adc07c6ca28"
+    },
+    "service_pid": 3035922,
+    "bench_started_wall": 1792415109.8721478,
+    "bench_started_monotonic": 8130813.32983532,
+    "bench_exit_code": 0,
+    "bench_ended_wall": 1792415231.8877332,
+    "bench_ended_monotonic": 8130935.345419306,
+    "output_throughput": 561.5090924988154,
+    "child_exit_codes": [
+      0,
+      0
+    ],
+    "ended": 1792415245.6758344,
+    "all_devices_released": true
+  },
+  "bounded_output_comparison": {
+    "exact_matches_vs_e16": 25,
+    "denominator": 200,
+    "scope": "256-token output equality, not MMLU answer accuracy or quality equivalence"
+  },
+  "measured": {
+    "arm": "b1",
+    "requests": 200,
+    "failures": 0,
+    "benchmark_duration_s": 91.18285114876926,
+    "output_tokens": 51200,
+    "input_tokens": 282265,
+    "output_tps": 561.5090924988154,
+    "ttft_s": {
+      "n": 200,
+      "mean": 54.89249345631339,
+      "p95": 83.41675745416433,
+      "p99": 87.63288068864495,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 83.42389960247091,
+      "p99_linear": 87.6358725789003
+    },
+    "tpot_s": {
+      "n": 200,
+      "mean": 0.02914320322091454,
+      "p95": 0.04004278598974149,
+      "p99": 0.04680455681667024,
+      "p95_rank": 190,
+      "p99_rank": 198,
+      "p95_linear": 0.04005454297560979,
+      "p99_linear": 0.04682774318480753
+    },
+    "timing": "Original vLLM bench SSE-chunk timing; reported P95/P99 use nearest rank; original linear estimates retained separately",
+    "allocated_card_seconds_per_output_token": 0.0035618301229987993,
+    "reserved_card_seconds_per_output_token": 0.007123660245997599,
+    "lifecycle_allocated_card_seconds_per_output_token": 0.020302413310855628,
+    "request_span_s": 91.17944430932403,
+    "device_utilization": {
+      "4": {
+        "covered_seconds": 91.17944430932403,
+        "mean_ai_core_percent": 53.7368964383513,
+        "uncovered_seconds": 0.0
+      },
+      "5": {
+        "covered_seconds": 91.17944430932403,
+        "mean_ai_core_percent": 53.47656451200717,
+        "uncovered_seconds": 0.0
+      },
+      "6": {
+        "covered_seconds": 91.17944430932403,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      },
+      "7": {
+        "covered_seconds": 91.17944430932403,
+        "mean_ai_core_percent": 0.0,
+        "uncovered_seconds": 0.0
+      }
+    },
+    "speculative_decode": {
+      "spec_decode_acceptance_rate": 84.45676158453294,
+      "spec_decode_acceptance_length": 2.689135231690659,
+      "spec_decode_num_drafts": 19034,
+      "spec_decode_draft_tokens": 38068,
+      "spec_decode_accepted_tokens": 32151,
+      "spec_decode_per_position_acceptance_rates": [
+        0.9082694126300305,
+        0.7808658190606284
+      ]
+    }
+  },
+  "prior_candidate_run": "mmlu-b1-r2",
+  "prior_candidate_output_tps": 529.8082507533761,
+  "baseline_run": "mmlu-b0-r2",
+  "baseline_output_tps": 452.2929712200654,
+  "throughput_change_vs_prior_pct": 5.983455655958814,
+  "throughput_change_vs_baseline_pct": 24.14720728118731,
+  "archive": {
+    "file": "b1-e24-screen-evidence.tar.gz",
+    "sha256": "561ab1f204bdf8962dd231dd19b10e08c49dd463dd7ff9a7fd7fefb150722b90",
+    "files": {
+      "baseline.py": "dca1288652eb73e50766128288bafdace46af8a2bb9cb8bed33c1c8394e86688",
+      "baseline.sh": "6229595f155329ef0a05565f378d36e108b48827576f9dc7711cb495b4a73188",
+      "bench.sh": "4ceaf51415c426c8f1d2157ca478a382ab6fd6028a2a34f81c89bff3a80cf2e9",
+      "compat/sitecustomize.py": "7df78275495234eafd486e7a1fbb7b5ce7e030c4ff27f8806b05283cebec3cb4",
+      "compat/triton_compat.py": "49deb71d6db6b0c41de82e987c0a28b5ff0c942ec2a270f0dd5a7adc07c6ca28",
+      "launch-e24-command.json": "ead4ffb1507b3b0291476b67520072fda2633cef6adbd7e0712b8e91b50734d7",
+      "launch_e24.py": "30f023f5702f6a3c494bbe5815c4d93644e8d88944c05e786284ce348d649c23",
+      "materialized.200.jsonl": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+      "measure_e24.py": "3c589bcf57f65fc940765068d91ac210e057bc397b633cd85c04f56fa226084b",
+      "mmlu-b1-e24-r36-screen-r2/SHA256SUMS": "2865818fa6094983287620dc48e2514d53c341b25cfd2b48c19446471ce51696",
+      "mmlu-b1-e24-r36-screen-r2/bench.log": "dee69252bc30cf1e8e4068a587ff9c0c4ad923436bee8fd92c58bd1f51368ca6",
+      "mmlu-b1-e24-r36-screen-r2/device-samples.jsonl": "f8624d9e19386b2cea096d996b7f4271c494a39d6980fd30eeee4734ad42003b",
+      "mmlu-b1-e24-r36-screen-r2/mmlu-pro.json": "88862275f953d10f45756e086432ef30e967c298c089a8e23dd917df1dc369aa",
+      "mmlu-b1-e24-r36-screen-r2/npu-after.txt": "a1a45fb5a664e11834683b1ac029c0418013311c18c181d6ba4f4148c1173bea",
+      "mmlu-b1-e24-r36-screen-r2/npu-before.txt": "ca034499d70a5287eed850bacc1738497e6f158a7a0b0f4709bc3cbe56ddaf67",
+      "mmlu-b1-e24-r36-screen-r2/receipt.json": "6459bcbfafaf6e862727df5ab6df176743832d20456fd7d7d6b7cb2fe20c3e78",
+      "mmlu-b1-e24-r36-screen-r2/service.log": "1b764639bd56a3caba0e8c17e18edae705f0a1f3e70aa3d60582b7a2b3972c66",
+      "payload-receipt.json": "c2079ded7c2922c55a32e27af3eaed39e00432f7bfa39efe54a35cdfdbdfefa7",
+      "runtime-e24.sh": "283bb89ae50486480f2768b482d2c655a091c2334e8d56bb67679ab830a46b3d"
+    }
+  },
+  "selection_scope": "Current measured output throughput among E16, E32, E24 and KV candidates; task accuracy not rescored"
+}

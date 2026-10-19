@@ -11,6 +11,9 @@ B1定义为“当前已实测最优的vLLM-HUST优化方案”。按同工况、
 新增MMLU-Pro同机配对沿用原200条输入及学校栈优化配置，B0/B1各200成功、0失败。吞吐、平均TTFT、平均TPOT及请求区间资源成本达到内部阈值；P99
 TPOT与完整生命周期成本未改善。完整配置、统计边界和结果见主报告5.2节，数值由`aligned-mmlu-results.json`生成。
 
+E24/R36与KV
+materialization的同工况补测见5.4节。`b1-current-best.json`按指标记录当前已测最优配置；`publish_mmlu_followup.py`从原始结果摘要生成网页矩阵，吞吐与时延分别选择，不拼接为同一部署。原始输出与设备采样保留于两个`b1-*-screen-evidence.tar.gz`归档。`b1-admission-attempts.tar.gz`保留设备锁占用及端口尚未释放时的两次未启动回执，不计为测量结果。
+
 在本报告目录执行以下命令，可使用CPU在独立临时目录中复算：
 
 ```bash
