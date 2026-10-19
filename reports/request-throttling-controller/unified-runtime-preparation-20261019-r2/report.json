@@ -1,0 +1,71 @@
+{
+  "status": "FROZEN_RUNTIME_STAGED_AND_OFFICIAL_BOOTSTRAP_PASS",
+  "main_commit": "8c8e91adf588eef3e6d6ac4e2f79ae297f6529cf",
+  "installer_commit": "38fcfeb18c114673ca8e61947b1ddb0449b765ef",
+  "source_commits": [
+    {
+      "repository": "https://github.com/vLLM-HUST/vllm-hust",
+      "commit": "ce5e49034a40d34fe88d78e4707c629449c3a5a2",
+      "tag": "gennova-unified-graph-v1-20261019"
+    },
+    {
+      "repository": "https://github.com/vLLM-HUST/vllm-ascend-hust",
+      "commit": "a9dd32033c5669ba28976c9d208a69d762796ba9",
+      "tag": "gennova-unified-graph-v1-20261019"
+    }
+  ],
+  "file_manifest_sha256": "1da3091eb521a93f2cfba9e6604e1aa56092c8834cec65d86c2431a35cfcb936",
+  "verified_files": 4695,
+  "artifacts": {
+    "sdk213-r1-direct.tgz": {
+      "sha256": "c03e96929d7b061e5cd66aba22d02ba1cb2df270ddb7654f562f8c6202f2e805",
+      "bytes": 833333955
+    },
+    "runtime-build-support-v1.tar.gz": {
+      "sha256": "0da58f84b9cb3d81896672e1f2fb3b36070fef61197c605a5374dc766f72d88a",
+      "bytes": 20954207
+    }
+  },
+  "preparation_elapsed_s": 82.39243532437831,
+  "official_check_exit": 0,
+  "job_status": "SUCCEEDED",
+  "packages": {
+    "torch": "2.13.0+cpu",
+    "torch-npu": "2.13.0rc1",
+    "triton-ascend": "3.6.0",
+    "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+    "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27"
+  },
+  "loaded_source_files": {
+    "vllm": {
+      "relative_path": "host/vllm/__init__.py",
+      "sha256": "fd3708e5a13abe98c566afd79a6b1987cef70c0548bb19c1218ff6a7f9d43346"
+    },
+    "vllm_ascend": {
+      "relative_path": "host/vllm_ascend/__init__.py",
+      "sha256": "064c2d3dd0aad0fd8e4278b4b2d6c15c98a4352c8df3ba1bd9dc685eb320d47f"
+    },
+    "test7_gdn_main": {
+      "relative_path": "targets/gdn-r6/test7_gdn_main/__init__.py",
+      "sha256": "8a9d94e016262937d3fcd50b4273564517422886143ad40a3b8e99987feaf7a1"
+    },
+    "g7_cumulative": {
+      "relative_path": "targets/contribution/g7_cumulative/__init__.py",
+      "sha256": "82f1408dd2ca68d37db1b3d8c0f51e0139f969bf9ec6859ffa9f2c6f0bad965f"
+    }
+  },
+  "central_validation": {
+    "shared_profile_id": "gennova-qwen35-tp2-graph-v1",
+    "shared_profile_sha256": "5792631172af883cf247e05b214444c02a106831aa50162b8c6f3a0e63f24661",
+    "scope": "configuration only; loaded bytes, graph execution and quality remain to verify"
+  },
+  "private_verification_sha256": "aa7e6cbdf42e99c3e2a3784668f7e00cb208f20b6912ce31ecda2ded9f4c3a37",
+  "temporary_auth_file_removed": true,
+  "original_model_health_after": 200,
+  "original_model_restarted": false,
+  "existing_runs_migrated": false,
+  "frozen_dependency_or_test_parameter_changes": false,
+  "new_model_or_tensor_execution": false,
+  "prior_cpu_only_failure_retained": "r1 failed during actual device-architecture lookup; unchanged official check passes in owned NPU-visible worker",
+  "qualification": "Source/SDK and official bootstrap only; no new model serving, graph execution, quality or MOD performance result"
+}

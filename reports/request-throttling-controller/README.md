@@ -64,3 +64,9 @@ MOD performance comparison. Private raw evidence independently verified and reta
 HUST runtime inputs were separately prepared and all4695 source/support files verified; CPU-only
 bootstrap fails on device-architecture discovery and is not claimed qualified. Existing runs were
 not migrated.
+
+[Unified runtime NPU-visible bootstrap follow-up](unified-runtime-preparation-20261019-r2/): same
+frozen HUST inputs and original official check pass in the owned NPU-visible worker,4695
+source/support files independently verified. The earlier zero-NPU failure remains in the preceding
+capsule. Existing Qwen service remains healthy; no migration, dependency substitution, new model
+serving or performance claim.
