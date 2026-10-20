@@ -12,31 +12,51 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--kind", choices=("model", "capacity"), default="model")
     args = parser.parse_args()
     selected = {}
-    for directory in (
-        "hccs-known-payload-r2",
-        "hccs64-known-payload-control-r2",
-        "microflow-hccs64-r1",
-        "microflow-hccs64-control-r1",
-    ):
+    directories = (
+        (
+            "hccs-known-payload-r2",
+            "hccs64-known-payload-control-r2",
+            "microflow-hccs64-r1",
+            "microflow-hccs64-control-r1",
+        )
+        if args.kind == "model"
+        else ("hccs-capacity-r1", "hccs-capacity-control-r1")
+    )
+    for directory in directories:
         for path in (args.root / directory).iterdir():
             if path.is_file():
                 selected[path.relative_to(args.root).as_posix()] = path
-    for name in (
-        "dcmi_hccs64.py",
-        "hccs_known_payload.py",
-        "hccs_known_payload_v2.py",
-        "hccs_known_payload_v2.sh",
-        "run_hccs64_known_payload.py",
-        "qualify_hccs64.py",
-        "run_model_hccs64.py",
-        "audit_model_hccs64.py",
-        "measure_microflow.py",
-        "bench.sh",
-        "recover_quality_gold.py",
-        "recovered-mmlu-gold.json",
-    ):
+    sources = (
+        (
+            "dcmi_hccs64.py",
+            "hccs_known_payload.py",
+            "hccs_known_payload_v2.py",
+            "hccs_known_payload_v2.sh",
+            "run_hccs64_known_payload.py",
+            "qualify_hccs64.py",
+            "run_model_hccs64.py",
+            "audit_model_hccs64.py",
+            "measure_microflow.py",
+            "bench.sh",
+            "recover_quality_gold.py",
+            "recovered-mmlu-gold.json",
+        )
+        if args.kind == "model"
+        else (
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "hccs_capacity_probe.py",
+            "hccs_capacity_probe.sh",
+            "run_hccs_capacity.py",
+            "audit_hccs_capacity.py",
+            "derive_hccs_link_bytes.py",
+            "measure_microflow.py",
+        )
+    )
+    for name in sources:
         selected[f"source/{name}"] = args.root / name
     args.output.mkdir(exist_ok=False)
     members = {}
@@ -63,10 +83,24 @@ def main():
         )
         + "\n"
     )
-    for name, source in (
-        ("qualification.json", "hccs64-known-payload-control-r2/qualification.json"),
-        ("summary.json", "microflow-hccs64-control-r1/summary.json"),
-    ):
+    summaries = (
+        (
+            (
+                "qualification.json",
+                "hccs64-known-payload-control-r2/qualification.json",
+            ),
+            ("summary.json", "microflow-hccs64-control-r1/summary.json"),
+        )
+        if args.kind == "model"
+        else (
+            ("summary.json", "hccs-capacity-control-r1/summary.json"),
+            (
+                "model-link-accounting.json",
+                "hccs-capacity-control-r1/model-link-accounting.json",
+            ),
+        )
+    )
+    for name, source in summaries:
         (args.output / name).write_bytes((args.root / source).read_bytes())
     (args.output / "SHA256SUMS").write_text(
         "".join(

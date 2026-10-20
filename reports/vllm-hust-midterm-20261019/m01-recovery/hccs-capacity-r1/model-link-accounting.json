@@ -1,0 +1,64 @@
+{
+  "schema": "midterm-hccs-driver-accounting/v1",
+  "bytes_per_flit": 20,
+  "unit_basis": "Pinned installed DCMI getter computes count*20/(ms/1000)/2**30; the cumulative counter convention is cross-checked against sampled getter rates in six known-payload phases.",
+  "decoder_library_sha256": "2e89f3a4d28e0002bb81f3617cede498784fd9cd28b2d0ab0121250e05fea10c",
+  "crosscheck_ratio_min": 0.9950009679577833,
+  "crosscheck_ratio_max": 1.006420280583857,
+  "maximum_observed_relative_difference": 0.006420280583856908,
+  "devices": [
+    {
+      "card": 4,
+      "tx_flits": 10381085319,
+      "rx_flits": 10345074440,
+      "driver_accounted_tx_bytes": 207621706380,
+      "driver_accounted_rx_bytes": 206901488800
+    },
+    {
+      "card": 5,
+      "tx_flits": 10345074440,
+      "rx_flits": 10381085319,
+      "driver_accounted_tx_bytes": 206901488800,
+      "driver_accounted_rx_bytes": 207621706380
+    }
+  ],
+  "aggregate_driver_accounted_tx_bytes": 414523195180,
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792470584.9964452,
+    "end_wall": 1792470647.891626,
+    "duration_seconds": 62.89518077392131,
+    "wall_monotonic_offset_difference_seconds": 4.76837158203125e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "counter_boundaries": [
+    {
+      "card": 4,
+      "start_wall": 1792470584.0035865,
+      "end_wall": 1792470648.9002345
+    },
+    {
+      "card": 5,
+      "start_wall": 1792470584.0050895,
+      "end_wall": 1792470648.881645
+    }
+  ],
+  "reference_16mib_aggregate_tx_bytes_per_second": {
+    "all_reduce": 37506776772.3523,
+    "all_gather": 37652218175.97048
+  },
+  "source_sha256": {
+    "hccs-capacity-control-r1/summary.json": "7d8c79d85ba0b140057c4cda6169de3ca50be17cf548baa268a570b069aee3d6",
+    "microflow-hccs64-control-r1/summary.json": "d5fe6e0f9256810dad604ed58cbb1188b5676f49e1e110a491a770fac6eb3238",
+    "microflow-hccs64-control-r1/receipt.json": "14317014f5356857f1628ebcce404ca312c1b5b2d21f3cf34231e2c09c0f5c4a"
+  },
+  "limitations": [
+    "Driver-accounted link bytes include protocol traffic; not tensor payload or an independent physical-line capture.",
+    "TX is summed across two directions; peer RX is not added again.",
+    "Getter sampling covers approximately half of each interior phase; the cross-check is not a full-volume integration.",
+    "16 MiB synchronous reference does not cover all model payload sizes or graph execution; it is not substituted for a matched whole-model communication reference.",
+    "No whole-model effective FLOPs or M01 attainment is claimed."
+  ],
+  "model_effective_flops": null,
+  "model_attainment_percent": null
+}
