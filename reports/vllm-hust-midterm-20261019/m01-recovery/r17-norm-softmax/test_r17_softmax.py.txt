@@ -1,0 +1,21 @@
+import pytest
+
+from derive_r17_softmax import count_cohort
+
+
+def test_empty_tail():
+    result = count_cohort({})
+    assert all(value == 0 for value in result['totals'].values())
+    assert result['canonical_add_subtract_multiply_count'] == 0
+
+
+def test_global_heads_and_layer_counts():
+    result = count_cohort({role: {'causal_pairs': 3, 'valid_query_tokens': 2}
+                           for role in ('target', 'draft_step0', 'draft_step1')})
+    assert result['canonical_add_subtract_multiply_count'] == (3 * 3 - 2) * 16 * 12
+    assert result['totals']['exponential'] == 3 * 16 * 12
+
+
+def test_invalid_role_rejected():
+    with pytest.raises(AssertionError):
+        count_cohort({'other': {'causal_pairs': 1, 'valid_query_tokens': 1}})

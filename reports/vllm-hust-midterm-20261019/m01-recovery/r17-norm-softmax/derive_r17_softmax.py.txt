@@ -1,0 +1,59 @@
+"""Canonical softmax semantics using r17 device causal lengths only."""
+import hashlib
+import json
+from pathlib import Path
+
+from derive_r12_softmax_semantics import softmax_counts
+
+ROOT = Path(__file__).resolve().parent
+
+
+def count_cohort(roles):
+    result = {}
+    for name, row in roles.items():
+        assert name in ('target', 'draft_step0', 'draft_step1')
+        result[name] = softmax_counts(row['causal_pairs'], row['valid_query_tokens'],
+                                    16, 10 if name == 'target' else 1)
+    totals = {key: sum(row[key] for row in result.values())
+              for key in softmax_counts(0, 0, 16, 1)}
+    return {'roles': result, 'totals': totals,
+            'canonical_add_subtract_multiply_count': sum(totals[key] for key in
+                ('score_scale_multiply', 'stability_subtract', 'denominator_add'))}
+
+
+def build():
+    source = ROOT / 'r17-request-attention.json'
+    matrix_path = ROOT / 'r17-matrix-accounting.json'
+    attention = json.loads(source.read_text())
+    matrix = json.loads(matrix_path.read_text())
+    for record in (attention, matrix):
+        for name, digest in record['source_sha256'].items():
+            assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest
+    assert matrix['source_sha256'][str(source)] == hashlib.sha256(source.read_bytes()).hexdigest()
+    cohorts = {name: count_cohort(roles) for name, roles in attention['cohorts'].items()}
+    for name, roles in attention['cohorts'].items():
+        assert sum(r['causal_pairs'] * 4 * 256 * 16 * (10 if role == 'target' else 1)
+                   for role, r in roles.items()) == matrix['cohorts'][name]['causal_qk_av_semantic_subtotal']
+    paths = [source, matrix_path, Path(__file__), ROOT / 'derive_r12_softmax_semantics.py']
+    return {
+        'status': 'r17_device_causal_length_canonical_softmax_semantics',
+        'cohorts': cohorts,
+        'source_sha256': {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
+        'model_effective_flops': None, 'm01_attainment': None,
+        'limitations': [
+            'Reuses a tested pure arithmetic function, not r12 observations or counts.',
+            'One global TP model: 16 query heads, 10 target attention layers and one layer per draft forward.',
+            'Canonical stable softmax, not observed fused implementation instructions or online rescaling.',
+            'Exponentials, division and comparisons remain separate; no arbitrary FLOP equivalence.',
+            'Every causal query has at least one key; graph padding is excluded and tail remains separate.',
+            'This semantic ledger is not full effective F, matched kernel capacity or an M01 attainment result.',
+        ],
+    }
+
+
+if __name__ == '__main__':
+    result = build()
+    with (ROOT / 'r17-softmax-semantics.json').open('x') as stream:
+        json.dump(result, stream, indent=2)
+        stream.write('\n')
+    print(json.dumps({k: v['totals'] for k, v in result['cohorts'].items()}, indent=2))

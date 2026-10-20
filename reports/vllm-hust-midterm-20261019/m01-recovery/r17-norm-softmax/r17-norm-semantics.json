@@ -1,0 +1,361 @@
+{
+  "status": "r17_device_extent_and_loaded_inventory_rms_semantics",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792528833.8494937,
+    "end_wall": 1792528900.9659054,
+    "duration_seconds": 67.1164116607979,
+    "wall_monotonic_offset_difference_seconds": 4.76837158203125e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "inventory_counts": [
+    {
+      "target": {
+        "128": 30,
+        "2048": 81,
+        "256": 20
+      },
+      "draft": {
+        "256": 2,
+        "2048": 5
+      }
+    },
+    {
+      "target": {
+        "128": 30,
+        "2048": 81,
+        "256": 20
+      },
+      "draft": {
+        "256": 2,
+        "2048": 5
+      }
+    }
+  ],
+  "cohorts": {
+    "inside_request_under_clock_tolerance": {
+      "target_valid_rows": 339835,
+      "draft_valid_rows": 359236,
+      "entries": [
+        {
+          "name": "target.hidden_no_residual",
+          "rows": 339835,
+          "width": 2048,
+          "residual": false,
+          "gated": false,
+          "operations": {
+            "square": 695982080,
+            "reduction_add": 695642245,
+            "mean_scale": 339835,
+            "epsilon_add": 339835,
+            "normalize_multiply": 695982080,
+            "weight_multiply": 695982080,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 339835,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 2784268155
+        },
+        {
+          "name": "target.hidden_with_residual",
+          "rows": 27186800,
+          "width": 2048,
+          "residual": true,
+          "gated": false,
+          "operations": {
+            "square": 55678566400,
+            "reduction_add": 55651379600,
+            "mean_scale": 27186800,
+            "epsilon_add": 27186800,
+            "normalize_multiply": 55678566400,
+            "weight_multiply": 55678566400,
+            "residual_add": 55678566400,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 27186800,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 278420018800
+        },
+        {
+          "name": "draft.embedding_hidden_and_first_norm",
+          "rows": 1077708,
+          "width": 2048,
+          "residual": false,
+          "gated": false,
+          "operations": {
+            "square": 2207145984,
+            "reduction_add": 2206068276,
+            "mean_scale": 1077708,
+            "epsilon_add": 1077708,
+            "normalize_multiply": 2207145984,
+            "weight_multiply": 2207145984,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 1077708,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 8829661644
+        },
+        {
+          "name": "draft.post_attention_and_final_norm",
+          "rows": 718472,
+          "width": 2048,
+          "residual": true,
+          "gated": false,
+          "operations": {
+            "square": 1471430656,
+            "reduction_add": 1470712184,
+            "mean_scale": 718472,
+            "epsilon_add": 718472,
+            "normalize_multiply": 1471430656,
+            "weight_multiply": 1471430656,
+            "residual_add": 1471430656,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 718472,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 7357871752
+        },
+        {
+          "name": "target.full_attention_qk",
+          "rows": 61170300,
+          "width": 256,
+          "residual": false,
+          "gated": false,
+          "operations": {
+            "square": 15659596800,
+            "reduction_add": 15598426500,
+            "mean_scale": 61170300,
+            "epsilon_add": 61170300,
+            "normalize_multiply": 15659596800,
+            "weight_multiply": 15659596800,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 61170300,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 62699557500
+        },
+        {
+          "name": "draft.full_attention_qk",
+          "rows": 6466248,
+          "width": 256,
+          "residual": false,
+          "gated": false,
+          "operations": {
+            "square": 1655359488,
+            "reduction_add": 1648893240,
+            "mean_scale": 6466248,
+            "epsilon_add": 6466248,
+            "normalize_multiply": 1655359488,
+            "weight_multiply": 1655359488,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 6466248,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 6627904200
+        },
+        {
+          "name": "target.gdn_output",
+          "rows": 326241600,
+          "width": 128,
+          "residual": false,
+          "gated": true,
+          "operations": {
+            "square": 41758924800,
+            "reduction_add": 41432683200,
+            "mean_scale": 326241600,
+            "epsilon_add": 326241600,
+            "normalize_multiply": 41758924800,
+            "weight_multiply": 41758924800,
+            "residual_add": 0,
+            "output_gate_multiply": 41758924800,
+            "inverse_sqrt_evaluations": 326241600,
+            "silu_evaluations": 41758924800
+          },
+          "basic_arithmetic_subtotal": 209120865600
+        }
+      ],
+      "basic_arithmetic_subtotal": 575840147651,
+      "inverse_sqrt_evaluations": 423200963,
+      "silu_evaluations": 41758924800
+    },
+    "boundary_or_tail": {
+      "target_valid_rows": 0,
+      "draft_valid_rows": 0,
+      "entries": [
+        {
+          "name": "target.hidden_no_residual",
+          "rows": 0,
+          "width": 2048,
+          "residual": false,
+          "gated": false,
+          "operations": {
+            "square": 0,
+            "reduction_add": 0,
+            "mean_scale": 0,
+            "epsilon_add": 0,
+            "normalize_multiply": 0,
+            "weight_multiply": 0,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 0,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 0
+        },
+        {
+          "name": "target.hidden_with_residual",
+          "rows": 0,
+          "width": 2048,
+          "residual": true,
+          "gated": false,
+          "operations": {
+            "square": 0,
+            "reduction_add": 0,
+            "mean_scale": 0,
+            "epsilon_add": 0,
+            "normalize_multiply": 0,
+            "weight_multiply": 0,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 0,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 0
+        },
+        {
+          "name": "draft.embedding_hidden_and_first_norm",
+          "rows": 0,
+          "width": 2048,
+          "residual": false,
+          "gated": false,
+          "operations": {
+            "square": 0,
+            "reduction_add": 0,
+            "mean_scale": 0,
+            "epsilon_add": 0,
+            "normalize_multiply": 0,
+            "weight_multiply": 0,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 0,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 0
+        },
+        {
+          "name": "draft.post_attention_and_final_norm",
+          "rows": 0,
+          "width": 2048,
+          "residual": true,
+          "gated": false,
+          "operations": {
+            "square": 0,
+            "reduction_add": 0,
+            "mean_scale": 0,
+            "epsilon_add": 0,
+            "normalize_multiply": 0,
+            "weight_multiply": 0,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 0,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 0
+        },
+        {
+          "name": "target.full_attention_qk",
+          "rows": 0,
+          "width": 256,
+          "residual": false,
+          "gated": false,
+          "operations": {
+            "square": 0,
+            "reduction_add": 0,
+            "mean_scale": 0,
+            "epsilon_add": 0,
+            "normalize_multiply": 0,
+            "weight_multiply": 0,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 0,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 0
+        },
+        {
+          "name": "draft.full_attention_qk",
+          "rows": 0,
+          "width": 256,
+          "residual": false,
+          "gated": false,
+          "operations": {
+            "square": 0,
+            "reduction_add": 0,
+            "mean_scale": 0,
+            "epsilon_add": 0,
+            "normalize_multiply": 0,
+            "weight_multiply": 0,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 0,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 0
+        },
+        {
+          "name": "target.gdn_output",
+          "rows": 0,
+          "width": 128,
+          "residual": false,
+          "gated": true,
+          "operations": {
+            "square": 0,
+            "reduction_add": 0,
+            "mean_scale": 0,
+            "epsilon_add": 0,
+            "normalize_multiply": 0,
+            "weight_multiply": 0,
+            "residual_add": 0,
+            "output_gate_multiply": 0,
+            "inverse_sqrt_evaluations": 0,
+            "silu_evaluations": 0
+          },
+          "basic_arithmetic_subtotal": 0
+        }
+      ],
+      "basic_arithmetic_subtotal": 0,
+      "inverse_sqrt_evaluations": 0,
+      "silu_evaluations": 0
+    }
+  },
+  "run_pinned_callsite_sha256": {
+    "/workspace/gennova-6-20261019/shared028-device-r1/deployed/runtime/venv-school-r1/lib/python3.12/site-packages/vllm/model_executor/models/qwen3_5.py": "3abeac36180df7bd1bd96b1a7c698a8f212d92c063026420cbdd16d1980e90e6",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/gdn.py": "765eb27018f762e970301978af80a91d86ce4d7110ed7f2c48a3986b2eb78e85",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/patch/worker/patch_qwen3_5.py": "0ea5111173d5a02e4f8ab89130a1a1bd7d44ad86885a4c64bb3cb4649afbb48c",
+    "/workspace/gennova-6-20261019/shared028-device-r1/deployed/runtime/venv-school-r1/lib/python3.12/site-packages/vllm/model_executor/models/qwen3_5_mtp.py": "89b0bde1d11fe5768a634e4365c78274e20694b26f4c6bb68e934328d8d0b190"
+  },
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r17_norm.py": "2a85c914423287fc027823759fe8f610ddfb0b2e5a96067a25a8e6aeeb846b5b",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_norm_accounting.py": "b77c7e05daccd468c279a3f83daa9913d1eea7c876d802b37459245fb4c86e56",
+    "/root/gennova-evidence/20261019-midterm-aligned/r17-request-attention.json": "c03950211443e1bddb3968f7e32be6914ae08e73ce13d733096a8806368560a4",
+    "/workspace/gennova-measurements/microflow-token-accounting-r17/receipt.json": "e0304f66c67b02e8a5bf95179fcd9dc09c08df53d128d38ff4ed3b8c78f30a6b",
+    "/workspace/gennova-measurements/microflow-token-accounting-r17/token-accounting-836975.jsonl": "d899478c78dbe80ec348ecc24753e79c1126c0b59b20d96f091bab48e29b479c",
+    "/workspace/gennova-measurements/microflow-token-accounting-r17/token-accounting-836976.jsonl": "462e5624979a77e32d8cf530ec8f898cad4b85431ac1428f5f3dca5f245b7b48"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "This is valid-row source-semantic RMS/residual arithmetic, not device instruction counting or a claim that every row contributes to a returned output.",
+    "Device GDN state-update skips do not prove that downstream output normalization is skipped; no skip count is subtracted here.",
+    "Global semantic TP model counted once; replicated hidden norms and graph padding are excluded.",
+    "Q/K L2 preprocessing is excluded to avoid double counting with GDN preprocessing.",
+    "Inverse square root and SiLU are separate evaluation counts, not assigned arbitrary FLOP equivalents.",
+    "Gemma weight-plus-one parameter transforms are excluded from per-token arithmetic.",
+    "Loaded inventory pins callsites, not every fused norm implementation or binary; this ledger alone does not establish BF16 numerical equivalence or matched capacity.",
+    "Time classification inherits the device-length ledger clock mapping and does not prove all-stream completion."
+  ]
+}
