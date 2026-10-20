@@ -13,11 +13,30 @@ def main():
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
-        "--kind", choices=("accounting", "accounting-v2", "quality"), required=True
+        "--kind",
+        choices=("accounting", "accounting-v2", "accounting-v3", "quality"),
+        required=True,
     )
     parser.add_argument("--run", action="append", default=[])
     args = parser.parse_args()
-    if args.kind == "accounting-v2":
+    if args.kind == "accounting-v3":
+        directories = ["microflow-token-accounting-r3", "token-observer-v3"]
+        sources = [
+            "prepare_token_observer_v3.py",
+            "host_logits_snapshot.py",
+            "host_mtp_snapshot.py",
+            "runtime-token-accounting-v3.sh",
+            "serve-token-accounting-v3.sh",
+            "measure_token_accounting_v3.py",
+            "launch_token_accounting_v3.py",
+            "token-observer-build-v3.json",
+            "test_host_logits_snapshot.py",
+            "audit_logits_accounting.py",
+            "audit_token_accounting.py",
+            "logits-accounting-summary-r3.json",
+        ]
+        summaries = {"logits-summary.json": "logits-accounting-summary-r3.json"}
+    elif args.kind == "accounting-v2":
         directories = ["microflow-token-accounting-r2", "token-observer-v2"]
         sources = [
             "prepare_token_observer_v2.py",
