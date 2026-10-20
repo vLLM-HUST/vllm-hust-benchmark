@@ -1,0 +1,176 @@
+{
+  "schema": "swe-bench-pro-200steps-single-agent-v1",
+  "run_id": "swe-pro-v1-test-loop-200steps-single-agent-20261020-r1",
+  "execution_source_commit": "8256f47d255b22df1a4d21ca4ea1a74a28c88272",
+  "runner_sha256": "e17d685cd2f492985471b27dcda4e58b2cf1185be628eb37379a6da9c86d4fbf",
+  "configuration_diff": {
+    "changed_fields": [
+      "run_id",
+      "agent.step_limit"
+    ],
+    "previous_step_limit": 100,
+    "step_limit": 200,
+    "program_instances": 1
+  },
+  "configuration": {
+    "program_instances": 1,
+    "arrival_time": 0,
+    "context": 262144,
+    "step_limit": 200,
+    "wall_budget_seconds": 1200,
+    "tool_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "automatic_retries": 0,
+    "task_instructions": "Before submitting, run the repository's existing relevant project tests against your code changes. Inspect the project test commands and required services in its own documentation and package configuration. Use actual runtime tests exercising the changed behavior; source-text checks or scripts that only inspect source strings are not a substitute. If a relevant test fails, use the failure output to fix the implementation and rerun it within the remaining budget. Preserve existing passing behavior. If tests cannot run, report the exact command and blocker honestly. Do not claim tests passed without executing them.",
+    "engine_packages_and_worker_epochs": "same retained deployment; unchanged before/after",
+    "model_restarted": false,
+    "controller_modules_loaded": []
+  },
+  "agent_result": {
+    "status": "Submitted",
+    "agent_submitted": true,
+    "elapsed_seconds": 315.77695144712925,
+    "model_calls": 68,
+    "patch_bytes": 10906,
+    "patch_sha256": "e43ed48e7c373eec971cc4f6f827700e8893e930492d219f0a86b5356999f358",
+    "container_cleanup_exit_code": 0
+  },
+  "query_replies": 68,
+  "query_exceptions": 0,
+  "max_prompt_tokens": 43434,
+  "project_test_tool_calls": 9,
+  "npm_test_invocations": 11,
+  "project_test_attempts": [
+    {
+      "npm_test_invocations": 1,
+      "summaries": [
+        "0 passing (20ms)",
+        "1 failing"
+      ],
+      "pipeline_exit_code": 0
+    },
+    {
+      "npm_test_invocations": 1,
+      "summaries": [
+        "6 passing (2s)",
+        "1 failing"
+      ],
+      "pipeline_exit_code": 0
+    },
+    {
+      "npm_test_invocations": 1,
+      "summaries": [
+        "0 passing (750ms)",
+        "1 failing"
+      ],
+      "pipeline_exit_code": 0
+    },
+    {
+      "npm_test_invocations": 1,
+      "summaries": [
+        "164 passing (7s)"
+      ],
+      "pipeline_exit_code": 0
+    },
+    {
+      "npm_test_invocations": 1,
+      "summaries": [
+        "0 passing (1s)",
+        "1 failing"
+      ],
+      "pipeline_exit_code": 0
+    },
+    {
+      "npm_test_invocations": 1,
+      "summaries": [
+        "8 passing (1s)"
+      ],
+      "pipeline_exit_code": 0
+    },
+    {
+      "npm_test_invocations": 1,
+      "summaries": [
+        "164 passing (8s)"
+      ],
+      "pipeline_exit_code": 0
+    },
+    {
+      "npm_test_invocations": 1,
+      "summaries": [
+        "7 passing (1s)"
+      ],
+      "pipeline_exit_code": 0
+    },
+    {
+      "npm_test_invocations": 3,
+      "summaries": [
+        "8 passing (2s)",
+        "7 passing (1s)",
+        "164 passing (8s)"
+      ],
+      "pipeline_exit_code": 0
+    }
+  ],
+  "final_agent_test_summaries": [
+    "164 passing: existing project topics tests",
+    "8 passing: Agent-added behavior tests",
+    "7 passing: Agent-added socket tests"
+  ],
+  "official_grading": {
+    "resolved": 0,
+    "total": 1,
+    "unresolved": 0,
+    "status": "OUTPUTS_PRESENT",
+    "new_model_calls": 0,
+    "all_parsed_tests": {
+      "PASSED": 148,
+      "FAILED": 1
+    },
+    "fail_to_pass": {
+      "expected": 1,
+      "statuses": {
+        "FAILED": 1
+      }
+    },
+    "pass_to_pass": {
+      "expected": 148,
+      "statuses": {
+        "PASSED": 148
+      }
+    },
+    "conclusion": "target repair test still fails; all expected pass-to-pass tests pass"
+  },
+  "evidence_archive": {
+    "bytes": 216912,
+    "sha256": "3e4268f4e1525e9ab17ae1ebfa438dbfdf81b74d8cb20e212bf8996d8efd483c",
+    "files": 77,
+    "archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "cpu_workspace": {
+    "standard_same_build_extension": true,
+    "deadline": "2026-10-20T22:45:47.284738+08:00",
+    "reason": "cover unchanged 1200-second program budget and independent grading"
+  },
+  "cleanup": {
+    "execution_actor_stopped": true,
+    "grading_actor_stopped": true,
+    "model_stopped": false
+  },
+  "limitations": [
+    "One task and one Agent only; not a quality leaderboard",
+    "Submitted after 68 calls, so higher step ceiling was not used",
+    "Different trajectories cannot establish a speedup or a causal benefit from increasing step_limit",
+    "Pipeline exit codes are not project-test success; inspect saved summaries",
+    "No new Ray/Grafana screenshots claimed"
+  ]
+}
