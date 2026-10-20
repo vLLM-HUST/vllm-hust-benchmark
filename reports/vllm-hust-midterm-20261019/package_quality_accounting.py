@@ -25,6 +25,7 @@ def main():
             "gdn-reference",
             "gdn-reference-r9",
             "moe-reference",
+            "dense-reference",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -120,6 +121,44 @@ def main():
             "measure_microflow.py",
         ]
         summaries = {"reference.json": "vocab-reference-summary-r1.json"}
+    elif args.kind == "dense-reference":
+        directories = [
+            "dense-reference-r1",
+            "dense-reference-control-r1",
+            "dense-reference-r2",
+            "dense-reference-control-r2",
+        ]
+        sources = [
+            "prepare_dense_reference.py",
+            "dense_reference_probe.py",
+            "dense_reference_probe.sh",
+            "run_dense_reference.py",
+            "dense-reference-plan-r1.json",
+            "dense-reference-summary-r1.json",
+            "prepare_dense_reference_repeat.py",
+            "dense_reference_repeat.py",
+            "dense_reference_repeat.sh",
+            "run_dense_reference_repeat.py",
+            "dense-reference-plan-r2.json",
+            "dense-reference-summary-r2.json",
+            "audit_dense_reference_repeat.py",
+            "audit_dense_reference.py",
+            "audit_moe_reference.py",
+            "audit_token_accounting.py",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+            "runtime/vllm_ascend/ops/linear.py",
+            "runtime/vllm_ascend/ops/gdn.py",
+            "runtime/vllm_ascend/utils.py",
+            "runtime/vllm_ascend/ascend_config.py",
+            "microflow-payload-r4/hust_prefill_microflow/runtime/microflow.py",
+            "microflow-payload-r4/hust_prefill_microflow/runtime/school028_attention.py",
+        ]
+        summaries = {
+            "reference.json": "dense-reference-summary-r2.json",
+            "initial-reference.json": "dense-reference-summary-r1.json",
+        }
     elif args.kind == "moe-reference":
         directories = [
             "moe-reference-r1",
