@@ -1,0 +1,86 @@
+{
+  "status": "cpu_device_lengths_compared",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792485051.4784307,
+    "end_wall": 1792485131.3300753,
+    "duration_seconds": 79.85164435114712,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "ranks": [
+    {
+      "rank": 0,
+      "file": "token-accounting-90388.jsonl",
+      "runtime_gate": {
+        "event": "attention_length_observer_installed",
+        "wall": 1792484906.367649,
+        "monotonic": 8200609.825334895,
+        "backend": "<class 'vllm_ascend.attention.attention_v1.AscendAttentionBackend'>",
+        "needs_seq_lens_cpu_sync": true,
+        "use_async_spec_decode": true,
+        "source_sha256": "b4f52dbda3e71c59e8b3fb54a0489d234f62979f51c60f989cfa5a0b371d74d8",
+        "scope": "Explicit CPU/device metadata synchronization during client lifecycle only"
+      },
+      "snapshots": 1746,
+      "comparison_groups": 6984,
+      "comparison_counts": {
+        "draft:context:kv:equal": 873,
+        "draft:context:q:equal": 873,
+        "draft:step0:kv:equal": 873,
+        "draft:step0:q:equal": 873,
+        "draft:step1:kv:equal": 873,
+        "draft:step1:q:equal": 873,
+        "target:context:kv:equal": 873,
+        "target:context:q:equal": 873
+      },
+      "synchronization_seconds": 53.541332562454045,
+      "mismatch_examples": []
+    },
+    {
+      "rank": 1,
+      "file": "token-accounting-90389.jsonl",
+      "runtime_gate": {
+        "event": "attention_length_observer_installed",
+        "wall": 1792484896.9994907,
+        "monotonic": 8200600.457176791,
+        "backend": "<class 'vllm_ascend.attention.attention_v1.AscendAttentionBackend'>",
+        "needs_seq_lens_cpu_sync": true,
+        "use_async_spec_decode": true,
+        "source_sha256": "b4f52dbda3e71c59e8b3fb54a0489d234f62979f51c60f989cfa5a0b371d74d8",
+        "scope": "Explicit CPU/device metadata synchronization during client lifecycle only"
+      },
+      "snapshots": 1746,
+      "comparison_groups": 6984,
+      "comparison_counts": {
+        "draft:context:kv:equal": 873,
+        "draft:context:q:equal": 873,
+        "draft:step0:kv:equal": 873,
+        "draft:step0:q:equal": 873,
+        "draft:step1:kv:equal": 873,
+        "draft:step1:q:equal": 873,
+        "target:context:kv:equal": 873,
+        "target:context:q:equal": 873
+      },
+      "synchronization_seconds": 54.18361338134855,
+      "mismatch_examples": []
+    }
+  ],
+  "completed": 200,
+  "failed": 0,
+  "model_effective_flops": null,
+  "attainment_percent": null,
+  "limitations": [
+    "All list extents are retained; no padding or rejected-token mask is silently removed.",
+    "Draft context metadata duplicates step0 metadata; comparison groups are not additive operation counts.",
+    "Device copies synchronize and alter timing; this run is not a performance replacement.",
+    "Equality validates observed metadata only, not the custom kernel arithmetic or full effective-F count."
+  ],
+  "source_sha256": {
+    "audit_attention_lengths.py": "2f10748b1fb43aa7bc9c4516752013f1f7cf363d20f0b1cc57790aa909b80d28",
+    "microflow-token-accounting-r5/receipt.json": "e203c01d726562cd3453c0f16ca7c8fa71a34e62edab795f0a1e9c2969df0a99",
+    "microflow-token-accounting-r5/mmlu-pro.json": "993874bb0eb2ae5ecf252679e155a5fac046041fba6d75cff500a0a66dac58dd",
+    "microflow-token-accounting-r5/token-accounting-90388.jsonl": "a1a7f930cbc5251e9e0ed150ccde876e14769ae7065fc6581d177a375bf36b9b",
+    "microflow-token-accounting-r5/token-accounting-90389.jsonl": "acf6c61d51f2a91d6d71c3fa568e54a18346fe82610bdce5d6873cbd1581986c"
+  }
+}

@@ -14,12 +14,54 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--kind",
-        choices=("accounting", "accounting-v2", "accounting-v3", "quality"),
+        choices=(
+            "accounting",
+            "accounting-v2",
+            "accounting-v3",
+            "attention",
+            "quality",
+        ),
         required=True,
     )
     parser.add_argument("--run", action="append", default=[])
     args = parser.parse_args()
-    if args.kind == "accounting-v3":
+    if args.kind == "attention":
+        directories = [
+            "microflow-token-accounting-r4",
+            "microflow-token-accounting-r5",
+            "token-observer-v4",
+        ]
+        sources = [
+            "prepare_token_observer_v4.py",
+            "attention_length_snapshot.py",
+            "host_logits_snapshot.py",
+            "host_mtp_snapshot.py",
+            "runtime-token-accounting-v4.sh",
+            "serve-token-accounting-v4.sh",
+            "measure_token_accounting_v4.py",
+            "launch_token_accounting_v4.py",
+            "token-observer-build-v4.json",
+            "test_attention_length_snapshot.py",
+            "test_attention_length_audit.py",
+            "audit_attention_lengths.py",
+            "audit_attention_length_sources.py",
+            "attention-length-source-audit.json",
+            "derive_attention_pairs.py",
+            "test_attention_pairs.py",
+            "derive_partial_operator_accounting.py",
+            "test_partial_operator_accounting.py",
+            "attention-length-summary-r5.json",
+            "attention-pairs-summary-r5.json",
+            "partial-operator-accounting-r5.json",
+            "audit_token_accounting.py",
+            "hbm-profiler-relocation-20261020.sha256",
+        ]
+        summaries = {
+            "length-summary.json": "attention-length-summary-r5.json",
+            "pairs-summary.json": "attention-pairs-summary-r5.json",
+            "partial-operators.json": "partial-operator-accounting-r5.json",
+        }
+    elif args.kind == "accounting-v3":
         directories = ["microflow-token-accounting-r3", "token-observer-v3"]
         sources = [
             "prepare_token_observer_v3.py",

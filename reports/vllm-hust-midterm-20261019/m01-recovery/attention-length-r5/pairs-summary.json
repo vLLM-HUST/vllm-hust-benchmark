@@ -1,0 +1,61 @@
+{
+  "status": "causal_pairs_derived_from_valid_extents",
+  "ranks": [
+    {
+      "rank": 0,
+      "roles": {
+        "target": {
+          "contexts": 873,
+          "causal_pairs": 297438500,
+          "valid_query_tokens": 339775,
+          "excluded_padded_query_tokens": 66913
+        },
+        "draft_step0": {
+          "contexts": 873,
+          "causal_pairs": 297438500,
+          "valid_query_tokens": 339775,
+          "excluded_padded_query_tokens": 66673
+        },
+        "draft_step1": {
+          "contexts": 873,
+          "causal_pairs": 29821777,
+          "valid_query_tokens": 19385,
+          "excluded_padded_query_tokens": 387063
+        }
+      },
+      "source_sha256": "a1a7f930cbc5251e9e0ed150ccde876e14769ae7065fc6581d177a375bf36b9b"
+    },
+    {
+      "rank": 1,
+      "roles": {
+        "target": {
+          "contexts": 873,
+          "causal_pairs": 297438500,
+          "valid_query_tokens": 339775,
+          "excluded_padded_query_tokens": 66913
+        },
+        "draft_step0": {
+          "contexts": 873,
+          "causal_pairs": 297438500,
+          "valid_query_tokens": 339775,
+          "excluded_padded_query_tokens": 66673
+        },
+        "draft_step1": {
+          "contexts": 873,
+          "causal_pairs": 29821777,
+          "valid_query_tokens": 19385,
+          "excluded_padded_query_tokens": 387063
+        }
+      },
+      "source_sha256": "acf6c61d51f2a91d6d71c3fa568e54a18346fe82610bdce5d6873cbd1581986c"
+    }
+  ],
+  "model_effective_flops": null,
+  "formula": "sum(q*(kv-q)+q*(q+1)/2), with q clipped to the observed actual-token extent",
+  "limitations": [
+    "These are causal semantic pair counts per metadata group, not executed kernel arithmetic.",
+    "Metadata layer aliases are not multiplied; actual layer/head mapping requires separate source verification.",
+    "Masked/padded implementation work and custom softmax arithmetic are not included.",
+    "This synchronized diagnostic is not an uninstrumented performance measurement."
+  ]
+}
