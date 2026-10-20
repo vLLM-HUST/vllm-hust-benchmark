@@ -147,13 +147,14 @@ def test_source_archive_cannot_escape_destination(tmp_path):
 
 
 @pytest.mark.parametrize(
-    "mutation", [None, "dataset", "source", "row", "image", "task_count"]
+    "mutation", [None, "dataset", "source", "row", "image", "task_count", "selection"]
 )
 def test_verified_inputs_fail_closed(tmp_path, monkeypatch, mutation):
     from types import ModuleType
 
     c = configuration()
     row = {"instance_id": "task", "repo": "NodeBB/NodeBB"}
+    c["batch"]["instance_ids"] = ["other" if mutation == "selection" else "task"]
     (tmp_path / "cases-private.jsonl").write_text(json.dumps(row) + "\n")
     case_hash = runner.digest(tmp_path / "cases-private.jsonl")
     (tmp_path / "input-selection.json").write_text(

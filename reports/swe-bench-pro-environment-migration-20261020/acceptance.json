@@ -1,0 +1,73 @@
+{
+  "schema": "swe-bench-pro-environment-acceptance-v1",
+  "run_id": "swe-pro-v1-benchmark-migration-20261020-r1",
+  "execution_source_commit": "742b5d516b193b5d01b0a04a5ae2044378e4e1e4",
+  "runner_sha256": "5e5bda20aa0e81458b0c4064156ecffc4549ab10fb66737bc53bea9d1d6631dd",
+  "scope": "one real official Agent, independent benchmark entry, direct model API, no Controller integration",
+  "program_instances": 1,
+  "arrival_time": 0,
+  "client_concurrency_limit": null,
+  "configuration": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "BF16",
+    "tensor_parallel_size": 2,
+    "hardware": "Ascend 910B2",
+    "device_count": 2,
+    "max_model_len": 32768,
+    "step_limit": 100,
+    "wall_budget_seconds": 1200,
+    "max_tokens": 4096,
+    "tool_timeout_seconds": 60,
+    "automatic_retries": 0,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "container_cpus": 2,
+    "container_memory": "4g"
+  },
+  "result": {
+    "status": "ContextWindowExceededError",
+    "elapsed_seconds": 89.54265687800944,
+    "successful_model_replies": 53,
+    "query_attempts": 54,
+    "query_exceptions": 1,
+    "model_calls_counter": 53,
+    "agent_submitted": false,
+    "patch_bytes": 4537,
+    "modified_files": 6,
+    "test_commands_executed": 0,
+    "grading_status": "DEFERRED",
+    "quality_score": null,
+    "container_cleanup_exit_code": 0,
+    "controller_modules_loaded": []
+  },
+  "acceptance": {
+    "standalone_execution": "PASS",
+    "input_and_source_identity": "PASS",
+    "private_archive_files_sha256": "PASS",
+    "task_completion": "NOT_ACHIEVED",
+    "performance_comparison": "NOT_RUN"
+  },
+  "private_evidence_archive": {
+    "bytes": 148012,
+    "files": 50,
+    "sha256": "c22e3dc940aaa2ec416f8bed62e2a7f8520cdab84a3247463f288e59f620828f",
+    "archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "source_sha256": {
+    "src/vllm_hust_benchmark/__init__.py": "459bd2a5e720ac1c0636d54ad87144c42d34043b8cf3c12bc0c85d6dd68dd7aa",
+    "src/vllm_hust_benchmark/_version.py": "91447944015cec709e8aa7655f7e9d64e1e4508e7023a57fe3746911c0fc6fed",
+    "src/vllm_hust_benchmark/swe_bench_pro.py": "5e5bda20aa0e81458b0c4064156ecffc4549ab10fb66737bc53bea9d1d6631dd",
+    "src/vllm_hust_benchmark/swe_bench_pro_inputs.py": "fbfcb5e6604426b49137fccffaf2cb5fc6b0b3a4645fd76d4814ea7f6f5d68e3",
+    "src/vllm_hust_benchmark/swe_bench_pro_timing.py": "f4ab6ed529f3ca213ebc6cc53b1092d2ec8ba1c25898e5942ac79a57986ea163",
+    "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json": "2976327798028fc6793ececca8743f46497b1396a46bfd27e4cb48be8cfe4179",
+    "scripts/run_swe_bench_pro.py": "3f4a36ebf31b0280f24ee9a1fe3281b1cf4133deda02aa6c4ce9f2196fa4a192"
+  }
+}

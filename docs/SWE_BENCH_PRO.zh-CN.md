@@ -23,10 +23,10 @@ NodeBB 的一道 V1 任务、一个独立 Agent。任务容器需要至少示例
 
 ## 1. 获取本仓库与固定版本上游源码
 
-从本仓库根目录运行；`WORK` 必须是自己的绝对路径，`sources` 目录必须尚不存在：
+本迁移尚在 PR 分支，合并前请使用下列分支；合并后可改用 main。 从本仓库根目录运行；`WORK` 必须是自己的绝对路径，`sources` 目录必须尚不存在：
 
 ```bash
-git clone https://github.com/vLLM-HUST/vllm-hust-benchmark.git
+git clone --branch codex/swe-bench-pro-environment https://github.com/vLLM-HUST/vllm-hust-benchmark.git
 cd vllm-hust-benchmark
 export WORK=/absolute/private/swe-pro-v1
 mkdir -p "$WORK"
@@ -131,6 +131,8 @@ cat "$WORK/run-001/task-000/report-private.json"
 示例 100 步、1200 秒、每次最多输出 4096 tokens、工具超时 60 秒、temperature=0、thinking=false， 是显式诊断协议，不是最优修题参数。HTTP
 read=null 只取消读取时限，其余三阶段仍各 180 秒。 模型上下文上限由服务端决定，包含输入和预留输出；本入口不会自动调大上下文。 固定官方 Agent
 保留完整累计历史，仅对单次过长工具输出裁剪字符，没有全局历史压缩。 因此 100 步也可能先遇到上下文限制；日志会保留这个真实失败，不把它写成任务完成。
+
+运行进程 exit=0 只说明编排与结果保存结束，Agent 是否完成必须读取 report 的 status。
 
 `Submitted` 只表示 Agent 主动结束并给出补丁，不能证明修复正确。`ContextWindowExceededError`、
 `LimitsExceeded`、超时均是执行失败；未评分不等于 0 分。迁移验收状态见
