@@ -96,6 +96,13 @@ Within that boundary, the important design point is:
   gates
 - `tests/`: focused tests for registry loading and command generation
 
+## Measured experimental reports
+
+- [BetterScale + solver mixed graph pool (2026-10-20)](reports/betterscale-solver-mixed-pool-20261020/README.md):
+  actual HTTP serving, C8/C16/C32 ×4K/8K, MMLU-Pro200 and HLE Gold text200, payload-free repeat
+  receipts and card-rental costs. Solver-enabled measurements, not predictions, native-OFF
+  comparisons, task accuracy or official fixed-target leaderboard submissions.
+
 ## Quick Start
 
 ```bash
