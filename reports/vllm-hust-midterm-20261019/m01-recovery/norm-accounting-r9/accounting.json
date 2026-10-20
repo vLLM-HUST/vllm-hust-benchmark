@@ -1,0 +1,222 @@
+{
+  "status": "source_and_host_derived_useful_rms_catalog",
+  "scope": "Whole TP2 model semantic work counted once, not duplicated hidden-state normalization on each rank.",
+  "target_valid_tokens": 339760,
+  "draft_valid_tokens": 359141,
+  "inventory_counts": [
+    {
+      "target": {
+        "128": 30,
+        "2048": 81,
+        "256": 20
+      },
+      "draft": {
+        "256": 2,
+        "2048": 5
+      }
+    },
+    {
+      "target": {
+        "128": 30,
+        "2048": 81,
+        "256": 20
+      },
+      "draft": {
+        "256": 2,
+        "2048": 5
+      }
+    }
+  ],
+  "entries": [
+    {
+      "name": "target.hidden_no_residual",
+      "rows": 339760,
+      "width": 2048,
+      "residual": false,
+      "gated": false,
+      "operations": {
+        "square": 695828480,
+        "reduction_add": 695488720,
+        "mean_scale": 339760,
+        "epsilon_add": 339760,
+        "normalize_multiply": 695828480,
+        "weight_multiply": 695828480,
+        "residual_add": 0,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 339760,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 2783653680
+    },
+    {
+      "name": "target.hidden_with_residual",
+      "rows": 27180800,
+      "width": 2048,
+      "residual": true,
+      "gated": false,
+      "operations": {
+        "square": 55666278400,
+        "reduction_add": 55639097600,
+        "mean_scale": 27180800,
+        "epsilon_add": 27180800,
+        "normalize_multiply": 55666278400,
+        "weight_multiply": 55666278400,
+        "residual_add": 55666278400,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 27180800,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 278358572800
+    },
+    {
+      "name": "draft.embedding_hidden_and_first_norm",
+      "rows": 1077423,
+      "width": 2048,
+      "residual": false,
+      "gated": false,
+      "operations": {
+        "square": 2206562304,
+        "reduction_add": 2205484881,
+        "mean_scale": 1077423,
+        "epsilon_add": 1077423,
+        "normalize_multiply": 2206562304,
+        "weight_multiply": 2206562304,
+        "residual_add": 0,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 1077423,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 8827326639
+    },
+    {
+      "name": "draft.post_attention_and_final_norm",
+      "rows": 718282,
+      "width": 2048,
+      "residual": true,
+      "gated": false,
+      "operations": {
+        "square": 1471041536,
+        "reduction_add": 1470323254,
+        "mean_scale": 718282,
+        "epsilon_add": 718282,
+        "normalize_multiply": 1471041536,
+        "weight_multiply": 1471041536,
+        "residual_add": 1471041536,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 718282,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 7355925962
+    },
+    {
+      "name": "target.full_attention_qk",
+      "rows": 61156800,
+      "width": 256,
+      "residual": false,
+      "gated": false,
+      "operations": {
+        "square": 15656140800,
+        "reduction_add": 15594984000,
+        "mean_scale": 61156800,
+        "epsilon_add": 61156800,
+        "normalize_multiply": 15656140800,
+        "weight_multiply": 15656140800,
+        "residual_add": 0,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 61156800,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 62685720000
+    },
+    {
+      "name": "draft.full_attention_qk",
+      "rows": 6464538,
+      "width": 256,
+      "residual": false,
+      "gated": false,
+      "operations": {
+        "square": 1654921728,
+        "reduction_add": 1648457190,
+        "mean_scale": 6464538,
+        "epsilon_add": 6464538,
+        "normalize_multiply": 1654921728,
+        "weight_multiply": 1654921728,
+        "residual_add": 0,
+        "output_gate_multiply": 0,
+        "inverse_sqrt_evaluations": 6464538,
+        "silu_evaluations": 0
+      },
+      "basic_arithmetic_subtotal": 6626151450
+    },
+    {
+      "name": "target.gdn_output",
+      "rows": 326169600,
+      "width": 128,
+      "residual": false,
+      "gated": true,
+      "operations": {
+        "square": 41749708800,
+        "reduction_add": 41423539200,
+        "mean_scale": 326169600,
+        "epsilon_add": 326169600,
+        "normalize_multiply": 41749708800,
+        "weight_multiply": 41749708800,
+        "residual_add": 0,
+        "output_gate_multiply": 41749708800,
+        "inverse_sqrt_evaluations": 326169600,
+        "silu_evaluations": 41749708800
+      },
+      "basic_arithmetic_subtotal": 209074713600
+    }
+  ],
+  "basic_arithmetic_subtotal": 575712064131,
+  "inverse_sqrt_evaluations": 423107203,
+  "silu_evaluations": 41749708800,
+  "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+  "counts_source_sha256": "237f6b71017e3a391ae8c164ad07ca43fbf6a66b3bf0637fd2aef03172aca3ca",
+  "sources": {
+    "ascend/patch_qwen3_5.py": {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/patch/worker/patch_qwen3_5.py",
+      "sha256": "0ea5111173d5a02e4f8ab89130a1a1bd7d44ad86885a4c64bb3cb4649afbb48c"
+    },
+    "ascend/layernorm.py": {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/layernorm.py",
+      "sha256": "50dedf714c6e485d47fea1cc4f0c8fc8058b43f1ad6e33b0df36dfaca0782991"
+    },
+    "ascend/layernorm_gated.py": {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/triton/layernorm_gated.py",
+      "sha256": "ecdd125ce32f969e1b1c0e4f8b4e84ee8657332cd02cdcc4c72edd2bff13aff2"
+    },
+    "ascend/gdn.py": {
+      "path": "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/gdn.py",
+      "sha256": "765eb27018f762e970301978af80a91d86ce4d7110ed7f2c48a3986b2eb78e85"
+    },
+    "vllm/qwen3_5.py": {
+      "path": "/workspace/gennova-6-20261019/shared028-device-r1/deployed/runtime/venv-school-r1/lib/python3.12/site-packages/vllm/model_executor/models/qwen3_5.py",
+      "sha256": "3abeac36180df7bd1bd96b1a7c698a8f212d92c063026420cbdd16d1980e90e6"
+    },
+    "vllm/qwen3_next.py": {
+      "path": "/workspace/gennova-6-20261019/shared028-device-r1/deployed/runtime/venv-school-r1/lib/python3.12/site-packages/vllm/model_executor/models/qwen3_next.py",
+      "sha256": "4a27cf7b065c2097688421e6ea849704cef946f347978fb426abbc72b77f00b2"
+    },
+    "vllm/qwen3_5_mtp.py": {
+      "path": "/workspace/gennova-6-20261019/shared028-device-r1/deployed/runtime/venv-school-r1/lib/python3.12/site-packages/vllm/model_executor/models/qwen3_5_mtp.py",
+      "sha256": "89b0bde1d11fe5768a634e4365c78274e20694b26f4c6bb68e934328d8d0b190"
+    },
+    "vllm/qwen_gdn_linear_attn.py": {
+      "path": "/workspace/gennova-6-20261019/shared028-device-r1/deployed/runtime/venv-school-r1/lib/python3.12/site-packages/vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py",
+      "sha256": "b80f8e6f3fff442fb880aebb3209c52f814f66490009f4ac4003de603576d10a"
+    }
+  },
+  "model_effective_flops": null,
+  "attainment_percent": null,
+  "limitations": [
+    "Counts valid tokens, not fixed-capacity graph padding or duplicated TP hidden normalization.",
+    "RMS square, reduction, average, epsilon, scaling, affine weight and residual additions use real arithmetic semantics.",
+    "Gemma weight+1 is a parameter transform, not charged once per token; its implementation work is excluded.",
+    "SiLU is recorded as one special-function evaluation with no FLOP cost; its outer gate multiply is counted separately.",
+    "Inverse square root evaluations have no arbitrary FLOP equivalent.",
+    "GDN input Q/K L2 normalization is already in the preprocess catalog and is not counted again.",
+    "Source and host-derived counts are not device instruction measurements, BF16 equivalence or matched timing."
+  ]
+}
