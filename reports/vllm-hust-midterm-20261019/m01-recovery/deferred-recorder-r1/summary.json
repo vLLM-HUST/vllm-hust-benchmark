@@ -1,0 +1,22 @@
+{
+  "status": "qualified_standalone_only",
+  "ranks": [
+    {
+      "rank": 0,
+      "raw_sha256": "6b88af8e078f26cb86d9334a00b976a6d0029c2fe9971149d2cf05b074cdc145"
+    },
+    {
+      "rank": 1,
+      "raw_sha256": "c77749da96338b178f7cab18e12248567b8af4f2b2719b0a22dde7f176f09ddf"
+    }
+  ],
+  "production_model_coverage_proven": false,
+  "performance_improvement_proven": false,
+  "limitations": [
+    "A standalone three-routing-call graph does not prove coverage of every production stream.",
+    "No latency improvement or model effective-compute attainment is inferred.",
+    "Finite capacity is explicit; overflow must reject a future model trace rather than overwrite it.",
+    "Event timestamps include stream idle/submission gaps, not only arithmetic kernel duration.",
+    "No explicit synchronize or device-to-host read occurs inside the replay loop; reads occur after the batch."
+  ]
+}

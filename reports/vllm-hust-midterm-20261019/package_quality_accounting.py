@@ -36,6 +36,7 @@ def main():
             "swiglu-reference",
             "moe-combine-reference",
             "router-gate-reference",
+            "deferred-recorder",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -45,7 +46,26 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "router-gate-reference":
+    if args.kind == "deferred-recorder":
+        directories = ["moe-deferred-capture-r1", "moe-deferred-capture-control-r1"]
+        sources = [
+            "moe_deferred_capture.py",
+            "moe_deferred_capture_probe.py",
+            "moe_deferred_capture_probe.sh",
+            "prepare_moe_deferred_capture.py",
+            "run_moe_deferred_capture.py",
+            "audit_moe_deferred_capture.py",
+            "test_moe_deferred_capture.py",
+            "moe-deferred-capture-plan-r1.json",
+            "moe-deferred-capture-summary-r1.json",
+            "run_swiglu_reference.py",
+            "swiglu_reference_probe.sh",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+        ]
+        summaries = {"summary.json": "moe-deferred-capture-summary-r1.json"}
+    elif args.kind == "router-gate-reference":
         directories = ["router-gate-reference-r1", "router-gate-reference-control-r1"]
         sources = [
             "prepare_router_gate_reference.py",
