@@ -12,6 +12,12 @@ The migration tool now fails closed on missing or mismatched visibility metadata
 drafts, and verifies draft Releases by API ID instead of the public tag endpoint. Its `--publish`
 flag means copying assets to the destination, not promoting a draft to public.
 
+Draft HTML/download links can use GitHub-generated `untagged-*` paths. Use the stable release and
+asset API IDs in [the final verification](final-verification.json) with authenticated access, not
+invented tag URLs. The final verification checks the original declared tag names as well as
+visibility and bytes. Release metadata edits must explicitly preserve the tag name and
+draft/prerelease flags. Draft assets require an owner-only local cache directory.
+
 The three SZYN evidence Releases originally hosted in dev-hub are copied into vllm-hust-benchmark
 without changing asset bytes. `manifest.json` records original release IDs, titles, notes, asset
 URLs, destination URLs, byte counts and SHA256 digests.

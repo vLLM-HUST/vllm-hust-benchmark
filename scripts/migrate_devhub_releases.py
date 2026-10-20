@@ -59,11 +59,15 @@ def check_visibility(source, target):
 
 def migrate(cache, output, publish):
     source = releases(SOURCE)
+    cache.mkdir(parents=True, exist_ok=True, mode=0o700)
+    if any(row.get("draft") for row in source) and cache.stat().st_mode & 0o077:
+        raise ValueError("Draft artifacts require a private cache directory")
     targets = {row["tag_name"]: row for row in releases(TARGET)}
     records = []
     for release in source:
         flags = visibility_flags(release)
         tag = release["tag_name"]
+        remote = targets.get(tag)
         if not tag.startswith("szyn-swebench-qwen35-"):
             raise ValueError("Unexpected release outside approved migration scope")
         directory = cache / tag
@@ -138,6 +142,8 @@ def migrate(cache, output, publish):
                 gh("api", f"repos/{TARGET}/releases/{targets[tag]['id']}")
             )
             check_visibility(release, remote)
+            if remote["tag_name"] != tag:
+                raise ValueError("Release tag identity mismatch")
             actual = {a["name"]: a for a in remote["assets"]}
             for asset in expected:
                 copied = actual[asset["name"]]
@@ -146,10 +152,12 @@ def migrate(cache, output, publish):
                     or copied["size"] != asset["size"]
                 ):
                     raise ValueError("Remote destination digest mismatch")
+        destination_assets = {a["name"]: a for a in (remote or {}).get("assets", [])}
         records.append(
             {
                 "source_release": release["html_url"],
                 "source_release_id": release["id"],
+                "original_tag": tag,
                 "original_draft": release["draft"],
                 "original_prerelease": release["prerelease"],
                 "original_published_at": release.get("published_at"),
@@ -157,7 +165,9 @@ def migrate(cache, output, publish):
                 "original_target_commitish": release.get("target_commitish"),
                 "original_title": release["name"],
                 "original_body": release["body"],
-                "destination_release": f"https://github.com/{TARGET}/releases/tag/{tag}",
+                "destination_release": (remote or {}).get("html_url"),
+                "destination_release_api_url": (remote or {}).get("url"),
+                "destination_release_id": (remote or {}).get("id"),
                 "remote_verified": publish,
                 "assets": [
                     {
@@ -165,7 +175,12 @@ def migrate(cache, output, publish):
                         "bytes": a["size"],
                         "digest": a["digest"],
                         "source_url": a["browser_download_url"],
-                        "destination_url": f"https://github.com/{TARGET}/releases/download/{tag}/{a['name']}",
+                        "destination_url": destination_assets.get(a["name"], {}).get(
+                            "browser_download_url"
+                        ),
+                        "destination_api_url": destination_assets.get(
+                            a["name"], {}
+                        ).get("url"),
                     }
                     for a in expected
                 ],
