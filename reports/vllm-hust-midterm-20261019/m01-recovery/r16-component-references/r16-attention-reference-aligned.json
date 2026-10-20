@@ -1,0 +1,143 @@
+{
+  "status": "same_r16_window_semantics_and_component_references_aligned",
+  "cohorts": {
+    "inside_request_under_clock_tolerance": {
+      "counts": {
+        "target": 879,
+        "draft_step0": 879,
+        "draft_step1": 879
+      },
+      "rank_component_ms": [
+        {
+          "target": 689.8861403763294,
+          "draft_step0": 62.02050001919268,
+          "draft_step1": 47.109049952030155
+        },
+        {
+          "target": 684.4942203164101,
+          "draft_step0": 62.49031202793123,
+          "draft_step1": 48.1777819991112
+        }
+      ],
+      "softmax_semantics": {
+        "target": {
+          "score_scale_multiply": 47598914720,
+          "stability_subtract": 47598914720,
+          "denominator_add": 47544540640,
+          "exponential": 47598914720,
+          "normalization_divide": 47598914720,
+          "maximum_compare": 47544540640,
+          "query_rows_all_heads_layers": 54374080,
+          "causal_scores_all_heads_layers": 47598914720
+        },
+        "draft_step0": {
+          "score_scale_multiply": 4759891472,
+          "stability_subtract": 4759891472,
+          "denominator_add": 4754454064,
+          "exponential": 4759891472,
+          "normalization_divide": 4759891472,
+          "maximum_compare": 4754454064,
+          "query_rows_all_heads_layers": 5437408,
+          "causal_scores_all_heads_layers": 4759891472
+        },
+        "draft_step1": {
+          "score_scale_multiply": 477495824,
+          "stability_subtract": 477495824,
+          "denominator_add": 477185264,
+          "exponential": 477495824,
+          "normalization_divide": 477495824,
+          "maximum_compare": 477185264,
+          "query_rows_all_heads_layers": 310560,
+          "causal_scores_all_heads_layers": 477495824
+        }
+      },
+      "qk_av_arithmetic": 54104373264384,
+      "softmax_add_subtract_multiply": 158448784000
+    },
+    "boundary_or_tail": {
+      "counts": {
+        "target": 1,
+        "draft_step0": 1,
+        "draft_step1": 1
+      },
+      "rank_component_ms": [
+        {
+          "target": 0.3643200099468231,
+          "draft_step0": 0.03648599982261658,
+          "draft_step1": 0.036320000886917114
+        },
+        {
+          "target": 0.3467999994754791,
+          "draft_step0": 0.03465200066566467,
+          "draft_step1": 0.03347800076007843
+        }
+      ],
+      "softmax_semantics": {
+        "target": {
+          "score_scale_multiply": 732960,
+          "stability_subtract": 732960,
+          "denominator_add": 732480,
+          "exponential": 732960,
+          "normalization_divide": 732960,
+          "maximum_compare": 732480,
+          "query_rows_all_heads_layers": 480,
+          "causal_scores_all_heads_layers": 732960
+        },
+        "draft_step0": {
+          "score_scale_multiply": 73296,
+          "stability_subtract": 73296,
+          "denominator_add": 73248,
+          "exponential": 73296,
+          "normalization_divide": 73296,
+          "maximum_compare": 73248,
+          "query_rows_all_heads_layers": 48,
+          "causal_scores_all_heads_layers": 73296
+        },
+        "draft_step1": {
+          "score_scale_multiply": 24464,
+          "stability_subtract": 24464,
+          "denominator_add": 24448,
+          "exponential": 24464,
+          "normalization_divide": 24464,
+          "maximum_compare": 24448,
+          "query_rows_all_heads_layers": 16,
+          "causal_scores_all_heads_layers": 24464
+        }
+      },
+      "qk_av_arithmetic": 850657280,
+      "softmax_add_subtract_multiply": 2491616
+    }
+  },
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792524247.4632442,
+    "end_wall": 1792524313.714946,
+    "duration_seconds": 66.25170172471553,
+    "wall_monotonic_offset_difference_seconds": 4.76837158203125e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r16-request-attention.json": "e2c4e868a8d6e8e015d7977f847e29e20395e1ca0ecbf0bd221163dbf24eb3d3",
+    "/root/gennova-evidence/20261019-midterm-aligned/fia-timing-summary-r1.json": "51df2bdf3cb11c4feda87cf56e9ef908a7977ee7dddbdf232db830900618b969",
+    "/root/gennova-evidence/20261019-midterm-aligned/fia-timing-plan-r1.json": "76d3393049f66915664a49131e786fea95104d0e7c4e8263420e090f2da77a64",
+    "/root/gennova-evidence/20261019-midterm-aligned/align_r16_attention_reference.py": "a38934db1cffe05ee911beb14c8ed3a60f003c990c39abac2484bafa78e95778",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r16_attention_window.py": "12c023c88f52762cbc7975a219686772e41821b9b0faa9a50dba22ebfa1651e2",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r12_softmax_semantics.py": "b264d2c4c836a16ac5c715a6dfc44e6ab9543872b6f277877ca7ffd29b2899a8",
+    "/root/gennova-evidence/20261019-midterm-aligned/integrate_r16_hardware.py": "5f3087113846f9559639c8020508d390651ccdde3ff2885f6f14fe7e45d15de4",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/moe-deferred-756636.json": "32cd83b8fc1bc0845bc702072aa9c3548175301b4d9d7871660b1f97ef70d1a5",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/owned-fia-756636.json": "141169132c34523e242af3c013ff5cc6aa98364a0fbe284552abf83ed6c33fb4",
+    "/root/gennova-evidence/20261019-midterm-aligned/fia-timing-r1/rank-0.jsonl": "9f90a7d1e6a8b88392753fb291c5dd4a6fd5a17bccc05797a578c8e35b6a9f81",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/moe-deferred-756637.json": "aabcae5bd648fcda5cdb55f95c8f3be462956a2d84f1faa28cf564d429ba45d2",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/owned-fia-756637.json": "045ea2122e88b9f6d1d997ebe4428f6b6b520ebe601c0539d1a332fba3f1b5e8",
+    "/root/gennova-evidence/20261019-midterm-aligned/fia-timing-r1/rank-1.jsonl": "8b90e8a428eb2a7aa8ca81bb7f56b611d5157c646c1da3471c7d3ae69dd188a8"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "2 ms event mapping tolerance conditions the window classification.",
+    "Canonical softmax arithmetic is not fused-kernel instruction counting.",
+    "Exponentials, divisions and comparisons remain separate categories.",
+    "Prewarmed synthetic component timing is not model critical-path time.",
+    "No whole-model F or capacity inference is made from this subtotal."
+  ]
+}
