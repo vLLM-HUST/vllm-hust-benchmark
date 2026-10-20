@@ -14,6 +14,8 @@ def test_archived_scalar_and_independent_inverse_checks(tmp_path):
     for name, content in members.items():
         if name.startswith("source/") and name.count("/") == 1 and name.endswith(".py"):
             (tmp_path / name.split("/")[-1]).write_bytes(content)
+    for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
+        (tmp_path / name).write_bytes((BASE.parent / name).read_bytes())
     completed = subprocess.run(
         [
             sys.executable,
