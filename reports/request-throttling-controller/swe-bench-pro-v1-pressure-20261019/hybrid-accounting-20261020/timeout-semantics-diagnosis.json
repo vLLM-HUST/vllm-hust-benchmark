@@ -1,0 +1,47 @@
+{
+  "status": "READONLY_SOURCE_AND_CPU_MOCK_VERIFIED_NO_MODEL_REQUESTS",
+  "versions": {
+    "litellm": "1.106.0",
+    "openai": "2.54.0",
+    "httpx": "0.28.1",
+    "httpcore": "1.0.9",
+    "tenacity": "9.2.1",
+    "mini-swe-agent": "2.4.6"
+  },
+  "facts": {
+    "configured_agent_timeout": {
+      "connect": 180,
+      "read": 180,
+      "write": 180,
+      "pool": 180
+    },
+    "none_becomes_seconds": 600,
+    "zero_becomes_seconds": 0,
+    "num_retries_zero_mock_attempts": 1,
+    "official_router_wait_default_seconds": 1800,
+    "agent_wall_seconds": 1200,
+    "step_limit": 30,
+    "limits_exceeded_all_at_model_calls": 30,
+    "limits_exceeded_native": 2,
+    "limits_exceeded_controller": 20,
+    "context_exceeded_native": 1,
+    "context_exceeded_controller": 7,
+    "context_failure_input_at_least": 28673,
+    "requested_output": 4096,
+    "context_limit": 32768
+  },
+  "qualifications": [
+    "CPU-only fake transport and static source verification; no inference, no model restart, no performance result.",
+    "Official request handler waits for admission/resume before forwarding; client response-header wait can include controller queue/pause and generation.",
+    "This does not measure the queue/pause/generation duration of each historical failure.",
+    "Disabling read timeout alone does not remove step, context, downstream900-second or overall1200-second limits."
+  ],
+  "evidence_files": {
+    "timeout-package-versions-private.json": "23c286416706c744491a26e7d8b95f94364c6d748b8d1701bb0b67916491762a",
+    "timeout-semantics-source-private.json": "b67d08406e583ffdace6ad3e0467ee7fa3ba4286a4b75cafe46bb629acfad7fd",
+    "timeout-route-source-verification.json": "3f58f4a81a0264f58f419d7ffe7f23032fc2a2c582b73b3167ddfabaffb6cdd5",
+    "timeout-config-semantics-private.json": "50094ca1fc39c1fa9548026494fb58133910470db58cb56d41bef521312230c0",
+    "timeout-config-semantics-r2-private.json": "7d2209cc72746c2e6da84a90377aad95ecebbec6f5856b03f17f4b97dfd44de6",
+    "step-limit-diagnosis.json": "d8241a089e2f73ae000e02ef1905cae84cbdbc2662046ef5947068057c35dd9f"
+  }
+}

@@ -43,3 +43,18 @@ intermediate and terminal platform Grafana/Ray/log receipts were retained; publi
 summaries, hashes, source and standard PNG/PDF figures only. Standard engine plots reuse the
 existing palette/layout and10-second rate window; hybrid KV is token-equivalent, not exact resident
 tokens. No repeat CN/NC was launched and both cards/model remain retained.
+
+## Read-only timeout semantics and proposed isolation protocol
+
+The frozen client libraries were checked without network connections or model requests. The actual
+scalar timeout180sets connect/read/write/pool to180seconds and num_retries0produces one mock
+attempt. Timeout0is zero, whereas None falls back to600seconds in this LiteLLM version. Explicit
+`httpx.Timeout(180.0, read=None)` changes only the read field to null. The official request route
+waits for admission/resume before forwarding; its resume wait default is1800seconds. This
+establishes a configuration mismatch risk, not exact per-request historical pause time.
+
+All22LimitsExceeded statuses (2Native/20Controller) occur at30successful model calls, so these are
+step limits, distinct from the1200-second wall budget. Context-window failures are separately
+retained. The attached protocol proposal changes only the Agent read timeout; every other
+transport/Agent/model/workload bound stays fixed. It is a reviewable, unapproved proposal snapshot,
+not a deployed configuration or new performance result. Other budgets may still prevent submission.

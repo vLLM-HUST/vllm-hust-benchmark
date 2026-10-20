@@ -1,0 +1,49 @@
+{
+  "status": "PROPOSED_NOT_APPROVED_NOT_DEPLOYED",
+  "goal": "Isolate premature Agent HTTP read timeout from scheduler wait; not a promise all Agents complete",
+  "same_arms": [
+    "native",
+    "controller"
+  ],
+  "change": {
+    "field": "Agent HTTP read timeout",
+    "before_seconds": 180,
+    "after_seconds": null,
+    "implementation_semantics": "httpx.Timeout(180.0, read=None), verified through frozen LiteLLM/openai/httpx mock transport"
+  },
+  "unchanged": {
+    "connect_timeout_seconds": 180,
+    "write_timeout_seconds": 180,
+    "pool_timeout_seconds": 180,
+    "downstream_transport_timeout_seconds": 900,
+    "agent_wall_seconds": 1200,
+    "agent_step_limit": 30,
+    "max_output_tokens": 4096,
+    "context_limit": 32768,
+    "max_num_seqs": 256,
+    "graph_max": 256,
+    "kv_bytes": 17179869184,
+    "program_instances": 256,
+    "official_tasks": 8,
+    "copies_per_task": 32,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "model_restart": false,
+    "official_thunderagent_core_change": false
+  },
+  "execution_after_explicit_approval": [
+    "Fresh registered Agent transport protocol and source/config hashes; no baseline overwrite or local override",
+    "CPU-only semantic gate verifies exactly the read field changes and retries stayzero",
+    "Fresh run/root/exclusive intent; same frozen tasks/Agent/model and newmatched Native/Controller NC",
+    "Actual UP/Grafana/Ray/log start/10min/pressure/terminal; idle gates; retain errors and independent archive",
+    "Review timeout/step/context/submitted/work before any repeat; no benefit claim from error exits"
+  ],
+  "not_authorized_until_user_decision": [
+    "No new Agent job",
+    "No timeout/config/source change to running or frozen measurements"
+  ],
+  "remaining_risks": [
+    "Step30/context32768 and wall1200 may still end Agents without submission",
+    "Historical per-request pause duration is unavailable; no exact failure causality reconstructed"
+  ]
+}

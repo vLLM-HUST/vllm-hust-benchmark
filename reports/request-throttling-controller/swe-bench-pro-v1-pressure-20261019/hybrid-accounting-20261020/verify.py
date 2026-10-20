@@ -36,3 +36,17 @@ assert (
 print(
     "PASS: public integrity/consistency; all Agents failed; no performance benefit established"
 )
+
+semantics = json.loads((root / "timeout-semantics-diagnosis.json").read_text())
+assert semantics["facts"]["none_becomes_seconds"] == 600
+assert semantics["facts"]["zero_becomes_seconds"] == 0
+assert semantics["facts"]["limits_exceeded_native"] == 2
+assert semantics["facts"]["limits_exceeded_controller"] == 20
+assert semantics["facts"]["limits_exceeded_all_at_model_calls"] == 30
+proposal = json.loads((root / "timeout-protocol-proposal.json").read_text())
+assert proposal["status"] == "PROPOSED_NOT_APPROVED_NOT_DEPLOYED"
+assert proposal["change"]["before_seconds"] == 180
+assert proposal["change"]["after_seconds"] is None
+assert proposal["unchanged"]["agent_wall_seconds"] == 1200
+assert proposal["unchanged"]["agent_step_limit"] == 30
+print("PASS: timeout semantics consistency and unapproved proposal snapshot")
