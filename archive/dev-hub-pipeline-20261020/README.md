@@ -8,6 +8,8 @@ SHA256 and lengths.
 real-online smoke receipt, not a formal performance claim. No points are combined, recomputed or
 promoted by archiving them here.
 
-Source cleanup remains pending: dev-hub's receipt tests must first consume the pinned benchmark
-copy. This directory establishes remote custody, not completion of that consumer migration. Follow
-benchmark issue #326.
+Source cleanup was merged in [dev-hub #99](https://github.com/vLLM-HUST/vllm-hust-dev-hub/pull/99)
+after custody and Quickstart checks passed. The two duplicate JSON files were removed; receipt tests
+now fetch the immutable benchmark copy and verify its SHA256 and byte length before retaining the
+measured-policy assertions. Other evidence and consumer migrations remain tracked in benchmark issue
+#326.
