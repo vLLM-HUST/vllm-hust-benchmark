@@ -1,0 +1,211 @@
+{
+  "status": "same_interval_counter_bounds",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792493702.0265539,
+    "end_wall": 1792493809.7795353,
+    "duration_seconds": 107.75298145599663,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "devices": [
+    {
+      "card": 4,
+      "intervals": {
+        "lower": {
+          "start_before_wall_ns": 1792493702032515481,
+          "start_after_wall_ns": 1792493702033107218,
+          "end_before_wall_ns": 1792493809771247382,
+          "end_after_wall_ns": 1792493809771625526,
+          "tx_flits": [
+            0,
+            0,
+            0,
+            0,
+            10423639228,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "rx_flits": [
+            0,
+            0,
+            0,
+            0,
+            10381564387,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "upper": {
+          "start_before_wall_ns": 1792493702012442487,
+          "start_after_wall_ns": 1792493702013973825,
+          "end_before_wall_ns": 1792493809791326086,
+          "end_after_wall_ns": 1792493809791699130,
+          "tx_flits": [
+            0,
+            0,
+            0,
+            0,
+            10423639228,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "rx_flits": [
+            0,
+            0,
+            0,
+            0,
+            10381564387,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "card": 5,
+      "intervals": {
+        "lower": {
+          "start_before_wall_ns": 1792493702033152469,
+          "start_after_wall_ns": 1792493702033616214,
+          "end_before_wall_ns": 1792493809771673657,
+          "end_after_wall_ns": 1792493809772070291,
+          "tx_flits": [
+            0,
+            10381499735,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "rx_flits": [
+            0,
+            10423573237,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "upper": {
+          "start_before_wall_ns": 1792493702014034925,
+          "start_after_wall_ns": 1792493702014640822,
+          "end_before_wall_ns": 1792493809791749471,
+          "end_after_wall_ns": 1792493809792232146,
+          "tx_flits": [
+            0,
+            10381499735,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "rx_flits": [
+            0,
+            10423573237,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      }
+    }
+  ],
+  "aggregate_tx_link_bytes": {
+    "lower": 416102779260,
+    "upper": 416102779260
+  },
+  "decoder": {
+    "library_sha256": "2e89f3a4d28e0002bb81f3617cede498784fd9cd28b2d0ab0121250e05fea10c",
+    "installed_getter_formula": "count * 20 / (profiling_time_ms / 1000) / 2**30",
+    "interpretation": "The installed getter returns GiB/s despite the API documentation's GB/s label. Equivalence to the separate cumulative counter is assessed experimentally, not assumed."
+  },
+  "source_sha256": {
+    "hccs64.jsonl": "d7b808af16ccdc29267b58a6a71be421ab250cc19f2ed8ef96ee386ca262aa09",
+    "reference_summary": "7d8c79d85ba0b140057c4cda6169de3ca50be17cf548baa268a570b069aee3d6",
+    "control_receipt": "b168704f6993fe4434e1ea391766694c288edafe249a15b3e7718ec69b0f469e"
+  },
+  "limitations": [
+    "Bounds use before/after read timestamps; no interpolation or exact endpoint attribution is claimed.",
+    "TX is summed once; RX is retained for inspection, not added as independent traffic.",
+    "Physical link accounting includes protocol/incidental traffic, not logical collective payload.",
+    "The 20-byte conversion is tied to the separately qualified installed driver getter."
+  ]
+}
