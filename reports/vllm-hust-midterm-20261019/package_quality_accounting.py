@@ -28,6 +28,7 @@ def main():
             "dense-reference",
             "gdn-triangular",
             "preprocess-reference",
+            "conv-accounting",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -37,7 +38,28 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "preprocess-reference":
+    if args.kind == "conv-accounting":
+        directories = []
+        sources = [
+            "audit_conv_accounting.py",
+            "test_conv_accounting.py",
+            "combine_gdn_accounting_r9.py",
+            "conv-accounting-r9.json",
+            "same-run-partial-accounting-r9-v4.json",
+            "same-run-partial-accounting-r9-v3.json",
+            "gdn-wy-inverse-accounting-r9.json",
+            "preprocess-reference-plan-r1.json",
+            "preprocess-reference-summary-r1.json",
+            "audit_gdn_host_schedule.py",
+            "audit_token_accounting.py",
+        ]
+        catalog = json.loads((args.root / "conv-accounting-r9.json").read_text())
+        sources.extend(catalog["source_sha256"])
+        summaries = {
+            "accounting.json": "conv-accounting-r9.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r9-v4.json",
+        }
+    elif args.kind == "preprocess-reference":
         directories = ["preprocess-reference-r1", "preprocess-reference-control-r1"]
         sources = [
             "prepare_preprocess_reference.py",
@@ -538,7 +560,7 @@ def main():
         ]
         summaries = {}
     selected = {}
-    if args.kind == "preprocess-reference":
+    if args.kind in ("preprocess-reference", "conv-accounting"):
         for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
             selected["source/" + name] = Path(__file__).parent / name
     if args.kind == "device-routing":
