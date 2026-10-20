@@ -30,6 +30,7 @@ def main():
             "preprocess-reference",
             "conv-accounting",
             "gdn-ho-accounting",
+            "norm-accounting",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -39,7 +40,22 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "gdn-ho-accounting":
+    if args.kind == "norm-accounting":
+        directories = []
+        sources = [
+            "audit_norm_accounting.py",
+            "test_norm_accounting.py",
+            "combine_norm_accounting_r9.py",
+            "norm-accounting-r9.json",
+            "host-attention-pairs-r9.json",
+            "same-run-partial-accounting-r9-v5.json",
+            "same-run-partial-accounting-r9-v6.json",
+        ]
+        summaries = {
+            "accounting.json": "norm-accounting-r9.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r9-v6.json",
+        }
+    elif args.kind == "gdn-ho-accounting":
         directories = ["gdn-native-source-r8"]
         sources = [
             "audit_gdn_ho_accounting.py",
@@ -578,6 +594,12 @@ def main():
         ]
         summaries = {}
     selected = {}
+    if args.kind == "norm-accounting":
+        norm_catalog = json.loads((args.root / "norm-accounting-r9.json").read_text())
+        for name, record in norm_catalog["sources"].items():
+            path = Path(record["path"])
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == record["sha256"]
+            selected["source/model-sources/" + name] = path
     if args.kind in ("preprocess-reference", "conv-accounting", "gdn-ho-accounting"):
         for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
             selected["source/" + name] = Path(__file__).parent / name
