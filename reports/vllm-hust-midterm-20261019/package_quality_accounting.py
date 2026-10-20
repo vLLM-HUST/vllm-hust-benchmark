@@ -29,6 +29,7 @@ def main():
             "gdn-triangular",
             "preprocess-reference",
             "conv-accounting",
+            "gdn-ho-accounting",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -38,7 +39,24 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "conv-accounting":
+    if args.kind == "gdn-ho-accounting":
+        directories = ["gdn-native-source-r8"]
+        sources = [
+            "audit_gdn_ho_accounting.py",
+            "test_gdn_ho_accounting.py",
+            "combine_ho_accounting_r9.py",
+            "gdn-ho-accounting-r9.json",
+            "same-run-partial-accounting-r9-v4.json",
+            "same-run-partial-accounting-r9-v5.json",
+            "audit_gdn_host_schedule.py",
+            "audit_token_accounting.py",
+            "payload/betterscale/models/qwen35/mixed_layout.py",
+        ]
+        summaries = {
+            "accounting.json": "gdn-ho-accounting-r9.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r9-v5.json",
+        }
+    elif args.kind == "conv-accounting":
         directories = []
         sources = [
             "audit_conv_accounting.py",
@@ -560,7 +578,7 @@ def main():
         ]
         summaries = {}
     selected = {}
-    if args.kind in ("preprocess-reference", "conv-accounting"):
+    if args.kind in ("preprocess-reference", "conv-accounting", "gdn-ho-accounting"):
         for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
             selected["source/" + name] = Path(__file__).parent / name
     if args.kind == "device-routing":
