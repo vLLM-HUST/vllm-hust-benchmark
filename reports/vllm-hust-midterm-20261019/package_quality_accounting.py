@@ -23,6 +23,7 @@ def main():
             "recurrence",
             "vocabulary-prefill",
             "gdn-reference",
+            "gdn-reference-r9",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -118,6 +119,27 @@ def main():
             "measure_microflow.py",
         ]
         summaries = {"reference.json": "vocab-reference-summary-r1.json"}
+    elif args.kind == "gdn-reference-r9":
+        directories = ["gdn-reference-r3", "gdn-reference-control-r3"]
+        sources = [
+            "prepare_gdn_reference_r9.py",
+            "prepare_gdn_reference_controller.py",
+            "prepare_gdn_reference_full.py",
+            "gdn-reference-r9-build.json",
+            "gdn-reference-plan-r3.json",
+            "gdn-reference-plan-r2.json",
+            "run_gdn_reference_r9.py",
+            "gdn_reference_probe_r9.py",
+            "gdn_reference_probe_r9.sh",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+            "audit_gdn_reference.py",
+            "audit_gdn_host_schedule.py",
+            "audit_token_accounting.py",
+            "gdn-reference-summary-r3.json",
+        ]
+        summaries = {"reference.json": "gdn-reference-summary-r3.json"}
     elif args.kind == "gdn-reference":
         directories = [
             "gdn-reference-r1",
