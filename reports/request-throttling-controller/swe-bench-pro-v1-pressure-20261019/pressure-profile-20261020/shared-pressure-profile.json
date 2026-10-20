@@ -1,0 +1,91 @@
+{
+  "schema": "shared-graph-profile-v1",
+  "id": "qwen35-tp2-graph-pressure-256-v1",
+  "status": "user-approved frozen pressure configuration; runtime graph qualification required",
+  "source_profile": "results/gennova-7-20261019/runs/gate-zero-qkv-r1/profile.json",
+  "engine": {
+    "tensor_parallel_size": 2,
+    "dtype": "bfloat16",
+    "max_model_len": 32768,
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 4095,
+    "gpu_memory_utilization": 0.9,
+    "seed": 17,
+    "enable_prefix_caching": true,
+    "mamba_cache_mode": "align",
+    "enable_chunked_prefill": true,
+    "async_scheduling": true,
+    "limit_mm_per_prompt": {
+      "image": 0,
+      "video": 0
+    },
+    "additional_config": {
+      "enable_cpu_binding": false
+    },
+    "compilation_config": {
+      "cudagraph_mode": "FULL_DECODE_ONLY",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ],
+      "max_cudagraph_capture_size": 256,
+      "pass_config": {
+        "enable_sp": false
+      }
+    },
+    "kv_cache_memory_bytes": 17179869184,
+    "speculative_config": null,
+    "enforce_eager": false
+  },
+  "packages": {
+    "torch": "2.13.0+cpu",
+    "torch-npu": "2.13.0rc1",
+    "triton-ascend": "3.6.0",
+    "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+    "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27"
+  },
+  "runtime_archive_sha256": {
+    "sdk213-r1-direct.tgz": "c03e96929d7b061e5cd66aba22d02ba1cb2df270ddb7654f562f8c6202f2e805",
+    "common-and-adapter-r2-direct.tgz": "79ba2c51565eba8e3fe3ec557264bea753e340b0cbfd241194c99527fbd1b5a3"
+  },
+  "source_identity_reference": "results/gennova-7-20261019/carrier-r6-install.json",
+  "policy": {
+    "eager_allowed": false,
+    "silent_graph_fallback_allowed": false,
+    "applies_to": "all new Qwen3.5 target-engine model launches, including diagnostics and bounded tests",
+    "new_shared_setting_change": "new central profile version and fresh matched controls; no local overrides",
+    "apc_note": "Native APC enabled in common baseline; not an independently added MOD benefit",
+    "compilation_mode": "SDK-resolved default of pinned common source; capture actual resolved mode in runtime receipt; no arm-specific override",
+    "deployment_only": [
+      "model path with matching content",
+      "container endpoint",
+      "visible-to-physical device mapping",
+      "private installation paths"
+    ],
+    "dataset_contract": "freeze dataset revision, ordered question/input/token hashes, template, sampling, caps, scorer, cache policy, actual request concurrency and run protocol per named track; all arms in track identical",
+    "comparison_group": "shared template plus actual hardware, loaded source/library identity, observations and dataset/run contract; cross-container results cannot be spliced",
+    "runtime_proof": "both TP worker epochs, actual effective config, loaded sources/libs, eligible decode graph replay in request window; capture alone is insufficient",
+    "formal_protocol_reference": "TESTING.md",
+    "quality_policy_reference": "config/quality-policy.json",
+    "fee": "freeze actual price or explicitly identified scenario; keep business/controller/reservation scopes separate"
+  },
+  "authorization": {
+    "approved_by": "myc",
+    "approved_on": "2026-10-20",
+    "instruction": "允许另冻压力配置",
+    "changed_engine_fields": [
+      "max_num_seqs",
+      "compilation_config.cudagraph_capture_sizes",
+      "compilation_config.max_cudagraph_capture_size"
+    ],
+    "baseline_profile": "unified-graph-profile-v1.json",
+    "scope": "Matched Native/Controller real SWE-bench Pro V1 pressure experiment; preserve original profile and both NPU cards"
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "status": "REAL_KV_PRESSURE_AND_SCHEDULER_ACTIONS_OBSERVED_ALL_AGENTS_FAILED",
+  "performance_comparison_valid": false,
+  "benefit_claim": false,
+  "run_id": "swe-pro-v1-pressure-profile-20261020-r2",
+  "protocol": {
+    "official_tasks": 8,
+    "independent_agents_per_task": 32,
+    "program_instances": 256,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "per_program_dependencies_preserved": true,
+    "agent_step_limit": 30,
+    "max_output_tokens": 4096,
+    "agent_wall_budget_seconds": 1200,
+    "agent_http_timeout_seconds": 180
+  },
+  "deployment": {
+    "source_commit": "c8fb885",
+    "central_profile_sha256": "82e3e4fb398d54a4b773faa9da960b19360067d494eec5801fcdef66ca2901fe",
+    "baseline_profile_sha256_unchanged": "5792631172af883cf247e05b214444c02a106831aa50162b8c6f3a0e63f24661",
+    "max_num_seqs": 256,
+    "graph_capture_max": 256,
+    "kv_bytes": 17179869184,
+    "actual_rank_graph_replay_delta": {
+      "0": 4,
+      "1": 4
+    },
+    "official_source_files_sha_matched": 17,
+    "model_restarted_after_user_approval": true,
+    "cards_retained": 2,
+    "failed_preinitialization_attempt": {
+      "run_suffix": "r1",
+      "reason": "cached old profile validation module TypeError",
+      "agent_requests": 0,
+      "preserved": true
+    },
+    "runtime_qualification": "Strict explicit pressure-profile fields passed both ranks. SDK-resolved additional compilation flags matched the historical baseline on both ranks; raw resolved dictionaries were retained rather than silently rewritten."
+  },
+  "arms": {
+    "native": {
+      "statuses": {
+        "RetryError": 253,
+        "LimitsExceeded": 3
+      },
+      "submitted": 0,
+      "elapsed_seconds": 1200.8286075699143,
+      "saved_responses": 2161,
+      "saved_usage": {
+        "completion_tokens": 159277,
+        "prompt_tokens": 11666522,
+        "total_tokens": 11825799
+      },
+      "exceptions": {
+        "httpx_read_timeout": 253,
+        "wall_budget": 5,
+        "limits_exceeded": 0
+      },
+      "kv_peak_fraction": 0.9987623762376238,
+      "samples_ge_90pct": 74,
+      "engine_samples": 1179,
+      "preemptions_delta": 15.0,
+      "engine_before": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "first_epoch": 1792462856.1734066,
+      "last_epoch": 1792464064.645984,
+      "peak_program_states": {
+        "active": 256
+      }
+    },
+    "controller": {
+      "statuses": {
+        "RetryError": 256
+      },
+      "submitted": 0,
+      "elapsed_seconds": 1202.4193708729,
+      "saved_responses": 2196,
+      "saved_usage": {
+        "completion_tokens": 121473,
+        "prompt_tokens": 11046642,
+        "total_tokens": 11168115
+      },
+      "exceptions": {
+        "httpx_read_timeout": 256,
+        "wall_budget": 54,
+        "limits_exceeded": 0
+      },
+      "kv_peak_fraction": 1.0,
+      "samples_ge_90pct": 78,
+      "engine_samples": 1197,
+      "preemptions_delta": 11.0,
+      "engine_before": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "first_epoch": 1792464113.7053065,
+      "last_epoch": 1792465340.3107672,
+      "peak_program_states": {
+        "active": 256,
+        "paused": 18
+      }
+    }
+  },
+  "logged_events": {
+    "native": {
+      "paused": 0,
+      "resumed": 0,
+      "marked": 0,
+      "disconnect_cancel": 192
+    },
+    "controller": {
+      "paused": 183,
+      "resumed": 181,
+      "marked": 207,
+      "disconnect_cancel": 201
+    }
+  },
+  "thunderagent_config": {
+    "scheduler_interval_seconds": 5,
+    "metrics_interval_seconds": 5,
+    "acting_token_weight": 1,
+    "use_acting_token_decay": false,
+    "buffer_per_program": 100,
+    "decode_buffer": 512,
+    "transport_timeout_seconds": 900,
+    "transport_request_retries": 0,
+    "agent_retry_attempts": 1,
+    "raw_capacity": 1656832,
+    "engine_mixed_capacity_estimate": 1204968
+  },
+  "capacity_disagreement": {
+    "controller_kv_ge_99pct_samples": 11,
+    "positive_remaining_in_all_11": true,
+    "first_kv_100pct_remaining_capacity": 1155488,
+    "first_kv_100pct_paused_programs": 0,
+    "interpretation": "Simultaneous sampled accounting disagreement; does not establish unique cause of every timeout. No capacity override was applied."
+  },
+  "scoring": {
+    "deferred_unresolved": 512,
+    "zero_score_claim": false
+  },
+  "private_archive_verification": {
+    "status": "PASS",
+    "bytes": 44321211,
+    "sha256": "a0942a5c58585df12e464973f0e8d24cc1a663d118a7f853498ca3fd78cdf84a",
+    "files_checked": 7672
+  },
+  "limits": [
+    "All failed or budget-exceeded; unequal saved work; no valid makespan or throughput gain.",
+    "Pause, mark and resume events are separate, not unique program counts.",
+    "Original non-streaming evidence lacks per-request queue/decode/pause timing; no invented TTFT.",
+    "Aggregate engine-recorded histograms are not per-failed-request cause decomposition.",
+    "NPU logs are separate from the CPU archive.",
+    "Start/terminal UI receipts exist; intermediate ten-minute screenshots are incomplete.",
+    "Public verifier checks consistency and hashes, not an independent re-audit of private task evidence."
+  ]
+}
