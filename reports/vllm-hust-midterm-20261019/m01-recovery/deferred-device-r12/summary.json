@@ -1,0 +1,121 @@
+{
+  "status": "complete_capture_consistent_request_and_drain_boundaries_separated",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792513033.6837723,
+    "end_wall": 1792513097.9899664,
+    "duration_seconds": 64.30619393009692,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "ranks": [
+    {
+      "rank": 0,
+      "complete_capture_roles": {
+        "target": {
+          "contexts": 889,
+          "calls_per_layer": 889,
+          "host_valid_tokens": 339919,
+          "padded_tokens": 412531,
+          "device_rows_including_padding": 132009920
+        },
+        "draft": {
+          "contexts": 889,
+          "calls_per_layer": 1778,
+          "host_valid_tokens": 359357,
+          "padded_tokens": 824662,
+          "device_rows_including_padding": 6597296
+        }
+      },
+      "request_boundary_frame_counts": {
+        "before": {
+          "target": 0,
+          "draft": 0
+        },
+        "inside": {
+          "target": 888,
+          "draft": 888
+        },
+        "crosses_boundary": {
+          "target": 1,
+          "draft": 0
+        },
+        "after": {
+          "target": 0,
+          "draft": 1
+        }
+      },
+      "device_capture_sha256": "e529a75012636aae3a7f00645d09e14943a949642bed65ab6bc7fd2b76ac5fb1",
+      "host_trace_sha256": "8ffd609915c7a4e84dd122c67adc2a2ae763b953b6b4972076afa31662282432",
+      "first_capture_event_start_wall_bounds": [
+        1792513033.9300108,
+        1792513033.9342306
+      ],
+      "last_capture_event_end_wall_bounds": [
+        1792513098.006228,
+        1792513098.0104477
+      ],
+      "clock_mapping_tolerance_seconds": 0.002
+    },
+    {
+      "rank": 1,
+      "complete_capture_roles": {
+        "target": {
+          "contexts": 889,
+          "calls_per_layer": 889,
+          "host_valid_tokens": 339919,
+          "padded_tokens": 412531,
+          "device_rows_including_padding": 132009920
+        },
+        "draft": {
+          "contexts": 889,
+          "calls_per_layer": 1778,
+          "host_valid_tokens": 359357,
+          "padded_tokens": 824662,
+          "device_rows_including_padding": 6597296
+        }
+      },
+      "request_boundary_frame_counts": {
+        "before": {
+          "target": 0,
+          "draft": 0
+        },
+        "inside": {
+          "target": 888,
+          "draft": 888
+        },
+        "crosses_boundary": {
+          "target": 0,
+          "draft": 0
+        },
+        "after": {
+          "target": 1,
+          "draft": 1
+        }
+      },
+      "device_capture_sha256": "debb0535f26e846fe11ff233dbeeb2a704072328478f6e965c650ca5c5df5e9f",
+      "host_trace_sha256": "a22edfe66ea175f38eaa6cb643c383c3dfcd51daa1797c5e801258d9765ceeda",
+      "first_capture_event_start_wall_bounds": [
+        1792513033.9309227,
+        1792513033.935176
+      ],
+      "last_capture_event_end_wall_bounds": [
+        1792513098.0062282,
+        1792513098.0104814
+      ],
+      "clock_mapping_tolerance_seconds": 0.002
+    }
+  ],
+  "observer_output_throughput": 796.1473408676019,
+  "completed": 200,
+  "failed": 0,
+  "whole_model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Current-stream event ordering does not establish every production stream boundary.",
+    "Complete capture counts include drain work and are not admitted as useful request FLOPs.",
+    "Event/host mapping uses the qualified 2 ms tolerance, not a proven hardware clock error bound.",
+    "No prior r9 arithmetic or hardware totals are transplanted into this run.",
+    "Observer throughput is not a replacement B1 performance result."
+  ]
+}
