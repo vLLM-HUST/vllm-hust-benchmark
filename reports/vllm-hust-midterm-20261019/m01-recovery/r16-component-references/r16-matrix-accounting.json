@@ -1,0 +1,97 @@
+{
+  "status": "same_run_loaded_shape_matrix_ledger_with_device_length_cohorts",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792524247.4632442,
+    "end_wall": 1792524313.714946,
+    "duration_seconds": 66.25170172471553,
+    "wall_monotonic_offset_difference_seconds": 4.76837158203125e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "cohorts": {
+    "inside_request_under_clock_tolerance": {
+      "valid_tokens": {
+        "target": 339838,
+        "draft": 359248
+      },
+      "projection_entries_global": {
+        "target": {
+          ".self_attn.qkv_proj": 128284549447680,
+          ".self_attn.o_proj": 57015355310080,
+          ".shared_expert.gate_up_proj": 57015355310080,
+          ".shared_expert.down_proj": 28507677655040,
+          ".mlp.gate": 14253838827520,
+          ".mlp.shared_expert_gate": 55679057920,
+          ".linear_attn.in_proj_qkvz": 513138197790720,
+          ".linear_attn.in_proj_ba": 2672594780160,
+          ".linear_attn.out_proj": 171046065930240,
+          "routed_expert_projection": 684184263720960
+        },
+        "draft": {
+          ".self_attn.qkv_proj": 13561157910528,
+          ".self_attn.o_proj": 6027181293568,
+          ".shared_expert.gate_up_proj": 1506795323392,
+          ".shared_expert.down_proj": 753397661696,
+          ".mlp.gate": 376698830848,
+          ".mlp.shared_expert_gate": 1471479808,
+          "model.fc": 6027181293568,
+          "routed_expert_projection": 18081543880704
+        }
+      },
+      "projection_semantic_subtotal": 1702509005504512,
+      "causal_qk_av_semantic_subtotal": 54104373264384,
+      "matrix_semantic_subtotal": 1756613378768896
+    },
+    "boundary_or_tail": {
+      "valid_tokens": {
+        "target": 3,
+        "draft": 4
+      },
+      "projection_entries_global": {
+        "target": {
+          ".self_attn.qkv_proj": 1132462080,
+          ".self_attn.o_proj": 503316480,
+          ".shared_expert.gate_up_proj": 503316480,
+          ".shared_expert.down_proj": 251658240,
+          ".mlp.gate": 125829120,
+          ".mlp.shared_expert_gate": 491520,
+          ".linear_attn.in_proj_qkvz": 4529848320,
+          ".linear_attn.in_proj_ba": 23592960,
+          ".linear_attn.out_proj": 1509949440,
+          "routed_expert_projection": 6039797760
+        },
+        "draft": {
+          ".self_attn.qkv_proj": 150994944,
+          ".self_attn.o_proj": 67108864,
+          ".shared_expert.gate_up_proj": 16777216,
+          ".shared_expert.down_proj": 8388608,
+          ".mlp.gate": 4194304,
+          ".mlp.shared_expert_gate": 16384,
+          "model.fc": 67108864,
+          "routed_expert_projection": 201326592
+        }
+      },
+      "projection_semantic_subtotal": 15136178176,
+      "causal_qk_av_semantic_subtotal": 850657280,
+      "matrix_semantic_subtotal": 15986835456
+    }
+  },
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r16-request-attention.json": "e2c4e868a8d6e8e015d7977f847e29e20395e1ca0ecbf0bd221163dbf24eb3d3",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/receipt.json": "3eae93c7711bcd64bfaec049b0b420b04c9cb27168ce5d2f2e50a285c1aa09c5",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r16_matrix.py": "9b0a1972c42581fbdecd380fd115721d38e345a9f34250c95a31accfb119b192",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/token-accounting-756636.jsonl": "afb3a0d79b68e10e4e01e507d393f689f7f484d6a8b892e456795c0f7671b3fd",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/token-accounting-756637.jsonl": "a916fd9c74ced7f4ab6bed654ce754ee3870b9411cba633f5ed0e2160bfbeff7"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Semantic 2MNK convention, not physical padded-kernel instruction counting.",
+    "Routed useful rows rely on the pinned full-range top-8 no-drop contract; valid per-expert distributions are not measured.",
+    "TP shards are summed once; replicated router and shared gate are not multiplied by TP.",
+    "Request classification inherits the qualified 2 ms clock-mapping assumption.",
+    "Vocabulary, GDN core/convolution, normalization, RoPE, softmax and activations are excluded.",
+    "This is not full effective F or an M01 attainment claim."
+  ]
+}

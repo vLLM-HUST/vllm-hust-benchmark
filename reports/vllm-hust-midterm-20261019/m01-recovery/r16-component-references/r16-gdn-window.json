@@ -1,0 +1,52 @@
+{
+  "status": "same_run_gdn_host_schedules_joined_to_device_event_cohorts",
+  "cohorts": {
+    "inside_request_under_clock_tolerance": {
+      "target_forwards": 879,
+      "prefill_token_layers": 8467950,
+      "verify_token_layers": 1727190,
+      "eligible_recurrent_token_layers": 1727190,
+      "skipped_recurrent_token_layers": 0,
+      "prefill_chunks_64_layers": 135450,
+      "prefill_chunks_256_layers": 36450,
+      "prefill_chunks_1216_layers": 10560,
+      "recurrent_semantic_basic_flops_global": 6345889505280,
+      "recurrent_exp_evaluations_global": 55270080
+    },
+    "boundary_or_tail": {
+      "target_forwards": 1,
+      "prefill_token_layers": 0,
+      "verify_token_layers": 90,
+      "eligible_recurrent_token_layers": 90,
+      "skipped_recurrent_token_layers": 0,
+      "recurrent_semantic_basic_flops_global": 330670080,
+      "recurrent_exp_evaluations_global": 2880
+    }
+  },
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792524247.4632442,
+    "end_wall": 1792524313.714946,
+    "duration_seconds": 66.25170172471553,
+    "wall_monotonic_offset_difference_seconds": 4.76837158203125e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r16-request-attention.json": "e2c4e868a8d6e8e015d7977f847e29e20395e1ca0ecbf0bd221163dbf24eb3d3",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/moe-deferred-756636.json": "32cd83b8fc1bc0845bc702072aa9c3548175301b4d9d7871660b1f97ef70d1a5",
+    "/workspace/gennova-measurements/microflow-token-accounting-r16/moe-deferred-756637.json": "aabcae5bd648fcda5cdb55f95c8f3be462956a2d84f1faa28cf564d429ba45d2",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r16_gdn_window.py": "d415467c07e0402abaa711044c90c75591c756a9365fdd8d0a76af1e3064cc2a",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_host_schedule.py": "b3a87664b34d257e8bc6188d8d7d5a9e7209754ccdcd72d030c1e6bc82f881cd",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_recurrence_r9.py": "ad8fca372cbf7d894ff0c1d0e209236607772301b233fee6d09b198f4a852012",
+    "/root/gennova-evidence/20261019-midterm-aligned/integrate_r16_hardware.py": "5f3087113846f9559639c8020508d390651ccdde3ff2885f6f14fe7e45d15de4"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "GDN lengths and slots are host observations, not independent device readback.",
+    "Window membership remains conditional on 2 ms event mapping tolerance.",
+    "Recurrent arithmetic is a semantic formula, not an instruction counter.",
+    "Prefill core, convolution, preprocessing and non-recurrent arithmetic are excluded.",
+    "No whole-model F, capacity or attainment is asserted."
+  ]
+}
