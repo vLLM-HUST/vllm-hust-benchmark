@@ -1,0 +1,56 @@
+{
+  "status": "qualified_swiglu_component_not_whole_model",
+  "plan_sha256": "74664854e54f064977bcf9e581a32cc1502dc248aa38b462b4ed6bbf9a3bc759",
+  "cases_per_rank": 28,
+  "source_calls_per_rank": 74256,
+  "ranks": [
+    {
+      "rank": 0,
+      "raw_sha256": "ea016480691c12bc183081ca6281c589fd89c9582413816cae6cae3c5e9756a4",
+      "source_call_weighted_ms": {
+        "routed": 533.7881789660454,
+        "shared": 424.6862292313576
+      },
+      "total_source_call_weighted_ms": 958.4744081974029,
+      "max_repetition_ratio": 1.0860349401107299,
+      "max_abs_cpu_sample_error": 0.0
+    },
+    {
+      "rank": 1,
+      "raw_sha256": "840f3e19a3ade6a9bc8734bca0ea4714f144436f7d09b702ab86c746115b1e68",
+      "source_call_weighted_ms": {
+        "routed": 540.8619662678242,
+        "shared": 425.782383223772
+      },
+      "total_source_call_weighted_ms": 966.6443494915961,
+      "max_repetition_ratio": 1.205820596590271,
+      "max_abs_cpu_sample_error": 0.0
+    }
+  ],
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792493702.0265539,
+    "end_wall": 1792493809.7795353,
+    "duration_seconds": 107.75298145599663,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "candidate_useful_counts": {
+    "routed_outer_multiply": 57137319936,
+    "shared_outer_multiply": 7142164992,
+    "routed_silu": 57137319936,
+    "shared_silu": 7142164992,
+    "basic_ops": 64279484928
+  },
+  "useful_token_layers": 13949541,
+  "admitted_to_whole_model_catalog": false,
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Routed activation value was not serialized by r9 inventory; SwiGLU follows the unquantized source default, pending explicit activation-field confirmation.",
+    "Actual grouped rows include graph padding; useful token-layer counts exclude padding.",
+    "Synthetic resident BF16 inputs do not reproduce the full model working set.",
+    "SiLU is recorded separately from its outer multiply; no special-function FLOP conversion.",
+    "No whole-model attainment or formal B1 throughput is inferred."
+  ]
+}
