@@ -23,13 +23,34 @@ def main():
             "recurrence",
             "vocabulary-prefill",
             "gdn-reference",
+            "vocab-reference",
             "quality",
         ),
         required=True,
     )
     parser.add_argument("--run", action="append", default=[])
     args = parser.parse_args()
-    if args.kind == "gdn-reference":
+    if args.kind == "vocab-reference":
+        directories = ["vocab-reference-r1", "vocab-reference-control-r1"]
+        sources = [
+            "prepare_vocab_reference.py",
+            "vocab_reference_probe.py",
+            "vocab_reference_probe.sh",
+            "run_vocab_reference.py",
+            "vocab-reference-plan-r1.json",
+            "vocab-reference-summary-r1.json",
+            "audit_vocab_reference.py",
+            "audit_token_accounting.py",
+            "vocab-projection-summary-r8.json",
+            "run_gdn_reference.py",
+            "gdn_reference_probe.sh",
+            "prepare_gdn_reference_controller.py",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+        ]
+        summaries = {"reference.json": "vocab-reference-summary-r1.json"}
+    elif args.kind == "gdn-reference":
         directories = [
             "gdn-reference-r1",
             "gdn-reference-control-r1",
