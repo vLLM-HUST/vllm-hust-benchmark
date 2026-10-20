@@ -21,13 +21,43 @@ def main():
             "attention",
             "moe-gdn",
             "recurrence",
+            "vocabulary-prefill",
             "quality",
         ),
         required=True,
     )
     parser.add_argument("--run", action="append", default=[])
     args = parser.parse_args()
-    if args.kind == "recurrence":
+    if args.kind == "vocabulary-prefill":
+        directories = ["gdn-native-source-r8"]
+        sources = [
+            "audit_vocab_projection.py",
+            "test_vocab_projection.py",
+            "snapshot_gdn_native_sources.py",
+            "audit_gdn_prefill_shapes.py",
+            "test_gdn_prefill_shapes.py",
+            "combine_vocab_accounting.py",
+            "audit_gdn_host_schedule.py",
+            "audit_token_accounting.py",
+            "vocab-projection-summary-r8.json",
+            "gdn-prefill-shapes-r8.json",
+            "same-run-partial-accounting-r8-v2.json",
+            "same-run-partial-accounting-r8.json",
+            "host-attention-pairs-r8.json",
+            "payload-receipt.json",
+            "actual-runtime.json",
+            "payload/betterscale/models/qwen35/__init__.py",
+            "payload/betterscale/models/qwen35/small_fish_runtime.py",
+            "payload/betterscale/models/qwen35/integration.py",
+            "runtime/vllm_ascend/spec_decode/llm_base_proposer.py",
+            "runtime/vllm_ascend/ops/vocab_parallel_embedding.py",
+        ]
+        summaries = {
+            "vocabulary.json": "vocab-projection-summary-r8.json",
+            "prefill-shapes.json": "gdn-prefill-shapes-r8.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r8-v2.json",
+        }
+    elif args.kind == "recurrence":
         directories = ["microflow-token-accounting-r8", "token-observer-v7"]
         sources = [
             "prepare_token_observer_v7.py",
