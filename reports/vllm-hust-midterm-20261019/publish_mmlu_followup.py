@@ -33,7 +33,40 @@ def build(evidence_commit):
     )
     pair = json.loads((REPORT / "aligned-mmlu-results.json").read_text())
     report_url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{evidence_commit}/reports/{REPORT.name}/中期测试报告.md"
-    sources = ["aligned-mmlu-results.json"]
+    quality_names = [
+        "quality-regression/microflow-pair.json",
+        "quality-regression/kvmat-pair.json",
+        "quality-regression/finish-breakdown.json",
+        "quality-regression/raw/archive.json",
+    ]
+    quality_micro = json.loads((REPORT / quality_names[0]).read_text())
+    quality_kv = json.loads((REPORT / quality_names[1]).read_text())
+    quality_finish = json.loads((REPORT / quality_names[2]).read_text())
+    assert quality_micro["b0"] == quality_kv["b0"]
+    assert quality_micro["request_plan_sha256"] == quality_kv["request_plan_sha256"]
+    quality_scores = [
+        quality_micro["b0"],
+        quality_micro["b1"],
+        quality_kv["b1"],
+    ]
+    assert all(row["total"] == 200 for row in quality_scores)
+    q0, qm, qk = quality_scores
+    quality_note = (
+        "Separate out8192 quality regression on the same 200 performance inputs: "
+        f"Native {q0['correct']}/200, FA Microflow {qm['correct']}/200, "
+        f"E16/R36+KV {qk['correct']}/200. "
+        f"Token-limit completions: {q0['truncated']}, {qm['truncated']}, {qk['truncated']}; "
+        "the report separates natural-end matches from extraction matches in truncated outputs. "
+        "This is not a full-dataset score or a statistical noninferiority claim."
+    )
+    quality_note_zh = (
+        "另以相同200条性能输入、out8192进行质量回归："
+        f"Native {q0['correct']}/200、FA Microflow {qm['correct']}/200、"
+        f"E16/R36+KV {qk['correct']}/200；"
+        f"达到输出上限分别为{q0['truncated']}、{qm['truncated']}、{qk['truncated']}条。"
+        "报告分列自然结束判对与截断提取命中；不作为全集分数或统计非劣性结论。"
+    )
+    sources = ["aligned-mmlu-results.json", *quality_names]
     arms = [
         (
             "e16-r36",
@@ -43,7 +76,7 @@ def build(evidence_commit):
             "not-recorded",
         )
     ]
-    ended = []
+    ended = [row["ended"] for row in quality_finish["runs"]]
     for kind in ("e32", "e24", "kvmat", "kvmat-e24"):
         name = f"b1-{kind}-screen.json"
         result = json.loads((REPORT / name).read_text())
@@ -159,8 +192,10 @@ def build(evidence_commit):
                 },
                 "provenance": selected["provenance"],
                 "baseline_provenance": provenance("mmlu-b0-r2"),
-                "note": "Sequential TP2 services: 200 requests per run, out256, infinite arrival. FA Microflow and its MTP local-argmax candidate each use the median of 3 independent ON starts and matched OFF controls with the same initial compiler-cache snapshot; small differences are not claims of statistical significance. Task accuracy was not rescored. Each metric selects its own configuration. KV recompute only; partial reuse and GDN Microflow were not exercised.",
-                "note_zh": "同机单TP2服务，每轮200请求、out256、无限到达率。FA Microflow及其MTP局部argmax候选分别取3次独立ON运行的中位数，配对OFF使用相同初始编译缓存快照；小幅差异不代表统计显著性。未重评任务正确率，各指标分别选择配置。KV仅逐请求重算，分段复用和GDN Microflow未执行。",
+                "note": "Sequential TP2 services: 200 requests per run, out256, infinite arrival. FA Microflow and its MTP local-argmax candidate each use the median of 3 independent ON starts and matched OFF controls with the same initial compiler-cache snapshot; small differences are not claims of statistical significance. Each metric selects its own configuration. KV recompute only; partial reuse and GDN Microflow were not exercised. "
+                + quality_note,
+                "note_zh": "同机单TP2服务，每轮200请求、out256、无限到达率。FA Microflow及其MTP局部argmax候选分别取3次独立ON运行的中位数，配对OFF使用相同初始编译缓存快照；小幅差异不代表统计显著性。各指标分别选择配置。KV仅逐请求重算，分段复用和GDN Microflow未执行。"
+                + quality_note_zh,
             }
         )
     return {
@@ -185,7 +220,7 @@ def build(evidence_commit):
             "id": "best-per-cell",
             "label": "当前已实测最优的vLLM-HUST优化方案",
             "single_version_required": False,
-            "rule": "Same model revision, BF16, TP2, source-pinned runtime, prepared inputs, arrival and output contract; optimization configuration may differ and is retained per candidate. Service performance only; task quality not rescored.",
+            "rule": "Same model revision, BF16, TP2, source-pinned runtime, prepared inputs, arrival and output contract; optimization configuration may differ and is retained per candidate. Selection uses out256 service performance only; separate out8192 quality regression is recorded for the two selected engine configurations.",
         },
         "scenario": {
             "id": SCENARIO,
