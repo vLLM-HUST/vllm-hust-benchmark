@@ -35,6 +35,7 @@ def main():
             "rope-reference",
             "swiglu-reference",
             "moe-combine-reference",
+            "router-gate-reference",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -44,7 +45,37 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "moe-combine-reference":
+    if args.kind == "router-gate-reference":
+        directories = ["router-gate-reference-r1", "router-gate-reference-control-r1"]
+        sources = [
+            "prepare_router_gate_reference.py",
+            "router_gate_reference_probe.py",
+            "router_gate_reference_probe.sh",
+            "run_router_gate_reference.py",
+            "audit_router_gate_reference.py",
+            "test_router_scalar_accounting.py",
+            "router-gate-reference-plan-r1.json",
+            "router-gate-reference-summary-r1.json",
+            "swiglu-reference-plan-r1.json",
+            "run_swiglu_reference.py",
+            "swiglu_reference_probe.sh",
+            "moe-scalar-source-audit-r1.json",
+            "rope-reference-summary-r2.json",
+            "same-run-partial-accounting-r9-v8.json",
+            "same-run-partial-accounting-r9-v9.json",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+        ]
+        plan = json.loads(
+            (args.root / "router-gate-reference-plan-r1.json").read_text()
+        )
+        sources.extend(plan["source_sha256"])
+        summaries = {
+            "summary.json": "router-gate-reference-summary-r1.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r9-v9.json",
+        }
+    elif args.kind == "moe-combine-reference":
         directories = [
             "moe-combine-reference-control-r1",
             "moe-combine-reference-control-r2",
