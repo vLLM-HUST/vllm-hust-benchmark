@@ -1,0 +1,70 @@
+{
+  "status": "device_lengths_joined_to_enclosing_forwards_and_partitioned_by_request_interval",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792531880.616833,
+    "end_wall": 1792531944.9309447,
+    "duration_seconds": 64.31411157455295,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "cohorts": {
+    "inside_request_under_clock_tolerance": {
+      "target": {
+        "publications": 874,
+        "valid_query_tokens": 339853,
+        "zero_kv_padding_tokens": 60068,
+        "causal_pairs": 297519488,
+        "nonempty_query_sequences": 19412,
+        "published_query_extent": 399921,
+        "semantic_qk_av_arithmetic": 48745592913920
+      },
+      "draft_step0": {
+        "publications": 874,
+        "valid_query_tokens": 339853,
+        "zero_kv_padding_tokens": 59812,
+        "causal_pairs": 297519488,
+        "nonempty_query_sequences": 19412,
+        "published_query_extent": 399665,
+        "semantic_qk_av_arithmetic": 4874559291392
+      },
+      "draft_step1": {
+        "publications": 874,
+        "valid_query_tokens": 19412,
+        "zero_kv_padding_tokens": 380253,
+        "causal_pairs": 29849993,
+        "nonempty_query_sequences": 19412,
+        "published_query_extent": 399665,
+        "semantic_qk_av_arithmetic": 489062285312
+      }
+    },
+    "boundary_or_tail": {}
+  },
+  "source_sha256": {
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/moe-deferred-892993.json": "dc692d9c24dcc9ae2c1d68e4b1e503dcf2941a0bba5d0aba635a60b0c49a951f",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/moe-deferred-892993.ready": "fe2807eb6a13434105b3785f7d6cb7223e4d9f7b30bbcfce205209361177f747",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/owned-fia-892993.json": "1e5c546d960495a0adab56e1cb0f1dd6b88cda7b49d6998c9b47d5b84ac7730b",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/owned-fia-892993.ready": "dfec068f22b6933787fa051d2973a669624f0015fd927854cacda7d306d8a94d",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/moe-deferred-892994.json": "45ec30aaaaba88c38d10c7d17d9ec73ebec59d60cd14726c852b112584a734fa",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/moe-deferred-892994.ready": "c6f28d2c76b593f9f89ca74e0602adad8b967f33156ddb36614d7d3e602fba69",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/owned-fia-892994.json": "b9f15d619a4a4ab0efdc7085c39227d52ba83fd733916c366ef52750ad10da16",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/owned-fia-892994.ready": "74d8c1a4e1647a0c86e1a0d7d429c09edfedeaf281ead1c0eeddf7b37f83e786",
+    "/models/Qwen3.5-35B-A3B/config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/receipt.json": "cbc9a477f720b8f48b340819a6bab7aac28821b13ba52b7a726696393110bd31",
+    "/workspace/gennova-measurements/microflow-token-accounting-r18/mmlu-pro.json": "02ccaa5554ad8de7635a94e0db7effdcbfc00acf5fa485e1e64f38e205a35042",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r18_attention_window.py": "098c828d590bdaa61c726d76c7314bba6a9c0ac6a3d8f6b099ae330425cbf962",
+    "/root/gennova-evidence/20261019-midterm-aligned/owned_fia_pairs.py": "8f5a1c67f43fa154709c2a7291405b90a3fda35f81dec67eb963699ea5aa8180",
+    "/root/gennova-evidence/20261019-midterm-aligned/integrate_r18_hardware.py": "8e038f8379fb7174b87dfa4bc60e6852586b1ff4b297969c9e4531538c833da5",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_deferred_model_capture.py": "85884c66b58465d08117945a26bc0f77f0125d68d7da5e1198ca348642e60636",
+    "/root/gennova-evidence/20261019-midterm-aligned/recover_model_hardware.py": "f54fe93b229f347f59e233d3def0d85486ce2dcbe6d25413815457ac3fbcbf7a"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Inside classification is conditional on the 2 ms event-to-host mapping tolerance.",
+    "Current-stream bounds do not establish every model stream boundary.",
+    "Counts are logical causal attention pairs and 2MNK-style QK/AV arithmetic, not kernel instructions.",
+    "TP2 partitions are counted once with global head count; padding is excluded.",
+    "Softmax, projection, other operators and matched reference capacity are not supplied by this subtotal."
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "status": "r18_loaded_configuration_valid_row_scalar_semantics",
+  "cohorts": {
+    "inside_request_under_clock_tolerance": {
+      "target_valid_rows": 339853,
+      "draft_valid_rows": 359265,
+      "moe_token_layers": 13953385,
+      "attention_token_layers": 3757795,
+      "moe_basic": {
+        "routed_swiglu_outer_multiply": 57153064960,
+        "shared_swiglu_outer_multiply": 7144133120,
+        "routed_weight_multiply": 228612259840,
+        "routed_weighted_sum_add": 200035727360,
+        "shared_gate_multiply": 28576532480,
+        "shared_routed_add": 28576532480
+      },
+      "router_basic": {
+        "subtract_max": 3572066560,
+        "full_sum_add": 3558113175,
+        "full_normalize_multiply": 3572066560,
+        "selected_sum_add": 97673695,
+        "selected_denominator_epsilon_add": 13953385
+      },
+      "rope_basic": {
+        "multiply": 8657959680,
+        "add_or_subtract": 4328979840
+      },
+      "attention_gate_multiply": 15391928320,
+      "basic_subtotal": 589290991455,
+      "separate": {
+        "moe_silu": 64297198080,
+        "shared_gate_sigmoid": 13953385,
+        "attention_gate_sigmoid": 15391928320,
+        "router_exp": 3572066560,
+        "router_reciprocal": 13953385,
+        "router_selected_normalize_divide": 111627080,
+        "router_reduce_max_semantic_comparisons": 3558113175
+      }
+    },
+    "boundary_or_tail": {
+      "target_valid_rows": 0,
+      "draft_valid_rows": 0,
+      "moe_token_layers": 0,
+      "attention_token_layers": 0,
+      "moe_basic": {
+        "routed_swiglu_outer_multiply": 0,
+        "shared_swiglu_outer_multiply": 0,
+        "routed_weight_multiply": 0,
+        "routed_weighted_sum_add": 0,
+        "shared_gate_multiply": 0,
+        "shared_routed_add": 0
+      },
+      "router_basic": {
+        "subtract_max": 0,
+        "full_sum_add": 0,
+        "full_normalize_multiply": 0,
+        "selected_sum_add": 0,
+        "selected_denominator_epsilon_add": 0
+      },
+      "rope_basic": {
+        "multiply": 0,
+        "add_or_subtract": 0
+      },
+      "attention_gate_multiply": 0,
+      "basic_subtotal": 0,
+      "separate": {
+        "moe_silu": 0,
+        "shared_gate_sigmoid": 0,
+        "attention_gate_sigmoid": 0,
+        "router_exp": 0,
+        "router_reciprocal": 0,
+        "router_selected_normalize_divide": 0,
+        "router_reduce_max_semantic_comparisons": 0
+      }
+    }
+  },
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r18-loaded-configuration.json": "4c898fa5c77930a4f2e406bd74b0a174ae7fd77759dd0646d19ea4d4317598af",
+    "/root/gennova-evidence/20261019-midterm-aligned/r18-matrix-accounting.json": "ae5cc25f392f99a2bfd6c3d9f52319de19ef581ba9dfce3d14f2e40fa4c22ac5",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r18_scalar.py": "d5b87c77dcf1e2b28b1d3b8088d23ce60d139f636818ea8b0a91102be6d06206",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_moe_scalar_sources.py": "edf9047db491a9d7356ce59c009a9adcca859cbd0472fe95324da24758a1ac00",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_rope_reference.py": "9124e0d48c2830d567325c804492c2722cd06f09a86f7ebd836a390d9fe76cc2",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_router_gate_reference.py": "9be78c14a36228a557cd01ee8bc613a9cc4a1e841bad70ba3d97c5a29d3f4767"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Source-semantic work on valid rows, not physical instruction counting or output-contribution certification.",
+    "Global TP2 model counted once. Q/K RMS, GDN normalization, projections and attention softmax are separate ledgers and excluded here.",
+    "Rotary shared-object count is not an invocation count; layer multiplicities come from loaded attention modules.",
+    "Special functions, divisions and max comparisons are separated; top-k selection algorithm comparisons remain uncounted.",
+    "Cached trigonometry construction, graph padding, parameter transforms and any unrecorded activation clipping are excluded.",
+    "Numerical qualification and shape-matched capacity are separate requirements; this ledger does not close M01."
+  ]
+}
