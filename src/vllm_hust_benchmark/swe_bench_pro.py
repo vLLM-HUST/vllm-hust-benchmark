@@ -62,6 +62,11 @@ def validate(configuration):
         raise ValueError("Explicit task ids must match batch size, without duplicates")
     if c["agent"]["automatic_retries"] != 0:
         raise ValueError("Automatic model retries must be zero")
+    instructions = c["agent"].get("task_instructions")
+    if instructions is not None and (
+        not isinstance(instructions, str) or not instructions.strip()
+    ):
+        raise ValueError("Optional task_instructions must be a nonempty string")
     timeouts = c["agent"]["http_timeouts"]
     if set(timeouts) != {"connect", "read", "write", "pool"}:
         raise ValueError("Record all four HTTP timeout phases explicitly")
@@ -196,6 +201,8 @@ def _agent_task(c, row, image, folder, barrier):
         )
     )
     task = formatter["create_problem_statement"](row)
+    if c["agent"].get("task_instructions"):
+        task += "\n\n" + c["agent"]["task_instructions"]
     (folder / "task-private.txt").write_text(task)
     program = c["run_id"] + ":" + folder.name
     hook = hooks(c)

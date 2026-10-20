@@ -56,6 +56,8 @@ def test_standalone_without_controller_or_deployment(tmp_path):
         ("batch", "client_concurrency_limit", 1),
         ("agent", "step_limit", 0),
         ("agent", "automatic_retries", 1),
+        ("agent", "task_instructions", "  "),
+        ("agent", "task_instructions", ["run tests"]),
         ("batch", "program_instances", 2),
         ("model", "api_base", "local"),
     ],
