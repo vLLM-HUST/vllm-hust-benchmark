@@ -128,6 +128,9 @@ cat "$WORK/run-001/task-000/report-private.json"
 - `batch-report.json`：本次一个 program 的汇总；`quality_score: null` 表示尚未评分。
 - `runner-provenance.json`、`input-verification.json`：入口源码身份和输入检查。
 
+可在 `agent.task_instructions` 中显式追加任务执行指令，例如要求运行仓库现有的相关测试。
+该项默认不设置；使用时会保存到运行配置和完整任务文本，属于新的提示词协议，不能冒充与默认提示词相同的对照。 不要填入官方评分答案或隐藏测试信息；指令也不保证 Agent 实际执行测试，应核对工具日志。
+
 示例 100 步、1200 秒、每次最多输出 4096 tokens、工具超时 60 秒、temperature=0、thinking=false， 是显式诊断协议，不是最优修题参数。HTTP
 read=null 只取消读取时限，其余三阶段仍各 180 秒。 模型上下文上限由服务端决定，包含输入和预留输出；本入口不会自动调大上下文。 固定官方 Agent
 保留完整累计历史，仅对单次过长工具输出裁剪字符，没有全局历史压缩。 因此 100 步也可能先遇到上下文限制；日志会保留这个真实失败，不把它写成任务完成。
