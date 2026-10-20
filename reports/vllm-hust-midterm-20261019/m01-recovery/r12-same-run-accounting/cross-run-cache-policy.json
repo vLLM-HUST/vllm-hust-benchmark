@@ -1,0 +1,63 @@
+{
+  "status": "required_for_future_runs_not_retroactive_certification",
+  "scope": "B0/B1 paired measurements and candidate repetitions",
+  "inference_state": {
+    "fresh_service_and_workers_each_run": true,
+    "previous_owned_workers_must_exit": true,
+    "device_release_evidence_required": true,
+    "forbid_cross_run_reuse": [
+      "KV and prefix blocks",
+      "Mamba and recurrent state",
+      "host-offloaded model state",
+      "external KV connector contents",
+      "cached model responses or intermediate tensors"
+    ],
+    "within_run_apc": "Keep the workload contract; do not disable APC merely to isolate runs.",
+    "persistent_connectors": "Disable unless explicitly tested; otherwise use a new empty namespace and retain evidence."
+  },
+  "directories": {
+    "run_directory": "Create exclusively; reject an existing directory.",
+    "runtime_state_directory": "Create exclusively; reject an existing directory or symlink.",
+    "compiler_cache": "Fresh, or a frozen audited code-only seed with the same policy for both arms; never implicitly use the preceding run directory."
+  },
+  "premeasurement_requests": {
+    "ready_check": "Use health checks without model inference.",
+    "benchmark_flags": [
+      "--ready-check-timeout-sec",
+      "0",
+      "--num-warmups",
+      "0"
+    ],
+    "explicit_warmup_exception": "Require a paired documented protocol and verified removal of request-derived state before measurement."
+  },
+  "other_caches": {
+    "weight_file_page_cache": "Record the policy and separate startup/loading from steady-state timing. Do not clear global caches on a shared host.",
+    "compilation_and_graph_capture": "Record separately from request-derived inference state; align both arms."
+  },
+  "admission": {
+    "record": [
+      "service and worker identities and lifecycle",
+      "effective launch arguments and imports",
+      "cache paths and initial contents or frozen seed hashes",
+      "warmup and readiness behavior",
+      "request interval and drain boundaries",
+      "cleanup and device release"
+    ],
+    "missing_evidence": "Unverified isolation; do not claim a fair paired comparison until audited or rerun.",
+    "historical_evidence": "Preserve originals. Add a separate audit; do not rewrite historical results."
+  },
+  "r12_limited_audit": {
+    "run": "/workspace/gennova-measurements/microflow-token-accounting-r12",
+    "service_pid": 534656,
+    "receipt_status": "measured",
+    "receipt_all_devices_released": true,
+    "bench_log": "Skipping endpoint ready check; no warmup run logged.",
+    "host_state_source": "TorchHostStateBackend initializes an empty in-process snapshot dictionary.",
+    "compiler_seed": "859 manifest entries, all under triton; compiler artifacts are intentionally reused.",
+    "not_yet_certified": [
+      "Complete content audit of the compiler seed",
+      "Identical compiler and file-cache policy for historical paired B0/B1",
+      "Every historical MOD external or persistent cache path"
+    ]
+  }
+}
