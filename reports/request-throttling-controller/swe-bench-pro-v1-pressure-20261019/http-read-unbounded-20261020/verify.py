@@ -39,3 +39,31 @@ assert not r["model_restarted"]
 print(
     "PASS: approved read-timeout configuration and real start consistency; no terminal benefit claim"
 )
+
+t = json.loads((root / "terminal-report.json").read_text())
+assert not t["performance_valid"] and not t["benefit_claim"]
+assert t["timeouts"] == {"connect": 180, "read": None, "write": 180, "pool": 180}
+assert t["protocol"]["tasks"] * t["protocol"]["replicas"] == 256
+assert (
+    t["protocol"]["arrival_time"] == 0
+    and t["protocol"]["client_concurrency_limit"] is None
+)
+assert not t["model_restarted"] and t["scoring"]["deferred"] == 512
+for arm in ["native", "controller"]:
+    a = t["arms"][arm]
+    assert a["submitted"] == 0 and a["statuses"] == {"RetryError": 256}
+    assert a["http_receipts_read_null"] == 256
+    assert not any(a["engine_before"].values()) and not any(a["engine_after"].values())
+assert t["arms"]["native"]["terminal_exception_classification"] == {
+    "wall_budget_1200_mapped_as_timeout": 256
+}
+assert t["arms"]["controller"]["terminal_exception_classification"] == {
+    "wall_budget_1200_mapped_as_timeout": 254,
+    "remote_disconnect": 2,
+}
+assert t["arms"]["native"]["preemptions_delta"] == 14
+assert t["arms"]["controller"]["preemptions_delta"] == 0
+assert t["archive"]["files_checked"] == 8183 and t["archive"]["bytes"] == 52154730
+print(
+    "PASS: terminal budget-alarm classification and failed-pair consistency; no benefit claim"
+)

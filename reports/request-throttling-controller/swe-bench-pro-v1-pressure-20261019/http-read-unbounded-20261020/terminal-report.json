@@ -1,0 +1,145 @@
+{
+  "run": "swe-pro-v1-http-read-unbounded-20261020-r2",
+  "performance_valid": false,
+  "arms": {
+    "native": {
+      "statuses": {
+        "RetryError": 256
+      },
+      "submitted": 0,
+      "elapsed_seconds": 1220.1047988329083,
+      "saved_responses": 2170,
+      "saved_usage": {
+        "completion_tokens": 121793,
+        "prompt_tokens": 11221217,
+        "total_tokens": 11343010
+      },
+      "exceptions": {
+        "httpx_read_timeout": 256,
+        "wall_budget": 256,
+        "limits_exceeded": 0,
+        "context_window_exceeded": 0
+      },
+      "kv_peak_fraction": 0.9987623762376238,
+      "samples_ge_90pct": 59,
+      "engine_samples": 1274,
+      "preemptions_delta": 14.0,
+      "engine_before": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "first_epoch": 1792475843.8263307,
+      "last_epoch": 1792477155.623773,
+      "peak_program_states": {
+        "active": 256
+      },
+      "terminal_exception_classification": {
+        "wall_budget_1200_mapped_as_timeout": 256
+      },
+      "example_files": {
+        "wall_budget_1200_mapped_as_timeout": "terminal-extract/pair-1-native/task-115/agent-exception-private.txt"
+      },
+      "http_receipts_read_null": 256
+    },
+    "controller": {
+      "statuses": {
+        "RetryError": 256
+      },
+      "submitted": 0,
+      "elapsed_seconds": 1219.9426209139638,
+      "saved_responses": 2110,
+      "saved_usage": {
+        "completion_tokens": 153594,
+        "prompt_tokens": 16798246,
+        "total_tokens": 16951840
+      },
+      "exceptions": {
+        "httpx_read_timeout": 254,
+        "wall_budget": 254,
+        "limits_exceeded": 0,
+        "context_window_exceeded": 0
+      },
+      "kv_peak_fraction": 0.698019801980198,
+      "samples_ge_90pct": 0,
+      "engine_samples": 1258,
+      "preemptions_delta": 0.0,
+      "engine_before": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "first_epoch": 1792477203.7732477,
+      "last_epoch": 1792478518.2274585,
+      "peak_program_states": {
+        "paused": 248,
+        "active": 103
+      },
+      "terminal_exception_classification": {
+        "wall_budget_1200_mapped_as_timeout": 254,
+        "remote_disconnect": 2
+      },
+      "example_files": {
+        "wall_budget_1200_mapped_as_timeout": "terminal-extract/pair-1-controller/task-115/agent-exception-private.txt",
+        "remote_disconnect": "terminal-extract/pair-1-controller/task-172/agent-exception-private.txt"
+      },
+      "http_receipts_read_null": 256
+    }
+  },
+  "controller_log_delta": {
+    "counts": {
+      "paused": 908,
+      "marked": 918,
+      "resumed": 899
+    },
+    "base_epoch": 1792477049.1301591,
+    "end_epoch": 1792479024.375618,
+    "qualification": "Exact retained proxy-log suffix; base before Controller batch start, includes terminal cleanup. Not unique program counts."
+  },
+  "diagnosis": "256 Native and254 Controller exception chains contain Frozen Agent wall budget reached; TimeoutError from retained1200s alarm is mapped to httpcore/httpx.ReadTimeout then OpenAI/LiteLLM/Tenacity. This is not evidence of an180s read expiration.2 Controller exceptions show remote disconnect, separate.",
+  "observability_limitations": [
+    "Controller start/10-minute live UI snapshots were missed during observation interruption; retained per-second CPU observations and separate terminal NPU logs remain. No continuous live-screen coverage claim.",
+    "Temporary local SSH forwarding failure was recovered; no model/proxy/CPU service restarted.",
+    "No per-request queue/pause/forward/first-token decomposition; not a unique proof of why total work exceeded1200s."
+  ],
+  "status": "HTTP_READ_ISOLATION_ALL_AGENTS_FAILED",
+  "benefit_claim": false,
+  "source_commit": "23e7efd1a4f4e494aabf96657fa905415021246f",
+  "http_profile_sha256": "03ae48525baf792259729c9eaf15cc66c40b37dff2d2fb970fce8e8c086ea655",
+  "timeouts": {
+    "connect": 180,
+    "read": null,
+    "write": 180,
+    "pool": 180
+  },
+  "model_restarted": false,
+  "protocol": {
+    "tasks": 8,
+    "replicas": 32,
+    "programs": 256,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "program_dependencies_preserved": true,
+    "wall_seconds": 1200,
+    "steps": 30,
+    "max_output_tokens": 4096,
+    "context": 32768,
+    "downstream_seconds": 900
+  },
+  "scoring": {
+    "deferred": 512,
+    "zero_score_claim": false
+  },
+  "archive": {
+    "status": "PASS",
+    "bytes": 52154730,
+    "sha256": "326dc5d5237523fa99ea3b2ab0de49dd2f20a5b9a7d8d3d16c5ab24309937339",
+    "files_checked": 8183
+  }
+}
