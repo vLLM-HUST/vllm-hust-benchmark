@@ -1,0 +1,139 @@
+{
+  "status": "same_run_source_shaped_matrix_subtotals_with_explicit_tail",
+  "cohorts": {
+    "definitely_inside_request_interval": {
+      "roles": {
+        "target": {
+          "contexts": 888,
+          "causal_pairs": 297670946,
+          "valid_query_tokens": 339916,
+          "excluded_padded_query_tokens": 72612
+        },
+        "draft_step0": {
+          "contexts": 888,
+          "causal_pairs": 297670946,
+          "valid_query_tokens": 339916,
+          "excluded_padded_query_tokens": 72412
+        },
+        "draft_step1": {
+          "contexts": 888,
+          "causal_pairs": 29902575,
+          "valid_query_tokens": 19437,
+          "excluded_padded_query_tokens": 392891
+        }
+      },
+      "device_routed_rows_including_padding": 138606208,
+      "non_moe_entries": {
+        "target.attention_qkv_gate": 128313993461760,
+        "target.attention_output": 57028441538560,
+        "draft.attention_qkv_gate": 13565121527808,
+        "draft.attention_output": 6028942901248,
+        "target.gdn_qkvz": 513255973847040,
+        "target.gdn_ba": 2673208197120,
+        "target.gdn_output": 171085324615680,
+        "draft.input_fusion": 6028942901248,
+        "target.causal_qk_av": 48770407792640,
+        "draft.causal_qk_av": 5366964568064
+      },
+      "moe": {
+        "target": {
+          "nominal_routed_rows_all_layers": 108773120,
+          "routed_projection_semantic_flops": 684341298462720,
+          "shared_projection_semantic_flops": 85542662307840,
+          "router_projection_semantic_flops": 14257110384640,
+          "shared_gate_projection_semantic_flops": 55691837440
+        },
+        "draft": {
+          "nominal_routed_rows_all_layers": 2874824,
+          "routed_projection_semantic_flops": 18086828703744,
+          "shared_projection_semantic_flops": 2260853587968,
+          "router_projection_semantic_flops": 376808931328,
+          "shared_gate_projection_semantic_flops": 1471909888
+        }
+      },
+      "matrix_semantic_subtotal": 1757040047476736
+    },
+    "tail_or_boundary": {
+      "roles": {
+        "target": {
+          "contexts": 1,
+          "causal_pairs": 7527,
+          "valid_query_tokens": 3,
+          "excluded_padded_query_tokens": 0
+        },
+        "draft_step0": {
+          "contexts": 1,
+          "causal_pairs": 7527,
+          "valid_query_tokens": 3,
+          "excluded_padded_query_tokens": 0
+        },
+        "draft_step1": {
+          "contexts": 1,
+          "causal_pairs": 2511,
+          "valid_query_tokens": 1,
+          "excluded_padded_query_tokens": 2
+        }
+      },
+      "device_routed_rows_including_padding": 1008,
+      "non_moe_entries": {
+        "target.attention_qkv_gate": 1132462080,
+        "target.attention_output": 503316480,
+        "draft.attention_qkv_gate": 150994944,
+        "draft.attention_output": 67108864,
+        "target.gdn_qkvz": 4529848320,
+        "target.gdn_ba": 23592960,
+        "target.gdn_output": 1509949440,
+        "draft.input_fusion": 67108864,
+        "target.causal_qk_av": 1233223680,
+        "draft.causal_qk_av": 164462592
+      },
+      "moe": {
+        "target": {
+          "nominal_routed_rows_all_layers": 960,
+          "routed_projection_semantic_flops": 6039797760,
+          "shared_projection_semantic_flops": 754974720,
+          "router_projection_semantic_flops": 125829120,
+          "shared_gate_projection_semantic_flops": 491520
+        },
+        "draft": {
+          "nominal_routed_rows_all_layers": 32,
+          "routed_projection_semantic_flops": 201326592,
+          "shared_projection_semantic_flops": 25165824,
+          "router_projection_semantic_flops": 4194304,
+          "shared_gate_projection_semantic_flops": 16384
+        }
+      },
+      "matrix_semantic_subtotal": 16533864448
+    }
+  },
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792513033.6837723,
+    "end_wall": 1792513097.9899664,
+    "duration_seconds": 64.30619393009692,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "source_sha256": {
+    "/workspace/gennova-measurements/microflow-token-accounting-r12/moe-deferred-538142.json": "e529a75012636aae3a7f00645d09e14943a949642bed65ab6bc7fd2b76ac5fb1",
+    "/workspace/gennova-measurements/microflow-token-accounting-r12/moe-deferred-538143.json": "debb0535f26e846fe11ff233dbeeb2a704072328478f6e965c650ca5c5df5e9f",
+    "/workspace/gennova-measurements/microflow-token-accounting-r12/token-accounting-538142.jsonl": "8ffd609915c7a4e84dd122c67adc2a2ae763b953b6b4972076afa31662282432",
+    "/workspace/gennova-measurements/microflow-token-accounting-r12/token-accounting-538143.jsonl": "a22edfe66ea175f38eaa6cb643c383c3dfcd51daa1797c5e801258d9765ceeda",
+    "/models/Qwen3.5-35B-A3B/config.json": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r12_matrix_accounting.py": "fb4a3510994f994fdf890fcb72d4faf03895a886482b453157e249ede551992b",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_attention_pairs.py": "eec10808308137d0d353386184deb58e8169a7267fb68cf9ecefdea0895aca9b",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_moe_projection_accounting_r9.py": "e736d0324184ebf9f2798f11e23c438d7d3011f229e26c3eba20a632077c9b7c",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_partial_operator_accounting_r9.py": "a66a0b87abb9709b906b601cae7bdc13b2d725b8d1d0632fc6dd1d87ec715301"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Semantic 2MNK matrix arithmetic, not hardware instruction counts or complete F.",
+    "Valid routed rows use the source-checked top-8 no-drop contract; per-expert valid/padded separation is not measured.",
+    "TP partitions are combined once; duplicated rank routing and router/gate execution are not added twice.",
+    "Host causal metadata is not a same-run device-length comparison.",
+    "Tail work is retained separately, not asserted useful request work.",
+    "Vocabulary, GDN core/convolution, normalization, RoPE, softmax and activations are excluded here."
+  ]
+}
