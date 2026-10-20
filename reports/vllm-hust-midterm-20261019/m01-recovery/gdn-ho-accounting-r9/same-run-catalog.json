@@ -1,0 +1,78 @@
+{
+  "status": "same_run_partial_catalog_with_gdn_prefill_core",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792493702.0265539,
+    "end_wall": 1792493809.7795353,
+    "duration_seconds": 107.75298145599663,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "components": {
+    "non_moe_projections_and_causal_attention": 951648931774464,
+    "slot_eligible_gdn_recurrent_basic_ops": 6337292083200,
+    "vocabulary_projection_semantics": 98124494274560,
+    "moe_projections_device_total_checked_host_valid_semantics": 804550602018816,
+    "gdn_prefill_kkt_inverse_wy_basic_ops": 7152416954880,
+    "gdn_qk_normalization_basic_ops": 125249126400,
+    "gdn_causal_convolution_basic_ops": 583906099200,
+    "gdn_prefill_ho_and_scan_basic_ops": 30628054947840
+  },
+  "covered_basic_semantic_subtotal": 1899150947279360,
+  "separate_recurrence_exp_evaluations": 55195200,
+  "model_effective_flops": null,
+  "attainment_percent": null,
+  "excluded": [
+    "Remaining model normalization, RoPE, softmax, activations and elementwise gates",
+    "Special functions have separate counts where known, not arbitrary FLOP equivalents",
+    "Graph padding, masked implementation arithmetic and TP-replicated work"
+  ],
+  "limitations": [
+    "The catalog combines disjoint model-semantic families, not complete device execution.",
+    "Actual device routing totals match valid/padded row bounds for every observed call. Useful routed totals use host valid-token extents; per-expert useful distribution under padding is not isolated.",
+    "Attention lengths and recurrent eligibility are host-observed without same-run device validation.",
+    "No cross-run time denominator, effective FLOP/s, reference capacity or acceptance percentage is derived.",
+    "Draft vocabulary rows are source-mapped replay arguments, not internal kernel observations.",
+    "F remains partial. HBM and communication are from this same observer run; the host event filter is not a complete synchronized boundary for every non-MoE operator.",
+    "Convolution state-access offsets were not captured in r9; source-derived arithmetic does not establish a matched state-access reference.",
+    "All additional families are source/host-derived, not device FLOP counters; original evidence remains unchanged.",
+    "GDN H/O and scan are source/host-derived with CPU real-arithmetic equivalence tests; not device instruction counts or BF16 rounding equivalence."
+  ],
+  "input_sha256": {
+    "host-attention-pairs-r9.json": "237f6b71017e3a391ae8c164ad07ca43fbf6a66b3bf0637fd2aef03172aca3ca",
+    "partial-operator-accounting-r9.json": "5313c6ebe516758ec5b170717f278e2bbe4dd68b384b15bfc98c3e926aa97324",
+    "moe-projection-summary-r9.json": "ee99d326bab3fde4675c59b43fc3db111af081b62fbc9d661c8120fa449eeaa5",
+    "gdn-recurrence-summary-r9.json": "24cf04b1649fa22e99737175b3cef3358d9b1385b7c40f27ad5615fbf5718554",
+    "vocab-projection-summary-r9.json": "b36de6b27f225a85bf869962910248b50ab8b7eb5c9aa16cb2e42a5f400f1855"
+  },
+  "previous_catalog_sha256": "9910d9b229f1055161ca6e9614a8a03554faa3a0919d36f50b215ccf9ac4d394",
+  "native_h_o_dense_arithmetic_included": false,
+  "hardware": {
+    "hbm_prorated_bytes": 65546442364680.58,
+    "hbm_fully_contained_bytes": 65546438500672,
+    "hbm_intersecting_bytes": 65546444885568,
+    "tx_link_byte_bounds": {
+      "lower": 416102779260,
+      "upper": 416102779260
+    },
+    "duration_seconds": 107.75298145599663,
+    "scope": "Observer-run device-wide physical traffic; not uninstrumented serving performance."
+  },
+  "routed_projection_host_valid_semantic_flops": 702103387373568,
+  "routed_projection_device_flops_including_padding": 869844425637888,
+  "evidence_sha256": {
+    "same-run-partial-accounting-r9-v2.json": "7eb551b3e530b29235c63496b62e6a0b7c68932620de72e42c9da1c782fb776f",
+    "moe-device-counts-r9.json": "53405fa6226c208fc014fe34d07eb9cdefb1439b1ebc52f44d3c2396f962ce35",
+    "moe-projection-summary-r9.json": "ee99d326bab3fde4675c59b43fc3db111af081b62fbc9d661c8120fa449eeaa5",
+    "host-attention-pairs-r9.json": "237f6b71017e3a391ae8c164ad07ca43fbf6a66b3bf0637fd2aef03172aca3ca",
+    "r9-hbm-integration.json": "39ed8a8ffbff7654d6334dbcd35caa64e9d06e0df3b8a0d8397eaf78c6cadfa2",
+    "r9-hccs-integration.json": "c578a25d7b09b7f2c53d85c0ad6893cf04cb515af88fe3e00b4157bf70c2bcca"
+  },
+  "extension_input_sha256": {
+    "gdn-wy-inverse-accounting-r9.json": "24f97fad485bb8eda5783403ead13485bbf7665b5765a186c6919616e4b41edf",
+    "preprocess-reference-plan-r1.json": "d608214c5ce06012c9df432a1c5bd059b0eec29e5cd6876f4531c93ca18518de",
+    "preprocess-reference-summary-r1.json": "f0a21ad0955f171ad437316afc59b02edfb682974ef33f3aa0618e0517667351",
+    "conv-accounting-r9.json": "65327426c70633c88d557f19dea35a71fff3772f5c2c188e84992f0d236633f7",
+    "gdn-ho-accounting-r9.json": "963f9e38589307a72ab7154685ac3f2787b85ebb98344e0583dacd35f917182e"
+  }
+}
