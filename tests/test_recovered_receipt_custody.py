@@ -80,3 +80,20 @@ def test_dedup_preserves_invalid_status_and_has_no_local_archive_dependency(tmp_
 def test_unsafe_paths_rejected(name):
     with pytest.raises(ValueError, match="Unsafe"):
         MODULE.safe_path(name)
+
+
+@pytest.mark.parametrize(
+    "tag,asset",
+    [
+        ("../tag", "safe.tar.gz"),
+        ("safe", "manifest.json"),
+        ("safe", "dir/file.tar.gz"),
+        ("safe", "a?b.tar.gz"),
+        ("safe", "a#b.tar.gz"),
+    ],
+)
+def test_invalid_release_identity_rejected_before_reading(tmp_path, tag, asset):
+    with pytest.raises(ValueError, match="Invalid"):
+        MODULE.build(
+            tmp_path / "missing", tmp_path / "out", tmp_path / "index", tag, asset
+        )

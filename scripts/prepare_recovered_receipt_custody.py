@@ -5,6 +5,7 @@ import gzip
 import hashlib
 import io
 import json
+import re
 import tarfile
 from pathlib import Path, PurePosixPath
 
@@ -24,7 +25,15 @@ def safe_path(name):
     return path
 
 
-def build(inventory_path, destination, index_path):
+def build(inventory_path, destination, index_path, tag=TAG, asset_name=ASSET):
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", tag):
+        raise ValueError("Invalid release tag")
+    if (
+        str(safe_path(asset_name)) != asset_name
+        or "/" in asset_name
+        or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*\.tar\.gz", asset_name)
+    ):
+        raise ValueError("Invalid asset name")
     inventory = json.loads(inventory_path.read_text())
     index = json.loads(index_path.read_text())
     if destination.exists():
@@ -64,7 +73,7 @@ def build(inventory_path, destination, index_path):
                 info.mode = 0o644
                 archive.addfile(info, io.BytesIO(raw))
                 members.append({"member": name, "sha256": identity, "bytes": len(raw)})
-                known[identity] = {"asset": ASSET, "member": name}
+                known[identity] = {"asset": asset_name, "member": name}
             row = {
                 "original_path": name,
                 "sha256": identity,
@@ -78,7 +87,7 @@ def build(inventory_path, destination, index_path):
     archive_sha = sha(compressed)
     archive_url = (
         "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/"
-        f"{TAG}/{ASSET}"
+        f"{tag}/{asset_name}"
     )
     for row in rows:
         if "asset" in row["source"]:
@@ -89,7 +98,7 @@ def build(inventory_path, destination, index_path):
             }
     manifest = {
         "schema": "recovered-receipt-custody/v1",
-        "release_tag": TAG,
+        "release_tag": tag,
         "source_root": str(source),
         "inventory_sha256": sha(inventory_path.read_bytes()),
         "reused_index_sha256": sha(index_path.read_bytes()),
@@ -98,7 +107,7 @@ def build(inventory_path, destination, index_path):
         "excluded_directories": inventory["excluded_directories"],
         "included_suffixes": inventory["included_suffixes"],
         "asset": {
-            "name": ASSET,
+            "name": asset_name,
             "url": archive_url,
             "bytes": len(compressed),
             "sha256": archive_sha,
@@ -109,7 +118,7 @@ def build(inventory_path, destination, index_path):
         "raw_source_unchanged": True,
     }
     destination.mkdir(parents=True, mode=0o700)
-    (destination / ASSET).write_bytes(compressed)
+    (destination / asset_name).write_bytes(compressed)
     (destination / "manifest.json").write_text(
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n"
     )
@@ -131,10 +140,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--inventory", type=Path, required=True)
     parser.add_argument("--destination", type=Path, required=True)
+    parser.add_argument("--release-tag", default=TAG)
+    parser.add_argument("--asset-name", default=ASSET)
     parser.add_argument(
         "--index",
         type=Path,
         default=ROOT / "archive/frontier-20260927-v1/manifest.json",
     )
     args = parser.parse_args()
-    build(args.inventory, args.destination, args.index)
+    build(
+        args.inventory, args.destination, args.index, args.release_tag, args.asset_name
+    )
