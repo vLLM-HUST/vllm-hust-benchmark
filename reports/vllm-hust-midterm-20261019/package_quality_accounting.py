@@ -24,13 +24,81 @@ def main():
             "vocabulary-prefill",
             "gdn-reference",
             "vocab-reference",
+            "device-routing",
             "quality",
         ),
         required=True,
     )
     parser.add_argument("--run", action="append", default=[])
+    parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "vocab-reference":
+    if args.kind == "device-routing":
+        if args.profile_root is None:
+            parser.error("--profile-root is required for device-routing")
+        directories = [
+            "microflow-token-accounting-r9",
+            "token-observer-v8",
+            "moe-capture-r1",
+            "moe-capture-control-r1",
+            "r9-system-control",
+        ]
+        sources = [
+            "moe_device_capture.py",
+            "moe_model_capture.py",
+            "moe_capture_probe.py",
+            "moe_capture_probe.sh",
+            "run_moe_capture.py",
+            "prepare_moe_capture_probe.py",
+            "moe-capture-plan-r1.json",
+            "moe-capture-qualification.json",
+            "audit_moe_capture_qualification.py",
+            "audit_moe_device_counts.py",
+            "moe-device-counts-r9.json",
+            "prepare_token_observer_v8.py",
+            "measure_token_accounting_v8.py",
+            "launch_token_accounting_v8.py",
+            "runtime-token-accounting-v8.sh",
+            "serve-token-accounting-v8.sh",
+            "token-observer-build-v8.json",
+            "collect_r9_system.py",
+            "sample_system_hardware.sh",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+            "audit_r9_hccs.py",
+            "r9-hccs-integration.json",
+            "r9-hbm-integration.json",
+            "prepare_r9_accounting.py",
+            "r9-accounting-build.json",
+            "link_r9_accounting.py",
+            "same-run-partial-accounting-r9-v3.json",
+            "audit_token_accounting.py",
+            "audit_gdn_host_schedule.py",
+            "derive_attention_pairs.py",
+            "host-attention-pairs-r9.json",
+            "partial-operator-accounting-r9.json",
+            "moe-projection-summary-r9.json",
+            "gdn-recurrence-summary-r9.json",
+            "vocab-projection-summary-r9.json",
+            "same-run-partial-accounting-r9.json",
+            "same-run-partial-accounting-r9-v2.json",
+            "runtime/vllm_ascend/ops/fused_moe/routed_experts.py",
+            "runtime/vllm_ascend/ops/fused_moe/token_dispatcher.py",
+            "runtime/vllm_ascend/ops/fused_moe/dataclass/moe_mlp.py",
+            "hccs-capacity-control-r1/summary.json",
+        ]
+        build = json.loads((args.root / "r9-accounting-build.json").read_text())
+        sources.extend(
+            sorted({row[key] for row in build for key in ("source", "output")})
+        )
+        summaries = {
+            "routing.json": "moe-device-counts-r9.json",
+            "qualification.json": "moe-capture-qualification.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r9-v3.json",
+            "hbm.json": "r9-hbm-integration.json",
+            "hccs.json": "r9-hccs-integration.json",
+        }
+    elif args.kind == "vocab-reference":
         directories = ["vocab-reference-r1", "vocab-reference-control-r1"]
         sources = [
             "prepare_vocab_reference.py",
@@ -334,6 +402,17 @@ def main():
         ]
         summaries = {}
     selected = {}
+    if args.kind == "device-routing":
+        for path in args.profile_root.rglob("*"):
+            relative = path.relative_to(args.profile_root)
+            if (
+                path.is_file()
+                and "mindstudio_profiler_output" not in relative.parts
+                and path.name.startswith(("hbm", "info.json", "start_info", "end_info"))
+            ):
+                selected["profiler/" + relative.as_posix()] = path
+        for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
+            selected["source/" + name] = Path(__file__).parent / name
     for directory in directories:
         for path in (args.root / directory).rglob("*"):
             if path.is_file() and "__pycache__" not in path.parts:
