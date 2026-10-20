@@ -27,6 +27,7 @@ def main():
             "moe-reference",
             "dense-reference",
             "gdn-triangular",
+            "preprocess-reference",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -36,7 +37,29 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "gdn-triangular":
+    if args.kind == "preprocess-reference":
+        directories = ["preprocess-reference-r1", "preprocess-reference-control-r1"]
+        sources = [
+            "prepare_preprocess_reference.py",
+            "preprocess_reference_probe.py",
+            "preprocess_reference_probe.sh",
+            "run_preprocess_reference.py",
+            "preprocess-reference-plan-r1.json",
+            "preprocess-reference-summary-r1.json",
+            "audit_preprocess_reference.py",
+            "test_preprocess_accounting.py",
+            "audit_gdn_host_schedule.py",
+            "audit_token_accounting.py",
+            "run_dense_reference_repeat.py",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+            "payload/betterscale/models/qwen35/preprocess.py",
+            "payload/betterscale/models/qwen35/mixed_core.py",
+            "payload/betterscale/models/qwen35/service_metadata.py",
+        ]
+        summaries = {"reference.json": "preprocess-reference-summary-r1.json"}
+    elif args.kind == "gdn-triangular":
         directories = []
         sources = [
             "audit_gdn_wy_accounting.py",
@@ -515,6 +538,9 @@ def main():
         ]
         summaries = {}
     selected = {}
+    if args.kind == "preprocess-reference":
+        for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
+            selected["source/" + name] = Path(__file__).parent / name
     if args.kind == "device-routing":
         for path in args.profile_root.rglob("*"):
             relative = path.relative_to(args.profile_root)
