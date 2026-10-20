@@ -1,0 +1,18 @@
+{
+  "schema": "swe-bench-pro-agent-http-profile-v1",
+  "name": "read-unbounded-v1",
+  "timeouts": {
+    "connect": 180,
+    "read": null,
+    "write": 180,
+    "pool": 180
+  },
+  "agent_constraints": {
+    "http_timeout_seconds": 180,
+    "step_limit": 30,
+    "wall_budget_seconds": 1200,
+    "max_tokens": 4096,
+    "automatic_retries": 0
+  },
+  "qualification": "Explicitly approved read-timeout isolation; other Agent/model/transport bounds remain. No promise of Agent completion."
+}

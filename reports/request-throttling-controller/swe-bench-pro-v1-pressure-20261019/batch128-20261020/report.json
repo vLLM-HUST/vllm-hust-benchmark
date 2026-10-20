@@ -1,0 +1,144 @@
+{
+  "run": "swe-pro-v1-batch128-20261020-r1",
+  "performance_valid": false,
+  "arms": {
+    "native": {
+      "statuses": {
+        "RetryError": 128
+      },
+      "submitted": 0,
+      "elapsed_seconds": 1208.8440197180025,
+      "saved_responses": 1540,
+      "saved_usage": {
+        "completion_tokens": 87405,
+        "prompt_tokens": 10297469,
+        "total_tokens": 10384874
+      },
+      "exceptions": {
+        "httpx_read_timeout": 128,
+        "wall_budget": 128,
+        "limits_exceeded": 0,
+        "context_window_exceeded": 0
+      },
+      "kv_peak_fraction": 0.6757425742574257,
+      "samples_ge_90pct": 0,
+      "engine_samples": 1236,
+      "preemptions_delta": 0.0,
+      "engine_before": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "first_epoch": 1792482531.7436955,
+      "last_epoch": 1792483798.0750055,
+      "peak_program_states": {
+        "active": 128
+      }
+    },
+    "controller": {
+      "statuses": {
+        "RetryError": 118,
+        "ContextWindowExceededError": 5,
+        "LimitsExceeded": 5
+      },
+      "submitted": 0,
+      "elapsed_seconds": 1208.966641527135,
+      "saved_responses": 1865,
+      "saved_usage": {
+        "completion_tokens": 152924,
+        "prompt_tokens": 15485113,
+        "total_tokens": 15638037
+      },
+      "exceptions": {
+        "httpx_read_timeout": 118,
+        "wall_budget": 118,
+        "limits_exceeded": 0,
+        "context_window_exceeded": 5
+      },
+      "kv_peak_fraction": 0.6658415841584158,
+      "samples_ge_90pct": 0,
+      "engine_samples": 1229,
+      "preemptions_delta": 0.0,
+      "engine_before": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "first_epoch": 1792483816.1485944,
+      "last_epoch": 1792485078.3004727,
+      "peak_program_states": {
+        "active": 102,
+        "paused": 128
+      }
+    }
+  },
+  "controller_log_delta": {
+    "paused": 1015,
+    "marked": 1000,
+    "resumed": 998
+  },
+  "step_limit_witness": {
+    "controller_model_calls": [
+      30,
+      30,
+      30,
+      30,
+      30
+    ]
+  },
+  "observation_gap": "Native~6min checkpoint saved; later Native terminal/Controller start/Controller10min live UI capture missed. Per-second CPU observations retained. Terminal capture is later16:50, not live at16:30.",
+  "status": "BATCH128_ALL_AGENTS_FAILED",
+  "benefit_claim": false,
+  "source_commit": "3fd5a39902472faca01f17de1b041b5e6f9d1685",
+  "runner_commit": "23e7efd1a4f4e494aabf96657fa905415021246f",
+  "http_profile_sha256": "03ae48525baf792259729c9eaf15cc66c40b37dff2d2fb970fce8e8c086ea655",
+  "protocol": {
+    "official_tasks": 8,
+    "independent_agents_per_task": 16,
+    "program_instances": 128,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "program_dependencies_preserved": true,
+    "agent_wall_seconds": 1200,
+    "step_limit": 30,
+    "max_output_tokens": 4096,
+    "context": 32768,
+    "read_timeout": null,
+    "connect_write_pool_seconds": 180,
+    "proxy_downstream_seconds": 900
+  },
+  "model": {
+    "max_num_seqs": 256,
+    "graph_max": 256,
+    "kv_bytes": 17179869184,
+    "restarted": false
+  },
+  "capacity": {
+    "usable_tokens": 1654784,
+    "per_program_buffer": 14335
+  },
+  "scoring": {
+    "deferred_unresolved": 256,
+    "zero_score_claim": false
+  },
+  "archive": {
+    "status": "PASS",
+    "bytes": 40209726,
+    "sha256": "2eb0aff9da096afa5c6aae35ad2f2581f0c411d467e7875304aff8b0e735591f",
+    "files_checked": 4338
+  },
+  "limitations": [
+    "Zero submitted Agents and unequal work: no complete-batch performance claim.",
+    "Batch128 changes workload from256; do not call lower batch elapsed a scheduler gain.",
+    "Wall-budget TimeoutError is mapped to ReadTimeout; no180s read expiration claim.",
+    "Native6-minute checkpoint and terminal evidence retained; later midrun/transition live screenshots were missed. Per-second CPU observations retained.",
+    "NPU logs are separate from CPU archive.",
+    "Hybrid KV figure axis is token-equivalent estimate, not exact resident tokens."
+  ]
+}
