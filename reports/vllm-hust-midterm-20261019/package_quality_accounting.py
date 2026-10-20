@@ -42,23 +42,29 @@ def main():
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
     if args.kind == "norm-reference":
-        directories = ["norm-reference-r1", "norm-reference-control-r1"]
+        directories = ["norm-reference-r2", "norm-reference-control-r2"]
         sources = [
             "prepare_norm_reference.py",
             "norm_reference_probe.py",
             "norm_reference_probe.sh",
             "run_norm_reference.py",
             "audit_norm_reference.py",
+            "prepare_norm_reference_r2.py",
+            "norm_reference_probe_r2.py",
+            "norm_reference_probe_r2.sh",
+            "run_norm_reference_r2.py",
+            "audit_norm_reference_r2.py",
             "norm-reference-plan-r1.json",
-            "norm-reference-summary-r1.json",
+            "norm-reference-plan-r2.json",
+            "norm-reference-summary-r2.json",
             "audit_token_accounting.py",
             "dcmi_hccs64.py",
             "dcmi_hccs_bandwidth.py",
             "measure_microflow.py",
         ]
-        norm_plan = json.loads((args.root / "norm-reference-plan-r1.json").read_text())
+        norm_plan = json.loads((args.root / "norm-reference-plan-r2.json").read_text())
         sources.extend(norm_plan["source_sha256"])
-        summaries = {"summary.json": "norm-reference-summary-r1.json"}
+        summaries = {"summary.json": "norm-reference-summary-r2.json"}
     elif args.kind == "norm-accounting":
         directories = []
         sources = [

@@ -10,16 +10,40 @@ from test_midterm_vocab_prefill import BASE, archive_members
 
 
 def test_norm_reference_schedule_and_sources():
-    members = archive_members(BASE / "norm-reference-r1")
-    plan = json.loads(members["source/norm-reference-plan-r1.json"])
+    members = archive_members(BASE / "norm-reference-r2")
+    plan = json.loads(members["source/norm-reference-plan-r2.json"])
     raw = archive_members(BASE / "device-routing-r9")
     phase = plan["request_phase"]
     for rank in plan["ranks"]:
         data = raw["microflow-token-accounting-r9/" + rank["trace"]]
         assert hashlib.sha256(data).hexdigest() == rank["trace_sha256"]
+        events = list(map(json.loads, data.splitlines()))
+        pid = rank["trace"].removeprefix("token-accounting-").removesuffix(".jsonl")
+        prefix = list(
+            map(
+                json.loads,
+                raw[
+                    f"microflow-token-accounting-r9/microflow-{pid}.jsonl"
+                ].splitlines(),
+            )
+        )
+        captured = {
+            (e["layer"], e["tokens"], e["split"])
+            for e in prefix
+            if e["event"] == "prefix"
+            and e["capturing"]
+            and e["time"] < phase["start_wall"]
+        }
+        inventory = next(e for e in events if e["event"] == "loaded_model_inventory")
+        fa_layers = [
+            m["name"].removesuffix(".self_attn.qkv_proj")
+            for m in inventory["target"]["modules"]
+            if m["name"].endswith(".self_attn.qkv_proj")
+        ]
+        assert len(fa_layers) == 10
         counts = Counter()
         contexts = Counter()
-        for event in map(json.loads, data.splitlines()):
+        for event in events:
             if event["event"] != "forward_enter":
                 continue
             if not phase["start_wall"] <= event["wall"] <= phase["end_wall"]:
@@ -28,8 +52,12 @@ def test_norm_reference_schedule_and_sources():
             rows = event["padded_tokens"]
             contexts[event["role"]] += 1
             if event["role"] == "target":
+                pieces = {1024: 2, 2048: 2, 4096: 4, 8192: 4}.get(rows, 1)
+                for layer in fa_layers:
+                    assert (layer, rows, pieces > 1) in captured
                 counts["hidden_plain", rows, 2048] += 1
-                counts["hidden_residual", rows, 2048] += 80
+                counts["hidden_residual", rows, 2048] += 70
+                counts["hidden_residual", rows // pieces, 2048] += 10 * pieces
                 counts["gdn_output", rows * 16, 128] += 30
             else:
                 assert event["role"] == "draft" and len(event["draft_steps"]) == 2
@@ -45,14 +73,29 @@ def test_norm_reference_schedule_and_sources():
     ]
     for name, digest in plan["source_sha256"].items():
         assert hashlib.sha256(members["source/" + name]).hexdigest() == digest
+    prior_data = members["source/norm-reference-plan-r1.json"]
+    assert hashlib.sha256(prior_data).hexdigest() == plan["previous_plan_sha256"]
+    prior = json.loads(prior_data)
+    assert prior["cases"] != plan["cases"]
+    # Partitioning changes invocation count/shape, not the number of normalized elements.
+    for kind in ("hidden_plain", "hidden_residual", "gdn_output"):
+        assert sum(
+            c["rows"] * c["width"] * c["calls"]
+            for c in prior["cases"]
+            if c["kind"] == kind
+        ) == sum(
+            c["rows"] * c["width"] * c["calls"]
+            for c in plan["cases"]
+            if c["kind"] == kind
+        )
 
 
 def test_norm_reference_measurements_and_cleanup():
-    root = BASE / "norm-reference-r1"
+    root = BASE / "norm-reference-r2"
     members = archive_members(root)
     summary = json.loads((root / "summary.json").read_text())
-    plan_data = members["source/norm-reference-plan-r1.json"]
-    control_data = members["norm-reference-control-r1/receipt.json"]
+    plan_data = members["source/norm-reference-plan-r2.json"]
+    control_data = members["norm-reference-control-r2/receipt.json"]
     plan, control = json.loads(plan_data), json.loads(control_data)
     assert hashlib.sha256(plan_data).hexdigest() == summary["plan_sha256"]
     assert hashlib.sha256(control_data).hexdigest() == summary["control_sha256"]
@@ -62,7 +105,7 @@ def test_norm_reference_measurements_and_cleanup():
     for name, digest in control["input_hashes"].items():
         assert hashlib.sha256(members["source/" + name]).hexdigest() == digest
     for rank in summary["ranks"]:
-        data = members[f"norm-reference-r1/rank-{rank['rank']}.json"]
+        data = members[f"norm-reference-r2/rank-{rank['rank']}.json"]
         assert hashlib.sha256(data).hexdigest() == rank["raw_sha256"]
         raw = json.loads(data)
         assert (
