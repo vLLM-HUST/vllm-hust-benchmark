@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "mod": "dla",
+  "date": "2026-10-20",
+  "language_note": "Field values are English for direct comparability with reports/kvcompress-five-dataset-applicability-20261011. The Chinese narrative is in README.md.",
+  "review_status": "candidate; maintainer and benchmark contract review pending",
+  "mod_issue": "https://github.com/vLLM-HUST/vllm-hust-dla/issues/6",
+  "canonical_issue": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/254",
+  "source_asset_audit_commit": "e3a7183206bd399447475b2d117fef897c0880b6",
+  "canonical_program": {
+    "path": "leaderboard-data/dataset-validation/dataset_program_v1.json",
+    "contract_version": "dataset-program-v1",
+    "program_updated_at": "2026-10-10",
+    "mandatory_model": "Qwen/Qwen3.5-35B-A3B",
+    "formal_precision": "BF16",
+    "rule": "Per-row dataset_revision and primary_metric are read from this canonical program file, not from secondary reports."
+  },
+  "host_contract_observed": {
+    "observed_at": "2026-10-20",
+    "host_commit": "a4c2404dbe",
+    "host_source_line": "0.31.1",
+    "declared_host_version_range": ">=0.23.1.dev653,<0.24",
+    "predicted_length_on_preemption_candidate": false,
+    "evidence_path": "vllm/v1/core/sched/preemption.py",
+    "evidence_note": "The PreemptionCandidate definition on main carries num_output_tokens, max_tokens and builtin_victim_id but no predicted_length field. DlaVictimPolicy._any_prediction() therefore returns False for every context and select_victim() abstains, which is bit-identical to upstream scheduling.",
+    "consequence": "Two independent gates fail before any workload question: the manifest version range excludes the current host source line, and the required vllm.predicted-length protocol is not supplied by the host."
+  },
+  "profile": {
+    "model": "Qwen/Qwen3.5-35B-A3B",
+    "model_revision": null,
+    "model_revision_note": "No DLA run exists against this model. A revision must be frozen by whichever measured run is eventually claimed; no value is inferred here.",
+    "mechanism": "Decode-length-aware preemption victim selection in the vLLM scheduler process",
+    "contract": "vllm.preemption-policy.v1",
+    "required_protocol": "vllm.predicted-length ==1.0",
+    "implementation": "python_module dla.policy:DlaVictimPolicy (status active, no entry-point auto-registration)",
+    "extension_version": "0.1.1",
+    "predictor_validated_workload": "Qwen2.5-7B-Instruct (EGTP head reproduced on ForeLen); no Qwen3.5-35B-A3B predictor is validated",
+    "mod_qualification": "unqualified; MOD_METADATA.json performance_claims is empty",
+    "activation_rule": "DLA can change a decision only when all three hold: (1) the host exposes predicted_length on preemption candidates, (2) at least one candidate carries a prediction, and (3) the KV block pool is full so the scheduler actually preempts. Condition (3) requires at least two concurrently running requests. Every primary-dataset protocol below is single-concurrency, so condition (3) never holds. Additionally the deployed host fails (1) and (2) outright.",
+    "primary_benefit_metrics": [
+      "JCT (p50/p99)",
+      "preemption count",
+      "recomputed (wasted) prefill tokens"
+    ],
+    "non_metrics": "Task accuracy and task resolution rate are not DLA metrics and cannot demonstrate this mechanism."
+  },
+  "optimization_claims": [],
+  "task_quality_results": null,
+  "datasets": [
+    {
+      "id": "mmlu-pro",
+      "status": "not-exercised",
+      "dataset_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+      "primary_metric": "Task accuracy under a pinned evaluator",
+      "reason": "Task-quality evaluation submits one request at a time. The frozen reference five-shot prompts are 898-2910 tokens, so even the longest single prompt is far from saturating a 16 GiB-per-card KV pool. With one active request the scheduler never has to preempt, so the victim-selection decision DLA changes is never reached. The historical 200-prompt artifact is serving telemetry and is not task accuracy.",
+      "owner": "@xiehanlong834-gif (MOD); benchmark #254 maintainers (task manifest and scorer contract)",
+      "next_step": "Do not report a DLA result here. If a serving-side claim is ever wanted, keep the task-quality protocol unchanged and construct a separate concurrent workload that saturates the KV pool, then report JCT and preemption counts as serving evidence, not accuracy."
+    },
+    {
+      "id": "hle-verified",
+      "status": "not-exercised",
+      "dataset_revision": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+      "primary_metric": "Accuracy under the pinned HLE-Verified evaluator",
+      "reason": "Single-request serial evaluation. The 2500-row source includes a 668-question Gold subset with 93 image questions; whatever subset is chosen, one question is submitted at a time, so no concurrent KV pressure and no preemption exists for DLA to act on. The dataset-side licence, scope and judge gaps are tracked separately under #254 and are not a DLA mechanism question.",
+      "owner": "@xiehanlong834-gif (MOD); benchmark #254 maintainers (rights, subset and evaluator contract)",
+      "next_step": "Keep the row not-exercised regardless of how the rights and judge gates close; they do not create a concurrent workload. A DLA claim would require a separate serving workload with its own frozen preemption evidence."
+    },
+    {
+      "id": "swe-bench-pro",
+      "status": "not-exercised",
+      "dataset_revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+      "primary_metric": "Resolved task rate in isolated regrading",
+      "reason": "Agentic but strictly serial: the archived single trajectory runs one agent in one container, issuing 79 model replies before submitting. Only one request is ever active, so even a 37,370-token turn competes with nothing and cannot cause preemption. Multi-turn agent behaviour raises context length, not concurrency.",
+      "owner": "@xiehanlong834-gif (MOD); benchmark #254 maintainers (sandbox, agent and regrader contract)",
+      "next_step": "Do not attribute agent turn count or context length to DLA benefit. A DLA measurement would need several concurrent agents sharing one KV pool, which the frozen protocol explicitly forbids."
+    },
+    {
+      "id": "frontierscience",
+      "status": "not-exercised",
+      "dataset_revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+      "primary_metric": "Track-specific accuracy or rubric score",
+      "reason": "Single-question, problem-only and thinking-disabled rendering; 100 Olympiad and 60 Research tasks are evaluated track by track, one request at a time. No concurrent occupancy exists, so the scheduler never preempts and DLA abstains structurally rather than by configuration.",
+      "owner": "@xiehanlong834-gif (MOD); benchmark #254 maintainers (per-track grader contract)",
+      "next_step": "Keep both tracks separate and keep this row not-exercised. The pending track-specific graders are a dataset-contract blocker under #254, not a DLA activation path."
+    },
+    {
+      "id": "terminal-bench-2.1",
+      "status": "not-exercised",
+      "dataset_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+      "primary_metric": "Resolved task rate (pass@1)",
+      "reason": "The candidate Harbor protocol pins one trial per task and one concurrent trial, with 100 turns and a 32K context. Concurrency is therefore exactly one by contract, so preemption cannot occur and the DLA decision point is unreachable.",
+      "owner": "@xiehanlong834-gif (MOD); benchmark #254 maintainers (Harbor image, agent and verifier contract)",
+      "next_step": "Do not raise concurrency to manufacture a DLA effect; that would change the pinned protocol. Any DLA evidence must come from a separately declared serving workload."
+    }
+  ],
+  "boundaries": {
+    "offline_simulation_is_not_evidence": "The repository README records an offline block-pool simulation (BurstGPT 10k requests, vLLM LIFO baseline, 3 seeds) with JCT p50 -23%, preemptions -28% and wasted prefill tokens -56%. That is mechanism-side offline evidence. It is not a primary-dataset measurement, not a served result and not task quality, and must not be cited as any row's outcome.",
+    "no_activation_claim": "Implementation, unit tests and successful discovery do not prove activation in a real preemption case. No activation is claimed here.",
+    "cross_dataset_gaps_stay_separate": "Four of the five rows carry dataset-side contract blockers under #254 (licence, judge, sandbox, images). This report answers only whether DLA can be activated on each dataset and does not restate or resolve those blockers.",
+    "no_readiness_change": "No global readiness, official leaderboard cell or MOD qualification changes because of this report."
+  }
+}
