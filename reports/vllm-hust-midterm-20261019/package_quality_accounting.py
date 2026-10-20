@@ -33,6 +33,7 @@ def main():
             "norm-accounting",
             "norm-reference",
             "rope-reference",
+            "swiglu-reference",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -42,7 +43,28 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "rope-reference":
+    if args.kind == "swiglu-reference":
+        directories = ["swiglu-reference-r1", "swiglu-reference-control-r1"]
+        sources = [
+            "prepare_swiglu_reference.py",
+            "swiglu_reference_probe.py",
+            "swiglu_reference_probe.sh",
+            "run_swiglu_reference.py",
+            "audit_swiglu_reference.py",
+            "test_swiglu_accounting.py",
+            "swiglu-reference-plan-r1.json",
+            "swiglu-reference-summary-r1.json",
+            "run_norm_reference_r2.py",
+            "norm_reference_probe_r2.sh",
+            "audit_token_accounting.py",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+        ]
+        plan = json.loads((args.root / "swiglu-reference-plan-r1.json").read_text())
+        sources.extend(plan["source_sha256"])
+        summaries = {"summary.json": "swiglu-reference-summary-r1.json"}
+    elif args.kind == "rope-reference":
         directories = [
             "rope-reference-r1",
             "rope-reference-control-r1",
@@ -668,6 +690,7 @@ def main():
         "gdn-ho-accounting",
         "norm-reference",
         "rope-reference",
+        "swiglu-reference",
     ):
         for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
             selected["source/" + name] = Path(__file__).parent / name
