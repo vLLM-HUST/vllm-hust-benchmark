@@ -1,0 +1,55 @@
+{
+  "schema": "swe-bench-pro-experiment-v1",
+  "run_id": "swe-pro-v1-single-example",
+  "paths": {
+    "dataset_parquet": "/absolute/private/v1.parquet",
+    "agent_source": "/absolute/swe-pro-sources/agent",
+    "official_v1_source": "/absolute/swe-pro-sources/official-v1",
+    "docker": "/usr/bin/docker",
+    "docker_host": "unix:///var/run/docker.sock",
+    "crane": "/usr/local/bin/crane"
+  },
+  "batch": {
+    "repository": "NodeBB/NodeBB",
+    "selection": "lexicographic-first",
+    "size": 1,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "independent_agents_per_task": 1,
+    "program_instances": 1,
+    "instance_ids": [
+      "instance_NodeBB__NodeBB-0e07f3c9bace416cbab078a30eae972868c0a8a3-vf2cf3cbd463b7ad942381f1c6d077626485a1e9e"
+    ]
+  },
+  "model": {
+    "model_name": "openai/Qwen3.5-35B-A3B",
+    "api_base": "http://127.0.0.1:8000/v1",
+    "api_key_env": null
+  },
+  "agent": {
+    "step_limit": 100,
+    "wall_budget_seconds": 1200,
+    "tool_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "automatic_retries": 0
+  },
+  "container": {
+    "cpus": 2,
+    "memory": "4g",
+    "network": "bridge"
+  },
+  "protocol": {
+    "defer_grading": true
+  },
+  "image_mirror_prefix": "",
+  "keep_image_archives": false
+}
