@@ -34,6 +34,7 @@ def main():
             "norm-reference",
             "rope-reference",
             "swiglu-reference",
+            "moe-combine-reference",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -43,7 +44,46 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "swiglu-reference":
+    if args.kind == "moe-combine-reference":
+        directories = [
+            "moe-combine-reference-control-r1",
+            "moe-combine-reference-control-r2",
+            "moe-combine-reference-r2",
+        ]
+        sources = [
+            "prepare_moe_combine_reference.py",
+            "prepare_moe_combine_reference_r2.py",
+            "moe_combine_reference_probe.py",
+            "moe_combine_reference_probe.sh",
+            "run_moe_combine_reference.py",
+            "moe_combine_reference_probe_r2.py",
+            "moe_combine_reference_probe_r2.sh",
+            "run_moe_combine_reference_r2.py",
+            "audit_moe_combine_reference.py",
+            "audit_moe_scalar_sources.py",
+            "test_moe_scalar_sources.py",
+            "moe-scalar-source-audit-r1.json",
+            "moe-combine-reference-plan-r1.json",
+            "moe-combine-reference-plan-r2.json",
+            "moe-combine-reference-summary-r2.json",
+            "same-run-partial-accounting-r9-v7.json",
+            "same-run-partial-accounting-r9-v8.json",
+            "swiglu-reference-plan-r1.json",
+            "run_swiglu_reference.py",
+            "swiglu_reference_probe.sh",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+        ]
+        plan = json.loads(
+            (args.root / "moe-combine-reference-plan-r2.json").read_text()
+        )
+        sources.extend(plan["source_sha256"])
+        summaries = {
+            "summary.json": "moe-combine-reference-summary-r2.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r9-v8.json",
+        }
+    elif args.kind == "swiglu-reference":
         directories = ["swiglu-reference-r1", "swiglu-reference-control-r1"]
         sources = [
             "prepare_swiglu_reference.py",
@@ -678,6 +718,14 @@ def main():
         ]
         summaries = {}
     selected = {}
+    if args.kind == "moe-combine-reference":
+        scalar_audit = json.loads(
+            (args.root / "moe-scalar-source-audit-r1.json").read_text()
+        )
+        for name, record in scalar_audit["sources"].items():
+            path = Path(record["path"])
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == record["sha256"]
+            selected["source/model-sources/" + name] = path
     if args.kind == "norm-accounting":
         norm_catalog = json.loads((args.root / "norm-accounting-r9.json").read_text())
         for name, record in norm_catalog["sources"].items():
