@@ -3,6 +3,7 @@
 import hashlib
 import io
 import json
+import math
 import sqlite3
 import tarfile
 import types
@@ -139,8 +140,20 @@ def test_r12_hardware_intervals_against_archived_hccs(tmp_path, monkeypatch):
             )
             assert has_complete_hbm_coverage(calculated)
             for key, value in calculated.items():
-                assert device[key] == value
+                if key == "prorated_bytes":
+                    # Python 3.12 changed float sum accuracy; preserve exact integer checks.
+                    assert abs(device[key] - value) <= 8 * max(
+                        math.ulp(device[key]), math.ulp(value)
+                    )
+                else:
+                    assert device[key] == value
             for key in totals:
                 totals[key] += calculated[key]
-        assert totals == values
+        for key, value in totals.items():
+            if key == "prorated_bytes":
+                assert abs(values[key] - value) <= 8 * max(
+                    math.ulp(values[key]), math.ulp(value)
+                )
+            else:
+                assert values[key] == value
     assert summary["model_effective_flops"] is summary["m01_attainment"] is None
