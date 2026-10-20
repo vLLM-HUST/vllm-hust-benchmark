@@ -26,6 +26,7 @@ def main():
             "gdn-reference-r9",
             "moe-reference",
             "dense-reference",
+            "gdn-triangular",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -35,7 +36,27 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "device-routing":
+    if args.kind == "gdn-triangular":
+        directories = []
+        sources = [
+            "audit_gdn_wy_accounting.py",
+            "test_gdn_wy_accounting.py",
+            "gdn_inverse_accounting.py",
+            "test_gdn_inverse_accounting.py",
+            "combine_gdn_wy_inverse.py",
+            "gdn-wy-accounting-r9.json",
+            "gdn-wy-inverse-accounting-r9.json",
+            "audit_gdn_host_schedule.py",
+            "audit_token_accounting.py",
+            "payload/betterscale/models/qwen35/chunk_layout.py",
+            "payload/betterscale/models/qwen35/wy_head_major.py",
+            "payload/betterscale/patches/qwen_gdn/solve_tril.py",
+            "runtime/vllm_ascend/device/device_op.py",
+            "runtime/vllm_ascend/ops/triton/fla/chunk_scaled_dot_kkt.py",
+            "runtime/vllm_ascend/ops/triton/fla/solve_tril.py",
+        ]
+        summaries = {"accounting.json": "gdn-wy-inverse-accounting-r9.json"}
+    elif args.kind == "device-routing":
         if args.profile_root is None:
             parser.error("--profile-root is required for device-routing")
         directories = [
