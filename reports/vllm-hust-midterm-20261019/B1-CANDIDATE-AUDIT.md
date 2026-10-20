@@ -6,6 +6,10 @@ B1定义：**当前已实测最优的vLLM-HUST优化方案**。按同工况、�
 
 ## 2026年10月20日扩展审计
 
+vSpec
+MTP局部argmax已完成学校0.28受限适配及三组同工况OFF/ON补测。六轮共1200请求、0失败，双rank模型头一致性、真实草稿图捕获与重放、Microflow及KV控制、设备释放均通过校验。该候选未超过现有B1，保留Microflow吞吐/TTFT及E16
+KV的TPOT最优配置；完整中位数、范围、配对变化和原始证据见报告5.6节与`vspec-school028/summary.json`。不据此推断vSpec其他组件或其他工况无效。
+
 当前MMLU-Pro吞吐B1为E24/R36 + KV recompute + FA Microflow三次运行中位数824.894609
 token/秒。固定200请求、原始输入哈希、inf/out256、BF16、TP2、MTP2、APC、async、FULL及每卡20 GiB状态预算、8 GiB host缓存。
 

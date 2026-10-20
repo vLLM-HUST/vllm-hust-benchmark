@@ -71,7 +71,7 @@ def test_publication_is_derived_from_evidence_and_selects_each_metric(monkeypatc
     assert not saved["scenario"]["accuracy_evaluated"]
     assert len(saved["results"]) == 3
     for cell in saved["results"]:
-        assert len(cell["candidate_values"]) == 6
+        assert len(cell["candidate_values"]) == 7
         values = [row["value"] for row in cell["candidate_values"]]
         expected = (
             max if cell["comparison"]["direction"] == "higher_is_better" else min

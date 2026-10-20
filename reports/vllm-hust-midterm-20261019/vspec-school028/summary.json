@@ -1,0 +1,292 @@
+{
+  "schema": "vspec-school028-pair-screen/v1",
+  "project": "vLLM-HUST",
+  "scope": "Microflow B1 plus isolated MTP local argmax service performance screen",
+  "workload": "MMLU-Pro, original 200-request burst, infinite arrival, out256",
+  "input_sha256": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+  "configuration": "Qwen3.5-35B-A3B BF16 TP2 EP-off E24/R36 ctx64k APC MTP2 FULL async, 20GiB state and 8GiB host per rank",
+  "independent_pairs": 3,
+  "quality_rescored": false,
+  "aggregation": "Median of the three per-run measurements, independently per metric; preserve full range and all failures",
+  "aggregates": {
+    "off": {
+      "output_throughput": {
+        "median": 816.5790730055838,
+        "min": 815.7954949888633,
+        "max": 822.0024129685384
+      },
+      "mean_ttft_ms": {
+        "median": 28601.938157822005,
+        "min": 28267.503400733694,
+        "max": 28706.331490208395
+      },
+      "mean_tpot_ms": {
+        "median": 26.403875103311645,
+        "min": 26.174873057533713,
+        "max": 26.472406824028084
+      },
+      "p99_tpot_ms": {
+        "median": 34.18064798776279,
+        "min": 33.78322971557431,
+        "max": 34.39078006316341
+      },
+      "p99_tpot_nearest_ms": {
+        "median": 34.17793978736096,
+        "min": 33.77446442404214,
+        "max": 34.39051651341073
+      }
+    },
+    "on": {
+      "output_throughput": {
+        "median": 817.6704057681286,
+        "min": 816.0928080213364,
+        "max": 820.3623825056773
+      },
+      "mean_ttft_ms": {
+        "median": 28332.8939764807,
+        "min": 28240.975860869512,
+        "max": 28434.836931042373
+      },
+      "mean_tpot_ms": {
+        "median": 26.285374376831538,
+        "min": 26.174587545021637,
+        "max": 26.41825440443833
+      },
+      "p99_tpot_ms": {
+        "median": 35.35941063484871,
+        "min": 34.86866212150483,
+        "max": 35.70559656072188
+      },
+      "p99_tpot_nearest_ms": {
+        "median": 35.35774730730291,
+        "min": 34.86801106847968,
+        "max": 35.69001990060012
+      }
+    }
+  },
+  "paired_throughput_ratios": [
+    0.9994045096178407,
+    0.9980048349773836,
+    1.0022982607660649
+  ],
+  "runs": [
+    {
+      "pair_index": 1,
+      "mode": "off",
+      "verification": {
+        "run_id": "mmlu-b1-vspec-argmax-off-r1",
+        "active": false,
+        "requests": 200,
+        "failures": 0,
+        "ranks": [
+          {
+            "rank": 0,
+            "draft_replays": 882
+          },
+          {
+            "rank": 1,
+            "draft_replays": 882
+          }
+        ],
+        "quality_rescored": false,
+        "source_commit": "d8cbfb50ee1df8e1664bd080a59e49ed2e47c104"
+      },
+      "metrics": {
+        "output_throughput": 816.5790730055838,
+        "mean_ttft_ms": 28601.938157822005,
+        "mean_tpot_ms": 26.403875103311645,
+        "p99_tpot_ms": 33.78322971557431,
+        "p99_tpot_nearest_ms": 33.77446442404214
+      },
+      "duration_seconds": 62.70060266368091,
+      "ended": 1792462812.1345649,
+      "archive": "mmlu-b1-vspec-argmax-off-r1-evidence.tar.gz",
+      "archive_sha256": "ba0f5913cddedc7c895a8d01104156e08a49e1f754934844f95d6e7e90a1c23d",
+      "raw_sha256": "d1d753be7d6f752a272f1e0251156531a37d232d33ea292635bdcf7aee1a7f11"
+    },
+    {
+      "pair_index": 1,
+      "mode": "on",
+      "verification": {
+        "run_id": "mmlu-b1-vspec-argmax-on-r4",
+        "active": true,
+        "requests": 200,
+        "failures": 0,
+        "ranks": [
+          {
+            "rank": 1,
+            "draft_replays": 884
+          },
+          {
+            "rank": 0,
+            "draft_replays": 884
+          }
+        ],
+        "quality_rescored": false,
+        "source_commit": "d8cbfb50ee1df8e1664bd080a59e49ed2e47c104"
+      },
+      "metrics": {
+        "output_throughput": 816.0928080213364,
+        "mean_ttft_ms": 28332.8939764807,
+        "mean_tpot_ms": 26.41825440443833,
+        "p99_tpot_ms": 35.35941063484871,
+        "p99_tpot_nearest_ms": 35.35774730730291
+      },
+      "duration_seconds": 62.73796251695603,
+      "ended": 1792463280.8468874,
+      "archive": "mmlu-b1-vspec-argmax-on-r4-evidence.tar.gz",
+      "archive_sha256": "26c31f0c6963a913c7054de5fb35e36ab2b5800a4135a7f2af93cf7462126642",
+      "raw_sha256": "115c8812f4f9cdd82ae01e58a21762aba07bff756fea2a133a67c41bf7d28b9d"
+    },
+    {
+      "pair_index": 2,
+      "mode": "off",
+      "verification": {
+        "run_id": "mmlu-b1-vspec-argmax-off-r2",
+        "active": false,
+        "requests": 200,
+        "failures": 0,
+        "ranks": [
+          {
+            "rank": 1,
+            "draft_replays": 883
+          },
+          {
+            "rank": 0,
+            "draft_replays": 883
+          }
+        ],
+        "quality_rescored": false,
+        "source_commit": "d8cbfb50ee1df8e1664bd080a59e49ed2e47c104"
+      },
+      "metrics": {
+        "output_throughput": 822.0024129685384,
+        "mean_ttft_ms": 28267.503400733694,
+        "mean_tpot_ms": 26.174873057533713,
+        "p99_tpot_ms": 34.39078006316341,
+        "p99_tpot_nearest_ms": 34.39051651341073
+      },
+      "duration_seconds": 62.28692178055644,
+      "ended": 1792463763.5761285,
+      "archive": "mmlu-b1-vspec-argmax-off-r2-evidence.tar.gz",
+      "archive_sha256": "be27fc33995a4d75d15778f426dee976d0b7e2f7ab9beed3ab836153336b0625",
+      "raw_sha256": "ef0160c7917f10f8d6a236b07c5245d476f09b1ad5ee3d1f31ef2f1761c6d1d9"
+    },
+    {
+      "pair_index": 2,
+      "mode": "on",
+      "verification": {
+        "run_id": "mmlu-b1-vspec-argmax-on-r5",
+        "active": true,
+        "requests": 200,
+        "failures": 0,
+        "ranks": [
+          {
+            "rank": 1,
+            "draft_replays": 882
+          },
+          {
+            "rank": 0,
+            "draft_replays": 882
+          }
+        ],
+        "quality_rescored": false,
+        "source_commit": "d8cbfb50ee1df8e1664bd080a59e49ed2e47c104"
+      },
+      "metrics": {
+        "output_throughput": 820.3623825056773,
+        "mean_ttft_ms": 28240.975860869512,
+        "mean_tpot_ms": 26.174587545021637,
+        "p99_tpot_ms": 35.70559656072188,
+        "p99_tpot_nearest_ms": 35.69001990060012
+      },
+      "duration_seconds": 62.41144290845841,
+      "ended": 1792464242.3248804,
+      "archive": "mmlu-b1-vspec-argmax-on-r5-evidence.tar.gz",
+      "archive_sha256": "2774de5a8616b88bf13a18851026967d90086b55ad2c564e0c8af79ff2e24443",
+      "raw_sha256": "d267fb2b82f800e45ca70c2467dcba54d0a59d160f7ac389c0dba304de807d4b"
+    },
+    {
+      "pair_index": 3,
+      "mode": "off",
+      "verification": {
+        "run_id": "mmlu-b1-vspec-argmax-off-r3",
+        "active": false,
+        "requests": 200,
+        "failures": 0,
+        "ranks": [
+          {
+            "rank": 0,
+            "draft_replays": 880
+          },
+          {
+            "rank": 1,
+            "draft_replays": 880
+          }
+        ],
+        "quality_rescored": false,
+        "source_commit": "d8cbfb50ee1df8e1664bd080a59e49ed2e47c104"
+      },
+      "metrics": {
+        "output_throughput": 815.7954949888633,
+        "mean_ttft_ms": 28706.331490208395,
+        "mean_tpot_ms": 26.472406824028084,
+        "p99_tpot_ms": 34.18064798776279,
+        "p99_tpot_nearest_ms": 34.17793978736096
+      },
+      "duration_seconds": 62.760827087797225,
+      "ended": 1792464716.0356674,
+      "archive": "mmlu-b1-vspec-argmax-off-r3-evidence.tar.gz",
+      "archive_sha256": "7e13d0401023d5664f0ce35f56172cf5182ce36c89a0de677b139e09daa494df",
+      "raw_sha256": "ed10c0c049008cee26dd6caa319d67e4ecca9a27d68edef67f7cdb2d824ce677"
+    },
+    {
+      "pair_index": 3,
+      "mode": "on",
+      "verification": {
+        "run_id": "mmlu-b1-vspec-argmax-on-r6",
+        "active": true,
+        "requests": 200,
+        "failures": 0,
+        "ranks": [
+          {
+            "rank": 1,
+            "draft_replays": 881
+          },
+          {
+            "rank": 0,
+            "draft_replays": 881
+          }
+        ],
+        "quality_rescored": false,
+        "source_commit": "d8cbfb50ee1df8e1664bd080a59e49ed2e47c104"
+      },
+      "metrics": {
+        "output_throughput": 817.6704057681286,
+        "mean_ttft_ms": 28434.836931042373,
+        "mean_tpot_ms": 26.285374376831538,
+        "p99_tpot_ms": 34.86866212150483,
+        "p99_tpot_nearest_ms": 34.86801106847968
+      },
+      "duration_seconds": 62.6169170839712,
+      "ended": 1792465194.7664962,
+      "archive": "mmlu-b1-vspec-argmax-on-r6-evidence.tar.gz",
+      "archive_sha256": "8577a271be9b8bfe11694483a65ae93ab3b489ad0aebc6536c8bed2de98d8010",
+      "raw_sha256": "b0621265967579c582007bd8216b1cb9c72eb7e8a360499a9ec726e6fbc2dd27"
+    }
+  ],
+  "verifier_sha256": "65521ce16acf4823a107cb0a51e0afa769157a3ffada607b9c9db0f3eba004dc",
+  "current_best_per_metric": {
+    "output_throughput": 824.8946090250279,
+    "mean_ttft_ms": 28129.14797556121,
+    "mean_tpot_ms": 21.017554329562127
+  },
+  "improves_current_best_per_metric": {
+    "output_throughput": false,
+    "mean_ttft_ms": false,
+    "mean_tpot_ms": false
+  },
+  "on_vs_off_throughput_pct": -0.00990624157838349,
+  "on_vs_current_throughput_b1_pct": -0.8757728778756135,
+  "promote_throughput_candidate": false
+}
