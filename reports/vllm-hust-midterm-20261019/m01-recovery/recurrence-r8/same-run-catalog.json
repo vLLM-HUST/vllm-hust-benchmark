@@ -1,0 +1,37 @@
+{
+  "status": "same_run_partial_semantic_catalog",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792488630.705468,
+    "end_wall": 1792488693.64192,
+    "duration_seconds": 62.936452069319785,
+    "wall_monotonic_offset_difference_seconds": 0.0,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "components": {
+    "non_moe_projections_and_causal_attention": 951981865271296,
+    "nominal_moe_projections": 804815160803328,
+    "slot_eligible_gdn_recurrent_basic_ops": 6349526876160
+  },
+  "covered_basic_semantic_subtotal": 1763146552950784,
+  "separate_recurrence_exp_evaluations": 55301760,
+  "model_effective_flops": null,
+  "attainment_percent": null,
+  "excluded": [
+    "Vocabulary projections, GDN prefill core and convolution",
+    "Preprocessing, normalization, RoPE, softmax, activations and elementwise gates",
+    "Graph padding, masked implementation arithmetic and TP-replicated work"
+  ],
+  "limitations": [
+    "The catalog combines disjoint model-semantic families, not complete device execution.",
+    "MoE projections assume full-range no-capacity-drop routing; actual routed rows are not device-counted.",
+    "Attention lengths and recurrent eligibility are host-observed without same-run device validation.",
+    "No cross-run time denominator, effective FLOP/s, reference capacity or acceptance percentage is derived."
+  ],
+  "input_sha256": {
+    "host-attention-pairs-r8.json": "574dab4181f3f543059612f288a0af193c16e23d88323341ce69a46ac783b63a",
+    "partial-operator-accounting-r8.json": "37f6d3479a388b7b3537bc2a2a5a592ddf3d5e96326ce9fc1dde7060613f9704",
+    "moe-projection-summary-r8.json": "5306f3d9216c04f3d11d0e7962b892b3ed5359a768d518eabbe02cf8a1a0c4af",
+    "gdn-recurrence-summary-r8.json": "fa15077c22f947314a626baebea6f7af35c60684bc3c583233cad2aa89cb4386"
+  }
+}

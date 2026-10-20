@@ -1,0 +1,89 @@
+{
+  "status": "nominal_moe_projection_arithmetic_derived",
+  "ranks": [
+    {
+      "rank": 0,
+      "roles": {
+        "target": {
+          "valid_context_tokens": 339871,
+          "layers": 40,
+          "moe_ep_size": 1,
+          "tp_size": 2,
+          "nominal_routed_rows_all_layers": 108758720,
+          "routed_projection_semantic_flops": 684250701496320,
+          "shared_projection_semantic_flops": 85531337687040,
+          "router_projection_semantic_flops": 14255222947840,
+          "shared_gate_projection_semantic_flops": 55684464640
+        },
+        "draft": {
+          "valid_context_tokens": 359288,
+          "layers": 1,
+          "moe_ep_size": 1,
+          "tp_size": 2,
+          "nominal_routed_rows_all_layers": 2874304,
+          "routed_projection_semantic_flops": 18083557146624,
+          "shared_projection_semantic_flops": 2260444643328,
+          "router_projection_semantic_flops": 376740773888,
+          "shared_gate_projection_semantic_flops": 1471643648
+        }
+      },
+      "source_sha256": "dc5b49c2ecbc7036946315e6d94b721ba9a122d04e5d48563157092c3b475926"
+    },
+    {
+      "rank": 1,
+      "roles": {
+        "target": {
+          "valid_context_tokens": 339871,
+          "layers": 40,
+          "moe_ep_size": 1,
+          "tp_size": 2,
+          "nominal_routed_rows_all_layers": 108758720,
+          "routed_projection_semantic_flops": 684250701496320,
+          "shared_projection_semantic_flops": 85531337687040,
+          "router_projection_semantic_flops": 14255222947840,
+          "shared_gate_projection_semantic_flops": 55684464640
+        },
+        "draft": {
+          "valid_context_tokens": 359288,
+          "layers": 1,
+          "moe_ep_size": 1,
+          "tp_size": 2,
+          "nominal_routed_rows_all_layers": 2874304,
+          "routed_projection_semantic_flops": 18083557146624,
+          "shared_projection_semantic_flops": 2260444643328,
+          "router_projection_semantic_flops": 376740773888,
+          "shared_gate_projection_semantic_flops": 1471643648
+        }
+      },
+      "source_sha256": "3a5468568361c06e12f96154173b6e0bc286387d152d1c4616e20e2e2185ffb0"
+    }
+  ],
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792488630.705468,
+    "end_wall": 1792488693.64192,
+    "duration_seconds": 62.936452069319785,
+    "wall_monotonic_offset_difference_seconds": 0.0,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "source_sha256": {
+    "runtime/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+    "runtime/vllm_ascend/eplb/core/eplb_utils.py": "1fcf2a5d8ee56366d460ccd87661176822745f2d86e295a6438c0f8651d2392e",
+    "runtime/vllm_ascend/ops/fused_moe/routed_experts.py": "b17e5a105d59fc280f244bdc4036b4cb41efd1d5a2ff1accca4b56620cc91ab7",
+    "runtime/vllm_ascend/device/device_op.py": "151f03a3344f2651317db0c9d5503a272dcdd61ff8b5712cbef4e112f6e4a013",
+    "derive_moe_projection_accounting_r8.py": "8f172edebb8d7012a3d7c5d107f081129afbfdf5d11e967521dbb0e85f2c90e0"
+  },
+  "scope": "Model-level semantic projection arithmetic; TP partitions combined once, replicated router/gate counted once.",
+  "assumptions": [
+    "The full-range, non-EP routing operator implements its documented no-capacity-drop contract.",
+    "Each valid context token has eight expert assignments; expert-count axis is not another multiplier."
+  ],
+  "actual_routed_rows_measured": null,
+  "model_effective_flops": null,
+  "limitations": [
+    "Nominal routed rows are derived from the active routing contract, not sampled device counters.",
+    "Unselected experts, padding and repeated metadata across ranks are not counted as useful projection work.",
+    "GDN core, activations, normalization and matched reference remain incomplete.",
+    "No cross-run subtotal addition, performance substitution or M01 attainment is made."
+  ]
+}
