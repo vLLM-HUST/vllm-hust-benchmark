@@ -1,0 +1,80 @@
+{
+  "status": "r17_device_causal_length_canonical_softmax_semantics",
+  "cohorts": {
+    "inside_request_under_clock_tolerance": {
+      "roles": {
+        "target": {
+          "score_scale_multiply": 47603144480,
+          "stability_subtract": 47603144480,
+          "denominator_add": 47548770880,
+          "exponential": 47603144480,
+          "normalization_divide": 47603144480,
+          "maximum_compare": 47548770880,
+          "query_rows_all_heads_layers": 54373600,
+          "causal_scores_all_heads_layers": 47603144480
+        },
+        "draft_step0": {
+          "score_scale_multiply": 4760314448,
+          "stability_subtract": 4760314448,
+          "denominator_add": 4754877088,
+          "exponential": 4760314448,
+          "normalization_divide": 4760314448,
+          "maximum_compare": 4754877088,
+          "query_rows_all_heads_layers": 5437360,
+          "causal_scores_all_heads_layers": 4760314448
+        },
+        "draft_step1": {
+          "score_scale_multiply": 477560736,
+          "stability_subtract": 477560736,
+          "denominator_add": 477250320,
+          "exponential": 477560736,
+          "normalization_divide": 477560736,
+          "maximum_compare": 477250320,
+          "query_rows_all_heads_layers": 310416,
+          "causal_scores_all_heads_layers": 477560736
+        }
+      },
+      "totals": {
+        "score_scale_multiply": 52841019664,
+        "stability_subtract": 52841019664,
+        "denominator_add": 52780898288,
+        "exponential": 52841019664,
+        "normalization_divide": 52841019664,
+        "maximum_compare": 52780898288,
+        "query_rows_all_heads_layers": 60121376,
+        "causal_scores_all_heads_layers": 52841019664
+      },
+      "canonical_add_subtract_multiply_count": 158462937616
+    },
+    "boundary_or_tail": {
+      "roles": {},
+      "totals": {
+        "score_scale_multiply": 0,
+        "stability_subtract": 0,
+        "denominator_add": 0,
+        "exponential": 0,
+        "normalization_divide": 0,
+        "maximum_compare": 0,
+        "query_rows_all_heads_layers": 0,
+        "causal_scores_all_heads_layers": 0
+      },
+      "canonical_add_subtract_multiply_count": 0
+    }
+  },
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r17-request-attention.json": "c03950211443e1bddb3968f7e32be6914ae08e73ce13d733096a8806368560a4",
+    "/root/gennova-evidence/20261019-midterm-aligned/r17-matrix-accounting.json": "85b6cbea5106c1ca5843ec34c542373aabedbcb6f2661f35c7107d65fe5f51e4",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r17_softmax.py": "3b8be0db86e7b78cb6be758171bf819053e313c2c242617879139d4eac2232d0",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r12_softmax_semantics.py": "b264d2c4c836a16ac5c715a6dfc44e6ab9543872b6f277877ca7ffd29b2899a8"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Reuses a tested pure arithmetic function, not r12 observations or counts.",
+    "One global TP model: 16 query heads, 10 target attention layers and one layer per draft forward.",
+    "Canonical stable softmax, not observed fused implementation instructions or online rescaling.",
+    "Exponentials, division and comparisons remain separate; no arbitrary FLOP equivalence.",
+    "Every causal query has at least one key; graph padding is excluded and tail remains separate.",
+    "This semantic ledger is not full effective F, matched kernel capacity or an M01 attainment result."
+  ]
+}

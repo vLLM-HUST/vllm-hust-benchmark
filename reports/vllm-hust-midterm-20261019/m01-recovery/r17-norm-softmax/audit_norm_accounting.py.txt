@@ -1,0 +1,127 @@
+"""Useful model RMS arithmetic; replicated TP work and SFU costs stay separate."""
+
+import hashlib
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+SITE = Path("/workspace/gennova-6-20261019/shared028-device-r1/deployed/runtime/venv-school-r1/lib/python3.12/site-packages")
+
+
+def rms_operations(rows, width, residual=False, gated=False):
+    if type(rows) is not int or type(width) is not int or rows < 0 or width < 1:
+        raise ValueError("invalid RMS dimensions")
+    return {
+        "square": rows * width,
+        "reduction_add": rows * (width - 1),
+        "mean_scale": rows,
+        "epsilon_add": rows,
+        "normalize_multiply": rows * width,
+        "weight_multiply": rows * width,
+        "residual_add": rows * width if residual else 0,
+        "output_gate_multiply": rows * width if gated else 0,
+        "inverse_sqrt_evaluations": rows,
+        "silu_evaluations": rows * width if gated else 0,
+    }
+
+
+def catalog(target, draft):
+    entries = []
+
+    def add(name, rows, width, residual=False, gated=False):
+        ops = rms_operations(rows, width, residual, gated)
+        entries.append({
+            "name": name, "rows": rows, "width": width,
+            "residual": residual, "gated": gated, "operations": ops,
+            "basic_arithmetic_subtotal": sum(v for k, v in ops.items() if not k.endswith("_evaluations")),
+        })
+
+    # Each forward starts with no residual. Final model norm consumes a residual.
+    add("target.hidden_no_residual", target, 2048)
+    add("target.hidden_with_residual", target * 80, 2048, residual=True)
+    add("draft.embedding_hidden_and_first_norm", draft * 3, 2048)
+    add("draft.post_attention_and_final_norm", draft * 2, 2048, residual=True)
+    add("target.full_attention_qk", target * 10 * (16 + 2), 256)
+    add("draft.full_attention_qk", draft * (16 + 2), 256)
+    add("target.gdn_output", target * 30 * 32, 128, gated=True)
+    return entries
+
+
+def main():
+    config_path = Path("/models/Qwen3.5-35B-A3B/config.json")
+    config = json.loads(config_path.read_text())["text_config"]
+    assert not config.get("layer_scale", False)
+    for key, expected in {
+        "hidden_size": 2048, "num_attention_heads": 16, "num_key_value_heads": 2,
+        "head_dim": 256, "linear_num_value_heads": 32, "linear_value_head_dim": 128,
+        "num_hidden_layers": 40, "mtp_num_hidden_layers": 1,
+    }.items():
+        assert config[key] == expected
+    assert config["layer_types"].count("full_attention") == 10
+    counts_path = ROOT / "host-attention-pairs-r9.json"
+    counts = json.loads(counts_path.read_text())
+    assert counts["ranks"][0]["roles"] == counts["ranks"][1]["roles"]
+    roles = counts["ranks"][0]["roles"]
+    target = roles["target"]["valid_query_tokens"]
+    draft = sum(roles[f"draft_step{i}"]["valid_query_tokens"] for i in range(2))
+    inventory_counts = []
+    for path in sorted((ROOT / "microflow-token-accounting-r9").glob("token-accounting-*.jsonl")):
+        with path.open() as stream:
+            inventory = next(e for line in stream if (e := json.loads(line))["event"] == "loaded_model_inventory")
+        record = {}
+        for role, expected in (("target", {2048: 81, 256: 20, 128: 30}),
+                               ("draft", {2048: 5, 256: 2})):
+            dims = {}
+            for module in inventory[role]["modules"]:
+                if "RMSNorm" not in module["type"]:
+                    continue
+                shape = module["parameters"]["weight"]["shape"]
+                assert len(shape) == 1
+                dims[shape[0]] = dims.get(shape[0], 0) + 1
+            assert dims == expected, (role, dims)
+            record[role] = dims
+        inventory_counts.append(record)
+    assert len(inventory_counts) == 2
+    sources = {
+        "ascend/patch_qwen3_5.py": ROOT / "runtime/vllm_ascend/patch/worker/patch_qwen3_5.py",
+        "ascend/layernorm.py": ROOT / "runtime/vllm_ascend/ops/layernorm.py",
+        "ascend/layernorm_gated.py": ROOT / "runtime/vllm_ascend/ops/triton/layernorm_gated.py",
+        "ascend/gdn.py": ROOT / "runtime/vllm_ascend/ops/gdn.py",
+        "vllm/qwen3_5.py": SITE / "vllm/model_executor/models/qwen3_5.py",
+        "vllm/qwen3_next.py": SITE / "vllm/model_executor/models/qwen3_next.py",
+        "vllm/qwen3_5_mtp.py": SITE / "vllm/model_executor/models/qwen3_5_mtp.py",
+        "vllm/qwen_gdn_linear_attn.py": SITE / "vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py",
+    }
+    assert "norm_before_gate=True" in sources["vllm/qwen_gdn_linear_attn.py"].read_text()
+    entries = catalog(target, draft)
+    result = {
+        "status": "source_and_host_derived_useful_rms_catalog",
+        "scope": "Whole TP2 model semantic work counted once, not duplicated hidden-state normalization on each rank.",
+        "target_valid_tokens": target, "draft_valid_tokens": draft,
+        "inventory_counts": inventory_counts, "entries": entries,
+        "basic_arithmetic_subtotal": sum(e["basic_arithmetic_subtotal"] for e in entries),
+        "inverse_sqrt_evaluations": sum(e["operations"]["inverse_sqrt_evaluations"] for e in entries),
+        "silu_evaluations": sum(e["operations"]["silu_evaluations"] for e in entries),
+        "model_config_sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
+        "counts_source_sha256": hashlib.sha256(counts_path.read_bytes()).hexdigest(),
+        "sources": {name: {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                    for name, path in sources.items()},
+        "model_effective_flops": None, "attainment_percent": None,
+        "limitations": [
+            "Counts valid tokens, not fixed-capacity graph padding or duplicated TP hidden normalization.",
+            "RMS square, reduction, average, epsilon, scaling, affine weight and residual additions use real arithmetic semantics.",
+            "Gemma weight+1 is a parameter transform, not charged once per token; its implementation work is excluded.",
+            "SiLU is recorded as one special-function evaluation with no FLOP cost; its outer gate multiply is counted separately.",
+            "Inverse square root evaluations have no arbitrary FLOP equivalent.",
+            "GDN input Q/K L2 normalization is already in the preprocess catalog and is not counted again.",
+            "Source and host-derived counts are not device instruction measurements, BF16 equivalence or matched timing.",
+        ],
+    }
+    with (ROOT / "norm-accounting-r9.json").open("x") as stream:
+        json.dump(result, stream, indent=2)
+        stream.write("\n")
+    print(json.dumps({k: result[k] for k in ("basic_arithmetic_subtotal", "inverse_sqrt_evaluations", "silu_evaluations")}))
+
+
+if __name__ == "__main__":
+    main()

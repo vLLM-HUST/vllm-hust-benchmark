@@ -1,0 +1,107 @@
+"""Recover r17 valid-row RMS semantics, without asserting useful whole-model F."""
+
+import hashlib
+import json
+from collections import Counter
+from pathlib import Path
+
+from audit_norm_accounting import catalog
+
+ROOT = Path(__file__).resolve().parent
+RUN = Path('/workspace/gennova-measurements/microflow-token-accounting-r17')
+
+
+def inventory_check(inventory):
+    result = {}
+    for role, expected in (('target', {2048: 81, 256: 20, 128: 30}),
+                           ('draft', {2048: 5, 256: 2})):
+        dims = Counter()
+        for module in inventory[role]['modules']:
+            if 'RMSNorm' not in module['type']:
+                continue
+            weight = module['parameters']['weight']
+            assert weight['dtype'] == 'torch.bfloat16'
+            assert len(weight['shape']) == 1
+            dims[weight['shape'][0]] += 1
+        assert dict(dims) == expected, (role, dims)
+        result[role] = dict(dims)
+    return result
+
+
+def cohort_entries(counts):
+    target = counts.get('target', {}).get('valid_query_tokens', 0)
+    draft = sum(counts.get(f'draft_step{i}', {}).get('valid_query_tokens', 0)
+                for i in (0, 1))
+    entries = catalog(target, draft)
+    return {
+        'target_valid_rows': target, 'draft_valid_rows': draft,
+        'entries': entries,
+        'basic_arithmetic_subtotal': sum(e['basic_arithmetic_subtotal'] for e in entries),
+        'inverse_sqrt_evaluations': sum(e['operations']['inverse_sqrt_evaluations'] for e in entries),
+        'silu_evaluations': sum(e['operations']['silu_evaluations'] for e in entries),
+    }
+
+
+def build():
+    counts_path = ROOT / 'r17-request-attention.json'
+    counts = json.loads(counts_path.read_text())
+    assert counts['status'] == 'device_lengths_joined_to_enclosing_forwards_and_partitioned_by_request_interval'
+    for name, digest in counts['source_sha256'].items():
+        assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest
+    receipt = json.loads((RUN / 'receipt.json').read_text())
+    assert receipt['status'] == 'measured' and receipt['all_devices_released']
+    traces = sorted(RUN.glob('token-accounting-*.jsonl'))
+    assert len(traces) == 2
+    inventories, sources, ranks = [], {}, []
+    for trace in traces:
+        inventory, rank = None, None
+        for line in trace.open():
+            event = json.loads(line)
+            if event['event'] == 'loaded_model_inventory':
+                assert inventory is None
+                inventory = event
+            elif event['event'] == 'observer_installed':
+                assert rank is None
+                rank = event['rank']
+        assert inventory is not None
+        ranks.append(rank)
+        inventories.append(inventory_check(inventory))
+        for role in ('target', 'draft'):
+            for name, digest in inventory[role]['source_sha256'].items():
+                if Path(name).name not in ('qwen3_5.py', 'qwen3_5_mtp.py', 'patch_qwen3_5.py', 'gdn.py'):
+                    continue
+                assert hashlib.sha256(Path(name).read_bytes()).hexdigest() == digest
+                assert sources.get(name, digest) == digest
+                sources[name] = digest
+    assert set(ranks) == {0, 1} and inventories[0] == inventories[1]
+    assert {'qwen3_5.py', 'qwen3_5_mtp.py', 'patch_qwen3_5.py', 'gdn.py'} <= {Path(p).name for p in sources}
+    paths = [Path(__file__), ROOT / 'audit_norm_accounting.py', counts_path,
+             RUN / 'receipt.json', *traces]
+    return {
+        'status': 'r17_device_extent_and_loaded_inventory_rms_semantics',
+        'request_phase': counts['request_phase'],
+        'inventory_counts': inventories,
+        'cohorts': {name: cohort_entries(rows) for name, rows in counts['cohorts'].items()},
+        'run_pinned_callsite_sha256': sources,
+        'source_sha256': {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths},
+        'model_effective_flops': None, 'm01_attainment': None,
+        'limitations': [
+            'This is valid-row source-semantic RMS/residual arithmetic, not device instruction counting or a claim that every row contributes to a returned output.',
+            'Device GDN state-update skips do not prove that downstream output normalization is skipped; no skip count is subtracted here.',
+            'Global semantic TP model counted once; replicated hidden norms and graph padding are excluded.',
+            'Q/K L2 preprocessing is excluded to avoid double counting with GDN preprocessing.',
+            'Inverse square root and SiLU are separate evaluation counts, not assigned arbitrary FLOP equivalents.',
+            'Gemma weight-plus-one parameter transforms are excluded from per-token arithmetic.',
+            'Loaded inventory pins callsites, not every fused norm implementation or binary; this ledger alone does not establish BF16 numerical equivalence or matched capacity.',
+            'Time classification inherits the device-length ledger clock mapping and does not prove all-stream completion.',
+        ],
+    }
+
+
+if __name__ == '__main__':
+    result = build()
+    with (ROOT / 'r17-norm-semantics.json').open('x') as stream:
+        json.dump(result, stream, indent=2)
+        stream.write('\n')
+    print(json.dumps({name: {k: v for k, v in row.items() if k != 'entries'}
+                      for name, row in result['cohorts'].items()}, indent=2))

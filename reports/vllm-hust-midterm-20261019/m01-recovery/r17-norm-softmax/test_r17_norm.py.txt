@@ -1,0 +1,31 @@
+import pytest
+
+from derive_r17_norm import cohort_entries, inventory_check
+
+
+def test_empty_tail_is_zero():
+    result = cohort_entries({})
+    assert result['basic_arithmetic_subtotal'] == 0
+    assert result['inverse_sqrt_evaluations'] == 0
+    assert result['silu_evaluations'] == 0
+
+
+def test_device_roles_are_counted_once():
+    result = cohort_entries({'target': {'valid_query_tokens': 2},
+                             'draft_step0': {'valid_query_tokens': 3},
+                             'draft_step1': {'valid_query_tokens': 5}})
+    entries = {e['name']: e for e in result['entries']}
+    assert entries['target.hidden_with_residual']['rows'] == 160
+    assert entries['draft.embedding_hidden_and_first_norm']['rows'] == 24
+    assert entries['target.gdn_output']['rows'] == 1920
+    assert result['inverse_sqrt_evaluations'] == 2 * (81 + 180 + 960) + 8 * (5 + 18)
+
+
+def test_missing_loaded_norms_rejected():
+    with pytest.raises(AssertionError):
+        inventory_check({role: {'modules': []} for role in ('target', 'draft')})
+
+
+def test_negative_extent_rejected():
+    with pytest.raises(ValueError):
+        cohort_entries({'target': {'valid_query_tokens': -1}})

@@ -1,0 +1,91 @@
+"""Canonical causal softmax ledger, not fused-kernel instruction accounting."""
+import hashlib
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+
+
+def softmax_counts(pairs, rows, heads, layers):
+    for value in (pairs, rows, heads, layers):
+        if type(value) is not int or value < 0:
+            raise ValueError("Counts must be nonnegative integers")
+    if (rows == 0 and pairs != 0) or pairs < rows:
+        raise ValueError("Every query row must have at least one causal key")
+    multiplier = heads * layers
+    return {
+        "score_scale_multiply": pairs * multiplier,
+        "stability_subtract": pairs * multiplier,
+        "denominator_add": (pairs - rows) * multiplier,
+        "exponential": pairs * multiplier,
+        "normalization_divide": pairs * multiplier,
+        "maximum_compare": (pairs - rows) * multiplier,
+        "query_rows_all_heads_layers": rows * multiplier,
+        "causal_scores_all_heads_layers": pairs * multiplier,
+    }
+
+
+def main():
+    matrix_path = ROOT / "r12-matrix-accounting.json"
+    matrix = json.loads(matrix_path.read_text())
+    for filename, digest in matrix["source_sha256"].items():
+        assert hashlib.sha256(Path(filename).read_bytes()).hexdigest() == digest
+    model_path = Path("/models/Qwen3.5-35B-A3B/config.json")
+    config = json.loads(model_path.read_text())["text_config"]
+    heads = config["num_attention_heads"]
+    layers = config["layer_types"].count("full_attention")
+    assert (heads, layers, config["mtp_num_hidden_layers"]) == (16, 10, 1)
+    cohorts = {}
+    for cohort, values in matrix["cohorts"].items():
+        roles = {
+            role: softmax_counts(
+                counts["causal_pairs"], counts["valid_query_tokens"],
+                heads, layers if role == "target" else 1,
+            )
+            for role, counts in values["roles"].items()
+        }
+        totals = {name: sum(role[name] for role in roles.values())
+                  for name in next(iter(roles.values()))}
+        cohorts[cohort] = {
+            "roles": roles,
+            "totals": totals,
+            "canonical_add_subtract_multiply_count": sum(
+                totals[name] for name in (
+                    "score_scale_multiply", "stability_subtract", "denominator_add"
+                )
+            ),
+        }
+    paths = [
+        matrix_path, model_path, Path(__file__),
+        ROOT / "runtime/vllm_ascend/attention/attention_v1.py",
+        ROOT / "microflow-payload-r4/hust_prefill_microflow/runtime/school028_attention.py",
+    ]
+    result = {
+        "status": "canonical_semantic_operation_ledger_not_measured_kernel_flops",
+        "cohorts": cohorts,
+        "convention": [
+            "For each causal row of n keys: multiply scores by scale, find maximum, subtract maximum, exponentiate, sum n values with n-1 adds, divide each exponential by sum.",
+            "Ordinary add/subtract/multiply count is 3*pairs-rows per query head and layer.",
+            "Exponential, division and comparisons are separate categories; no equivalence to multiply-add FLOPs is assigned.",
+            "This canonical algorithm is not a claim about the internal algorithm of fused attention.",
+        ],
+        "source_sha256": {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in paths},
+        "model_effective_flops": None,
+        "m01_attainment": None,
+        "limitations": [
+            "Online softmax tile rescaling and physical masked/padded operations are not observed.",
+            "Counts inherit host causal lengths and dual-rank forward boundaries from the r12 matrix audit.",
+            "Backend call sites invoke fused attention; instruction-level softmax execution is unverified.",
+            "No independent matching fused-attention reference timing is supplied by this ledger.",
+            "Tail or boundary work remains separate; this ledger does not close the full-model F or timing gap.",
+        ],
+    }
+    destination = ROOT / "r12-softmax-semantics.json"
+    with destination.open("x") as stream:
+        json.dump(result, stream, indent=2)
+        stream.write("\n")
+    print(json.dumps({name: item["totals"] for name, item in cohorts.items()}, indent=2))
+
+
+if __name__ == "__main__":
+    main()

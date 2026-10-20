@@ -1,0 +1,70 @@
+import math
+import unittest
+
+from derive_r12_softmax_semantics import softmax_counts
+
+
+def counted_reference(scores, scale):
+    counts = {
+        "score_scale_multiply": 0, "stability_subtract": 0,
+        "denominator_add": 0, "exponential": 0,
+        "normalization_divide": 0, "maximum_compare": 0,
+    }
+    scaled = []
+    for score in scores:
+        scaled.append(score * scale)
+        counts["score_scale_multiply"] += 1
+    maximum = scaled[0]
+    for score in scaled[1:]:
+        maximum = max(maximum, score)
+        counts["maximum_compare"] += 1
+    exps = []
+    for score in scaled:
+        exps.append(math.exp(score - maximum))
+        counts["stability_subtract"] += 1
+        counts["exponential"] += 1
+    denominator = exps[0]
+    for value in exps[1:]:
+        denominator += value
+        counts["denominator_add"] += 1
+    output = []
+    for value in exps:
+        output.append(value / denominator)
+        counts["normalization_divide"] += 1
+    return output, counts
+
+
+class SoftmaxLedgerTests(unittest.TestCase):
+    def test_explicit_causal_rows_match_aggregated_formula(self):
+        lengths = [1, 2, 7, 19]
+        expected = softmax_counts(sum(lengths), len(lengths), 1, 1)
+        actual = {}
+        for length in lengths:
+            probabilities, counts = counted_reference(list(range(length)), .125)
+            self.assertAlmostEqual(sum(probabilities), 1)
+            self.assertTrue(all(math.isfinite(p) and p > 0 for p in probabilities))
+            for name, value in counts.items():
+                actual[name] = actual.get(name, 0) + value
+        for name, value in actual.items():
+            self.assertEqual(value, expected[name])
+
+    def test_shift_invariance_and_large_scores(self):
+        a, _ = counted_reference([10001, 10000, 9999], 1)
+        b, _ = counted_reference([1, 0, -1], 1)
+        self.assertEqual(a, b)
+
+    def test_head_layer_multiplicity_not_tp_duplication(self):
+        one = softmax_counts(20, 3, 1, 1)
+        target = softmax_counts(20, 3, 16, 10)
+        self.assertEqual(target, {key: value * 160 for key, value in one.items()})
+
+    def test_empty_and_invalid_inputs(self):
+        self.assertTrue(all(value == 0 for value in softmax_counts(0, 0, 16, 10).values()))
+        for values in ((3, 4, 16, 10), (1, 0, 16, 10), (-1, 1, 16, 10),
+                       (True, 1, 16, 10), (1.0, 1, 16, 10)):
+            with self.assertRaises(ValueError):
+                softmax_counts(*values)
+
+
+if __name__ == "__main__":
+    unittest.main()
