@@ -1,0 +1,132 @@
+{
+  "schema": "swe-bench-pro-test-loop-diagnosis-v1",
+  "run_id": "swe-pro-v1-test-loop-single-agent-20261020-r1",
+  "source_commit": "de2472652debecd842e652704d907fa11793cc31",
+  "runner_sha256": "e17d685cd2f492985471b27dcda4e58b2cf1185be628eb37379a6da9c86d4fbf",
+  "program_instances": 1,
+  "changed_protocol": [
+    "agent.task_instructions"
+  ],
+  "task_instructions": "Before submitting, run the repository's existing relevant project tests against your code changes. Inspect the project test commands and required services in its own documentation and package configuration. Use actual runtime tests exercising the changed behavior; source-text checks or scripts that only inspect source strings are not a substitute. If a relevant test fails, use the failure output to fix the implementation and rerun it within the remaining budget. Preserve existing passing behavior. If tests cannot run, report the exact command and blocker honestly. Do not claim tests passed without executing them.",
+  "configuration": {
+    "context": 262144,
+    "step_limit": 100,
+    "wall_budget_seconds": 1200,
+    "tool_timeout_seconds": 60,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "automatic_retries": 0,
+    "model_restarted": false,
+    "model_runtime_same_worker_epochs": true,
+    "controller_modules_loaded": []
+  },
+  "agent_result": {
+    "status": "LimitsExceeded",
+    "agent_submitted": false,
+    "elapsed_seconds": 342.9991165022366,
+    "model_calls": 100,
+    "patch_bytes": 4458,
+    "patch_sha256": "72d86989709e5d20156a007064af91196e9b0962742991b3caca54bb43392f4d",
+    "container_cleanup_exit_code": 0
+  },
+  "query_replies": 100,
+  "query_exceptions": 0,
+  "max_prompt_tokens": 44165,
+  "project_test_attempts": [
+    {
+      "command": "cd /app && npm test 2>&1 | head -100",
+      "returncode": 0,
+      "summary": [],
+      "syntax_error": true,
+      "redis_connection_refused": false
+    },
+    {
+      "command": "cd /app && npm test 2>&1 | head -150",
+      "returncode": 0,
+      "summary": [
+        "0 passing (40ms)",
+        "1 failing"
+      ],
+      "syntax_error": false,
+      "redis_connection_refused": true
+    },
+    {
+      "command": "redis-server --daemonize yes && sleep 2 && cd /app && npm test 2>&1 | head -200",
+      "returncode": 0,
+      "summary": [
+        "338 passing (20s)",
+        "1 failing"
+      ],
+      "syntax_error": false,
+      "redis_connection_refused": false
+    },
+    {
+      "command": "cd /app && npm test 2>&1 | tail -50",
+      "returncode": 0,
+      "summary": [
+        "338 passing (18s)",
+        "1 failing"
+      ],
+      "syntax_error": false,
+      "redis_connection_refused": false
+    },
+    {
+      "command": "cd /app && npm test 2>&1 | grep -E \"(passing|failing)\" | tail -5",
+      "returncode": 0,
+      "summary": [
+        "338 passing (18s)",
+        "1 failing"
+      ],
+      "syntax_error": false,
+      "redis_connection_refused": false
+    }
+  ],
+  "official_grading": {
+    "scope": "diagnosis of saved unsubmitted patch, not a successful Agent submission",
+    "resolved": 0,
+    "total": 1,
+    "unresolved": 0,
+    "status": "OUTPUTS_PRESENT",
+    "new_model_calls": 0,
+    "all_parsed_tests": {
+      "PASSED": 117,
+      "FAILED": 4
+    },
+    "fail_to_pass": {
+      "expected": 1,
+      "statuses": {
+        "MISSING": 1
+      }
+    },
+    "pass_to_pass": {
+      "expected": 148,
+      "statuses": {
+        "PASSED": 117,
+        "MISSING": 29,
+        "FAILED": 2
+      }
+    },
+    "failure_kind": "Cannot find module error introduced by an incorrect relative import in the patch"
+  },
+  "evidence_archive": {
+    "bytes": 235941,
+    "sha256": "eecac28faaf0da88c376c6b2feb9205300e3799acda50fb5ff670c3bf80b3d00",
+    "files": 78,
+    "archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "limitations": [
+    "Only one task and one Agent; no performance comparison",
+    "Pipeline exit codes are not npm test exit codes; failure output retained",
+    "Agent did not submit; saved patch was graded separately",
+    "UI tunnel was unavailable; no new live Ray/Grafana screenshots are claimed"
+  ]
+}
