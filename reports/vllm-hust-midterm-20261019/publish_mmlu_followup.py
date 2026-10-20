@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from microflow_candidate import RUN as MICROFLOW_RUN, load as load_microflow
+from vspec_candidate import RUN as VSPEC_RUN, load as load_vspec
 
 
 REPORT = Path(__file__).resolve().parent
@@ -82,6 +83,18 @@ def build(evidence_commit):
             "exercised",
         )
     )
+    vspec, measured = load_vspec()
+    sources.append("vspec-school028/summary.json")
+    ended.extend(row["ended"] for row in vspec["runs"])
+    arms.append(
+        (
+            "vspec-argmax-median",
+            "vLLM-HUST E24/R36 + KV + FA Microflow + MTP local argmax (median of 3 starts)",
+            measured,
+            VSPEC_RUN,
+            "exercised",
+        )
+    )
 
     def provenance(run):
         return {
@@ -116,6 +129,13 @@ def build(evidence_commit):
                 "tpot_mean": "mean_tpot_ms",
             }[metric]
             assert microflow["improves_current_best_per_metric"][key]
+        if selected["candidate_id"] == "vspec-argmax-median":
+            key = {
+                "output_token_throughput": "output_throughput",
+                "ttft_mean": "mean_ttft_ms",
+                "tpot_mean": "mean_tpot_ms",
+            }[metric]
+            assert vspec["improves_current_best_per_metric"][key]
         improved = (
             selected["value"] > baseline
             if direction == "higher"
@@ -129,18 +149,18 @@ def build(evidence_commit):
                 "baseline_value": baseline,
                 "value": selected["value"],
                 "delta_pct": selected["delta_pct"],
-                "updated_at": "2026-10-19",
+                "updated_at": "2026-10-20",
                 "selected_candidate_id": selected["candidate_id"],
                 "candidate_values": candidates,
                 "comparison": {
                     "direction": f"{direction}_is_better",
                     "trend": "improved" if improved else "regressed",
-                    "selection": "Best measured service-performance value per metric; FA Microflow uses the median of 3 independent starts; not a joint deployment result",
+                    "selection": "Best measured service-performance value per metric; FA Microflow and its MTP local-argmax candidate use medians of 3 independent starts; not a joint deployment result",
                 },
                 "provenance": selected["provenance"],
                 "baseline_provenance": provenance("mmlu-b0-r2"),
-                "note": "Sequential TP2 services: 200 requests per run, out256, infinite arrival. FA Microflow uses the median of 3 independent ON starts and matched OFF controls with the same initial compiler-cache snapshot; small differences are not claims of statistical significance. Task accuracy was not rescored. Each metric selects its own configuration. KV recompute only; partial reuse and GDN Microflow were not exercised.",
-                "note_zh": "同机单TP2服务，每轮200请求、out256、无限到达率。FA Microflow取3次独立ON运行的中位数，配对OFF使用相同初始编译缓存快照；小幅差异不代表统计显著性。未重评任务正确率，各指标分别选择配置。KV仅逐请求重算，分段复用和GDN Microflow未执行。",
+                "note": "Sequential TP2 services: 200 requests per run, out256, infinite arrival. FA Microflow and its MTP local-argmax candidate each use the median of 3 independent ON starts and matched OFF controls with the same initial compiler-cache snapshot; small differences are not claims of statistical significance. Task accuracy was not rescored. Each metric selects its own configuration. KV recompute only; partial reuse and GDN Microflow were not exercised.",
+                "note_zh": "同机单TP2服务，每轮200请求、out256、无限到达率。FA Microflow及其MTP局部argmax候选分别取3次独立ON运行的中位数，配对OFF使用相同初始编译缓存快照；小幅差异不代表统计显著性。未重评任务正确率，各指标分别选择配置。KV仅逐请求重算，分段复用和GDN Microflow未执行。",
             }
         )
     return {

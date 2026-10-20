@@ -1,0 +1,15 @@
+{
+  "scope": "Original MMLU-Pro 200-request inf/out256 Microflow B1 plus isolated MTP local argmax",
+  "qualification": "Separate startup/head equivalence and graph qualification; exclude qualification runs from selected B1",
+  "pairs": [
+    {"off": "mmlu-b1-vspec-argmax-off-r1", "on": "mmlu-b1-vspec-argmax-on-r4"},
+    {"off": "mmlu-b1-vspec-argmax-off-r2", "on": "mmlu-b1-vspec-argmax-on-r5"},
+    {"off": "mmlu-b1-vspec-argmax-off-r3", "on": "mmlu-b1-vspec-argmax-on-r6"}
+  ],
+  "selection": "Median of the three per-run measurements, independently per metric; preserve full range and all failures",
+  "paired_gain": "(geomean(on_output_tps/off_output_tps)-1)*100",
+  "current_b1": "microflow-school028/summary.json ON median; do not select the best single run",
+  "cache_policy": "Independent copies of the same existing warm Triton/Inductor seed; fresh per-run vLLM AOT",
+  "stop": "Any correctness, source, request or device-isolation failure blocks publication; no exclusion of slow successful runs",
+  "quality_scope": "Service-performance screening only, not a complete MMLU-Pro task accuracy evaluation"
+}
