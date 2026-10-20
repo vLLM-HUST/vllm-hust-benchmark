@@ -26,6 +26,8 @@ python verify_aligned_pair.py "$work/20261019-midterm-aligned" mmlu-b0-r2 mmlu-b
 
 `aligned-profile-probes.tar.gz`保留计数探针原始轨迹；`aligned-profile-control.tar.gz`保留整模型补采的失败回执和离线恢复索引。双rank算子明细已恢复，覆盖见`aligned-profile-coverage.json`；自定义算子形状及物理流量计量仍不完整，未给出有效算力验收结论。整模型大轨迹保留于主报告列明的本机路径，未完整上传Git。
 
+10月20日的[M01计量补证](m01-recovery/README.md)恢复了包含FULL图重放的矩阵形状执行次数和通信API载荷，并完成物理HBM采样探针校验。矩阵形状算量、通信API载荷和物理流量分别保存，不互相替代；新增脚本支持CPU复算与采样边界校验。
+
 ## 合成长输入诊断
 
 2026年10月19日完成Qwen3.5-35B-A3B BF16、TP2、C8合成长输入B0补测： 每条实际输入16,384 token，60秒资格检查后测量300秒，窗口内输出79,437
