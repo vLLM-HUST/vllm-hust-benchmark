@@ -12,10 +12,29 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--kind", choices=("accounting", "quality"), required=True)
+    parser.add_argument(
+        "--kind", choices=("accounting", "accounting-v2", "quality"), required=True
+    )
     parser.add_argument("--run", action="append", default=[])
     args = parser.parse_args()
-    if args.kind == "accounting":
+    if args.kind == "accounting-v2":
+        directories = ["microflow-token-accounting-r2", "token-observer-v2"]
+        sources = [
+            "prepare_token_observer_v2.py",
+            "host_mtp_snapshot.py",
+            "runtime-token-accounting-v2.sh",
+            "serve-token-accounting-v2.sh",
+            "measure_token_accounting_v2.py",
+            "launch_token_accounting_v2.py",
+            "token-observer-build-v2.json",
+            "test_host_mtp_snapshot.py",
+            "test_token_observer_v2.py",
+            "audit_token_accounting_v2.py",
+            "audit_token_accounting.py",
+            "token-accounting-step-summary-r2.json",
+        ]
+        summaries = {"step-summary.json": "token-accounting-step-summary-r2.json"}
+    elif args.kind == "accounting":
         directories = ["microflow-token-accounting-r1", "token-observer"]
         sources = [
             "prepare_token_observer.py",
