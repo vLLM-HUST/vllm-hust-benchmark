@@ -1,0 +1,144 @@
+{
+  "schema": "swe-bench-pro-native-context-diagnosis-v1",
+  "run_id": "swe-pro-v1-context256k-single-agent-20261020-r1",
+  "model_run": "swe-pro-v1-native-context256k-20261020-r2",
+  "scope": "one real official V1 Agent and independent official grading of its one saved patch",
+  "evidence_type": "real_agent_and_official_evaluation",
+  "execution_source_commit": "b260273a5814086699c09b9a24e108b9c847b4a1",
+  "runner_sha256": "5e5bda20aa0e81458b0c4064156ecffc4549ab10fb66737bc53bea9d1d6631dd",
+  "configuration": {
+    "model": "Qwen3.5-35B-A3B",
+    "hardware": "Ascend 910B2",
+    "device_count": 2,
+    "precision": "BF16",
+    "tensor_parallel_size": 2,
+    "max_model_len": 262144,
+    "previous_max_model_len": 32768,
+    "only_engine_change": "max_model_len",
+    "kv_cache_gib_per_rank": 16,
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 4095,
+    "graph_capture_max": 256,
+    "enforce_eager": false,
+    "agent_step_limit": 100,
+    "agent_wall_seconds": 1200,
+    "agent_max_tokens": 4096,
+    "tool_timeout_seconds": 60,
+    "agent_temperature": 0,
+    "agent_seed": 0,
+    "agent_thinking": false,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "automatic_retries": 0,
+    "program_instances": 1,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "container_cpus": 2,
+    "container_memory": "4g",
+    "agent_history_management": "unchanged official full history, no global compression"
+  },
+  "model_qualification": {
+    "actual_both_rank_context": 262144,
+    "same_packages": true,
+    "same_loaded_sources_per_rank": 39,
+    "graph_replay_delta": {
+      "0": 4,
+      "1": 4
+    },
+    "warmup_requests_separate_from_agent": 2,
+    "worker_epochs_stable_through_terminal": true
+  },
+  "agent_result": {
+    "status": "Submitted",
+    "elapsed_seconds": 231.10927500901744,
+    "successful_replies": 79,
+    "query_attempts": 79,
+    "query_exceptions": 0,
+    "modified_files": 6,
+    "patch_bytes": 3914,
+    "patch_sha256": "4fa6e2afb74f05986319f693c09b8484ce1b2d73bb1677024a79f07e4d05782c",
+    "agent_self_check_scripts": 4,
+    "agent_project_test_suite_invocations": 0,
+    "agent_submitted": true,
+    "max_observed_prompt_tokens": 37370,
+    "first_request_exceeding_old_reserved_input_budget": {
+      "call": 61,
+      "prompt_tokens": 30054,
+      "reserved_output_tokens": 4096,
+      "total": 34150
+    },
+    "controller_modules_loaded": [],
+    "container_cleanup_exit_code": 0
+  },
+  "official_grading": {
+    "resolved": 0,
+    "total": 1,
+    "unresolved": 0,
+    "status": "OUTPUTS_PRESENT",
+    "grading_model_calls": 0,
+    "all_parsed_test_statuses": {
+      "PASSED": 124,
+      "FAILED": 8
+    },
+    "fail_to_pass": {
+      "expected": 1,
+      "statuses": {
+        "FAILED": 1
+      }
+    },
+    "pass_to_pass": {
+      "expected": 148,
+      "statuses": {
+        "PASSED": 124,
+        "FAILED": 4,
+        "MISSING": 20
+      }
+    },
+    "failure_kind": "ReferenceError from an undefined variable in the submitted implementation; private original logs retained"
+  },
+  "conclusion": {
+    "old_context_barrier_removed": true,
+    "agent_execution_to_submission": true,
+    "repair_correctness_passed": false,
+    "performance_comparison": "INVALID_DIFFERENT_TRAJECTORIES; not a speedup result",
+    "full_256k_input_quality": "NOT_MEASURED; largest real input here is 37370 tokens"
+  },
+  "private_archives": {
+    "cpu": {
+      "bytes": 199886,
+      "sha256": "1339c3d63bc65aab5fad4206171a82841006735367196f83282a61a4daac3f01",
+      "files": 77,
+      "archive_verification": "PASS",
+      "individual_file_verification": "PASS"
+    },
+    "npu_head": {
+      "bytes": 72587,
+      "sha256": "a63887d5c7b29539f1733726af389302f97780891204dfdb9fdb9d6a9676ea14",
+      "files": 47,
+      "whole_archive_verification": "PASS",
+      "per_file_verification": "PASS"
+    },
+    "npu_worker": {
+      "bytes": 817503,
+      "sha256": "0c6fed243f524c1b846d60244994125e33348479aad0ea641d2c82b938f1d552",
+      "files": 122,
+      "whole_archive_verification": "PASS",
+      "per_file_verification": "PASS"
+    }
+  },
+  "operator_failures_before_agent": {
+    "first_model_stage": "receipt directory already existed; model initialization rejected before loading/inference",
+    "first_qualification_job": "generated script syntax error; zero model requests",
+    "first_agent_submission_preflight": "generated script syntax error before execution; zero Agent jobs",
+    "real_agent_executions_total": 1
+  },
+  "frontend": {
+    "matrix": "https://vllm-hust.sage.org.ai/dataset-matrix-v1.html",
+    "compact_entry_pull_request": "https://github.com/vLLM-HUST/vllm-hust-website/pull/471",
+    "scope": "compact run-guide link only; general introduction withdrawn at user request"
+  }
+}
