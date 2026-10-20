@@ -1,0 +1,105 @@
+# SPDX-License-Identifier: Apache-2.0
+"""Frozen-token HTTP burst measurement; distinct from the reference offline LLM.
+
+All cases are submitted together; the SERVER limits execution concurrency.
+Non-streaming transport measures full request latency, not TTFT or TPOT.
+One complete warmup and three complete formal repetitions; unique cold salts.
+"""
+import argparse
+import asyncio
+import hashlib
+import json
+from pathlib import Path
+import statistics
+import time
+
+
+def accounting(rows, seconds, *, cards=2, hourly=4):
+    inputs = sum(r["input_tokens"] for r in rows)
+    outputs = sum(r.get("output_tokens", 0) for r in rows)
+    fee = cards * hourly * seconds / 3600
+    return dict(seconds=seconds, planned_requests=len(rows),
+                completed=sum("error" not in r for r in rows),
+                failures=sum("error" in r for r in rows), retries=0,
+                logical_input_tokens=inputs, actual_output_tokens=outputs,
+                output_tokens_per_s=outputs / seconds,
+                input_tokens_per_s=inputs / seconds,
+                steady_card_rental_cny=fee,
+                cny_per_million_output=None if not outputs else fee * 1e6 / outputs,
+                cny_per_million_total=fee * 1e6 / (inputs + outputs),
+                cards=cards, assumed_cny_per_card_hour=hourly,
+                ttft=None, tpot=None, slo_certified=False)
+
+
+async def run(args):
+    import aiohttp
+
+    raw = args.requests.read_bytes()
+    cases = json.loads(raw)
+    if not cases or len({r["case_id"] for r in cases}) != len(cases):
+        raise ValueError("nonempty unique frozen cases required")
+    args.out.mkdir(parents=True, exist_ok=False)
+    identity = dict(schema=1, dataset_requests_sha256=hashlib.sha256(raw).hexdigest(),
+                    cases=len(cases), input_tokens=sum(len(r["prompt_token_ids"]) for r in cases),
+                    protocol="HTTP simultaneous burst; engine execution limit configured separately",
+                    source=Path(__file__).name, source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                    transport="fresh HTTP connection per request; no cross-burst keepalive reuse",
+                    max_output_tokens=args.max_output, temperature=0, seed=17,
+                    natural_eos=True, warmups=1, formal_repeats=3,
+                    cost_reference="inference-engine-project a765a4ca1e56d8a48b3d537bf71adb2cc9e292d0 TESTING.md",
+                    cost_scope="steady formal wall card rental only; 2 cards at assumed4 CNY/card-hour",
+                    scope="performance subset; no task accuracy or SLO certification; not an old MOD-ladder arm")
+    (args.out / "identity.json").write_text(json.dumps(identity, indent=2))
+    measurements = []
+    timeout = aiohttp.ClientTimeout(total=900)
+    async with aiohttp.ClientSession(timeout=timeout,
+                                    connector=aiohttp.TCPConnector(limit=len(cases), force_close=True)) as session:
+        for repeat in range(4):
+            async def one(case):
+                start = time.perf_counter()
+                record = dict(case_id=case["case_id"], input_tokens=len(case["prompt_token_ids"]))
+                body = dict(model=args.model, prompt=case["prompt_token_ids"], temperature=0,
+                            seed=17, max_tokens=args.max_output, return_token_ids=True,
+                            cache_salt=f"envelope-cold-{repeat}-{case['case_id']}")
+                try:
+                    async with session.post(args.url + "/v1/completions", json=body) as response:
+                        result = await response.json()
+                        if response.status != 200:
+                            raise RuntimeError(f"HTTP {response.status}: {str(result)[:500]}")
+                    usage = result["usage"]
+                    if usage["prompt_tokens"] != record["input_tokens"]:
+                        raise ValueError("server changed frozen logical input length")
+                    record.update(output_tokens=usage["completion_tokens"], response=result)
+                except Exception as error:
+                    record["error"] = repr(error)
+                record["request_wall_s"] = time.perf_counter() - start
+                return record
+
+            start = time.perf_counter()
+            rows = await asyncio.gather(*(one(case) for case in cases))
+            seconds = time.perf_counter() - start
+            result = dict(accounting(rows, seconds), repeat=repeat, warmup=repeat == 0)
+            measurements.append(result)
+            (args.out / f"responses-private-r{repeat}.json").write_text(json.dumps(rows))
+            (args.out / "measurements.json").write_text(json.dumps(measurements, indent=2))
+            print("MEASURE", json.dumps(result), flush=True)
+            if result["failures"]:
+                raise RuntimeError("failed burst retained in evidence; no automatic retry")
+    formal = measurements[1:]
+    keys = ("output_tokens_per_s", "steady_card_rental_cny", "cny_per_million_output",
+            "cny_per_million_total", "seconds")
+    summary = {key: dict(median=statistics.median(r[key] for r in formal),
+                         minimum=min(r[key] for r in formal), maximum=max(r[key] for r in formal))
+               for key in keys}
+    summary.update(independent_starts=1, formal_repeats=3, failures=0)
+    (args.out / "summary.json").write_text(json.dumps(summary, indent=2))
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--requests", type=Path, required=True)
+    p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--url", default="http://127.0.0.1:18449")
+    p.add_argument("--model", default="envelope-smoke")
+    p.add_argument("--max-output", type=int, default=256)
+    asyncio.run(run(p.parse_args()))
