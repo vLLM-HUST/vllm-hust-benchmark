@@ -1,0 +1,74 @@
+{
+  "status": "vocabulary_rows_partitioned_by_device_event_window",
+  "ranks": [
+    {
+      "rank": 0,
+      "rows_by_device_window": {
+        "target": {
+          "inside": 57433,
+          "after": 3
+        },
+        "draft_step0": {
+          "inside": 19291,
+          "after": 1
+        },
+        "draft_step1": {
+          "inside": 19291,
+          "after": 1
+        }
+      }
+    },
+    {
+      "rank": 1,
+      "rows_by_device_window": {
+        "target": {
+          "inside": 57433,
+          "after": 3
+        },
+        "draft_step0": {
+          "inside": 19291,
+          "after": 1
+        },
+        "draft_step1": {
+          "inside": 19291,
+          "after": 1
+        }
+      }
+    }
+  ],
+  "semantic_projection_flops_by_window": {
+    "target": {
+      "inside": 58416179445760,
+      "after": 3051356160
+    },
+    "draft_step0": {
+      "inside": 19621237227520,
+      "after": 1017118720
+    },
+    "draft_step1": {
+      "inside": 19621237227520,
+      "after": 1017118720
+    }
+  },
+  "inside_projection_subtotal": 97658653900800,
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r19-direct-logits.json": "4aaf814bfe02be0a15dcc46ebc7f8e88b24b19e3593f9ffec9c0c9411d2a6788",
+    "/root/gennova-evidence/20261019-midterm-aligned/vocab-projection-summary-r19.json": "86ae56c436a4f936a221923cf984d9c1bdbd7c9ddd2073462216a240e86caf36",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r19_vocab_window.py": "2aa57f5ce90c4962135c949a0cb89a9f3acad46a5db6d3fb46daf7d9c6d614cf",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_vocab_projection_r19.py": "695d2adc6e281038a814684a3a44254742f8b92f21f914d1554a5acc888bd865",
+    "/root/gennova-evidence/20261019-midterm-aligned/integrate_r18_hardware.py": "8e038f8379fb7174b87dfa4bc60e6852586b1ff4b297969c9e4531538c833da5",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_r18_vocab_envelopes.py": "3f7986306b2760acb92a55296406eab26fd74ffe3cd097266d33ebbf319f09c0",
+    "/workspace/gennova-measurements/microflow-token-accounting-r19/moe-deferred-955092.json": "caed7e480c2247d700734f3138329bc11a0b35f85f61bcc8a2935a9922bd2d63",
+    "/workspace/gennova-measurements/microflow-token-accounting-r19/moe-deferred-955092.ready": "4f3514ca53446dd7397d16677d1e0f83c7f508a123d19cf40411c544976e0c07",
+    "/workspace/gennova-measurements/microflow-token-accounting-r19/moe-deferred-955093.json": "fac618d9cd3cac0d6bfe15bd893b88d46f3e03636a6fd4079103b2b0d85f142c",
+    "/workspace/gennova-measurements/microflow-token-accounting-r19/moe-deferred-955093.ready": "9deb040300c516336a6b770fcdf40a40b4263aa0f2746a7cd1dfcf0154e5b239"
+  },
+  "limitations": [
+    "Target uses direct current-stream events; draft uses enclosing merged-forward events and pinned replay row mapping.",
+    "Clock classification uses the existing 2 ms tolerance.",
+    "2MNK counts only projection arithmetic, not gather, sampling or argmax.",
+    "Current-stream operator dependency coverage is required; this is not a full-model effective FLOP certificate."
+  ]
+}
