@@ -1,0 +1,60 @@
+{
+  "status": "host_logits_and_draft_replay_shapes_observed",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792483421.0240557,
+    "end_wall": 1792483483.1468506,
+    "duration_seconds": 62.1227949289605,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "observation_end_wall": 1792483485.0387275,
+  "ranks": [
+    {
+      "rank": 0,
+      "file": "token-accounting-64801.jsonl",
+      "target_logits_calls": 884,
+      "target_logits_input_rows": 57828,
+      "draft_replay_calls": 884,
+      "draft_first_step_sample_indices_rows": 19420,
+      "draft_batch_size_sum": 19420,
+      "target_forward_actual_tokens": 339877,
+      "draft_step_actual_tokens": [
+        339877,
+        19420
+      ]
+    },
+    {
+      "rank": 1,
+      "file": "token-accounting-64802.jsonl",
+      "target_logits_calls": 884,
+      "target_logits_input_rows": 57828,
+      "draft_replay_calls": 884,
+      "draft_first_step_sample_indices_rows": 19420,
+      "draft_batch_size_sum": 19420,
+      "target_forward_actual_tokens": 339877,
+      "draft_step_actual_tokens": [
+        339877,
+        19420
+      ]
+    }
+  ],
+  "rank_counts_match": true,
+  "completed": 200,
+  "failed": 0,
+  "model_effective_flops": null,
+  "attainment_percent": null,
+  "limitations": [
+    "Target logits rows are host input shapes, not separately sampled kernel execution.",
+    "Draft observations are graph replay arguments, not internal logits kernel counters.",
+    "Attention lengths, routed rows, custom arithmetic and shape-matched reference remain open.",
+    "Diagnostic results do not replace uninstrumented performance."
+  ],
+  "source_sha256": {
+    "audit_logits_accounting.py": "62cc0b4182621f045fd91c5b3efec78c015ae5d282750712bafbc6d6a460df9e",
+    "microflow-token-accounting-r3/receipt.json": "43a28398c5916902c4725ed30abab714d93a8bf7930874efdbd55d3fd1ede5b3",
+    "microflow-token-accounting-r3/mmlu-pro.json": "af80e5c79e9fdcc23292db88fddcae34915153d59bf8231b79ca34dd75206882",
+    "microflow-token-accounting-r3/token-accounting-64801.jsonl": "956a3a3ed68d679408152b788888f79b7f4338bb17aa5351e5b94a1fbc3f9f7b",
+    "microflow-token-accounting-r3/token-accounting-64802.jsonl": "bb3757037e3a9e4f95ee14712f535507bffaec9fa1a70081358d2a8445309283"
+  }
+}
