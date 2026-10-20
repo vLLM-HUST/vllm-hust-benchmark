@@ -32,6 +32,7 @@ def main():
             "gdn-ho-accounting",
             "norm-accounting",
             "norm-reference",
+            "rope-reference",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -41,7 +42,43 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "norm-reference":
+    if args.kind == "rope-reference":
+        directories = [
+            "rope-reference-r1",
+            "rope-reference-control-r1",
+            "rope-reference-r2",
+            "rope-reference-control-r2",
+        ]
+        sources = [
+            "prepare_rope_reference.py",
+            "prepare_rope_reference_r2.py",
+            "rope_reference_probe.py",
+            "rope_reference_probe.sh",
+            "run_rope_reference.py",
+            "rope_reference_probe_r2.py",
+            "rope_reference_probe_r2.sh",
+            "run_rope_reference_r2.py",
+            "audit_rope_reference.py",
+            "audit_rope_reference_r2.py",
+            "test_rope_arithmetic.py",
+            "rope-reference-plan-r1.json",
+            "rope-reference-plan-r2.json",
+            "rope-reference-summary-r2.json",
+            "host-attention-pairs-r9.json",
+            "same-run-partial-accounting-r9-v6.json",
+            "same-run-partial-accounting-r9-v7.json",
+            "audit_token_accounting.py",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+        ]
+        rope_plan = json.loads((args.root / "rope-reference-plan-r2.json").read_text())
+        sources.extend(rope_plan["source_sha256"])
+        summaries = {
+            "summary.json": "rope-reference-summary-r2.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r9-v7.json",
+        }
+    elif args.kind == "norm-reference":
         directories = ["norm-reference-r2", "norm-reference-control-r2"]
         sources = [
             "prepare_norm_reference.py",
@@ -630,6 +667,7 @@ def main():
         "conv-accounting",
         "gdn-ho-accounting",
         "norm-reference",
+        "rope-reference",
     ):
         for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
             selected["source/" + name] = Path(__file__).parent / name
