@@ -24,6 +24,7 @@ def main():
             "vocabulary-prefill",
             "gdn-reference",
             "gdn-reference-r9",
+            "moe-reference",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -119,6 +120,36 @@ def main():
             "measure_microflow.py",
         ]
         summaries = {"reference.json": "vocab-reference-summary-r1.json"}
+    elif args.kind == "moe-reference":
+        directories = [
+            "moe-reference-r1",
+            "moe-reference-control-r1",
+            "moe-reference-r2",
+            "moe-reference-control-r2",
+        ]
+        sources = [
+            "prepare_moe_reference.py",
+            "prepare_moe_reference_full.py",
+            "moe_reference_probe.py",
+            "moe_reference_probe.sh",
+            "moe_reference_full.py",
+            "moe_reference_full.sh",
+            "run_moe_reference.py",
+            "run_moe_reference_full.py",
+            "moe-reference-plan-r1.json",
+            "moe-reference-plan-r2.json",
+            "audit_moe_reference.py",
+            "moe-reference-summary-r2.json",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+            "audit_token_accounting.py",
+            "audit_moe_device_counts.py",
+            "runtime/vllm_ascend/ops/fused_moe/routed_experts.py",
+            "runtime/vllm_ascend/utils.py",
+            "runtime/vllm_ascend/ascend_config.py",
+        ]
+        summaries = {"reference.json": "moe-reference-summary-r2.json"}
     elif args.kind == "gdn-reference-r9":
         directories = ["gdn-reference-r3", "gdn-reference-control-r3"]
         sources = [
