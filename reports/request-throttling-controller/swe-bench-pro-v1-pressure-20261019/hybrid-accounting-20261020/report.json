@@ -1,0 +1,156 @@
+{
+  "run": "swe-pro-v1-hybrid-accounting-20261020-r2",
+  "performance_valid": false,
+  "arms": {
+    "native": {
+      "statuses": {
+        "RetryError": 253,
+        "LimitsExceeded": 2,
+        "ContextWindowExceededError": 1
+      },
+      "submitted": 0,
+      "elapsed_seconds": 1005.2748880968429,
+      "saved_responses": 1959,
+      "saved_usage": {
+        "completion_tokens": 116859,
+        "prompt_tokens": 9508725,
+        "total_tokens": 9625584
+      },
+      "exceptions": {
+        "httpx_read_timeout": 253,
+        "wall_budget": 0,
+        "limits_exceeded": 0,
+        "context_window_exceeded": 1
+      },
+      "kv_peak_fraction": 1.0,
+      "samples_ge_90pct": 72,
+      "engine_samples": 987,
+      "preemptions_delta": 13.0,
+      "engine_before": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "first_epoch": 1792471245.655086,
+      "last_epoch": 1792472258.0568771,
+      "peak_program_states": {
+        "active": 256
+      }
+    },
+    "controller": {
+      "statuses": {
+        "RetryError": 229,
+        "LimitsExceeded": 20,
+        "ContextWindowExceededError": 7
+      },
+      "submitted": 0,
+      "elapsed_seconds": 1115.2417142931372,
+      "saved_responses": 1714,
+      "saved_usage": {
+        "completion_tokens": 143187,
+        "prompt_tokens": 16571910,
+        "total_tokens": 16715097
+      },
+      "exceptions": {
+        "httpx_read_timeout": 229,
+        "wall_budget": 0,
+        "limits_exceeded": 0,
+        "context_window_exceeded": 7
+      },
+      "kv_peak_fraction": 0.6584158415841583,
+      "samples_ge_90pct": 0,
+      "engine_samples": 1093,
+      "preemptions_delta": 0.0,
+      "engine_before": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "engine_after": {
+        "num_requests_running": 0.0,
+        "num_requests_waiting": 0.0
+      },
+      "first_epoch": 1792472308.6452742,
+      "last_epoch": 1792473430.9157767,
+      "peak_program_states": {
+        "active": 110,
+        "paused": 256
+      }
+    }
+  },
+  "log_actions": {
+    "native": {
+      "paused": 0,
+      "resumed": 0,
+      "marked": 0,
+      "disconnect_cancel": 187
+    },
+    "controller": {
+      "paused": 688,
+      "resumed": 662,
+      "marked": 697,
+      "disconnect_cancel": 202
+    }
+  },
+  "status": "CAPACITY_ACCOUNTING_ADAPTED_ALL_AGENTS_FAILED",
+  "benefit_claim": false,
+  "protocol": {
+    "official_tasks": 8,
+    "independent_agents_per_task": 32,
+    "program_instances": 256,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "per_program_dependencies_preserved": true,
+    "http_timeout_seconds": 180,
+    "agent_wall_budget_seconds": 1200,
+    "agent_steps": 30,
+    "max_output_tokens": 4096
+  },
+  "capacity_input": {
+    "old_raw_capacity": 1656832,
+    "usable_capacity": 1654784,
+    "old_per_program_buffer": 100,
+    "per_program_buffer": 14335,
+    "audit": "3 Mamba groups, 6 fixed upper-reservation blocks plus 2047 attention rounding tokens; conservative source-derived reservation, not exact occupancy",
+    "evidence_original_sha256": "b567584605c8b41a02731c8940e5662f151f97b09c663e2deaa67ec51b3fbad4"
+  },
+  "source": {
+    "commit": "4cd748f",
+    "official_thunderagent_commit": "7ddc8610270e56d3b109eed8796b3a4360fc67c9",
+    "official_source_files_unchanged": 17,
+    "model_restarted_for_this_phase": false,
+    "max_num_seqs": 256,
+    "graph_max": 256,
+    "kv_bytes": 17179869184,
+    "scheduler_seconds": 5,
+    "metrics_seconds": 5,
+    "acting_weight": 1,
+    "decay": false,
+    "warmup_graph_replay_delta": {
+      "0": 4,
+      "1": 4
+    }
+  },
+  "scoring": {
+    "deferred_unresolved": 512,
+    "zero_score_claim": false
+  },
+  "archive": {
+    "status": "PASS",
+    "bytes": 38851627,
+    "sha256": "cb9150afcabb158012160015719085a0244845d173c4a4773acba8425c172676",
+    "files_checked": 7649
+  },
+  "limitations": [
+    "Both arms submitted zero Agents; unequal saved work/error-exit time is not a valid batch performance comparison.",
+    "HTTP response-header ReadTimeout remains after physical KV pressure and preemptions decrease; no unique per-request cause decomposition.",
+    "ContextWindowExceededError is distinct: at least28673 input tokens plus4096 requested output exceeds32768.",
+    "Pause/mark/resume counts are log events, not independent programs.",
+    "Per-request queue/pause/token timing is absent; do not invent TTFT.",
+    "Hybrid KV axis in standard plots is occupancy times startup token-equivalent estimate, not exact resident tokens.",
+    "NPU logs separately retained; public verifier checks consistency, not a private re-audit.",
+    "Failed diagnostic audits and r1 missing management-config packaging retained; no Agent inference in those failures."
+  ]
+}

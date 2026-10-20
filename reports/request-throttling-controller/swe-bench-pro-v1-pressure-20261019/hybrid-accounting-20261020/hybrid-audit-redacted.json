@@ -1,0 +1,122 @@
+{
+  "status": "PASS",
+  "evidence_type": "source-derived-capacity-model",
+  "scope": "No inference or model allocation; derived layout validated by engine block count and startup estimate, not direct worker-layout introspection",
+  "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+  "model_layer_types": {
+    "linear_attention": 30,
+    "full_attention": 10
+  },
+  "resolved_kv_cache_layout": "LBHNC",
+  "resolved_groups": [
+    {
+      "type": "MambaSpec",
+      "layers": 10,
+      "block_size": 2048,
+      "page_size_bytes": 2121728
+    },
+    {
+      "type": "MambaSpec",
+      "layers": 10,
+      "block_size": 2048,
+      "page_size_bytes": 2121728
+    },
+    {
+      "type": "MambaSpec",
+      "layers": 10,
+      "block_size": 2048,
+      "page_size_bytes": 2121728
+    },
+    {
+      "type": "FullAttentionSpec",
+      "layers": 10,
+      "block_size": 2048,
+      "page_size_bytes": 2121728
+    }
+  ],
+  "engine_num_blocks": 809,
+  "reconstructed_num_blocks": 809,
+  "usable_blocks_after_source_block_pool_initialization": 808,
+  "reported_startup_tokens": 1204968,
+  "source_startup_concurrency": 36.77272727272727,
+  "raw_block_tokens": 1656832,
+  "per_program_mamba_blocks_upper_bound": 6,
+  "full_attention_rounding_reserve_tokens": 2047,
+  "proposed_usable_token_budget": 1654784,
+  "proposed_per_program_buffer_tokens": 14335,
+  "context_costs": [
+    {
+      "context_tokens": 512,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        1
+      ],
+      "blocks_per_program_upper_bound": 7,
+      "whole_programs_within_usable_pool": 115
+    },
+    {
+      "context_tokens": 2048,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        1
+      ],
+      "blocks_per_program_upper_bound": 7,
+      "whole_programs_within_usable_pool": 115
+    },
+    {
+      "context_tokens": 4096,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "blocks_per_program_upper_bound": 8,
+      "whole_programs_within_usable_pool": 101
+    },
+    {
+      "context_tokens": 8192,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        4
+      ],
+      "blocks_per_program_upper_bound": 10,
+      "whole_programs_within_usable_pool": 80
+    },
+    {
+      "context_tokens": 16384,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        8
+      ],
+      "blocks_per_program_upper_bound": 14,
+      "whole_programs_within_usable_pool": 57
+    },
+    {
+      "context_tokens": 32768,
+      "group_blocks": [
+        2,
+        2,
+        2,
+        16
+      ],
+      "blocks_per_program_upper_bound": 22,
+      "whole_programs_within_usable_pool": 36
+    }
+  ],
+  "source_sha256": {
+    "qwen3_5.py": "3abeac36180df7bd1bd96b1a7c698a8f212d92c063026420cbdd16d1980e90e6",
+    "block_pool.py": "709b67ebcd2ee393654c3a875f8ecb360b22bcd10f43503be078e692dd38fc20",
+    "kv_cache_utils.py": "70e289eb278f96bd4a49f63f7d96d533ec2f2728fbefb734ce6eb2a244c2569f",
+    "patch_kv_cache_utils.py": "c698436927db7d58d694ef9d1fbe25e6edd3d1be4a40115a2b7343bc414a8734",
+    "model_runner_v1.py": "83da7d9c6c53f718322328bb43d80651a7cd62992a8d0e8d723d62769bd0b346"
+  }
+}
