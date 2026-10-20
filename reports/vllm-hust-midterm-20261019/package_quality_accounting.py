@@ -22,13 +22,43 @@ def main():
             "moe-gdn",
             "recurrence",
             "vocabulary-prefill",
+            "gdn-reference",
             "quality",
         ),
         required=True,
     )
     parser.add_argument("--run", action="append", default=[])
     args = parser.parse_args()
-    if args.kind == "vocabulary-prefill":
+    if args.kind == "gdn-reference":
+        directories = [
+            "gdn-reference-r1",
+            "gdn-reference-control-r1",
+            "gdn-reference-r2",
+            "gdn-reference-control-r2",
+        ]
+        sources = [
+            "prepare_gdn_reference_plan.py",
+            "prepare_gdn_reference_plan_full.py",
+            "prepare_gdn_reference_controller.py",
+            "prepare_gdn_reference_full.py",
+            "gdn-reference-controller-build.json",
+            "gdn-reference-full-build.json",
+            "gdn-reference-plan-r1.json",
+            "gdn-reference-plan-r2.json",
+            "run_gdn_reference.py",
+            "run_gdn_reference_full.py",
+            "gdn_reference_probe.py",
+            "gdn_reference_probe_full.py",
+            "gdn_reference_probe.sh",
+            "gdn_reference_probe_full.sh",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+            "audit_gdn_reference.py",
+            "gdn-reference-summary-r2.json",
+        ]
+        summaries = {"reference.json": "gdn-reference-summary-r2.json"}
+    elif args.kind == "vocabulary-prefill":
         directories = ["gdn-native-source-r8"]
         sources = [
             "audit_vocab_projection.py",
