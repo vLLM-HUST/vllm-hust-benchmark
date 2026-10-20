@@ -16,6 +16,10 @@ export and website publication flows in one place.
 
 ## Current Delivery Contract
 
+Historical Frontier raw measurements and offline recomputation:
+[56-run raw archive](reports/frontier-raw-recovery-20261020/README.md) (BetterScale/Native and six
+additional MOD series; includes complete concurrency curves and SHA-256).
+
 The active delivery test plan is **V5.5**. Its machine-readable authority is
 `src/vllm_hust_benchmark/data/acceptance_v5_5.json`; see `docs/ACCEPTANCE_V5_5.md` for the human
 boundary and semantic-mirror provenance. V4.x material is historical only and cannot generate a
