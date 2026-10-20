@@ -1,0 +1,115 @@
+{
+  "run": "swe-pro-v1-http-read-unbounded-20261020-r2",
+  "status": "NATIVE_RUNNING",
+  "snapshot_epoch": 1792475914.1213028,
+  "native_batch_start": {
+    "epoch": 1792475849.1265664,
+    "monotonic": 3872108.504076181,
+    "batch_size": 256,
+    "client_concurrency_limit": null,
+    "arrival_time": 0
+  },
+  "native_unique_containers": 256,
+  "controller_started": false,
+  "http_profile_gate": {
+    "status": "PASS_FROZEN_CLIENT_MOCK",
+    "profile": {
+      "profile": "read-unbounded-v1",
+      "profile_sha256": "03ae48525baf792259729c9eaf15cc66c40b37dff2d2fb970fce8e8c086ea655",
+      "timeouts": {
+        "connect": 180,
+        "read": null,
+        "write": 180,
+        "pool": 180
+      }
+    },
+    "attempts": [
+      {
+        "timeout": {
+          "connect": 180,
+          "read": null,
+          "write": 180,
+          "pool": 180
+        },
+        "retry": "0"
+      }
+    ],
+    "network_connections": 0,
+    "model_requests": 0,
+    "official_model_config_json_serializable": true,
+    "binding": {
+      "profile": "read-unbounded-v1",
+      "profile_sha256": "03ae48525baf792259729c9eaf15cc66c40b37dff2d2fb970fce8e8c086ea655",
+      "timeouts": {
+        "connect": 180,
+        "read": null,
+        "write": 180,
+        "pool": 180
+      },
+      "request_override": "official-model-query-kwargs",
+      "num_retries": 0
+    }
+  },
+  "warmup_graph": {
+    "status": "ACTUAL_REPLAY_OBSERVED",
+    "delta": {
+      "0": 4,
+      "1": 4
+    }
+  },
+  "fixed_agent_budget": {
+    "wall_seconds": 1200,
+    "steps": 30,
+    "max_output_tokens": 4096
+  },
+  "changed_only_http_read_timeout": true,
+  "model_restarted": false,
+  "performance_validity": "UNFINISHED_NO_GAIN_CLAIM",
+  "source_commit": "5c81661cc6cb115f33492efa83ef3a94cd435d9f",
+  "tests": {
+    "targeted_passed": 27,
+    "full_passed": 151,
+    "full_skipped": 4
+  },
+  "stage": "APPROVED_HTTP_READ_TIMEOUT_ISOLATION_STARTED",
+  "user_approved": true,
+  "agent_http_profile_sha256": "03ae48525baf792259729c9eaf15cc66c40b37dff2d2fb970fce8e8c086ea655",
+  "per_agent_receipts": {
+    "native_files": 256,
+    "all_actual_read_timeouts_null": true,
+    "other_phases_seconds": 180,
+    "json_valid_live_trajectories": 256,
+    "observer_errors": 0
+  },
+  "previous_pre_submission_attempt": {
+    "run_suffix": "r1",
+    "failure": "Official trajectory configuration cannot JSON-serialize a live HTTPX Timeout object",
+    "model_requests": 0,
+    "agent_programs": 0,
+    "retained": true
+  },
+  "preserved": {
+    "max_num_seqs": 256,
+    "graph_max": 256,
+    "kv_bytes": 17179869184,
+    "context_limit": 32768,
+    "downstream_transport_timeout_seconds": 900,
+    "agent_step_limit": 30,
+    "agent_wall_seconds": 1200,
+    "max_output_tokens": 4096,
+    "official_tasks": 8,
+    "copies_per_task": 32,
+    "program_instances": 256,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "official_thunderagent_files_unchanged": 17,
+    "official_agent_files_changed": 0
+  },
+  "limits": [
+    "RUNNING start snapshot only; no completed-Agent, quality or performance benefit claim.",
+    "CPU mock gate records configuration semantics with zero network/model requests; actual warmup graph deltas are separate.",
+    "Official model.config retains serializable baseline timeout180; official query kwargs carry the effective HTTPX phase override.",
+    "Step/context/downstream/whole-Agent bounds remain and may still cause failure.",
+    "Start screenshot window may extend beyond capture; flat future rendering is not measured future data."
+  ]
+}
