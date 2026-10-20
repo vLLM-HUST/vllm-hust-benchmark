@@ -212,7 +212,9 @@ def test_sampled_getter_crosscheck_recomputes_without_filling_gaps(capacity):
                 (row["after"]["monotonic_ns"] - row["before"]["monotonic_ns"]) / 1e9
                 for row in windows
             ]
-            assert sum(durations) == device["observed_seconds"]
+            assert sum(durations) == pytest.approx(
+                device["observed_seconds"], rel=0, abs=1e-12
+            )
             assert 0 < sum(durations) < device["interior_seconds"]
             for direction in ("tx", "rx"):
                 mean = sum(
