@@ -22,6 +22,10 @@ and every reused Git blob. Verification reads members without extracting archive
 
 ## Scope and source cleanup
 
+The 358 indexed paths were removed from dev-hub main after remote verification and passing CI in
+[dev-hub PR #98](https://github.com/vLLM-HUST/vllm-hust-dev-hub/pull/98). This does not include
+Release assets or measured records embedded elsewhere in scripts.
+
 The `outside_scope_review` list identifies additional potential evidence paths, including test code
 that must not be treated as measurements automatically. Source removal requires verified remote
 custody and migrated consumers. Until those checks are completed, source files remain in dev-hub;
