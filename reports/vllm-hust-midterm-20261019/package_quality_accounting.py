@@ -20,13 +20,55 @@ def main():
             "accounting-v3",
             "attention",
             "moe-gdn",
+            "recurrence",
             "quality",
         ),
         required=True,
     )
     parser.add_argument("--run", action="append", default=[])
     args = parser.parse_args()
-    if args.kind == "moe-gdn":
+    if args.kind == "recurrence":
+        directories = ["microflow-token-accounting-r8", "token-observer-v7"]
+        sources = [
+            "prepare_token_observer_v7.py",
+            "measure_token_accounting_v7.py",
+            "launch_token_accounting_v7.py",
+            "runtime-token-accounting-v7.sh",
+            "serve-token-accounting-v7.sh",
+            "token-observer-build-v7.json",
+            "test_gdn_slots.py",
+            "audit_gdn_recurrence.py",
+            "test_gdn_recurrence.py",
+            "audit_gdn_host_schedule.py",
+            "audit_token_accounting.py",
+            "audit_host_attention_pairs.py",
+            "derive_attention_pairs.py",
+            "prepare_same_run_accounting.py",
+            "same-run-accounting-build.json",
+            "derive_moe_projection_accounting.py",
+            "derive_moe_projection_accounting_r8.py",
+            "derive_partial_operator_accounting.py",
+            "derive_partial_operator_accounting_r8.py",
+            "combine_same_run_accounting.py",
+            "test_same_run_accounting.py",
+            "gdn-recurrence-summary-r8.json",
+            "host-attention-pairs-r8.json",
+            "partial-operator-accounting-r8.json",
+            "moe-projection-summary-r8.json",
+            "same-run-partial-accounting-r8.json",
+            "payload/betterscale/models/qwen35/decode_kv.py",
+            "payload/betterscale/models/qwen35/service_metadata.py",
+            "payload/betterscale/models/qwen35/host_metadata.py",
+            "payload/betterscale/models/qwen35/mixed_core.py",
+        ]
+        summaries = {
+            "recurrence.json": "gdn-recurrence-summary-r8.json",
+            "attention-pairs.json": "host-attention-pairs-r8.json",
+            "projections.json": "partial-operator-accounting-r8.json",
+            "moe-projections.json": "moe-projection-summary-r8.json",
+            "same-run-catalog.json": "same-run-partial-accounting-r8.json",
+        }
+    elif args.kind == "moe-gdn":
         directories = [
             "microflow-token-accounting-r6",
             "microflow-token-accounting-r7",

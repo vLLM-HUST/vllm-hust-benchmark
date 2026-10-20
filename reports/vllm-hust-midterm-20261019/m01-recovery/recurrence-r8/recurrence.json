@@ -1,0 +1,74 @@
+{
+  "status": "host_slot_eligible_recurrence_semantics",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792488630.705468,
+    "end_wall": 1792488693.64192,
+    "duration_seconds": 62.936452069319785,
+    "wall_monotonic_offset_difference_seconds": 0.0,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "ranks": [
+    {
+      "rank": 0,
+      "file": "token-accounting-148228.jsonl",
+      "sha256": "dc5b49c2ecbc7036946315e6d94b721ba9a122d04e5d48563157092c3b475926",
+      "counts": {
+        "target_contexts": 888,
+        "eligible_token_layers": 1728180,
+        "skipped_token_layers": 0,
+        "mixed_eligible_token_layers": 274500,
+        "decode_eligible_token_layers": 1453680
+      },
+      "eligible_head_token_layers": 27650880,
+      "semantic_basic_flops": 3174763438080,
+      "source_tiled_basic_flops": 3185381376000,
+      "semantic_exp_evaluations": 27650880,
+      "source_tiled_exp_evaluations": 110603520
+    },
+    {
+      "rank": 1,
+      "file": "token-accounting-148229.jsonl",
+      "sha256": "3a5468568361c06e12f96154173b6e0bc286387d152d1c4616e20e2e2185ffb0",
+      "counts": {
+        "target_contexts": 888,
+        "eligible_token_layers": 1728180,
+        "skipped_token_layers": 0,
+        "mixed_eligible_token_layers": 274500,
+        "decode_eligible_token_layers": 1453680
+      },
+      "eligible_head_token_layers": 27650880,
+      "semantic_basic_flops": 3174763438080,
+      "source_tiled_basic_flops": 3185381376000,
+      "semantic_exp_evaluations": 27650880,
+      "source_tiled_exp_evaluations": 110603520
+    }
+  ],
+  "per_head_token": {
+    "components": {
+      "query_scale": 128,
+      "state_decay": 16384,
+      "prediction_multiply": 16384,
+      "prediction_reduce": 16256,
+      "residual_subtract": 128,
+      "beta_scale": 128,
+      "state_fma": 32768,
+      "output_multiply": 16384,
+      "output_reduce": 16256
+    },
+    "semantic_basic_flops": 114816,
+    "source_tiled_basic_flops": 115200,
+    "semantic_exp_evaluations": 1,
+    "source_tiled_exp_evaluations": 4
+  },
+  "source_sha256": "135bac7406d18b2e58fde579d18c053abb3aba6d2c1a5f4b91c7a8a6931b9109",
+  "model_effective_flops": null,
+  "attainment_percent": null,
+  "limitations": [
+    "Slot eligibility is observed on the host, not independently read back from device.",
+    "Only recurrent verification core is covered; prefill, convolution, preprocessing and outer projections are excluded.",
+    "Basic scalar FLOPs count FMA as two, K-term reduction as K-1 additions; exp is separate, not assigned a FLOP cost.",
+    "Source-tiled count includes repeated query scaling across four value tiles; it is not a hardware instruction counter.",
+    "No replacement of uninstrumented performance or whole-model M01 pass is claimed."
+  ]
+}

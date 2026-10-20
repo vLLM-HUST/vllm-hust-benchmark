@@ -1,0 +1,149 @@
+{
+  "status": "partial_source_shaped_semantic_accounting",
+  "scope": "Whole TP2 model semantic arithmetic, counted once; not sum of duplicated rank metadata.",
+  "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+  "counts_source_sha256": "574dab4181f3f543059612f288a0af193c16e23d88323341ce69a46ac783b63a",
+  "sources": {
+    "vllm/model_executor/models/qwen3_5.py": {
+      "sha256": "3abeac36180df7bd1bd96b1a7c698a8f212d92c063026420cbdd16d1980e90e6",
+      "matched_existing_admitted_pin": true,
+      "classes": [
+        "Qwen3_5ProcessingInfo",
+        "Qwen3_5MoeProcessingInfo",
+        "Qwen3_5DecoderLayer",
+        "Qwen3_5Model",
+        "Qwen3_5ForCausalLMBase",
+        "Qwen3_5ForCausalLM",
+        "Qwen3_5MoeForCausalLM",
+        "Qwen3_5ForConditionalGeneration",
+        "Qwen3_5_MoeMixtureOfExperts",
+        "Qwen3_5MoeForConditionalGeneration"
+      ]
+    },
+    "vllm/model_executor/models/qwen3_next.py": {
+      "sha256": "4a27cf7b065c2097688421e6ea849704cef946f347978fb426abbc72b77f00b2",
+      "matched_existing_admitted_pin": false,
+      "classes": [
+        "Qwen3NextSparseMoeBlock",
+        "Qwen3NextAttention",
+        "Qwen3NextDecoderLayer",
+        "Qwen3NextModel",
+        "QwenNextMixtureOfExperts",
+        "Qwen3NextForCausalLM"
+      ]
+    },
+    "vllm/model_executor/models/qwen3_5_mtp.py": {
+      "sha256": "89b0bde1d11fe5768a634e4365c78274e20694b26f4c6bb68e934328d8d0b190",
+      "matched_existing_admitted_pin": false,
+      "classes": [
+        "Qwen3_5MultiTokenPredictor",
+        "Qwen3_5MTP",
+        "Qwen3_5MoeMTP"
+      ]
+    },
+    "vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py": {
+      "sha256": "b80f8e6f3fff442fb880aebb3209c52f814f66490009f4ac4003de603576d10a",
+      "matched_existing_admitted_pin": true,
+      "classes": [
+        "ChunkGatedDeltaRule",
+        "QwenGatedDeltaNetAttention"
+      ]
+    },
+    "vllm_ascend/patch/worker/patch_qwen3_5.py": {
+      "sha256": "0ea5111173d5a02e4f8ab89130a1a1bd7d44ad86885a4c64bb3cb4649afbb48c",
+      "matched_existing_admitted_pin": true,
+      "classes": [
+        "AscendQwen3NextAttention",
+        "AscendQwen3_5DecoderLayer"
+      ]
+    }
+  },
+  "full_attention_layers": 10,
+  "gdn_layers": 30,
+  "matrix_convention": "2*M*N*K, fused multiply-add counts as two operations",
+  "projections": [
+    {
+      "name": "target.full_attention.qkv_with_output_gate",
+      "rows_per_layer": 339871,
+      "input_dim": 2048,
+      "output_dim": 9216,
+      "layers": 10,
+      "semantic_flops": 128297006530560
+    },
+    {
+      "name": "target.full_attention.output",
+      "rows_per_layer": 339871,
+      "input_dim": 4096,
+      "output_dim": 2048,
+      "layers": 10,
+      "semantic_flops": 57020891791360
+    },
+    {
+      "name": "draft.full_attention.qkv_with_output_gate",
+      "rows_per_layer": 359288,
+      "input_dim": 2048,
+      "output_dim": 9216,
+      "layers": 1,
+      "semantic_flops": 13562667859968
+    },
+    {
+      "name": "draft.full_attention.output",
+      "rows_per_layer": 359288,
+      "input_dim": 4096,
+      "output_dim": 2048,
+      "layers": 1,
+      "semantic_flops": 6027852382208
+    },
+    {
+      "name": "target.gdn.qkvz",
+      "rows_per_layer": 339871,
+      "input_dim": 2048,
+      "output_dim": 12288,
+      "layers": 30,
+      "semantic_flops": 513188026122240
+    },
+    {
+      "name": "target.gdn.ba",
+      "rows_per_layer": 339871,
+      "input_dim": 2048,
+      "output_dim": 64,
+      "layers": 30,
+      "semantic_flops": 2672854302720
+    },
+    {
+      "name": "target.gdn.output",
+      "rows_per_layer": 339871,
+      "input_dim": 4096,
+      "output_dim": 2048,
+      "layers": 30,
+      "semantic_flops": 171062675374080
+    },
+    {
+      "name": "draft.input_fusion",
+      "rows_per_layer": 359288,
+      "input_dim": 4096,
+      "output_dim": 2048,
+      "layers": 1,
+      "semantic_flops": 6027852382208
+    }
+  ],
+  "causal_qk_av_semantic_flops": {
+    "target": 48756925890560,
+    "draft": 5365112635392
+  },
+  "covered_semantic_subtotal": 951981865271296,
+  "model_effective_flops": null,
+  "attainment_percent": null,
+  "excluded": [
+    "MoE routed/shared projections, router and shared gates",
+    "Vocabulary projections until same-run row-to-kernel mapping is confirmed",
+    "GDN recurrent/chunk arithmetic and convolution",
+    "RMS normalization, RoPE, softmax, activations and elementwise gates",
+    "Padding, masked kernel work, communication and TP replicated execution"
+  ],
+  "limitations": [
+    "This is a source-shaped semantic subtotal, not a profiler-complete F or a hardware instruction counter.",
+    "Historical pin coverage is explicit; newly inspected source files are hashed, not retroactively claimed pinned.",
+    "No cross-run time denominator or attainment is derived."
+  ]
+}
