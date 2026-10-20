@@ -1,0 +1,89 @@
+{
+  "status": "nominal_moe_projection_arithmetic_derived",
+  "ranks": [
+    {
+      "rank": 0,
+      "roles": {
+        "target": {
+          "valid_context_tokens": 339718,
+          "layers": 40,
+          "moe_ep_size": 1,
+          "tp_size": 2,
+          "nominal_routed_rows_all_layers": 108709760,
+          "routed_projection_semantic_flops": 683942671810560,
+          "shared_projection_semantic_flops": 85492833976320,
+          "router_projection_semantic_flops": 14248805662720,
+          "shared_gate_projection_semantic_flops": 55659397120
+        },
+        "draft": {
+          "valid_context_tokens": 359079,
+          "layers": 1,
+          "moe_ep_size": 1,
+          "tp_size": 2,
+          "nominal_routed_rows_all_layers": 2872632,
+          "routed_projection_semantic_flops": 18073037832192,
+          "shared_projection_semantic_flops": 2259129729024,
+          "router_projection_semantic_flops": 376521621504,
+          "shared_gate_projection_semantic_flops": 1470787584
+        }
+      },
+      "source_sha256": "f025150bc297f261fe089e47d639a2f04bff296ab8c30cd2ccc3288ca604d934"
+    },
+    {
+      "rank": 1,
+      "roles": {
+        "target": {
+          "valid_context_tokens": 339718,
+          "layers": 40,
+          "moe_ep_size": 1,
+          "tp_size": 2,
+          "nominal_routed_rows_all_layers": 108709760,
+          "routed_projection_semantic_flops": 683942671810560,
+          "shared_projection_semantic_flops": 85492833976320,
+          "router_projection_semantic_flops": 14248805662720,
+          "shared_gate_projection_semantic_flops": 55659397120
+        },
+        "draft": {
+          "valid_context_tokens": 359079,
+          "layers": 1,
+          "moe_ep_size": 1,
+          "tp_size": 2,
+          "nominal_routed_rows_all_layers": 2872632,
+          "routed_projection_semantic_flops": 18073037832192,
+          "shared_projection_semantic_flops": 2259129729024,
+          "router_projection_semantic_flops": 376521621504,
+          "shared_gate_projection_semantic_flops": 1470787584
+        }
+      },
+      "source_sha256": "fad9adbd9b606e0ae9c3a2f871f4b8e46dfaf4fadb909bab997690b512dc6e88"
+    }
+  ],
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792486329.7135174,
+    "end_wall": 1792486392.2578623,
+    "duration_seconds": 62.54434481356293,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "source_sha256": {
+    "runtime/vllm_ascend/ops/fused_moe/token_dispatcher.py": "cf4e44a06db2dd7d1a0abce35381ed270aef6b75e4d3bf6557a50b0bb7ffebb5",
+    "runtime/vllm_ascend/eplb/core/eplb_utils.py": "1fcf2a5d8ee56366d460ccd87661176822745f2d86e295a6438c0f8651d2392e",
+    "runtime/vllm_ascend/ops/fused_moe/routed_experts.py": "b17e5a105d59fc280f244bdc4036b4cb41efd1d5a2ff1accca4b56620cc91ab7",
+    "runtime/vllm_ascend/device/device_op.py": "151f03a3344f2651317db0c9d5503a272dcdd61ff8b5712cbef4e112f6e4a013",
+    "derive_moe_projection_accounting.py": "ec0535f82969a69dcd3ffab7220dd46c036b4a439f26dea8df8c053eaa3e76f3"
+  },
+  "scope": "Model-level semantic projection arithmetic; TP partitions combined once, replicated router/gate counted once.",
+  "assumptions": [
+    "The full-range, non-EP routing operator implements its documented no-capacity-drop contract.",
+    "Each valid context token has eight expert assignments; expert-count axis is not another multiplier."
+  ],
+  "actual_routed_rows_measured": null,
+  "model_effective_flops": null,
+  "limitations": [
+    "Nominal routed rows are derived from the active routing contract, not sampled device counters.",
+    "Unselected experts, padding and repeated metadata across ranks are not counted as useful projection work.",
+    "GDN core, activations, normalization and matched reference remain incomplete.",
+    "No cross-run subtotal addition, performance substitution or M01 attainment is made."
+  ]
+}

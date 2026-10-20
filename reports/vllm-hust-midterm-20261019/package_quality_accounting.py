@@ -19,13 +19,55 @@ def main():
             "accounting-v2",
             "accounting-v3",
             "attention",
+            "moe-gdn",
             "quality",
         ),
         required=True,
     )
     parser.add_argument("--run", action="append", default=[])
     args = parser.parse_args()
-    if args.kind == "attention":
+    if args.kind == "moe-gdn":
+        directories = [
+            "microflow-token-accounting-r6",
+            "microflow-token-accounting-r7",
+            "token-observer-v5",
+            "token-observer-v6",
+        ]
+        sources = [
+            "model_shape_inventory.py",
+            "gdn_host_snapshot.py",
+            "host_logits_snapshot.py",
+            "host_mtp_snapshot.py",
+            "attention_length_snapshot.py",
+            "audit_loaded_moe.py",
+            "derive_moe_projection_accounting.py",
+            "audit_gdn_host_schedule.py",
+            "audit_token_accounting.py",
+            "test_model_shape_inventory.py",
+            "test_moe_projection_accounting.py",
+            "test_gdn_host_snapshot.py",
+            "test_gdn_schedule_audit.py",
+            "loaded-moe-summary-r6.json",
+            "moe-projection-summary-r6.json",
+            "gdn-host-summary-r7.json",
+        ]
+        for version in (5, 6):
+            sources.extend(
+                [
+                    f"prepare_token_observer_v{version}.py",
+                    f"runtime-token-accounting-v{version}.sh",
+                    f"serve-token-accounting-v{version}.sh",
+                    f"measure_token_accounting_v{version}.py",
+                    f"launch_token_accounting_v{version}.py",
+                    f"token-observer-build-v{version}.json",
+                ]
+            )
+        summaries = {
+            "loaded-moe.json": "loaded-moe-summary-r6.json",
+            "moe-projections.json": "moe-projection-summary-r6.json",
+            "gdn-schedule.json": "gdn-host-summary-r7.json",
+        }
+    elif args.kind == "attention":
         directories = [
             "microflow-token-accounting-r4",
             "microflow-token-accounting-r5",
