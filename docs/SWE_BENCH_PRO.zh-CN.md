@@ -23,10 +23,10 @@ NodeBB 的一道 V1 任务、一个独立 Agent。任务容器需要至少示例
 
 ## 1. 获取本仓库与固定版本上游源码
 
-本迁移尚在 PR 分支，合并前请使用下列分支；合并后可改用 main。 从本仓库根目录运行；`WORK` 必须是自己的绝对路径，`sources` 目录必须尚不存在：
+从本仓库根目录运行；`WORK` 必须是自己的绝对路径，`sources` 目录必须尚不存在：
 
 ```bash
-git clone --branch codex/swe-bench-pro-environment https://github.com/vLLM-HUST/vllm-hust-benchmark.git
+git clone https://github.com/vLLM-HUST/vllm-hust-benchmark.git
 cd vllm-hust-benchmark
 export WORK=/absolute/private/swe-pro-v1
 mkdir -p "$WORK"
@@ -137,6 +137,15 @@ read=null 只取消读取时限，其余三阶段仍各 180 秒。 模型上下�
 `Submitted` 只表示 Agent 主动结束并给出补丁，不能证明修复正确。`ContextWindowExceededError`、
 `LimitsExceeded`、超时均是执行失败；未评分不等于 0 分。迁移验收状态见
 [单 Agent 验收记录](../reports/swe-bench-pro-environment-migration-20261020/README.md)。
+
+### 模型上下文与最新单 Agent 记录
+
+本入口没有规定模型只能使用 32K。应核对模型原生窗口、服务端实际上限和当前硬件/SDK资源， 上下文预算包含累计输入历史与预留输出。不要把沿用配置当作模型的原生限制。
+
+Qwen3.5-35B-A3B 已在保留的两张 Ascend 910B2、BF16 TP2、每卡16GiB KV池上， 实际启用原生262144上下文并验证双卡图执行，其他引擎/Agent参数保持。
+一个真实Agent在79次回复后Submitted，最大输入37370 tokens；独立官方评分为0/1， 说明上下文阻塞解除与修复正确性是两件事。详见
+[原生上下文单 Agent 报告](../reports/swe-bench-pro-native-context-20261020/README.md)。
+这是特定部署的实测配置，通用入口仍只依赖你自己的模型API；不会自动替你重启模型或调整资源。
 
 ## 5. 独立评分（可选）
 

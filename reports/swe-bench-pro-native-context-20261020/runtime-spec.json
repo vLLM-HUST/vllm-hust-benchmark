@@ -1,0 +1,56 @@
+{
+  "schema": "swe-bench-pro-diagnostic-runtime-v1",
+  "status": "ACTUAL_CONFIGURATION_AND_GRAPH_VALIDATED; not an official leaderboard spec",
+  "model": "Qwen/Qwen3.5-35B-A3B",
+  "engine": {
+    "tensor_parallel_size": 2,
+    "dtype": "bfloat16",
+    "max_model_len": 262144,
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 4095,
+    "gpu_memory_utilization": 0.9,
+    "seed": 17,
+    "enable_prefix_caching": true,
+    "mamba_cache_mode": "align",
+    "enable_chunked_prefill": true,
+    "async_scheduling": true,
+    "limit_mm_per_prompt": {
+      "image": 0,
+      "video": 0
+    },
+    "additional_config": {
+      "enable_cpu_binding": false
+    },
+    "compilation_config": {
+      "cudagraph_mode": "FULL_DECODE_ONLY",
+      "cudagraph_capture_sizes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32,
+        64,
+        128,
+        256
+      ],
+      "max_cudagraph_capture_size": 256,
+      "pass_config": {
+        "enable_sp": false
+      }
+    },
+    "kv_cache_memory_bytes": 17179869184,
+    "speculative_config": null,
+    "enforce_eager": false
+  },
+  "packages": {
+    "torch": "2.13.0+cpu",
+    "torch-npu": "2.13.0rc1",
+    "triton-ascend": "3.6.0",
+    "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+    "vllm-ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27"
+  },
+  "native_context_source": "https://huggingface.co/Qwen/Qwen3.5-35B-A3B/raw/main/config.json",
+  "configuration_source": "https://github.com/vLLM-HUST/request-throttling-controller/blob/30b10b0/config/unified-graph-profile-native-context-256k-v1.json",
+  "agent_runner": "vllm-hust-benchmark/scripts/run_swe_bench_pro.py"
+}
