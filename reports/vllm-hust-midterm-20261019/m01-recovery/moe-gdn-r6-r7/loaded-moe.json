@@ -1,0 +1,155 @@
+{
+  "status": "loaded_moe_shapes_and_communication_verified",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792486329.7135174,
+    "end_wall": 1792486392.2578623,
+    "duration_seconds": 62.54434481356293,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "ranks": [
+    {
+      "rank": 0,
+      "source_file": "token-accounting-111345.jsonl",
+      "source_sha256": "f025150bc297f261fe089e47d639a2f04bff296ab8c30cd2ccc3288ca604d934",
+      "target": {
+        "routed_layers": 40,
+        "top_k": 8,
+        "experts_per_rank": 256,
+        "routed_w13_shape": [
+          256,
+          2048,
+          512
+        ],
+        "routed_w2_shape": [
+          256,
+          256,
+          2048
+        ],
+        "shared_gate_up_shape": [
+          512,
+          2048
+        ],
+        "shared_down_shape": [
+          2048,
+          256
+        ],
+        "fused_shared_expert": false,
+        "sequence_parallel": false,
+        "eplb": false,
+        "redundant_experts": 0
+      },
+      "draft": {
+        "routed_layers": 1,
+        "top_k": 8,
+        "experts_per_rank": 256,
+        "routed_w13_shape": [
+          256,
+          2048,
+          512
+        ],
+        "routed_w2_shape": [
+          256,
+          256,
+          2048
+        ],
+        "shared_gate_up_shape": [
+          512,
+          2048
+        ],
+        "shared_down_shape": [
+          2048,
+          256
+        ],
+        "fused_shared_expert": false,
+        "sequence_parallel": false,
+        "eplb": false,
+        "redundant_experts": 0
+      },
+      "contexts": {
+        "target": 876,
+        "draft": 876
+      },
+      "communication_modes": {
+        "MoECommType.ALLGATHER": 1752
+      }
+    },
+    {
+      "rank": 1,
+      "source_file": "token-accounting-111346.jsonl",
+      "source_sha256": "fad9adbd9b606e0ae9c3a2f871f4b8e46dfaf4fadb909bab997690b512dc6e88",
+      "target": {
+        "routed_layers": 40,
+        "top_k": 8,
+        "experts_per_rank": 256,
+        "routed_w13_shape": [
+          256,
+          2048,
+          512
+        ],
+        "routed_w2_shape": [
+          256,
+          256,
+          2048
+        ],
+        "shared_gate_up_shape": [
+          512,
+          2048
+        ],
+        "shared_down_shape": [
+          2048,
+          256
+        ],
+        "fused_shared_expert": false,
+        "sequence_parallel": false,
+        "eplb": false,
+        "redundant_experts": 0
+      },
+      "draft": {
+        "routed_layers": 1,
+        "top_k": 8,
+        "experts_per_rank": 256,
+        "routed_w13_shape": [
+          256,
+          2048,
+          512
+        ],
+        "routed_w2_shape": [
+          256,
+          256,
+          2048
+        ],
+        "shared_gate_up_shape": [
+          512,
+          2048
+        ],
+        "shared_down_shape": [
+          2048,
+          256
+        ],
+        "fused_shared_expert": false,
+        "sequence_parallel": false,
+        "eplb": false,
+        "redundant_experts": 0
+      },
+      "contexts": {
+        "target": 876,
+        "draft": 876
+      },
+      "communication_modes": {
+        "MoECommType.ALLGATHER": 1752
+      }
+    }
+  ],
+  "completed": 200,
+  "failed": 0,
+  "actual_routed_rows": null,
+  "model_effective_flops": null,
+  "limitations": [
+    "Module EP group size is not the enable_expert_parallel flag; full per-rank expert tensors are recorded explicitly.",
+    "Loaded top-k and shapes establish configuration, not a measurement of effective rows after routing.",
+    "GDN owned-core arithmetic and shape-matched capacity remain separate incomplete items.",
+    "Observer results do not replace uninstrumented performance."
+  ]
+}
