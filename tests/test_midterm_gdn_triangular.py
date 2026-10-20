@@ -14,7 +14,7 @@ def test_archived_scalar_and_independent_inverse_checks(tmp_path):
     for name, content in members.items():
         if name.startswith("source/") and name.count("/") == 1 and name.endswith(".py"):
             (tmp_path / name.split("/")[-1]).write_bytes(content)
-    subprocess.run(
+    completed = subprocess.run(
         [
             sys.executable,
             "-m",
@@ -24,10 +24,11 @@ def test_archived_scalar_and_independent_inverse_checks(tmp_path):
             "test_gdn_inverse_accounting.py",
         ],
         cwd=tmp_path,
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
     )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
 
 
 def test_r9_histogram_source_hashes_and_totals():
