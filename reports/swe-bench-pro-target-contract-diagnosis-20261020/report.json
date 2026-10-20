@@ -1,0 +1,57 @@
+{
+  "schema": "swe-bench-pro-target-contract-diagnosis-v1",
+  "source_agent_run": "swe-pro-v1-test-loop-200steps-single-agent-20261020-r1",
+  "scope": "two serial manually modified saved-patch gradings, zero Agents and zero model calls",
+  "direct_cause": "array-only gate skips comma-separated string config, no exception thrown",
+  "secondary_contract_difference": "raw English exception versus repository-localized error key; requirement wording differs from machine expectation",
+  "self_test_gap": "Agent-added tests only use array config",
+  "comparison": [
+    {
+      "variant": "A: archived unchanged Agent patch",
+      "official_resolved": 0,
+      "total": 1,
+      "parsed": {
+        "PASSED": 148,
+        "FAILED": 1
+      }
+    },
+    {
+      "variant": "B-normalize-string-only",
+      "official_resolved": 0,
+      "total": 1,
+      "parsed": {
+        "PASSED": 148,
+        "FAILED": 1
+      },
+      "unresolved": 0,
+      "model_calls": 0
+    },
+    {
+      "variant": "C-normalize-string-and-error-key",
+      "official_resolved": 1,
+      "total": 1,
+      "parsed": {
+        "PASSED": 149
+      },
+      "unresolved": 0,
+      "model_calls": 0
+    }
+  ],
+  "manual_diagnostic_only": true,
+  "test_or_grader_changed": false,
+  "same_immutable_image": true,
+  "environment_conclusion": "failure explained by patch/configuration contract and error-message representation; no environment change needed for this case",
+  "archive": {
+    "bytes": 68820,
+    "sha256": "e6f144c48a66b9a52568d0f929a5cb879a5a5cf87c6f10fe1e73f903a22852f6",
+    "files": 63,
+    "archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "limits": [
+    "Manual repair is not Agent success",
+    "Only this task and observed failure are explained",
+    "Requirement English text and internal localization key differ; ambiguity retained rather than modifying official tests",
+    "New Agent must not receive official tests, reference patch, or manually corrected patch"
+  ]
+}
