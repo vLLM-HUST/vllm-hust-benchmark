@@ -1,5 +1,8 @@
 # vllm-hust-benchmark
 
+SWE-bench Pro V1 真实 Agent 的独立环境与运行入口： [用户指南](docs/SWE_BENCH_PRO.zh-CN.md)（从一个 ARM 任务开始，无需
+Controller）。
+
 > The legacy Ascend benchmark, baseline, HF publication, and website-dispatch workflows have been
 > removed. The execution scripts and historical design notes below are retained for reference only;
 > new PR validation is performed by the external fixed-machine dataset service.
