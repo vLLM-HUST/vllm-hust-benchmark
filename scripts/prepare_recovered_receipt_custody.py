@@ -31,7 +31,7 @@ def build(inventory_path, destination, index_path, tag=TAG, asset_name=ASSET):
     if (
         str(safe_path(asset_name)) != asset_name
         or "/" in asset_name
-        or not asset_name.endswith(".tar.gz")
+        or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*\.tar\.gz", asset_name)
     ):
         raise ValueError("Invalid asset name")
     inventory = json.loads(inventory_path.read_text())
