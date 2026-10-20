@@ -1,6 +1,7 @@
 """Capture immutable public source receipts for same-workload MOD screening."""
 
 import base64
+import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -26,14 +27,37 @@ IMPLEMENTATIONS = {
     "vllm-hust-dla": ["src/dla/policy.py"],
 }
 
+EXTENDED_REPOS = [
+    "vllm-hust-vSpec",
+    "vllm-hust-opset",
+    "vllm-hust-opfuse",
+    "vllm-hust-unified-comm",
+    "vllm-ascend-layered-prefill-hust",
+    "stateaxis-async-kv-transfer",
+    "stateaxis-automatic-prefix-cache",
+    "vllm-hust-qos-scheduler",
+    "vllm-hust-activation-sparsity",
+    "vllm-ascend-hust-LatchMoE",
+    "ascend-distributed-metadata",
+    "vllm-hust-kv-tiering",
+    "vllm-ascend-simllm-hust",
+]
+EXTENDED_IMPLEMENTATIONS = {
+    "vllm-hust-vSpec": ["src/vllm_hust_vspec/backends/mtp.py"],
+    "vllm-hust-hybrid-spec": [
+        "tools/gdn_prepare_fastpath.py",
+        "tools/gdn_prepare_control.py",
+    ],
+}
+
 
 def api(path):
     return json.loads(subprocess.check_output(["gh", "api", path], text=True))
 
 
-def capture():
+def capture(output=None, extended=False):
     rows = []
-    for name in REPOS:
+    for name in REPOS + (EXTENDED_REPOS if extended else []):
         repo = f"vLLM-HUST/{name}"
         meta = api(f"repos/{repo}")
         head = api(f"repos/{repo}/commits/{meta['default_branch']}")["sha"]
@@ -44,10 +68,19 @@ def capture():
             if row["type"] == "blob"
             and (
                 row["path"] == "README.md"
+                or (
+                    extended
+                    and row["path"] in ("MOD_METADATA.json", "HOST_CONTRACT.md")
+                )
                 or row["path"] in IMPLEMENTATIONS.get(name, [])
+                or (extended and row["path"] in EXTENDED_IMPLEMENTATIONS.get(name, []))
                 or (
                     row["path"].startswith("src/")
-                    and ("manifest" in row["path"] or "host-contract" in row["path"])
+                    and (
+                        "manifest" in row["path"]
+                        or "host-contract" in row["path"]
+                        or "vllm-hust-extension" in row["path"]
+                    )
                 )
                 and row["path"].endswith(".json")
             )
@@ -84,6 +117,13 @@ def capture():
         "payload/betterscale/models/qwen35/seat_scheduler.py",
         "payload/betterscale/models/qwen35/fair_schedule.py",
     ]
+    if extended:
+        local_paths += [
+            "payload/betterscale/models/qwen35/integration.py",
+            "payload/betterscale/models/qwen35/draft_sampling.py",
+            "payload/betterscale/models/qwen35/mamba_abi.py",
+            "payload/betterscale/models/qwen35/device_apc.py",
+        ]
     result["measured_host_sources"] = [
         {
             "path": name,
@@ -92,10 +132,16 @@ def capture():
         }
         for name in local_paths
     ]
-    (ROOT / "b1-mod-source-audit.json").write_text(
+    (output or ROOT / "b1-mod-source-audit.json").write_text(
         json.dumps(result, indent=2, ensure_ascii=False) + "\n"
     )
 
 
 if __name__ == "__main__":
-    capture()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path)
+    parser.add_argument("--extended", action="store_true")
+    args = parser.parse_args()
+    if args.extended and args.output is None:
+        parser.error("--extended requires a new --output; preserve earlier receipts")
+    capture(args.output, args.extended)
