@@ -1,4 +1,4 @@
-"""Copy existing public dev-hub releases to benchmark with digest verification."""
+"""Copy dev-hub releases without changing visibility, validity or asset bytes."""
 
 import argparse
 import hashlib
@@ -37,11 +37,32 @@ def digest(path):
     return "sha256:" + value.hexdigest()
 
 
+def visibility_flags(release):
+    if not isinstance(release.get("draft"), bool) or not isinstance(
+        release.get("prerelease"), bool
+    ):
+        raise ValueError("Missing release visibility metadata")
+    return (["--draft"] if release["draft"] else []) + (
+        ["--prerelease"] if release["prerelease"] else []
+    )
+
+
+def check_visibility(source, target):
+    visibility_flags(source)
+    visibility_flags(target)
+    if (source["draft"], source["prerelease"]) != (
+        target["draft"],
+        target["prerelease"],
+    ):
+        raise ValueError("Release visibility mismatch; refusing asset publication")
+
+
 def migrate(cache, output, publish):
     source = releases(SOURCE)
     targets = {row["tag_name"]: row for row in releases(TARGET)}
     records = []
     for release in source:
+        flags = visibility_flags(release)
         tag = release["tag_name"]
         if not tag.startswith("szyn-swebench-qwen35-"):
             raise ValueError("Unexpected release outside approved migration scope")
@@ -101,8 +122,10 @@ def migrate(cache, output, publish):
                     "--notes",
                     notes,
                     "--latest=false",
+                    *flags,
                 )
-                targets[tag] = {"assets": []}
+                targets = {row["tag_name"]: row for row in releases(TARGET)}
+            check_visibility(release, targets[tag])
             existing = {a["name"]: a for a in targets[tag]["assets"]}
             for asset in expected:
                 name = asset["name"]
@@ -111,7 +134,10 @@ def migrate(cache, output, publish):
                         raise ValueError(f"Destination asset conflict: {tag}/{name}")
                     continue
                 gh("release", "upload", tag, str(directory / name), "--repo", TARGET)
-            remote = json.loads(gh("api", f"repos/{TARGET}/releases/tags/{tag}"))
+            remote = json.loads(
+                gh("api", f"repos/{TARGET}/releases/{targets[tag]['id']}")
+            )
+            check_visibility(release, remote)
             actual = {a["name"]: a for a in remote["assets"]}
             for asset in expected:
                 copied = actual[asset["name"]]
@@ -124,6 +150,8 @@ def migrate(cache, output, publish):
             {
                 "source_release": release["html_url"],
                 "source_release_id": release["id"],
+                "original_draft": release["draft"],
+                "original_prerelease": release["prerelease"],
                 "original_published_at": release.get("published_at"),
                 "original_updated_at": release.get("updated_at"),
                 "original_target_commitish": release.get("target_commitish"),

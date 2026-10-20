@@ -1,5 +1,17 @@
 # Dev-hub Release custody
 
+## Visibility correction
+
+Two source Releases were drafts: attempt 2, and the original checkpoint release (also a prerelease).
+The initial migration incorrectly published their destination copies; both were restored to their
+original draft/prerelease states. Attempt 3 remains public. `visibility-verification.json` records
+the corrected states and rechecked asset digests. Original asset bytes and the initial custody
+snapshot were not rewritten.
+
+The migration tool now fails closed on missing or mismatched visibility metadata, creates drafts as
+drafts, and verifies draft Releases by API ID instead of the public tag endpoint. Its `--publish`
+flag means copying assets to the destination, not promoting a draft to public.
+
 The three SZYN evidence Releases originally hosted in dev-hub are copied into vllm-hust-benchmark
 without changing asset bytes. `manifest.json` records original release IDs, titles, notes, asset
 URLs, destination URLs, byte counts and SHA256 digests.

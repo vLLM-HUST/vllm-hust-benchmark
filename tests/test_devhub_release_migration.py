@@ -20,6 +20,8 @@ def source(tmp_path):
     path.write_bytes(b'{"valid": false}\n')
     return {
         "tag_name": tag,
+        "draft": True,
+        "prerelease": False,
         "name": "INVALIDATED: test attempt",
         "id": 1,
         "html_url": "https://example.invalid/original",
@@ -85,3 +87,40 @@ def test_existing_custody_snapshot_is_not_rewritten(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="rewriting history"):
         MODULE.migrate(tmp_path / "cache", output, False)
     assert output.read_bytes() == original
+
+
+def test_draft_and_prerelease_flags_are_preserved():
+    assert MODULE.visibility_flags({"draft": True, "prerelease": True}) == [
+        "--draft",
+        "--prerelease",
+    ]
+    assert MODULE.visibility_flags({"draft": False, "prerelease": False}) == []
+
+
+def test_missing_visibility_fails_closed():
+    with pytest.raises(ValueError, match="Missing release visibility"):
+        MODULE.visibility_flags({})
+
+
+def test_draft_cannot_be_silently_published():
+    with pytest.raises(ValueError, match="visibility mismatch"):
+        MODULE.check_visibility(
+            {"draft": True, "prerelease": False},
+            {"draft": False, "prerelease": False},
+        )
+
+
+def test_corrected_release_visibility_receipt():
+    root = Path(__file__).resolve().parents[1]
+    receipt = json.loads(
+        (
+            root / "archive/dev-hub-releases-20261020/visibility-verification.json"
+        ).read_text()
+    )
+    rows = receipt["releases"]
+    assert len(rows) == 3
+    assert sum(r["assets_verified"] for r in rows) == 78
+    assert sum(r["destination_draft"] for r in rows) == 2
+    for row in rows:
+        assert row["source_draft"] == row["destination_draft"]
+        assert row["source_prerelease"] == row["destination_prerelease"]
