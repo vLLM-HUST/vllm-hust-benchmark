@@ -31,6 +31,7 @@ def main():
             "conv-accounting",
             "gdn-ho-accounting",
             "norm-accounting",
+            "norm-reference",
             "vocab-reference",
             "device-routing",
             "quality",
@@ -40,7 +41,25 @@ def main():
     parser.add_argument("--run", action="append", default=[])
     parser.add_argument("--profile-root", type=Path)
     args = parser.parse_args()
-    if args.kind == "norm-accounting":
+    if args.kind == "norm-reference":
+        directories = ["norm-reference-r1", "norm-reference-control-r1"]
+        sources = [
+            "prepare_norm_reference.py",
+            "norm_reference_probe.py",
+            "norm_reference_probe.sh",
+            "run_norm_reference.py",
+            "audit_norm_reference.py",
+            "norm-reference-plan-r1.json",
+            "norm-reference-summary-r1.json",
+            "audit_token_accounting.py",
+            "dcmi_hccs64.py",
+            "dcmi_hccs_bandwidth.py",
+            "measure_microflow.py",
+        ]
+        norm_plan = json.loads((args.root / "norm-reference-plan-r1.json").read_text())
+        sources.extend(norm_plan["source_sha256"])
+        summaries = {"summary.json": "norm-reference-summary-r1.json"}
+    elif args.kind == "norm-accounting":
         directories = []
         sources = [
             "audit_norm_accounting.py",
@@ -600,7 +619,12 @@ def main():
             path = Path(record["path"])
             assert hashlib.sha256(path.read_bytes()).hexdigest() == record["sha256"]
             selected["source/model-sources/" + name] = path
-    if args.kind in ("preprocess-reference", "conv-accounting", "gdn-ho-accounting"):
+    if args.kind in (
+        "preprocess-reference",
+        "conv-accounting",
+        "gdn-ho-accounting",
+        "norm-reference",
+    ):
         for name in ("recover_model_hardware.py", "integrate_hbm_samples.py"):
             selected["source/" + name] = Path(__file__).parent / name
     if args.kind == "device-routing":
