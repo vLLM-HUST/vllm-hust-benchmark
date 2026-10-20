@@ -78,7 +78,8 @@ def test_publication_is_derived_from_evidence_and_selects_each_metric(monkeypatc
         )(values)
         assert cell["value"] == expected
         assert cell["delta_pct"] == 100 * (expected / cell["baseline_value"] - 1)
-        assert "Task accuracy was not rescored" in cell["note"]
+        assert "Separate out8192 quality regression" in cell["note"]
+        assert "Task accuracy was not rescored" not in cell["note"]
 
 
 def test_latency_validator_rejects_larger_selected_value():
