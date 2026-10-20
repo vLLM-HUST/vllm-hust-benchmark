@@ -1,0 +1,92 @@
+{
+  "status": "qualified_all_observed_device_gmm_distributions",
+  "plan_sha256": "4814f8127ae282e2fcdd00d19a0446256ee645123a35a2fd7e333742d226e98e",
+  "receipt_sha256": "834160f0897fc34feebb27dcf0efa6ab6835efd581fd5dc4c1c90e62f65a2728",
+  "unique_distributions": 37128,
+  "row_buckets": 14,
+  "ranks": [
+    {
+      "rank": 0,
+      "max_sample_abs_error": 0.0001590251922607422,
+      "group_update_checks": 56,
+      "timing_records": 222768,
+      "operators": [
+        {
+          "operator": "w13",
+          "distributions": 37128,
+          "repetition_weighted_device_ms": [
+            9652.436420328915,
+            9655.711200334132,
+            9682.775818590075
+          ],
+          "sum_case_median_weighted_ms": 9659.20777888596,
+          "device_matrix_flops_including_padding": 289948141879296,
+          "component_tflops_from_case_medians": 30.017797371860347
+        },
+        {
+          "operator": "w2",
+          "distributions": 37128,
+          "repetition_weighted_device_ms": [
+            5734.245720196515,
+            5742.687781974673,
+            5735.888239465654
+          ],
+          "sum_case_median_weighted_ms": 5725.111200809479,
+          "device_matrix_flops_including_padding": 144974070939648,
+          "component_tflops_from_case_medians": 25.322489966509295
+        }
+      ],
+      "result_sha256": "aef96a2059359f1a1b392b23e14b3ed877b65365bc2b2f4f229d414c58c4fab8",
+      "timings_sha256": "f52d6ea7b94fd910f33b397b85f2169f9badc9e11d5592429463a008136498c3"
+    },
+    {
+      "rank": 1,
+      "max_sample_abs_error": 0.00019156932830810547,
+      "group_update_checks": 56,
+      "timing_records": 222768,
+      "operators": [
+        {
+          "operator": "w13",
+          "distributions": 37128,
+          "repetition_weighted_device_ms": [
+            9658.211578719318,
+            9675.373056739569,
+            9684.234318755567
+          ],
+          "sum_case_median_weighted_ms": 9657.098597288132,
+          "device_matrix_flops_including_padding": 289948141879296,
+          "component_tflops_from_case_medians": 30.024353480321523
+        },
+        {
+          "operator": "w2",
+          "distributions": 37128,
+          "repetition_weighted_device_ms": [
+            5675.337260629982,
+            5685.787440575659,
+            5670.943340253085
+          ],
+          "sum_case_median_weighted_ms": 5665.670020468533,
+          "device_matrix_flops_including_padding": 144974070939648,
+          "component_tflops_from_case_medians": 25.588159990944742
+        }
+      ],
+      "result_sha256": "5819ce8acb1025c91ee540974a87a796c7a1367af3ce94defc27b8d4ee25c80b",
+      "timings_sha256": "9b0866126112fd46df2b1a4a46b2807ceb0f882ee64cdfc65def0975b6bce7f4"
+    }
+  ],
+  "all_devices_released": true,
+  "model_effective_flops": null,
+  "attainment_percent": null,
+  "limitations": [
+    "Device group lists include graph padding; per-expert useful-row distribution is not reconstructed.",
+    "Synthetic bounded inputs and one resident expert weight bank do not reproduce the model working set.",
+    "CPU FP32 checks sample output rows/columns, not every output element.",
+    "The qualification excludes routing, activation, combination, shared experts and communication.",
+    "No full-model effective FLOPs, reference capacity or M01 attainment is inferred.",
+    "Graph reuse is qualified at the first and last group list of every row-count bucket, not every timed result.",
+    "Per-call device events exclude the group-buffer copy but can include host submission gaps.",
+    "Each case has three single-replay timings; use dispersion, not the fastest observation.",
+    "ND layout follows the pinned runtime source and default BF16 configuration, not independent model weight-format readback.",
+    "Component rates include device graph replay timing and do not establish a full-model matched aggregate capacity."
+  ]
+}
