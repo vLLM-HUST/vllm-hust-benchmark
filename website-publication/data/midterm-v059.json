@@ -1,0 +1,1182 @@
+{
+  "schema": "midterm-publication/v1",
+  "version": "V0.59",
+  "report_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/7154c84cdb399086d51f9c032f8abd282bdfbe88/reports/vllm-hust-midterm-20261019/中期测试报告.md",
+  "report_sha256": "649182bb234e5ce72e4774fbdc8f244d77b0563da1dda835670ed5bb112d5ce6",
+  "source_commit": "7154c84cdb399086d51f9c032f8abd282bdfbe88",
+  "sections": [
+    {
+      "id": "paired-lifecycle",
+      "title": "恢复环境配对性能与成本 / Recovered paired performance and lifecycle cost",
+      "scope": "同一200条输入、out256、每臂一次预检查，独立服务和空编译缓存。操作系统文件页缓存未全局清空。请求阶段与启动至释放的全流程分别统计；保留P99退化、协议偏差及退出日志，不推断长期摊销、统计显著性或任务准确率。",
+      "tables": [
+        {
+          "headers": [
+            "指标",
+            "Native B0",
+            "vLLM-HUST B1",
+            "B1相对B0变化"
+          ],
+          "rows": [
+            [
+              "输出吞吐（token/s）",
+              "477.258648",
+              "616.624727",
+              "+29.20%"
+            ],
+            [
+              "平均 TTFT（s）",
+              "49.230961",
+              "44.194992",
+              "-10.23%"
+            ],
+            [
+              "平均 TPOT（ms/token）",
+              "29.584112",
+              "28.274065",
+              "-4.43%"
+            ],
+            [
+              "P99 TPOT（ms/token）",
+              "32.290506",
+              "71.517126",
+              "+121.48%"
+            ],
+            [
+              "请求阶段成本（卡秒/token）",
+              "0.008381",
+              "0.006487",
+              "-22.60%"
+            ],
+            [
+              "全流程成本（卡秒/token）",
+              "0.060325",
+              "0.094789",
+              "+57.13%"
+            ]
+          ]
+        },
+        {
+          "headers": [
+            "阶段（秒）",
+            "Native B0",
+            "vLLM-HUST B1"
+          ],
+          "rows": [
+            [
+              "启动至客户端",
+              "581.668",
+              "1018.440"
+            ],
+            [
+              "客户端执行（含预检查）",
+              "173.752",
+              "172.136"
+            ],
+            [
+              "客户端结束至设备释放",
+              "16.737",
+              "22.717"
+            ],
+            [
+              "全流程",
+              "772.157",
+              "1213.293"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "5.10 恢复环境配对性能与全流程成本",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m06-paired-20261021",
+          "kind": "tree",
+          "label": "m06-paired-20261021"
+        }
+      ]
+    },
+    {
+      "id": "candidates",
+      "title": "同工况性能候选 / Performance candidates",
+      "scope": "200请求、out256。各指标分别选择B1，不将不同配置的最优指标合并为单一部署结果。",
+      "tables": [
+        {
+          "headers": [
+            "配置",
+            "成功/失败",
+            "输出吞吐 token/秒",
+            "相对B0",
+            "平均TTFT 秒",
+            "平均TPOT 毫秒/token",
+            "TPOT P99 毫秒/token"
+          ],
+          "rows": [
+            [
+              "Native B0",
+              "200/0",
+              "452.292971",
+              "+0.00%",
+              "57.983162",
+              "28.187227",
+              "30.148064"
+            ],
+            [
+              "E16/R36",
+              "200/0",
+              "529.808251",
+              "+17.14%",
+              "49.364675",
+              "24.054954",
+              "47.352907"
+            ],
+            [
+              "E32/R36",
+              "200/0",
+              "478.590799",
+              "+5.81%",
+              "74.829199",
+              "32.868158",
+              "73.085354"
+            ],
+            [
+              "E24/R36",
+              "200/0",
+              "561.509092",
+              "+24.15%",
+              "54.892493",
+              "29.143203",
+              "46.804557"
+            ],
+            [
+              "E16/R36 + KV materialization",
+              "200/0",
+              "695.250622",
+              "+53.72%",
+              "34.578142",
+              "21.017554",
+              "26.449774"
+            ],
+            [
+              "E24/R36 + KV materialization",
+              "200/0",
+              "823.880249",
+              "+82.16%",
+              "28.257484",
+              "26.274483",
+              "34.800143"
+            ],
+            [
+              "E24/R36 + KV + FA Microflow（3次中位数）",
+              "600/0",
+              "824.894609",
+              "+82.38%",
+              "28.129148",
+              "26.103700",
+              "33.503787"
+            ],
+            [
+              "E24/R36 + KV + FA Microflow + MTP local argmax（3次中位数）",
+              "600/0",
+              "817.670406",
+              "+80.78%",
+              "28.332894",
+              "26.285374",
+              "35.357747"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "5.4 E24/R36与KV materialization同工况补测",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/aligned-mmlu-b0.tar.gz",
+          "kind": "blob",
+          "label": "aligned-mmlu-b0.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/aligned-mmlu-b1.tar.gz",
+          "kind": "blob",
+          "label": "aligned-mmlu-b1.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/b1-e32-screen-evidence.tar.gz",
+          "kind": "blob",
+          "label": "b1-e32-screen-evidence.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/b1-e24-screen-evidence.tar.gz",
+          "kind": "blob",
+          "label": "b1-e24-screen-evidence.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/b1-kvmat-screen-evidence.tar.gz",
+          "kind": "blob",
+          "label": "b1-kvmat-screen-evidence.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/b1-kvmat-e24-screen-evidence.tar.gz",
+          "kind": "blob",
+          "label": "b1-kvmat-e24-screen-evidence.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/microflow-school028",
+          "kind": "tree",
+          "label": "microflow-school028"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/vspec-school028",
+          "kind": "tree",
+          "label": "vspec-school028"
+        }
+      ]
+    },
+    {
+      "id": "quality",
+      "title": "质量回归 / Quality regression",
+      "scope": "同一200题，输出上限8192；固定评分器、完整分母。达到输出上限仍可被提取器判对，不等于自然完成；不是全集评分或统计非劣性结论。",
+      "tables": [
+        {
+          "headers": [
+            "方案",
+            "判对/200",
+            "正确率",
+            "自然结束且判对",
+            "达到输出上限",
+            "其中提取命中",
+            "传输失败"
+          ],
+          "rows": [
+            [
+              "B0原生",
+              "147/200",
+              "73.50%",
+              "136",
+              "19",
+              "11",
+              "0"
+            ],
+            [
+              "vLLM-HUST E24/R36 + KV + FA Microflow",
+              "149/200",
+              "74.50%",
+              "139",
+              "25",
+              "10",
+              "0"
+            ],
+            [
+              "vLLM-HUST E16/R36 + KV",
+              "152/200",
+              "76.00%",
+              "141",
+              "23",
+              "11",
+              "0"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "5.7 MMLU-Pro性能输入的任务质量回归",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/quality-regression/raw",
+          "kind": "tree",
+          "label": "quality-regression/raw"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/quality-regression/finish-breakdown.json",
+          "kind": "blob",
+          "label": "quality-regression/finish-breakdown.json"
+        }
+      ]
+    },
+    {
+      "id": "recovered-quality",
+      "title": "恢复环境质量复核 / Recovered-runtime quality",
+      "scope": "同一200题、原评分器、out8192，新服务与空编译缓存，计量观察器关闭。保存全部SSE和截断，按固定分母评分；与既有B0及Microflow结果分别比较，不冒充同环境新增性能配对或统计非劣性结论。",
+      "tables": [
+        {
+          "headers": [
+            "运行与方案",
+            "请求成功 / 失败",
+            "固定评分器判对",
+            "自然结束数",
+            "达到输出上限数"
+          ],
+          "rows": [
+            [
+              "既有环境 Native B0",
+              "200 / 0",
+              "147/200",
+              "181",
+              "19"
+            ],
+            [
+              "既有环境 vLLM-HUST B1",
+              "200 / 0",
+              "149/200",
+              "175",
+              "25"
+            ],
+            [
+              "恢复环境 vLLM-HUST B1",
+              "200 / 0",
+              "146/200",
+              "178",
+              "22"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "5.8 恢复环境完整回答质量复核",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/quality-regression/recovered-20261021",
+          "kind": "tree",
+          "label": "quality-regression/recovered-20261021"
+        }
+      ]
+    },
+    {
+      "id": "native-paired-quality",
+      "title": "恢复环境配对质量 / Recovered native-paired quality",
+      "scope": "同一恢复基础运行栈、200题、原评分器、out8192，独立服务和空缓存。Native恢复五个原生源码模块，禁用候选插件；两臂请求与分词逐题一致。完整分母包含截断，逐题差异见中文报告，不宣称全集质量或统计非劣性，不替换正式吞吐。",
+      "tables": [
+        {
+          "headers": [
+            "方案",
+            "请求成功 / 失败",
+            "固定评分器判对",
+            "自然结束数",
+            "达到输出上限数"
+          ],
+          "rows": [
+            [
+              "恢复环境 Native B0",
+              "200 / 0",
+              "147/200",
+              "181",
+              "19"
+            ],
+            [
+              "恢复环境 vLLM-HUST B1",
+              "200 / 0",
+              "146/200",
+              "178",
+              "22"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "5.9 恢复环境 Native 与优化方案配对质量",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/quality-regression/native-recovered-20261021",
+          "kind": "tree",
+          "label": "quality-regression/native-recovered-20261021"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/quality-regression/recovered-20261021",
+          "kind": "tree",
+          "label": "quality-regression/recovered-20261021"
+        }
+      ]
+    },
+    {
+      "id": "long-context",
+      "title": "长上下文 / Long context",
+      "scope": "四组共160条探针，其中72条实际输入≥16K均回答正确；长度32,781、131,085、261,901 token，每条仅输出7 token。探针没有完整流式时序，不能推导TTFT/TPOT分位数。",
+      "tables": [
+        {
+          "headers": [
+            "记录组",
+            "全部探针数",
+            "实际输入≥16K数",
+            "长输入正确数",
+            "长输入输出总数"
+          ],
+          "rows": [
+            [
+              "10月15日Native",
+              "40",
+              "18",
+              "18",
+              "126 token"
+            ],
+            [
+              "10月15日lazy-reduction",
+              "40",
+              "18",
+              "18",
+              "126 token"
+            ],
+            [
+              "10月18日Native",
+              "40",
+              "18",
+              "18",
+              "126 token"
+            ],
+            [
+              "10月18日candidate",
+              "40",
+              "18",
+              "18",
+              "126 token"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "7.1 既有配置长上下文探针",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/long-context-originals.tar.gz",
+          "kind": "blob",
+          "label": "long-context-originals.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/long-context-originals.json",
+          "kind": "blob",
+          "label": "long-context-originals.json"
+        }
+      ]
+    },
+    {
+      "id": "current-b1-long-context",
+      "title": "当前B1长输入检索 / Current B1 long-input retrieval",
+      "scope": "保持E24/R36、KV materialization与Microflow配置，独立空缓存和逐请求隔离。6题完成、零传输失败，实际输入16,457与32,843 token。正文严格匹配0/6；唯一思考结束标记之后的答案段补充解析6/6，不替换原始判分，不计入数据集准确率或性能排名。",
+      "tables": [
+        {
+          "headers": [
+            "题目",
+            "实际输入，token",
+            "正文严格匹配",
+            "最终答案段匹配（补充）",
+            "输出，token",
+            "结束原因"
+          ],
+          "rows": [
+            [
+              "m05-16384-0.1-r1",
+              "16,457",
+              "未通过",
+              "正确",
+              "346",
+              "stop"
+            ],
+            [
+              "m05-16384-0.5-r1",
+              "16,457",
+              "未通过",
+              "正确",
+              "486",
+              "stop"
+            ],
+            [
+              "m05-16384-0.9-r1",
+              "16,457",
+              "未通过",
+              "正确",
+              "465",
+              "stop"
+            ],
+            [
+              "m05-32768-0.1-r1",
+              "32,843",
+              "未通过",
+              "正确",
+              "379",
+              "stop"
+            ],
+            [
+              "m05-32768-0.5-r1",
+              "32,843",
+              "未通过",
+              "正确",
+              "374",
+              "stop"
+            ],
+            [
+              "m05-32768-0.9-r1",
+              "32,843",
+              "未通过",
+              "正确",
+              "418",
+              "stop"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "7.2 当前B1恢复环境长输入检索",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/long-context-current-b1-20261021",
+          "kind": "tree",
+          "label": "long-context-current-b1-20261021"
+        }
+      ]
+    },
+    {
+      "id": "long-diagnostic",
+      "title": "长输入连续运行诊断 / Sustained long-input diagnostic",
+      "scope": "实际16,384 token、C8、300秒测量，固定输入温缓存工况，无语义评分。此处B1是异运行栈的诊断候选，不是中期MMLU-Pro最优B1；吞吐下降27.5086%，窗口资源成本增加37.9474%。资格预热及排空另计，不能将此组和数据集配对拼接为同一结论。",
+      "tables": [
+        {
+          "headers": [
+            "指标",
+            "B0",
+            "B1"
+          ],
+          "rows": [
+            [
+              "300秒窗口输出token",
+              "79,437",
+              "57,585"
+            ],
+            [
+              "输出吞吐token/秒",
+              "264.79",
+              "191.95"
+            ],
+            [
+              "TTFT均值 / P95 / P99，秒",
+              "1.3225 / 2.0287 / 2.3432",
+              "2.6423 / 7.1641 / 8.1612"
+            ],
+            [
+              "TPOT均值 / P95 / P99，毫秒/token",
+              "25.0834 / 28.6647 / 28.7725",
+              "31.0389 / 36.9470 / 37.1992"
+            ],
+            [
+              "请求数 / 传输失败",
+              "312 / 0",
+              "230 / 0"
+            ],
+            [
+              "窗口完成 / 排空完成",
+              "304 / 8",
+              "222 / 8"
+            ],
+            [
+              "排空token / 秒",
+              "435 / 1.1312",
+              "1,295 / 7.3369"
+            ],
+            [
+              "卡4 / 卡5平均AI Core忙碌率",
+              "57.83% / 56.99%",
+              "87.60% / 87.95%"
+            ],
+            [
+              "窗口资源系数，卡秒/token",
+              "0.0075531553",
+              "0.0104193800"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "10.2 异配置候选诊断（不参与原方案验收）",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019",
+          "kind": "tree",
+          "label": "B0 + B1 原始归档 / original archives"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/synthetic-b0-evidence.tar.gz",
+          "kind": "blob",
+          "label": "synthetic-b0-evidence.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/synthetic-b1-evidence.tar.gz",
+          "kind": "blob",
+          "label": "synthetic-b1-evidence.tar.gz"
+        }
+      ]
+    },
+    {
+      "id": "resources",
+      "title": "资源成本与尾时延 / Resource cost and tail latency",
+      "scope": "此表为原始E16/R36配对，不是当前Microflow最优配置。主成本包含4张预约卡，另列2卡服务口径；请求区间成本下降14.63%，完整生命周期成本增加2.68%，P99 TPOT增加57.07%。没有人民币计费依据。",
+      "tables": [
+        {
+          "headers": [
+            "指标",
+            "B0",
+            "vLLM-HUST B1候选"
+          ],
+          "rows": [
+            [
+              "请求数 / 失败",
+              "200 / 0",
+              "200 / 0"
+            ],
+            [
+              "实际输入 / 输出token",
+              "282,265 / 51,200",
+              "282,265 / 51,200"
+            ],
+            [
+              "测量时长，秒",
+              "113.201",
+              "96.639"
+            ],
+            [
+              "输出吞吐，token/秒",
+              "452.29",
+              "529.81"
+            ],
+            [
+              "TTFT，秒，均值",
+              "57.983",
+              "49.365"
+            ],
+            [
+              "TTFT，秒，P95",
+              "100.817",
+              "85.177"
+            ],
+            [
+              "TTFT，秒，P99",
+              "108.103",
+              "89.070"
+            ],
+            [
+              "TPOT，毫秒/token，均值",
+              "28.187",
+              "24.055"
+            ],
+            [
+              "TPOT，毫秒/token，P95",
+              "30.039",
+              "30.359"
+            ],
+            [
+              "TPOT，毫秒/token，P99",
+              "30.148",
+              "47.353"
+            ],
+            [
+              "请求区间4卡预约，卡秒/token",
+              "0.008844",
+              "0.007550"
+            ],
+            [
+              "请求区间2卡服务，卡秒/token",
+              "0.004422",
+              "0.003775"
+            ],
+            [
+              "完整生命周期4卡预约，卡秒/token",
+              "0.037791",
+              "0.038804"
+            ],
+            [
+              "卡4 / 卡5平均AI Core忙碌率",
+              "56.08% / 56.77%",
+              "58.74% / 58.33%"
+            ]
+          ]
+        },
+        {
+          "headers": [
+            "指标",
+            "配对变化",
+            "内部阈值",
+            "本工况判定"
+          ],
+          "rows": [
+            [
+              "M02 输出吞吐提升",
+              "17.14%",
+              "≥10%",
+              "达到"
+            ],
+            [
+              "M03 平均TTFT下降",
+              "14.86%",
+              "≥5%",
+              "达到"
+            ],
+            [
+              "M04 平均TPOT下降",
+              "14.66%",
+              "≥5%",
+              "达到"
+            ],
+            [
+              "M06 请求区间资源成本下降",
+              "14.63%",
+              "≥10%",
+              "达到"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "5.2 MMLU-Pro同机配对补测",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019",
+          "kind": "tree",
+          "label": "B0 + B1 原始归档 / original archives"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/aligned-mmlu-b0.tar.gz",
+          "kind": "blob",
+          "label": "aligned-mmlu-b0.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/aligned-mmlu-b1.tar.gz",
+          "kind": "blob",
+          "label": "aligned-mmlu-b1.tar.gz"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/aligned-mmlu-common.tar.gz",
+          "kind": "blob",
+          "label": "aligned-mmlu-common.tar.gz"
+        }
+      ]
+    },
+    {
+      "id": "m01",
+      "title": "M01 有效算力进展 / Effective compute progress",
+      "scope": "V0.57：恢复环境投影及词表通信参考已完成；M01本轮结论为证据受限、未通过验收，不等于实测低于50%。具体同窗口、运算量与匹配参考限制见独立判定表。保留既有原始计量与全部失败，不采纳原始证据不可用的r23结果，正式B0/B1性能不变。",
+      "tables": [
+        {
+          "headers": [
+            "区间",
+            "时长（秒）",
+            "HBM 积分估计（字节）",
+            "HCCS TX 下界／上界（字节）"
+          ],
+          "rows": [
+            [
+              "首请求至末响应",
+              "66.317792",
+              "65994144973250.8",
+              "411948778680 / 411948778680"
+            ],
+            [
+              "首请求至末前向事件外边界",
+              "66.356008",
+              "65994719962550.9",
+              "411948778680 / 412116997140"
+            ],
+            [
+              "首请求至全部导出同步",
+              "154.116200",
+              "66015228834111.016",
+              "412117161060 / 412117161060"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "r21 设备映射与同轮计量",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/r21-device-maps",
+          "kind": "tree",
+          "label": "m01-recovery/r21-device-maps"
+        }
+      ]
+    },
+    {
+      "id": "runtime-recovery",
+      "title": "运行时恢复与FIA验证 / Runtime recovery and FIA validation",
+      "scope": "33项锁定源码哈希一致；按CANN 9.1.0重建产物不同于原准入产物，未放宽原哈希准入规则。每轮新进程、新输出、独立可写缓存，不导入上一轮推理状态。双卡各18个用例；固定元数据图重放采用query倍率1、-1、2，每次输出填NaN并重算CPU参考，每卡36项变输入检查通过，保存数组独立复算。该组仅覆盖采样输出和固定元数据图重放，不覆盖动态长度、块表更新、双缓冲生命周期，不能据此排除完整模型跨轮状态污染。完整模型恢复计量见下方独立记录。",
+      "tables": [
+        {
+          "headers": [
+            "验证方式",
+            "每卡用例/变体",
+            "每卡比较元素数",
+            "rank 0 最大绝对误差",
+            "rank 1 最大绝对误差",
+            "结论"
+          ],
+          "rows": [
+            [
+              "eager 采样输出",
+              "18 / 18",
+              "110592",
+              "0.0006552785634994507",
+              "0.0006721019744873047",
+              "通过"
+            ],
+            [
+              "固定元数据图重放",
+              "18 / 54",
+              "331776",
+              "0.005695343017578125",
+              "0.004934072494506836",
+              "通过"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "运行时恢复与 FIA 数值资格验证",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/runtime-recovery",
+          "kind": "tree",
+          "label": "m01-recovery/runtime-recovery"
+        }
+      ]
+    },
+    {
+      "id": "state-commit",
+      "title": "状态提交隔离验证 / Isolated state-commit validation",
+      "scope": "锁定state_commit.publish源码；r1/r2导入失败原样保留。r3使用独立虚拟环境、禁用系统site-packages，两卡各24个用例（6空、18非空）及同卡跨流事件检查通过；保存数组独立CPU重算完全相等，变输入产生不同accepted输出。三次尝试均新进程、新输出目录、全新编译缓存，不导入前次缓存或推理状态，四卡释放。恢复候选未证明等同原运行时；仅证明合成用例下eager状态提交和同卡跨流行为，不证明完整模型质量、图执行、跨卡时钟对齐或全模型执行流闭合，不能排除完整模型跨轮状态污染。M01仍未判定，B0/B1数值不变。",
+      "tables": [
+        {
+          "headers": [
+            "尝试",
+            "环境隔离方式",
+            "结果",
+            "资源释放"
+          ],
+          "rows": [
+            [
+              "r1",
+              "原归档依赖目录",
+              "Gluon 模块导入失败，未完成数值验证",
+              "四卡空闲"
+            ],
+            [
+              "r2",
+              "排除归档目录中的冲突 Triton 条目",
+              "同一导入失败；系统 Python 仍含旧版元数据",
+              "四卡空闲"
+            ],
+            [
+              "r3",
+              "独立虚拟环境，禁用系统 site-packages，排除冲突条目",
+              "两卡各 24 个用例及同卡跨流事件检查通过",
+              "子进程及清理退出 0，四卡空闲"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "状态提交内核恢复验证",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/state-commit-recovery",
+          "kind": "tree",
+          "label": "m01-recovery/state-commit-recovery"
+        }
+      ]
+    },
+    {
+      "id": "model-runtime",
+      "title": "恢复环境同工况计量 / Recovered same-workload measurements",
+      "scope": "两轮均为同一MMLU-Pro 200请求、out256、新服务及空编译缓存；双卡FULL图捕获及Microflow分区检查通过。360秒采样完整覆盖请求、末次前向事件和全部导出同步三个区间。表内吞吐包含计量插桩开销，不替换正式B1；十类基础运算小计不是完整有效F，M01仍未判定。完整原始记录、逐文件SHA256和Release定位随证据入库。",
+      "tables": [
+        {
+          "headers": [
+            "硬件采样时长（秒）",
+            "成功 / 失败请求",
+            "输出 token",
+            "请求时长（秒）",
+            "诊断吞吐（token/秒）",
+            "全导出同步区间 HBM 最小覆盖率"
+          ],
+          "rows": [
+            [
+              "240",
+              "200 / 0",
+              "51200",
+              "123.327480",
+              "415.154838",
+              "87.272899%"
+            ],
+            [
+              "360",
+              "200 / 0",
+              "51200",
+              "123.700756",
+              "413.902079",
+              "100.000000%"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "恢复环境同工况计量",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/model-runtime-20261021",
+          "kind": "tree",
+          "label": "m01-recovery/model-runtime-20261021"
+        }
+      ]
+    },
+    {
+      "id": "preprocess-publication",
+      "title": "GDN 发布与预处理图验证 / GDN publication and preprocessing graphs",
+      "scope": "两卡、两个元数据bank、80/1024/2048/4096容量，64次变元数据图重放及560项独立CPU数值复算通过。前两次探针准入失败保留；成功轮新进程、空编译缓存，四卡释放。仅验证实际MTPFrame发布和preprocess局部路径，未覆盖完整模型并发批次、全执行流依赖或历史设备映射恢复。两轮out256性能记录缺少结束原因与原始生成token，不能据此判完整质量。完整有效F和M01仍未判定，正式B0/B1不变。",
+      "tables": [
+        {
+          "headers": [
+            "指标",
+            "结果"
+          ],
+          "rows": [
+            [
+              "通过的图重放用例",
+              "64"
+            ],
+            [
+              "独立复算数值张量检查",
+              "560"
+            ],
+            [
+              "q 最大绝对误差",
+              "0.001953125"
+            ],
+            [
+              "k 最大绝对误差",
+              "0.001953125"
+            ],
+            [
+              "v 最大绝对误差",
+              "0"
+            ],
+            [
+              "g 最大绝对误差",
+              "3.81469726562e-06"
+            ],
+            [
+              "beta 最大绝对误差",
+              "0"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "GDN 元数据发布与预处理图重放验证",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/preprocess-publication-20261021",
+          "kind": "tree",
+          "label": "m01-recovery/preprocess-publication-20261021"
+        }
+      ]
+    },
+    {
+      "id": "projection-references",
+      "title": "投影算子参考标定 / Projection reference calibration",
+      "scope": "恢复环境两卡覆盖121种密集形状、36,708个实际专家分布及45种词表形状；按r7调用次数加权，保留全部重复与两卡差异。每组新进程、空编译缓存，四卡释放。独立热重放组件参考不等于整模型关键路径；图填充运算不冒充有效F，M01仍未判定，正式B0/B1不变。",
+      "tables": [
+        {
+          "headers": [
+            "组件",
+            "Rank",
+            "形状或分布数",
+            "r7 调用次数",
+            "重复组数",
+            "加权组件参考时间（ms）"
+          ],
+          "rows": [
+            [
+              "密集投影",
+              "0",
+              "121",
+              "250096",
+              "5",
+              "5124.888"
+            ],
+            [
+              "专家投影 w13",
+              "0",
+              "36708",
+              "36708",
+              "3",
+              "9632.865"
+            ],
+            [
+              "专家投影 w2",
+              "0",
+              "36708",
+              "36708",
+              "3",
+              "6372.136"
+            ],
+            [
+              "目标模型词表投影",
+              "0",
+              "45（两角色合计）",
+              "874",
+              "3",
+              "403.979"
+            ],
+            [
+              "草稿模型词表投影",
+              "0",
+              "45（两角色合计）",
+              "1748",
+              "3",
+              "692.277"
+            ],
+            [
+              "密集投影",
+              "1",
+              "121",
+              "250096",
+              "5",
+              "5129.907"
+            ],
+            [
+              "专家投影 w13",
+              "1",
+              "36708",
+              "36708",
+              "3",
+              "9582.209"
+            ],
+            [
+              "专家投影 w2",
+              "1",
+              "36708",
+              "36708",
+              "3",
+              "5389.571"
+            ],
+            [
+              "目标模型词表投影",
+              "1",
+              "45（两角色合计）",
+              "874",
+              "3",
+              "402.689"
+            ],
+            [
+              "草稿模型词表投影",
+              "1",
+              "45（两角色合计）",
+              "1748",
+              "3",
+              "691.711"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "恢复环境投影算子参考标定",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/projection-references-20261021",
+          "kind": "tree",
+          "label": "m01-recovery/projection-references-20261021"
+        }
+      ]
+    },
+    {
+      "id": "logits-collective-reference",
+      "title": "词表通信参考 / Logits collective reference",
+      "scope": "76种TP2载荷，每种3组、每组512次；数值、边界与对端计数器校验通过，无重置，四卡释放。保留flit原单位与全部重复，不叠加收发流量。仅为源码推导的词表相关通信参考，不是整模型HCCL覆盖或M01通过结论。",
+      "tables": [
+        {
+          "headers": [
+            "数据类型",
+            "形状数",
+            "单卡输入载荷范围（bytes/调用）",
+            "每形状重复组数",
+            "每组调用数"
+          ],
+          "rows": [
+            [
+              "BF16",
+              "55",
+              "2–17,879,040",
+              "3",
+              "512"
+            ],
+            [
+              "INT64",
+              "21",
+              "8–192",
+              "3",
+              "512"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "恢复环境词表通信参考标定",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/logits-collective-reference-20261021",
+          "kind": "tree",
+          "label": "m01-recovery/logits-collective-reference-20261021"
+        }
+      ]
+    },
+    {
+      "id": "m01-verdict",
+      "title": "M01 本轮判定 / M01 acceptance verdict",
+      "scope": "证据受限，未通过本轮验收；不是实测有效算力低于50%。F及达成率保持未赋值，缺口限定为同窗口覆盖、运算量口径及匹配参考，不影响按各自边界保留的正式B0/B1结果。",
+      "tables": [
+        {
+          "headers": [
+            "验收条件",
+            "已有结果",
+            "判定限制"
+          ],
+          "rows": [
+            [
+              "同窗口 F/B/V/T",
+              "r7 请求区间为 123.698 秒；两卡各 874 个目标前向及 874 个合并草稿前向归入该区间，硬件采样覆盖完整区间",
+              "现有事件只确认所记录执行流，未证明所有模型与通信流的边界闭合；物理流量包含观察器开销。导出同步区间不替代请求区间"
+            ],
+            [
+              "运算量覆盖",
+              "十类源码语义基础运算小计为 1,900,062,403,790,943；TP 分片与复制类别分别处理，特殊函数等另列",
+              "账本仍是已覆盖类别小计；有效行语义与含图填充的物理执行形状不能混作同一个 F/P 口径，未记录的调用不能按零处理"
+            ],
+            [
+              "匹配参考",
+              "恢复环境的密集、专家、词表投影及 76 种 logits 通信参考已完成，保留重复、离散度和两卡差异",
+              "当前组合尚未证明所有算子、状态访问、HBM 与整模型通信载荷均有匹配参考；组件参考不能直接相加为整模型关键路径"
+            ]
+          ]
+        }
+      ],
+      "source_heading": "M01 本轮验收判定",
+      "evidence": [
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/model-runtime-20261021",
+          "kind": "tree",
+          "label": "m01-recovery/model-runtime-20261021"
+        },
+        {
+          "path": "reports/vllm-hust-midterm-20261019/m01-recovery/logits-collective-reference-20261021",
+          "kind": "tree",
+          "label": "m01-recovery/logits-collective-reference-20261021"
+        }
+      ]
+    }
+  ],
+  "kv_audit": {
+    "status": "historical-controls-verified-not-a-bug-exclusion",
+    "scope": "仅核对E16/E24逐请求重算归档；每轮独立服务、运行前四卡无进程、请求盐唯一且跨两轮不重复、已记录前缀命中率均0%。这些证据不支持常规前缀缓存跨轮命中的解释，但不能排除Mamba/GDN状态残留或底层错误。未进行新的设备复测，未将隔离性或收益因果归因判为通过。Microflow与其他配置不自动继承本审计结论。",
+    "runs": [
+      {
+        "run_id": "mmlu-b1-kvmat-e16-r36-screen-r2",
+        "requests": 200,
+        "unique_salts": 200,
+        "prefix_hit_samples": 9,
+        "max_logged_prefix_hit_percent": 0.0,
+        "service_pid": 3059011,
+        "devices_released": true,
+        "archive_sha256": "90650cc6f57472278d2109a0969dbcdc211661e6ecc57649bd2d25616d5459c4"
+      },
+      {
+        "run_id": "mmlu-b1-kvmat-e24-r36-screen-r1",
+        "requests": 200,
+        "unique_salts": 200,
+        "prefix_hit_samples": 7,
+        "max_logged_prefix_hit_percent": 0.0,
+        "service_pid": 3100392,
+        "devices_released": true,
+        "archive_sha256": "a9e543498abff28f9659b3220d24177c6677b04395d0cf86cc8acbce62a43f67"
+      }
+    ]
+  }
+}
