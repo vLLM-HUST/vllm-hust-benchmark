@@ -8,7 +8,7 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "6620b877502734a45120ba420009d2afc0c020f8"  # pragma: allowlist secret
+REVISION = "d9dec3613c7714bd2962cda818de06f298bf2cad"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
 OUTPUT = ROOT / "website-publication/data/midterm-v055.json"
