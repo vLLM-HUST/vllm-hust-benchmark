@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "36a37b7fbea9ed52aa7f20e1b132136f866dc4e8"  # pragma: allowlist secret
+REVISION = "6620b877502734a45120ba420009d2afc0c020f8"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v054.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v055.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
@@ -44,6 +44,7 @@ EVIDENCE = {
     "state-commit": ["m01-recovery/state-commit-recovery"],
     "model-runtime": ["m01-recovery/model-runtime-20261021"],
     "preprocess-publication": ["m01-recovery/preprocess-publication-20261021"],
+    "projection-references": ["m01-recovery/projection-references-20261021"],
 }
 
 
@@ -158,7 +159,7 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.54" in text
+    assert "报告版本：V0.55" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
@@ -195,7 +196,7 @@ def build():
             "m01",
             "M01 有效算力进展 / Effective compute progress",
             "#### r21 设备映射与同轮计量",
-            "V0.54：恢复环境两轮完整模型计量各完成200请求，360秒硬件采样覆盖三个命名区间（见下）；保留r21设备映射与同轮计量。r23原始请求、设备事件、退出回执及profiler数据库不可用，不采纳其吞吐或M01计量。完整跨流依赖、算术覆盖和匹配参考容量尚未闭合；完整有效F和M01≥50%达成率未判定，中期整体验收待定。正式B0/B1性能结果不变。",
+            "V0.55：恢复环境两轮完整模型计量各完成200请求，360秒硬件采样覆盖三个命名区间（见下）；新增密集、专家及词表投影参考标定。保留r21设备映射与同轮计量。r23原始请求、设备事件、退出回执及profiler数据库不可用，不采纳其吞吐或M01计量。完整跨流依赖、算术覆盖和匹配参考容量尚未闭合；完整有效F和M01≥50%达成率未判定，中期整体验收待定。正式B0/B1性能结果不变。",
         ),
         (
             "runtime-recovery",
@@ -225,6 +226,14 @@ def build():
         )
     )
     sections = []
+    specs.append(
+        (
+            "projection-references",
+            "投影算子参考标定 / Projection reference calibration",
+            "#### 恢复环境投影算子参考标定",
+            "恢复环境两卡覆盖121种密集形状、36,708个实际专家分布及45种词表形状；按r7调用次数加权，保留全部重复与两卡差异。每组新进程、空编译缓存，四卡释放。独立热重放组件参考不等于整模型关键路径；图填充运算不冒充有效F，M01仍未判定，正式B0/B1不变。",
+        )
+    )
     for ident, title, heading, note in specs:
         selected = tables(section(text, heading))
         assert selected, heading
@@ -240,7 +249,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.54",
+        "version": "V0.55",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,

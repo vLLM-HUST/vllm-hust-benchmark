@@ -31,6 +31,9 @@ python verify_aligned_pair.py "$work/20261019-midterm-aligned" mmlu-b0-r2 mmlu-b
 10月21日的[恢复环境同工况计量](m01-recovery/model-runtime-20261021/archive.json)包含两轮MMLU-Pro完整模型运行，每轮200请求全部成功。第二轮360秒硬件采样覆盖请求、末次前向事件及全部导出同步三个区间。原始硬件数据库、请求记录和源码保存在benchmark
 Release，逐文件校验清单与便携复核包入库。插桩吞吐不替换第五章性能数据；完整有效F、跨流依赖及匹配参考容量尚未闭合，M01仍未判定。
 
+新增的[投影算子参考标定](m01-recovery/projection-references-20261021/archive.json)覆盖恢复环境两卡的 121 种密集投影形状、36,708
+个专家分组分布和 45 种词表投影形状。各卡原始重复计时、数值检查、 设备状态及退出记录均保留；原始大文件由索引定位至 Release。组件参考不等于完整有效算力达成率。
+
 新增的[GDN 元数据发布与预处理图重放验证](m01-recovery/preprocess-publication-20261021/archive.json)覆盖两卡、两个元数据
 bank、四档图容量及变更元数据重放，保存原始张量和独立 CPU 复算证据。该项为局部链路验证，不等于完整模型并发执行流闭合或 M01 验收通过；具体配置、误差和限制见主报告。
 
