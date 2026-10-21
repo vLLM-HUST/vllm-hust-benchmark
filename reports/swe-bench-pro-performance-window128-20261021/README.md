@@ -95,3 +95,7 @@ tokens/调用；24.7%的输出总量优势同时包含11.6%的完成调用增加
 
 图表：[完成量 SVG](figures/comparison/completed-work-comparison.svg) ·
 [机制 SVG](figures/comparison/engine-and-context-comparison.svg)；完整派生数据：[comparison-data.json](figures/comparison/comparison-data.json)、[diagnosis.json](diagnosis.json)。
+
+## Controller内部行为审计
+
+[内部行为、指标缺口和约2倍预期差距](controller-internals-analysis.md)：新增实际ACTIVE/PAUSED、容量账本、future/shared和动作图，保留未解释的因果边界。
