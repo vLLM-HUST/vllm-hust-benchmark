@@ -17,7 +17,7 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.52"
+    assert actual["version"] == "V0.53"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
     historical = json.loads(
@@ -42,6 +42,11 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert "通过" in state["tables"][0]["rows"][2][2]
     assert "不能排除完整模型跨轮状态污染" in state["scope"]
     assert "不采纳其吞吐或M01计量" in sections["m01"]["scope"]
+    recovered = sections["model-runtime"]
+    assert [row[0] for row in recovered["tables"][0]["rows"]] == ["240", "360"]
+    assert all(row[1] == "200 / 0" for row in recovered["tables"][0]["rows"])
+    assert recovered["tables"][0]["rows"][1][-1] == "100.000000%"
+    assert "运行时恢复未完成" not in sections["runtime-recovery"]["scope"]
     assert actual["kv_audit"]["runs"] == module.kv_audit()
     assert module.tables("| A | B |\n| --- | ---: |\n| 1 | 2 |\n") == [
         {"headers": ["A", "B"], "rows": [["1", "2"]]}
