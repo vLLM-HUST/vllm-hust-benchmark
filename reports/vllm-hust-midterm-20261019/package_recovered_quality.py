@@ -15,7 +15,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--run", default=RUN)
+    parser.add_argument("--destination", type=Path)
     args = parser.parse_args()
+    run = args.run
     manifest = json.loads(args.manifest.read_text())
     raw = args.raw.read_bytes()
     assert hashlib.sha256(raw).hexdigest() == manifest["sha256"]
@@ -28,12 +31,12 @@ def main():
             content = archive.extractfile(name).read()
             assert hashlib.sha256(content).hexdigest() == expected["sha256"]
             assert len(content) == expected["bytes"]
-        receipt = json.load(archive.extractfile(f"{RUN}/receipt.json"))
-        result = json.load(archive.extractfile(f"{RUN}/mmlu-pro.json"))
+        receipt = json.load(archive.extractfile(f"{run}/receipt.json"))
+        result = json.load(archive.extractfile(f"{run}/mmlu-pro.json"))
     assert receipt["status"] == "measured" and receipt["all_devices_released"]
     assert receipt["bench_exit_code"] == 0
     assert result["completed"] == result["total"] == 200 and result["failed"] == 0
-    destination = ROOT / "quality-regression/recovered-20261021"
+    destination = args.destination or ROOT / "quality-regression/recovered-20261021"
     destination.mkdir(exist_ok=False)
     parts = []
     for index, offset in enumerate(range(0, len(raw), 900000)):
@@ -55,7 +58,7 @@ def main():
         "members": manifest["members"],
         "raw_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/"
         "m01-recovery-20261021-r7/" + args.raw.name,
-        "run_id": RUN,
+        "run_id": run,
         "scope": "Same 200 MMLU-Pro questions and frozen scorer in recovered runtime; not a new throughput result or statistical noninferiority claim.",
         "result": {
             k: result[k]
