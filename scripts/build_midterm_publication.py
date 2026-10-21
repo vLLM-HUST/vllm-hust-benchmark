@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "d9dec3613c7714bd2962cda818de06f298bf2cad"  # pragma: allowlist secret
+REVISION = "0b8a85f85deb8ff925a842be20c9f221cb221f4b"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v055.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v056.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
@@ -27,6 +27,7 @@ EVIDENCE = {
         "vspec-school028",
     ],
     "quality": ["quality-regression/raw", "quality-regression/finish-breakdown.json"],
+    "recovered-quality": ["quality-regression/recovered-20261021"],
     "long-context": ["long-context-originals.tar.gz", "long-context-originals.json"],
     "long-diagnostic": [
         ".",
@@ -45,6 +46,13 @@ EVIDENCE = {
     "model-runtime": ["m01-recovery/model-runtime-20261021"],
     "preprocess-publication": ["m01-recovery/preprocess-publication-20261021"],
     "projection-references": ["m01-recovery/projection-references-20261021"],
+    "logits-collective-reference": [
+        "m01-recovery/logits-collective-reference-20261021"
+    ],
+    "m01-verdict": [
+        "m01-recovery/model-runtime-20261021",
+        "m01-recovery/logits-collective-reference-20261021",
+    ],
 }
 
 
@@ -159,7 +167,7 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.55" in text
+    assert "报告版本：V0.56" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
@@ -173,6 +181,12 @@ def build():
             "质量回归 / Quality regression",
             "### 5.7 MMLU-Pro性能输入的任务质量回归",
             "同一200题，输出上限8192；固定评分器、完整分母。达到输出上限仍可被提取器判对，不等于自然完成；不是全集评分或统计非劣性结论。",
+        ),
+        (
+            "recovered-quality",
+            "恢复环境质量复核 / Recovered-runtime quality",
+            "### 5.8 恢复环境完整回答质量复核",
+            "同一200题、原评分器、out8192，新服务与空编译缓存，计量观察器关闭。保存全部SSE和截断，按固定分母评分；与既有B0及Microflow结果分别比较，不冒充同环境新增性能配对或统计非劣性结论。",
         ),
         (
             "long-context",
@@ -196,7 +210,7 @@ def build():
             "m01",
             "M01 有效算力进展 / Effective compute progress",
             "#### r21 设备映射与同轮计量",
-            "V0.55：恢复环境两轮完整模型计量各完成200请求，360秒硬件采样覆盖三个命名区间（见下）；新增密集、专家及词表投影参考标定。保留r21设备映射与同轮计量。r23原始请求、设备事件、退出回执及profiler数据库不可用，不采纳其吞吐或M01计量。完整跨流依赖、算术覆盖和匹配参考容量尚未闭合；完整有效F和M01≥50%达成率未判定，中期整体验收待定。正式B0/B1性能结果不变。",
+            "V0.56：恢复环境投影及词表通信参考已完成；M01本轮结论为证据受限、未通过验收，不等于实测低于50%。具体同窗口、运算量与匹配参考限制见独立判定表。保留既有原始计量与全部失败，不采纳原始证据不可用的r23结果，正式B0/B1性能不变。",
         ),
         (
             "runtime-recovery",
@@ -234,6 +248,22 @@ def build():
             "恢复环境两卡覆盖121种密集形状、36,708个实际专家分布及45种词表形状；按r7调用次数加权，保留全部重复与两卡差异。每组新进程、空编译缓存，四卡释放。独立热重放组件参考不等于整模型关键路径；图填充运算不冒充有效F，M01仍未判定，正式B0/B1不变。",
         )
     )
+    specs.extend(
+        [
+            (
+                "logits-collective-reference",
+                "词表通信参考 / Logits collective reference",
+                "#### 恢复环境词表通信参考标定",
+                "76种TP2载荷，每种3组、每组512次；数值、边界与对端计数器校验通过，无重置，四卡释放。保留flit原单位与全部重复，不叠加收发流量。仅为源码推导的词表相关通信参考，不是整模型HCCL覆盖或M01通过结论。",
+            ),
+            (
+                "m01-verdict",
+                "M01 本轮判定 / M01 acceptance verdict",
+                "#### M01 本轮验收判定",
+                "证据受限，未通过本轮验收；不是实测有效算力低于50%。F及达成率保持未赋值，缺口限定为同窗口覆盖、运算量口径及匹配参考，不影响按各自边界保留的正式B0/B1结果。",
+            ),
+        ]
+    )
     for ident, title, heading, note in specs:
         selected = tables(section(text, heading))
         assert selected, heading
@@ -249,7 +279,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.55",
+        "version": "V0.56",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
