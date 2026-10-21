@@ -18,9 +18,9 @@ def git(root, *args):
     return subprocess.check_output(["git", *args], cwd=root)
 
 
-def tree(root):
+def tree(root, revision):
     entries = {}
-    for entry in git(root, "ls-tree", "-rz", "HEAD").split(b"\0"):
+    for entry in git(root, "ls-tree", "-rz", revision).split(b"\0"):
         if not entry:
             continue
         metadata, path = entry.split(b"\t", 1)
@@ -30,12 +30,12 @@ def tree(root):
     return entries
 
 
-def inventory(website):
+def inventory(website, benchmark_revision="HEAD", website_revision="HEAD"):
     sources = collections.defaultdict(list)
-    for path, oid in tree(ROOT).items():
+    for path, oid in tree(ROOT, benchmark_revision).items():
         sources[oid].append(path)
     rows = []
-    for path, oid in tree(website).items():
+    for path, oid in tree(website, website_revision).items():
         if not path.startswith(PREFIXES):
             continue
         matches = sorted(sources.get(oid, []))
@@ -48,8 +48,12 @@ def inventory(website):
         })
     return {
         "schema": "website-source-consolidation-audit/v1",
-        "website_commit": git(website, "rev-parse", "HEAD").decode().strip(),
-        "benchmark_commit": git(ROOT, "rev-parse", "HEAD").decode().strip(),
+        "website_commit": git(
+            website, "rev-parse", f"{website_revision}^{{commit}}"
+        ).decode().strip(),
+        "benchmark_commit": git(
+            ROOT, "rev-parse", f"{benchmark_revision}^{{commit}}"
+        ).decode().strip(),
         "scope": list(PREFIXES),
         "counts": dict(collections.Counter(row["status"] for row in rows)),
         "limitations": [
@@ -83,8 +87,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--website", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--benchmark-revision",
+        default="HEAD",
+        help="Committed benchmark tree to inventory (set to the pre-import revision)",
+    )
+    parser.add_argument(
+        "--website-revision",
+        default="HEAD",
+        help="Committed website tree to inventory",
+    )
     args = parser.parse_args()
-    result = inventory(args.website.resolve())
+    result = inventory(
+        args.website.resolve(), args.benchmark_revision, args.website_revision
+    )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps(result["counts"]))

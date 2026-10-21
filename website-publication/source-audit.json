@@ -1,7 +1,7 @@
 {
   "schema": "website-source-consolidation-audit/v1",
-  "website_commit": "17bc4d5a0e89139961b120d6324f1348f3d45f85",
-  "benchmark_commit": "2e80fe1c195c426458f3460dbb74eff1a6c94071",
+  "website_commit": "8816b890c083e3cf61b13f6349968cbd60f21714",
+  "benchmark_commit": "8f7b417c067f8036041f01c847893c6917ad5351",
   "scope": [
     "data/",
     "docs/evidence/",
@@ -9,8 +9,8 @@
     "op01-evidence/"
   ],
   "counts": {
-    "needs-provenance-review": 441,
-    "existing-identical-source": 20
+    "needs-provenance-review": 440,
+    "existing-identical-source": 21
   },
   "limitations": [
     "Non-identical files may be generated projections, reformatted JSON, or archive members.",
@@ -234,10 +234,12 @@
     },
     {
       "website_path": "data/dataset_validation_qwen35_mmlu_school028_inf_out256.json",
-      "website_git_blob": "969ece05acf74d3bb6c1e0828f1ba5fb2bf85a3e",
-      "status": "needs-provenance-review",
-      "benchmark_paths": [],
-      "action": "trace-or-migrate-original"
+      "website_git_blob": "3514213489cd7fcea1e0a826e9f0701781aadd60",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_qwen35_mmlu_school028_inf_out256.json"
+      ],
+      "action": "reuse-existing-source"
     },
     {
       "website_path": "data/dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json",
@@ -250,7 +252,7 @@
     },
     {
       "website_path": "data/dataset_validation_qwen35_tp2_matrix.json",
-      "website_git_blob": "950215c9c736596f2e4aba9ecfb4fe366f0a3b3c",
+      "website_git_blob": "397470e11d8f381e403c1a309f44c57dc5cd2f94",
       "status": "existing-identical-source",
       "benchmark_paths": [
         "leaderboard-data/dataset-validation/dataset_validation_qwen35_tp2_matrix.json"

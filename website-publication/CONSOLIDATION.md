@@ -6,8 +6,8 @@
 统一由 vllm-hust-benchmark 接收、审核和版本管理。网站负责展示，不作为实验数据源。
 
 已有 benchmark 原文件必须复用，不因网站文件名或 JSON 排版不同而复制一套新权威数据。
-现有 `website-publication/data/` 是未提交的导入暂存材料，不是已经确认的权威源，不能直接
-整包发布。来源审计排除这些未提交材料，避免循环证明。
+`website-publication/data/` 的初始快照是网站公开字节的保全导入，不等于逐项来源验收。
+来源审计固定到导入前的 benchmark 提交，排除新导入副本，避免循环证明。
 
 ## 清理顺序
 
@@ -34,6 +34,6 @@
 
 ## 当前状态
 
-`source-audit.json` 是已提交对象的可复算清单。`needs-provenance-review` 表示需要继续追溯，
+`source-audit.json` 是固定在迁移前两仓库提交的可复算清单。`needs-provenance-review` 表示需要继续追溯，
 不是缺测判定。它也不代表裸机归档已核实或完整迁移已完成。
 远端合并、发布流程接入和必需检查配置尚未完成。
