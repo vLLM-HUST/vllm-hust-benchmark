@@ -28,7 +28,7 @@ def section(text, heading):
 
 def tables(text):
     found = []
-    for block in re.findall(r"(?m)(?:^\|.*\|\s*\n)+", text):
+    for block in re.findall(r"(?m)(?:^\|.*\|[ \t]*\n)+", text):
         rows = [
             [c.strip() for c in row.strip().strip("|").split("|")]
             for row in block.strip().splitlines()
