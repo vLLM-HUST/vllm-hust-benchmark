@@ -9,9 +9,9 @@ deferred，不记为官方 0 分，也不因此丢弃真实窗口性能数据。
 
 ## 相同时间窗口的实际完成量
 
-每格按 Native / Controller 排列。完整调用指客户端已收到正常模型回复；输出量来自回复实际 usage，与独立保存的 trajectory 逐项总数交叉核对。无缺失
-usage，无重复 query-return ID，无 JSONL 解析错误。窗口使用每臂最早实际到达的单调时钟对齐；父 batch-start 与其仅相差 2.276 / 1.331 毫秒，独立
-epoch 边界计算四个窗口的调用和输出数完全一致。
+每格按 Native / Controller 排列。完整调用指客户端已收到正常模型回复；输出量来自回复实际 usage，与另一路保存的 trajectory 逐项总数核对。无缺失 usage，无重复
+query-return ID，无 JSONL 解析错误。窗口使用每臂最早实际到达的单调时钟对齐；父 batch-start 与其仅相差 2.276 / 1.331 毫秒，独立 epoch
+边界计算四个窗口的调用和输出数完全一致。
 
 | 窗口秒 | 完成模型调用 | 返回输出 tokens | 返回输出 tokens/s |
 | ------ | ------------ | --------------- | ----------------- |
@@ -99,3 +99,7 @@ tokens/调用；24.7%的输出总量优势同时包含11.6%的完成调用增加
 ## Controller内部行为审计
 
 [内部行为、指标缺口和约2倍预期差距](controller-internals-analysis.md)：新增实际ACTIVE/PAUSED、容量估计、future/shared和动作图，保留未解释的因果边界。
+
+## 证据限制与逐请求核账
+
+[核账结论、未解释的27/28请求差异及metadata实际路径](verification/README.md)。客户端正常返回总量重算一致，但事件与trajectory是同一返回对象的两条保存路径，不能称独立外部计量；单对NC及跨层未核销计数不支持Controller因果加速25%的结论。保留历史观测数值，新增逐queryCSV供复核。
