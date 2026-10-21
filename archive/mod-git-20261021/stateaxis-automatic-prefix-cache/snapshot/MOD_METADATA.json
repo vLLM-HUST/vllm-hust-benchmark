@@ -1,0 +1,46 @@
+{
+  "schema_version": "vllm-hust-mod-metadata-v1",
+  "mod_id": "org.vllm-hust.stateaxis-automatic-prefix-cache",
+  "repository": "stateaxis-automatic-prefix-cache",
+  "display_name": "stateaxis-automatic-prefix-cache",
+  "canonical_repository": "https://github.com/vLLM-HUST/stateaxis-automatic-prefix-cache",
+  "responsibility": {
+    "organization": "vLLM-HUST",
+    "maintainers": [
+      {
+        "name": "Shuhao Zhang (Tony)",
+        "github": "ShuhaoZhangTony"
+      }
+    ],
+    "advisor_status": "none",
+    "advisors": []
+  },
+  "lifecycle": {
+    "status": "experimental",
+    "default_enabled": false,
+    "activation_contract": "Extension Manager/ECPA forwards the hash-bound two-entry lease-safe contract; StateAxis admits it only in explicit experiment mode.",
+    "rollback_contract": "Disable the extension or omit --additional-config; StateAxis then retains automatic prefix caching off and caller-owned state authority unchanged."
+  },
+  "scope": {
+    "mechanism": "lease_safe_content_addressed_prefix_cache",
+    "supported_workloads": [
+      "experimental StateAxis Native Engine runs with 128-token cache blocks and at least three worker state slots"
+    ],
+    "out_of_scope": [
+      "general performance claims",
+      "automatic inheritance from StateAxis aggregate evidence"
+    ]
+  },
+  "evidence": {
+    "qualification": "historical-matched-real-online-no-harm-scoped",
+    "latest_result": "evidence/ecpa-matched-process-20261010/SUMMARY.json",
+    "index": "EVIDENCE.md",
+    "performance_claims": [
+      {
+        "label": "historical-matched-real-online-no-harm-scoped",
+        "scope": "frozen StateAxis source evidence only",
+        "result": "The bounded closure was exact and lifecycle-clean with 0.0256% throughput overhead, but exercised zero cache hits; it does not qualify an online gain or the independent implementation."
+      }
+    ]
+  }
+}

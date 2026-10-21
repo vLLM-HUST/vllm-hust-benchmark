@@ -1,0 +1,53 @@
+{
+  "schema_version": "vllm-hust-mod-metadata-v1",
+  "mod_id": "org.vllm-hust.stateaxis-pipelined-weight-loading",
+  "repository": "stateaxis-pipelined-weight-loading",
+  "display_name": "stateaxis-pipelined-weight-loading",
+  "canonical_repository": "https://github.com/vLLM-HUST/stateaxis-pipelined-weight-loading",
+  "responsibility": {
+    "organization": "vLLM-HUST",
+    "maintainers": [
+      {
+        "name": "Shuhao Zhang (Tony)",
+        "github": "ShuhaoZhangTony"
+      }
+    ],
+    "advisor_status": "none",
+    "advisors": []
+  },
+  "lifecycle": {
+    "status": "experimental",
+    "default_enabled": false,
+    "activation_contract": "Extension Manager verifies RESEARCH_MANIFEST.json; StateAxis admits only an execution-artifact-v6-bound canonical pinned double-buffer plan and injects its validated absolute path into the worker.",
+    "rollback_contract": "Disable the extension; StateAxis strips the weight-load-plan environment from the worker and preserves the serial pageable synchronous loader."
+  },
+  "scope": {
+    "mechanism": "identity_verified_pipelined_weight_loading",
+    "supported_workloads": [
+      "Qwen2 artifact-bound cold and warm startup loading",
+      "validated two-slot 64 MiB pinned asynchronous H2D loading",
+      "Qwen3.5-35B-A3B BF16 TP2 pre-sharded startup carrier diagnostics"
+    ],
+    "out_of_scope": [
+      "general performance claims",
+      "automatic inheritance from StateAxis aggregate evidence"
+    ]
+  },
+  "evidence": {
+    "qualification": "matched-real-npu-qwen-cold-warm-scoped-positive",
+    "latest_result": "evidence/qwen35-loader-sharded-qualification-20261012/RESULT.json",
+    "index": "EVIDENCE.md",
+    "performance_claims": [
+      {
+        "label": "matched-real-npu-qwen-cold-warm-scoped-positive",
+        "scope": "Qwen2.5-14B matched 3+3 cold/warm cells; separate MiniMax-M2.5 EP8 loader 1+1",
+        "result": "Qwen process-to-Ready improved 84.340% cold and 88.796% warm with TPOT regression gates passed; EP8 loader process-time point estimate improved 54.748%."
+      },
+      {
+        "label": "matched-real-npu-carrier-diagnostic-not-mod-performance",
+        "scope": "Qwen3.5-35B-A3B BF16 TP2, 3+3 same-host/same-filesystem startup repetitions",
+        "result": "Median process-to-Ready improved 10.68% and median weight-iterator time improved 35.53%; ECPA activation and cache controls remain pending."
+      }
+    ]
+  }
+}

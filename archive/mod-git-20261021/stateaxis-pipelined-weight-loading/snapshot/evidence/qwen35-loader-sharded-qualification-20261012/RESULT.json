@@ -1,0 +1,132 @@
+{
+  "arms": {
+    "control": "vLLM serial safetensors over 14 source shards",
+    "order": [
+      "sharded-r1",
+      "control-r1",
+      "sharded-r2",
+      "control-r2",
+      "sharded-r3",
+      "control-r3"
+    ],
+    "repetitions_per_arm": 3,
+    "sharded": "vLLM TP sharded_state over 9 pre-sharded files per rank"
+  },
+  "correctness": {
+    "all_first_response_hashes_equal": true,
+    "request_failures": 0
+  },
+  "date_utc": "2026-10-12",
+  "decision": {
+    "reason": "Three matched same-host/same-filesystem repetitions preserve output identity and show a positive median startup reduction, but activation and cache-state controls are not yet formal.",
+    "status": "promising-carrier-needs-formal-ecpa-on-off"
+  },
+  "evidence_label": "matched-real-npu-carrier-diagnostic-not-mod-performance",
+  "formal_stateaxis_mod_on": false,
+  "identity": {
+    "model_config_sha256": "5e4d7f74fec2f360eb9cfbfcd6ec0c4c76e684d3a11caaed259d9fd9bfbc7944",
+    "model_index_sha256": "d8d0b7ca4e61ae107e3e87a3ff21136b3ac7c789e64bb24267227ca804e04205",
+    "response_content_sha256": "a4bf318f01f7b329d2d8ce12d19ff432d7527c077e3137c5f29f82e0be8b6deb",
+    "sharded_artifact_manifest_sha256": "170bed99a870c0e602016db824f36cf98668e0400d5c46d525d3d7e4222deddf",
+    "vllm_ascend_commit": "1cdb8c4db6e50f36f1fb3283b3e3dd618f6821e8",
+    "vllm_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665"
+  },
+  "limitations": [
+    "The first sharded run preceded the first matched overlay control run.",
+    "OS page-cache state was not reset or measured.",
+    "Runtime dirty state was not captured at each launch.",
+    "This carrier test did not activate the mod through ECPA/Manifest 0.3.",
+    "The result applies only to Qwen3.5-35B-A3B BF16 TP2 startup.",
+    "No steady-state AgentX throughput or latency claim is made."
+  ],
+  "metrics": {
+    "first_request": {
+      "control": {
+        "maximum_seconds": 4.299806909,
+        "mean_seconds": 4.180886285666666,
+        "median_seconds": 4.212577783,
+        "minimum_seconds": 4.030274165,
+        "values_seconds": [
+          4.030274165,
+          4.212577783,
+          4.299806909
+        ]
+      },
+      "median_reduction_percent": 2.107439923323552,
+      "sharded": {
+        "maximum_seconds": 4.169864921,
+        "mean_seconds": 4.1359993096666665,
+        "median_seconds": 4.123800237,
+        "minimum_seconds": 4.114332771,
+        "values_seconds": [
+          4.114332771,
+          4.169864921,
+          4.123800237
+        ]
+      }
+    },
+    "process_to_ready": {
+      "control": {
+        "maximum_seconds": 420.618379241,
+        "mean_seconds": 363.1412876676667,
+        "median_seconds": 337.703302286,
+        "minimum_seconds": 331.102181476,
+        "values_seconds": [
+          420.618379241,
+          337.703302286,
+          331.102181476
+        ]
+      },
+      "median_reduction_percent": 10.683772633186866,
+      "sharded": {
+        "maximum_seconds": 302.726050269,
+        "mean_seconds": 291.7009414423333,
+        "median_seconds": 301.623849295,
+        "minimum_seconds": 270.752924763,
+        "values_seconds": [
+          301.623849295,
+          270.752924763,
+          302.726050269
+        ]
+      }
+    },
+    "weight_iterator": {
+      "control": {
+        "maximum_seconds": 224.8,
+        "mean_seconds": 185.17666666666668,
+        "median_seconds": 166.2,
+        "minimum_seconds": 164.53,
+        "values_seconds": [
+          224.8,
+          166.2,
+          164.53
+        ]
+      },
+      "median_reduction_percent": 35.5294825511432,
+      "sharded": {
+        "maximum_seconds": 126.32,
+        "mean_seconds": 109.72333333333333,
+        "median_seconds": 107.15,
+        "minimum_seconds": 95.7,
+        "values_seconds": [
+          107.15,
+          95.7,
+          126.32
+        ]
+      }
+    }
+  },
+  "mod_id": "org.vllm-hust.stateaxis-pipelined-weight-loading",
+  "performance_qualified": false,
+  "schema_version": "stateaxis-qwen35-loader-comparison/v1",
+  "workload": {
+    "cache_policy": "uncontrolled warm/cold state; alternating arms",
+    "enforce_eager": true,
+    "hardware": "2 x Ascend 910B2, 64 GiB HBM each",
+    "max_model_len": 2048,
+    "model": "Qwen3.5-35B-A3B BF16",
+    "npu_smi_version": "25.2.1",
+    "storage_pairing": "both arms on /dev/nvme0n1p1 overlay",
+    "tensor_parallel_size": 2
+  }
+}
