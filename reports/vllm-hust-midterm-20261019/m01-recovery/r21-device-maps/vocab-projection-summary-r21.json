@@ -1,0 +1,89 @@
+{
+  "status": "same_run_host_observed_vocabulary_rows_not_device_window_attainment",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792551772.8757424,
+    "end_wall": 1792551839.1935341,
+    "duration_seconds": 66.31779161095619,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "host_selection_end": 1792551841.6492274,
+  "ranks": [
+    {
+      "rank": 0,
+      "loaded_head_shapes": {
+        "target": [
+          124160,
+          2048
+        ],
+        "draft": [
+          124160,
+          2048
+        ]
+      },
+      "contexts": 882,
+      "rows": {
+        "target": 57763,
+        "draft_step0": 19395,
+        "draft_step1": 19395
+      },
+      "first_host_event": 1792551773.139789,
+      "last_host_event": 1792551839.2233827
+    },
+    {
+      "rank": 1,
+      "loaded_head_shapes": {
+        "target": [
+          124160,
+          2048
+        ],
+        "draft": [
+          124160,
+          2048
+        ]
+      },
+      "contexts": 882,
+      "rows": {
+        "target": 57763,
+        "draft_step0": 19395,
+        "draft_step1": 19395
+      },
+      "first_host_event": 1792551773.140934,
+      "last_host_event": 1792551839.2184958
+    }
+  ],
+  "source_sha256": {
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/receipt.json": "8316f30cc938ff68a12b47052430163066e5f9031e7f1d8ceceea469070be24c",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/mmlu-pro.json": "a2b1e7e9048c803a64d51246962f19233056ec3c5d62de5fb0399d8150980bb7",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/launch-command.json": "5136def84c86d3c87377f6bac77eefe4323e807cd246c0f42982ebf2338d5f92",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_vocab_projection_r21.py": "38cb671136fa7fb15f3355329502b804638f61883a6c63336f07978146f80635",
+    "/root/gennova-evidence/20261019-midterm-aligned/recover_model_hardware.py": "f54fe93b229f347f59e233d3def0d85486ce2dcbe6d25413815457ac3fbcbf7a",
+    "/root/gennova-evidence/20261019-midterm-aligned/payload-receipt.json": "c2079ded7c2922c55a32e27af3eaed39e00432f7bfa39efe54a35cdfdbdfefa7",
+    "/root/gennova-evidence/20261019-midterm-aligned/actual-runtime.json": "8cfb331e6b4431574d8374c6fbee9c3957f4188852d2b4fc67f397f2abc889d3",
+    "/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/__init__.py": "9c42ec68ba530defafae0eae9eae5844898a258b924b0121211e76bbe9a12bc5",
+    "/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/small_fish_runtime.py": "9a545c72f79215eb9ce3fdb052fc509385ce6a35d452faec6c611dbc4781bb03",
+    "/root/gennova-evidence/20261019-midterm-aligned/payload/betterscale/models/qwen35/integration.py": "1f3a84db4c10de285fa623732781d34dc773685d6714472f6774a77baf832bb5",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/spec_decode/llm_base_proposer.py": "d106cb3cc2e048734fa2986394c43c2177d04190715dc390d8a62d50830cb6e2",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime/vllm_ascend/ops/vocab_parallel_embedding.py": "c6aa66851d05881d90c66a045cd4321d95bfe94e944a759632276bb4a82bd066",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/token-accounting-1246468.jsonl": "484b2f4d6aa87558eb785cc488cb424ed0e59f88a4b16eff7aa75997a92486a6",
+    "/root/gennova-evidence/20261019-midterm-aligned/token-observer-v19/hust_token_observer/logits.py": "8dea13bb4786e85099d086c245965778b0e28e68a87acc934bdff2d44fb3240b",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/token-accounting-1246469.jsonl": "49c9978aa966c82ce2e5b65a538a83176d7b01b80b08cdf8284c36e5c9dc9a81"
+  },
+  "semantic_projection_flops": {
+    "target": 58751828623360,
+    "draft_step0": 19727017574400,
+    "draft_step1": 19727017574400
+  },
+  "semantic_projection_subtotal": 98205863772160,
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Selection includes drain until benchmark client completion.",
+    "Target logits are outside the observed model forward; device completion is not timed here.",
+    "Draft rows use pinned replay inputs and source mapping, not per-kernel observations.",
+    "Do not add this subtotal to request-window F without matching device boundaries.",
+    "TP vocabulary partitions are counted once; 2MNK is semantic arithmetic.",
+    "Gathering, sampling, argmax and non-matrix operations are excluded."
+  ]
+}
