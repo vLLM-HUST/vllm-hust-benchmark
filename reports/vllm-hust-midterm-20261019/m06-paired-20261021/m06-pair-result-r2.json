@@ -1,0 +1,87 @@
+{
+  "schema": "m06-paired-lifecycle-result/v2",
+  "arms": {
+    "b1": {
+      "requests": 200,
+      "failed": 0,
+      "output_tokens": 51200,
+      "lifecycle_s": 1227.8402948956937,
+      "lifecycle_wall_s": 1227.8402965068817,
+      "pre_client_s": 1037.0401232708246,
+      "client_s": 169.01132909487933,
+      "post_client_release_s": 21.78884252998978,
+      "burst_s": 119.4540501870215,
+      "output_tok_per_s": 428.6166933631758,
+      "mean_ttft_s": 80.50755732181948,
+      "mean_tpot_s": 0.028879822606239103,
+      "p99_tpot_s": 0.06923414178046526,
+      "p99_sample_count": 200,
+      "p99_nearest_rank": 198,
+      "lifecycle_reservation_card_s_per_token": 0.09592502303872606,
+      "lifecycle_service_card_s_per_token": 0.04796251151936303,
+      "request_reservation_card_s_per_token": 0.009332347670861054,
+      "original_controller_status": "failed",
+      "shutdown": {
+        "manager_signals": [
+          {
+            "event": "launch_leader",
+            "pid": 944313,
+            "signal": 2
+          }
+        ],
+        "engine_timeout_force_kill": false,
+        "engine_dead_error_logged": true,
+        "api_shutdown_complete": true
+      }
+    },
+    "b0": {
+      "requests": 200,
+      "failed": 0,
+      "output_tokens": 51200,
+      "lifecycle_s": 777.0263864835724,
+      "lifecycle_wall_s": 777.0263872146606,
+      "pre_client_s": 591.548926317133,
+      "client_s": 165.7358212750405,
+      "post_client_release_s": 19.741638891398907,
+      "burst_s": 115.14931693673134,
+      "output_tok_per_s": 444.6400670195185,
+      "mean_ttft_s": 59.336640182151456,
+      "mean_tpot_s": 0.028564582153059105,
+      "p99_tpot_s": 0.030546325664309894,
+      "p99_sample_count": 200,
+      "p99_nearest_rank": 198,
+      "lifecycle_reservation_card_s_per_token": 0.06070518644402909,
+      "lifecycle_service_card_s_per_token": 0.030352593222014546,
+      "request_reservation_card_s_per_token": 0.008996040385682136,
+      "original_controller_status": "measured",
+      "shutdown": {
+        "manager_signals": [],
+        "engine_timeout_force_kill": false,
+        "engine_dead_error_logged": true,
+        "api_shutdown_complete": true
+      }
+    }
+  },
+  "b1_admission_correction": "Controller expected 201 events, but actual frozen client defaults ready-check timeout to zero; 200 requests and 200 uniquely matched control events are complete.",
+  "original_prechecked_protocol_confirmation": false,
+  "protocol_deviation": "Both arms actually skipped the initial client ready check. Preserve original receipts including their inaccurate one-precheck description; this is a disclosed no-precheck paired follow-up, not a reproduction of the old prechecked protocol.",
+  "lifecycle_cost_reduction_percent": -58.01783777926468,
+  "m06_lifecycle_gate_pass": false,
+  "request_cost_reduction_percent": -3.7383923455276635,
+  "throughput_change_percent": -3.6036729131833534,
+  "mean_ttft_reduction_percent": -35.67933249115149,
+  "mean_tpot_reduction_percent": -1.1036060373326162,
+  "order": [
+    "b1",
+    "b0"
+  ],
+  "repetitions": 1,
+  "quality_scored": false,
+  "limitations": [
+    "Output256 performance only, not task correctness.",
+    "Same frozen client skips precheck on both arms; original plan description and B1 post-run count assertion were wrong and separately corrected.",
+    "Complete new-service/empty-compile-cache lifecycle; host OS file cache not globally flushed.",
+    "Four reserved cards primary, two service cards secondary; equal-rate resource cost, not currency expense.",
+    "One reversed-order pair; no statistical certainty or assumed amortization; retain all shutdown errors."
+  ]
+}

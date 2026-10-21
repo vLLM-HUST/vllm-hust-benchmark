@@ -1,0 +1,79 @@
+{
+  "schema": "m06-prechecked-lifecycle/v1",
+  "order": [
+    "b1",
+    "b0"
+  ],
+  "repetitions": 1,
+  "role": "Independent confirmation, not new candidate selection",
+  "b1": "Preselected current best E24/R36 + Microflow + KV recompute, same recovered runtime as quality pair",
+  "b0": "Original Native profile on verified isolated recovered native runtime",
+  "workload": {
+    "dataset": "MMLU-Pro",
+    "requests": 200,
+    "output_cap": 256,
+    "temperature": 0,
+    "client_seed": 0,
+    "arrival_rate": "inf",
+    "shuffle": false,
+    "sha256": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506"
+  },
+  "precheck": "Explicit --ready-check-timeout-sec 60 on both arms; require actual successful precheck log and no skipped-check log. Exactly200 measured requests; B1 expected201 policy and engine events including the successful precheck. Lifecycle includes precheck time, measured output denominator excludes its tokens.",
+  "cache": "Each arm new empty compilation/cache directory and new service; no previous run intermediates or cache seed",
+  "reservation": {
+    "all_devices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "service_devices": [
+      4,
+      5
+    ]
+  },
+  "shutdown": {
+    "inner_seconds_both": 60,
+    "b1_manager_seconds": 90,
+    "outer_seconds_both": 120,
+    "known_errors": "Keep worker termination and EngineDeadError observations; report real signal escalation and release."
+  },
+  "cost": "q=k*(release-confirmation-start)/sum(successful measured output tokens); k4 reservation primary, k2 service secondary; request interval separate; no subtracted startup/drain or assumed amortization",
+  "gate": "Equal-rate lifecycle cost reduction >=10%; publish pass/fail and quality references, no claim from output256 answers",
+  "stop": "One protocol-corrected pair B1 then B0; preserve all results and errors; no automatic retries after a failed arm.",
+  "run_ids": [
+    "m01-recovery-model-m06-prechecked-b1-r1",
+    "m01-recovery-model-m06-prechecked-b0-r1"
+  ],
+  "restoration": "Prior no-precheck pair retained as protocol-deviation evidence. Restore the originally intended precheck, not retune candidate/workload/order/gates or choose results.",
+  "source_sha256": {
+    "/root/extension-manager/src/vllm_hust_ext/cli.py": "80c9cbda0cce1d2937f716d47a1a70db7dbce5b45a5e1068ec995a866c4fb772",
+    "/root/extension-manager/src/vllm_hust_ext/process_supervisor.py": "bf0cbc8cbb83671e6c376b6f6cb375eeda480b7cdd39cde08a1144c1c17334bd",
+    "/root/gennova-evidence/20261019-midterm-aligned/bench-m06-prechecked-recovery-r1.sh": "e51fcc465f9b1cf5a1a05e9050568e1da4e62c7405d273cfcea6d14bfb4a44c7",
+    "/root/gennova-evidence/20261019-midterm-aligned/bench-m06-recovery-r1.sh": "6c62282426f4c2a7c53900280b49a35607c3c476a2609ec3e60513c5270d8281",
+    "/root/gennova-evidence/20261019-midterm-aligned/launch_m06_b0_r1.py": "2187c55ae8eaf64484c7e9fc8857c819632883ba7d08d0ce3c41a6e2f5466ce4",
+    "/root/gennova-evidence/20261019-midterm-aligned/launch_m06_b1_r1.py": "341565bc911ae5d771181a7febb2e5d27b21859e0e05fe90593630a8a58f3b4e",
+    "/root/gennova-evidence/20261019-midterm-aligned/launch_m06_prechecked_b0_r1.py": "a4b2e3529f950f41071494e24f1e01032d495be0e99a26426c9fb73c5bdd6e03",
+    "/root/gennova-evidence/20261019-midterm-aligned/launch_m06_prechecked_b1_r1.py": "e8ffe7d1e8d97ff21db7b0684f77952743598268e814aa258cebaec80e401d27",
+    "/root/gennova-evidence/20261019-midterm-aligned/launch_model_m06_b1_r1.py": "5c5c250ffb38f37fab1ddf49f9e55bf66ee1f912bc75011ce2d816d47c1c291d",
+    "/root/gennova-evidence/20261019-midterm-aligned/launch_model_m06_prechecked_b1_r1.py": "5c5c250ffb38f37fab1ddf49f9e55bf66ee1f912bc75011ce2d816d47c1c291d",
+    "/root/gennova-evidence/20261019-midterm-aligned/materialized.200.jsonl": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+    "/root/gennova-evidence/20261019-midterm-aligned/measure_m06_b0_r1.py": "a4abdc6ff97a7bfe3fff7c205bef24c75f78d6b43a651cf1b16347c4cfaba8d3",
+    "/root/gennova-evidence/20261019-midterm-aligned/measure_m06_b1_r1.py": "389d3f51c81973c9400d88f7fb66d7c40e7ed7654cb791bc2e90f344c38d6006",
+    "/root/gennova-evidence/20261019-midterm-aligned/measure_m06_prechecked_b0_r1.py": "8da00eacbfd4cea3bebf4c25b2c8cb2665f56803b25138e5fd0abb7f3720af09",
+    "/root/gennova-evidence/20261019-midterm-aligned/measure_m06_prechecked_b1_r1.py": "36978e8578b90f57e873c56e75f4b1682cabf15ff10f6a3371e09261ba0b0f01",
+    "/root/gennova-evidence/20261019-midterm-aligned/native-quality-runtime-r1.json": "c4c7f082a4362665efaffda9317321ef43214216452ad36d9b826f9bcb6175a8",
+    "/root/gennova-evidence/20261019-midterm-aligned/prepare_after_weight_load.py": "9b87791bd22a87ecf2602cb8975c3d89130fc4240c9a2ade36deb205394b7001",
+    "/root/gennova-evidence/20261019-midterm-aligned/prepare_checkpoint_headroom_v2.py": "ebdc84fa6ff373da16395679fc391ab33ff40fd64c6aa384c25da09551e8b2cf",
+    "/root/gennova-evidence/20261019-midterm-aligned/prepare_m06_pair_r1.py": "602a28c214cc8d62687c4d4e5e1c2742b8d0d5ac45fb9a8f89751f0180485474",
+    "/root/gennova-evidence/20261019-midterm-aligned/prepare_m06_prechecked_pair_r1.py": "78d289c80248fb777b9b8f7dc1f236a58de6bd171a604d9eb1af08291e898bd0",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime-gdn-recovery-r2.sh": "4c925989086996d984ed5b6c4901eb1a5bb2040392deb98c04977b56ae5e252a",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime-m06-b0-r1.sh": "d0605c6f342f513feb093544ee53389e32cff48234ff79a08342cef0e2118205",
+    "/root/gennova-evidence/20261019-midterm-aligned/runtime-m06-prechecked-b0-r1.sh": "97ea058bf157a7417363cf5017e4f87faadba8dcffbf265a7efffc13631c53a3",
+    "/root/gennova-evidence/20261019-midterm-aligned/test_m06_actual_ready_check.py": "0897c37a15adcf7776d6461ab2e0c552b6f72559dfac72d229fb9932d88cc03c",
+    "/root/gennova-evidence/20261019-midterm-aligned/verify_native_quality_runtime_r1.py": "b899f4d2ab78e5f49d14b2d41557cf075c167a6eb61e1b05f23b689cfee2af11",
+    "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/benchmarks/lib/ready_checker.py": "1ed87d5c1e0166c95e57fbecd0688a0716fb6dcfb6824d01278751d78ac7b4c0",
+    "/root/modcost-runtime-028-20261017/vllm-workspace/vllm/vllm/benchmarks/serve.py": "bebbfafbe4b23f6f6323159c77c74c37d2144c94d317b88340b9c9b105af51a0",
+    "/root/vllm-hust-benchmark/reports/mmlu-pro-qwen35-b0-precheck-20261012/reproduction/b0_35b.profile.json": "abc7641b0c2095bd1694907a29fa02674754034718d2dab90b5688142c9aa551"
+  }
+}
