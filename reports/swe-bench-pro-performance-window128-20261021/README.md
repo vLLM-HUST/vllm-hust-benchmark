@@ -2,7 +2,7 @@
 
 ## 四层图与引擎瓶颈复核
 
-[四层完整分析与六张新图](four-layer-analysis.md)：按 Controller、Engine、Program、Request 分层，补齐缓存池
+[四层完整分析与七张新图](four-layer-analysis.md)：按 Controller、Engine、Program、Request 分层，补齐缓存池
 GiB、引擎排队/prefill/decode 直方图、输入计算/输出生成速率，以及客户端长尾。保留设备负载缺失、iteration 指标口径疑点和未完成请求，不新增推理实验。
 
 本次回到 Native/Controller 引擎性能问题。相同 8 道 SWE-bench Pro V1 NodeBB 初始任务、各 16 个独立副本，两臂各 128 个 Agent 在 time
