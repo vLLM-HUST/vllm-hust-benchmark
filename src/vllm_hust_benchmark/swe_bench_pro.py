@@ -79,6 +79,16 @@ def validate(configuration):
         raise ValueError("Explicit OpenAI-compatible API base required")
     if not c["model"]["model_name"]:
         raise ValueError("Explicit served model name required")
+    allowed = c.get("container", {}).get("allowed_initial_untracked", [])
+    if not isinstance(allowed, list) or any(
+        not isinstance(name, str)
+        or not name.strip("/")
+        or name.startswith("/")
+        or any(part in (".", "..", ".git") for part in name.split("/"))
+        or any(char in name for char in "\n\r*?[")
+        for name in allowed
+    ):
+        raise ValueError("Initial untracked allowlist requires exact relative paths")
     for name in ("dataset_parquet", "agent_source", "official_v1_source", "docker"):
         if not Path(c["paths"][name]).is_absolute():
             raise ValueError("Absolute runtime path required: " + name)
@@ -97,6 +107,20 @@ def call_hook(hook, method, *args):
     if hook is not None and hasattr(hook, method):
         return getattr(hook, method)(*args)
     return None
+
+
+def validate_initial_repository(before, base_commit, allowed_untracked=()):
+    lines = before["output"].splitlines()
+    if (
+        before["returncode"]
+        or not lines
+        or lines[0] != base_commit
+        or any(
+            line not in {"?? " + name for name in allowed_untracked}
+            for line in lines[1:]
+        )
+    ):
+        raise ValueError("Task container must start at the clean official base commit")
 
 
 def verify_inputs(c, folder):
@@ -233,12 +257,11 @@ def _agent_task(c, row, image, folder, barrier):
         (folder / "container-id.txt").write_text(env.container_id)
         before = env.execute("git rev-parse HEAD && git status --porcelain")
         save(folder / "code-before.json", before)
-        if before["returncode"] or before["output"].splitlines() != [
-            row["base_commit"]
-        ]:
-            raise ValueError(
-                "Task container must start at the clean official base commit"
-            )
+        validate_initial_repository(
+            before,
+            row["base_commit"],
+            c["container"].get("allowed_initial_untracked", []),
+        )
         inspected = json.loads(
             subprocess.check_output([c["paths"]["docker"], "inspect", env.container_id])
         )[0]

@@ -69,6 +69,66 @@ def test_invalid_protocol(section, key, value):
         runner.validate(c)
 
 
+def test_initial_repository_checks_real_git_state(tmp_path):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    tracked = tmp_path / "source.txt"
+    tracked.write_text("original\n")
+    subprocess.run(["git", "add", "source.txt"], cwd=tmp_path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "commit",
+            "-qm",
+            "fixture",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=tmp_path, text=True
+    ).strip()
+
+    def actual_state():
+        result = subprocess.run(
+            ["sh", "-c", "git rev-parse HEAD && git status --porcelain"],
+            cwd=tmp_path,
+            capture_output=True,
+            text=True,
+        )
+        return {"returncode": result.returncode, "output": result.stdout}
+
+    runner.validate_initial_repository(actual_state(), commit)
+    (tmp_path / "appendonly.aof").write_text("runtime data\n")
+    with pytest.raises(ValueError):
+        runner.validate_initial_repository(actual_state(), commit)
+    runner.validate_initial_repository(actual_state(), commit, ["appendonly.aof"])
+    tracked.write_text("changed source\n")
+    with pytest.raises(ValueError):
+        runner.validate_initial_repository(actual_state(), commit, ["appendonly.aof"])
+    tracked.write_text("original\n")
+    (tmp_path / "unexpected.txt").write_text("unexpected\n")
+    with pytest.raises(ValueError):
+        runner.validate_initial_repository(actual_state(), commit, ["appendonly.aof"])
+    with pytest.raises(ValueError):
+        runner.validate_initial_repository(
+            actual_state(), "wrong", ["appendonly.aof", "unexpected.txt"]
+        )
+
+
+@pytest.mark.parametrize(
+    "allowed", [["*"], ["../data"], ["/tmp/data"], [".git/config"], "data"]
+)
+def test_initial_untracked_allowlist_rejects_broad_or_unsafe_paths(allowed):
+    c = configuration()
+    c["container"]["allowed_initial_untracked"] = allowed
+    with pytest.raises(ValueError):
+        runner.validate(c)
+
+
 def test_query_instrumentation_preserves_result_timeout_and_headers(tmp_path):
     calls = []
     response = {
