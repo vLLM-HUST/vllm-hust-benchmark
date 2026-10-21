@@ -1,0 +1,116 @@
+{
+  "status": "accounted_source_semantic_families_not_full_effective_flops",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792543600.510896,
+    "end_wall": 1792543665.967751,
+    "duration_seconds": 65.4568552179262,
+    "wall_monotonic_offset_difference_seconds": 4.76837158203125e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "families": [
+    {
+      "family": "linear_and_expert_projections",
+      "source": "r20-matrix-accounting.json",
+      "counting_scope": "already_global",
+      "global_basic_operations": 1701766687879168
+    },
+    {
+      "family": "causal_attention_qk_av",
+      "source": "r20-matrix-accounting.json",
+      "counting_scope": "already_global",
+      "global_basic_operations": 54066243239936
+    },
+    {
+      "family": "vocabulary_projection",
+      "source": "r20-vocab-window.json",
+      "counting_scope": "already_global",
+      "global_basic_operations": 98001422909440
+    },
+    {
+      "family": "rms_residual_and_gdn_output_norm",
+      "source": "r20-norm-semantics.json",
+      "counting_scope": "already_global",
+      "global_basic_operations": 575593808120
+    },
+    {
+      "family": "attention_softmax_basic",
+      "source": "r20-softmax-semantics.json",
+      "counting_scope": "already_global",
+      "global_basic_operations": 158337101680
+    },
+    {
+      "family": "rope_moe_router_and_full_attention_gate",
+      "source": "r20-scalar-semantics.json",
+      "counting_scope": "already_global",
+      "global_basic_operations": 589007857977
+    },
+    {
+      "family": "gdn_convolution",
+      "source": "r20-device-gdn-ledger.json",
+      "counting_scope": "sum_two_tp_shards",
+      "global_basic_operations": 583209369600
+    },
+    {
+      "family": "gdn_active_recurrence",
+      "source": "r20-device-gdn-ledger.json",
+      "counting_scope": "sum_two_tp_shards",
+      "global_basic_operations": 6292651622400
+    },
+    {
+      "family": "gdn_prefill_kkt_wy_inverse_ho_and_prefix_scan",
+      "source": "r20-device-gdn-prefill.json",
+      "counting_scope": "sum_two_tp_shards",
+      "global_basic_operations": 37780905372480
+    },
+    {
+      "family": "gdn_qk_l2_and_preprocess_gate_valid_rows",
+      "source": "r20-gdn-preprocess-semantics.json",
+      "counting_scope": "sum_two_tp_shards",
+      "global_basic_operations": 126202000320
+    }
+  ],
+  "accounted_basic_operation_subtotal": 1899940261161121,
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "remaining_checks": [
+    {
+      "id": "gdn_preprocess_mapping",
+      "requirement": "Establish device-final mapped preprocessing extents or qualify the exact host-to-device mapping path.",
+      "evidence": "r20-gdn-preprocess-semantics.json"
+    },
+    {
+      "id": "stream_dependencies",
+      "requirement": "Establish dependency closure for timed model/collective/custom-op streams, beyond unchanged current stream identity.",
+      "evidence": "r20-direct-logits.json"
+    },
+    {
+      "id": "numerical_coverage",
+      "requirement": "Reconcile source-semantic families with loaded binary behavior and retain special-function, selection, padding and parameter-transform exclusions.",
+      "evidence": "Per-family limitations remain applicable; this index does not override them."
+    },
+    {
+      "id": "matched_capacity",
+      "requirement": "Calibrate actual operation shapes, precision, state access, collective payloads and topology with repetitions and dispersion.",
+      "evidence": "Existing 16 MiB HCCS probe is not an application-matched reference for all shapes."
+    }
+  ],
+  "non_additive_categories": [
+    "State-update-eligible preprocessing is an alternative scope, not an additional family.",
+    "Prefix scan is already in the GDN prefill H/O ledger.",
+    "Q/K L2 preprocessing is excluded from the RMS ledger.",
+    "Special functions, division, comparison and unary negation retain separate counts without arbitrary FLOP weights.",
+    "Tail operations and replicated TP hidden normalization are not added to this request-window semantic subtotal."
+  ],
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-matrix-accounting.json": "a47fff89e4172f1d0c36e50b73a594dfdab8687d5813633b2f3a508187a3c10d",
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-vocab-window.json": "2d9dd1d280b715739445bdf3a4d6ad1095d2e50229a82e1a1e757347e12cf255",
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-norm-semantics.json": "3f98743c267ea9eebc49e7cf6bf356bb1afc5f0bc419949dc41bdac2971b8f36",
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-softmax-semantics.json": "ef4c7d39571cb1487f4404dc33a242826dc2cc6a6a4bda127bc1f6f4a32790ed",
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-scalar-semantics.json": "eabdf64118bc4cea6fa6328eb199927499108f39c71e1d318c9176b6a1b825d6",
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-device-gdn-ledger.json": "02e9482a703a3a791e5d920988c90d3e65664bd6cc606265c130289bf10910e6",
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-device-gdn-prefill.json": "bc90b0ee9bcbf0ce6564f6997265f0335b3f670dda1976fd72b30c86b516cb8c",
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-gdn-preprocess-semantics.json": "2a271eae936c1766183774bb6a43a6f89a9707a08d6d529965e84f5c8c41486b",
+    "/root/gennova-evidence/20261019-midterm-aligned/assemble_r20_accounted_families.py": "dd0e09bcb041369f93af9a1812381580dd11e0bdf5e65b970870497712d32689"
+  }
+}

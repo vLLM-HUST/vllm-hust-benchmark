@@ -1,0 +1,111 @@
+{
+  "status": "r20_device_causal_length_canonical_softmax_semantics",
+  "cohorts": {
+    "inside_request_under_clock_tolerance": {
+      "roles": {
+        "target": {
+          "score_scale_multiply": 47566152320,
+          "stability_subtract": 47566152320,
+          "denominator_add": 47511801760,
+          "exponential": 47566152320,
+          "normalization_divide": 47566152320,
+          "maximum_compare": 47511801760,
+          "query_rows_all_heads_layers": 54350560,
+          "causal_scores_all_heads_layers": 47566152320
+        },
+        "draft_step0": {
+          "score_scale_multiply": 4756615232,
+          "stability_subtract": 4756615232,
+          "denominator_add": 4751180176,
+          "exponential": 4756615232,
+          "normalization_divide": 4756615232,
+          "maximum_compare": 4751180176,
+          "query_rows_all_heads_layers": 5435056,
+          "causal_scores_all_heads_layers": 4756615232
+        },
+        "draft_step1": {
+          "score_scale_multiply": 476298112,
+          "stability_subtract": 476298112,
+          "denominator_add": 475988416,
+          "exponential": 476298112,
+          "normalization_divide": 476298112,
+          "maximum_compare": 475988416,
+          "query_rows_all_heads_layers": 309696,
+          "causal_scores_all_heads_layers": 476298112
+        }
+      },
+      "totals": {
+        "score_scale_multiply": 52799065664,
+        "stability_subtract": 52799065664,
+        "denominator_add": 52738970352,
+        "exponential": 52799065664,
+        "normalization_divide": 52799065664,
+        "maximum_compare": 52738970352,
+        "query_rows_all_heads_layers": 60095312,
+        "causal_scores_all_heads_layers": 52799065664
+      },
+      "canonical_add_subtract_multiply_count": 158337101680
+    },
+    "boundary_or_tail": {
+      "roles": {
+        "target": {
+          "score_scale_multiply": 673440,
+          "stability_subtract": 673440,
+          "denominator_add": 672960,
+          "exponential": 673440,
+          "normalization_divide": 673440,
+          "maximum_compare": 672960,
+          "query_rows_all_heads_layers": 480,
+          "causal_scores_all_heads_layers": 673440
+        },
+        "draft_step0": {
+          "score_scale_multiply": 67344,
+          "stability_subtract": 67344,
+          "denominator_add": 67296,
+          "exponential": 67344,
+          "normalization_divide": 67344,
+          "maximum_compare": 67296,
+          "query_rows_all_heads_layers": 48,
+          "causal_scores_all_heads_layers": 67344
+        },
+        "draft_step1": {
+          "score_scale_multiply": 22480,
+          "stability_subtract": 22480,
+          "denominator_add": 22464,
+          "exponential": 22480,
+          "normalization_divide": 22480,
+          "maximum_compare": 22464,
+          "query_rows_all_heads_layers": 16,
+          "causal_scores_all_heads_layers": 22480
+        }
+      },
+      "totals": {
+        "score_scale_multiply": 763264,
+        "stability_subtract": 763264,
+        "denominator_add": 762720,
+        "exponential": 763264,
+        "normalization_divide": 763264,
+        "maximum_compare": 762720,
+        "query_rows_all_heads_layers": 544,
+        "causal_scores_all_heads_layers": 763264
+      },
+      "canonical_add_subtract_multiply_count": 2289248
+    }
+  },
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-request-attention.json": "46959759e39c4e00ec3c80c7cf54fbfa371308f21b5332c889ffcc2428f4038a",
+    "/root/gennova-evidence/20261019-midterm-aligned/r20-matrix-accounting.json": "a47fff89e4172f1d0c36e50b73a594dfdab8687d5813633b2f3a508187a3c10d",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r20_softmax.py": "1674dd82673dc8f5ec0d0665611bd4f6e5d10ca8b430841c091e3726882b6edd",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r12_softmax_semantics.py": "b264d2c4c836a16ac5c715a6dfc44e6ab9543872b6f277877ca7ffd29b2899a8"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Reuses a tested pure arithmetic function, not r12 observations or counts.",
+    "One global TP model: 16 query heads, 10 target attention layers and one layer per draft forward.",
+    "Canonical stable softmax, not observed fused implementation instructions or online rescaling.",
+    "Exponentials, division and comparisons remain separate; no arbitrary FLOP equivalence.",
+    "Every causal query has at least one key; graph padding is excluded and tail remains separate.",
+    "This semantic ledger is not full effective F, matched kernel capacity or an M01 attainment result."
+  ]
+}
