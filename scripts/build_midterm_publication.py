@@ -8,14 +8,15 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "a103e05749e0d0f7760689f495902ef96e942d8a"  # pragma: allowlist secret
+REVISION = "4c98929e214145f93f0172a39060f08fac04d0e2"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v060.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v061.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "trace-qualification": ["m01-recovery/trace-qualification-20261021"],
     "long-context-parser": ["m05-parser-confirmation-20261021"],
     "paired-lifecycle": ["m06-paired-20261021"],
     "candidates": [
@@ -174,9 +175,15 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.60" in text
+    assert "报告版本：V0.61" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "trace-qualification",
+            "M01采集资格 / M01 collection qualification",
+            "#### 应用级采集与原生事件身份验证",
+            "两卡BF16合成资格，非35B模型性能复测。原生日志与profiler计数一致，16条已知探针依赖配对通过；整模型事件代次、图内事件与HCCL通知尚未全覆盖。插桩计时不代替未插桩性能，M01仍未通过本轮验收。",
+        ),
         (
             "long-context-parser",
             "长输入接口修复确认 / Long-input API repair confirmation",
@@ -310,7 +317,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.60",
+        "version": "V0.61",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
