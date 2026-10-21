@@ -8,14 +8,15 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "2c7a7de9b77ad6e3a56dd1434e7079ab8ab90151"  # pragma: allowlist secret
+REVISION = "7154c84cdb399086d51f9c032f8abd282bdfbe88"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v058.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v059.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "paired-lifecycle": ["m06-paired-20261021"],
     "candidates": [
         "aligned-mmlu-b0.tar.gz",
         "aligned-mmlu-b1.tar.gz",
@@ -172,9 +173,15 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.58" in text
+    assert "报告版本：V0.59" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "paired-lifecycle",
+            "恢复环境配对性能与成本 / Recovered paired performance and lifecycle cost",
+            "### 5.10 恢复环境配对性能与全流程成本",
+            "同一200条输入、out256、每臂一次预检查，独立服务和空编译缓存。操作系统文件页缓存未全局清空。请求阶段与启动至释放的全流程分别统计；保留P99退化、协议偏差及退出日志，不推断长期摊销、统计显著性或任务准确率。",
+        ),
         (
             "candidates",
             "同工况性能候选 / Performance candidates",
@@ -296,7 +303,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.58",
+        "version": "V0.59",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
