@@ -34,6 +34,14 @@ from .swe_bench_pro_inputs import (
 )
 
 
+class AgentWallBudgetExceeded(BaseException):
+    """End the frozen run even if the Agent recovers ordinary tool errors."""
+
+
+def _wall_budget_expired(signum, frame):
+    raise AgentWallBudgetExceeded("Frozen Agent wall budget reached")
+
+
 def validate(configuration):
     c = configuration
     if c.get("schema") != "swe-bench-pro-experiment-v1":
@@ -329,9 +337,6 @@ def _agent_task(c, row, image, folder, barrier):
             },
         )
 
-        def timeout(signum, frame):
-            raise TimeoutError("Frozen Agent wall budget reached")
-
         def observe():
             previous = -1
             while not stop.wait(2):
@@ -350,13 +355,13 @@ def _agent_task(c, row, image, folder, barrier):
                 except Exception:
                     (folder / "observer-error.txt").write_text(traceback.format_exc())
 
-        signal.signal(signal.SIGALRM, timeout)
+        signal.signal(signal.SIGALRM, _wall_budget_expired)
         signal.alarm(c["agent"]["wall_budget_seconds"])
         observer = threading.Thread(target=observe, daemon=True)
         observer.start()
         try:
             status, result = agent.run(task)
-        except Exception as exc:
+        except (Exception, AgentWallBudgetExceeded) as exc:
             status, error = type(exc).__name__, str(exc)
             (folder / "agent-exception-private.txt").write_text(traceback.format_exc())
         finally:

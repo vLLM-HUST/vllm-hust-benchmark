@@ -277,3 +277,55 @@ def test_verified_inputs_fail_closed(tmp_path, monkeypatch, mutation):
             runner.verify_inputs(c, tmp_path)
     else:
         assert runner.verify_inputs(c, tmp_path)["official_sources"] == "PASS"
+
+
+@pytest.mark.parametrize("phase", ["query", "tool"])
+def test_real_wall_alarm_bypasses_agent_error_recovery_and_closes_event(
+    tmp_path, phase
+):
+    """A real timer must abort rather than become a recoverable tool/HTTP error."""
+    code = """
+import json, signal, time, sys
+from pathlib import Path
+from types import SimpleNamespace
+from vllm_hust_benchmark.swe_bench_pro import AgentWallBudgetExceeded, _wall_budget_expired
+from vllm_hust_benchmark.swe_bench_pro_timing import instrument
+folder, phase = Path(sys.argv[1]), sys.argv[2]
+def blocked(*args, **kwargs):
+    time.sleep(5)
+model = SimpleNamespace(config=SimpleNamespace(model_kwargs={}), query=blocked)
+env = SimpleNamespace(execute=blocked)
+instrument(model, env, folder, 'budget-program')
+signal.signal(signal.SIGALRM, _wall_budget_expired)
+signal.setitimer(signal.ITIMER_REAL, 0.05)
+try:
+    try:
+        model.query([]) if phase == 'query' else env.execute('blocked tool')
+    except Exception:
+        print('RECOVERED_AND_CONTINUED')
+except AgentWallBudgetExceeded as exc:
+    print(type(exc).__name__, str(exc))
+finally:
+    signal.setitimer(signal.ITIMER_REAL, 0)
+    (folder / 'cleanup-ran').write_text('yes')
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", code, str(tmp_path), phase],
+        env={**os.environ, "PYTHONPATH": str(ROOT / "src")},
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=True,
+    )
+    assert "AgentWallBudgetExceeded Frozen Agent wall budget reached" in result.stdout
+    assert "RECOVERED_AND_CONTINUED" not in result.stdout
+    assert (tmp_path / "cleanup-ran").read_text() == "yes"
+    events = [
+        json.loads(line)
+        for line in (tmp_path / "agent-events-private.jsonl").read_text().splitlines()
+    ]
+    assert len(events) == 2
+    assert events[-1]["event"] == (
+        "agent_query_exception" if phase == "query" else "tool_exception"
+    )
+    assert events[-1]["error"] == "AgentWallBudgetExceeded"
