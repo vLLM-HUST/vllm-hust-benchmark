@@ -1,0 +1,77 @@
+{
+  "schema": "stateaxis-mod-catalog-v1",
+  "id": "org.vllm-hust.gdn-state-codec",
+  "name": "gdn-state-codec",
+  "display_name": "GDN State Codec",
+  "version": "0.2.0",
+  "license": "Apache-2.0",
+  "owner": "vLLM-HUST",
+  "maintainers": [
+    "ShuhaoZhangTony"
+  ],
+  "advisor_status": "none",
+  "advisors": [],
+  "canonical_repository": "vLLM-HUST/gdn-state-codec",
+  "repository_url": "https://github.com/vLLM-HUST/gdn-state-codec",
+  "status": "unqualified-experiment",
+  "default_enabled": false,
+  "runtime_modes": [
+    "shadow",
+    "replace"
+  ],
+  "activation": {
+    "manager": "vllm-hust-extension-manager",
+    "manifest_schema": "0.3-experimental",
+    "bundle_id": "org.vllm-hust.gdn-state-codec",
+    "entry_point": "vllm.general_plugins:gdn_state_codec",
+    "default_enabled": false,
+    "enable_environment": "VLLM_HUST_GDN_STATE_CODEC_ENABLE",
+    "kill_switch_environment": "VLLM_HUST_GDN_STATE_CODEC_KILL_SWITCH",
+    "stateaxis_runtime_dependency": false
+  },
+  "performance_qualified": false,
+  "qualification_scope": "none for version 0.2.0; historical v68 evidence is retained but not inherited",
+  "general_performance_claim": false,
+  "supported_hardware": [
+    "Ascend 910B2"
+  ],
+  "target_models": [
+    "Qwen3.5-35B-A3B",
+    "Qwen3.8 GDN family (mechanism only; not performance-qualified)"
+  ],
+  "latest_evidence": {
+    "date": "2026-10-09",
+    "label": "matched-real-online-negative",
+    "candidate": "version 0.2.0 quant_only vector replace",
+    "exact_output_gate": "fail",
+    "output_hash_matches": 0,
+    "output_hash_cells": 4,
+    "online_no_harm_gate": "not-qualified",
+    "online_total_delta_pct_range": [-0.5967160579236186, 0.8061837834646646],
+    "online_repetitions_per_cell": 3,
+    "concurrency_two": "fail-closed and engine terminated",
+    "claim": "no stable end-to-end gain; all exact output hashes changed and multi-request decode is unsupported"
+  },
+  "component_candidates": [
+    {
+      "date": "2026-10-09",
+      "name": "batched provider-state initialization with combined host ABI",
+      "status": "component-correct-online-unqualified",
+      "scope": "Qwen3.5-35B-A3B TP2 local 16x128x128 state on Ascend 910B2",
+      "result": "0.738162% reconstruction RMS; about 68 us synchronized device time; combined ABI reduced Python host submission by 3.90 us per initialized layer",
+      "evidence": "evidence/batched-provider-init-20261009/ROUND-RESULTS.md"
+    }
+  ],
+  "evidence_index": [
+    "evidence/ecpa-manager03-launch-20261009/ROUND-RESULTS.md",
+    "evidence/batched-provider-init-20261009/ROUND-RESULTS.md",
+    "evidence/qwen35-agentx-v020-expanded-20261009/ROUND-RESULTS.md",
+    "evidence/qwen35-agentx-v68/ROUND-RESULTS.md",
+    "evidence/qwen35-agentx-expanded-20261008/ROUND-RESULTS.md",
+    "evidence/paper-alignment-20261008/ROUND-RESULTS.md",
+    "evidence/rank1-active-rank-20261008/ROUND-RESULTS.md",
+    "evidence/rank1-fast-boundary-20261008/ROUND-RESULTS.md",
+    "evidence/all-head-negative-m2/NEGATIVE_RESULTS.md"
+  ],
+  "rollback": "Set VLLM_HUST_GDN_STATE_CODEC_KILL_SWITCH=1 or disable the org.vllm-hust.gdn-state-codec ECPA Bundle, restart vLLM, and use the unchanged native Qwen GDN provider."
+}

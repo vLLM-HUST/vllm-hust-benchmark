@@ -1,0 +1,42 @@
+{
+  "canonical_repository": "https://github.com/vLLM-HUST/vllm-hust-opset",
+  "display_name": "OPset for vLLM-HUST",
+  "evidence": {
+    "index": "README.md",
+    "latest_result": "https://github.com/vLLM-HUST/vllm-hust-opset#evidence-and-results",
+    "performance_claims": [
+      {
+        "label": "matched-real-online-tested-cell",
+        "scope": "Qwen2.5-7B-Instruct, Ascend 910B2/CANN 9.0.0, graph batch-invariant path, 64 ShareGPT requests at concurrency 4",
+        "result": "Across three matched rounds, linear-SwiGLU fusion reduced steady-state TPOT by 3.82% and increased output-token throughput by 5.24%; cold start and other execution paths are out of scope."
+      }
+    ],
+    "qualification": "qualified"
+  },
+  "lifecycle": {
+    "activation_contract": "See the extension manifest and README; installation or discovery alone does not enable this MOD.",
+    "default_enabled": false,
+    "rollback_contract": "Disable or remove the MOD and return to the unmodified host path.",
+    "status": "experimental"
+  },
+  "mod_id": "operator-optimizations",
+  "repository": "vllm-hust-opset",
+  "repository_type": "mod_bundle",
+  "responsibility": {
+    "advisor_status": "not_declared",
+    "advisors": [],
+    "maintainers": [
+      {
+        "github": "keridone",
+        "name": "Shenghui Zhou"
+      }
+    ],
+    "organization": "vLLM-HUST"
+  },
+  "schema_version": "vllm-hust-mod-metadata-v1",
+  "scope": {
+    "mechanism": "operator_optimization_bundle",
+    "out_of_scope": [],
+    "supported_workloads": []
+  }
+}

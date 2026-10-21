@@ -1,0 +1,531 @@
+diff --git a/native/ascendc/leapquant_state_codec/CMakeLists.txt b/native/ascendc/leapquant_state_codec/CMakeLists.txt
+index 95ad00fa8..8619b1cde 100644
+--- a/native/ascendc/leapquant_state_codec/CMakeLists.txt
++++ b/native/ascendc/leapquant_state_codec/CMakeLists.txt
+@@ -50,22 +50,43 @@ find_library(ASCENDCL_LIBRARY NAMES ascendcl
+ 
+ add_executable(statecentric_leapquant_state_codec_runtime_probe
+                host/leapquant_state_codec_runtime_probe.cpp)
++add_executable(statecentric_leapquant_all_head_runtime_probe
++               host/leapquant_all_head_runtime_probe.cpp)
+ target_include_directories(
+   statecentric_leapquant_state_codec_runtime_probe
+   PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
++target_include_directories(
++  statecentric_leapquant_all_head_runtime_probe
++  PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../include")
+ target_include_directories(
+   statecentric_leapquant_state_codec_runtime_probe
+   SYSTEM PRIVATE "${ASCENDCL_INCLUDE_DIR}")
++target_include_directories(
++  statecentric_leapquant_all_head_runtime_probe
++  SYSTEM PRIVATE "${ASCENDCL_INCLUDE_DIR}")
+ target_link_libraries(
+   statecentric_leapquant_state_codec_runtime_probe
+   PRIVATE statecentric_leapquant_smoothing_kernel
+           statecentric_leapquant_quantize_kernel
+           statecentric_leapquant_dequantize_kernel
+           "${ASCENDCL_LIBRARY}")
++target_link_libraries(
++  statecentric_leapquant_all_head_runtime_probe
++  PRIVATE statecentric_leapquant_smoothing_kernel
++          statecentric_leapquant_quantize_kernel
++          statecentric_leapquant_dequantize_kernel
++          "${ASCENDCL_LIBRARY}")
+ target_compile_options(
+   statecentric_leapquant_state_codec_runtime_probe
+   PRIVATE -Wall -Wextra -Wpedantic -Werror)
++target_compile_options(
++  statecentric_leapquant_all_head_runtime_probe
++  PRIVATE -Wall -Wextra -Wpedantic -Werror)
+ set_target_properties(
+   statecentric_leapquant_state_codec_runtime_probe
+   PROPERTIES BUILD_RPATH
+              "${CMAKE_CURRENT_BINARY_DIR}/lib;${ASCEND_HOME_PATH}/${CANN_ARCH}/lib64")
++set_target_properties(
++  statecentric_leapquant_all_head_runtime_probe
++  PROPERTIES BUILD_RPATH
++             "${CMAKE_CURRENT_BINARY_DIR}/lib;${ASCEND_HOME_PATH}/${CANN_ARCH}/lib64")
+diff --git a/native/ascendc/leapquant_state_codec/kernel/leapquant_dequantize.cpp b/native/ascendc/leapquant_state_codec/kernel/leapquant_dequantize.cpp
+index 02f27b41a..6199ff745 100644
+--- a/native/ascendc/leapquant_state_codec/kernel/leapquant_dequantize.cpp
++++ b/native/ascendc/leapquant_state_codec/kernel/leapquant_dequantize.cpp
+@@ -11,18 +11,29 @@ constexpr std::uint32_t kCompensatorElements = kKeys * kRank;
+ 
+ class DequantizeKernel {
+  public:
+-  __aicore__ inline void Init(GM_ADDR quantized, GM_ADDR smoothing, GM_ADDR scales, GM_ADDR keys, GM_ADDR values, GM_ADDR dense) {
+-    quantized_.SetGlobalBuffer(reinterpret_cast<__gm__ std::int8_t*>(quantized), kElements);
+-    smoothing_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(smoothing), kKeys);
+-    scales_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(scales), kValues);
+-    keys_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(keys), kCompensatorElements);
+-    values_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(values), kCompensatorElements);
+-    dense_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(dense), kElements);
++  __aicore__ inline void Init(GM_ADDR quantized, GM_ADDR smoothing,
++                              GM_ADDR scales, GM_ADDR keys, GM_ADDR values,
++                              GM_ADDR dense, std::uint32_t heads) {
++    heads_ = heads;
++    quantized_.SetGlobalBuffer(
++        reinterpret_cast<__gm__ std::int8_t*>(quantized), heads * kElements);
++    smoothing_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(smoothing),
++                               heads * kKeys);
++    scales_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(scales),
++                            heads * kValues);
++    keys_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(keys),
++                          heads * kCompensatorElements);
++    values_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(values),
++                            heads * kCompensatorElements);
++    dense_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(dense),
++                           heads * kElements);
+     pipe_.InitBuffer(quantized_buffer_, kValues * sizeof(std::int8_t));
+-    pipe_.InitBuffer(smoothing_buffer_, 32);
++    pipe_.InitBuffer(smoothing_buffer_, kKeys * sizeof(float));
+     pipe_.InitBuffer(scales_buffer_, kValues * sizeof(float));
+-    pipe_.InitBuffer(keys_buffer_, 32);
++    pipe_.InitBuffer(keys_buffer_, kCompensatorElements * sizeof(float));
+     pipe_.InitBuffer(values_buffer_, kCompensatorElements * sizeof(float));
++    pipe_.InitBuffer(values_transposed_buffer_, kCompensatorElements * sizeof(float));
++    pipe_.InitBuffer(low_rank_buffer_, kValues * sizeof(float));
+     pipe_.InitBuffer(dense_buffer_, kValues * sizeof(float));
+   }
+   __aicore__ inline void Process() {
+@@ -31,35 +42,70 @@ class DequantizeKernel {
+     auto scales = scales_buffer_.Get<float>();
+     auto keys = keys_buffer_.Get<float>();
+     auto values = values_buffer_.Get<float>();
++    auto values_transposed = values_transposed_buffer_.Get<float>();
++    auto low_rank = low_rank_buffer_.Get<float>();
+     auto dense = dense_buffer_.Get<float>();
+     const AscendC::DataCopyPadExtParams<std::int8_t> no_int8_pad{false, 0, 0, 0};
+     const AscendC::DataCopyPadExtParams<float> no_float_pad{false, 0, 0, 0.0F};
+-    const std::uint32_t row = AscendC::GetBlockIdx();
+     const AscendC::DataCopyExtParams quantized_copy{1, kValues * sizeof(std::int8_t), 0, 0, 0};
+-    const AscendC::DataCopyExtParams scalar_copy{1, sizeof(float), 0, 0, 0};
++    const AscendC::DataCopyExtParams smoothing_copy{1, kKeys * sizeof(float), 0, 0, 0};
+     const AscendC::DataCopyExtParams vector_copy{1, kValues * sizeof(float), 0, 0, 0};
+-    const AscendC::DataCopyExtParams key_copy{1, kRank * sizeof(float), 0, 0, 0};
+     const AscendC::DataCopyExtParams compensator_copy{1, kCompensatorElements * sizeof(float), 0, 0, 0};
+-    AscendC::DataCopyPad(quantized, quantized_[row * kValues], quantized_copy, no_int8_pad);
+-    AscendC::DataCopyPad(smoothing, smoothing_[row], scalar_copy, no_float_pad);
+-    AscendC::DataCopyPad(scales, scales_, vector_copy, no_float_pad);
+-    AscendC::DataCopyPad(keys, keys_[row * kRank], key_copy, no_float_pad);
+-    AscendC::DataCopyPad(values, values_, compensator_copy, no_float_pad);
+-    AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
+-    AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
+-    for (std::uint32_t column = 0; column < kValues; ++column) {
+-      float value = static_cast<float>(quantized.GetValue(column)) / 127.0F * scales.GetValue(column) * smoothing.GetValue(0);
+-      for (std::uint32_t rank = 0; rank < kRank; ++rank) {
+-        value += keys.GetValue(rank) * values.GetValue(column * kRank + rank);
++    const AscendC::DataCopyExtParams dense_copy{1, kValues * sizeof(float), 0, 0, 0};
++    for (std::uint32_t head = AscendC::GetBlockIdx(); head < heads_;
++         head += AscendC::GetBlockNum()) {
++      const std::uint32_t head_elements = head * kElements;
++      const std::uint32_t head_compensators = head * kCompensatorElements;
++      AscendC::DataCopyPad(smoothing, smoothing_[head * kKeys],
++                           smoothing_copy, no_float_pad);
++      AscendC::DataCopyPad(scales, scales_[head * kValues], vector_copy,
++                           no_float_pad);
++      AscendC::DataCopyPad(keys, keys_[head_compensators], compensator_copy,
++                           no_float_pad);
++      AscendC::DataCopyPad(values, values_[head_compensators],
++                           compensator_copy, no_float_pad);
++      AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
++      AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
++      for (std::uint32_t column = 0; column < kValues; ++column) {
++        for (std::uint32_t rank = 0; rank < kRank; ++rank) {
++          values_transposed.SetValue(rank * kValues + column,
++                                     values.GetValue(column * kRank + rank));
++        }
++      }
++      for (std::uint32_t row = 0; row < kKeys; ++row) {
++        AscendC::DataCopyPad(quantized,
++                             quantized_[head_elements + row * kValues],
++                             quantized_copy, no_int8_pad);
++        AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
++        AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
++        for (std::uint32_t column = 0; column < kValues; ++column) {
++          dense.SetValue(column,
++                         static_cast<float>(quantized.GetValue(column)));
++        }
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::Muls(dense, dense, smoothing.GetValue(row) / 127.0F,
++                      kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::Mul(dense, dense, scales, kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        for (std::uint32_t rank = 0; rank < kRank; ++rank) {
++          AscendC::Muls(low_rank, values_transposed[rank * kValues],
++                        keys.GetValue(row * kRank + rank), kValues);
++          AscendC::PipeBarrier<PIPE_V>();
++          AscendC::Add(dense, dense, low_rank, kValues);
++          AscendC::PipeBarrier<PIPE_V>();
++        }
++        AscendC::SetFlag<AscendC::HardEvent::V_MTE3>(0);
++        AscendC::WaitFlag<AscendC::HardEvent::V_MTE3>(0);
++        AscendC::DataCopyPad(dense_[head_elements + row * kValues], dense,
++                             dense_copy);
++        AscendC::SetFlag<AscendC::HardEvent::MTE3_V>(0);
++        AscendC::WaitFlag<AscendC::HardEvent::MTE3_V>(0);
+       }
+-      dense.SetValue(column, value);
+     }
+-    AscendC::SetFlag<AscendC::HardEvent::V_MTE3>(0);
+-    AscendC::WaitFlag<AscendC::HardEvent::V_MTE3>(0);
+-    const AscendC::DataCopyExtParams dense_copy{1, kValues * sizeof(float), 0, 0, 0};
+-    AscendC::DataCopyPad(dense_[row * kValues], dense, dense_copy);
+   }
+  private:
++  std::uint32_t heads_ = 0;
+   AscendC::GlobalTensor<std::int8_t> quantized_;
+   AscendC::GlobalTensor<float> smoothing_;
+   AscendC::GlobalTensor<float> scales_;
+@@ -72,18 +118,41 @@ class DequantizeKernel {
+   AscendC::TBuf<AscendC::TPosition::VECCALC> scales_buffer_;
+   AscendC::TBuf<AscendC::TPosition::VECCALC> keys_buffer_;
+   AscendC::TBuf<AscendC::TPosition::VECCALC> values_buffer_;
++  AscendC::TBuf<AscendC::TPosition::VECCALC> values_transposed_buffer_;
++  AscendC::TBuf<AscendC::TPosition::VECCALC> low_rank_buffer_;
+   AscendC::TBuf<AscendC::TPosition::VECCALC> dense_buffer_;
+ };
+ }  // namespace
+ 
+-extern "C" __global__ __aicore__ void statecentric_leapquant_dequantize(GM_ADDR quantized, GM_ADDR smoothing, GM_ADDR scales, GM_ADDR keys, GM_ADDR values, GM_ADDR dense) {
++extern "C" __global__ __aicore__ void statecentric_leapquant_dequantize(
++    GM_ADDR quantized, GM_ADDR smoothing, GM_ADDR scales, GM_ADDR keys,
++    GM_ADDR values, GM_ADDR dense, uint32_t heads) {
+   DequantizeKernel kernel;
+-  kernel.Init(quantized, smoothing, scales, keys, values, dense);
++  kernel.Init(quantized, smoothing, scales, keys, values, dense, heads);
+   kernel.Process();
+ }
+ 
+ extern "C" std::int32_t statecentric_leapquant_dequantize_launch_v1(void* stream, const std::int8_t* quantized, const float* smoothing, const float* scales, const float* keys, const float* values, float* dense) {
+   if (stream == nullptr || quantized == nullptr || smoothing == nullptr || scales == nullptr || keys == nullptr || values == nullptr || dense == nullptr) return 1;
+-  statecentric_leapquant_dequantize<<<128, nullptr, stream>>>(const_cast<std::int8_t*>(quantized), const_cast<float*>(smoothing), const_cast<float*>(scales), const_cast<float*>(keys), const_cast<float*>(values), dense);
++  statecentric_leapquant_dequantize<<<128, nullptr, stream>>>(
++      const_cast<std::int8_t*>(quantized), const_cast<float*>(smoothing),
++      const_cast<float*>(scales), const_cast<float*>(keys),
++      const_cast<float*>(values), dense, 1);
++  return 0;
++}
++
++extern "C" std::int32_t statecentric_leapquant_dequantize_launch_v2(
++    void* stream, const std::int8_t* quantized, const float* smoothing,
++    const float* scales, const float* keys, const float* values, float* dense,
++    uint32_t heads) {
++  if (stream == nullptr || quantized == nullptr || smoothing == nullptr ||
++      scales == nullptr || keys == nullptr || values == nullptr ||
++      dense == nullptr || heads == 0 || heads > 576) {
++    return 1;
++  }
++  statecentric_leapquant_dequantize<<<64, nullptr, stream>>>(
++      const_cast<std::int8_t*>(quantized), const_cast<float*>(smoothing),
++      const_cast<float*>(scales), const_cast<float*>(keys),
++      const_cast<float*>(values), dense, heads);
+   return 0;
+ }
+diff --git a/native/ascendc/leapquant_state_codec/kernel/leapquant_quantize.cpp b/native/ascendc/leapquant_state_codec/kernel/leapquant_quantize.cpp
+index ee67a0ba8..c4afd2b83 100644
+--- a/native/ascendc/leapquant_state_codec/kernel/leapquant_quantize.cpp
++++ b/native/ascendc/leapquant_state_codec/kernel/leapquant_quantize.cpp
+@@ -10,52 +10,100 @@ __aicore__ inline float Absolute(float value) { return value < 0.0F ? -value : v
+ 
+ class QuantizeKernel {
+  public:
+-  __aicore__ inline void Init(GM_ADDR residual, GM_ADDR smoothing, GM_ADDR quantized, GM_ADDR scales) {
+-    residual_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(residual), kElements);
+-    smoothing_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(smoothing), kKeys);
+-    quantized_.SetGlobalBuffer(reinterpret_cast<__gm__ std::int8_t*>(quantized), kElements);
+-    scales_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(scales), kValues);
+-    // A 4-byte strided GM block is padded to one 32-byte UB data block.
+-    pipe_.InitBuffer(residual_buffer_, kKeys * 32);
++  __aicore__ inline void Init(GM_ADDR residual, GM_ADDR smoothing,
++                              GM_ADDR quantized, GM_ADDR scales,
++                              std::uint32_t heads) {
++    heads_ = heads;
++    residual_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(residual),
++                              heads * kElements);
++    smoothing_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(smoothing),
++                               heads * kKeys);
++    quantized_.SetGlobalBuffer(
++        reinterpret_cast<__gm__ std::int8_t*>(quantized), heads * kElements);
++    scales_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(scales),
++                            heads * kValues);
++    pipe_.InitBuffer(residual_buffer_, kValues * sizeof(float));
+     pipe_.InitBuffer(smoothing_buffer_, kKeys * sizeof(float));
+-    // Each 1-byte UB-to-GM strided block likewise starts on a 32-byte boundary.
+-    pipe_.InitBuffer(quantized_buffer_, kKeys * 32);
+-    pipe_.InitBuffer(scales_buffer_, 32);
++    pipe_.InitBuffer(normalized_buffer_, kValues * sizeof(float));
++    pipe_.InitBuffer(divisor_buffer_, kValues * sizeof(float));
++    pipe_.InitBuffer(quantized_buffer_, kValues * sizeof(std::int8_t));
++    pipe_.InitBuffer(scales_buffer_, kValues * sizeof(float));
+   }
+   __aicore__ inline void Process() {
+     auto residual = residual_buffer_.Get<float>();
+     auto smoothing = smoothing_buffer_.Get<float>();
++    auto normalized = normalized_buffer_.Get<float>();
++    auto divisor = divisor_buffer_.Get<float>();
+     auto quantized = quantized_buffer_.Get<std::int8_t>();
+     auto scales = scales_buffer_.Get<float>();
+-    const std::uint32_t column = AscendC::GetBlockIdx();
+-    const AscendC::DataCopyExtParams residual_copy{kKeys, sizeof(float), (kValues - 1) * sizeof(float), 0, 0};
++    const AscendC::DataCopyExtParams residual_copy{1, kValues * sizeof(float), 0, 0, 0};
+     const AscendC::DataCopyExtParams smoothing_copy{1, kKeys * sizeof(float), 0, 0, 0};
+     const AscendC::DataCopyPadExtParams<float> no_pad{false, 0, 0, 0.0F};
+-    AscendC::DataCopyPad(residual, residual_[column], residual_copy, no_pad);
+-    AscendC::DataCopyPad(smoothing, smoothing_, smoothing_copy, no_pad);
+-    AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
+-    AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
+-    float maximum = 0.0F;
+-    for (std::uint32_t row = 0; row < kKeys; ++row) {
+-      const float value = Absolute(residual.GetValue(row * 8) / smoothing.GetValue(row));
+-      maximum = value > maximum ? value : maximum;
++    const AscendC::DataCopyExtParams quantized_copy{1, kValues * sizeof(std::int8_t), 0, 0, 0};
++    const AscendC::DataCopyExtParams scales_copy{1, kValues * sizeof(float), 0, 0, 0};
++    for (std::uint32_t head = AscendC::GetBlockIdx(); head < heads_;
++         head += AscendC::GetBlockNum()) {
++      const std::uint32_t head_elements = head * kElements;
++      AscendC::DataCopyPad(smoothing, smoothing_[head * kKeys],
++                           smoothing_copy, no_pad);
++      AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
++      AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
++      AscendC::Duplicate(scales, 0.0F, kValues);
++      AscendC::PipeBarrier<PIPE_V>();
++      for (std::uint32_t row = 0; row < kKeys; ++row) {
++        AscendC::DataCopyPad(residual,
++                             residual_[head_elements + row * kValues],
++                             residual_copy, no_pad);
++        AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
++        AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
++        AscendC::Duplicate(divisor, smoothing.GetValue(row), kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::Div(residual, residual, divisor, kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::Abs(normalized, residual, kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::Max(scales, scales, normalized, kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::SetFlag<AscendC::HardEvent::V_MTE2>(0);
++        AscendC::WaitFlag<AscendC::HardEvent::V_MTE2>(0);
++      }
++      AscendC::SetFlag<AscendC::HardEvent::V_MTE3>(0);
++      AscendC::WaitFlag<AscendC::HardEvent::V_MTE3>(0);
++      AscendC::DataCopyPad(scales_[head * kValues], scales, scales_copy);
++      AscendC::Maxs(normalized, scales, 1.0e-30F, kValues);
++      AscendC::PipeBarrier<PIPE_V>();
++      for (std::uint32_t row = 0; row < kKeys; ++row) {
++        AscendC::DataCopyPad(residual,
++                             residual_[head_elements + row * kValues],
++                             residual_copy, no_pad);
++        AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
++        AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
++        AscendC::Duplicate(divisor, smoothing.GetValue(row), kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::Div(residual, residual, divisor, kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::Div(residual, residual, normalized, kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        AscendC::Muls(residual, residual, 127.0F, kValues);
++        AscendC::PipeBarrier<PIPE_V>();
++        for (std::uint32_t column = 0; column < kValues; ++column) {
++          const float scaled = residual.GetValue(column);
++          float rounded = scaled >= 0.0F ? scaled + 0.5F : scaled - 0.5F;
++          rounded = rounded > 127.0F ? 127.0F : rounded;
++          rounded = rounded < -127.0F ? -127.0F : rounded;
++          quantized.SetValue(column, static_cast<std::int8_t>(rounded));
++        }
++        AscendC::SetFlag<AscendC::HardEvent::V_MTE3>(0);
++        AscendC::WaitFlag<AscendC::HardEvent::V_MTE3>(0);
++        AscendC::DataCopyPad(quantized_[head_elements + row * kValues],
++                             quantized, quantized_copy);
++        AscendC::SetFlag<AscendC::HardEvent::MTE3_V>(0);
++        AscendC::WaitFlag<AscendC::HardEvent::MTE3_V>(0);
++      }
+     }
+-    scales.SetValue(0, maximum);
+-    for (std::uint32_t row = 0; row < kKeys; ++row) {
+-      const float scaled = maximum == 0.0F ? 0.0F : residual.GetValue(row * 8) / smoothing.GetValue(row) / maximum * 127.0F;
+-      float rounded = scaled >= 0.0F ? scaled + 0.5F : scaled - 0.5F;
+-      rounded = rounded > 127.0F ? 127.0F : rounded;
+-      rounded = rounded < -127.0F ? -127.0F : rounded;
+-      quantized.SetValue(row * 32, static_cast<std::int8_t>(rounded));
+-    }
+-    AscendC::SetFlag<AscendC::HardEvent::V_MTE3>(0);
+-    AscendC::WaitFlag<AscendC::HardEvent::V_MTE3>(0);
+-    const AscendC::DataCopyExtParams quantized_copy{kKeys, sizeof(std::int8_t), 0, kValues - 1, 0};
+-    const AscendC::DataCopyExtParams scales_copy{1, sizeof(float), 0, 0, 0};
+-    AscendC::DataCopyPad(quantized_[column], quantized, quantized_copy);
+-    AscendC::DataCopyPad(scales_[column], scales, scales_copy);
+   }
+  private:
++  std::uint32_t heads_ = 0;
+   AscendC::GlobalTensor<float> residual_;
+   AscendC::GlobalTensor<float> smoothing_;
+   AscendC::GlobalTensor<std::int8_t> quantized_;
+@@ -63,19 +111,39 @@ class QuantizeKernel {
+   AscendC::TPipe pipe_;
+   AscendC::TBuf<AscendC::TPosition::VECCALC> residual_buffer_;
+   AscendC::TBuf<AscendC::TPosition::VECCALC> smoothing_buffer_;
++  AscendC::TBuf<AscendC::TPosition::VECCALC> normalized_buffer_;
++  AscendC::TBuf<AscendC::TPosition::VECCALC> divisor_buffer_;
+   AscendC::TBuf<AscendC::TPosition::VECCALC> quantized_buffer_;
+   AscendC::TBuf<AscendC::TPosition::VECCALC> scales_buffer_;
+ };
+ }  // namespace
+ 
+-extern "C" __global__ __aicore__ void statecentric_leapquant_quantize(GM_ADDR residual, GM_ADDR smoothing, GM_ADDR quantized, GM_ADDR scales) {
++extern "C" __global__ __aicore__ void statecentric_leapquant_quantize(
++    GM_ADDR residual, GM_ADDR smoothing, GM_ADDR quantized, GM_ADDR scales,
++    uint32_t heads) {
+   QuantizeKernel kernel;
+-  kernel.Init(residual, smoothing, quantized, scales);
++  kernel.Init(residual, smoothing, quantized, scales, heads);
+   kernel.Process();
+ }
+ 
+ extern "C" std::int32_t statecentric_leapquant_quantize_launch_v1(void* stream, const float* residual, const float* smoothing, std::int8_t* quantized, float* scales) {
+   if (stream == nullptr || residual == nullptr || smoothing == nullptr || quantized == nullptr || scales == nullptr) return 1;
+-  statecentric_leapquant_quantize<<<128, nullptr, stream>>>(const_cast<float*>(residual), const_cast<float*>(smoothing), quantized, scales);
++  statecentric_leapquant_quantize<<<128, nullptr, stream>>>(
++      const_cast<float*>(residual), const_cast<float*>(smoothing), quantized,
++      scales, 1);
++  return 0;
++}
++
++extern "C" std::int32_t statecentric_leapquant_quantize_launch_v2(
++    void* stream, const float* residual, const float* smoothing,
++    std::int8_t* quantized, float* scales, std::uint32_t heads) {
++  if (stream == nullptr || residual == nullptr || smoothing == nullptr ||
++      quantized == nullptr || scales == nullptr || heads == 0 ||
++      heads > 576) {
++    return 1;
++  }
++  statecentric_leapquant_quantize<<<64, nullptr, stream>>>(
++      const_cast<float*>(residual), const_cast<float*>(smoothing), quantized,
++      scales, heads);
+   return 0;
+ }
+diff --git a/native/ascendc/leapquant_state_codec/kernel/leapquant_smoothing.cpp b/native/ascendc/leapquant_state_codec/kernel/leapquant_smoothing.cpp
+index a3b49cfe3..8db5ac0e8 100644
+--- a/native/ascendc/leapquant_state_codec/kernel/leapquant_smoothing.cpp
++++ b/native/ascendc/leapquant_state_codec/kernel/leapquant_smoothing.cpp
+@@ -19,33 +19,47 @@ __aicore__ inline float SquareRoot(float value) {
+ 
+ class SmoothingKernel {
+  public:
+-  __aicore__ inline void Init(GM_ADDR residual, GM_ADDR smoothing) {
+-    residual_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(residual), kElements);
+-    smoothing_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(smoothing), kKeys);
++  __aicore__ inline void Init(GM_ADDR residual, GM_ADDR smoothing,
++                              std::uint32_t heads) {
++    heads_ = heads;
++    residual_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(residual),
++                              heads * kElements);
++    smoothing_.SetGlobalBuffer(reinterpret_cast<__gm__ float*>(smoothing),
++                               heads * kKeys);
+     pipe_.InitBuffer(residual_buffer_, kValues * sizeof(float));
+     pipe_.InitBuffer(smoothing_buffer_, 32);
+   }
+   __aicore__ inline void Process() {
+     auto residual = residual_buffer_.Get<float>();
+     auto smoothing = smoothing_buffer_.Get<float>();
+-    const std::uint32_t row = AscendC::GetBlockIdx();
+     const AscendC::DataCopyExtParams residual_copy{1, kValues * sizeof(float), 0, 0, 0};
+     const AscendC::DataCopyPadExtParams<float> no_pad{false, 0, 0, 0.0F};
+-    AscendC::DataCopyPad(residual, residual_[row * kValues], residual_copy, no_pad);
+-    AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
+-    AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
+-    float sum = 0.0F;
+-    for (std::uint32_t column = 0; column < kValues; ++column) {
+-      sum += Absolute(residual.GetValue(column));
+-    }
+-    const float mean = sum / 128.0F;
+-    smoothing.SetValue(0, SquareRoot(mean > kFloor ? mean : kFloor));
+-    AscendC::SetFlag<AscendC::HardEvent::V_MTE3>(0);
+-    AscendC::WaitFlag<AscendC::HardEvent::V_MTE3>(0);
+     const AscendC::DataCopyExtParams smoothing_copy{1, sizeof(float), 0, 0, 0};
+-    AscendC::DataCopyPad(smoothing_[row], smoothing, smoothing_copy);
++    const std::uint32_t tasks = heads_ * kKeys;
++    for (std::uint32_t task = AscendC::GetBlockIdx(); task < tasks;
++         task += AscendC::GetBlockNum()) {
++      const std::uint32_t head = task / kKeys;
++      const std::uint32_t row = task % kKeys;
++      const std::uint32_t row_offset = head * kElements + row * kValues;
++      AscendC::DataCopyPad(residual, residual_[row_offset], residual_copy,
++                           no_pad);
++      AscendC::SetFlag<AscendC::HardEvent::MTE2_V>(0);
++      AscendC::WaitFlag<AscendC::HardEvent::MTE2_V>(0);
++      float sum = 0.0F;
++      for (std::uint32_t column = 0; column < kValues; ++column) {
++        sum += Absolute(residual.GetValue(column));
++      }
++      const float mean = sum / 128.0F;
++      smoothing.SetValue(
++          0, SquareRoot(mean > kFloor ? mean : kFloor));
++      AscendC::SetFlag<AscendC::HardEvent::V_MTE3>(0);
++      AscendC::WaitFlag<AscendC::HardEvent::V_MTE3>(0);
++      AscendC::DataCopyPad(smoothing_[head * kKeys + row], smoothing,
++                           smoothing_copy);
++    }
+   }
+  private:
++  std::uint32_t heads_ = 0;
+   AscendC::GlobalTensor<float> residual_;
+   AscendC::GlobalTensor<float> smoothing_;
+   AscendC::TPipe pipe_;
+@@ -54,14 +68,28 @@ class SmoothingKernel {
+ };
+ }  // namespace
+ 
+-extern "C" __global__ __aicore__ void statecentric_leapquant_smoothing(GM_ADDR residual, GM_ADDR smoothing) {
++extern "C" __global__ __aicore__ void statecentric_leapquant_smoothing(
++    GM_ADDR residual, GM_ADDR smoothing, uint32_t heads) {
+   SmoothingKernel kernel;
+-  kernel.Init(residual, smoothing);
++  kernel.Init(residual, smoothing, heads);
+   kernel.Process();
+ }
+ 
+ extern "C" std::int32_t statecentric_leapquant_smoothing_launch_v1(void* stream, const float* residual, float* smoothing) {
+   if (stream == nullptr || residual == nullptr || smoothing == nullptr) return 1;
+-  statecentric_leapquant_smoothing<<<128, nullptr, stream>>>(const_cast<float*>(residual), smoothing);
++  statecentric_leapquant_smoothing<<<128, nullptr, stream>>>(
++      const_cast<float*>(residual), smoothing, 1);
++  return 0;
++}
++
++extern "C" std::int32_t statecentric_leapquant_smoothing_launch_v2(
++    void* stream, const float* residual, float* smoothing,
++    uint32_t heads) {
++  if (stream == nullptr || residual == nullptr || smoothing == nullptr ||
++      heads == 0 || heads > 576) {
++    return 1;
++  }
++  statecentric_leapquant_smoothing<<<64, nullptr, stream>>>(
++      const_cast<float*>(residual), smoothing, heads);
+   return 0;
+ }
+diff --git a/native/include/statecentric/leapquant_state_codec_kernel.h b/native/include/statecentric/leapquant_state_codec_kernel.h
+index 40b7e5f65..3d65bfd80 100644
+--- a/native/include/statecentric/leapquant_state_codec_kernel.h
++++ b/native/include/statecentric/leapquant_state_codec_kernel.h
+@@ -13,3 +13,18 @@ extern "C" std::int32_t statecentric_leapquant_dequantize_launch_v1(
+     void* stream, const std::int8_t* quantized, const float* smoothing,
+     const float* value_scales, const float* compensator_keys,
+     const float* compensator_values, float* dense);
++
++// Batched ABI for contiguous [head,key,value] tensors. One device launch
++// covers every head; callers must not emulate batching with a host loop.
++extern "C" std::int32_t statecentric_leapquant_smoothing_launch_v2(
++    void* stream, const float* residual, float* smoothing,
++    std::uint32_t heads);
++
++extern "C" std::int32_t statecentric_leapquant_quantize_launch_v2(
++    void* stream, const float* residual, const float* smoothing,
++    std::int8_t* quantized, float* value_scales, std::uint32_t heads);
++
++extern "C" std::int32_t statecentric_leapquant_dequantize_launch_v2(
++    void* stream, const std::int8_t* quantized, const float* smoothing,
++    const float* value_scales, const float* compensator_keys,
++    const float* compensator_values, float* dense, std::uint32_t heads);
