@@ -39,21 +39,27 @@ def inventory(website, benchmark_revision="HEAD", website_revision="HEAD"):
         if not path.startswith(PREFIXES):
             continue
         matches = sorted(sources.get(oid, []))
-        rows.append({
-            "website_path": path,
-            "website_git_blob": oid,
-            "status": "existing-identical-source" if matches else "needs-provenance-review",
-            "benchmark_paths": matches,
-            "action": "reuse-existing-source" if matches else "trace-or-migrate-original",
-        })
+        rows.append(
+            {
+                "website_path": path,
+                "website_git_blob": oid,
+                "status": "existing-identical-source"
+                if matches
+                else "needs-provenance-review",
+                "benchmark_paths": matches,
+                "action": "reuse-existing-source"
+                if matches
+                else "trace-or-migrate-original",
+            }
+        )
     return {
         "schema": "website-source-consolidation-audit/v1",
-        "website_commit": git(
-            website, "rev-parse", f"{website_revision}^{{commit}}"
-        ).decode().strip(),
-        "benchmark_commit": git(
-            ROOT, "rev-parse", f"{benchmark_revision}^{{commit}}"
-        ).decode().strip(),
+        "website_commit": git(website, "rev-parse", f"{website_revision}^{{commit}}")
+        .decode()
+        .strip(),
+        "benchmark_commit": git(ROOT, "rev-parse", f"{benchmark_revision}^{{commit}}")
+        .decode()
+        .strip(),
         "scope": list(PREFIXES),
         "counts": dict(collections.Counter(row["status"] for row in rows)),
         "limitations": [
@@ -69,7 +75,7 @@ def inventory(website, benchmark_revision="HEAD", website_revision="HEAD"):
                 "status": "documented-location-not-live-verified",
             },
             {
-                "path": "/data/codex-build-work/frontier-mods-qwen35-20260925",
+                "path": "/data/codex-build-work/frontier-mods-qwen35-20260925",  # pragma: allowlist secret
                 "evidence": "vllm-hust-dev-hub/config/frontier-mod-campaign-20260925.json",
                 "status": "documented-location-not-live-verified",
             },
