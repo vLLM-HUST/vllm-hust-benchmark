@@ -44,7 +44,7 @@ tokens/s；Controller 1198.922316 秒增加 125712，104.8542 tokens/s。采样�
 保留 Qwen3.5-35B-A3B BF16 TP2、Ascend 910B2 两卡、每卡 16 GiB KV、max sequences/图上限 256、batch tokens 4095、APC
 与 Mamba align。每臂前后实际两个 worker 的 epoch、有效引擎参数、包与已加载源码一致；没有重启模型。两臂开始前分别排空并重置 prefix cache。固定官方
 ThunderAgent 核心经 17 源核对，只以 scheduling_enabled 区分 Native 与 Controller；调度/指标间隔 5 秒、acting weight
-1、decay=false。复算实际 256K 模型缓存布局后，沿用账本容量 1654784 / 每 program 缓冲 14335，不用旧代理的 32K 元数据冒充当前引擎长度。
+1、decay=false。复算实际 256K 模型缓存布局后，沿用容量估计容量 1654784 / 每 program 缓冲 14335，不用旧代理的 32K 元数据冒充当前引擎长度。
 
 执行入口为维护中的 benchmark runner；源码提交、运行文件与输入 SHA 见 [report.json](report.json)。默认干净仓库检查保持严格；仅显式允许不可变 ARM
 镜像原有 Redis 数据路径 `appendonlydir/` 与 `appendonly.aof`。错误 HEAD、tracked 修改或其他额外未跟踪路径仍拒绝。真实 Git 状态测试及相关
@@ -98,4 +98,4 @@ tokens/调用；24.7%的输出总量优势同时包含11.6%的完成调用增加
 
 ## Controller内部行为审计
 
-[内部行为、指标缺口和约2倍预期差距](controller-internals-analysis.md)：新增实际ACTIVE/PAUSED、容量账本、future/shared和动作图，保留未解释的因果边界。
+[内部行为、指标缺口和约2倍预期差距](controller-internals-analysis.md)：新增实际ACTIVE/PAUSED、容量估计、future/shared和动作图，保留未解释的因果边界。

@@ -2,7 +2,7 @@
 
 本轮尚未复现约2倍性能提升。完整窗口调用完成量比值为1.116，返回输出比值为1.247，不能把后者当相同逐请求工作量的调度加速。此前仅展示事件总量和引擎图，不足以解释决策；本次从相同已归档原件补出内部审计，0新增Agent/模型请求。
 
-![Controller内部状态、账本与动作](figures/comparison/controller-internals.png)
+![Controller内部状态、容量估计与动作](figures/comparison/controller-internals.png)
 
 ## 固定源码身份与pause语义
 
@@ -12,7 +12,7 @@ pause是program级准入控制，不是引擎中途抢占或立即释放物理KV
 
 Controller整个臂（含准备/排空）Marked1105/Paused1087/Resumed1046；窗口边界分别1105、1086–1087、1045–1046。全臂有128个program被标记、127个有Paused日志、127个有Resumed日志；最大单program16次pause、15次resume。初始新program直接入队也算PAUSED状态，但不一定出现Paused日志，因此不能把全128暂停状态与127个Paused日志误认为矛盾。恢复组日志全臂reasoning1014/new29/acting3，动作绝大部分围绕已有待推理program，而非长工具调用。
 
-## 发现一：轻微超账本触发整组标记
+## 发现一：轻微超过容量估计触发整组标记
 
 约26.14秒真实快照：active101，paused27，active_program_tokens208232，capacity1654784，buffer_per_program14335。按官方remaining_capacity公式，1654784-(208232+101\*14335)=-1283。随后原日志一次Scheduler
 paused/marked101programs；约32.29秒快照active0/paused128。此处数据来自相邻不同采样点，不能冒充同一原子决策快照或逐行精确发生时刻。
@@ -24,13 +24,13 @@ paused/marked101programs；约32.29秒快照active0/paused128。此处数据来�
 ## 发现二：共享缓存抵扣未接入该调度路径
 
 两臂逐秒scheduler-diagnostics的shared_tokens全程0。官方BackendState.update_shared_tokens确实定义了按reasoning_program_tokens与物理占用等价值计算抵扣的方法，但固定路由的调度路径没有调用；backend.fetch_metrics也只更新metrics_client。引擎prefix
-cache命中确有发生，它与账本shared_tokens是不同指标。不能把账本0解释成没有prefix
+cache命中确有发生，它与容量估计shared_tokens是不同指标。不能把容量估计0解释成没有prefix
 cache复用；也不能未经混合缓存验证直接启用抵扣，避免把Mamba/Attention驻留估计混成物理精确值。
 
 ## 发现三：每program预留本身足以迫使128批次限准入
 
-128\*14335=1834880，大于账本总容量1654784，尚未计任何上下文token。当前buffer是混合缓存布局推导的保守上界，代价是只要128都登记即必然超账本。Native首次负账本快照active128、active
-tokens274368，对应remaining=-454464，符合该公式。Controller因此围绕账本上限反复限制准入，而实际引擎KV峰62.75%，Native68.44%。
+128\*14335=1834880，大于配置容量1654784，尚未计任何上下文token。当前buffer是混合缓存布局推导的保守上界，代价是只要128都登记即必然超容量估计。Native首次剩余容量估计为负快照active128、active
+tokens274368，对应remaining=-454464，符合该公式。Controller因此围绕容量估计上限反复限制准入，而实际引擎KV峰62.75%，Native68.44%。
 
 这不证明应任意缩小buffer，也不证明物理KV低就一定没有缓存压力；要核对实际每program Mamba块驻留、Attention舍入与上界余量。不能缩容量/调预留以追求预设正收益。
 
@@ -42,7 +42,7 @@ tokens274368，对应remaining=-454464，符合该公式。Controller因此围�
 | global_waiting_queue长度、ACTIVE/PAUSED、reasoning/acting、每program token与step_count | /programs、diagnostics、/health                     | 已采集状态及队列，但此前只展示少量平均值；队列等待年龄未采                             |
 | reasoning/acting token分项、buffer、capacity_overflow、active_program_tokens_ratio     | 上游JSON /metrics                                   | 原生可提供，未做完整连续采样；部分可从program快照近似重建，跨接口非原子                |
 | marked_for_pause每program、paused_at、origin_backend、等待候选顺序                     | Program/PausedInfo内部字段；/health有部分marked聚合 | /programs未输出marked；diagnostics队列未输出paused_at/排序/来源。仅日志能追部分标记    |
-| 每次调度tick的before/after账本、选中/跳过候选及理由、执行耗时、指标数据年龄            | 内部决策过程                                        | 未结构化记录；不能回填成原子决策轨迹                                                   |
+| 每轮调度的before/after容量估计、选中/跳过候选及理由、执行耗时、指标数据年龄            | 内部决策过程                                        | 未结构化记录；不能回填成原子决策轨迹                                                   |
 | pause_time、prefill_time、decode_time、cached_tokens及step_profiles.csv                | /profiles与ProfileState                             | 本轮profile_enabled=false，没有记录，不能补造                                          |
 | request到达代理→放行→引擎排队/首Token→结束→客户端收到                                  | 跨层request关联                                     | 客户端query与tool时间已记录；代理逐请求分段没有打开。非流式不能从首尾回执恢复TTFT/TPOT |
 | 公平性：每program暂停总时长、最长连续等待、切换次数/千次完成调用                       | 部分可由状态/动作导出                               | 次数可复算，精确等待缺时间戳；右删失和初始入队必须分开                                 |
@@ -60,3 +60,12 @@ Together官方单节点实例：SGLang+HiCache、8×H100、batch192，吞吐390�
 
 额外单位与估计误差缺口：上游`context_len`实际是整个JSON
 payload的字符数，并非Token；request前用全局`char_to_token_ratio`估计`total_tokens`，回复后才以usage回写。这个比例及逐请求估计误差没有导出。`reasoning`还包含等待准入和引擎排队，不能当GPU正在运行；`acting`是代理收到回复后的状态，不等同客户端已收到或工具已开始。
+
+## 术语与观测层级
+
+原图使用的“accounting tokens”不是通用性能指标，已删除。主性能报告按标准指标区分：客户端request throughput、output token
+throughput、end-to-end latency；Controller admission control、queue length、active/paused program
+count、pause duration；引擎running/waiting requests、KV cache usage、prefix cache hit
+rate、preemptions；设备NPU utilization、HBM
+usage。内部字段active_program_tokens/shared_tokens/future_paused_tokens保留原始源码名，仅作调度器估计，不冒充实测KV cache
+usage。TTFT/TPOT本轮没有逐请求观测，不能由非流式首尾时间补造。
