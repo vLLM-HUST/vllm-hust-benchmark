@@ -58,6 +58,11 @@ A 是登记为 active 的 program，不等于引擎正在执行的 request；B �
 全窗口引擎平均queue
 time为45.40/14.25秒，prefill为1.62/1.51秒，decode为25.70/23.99秒。引擎全局完成数与客户端返回数仍差27/28，未逐请求核销，因此这些全局统计只说明引擎层的相关现象，不能逐个归属于客户端正常返回集合。
 
+![引擎内部首token与每输出token耗时](figures/four-layers/engine-token-latency.png)
+
+补齐原始引擎直方图的TTFT（time to first token，首token时间）和TPOT（time per output
+token，每输出token时间）。最后600秒，引擎TTFT均值145.53/36.61秒，而每请求加权TPOT均值483.50/443.65毫秒，后者下降约8.2%，远小于首token等待的变化。图采用各自直方图sum/count增量，TTFT观察数与已完成请求数不同；不包含Controller准入等待，也不是非流式客户端可见的逐token到达时间。它进一步支持差异主要体现在引擎等待，而不能证明kernel计算速度提高相同比例。
+
 ### vLLM卡在哪里：结论的强弱
 
 1. **直接观察：长上下文阶段有明显的引擎排队压力。** 最后600秒Native平均约79个请求等待，queue
