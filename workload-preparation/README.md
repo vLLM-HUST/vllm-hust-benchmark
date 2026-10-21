@@ -71,3 +71,5 @@ python -m pytest -q workload-preparation/tests tests/test_workload_data_boundary
 ```
 
 上述测试是 CPU 软件正确性检查，不加载模型，不证明真实数据集完整执行或性能提升。
+
+独立知识问答任务的原版候选似然执行示例见 [ARC-Challenge 抽样复现](../docs/workload-data/ARC_CHALLENGE.zh-CN.md)，与聊天生成协议分开。
