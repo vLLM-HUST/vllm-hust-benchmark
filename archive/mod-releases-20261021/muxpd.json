@@ -1,0 +1,74 @@
+{
+  "schema": "mod-release-custody/v1",
+  "releases": [
+    {
+      "tag": "evidence-tp4-goodput-20261011",
+      "source": "vLLM-HUST/vllm-ascend-MuxPD-hust",
+      "source_release_id": 409719968,
+      "source_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/releases/tag/evidence-tp4-goodput-20261011",
+      "source_target_commitish": "681a69f31000f286ce1b21b92a80a50e42af98e1",
+      "original_body": "TP4+EP4 interactive Goodput evidence for Qwen3.5-35B-A3B on Ascend 910B2.\n\nThree held-out arrival seeds with card-group crossover give 117/378 → 368/378 requests meeting scheduled TTFT≤1 s and every single-token gap≤100 ms: **3.145× Goodput**. A separate same-card serial confirmation gives 22/71 → 68/71: **3.091× Goodput**. Fixed-window throughput is effectively unchanged; reduced per-request stalls come with slower TTFT and pooled token-gap P99.\n\n[Full report](https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/blob/681a69f31000f286ce1b21b92a80a50e42af98e1/docs/performance-tp4-goodput.md) · [Reproduction and verification](https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/blob/681a69f31000f286ce1b21b92a80a50e42af98e1/evidence/2026-10-11-tp4-goodput/README.md)\n\nThe raw archive contains 763 original files (1,093,786,647 bytes): all pilot/confirmation reports, raw SSE/chunk journals, 20 passing raw audits, frozen plans, source/configuration pins, CPU snapshots and preserved readiness failures. Every decompressed member was checked against its original SHA256. A relocated sample raw-audit replay also passed.\n\n`tp4-goodput-evidence.tar.gz`: 94,280,420 bytes, SHA256 `58e97810b71bfb32c4717c1e590695f6ca6cebb09e1922577e6758c18ce41502`.\n\nThese results cover the declared fixed-load scenario and tested native configurations. They do not establish maximum sustainable throughput, universal speedups, hardware resource partitioning or arbitrary-input numerical equivalence. All SLO thresholds and latency costs are retained in the report.\n",
+      "draft": false,
+      "prerelease": true,
+      "destination_release_id": 419424952,
+      "destination_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-tp4-goodput-20261011",
+      "assets": [
+        {
+          "name": "archive-index.json",
+          "bytes": 165382,
+          "digest": "sha256:77a52b18cffae608e82bab8f9e6896d6e609e0bea3739b835083c1ef5732f3b2",
+          "source_id": 630962106,
+          "source_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/releases/download/evidence-tp4-goodput-20261011/archive-index.json",
+          "destination_id": 662140807,
+          "destination_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-tp4-goodput-20261011/archive-index.json",
+          "download_back_verified": true
+        },
+        {
+          "name": "tp4-goodput-evidence.tar.gz",
+          "bytes": 94280420,
+          "digest": "sha256:58e97810b71bfb32c4717c1e590695f6ca6cebb09e1922577e6758c18ce41502",
+          "source_id": 630962111,
+          "source_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/releases/download/evidence-tp4-goodput-20261011/tp4-goodput-evidence.tar.gz",
+          "destination_id": 662141898,
+          "destination_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-tp4-goodput-20261011/tp4-goodput-evidence.tar.gz",
+          "download_back_verified": true
+        },
+        {
+          "name": "verification.json",
+          "bytes": 364,
+          "digest": "sha256:f75ab2d5e8963d6b7a35f91840bf7c2729a8211c16caddd62193ca25a2083ec4",
+          "source_id": 630962109,
+          "source_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/releases/download/evidence-tp4-goodput-20261011/verification.json",
+          "destination_id": 662144899,
+          "destination_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-tp4-goodput-20261011/verification.json",
+          "download_back_verified": true
+        }
+      ]
+    },
+    {
+      "tag": "evidence-tp4-groupfx-20261012",
+      "source": "vLLM-HUST/vllm-ascend-MuxPD-hust",
+      "source_release_id": 409790653,
+      "source_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/releases/tag/evidence-tp4-groupfx-20261012",
+      "source_target_commitish": "test/tp4-prefill-group-validation",
+      "original_body": "Raw TP4 diagnostics for PR #12 and experimental PR #10; unresolved numerical follow-up: #11.\n\nTwo TP4 roles use identical runtime f09a100 and native fusion backend. Numeric transport completes 19/19 per role, natural-language checks match 16/16, and the candidate passes endpoint/cancellation/reuse checks. Synthetic cross-role exact sequence agreement is 9/19; no group-FX performance or arbitrary-input equivalence claim is made.\n\nThe archive contains 348 files and 138,926,948 uncompressed bytes, including all 80 admissions (79 complete, one planned cancellation), plans, raw SSE/journals, traces/logs, source snapshots, compiler artifacts, audit tools and test/stop receipts. Compressed size: 15,707,721 bytes.\n\nSHA256: a931a7329ad534f03fb7d05e7845b43125c19637b7daf33b146dd9aeebcfe951\n\nEvery extracted member was hash-verified. Portable numeric replay in a different directory reads all seven required artifacts only from the archive and reproduces the sealed result. See README.md and SHA256SUMS.json inside the package. Archived launch scripts are historical recipes, not part of offline replay.\n",
+      "draft": false,
+      "prerelease": false,
+      "destination_release_id": 419427304,
+      "destination_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/tag/evidence-tp4-groupfx-20261012",
+      "assets": [
+        {
+          "name": "tp4-groupfx-20261012.tar.gz",
+          "bytes": 15707721,
+          "digest": "sha256:a931a7329ad534f03fb7d05e7845b43125c19637b7daf33b146dd9aeebcfe951",
+          "source_id": 631252865,
+          "source_url": "https://github.com/vLLM-HUST/vllm-ascend-MuxPD-hust/releases/download/evidence-tp4-groupfx-20261012/tp4-groupfx-20261012.tar.gz",
+          "destination_id": 662145460,
+          "destination_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/releases/download/evidence-tp4-groupfx-20261012/tp4-groupfx-20261012.tar.gz",
+          "download_back_verified": true
+        }
+      ]
+    }
+  ],
+  "source_cleanup": "not performed; pending consumer migration"
+}
