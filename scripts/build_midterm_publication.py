@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "903fd7d41a28498b582d2d53a752f51bfef7feed"  # pragma: allowlist secret
+REVISION = "d2ce1a0d797c6cc72ebae5771f3372711bab0b9f"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v056.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v057.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
@@ -29,6 +29,7 @@ EVIDENCE = {
     "quality": ["quality-regression/raw", "quality-regression/finish-breakdown.json"],
     "recovered-quality": ["quality-regression/recovered-20261021"],
     "long-context": ["long-context-originals.tar.gz", "long-context-originals.json"],
+    "current-b1-long-context": ["long-context-current-b1-20261021"],
     "long-diagnostic": [
         ".",
         "synthetic-b0-evidence.tar.gz",
@@ -167,7 +168,7 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.56" in text
+    assert "报告版本：V0.57" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
@@ -191,8 +192,14 @@ def build():
         (
             "long-context",
             "长上下文 / Long context",
-            "## 七、长上下文结果",
+            "### 7.1 既有配置长上下文探针",
             "四组共160条探针，其中72条实际输入≥16K均回答正确；长度32,781、131,085、261,901 token，每条仅输出7 token。探针没有完整流式时序，不能推导TTFT/TPOT分位数。",
+        ),
+        (
+            "current-b1-long-context",
+            "当前B1长输入检索 / Current B1 long-input retrieval",
+            "### 7.2 当前B1恢复环境长输入检索",
+            "保持E24/R36、KV materialization与Microflow配置，独立空缓存和逐请求隔离。6题完成、零传输失败，实际输入16,457与32,843 token。正文严格匹配0/6；唯一思考结束标记之后的答案段补充解析6/6，不替换原始判分，不计入数据集准确率或性能排名。",
         ),
         (
             "long-diagnostic",
@@ -210,7 +217,7 @@ def build():
             "m01",
             "M01 有效算力进展 / Effective compute progress",
             "#### r21 设备映射与同轮计量",
-            "V0.56：恢复环境投影及词表通信参考已完成；M01本轮结论为证据受限、未通过验收，不等于实测低于50%。具体同窗口、运算量与匹配参考限制见独立判定表。保留既有原始计量与全部失败，不采纳原始证据不可用的r23结果，正式B0/B1性能不变。",
+            "V0.57：恢复环境投影及词表通信参考已完成；M01本轮结论为证据受限、未通过验收，不等于实测低于50%。具体同窗口、运算量与匹配参考限制见独立判定表。保留既有原始计量与全部失败，不采纳原始证据不可用的r23结果，正式B0/B1性能不变。",
         ),
         (
             "runtime-recovery",
@@ -279,7 +286,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.56",
+        "version": "V0.57",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,

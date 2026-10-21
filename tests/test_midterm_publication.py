@@ -17,7 +17,7 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.56"
+    assert actual["version"] == "V0.57"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
     historical = json.loads(
@@ -25,9 +25,12 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     )
     for prior in historical["sections"]:
         if prior["id"] != "m01":
+            excluded = {"evidence"}
+            if prior["id"] == "long-context":
+                excluded.add("source_heading")
             assert {
-                k: v for k, v in sections[prior["id"]].items() if k != "evidence"
-            } == prior
+                k: v for k, v in sections[prior["id"]].items() if k not in excluded
+            } == {k: v for k, v in prior.items() if k not in excluded}
     for section in sections.values():
         assert section["evidence"]
         for locator in section["evidence"]:
@@ -36,6 +39,10 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
             assert locator["kind"] == ("tree" if path.is_dir() else "blob")
     assert actual["kv_audit"] == historical["kv_audit"]
     assert len(sections["runtime-recovery"]["tables"][0]["rows"]) == 2
+    current_long = sections["current-b1-long-context"]
+    assert len(current_long["tables"][0]["rows"]) == 6
+    assert "0/6" in current_long["scope"] and "6/6" in current_long["scope"]
+    assert "不替换原始判分" in current_long["scope"]
     state = sections["state-commit"]
     assert [r[0] for r in state["tables"][0]["rows"]] == ["r1", "r2", "r3"]
     assert "导入失败" in state["tables"][0]["rows"][0][2]
