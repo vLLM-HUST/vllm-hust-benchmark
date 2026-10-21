@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "3c3ccc483ee966e9466ae480556890dd48b20565"  # pragma: allowlist secret
+REVISION = "f97b92ec5bc39ac9294ce3b7975fd53ae53586ec"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v053.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v054.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
@@ -43,6 +43,7 @@ EVIDENCE = {
     "runtime-recovery": ["m01-recovery/runtime-recovery"],
     "state-commit": ["m01-recovery/state-commit-recovery"],
     "model-runtime": ["m01-recovery/model-runtime-20261021"],
+    "preprocess-publication": ["m01-recovery/preprocess-publication-20261021"],
 }
 
 
@@ -157,7 +158,7 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.53" in text
+    assert "报告版本：V0.54" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
@@ -194,7 +195,7 @@ def build():
             "m01",
             "M01 有效算力进展 / Effective compute progress",
             "#### r21 设备映射与同轮计量",
-            "V0.53：恢复环境两轮完整模型计量各完成200请求，360秒硬件采样覆盖三个命名区间（见下）；保留r21设备映射与同轮计量。r23原始请求、设备事件、退出回执及profiler数据库不可用，不采纳其吞吐或M01计量。完整跨流依赖、算术覆盖和匹配参考容量尚未闭合；完整有效F和M01≥50%达成率未判定，中期整体验收待定。正式B0/B1性能结果不变。",
+            "V0.54：恢复环境两轮完整模型计量各完成200请求，360秒硬件采样覆盖三个命名区间（见下）；保留r21设备映射与同轮计量。r23原始请求、设备事件、退出回执及profiler数据库不可用，不采纳其吞吐或M01计量。完整跨流依赖、算术覆盖和匹配参考容量尚未闭合；完整有效F和M01≥50%达成率未判定，中期整体验收待定。正式B0/B1性能结果不变。",
         ),
         (
             "runtime-recovery",
@@ -215,6 +216,14 @@ def build():
             "两轮均为同一MMLU-Pro 200请求、out256、新服务及空编译缓存；双卡FULL图捕获及Microflow分区检查通过。360秒采样完整覆盖请求、末次前向事件和全部导出同步三个区间。表内吞吐包含计量插桩开销，不替换正式B1；十类基础运算小计不是完整有效F，M01仍未判定。完整原始记录、逐文件SHA256和Release定位随证据入库。",
         ),
     ]
+    specs.append(
+        (
+            "preprocess-publication",
+            "GDN 发布与预处理图验证 / GDN publication and preprocessing graphs",
+            "#### GDN 元数据发布与预处理图重放验证",
+            "两卡、两个元数据bank、80/1024/2048/4096容量，64次变元数据图重放及560项独立CPU数值复算通过。前两次探针准入失败保留；成功轮新进程、空编译缓存，四卡释放。仅验证实际MTPFrame发布和preprocess局部路径，未覆盖完整模型并发批次、全执行流依赖或历史设备映射恢复。两轮out256性能记录缺少结束原因与原始生成token，不能据此判完整质量。完整有效F和M01仍未判定，正式B0/B1不变。",
+        )
+    )
     sections = []
     for ident, title, heading, note in specs:
         selected = tables(section(text, heading))
@@ -231,7 +240,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.53",
+        "version": "V0.54",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
