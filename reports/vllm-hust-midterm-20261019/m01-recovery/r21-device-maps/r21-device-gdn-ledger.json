@@ -1,0 +1,77 @@
+{
+  "status": "device_eligible_r21_recurrence_and_convolution_semantic_ledger",
+  "request_phase": {
+    "name": "first_request_to_last_response",
+    "start_wall": 1792551772.8757424,
+    "end_wall": 1792551839.1935341,
+    "duration_seconds": 66.31779161095619,
+    "wall_monotonic_offset_difference_seconds": 2.384185791015625e-07,
+    "method": "Request perf_counter timestamps mapped to wall time by mean of controller start/end clock offsets."
+  },
+  "ranks": [
+    {
+      "pid": 1246468,
+      "cohorts": {
+        "inside_request_under_clock_tolerance": {
+          "convolution_multiply": 166692126720,
+          "convolution_add": 124982231040,
+          "silu_evaluations": 41709895680,
+          "zero_history_multiply_excluded": 147456000,
+          "prefill_token_layers": 8467950,
+          "active_verify_token_layers": 1715130,
+          "recurrent_basic_arithmetic": 3150789857280,
+          "recurrent_exp_evaluations": 27442080,
+          "skipped_verify_token_layers": 11340,
+          "convolution_basic_arithmetic": 291674357760
+        },
+        "boundary_or_tail": {
+          "skipped_verify_token_layers": 90,
+          "convolution_basic_arithmetic": 0
+        }
+      }
+    },
+    {
+      "pid": 1246469,
+      "cohorts": {
+        "inside_request_under_clock_tolerance": {
+          "convolution_multiply": 166692126720,
+          "convolution_add": 124982231040,
+          "silu_evaluations": 41709895680,
+          "zero_history_multiply_excluded": 147456000,
+          "prefill_token_layers": 8467950,
+          "active_verify_token_layers": 1715130,
+          "recurrent_basic_arithmetic": 3150789857280,
+          "recurrent_exp_evaluations": 27442080,
+          "skipped_verify_token_layers": 11340,
+          "convolution_basic_arithmetic": 291674357760
+        },
+        "boundary_or_tail": {
+          "skipped_verify_token_layers": 90,
+          "convolution_basic_arithmetic": 0
+        }
+      }
+    }
+  ],
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/r21-gdn-publication-summary.json": "790939ac7bdb332b9c0709e5fd759c6217b619c6ce35c9c138d7555eeb507604",
+    "/root/gennova-evidence/20261019-midterm-aligned/derive_r21_device_gdn.py": "f2a203217f02f5326acdabf078516a57ea095360d53b08f62e6eba475d1eb39e",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_conv_accounting.py": "5f21010dc3aac2d7a4a453f8fd5bf771232ea93cb65d827ce2c6f1a87c72c74b",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_gdn_recurrence_r9.py": "ad8fca372cbf7d894ff0c1d0e209236607772301b233fee6d09b198f4a852012",
+    "/root/gennova-evidence/20261019-midterm-aligned/audit_r21_gdn_publications.py": "1a1bc35936bb755d8be6d511e75ed92825f6d0872bc734144e438b713ee7978e",
+    "/root/gennova-evidence/20261019-midterm-aligned/integrate_r21_hardware.py": "1fb43c3ffc43322da70171a19a75316674fea8ea96f952eb7687e470c9296579",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/token-accounting-1246468.jsonl": "484b2f4d6aa87558eb785cc488cb424ed0e59f88a4b16eff7aa75997a92486a6",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/moe-deferred-1246468.json": "a50c11f36d8bb95ca73668a48ecc062f0ffcf3986e39d28d40c7370790e87825",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/gdn-publication-1246468.json": "79af5857f9fac9763a7eec18d1b3ce074135d8011c29d88d916c6954633ea447",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/token-accounting-1246469.jsonl": "49c9978aa966c82ce2e5b65a538a83176d7b01b80b08cdf8284c36e5c9dc9a81",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/moe-deferred-1246469.json": "cb6822feb0ffcb6fe207d018d8c3b64231df0923a49d890782f8d55b0b045adf",
+    "/workspace/gennova-measurements/microflow-token-accounting-r21/gdn-publication-1246469.json": "4d18cb9c21355b996902e510742fc3e0ed3c084e3d007b5182ae735383decef9"
+  },
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "limitations": [
+    "Per-rank counts; sum TP shards once, do not multiply global head count twice.",
+    "Semantic operations, not physical padded instructions or full effective F.",
+    "SiLU and exp remain separate categories; full GDN prefill and other families are excluded.",
+    "Matched state-access component reference remains to be measured."
+  ]
+}
