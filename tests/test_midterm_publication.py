@@ -23,3 +23,10 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives():
         "152/200",
     ]
     assert len(actual["kv_audit"]["runs"]) == 2
+    adjacent = (
+        "| A | B |\n| --- | ---: |\n| 1 | 2 |\n\n| C | D |\n| --- | --- |\n| 3 | 4 |\n"
+    )
+    assert len(module.tables(adjacent)) == 2
+    for section in actual["sections"]:
+        for table in section["tables"]:
+            assert all(len(row) == len(table["headers"]) for row in table["rows"])
