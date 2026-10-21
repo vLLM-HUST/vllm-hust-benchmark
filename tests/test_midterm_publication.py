@@ -17,7 +17,7 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.54"
+    assert actual["version"] == "V0.55"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
     historical = json.loads(
@@ -50,6 +50,9 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     publication = sections["preprocess-publication"]
     assert [row[1] for row in publication["tables"][0]["rows"][:2]] == ["64", "560"]
     assert "完整有效F和M01仍未判定" in publication["scope"]
+    projections = sections["projection-references"]
+    assert len(projections["tables"][0]["rows"]) == 10
+    assert "图填充运算不冒充有效F" in projections["scope"]
     assert actual["kv_audit"]["runs"] == module.kv_audit()
     assert module.tables("| A | B |\n| --- | ---: |\n| 1 | 2 |\n") == [
         {"headers": ["A", "B"], "rows": [["1", "2"]]}
