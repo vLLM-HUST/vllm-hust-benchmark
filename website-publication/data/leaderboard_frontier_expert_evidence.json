@@ -1,0 +1,963 @@
+{
+  "schema_version": "frontier-agentx-expert-evidence/v1",
+  "published_date": "2026-09-24",
+  "scope": "Metric-only official extracts; full raw evidence retained privately. All five C64 runs use snapshot primers only, MTP0 and eight chips.",
+  "cohort_id": "qwen35-35b-a3b-bf16-agentx256k-smoke-v1",
+  "runs": [
+    {
+      "arm": "tp8",
+      "run_id": "20260924T024916Z-smoke-c64-592b8340",
+      "official_metrics": {
+        "request_count": {
+          "unit": "requests",
+          "avg": 111.0
+        },
+        "output_token_throughput": {
+          "unit": "tokens/sec",
+          "avg": 56.230696252168755
+        },
+        "output_token_throughput_per_user": {
+          "unit": "tokens/sec/user",
+          "avg": 3.5791291157125777,
+          "p1": 2.575971535054115,
+          "p5": 2.5855478531262506,
+          "p10": 2.6290823116720183,
+          "p25": 2.8770801255995426,
+          "p50": 3.183408668397182,
+          "p75": 3.676927239717352,
+          "p90": 4.738316599917493,
+          "p95": 5.567540817618575,
+          "p99": 7.681645253786743,
+          "min": 2.574637849140286,
+          "max": 17.276651704735958,
+          "std": 1.5926966192021805,
+          "count": 111,
+          "sum": 397.28333184409615
+        },
+        "inter_token_latency": {
+          "unit": "ms",
+          "avg": 302.1163567976187,
+          "p1": 130.23536942295277,
+          "p5": 179.72011514258492,
+          "p10": 211.04541642857143,
+          "p25": 271.9674247516352,
+          "p50": 314.1286916528662,
+          "p75": 347.57462126398826,
+          "p90": 380.36085654694836,
+          "p95": 386.7652328805688,
+          "p99": 388.2031107165758,
+          "min": 57.88158591666666,
+          "max": 388.4041401527272,
+          "std": 63.20645351563703,
+          "count": 111,
+          "sum": 33534.91560453568
+        },
+        "time_to_first_token": {
+          "unit": "ms",
+          "avg": 54435.83995572972,
+          "p1": 2356.7767701000002,
+          "p5": 19449.679459,
+          "p10": 28562.161544,
+          "p25": 41598.3347275,
+          "p50": 53233.554957,
+          "p75": 68571.13032899999,
+          "p90": 79860.38788499999,
+          "p95": 87851.920376,
+          "p99": 97947.0449472,
+          "min": 1189.919035,
+          "max": 107434.747961,
+          "std": 21537.401283894877,
+          "count": 111,
+          "sum": 6042378.235086
+        },
+        "request_latency": {
+          "unit": "ms",
+          "avg": 197022.9569308288,
+          "p1": 32608.1559204,
+          "p5": 54403.344034999995,
+          "p10": 69884.349773,
+          "p25": 102433.51216849999,
+          "p50": 143450.501105,
+          "p75": 254523.5583745,
+          "p90": 414330.235244,
+          "p95": 489541.033404,
+          "p99": 652802.2804267005,
+          "min": 19310.223216,
+          "max": 683829.836696,
+          "std": 141612.92068065045,
+          "count": 111,
+          "sum": 21869548.219322
+        },
+        "output_sequence_length": {
+          "unit": "tokens",
+          "avg": 476.18918918918916,
+          "p1": 14.3,
+          "p5": 79.5,
+          "p10": 85.0,
+          "p25": 154.0,
+          "p50": 284.0,
+          "p75": 608.0,
+          "p90": 1243.0,
+          "p95": 1506.0,
+          "p99": 2033.1000000000017,
+          "min": 13.0,
+          "max": 2101.0,
+          "std": 472.4381939368721,
+          "count": 111,
+          "sum": 52857.0
+        },
+        "input_sequence_length": {
+          "unit": "tokens",
+          "avg": 88560.54954954956,
+          "p1": 321.40000000000003,
+          "p5": 2972.0,
+          "p10": 20950.0,
+          "p25": 35045.5,
+          "p50": 78184.0,
+          "p75": 114687.5,
+          "p90": 191971.0,
+          "p95": 206347.5,
+          "p99": 240371.20000000004,
+          "min": 281.0,
+          "max": 241589.0,
+          "std": 65354.6477670261,
+          "count": 111,
+          "sum": 9830221.0
+        },
+        "total_output_tokens": {
+          "unit": "tokens",
+          "avg": 52857.0
+        },
+        "benchmark_duration": {
+          "unit": "sec",
+          "avg": 921.837840128
+        },
+        "error_summary": [],
+        "osl_mismatch_count": {
+          "unit": "requests",
+          "avg": 0.0
+        },
+        "metadata": {
+          "dataset": {
+            "source_type": "public_dataset",
+            "loader": "semianalysis_cc_traces_weka_062126_256k",
+            "hf_dataset_name": "semianalysisai/cc-traces-weka-062126-256k",
+            "hf_split": "train"
+          },
+          "metric_duration_coverage": [
+            {
+              "phase_name": "profiling",
+              "expected_duration_seconds": 900.0,
+              "required_ratio": 0.95,
+              "ttft_ratio": 0.9012236324977778,
+              "inter_token_latency_ratio": 1.0
+            }
+          ],
+          "scenario": "inferencex-agentx-mvp",
+          "submission_valid": true
+        },
+        "start_time": "2026-09-24T03:00:06.023754",
+        "end_time": "2026-09-24T03:15:46.026342"
+      },
+      "client_exit_code": 0,
+      "remote_exit_code": 0,
+      "measurement_seconds": 900,
+      "warmup": {
+        "completed": true,
+        "completed_requests": 63,
+        "cancelled_requests": 0,
+        "errors": 0,
+        "elapsed_seconds": 639.9
+      },
+      "protocol": {
+        "methodology_url": "https://inferencex.semianalysis.com/agentx/methodology",
+        "methodology_checked_utc": "2026-09-23",
+        "harness_repository": "https://github.com/SemiAnalysisAI/agentx-harness",
+        "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+        "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+        "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+        "dataset_alias": "semianalysis_cc_traces_weka_062126_256k",
+        "dataset_sessions": 393,
+        "scenario": "inferencex-agentx-mvp",
+        "seed": 20260923,
+        "trajectory_start_min_ratio": 0.25,
+        "trajectory_start_max_ratio": 0.75,
+        "profiles": {
+          "formal": {
+            "measurement_seconds": 3600
+          },
+          "smoke": {
+            "measurement_seconds": 900
+          }
+        },
+        "protocol_id": "agentx256k-snapshot-primers-v2",
+        "warmup_policy": "Mandatory snapshot primers only; no additional cache-pressure replay; primer time reported separately",
+        "methodology_deviation": "Omit website ten additional warmup requests per lane by explicit experimental protocol choice, 2026-09-24"
+      }
+    },
+    {
+      "arm": "dp8ep8",
+      "run_id": "20260924T031857Z-smoke-c64-1687b2b3",
+      "official_metrics": {
+        "request_count": {
+          "unit": "requests",
+          "avg": 289.0
+        },
+        "output_token_throughput": {
+          "unit": "tokens/sec",
+          "avg": 160.191027326812
+        },
+        "output_token_throughput_per_user": {
+          "unit": "tokens/sec/user",
+          "avg": 8.750108385930485,
+          "p1": 2.131551119813923,
+          "p5": 2.7007437467872246,
+          "p10": 3.149595812172375,
+          "p25": 5.664152095901766,
+          "p50": 8.490726798351872,
+          "p75": 11.666552858147252,
+          "p90": 13.26790138204247,
+          "p95": 14.168607767778738,
+          "p99": 17.167566358022032,
+          "min": 1.8673151385218207,
+          "max": 57.698230637598904,
+          "std": 4.696155414317668,
+          "count": 289,
+          "sum": 2528.78132353391
+        },
+        "inter_token_latency": {
+          "unit": "ms",
+          "avg": 152.53492025074104,
+          "p1": 58.24944903285276,
+          "p5": 70.58135860353735,
+          "p10": 75.37009476832215,
+          "p25": 85.71512186666665,
+          "p50": 117.77554781224488,
+          "p75": 176.54893143203884,
+          "p90": 317.5026335609866,
+          "p95": 370.3236175641279,
+          "p99": 469.14330323061387,
+          "min": 17.331554,
+          "max": 535.5282455384615,
+          "std": 98.15181868749657,
+          "count": 289,
+          "sum": 44082.59195246416
+        },
+        "time_to_first_token": {
+          "unit": "ms",
+          "avg": 4391.971387595156,
+          "p1": 616.43323684,
+          "p5": 774.176801,
+          "p10": 1028.0282634,
+          "p25": 1452.25785,
+          "p50": 2059.100171,
+          "p75": 3149.891615,
+          "p90": 10415.50562279999,
+          "p95": 18490.114295999992,
+          "p99": 38164.64146680003,
+          "min": 463.01881499999996,
+          "max": 62709.248806999996,
+          "std": 7428.801795623683,
+          "count": 289,
+          "sum": 1269279.731015
+        },
+        "request_latency": {
+          "unit": "ms",
+          "avg": 75912.67402643945,
+          "p1": 1805.3911215199998,
+          "p5": 8159.923999399999,
+          "p10": 11228.404507799998,
+          "p25": 21552.815409,
+          "p50": 42181.144890999996,
+          "p75": 88293.702445,
+          "p90": 175567.42092539996,
+          "p95": 271385.71511519986,
+          "p99": 404432.5951666401,
+          "min": 1191.011694,
+          "max": 829382.8553919999,
+          "std": 97578.16020461293,
+          "count": 289,
+          "sum": 21938762.793640997
+        },
+        "output_sequence_length": {
+          "unit": "tokens",
+          "avg": 521.0380622837371,
+          "p1": 12.76,
+          "p5": 75.0,
+          "p10": 92.0,
+          "p25": 149.0,
+          "p50": 280.0,
+          "p75": 541.0,
+          "p90": 1246.1999999999998,
+          "p95": 1610.7999999999995,
+          "p99": 3587.1600000000003,
+          "min": 2.0,
+          "max": 6004.0,
+          "std": 697.2486278726504,
+          "count": 289,
+          "sum": 150580.0
+        },
+        "input_sequence_length": {
+          "unit": "tokens",
+          "avg": 89573.40484429066,
+          "p1": 465.96,
+          "p5": 9346.400000000001,
+          "p10": 25906.6,
+          "p25": 47127.0,
+          "p50": 79917.0,
+          "p75": 110810.0,
+          "p90": 176446.6,
+          "p95": 194090.59999999998,
+          "p99": 217246.2400000001,
+          "min": 280.0,
+          "max": 241590.0,
+          "std": 55516.807301579116,
+          "count": 289,
+          "sum": 25886714.0
+        },
+        "total_output_tokens": {
+          "unit": "tokens",
+          "avg": 150580.0
+        },
+        "benchmark_duration": {
+          "unit": "sec",
+          "avg": 911.757158656
+        },
+        "error_summary": [],
+        "osl_mismatch_count": {
+          "unit": "requests",
+          "avg": 0.0
+        },
+        "metadata": {
+          "dataset": {
+            "source_type": "public_dataset",
+            "loader": "semianalysis_cc_traces_weka_062126_256k",
+            "hf_dataset_name": "semianalysisai/cc-traces-weka-062126-256k",
+            "hf_split": "train"
+          },
+          "metric_duration_coverage": [
+            {
+              "phase_name": "profiling",
+              "expected_duration_seconds": 900.0,
+              "required_ratio": 0.95,
+              "ttft_ratio": 0.9419760651377778,
+              "inter_token_latency_ratio": 1.0
+            }
+          ],
+          "scenario": "inferencex-agentx-mvp",
+          "submission_valid": true
+        },
+        "start_time": "2026-09-24T03:23:36.339126",
+        "end_time": "2026-09-24T03:39:16.341837"
+      },
+      "client_exit_code": 0,
+      "remote_exit_code": 0,
+      "measurement_seconds": 900,
+      "warmup": {
+        "completed": true,
+        "completed_requests": 63,
+        "cancelled_requests": 0,
+        "errors": 0,
+        "elapsed_seconds": 268.26
+      },
+      "protocol": {
+        "methodology_url": "https://inferencex.semianalysis.com/agentx/methodology",
+        "methodology_checked_utc": "2026-09-23",
+        "harness_repository": "https://github.com/SemiAnalysisAI/agentx-harness",
+        "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+        "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+        "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+        "dataset_alias": "semianalysis_cc_traces_weka_062126_256k",
+        "dataset_sessions": 393,
+        "scenario": "inferencex-agentx-mvp",
+        "seed": 20260923,
+        "trajectory_start_min_ratio": 0.25,
+        "trajectory_start_max_ratio": 0.75,
+        "profiles": {
+          "formal": {
+            "measurement_seconds": 3600
+          },
+          "smoke": {
+            "measurement_seconds": 900
+          }
+        },
+        "protocol_id": "agentx256k-snapshot-primers-v2",
+        "warmup_policy": "Mandatory snapshot primers only; no additional cache-pressure replay; primer time reported separately",
+        "methodology_deviation": "Omit website ten additional warmup requests per lane by explicit experimental protocol choice, 2026-09-24"
+      }
+    },
+    {
+      "arm": "tp8ep8",
+      "run_id": "20260924T034202Z-smoke-c64-b250f71b",
+      "official_metrics": {
+        "request_count": {
+          "unit": "requests",
+          "avg": 111.0
+        },
+        "output_token_throughput": {
+          "unit": "tokens/sec",
+          "avg": 56.23073203084757
+        },
+        "output_token_throughput_per_user": {
+          "unit": "tokens/sec/user",
+          "avg": 3.56786926515265,
+          "p1": 2.6453660974712383,
+          "p5": 2.781142287545652,
+          "p10": 2.8239925197785642,
+          "p25": 2.861577993467024,
+          "p50": 3.178778640939253,
+          "p75": 3.6135861585962514,
+          "p90": 4.8355233051778175,
+          "p95": 5.5595263601002305,
+          "p99": 7.582463450750278,
+          "min": 2.6074928776763286,
+          "max": 15.458607633497289,
+          "std": 1.4385343220509172,
+          "count": 111,
+          "sum": 396.03348843194414
+        },
+        "inter_token_latency": {
+          "unit": "ms",
+          "avg": 300.31986730021,
+          "p1": 131.9537267296324,
+          "p5": 179.87870495740282,
+          "p10": 206.80284984444444,
+          "p25": 276.73498628908027,
+          "p50": 314.58623356816184,
+          "p75": 349.4575917589718,
+          "p90": 354.10858668932036,
+          "p95": 359.57086350328564,
+          "p99": 378.0902120504057,
+          "min": 64.68887908333333,
+          "max": 383.5101558901099,
+          "std": 58.66755634596406,
+          "count": 111,
+          "sum": 33335.50527032331
+        },
+        "time_to_first_token": {
+          "unit": "ms",
+          "avg": 54854.70963597298,
+          "p1": 2302.5086671000004,
+          "p5": 16551.4529825,
+          "p10": 26568.229925,
+          "p25": 41048.134861499995,
+          "p50": 54537.371505999996,
+          "p75": 70375.0198845,
+          "p90": 85283.819479,
+          "p95": 96658.44729299999,
+          "p99": 99822.4462501,
+          "min": 1134.539031,
+          "max": 103823.308422,
+          "std": 22791.459426764337,
+          "count": 111,
+          "sum": 6088872.7695929995
+        },
+        "request_latency": {
+          "unit": "ms",
+          "avg": 197301.31687162162,
+          "p1": 21815.097707999998,
+          "p5": 50736.3179465,
+          "p10": 76807.038824,
+          "p25": 105740.890199,
+          "p50": 142037.485666,
+          "p75": 251302.0064925,
+          "p90": 410587.237515,
+          "p95": 485380.255006,
+          "p99": 648159.9954823005,
+          "min": 19233.872893,
+          "max": 681085.514552,
+          "std": 140661.46314543477,
+          "count": 111,
+          "sum": 21900446.17275
+        },
+        "output_sequence_length": {
+          "unit": "tokens",
+          "avg": 476.18918918918916,
+          "p1": 14.3,
+          "p5": 79.5,
+          "p10": 85.0,
+          "p25": 154.0,
+          "p50": 284.0,
+          "p75": 608.0,
+          "p90": 1243.0,
+          "p95": 1506.0,
+          "p99": 2033.1000000000017,
+          "min": 13.0,
+          "max": 2101.0,
+          "std": 472.4381939368721,
+          "count": 111,
+          "sum": 52857.0
+        },
+        "input_sequence_length": {
+          "unit": "tokens",
+          "avg": 88560.45045045044,
+          "p1": 322.20000000000005,
+          "p5": 2971.0,
+          "p10": 20951.0,
+          "p25": 35046.0,
+          "p50": 78184.0,
+          "p75": 114687.5,
+          "p90": 191971.0,
+          "p95": 206348.5,
+          "p99": 240371.20000000004,
+          "min": 279.0,
+          "max": 241589.0,
+          "std": 65354.64213166082,
+          "count": 111,
+          "sum": 9830210.0
+        },
+        "total_output_tokens": {
+          "unit": "tokens",
+          "avg": 52857.0
+        },
+        "benchmark_duration": {
+          "unit": "sec",
+          "avg": 919.078969344
+        },
+        "error_summary": [],
+        "osl_mismatch_count": {
+          "unit": "requests",
+          "avg": 0.0
+        },
+        "metadata": {
+          "dataset": {
+            "source_type": "public_dataset",
+            "loader": "semianalysis_cc_traces_weka_062126_256k",
+            "hf_dataset_name": "semianalysisai/cc-traces-weka-062126-256k",
+            "hf_split": "train"
+          },
+          "metric_duration_coverage": [
+            {
+              "phase_name": "profiling",
+              "expected_duration_seconds": 900.0,
+              "required_ratio": 0.95,
+              "ttft_ratio": 0.9869424850488889,
+              "inter_token_latency_ratio": 1.0
+            }
+          ],
+          "scenario": "inferencex-agentx-mvp",
+          "submission_valid": true
+        },
+        "start_time": "2026-09-24T03:52:27.309997",
+        "end_time": "2026-09-24T04:08:07.311986"
+      },
+      "client_exit_code": 0,
+      "remote_exit_code": 0,
+      "measurement_seconds": 900,
+      "warmup": {
+        "completed": true,
+        "completed_requests": 63,
+        "cancelled_requests": 0,
+        "errors": 0,
+        "elapsed_seconds": 615.38
+      },
+      "protocol": {
+        "methodology_url": "https://inferencex.semianalysis.com/agentx/methodology",
+        "methodology_checked_utc": "2026-09-23",
+        "harness_repository": "https://github.com/SemiAnalysisAI/agentx-harness",
+        "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+        "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+        "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+        "dataset_alias": "semianalysis_cc_traces_weka_062126_256k",
+        "dataset_sessions": 393,
+        "scenario": "inferencex-agentx-mvp",
+        "seed": 20260923,
+        "trajectory_start_min_ratio": 0.25,
+        "trajectory_start_max_ratio": 0.75,
+        "profiles": {
+          "formal": {
+            "measurement_seconds": 3600
+          },
+          "smoke": {
+            "measurement_seconds": 900
+          }
+        },
+        "protocol_id": "agentx256k-snapshot-primers-v2",
+        "warmup_policy": "Mandatory snapshot primers only; no additional cache-pressure replay; primer time reported separately",
+        "methodology_deviation": "Omit website ten additional warmup requests per lane by explicit experimental protocol choice, 2026-09-24"
+      }
+    },
+    {
+      "arm": "a4e4",
+      "run_id": "20260924T041049Z-smoke-c64-6f35cecb",
+      "official_metrics": {
+        "request_count": {
+          "unit": "requests",
+          "avg": 237.0
+        },
+        "output_token_throughput": {
+          "unit": "tokens/sec",
+          "avg": 152.92952688144717
+        },
+        "output_token_throughput_per_user": {
+          "unit": "tokens/sec/user",
+          "avg": 21.731887469953655,
+          "p1": 2.0733797533854657,
+          "p5": 2.511663775218588,
+          "p10": 3.1550933530077465,
+          "p25": 4.598701917516334,
+          "p50": 7.6385750375909645,
+          "p75": 12.925637117911753,
+          "p90": 15.044485589026394,
+          "p95": 15.573708554565442,
+          "p99": 16.761016929936147,
+          "min": 2.015594806701358,
+          "max": 3130.8115689749097,
+          "std": 202.43304523697407,
+          "count": 237,
+          "sum": 5150.457330379017
+        },
+        "inter_token_latency": {
+          "unit": "ms",
+          "avg": 163.8529586867646,
+          "p1": 59.692151978411324,
+          "p5": 64.21147482578294,
+          "p10": 66.46953805773248,
+          "p25": 77.36562545255474,
+          "p50": 130.91446965943237,
+          "p75": 217.45266771717172,
+          "p90": 316.9661805844534,
+          "p95": 398.16793708131854,
+          "p99": 482.3480763831445,
+          "min": 0.31940599999999997,
+          "max": 496.1314628690476,
+          "std": 105.81794430780451,
+          "count": 237,
+          "sum": 38833.15120876321
+        },
+        "time_to_first_token": {
+          "unit": "ms",
+          "avg": 15511.281024270042,
+          "p1": 606.79314684,
+          "p5": 791.6090449999999,
+          "p10": 923.2335549999999,
+          "p25": 1307.280141,
+          "p50": 3952.5401789999996,
+          "p75": 23459.355207,
+          "p90": 48354.9896106,
+          "p95": 57801.80746059999,
+          "p99": 96948.64404743993,
+          "min": 532.183827,
+          "max": 110190.749853,
+          "std": 21500.511308122383,
+          "count": 237,
+          "sum": 3676173.6027519996
+        },
+        "request_latency": {
+          "unit": "ms",
+          "avg": 100609.12065112658,
+          "p1": 6035.83362668,
+          "p5": 8688.995722,
+          "p10": 11608.558381399998,
+          "p25": 25933.779780999997,
+          "p50": 64095.709426999994,
+          "p75": 123251.00332799999,
+          "p90": 237116.50413960003,
+          "p95": 338889.45981099986,
+          "p99": 548728.2183809594,
+          "min": 2805.598107,
+          "max": 676890.005625,
+          "std": 115857.40861193492,
+          "count": 237,
+          "sum": 23844361.594317
+        },
+        "output_sequence_length": {
+          "unit": "tokens",
+          "avg": 606.5569620253165,
+          "p1": 13.36,
+          "p5": 80.2,
+          "p10": 93.6,
+          "p25": 149.0,
+          "p50": 284.0,
+          "p75": 600.0,
+          "p90": 1372.0000000000005,
+          "p95": 2108.3999999999996,
+          "p99": 4970.799999999996,
+          "min": 2.0,
+          "max": 6682.0,
+          "std": 896.4565605196873,
+          "count": 237,
+          "sum": 143754.0
+        },
+        "input_sequence_length": {
+          "unit": "tokens",
+          "avg": 89791.31223628692,
+          "p1": 500.23999999999995,
+          "p5": 15623.200000000004,
+          "p10": 26840.4,
+          "p25": 46574.0,
+          "p50": 79846.0,
+          "p75": 110542.0,
+          "p90": 175721.6,
+          "p95": 193369.8,
+          "p99": 232046.27999999988,
+          "min": 280.0,
+          "max": 241588.0,
+          "std": 55305.90839614482,
+          "count": 237,
+          "sum": 21280541.0
+        },
+        "total_output_tokens": {
+          "unit": "tokens",
+          "avg": 143754.0
+        },
+        "benchmark_duration": {
+          "unit": "sec",
+          "avg": 928.952576256
+        },
+        "error_summary": [],
+        "osl_mismatch_count": {
+          "unit": "requests",
+          "avg": 0.0
+        },
+        "metadata": {
+          "dataset": {
+            "source_type": "public_dataset",
+            "loader": "semianalysis_cc_traces_weka_062126_256k",
+            "hf_dataset_name": "semianalysisai/cc-traces-weka-062126-256k",
+            "hf_split": "train"
+          },
+          "metric_duration_coverage": [
+            {
+              "phase_name": "profiling",
+              "expected_duration_seconds": 900.0,
+              "required_ratio": 0.95,
+              "ttft_ratio": 0.9787997090133334,
+              "inter_token_latency_ratio": 1.0
+            }
+          ],
+          "scenario": "inferencex-agentx-mvp",
+          "submission_valid": true
+        },
+        "start_time": "2026-09-24T04:17:30.271024",
+        "end_time": "2026-09-24T04:33:10.272624"
+      },
+      "client_exit_code": 0,
+      "remote_exit_code": 0,
+      "measurement_seconds": 900,
+      "warmup": {
+        "completed": true,
+        "completed_requests": 63,
+        "cancelled_requests": 0,
+        "errors": 0,
+        "elapsed_seconds": 391.96
+      },
+      "protocol": {
+        "methodology_url": "https://inferencex.semianalysis.com/agentx/methodology",
+        "methodology_checked_utc": "2026-09-23",
+        "harness_repository": "https://github.com/SemiAnalysisAI/agentx-harness",
+        "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+        "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+        "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+        "dataset_alias": "semianalysis_cc_traces_weka_062126_256k",
+        "dataset_sessions": 393,
+        "scenario": "inferencex-agentx-mvp",
+        "seed": 20260923,
+        "trajectory_start_min_ratio": 0.25,
+        "trajectory_start_max_ratio": 0.75,
+        "profiles": {
+          "formal": {
+            "measurement_seconds": 3600
+          },
+          "smoke": {
+            "measurement_seconds": 900
+          }
+        },
+        "protocol_id": "agentx256k-snapshot-primers-v2",
+        "warmup_policy": "Mandatory snapshot primers only; no additional cache-pressure replay; primer time reported separately",
+        "methodology_deviation": "Omit website ten additional warmup requests per lane by explicit experimental protocol choice, 2026-09-24"
+      }
+    },
+    {
+      "arm": "a6e2",
+      "run_id": "20260924T043605Z-smoke-c64-bd9798b9",
+      "official_metrics": {
+        "request_count": {
+          "unit": "requests",
+          "avg": 391.0
+        },
+        "output_token_throughput": {
+          "unit": "tokens/sec",
+          "avg": 260.1205337061668
+        },
+        "output_token_throughput_per_user": {
+          "unit": "tokens/sec/user",
+          "avg": 22.503427261015712,
+          "p1": 3.46438866577553,
+          "p5": 6.956088241230333,
+          "p10": 8.860631353252025,
+          "p25": 11.474247989734838,
+          "p50": 14.405543495094097,
+          "p75": 17.003635381714616,
+          "p90": 20.078337044268018,
+          "p95": 23.369138783262848,
+          "p99": 31.148694988932395,
+          "min": 2.132332823099241,
+          "max": 2141.0525414293666,
+          "std": 119.0659954966248,
+          "count": 391,
+          "sum": 8798.840059057144
+        },
+        "inter_token_latency": {
+          "unit": "ms",
+          "avg": 79.61734268064858,
+          "p1": 32.1059050318336,
+          "p5": 42.791478632142855,
+          "p10": 49.80492148305084,
+          "p25": 58.810981391978665,
+          "p50": 69.41772105582524,
+          "p75": 87.15168110073499,
+          "p90": 112.85877497126435,
+          "p95": 143.7631495746948,
+          "p99": 288.7192572617037,
+          "min": 0.46706,
+          "max": 468.9699418248175,
+          "std": 43.61762900968112,
+          "count": 391,
+          "sum": 31130.380988133595
+        },
+        "time_to_first_token": {
+          "unit": "ms",
+          "avg": 4852.919153005116,
+          "p1": 484.1991336,
+          "p5": 636.0956855,
+          "p10": 785.2292269999999,
+          "p25": 1016.5596409999999,
+          "p50": 1439.4030269999998,
+          "p75": 2722.6029645,
+          "p90": 12869.939562,
+          "p95": 26845.357053,
+          "p99": 46821.66566060014,
+          "min": 407.338739,
+          "max": 65142.989128999994,
+          "std": 9713.261001353552,
+          "count": 391,
+          "sum": 1897491.3888249998
+        },
+        "request_latency": {
+          "unit": "ms",
+          "avg": 54080.869579317136,
+          "p1": 1456.2875771,
+          "p5": 6019.060466999999,
+          "p10": 7414.837801,
+          "p25": 13644.918216999999,
+          "p50": 29062.365733,
+          "p75": 66635.147533,
+          "p90": 125796.819674,
+          "p95": 178334.971004,
+          "p99": 404717.4032105006,
+          "min": 725.502402,
+          "max": 629340.7920199999,
+          "std": 74964.4141945743,
+          "count": 391,
+          "sum": 21145620.005512998
+        },
+        "output_sequence_length": {
+          "unit": "tokens",
+          "avg": 625.3554987212276,
+          "p1": 10.1,
+          "p5": 75.0,
+          "p10": 95.0,
+          "p25": 167.5,
+          "p50": 343.0,
+          "p75": 694.5,
+          "p90": 1408.0,
+          "p95": 2119.5,
+          "p99": 4784.500000000008,
+          "min": 2.0,
+          "max": 6682.0,
+          "std": 873.6403621149333,
+          "count": 391,
+          "sum": 244514.0
+        },
+        "input_sequence_length": {
+          "unit": "tokens",
+          "avg": 94005.90281329924,
+          "p1": 469.6,
+          "p5": 13973.5,
+          "p10": 30111.0,
+          "p25": 51037.5,
+          "p50": 84574.0,
+          "p75": 113226.5,
+          "p90": 180367.0,
+          "p95": 197902.0,
+          "p99": 229176.0,
+          "min": 281.0,
+          "max": 241589.0,
+          "std": 56126.84152580822,
+          "count": 391,
+          "sum": 36756308.0
+        },
+        "total_output_tokens": {
+          "unit": "tokens",
+          "avg": 244514.0
+        },
+        "benchmark_duration": {
+          "unit": "sec",
+          "avg": 929.3887697920001
+        },
+        "error_summary": [],
+        "osl_mismatch_count": {
+          "unit": "requests",
+          "avg": 0.0
+        },
+        "metadata": {
+          "dataset": {
+            "source_type": "public_dataset",
+            "loader": "semianalysis_cc_traces_weka_062126_256k",
+            "hf_dataset_name": "semianalysisai/cc-traces-weka-062126-256k",
+            "hf_split": "train"
+          },
+          "metric_duration_coverage": [
+            {
+              "phase_name": "profiling",
+              "expected_duration_seconds": 900.0,
+              "required_ratio": 0.95,
+              "ttft_ratio": 1.0,
+              "inter_token_latency_ratio": 1.0
+            }
+          ],
+          "scenario": "inferencex-agentx-mvp",
+          "submission_valid": true
+        },
+        "start_time": "2026-09-24T04:42:28.926082",
+        "end_time": "2026-09-24T04:58:08.928767"
+      },
+      "client_exit_code": 0,
+      "remote_exit_code": 0,
+      "measurement_seconds": 900,
+      "warmup": {
+        "completed": true,
+        "completed_requests": 63,
+        "cancelled_requests": 0,
+        "errors": 0,
+        "elapsed_seconds": 373.17
+      },
+      "protocol": {
+        "methodology_url": "https://inferencex.semianalysis.com/agentx/methodology",
+        "methodology_checked_utc": "2026-09-23",
+        "harness_repository": "https://github.com/SemiAnalysisAI/agentx-harness",
+        "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+        "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+        "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+        "dataset_alias": "semianalysis_cc_traces_weka_062126_256k",
+        "dataset_sessions": 393,
+        "scenario": "inferencex-agentx-mvp",
+        "seed": 20260923,
+        "trajectory_start_min_ratio": 0.25,
+        "trajectory_start_max_ratio": 0.75,
+        "profiles": {
+          "formal": {
+            "measurement_seconds": 3600
+          },
+          "smoke": {
+            "measurement_seconds": 900
+          }
+        },
+        "protocol_id": "agentx256k-snapshot-primers-v2",
+        "warmup_policy": "Mandatory snapshot primers only; no additional cache-pressure replay; primer time reported separately",
+        "methodology_deviation": "Omit website ten additional warmup requests per lane by explicit experimental protocol choice, 2026-09-24"
+      }
+    }
+  ]
+}

@@ -1,0 +1,297 @@
+{
+  "title": "BetterScale · DeepSeek V4 Flash execution study",
+  "date": "2026-09-13",
+  "source": {
+    "repository": "vLLM-HUST/BetterScale (Apache-2.0)",
+    "commit": "7f7bda350471bab47decc45b64264280b9c4d4d7",
+    "documents": [
+      "RESULTS.md",
+      "evidence/dp-continuation-20260913.json"
+    ],
+    "disclosure": "Curated public measurement summary. Raw traces and implementation are not bundled; the referenced commit and documents are available in the public GitHub repository."
+  },
+  "environment": {
+    "hardware": "8 × Ascend 910B2 / HCCS",
+    "model": "DeepSeek-V4-Flash-0731-w8a8",
+    "precision": "W8A8 weights / BF16 activations",
+    "cann": "9.0.1",
+    "torch_npu": "2.10.0.post2",
+    "vllm": "v0.25.1",
+    "vllm_commit": "752a3a504485790a2e8491cacbb35c137339ad34",
+    "vllm_ascend": "v0.25.1rc1",
+    "vllm_ascend_commit": "9bf964cb4b87c8cd0d6852c41a55b3c29711fa95",
+    "timing": "Unprofiled, normal HCCL, no state oracle; median across eight per-rank cycle medians. Source pins do not assert byte-identical rebuilds of historical installed packages.",
+    "prefix_cache": false
+  },
+  "studies": [
+    {
+      "id": "tp-draft",
+      "label": {
+        "en": "TP8 · Capture the draft body",
+        "zh": "TP8 · 捕获 draft 执行体"
+      },
+      "control": {
+        "en": "Native eager draft",
+        "zh": "原生 eager draft"
+      },
+      "candidate": {
+        "en": "Draft FULL + ordered replay + CPU QLI",
+        "zh": "Draft FULL + 有序 replay + CPU QLI"
+      },
+      "runs": [
+        "026"
+      ],
+      "topology": "TP8 + EP, DSACP on, DCP=1, K5, 4 requests × 6 target queries",
+      "budget": "288 tokens, capture 24/288, max length 2048, KV memory utilization 0.85",
+      "selection": "21 matched intervals/rank/phase; 64-token prompts, 128-token outputs; target FULL_DECODE_ONLY in both arms. Same-engine alternating controls.",
+      "repeats": [
+        {
+          "repeat": 0,
+          "control_ms": 65.6,
+          "candidate_ms": 51.74
+        },
+        {
+          "repeat": 1,
+          "control_ms": 64.5,
+          "candidate_ms": 51.54
+        }
+      ]
+    },
+    {
+      "id": "tp-receipt",
+      "label": {
+        "en": "TP8 · Move receipt handling off the critical path",
+        "zh": "TP8 · 将收据处理移出关键路径"
+      },
+      "control": {
+        "en": "Already-optimized draft graph path",
+        "zh": "已优化的 draft graph 路径"
+      },
+      "candidate": {
+        "en": "Conservative CPU bounds + later receipt handling",
+        "zh": "保守 CPU 边界 + 延后收据处理"
+      },
+      "runs": [
+        "031"
+      ],
+      "topology": "Same four-request TP8 K5 geometry as study 026",
+      "budget": "288 tokens, capture 24/288, max length 2048",
+      "selection": "21 matched intervals/rank/phase; all four draft banks prewarmed. This is an incremental comparison, not stock vLLM.",
+      "repeats": [
+        {
+          "repeat": 0,
+          "control_ms": 52.05,
+          "candidate_ms": 46.6
+        },
+        {
+          "repeat": 1,
+          "control_ms": 52.46,
+          "candidate_ms": 46.26
+        },
+        {
+          "repeat": 2,
+          "control_ms": 51.66,
+          "candidate_ms": 46.11
+        }
+      ]
+    },
+    {
+      "id": "dp-metadata",
+      "label": {
+        "en": "DP8 · Prepare progress and metadata on device",
+        "zh": "DP8 · 在 device 准备进度与元数据"
+      },
+      "control": {
+        "en": "Dual target graph endpoints",
+        "zh": "双 target graph 端点"
+      },
+      "candidate": {
+        "en": "Dual banks + device producer / metadata",
+        "zh": "双槽 + device 进度 / 元数据准备"
+      },
+      "runs": [
+        "120"
+      ],
+      "topology": "TP1 / DP8 / EP8, K5, 16 global requests, 2 requests / 12 queries per rank, DSACP off",
+      "budget": "1026 local tokens, max length 16384, 8 GiB KV/rank",
+      "selection": "First 10 consecutive common occupied cycle ordinals per repeat; target FULL, native eager draft. Both arms retain experimental allocations. Not a stock whole-service comparison.",
+      "repeats": [
+        {
+          "repeat": 0,
+          "control_ms": 59.893096923828125,
+          "candidate_ms": 50.37725830078125,
+          "control_interval_ms": 9.416968941688538,
+          "candidate_interval_ms": 1.2381722927093506
+        },
+        {
+          "repeat": 1,
+          "control_ms": 59.085357666015625,
+          "candidate_ms": 49.99794006347656,
+          "control_interval_ms": 9.49313199520111,
+          "candidate_interval_ms": 1.2344282865524292
+        }
+      ]
+    }
+  ],
+  "short_mixed": {
+    "runs": [
+      "041",
+      "046"
+    ],
+    "control": "Prior optimized FULL-target control, not stock vLLM",
+    "geometry": "TP8 K5; budget 4128; capture 24/4128; max length 8256; 3 GiB KV/rank; 64 output tokens/request",
+    "aggregation": "Warm matching scheduled-row observations; medians across ranks; a single paired shape observation, not a universal gain",
+    "rows": [
+      {
+        "scheduled_rows": "6 + 17",
+        "control_ms": 63.96,
+        "candidate_ms": 46.37
+      },
+      {
+        "scheduled_rows": "7",
+        "control_ms": 63.05,
+        "candidate_ms": 49.55
+      },
+      {
+        "scheduled_rows": "64",
+        "control_ms": 202.92,
+        "candidate_ms": 204.03
+      },
+      {
+        "scheduled_rows": "1025",
+        "control_ms": 219.96,
+        "candidate_ms": 221.15
+      },
+      {
+        "scheduled_rows": "4112",
+        "control_ms": 259.65,
+        "candidate_ms": 262.16
+      }
+    ]
+  },
+  "quality": {
+    "dataset": "32 retained original-input OpenCompass LongBench English retrieval questions",
+    "evaluator": "60a28a727d3b7807eb3554928f3530d04c948452",
+    "tp_control": "048: 32/32",
+    "tp_candidate": "049: 32/32",
+    "tp_geometry": "Original 9921–14997-token inputs; 32-token output cap, EOS honored; TP8/K5, four seats, budget 4128, max length 15104, 12 GiB KV/rank",
+    "dp_packaged_candidate": "124: 32/32",
+    "scope": "Subset only, not the complete OpenCompass suite or general quality certification"
+  },
+  "limits": [
+    "Matched-cycle gains are not stable end-to-end throughput, TTFT or maximum-concurrency gains.",
+    "TP increments are separate studies: do not add percentage reductions or present their cumulative progression as a direct stock-to-final A/B.",
+    "Short mixed gains do not imply a general large-prefill speedup.",
+    "DP unprofiled intervals do not imply every profiled wave is bubble-free; a separate aligned profile retains an approximately 10 ms gap.",
+    "No KV capacity, mapped C4, PCP or all-mode N+2 scheduler claim is included."
+  ],
+  "service_http": {
+    "date": "2026-09-14",
+    "release": "0.3.1",
+    "source": "https://github.com/vLLM-HUST/BetterScale/blob/fbfa963/docs/E2E-20260914.zh-CN.md",
+    "method": "Total output tokens divided by total duration of nine synthetic HTTP cohorts (three workloads, three repeats), excluding startup, separately logged prelude and quality. No slow repeat removed.",
+    "scope": "Same hw3, 8x910B2 HCCS, DSV4 W8A8 K5. DP and TP have different concurrency and separate native comparators. Reused qualified measurements, not a new 0.3.1 wheel benchmark.",
+    "rows": [
+      {
+        "layout": "DP8",
+        "concurrency": 16,
+        "kv_gib_per_rank": 8,
+        "baseline_run": 158,
+        "candidate_run": 155,
+        "native_tps": 268.89,
+        "candidate_tps": 375.45,
+        "gain_percent": 39.63,
+        "quality": "32/32",
+        "provenance": "Qualified startup program carried into 0.3.1; 0.3.0 measured -6.11% and is retained in source report."
+      },
+      {
+        "layout": "TP8",
+        "concurrency": 4,
+        "kv_gib_per_rank": 12,
+        "baseline_run": 160,
+        "candidate_run": 161,
+        "native_tps": 155.13,
+        "candidate_tps": 209.68,
+        "gain_percent": 35.17,
+        "quality": "32/32",
+        "provenance": "0.3.0 measured TP path is unchanged in 0.3.1; native comparator includes only LCM startup compatibility."
+      }
+    ],
+    "limits": [
+      "One process per arm, sequential runs; not randomized independent replications.",
+      "TP decode chunk-gap P99 worsened; no universal latency win.",
+      "These are synthetic HTTP workloads, not full agent traces, maximum concurrency or SLO capacity."
+    ]
+  },
+  "startup_smoke": {
+    "date": "2026-09-14",
+    "package": "vllm-betterscale==0.3.1",
+    "run": "163-hw3-dp8-mod-startup031",
+    "command_source_commit": "a698b2a",
+    "layout": "DP8 / EP8, TP1",
+    "model": "DeepSeek-V4-Flash-0731-w8a8",
+    "hardware": "8xAscend 910B2 / HCCS",
+    "command_matches_display": true,
+    "command_substitution": "Model filesystem path only; native CANN/HCCL environment provided externally.",
+    "initialized_dp_ranks": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "health_http_status": 200,
+    "completion_tokens": 32,
+    "exit_code": 0,
+    "all_cards_released": true,
+    "scope": "Actual public-wheel installation and DP8 startup/one short HTTP completion. Not a throughput or quality rerun; TP8 launch has CPU contract and retained prior path evidence, not a new TP8 service smoke.",
+    "teardown_note": "Native peer-disconnect messages followed supervised termination after the successful response; all eight cards were reclaimed."
+  },
+  "capacity": {
+    "release": "0.4.0",
+    "context_ceiling_tokens": 524288,
+    "safety_gib_per_rank": 1,
+    "tp8": {
+      "kv_gib_per_rank_approx": 14.94,
+      "real_quality_correct": 32,
+      "real_quality_total": 32,
+      "real_quality_run": 190,
+      "dummy_peak_kv_usage_percent": 96.84010590537585,
+      "dummy_pressure_run": 189,
+      "dummy_prompt_tokens": 458752,
+      "dummy_offered_requests": 4,
+      "dummy_max_running": 3,
+      "dummy_preemptions": 0
+    },
+    "dp8": {
+      "kv_gib_per_rank_approx": 7.9,
+      "real_runs": [
+        170,
+        171,
+        174
+      ],
+      "long_pressure_saturation_qualified": false
+    },
+    "boundary": "No new throughput comparison; running includes partial prefill; no preemption recovery claim; APC disabled"
+  },
+  "prefix_reuse": {
+    "release": "0.4.1",
+    "tp_run": 194,
+    "dp_run": 195,
+    "quality_each_layout": {
+      "cold_correct": 32,
+      "warm_correct": 32,
+      "positive_warm_hits": 32,
+      "identical_output_sequences": 32
+    },
+    "dp_balanced": {
+      "requests": 16,
+      "per_engine": 2,
+      "warm_hits": 16
+    },
+    "scope": "native APC compatibility, retained retrieval subset; engine-local DP; no new throughput or preemption claim"
+  }
+}

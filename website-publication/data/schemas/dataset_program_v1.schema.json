@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vLLM-HUST/vllm-hust-benchmark/schemas/dataset_program_v1.schema.json",
+  "title": "Dataset evaluation program v1",
+  "type": "object",
+  "required": ["contract_version", "updated_at", "test_plan", "designation", "primary_datasets", "supplementary_material"],
+  "properties": {
+    "contract_version": { "const": "dataset-program-v1" },
+    "updated_at": { "type": "string", "format": "date" },
+    "test_plan": {
+      "type": "object",
+      "required": ["test_plan_version", "contract_url", "mandatory_model", "formal_precision", "baseline_roles", "optional_status", "optional_status_zh", "evidence_boundary", "evidence_boundary_zh", "b0_receipt_gate"],
+      "properties": {
+        "test_plan_version": { "const": "V5.5" },
+        "contract_url": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "mandatory_model": { "const": "Qwen/Qwen3.5-35B-A3B" },
+        "formal_precision": { "const": "BF16" },
+        "baseline_roles": { "const": ["B0", "B1"] },
+        "optional_status": { "type": "string", "minLength": 1 },
+        "optional_status_zh": { "type": "string", "minLength": 1 },
+        "evidence_boundary": { "type": "string", "minLength": 1 },
+        "evidence_boundary_zh": { "type": "string", "minLength": 1 },
+        "b0_receipt_gate": {
+          "type": "object",
+          "required": ["owner", "owner_zh", "producer", "required_materials", "value_source", "prefill_actual_values", "infer_actual_values"],
+          "properties": {
+            "owner": { "const": "release-and-evaluation-engineering" },
+            "owner_zh": { "const": "课题组（发布与评测工程）" },
+            "producer": { "const": "release-and-evaluation-engineering-process" },
+            "required_materials": { "const": ["signed_release_manifest", "b0_oci_repo_digest", "b1_oci_repo_digest", "complete_server_argv", "complete_client_contract", "effective_runtime_receipt", "startup_receipt"] },
+            "value_source": { "const": "actual-release-artifacts-and-actual-runtime" },
+            "prefill_actual_values": { "const": false },
+            "infer_actual_values": { "const": false }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "designation": {
+      "type": "object",
+      "required": ["id", "label", "label_zh", "scope_status", "scope_note", "scope_note_zh", "historical_b0_boundary"],
+      "properties": {
+        "id": { "const": "pujiang-specified-dataset-scope" },
+        "label": { "const": "Pujiang-specified datasets" },
+        "label_zh": { "const": "浦江指定数据集" },
+        "scope_status": { "const": "names-only" },
+        "scope_note": { "type": "string", "minLength": 1 },
+        "scope_note_zh": { "type": "string", "minLength": 1 },
+        "historical_b0_boundary": {
+          "type": "object",
+          "required": ["workbook_dataset_count", "covered_designated_dataset_ids", "not_covered_designated_dataset_ids", "note", "note_zh"],
+          "properties": {
+            "workbook_dataset_count": { "const": 21 },
+            "covered_designated_dataset_ids": { "const": ["mmlu-pro"] },
+            "not_covered_designated_dataset_ids": {
+              "const": ["hle-verified", "swe-bench-pro", "frontierscience", "terminal-bench-2.1"]
+            },
+            "note": { "type": "string", "minLength": 1 },
+            "note_zh": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "primary_datasets": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "evaluation_class", "primary_metric", "primary_metric_zh", "status", "source_url", "version_policy", "readiness", "note", "note_zh"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "evaluation_class": { "enum": ["knowledge-reasoning", "agentic-engineering", "scientific-reasoning"] },
+          "primary_metric": { "type": "string", "minLength": 1 },
+          "primary_metric_zh": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["serving-evidence-only", "contract-pending", "ready", "running", "measured"] },
+          "source_url": { "type": "string", "format": "uri", "pattern": "^https://" },
+          "version_policy": { "type": "string", "minLength": 1 },
+          "readiness": {
+            "type": "object",
+            "required": ["status", "observed_materials", "dataset_revision", "split", "sample_count", "sample_count_scope", "manifest_path", "manifest_sha256", "scorer", "runtime_dependencies", "blockers"],
+            "properties": {
+              "status": { "enum": ["executable", "asset-frozen", "material-unfrozen", "missing"] },
+              "observed_materials": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["path", "kind", "sha256"],
+                  "properties": {
+                    "path": { "type": "string", "minLength": 1 },
+                    "kind": {
+                      "enum": [
+                        "canonical-serving-artifact",
+                        "dataset-snapshot-manifest",
+                        "checksum-inventory",
+                        "preparation-note",
+                        "screenshot"
+                      ]
+                    },
+                    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "dataset_revision": { "type": ["string", "null"] },
+              "split": { "type": ["string", "null"] },
+              "sample_count": { "type": ["integer", "null"], "minimum": 1 },
+              "sample_count_scope": { "type": ["string", "null"] },
+              "manifest_path": { "type": ["string", "null"] },
+              "manifest_sha256": {
+                "anyOf": [
+                  { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                  { "type": "null" }
+                ]
+              },
+              "scorer": { "type": ["string", "null"] },
+              "runtime_dependencies": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "blockers": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              }
+            },
+            "additionalProperties": false
+          },
+          "note": { "type": "string", "minLength": 1 },
+          "note_zh": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "supplementary_material": {
+      "type": "object",
+      "required": ["default_tier", "classification_rule", "rule", "rule_zh", "publication_rule", "publication_rule_zh"],
+      "properties": {
+        "default_tier": { "const": "supplementary" },
+        "classification_rule": { "const": "all-other-registered-or-planned-datasets" },
+        "rule": { "type": "string", "minLength": 1 },
+        "rule_zh": { "type": "string", "minLength": 1 },
+        "publication_rule": { "type": "string", "minLength": 1 },
+        "publication_rule_zh": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

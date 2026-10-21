@@ -1,0 +1,4346 @@
+{
+  "contract_version": "dataset-validation-v1",
+  "generated_at": "2026-10-03T03:42:16Z",
+  "status": "explicit_partial_comparison",
+  "source": {
+    "service": "Home archive import",
+    "run_id": "b0-home-20260904-07",
+    "repository": "vLLM-HUST/vllm-hust-dev-hub",
+    "commit": "91bcc4154b70333d87c8180afe85dc933452e253",
+    "artifact_url": null
+  },
+  "baseline": {
+    "id": "b0-vllm018-fp16",
+    "label": "B0 vLLM 0.18 FP16",
+    "commit": null,
+    "generated_at": "2026-09-07T14:17:48+08:00",
+    "image": "codex/vllm-ascend-official:v018-on-v023-cann91-preload"
+  },
+  "candidate_policy": {
+    "id": "best-per-cell",
+    "label": "Best compliant measured result per cell",
+    "single_version_required": false,
+    "rule": "Each B1 cell may select a different engine version; provenance is mandatory and comparison settings must match B0."
+  },
+  "candidate_search": {
+    "audited_at": "2026-10-03",
+    "eligible_cells": 6,
+    "sources": [
+      {
+        "repository": "vLLM-HUST/vllm-hust-benchmark",
+        "commit": "47c12e518a9188bb714bb6193d00260a7741841b",
+        "scope": "canonical single-GPU, historical, comparison, and multi-GPU snapshots"
+      },
+      {
+        "repository": "vLLM-HUST/vllm-hust-benchmark",
+        "scope": "remote result-bearing branches and submission paths"
+      },
+      {
+        "repository": "vLLM-HUST/vllm-hust-dev-hub",
+        "scope": "A1-A4 registry, evaluation handoff, and public result references"
+      },
+      {
+        "repository": "vLLM-HUST/vllm-hust-vSpec",
+        "commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+        "scope": "published Qwen2.5-14B GSM8K and ARC-Easy raw online benchmark artifacts"
+      },
+      {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "scope": "Plugin-page comparisons and their linked primary reports; Qwen3.5 BidKV evidence is published as a separate scenario"
+      }
+    ],
+    "rejected_near_matches": [
+      {
+        "dataset_id": "sharegpt-v3",
+        "candidate_workload": "sharegpt-online",
+        "reason": "Candidate uses request_rate=1 and the completions endpoint; B0 uses request_rate=inf and the chat-completions endpoint."
+      },
+      {
+        "dataset_id": "sharegpt-v3",
+        "candidate_workload": "sharegpt-throughput",
+        "reason": "Candidate is an offline throughput run and does not provide the matching online latency measurements."
+      },
+      {
+        "dataset_id": "sonnet",
+        "candidate_workload": "sonnet-throughput",
+        "reason": "Candidate is an offline throughput run; B0 is an online chat-completions run."
+      },
+      {
+        "dataset_id": "instructcoder",
+        "candidate_workload": "instructcoder-online",
+        "reason": "Candidate uses Qwen2.5-Coder-14B-Instruct, request_rate=1, and the completions endpoint; B0 uses Qwen2.5-14B-Instruct, request_rate=inf, and chat completions."
+      }
+    ],
+    "unadmitted_candidates": [
+      {
+        "id": "gsm8k-vspec-b16-eagle-adaptive-unmatched-b0",
+        "dataset_id": "gsm8k",
+        "reason": "The measured candidate has no same-spec B0 observation; retain its raw provenance without publishing a B1 comparison.",
+        "results": [
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "request_throughput",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 2.892546842694908,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "output_token_throughput",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 611.2674615325014,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "total_token_throughput",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 956.594166347633,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "ttft_mean",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 30740.689778965898,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "tpot_mean",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 22.13804264180199,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          },
+          {
+            "dataset_id": "gsm8k",
+            "metric_id": "request_success_rate",
+            "status": "passed",
+            "baseline_value": null,
+            "value": 100.0,
+            "updated_at": "2026-09-13T22:27:01+08:00",
+            "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+            "hardware": "Ascend 910B2 · single NPU",
+            "provenance": {
+              "repository": "vLLM-HUST/vllm-hust-vSpec",
+              "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+              "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+              "cann_version": "9.1",
+              "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+              "artifact_path": "benchmark_results/regression_20260913/gsm8k_b16_eagle_adaptive.json",
+              "endpoint_type": "openai-chat",
+              "num_prompts": 200,
+              "request_rate": "inf",
+              "completed": 200,
+              "failed": 0,
+              "precision": "FP16",
+              "method": "EAGLE Adaptive gamma=1..4"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "scenario": {
+    "id": "qwen25-14b-instruct-fp16-ascend-single",
+    "label": "V4.6 A1-A4 · B0 archive import",
+    "model": "Qwen2.5-14B-Instruct",
+    "hardware": "Ascend single NPU",
+    "precision": "FP16"
+  },
+  "datasets": [
+    {
+      "id": "ai2-arc",
+      "label": "AI2-ARC",
+      "group": "A2",
+      "description": "ARC reasoning evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "aime-2024",
+      "label": "AIME-2024",
+      "group": "A2",
+      "description": "AIME 2024 problems",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "bbh",
+      "label": "BBH",
+      "group": "A2",
+      "description": "Big-Bench Hard tasks",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "bfcl-v3",
+      "label": "BFCL-V3",
+      "group": "A2/A3",
+      "description": "BFCL v3 tool and structured-call data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "bfcl-v4",
+      "label": "BFCL-V4",
+      "group": "A2/A3",
+      "description": "BFCL v4 extracted data; wheel/source copies are not separate datasets",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "burstgpt-trace",
+      "label": "BURSTGPT-TRACE",
+      "group": "A4",
+      "description": "Arrival trace rather than semantic prompt dataset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "evoscientist",
+      "label": "EVOSCIENTIST",
+      "group": "A2",
+      "description": "Two symlinked representations of one workload family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "gpqa",
+      "label": "GPQA",
+      "group": "A2",
+      "description": "gpqa and gpqa-github are source/cache copies of this family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "gsm8k",
+      "label": "GSM8K",
+      "group": "A2",
+      "description": "Main and Socratic configurations share this physical dataset family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "hotpot-qa",
+      "label": "HOTPOT-QA",
+      "group": "A2",
+      "description": "Full HotpotQA data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "hotpotqa-react-100",
+      "label": "HOTPOTQA-REACT-100",
+      "group": "A2",
+      "description": "Frozen ReAct-formatted 100-case derivative",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "humaneval",
+      "label": "HUMANEVAL",
+      "group": "A2",
+      "description": "Code evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "infinitebench",
+      "label": "INFINITEBENCH",
+      "group": "A3",
+      "description": "infinitebench is the source repository and is not a second dataset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "instructcoder",
+      "label": "INSTRUCTCODER",
+      "group": "A2",
+      "description": "Code instruction data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "jsonschemabench",
+      "label": "JSONSCHEMABENCH",
+      "group": "A2",
+      "description": "JSON Schema evaluation data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "livecodebench-code-generation",
+      "label": "LIVECODEBENCH-CODE-GENERATION",
+      "group": "A2",
+      "description": "LiveCodeBench code-generation split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "livecodebench-execution",
+      "label": "LIVECODEBENCH-EXECUTION",
+      "group": "A2",
+      "description": "LiveCodeBench execution split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "livecodebench-test-generation",
+      "label": "LIVECODEBENCH-TEST-GENERATION",
+      "group": "A2",
+      "description": "LiveCodeBench test-generation split",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "longbench",
+      "label": "LONGBENCH",
+      "group": "A3",
+      "description": "LongBench data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "longbench-v2",
+      "label": "LONGBENCH-V2",
+      "group": "A2/A3",
+      "description": "LongBench-v2 data referenced by multiple configurations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "math-500",
+      "label": "MATH-500",
+      "group": "A2",
+      "description": "MATH-500 reasoning data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "mbpp",
+      "label": "MBPP",
+      "group": "A2",
+      "description": "Mostly Basic Python Problems",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "mmlu-pro",
+      "label": "MMLU-PRO",
+      "group": "A2",
+      "description": "MMLU-Pro data",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "oasst1",
+      "label": "OASST1",
+      "group": "A2/A3",
+      "description": "OpenAssistant conversations referenced by multiple configurations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-chat-1000",
+      "label": "PAIO-CHAT-1000",
+      "group": "A2",
+      "description": "Enterprise chat asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-code-eval-1000",
+      "label": "PAIO-CODE-EVAL-1000",
+      "group": "A2",
+      "description": "Enterprise code-evaluation asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-json-500",
+      "label": "PAIO-JSON-500",
+      "group": "A2",
+      "description": "Enterprise structured-output asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-long-prefill-5000",
+      "label": "PAIO-LONG-PREFILL-5000",
+      "group": "A1/A3",
+      "description": "Enterprise long-prefill asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-longtext-4000",
+      "label": "PAIO-LONGTEXT-4000",
+      "group": "A3",
+      "description": "Enterprise long-text asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-prefix-shared-5000",
+      "label": "PAIO-PREFIX-SHARED-5000",
+      "group": "A1/A3",
+      "description": "Enterprise shared-prefix asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-reuse-conv-5000",
+      "label": "PAIO-REUSE-CONV-5000",
+      "group": "A2/A4",
+      "description": "Enterprise conversation-reuse asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "paio-semantic-similar-5000",
+      "label": "PAIO-SEMANTIC-SIMILAR-5000",
+      "group": "A2/A4",
+      "description": "Enterprise semantic-similarity asset",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "schemastore",
+      "label": "SCHEMASTORE",
+      "group": "A2",
+      "description": "SchemaStore schemas",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "sharegpt-v3",
+      "label": "SHAREGPT-V3",
+      "group": "A2/A4",
+      "description": "One physical conversation corpus used by several online profiles",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "sonnet",
+      "label": "SONNET",
+      "group": "A1/A3",
+      "description": "Fixed benchmark text corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "structeval",
+      "label": "STRUCTEVAL",
+      "group": "A2",
+      "description": "Code and zip assets are source/package copies and not separate datasets",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "szyn-opencode-swebench-verified-500",
+      "label": "SZYN-OPENCODE-SWEBENCH-VERIFIED-500",
+      "group": "A2",
+      "description": "SWE-bench Verified task pool and associated local metadata",
+      "applicable_metric_ids": []
+    },
+    {
+      "id": "syfi-coding-trace",
+      "label": "SYFI-CODING-TRACE",
+      "group": "A2/A3",
+      "description": "One physical trace referenced by tool coding and long-context profiles",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "tau2-bench",
+      "label": "TAU2-BENCH",
+      "group": "A2",
+      "description": "Domain data under the tau2 repository are one benchmark family",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "toolbench",
+      "label": "TOOLBENCH",
+      "group": "A2",
+      "description": "Official full data.zip with G1 G2 G3 instructions test splits tool environment and answers",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "ultrachat-200k",
+      "label": "ULTRACHAT-200K",
+      "group": "A2",
+      "description": "UltraChat 200K conversations",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "visionarena",
+      "label": "VISIONARENA",
+      "group": "A2",
+      "description": "Physical parquet is present via symlink; requires a supported multimodal model",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "wildchat",
+      "label": "WILDCHAT",
+      "group": "A2/A4",
+      "description": "WildChat corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    },
+    {
+      "id": "wildchat-4.8m",
+      "label": "WILDCHAT-4.8M",
+      "group": "A2/A4",
+      "description": "WildChat 4.8M corpus",
+      "applicable_metric_ids": [
+        "request_throughput",
+        "output_token_throughput",
+        "total_token_throughput",
+        "ttft_mean",
+        "tpot_mean",
+        "request_success_rate"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "request_throughput",
+      "label": "Request throughput",
+      "unit": "request/s",
+      "direction": "higher"
+    },
+    {
+      "id": "output_token_throughput",
+      "label": "Output token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    },
+    {
+      "id": "total_token_throughput",
+      "label": "Total token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    },
+    {
+      "id": "ttft_mean",
+      "label": "Mean TTFT",
+      "unit": "ms",
+      "direction": "lower"
+    },
+    {
+      "id": "tpot_mean",
+      "label": "Mean TPOT",
+      "unit": "ms/token",
+      "direction": "lower"
+    },
+    {
+      "id": "request_success_rate",
+      "label": "Request success rate",
+      "unit": "%",
+      "direction": "higher"
+    }
+  ],
+  "results": [
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "request_throughput",
+      "status": "passed",
+      "baseline_value": 1.8,
+      "value": 2.7897729291534117,
+      "updated_at": "2026-09-13T22:12:17+08:00",
+      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+      "hardware": "Ascend 910B2 · single NPU",
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-vSpec",
+        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+        "cann_version": "9.1",
+        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+        "artifact_path": "benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "endpoint_type": "openai-chat",
+        "num_prompts": 200,
+        "request_rate": "inf",
+        "completed": 200,
+        "failed": 0,
+        "precision": "FP16",
+        "method": "EAGLE Adaptive gamma=1..4"
+      }
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 274.82,
+      "value": 442.61142407483453,
+      "updated_at": "2026-09-13T22:12:17+08:00",
+      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+      "hardware": "Ascend 910B2 · single NPU",
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-vSpec",
+        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+        "cann_version": "9.1",
+        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+        "artifact_path": "benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "endpoint_type": "openai-chat",
+        "num_prompts": 200,
+        "request_rate": "inf",
+        "completed": 200,
+        "failed": 0,
+        "precision": "FP16",
+        "method": "EAGLE Adaptive gamma=1..4"
+      }
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "total_token_throughput",
+      "status": "passed",
+      "baseline_value": 455.55,
+      "value": 803.8591206709098,
+      "updated_at": "2026-09-13T22:12:17+08:00",
+      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+      "hardware": "Ascend 910B2 · single NPU",
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-vSpec",
+        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+        "cann_version": "9.1",
+        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+        "artifact_path": "benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "endpoint_type": "openai-chat",
+        "num_prompts": 200,
+        "request_rate": "inf",
+        "completed": 200,
+        "failed": 0,
+        "precision": "FP16",
+        "method": "EAGLE Adaptive gamma=1..4"
+      }
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "ttft_mean",
+      "status": "passed",
+      "baseline_value": 69831.12,
+      "value": 29940.011453730986,
+      "updated_at": "2026-09-13T22:12:17+08:00",
+      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+      "hardware": "Ascend 910B2 · single NPU",
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-vSpec",
+        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+        "cann_version": "9.1",
+        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+        "artifact_path": "benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "endpoint_type": "openai-chat",
+        "num_prompts": 200,
+        "request_rate": "inf",
+        "completed": 200,
+        "failed": 0,
+        "precision": "FP16",
+        "method": "EAGLE Adaptive gamma=1..4"
+      }
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "tpot_mean",
+      "status": "passed",
+      "baseline_value": 40.1,
+      "value": 29.822154098417474,
+      "updated_at": "2026-09-13T22:12:17+08:00",
+      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+      "hardware": "Ascend 910B2 · single NPU",
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-vSpec",
+        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+        "cann_version": "9.1",
+        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+        "artifact_path": "benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "endpoint_type": "openai-chat",
+        "num_prompts": 200,
+        "request_rate": "inf",
+        "completed": 200,
+        "failed": 0,
+        "precision": "FP16",
+        "method": "EAGLE Adaptive gamma=1..4"
+      }
+    },
+    {
+      "dataset_id": "ai2-arc",
+      "metric_id": "request_success_rate",
+      "status": "passed",
+      "baseline_value": 100.0,
+      "value": 100.0,
+      "updated_at": "2026-09-13T22:12:17+08:00",
+      "model": "Qwen2.5-14B-Instruct + Qwen2.5-0.5B-Instruct (EAGLE)",
+      "hardware": "Ascend 910B2 · single NPU",
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-vSpec",
+        "repository_commit": "4a29bf9bce72b3ea8cf7abbc54cbba204f00942f",
+        "engine_commit": "762f85b311fbab0bcf8921dd216f5093cd58b9b8",
+        "cann_version": "9.1",
+        "artifact": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/4a29bf9bce72b3ea8cf7abbc54cbba204f00942f/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+        "artifact_path": "benchmark_results/regression_20260913/arc_easy_b16_eagle_adaptive.json",
+        "endpoint_type": "openai-chat",
+        "num_prompts": 200,
+        "request_rate": "inf",
+        "completed": 200,
+        "failed": 0,
+        "precision": "FP16",
+        "method": "EAGLE Adaptive gamma=1..4"
+      }
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.37,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "AIME-2024/截屏2026-09-05 15.09.19.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 350.45,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "AIME-2024/截屏2026-09-05 15.09.19.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 561.1,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "AIME-2024/截屏2026-09-05 15.09.19.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 86505.57,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "AIME-2024/截屏2026-09-05 15.09.19.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 33.93,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "AIME-2024/截屏2026-09-05 15.09.19.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "aime-2024",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "AIME-2024/截屏2026-09-05 15.09.19.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.8,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BBH/截屏2026-09-05 16.41.55.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 251.63,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BBH/截屏2026-09-05 16.41.55.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 359.78,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BBH/截屏2026-09-05 16.41.55.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 66985.55,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BBH/截屏2026-09-05 16.41.55.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 41.82,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BBH/截屏2026-09-05 16.41.55.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bbh",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BBH/截屏2026-09-05 16.41.55.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 3.03,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BFCL-V3/截屏2026-09-05 18.35.59.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 95.05,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BFCL-V3/截屏2026-09-05 18.35.59.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 725.83,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BFCL-V3/截屏2026-09-05 18.35.59.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 42899.59,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BFCL-V3/截屏2026-09-05 18.35.59.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 78.76,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BFCL-V3/截屏2026-09-05 18.35.59.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bfcl-v3",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "BFCL-V3/截屏2026-09-05 18.35.59.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "bfcl-v4",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "burstgpt-trace",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.36,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "EVOSCIENTIST/截屏2026-09-06 15.19.22.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 347.48,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "EVOSCIENTIST/截屏2026-09-06 15.19.22.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 621.97,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "EVOSCIENTIST/截屏2026-09-06 15.19.22.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 85692.98,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "EVOSCIENTIST/截屏2026-09-06 15.19.22.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 33.8,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "EVOSCIENTIST/截屏2026-09-06 15.19.22.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "EVOSCIENTIST/截屏2026-09-06 15.19.22.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gpqa",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
+    },
+    {
+      "dataset_id": "gsm8k",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "A candidate measurement exists but lacks a matching B0; see candidate_search.unadmitted_candidates."
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.71,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HOTPOT-QA/截屏2026-09-06 15.49.07.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 168.67,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HOTPOT-QA/截屏2026-09-06 15.49.07.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 2665.76,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HOTPOT-QA/截屏2026-09-06 15.49.07.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 71563.59,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HOTPOT-QA/截屏2026-09-06 15.49.07.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 65.54,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HOTPOT-QA/截屏2026-09-06 15.49.07.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "hotpot-qa",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HOTPOT-QA/截屏2026-09-06 15.49.07.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "hotpotqa-react-100",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.25,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HUMANEVAL/截屏2026-09-06 16.04.51.png",
+        "successful_requests": 164,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 315.64,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HUMANEVAL/截屏2026-09-06 16.04.51.png",
+        "successful_requests": 164,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 518.46,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HUMANEVAL/截屏2026-09-06 16.04.51.png",
+        "successful_requests": 164,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 76846.61,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HUMANEVAL/截屏2026-09-06 16.04.51.png",
+        "successful_requests": 164,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 35.44,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HUMANEVAL/截屏2026-09-06 16.04.51.png",
+        "successful_requests": 164,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "humaneval",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "HUMANEVAL/截屏2026-09-06 16.04.51.png",
+        "successful_requests": 164,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "infinitebench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.79,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "INSTRUCTCODER/截屏2026-09-06 17.56.58.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 270.76,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "INSTRUCTCODER/截屏2026-09-06 17.56.58.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 592.03,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "INSTRUCTCODER/截屏2026-09-06 17.56.58.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 69110.87,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "INSTRUCTCODER/截屏2026-09-06 17.56.58.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 41.67,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "INSTRUCTCODER/截屏2026-09-06 17.56.58.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "instructcoder",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "INSTRUCTCODER/截屏2026-09-06 17.56.58.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 0.95,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "JSONSCHEMABENCH/截屏2026-09-06 18.17.35.png",
+        "successful_requests": 199,
+        "failed_requests": 1
+      }
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 136.13,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "JSONSCHEMABENCH/截屏2026-09-06 18.17.35.png",
+        "successful_requests": 199,
+        "failed_requests": 1,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 2259.84,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "JSONSCHEMABENCH/截屏2026-09-06 18.17.35.png",
+        "successful_requests": 199,
+        "failed_requests": 1
+      }
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 76051.44,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "JSONSCHEMABENCH/截屏2026-09-06 18.17.35.png",
+        "successful_requests": 199,
+        "failed_requests": 1
+      }
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 89.09,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "JSONSCHEMABENCH/截屏2026-09-06 18.17.35.png",
+        "successful_requests": 199,
+        "failed_requests": 1
+      }
+    },
+    {
+      "dataset_id": "jsonschemabench",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 99.5,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "JSONSCHEMABENCH/截屏2026-09-06 18.17.35.png",
+        "successful_requests": 199,
+        "failed_requests": 1
+      }
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.84,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-CODE-GENERATION/截屏2026-09-06 20.48.42.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 244.44,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-CODE-GENERATION/截屏2026-09-06 20.48.42.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1156.25,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-CODE-GENERATION/截屏2026-09-06 20.48.42.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 64792.66,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-CODE-GENERATION/截屏2026-09-06 20.48.42.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 44.05,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-CODE-GENERATION/截屏2026-09-06 20.48.42.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-code-generation",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-CODE-GENERATION/截屏2026-09-06 20.48.42.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.38,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-EXECUTION/截屏2026-09-06 21.06.40.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 316.23,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-EXECUTION/截屏2026-09-06 21.06.40.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 548.91,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-EXECUTION/截屏2026-09-06 21.06.40.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 84200.96,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-EXECUTION/截屏2026-09-06 21.06.40.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 36.8,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-EXECUTION/截屏2026-09-06 21.06.40.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-execution",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-EXECUTION/截屏2026-09-06 21.06.40.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.85,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-TEST-GENERATION/截屏2026-09-06 21.18.53.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 248.84,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-TEST-GENERATION/截屏2026-09-06 21.18.53.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 623.56,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-TEST-GENERATION/截屏2026-09-06 21.18.53.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 67312.21,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-TEST-GENERATION/截屏2026-09-06 21.18.53.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 43.12,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-TEST-GENERATION/截屏2026-09-06 21.18.53.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "livecodebench-test-generation",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LIVECODEBENCH-TEST-GENERATION/截屏2026-09-06 21.18.53.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 0.47,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH/截屏2026-09-06 21.45.36.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 55.5,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH/截屏2026-09-06 21.45.36.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 3603.35,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH/截屏2026-09-06 21.45.36.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 228597.76,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH/截屏2026-09-06 21.45.36.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 233.07,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH/截屏2026-09-06 21.45.36.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "longbench",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH/截屏2026-09-06 21.45.36.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 0.02,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH-V2/截屏2026-09-06 23.16.15.png",
+        "successful_requests": 98,
+        "failed_requests": 2
+      }
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 4.13,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH-V2/截屏2026-09-06 23.16.15.png",
+        "successful_requests": 98,
+        "failed_requests": 2,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 733.89,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH-V2/截屏2026-09-06 23.16.15.png",
+        "successful_requests": 98,
+        "failed_requests": 2
+      }
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 2029754.75,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH-V2/截屏2026-09-06 23.16.15.png",
+        "successful_requests": 98,
+        "failed_requests": 2
+      }
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 837.1,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH-V2/截屏2026-09-06 23.16.15.png",
+        "successful_requests": 98,
+        "failed_requests": 2
+      }
+    },
+    {
+      "dataset_id": "longbench-v2",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 98.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "LONGBENCH-V2/截屏2026-09-06 23.16.15.png",
+        "successful_requests": 98,
+        "failed_requests": 2
+      }
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.39,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MATH-500/截屏2026-09-06 23.29.08.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 317.95,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MATH-500/截屏2026-09-06 23.29.08.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 483.94,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MATH-500/截屏2026-09-06 23.29.08.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 83844.28,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MATH-500/截屏2026-09-06 23.29.08.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 36.72,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MATH-500/截屏2026-09-06 23.29.08.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "math-500",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MATH-500/截屏2026-09-06 23.29.08.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 2.63,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MBPP/截屏2026-09-06 23.45.31.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 159.86,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MBPP/截屏2026-09-06 23.45.31.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 437.38,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MBPP/截屏2026-09-06 23.45.31.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 47228.36,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MBPP/截屏2026-09-06 23.45.31.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 57.02,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MBPP/截屏2026-09-06 23.45.31.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mbpp",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MBPP/截屏2026-09-06 23.45.31.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.47,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MMLU-PRO/截屏2026-09-06 23.59.39.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 309.95,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MMLU-PRO/截屏2026-09-06 23.59.39.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 631.03,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MMLU-PRO/截屏2026-09-06 23.59.39.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 79432.31,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MMLU-PRO/截屏2026-09-06 23.59.39.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 39.07,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MMLU-PRO/截屏2026-09-06 23.59.39.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "mmlu-pro",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "MMLU-PRO/截屏2026-09-06 23.59.39.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.5,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "OASST1/截屏2026-09-07 00.17.30.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 319.5,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "OASST1/截屏2026-09-07 00.17.30.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 407.05,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "OASST1/截屏2026-09-07 00.17.30.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 81240.06,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "OASST1/截屏2026-09-07 00.17.30.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 35.97,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "OASST1/截屏2026-09-07 00.17.30.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "oasst1",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "OASST1/截屏2026-09-07 00.17.30.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.53,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CHAT-1000/截屏2026-09-07 00.29.49.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 295.69,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CHAT-1000/截屏2026-09-07 00.29.49.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 681.7,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CHAT-1000/截屏2026-09-07 00.29.49.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 77722.77,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CHAT-1000/截屏2026-09-07 00.29.49.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 38.06,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CHAT-1000/截屏2026-09-07 00.29.49.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-chat-1000",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CHAT-1000/截屏2026-09-07 00.29.49.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 2.46,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CODE-EVAL-1000/截屏2026-09-07 00.44.44.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 79.92,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CODE-EVAL-1000/截屏2026-09-07 00.44.44.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 2254.43,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CODE-EVAL-1000/截屏2026-09-07 00.44.44.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 56675.81,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CODE-EVAL-1000/截屏2026-09-07 00.44.44.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 589.46,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CODE-EVAL-1000/截屏2026-09-07 00.44.44.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-code-eval-1000",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-CODE-EVAL-1000/截屏2026-09-07 00.44.44.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.41,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-JSON-500/截屏2026-09-07 00.56.26.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 262.11,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-JSON-500/截屏2026-09-07 00.56.26.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1301.52,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-JSON-500/截屏2026-09-07 00.56.26.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 84839.36,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-JSON-500/截屏2026-09-07 00.56.26.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 44.04,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-JSON-500/截屏2026-09-07 00.56.26.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-json-500",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-JSON-500/截屏2026-09-07 00.56.26.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 0.49,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-LONG-PREFILL-5000/截屏2026-09-07 01.17.17.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 15.78,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-LONG-PREFILL-5000/截屏2026-09-07 01.17.17.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 5105.14,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-LONG-PREFILL-5000/截屏2026-09-07 01.17.17.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 195027.85,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-LONG-PREFILL-5000/截屏2026-09-07 01.17.17.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 580.21,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-LONG-PREFILL-5000/截屏2026-09-07 01.17.17.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-long-prefill-5000",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-LONG-PREFILL-5000/截屏2026-09-07 01.17.17.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-longtext-4000",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 0.81,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-PREFIX-SHARED-5000/截屏2026-09-07 01.54.02.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 164.95,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-PREFIX-SHARED-5000/截屏2026-09-07 01.54.02.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 3314.5,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-PREFIX-SHARED-5000/截屏2026-09-07 01.54.02.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 136404.44,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-PREFIX-SHARED-5000/截屏2026-09-07 01.54.02.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 80.15,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-PREFIX-SHARED-5000/截屏2026-09-07 01.54.02.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-prefix-shared-5000",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-PREFIX-SHARED-5000/截屏2026-09-07 01.54.02.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 0.79,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-REUSE-CONV-5000/截屏2026-09-07 02.13.24.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 172.08,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-REUSE-CONV-5000/截屏2026-09-07 02.13.24.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 3186.86,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-REUSE-CONV-5000/截屏2026-09-07 02.13.24.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 139286.96,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-REUSE-CONV-5000/截屏2026-09-07 02.13.24.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 78.88,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-REUSE-CONV-5000/截屏2026-09-07 02.13.24.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-reuse-conv-5000",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-REUSE-CONV-5000/截屏2026-09-07 02.13.24.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 0.85,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-SEMANTIC-SIMILAR-5000/截屏2026-09-07 02.27.29.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 183.94,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-SEMANTIC-SIMILAR-5000/截屏2026-09-07 02.27.29.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 3007.39,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-SEMANTIC-SIMILAR-5000/截屏2026-09-07 02.27.29.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 130388.55,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-SEMANTIC-SIMILAR-5000/截屏2026-09-07 02.27.29.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 71.44,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-SEMANTIC-SIMILAR-5000/截屏2026-09-07 02.27.29.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "paio-semantic-similar-5000",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "PAIO-SEMANTIC-SIMILAR-5000/截屏2026-09-07 02.27.29.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "schemastore",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.38,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SHAREGPT-V3/截屏2026-09-07 02.44.45.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 291.99,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SHAREGPT-V3/截屏2026-09-07 02.44.45.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 592.54,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SHAREGPT-V3/截屏2026-09-07 02.44.45.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 80125.33,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SHAREGPT-V3/截屏2026-09-07 02.44.45.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 42.65,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SHAREGPT-V3/截屏2026-09-07 02.44.45.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sharegpt-v3",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SHAREGPT-V3/截屏2026-09-07 02.44.45.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.25,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SONNET/截屏2026-09-07 13.56.37.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 319.88,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SONNET/截屏2026-09-07 13.56.37.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 950.24,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SONNET/截屏2026-09-07 13.56.37.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 95570.16,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SONNET/截屏2026-09-07 13.56.37.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 35.01,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SONNET/截屏2026-09-07 13.56.37.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "sonnet",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "SONNET/截屏2026-09-07 13.56.37.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "request_throughput",
+      "status": "baseline_only",
+      "baseline_value": 1.38,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "STRUCTEVAL/截屏2026-09-07 14.17.48.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "output_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 336.35,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "STRUCTEVAL/截屏2026-09-07 14.17.48.png",
+        "successful_requests": 200,
+        "failed_requests": 0,
+        "spreadsheet": "B0 baseline.xlsx",
+        "spreadsheet_sheet": "a1-a4-metric-dataset-matrix",
+        "spreadsheet_metric": "输出吞吐"
+      }
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "total_token_throughput",
+      "status": "baseline_only",
+      "baseline_value": 698.55,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "STRUCTEVAL/截屏2026-09-07 14.17.48.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "ttft_mean",
+      "status": "baseline_only",
+      "baseline_value": 85956.58,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "STRUCTEVAL/截屏2026-09-07 14.17.48.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "tpot_mean",
+      "status": "baseline_only",
+      "baseline_value": 35.39,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "STRUCTEVAL/截屏2026-09-07 14.17.48.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "structeval",
+      "metric_id": "request_success_rate",
+      "status": "baseline_only",
+      "baseline_value": 100.0,
+      "value": null,
+      "updated_at": "2026-09-07T14:17:48+08:00",
+      "provenance": {
+        "artifact": "B0实验验证.zip",
+        "archive_sha256": "60084956ff45dbd361c299fb4f1f0d0e4ff6538636701405c97b4d5f4848f9bd",
+        "screenshot": "STRUCTEVAL/截屏2026-09-07 14.17.48.png",
+        "successful_requests": 200,
+        "failed_requests": 0
+      }
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "request_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "output_token_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "total_token_throughput",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "ttft_mean",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "tpot_mean",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "szyn-opencode-swebench-verified-500",
+      "metric_id": "request_success_rate",
+      "status": "not_applicable",
+      "baseline_value": null,
+      "value": null,
+      "reason": "This agent evaluation uses resolve rate rather than online serving metrics."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "syfi-coding-trace",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "tau2-bench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "toolbench",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "ultrachat-200k",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "visionarena",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "request_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "output_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "total_token_throughput",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "ttft_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "tpot_mean",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    },
+    {
+      "dataset_id": "wildchat-4.8m",
+      "metric_id": "request_success_rate",
+      "status": "not_tested",
+      "baseline_value": null,
+      "value": null,
+      "reason": "No matching measurement has been admitted for this dataset, model, and serving configuration."
+    }
+  ],
+  "limitations": [
+    "B0 values are transcribed from the 28 benchmark-result screenshots present in the Home archive.",
+    "The other 16 registered datasets have preparation material but no benchmark-result screenshot in the archive.",
+    "The screenshots report mean and P99 latency, not P95; this publication uses only the explicitly reported mean latency fields.",
+    "The 2026-10-03 candidate audit populated 12 B1 cells from vSpec raw artifacts; remaining B1 cells require matching measured evidence.",
+    "The Qwen3.5 BidKV EvoScientist result uses a different model and TP4 configuration, so it is published through a separate model scenario."
+  ],
+  "coverage_contract": {
+    "mode": "explicit-dataset-metric-applicability",
+    "complete_cell_states_required": true,
+    "non_measured_reason_required": true,
+    "matched_b0_required_for_b1": true
+  }
+}

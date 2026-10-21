@@ -1,0 +1,3310 @@
+{
+  "schema": "website-source-consolidation-audit/v1",
+  "website_commit": "8816b890c083e3cf61b13f6349968cbd60f21714",
+  "benchmark_commit": "8f7b417c067f8036041f01c847893c6917ad5351",
+  "scope": [
+    "data/",
+    "docs/evidence/",
+    "reports/",
+    "op01-evidence/"
+  ],
+  "counts": {
+    "needs-provenance-review": 440,
+    "existing-identical-source": 21
+  },
+  "limitations": [
+    "Non-identical files may be generated projections, reformatted JSON, or archive members.",
+    "A matching Git blob proves identical bytes, not experiment comparability or acceptance.",
+    "Uncommitted website-publication copies are not accepted as established sources.",
+    "Remote bare-metal archives have not been inspected by this audit."
+  ],
+  "migration_leads": [
+    {
+      "path": "/data/codex-build-artifacts/frontier-mods-qwen35-20260925",
+      "evidence": "vllm-hust-dev-hub/docs/frontier-mod-campaign-20260925.md",
+      "status": "documented-location-not-live-verified"
+    },
+    {
+      "path": "/data/codex-build-work/frontier-mods-qwen35-20260925",
+      "evidence": "vllm-hust-dev-hub/config/frontier-mod-campaign-20260925.json",
+      "status": "documented-location-not-live-verified"
+    },
+    {
+      "host": "192.168.0.84",
+      "path": "/data/users/admin/frontier-mods-qwen35-20260925",
+      "status": "user-supplied-location-not-live-verified"
+    }
+  ],
+  "files": [
+    {
+      "website_path": "data/DATASET_VALIDATION_RESULTS.md",
+      "website_git_blob": "6ae195f832af2377e65343f5a041ef536667b662",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/FIELD_SPECIFICATION.md",
+      "website_git_blob": "8e2c1a73e347e37eae3733cb5ca64fd71153a78f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/FORMAT_CHANGES.md",
+      "website_git_blob": "b0e6dcace27b9f25d1d301c82bedf723ee94a0f5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/README.md",
+      "website_git_blob": "32b3dd28158c1d419e75f92081eaa12ce6b294ef",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/VALIDATION_RULES.md",
+      "website_git_blob": "de88a75a7568c36c3dc2720b77698440ee0469cf",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/agent_dataset_results.json",
+      "website_git_blob": "7edab0603794a5955f8fdab41ce8f186bf17ebe3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-dataset-validation-20261015/report.json",
+      "website_git_blob": "c797a3d6f3ca5f8a0818ae7e9586d8e9102a541a",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "reports/betterscale-dataset-validation-20261015/report.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/betterscale-dsv4-steps.json",
+      "website_git_blob": "b7e602420a5c6053aaf4fc3ffe80f80b85cfbdfe",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-hle-20261015/report.json",
+      "website_git_blob": "743a2777b8f15ba6823a4e7b0329721a21790b12",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-qwen-mc2.json",
+      "website_git_blob": "045dbdeaa1ccd6f49ab91efb74e25dae70f92aab",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-qwen-mechanism.json",
+      "website_git_blob": "8ed39aa1c03d43fe13116a53972072206b7f3bbf",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-qwen-mtp-apc.json",
+      "website_git_blob": "f034c53f8a995d22dbadf519e6cd5e0e9f501685",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-qwen-mtp-async.json",
+      "website_git_blob": "a3182c5445021da333494386db48fc6ea72bdc3e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-qwen-steps.json",
+      "website_git_blob": "fab3b473bd377731cef909f2743df3fd7d37cafd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-qwen-swe.json",
+      "website_git_blob": "33f096cfa37f7771aedb2e2e4cb1a310562f737e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-results.json",
+      "website_git_blob": "89eb3f6b10e81849453f9bbb6a0e691efd7b38bd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/betterscale-school-runtime-20261016/report.json",
+      "website_git_blob": "f11cd2fb5c70f0a1f89b66677ec111fea3a08c3d",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "reports/betterscale-school-runtime-20261016/report.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/core_contributors.json",
+      "website_git_blob": "4b1e634c5c3aadcc5b58ecdfbf0ede6d790bf6fa",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/dataset-matrix-campaign-20261016/report.json",
+      "website_git_blob": "5038876a66af6d43b2a2d03ff83b3dc90e1d0b7d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/dataset-matrix-v1.json",
+      "website_git_blob": "f1696122d1cadc4b6ff8b42ee6cc89f0fc26b2a3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/dataset_program_v1.json",
+      "website_git_blob": "8e5934f801f021752c77c5683880c5a688517930",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_program_v1.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_index_v1.json",
+      "website_git_blob": "5d8785532bbdfa6e016facdce5521b27ba712428",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/dataset_validation_qwen35_bidkv.json",
+      "website_git_blob": "9d2e0b480f16b5e33b0f341f81ba6e4b3992bf62",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_qwen35_bidkv.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_qwen35_frontier_betterscale_900s.json",
+      "website_git_blob": "0195d6279cf59bfa6aaa8e34fcd5f3c615fdb580",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_qwen35_frontier_betterscale_900s.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_qwen35_frontier_pipeline_pp2_900s.json",
+      "website_git_blob": "dfddfc034ac9d91c8519ef12486c7f2e41714c6d",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_qwen35_frontier_pipeline_pp2_900s.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_qwen35_frontier_unified_900s.json",
+      "website_git_blob": "a944d2f4770e7d6b177f06a6bccca965af3d5290",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_qwen35_frontier_unified_900s.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_qwen35_mmlu_school028_inf_out256.json",
+      "website_git_blob": "3514213489cd7fcea1e0a826e9f0701781aadd60",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_qwen35_mmlu_school028_inf_out256.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json",
+      "website_git_blob": "65488a0614df68e9355eb55e0193356891225118",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_qwen35_tp2_matrix.json",
+      "website_git_blob": "397470e11d8f381e403c1a309f44c57dc5cd2f94",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_qwen35_tp2_matrix.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_v1.b0.json",
+      "website_git_blob": "726e74dd80b4a54c460defe222f7d07a5c800d4a",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/dataset-validation/dataset_validation_v1.b0.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/dataset_validation_v1.empty.json",
+      "website_git_blob": "96244aa16481c7d50c4945287ef630839f40a5e8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/ecosystem.json",
+      "website_git_blob": "66bb9cdfeacd688813e50c373500890f1c21a4a6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/examples/frontier-submission/README.md",
+      "website_git_blob": "4196275e2eae9bb92399e6ae369dbb9e6eb1515c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/examples/frontier-submission/evidence.json",
+      "website_git_blob": "143aaa65f0d5224f8c0e28a952105f4016ff15ff",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/examples/frontier-submission/snapshot.json",
+      "website_git_blob": "5152d52f8f5c6af5ecd78059f0d3716153ddb75b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/examples/multi_gpu_example.json",
+      "website_git_blob": "612faf4305f527ded09ab69561cba55b811bdf98",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/examples/multi_node_example.json",
+      "website_git_blob": "084870e9648cae6184eca8ce59a3b33bc914ffa8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/examples/single_node_example.json",
+      "website_git_blob": "ca71e02e2455b9682093fac1fb283ab45ccabccb",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/frontierscience-20261013/manifest.json",
+      "website_git_blob": "6bb6467f91aba43e5f5717b205644e720ec24017",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/frontierscience-20261013/original-manifest.json.gz",
+      "website_git_blob": "143b6d90a4656cc510f03cec07fb84fb4a944400",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/frontierscience-20261013/report.json",
+      "website_git_blob": "df29fb60d900d48d7a6574e58c0ddd4b956ad8ad",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "reports/frontierscience-qwen35-b0-precheck-20261013/report.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/frontierscience-20261013/result-table.md.gz",
+      "website_git_blob": "1d887e4ab07aeb30ec0d4092d445d6e57a3d8c0a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/frontierscience-20261013/runtime.json",
+      "website_git_blob": "e8b1bfcf96f0d5d4cb4c2d21168bee7666b492fa",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/bench-manifest.json.gz",
+      "website_git_blob": "b9e6426985e6f85424c28ee9f48f462f856c19d1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/bench-table.md.gz",
+      "website_git_blob": "9bd286b73f4a3adc4a3eac12c0579d687764966c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/gold-manifest.json.gz",
+      "website_git_blob": "8037db0e578cbead5bb3120e3059c0d4cfd6a7d3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/gold-table.md.gz",
+      "website_git_blob": "c9b3e70756833ea776df5c0d3ad6757992c14299",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/manifest.json",
+      "website_git_blob": "fdb7f3eab9e53a20f5eae1e04b8b2af0e48809c5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/report.json",
+      "website_git_blob": "d09ca02767dcdac7f180d77484388fab394b515c",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "reports/hle-verified-qwen35-20261015/report.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/revision-manifest.json.gz",
+      "website_git_blob": "f65e1aefdabc5430547e6b0eea9aaf440ea423e0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/revision-table.md.gz",
+      "website_git_blob": "04639a48befae2e671c342b58eb0f32f0b87be32",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/hle-verified-20261015/runtime.json",
+      "website_git_blob": "fbb360efc478c4b2a023a263be81d165d3f4da4b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/issues.json",
+      "website_git_blob": "f5227af32404b6f39c5b03652ae512aaf2f397e3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/last_updated.json",
+      "website_git_blob": "64c57ec0291e7747c3ec30042686b469fdf5f9f5",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/snapshots/last_updated.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/leaderboard_910c_native_evidence.json",
+      "website_git_blob": "057d9850abfdc119f0d98b450f70fd4779035d4d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_betterscale_knee_evidence.json",
+      "website_git_blob": "dbb5b199a4e0aae558ce978a7799bd1281c465d8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_betterscale_width_evidence.json",
+      "website_git_blob": "fc17bc8e3f813d1cf82c6154cce06597fa030508",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_compare.json",
+      "website_git_blob": "13c4511050db176f79cb9985baaba9ea3631e0c8",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/snapshots/leaderboard_compare.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/leaderboard_frontier.json",
+      "website_git_blob": "94e7a00365bab3d1d8a787a9ede791cc39dbb619",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_frontier_dsv4_evidence.json",
+      "website_git_blob": "0c577821a09912b2a97c39905c05431027f1f3a9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_frontier_evidence.json",
+      "website_git_blob": "a503169229a45fe2d1f801151a5a949e4278df13",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_frontier_expert_evidence.json",
+      "website_git_blob": "1fb1e4bb8315074ccd3d5af4431a94f53bc74d1e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_frontier_native_20261013_evidence.json",
+      "website_git_blob": "7d511f8d65d15cdae901692bcaead22cb0f733c6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_frontier_swe_evidence.json",
+      "website_git_blob": "b9f866d706b2eaf2e1b54a8e3b1611debaebf6f1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_historical.json",
+      "website_git_blob": "469b5ab5c245d835562f2f93e9d64d1918a2f62f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_mod_attributions.json",
+      "website_git_blob": "90e852ea6ace898219d64e366a57121bc049ccf7",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_multi.json",
+      "website_git_blob": "a0d62e823acc588b2865fa50c5c3083129d4d4c7",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/snapshots/leaderboard_multi.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/leaderboard_prefix_routing_mean_evidence.json",
+      "website_git_blob": "a28525c8ec370f6e88cfba81a57eeaa7f4ced2d2",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_run_observations.json",
+      "website_git_blob": "ccbaf689f666a24f95b1685b8e74205d35f3328d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leaderboard_single.json",
+      "website_git_blob": "06a4846d106a38e858069ff47d16a906f3df9c76",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/snapshots/leaderboard_single.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/leaderboard_utility_victim_evidence.json",
+      "website_git_blob": "2274b571abe1aaf7bb1601e40c6ffe3ced0c7120",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/leadership_performance_targets.json",
+      "website_git_blob": "e18d2a0751a33e6b7dd06ed0778ae8cd3b5790f3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/member_roster.json",
+      "website_git_blob": "f7b594df75428f696657d70ea564154df22bf993",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/members.json",
+      "website_git_blob": "bcb1d4a3e758995446c160984cfd518e174bd5fe",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/mmlu-pro-20261012/accuracy.json",
+      "website_git_blob": "3ec24906c73c64b3450f7dd96f5d7b911c853972",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/mmlu-pro-20261012/manifest.json",
+      "website_git_blob": "804262eab0beaed86a823edd1352b8974593fd0c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/mmlu-pro-20261012/performance.json",
+      "website_git_blob": "a4b36284e5544f5e5706c88d79375490d54eaad9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/mmlu-pro-20261012/report.json",
+      "website_git_blob": "3c489b3296298a136405e16e1b1a4c0f39b31153",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/mmlu-pro-20261012/runtime.json",
+      "website_git_blob": "f9a53ecaa9218617052d689cc034602b90399052",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/mod-taxonomy.json",
+      "website_git_blob": "e35c3d33d1c93783a2947c561c102241d0703337",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/news.json",
+      "website_git_blob": "4f96b108982c423f567218b5fc731e4694015522",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/official_targets.json",
+      "website_git_blob": "f3759c235b3f2f9c3f2e5be0f617a0a936c0e9a1",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/official-targets.json",
+        "src/vllm_hust_benchmark/data/official_targets.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/official_targets.sha256",
+      "website_git_blob": "64a32a87f28c6f75afce4b02bc14456bd08400c8",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "leaderboard-data/official-targets.sha256"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/plugin-performance.json",
+      "website_git_blob": "1e44cc237a4a10fc113916a0f4bb1a784b5c6a03",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/plugin-workload-navigation.json",
+      "website_git_blob": "3f94f08cfda400f989bdd6a69c897d6e07a32572",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/plugin-workshop-metadata.json",
+      "website_git_blob": "a408bf055379753524bcb8401faacd5e7eecc31d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/repository-portfolio.json",
+      "website_git_blob": "0b0137cd4bcb6803c98a2e913637bd051eb24379",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/request-throttling-dataset-matrix-20261018/frontierscience.json",
+      "website_git_blob": "a4da624d59bbcb163caa35fa2e517d952e33516c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/request-throttling-dataset-matrix-20261018/hle-gold.json",
+      "website_git_blob": "c6ae62834373e76c3bcb3a872c03b73a1323d394",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/request-throttling-dataset-matrix-20261018/hle-revision.json",
+      "website_git_blob": "1857cebcefeba00c0d1d378fe29379cc1a47240b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/request-throttling-dataset-matrix-20261018/mmlu-pro.json",
+      "website_git_blob": "be624f889ec81566ffd9e02d2f7294c0fce5601e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/request-throttling-offline-window-20261017/report.json",
+      "website_git_blob": "d963e77fde8ede61d5191a560383c5d5ce284f30",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/results/cpu/gpt2/short_20260128_005_short_input_leaderboard.json",
+      "website_git_blob": "f1d58816e0f39b0755c146c7c145fa9b285e716f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/results/cpu/gpt2/short_20260128_006_short_input_leaderboard.json",
+      "website_git_blob": "4fc943c7afcf848fdeaf4853fdc63f9ec6303aa0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/schemas/dataset_program_v1.schema.json",
+      "website_git_blob": "29bf7d1b3526c23e857532100aedc306337ceaf5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/schemas/ecosystem_v1.schema.json",
+      "website_git_blob": "4d92c8e82537c9deb9be8ef4d45d979a6856c0d9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/schemas/issues_v1.schema.json",
+      "website_git_blob": "d172dbedc10d288201c151dd25839792cf983bac",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/schemas/leaderboard_v1.schema.json",
+      "website_git_blob": "6dc5f73309f2d6a654770ce61749456d9e402bdd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/schemas/mod_taxonomy_v2.schema.json",
+      "website_git_blob": "592d8660ebf160467a7378da727bac3df2b8762d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/schemas/official_target_registry_v1.schema.json",
+      "website_git_blob": "5361f09628241155608406e879611824ecea61e4",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "schemas/official_target_registry_v1.schema.json"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "data/schemas/plugin_workload_navigation_v1.schema.json",
+      "website_git_blob": "e5f1116ef672b7e1d239e937ed6812918024bbb5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/schemas/plugin_workshop_metadata_v1.schema.json",
+      "website_git_blob": "b20e23702dd4cd629b71994e4655950d9f229710",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/serving-plans.json",
+      "website_git_blob": "15fa17d71ad3609f7f95b02a19b311f52fbc2a1f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/traceloom-capture.json",
+      "website_git_blob": "3bbd6f49bd6b3693e4c2256bd5eb8e90ba90d90a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/traceloom-story.json",
+      "website_git_blob": "d189d49c707a26725c86185f4cec898e19149e42",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/validate_schema.py",
+      "website_git_blob": "ecd0b4f5eaa1bc9d78680fdef01b2a406d99b4c6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "data/version_meta.json",
+      "website_git_blob": "71eb514ad356defe44166af7f0efdbefad6678fa",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c1/accounting.json",
+      "website_git_blob": "469e6ada85634baade2c8d2da4b98cbad9bf078b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c1/qualification.json",
+      "website_git_blob": "cfc0ea3c84970eee7893060a3863a58f8cc954ca",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c1/usage.jsonl.gz",
+      "website_git_blob": "4690ddb57ed97cebe5e8810e79ad0f30dea156fa",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c12/accounting.json",
+      "website_git_blob": "31f15147a1ab3155876ba3b7b0c536284741a963",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c12/qualification.json",
+      "website_git_blob": "6f8cf5d8996c6c22aa1adf2de5ce4a45e9b289ee",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c12/usage.jsonl.gz",
+      "website_git_blob": "3c56e075175c53b6f072ba2e364ea0c23964915f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c16/accounting.json",
+      "website_git_blob": "0091aedc4023e80447287a10a9ff66d3ffb86303",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c16/qualification.json",
+      "website_git_blob": "b7a1decd2c6e56ed6c5f1626732203b7ec3cc6e6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c16/usage.jsonl.gz",
+      "website_git_blob": "ae9ab5c7d1d843b9d40b3b8ee38ab3971b8a24b5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c2/accounting.json",
+      "website_git_blob": "8ffccc1992f1714b77049bf63f39722fb4cea236",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c2/qualification.json",
+      "website_git_blob": "970dea5b56e1b6e4575aff96c5096d234bde9102",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c2/usage.jsonl.gz",
+      "website_git_blob": "6913edeab86ac236ba9e330fc155add0e3bbb989",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c4/accounting.json",
+      "website_git_blob": "3d4ca84057b0bf82bf17c7de01a0c23d93af83c0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c4/qualification.json",
+      "website_git_blob": "8def4707c0e706dba44ad1cd583b279d5ae5d6fc",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c4/usage.jsonl.gz",
+      "website_git_blob": "d5178160d74f0ef919a6cf5715ced080900664cb",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c8/accounting.json",
+      "website_git_blob": "742f33aff10bbef023db449d872ddd3786b1940c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c8/qualification.json",
+      "website_git_blob": "c27bc467105b4f84102e826109f51c45caf3a122",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/c8/usage.jsonl.gz",
+      "website_git_blob": "1599585530e36e63260cdd09a8b43e88cf8ad3c4",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-current-20261009/workload-equivalence.json",
+      "website_git_blob": "000c30395577b44c51dfd5d25677b6a6aca39a54",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c1/accounting.json",
+      "website_git_blob": "c8555cc6af3a2976b99c8017f9633dd2b8697521",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c1/qualification.json",
+      "website_git_blob": "d35f9f9cab26430146fd73501416ec6f104e7aae",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c1/usage.jsonl.gz",
+      "website_git_blob": "7effe11cde05fcb0759879b6c39c2a775cfed358",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c12/accounting.json",
+      "website_git_blob": "783a2913eb604da96fcc9125c5e4a6ff2424817e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c12/qualification.json",
+      "website_git_blob": "f5b0ad5905446b18d7b01862b3475815cdbca859",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c12/usage.jsonl.gz",
+      "website_git_blob": "63f325c65e453c3a1985a4dd4cc35524ff0ae782",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c16/accounting.json",
+      "website_git_blob": "8701c567867ab429a188e0febdac7ed40ab97d73",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c16/qualification.json",
+      "website_git_blob": "186136d5211bda6db4099194fbc9b6f21e5f6f1a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c16/usage.jsonl.gz",
+      "website_git_blob": "a25e017a4605374f881b1ab8e3f4ef8768a8a889",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c2/accounting.json",
+      "website_git_blob": "5648794f65e5bdb152c1f39efcd6722ab686c342",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c2/qualification.json",
+      "website_git_blob": "1ab3a5ba6587810f2de37ce4bc104b8e3a440f2a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c2/usage.jsonl.gz",
+      "website_git_blob": "155d001f1919308a4c0847aed9cd47c2923b66f4",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c24/accounting.json",
+      "website_git_blob": "81f4769a41bbc8d2089172f4dbd0100c1c0e3e9c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c24/qualification.json",
+      "website_git_blob": "cac70a2f93e7377ac1b375c80eae7c824b70cc53",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c24/usage.jsonl.gz",
+      "website_git_blob": "64a25c9346cd1ef9c5b840a934a0ef1517d5c173",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c32/accounting.json",
+      "website_git_blob": "60568dbba68a3ca3f4ef2cb331dcaa00786f4b43",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c32/qualification.json",
+      "website_git_blob": "cc34d1cf5504e3b1be7167e505c343b73f5f29ec",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c32/usage.jsonl.gz",
+      "website_git_blob": "c0c523d0bec1493c8f2a978822caf33fdf987c07",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c4/accounting.json",
+      "website_git_blob": "3989aa39dd189d94176b58d866c07dd1c33c0383",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c4/qualification.json",
+      "website_git_blob": "593b126665c7e6ebb187dc75cf67d447cb4c7847",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c4/usage.jsonl.gz",
+      "website_git_blob": "205ecc0704fecf739c1cf57bc1e795b409a1a630",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c40/accounting.json",
+      "website_git_blob": "733147ea95cadf65558fe606c43dd7baacd73955",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c40/qualification.json",
+      "website_git_blob": "d79109bbedc52bb68c39630e665f1572df807ac7",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c40/usage.jsonl.gz",
+      "website_git_blob": "5fc3ad1ebf19412236b1e8e5212e58a543b24f52",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c48/accounting.json",
+      "website_git_blob": "eea66163e42235eda8a4987fb5fd38240b3a8205",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c48/qualification.json",
+      "website_git_blob": "2200421bc6b56877b2020f714b71e89511ad962e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c48/usage.jsonl.gz",
+      "website_git_blob": "93ef5d1ad420a9845682e4b063d9e4a2def011c6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c8/accounting.json",
+      "website_git_blob": "2933b87f9c5c6b1cd6e08c1ec4e311f5bcf204e4",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c8/qualification.json",
+      "website_git_blob": "62d3a958b618d3d4755cfaf16ff07724442be904",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-tp4-20261009/c8/usage.jsonl.gz",
+      "website_git_blob": "805d096316a5976604cb81e6059ef9ae6949c964",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-width-20261009/c24/accounting.json",
+      "website_git_blob": "6872b347068963c277b4b27ac0bf1becb1363804",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-width-20261009/c24/qualification.json",
+      "website_git_blob": "626727733cba47b9a491ddb8cc07d651ec1df281",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-width-20261009/c24/usage.jsonl.gz",
+      "website_git_blob": "ce3faa6457fd9db91b4124da2f2b253dc222ccd9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-width-20261009/c32/accounting.json",
+      "website_git_blob": "25719073e4a83c870070be4ac3f236da256f6e34",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-width-20261009/c32/qualification.json",
+      "website_git_blob": "c640cf8d26ac5ac584297cde449780fd98979a44",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dense27-width-20261009/c32/usage.jsonl.gz",
+      "website_git_blob": "4ac8d371610cec71448d0f7b1acd66e2bb2c10d3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/README.md",
+      "website_git_blob": "9c4225a67692142ab794a1e9633af3c595154034",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c1/accounting.json",
+      "website_git_blob": "c2172224c7986848e99eda117918c8eb5e893b62",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c1/summary.json",
+      "website_git_blob": "aed86b408def9d4614fceec589030bb8e28bb745",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c1/usage.jsonl.gz",
+      "website_git_blob": "2dd688be70d9d8e5d57ef10f929ee012d3304309",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c16/accounting.json",
+      "website_git_blob": "f9cb21ebee83cf12925e7795745eda340ca5277e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c16/summary.json",
+      "website_git_blob": "c8d0fbf5041a72827ae52b1a6984afa283436cb1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c16/usage.jsonl.gz",
+      "website_git_blob": "84f3413ffe4a542aca6c72a7e77dc1e2e26507e3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c2/accounting.json",
+      "website_git_blob": "034f251926041c24f8d4af451319bf642a92a3fe",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c2/summary.json",
+      "website_git_blob": "d3a1628a43fa513cb1cff28b004f740d9c3c6cb2",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c2/usage.jsonl.gz",
+      "website_git_blob": "7e1e667f6aace86d1ca3591b16fff6d7e134454c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c32/accounting.json",
+      "website_git_blob": "4300a1b24b8e1b3ef6f6f41e2ed1bedeaeef6a66",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c32/summary.json",
+      "website_git_blob": "76221dc31795db935bda1fd61f51fb032467ce7e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c32/usage.jsonl.gz",
+      "website_git_blob": "56e647276750ffa9a1a75048680438306091086b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c4/accounting.json",
+      "website_git_blob": "2e10f2a8c8148ff7decd68d180886bc25cd68aa8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c4/summary.json",
+      "website_git_blob": "03cf9d06c4520f84c21a546caafc960d2c912b2e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c4/usage.jsonl.gz",
+      "website_git_blob": "ed64dcb0483f7feeaaa46c5220c136e8c94c92c4",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c8/accounting.json",
+      "website_git_blob": "8510035a68546280ab12e8c89ffbd1e7a527ceb2",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c8/summary.json",
+      "website_git_blob": "7b96406f948da88dfb9f0f9d005540867baa8fc8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/c8/usage.jsonl.gz",
+      "website_git_blob": "09ea66dae598136e4cde3e11b23d3ced2898d8fd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/functional.json",
+      "website_git_blob": "6c3f989f1be5841b54d86683b5203da3c6261aa8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/receipt.json",
+      "website_git_blob": "9623f5b69720ea3738edb1dec6fa96b4d088e3d1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-qualified1/server-metadata.json",
+      "website_git_blob": "9d81ef0365dbce2ac2cb2d8656afd6099769433d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/c48/accounting.json",
+      "website_git_blob": "eb9c58481e0adb5fc997e7e17b3cbd6ecb9210d5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/c48/summary.json",
+      "website_git_blob": "261765941b306444c425598cc5a62aeb6e5746e9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/c48/usage.jsonl.gz",
+      "website_git_blob": "89feb1c5b7a3627a7b844326a2abc73913b26a37",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/c64/accounting.json",
+      "website_git_blob": "2751b00a895912b6eb3d9df16f5eaa20f68dcc58",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/c64/summary.json",
+      "website_git_blob": "565407ad06d3468379cf89f011de1635c748fdfe",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/c64/usage.jsonl.gz",
+      "website_git_blob": "3203a8397759c2c1364c79246bdf1548948e83c5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/functional.json",
+      "website_git_blob": "6c3f989f1be5841b54d86683b5203da3c6261aa8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/receipt.json",
+      "website_git_blob": "35b29d4a66b3b330a62fbad85d23b5049c4cf951",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-highc-20261013/server-metadata.json",
+      "website_git_blob": "8abd9b5330f7b6d7485031fa4872ecfbc6e5ef21",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c16/accounting.json",
+      "website_git_blob": "65f7e17b4dc665a3876c99c0ff3df30f7b600994",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c16/summary.json",
+      "website_git_blob": "1b862f15775461e5b0f8ad240009192a4d2dcebd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c16/usage.jsonl.gz",
+      "website_git_blob": "ac551162f00b8e2990ff69b8a046b3efee6939bc",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c32/accounting.json",
+      "website_git_blob": "925823f6357af7ec3f1bb80a6843b0806c5bedb0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c32/summary.json",
+      "website_git_blob": "ef3c1836d12da9e19c79ee61b323b4df7254692d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c32/usage.jsonl.gz",
+      "website_git_blob": "308d720ae68d55d8e512d93c95c58597f9a783f5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c8/accounting.json",
+      "website_git_blob": "e778ee753e2bf8f69c03cb6b99943bc2640c7a7b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c8/summary.json",
+      "website_git_blob": "c99531dc2af2dad97c15caa75bc2768f6765987d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/c8/usage.jsonl.gz",
+      "website_git_blob": "bbd6370fe2fa9d45412a7b3942fd1c7caeebbdaa",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/functional.json",
+      "website_git_blob": "6c3f989f1be5841b54d86683b5203da3c6261aa8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/receipt.json",
+      "website_git_blob": "0154fc814056b9a92b79ad412c6868b3f28cb81f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/dsv4-dp8-s4-kv8-20261013/server-metadata.json",
+      "website_git_blob": "8abd9b5330f7b6d7485031fa4872ecfbc6e5ef21",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/dsv4-native-20261013/encoder-qualification.json",
+      "website_git_blob": "4e485d33a8d7d59fb1748e55575d75d4d6d9565c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/README.md",
+      "website_git_blob": "54fac325c3754172f88b4120eed9fed0935cb202",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c1/accounting.json",
+      "website_git_blob": "3d05e4e3e55cb8cb4da0dc6828298df28aedbfcf",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c1/summary.json",
+      "website_git_blob": "c6edadd8a423f09e5870347d499ec528c503ff58",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c1/usage.jsonl.gz",
+      "website_git_blob": "b161bbd86b7c1413fecbff9079bfc3a6323d1c0b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c16/accounting.json",
+      "website_git_blob": "407b80e2b0859e58c20c23f855b446f8e29ad4b3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c16/summary.json",
+      "website_git_blob": "260362564d903af7781b9d338f715c565827a195",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c16/usage.jsonl.gz",
+      "website_git_blob": "95293fb4fc4c9268677e567da5503e213e358cab",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c2/accounting.json",
+      "website_git_blob": "601bc23e436f8bfcf5e4c0e57f4b6aaffe0c2394",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c2/summary.json",
+      "website_git_blob": "9a746d5ad96bd99662488ad14e3a8175da44d0df",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c2/usage.jsonl.gz",
+      "website_git_blob": "eb675ed71c2a3484b617f0c0a0d09e252ebbd67f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c32/accounting.json",
+      "website_git_blob": "7611ee2d1b55f1392c6ac19c05a54f2b71bfdff1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c32/summary.json",
+      "website_git_blob": "83edf7d4f2a286864d62e196d5b15f29b76cbc6d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c32/usage.jsonl.gz",
+      "website_git_blob": "408f76c696450657ca2bf9be1403e842b1a6c4af",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c4/accounting.json",
+      "website_git_blob": "bed862e335c9391bdc53d4c17d5f9729bbe7c051",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c4/summary.json",
+      "website_git_blob": "1280d16d15694952f4a98f711f8aa74112da52da",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c4/usage.jsonl.gz",
+      "website_git_blob": "0d604c3b075fe6d35df1b335a8f2d3003579f98a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c8/accounting.json",
+      "website_git_blob": "4526aafee124df5ed47bbf6c80a48139ea885aa9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c8/summary.json",
+      "website_git_blob": "5c98b36fbd69ab0fdaffbd6325b4ebab0e6426c1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/c8/usage.jsonl.gz",
+      "website_git_blob": "1e6ea325b9b73df1dc3bcd9a0519158472898d25",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/functional.json",
+      "website_git_blob": "5f8edec675433a663ebbee18163b2bdfcc6c5c3f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/receipt.json",
+      "website_git_blob": "86213fd88566f9e2bfe8aab5ce06ccec829b8572",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-attempt1/server-metadata.json",
+      "website_git_blob": "e39914df4d218fbc43db0304b7ccf7ceb459e371",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c16/accounting.json",
+      "website_git_blob": "a9cde205603c2fb477a738e3c509fa44ca04bb8e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c16/summary.json",
+      "website_git_blob": "5cdb3caf14b318d46d2d3c35abc4f7b93a0f13a5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c16/usage.jsonl.gz",
+      "website_git_blob": "d26bcf4f89a32e585e9cdb98bec7e098019f4ee0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c32/accounting.json",
+      "website_git_blob": "f6375f7ad95a9a0bc1eadee58fe2e4e998bb6d1f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c32/summary.json",
+      "website_git_blob": "a7daf46487906ecd7970ea06dcfb0d32806cedb7",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c32/usage.jsonl.gz",
+      "website_git_blob": "50c7a12034945dfc1be43d15570693037d25163d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c48/accounting.json",
+      "website_git_blob": "fa179d68103f35b5eef65f035cedf328891bca34",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c48/summary.json",
+      "website_git_blob": "1226d2ed835f6c7930ee0b64abc224a9cb1897f1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c48/usage.jsonl.gz",
+      "website_git_blob": "f9027344f2d5f8db8ee2220314ce61867c1988b9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c8/accounting.json",
+      "website_git_blob": "bc1a7192216f76d8c004c5a1d5cac13c05657347",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c8/summary.json",
+      "website_git_blob": "0f16a637d76efbefa5c0380ae0d56e0bafccccbd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/c8/usage.jsonl.gz",
+      "website_git_blob": "75069dbadabb25e00de907441119d85e5f883107",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/functional.json",
+      "website_git_blob": "f70bdf6ad80e6941f465e72119fd7e92844fd941",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/receipt.json",
+      "website_git_blob": "eeaca407d6e6fe674ac2005c624c4841d2111173",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/glm-native-20261013/glm-tp8-wide1/server-metadata.json",
+      "website_git_blob": "17ed19b5d62772bc275237f65af36bba36b6c4fd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/kv-materialization-qwen35-20260928/summary.json",
+      "website_git_blob": "b4f2f1ca30ae42a014783cf24f2b340bee675c6d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/README.md",
+      "website_git_blob": "ca23f6e14f4876a93f042f543a88bf7fd67589df",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/ascend-build-compat.patch.gz",
+      "website_git_blob": "bbe28bde58481cfa1ca4f837c9fcd11492fe63f7",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/comparisons.csv",
+      "website_git_blob": "75c09aa18f4f68bd53eca99b3555f5ba6f7c3db5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/core-results.tar.gz",
+      "website_git_blob": "63c9daa54e6faa688ce4aaa0aeb0bb0f62d79f5e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/evoscientist-first12.jsonl",
+      "website_git_blob": "055aba8ba2676148012191b75e6ac6348ce25ee7",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/evoscientist-short-ascending-4.jsonl",
+      "website_git_blob": "4a6a0d8070eb5e62799d31f07b0acf07a11cfc9b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/evoscientist-short-mixed-4.jsonl",
+      "website_git_blob": "c52b0a7916245c29c59d91e616b6e865a533c699",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/evoscientist-workload-custom.jsonl",
+      "website_git_blob": "0219d4f02ec6e0c1a70dbe5ff7a06ce1c90c4baa",
+      "status": "existing-identical-source",
+      "benchmark_paths": [
+        "scripts/traces/evoscientist-workload-custom.jsonl"
+      ],
+      "action": "reuse-existing-source"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/first12-c12-512m-preempt5.tar.gz",
+      "website_git_blob": "45d3b795268bac1fc5aa11d8dc51a0c6c60ad7e3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/qwen35-manifest.json",
+      "website_git_blob": "0afc9c4cf2de36d86f39e494c6419438e1ec5e63",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/shortascending4-256m-preempt5.tar.gz",
+      "website_git_blob": "416a1f4108a0305d515e5a21b7878bf79392eaae",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/shortmixed4-256m-completion10.tar.gz",
+      "website_git_blob": "0fe3116814faace51c493c807d57962c8ac46311",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/shortmixed4-256m-preempt5.tar.gz",
+      "website_git_blob": "092d347d7b3f87b811ca9b24a2c4d01e70c244bb",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-bidkv-tp4-20260929/shortmixed4-96m-aborted.tar.gz",
+      "website_git_blob": "3bf8f9baf6b329d0d6cb22f935308515d0c74cd4",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-mods-k8s-20260925/README.md",
+      "website_git_blob": "609d7512ae5328552139428a791b7189b69cb6ca",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-mods-k8s-20260925/ascend-feedback-mailbox.patch.gz",
+      "website_git_blob": "727ba4e9affde2e62251e73ae7df7ca73762eb40",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-mods-k8s-20260925/core-common.patch.gz",
+      "website_git_blob": "3ae9a50ae2966bba96dcc0658dfdadc45f7971a5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-mods-k8s-20260925/frontier_worker.py.txt",
+      "website_git_blob": "fdf1f1a12e1991b7ba55ea98f42f52e513fa05b9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-mods-k8s-20260925/launch-bidkv.sh.txt",
+      "website_git_blob": "0d92ce8c6915d793181db48d2b8d69f80f943318",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-mods-k8s-20260925/launch-native.sh.txt",
+      "website_git_blob": "202504b3e4aaf8890c720f6073e11d3201bda7f0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-mods-k8s-20260925/model-manifest.json",
+      "website_git_blob": "2b7fa7a80676eb33e6506cb073a126745c46df50",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-mods-k8s-20260925/workload-equivalence.json",
+      "website_git_blob": "a3df43af9c3b0f882f153e2477ea2c65bfbe88df",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/audit-canonical.json",
+      "website_git_blob": "49e81217aaff9ea231c6b0b86f5eeca8b376bee1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/benchmark-source-verification.json",
+      "website_git_blob": "694f83919239bbb2c2fdd530584b43d2a63b0934",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/mod-source-verification.json",
+      "website_git_blob": "e9c19971485ec1777bfb05548ac4c0ab093e3e70",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/model-manifest-verification.json",
+      "website_git_blob": "2401f7cda14c041ea97a101a388431f45fc739eb",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c1-900s/config.json",
+      "website_git_blob": "25c4dde894466f5c0ca10f5903e806a08a3426d0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c1-900s/requests.jsonl",
+      "website_git_blob": "fe9599e745584fc5ce4b2e5fe601d55409a6f1a9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c1-900s/summary.json",
+      "website_git_blob": "10fff35e32a0080f442ae72c38768bf499f00a1f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c16-900s/config.json",
+      "website_git_blob": "5fdb93eccc9811a81194b36118483a0a5ee34284",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c16-900s/requests.jsonl",
+      "website_git_blob": "5876ba3249e4066c0c7c6f646a05577d7ffa59bf",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c16-900s/summary.json",
+      "website_git_blob": "777379681ed33045ed3137d99127abeefcdfae20",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c2-900s/config.json",
+      "website_git_blob": "2e4ba386ee2f149a037cf3293f05dd147693fed5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c2-900s/requests.jsonl",
+      "website_git_blob": "affef764d47c8005036e4637b1c8d36a4c3ca0b0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c2-900s/summary.json",
+      "website_git_blob": "2432d2c723a157cc8c277a995adb64f0a45036bd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c4-900s/config.json",
+      "website_git_blob": "09cb8f068c28d94dc0cb63aade6fc1044de8877a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c4-900s/requests.jsonl",
+      "website_git_blob": "9501ddc9f5b24c1bdc223783358925dc26cf5db3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c4-900s/summary.json",
+      "website_git_blob": "2775dc661b665598dc18842bae7def17a0c46aa6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c8-900s/config.json",
+      "website_git_blob": "878ffb9e23b9eebbd7ec31b68dc1817806cb524b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c8-900s/requests.jsonl",
+      "website_git_blob": "6e4c0c29132a33ed50bdac874c0191387025409c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/off-c8-900s/summary.json",
+      "website_git_blob": "cf88b52ae004d58f7c065384bbccecbfc414c5c6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c1-900s/config.json",
+      "website_git_blob": "6c63a6ca1c6da7f013f5a61e2cc79797c8e5ee2c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c1-900s/requests.jsonl",
+      "website_git_blob": "1cad4430e6973174cf6f552cc88ffd21b8e798e1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c1-900s/summary.json",
+      "website_git_blob": "82a86c5bd31bcc4ad70c1b4ba57b1ba504709099",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c16-900s/config.json",
+      "website_git_blob": "5fce5b3efd239af045bb77b3de12a042b69ead52",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c16-900s/requests.jsonl",
+      "website_git_blob": "c525adb54fe4ef06bc0adc6d95d780e81d6890c3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c16-900s/summary.json",
+      "website_git_blob": "dae191fb2cf8c6bd66743842fddcdf872304eeba",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c2-900s/config.json",
+      "website_git_blob": "c296d9ed55cd19230730026d0789cd2bdccb4819",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c2-900s/requests.jsonl",
+      "website_git_blob": "111ac200c9f546434f18ff0f12718dcc52e3c226",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c2-900s/summary.json",
+      "website_git_blob": "8b3d3be1a61d42513c173bf46786ae88b4581292",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c4-900s/config.json",
+      "website_git_blob": "b3b069ce5a1a2557125d66e5d793d9690158c183",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c4-900s/requests.jsonl",
+      "website_git_blob": "0487eda3a24f49eaabd84aa2fece2a9f7fc22eb2",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c4-900s/summary.json",
+      "website_git_blob": "9a40e1b1ca04ba74bfc2337f0508b39a08a052a9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c8-900s/config.json",
+      "website_git_blob": "fef38f8509cadb04e942e911352da11ea1d056e8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c8-900s/requests.jsonl",
+      "website_git_blob": "6fb716b00737b23d706f50d40c7d273beed84228",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/runs/on-c8-900s/summary.json",
+      "website_git_blob": "6a81ddfaf1f5464215d3d0e7f6224353ee4db898",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/server-metadata-off.json",
+      "website_git_blob": "e0415875dd3e19709106b433797086a15c430fdd",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/qwen35-op02-core-attention-boundary/server-metadata-on.json",
+      "website_git_blob": "aff86127565e3618f86a5611b160430dde9f1916",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/serving-plans-20261009/native35-c16/accounting.json",
+      "website_git_blob": "39742f3d9aeb669b1d1ff4468b214a13a913f0a4",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/serving-plans-20261009/native35-c16/qualification.json",
+      "website_git_blob": "586b769e48db325bce38ff59cc900da9aa7e66b2",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/serving-plans-20261009/native35-c16/usage.jsonl.gz",
+      "website_git_blob": "bb90232f00b002cc23a63b09114be78fe181819e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/serving-plans-20261009/qwen35-c44/accounting.json",
+      "website_git_blob": "b13fe9bb1ad21cc603d5201531814250ceab7331",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/serving-plans-20261009/qwen35-c44/usage.jsonl.gz",
+      "website_git_blob": "5c08d59a21d8742e57f12b7b02da60c9360476ab",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/serving-plans-20261009/qwen38-c8/accounting.json",
+      "website_git_blob": "f753563c5f4a63a907b3b020456e94543ff61e5a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/serving-plans-20261009/qwen38-c8/qualification.json",
+      "website_git_blob": "4d92e637831ae0fc772a4c1f1634642e6b800aac",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "docs/evidence/serving-plans-20261009/qwen38-c8/usage.jsonl.gz",
+      "website_git_blob": "98a7d873fa59958a80730e0d78ac526e60224632",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/README.md",
+      "website_git_blob": "9dbdacbca1cd650bc710fdd11e4ba36324c7bd5c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c1-900s/config.json",
+      "website_git_blob": "26f88d7aa81c8335e57e07cf8186ff3760209d87",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c1-900s/requests.jsonl",
+      "website_git_blob": "339163281367f2cc8946e40f1765ceb66adfa489",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c1-900s/summary.json",
+      "website_git_blob": "7bc9b7eb035a2993884a3db16606349032647e19",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c16-900s/config.json",
+      "website_git_blob": "95791039f23e2296aaa60072f2de6b8057d1dd75",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c16-900s/requests.jsonl",
+      "website_git_blob": "e646650e11caf0fba8fdd323ddd5eee9d0e59861",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c16-900s/summary.json",
+      "website_git_blob": "9f20d6433ad420b177589b1f6b349c281b7e3ceb",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c2-900s/config.json",
+      "website_git_blob": "f8fcd017103db124c3edaadb2f035d9d39b90ad9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c2-900s/requests.jsonl",
+      "website_git_blob": "ea7d2687797698a4fe10b180d665545f174293d0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c2-900s/summary.json",
+      "website_git_blob": "47d53955028053bf532164893a5e3d031aaf51ed",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c4-900s/config.json",
+      "website_git_blob": "fc60a02994e09615b39f997ed3d38e07178393e2",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c4-900s/requests.jsonl",
+      "website_git_blob": "c0ba347f692cad67b949ade420405abc70992592",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c4-900s/summary.json",
+      "website_git_blob": "df389ed3316218588824d33f06040c0a7af5d2b6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c8-900s-r2/config.json",
+      "website_git_blob": "425c77f5d4caa77c9cc722c5c3f2612ff41a38cb",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c8-900s-r2/requests.jsonl",
+      "website_git_blob": "6b3834c31fec5bd3009876b6b820cb4247695394",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-off-c8-900s-r2/summary.json",
+      "website_git_blob": "5dd12161d71e6eae725a42e0a5ad4819d4555d25",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c1-900s/config.json",
+      "website_git_blob": "70d3d42fa49601d113f29307b4ccbab54672bed0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c1-900s/requests.jsonl",
+      "website_git_blob": "e7c1668680436bbd8980f524d8c7cd5e325dd06d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c1-900s/summary.json",
+      "website_git_blob": "c67e2cb370ca90e36d23ce9fb1eb8b0f92dffc53",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c16-900s/config.json",
+      "website_git_blob": "8579bb8a56de53ea77a87ba3594fb13ff8bea350",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c16-900s/requests.jsonl",
+      "website_git_blob": "9da69ed63078bd221cca4af402b8a5773472d449",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c16-900s/summary.json",
+      "website_git_blob": "085a0c5703803a81bdf09db0b6a2b7be1169df7a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c2-900s/config.json",
+      "website_git_blob": "3c6b16313f9b71c4057eef6578bfdf2d3277a40a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c2-900s/requests.jsonl",
+      "website_git_blob": "7d0d1a4b9e97357bba912cb90b97403bec696f75",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c2-900s/summary.json",
+      "website_git_blob": "fe835def55c602249b77bd6f1e272ae80f2dea2d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c4-900s/config.json",
+      "website_git_blob": "9f2c0af40e84ba69d92be1540ca49eaad2b18e36",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c4-900s/requests.jsonl",
+      "website_git_blob": "5d8ab7690b5850d5b0e0ceadc1cc6c4ffe802517",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c4-900s/summary.json",
+      "website_git_blob": "10c7c518ac8eb2ffdc9de9c7b65ea32e0a639565",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c8-900s-r3/config.json",
+      "website_git_blob": "0e19c7957cc0e6dd01e65eaae5b880a64f9ce018",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c8-900s-r3/requests.jsonl",
+      "website_git_blob": "e742bdfa19ae2bcab93fc02f173888201b370578",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/op01-on-c8-900s-r3/summary.json",
+      "website_git_blob": "70f57d7f76bfa56e43715f58bc01486e6f59db23",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/qwen35.json",
+      "website_git_blob": "868f88920a75fe6ed6d23630db431c7c3deff56a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/vllm_qwen35_op01_off_sweep.log",
+      "website_git_blob": "168c8005f4e4195994e5065f90f49d78eaf7087a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "op01-evidence/vllm_qwen35_op01_on_sweep.log",
+      "website_git_blob": "429e7aa91f73657d47c3f72e6d2f7d3321f62e63",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/KV缓存共享选择层课题概览.png",
+      "website_git_blob": "94371d1a0624435c0747c2a34c83f4ed76e7624c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/KV缓存共享选择层课题概览.pptx",
+      "website_git_blob": "fb66c54f7df81d3371b178ae6a387ea41bf7f585",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/KV缓存共享选择层课题页.png",
+      "website_git_blob": "88e199b542f327e78c7b1b429319fed8d19da2c8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/KV缓存共享选择层课题页.pptx",
+      "website_git_blob": "3ebbb5e409a2f521e3b3bc0ded1fdac262dac0b1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/latency-audit.json",
+      "website_git_blob": "b0eaf308a0320a2894bdcc157b9dea62df979bd7",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/manifest.json.gz",
+      "website_git_blob": "0b3d94cc586867f13df334dbda02ee6fdd82feb0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/metadata-mooncake.json.gz",
+      "website_git_blob": "ef309eae4b192989179ed8d7def4ea0ac70c6b8e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/metadata-native.json.gz",
+      "website_git_blob": "924664fb600bc3574272df4bef3c851be87dd14c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c1-after.prom",
+      "website_git_blob": "6a8d7c06c2d55a5f657ddf6f1a8abaec50044758",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c1-before.prom",
+      "website_git_blob": "05fc9bb67d97631611e6b0ef992673096cb33852",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c1-config.json.gz",
+      "website_git_blob": "636d842186ddba29623ed9569620ceccb7837a5b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c1-requests.jsonl.gz",
+      "website_git_blob": "af971c6f574398dee2fb76973573e406b7c0039c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c1-summary.json.gz",
+      "website_git_blob": "e0ff4b0e30803aba20db50566a5b6b9c6be944b6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c16-after.prom",
+      "website_git_blob": "67791003130f098d20285cbb8ade5ab8af37b6ce",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c16-before.prom",
+      "website_git_blob": "a074de72f7a0883fa7dc9f1e6244b5c236ced4ae",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c16-config.json.gz",
+      "website_git_blob": "c5e29dd7472c55f3b292d645e5b99ef2b52fe54b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c16-requests.jsonl.gz",
+      "website_git_blob": "90caa7873daa41796e46e919a0cde9bf39b64a8e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c16-summary.json.gz",
+      "website_git_blob": "028d3a52b6daf7c7cd4b06a37097bab3db3a5efc",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c2-after.prom",
+      "website_git_blob": "46f39824b50e8e54cdc990807361db71ae16b01e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c2-before.prom",
+      "website_git_blob": "73a8276673cb46d0419e89ce8b80f09078781a98",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c2-config.json.gz",
+      "website_git_blob": "1d15172a9dcfe3f210ce479220f83e7f1736e8d9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c2-requests.jsonl.gz",
+      "website_git_blob": "91830dfee3b8ae050201eda2e258f3ab94b1235b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c2-summary.json.gz",
+      "website_git_blob": "3577aefffbf8310b5dc13dd33193f8796bd8b627",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c4-after.prom",
+      "website_git_blob": "d0b249df4ba787b7e082820e32c4b37e27ce6b76",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c4-before.prom",
+      "website_git_blob": "b4226c0f679442bc26d788deb2c4d6d524a4f322",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c4-config.json.gz",
+      "website_git_blob": "42d6e2d2e24c2c27292ad9c62b32723a74ee9215",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c4-requests.jsonl.gz",
+      "website_git_blob": "8d637c1b61947c948a1ea1c5152cf22c51c8e71e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c4-summary.json.gz",
+      "website_git_blob": "0b6df88a157efdeafb0ffeb5b4d510974ce73a9b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c8-after.prom",
+      "website_git_blob": "5696e787a66df3045bd0b2da72e0bdb6fe0911b6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c8-before.prom",
+      "website_git_blob": "b305dfd3c7e565eb010494e2972a135472423651",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c8-config.json.gz",
+      "website_git_blob": "33e9c181bc36131b118a870b26bb4f511e847f7e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c8-requests.jsonl.gz",
+      "website_git_blob": "6274919efcd5f8e105485b31326fd56b9592e84c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-c8-summary.json.gz",
+      "website_git_blob": "b8e4931aadc82fa9b3c0f5ad57ba584785ee64bb",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-qualification-after.prom",
+      "website_git_blob": "134ed004c5ede97498dfe92dace25ed6fc614f98",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-qualification-before.prom",
+      "website_git_blob": "13fcfae02215ecfad7c16a36646b275747d65a64",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-qualification-config.json.gz",
+      "website_git_blob": "8e00447cfa321bb7b9e886cfae15d06b647400ab",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-qualification-requests.jsonl.gz",
+      "website_git_blob": "96e3e6c9cde30f80fc1e772899804f9e762b4dd0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-qualification-summary.json.gz",
+      "website_git_blob": "13d65b1b90471a076a57bc1b16711e2b5c4f8d25",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-qualification.json",
+      "website_git_blob": "2df6b9bf51516b5610f9a40e8975c69b022df6cc",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/mooncake-retrieval.json.gz",
+      "website_git_blob": "9e26047228a43659390cd79a954600ee88d87c82",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c1-after.prom",
+      "website_git_blob": "18a2cc9da6777ae600aec4e6c850100749b999c3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c1-before.prom",
+      "website_git_blob": "19a5501c2abe582ee363c82efee36e0d53a94a66",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c1-config.json.gz",
+      "website_git_blob": "d708dba2493cbfdb9a3258e4169ea9c40c73b97f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c1-requests.jsonl.gz",
+      "website_git_blob": "e3877ff3e628a6f6084da1548d35852c9319b155",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c1-summary.json.gz",
+      "website_git_blob": "2397203eb02fc274b9dcefdbee672a03b386483e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c16-after.prom",
+      "website_git_blob": "e857969cbd1fdc9b739219baaed3c8ec5de58ecf",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c16-before.prom",
+      "website_git_blob": "eb3a83e3ba7a3b5fd5c5ac5497251a7f2fdd3ee6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c16-config.json.gz",
+      "website_git_blob": "a89e6c4ff063b6e5dcfcfb9403d88e6e705f479e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c16-requests.jsonl.gz",
+      "website_git_blob": "905f15cb7959d7b14a75b89a044fe0448262d1ec",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c16-summary.json.gz",
+      "website_git_blob": "559cf382a15b98758fba0148268fd9dea82da54c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c2-after.prom",
+      "website_git_blob": "16415911d3e195b2bc76eb5a64145671e5274f0d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c2-before.prom",
+      "website_git_blob": "180d5c22894a3fb2a102e758d1545102ac829052",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c2-config.json.gz",
+      "website_git_blob": "27f88bbdfe9d11be2db3d99c5f410c043a337777",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c2-requests.jsonl.gz",
+      "website_git_blob": "2a27e93c43a7d7013233bf558fa5e4f72ad4e606",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c2-summary.json.gz",
+      "website_git_blob": "9279ae96b8e2a1852bf90a24bffaab500d69bee5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c4-after.prom",
+      "website_git_blob": "05367bad355b9028a07cb13396eb9f5451d856d6",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c4-before.prom",
+      "website_git_blob": "d21b504bcb1f52f674fe5f82d38a2c6fe83ec797",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c4-config.json.gz",
+      "website_git_blob": "93ddd54fca4592c2d01b54aa3dd34f4e308e7c0b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c4-requests.jsonl.gz",
+      "website_git_blob": "ae3e2f1f48d86041173c6377531ba40333de63a9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c4-summary.json.gz",
+      "website_git_blob": "b4b018b62283a2a1d88c8f6861f373f50fb7a3b0",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c8-after.prom",
+      "website_git_blob": "6a4c0f61cb934a79a6edbf76b3035f980f8b3578",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c8-before.prom",
+      "website_git_blob": "50a3b7fe3a5e70a1624cba5ee772d40f87ff0873",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c8-config.json.gz",
+      "website_git_blob": "f8cb7578009a5aa513b2f79c6cec981d5431f5bb",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c8-requests.jsonl.gz",
+      "website_git_blob": "6106ccd7a56e2b7078a0c21b1e2da353742b3e96",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-c8-summary.json.gz",
+      "website_git_blob": "594c00b8dc3477a82e904ec063f54eb5f0ec539d",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-qualification-after.prom",
+      "website_git_blob": "018226130beecd9d444e63f740069167d22fc87e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-qualification-before.prom",
+      "website_git_blob": "18b2ce16c46ae0884993fa4701e132ec4f1057c3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-qualification-config.json.gz",
+      "website_git_blob": "b855268ed27b0a7a0f76a62d2be037c909cb1de5",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-qualification-requests.jsonl.gz",
+      "website_git_blob": "245a8d087c719d7d2071f2155d450d9a14889c43",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-qualification-summary.json.gz",
+      "website_git_blob": "750645d1d0109a634275a669a59de2af3a5a3cc7",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-qualification.json",
+      "website_git_blob": "c301c9f18b094e80270f5f1fe904ab01cb0ecc6a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/native-retrieval.json.gz",
+      "website_git_blob": "c85fac0ab745a2c03025ab555c4efed248952182",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-mooncake-20260926/pair-status.json",
+      "website_git_blob": "e0bd1812014e0e2f85b279171649fabf6875ae65",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/latency-audit.json",
+      "website_git_blob": "63283aead9a5e4e9e361e2b427e1744fa61f611a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/metadata-native.json.gz",
+      "website_git_blob": "87bdac35371f47c5e6b4831a2060070427df7a33",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/metadata-tiering.json.gz",
+      "website_git_blob": "11024492a0b7d3240fc475cfbd57a221d882e08f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c1-after.prom",
+      "website_git_blob": "3e709909def890546d78f701ca1ac69399eca376",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c1-before.prom",
+      "website_git_blob": "a2956613c0cb59ae3e78ce9bfa845c98d331c35b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c1-requests.jsonl.gz",
+      "website_git_blob": "6554f30fa9117106a5542c242e9777149317e45e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c16-after.prom",
+      "website_git_blob": "af433fb9a01071695c031a8be39bb9ca04ee1e02",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c16-before.prom",
+      "website_git_blob": "fc5e07e5243541d6f9e6a20b9179cb6a1f92f2c1",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c16-requests.jsonl.gz",
+      "website_git_blob": "41bb9ea2ee69079a172f05b8fde39d440c374389",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c2-after.prom",
+      "website_git_blob": "ebbf41a0be1fc2cee6ed7a0eb62442305df0b53b",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c2-before.prom",
+      "website_git_blob": "25ae2702202e04d5c624806fece3228f12a7ab5a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c2-requests.jsonl.gz",
+      "website_git_blob": "22da26f584478bf1678a73ad07cb8436dbd086e4",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c4-after.prom",
+      "website_git_blob": "0350041a3b4420da6fa756f22e61cde08e9f6b8a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c4-before.prom",
+      "website_git_blob": "90d39201569ca6605eb8887e1410ad71c05c3c73",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c4-requests.jsonl.gz",
+      "website_git_blob": "67e3b0e20b4a4b6562a41478a0a1784385e6bd98",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c8-after.prom",
+      "website_git_blob": "9a0bb03e38c8caf09739a1083c83655406d3994a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c8-before.prom",
+      "website_git_blob": "0350041a3b4420da6fa756f22e61cde08e9f6b8a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-c8-requests.jsonl.gz",
+      "website_git_blob": "2a93dd629ec63b710926a980cfa135d219e370d3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-qualification.json",
+      "website_git_blob": "fe21ee939e253cc871ab75fe1cc8a90b0ca5bd14",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/native-retrieval.json.gz",
+      "website_git_blob": "7534e39ec9eb91fef984519d8388dffc372aa540",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c1-after.prom",
+      "website_git_blob": "fa95b7221eea9460e205bf519d4637582982ad5f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c1-before.prom",
+      "website_git_blob": "21820b81f35f50ec626c98a0541b40e9ef478e75",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c1-requests.jsonl.gz",
+      "website_git_blob": "237580338caf56776194e907f2dfb386961eb7c2",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c16-after.prom",
+      "website_git_blob": "9b90c83af1fefa95ec2b64269dcbdb436fc07ae3",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c16-before.prom",
+      "website_git_blob": "70ae7f512644e82974a93fb46f8820181f2c9835",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c16-requests.jsonl.gz",
+      "website_git_blob": "c27ebc794fdc9a5c54fa3c807861c5a6ef78ddad",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c2-after.prom",
+      "website_git_blob": "07a3ad79a4dd95728808e0140b841f0beb056d0f",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c2-before.prom",
+      "website_git_blob": "552492c5fab4b5c5aba84f95da664ba0c785ca94",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c2-requests.jsonl.gz",
+      "website_git_blob": "c0abaf676c2e4e2643d2df48faaa1e674636b7b9",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c4-after.prom",
+      "website_git_blob": "6451e2f5a2e8135ba77028d876a0bee975451c3a",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c4-before.prom",
+      "website_git_blob": "d3273d41f1c34dc26e78305078550dcb6c9bc154",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c4-requests.jsonl.gz",
+      "website_git_blob": "57d58b754761b4b7de71f4b6c5a1fc7f6da610b7",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c8-after.prom",
+      "website_git_blob": "2369ca23ad870c63def839e155ab622636b9ce90",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c8-before.prom",
+      "website_git_blob": "10912a309d8ce8e465bfff127547285ed16140dc",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-c8-requests.jsonl.gz",
+      "website_git_blob": "4d526d31a294960f78632b4548256e548f7e0540",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-qualification.json",
+      "website_git_blob": "e5aed31d2a606e4de5354c659dcd74761b6e4014",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/frontier-managed-tiering-20260926/tiering-retrieval.json.gz",
+      "website_git_blob": "45d43a63b2aef5dc4a2539155165e420c87fcd02",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/leaderboard_workload_audit.md",
+      "website_git_blob": "3af3203744a58ed307c50adf4d2a8317258da3ac",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/leaderboard_workload_audit_followup.md",
+      "website_git_blob": "084ef57ca47b1a9574a0f3a5c9f8c327f367f627",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/prefix_repetition_wrong_gpu_mem_removed_20260726.json",
+      "website_git_blob": "e58e989f8844798333db1891446179403fd8ecc8",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/国产架构落地新挑战.png",
+      "website_git_blob": "ce4c00b1aeb0dc9a9420a1bc1fa5dea57f0a450e",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/国产架构落地新挑战.pptx",
+      "website_git_blob": "9f9da8893c6895566c71e90d9a98ce36872b434c",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/推理中间状态新形态挑战.png",
+      "website_git_blob": "d4c6be3c11730e5d18138d0d0d2cde6d462a55ea",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    },
+    {
+      "website_path": "reports/推理中间状态新形态挑战.pptx",
+      "website_git_blob": "97affecb9abbfcd155cca09b30537554d4c7ea33",
+      "status": "needs-provenance-review",
+      "benchmark_paths": [],
+      "action": "trace-or-migrate-original"
+    }
+  ]
+}

@@ -1,0 +1,572 @@
+{
+  "contract_version": "dataset-validation-v1",
+  "generated_at": "2026-10-08T00:00:00Z",
+  "status": "complete_comparison",
+  "source": {
+    "service": "Qwen3.5 paired Frontier measurement",
+    "repository": "vLLM-HUST/vllm-hust-website",
+    "commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+    "frontier_data_sha256": "5913253b83455ce375d0252ed803beed76fb6a5a98348f60c103e6f44f246a7d",
+    "comparison_contract_sha256": "d174bd33ab9b4e1b9b02a836f3f24b0be8fbfd156ae33e19539d8f5984e1e4c2",
+    "tracking_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/issues/247"
+  },
+  "baseline": {
+    "id": "swe-capacity16-native",
+    "label": "Matched Native 900s series",
+    "generated_at": "2026-09-27"
+  },
+  "candidate_policy": {
+    "id": "declared-matched-pair",
+    "label": "Declared matched Frontier comparison",
+    "single_version_required": true,
+    "rule": "Publish the complete declared Native/MOD pair, including regressions; do not select a different Native or drop losing cells."
+  },
+  "scenario": {
+    "id": "qwen35-35b-a3b-bf16-tp2-pp1-dp1-ep-off-ctx262k-apc-on-mtp2-native-full-piecewise-vs-betterscale-full-e16-r20-sweprefix-900s",
+    "label": "Qwen3.5-35B-A3B · BF16 · TP2/PP1/DP1 · Native FULL_AND_PIECEWISE vs BetterScale FULL/E16/R20 · SWE Prefix Reuse · 900s",
+    "hardware": "2× Ascend 910B2",
+    "tensor_parallel_size": 2,
+    "pipeline_parallel_size": 1,
+    "data_parallel_size": 1,
+    "expert_parallel": false,
+    "baseline_graph_mode": "FULL_AND_PIECEWISE",
+    "candidate_graph_mode": "FULL",
+    "candidate_execution_seats": 16,
+    "candidate_resident_seats": 20,
+    "model": "Qwen3.5-35B-A3B",
+    "model_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+    "precision": "BF16",
+    "max_model_len": 262144,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "prefix_caching": true,
+    "async_scheduling": true,
+    "mamba_cache_mode": "align",
+    "mtp_draft_tokens": 2,
+    "thinking": true,
+    "temperature": 0,
+    "kv_cache_memory_bytes_per_chip": 26038239232,
+    "workload": "swe-prefix-reuse/v1",
+    "prepared_workload_sha256": "8044561ffa1bb430bea8f778ef814d96649321e1a92654b95f64263b996d5e85",
+    "tokenizer_fingerprint": "3f9ca78537850303ee04bfa6640c020be89723c62f37121c0f27a4c0babc53e0",
+    "measurement_seconds": 900
+  },
+  "datasets": [
+    {
+      "id": "swe-prefix-reuse-c1",
+      "label": "SWE Prefix Reuse · C1",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 1",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c2",
+      "label": "SWE Prefix Reuse · C2",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 2",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c4",
+      "label": "SWE Prefix Reuse · C4",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 4",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c8",
+      "label": "SWE Prefix Reuse · C8",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 8",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    },
+    {
+      "id": "swe-prefix-reuse-c16",
+      "label": "SWE Prefix Reuse · C16",
+      "group": "SWE Prefix Reuse",
+      "description": "swe-prefix-reuse/v1 at closed-loop client concurrency 16",
+      "applicable_metric_ids": [
+        "output_token_throughput",
+        "decode_p90_tps_per_user"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "output_token_throughput",
+      "label": "Output token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    },
+    {
+      "id": "decode_p90_tps_per_user",
+      "label": "P90 decode throughput per user",
+      "unit": "token/s/user",
+      "direction": "higher"
+    }
+  ],
+  "results": [
+    {
+      "dataset_id": "swe-prefix-reuse-c1",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 100.83333333333333,
+      "value": 133.0522222222222,
+      "delta_pct": 31.952617079889812,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 133.0522222222222,
+          "delta_pct": 31.952617079889812,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "9d3f967ade4a45a1b3cc506033575436"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "9d3f967ade4a45a1b3cc506033575436"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "17daf5bdbc6540b1af34a08bdc595466"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c1",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 121.05405353222709,
+      "value": 146.16287529638393,
+      "delta_pct": 20.741826507670268,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 146.16287529638393,
+          "delta_pct": 20.741826507670268,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "9d3f967ade4a45a1b3cc506033575436"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "9d3f967ade4a45a1b3cc506033575436"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "17daf5bdbc6540b1af34a08bdc595466"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c2",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 157.51777777777778,
+      "value": 252.0611111111111,
+      "delta_pct": 60.02073839989841,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 252.0611111111111,
+          "delta_pct": 60.02073839989841,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "3b7da246123544a893ef7abee7687f5d"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "3b7da246123544a893ef7abee7687f5d"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "06b07f7e09d84815a69c9f5e2d1381b0"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c2",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 104.2267345441546,
+      "value": 141.99636689128465,
+      "delta_pct": 36.237950380311815,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 141.99636689128465,
+          "delta_pct": 36.237950380311815,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "3b7da246123544a893ef7abee7687f5d"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "3b7da246123544a893ef7abee7687f5d"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "06b07f7e09d84815a69c9f5e2d1381b0"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c4",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 219.37,
+      "value": 424.00888888888886,
+      "delta_pct": 93.28481054332354,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 424.00888888888886,
+          "delta_pct": 93.28481054332354,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "749083df229c4384a45c257bdb16f4ec"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "749083df229c4384a45c257bdb16f4ec"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "a9287c3d4d674849983c2ba394624aaf"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c4",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 77.62100602322748,
+      "value": 123.19485196900348,
+      "delta_pct": 58.71328945690087,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 123.19485196900348,
+          "delta_pct": 58.71328945690087,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "749083df229c4384a45c257bdb16f4ec"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "749083df229c4384a45c257bdb16f4ec"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "a9287c3d4d674849983c2ba394624aaf"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c8",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 307.79777777777775,
+      "value": 615.7244444444444,
+      "delta_pct": 100.04187453522877,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 615.7244444444444,
+          "delta_pct": 100.04187453522877,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "5ebc6e929f2d46cc965e400c1ddc4ad0"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "5ebc6e929f2d46cc965e400c1ddc4ad0"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "a6205fecc90147318e8e7fe1c9570004"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c8",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 55.76883889577,
+      "value": 87.98440923210494,
+      "delta_pct": 57.76625616420794,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 87.98440923210494,
+          "delta_pct": 57.76625616420794,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "5ebc6e929f2d46cc965e400c1ddc4ad0"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "5ebc6e929f2d46cc965e400c1ddc4ad0"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "a6205fecc90147318e8e7fe1c9570004"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c16",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 443.90777777777777,
+      "value": 885.9611111111111,
+      "delta_pct": 99.58224556151553,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 885.9611111111111,
+          "delta_pct": 99.58224556151553,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "fa0e01a32eef456bab4bebe51e4aa7dd"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "fa0e01a32eef456bab4bebe51e4aa7dd"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "e52aadd2f98746d2b7da71ccd235ebb9"
+      }
+    },
+    {
+      "dataset_id": "swe-prefix-reuse-c16",
+      "metric_id": "decode_p90_tps_per_user",
+      "status": "passed",
+      "baseline_value": 38.93415177865642,
+      "value": 62.906279664144115,
+      "delta_pct": 61.57095195439479,
+      "updated_at": "2026-09-27",
+      "selected_candidate_id": "betterscale",
+      "candidate_values": [
+        {
+          "candidate_id": "betterscale",
+          "label": "BetterScale resident E16/R20 balanced attention · FULL graph",
+          "series_id": "swe-betterscale-resident-e16-r20-balanced-attn-graph-full-20260927",
+          "value": 62.906279664144115,
+          "delta_pct": 61.57095195439479,
+          "runtime_effectiveness": "not-recorded",
+          "provenance": {
+            "repository": "vLLM-HUST/BetterScale",
+            "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+            "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+            "run_id": "fa0e01a32eef456bab4bebe51e4aa7dd"
+          }
+        }
+      ],
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "selection": "declared matched Frontier comparison pair"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/BetterScale",
+        "repository_commit": "eee35fd6b50fca73385ad8f8af714fcd7e5c2684",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "run_id": "fa0e01a32eef456bab4bebe51e4aa7dd"
+      },
+      "baseline_provenance": {
+        "repository": "vLLM-HUST/vllm-hust-website",
+        "repository_commit": "6ac7463355ae35efc029ca4d0fbf90c9c26cd019",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/6ac7463355ae35efc029ca4d0fbf90c9c26cd019/docs/FRONTIER-QWEN35-RESIDENT-BALANCED.md",
+        "series_id": "swe-capacity16-native",
+        "run_id": "e52aadd2f98746d2b7da71ccd235ebb9"
+      }
+    }
+  ],
+  "limitations": [
+    "The candidate graph mode, resident/execution seat policy, scheduler and memory-utilization setting are part of the BetterScale treatment; this is not an isolated attention-only ablation.",
+    "Every cell is one 900-second observation, not a repeatability estimate or answer-quality certification."
+  ],
+  "coverage_contract": {
+    "mode": "explicit-dataset-metric-applicability",
+    "complete_cell_states_required": true,
+    "non_measured_reason_required": true,
+    "matched_b0_required_for_b1": true
+  }
+}

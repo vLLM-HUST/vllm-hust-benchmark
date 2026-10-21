@@ -1,0 +1,227 @@
+{
+  "schema_version": "frontier-agentx-evidence/v1",
+  "scope": "Curated metric-only extracts from unmodified official harness exports; private paths, host identities and request payloads omitted. Not raw full exports.",
+  "protocol": {
+    "methodology_url": "https://inferencex.semianalysis.com/agentx/methodology",
+    "methodology_checked_utc": "2026-09-23",
+    "harness_repository": "https://github.com/SemiAnalysisAI/agentx-harness",
+    "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+    "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+    "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+    "dataset_alias": "semianalysis_cc_traces_weka_062126_256k",
+    "dataset_sessions": 393,
+    "scenario": "inferencex-agentx-mvp",
+    "seed": 20260923,
+    "trajectory_start_min_ratio": 0.25,
+    "trajectory_start_max_ratio": 0.75,
+    "warmup_requests_per_lane": 10,
+    "profiles": {
+      "formal": {
+        "measurement_seconds": 3600
+      },
+      "smoke": {
+        "measurement_seconds": 900
+      }
+    }
+  },
+  "runtime": {
+    "versions": {
+      "vllm": "0.25.1",
+      "vllm-ascend": "0.25.1rc1",
+      "torch-npu": "2.10.0.post2",
+      "torch": "2.10.0",
+      "transformers": "5.14.1"
+    },
+    "base_commits": {
+      "vllm": "752a3a504485790a2e8491cacbb35c137339ad34",
+      "vllm-ascend": "9bf964cb4b87c8cd0d6852c41a55b3c29711fa95"
+    },
+    "cann": "9.0.1",
+    "candidate": "moe-full5 / candidate-runtime1; unreleased experimental BetterScale; prototype source local commit 3e99033",
+    "native": "Frozen runtime-source, required SD/V1 Mamba ABI bridge only; no BetterScale graph/scheduler treatment",
+    "shared_sampler": "Both arms use the same benchmark-only pinned synthetic greedy MTP2 sampler with TP-rank0 uniform broadcast; not stock synthetic support or quality evidence"
+  },
+  "calibration": {
+    "status": "PASS",
+    "purpose": "coding MTP2 acceptance calibration, not AgentX performance",
+    "thinking": false,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "presence_penalty": 1.5,
+    "max_output_tokens": 4096,
+    "concurrency": 1,
+    "prompts": 80,
+    "speculation": "real acceptance only",
+    "accepted_tokens": 44587.0,
+    "draft_steps": 27396.0,
+    "acceptance_length": 2.6275003650167905,
+    "completed": 80,
+    "dataset": "nvidia/SPEED-Bench",
+    "revision": "454f88454792dfa3ccfd7ef15fff248efde44cd1",
+    "category": "coding",
+    "forced_reference": 2.63
+  },
+  "runs": [
+    {
+      "arm": "betterscale",
+      "run_id": "20260923T103407Z-smoke-c4-90c340f1",
+      "official_metrics": {
+        "request_count": {
+          "unit": "requests",
+          "avg": 111.0
+        },
+        "output_token_throughput": {
+          "unit": "tokens/sec",
+          "avg": 84.62433838849498
+        },
+        "output_token_throughput_per_user": {
+          "unit": "tokens/sec/user",
+          "avg": 77.04174497212864,
+          "p1": 27.16275204530824,
+          "p5": 49.83452495623909,
+          "p10": 57.57826078928227,
+          "p25": 67.24503984251994,
+          "p50": 79.88701077122406,
+          "p75": 89.44569681415206,
+          "p90": 97.66183282742962,
+          "p95": 100.3800200340899,
+          "p99": 106.67650626138018,
+          "min": 7.715064188185484,
+          "max": 108.36513276652873,
+          "std": 17.6266575760496,
+          "count": 111,
+          "sum": 8551.63369190628
+        },
+        "inter_token_latency": {
+          "unit": "ms",
+          "avg": 14.773091788515762,
+          "p1": 9.374889463075906,
+          "p5": 9.962327588633183,
+          "p10": 10.239414631578946,
+          "p25": 11.18000849323743,
+          "p50": 12.51767953696182,
+          "p75": 14.871104235725113,
+          "p90": 17.3676659609375,
+          "p95": 20.08189176668113,
+          "p99": 36.82222690303031,
+          "min": 9.228060488372092,
+          "max": 129.6165495980392,
+          "std": 11.82388928221363,
+          "count": 111,
+          "sum": 1639.8131885252496
+        },
+        "time_to_first_token": {
+          "unit": "ms",
+          "avg": 1241.8711884864863,
+          "p1": 263.9181659,
+          "p5": 313.605325,
+          "p10": 357.659308,
+          "p25": 516.1830605,
+          "p50": 806.407752,
+          "p75": 1178.8073319999999,
+          "p90": 2029.574024,
+          "p95": 4189.507085499999,
+          "p99": 5915.003372800004,
+          "min": 156.04338099999998,
+          "max": 18927.934059,
+          "std": 1988.5318282391354,
+          "count": 111,
+          "sum": 137847.701922
+        },
+        "request_latency": {
+          "unit": "ms",
+          "avg": 11486.410568873875,
+          "p1": 1150.1009751,
+          "p5": 1530.2703265,
+          "p10": 1701.63089,
+          "p25": 2026.439128,
+          "p50": 2634.080523,
+          "p75": 7801.49856,
+          "p90": 37040.365121999996,
+          "p95": 52844.168638999996,
+          "p99": 100118.2658123,
+          "min": 389.426134,
+          "max": 112914.45862599999,
+          "std": 21720.954883572187,
+          "count": 111,
+          "sum": 1274991.573145
+        },
+        "output_sequence_length": {
+          "unit": "tokens",
+          "avg": 716.6396396396397,
+          "p1": 62.0,
+          "p5": 75.5,
+          "p10": 87.0,
+          "p25": 105.0,
+          "p50": 132.0,
+          "p75": 365.0,
+          "p90": 2719.0,
+          "p95": 3945.5,
+          "p99": 6273.600000000004,
+          "min": 23.0,
+          "max": 6674.0,
+          "std": 1378.5771669643837,
+          "count": 111,
+          "sum": 79547.0
+        },
+        "input_sequence_length": {
+          "unit": "tokens",
+          "avg": 58367.23423423423,
+          "p1": 17442.5,
+          "p5": 17922.5,
+          "p10": 18726.0,
+          "p25": 25229.0,
+          "p50": 57340.0,
+          "p75": 76946.0,
+          "p90": 106788.0,
+          "p95": 115953.0,
+          "p99": 163719.10000000027,
+          "min": 727.0,
+          "max": 169165.0,
+          "std": 33961.06575274473,
+          "count": 111,
+          "sum": 6478763.0
+        },
+        "total_output_tokens": {
+          "unit": "tokens",
+          "avg": 79547.0
+        },
+        "benchmark_duration": {
+          "unit": "sec",
+          "avg": 913.878904064
+        },
+        "error_summary": [],
+        "osl_mismatch_count": {
+          "unit": "requests",
+          "avg": 0.0
+        },
+        "metadata": {
+          "dataset": {
+            "source_type": "public_dataset",
+            "loader": "semianalysis_cc_traces_weka_062126_256k",
+            "hf_dataset_name": "semianalysisai/cc-traces-weka-062126-256k",
+            "hf_split": "train"
+          },
+          "metric_duration_coverage": [
+            {
+              "phase_name": "profiling",
+              "expected_duration_seconds": 900.0,
+              "required_ratio": 0.95,
+              "ttft_ratio": 0.9961966338844445,
+              "inter_token_latency_ratio": 1.0
+            }
+          ],
+          "scenario": "inferencex-agentx-mvp",
+          "submission_valid": true
+        },
+        "start_time": "2026-09-23T10:38:15.210094",
+        "end_time": "2026-09-23T10:53:55.211535"
+      },
+      "client_exit_code": 0,
+      "remote_exit_code": 0,
+      "measurement_profile": "smoke",
+      "measurement_seconds": 900
+    }
+  ]
+}

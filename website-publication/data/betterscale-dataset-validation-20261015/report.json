@@ -1,0 +1,298 @@
+{
+  "model": "Qwen3.5-35B-A3B BF16",
+  "betterscale_commit": "31fe12b2ddff70209f78d9dab287aedac9dd4bbd",
+  "mmlu": {
+    "cases": 12032,
+    "correct": 9611,
+    "accuracy": 0.7987865691489362,
+    "invalid_answers": 65,
+    "transport_failures": 0,
+    "length_limited": 1548,
+    "wall_seconds_this_invocation": 9259.440616141073,
+    "mean_ttft_s": 0.24528011316354598,
+    "mean_e2e_s": 12.299382534087544,
+    "smoke_only": false
+  },
+  "frontier": {
+    "protocol": "hust-qwen-judge-v3; Appendix B prompts; Qwen substitute; single trial; scoring_policy=mmlu_extract_first; not official replication",
+    "scoring_policy": "mmlu_extract_first",
+    "denominator_policy": "all_cases_invalid_as_nonsuccess",
+    "judge_model": "qwen3.5-35b",
+    "solver_model": "qwen3.5-35b",
+    "same_model_name": true,
+    "scope": "full_gold",
+    "contract_sha256": "82d3ba7fc282acfd6b1e79f618143a9b2e2c3fbd4829c9e3de951a82db92fb4c",
+    "solver_index_sha256": "b327c216577949c5e4e21adad055112c131063a1b70e6c7288aaf5bfd845c2fd",
+    "judge_index_sha256": "24a70d1f122b60d50c05eed80b371aed3f69dccbd7ba0de6a30d83252cbfed9e",
+    "tracks": {
+      "olympiad": {
+        "total": 100,
+        "graded": 96,
+        "successes": 63,
+        "solver_failures": 0,
+        "judge_unresolved": 4,
+        "judge_invalid": 4,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 4,
+        "judge_audit_flagged": 4,
+        "solver_truncated": 27,
+        "judge_truncated": 8,
+        "success_rate": 0.63,
+        "observed_success_lower_bound": 0.63,
+        "mean_research_score_valid_only": null
+      },
+      "research": {
+        "total": 60,
+        "graded": 57,
+        "successes": 2,
+        "solver_failures": 0,
+        "judge_unresolved": 3,
+        "judge_invalid": 3,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 6,
+        "judge_audit_flagged": 8,
+        "solver_truncated": 9,
+        "judge_truncated": 9,
+        "success_rate": 0.03333333333333333,
+        "observed_success_lower_bound": 0.03333333333333333,
+        "mean_research_score_valid_only": 2.620350877192983
+      }
+    },
+    "subjects": {
+      "olympiad/biology": {
+        "total": 10,
+        "graded": 9,
+        "successes": 1,
+        "solver_failures": 0,
+        "judge_unresolved": 1,
+        "judge_invalid": 1,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 0,
+        "judge_audit_flagged": 0,
+        "solver_truncated": 3,
+        "judge_truncated": 1,
+        "success_rate": 0.1,
+        "observed_success_lower_bound": 0.1,
+        "mean_research_score_valid_only": null
+      },
+      "olympiad/chemistry": {
+        "total": 40,
+        "graded": 39,
+        "successes": 29,
+        "solver_failures": 0,
+        "judge_unresolved": 1,
+        "judge_invalid": 1,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 1,
+        "judge_audit_flagged": 1,
+        "solver_truncated": 13,
+        "judge_truncated": 2,
+        "success_rate": 0.725,
+        "observed_success_lower_bound": 0.725,
+        "mean_research_score_valid_only": null
+      },
+      "olympiad/physics": {
+        "total": 50,
+        "graded": 48,
+        "successes": 33,
+        "solver_failures": 0,
+        "judge_unresolved": 2,
+        "judge_invalid": 2,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 3,
+        "judge_audit_flagged": 3,
+        "solver_truncated": 11,
+        "judge_truncated": 5,
+        "success_rate": 0.66,
+        "observed_success_lower_bound": 0.66,
+        "mean_research_score_valid_only": null
+      },
+      "research/biology": {
+        "total": 20,
+        "graded": 18,
+        "successes": 0,
+        "solver_failures": 0,
+        "judge_unresolved": 2,
+        "judge_invalid": 2,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 3,
+        "judge_audit_flagged": 3,
+        "solver_truncated": 3,
+        "judge_truncated": 5,
+        "success_rate": 0.0,
+        "observed_success_lower_bound": 0.0,
+        "mean_research_score_valid_only": 2.443611111111111
+      },
+      "research/chemistry": {
+        "total": 20,
+        "graded": 19,
+        "successes": 1,
+        "solver_failures": 0,
+        "judge_unresolved": 1,
+        "judge_invalid": 1,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 0,
+        "judge_audit_flagged": 2,
+        "solver_truncated": 4,
+        "judge_truncated": 1,
+        "success_rate": 0.05,
+        "observed_success_lower_bound": 0.05,
+        "mean_research_score_valid_only": 3.547368421052632
+      },
+      "research/physics": {
+        "total": 20,
+        "graded": 20,
+        "successes": 1,
+        "solver_failures": 0,
+        "judge_unresolved": 0,
+        "judge_invalid": 0,
+        "judge_transport_failures": 0,
+        "judge_truncated_with_grade": 3,
+        "judge_audit_flagged": 3,
+        "solver_truncated": 2,
+        "judge_truncated": 3,
+        "success_rate": 0.05,
+        "observed_success_lower_bound": 0.05,
+        "mean_research_score_valid_only": 1.8987500000000002
+      }
+    }
+  },
+  "mmlu_bench": {
+    "date": "20261015-074058",
+    "num_prompts": 200,
+    "completed": 200,
+    "failed": 0,
+    "duration": 81.9430637517944,
+    "request_throughput": 2.440719090096511,
+    "output_throughput": 624.8240870647068,
+    "total_token_throughput": 4069.471956895165,
+    "mean_ttft_ms": 40626.99726256542,
+    "mean_tpot_ms": 23.61731110082245,
+    "total_input_tokens": 282265,
+    "total_output_tokens": 51200
+  },
+  "frontier_bench": {
+    "date": "20261015-083544",
+    "num_prompts": 160,
+    "completed": 160,
+    "failed": 0,
+    "duration": 44.4029835453257,
+    "request_throughput": 3.603361468642645,
+    "output_throughput": 922.4605359725172,
+    "total_token_throughput": 2331.6226013127603,
+    "mean_ttft_ms": 20375.039425608702,
+    "mean_tpot_ms": 16.20724046050443,
+    "total_input_tokens": 62571,
+    "total_output_tokens": 40960
+  },
+  "source": "https://vllm-hust.sage.org.ai/dataset-validation.html",
+  "limits": [
+    "Single run; engine and donor settings differ from web baseline.",
+    "MMLU bench overlapped Frontier judging; Frontier bench ran after MMLU release.",
+    "Same Qwen solver/judge; invalid grades retained as nonsuccess; no retries.",
+    "HLE deferred by user; multimodal patch not merged or evaluated."
+  ],
+  "measurement_date": "2026-10-15",
+  "formal_acceptance": false,
+  "repeats": 1,
+  "hardware": "Ascend 910B2, two separate TP2 services on four physical devices",
+  "scope": "MMLU-Pro full test; FrontierScience full Olympiad and Research; HLE deferred",
+  "source_scope": "BetterScale source snapshot and qualified existing CANN9.1 runtime; no later multimodal patch",
+  "engine_configuration": {
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 2,
+    "speculative_tokens": 2,
+    "cudagraph_mode": "FULL",
+    "execution_seats": 16,
+    "resident_seats": 36,
+    "state_bytes_per_rank": 21474836480,
+    "host_bytes_per_rank": 8589934592,
+    "max_model_len": 65536,
+    "max_num_batched_tokens": 4096,
+    "prefix_caching": true
+  },
+  "baseline_reports": {
+    "mmlu": "../mmlu-pro-qwen35-b0-precheck-20261012",
+    "frontier": "../frontierscience-qwen35-b0-precheck-20261013"
+  },
+  "mmlu_release": {
+    "time": 1792050095.5039873,
+    "exit": 0
+  },
+  "frontier_release": {
+    "time": 1792053362.4377115,
+    "exit": 0
+  },
+  "mmlu_categories": {
+    "biology": {
+      "count": 717,
+      "correct": 649,
+      "accuracy": 0.905160390516039
+    },
+    "business": {
+      "count": 789,
+      "correct": 679,
+      "accuracy": 0.8605830164765526
+    },
+    "chemistry": {
+      "count": 1132,
+      "correct": 950,
+      "accuracy": 0.8392226148409894
+    },
+    "computer science": {
+      "count": 410,
+      "correct": 326,
+      "accuracy": 0.7951219512195122
+    },
+    "economics": {
+      "count": 844,
+      "correct": 730,
+      "accuracy": 0.8649289099526066
+    },
+    "engineering": {
+      "count": 969,
+      "correct": 617,
+      "accuracy": 0.6367389060887513
+    },
+    "health": {
+      "count": 818,
+      "correct": 642,
+      "accuracy": 0.784841075794621
+    },
+    "history": {
+      "count": 381,
+      "correct": 267,
+      "accuracy": 0.7007874015748031
+    },
+    "law": {
+      "count": 1101,
+      "correct": 680,
+      "accuracy": 0.6176203451407811
+    },
+    "math": {
+      "count": 1351,
+      "correct": 1212,
+      "accuracy": 0.8971132494448557
+    },
+    "other": {
+      "count": 924,
+      "correct": 704,
+      "accuracy": 0.7619047619047619
+    },
+    "philosophy": {
+      "count": 499,
+      "correct": 377,
+      "accuracy": 0.7555110220440882
+    },
+    "physics": {
+      "count": 1299,
+      "correct": 1115,
+      "accuracy": 0.8583525789068515
+    },
+    "psychology": {
+      "count": 798,
+      "correct": 663,
+      "accuracy": 0.8308270676691729
+    }
+  }
+}

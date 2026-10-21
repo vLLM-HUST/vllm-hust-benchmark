@@ -1,0 +1,124 @@
+{
+    "entry_id": "f9e8d7c6-b5a4-3210-fedc-ba9876543210",
+    "engine": "vllm-hust",
+    "engine_version": "0.2.3.3",
+    "config_type": "multi_node",
+    "hardware": {
+        "vendor": "Huawei",
+        "chip_model": "Sample-NPU-64GB",
+        "chip_count": 8,
+        "interconnect": "HCCS",
+        "chips_per_node": 4,
+        "intra_node_interconnect": "HCCS",
+        "memory_per_chip_gb": 64,
+        "total_memory_gb": 512
+    },
+    "model": {
+        "canonical_id": "hf:meta-llama/Llama-3-70B",
+        "repo_id": "meta-llama/Llama-3-70B",
+        "short_name": "Llama-3-70B",
+        "display_name": "Llama-3-70B",
+        "name": "meta-llama/Llama-3-70B",
+        "parameters": "70B",
+        "precision": "BF16",
+        "quantization": "None"
+    },
+    "workload": {
+        "name": "tool-calling-long-context",
+        "input_length": 2048,
+        "output_length": 512,
+        "batch_size": 4,
+        "concurrent_requests": 8,
+        "dataset": "AlpacaEval"
+    },
+    "metrics": {
+        "ttft_ms": 120.5,
+        "tbt_ms": 15.2,
+        "tpot_ms": 15.2,
+        "throughput_tps": 512.8,
+        "peak_mem_mb": 458752,
+        "error_rate": 0.01,
+        "prefix_hit_rate": 0.72,
+        "kv_used_tokens": 16384,
+        "kv_used_bytes": 536870912,
+        "evict_count": 12,
+        "evict_ms": 8.5,
+        "spec_accept_rate": 0.68
+    },
+    "constraints": {
+        "scenario_source": "vllm-benchmark",
+        "accountable_scope": {
+            "domestic_chip_class": "sample-multi-node-accelerator-cluster",
+            "representative_model_band": "7B-13B",
+            "representative_business_scenario": "tool-calling-multi-turn",
+            "baseline_engine": "vllm",
+            "owner_confirmed": true
+        },
+        "metrics": {
+            "single_chip_effective_utilization_pct": 90.4,
+            "typical_throughput_ratio_vs_baseline": 2.11,
+            "typical_ttft_reduction_pct_vs_baseline": 22.2,
+            "typical_tpot_reduction_pct_vs_baseline": 20.8,
+            "long_context_length": 32768,
+            "long_context_throughput_stable": true,
+            "long_context_ttft_p95_ms": 141.0,
+            "long_context_ttft_p99_ms": 168.0,
+            "long_context_tpot_p95_ms": 17.0,
+            "long_context_tpot_p99_ms": 20.2,
+            "long_context_ttft_p95_stable": true,
+            "long_context_ttft_p99_stable": true,
+            "long_context_tpot_p95_stable": true,
+            "long_context_tpot_p99_stable": true,
+            "unit_token_cost_reduction_pct": 30.9,
+            "multi_tenant_high_utilization": true
+        }
+    },
+    "cluster": {
+        "node_count": 2,
+        "comm_backend": "HCCL",
+        "inter_node_network": "InfiniBand",
+        "network_bandwidth_gbps": 200,
+        "topology_type": "Ring",
+        "parallelism": {
+            "tensor_parallel": 4,
+            "pipeline_parallel": 2,
+            "data_parallel": 1
+        }
+    },
+    "versions": {
+        "protocol": "0.1.1.0",
+        "backend": "0.2.1.6",
+        "core": "0.2.2.8",
+        "control_plane": "0.1.1.5",
+        "gateway": "0.1.1.5",
+        "kv_cache": "0.1.1.6",
+        "comm": "0.1.1.7",
+        "compression": "0.1.1.7",
+        "benchmark": "0.1.0.0"
+    },
+    "environment": {
+        "os": "openEuler 22.03 LTS",
+        "python_version": "3.10.12",
+        "pytorch_version": "2.1.0+ascend",
+        "cuda_version": null,
+        "cann_version": "8.0.RC1",
+        "driver_version": "24.1.rc1"
+    },
+    "kv_cache_config": {
+        "enabled": true,
+        "eviction_policy": "Lifetime-Aware",
+        "budget_tokens": 32768,
+        "prefix_cache_enabled": true
+    },
+    "metadata": {
+        "submitted_at": "2026-01-28T11:00:00Z",
+        "submitter": "HUST",
+        "data_source": "automated-benchmark",
+        "reproducible_cmd": "vllm bench serve --model meta-llama/Llama-3-70B --backend ascend --multi-node --nodes 2 --tp 4 --pp 2 --input-len 2048 --output-len 512 --batch-size 4 --concurrent 8",
+        "git_commit": "a1b2c3d4e5f6789012345678901234567890abcd",
+        "release_date": "2026-01-27",
+        "changelog_url": "https://github.com/vLLM-HUST/vllm-hust/blob/main/CHANGELOG.md#0233---2026-01-27",
+        "notes": "Multi-node performance sample on a generic accelerator cluster with HCCL",
+        "verified": true
+    }
+}

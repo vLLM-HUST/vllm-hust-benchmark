@@ -1,0 +1,425 @@
+{
+  "schema_version": "plugin-performance/v8",
+  "entries": [
+    {
+      "id": "adm",
+      "url": "https://github.com/vLLM-HUST/ascend-distributed-metadata/blob/main/qualifications/qwen3moe-dp4-int64-word-20260928.json",
+      "ecpa": {
+        "launch_acceptance": "not-reproduced-this-round",
+        "configuration_path": "not-evaluated",
+        "analysis_integration": "external-harness",
+        "note_zh": "引用 ADM 仓库中固定版本的配对服务结果；本轮未通过网站 ECPA 复现，对照为先前已发布 MOD。",
+        "note_en": "Cites pinned paired serving results from the ADM repository; this website ECPA round did not reproduce them. The comparator is the previous published MOD."
+      },
+      "default_observation_id": "adm:qwen3moe-published",
+      "observations": [
+        {
+          "id": "adm:qwen3moe-published",
+          "kind": "published-comparisons",
+          "comparisons": [
+            {
+          "metric": "output_tps",
+          "baseline": 463.1999171118466,
+          "candidate": 464.9764975222131,
+          "model_label": "Qwen3-30B-A3B-W8A8",
+          "scope": "TP1/DP4 FULL_DECODE_ONLY · frozen 64-request trace · two rounds per session · new word path vs previous MOD"
+        },
+            {
+          "metric": "output_tps",
+          "baseline": 462.1914940510524,
+          "candidate": 465.46964175026187,
+          "model_label": "Qwen3-30B-A3B-W8A8",
+          "scope": "TP1/DP4 FULL_DECODE_ONLY · frozen 64-request trace · two rounds per session · new word path vs previous MOD"
+        },
+            {
+          "metric": "output_tps",
+          "baseline": 464.7356391006364,
+          "candidate": 470.8495848419581,
+          "model_label": "Qwen3-30B-A3B-W8A8",
+          "scope": "TP1/DP4 FULL_DECODE_ONLY · frozen 64-request trace · two rounds per session · new word path vs previous MOD"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bidkv",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-bidkv/tree/main/results/qwen35-evoscientist-20260929",
+      "ecpa": {
+        "launch_acceptance": "manager-verified",
+        "configuration_path": "manager-standard",
+        "analysis_integration": "external-harness",
+        "note_zh": "TP2/SWE 五点观察通过 Manager 启动；新的 TP4/C12 KV-pressure 配对观察来自独立 runner，二者不合并。",
+        "note_en": "The TP2/SWE five-point observation used a Manager launch. The newer TP4/C12 KV-pressure pairs use a separate runner and are not pooled with it."
+      },
+      "default_observation_id": "bidkv:qwen35-tp4-c12-kv-pressure",
+      "observations": [
+        {
+          "id": "bidkv:qwen35-tp4-c12-kv-pressure",
+          "kind": "published-comparisons",
+          "url": "https://github.com/vLLM-HUST/vllm-hust-bidkv/blob/main/results/qwen35-evoscientist-20260929/README.md#high-concurrency-kv-pressure-result",
+          "setting_label_en": "TP4 · C12 · 512 MiB KV/NPU · 2 paired repeats",
+          "setting_label_zh": "TP4 · C12 · 每 NPU 512 MiB KV · 2 轮配对",
+          "aggregation_note_en": "Geometric mean +13.83%; arithmetic mean of paired changes +13.88%",
+          "aggregation_note_zh": "几何平均 +13.83%；两轮变化的算术平均 +13.88%",
+          "comparisons": [
+            {
+              "metric": "output_tps",
+              "baseline": 35.37035637779263,
+              "candidate": 41.42218456909079,
+              "model_label": "Qwen3.5-35B-A3B",
+              "scope": "EvoScientist first 12 requests · TP4 FULL_AND_PIECEWISE · C12 · request rate 4 · 512 MiB KV/NPU · baseline then BidKV"
+            },
+            {
+              "metric": "output_tps",
+              "baseline": 35.96565121399601,
+              "candidate": 39.795148276368685,
+              "model_label": "Qwen3.5-35B-A3B",
+              "scope": "EvoScientist first 12 requests · TP4 FULL_AND_PIECEWISE · C12 · request rate 4 · 512 MiB KV/NPU · BidKV then baseline"
+            }
+          ]
+        },
+        {
+          "id": "bidkv:qwen35-frontier",
+          "kind": "frontier-series",
+          "series_id": "swe-unified-bidkv-20260927",
+          "setting_label_en": "TP2 · SWE Prefix Reuse · C1/C2/C4/C8/C16 · policy not exercised",
+          "setting_label_zh": "TP2 · SWE Prefix Reuse · C1/C2/C4/C8/C16 · 策略未触发"
+        }
+      ]
+    },
+    {
+      "id": "dla",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+      "ecpa": {
+        "launch_acceptance": "manager-verified",
+        "configuration_path": "manager-standard",
+        "analysis_integration": "external-harness"
+      },
+      "default_observation_id": "dla:qwen35-frontier",
+      "observations": [
+        {"id": "dla:qwen35-frontier", "kind": "frontier-series", "series_id": "swe-unified-dla-20260927"}
+      ]
+    },
+    {
+      "id": "kv-tiering-migration",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/FRONTIER-QWEN35-UNIFIED-MODS.md",
+      "ecpa": {
+        "launch_acceptance": "manager-verified",
+        "configuration_path": "manager-standard",
+        "analysis_integration": "external-harness"
+      },
+      "default_observation_id": "kv-tiering-migration:qwen35-frontier",
+      "observations": [
+        {"id": "kv-tiering-migration:qwen35-frontier", "kind": "frontier-series", "series_id": "swe-unified-kv-tiering-migration-20260927"}
+      ]
+    },
+    {
+      "id": "kv-materialization-arrival-control",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/FRONTIER-QWEN35-KV-MATERIALIZATION.md",
+      "ecpa": {
+        "launch_acceptance": "manager-verified",
+        "configuration_path": "manager-standard",
+        "analysis_integration": "external-harness",
+        "note_zh": "Qwen3.5 统一配置已通过 ECPA 启动验收；Qwen2.5-7B-Instruct M2 controller 配置结果单独保留。",
+        "note_en": "The unified Qwen3.5 configuration passed ECPA launch acceptance; the Qwen2.5-7B-Instruct M2 controller result remains available under its own configuration."
+      },
+      "default_observation_id": "kv-materialization-arrival-control:qwen35-frontier",
+      "observations": [
+        {
+          "id": "kv-materialization-arrival-control:qwen35-frontier",
+          "kind": "frontier-series",
+          "series_id": "swe-unified-kv-materialization-arrival-control-20260928"
+        },
+        {
+          "id": "kv-materialization-arrival-control:qwen25-7b-m2-controller",
+          "kind": "published-comparisons",
+          "comparisons": [
+        {
+          "metric": "output_tps",
+          "baseline": 216.886,
+          "candidate": 215.699,
+          "model_label": "Qwen2.5-7B-Instruct",
+          "scope": "M2 benefit boundary · controller vs always_full_reuse · 3 rounds × 2 workloads"
+        },
+        {
+          "metric": "output_tps",
+          "baseline": 218.216,
+          "candidate": 217.106,
+          "model_label": "Qwen2.5-7B-Instruct",
+          "scope": "M2 benefit boundary · controller vs always_full_reuse · 3 rounds × 2 workloads"
+        },
+        {
+          "metric": "output_tps",
+          "baseline": 218.795,
+          "candidate": 216.723,
+          "model_label": "Qwen2.5-7B-Instruct",
+          "scope": "M2 benefit boundary · controller vs always_full_reuse · 3 rounds × 2 workloads"
+        },
+        {
+          "metric": "output_tps",
+          "baseline": 230.588,
+          "candidate": 232.017,
+          "model_label": "Qwen2.5-7B-Instruct",
+          "scope": "M2 benefit boundary · controller vs always_full_reuse · 3 rounds × 2 workloads"
+        },
+        {
+          "metric": "output_tps",
+          "baseline": 234.115,
+          "candidate": 233.016,
+          "model_label": "Qwen2.5-7B-Instruct",
+          "scope": "M2 benefit boundary · controller vs always_full_reuse · 3 rounds × 2 workloads"
+        },
+        {
+          "metric": "output_tps",
+          "baseline": 233.129,
+          "candidate": 231.599,
+          "model_label": "Qwen2.5-7B-Instruct",
+          "scope": "M2 benefit boundary · controller vs always_full_reuse · 3 rounds × 2 workloads"
+        }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pipeline-microbatch-migration",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/FRONTIER-QWEN35-PIPELINE-K8S.md",
+      "ecpa": {
+        "launch_acceptance": "manager-verified",
+        "configuration_path": "frontier-adapter",
+        "analysis_integration": "external-harness",
+        "evidence_url": "https://github.com/vLLM-HUST/vllm-hust-dev-hub/tree/main/scripts/frontier_pipeline/ecpa"
+      },
+      "default_observation_id": "pipeline-microbatch-migration:qwen35-frontier",
+      "observations": [
+        {"id": "pipeline-microbatch-migration:qwen35-frontier", "kind": "frontier-series", "series_id": "swe-k8s-pp2-20260925-pipelinepp-r1"}
+      ]
+    },
+    {
+      "id": "betterscale",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/FRONTIER-SMALL-FISH.md",
+      "ecpa": {
+        "launch_acceptance": "not-reproduced-this-round",
+        "configuration_path": "not-evaluated",
+        "analysis_integration": "external-harness",
+        "note_zh": "主页引用已有公开性能结果；本轮未通过 ECPA 复现。",
+        "note_en": "The homepage cites existing public performance results; this round did not reproduce them through ECPA."
+      },
+      "default_observation_id": "betterscale:qwen35-frontier",
+      "observations": [
+        {"id": "betterscale:qwen35-frontier", "kind": "frontier-series", "series_id": "swe-capacity16-small-fish-20260924"}
+      ]
+    },
+    {
+      "id": "vspec",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-vSpec/blob/main/docs/gsm8k_b128_recovery_and_arc_easy_20260913.md",
+      "ecpa": {
+        "launch_acceptance": "not-reproduced-this-round",
+        "configuration_path": "not-evaluated",
+        "analysis_integration": "external-harness",
+        "note_zh": "主页引用已有公开性能结果；本轮未通过 ECPA 复现。",
+        "note_en": "The homepage cites existing public performance results; this round did not reproduce them through ECPA."
+      },
+      "default_observation_id": "vspec:qwen25-14b-published",
+      "observations": [
+        {
+          "id": "vspec:qwen25-14b-published",
+          "kind": "published-comparisons",
+          "comparisons": [
+        {
+          "metric": "output_tps",
+          "baseline": 1557.25,
+          "candidate": 2363.98,
+          "model_label": "Qwen2.5-14B",
+          "scope": "GSM8K B128 · same-card target-only comparison"
+        }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "kvcompress-ascend",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/FRONTIER-QWEN35-KVCOMPRESS.md",
+      "ecpa": {
+        "launch_acceptance": "manager-verified",
+        "configuration_path": "manager-standard",
+        "analysis_integration": "external-harness",
+        "note_zh": "Qwen3.5 统一配置已通过 ECPA 启动验收；Qwen2.5-Coder-14B 长上下文 Ascend 910B2 配置结果单独保留。",
+        "note_en": "The unified Qwen3.5 configuration passed ECPA launch acceptance; the Qwen2.5-Coder-14B long-context Ascend 910B2 result remains available under its own configuration."
+      },
+      "default_observation_id": "kvcompress-ascend:qwen35-frontier",
+      "observations": [
+        {
+          "id": "kvcompress-ascend:qwen35-frontier",
+          "kind": "frontier-series",
+          "series_id": "swe-unified-kvcompress-ascend-20260928"
+        },
+        {
+          "id": "kvcompress-ascend:qwen25-coder-14b-long-context-910b2",
+          "kind": "published-comparisons",
+          "url": "https://github.com/vLLM-HUST/vllm-ascend-kvcompress-hust/blob/e4a4864/docs/resuts.md",
+          "comparisons": [
+            {
+              "metric": "output_tps",
+              "baseline": 2215.61,
+              "candidate": 2442.73,
+              "model_label": "Qwen2.5-Coder-14B",
+              "scope": "Long context · Ascend 910B2 · matched single run"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pegaflow-vllm-connectors",
+      "url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/FRONTIER-QWEN35-PEGAFLOW.md",
+      "ecpa": {
+        "launch_acceptance": "manager-verified",
+        "configuration_path": "manager-standard",
+        "analysis_integration": "external-harness",
+        "note_zh": "Qwen3.5 统一配置已通过外部服务连接器实际执行 PegaFlow save/load 路径。",
+        "note_en": "The Qwen3.5 unified configuration exercised real PegaFlow save/load paths through the external-service connector."
+      },
+      "default_observation_id": "pegaflow-vllm-connectors:qwen35-frontier",
+      "observations": [
+        {
+          "id": "pegaflow-vllm-connectors:qwen35-frontier",
+          "kind": "frontier-series",
+          "series_id": "swe-unified-pegaflow-vllm-connectors-20260929"
+        }
+      ]
+    },
+    {
+      "id": "latchmoe",
+      "url": "https://github.com/vLLM-HUST/vllm-ascend-hust-LatchMoE#qualified-graph-result",
+      "ecpa": {
+        "launch_acceptance": "not-reproduced-this-round",
+        "configuration_path": "not-evaluated",
+        "analysis_integration": "external-harness",
+        "note_zh": "主页引用已有公开性能结果；本轮未通过 ECPA 复现。",
+        "note_en": "The homepage cites existing public performance results; this round did not reproduce them through ECPA."
+      },
+      "default_observation_id": "latchmoe:qwen3-published",
+      "observations": [
+        {
+          "id": "latchmoe:qwen3-published",
+          "kind": "published-comparisons",
+          "comparisons": [
+        {
+          "metric": "output_tps",
+          "baseline": 23.57,
+          "candidate": 2.91,
+          "model_label": "Qwen3-30B-A3B",
+          "scope": "Qualified TP4 PIECEWISE graph · matched no-plugin comparison"
+        }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "simllm-migration",
+      "url": "https://github.com/vLLM-HUST/vllm-ascend-simllm-hust/pull/5",
+      "ecpa": {
+        "launch_acceptance": "repository-verified",
+        "configuration_path": "extension-manager",
+        "analysis_integration": "repository-harness",
+        "note_zh": "引用 SimLLM 仓库两次独立的 5,000 请求固定卡回放；单输出 token 负载主要衡量 prefill，不能推广为长生成收益。",
+        "note_en": "Cites two independent 5,000-request fixed-card replays from the SimLLM repository. The one-output-token workload primarily measures prefill and does not establish long-generation benefit."
+      },
+      "default_observation_id": "simllm:qwen35-published-replays",
+      "observations": [
+        {
+          "id": "simllm:qwen35-published-replays",
+          "kind": "published-comparisons",
+          "comparisons": [
+            {
+              "metric": "output_tps",
+              "baseline": 5.1964,
+              "candidate": 6.2558,
+              "model_label": "Qwen3.5-35B-A3B W8A8",
+              "scope": "5,000 requests · TP2 eager · one output token · fixed baseline card 7 / plugin card 6"
+            },
+            {
+              "metric": "output_tps",
+              "baseline": 5.2563,
+              "candidate": 6.2435,
+              "model_label": "Qwen3.5-35B-A3B W8A8",
+              "scope": "Independent 5,000-request replay · TP2 eager · one output token · fixed baseline card 7 / plugin card 6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "diffspec",
+      "url": "https://github.com/vLLM-HUST/vllm-ascend-hust-diffspec#key-results",
+      "ecpa": {
+        "launch_acceptance": "not-reproduced-this-round",
+        "configuration_path": "not-evaluated",
+        "analysis_integration": "external-harness",
+        "note_zh": "主页引用已有公开性能结果；本轮未通过 ECPA 复现。",
+        "note_en": "The homepage cites existing public performance results; this round did not reproduce them through ECPA."
+      },
+      "default_observation_id": "diffspec:qwen38-published",
+      "observations": [
+        {
+          "id": "diffspec:qwen38-published",
+          "kind": "published-comparisons",
+          "comparisons": [
+        {
+          "metric": "output_tps",
+          "baseline": 47.72,
+          "candidate": 14.0,
+          "model_label": "Qwen3.8-27B",
+          "scope": "Warm output-throughput P50 · TP4 graph · target-only comparison"
+        }
+          ]
+        }
+      ]
+    }
+  ],
+  "comparison_sets": [
+    {
+      "baseline_series_id": "swe-unified-native-20260927",
+      "observation_ids": [
+        "bidkv:qwen35-frontier",
+        "dla:qwen35-frontier",
+        "kv-tiering-migration:qwen35-frontier",
+        "kv-materialization-arrival-control:qwen35-frontier",
+        "kvcompress-ascend:qwen35-frontier",
+        "pegaflow-vllm-connectors:qwen35-frontier"
+      ]
+    },
+    {
+      "baseline_series_id": "swe-capacity16-native",
+      "observation_ids": [
+        "betterscale:qwen35-frontier"
+      ]
+    },
+    {
+      "baseline_series_id": "swe-k8s-pp2-20260925-nativepp-r1",
+      "observation_ids": [
+        "pipeline-microbatch-migration:qwen35-frontier"
+      ]
+    }
+  ],
+  "ecpa_experiment_boundary": {
+    "as_of": "2026-09-28",
+    "manager_repository": "https://github.com/vLLM-HUST/extension-manager",
+    "manager_main_commit": "cf1ea71e3e2cb81ab06267ef05eddb3e580ea20b",
+    "performance_analysis": "external-harness",
+    "performance_analysis_zh": "请求采集、吞吐与延迟复算、Native 配对及 Frontier 导入由专项实验脚本完成；check/status/plan 不构成绩效分析。",
+    "performance_analysis_en": "Specialized experiment scripts collected requests, recomputed throughput and latency, paired Native controls, and imported Frontier records; check/status/plan is not performance analysis.",
+    "process_release": "known-defect",
+    "process_release_evidence": "https://github.com/vLLM-HUST/extension-manager/pull/8#issuecomment-5844402943"
+  },
+  "metric": "output_tps",
+  "aggregation": "geometric-mean",
+  "concurrencies": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ]
+}

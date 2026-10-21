@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.sage.org.ai/data/schemas/plugin_workshop_metadata_v1.schema.json",
+  "title": "Plugin Workshop metadata v1",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "source", "plugins"],
+  "properties": {
+    "schema_version": {"const": "plugin-workshop-metadata/v1"},
+    "generated_at": {"type": "string", "minLength": 1},
+    "source": {"type": "string", "minLength": 1},
+    "plugins": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["repository", "repository_url", "metrics", "maintainers", "advisors", "maintainer_source"],
+        "properties": {
+          "repository": {"type": "string", "minLength": 1},
+          "repository_url": {"type": "string", "pattern": "^https://github\\.com/"},
+          "metrics": {
+            "type": "object",
+            "required": ["stars", "forks", "open_pull_requests"],
+            "properties": {
+              "stars": {"type": ["integer", "null"], "minimum": 0},
+              "forks": {"type": ["integer", "null"], "minimum": 0},
+              "open_pull_requests": {"type": ["integer", "null"], "minimum": 0}
+            },
+            "additionalProperties": false
+          },
+          "maintainers": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["login", "name", "profile_url", "avatar_url"],
+              "properties": {
+                "login": {"type": "string", "minLength": 1},
+                "name": {"type": "string", "minLength": 1},
+                "profile_url": {"type": "string", "pattern": "^https://github\\.com/"},
+                "avatar_url": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "advisors": {
+            "type": "array",
+            "minItems": 0,
+            "items": {"$ref": "#/definitions/advisor"}
+          },
+          "maintainer_source": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "definitions": {
+    "advisor": {
+      "type": "object",
+      "required": ["name_en", "name_zh", "relationship"],
+      "properties": {
+        "name_en": {"type": "string", "minLength": 1},
+        "name_zh": {"type": "string", "minLength": 1},
+        "affiliation_en": {"type": "string", "minLength": 1},
+        "affiliation_zh": {"type": "string", "minLength": 1},
+        "relationship": {"enum": ["internal", "external_contributor"]}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

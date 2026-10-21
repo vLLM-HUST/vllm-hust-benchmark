@@ -1,0 +1,249 @@
+{
+  "contract_version": "dataset-program-v1",
+  "updated_at": "2026-10-10",
+  "test_plan": {
+    "test_plan_version": "V5.5",
+    "contract_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/docs/ACCEPTANCE_V5_5.md",
+    "mandatory_model": "Qwen/Qwen3.5-35B-A3B",
+    "formal_precision": "BF16",
+    "baseline_roles": ["B0", "B1"],
+    "optional_status": "E1, E2-G and E2-D are inactive (NOT_EXECUTED_OPTIONAL)",
+    "optional_status_zh": "E1、E2-G、E2-D 本版均不启用（NOT_EXECUTED_OPTIONAL）",
+    "evidence_boundary": "BF16 matches the measured B0 and Frontier precision. Formal V5.5 admission requires release artifacts and actual-run materials in one immutable verified manifest, including both OCI RepoDigests and complete execution receipts.",
+    "evidence_boundary_zh": "BF16 已与 B0 和 Frontier 实测精度对齐；正式纳入 V5.5 还须将发布工件和实际运行材料纳入同一不可变 manifest 并验签，包括两侧 OCI RepoDigest 和完整执行回执。",
+    "b0_receipt_gate": {
+      "owner": "release-and-evaluation-engineering",
+      "owner_zh": "课题组（发布与评测工程）",
+      "producer": "release-and-evaluation-engineering-process",
+      "required_materials": ["signed_release_manifest", "b0_oci_repo_digest", "b1_oci_repo_digest", "complete_server_argv", "complete_client_contract", "effective_runtime_receipt", "startup_receipt"],
+      "value_source": "actual-release-artifacts-and-actual-runtime",
+      "prefill_actual_values": false,
+      "infer_actual_values": false
+    }
+  },
+  "designation": {
+    "id": "pujiang-specified-dataset-scope",
+    "label": "Pujiang-specified datasets",
+    "label_zh": "浦江指定数据集",
+    "scope_status": "names-only",
+    "scope_note": "The designation freezes the five dataset names and scope. The source snapshots below are separately revision- and checksum-frozen; task manifests, sampling rules, scorers, execution images, and license gates remain part of each execution contract.",
+    "scope_note_zh": "浦江指定冻结五个数据集的名称与范围；下列源数据快照已另行按 revision 与校验和冻结，任务清单、抽样规则、scorer、执行镜像和许可门禁仍属于各自执行合同。",
+    "historical_b0_boundary": {
+      "workbook_dataset_count": 21,
+      "covered_designated_dataset_ids": ["mmlu-pro"],
+      "not_covered_designated_dataset_ids": ["hle-verified", "swe-bench-pro", "frontierscience", "terminal-bench-2.1"],
+      "note": "The historical 21-dataset B0 workbook contains serving telemetry for MMLU-Pro only. It does not cover the other four designated datasets and does not provide a task-quality score for MMLU-Pro.",
+      "note_zh": "历史 21 数据集 B0 工作簿只包含 MMLU-Pro 的服务遥测；另外四项不在其中，且该 MMLU-Pro 单元也不是任务质量成绩。"
+    }
+  },
+  "primary_datasets": [
+    {
+      "id": "mmlu-pro",
+      "label": "MMLU-Pro",
+      "evaluation_class": "knowledge-reasoning",
+      "primary_metric": "Task accuracy under a pinned evaluator",
+      "primary_metric_zh": "固定评分器下的任务准确率",
+      "status": "serving-evidence-only",
+      "source_url": "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro",
+      "version_policy": "Use the frozen dataset snapshot and freeze the evaluator before publishing task-quality scores.",
+      "readiness": {
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          },
+          {
+            "path": "leaderboard-data/dataset-validation/dataset_validation_qwen35_tp2_ep_ctx32k_apcoff_inf_out256.json",
+            "kind": "canonical-serving-artifact",
+            "sha256": "f75a86fb802d933e55ab12738fae198233b350f94d573bd16a5fbdcfb397f019"
+          },
+          {
+            "path": "external-handoff/MMLU-PRO/准备操作.md",
+            "kind": "preparation-note",
+            "sha256": "b0984321c69037ca9d0645441f3c55c6c84eea49b0598d96b6c78b12f23a0a87"
+          },
+          {
+            "path": "external-handoff/MMLU-PRO/截屏2026-09-06 23.59.39.png",
+            "kind": "screenshot",
+            "sha256": "1bb66c18688891f12a30a38a6379162eb27e0573d4ca5bb531675cef571fd1c7"
+          },
+          {
+            "path": "external-handoff/MMLU-PRO/截屏2026-09-06 23.59.49.png",
+            "kind": "screenshot",
+            "sha256": "84d4280e10c57bd9d588485b013d15099f96c20a804e3584f083f4cac8d77b09"
+          }
+        ],
+        "dataset_revision": "b189ec765aa7ed75c8acfea42df31fdae71f97be",
+        "split": "validation and test Parquet snapshots",
+        "sample_count": null,
+        "sample_count_scope": "Snapshot row counts and the formal evaluation task manifest still need to be extracted; the historical serving command used 200 prompts and is not the dataset cardinality.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
+        "scorer": null,
+        "runtime_dependencies": ["Parquet reader used by the preparation note", "vLLM bench serve for serving telemetry"],
+        "blockers": ["Extract and freeze the full task manifest, row counts, sampling rule, pinned scorer, and execution environment from the verified snapshot.", "Produce task-accuracy evidence; the existing artifact contains serving telemetry only."]
+      },
+      "note": "The source snapshot is revision- and checksum-frozen; serving B0 evidence exists but is not a task-accuracy result.",
+      "note_zh": "源数据快照已按 revision 与校验和冻结；已有服务侧 B0 证据，但不能将其当作任务准确率结果。"
+    },
+    {
+      "id": "hle-verified",
+      "label": "HLE-Verified",
+      "evaluation_class": "knowledge-reasoning",
+      "primary_metric": "Accuracy under the pinned HLE-Verified evaluator",
+      "primary_metric_zh": "固定 HLE-Verified 评分器下的准确率",
+      "status": "contract-pending",
+      "source_url": "https://huggingface.co/datasets/skylenage-ai/HLE-Verified",
+      "version_policy": "Freeze the dataset revision and explicitly choose the full verified set or a named verified-gold subset.",
+      "readiness": {
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          }
+        ],
+        "dataset_revision": "b705e0fb541c025a1532ce0d60d70ae2f53b00e0",
+        "split": "Gold, Revision, and Uncertain JSONL subsets",
+        "sample_count": 2500,
+        "sample_count_scope": "Gold 668, Revision 1143, and Uncertain 689; local objects match the upstream Git LFS SHA-256 values.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
+        "scorer": null,
+        "runtime_dependencies": ["Snapshot judge_round1.py and judge_round2.py", "Pinned judge model, prompts, and execution environment"],
+        "blockers": ["Upstream does not declare a dataset license; complete license review before formal execution.", "Choose and freeze the evaluated subset, task manifest, judge model and prompts, scorer, and execution image."]
+      },
+      "note": "The 2500-row source snapshot is revision- and checksum-frozen; no measured result is admitted until licensing, the evaluated subset, and the grader are frozen.",
+      "note_zh": "2500 条源数据快照已按 revision 与校验和冻结；在完成许可核验、明确评测子集并冻结评分器之前，不接纳实测结果。"
+    },
+    {
+      "id": "swe-bench-pro",
+      "label": "SWE-bench-Pro",
+      "evaluation_class": "agentic-engineering",
+      "primary_metric": "Resolved task rate in isolated regrading",
+      "primary_metric_zh": "隔离复判下的任务解决率",
+      "status": "contract-pending",
+      "source_url": "https://huggingface.co/datasets/ScaleAI/SWE-bench_Pro",
+      "version_policy": "Freeze the validated release, task IDs, Harbor environment, agent scaffold, budget, and regrading protocol.",
+      "readiness": {
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          }
+        ],
+        "dataset_revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+        "split": "default, hard, and v1 test Parquet snapshots",
+        "sample_count": null,
+        "sample_count_scope": "Snapshot files are frozen; task IDs and repository/image mapping must be extracted into the formal execution manifest.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
+        "scorer": null,
+        "runtime_dependencies": ["Pinned task repositories and fresh-sandbox container images", "Agent scaffold, tool policy, budget, and isolated regrader"],
+        "blockers": ["Upstream does not declare a dataset-card license; complete license review before formal execution.", "Freeze task IDs, code repository revisions, fresh-sandbox image digests, agent scaffold, tool policy, budget, and regrader."]
+      },
+      "note": "The dataset snapshot is revision- and checksum-frozen; agent execution and fresh-sandbox regrading remain part of the pending measurement contract.",
+      "note_zh": "数据快照已按 revision 与校验和冻结；智能体执行与全新沙箱复判仍属于待冻结的测量合同。"
+    },
+    {
+      "id": "frontierscience",
+      "label": "FrontierScience",
+      "evaluation_class": "scientific-reasoning",
+      "primary_metric": "Track-specific accuracy or rubric score",
+      "primary_metric_zh": "分赛道准确率或量表评分",
+      "status": "contract-pending",
+      "source_url": "https://huggingface.co/datasets/openai/frontierscience",
+      "version_policy": "Freeze the dataset revision and report Olympiad and Research tracks separately with their pinned graders.",
+      "readiness": {
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          }
+        ],
+        "dataset_revision": "25ed67db7da8f4591484e764008ff585544f5a30",
+        "split": "olympiad/test and research/test",
+        "sample_count": 160,
+        "sample_count_scope": "Olympiad 100 and Research 60; the tracks remain separate in formal reporting.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
+        "scorer": null,
+        "runtime_dependencies": ["Track-specific answer extraction and pinned graders"],
+        "blockers": ["Freeze separate Olympiad and Research task manifests, scorers, and execution environment."]
+      },
+      "note": "The Apache-2.0 source snapshot is revision- and checksum-frozen; the two tracks use different answer and scoring contracts and must not be pooled silently.",
+      "note_zh": "Apache-2.0 源数据快照已按 revision 与校验和冻结；两个赛道的答案与评分合同不同，不得静默合并。"
+    },
+    {
+      "id": "terminal-bench-2.1",
+      "label": "Terminal-Bench 2.1",
+      "evaluation_class": "agentic-engineering",
+      "primary_metric": "Resolved task rate (pass@1)",
+      "primary_metric_zh": "任务解决率（pass@1）",
+      "status": "contract-pending",
+      "source_url": "https://www.tbench.ai/",
+      "version_policy": "Pin the 2.1 task release, Harbor environment, agent scaffold, tool policy, and budget.",
+      "readiness": {
+        "status": "asset-frozen",
+        "observed_materials": [
+          {
+            "path": "pujiang-five/MANIFEST.json",
+            "kind": "dataset-snapshot-manifest",
+            "sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b"
+          },
+          {
+            "path": "pujiang-five/SHA256SUMS",
+            "kind": "checksum-inventory",
+            "sha256": "c02431d400b89146fd1b65dec8d505c40a981066ff8d4615eebe12ba0fa7effc"
+          }
+        ],
+        "dataset_revision": "7131e4375048a0e408a8fb404b5f499d726b695b",
+        "split": "89 task definitions",
+        "sample_count": 89,
+        "sample_count_scope": "Task definitions and harness metadata are frozen; approximately 40 GB of runtime images were intentionally not pre-pulled.",
+        "manifest_path": "pujiang-five/MANIFEST.json",
+        "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
+        "scorer": null,
+        "runtime_dependencies": ["Pinned Harbor runtime image digests", "Agent scaffold, tool policy, budget, and task scorer"],
+        "blockers": ["Pull and freeze all required Harbor runtime image digests; the task snapshot alone is not executable.", "Freeze the agent scaffold, tool policy, budget, scorer, and task-level third-party rights review."]
+      },
+      "note": "The Apache-2.0 repository snapshot and 89 task definitions are revision- and checksum-frozen, but runtime images are not present. Task resolution is primary; token throughput is supporting telemetry only.",
+      "note_zh": "Apache-2.0 仓库快照与 89 个任务定义已按 revision 与校验和冻结，但运行镜像尚未落地。任务解决率是主指标，token 吞吐仅作为辅助遥测。"
+    }
+  ],
+  "supplementary_material": {
+    "default_tier": "supplementary",
+    "classification_rule": "all-other-registered-or-planned-datasets",
+    "rule": "Every registered or planned dataset outside the five primary datasets is supplementary material.",
+    "rule_zh": "除五个主评测集外，所有已注册或已规划的数据集均归入补充材料。",
+    "publication_rule": "Preserve measured evidence and configuration-specific scenarios; never turn a planning entry into an empty measured cell.",
+    "publication_rule_zh": "保留所有实测证据及其配置场景；不得把规划项转换成空白实测单元格。"
+  }
+}

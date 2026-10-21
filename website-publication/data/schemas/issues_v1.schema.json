@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.sage.org.ai/schemas/issues_v1.schema.json",
+  "title": "Issues Tracking Schema v1",
+  "description": "Schema for the manually-maintained benchmark issue tracking data",
+  "type": "object",
+  "required": [
+    "last_updated",
+    "source_repo",
+    "issues"
+  ],
+  "properties": {
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_repo": {
+      "type": "string"
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "localized": {
+      "type": "object",
+      "required": [
+        "en",
+        "zh"
+      ],
+      "properties": {
+        "en": {
+          "type": "string"
+        },
+        "zh": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "issue": {
+      "type": "object",
+      "required": [
+        "number",
+        "title",
+        "category",
+        "state",
+        "created_at",
+        "summary",
+        "status",
+        "acceptance_criteria",
+        "tags",
+        "links",
+        "pr"
+      ],
+      "properties": {
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "$ref": "#/$defs/localized"
+        },
+        "category": {
+          "type": "string"
+        },
+        "priority": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "state": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date"
+        },
+        "summary": {
+          "$ref": "#/$defs/localized"
+        },
+        "pr": {
+          "type": "object",
+          "required": [
+            "number",
+            "state",
+            "url"
+          ],
+          "properties": {
+            "number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "state": {
+              "type": "string"
+            },
+            "draft": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "head_branch": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "title": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "additionalProperties": true
+        },
+        "status": {
+          "type": "string"
+        },
+        "status_label": {
+          "$ref": "#/$defs/localized"
+        },
+        "progress_summary": {
+          "$ref": "#/$defs/localized"
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "met"
+            ],
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/localized"
+              },
+              "met": {
+                "type": "boolean"
+              },
+              "note": {
+                "$ref": "#/$defs/localized"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/localized"
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "href"
+            ],
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/localized"
+              },
+              "href": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

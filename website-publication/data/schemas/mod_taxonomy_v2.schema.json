@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.sage.org.ai/data/schemas/mod_taxonomy_v2.schema.json",
+  "title": "vLLM-HUST MOD taxonomy v2",
+  "type": "object",
+  "required": ["schema_version", "description_en", "description_zh", "components"],
+  "properties": {
+    "schema_version": {"const": "mod-taxonomy/v2"},
+    "description_en": {"type": "string", "minLength": 1},
+    "description_zh": {"type": "string", "minLength": 1},
+    "components": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/definitions/profile"}
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "profile": {
+      "type": "object",
+      "required": ["kind", "capability", "phases", "lifecycle", "evidence"],
+      "properties": {
+        "kind": {"enum": ["runtime_mod", "connector_mod", "tool_mod", "control_plane", "external_system", "retired"]},
+        "capability": {"enum": ["execution_optimization", "decoding", "scheduling_routing", "kv_management", "state_compression", "state_residency", "model_residency", "operators_attention", "parallel_communication", "prefill_optimization", "sampling", "request_recovery", "observability_evaluation", "model_preparation", "startup_deployment", "lifecycle_control", "policy_research"]},
+        "phases": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["offline_preparation", "service_startup", "request_admission", "prefill", "decode", "state_lifecycle", "service_lifecycle", "observability"]}
+        },
+        "lifecycle": {"enum": ["implemented", "implemented_restricted", "qualification_pending", "evidence_reconciliation", "pending", "research", "external", "retired"]},
+        "evidence": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9_]+$"}
+      },
+      "additionalProperties": false
+    }
+  }
+}
