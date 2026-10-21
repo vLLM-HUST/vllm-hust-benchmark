@@ -1,0 +1,639 @@
+{
+  "run_id": "swe-pro-v1-performance-window128-20261021-r2",
+  "window_seconds": 1200,
+  "clock": "per-arm earliest actual Agent arrival monotonic; each arm uses its own aligned origin",
+  "arms": {
+    "native": {
+      "origin_epoch": 1792544037.7390106,
+      "arrival_spread_seconds": 0.012848658952862024,
+      "reports": 128,
+      "measurement_validation": {
+        "query_return_ids_unique": true,
+        "saved_trajectory_normal_replies": 1521,
+        "all_query_return_events": 1521,
+        "response_count_matches_independent_trajectory_source": true,
+        "trajectory_completion_tokens": 87494,
+        "event_completion_tokens": 87494,
+        "completion_tokens_match_independent_trajectory_source": true,
+        "parent_batch_start_minus_first_arrival_seconds": 0.002276182174682617,
+        "parent_epoch_window_alignment": {
+          "60": {
+            "calls": 136,
+            "completion_tokens": 12926,
+            "same_calls_as_monotonic_origin": true
+          },
+          "300": {
+            "calls": 955,
+            "completion_tokens": 54916,
+            "same_calls_as_monotonic_origin": true
+          },
+          "600": {
+            "calls": 1205,
+            "completion_tokens": 66047,
+            "same_calls_as_monotonic_origin": true
+          },
+          "1200": {
+            "calls": 1521,
+            "completion_tokens": 87494,
+            "same_calls_as_monotonic_origin": true
+          }
+        }
+      },
+      "terminal_statuses": {
+        "RetryError": 128
+      },
+      "windows": {
+        "60": {
+          "scheduler_action_event_count_bounds": {},
+          "scheduler_action_timing_boundary": "raw proxy lines lack timestamps; 5-second log snapshots bound boundary events, not unique programs; extra observer started late in Native and before Controller",
+          "program_response_coverage": {
+            "programs_with_at_least_one_return": 118,
+            "programs_with_zero_returns": 10,
+            "minimum_returns": 0,
+            "median_returns": 1.0,
+            "maximum_returns": 2
+          },
+          "completed_query_returns": 136,
+          "missing_usage_returns": 0,
+          "returned_usage": {
+            "prompt_tokens": 316826,
+            "completion_tokens": 12926,
+            "total_tokens": 329752
+          },
+          "returned_completion_tokens_per_second": 215.43333333333334,
+          "query_exceptions": {},
+          "query_starts": 264,
+          "inflight_at_window_end": 128,
+          "tool_returns": 79,
+          "submitted_programs_in_window": 0,
+          "engine_observation_samples": 59,
+          "engine_counter_delta_in_sampled_interval": {
+            "vllm:generation_tokens_total": 16761.0,
+            "vllm:prompt_tokens_total": 644986.0,
+            "vllm:num_preemptions_total": 0.0,
+            "vllm:request_success_total": 138.0,
+            "vllm:prefix_cache_queries_total": 648031.0,
+            "vllm:prefix_cache_hits_total": 395264.0
+          },
+          "engine_sampled_interval_seconds": 59.796977282036096,
+          "engine_sampled_interval_from_window_start": [
+            0.08967380272224545,
+            59.88665108475834
+          ],
+          "kv_peak_fraction": 0.6844059405940595,
+          "peak_observed_program_states": {
+            "active": 128
+          },
+          "engine_generated_tokens_per_second_sampled": 280.298449216684
+        },
+        "300": {
+          "scheduler_action_event_count_bounds": {},
+          "scheduler_action_timing_boundary": "raw proxy lines lack timestamps; 5-second log snapshots bound boundary events, not unique programs; extra observer started late in Native and before Controller",
+          "program_response_coverage": {
+            "programs_with_at_least_one_return": 126,
+            "programs_with_zero_returns": 2,
+            "minimum_returns": 0,
+            "median_returns": 8.0,
+            "maximum_returns": 11
+          },
+          "completed_query_returns": 955,
+          "missing_usage_returns": 0,
+          "returned_usage": {
+            "prompt_tokens": 4657886,
+            "completion_tokens": 54916,
+            "total_tokens": 4712802
+          },
+          "returned_completion_tokens_per_second": 183.05333333333334,
+          "query_exceptions": {},
+          "query_starts": 1083,
+          "inflight_at_window_end": 128,
+          "tool_returns": 890,
+          "submitted_programs_in_window": 0,
+          "engine_observation_samples": 293,
+          "engine_counter_delta_in_sampled_interval": {
+            "vllm:generation_tokens_total": 56897.0,
+            "vllm:prompt_tokens_total": 5000403.0,
+            "vllm:num_preemptions_total": 0.0,
+            "vllm:request_success_total": 977.0,
+            "vllm:prefix_cache_queries_total": 5009314.0,
+            "vllm:prefix_cache_hits_total": 3338240.0
+          },
+          "engine_sampled_interval_seconds": 299.50207408191636,
+          "engine_sampled_interval_from_window_start": [
+            0.08967380272224545,
+            299.5917478846386
+          ],
+          "kv_peak_fraction": 0.6844059405940595,
+          "peak_observed_program_states": {
+            "active": 128
+          },
+          "engine_generated_tokens_per_second_sampled": 189.97197323060337
+        },
+        "600": {
+          "scheduler_action_event_count_bounds": {},
+          "scheduler_action_timing_boundary": "raw proxy lines lack timestamps; 5-second log snapshots bound boundary events, not unique programs; extra observer started late in Native and before Controller",
+          "program_response_coverage": {
+            "programs_with_at_least_one_return": 126,
+            "programs_with_zero_returns": 2,
+            "minimum_returns": 0,
+            "median_returns": 10.0,
+            "maximum_returns": 14
+          },
+          "completed_query_returns": 1205,
+          "missing_usage_returns": 0,
+          "returned_usage": {
+            "prompt_tokens": 7220919,
+            "completion_tokens": 66047,
+            "total_tokens": 7286966
+          },
+          "returned_completion_tokens_per_second": 110.07833333333333,
+          "query_exceptions": {},
+          "query_starts": 1333,
+          "inflight_at_window_end": 128,
+          "tool_returns": 1140,
+          "submitted_programs_in_window": 0,
+          "engine_observation_samples": 586,
+          "engine_counter_delta_in_sampled_interval": {
+            "vllm:generation_tokens_total": 68396.0,
+            "vllm:prompt_tokens_total": 7572984.0,
+            "vllm:num_preemptions_total": 0.0,
+            "vllm:request_success_total": 1230.0,
+            "vllm:prefix_cache_queries_total": 7595283.0,
+            "vllm:prefix_cache_hits_total": 4423680.0
+          },
+          "engine_sampled_interval_seconds": 599.7315859310329,
+          "engine_sampled_interval_from_window_start": [
+            0.08967380272224545,
+            599.8212597337551
+          ],
+          "kv_peak_fraction": 0.6844059405940595,
+          "peak_observed_program_states": {
+            "active": 128
+          },
+          "engine_generated_tokens_per_second_sampled": 114.04435184753686
+        },
+        "1200": {
+          "scheduler_action_event_count_bounds": {},
+          "scheduler_action_timing_boundary": "raw proxy lines lack timestamps; 5-second log snapshots bound boundary events, not unique programs; extra observer started late in Native and before Controller",
+          "program_response_coverage": {
+            "programs_with_at_least_one_return": 126,
+            "programs_with_zero_returns": 2,
+            "minimum_returns": 0,
+            "median_returns": 14.0,
+            "maximum_returns": 17
+          },
+          "completed_query_returns": 1521,
+          "missing_usage_returns": 0,
+          "returned_usage": {
+            "prompt_tokens": 11283144,
+            "completion_tokens": 87494,
+            "total_tokens": 11370638
+          },
+          "returned_completion_tokens_per_second": 72.91166666666666,
+          "query_exceptions": {},
+          "query_starts": 1649,
+          "inflight_at_window_end": 128,
+          "tool_returns": 1456,
+          "submitted_programs_in_window": 0,
+          "engine_observation_samples": 1172,
+          "engine_counter_delta_in_sampled_interval": {
+            "vllm:generation_tokens_total": 95321.0,
+            "vllm:prompt_tokens_total": 11709833.0,
+            "vllm:num_preemptions_total": 0.0,
+            "vllm:request_success_total": 1548.0,
+            "vllm:prefix_cache_queries_total": 11727361.0,
+            "vllm:prefix_cache_hits_total": 5705728.0
+          },
+          "engine_sampled_interval_seconds": 1199.6532922121696,
+          "engine_sampled_interval_from_window_start": [
+            0.08967380272224545,
+            1199.7429660148919
+          ],
+          "kv_peak_fraction": 0.6844059405940595,
+          "peak_observed_program_states": {
+            "active": 128
+          },
+          "engine_generated_tokens_per_second_sampled": 79.45712366964572
+        }
+      },
+      "engine_preemptions_whole_arm": 0.0,
+      "whole_arm_scheduler_events": {
+        "Marked": 0,
+        "Paused": 0,
+        "Resumed": 0
+      },
+      "terminal_wall_budget_witnesses": 128,
+      "runtime_identity_before_after": [
+        {
+          "rank": true,
+          "pid": true,
+          "worker_epoch": true,
+          "effective_engine": true,
+          "packages": true,
+          "loaded_sources": true
+        },
+        {
+          "rank": true,
+          "pid": true,
+          "worker_epoch": true,
+          "effective_engine": true,
+          "packages": true,
+          "loaded_sources": true
+        }
+      ]
+    },
+    "controller": {
+      "origin_epoch": 1792545331.6578453,
+      "arrival_spread_seconds": 0.008492894936352968,
+      "reports": 128,
+      "measurement_validation": {
+        "query_return_ids_unique": true,
+        "saved_trajectory_normal_replies": 1698,
+        "all_query_return_events": 1698,
+        "response_count_matches_independent_trajectory_source": true,
+        "trajectory_completion_tokens": 109101,
+        "event_completion_tokens": 109101,
+        "completion_tokens_match_independent_trajectory_source": true,
+        "parent_batch_start_minus_first_arrival_seconds": 0.001331329345703125,
+        "parent_epoch_window_alignment": {
+          "60": {
+            "calls": 189,
+            "completion_tokens": 15031,
+            "same_calls_as_monotonic_origin": true
+          },
+          "300": {
+            "calls": 893,
+            "completion_tokens": 49704,
+            "same_calls_as_monotonic_origin": true
+          },
+          "600": {
+            "calls": 1286,
+            "completion_tokens": 70923,
+            "same_calls_as_monotonic_origin": true
+          },
+          "1200": {
+            "calls": 1698,
+            "completion_tokens": 109101,
+            "same_calls_as_monotonic_origin": true
+          }
+        }
+      },
+      "terminal_statuses": {
+        "RetryError": 128
+      },
+      "windows": {
+        "60": {
+          "scheduler_action_event_count_bounds": {
+            "Marked": {
+              "minimum": 197,
+              "maximum": 197
+            },
+            "Paused": {
+              "minimum": 154,
+              "maximum": 160
+            },
+            "Resumed": {
+              "minimum": 144,
+              "maximum": 152
+            }
+          },
+          "scheduler_action_timing_boundary": "raw proxy lines lack timestamps; 5-second log snapshots bound boundary events, not unique programs; extra observer started late in Native and before Controller",
+          "program_response_coverage": {
+            "programs_with_at_least_one_return": 101,
+            "programs_with_zero_returns": 27,
+            "minimum_returns": 0,
+            "median_returns": 2.0,
+            "maximum_returns": 3
+          },
+          "completed_query_returns": 189,
+          "missing_usage_returns": 0,
+          "returned_usage": {
+            "prompt_tokens": 459552,
+            "completion_tokens": 15031,
+            "total_tokens": 474583
+          },
+          "returned_completion_tokens_per_second": 250.51666666666668,
+          "query_exceptions": {},
+          "query_starts": 317,
+          "inflight_at_window_end": 128,
+          "tool_returns": 137,
+          "submitted_programs_in_window": 0,
+          "engine_observation_samples": 59,
+          "engine_counter_delta_in_sampled_interval": {
+            "vllm:generation_tokens_total": 16979.0,
+            "vllm:prompt_tokens_total": 712508.0,
+            "vllm:num_preemptions_total": 0.0,
+            "vllm:request_success_total": 192.0,
+            "vllm:prefix_cache_queries_total": 719454.0,
+            "vllm:prefix_cache_hits_total": 440320.0
+          },
+          "engine_sampled_interval_seconds": 59.806390669662505,
+          "engine_sampled_interval_from_window_start": [
+            0.16496187122538686,
+            59.97135254088789
+          ],
+          "kv_peak_fraction": 0.5445544554455446,
+          "peak_observed_program_states": {
+            "active": 101,
+            "paused": 128
+          },
+          "engine_generated_tokens_per_second_sampled": 283.8994262968087
+        },
+        "300": {
+          "scheduler_action_event_count_bounds": {
+            "Marked": {
+              "minimum": 661,
+              "maximum": 661
+            },
+            "Paused": {
+              "minimum": 598,
+              "maximum": 604
+            },
+            "Resumed": {
+              "minimum": 566,
+              "maximum": 570
+            }
+          },
+          "scheduler_action_timing_boundary": "raw proxy lines lack timestamps; 5-second log snapshots bound boundary events, not unique programs; extra observer started late in Native and before Controller",
+          "program_response_coverage": {
+            "programs_with_at_least_one_return": 105,
+            "programs_with_zero_returns": 23,
+            "minimum_returns": 0,
+            "median_returns": 8.5,
+            "maximum_returns": 13
+          },
+          "completed_query_returns": 893,
+          "missing_usage_returns": 0,
+          "returned_usage": {
+            "prompt_tokens": 4769419,
+            "completion_tokens": 49704,
+            "total_tokens": 4819123
+          },
+          "returned_completion_tokens_per_second": 165.68,
+          "query_exceptions": {},
+          "query_starts": 1021,
+          "inflight_at_window_end": 128,
+          "tool_returns": 841,
+          "submitted_programs_in_window": 0,
+          "engine_observation_samples": 292,
+          "engine_counter_delta_in_sampled_interval": {
+            "vllm:generation_tokens_total": 52336.0,
+            "vllm:prompt_tokens_total": 5116003.0,
+            "vllm:num_preemptions_total": 0.0,
+            "vllm:request_success_total": 912.0,
+            "vllm:prefix_cache_queries_total": 5141802.0,
+            "vllm:prefix_cache_hits_total": 3493888.0
+          },
+          "engine_sampled_interval_seconds": 299.06633786670864,
+          "engine_sampled_interval_from_window_start": [
+            0.16496187122538686,
+            299.231299737934
+          ],
+          "kv_peak_fraction": 0.5631188118811881,
+          "peak_observed_program_states": {
+            "active": 101,
+            "paused": 128
+          },
+          "engine_generated_tokens_per_second_sampled": 174.99796323893102
+        },
+        "600": {
+          "scheduler_action_event_count_bounds": {
+            "Marked": {
+              "minimum": 878,
+              "maximum": 878
+            },
+            "Paused": {
+              "minimum": 874,
+              "maximum": 874
+            },
+            "Resumed": {
+              "minimum": 837,
+              "maximum": 838
+            }
+          },
+          "scheduler_action_timing_boundary": "raw proxy lines lack timestamps; 5-second log snapshots bound boundary events, not unique programs; extra observer started late in Native and before Controller",
+          "program_response_coverage": {
+            "programs_with_at_least_one_return": 118,
+            "programs_with_zero_returns": 10,
+            "minimum_returns": 0,
+            "median_returns": 12.0,
+            "maximum_returns": 21
+          },
+          "completed_query_returns": 1286,
+          "missing_usage_returns": 0,
+          "returned_usage": {
+            "prompt_tokens": 8995327,
+            "completion_tokens": 70923,
+            "total_tokens": 9066250
+          },
+          "returned_completion_tokens_per_second": 118.205,
+          "query_exceptions": {},
+          "query_starts": 1414,
+          "inflight_at_window_end": 128,
+          "tool_returns": 1230,
+          "submitted_programs_in_window": 0,
+          "engine_observation_samples": 584,
+          "engine_counter_delta_in_sampled_interval": {
+            "vllm:generation_tokens_total": 78261.0,
+            "vllm:prompt_tokens_total": 9413719.0,
+            "vllm:num_preemptions_total": 0.0,
+            "vllm:request_success_total": 1309.0,
+            "vllm:prefix_cache_queries_total": 9434039.0,
+            "vllm:prefix_cache_hits_total": 6219776.0
+          },
+          "engine_sampled_interval_seconds": 599.1197469625622,
+          "engine_sampled_interval_from_window_start": [
+            0.16496187122538686,
+            599.2847088337876
+          ],
+          "kv_peak_fraction": 0.6138613861386139,
+          "peak_observed_program_states": {
+            "active": 101,
+            "paused": 128
+          },
+          "engine_generated_tokens_per_second_sampled": 130.62664082893326
+        },
+        "1200": {
+          "scheduler_action_event_count_bounds": {
+            "Marked": {
+              "minimum": 1105,
+              "maximum": 1105
+            },
+            "Paused": {
+              "minimum": 1086,
+              "maximum": 1087
+            },
+            "Resumed": {
+              "minimum": 1045,
+              "maximum": 1046
+            }
+          },
+          "scheduler_action_timing_boundary": "raw proxy lines lack timestamps; 5-second log snapshots bound boundary events, not unique programs; extra observer started late in Native and before Controller",
+          "program_response_coverage": {
+            "programs_with_at_least_one_return": 126,
+            "programs_with_zero_returns": 2,
+            "minimum_returns": 0,
+            "median_returns": 14.0,
+            "maximum_returns": 26
+          },
+          "completed_query_returns": 1698,
+          "missing_usage_returns": 0,
+          "returned_usage": {
+            "prompt_tokens": 13816140,
+            "completion_tokens": 109101,
+            "total_tokens": 13925241
+          },
+          "returned_completion_tokens_per_second": 90.9175,
+          "query_exceptions": {},
+          "query_starts": 1826,
+          "inflight_at_window_end": 128,
+          "tool_returns": 1641,
+          "submitted_programs_in_window": 0,
+          "engine_observation_samples": 1168,
+          "engine_counter_delta_in_sampled_interval": {
+            "vllm:generation_tokens_total": 125712.0,
+            "vllm:prompt_tokens_total": 14424405.0,
+            "vllm:num_preemptions_total": 0.0,
+            "vllm:request_success_total": 1726.0,
+            "vllm:prefix_cache_queries_total": 14441399.0,
+            "vllm:prefix_cache_hits_total": 8372224.0
+          },
+          "engine_sampled_interval_seconds": 1198.9223158606328,
+          "engine_sampled_interval_from_window_start": [
+            0.16496187122538686,
+            1199.0872777318582
+          ],
+          "kv_peak_fraction": 0.6274752475247525,
+          "peak_observed_program_states": {
+            "active": 101,
+            "paused": 128
+          },
+          "engine_generated_tokens_per_second_sampled": 104.8541663933906
+        }
+      },
+      "engine_preemptions_whole_arm": 0.0,
+      "whole_arm_scheduler_events": {
+        "Marked": 1105,
+        "Paused": 1087,
+        "Resumed": 1046
+      },
+      "terminal_wall_budget_witnesses": 128,
+      "runtime_identity_before_after": [
+        {
+          "rank": true,
+          "pid": true,
+          "worker_epoch": true,
+          "effective_engine": true,
+          "packages": true,
+          "loaded_sources": true
+        },
+        {
+          "rank": true,
+          "pid": true,
+          "worker_epoch": true,
+          "effective_engine": true,
+          "packages": true,
+          "loaded_sources": true
+        }
+      ]
+    }
+  },
+  "quality_is_gate": false,
+  "whole_batch_speedup_claim": false,
+  "single_pair_only": true,
+  "observed_ratios": {
+    "60": {
+      "returned_calls_controller_over_native": 1.3897058823529411,
+      "returned_completion_tokens_controller_over_native": 1.1628500696271082,
+      "scope": "same-window observed work only; generated trajectories may differ; not per-token latency or whole-batch speedup"
+    },
+    "300": {
+      "returned_calls_controller_over_native": 0.9350785340314136,
+      "returned_completion_tokens_controller_over_native": 0.9050914123388448,
+      "scope": "same-window observed work only; generated trajectories may differ; not per-token latency or whole-batch speedup"
+    },
+    "600": {
+      "returned_calls_controller_over_native": 1.0672199170124481,
+      "returned_completion_tokens_controller_over_native": 1.0738262146653141,
+      "scope": "same-window observed work only; generated trajectories may differ; not per-token latency or whole-batch speedup"
+    },
+    "1200": {
+      "returned_calls_controller_over_native": 1.116370808678501,
+      "returned_completion_tokens_controller_over_native": 1.2469540768509841,
+      "scope": "same-window observed work only; generated trajectories may differ; not per-token latency or whole-batch speedup"
+    }
+  },
+  "jsonl_parse_error_lines": {},
+  "protocol": {
+    "batch_tasks": 8,
+    "independent_agents_per_task": 16,
+    "program_instances_per_arm": 128,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "order": [
+      "native",
+      "controller"
+    ],
+    "step_limit": 200,
+    "wall_budget_seconds": 1200,
+    "max_model_len": 262144,
+    "max_output_tokens": 4096,
+    "tool_timeout_seconds": 60,
+    "http_timeouts": {
+      "connect": 180,
+      "read": null,
+      "write": 180,
+      "pool": 180
+    },
+    "downstream_timeout_seconds": 900,
+    "automatic_retries": 0,
+    "temperature": 0,
+    "seed": 0,
+    "thinking": false,
+    "model": "Qwen3.5-35B-A3B",
+    "dtype": "bfloat16",
+    "tensor_parallel_size": 2,
+    "npu_count": 2,
+    "npu_type": "Ascend 910B2",
+    "kv_memory_gib_per_rank": 16,
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 4095,
+    "graph_capture_max": 256,
+    "prefix_cache_reset_before_each_arm": true,
+    "controller_capacity": 1654784,
+    "buffer_per_program": 14335,
+    "scheduler_interval_seconds": 5,
+    "metrics_interval_seconds": 5,
+    "acting_token_weight": 1,
+    "acting_token_decay": false
+  },
+  "source": {
+    "runner_commit": "0dde2de4915416b26793f4343f6ea46b25f3e8f1",
+    "runner_sha256": "846569e3fdad62e6c2451ca2b7858da8000f6e0a6be43c70202bd499a6f9b63a",
+    "official_controller_commit": "7ddc8610270e56d3b109eed8796b3a4360fc67c9",
+    "input_cases_sha256": "eea0db5a48938350d593aa8029bdad3c605705ba82d46bd41887dc0f05cd79c8",
+    "staged_files_verified": 55
+  },
+  "archive": {
+    "bytes": 35516733,
+    "files": 4235,
+    "sha256": "ae085b8ac610c6e82902c6952dc651ba541ef134e2f88727873d74a17fccebf1",
+    "whole_archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "preparation_failure_archive": {
+    "bytes": 1588056,
+    "files": 579,
+    "sha256": "886481adaa48151411a98a5686f2798e36deb00d70accb0807ffddeca4ddbfd3",
+    "model_queries": 0
+  },
+  "grade": "DEFERRED",
+  "limitations": [
+    "One NC pair; no repeated or reversed order estimate.",
+    "Same initial tasks/configuration does not mean identical generated trajectories or request lengths.",
+    "Auxiliary log observer failed, then repaired late in Native and before Controller; its asymmetric overhead was not independently calibrated. Main per-second observations and query events ran in both arms.",
+    "Proxy action log lines have no timestamps; snapshot-bounded counts are event counts, not distinct programs.",
+    "Completed-return output excludes inflight/aborted generated tokens; engine generation counters are reported separately.",
+    "No task correctness gate and no whole-batch makespan speedup claim."
+  ]
+}

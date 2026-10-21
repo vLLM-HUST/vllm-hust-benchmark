@@ -83,6 +83,11 @@ cp docs/examples/swe-bench-pro/single-agent.json "$WORK/settings-private.json"
 `size=1`、`program_instances=1`、`independent_agents_per_task=1`，不自动扩大批次。 当前锁定清单覆盖 8 道 NodeBB V1
 任务；扩展其他任务需要补齐对应官方文件哈希与 ARM 镜像验收。 可以用 `batch.instance_ids` 显式指定一道任务，必须同时匹配 repository 与 size。
 
+运行器默认要求任务容器位于官方 base commit，且工作树为空。部分不可变镜像自带 Redis 运行数据；只有核对镜像原件后，才可用
+`container.allowed_initial_untracked` 显式列出精确相对路径， 例如
+`["appendonlydir/", "appendonly.aof"]`。该配置只允许这些未跟踪路径，不允许通配符、源码改动、 错误的 base commit 或其他未跟踪文件；原始
+`git status` 始终保留在 `code-before.json` 中。
+
 ## 3. 检查、准备与运行
 
 安装后命令 `swe-bench-pro`、`python -m vllm_hust_benchmark.swe_bench_pro` 和
