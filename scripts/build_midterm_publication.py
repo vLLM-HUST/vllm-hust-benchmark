@@ -8,14 +8,15 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "7154c84cdb399086d51f9c032f8abd282bdfbe88"  # pragma: allowlist secret
+REVISION = "a103e05749e0d0f7760689f495902ef96e942d8a"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v059.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v060.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "long-context-parser": ["m05-parser-confirmation-20261021"],
     "paired-lifecycle": ["m06-paired-20261021"],
     "candidates": [
         "aligned-mmlu-b0.tar.gz",
@@ -173,9 +174,15 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.59" in text
+    assert "报告版本：V0.60" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "long-context-parser",
+            "长输入接口修复确认 / Long-input API repair confirmation",
+            "### 7.3 思考字段分离后的独立确认",
+            "同一恢复运行栈及原六题，启用原生qwen3思考解析器，正文严格匹配6/6、零失败；独立思考字段另存。固定资格请求不计入六题，输出token包含思考生成。新服务、空编译缓存和独立请求盐，OS文件页缓存未全局清空。原0/6记录保留，不代表主数据集质量或性能增益。",
+        ),
         (
             "paired-lifecycle",
             "恢复环境配对性能与成本 / Recovered paired performance and lifecycle cost",
@@ -303,7 +310,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.59",
+        "version": "V0.60",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
