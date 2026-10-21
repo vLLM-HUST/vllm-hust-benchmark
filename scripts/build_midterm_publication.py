@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "f5f39e035582e26dee5f46cbbc055519ad66194f"  # pragma: allowlist secret
+REVISION = "10eb638dac232ef2c4d579d64419cf0069124b4e"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v050.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v052.json"
 
 
 def pinned(path):
@@ -113,7 +113,7 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.50" in text
+    assert "报告版本：V0.52" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
@@ -150,7 +150,19 @@ def build():
             "m01",
             "M01 有效算力进展 / Effective compute progress",
             "#### r21 设备映射与同轮计量",
-            "V0.50：r21设备映射与同轮计量已完成；完整跨流依赖、算术覆盖和匹配参考容量尚未闭合。完整有效F和M01≥50%达成率未判定，中期整体验收待定。诊断计量不替换正式B0/B1性能结果。",
+            "V0.52：保留r21设备映射与同轮计量；新增运行时恢复和状态提交隔离验证（见下）。r23原始请求、设备事件、退出回执及profiler数据库不可用，不采纳其吞吐或M01计量。完整跨流依赖、算术覆盖和匹配参考容量尚未闭合；完整有效F和M01≥50%达成率未判定，中期整体验收待定。正式B0/B1性能结果不变。",
+        ),
+        (
+            "runtime-recovery",
+            "运行时恢复与FIA验证 / Runtime recovery and FIA validation",
+            "#### 运行时恢复与 FIA 数值资格验证",
+            "33项锁定源码哈希一致；按CANN 9.1.0重建产物不同于原准入产物，未放宽原哈希准入规则。每轮新进程、新输出、独立可写缓存，不导入上一轮推理状态。双卡各18个用例；固定元数据图重放采用query倍率1、-1、2，每次输出填NaN并重算CPU参考，每卡36项变输入检查通过，保存数组独立复算。仅覆盖采样输出和固定元数据图重放，不覆盖动态长度、块表更新、双缓冲生命周期或完整模型运行时；运行时恢复未完成，不能据此排除完整模型跨轮状态污染。",
+        ),
+        (
+            "state-commit",
+            "状态提交隔离验证 / Isolated state-commit validation",
+            "#### 状态提交内核恢复验证",
+            "锁定state_commit.publish源码；r1/r2导入失败原样保留。r3使用独立虚拟环境、禁用系统site-packages，两卡各24个用例（6空、18非空）及同卡跨流事件检查通过；保存数组独立CPU重算完全相等，变输入产生不同accepted输出。三次尝试均新进程、新输出目录、全新编译缓存，不导入前次缓存或推理状态，四卡释放。恢复候选未证明等同原运行时；仅证明合成用例下eager状态提交和同卡跨流行为，不证明完整模型质量、图执行、跨卡时钟对齐或全模型执行流闭合，不能排除完整模型跨轮状态污染。M01仍未判定，B0/B1数值不变。",
         ),
     ]
     sections = []
@@ -168,7 +180,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.50",
+        "version": "V0.52",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
