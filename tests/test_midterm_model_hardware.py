@@ -2,6 +2,7 @@ import importlib.util
 import hashlib
 import json
 import io
+import math
 from pathlib import Path
 import sqlite3
 import tarfile
@@ -109,9 +110,14 @@ def test_complete_capture_recomputes_from_archived_databases(module, tmp_path):
                 samples, phase["start_wall"] * 1e9, phase["end_wall"] * 1e9
             )
             assert module.has_complete_hbm_coverage(measured)
-            assert measured["prorated_bytes"] == d["prorated_bytes"]
-    assert summary["total_prorated_bytes"] == sum(
-        d["prorated_bytes"] for d in summary["devices"]
+            # Python 3.12 uses compensated float summation; retain a two-ULP bound.
+            assert measured["prorated_bytes"] == pytest.approx(
+                d["prorated_bytes"], rel=0, abs=2 * math.ulp(d["prorated_bytes"])
+            )
+    assert sum(d["prorated_bytes"] for d in summary["devices"]) == pytest.approx(
+        summary["total_prorated_bytes"],
+        rel=0,
+        abs=2 * math.ulp(summary["total_prorated_bytes"]),
     )
     assert summary["model_effective_flops"] is None
     assert summary["attainment_percent"] is None
