@@ -17,7 +17,7 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.55"
+    assert actual["version"] == "V0.56"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
     historical = json.loads(
@@ -41,7 +41,8 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert "导入失败" in state["tables"][0]["rows"][0][2]
     assert "通过" in state["tables"][0]["rows"][2][2]
     assert "不能排除完整模型跨轮状态污染" in state["scope"]
-    assert "不采纳其吞吐或M01计量" in sections["m01"]["scope"]
+    assert "不采纳原始证据不可用的r23结果" in sections["m01"]["scope"]
+    assert "未通过验收" in sections["m01"]["scope"]
     recovered = sections["model-runtime"]
     assert [row[0] for row in recovered["tables"][0]["rows"]] == ["240", "360"]
     assert all(row[1] == "200 / 0" for row in recovered["tables"][0]["rows"])
@@ -53,6 +54,12 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     projections = sections["projection-references"]
     assert len(projections["tables"][0]["rows"]) == 10
     assert "图填充运算不冒充有效F" in projections["scope"]
+    communication = sections["logits-collective-reference"]
+    assert [row[1] for row in communication["tables"][0]["rows"]] == ["55", "21"]
+    assert "不是整模型HCCL覆盖" in communication["scope"]
+    verdict = sections["m01-verdict"]
+    assert len(verdict["tables"][0]["rows"]) == 3
+    assert "不是实测有效算力低于50%" in verdict["scope"]
     assert actual["kv_audit"]["runs"] == module.kv_audit()
     assert module.tables("| A | B |\n| --- | ---: |\n| 1 | 2 |\n") == [
         {"headers": ["A", "B"], "rows": [["1", "2"]]}
@@ -63,6 +70,19 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
         "149/200",
         "152/200",
     ]
+    recovered_quality = sections["recovered-quality"]
+    quality_index = json.loads(
+        (
+            ROOT
+            / "reports/vllm-hust-midterm-20261019/quality-regression/recovered-20261021/archive.json"
+        ).read_text()
+    )
+    result = quality_index["result"]
+    assert (
+        recovered_quality["tables"][0]["rows"][2][2]
+        == f"{result['correct']}/{result['total']}"
+    )
+    assert "不冒充同环境新增性能配对" in recovered_quality["scope"]
     assert len(actual["kv_audit"]["runs"]) == 2
     adjacent = (
         "| A | B |\n| --- | ---: |\n| 1 | 2 |\n\n| C | D |\n| --- | --- |\n| 3 | 4 |\n"
