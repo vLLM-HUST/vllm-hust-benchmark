@@ -1,0 +1,67 @@
+{
+  "run_id": "swe-pro-v1-wait-aging-20261021-r2",
+  "runtime_controller_commit": "a4ac84faaa8512840efd68278820f4a5549d2c80",
+  "runtime_benchmark_commit": "45c4873d05d269f610c4e8935461e1ff4304768c",
+  "report_generator_commit": "d082c98",
+  "configuration": {
+    "programs_per_group": 128,
+    "unique_tasks": 8,
+    "replicas_per_task": 16,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "window_seconds": 300,
+    "step_limit": 200,
+    "context_tokens": 262144,
+    "output_limit": 4096,
+    "tool_timeout_seconds": 60,
+    "max_num_batched_tokens": 8192,
+    "max_num_seqs": 256,
+    "kv_bytes_per_rank": 17179869184,
+    "tensor_parallel_size": 2,
+    "async_scheduling": true,
+    "priority_wait_seconds": 30,
+    "admission_wait_seconds": 180
+  },
+  "normally_returned_calls": {
+    "native": {
+      "returns": 1216,
+      "output_tokens": 66472,
+      "mean_latency_s": 28.57802858324124,
+      "p50_latency_s": 25.71999130747281,
+      "p95_latency_s": 48.30871866783127,
+      "mean_input_tokens": 5885.1233552631575
+    },
+    "controller": {
+      "returns": 1147,
+      "output_tokens": 60128,
+      "mean_latency_s": 20.61632485192516,
+      "p50_latency_s": 17.116009200923145,
+      "p95_latency_s": 40.902756176097334,
+      "mean_input_tokens": 8539.992153443767
+    }
+  },
+  "validation_findings": {
+    "status": "未通过：仅作诊断，不作正式性能结论",
+    "findings": [
+      "Native组1个Agent将300秒总预算异常当作工具错误处理，随后仍发起89次模型请求；外层排空截止终止它，只有127份正常终态记录，缺失项没有补造。",
+      "Controller组128个Agent都有正常回复，等待优先级分支实际恢复32次；但还出现45次准入等待超时，不能宣称多轮等待问题已修复。",
+      "两组各128个Agent整批同时到达，无客户端并发限制；图中只统计前300秒，窗口外执行完整保留在原件。",
+      "总预算修复的28项相关回归通过；benchmark全仓在相同macOS环境下，修改前后均有69项失败，未把基线失败当作通过。正式长窗口继续受验收检查约束。"
+    ]
+  },
+  "archive": {
+    "bytes": 19302794,
+    "files": 4231,
+    "sha256": "9962891c1a10adab6632f72afdfc86f6605d4c14a545d3b9e152592b266a2b27",
+    "whole_archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "raw_problem_answers_patches_published": false,
+  "ci": "NOT_CHECKED; earlier source Actions blocked before steps by account billing/spending limits",
+  "local_software_checks": {
+    "controller": "Python3.11/3.12 each206passed5skipped plus CLI/build PASS for v2; earlier r2 used a4",
+    "benchmark_relevant": "28passed for wall-budget repair",
+    "benchmark_full_macos": "69 failures on both frozen baseline and changed tree; no introduced failures, not a full-suite PASS"
+  },
+  "validity": "One300s NC diagnostic; generated work differs; no causal speedup or completed-batch makespan claim"
+}
