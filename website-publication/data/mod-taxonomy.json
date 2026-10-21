@@ -1,0 +1,60 @@
+{
+  "schema_version": "mod-taxonomy/v2",
+  "description_en": "Canonical identity, capability, execution-phase, lifecycle, and evidence classification for every public MOD and adjacent catalog component.",
+  "description_zh": "全部公开 MOD 及相邻目录组件的规范分类：身份、能力域、作用阶段、生命周期与证据相互独立。",
+  "components": {
+    "state-scheduler": {"kind":"tool_mod","capability":"observability_evaluation","phases":["offline_preparation","observability"],"lifecycle":"retired","evidence":"no_performance_claim"},
+    "betterscale": {"kind":"runtime_mod","capability":"execution_optimization","phases":["prefill","decode"],"lifecycle":"implemented","evidence":"measured_beneficial"},
+    "pipeline-microbatch-migration": {"kind":"runtime_mod","capability":"execution_optimization","phases":["prefill","decode"],"lifecycle":"implemented","evidence":"measured_inconclusive"},
+    "split-batch-full-graph-migration": {"kind":"runtime_mod","capability":"execution_optimization","phases":["prefill","decode"],"lifecycle":"pending","evidence":"activation_pending"},
+    "diffspec": {"kind":"runtime_mod","capability":"decoding","phases":["decode"],"lifecycle":"implemented_restricted","evidence":"qualified_restricted"},
+    "vspec": {"kind":"runtime_mod","capability":"decoding","phases":["decode"],"lifecycle":"qualification_pending","evidence":"hardware_validation_pending"},
+    "bidkv": {"kind":"runtime_mod","capability":"scheduling_routing","phases":["request_admission","state_lifecycle"],"lifecycle":"implemented","evidence":"measured_inconclusive"},
+    "dla": {"kind":"runtime_mod","capability":"scheduling_routing","phases":["request_admission"],"lifecycle":"implemented","evidence":"measured_inconclusive"},
+    "prefix-router-migration": {"kind":"runtime_mod","capability":"scheduling_routing","phases":["request_admission","state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"measured_beneficial"},
+    "kv-materialization-arrival-control": {"kind":"runtime_mod","capability":"scheduling_routing","phases":["request_admission","state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"specialized_workload"},
+    "kvcompress-ascend": {"kind":"runtime_mod","capability":"kv_management","phases":["prefill","decode","state_lifecycle"],"lifecycle":"implemented","evidence":"measured_not_beneficial"},
+    "ascend-adaptive-quantized-kv": {"kind":"runtime_mod","capability":"kv_management","phases":["prefill","decode","state_lifecycle"],"lifecycle":"pending","evidence":"activation_pending"},
+    "quantized-kv-cache-migration": {"kind":"runtime_mod","capability":"kv_management","phases":["prefill","decode","state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"functionally_validated"},
+    "kv-tiering-migration": {"kind":"runtime_mod","capability":"kv_management","phases":["state_lifecycle"],"lifecycle":"qualification_pending","evidence":"runtime_effective_pending"},
+    "knorm-migration": {"kind":"runtime_mod","capability":"kv_management","phases":["prefill","decode","state_lifecycle"],"lifecycle":"qualification_pending","evidence":"hardware_validation_pending"},
+    "pyramidkv-ascend-migration": {"kind":"runtime_mod","capability":"kv_management","phases":["prefill","decode","state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"functionally_validated"},
+    "latchmoe": {"kind":"runtime_mod","capability":"operators_attention","phases":["prefill","decode"],"lifecycle":"implemented_restricted","evidence":"qualified_restricted"},
+    "vllm-hust-opset": {"kind":"runtime_mod","capability":"operators_attention","phases":["prefill","decode"],"lifecycle":"implemented_restricted","evidence":"measured_beneficial"},
+    "core-attention-boundary": {"kind":"runtime_mod","capability":"operators_attention","phases":["prefill","decode"],"lifecycle":"implemented_restricted","evidence":"runtime_effective_no_causal_attribution"},
+    "adm": {"kind":"runtime_mod","capability":"parallel_communication","phases":["prefill","decode"],"lifecycle":"implemented_restricted","evidence":"topology_limited"},
+    "opfuse": {"kind":"runtime_mod","capability":"execution_optimization","phases":["prefill","decode"],"lifecycle":"research","evidence":"host_integration_pending"},
+    "stateaxis-automatic-prefix-cache": {"kind":"runtime_mod","capability":"kv_management","phases":["prefill","state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"runtime_effective_no_benefit_demonstrated"},
+    "stateaxis-async-kv-transfer": {"kind":"runtime_mod","capability":"kv_management","phases":["state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"historical_scoped_positive_current_unqualified"},
+    "stateaxis-pipelined-weight-loading": {"kind":"runtime_mod","capability":"startup_deployment","phases":["service_startup"],"lifecycle":"implemented_restricted","evidence":"startup_diagnostic_formal_ecpa_pending"},
+    "gdn-state-codec": {"kind":"runtime_mod","capability":"state_compression","phases":["decode","state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"measured_inconclusive"},
+
+
+    "mooncake-vllm-connectors": {"kind":"connector_mod","capability":"kv_management","phases":["state_lifecycle"],"lifecycle":"implemented","evidence":"functionally_validated"},
+    "pegaflow-vllm-connectors": {"kind":"connector_mod","capability":"kv_management","phases":["state_lifecycle"],"lifecycle":"implemented","evidence":"measured_beneficial"},
+
+    "traceloom": {"kind":"tool_mod","capability":"observability_evaluation","phases":["observability"],"lifecycle":"implemented","evidence":"no_performance_claim"},
+    "request-lifecycle-profiler": {"kind":"tool_mod","capability":"observability_evaluation","phases":["observability"],"lifecycle":"implemented","evidence":"runtime_effective_functional"},
+    "kv-transfer-observability-migration": {"kind":"tool_mod","capability":"observability_evaluation","phases":["observability","state_lifecycle"],"lifecycle":"implemented","evidence":"runtime_effective_functional"},
+    "ascend-quant-toolkit": {"kind":"tool_mod","capability":"model_preparation","phases":["offline_preparation"],"lifecycle":"implemented","evidence":"offline_tool"},
+    "slicegpt-migration": {"kind":"tool_mod","capability":"model_preparation","phases":["offline_preparation","service_startup"],"lifecycle":"implemented_restricted","evidence":"hardware_validation_pending"},
+    "llm-serving-cost-pricing-model": {"kind":"tool_mod","capability":"observability_evaluation","phases":["offline_preparation","observability"],"lifecycle":"implemented","evidence":"offline_tool"},
+
+    "clm-lifecycle": {"kind":"control_plane","capability":"lifecycle_control","phases":["service_lifecycle","observability"],"lifecycle":"implemented","evidence":"functional_only"},
+    "request-throttling-controller": {"kind":"control_plane","capability":"scheduling_routing","phases":["request_admission"],"lifecycle":"implemented_restricted","evidence":"measured_beneficial"},
+    "tricard-clm-lifecycle": {"kind":"control_plane","capability":"lifecycle_control","phases":["service_lifecycle","observability"],"lifecycle":"implemented_restricted","evidence":"bridge_component"},
+    "quality-bounded-inference": {"kind":"control_plane","capability":"policy_research","phases":["request_admission"],"lifecycle":"research","evidence":"functional_only"},
+    "ride-control-plane": {"kind":"control_plane","capability":"lifecycle_control","phases":["service_lifecycle"],"lifecycle":"external","evidence":"external_lifecycle"},
+    "vllm-local-control-host": {"kind":"control_plane","capability":"lifecycle_control","phases":["service_lifecycle"],"lifecycle":"implemented","evidence":"bridge_component"},
+    "ride-runtime-bridge": {"kind":"control_plane","capability":"lifecycle_control","phases":["service_lifecycle"],"lifecycle":"implemented","evidence":"bridge_component"},
+
+    "mooncake": {"kind":"external_system","capability":"kv_management","phases":["state_lifecycle"],"lifecycle":"external","evidence":"integration_tested"},
+    "pegaflow": {"kind":"external_system","capability":"kv_management","phases":["state_lifecycle"],"lifecycle":"external","evidence":"integration_tested"},
+
+    "simllm-migration": {"kind":"runtime_mod","capability":"kv_management","phases":["prefill","state_lifecycle"],"lifecycle":"implemented_restricted","evidence":"measured_beneficial"},
+    "unified-communication-migration": {"kind":"retired","capability":"parallel_communication","phases":["prefill","decode"],"lifecycle":"retired","evidence":"host_integration_missing"},
+    "layered-prefill-migration": {"kind":"retired","capability":"prefill_optimization","phases":["prefill"],"lifecycle":"retired","evidence":"no_activation_entry"},
+    "activation-sparsity-migration": {"kind":"retired","capability":"operators_attention","phases":["prefill","decode"],"lifecycle":"retired","evidence":"operator_integration_missing"},
+    "qos-scheduler-migration": {"kind":"retired","capability":"scheduling_routing","phases":["request_admission"],"lifecycle":"retired","evidence":"host_integration_missing"}
+  }
+}

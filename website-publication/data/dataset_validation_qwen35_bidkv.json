@@ -1,0 +1,121 @@
+{
+  "contract_version": "dataset-validation-v1",
+  "generated_at": "2026-10-03T00:00:00Z",
+  "status": "partial_comparison",
+  "source": {
+    "service": "BidKV published paired measurement",
+    "run_id": "qwen35-evoscientist-first12-c12-512m-20260929",
+    "repository": "vLLM-HUST/vllm-hust-bidkv",
+    "commit": "edb7f090a9fe3698f68d755c36f793d71f9a460d",
+    "artifact_url": "https://github.com/vLLM-HUST/vllm-hust-bidkv/tree/edb7f090a9fe3698f68d755c36f793d71f9a460d/results/qwen35-evoscientist-20260929"
+  },
+  "baseline": {
+    "id": "native-qwen35-tp4-c12-512m",
+    "label": "Native paired arms",
+    "commit": "f18cf803c5f63625e2c71253ddaf8b0bad0bad1a",
+    "generated_at": "2026-09-29"
+  },
+  "candidate_policy": {
+    "id": "best-per-cell",
+    "label": "Best compliant measured result per cell",
+    "single_version_required": false,
+    "rule": "Each B1 cell may select a different engine version; provenance is mandatory and comparison settings must match B0."
+  },
+  "scenario": {
+    "id": "qwen35-35b-a3b-bf16-tp4-c12-kv512m",
+    "label": "Qwen3.5-35B-A3B · BF16 · TP4 · C12 · 512 MiB KV/NPU",
+    "model": "Qwen3.5-35B-A3B",
+    "hardware": "4× Ascend 910B2",
+    "precision": "BF16"
+  },
+  "datasets": [
+    {
+      "id": "evoscientist",
+      "label": "EVOSCIENTIST",
+      "group": "A2",
+      "description": "First 12 requests from the EvoScientist trace",
+      "applicable_metric_ids": [
+        "output_token_throughput"
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "id": "output_token_throughput",
+      "label": "Output token throughput",
+      "unit": "token/s",
+      "direction": "higher"
+    }
+  ],
+  "results": [
+    {
+      "dataset_id": "evoscientist",
+      "metric_id": "output_token_throughput",
+      "status": "passed",
+      "baseline_value": 35.66676184907216,
+      "value": 40.60051695308914,
+      "delta_pct": 13.832921320120706,
+      "updated_at": "2026-09-29",
+      "model": "Qwen3.5-35B-A3B",
+      "hardware": "4× Ascend 910B2 · TP4",
+      "comparison": {
+        "direction": "higher_is_better",
+        "trend": "improved",
+        "improvement_pct": 13.832921320120706,
+        "aggregation": "geometric mean across two order-reversed paired repeats"
+      },
+      "provenance": {
+        "repository": "vLLM-HUST/vllm-hust-bidkv",
+        "repository_commit": "edb7f090a9fe3698f68d755c36f793d71f9a460d",
+        "plugin_commit": "a0cba97d9abdc99908e46616db622f0e0099127f",
+        "engine_commit": "f18cf803c5f63625e2c71253ddaf8b0bad0bad1a",
+        "ascend_commit": "249ac128cae3ddec51114f482262988b7b312a4a",
+        "benchmark_commit": "47c12e518a9188bb714bb6193d00260a7741841b",
+        "artifact": "https://github.com/vLLM-HUST/vllm-hust-bidkv/blob/edb7f090a9fe3698f68d755c36f793d71f9a460d/results/qwen35-evoscientist-20260929/first12-c12-512m-preempt5.tar.gz",
+        "report_url": "https://github.com/vLLM-HUST/vllm-hust-bidkv/blob/edb7f090a9fe3698f68d755c36f793d71f9a460d/results/qwen35-evoscientist-20260929/README.md#high-concurrency-kv-pressure-result",
+        "artifact_sha256": "a9d3889bb195fa3be913b9201145c86ff17ffb702a0a8bcd51d6f8fcaa4a46e9",
+        "input_sha256": "53588fc1a06bbe59b6737b434a0664b58fd673a7dfe38a493749b3faed921d8d",
+        "endpoint_type": "openai-chat",
+        "num_prompts": 12,
+        "request_rate": 4,
+        "concurrency": 12,
+        "completed_per_arm": 12,
+        "failed_per_arm": 0,
+        "output_tokens_per_arm": 24148,
+        "precision": "BF16",
+        "method": "BidKV utility preemption weight 5.0",
+        "baseline_repeats": [
+          35.37035637779263,
+          35.96565121399601
+        ],
+        "candidate_repeats": [
+          41.42218456909079,
+          39.795148276368685
+        ],
+        "policy_calls": [
+          786,
+          711
+        ],
+        "policy_selections": [
+          10,
+          7
+        ],
+        "policy_failures": [
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "This is one measured TP4/C12 cell, not a complete Qwen3.5 dataset matrix.",
+    "The displayed values are geometric means across two order-reversed paired repeats; individual repeats remain in provenance.",
+    "The result must not be pooled with the separate TP2 SWE Prefix Reuse series."
+  ],
+  "coverage_contract": {
+    "mode": "explicit-dataset-metric-applicability",
+    "complete_cell_states_required": true,
+    "non_measured_reason_required": true,
+    "matched_b0_required_for_b1": true
+  }
+}

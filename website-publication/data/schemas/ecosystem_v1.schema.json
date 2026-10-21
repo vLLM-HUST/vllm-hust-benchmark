@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.sage.org.ai/data/schemas/ecosystem_v1.schema.json",
+  "title": "vLLM-HUST ecosystem registry v1",
+  "type": "object",
+  "required": ["schema_version", "canonical_owner", "components"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "canonical_owner": {"type": "string", "minLength": 1},
+    "components": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/component"}
+    }
+  },
+  "additionalProperties": true,
+  "definitions": {
+    "advisor": {
+      "type": "object",
+      "required": ["name_en", "name_zh", "relationship"],
+      "properties": {
+        "name_en": {"type": "string", "minLength": 1},
+        "name_zh": {"type": "string", "minLength": 1},
+        "affiliation_en": {"type": "string", "minLength": 1},
+        "affiliation_zh": {"type": "string", "minLength": 1},
+        "relationship": {"enum": ["internal", "external_contributor"]}
+      },
+      "additionalProperties": false
+    },
+    "compatibility": {
+      "type": "object",
+      "required": ["status", "host", "versions", "platforms", "requirements_en", "requirements_zh"],
+      "properties": {
+        "status": {"enum": ["ready", "verified", "experimental", "inspect_only", "external_service", "source_scaffold", "unsupported"]},
+        "host": {"type": "string", "minLength": 1},
+        "versions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "platforms": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "models": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "python": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "requirements_en": {"type": "string", "minLength": 1},
+        "requirements_zh": {"type": "string", "minLength": 1},
+        "followup_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://github\\.com/vLLM-HUST/[^/]+/issues/[0-9]+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "component": {
+      "type": "object",
+      "required": ["id", "name", "artifact_type", "delivery_model", "repository_relationship", "maturity", "summary_en", "summary_zh", "evidence_level"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "name_en": {"type": "string", "minLength": 1},
+        "name_zh": {"type": "string", "minLength": 1},
+        "artifact_type": {"type": "string", "minLength": 1},
+        "delivery_model": {"type": "string", "minLength": 1},
+        "repository_relationship": {"type": "string", "minLength": 1},
+        "maturity": {"type": "string", "minLength": 1},
+        "summary_en": {"type": "string", "minLength": 1},
+        "summary_zh": {"type": "string", "minLength": 1},
+        "evidence_level": {"type": "string", "minLength": 1},
+        "compatibility": {"$ref": "#/definitions/compatibility"},
+        "maintainer_profiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["login", "name"],
+            "properties": {
+              "login": {"type": "string", "minLength": 1},
+              "name": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        },
+        "advisors": {"type": "array", "minItems": 0, "items": {"$ref": "#/definitions/advisor"}}
+      },
+      "additionalProperties": true
+    }
+  }
+}

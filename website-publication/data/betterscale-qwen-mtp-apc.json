@@ -1,0 +1,384 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-20",
+  "status": "experimental_opt_in_not_released",
+  "model": "Qwen3.8-27B",
+  "configuration": {
+    "tp": 2,
+    "mtp_tokens": 2,
+    "prefix_caching": true,
+    "mamba_cache_mode": "align",
+    "kv_budget_gib": 6,
+    "max_batched_tokens": 2048,
+    "max_model_len": 4096,
+    "request_seats": 8
+  },
+  "comparison": "Earlier BetterScale MTP2 candidate vs lookahead-aware APC prototype; neither arm is native vLLM. Same hardware pair, separate same-day runs, not interleaved.",
+  "metric": "End-to-end output tokens/s including prefill; not decode-only or step rate.",
+  "workload": {
+    "type": "synthetic_shared_prefix",
+    "input_tokens": "3073 + 8*i, i=0..concurrency-1",
+    "output_tokens_per_request": 64,
+    "warmup_cohorts": 1,
+    "measured_cohorts": 3,
+    "concurrency": [
+      1,
+      4,
+      8
+    ]
+  },
+  "results": [
+    {
+      "concurrency": 1,
+      "before": {
+        "output_tps": 41.072126907240154,
+        "range": [
+          40.985240452590475,
+          42.022657418408144
+        ],
+        "ttft_ms": 585.6829478871077
+      },
+      "after": {
+        "output_tps": 58.510972241013945,
+        "range": [
+          57.612885291674296,
+          58.80505905238491
+        ],
+        "ttft_ms": 111.41294613480568
+      },
+      "ratio": 1.4245907540449212
+    },
+    {
+      "concurrency": 4,
+      "before": {
+        "output_tps": 79.29986444645442,
+        "range": [
+          77.66349166483883,
+          83.47567386703325
+        ],
+        "ttft_ms": 1444.4305750075728
+      },
+      "after": {
+        "output_tps": 193.3581042726604,
+        "range": [
+          186.70339495545176,
+          193.4673952064843
+        ],
+        "ttft_ms": 172.0381500199437
+      },
+      "ratio": 2.4383156972887567
+    },
+    {
+      "concurrency": 8,
+      "before": {
+        "output_tps": 104.3751935153945,
+        "range": [
+          101.92687008749627,
+          105.91692280912427
+        ],
+        "ttft_ms": 2511.815862962976
+      },
+      "after": {
+        "output_tps": 305.9247385367653,
+        "range": [
+          297.7248594462369,
+          325.9610194730024
+        ],
+        "ttft_ms": 269.563588895835
+      },
+      "ratio": 2.9310100248259072
+    }
+  ],
+  "validation": {
+    "status": "PASS",
+    "server_exit": 0,
+    "boundary_checks": [
+      {
+        "boundary": 1536,
+        "warm_equal": true,
+        "branch_equal": true
+      },
+      {
+        "boundary": 3072,
+        "warm_equal": true,
+        "branch_equal": true
+      }
+    ],
+    "hit_sequences_cold_warm_divergent_warm_divergent_cold": [
+      [
+        0,
+        1536,
+        0,
+        0
+      ],
+      [
+        0,
+        3072,
+        1536,
+        0
+      ]
+    ],
+    "cohort_request_prefix_hits": {
+      "before": 1536,
+      "after": 3072
+    },
+    "cpu_tests_passed": 109
+  },
+  "limits": [
+    "Opt-in prototype, not product admission",
+    "MTP2 only; K3 FIA failure remains unresolved",
+    "Cold/warm text equality and hash isolation are bounded evidence, not exhaustive numerical state equivalence",
+    "Divergent lookahead correctly retreats one checkpoint; not arbitrary token-granular GDN restoration",
+    "Same-day runs are not interleaved controls.",
+    "Not SWE task performance, an official leaderboard entry, or a native-vLLM speedup."
+  ],
+  "provenance": {
+    "before_capsule": "mtp-count-service-20260920-v2/candidate-k2",
+    "after_capsule": "mtp-apc-20260920-v4/candidate-k2",
+    "implementation": "Isolated prototype; not a released package qualification."
+  },
+  "before_cohorts": [
+    {
+      "concurrency": 1,
+      "repetition": 1,
+      "elapsed_s": 1.5582343749701977,
+      "output_tokens": 64,
+      "output_tokens_per_second": 41.072126907240154,
+      "ttft_s": [
+        0.5884030759334564
+      ]
+    },
+    {
+      "concurrency": 1,
+      "repetition": 2,
+      "elapsed_s": 1.5615377461072057,
+      "output_tokens": 64,
+      "output_tokens_per_second": 40.985240452590475,
+      "ttft_s": [
+        0.5856829478871077
+      ]
+    },
+    {
+      "concurrency": 1,
+      "repetition": 3,
+      "elapsed_s": 1.522987929172814,
+      "output_tokens": 64,
+      "output_tokens_per_second": 42.022657418408144,
+      "ttft_s": [
+        0.5554232858121395
+      ]
+    },
+    {
+      "concurrency": 4,
+      "repetition": 1,
+      "elapsed_s": 3.2962720901705325,
+      "output_tokens": 256,
+      "output_tokens_per_second": 77.66349166483883,
+      "ttft_s": [
+        0.5904072059784085,
+        2.003753064898774,
+        1.1775466578546911,
+        1.7130315080285072
+      ]
+    },
+    {
+      "concurrency": 4,
+      "repetition": 2,
+      "elapsed_s": 3.2282526809722185,
+      "output_tokens": 256,
+      "output_tokens_per_second": 79.29986444645442,
+      "ttft_s": [
+        1.178263631882146,
+        1.711780812824145,
+        2.001407332951203,
+        0.58619513688609
+      ]
+    },
+    {
+      "concurrency": 4,
+      "repetition": 3,
+      "elapsed_s": 3.0667617060244083,
+      "output_tokens": 256,
+      "output_tokens_per_second": 83.47567386703325,
+      "ttft_s": [
+        1.1764770119916648,
+        2.0001017961185426,
+        1.7105975181329995,
+        0.5864182959776372
+      ]
+    },
+    {
+      "concurrency": 8,
+      "repetition": 1,
+      "elapsed_s": 4.90538012678735,
+      "output_tokens": 512,
+      "output_tokens_per_second": 104.3751935153945,
+      "ttft_s": [
+        1.6961263630073518,
+        0.5725815331097692,
+        2.234655932057649,
+        2.7773006870411336,
+        1.1572020770981908,
+        2.775989809073508,
+        3.3135567649733275,
+        3.60715289413929
+      ]
+    },
+    {
+      "concurrency": 8,
+      "repetition": 2,
+      "elapsed_s": 4.833977294852957,
+      "output_tokens": 512,
+      "output_tokens_per_second": 105.91692280912427,
+      "ttft_s": [
+        1.7120459671132267,
+        2.795689727179706,
+        0.5875424209516495,
+        1.174354671034962,
+        2.7934790558647364,
+        3.3289709999226034,
+        2.247159535996616,
+        3.621816957136616
+      ]
+    },
+    {
+      "concurrency": 8,
+      "repetition": 3,
+      "elapsed_s": 5.02320928289555,
+      "output_tokens": 512,
+      "output_tokens_per_second": 101.92687008749627,
+      "ttft_s": [
+        2.7951917401514947,
+        0.5852326659951359,
+        2.793139792047441,
+        1.1726400398183614,
+        2.2476419168524444,
+        1.7079613599926233,
+        3.6237903679721057,
+        3.3277816609479487
+      ]
+    }
+  ],
+  "after_cohorts": [
+    {
+      "concurrency": 1,
+      "repetition": 1,
+      "elapsed_s": 1.0883417350705713,
+      "output_tokens": 64,
+      "output_tokens_per_second": 58.80505905238491,
+      "ttft_s": [
+        0.11154494807124138
+      ]
+    },
+    {
+      "concurrency": 1,
+      "repetition": 2,
+      "elapsed_s": 1.0938119390048087,
+      "output_tokens": 64,
+      "output_tokens_per_second": 58.510972241013945,
+      "ttft_s": [
+        0.10902444389648736
+      ]
+    },
+    {
+      "concurrency": 1,
+      "repetition": 3,
+      "elapsed_s": 1.1108626078348607,
+      "output_tokens": 64,
+      "output_tokens_per_second": 57.612885291674296,
+      "ttft_s": [
+        0.11141294613480568
+      ]
+    },
+    {
+      "concurrency": 4,
+      "repetition": 1,
+      "elapsed_s": 1.3711587840225548,
+      "output_tokens": 256,
+      "output_tokens_per_second": 186.70339495545176,
+      "ttft_s": [
+        0.1723763500340283,
+        0.17169995000585914,
+        0.09158726199530065,
+        0.24938550707884133
+      ]
+    },
+    {
+      "concurrency": 4,
+      "repetition": 2,
+      "elapsed_s": 1.3239682968705893,
+      "output_tokens": 256,
+      "output_tokens_per_second": 193.3581042726604,
+      "ttft_s": [
+        0.12949869805015624,
+        0.20595657802186906,
+        0.20499494508840144,
+        0.12729814904741943
+      ]
+    },
+    {
+      "concurrency": 4,
+      "repetition": 3,
+      "elapsed_s": 1.3232203789521009,
+      "output_tokens": 256,
+      "output_tokens_per_second": 193.4673952064843,
+      "ttft_s": [
+        0.1200778828933835,
+        0.11940836301073432,
+        0.20662533701397479,
+        0.20562973385676742
+      ]
+    },
+    {
+      "concurrency": 8,
+      "repetition": 1,
+      "elapsed_s": 1.7197085958905518,
+      "output_tokens": 512,
+      "output_tokens_per_second": 297.7248594462369,
+      "ttft_s": [
+        0.33122279099188745,
+        0.17415573401376605,
+        0.10345466108992696,
+        0.32922250498086214,
+        0.3282217108644545,
+        0.32700635492801666,
+        0.32658715988509357,
+        0.3258100689854473
+      ]
+    },
+    {
+      "concurrency": 8,
+      "repetition": 2,
+      "elapsed_s": 1.6736142439767718,
+      "output_tokens": 512,
+      "output_tokens_per_second": 305.9247385367653,
+      "ttft_s": [
+        0.1433523939922452,
+        0.28687855997122824,
+        0.285985697992146,
+        0.285003034863621,
+        0.13993066805414855,
+        0.28347210492938757,
+        0.2823510088492185,
+        0.2813012348487973
+      ]
+    },
+    {
+      "concurrency": 8,
+      "repetition": 3,
+      "elapsed_s": 1.5707399640232325,
+      "output_tokens": 512,
+      "output_tokens_per_second": 325.9610194730024,
+      "ttft_s": [
+        0.1732291930820793,
+        0.17204042710363865,
+        0.17136344802565873,
+        0.1706865089945495,
+        0.16993337799794972,
+        0.16927058016881347,
+        0.25782594294287264,
+        0.2567011269275099
+      ]
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "legacy_plan": true,
+  "complete": true,
+  "WARNING": null,
+  "accuracy": {
+    "cases": 12032,
+    "correct": 9609,
+    "accuracy": 0.7986203457446809,
+    "invalid_answers": 56,
+    "transport_failures": 0,
+    "length_limited": 1533,
+    "length_limited_but_correct": 426,
+    "finish_reasons": {
+      "length": 1533,
+      "stop": 10499
+    }
+  },
+  "by_termination": {
+    "finished_normally": {
+      "n": 10499,
+      "correct": 9183,
+      "stage_counts": {
+        "1": 10497,
+        "2": 2,
+        "3": 0,
+        "0": 0
+      }
+    },
+    "length_limited": {
+      "n": 1533,
+      "correct": 426,
+      "stage_counts": {
+        "1": 193,
+        "2": 14,
+        "3": 1287,
+        "0": 39
+      }
+    },
+    "note": "stage 3 = fallback that takes the last standalone A-J letter; for length-limited outputs it often picks a letter that is just text (e.g. 'A', 'I')"
+  },
+  "per_category": {
+    "biology": {
+      "n": 717,
+      "correct": 663,
+      "accuracy": 0.9246861924686193
+    },
+    "business": {
+      "n": 789,
+      "correct": 669,
+      "accuracy": 0.8479087452471483
+    },
+    "chemistry": {
+      "n": 1132,
+      "correct": 939,
+      "accuracy": 0.8295053003533569
+    },
+    "computer science": {
+      "n": 410,
+      "correct": 339,
+      "accuracy": 0.8268292682926829
+    },
+    "economics": {
+      "n": 844,
+      "correct": 726,
+      "accuracy": 0.8601895734597157
+    },
+    "engineering": {
+      "n": 969,
+      "correct": 624,
+      "accuracy": 0.6439628482972136
+    },
+    "health": {
+      "n": 818,
+      "correct": 637,
+      "accuracy": 0.7787286063569682
+    },
+    "history": {
+      "n": 381,
+      "correct": 277,
+      "accuracy": 0.7270341207349081
+    },
+    "law": {
+      "n": 1101,
+      "correct": 669,
+      "accuracy": 0.6076294277929155
+    },
+    "math": {
+      "n": 1351,
+      "correct": 1205,
+      "accuracy": 0.8919319022945966
+    },
+    "other": {
+      "n": 924,
+      "correct": 717,
+      "accuracy": 0.775974025974026
+    },
+    "philosophy": {
+      "n": 499,
+      "correct": 379,
+      "accuracy": 0.7595190380761523
+    },
+    "physics": {
+      "n": 1299,
+      "correct": 1103,
+      "accuracy": 0.8491147036181679
+    },
+    "psychology": {
+      "n": 798,
+      "correct": 662,
+      "accuracy": 0.8295739348370927
+    }
+  },
+  "tokens": {
+    "prompt": {
+      "n": 12032,
+      "mean": 1405.1018949468084,
+      "median": 1339.0,
+      "p95": 1911,
+      "p99": 2357,
+      "max": 2910
+    },
+    "completion": {
+      "n": 12032,
+      "mean": 736.19140625,
+      "median": 494.0,
+      "p95": 2048,
+      "p99": 2048,
+      "max": 2048
+    }
+  },
+  "client_timing_seconds": {
+    "ttft": {
+      "n": 12032,
+      "mean": 0.5931353479868545,
+      "median": 0.5400402736850083,
+      "p95": 0.8980276295915246,
+      "p99": 1.0500291381031275,
+      "max": 29.43248358834535
+    },
+    "e2e": {
+      "n": 12032,
+      "mean": 26.301909080331516,
+      "median": 18.23646163707599,
+      "p95": 70.44857389479876,
+      "p99": 82.06718556303531,
+      "max": 103.204007178545
+    }
+  },
+  "run_meta": {
+    "concurrency": 16,
+    "upstream_concurrency": 1,
+    "generation": {
+      "temperature": 0,
+      "seed": 17,
+      "thinking": false,
+      "max_tokens": 2048,
+      "stop": null,
+      "retries": 0,
+      "concurrency": 1,
+      "tools": [],
+      "truncation": "reject"
+    },
+    "n_cases": 12032,
+    "runner_sha256": "5d647fee41d599830f6bab705e4c36cff712b72d89f29e6d898c6d3122448c6f",
+    "scorer_sha256": null,
+    "adapter_sha256": "c2237c69f848e2358abe71c68f54143b5c090a81bd4f7915088b19b8ae157801",
+    "contract_sha256": "0a208ebbeec1afc9dea6d3b5e13d12863995d630ba34f60e510046292a63b5ca",
+    "deviations": [
+      "concurrency differs from contract.generation.concurrency",
+      "no PyramidKV activation check / telemetry"
+    ]
+  },
+  "bench": "not run yet"
+}

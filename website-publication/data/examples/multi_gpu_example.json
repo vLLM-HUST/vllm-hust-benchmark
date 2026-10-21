@@ -1,0 +1,81 @@
+{
+    "entry_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "engine": "vllm-hust",
+    "engine_version": "0.2.3.3",
+    "config_type": "multi_gpu",
+    "hardware": {
+        "vendor": "NVIDIA",
+        "chip_model": "A100-80GB",
+        "chip_count": 8,
+        "interconnect": "NVLink",
+        "chips_per_node": 8,
+        "intra_node_interconnect": "NVLink",
+        "memory_per_chip_gb": 80,
+        "total_memory_gb": 640
+    },
+    "model": {
+        "name": "Qwen2-72B",
+        "parameters": "72B",
+        "precision": "FP16",
+        "quantization": "None"
+    },
+    "workload": {
+        "name": "sharegpt-long",
+        "input_length": 1024,
+        "output_length": 256,
+        "batch_size": 8,
+        "concurrent_requests": 4,
+        "dataset": "ShareGPT"
+    },
+    "metrics": {
+        "ttft_ms": 80.3,
+        "tbt_ms": 12.5,
+        "tpot_ms": 12.5,
+        "throughput_tps": 320.5,
+        "peak_mem_mb": 524288,
+        "error_rate": 0.005,
+        "prefix_hit_rate": 0.78,
+        "kv_used_tokens": 8192,
+        "kv_used_bytes": 268435456,
+        "evict_count": 8,
+        "evict_ms": 5.2,
+        "spec_accept_rate": null
+    },
+    "cluster": null,
+    "versions": {
+        "protocol": "0.1.1.0",
+        "backend": "0.2.1.6",
+        "core": "0.2.2.8",
+        "control_plane": "0.1.1.5",
+        "gateway": "0.1.1.5",
+        "kv_cache": "0.1.1.6",
+        "comm": "0.1.1.7",
+        "compression": "0.1.1.7",
+        "benchmark": "0.1.0.0"
+    },
+    "environment": {
+        "os": "Ubuntu 22.04",
+        "python_version": "3.10.12",
+        "pytorch_version": "2.1.0+cu121",
+        "cuda_version": "12.1.0",
+        "cann_version": null,
+        "driver_version": "535.104.05"
+    },
+    "kv_cache_config": {
+        "enabled": true,
+        "eviction_policy": "LRU",
+        "budget_tokens": 16384,
+        "prefix_cache_enabled": true
+    },
+    "metadata": {
+        "submitted_at": "2026-01-28T10:45:00Z",
+        "submitter": "HUST",
+        "data_source": "automated-benchmark",
+        "reproducible_cmd": "vllm bench serve --model Qwen2-72B --backend cuda --gpus 8 --input-len 1024 --output-len 256 --batch-size 8 --concurrent 4",
+        "git_commit": "a1b2c3d4e5f6789012345678901234567890abcd",
+        "release_date": "2026-01-27",
+        "changelog_url": "https://github.com/vLLM-HUST/vllm-hust/blob/main/CHANGELOG.md#0233---2026-01-27",
+        "notes": "Single-node multi-GPU performance on 8x NVIDIA A100 with NVLink",
+        "verified": true
+    }
+}

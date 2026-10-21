@@ -1,0 +1,359 @@
+{
+  "scope": "Separate six-step per-rank APC-off diagnostic, not the final APC-on native-vs-candidate SWE service comparison",
+  "before": "aiv-service-profile1 (earlier BetterScale, source 8b0aebb)",
+  "after": "fia-wave-primed-profile1 (wave FIA, caller-ordered replay and startup priming)",
+  "traceloom_commit": "c2a6920",
+  "steps_per_rank": 6,
+  "display_counts": {
+    "fia_host": [
+      96,
+      6
+    ],
+    "task_update": [
+      96,
+      0
+    ],
+    "host_barrier": [
+      6,
+      0
+    ]
+  },
+  "fia_kernels_per_graph_body": 16,
+  "observations": [
+    {
+      "name": "aiv-service-profile1",
+      "rank": 0,
+      "apis": [
+        {
+          "name": "aclmdlRICaptureTaskUpdateBegin",
+          "n": 96,
+          "sum_us": 218.71,
+          "max_us": 6.01
+        },
+        {
+          "name": "aclmdlRICaptureTaskUpdateEnd",
+          "n": 96,
+          "sum_us": 211.73,
+          "max_us": 5.15
+        },
+        {
+          "name": "aclmdlRIExecuteAsync",
+          "n": 6,
+          "sum_us": 7267.14,
+          "max_us": 7162.07
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScore",
+          "n": 96,
+          "sum_us": 6027.96,
+          "max_us": 143.68
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          "n": 96,
+          "sum_us": 2520.9,
+          "max_us": 243.62
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScoreTiling",
+          "n": 6,
+          "sum_us": 431.3,
+          "max_us": 100.1
+        },
+        {
+          "name": "aclrtSynchronizeStreamWithTimeout",
+          "n": 6,
+          "sum_us": 393567.48,
+          "max_us": 322839.2
+        }
+      ],
+      "graphs": [
+        {
+          "step": 0,
+          "body_ms": 30.478149,
+          "members": 1152,
+          "fia": 16
+        },
+        {
+          "step": 1,
+          "body_ms": 30.340026,
+          "members": 1152,
+          "fia": 16,
+          "gap_us": 1333.246
+        },
+        {
+          "step": 2,
+          "body_ms": 335.658926,
+          "members": 2065,
+          "fia": 16,
+          "gap_us": 1468.65
+        },
+        {
+          "step": 3,
+          "body_ms": 31.308245,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 8781.296
+        },
+        {
+          "step": 4,
+          "body_ms": 31.505649,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1333.047
+        },
+        {
+          "step": 5,
+          "body_ms": 31.440448,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1350.647
+        }
+      ]
+    },
+    {
+      "name": "aiv-service-profile1",
+      "rank": 1,
+      "apis": [
+        {
+          "name": "aclmdlRICaptureTaskUpdateBegin",
+          "n": 96,
+          "sum_us": 212.77,
+          "max_us": 8.17
+        },
+        {
+          "name": "aclmdlRICaptureTaskUpdateEnd",
+          "n": 96,
+          "sum_us": 213.32,
+          "max_us": 4.75
+        },
+        {
+          "name": "aclmdlRIExecuteAsync",
+          "n": 6,
+          "sum_us": 7370.84,
+          "max_us": 7267.78
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScore",
+          "n": 96,
+          "sum_us": 6121.92,
+          "max_us": 143.66
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          "n": 96,
+          "sum_us": 2430.47,
+          "max_us": 232.35
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScoreTiling",
+          "n": 6,
+          "sum_us": 399.28,
+          "max_us": 97.77
+        },
+        {
+          "name": "aclrtSynchronizeStreamWithTimeout",
+          "n": 6,
+          "sum_us": 393473.6,
+          "max_us": 323036.6
+        }
+      ],
+      "graphs": [
+        {
+          "step": 0,
+          "body_ms": 30.451588,
+          "members": 1152,
+          "fia": 16
+        },
+        {
+          "step": 1,
+          "body_ms": 30.358967,
+          "members": 1152,
+          "fia": 16,
+          "gap_us": 1302.366
+        },
+        {
+          "step": 2,
+          "body_ms": 335.648986,
+          "members": 2065,
+          "fia": 16,
+          "gap_us": 1478.07
+        },
+        {
+          "step": 3,
+          "body_ms": 31.363067,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 8726.834
+        },
+        {
+          "step": 4,
+          "body_ms": 31.490609,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1347.447
+        },
+        {
+          "step": 5,
+          "body_ms": 31.429768,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1362.087
+        }
+      ]
+    },
+    {
+      "name": "fia-wave-primed-profile1",
+      "rank": 0,
+      "apis": [
+        {
+          "name": "aclmdlRIExecuteAsync",
+          "n": 6,
+          "sum_us": 167.93,
+          "max_us": 38.35
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScore",
+          "n": 6,
+          "sum_us": 347.62,
+          "max_us": 90.42
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          "n": 6,
+          "sum_us": 1356.71,
+          "max_us": 367.61
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScoreTiling",
+          "n": 6,
+          "sum_us": 500.51,
+          "max_us": 136.19
+        }
+      ],
+      "graphs": [
+        {
+          "step": 0,
+          "body_ms": 31.411387,
+          "members": 1152,
+          "fia": 16
+        },
+        {
+          "step": 1,
+          "body_ms": 30.390047,
+          "members": 1152,
+          "fia": 16,
+          "gap_us": 1227.945
+        },
+        {
+          "step": 2,
+          "body_ms": 337.937612,
+          "members": 2065,
+          "fia": 16,
+          "gap_us": 1363.827
+        },
+        {
+          "step": 3,
+          "body_ms": 31.401128,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1360.727
+        },
+        {
+          "step": 4,
+          "body_ms": 31.367147,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1262.925
+        },
+        {
+          "step": 5,
+          "body_ms": 31.226784,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1273.025
+        }
+      ]
+    },
+    {
+      "name": "fia-wave-primed-profile1",
+      "rank": 1,
+      "apis": [
+        {
+          "name": "aclmdlRIExecuteAsync",
+          "n": 6,
+          "sum_us": 135.13,
+          "max_us": 26.89
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScore",
+          "n": 6,
+          "sum_us": 332.54,
+          "max_us": 72.2
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          "n": 6,
+          "sum_us": 1040.74,
+          "max_us": 223.43
+        },
+        {
+          "name": "aclnnInnerFusedInferAttentionScoreTiling",
+          "n": 6,
+          "sum_us": 393.07,
+          "max_us": 93.64
+        }
+      ],
+      "graphs": [
+        {
+          "step": 0,
+          "body_ms": 36.881957,
+          "members": 1152,
+          "fia": 16
+        },
+        {
+          "step": 1,
+          "body_ms": 30.378687,
+          "members": 1152,
+          "fia": 16,
+          "gap_us": 1240.905
+        },
+        {
+          "step": 2,
+          "body_ms": 337.931272,
+          "members": 2065,
+          "fia": 16,
+          "gap_us": 1365.707
+        },
+        {
+          "step": 3,
+          "body_ms": 31.379246,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1387.348
+        },
+        {
+          "step": 4,
+          "body_ms": 31.363346,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1267.646
+        },
+        {
+          "step": 5,
+          "body_ms": 31.232204,
+          "members": 1344,
+          "fia": 16,
+          "gap_us": 1266.566
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Task-update pairs count one begin/end pair, not the sum of both API call counts.",
+    "Both diagnostic arms use native AIV. These are not native-baseline ablations.",
+    "Profile timing and bank phases do not establish an additive percentage contribution to service throughput.",
+    "Startup priming moves first-use setup out of traffic; the work remains."
+  ],
+  "provenance": "BetterScale runs/qwen38-tp2-serving/fia-wave-primed-profile1/comparison.json and RESULTS.md"
+}

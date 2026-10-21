@@ -1,0 +1,863 @@
+{
+  "protocol": "swe-prefix-reuse/v1",
+  "campaign": "utility-victim-qwen35-bf16-swe-c16-m65-20261002",
+  "scope": "Public metric/configuration extracts. Original generated-token streams and server logs retained by measurement owner; hashes identify originals.",
+  "runs": [
+    {
+      "run_id": "104b713512b94eaeac57215995af056e",
+      "point_id": "utility-victim-off-m65-c16-r1-20261002",
+      "summary": {
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 335,
+        "max_prompt_tokens_observed": 40244,
+        "prompt_tokens_p50": 13086.0,
+        "max_turn_index_reached": 29,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 6,
+        "requests_completed_in_window": 319,
+        "requests_drained": 16,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 155268,
+        "output_tokens_per_second": 172.52,
+        "output_tokens_per_second_per_chip": 86.26,
+        "decode_tokens_per_second_p90": 19.118523435188212,
+        "decode_speed_samples": 319,
+        "ttft_seconds_p95": 9.82921975534409,
+        "client_inflight_seconds": {
+          "0": 0.0002538328990340233,
+          "1": 0.0010767923668026924,
+          "2": 0.0007254583761096001,
+          "3": 0.0006432067602872849,
+          "4": 0.0006570182740688324,
+          "5": 0.0009372308850288391,
+          "6": 0.0006632981821894646,
+          "7": 0.0007159775123000145,
+          "8": 0.000687967985868454,
+          "9": 0.0006324071437120438,
+          "10": 0.0006281780079007149,
+          "11": 0.0006203372031450272,
+          "12": 0.0008920198306441307,
+          "13": 0.0006772279739379883,
+          "14": 0.0006665382534265518,
+          "15": 1.0134672475978732,
+          "16": 898.9760552607477
+        },
+        "mean_client_inflight": 15.998769774121335,
+        "full_concurrency_fraction": 0.998862283623053,
+        "drain_seconds": 160.36019985284656,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0
+      },
+      "client": {
+        "tool_version": "0.1.2",
+        "schema": "swe-prefix-reuse/v1",
+        "run_id": "104b713512b94eaeac57215995af056e",
+        "started_at_unix": 1790929446.497984,
+        "model": "qwen3.5-35b-a3b",
+        "workload_sha256": "4e62e54ef47497fd916a6c2906b220b3af400f87873ea0784740fed3f61e78c8",
+        "tokenizer": {
+          "fingerprint": "319f580a2fc8d2ff1e1f48a26ea0c29eea35798d747e7188ca584e92c014bdf9",
+          "transformers": "5.18.0",
+          "enable_thinking": true
+        },
+        "concurrency": 16,
+        "data_parallel_size": null,
+        "routing_policy": "server/relay managed; X-Correlation-ID per session",
+        "duration": 900.0,
+        "chips": 2,
+        "seed": 0,
+        "timeout": 1800,
+        "server_max_context": 262144,
+        "cache_policy": "unique salt per session play; reused within session; no cross-session reuse",
+        "window_policy": "cold-start fixed duration; count streamed tokens in window; drain in-flight only",
+        "server_metadata": null
+      },
+      "metrics": {
+        "output_tps": 172.52,
+        "decode_p90_tps": 19.118523435188212,
+        "ttft_p95_ms": 9829.21975534409,
+        "completed_requests": 319
+      },
+      "package_versions": null,
+      "hardware_snapshot_present": false,
+      "requests_artifact_sha256": "969af12f161dc5732e846fbb7ec47d346096614cc5e2b1561ca950a34ab3792d",
+      "source_artifacts": [
+        {
+          "path": "results/off-m65-c16-r1/config.json",
+          "sha256": "a418badd291a70d5f8ec530401e28b12df572675cf50fdf93749e253aae71f56",
+          "bytes": 984
+        },
+        {
+          "path": "results/off-m65-c16-r1/summary.json",
+          "sha256": "cf46e45c0a16aec93ae5ed580366060b2bb6ce1deaa52c312193850c40e52219",
+          "bytes": 1364
+        },
+        {
+          "path": "results/off-m65-c16-r1/requests.jsonl",
+          "sha256": "969af12f161dc5732e846fbb7ec47d346096614cc5e2b1561ca950a34ab3792d",
+          "bytes": 5191253
+        },
+        {
+          "path": "results/off-m65-c16-r1.after.prom",
+          "sha256": "488584ee6543d2586cb47c6c03585d0d77ef3a9ee332a6d40e6869aa35700471",
+          "bytes": 53951
+        },
+        {
+          "path": "results/off-m65-c16-r1.before.prom",
+          "sha256": "9d4e865662a8ca7ef150ad8ba083044af53dbf310849373aaa6e32376909fcf0",
+          "bytes": 51225
+        },
+        {
+          "path": "results/off-m65-c16-r1.server.log",
+          "sha256": "bcc90d46cb957a89293c4853dabb14d848941e737f803e42e73469b5ce8847f1",
+          "bytes": 101609
+        }
+      ],
+      "plugin_events": [],
+      "preemption_counter": {
+        "before": 0.0,
+        "after": 311.0,
+        "delta": 311.0,
+        "scope": "Before/after client invocation, including drain; not a strict 900s counter",
+        "status": "recorded"
+      },
+      "validation": {
+        "raw_window_tokens_verified": true,
+        "raw_request_budgets_verified": true,
+        "raw_percentiles_verified": true,
+        "prefix_cache_enabled": false,
+        "owned_devices_released": null,
+        "model_quality_evaluated": false
+      }
+    },
+    {
+      "run_id": "7414755adf5f4fdfbfa53246fd96338c",
+      "point_id": "utility-victim-on-m65-c16-r1-20261002",
+      "summary": {
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 304,
+        "max_prompt_tokens_observed": 40244,
+        "prompt_tokens_p50": 11911.5,
+        "max_turn_index_reached": 29,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 4,
+        "requests_completed_in_window": 288,
+        "requests_drained": 16,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 132297,
+        "output_tokens_per_second": 146.99666666666667,
+        "output_tokens_per_second_per_chip": 73.49833333333333,
+        "decode_tokens_per_second_p90": 19.15800389523167,
+        "decode_speed_samples": 288,
+        "ttft_seconds_p95": 5.973184735607355,
+        "client_inflight_seconds": {
+          "0": 0.00022476259618997574,
+          "1": 0.0010982928797602654,
+          "2": 0.0007318984717130661,
+          "3": 0.0006377967074513435,
+          "4": 0.0006190277636051178,
+          "5": 0.0009318599477410316,
+          "6": 0.0006842287257313728,
+          "7": 0.0007141586393117905,
+          "8": 0.0006737168878316879,
+          "9": 0.0006103077903389931,
+          "10": 0.0006260070949792862,
+          "11": 0.0006103971973061562,
+          "12": 0.0008910000324249268,
+          "13": 0.0006693284958600998,
+          "14": 0.0006582774221897125,
+          "15": 0.8573461631312966,
+          "16": 899.1322727762163
+        },
+        "mean_client_inflight": 15.9989441537112,
+        "full_concurrency_fraction": 0.9990358586402402,
+        "drain_seconds": 153.7652509501204,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0
+      },
+      "client": {
+        "tool_version": "0.1.2",
+        "schema": "swe-prefix-reuse/v1",
+        "run_id": "7414755adf5f4fdfbfa53246fd96338c",
+        "started_at_unix": 1790932776.231152,
+        "model": "qwen3.5-35b-a3b",
+        "workload_sha256": "4e62e54ef47497fd916a6c2906b220b3af400f87873ea0784740fed3f61e78c8",
+        "tokenizer": {
+          "fingerprint": "319f580a2fc8d2ff1e1f48a26ea0c29eea35798d747e7188ca584e92c014bdf9",
+          "transformers": "5.18.0",
+          "enable_thinking": true
+        },
+        "concurrency": 16,
+        "data_parallel_size": null,
+        "routing_policy": "server/relay managed; X-Correlation-ID per session",
+        "duration": 900.0,
+        "chips": 2,
+        "seed": 0,
+        "timeout": 1800,
+        "server_max_context": 262144,
+        "cache_policy": "unique salt per session play; reused within session; no cross-session reuse",
+        "window_policy": "cold-start fixed duration; count streamed tokens in window; drain in-flight only",
+        "server_metadata": null
+      },
+      "metrics": {
+        "output_tps": 146.99666666666667,
+        "decode_p90_tps": 19.15800389523167,
+        "ttft_p95_ms": 5973.184735607355,
+        "completed_requests": 288
+      },
+      "package_versions": {
+        "vllm": "0.23.0+empty",
+        "vllm_ascend": "0.23.0.post1",
+        "vllm-hust-utility-victim": "0.1.0.dev2"
+      },
+      "hardware_snapshot_present": true,
+      "requests_artifact_sha256": "d0a36cfb73c996ae8d064268c90bec22f5b0990ce59cf829b25cf4eda451049f",
+      "source_artifacts": [
+        {
+          "path": "results/on-m65-c16-r1/config.json",
+          "sha256": "bb0010f323e2ce66f8f5c302db2756a36f97c350f4b4f9529f120c0598317e69",
+          "bytes": 984
+        },
+        {
+          "path": "results/on-m65-c16-r1/summary.json",
+          "sha256": "7d1c702e0202edc303ed603b54e35968aec7f78021f7c57317d35db4da647465",
+          "bytes": 1388
+        },
+        {
+          "path": "results/on-m65-c16-r1/requests.jsonl",
+          "sha256": "d0a36cfb73c996ae8d064268c90bec22f5b0990ce59cf829b25cf4eda451049f",
+          "bytes": 4207403
+        },
+        {
+          "path": "results/on-m65-c16-r1.after.prom",
+          "sha256": "36292a8beb759f953f24ba65011cc4bbb1bcbe859f9aaced4f9c4dba6c6abb76",
+          "bytes": 53948
+        },
+        {
+          "path": "results/on-m65-c16-r1.before.prom",
+          "sha256": "7d7c7b08f086591a3e57cfde5d9b8aa4c85421e5e28afbcb5627aa4f8be23618",
+          "bytes": 51224
+        },
+        {
+          "path": "results/on-m65-c16-r1.hardware.txt",
+          "sha256": "9e33dd62ebad83fc50608e23eaf9fee9b2592ff95087ffe57d21a944564241c7",
+          "bytes": 2223
+        },
+        {
+          "path": "results/on-m65-c16-r1.server.log",
+          "sha256": "14d015e740ca124419f28157df11e94a7d1f5624b8e17be05ed7a94e57427f03",
+          "bytes": 99084
+        },
+        {
+          "path": "results/on-m65-c16-r1.versions.txt",
+          "sha256": "cce3be5c9edf5bd23f009d941ce6ff87266af2baebae5b97b15cc7a08927a6b0",
+          "bytes": 2071
+        }
+      ],
+      "plugin_events": [
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "runtime_effective {\"actual_kv_freed_verified\": false, \"mechanism\": \"ascend-utility-victim\", \"scope\": \"victim_selection_only\", \"selection_changed\": true, \"tokens_proxy\": 41308}"
+      ],
+      "preemption_counter": {
+        "before": 0.0,
+        "after": 188.0,
+        "delta": 188.0,
+        "scope": "Before/after client invocation, including drain; not a strict 900s counter",
+        "status": "recorded"
+      },
+      "validation": {
+        "raw_window_tokens_verified": true,
+        "raw_request_budgets_verified": true,
+        "raw_percentiles_verified": true,
+        "prefix_cache_enabled": false,
+        "owned_devices_released": null,
+        "model_quality_evaluated": false
+      }
+    },
+    {
+      "run_id": "09d31489d9634eb6979a7d3d4f08a54d",
+      "point_id": "utility-victim-off-m65-c16-r2-20261002",
+      "summary": {
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 334,
+        "max_prompt_tokens_observed": 40244,
+        "prompt_tokens_p50": 13141.5,
+        "max_turn_index_reached": 29,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 6,
+        "requests_completed_in_window": 318,
+        "requests_drained": 16,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 153772,
+        "output_tokens_per_second": 170.85777777777778,
+        "output_tokens_per_second_per_chip": 85.42888888888889,
+        "decode_tokens_per_second_p90": 19.22801045193484,
+        "decode_speed_samples": 318,
+        "ttft_seconds_p95": 11.62399559491311,
+        "client_inflight_seconds": {
+          "0": 0.0001994231715798378,
+          "1": 0.000996970571577549,
+          "2": 0.000741749070584774,
+          "3": 0.0006490983068943024,
+          "4": 0.0006282972171902657,
+          "5": 0.0009568911045789719,
+          "6": 0.0006768377497792244,
+          "7": 0.0007182285189628601,
+          "8": 0.0006973287090659142,
+          "9": 0.0006381068378686905,
+          "10": 0.0006323875859379768,
+          "11": 0.0006460873410105705,
+          "12": 0.0009015807881951332,
+          "13": 0.0006844382733106613,
+          "14": 0.0006754277274012566,
+          "15": 0.9696963503956795,
+          "16": 899.0198607966304
+        },
+        "mean_client_inflight": 15.998819952354664,
+        "full_concurrency_fraction": 0.9989109564407004,
+        "drain_seconds": 156.89148532878608,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0
+      },
+      "client": {
+        "tool_version": "0.1.2",
+        "schema": "swe-prefix-reuse/v1",
+        "run_id": "09d31489d9634eb6979a7d3d4f08a54d",
+        "started_at_unix": 1790939413.0088942,
+        "model": "qwen3.5-35b-a3b",
+        "workload_sha256": "4e62e54ef47497fd916a6c2906b220b3af400f87873ea0784740fed3f61e78c8",
+        "tokenizer": {
+          "fingerprint": "319f580a2fc8d2ff1e1f48a26ea0c29eea35798d747e7188ca584e92c014bdf9",
+          "transformers": "5.18.0",
+          "enable_thinking": true
+        },
+        "concurrency": 16,
+        "data_parallel_size": null,
+        "routing_policy": "server/relay managed; X-Correlation-ID per session",
+        "duration": 900.0,
+        "chips": 2,
+        "seed": 0,
+        "timeout": 1800,
+        "server_max_context": 262144,
+        "cache_policy": "unique salt per session play; reused within session; no cross-session reuse",
+        "window_policy": "cold-start fixed duration; count streamed tokens in window; drain in-flight only",
+        "server_metadata": null
+      },
+      "metrics": {
+        "output_tps": 170.85777777777778,
+        "decode_p90_tps": 19.22801045193484,
+        "ttft_p95_ms": 11623.995594913109,
+        "completed_requests": 318
+      },
+      "package_versions": {
+        "vllm": "0.23.0+empty",
+        "vllm_ascend": "0.23.0.post1",
+        "vllm-hust-utility-victim": "0.1.0.dev2"
+      },
+      "hardware_snapshot_present": true,
+      "requests_artifact_sha256": "a4f729c84c4231422977c71ce135e40ad50a3ea2a3d4cc1b6a50158dbb895328",
+      "source_artifacts": [
+        {
+          "path": "results/off-m65-c16-r2/config.json",
+          "sha256": "211a517b797b63d0539e87bed057df61e98e0a1517da6858de003f8a3b5b4110",
+          "bytes": 985
+        },
+        {
+          "path": "results/off-m65-c16-r2/summary.json",
+          "sha256": "8ab8d767413bc43f2cf41a8ae13a5e126bd4476df95111e26d460150fe0e9279",
+          "bytes": 1388
+        },
+        {
+          "path": "results/off-m65-c16-r2/requests.jsonl",
+          "sha256": "a4f729c84c4231422977c71ce135e40ad50a3ea2a3d4cc1b6a50158dbb895328",
+          "bytes": 5165586
+        },
+        {
+          "path": "results/off-m65-c16-r2.after.prom",
+          "sha256": "47ca4e2e7e02944c8036e12be9438681b89cdb3e67b4345b7ba0a36c1b97fdfc",
+          "bytes": 51236
+        },
+        {
+          "path": "results/off-m65-c16-r2.before.prom",
+          "sha256": "302ec8d1719f8ddf19964eb003c5189b45656c853838f11d0687261b83c04dd0",
+          "bytes": 51222
+        },
+        {
+          "path": "results/off-m65-c16-r2.hardware.txt",
+          "sha256": "42f575b050ecd9487f21eca081f89377a8ce672072fd235cb70c3d08e86ea560",
+          "bytes": 2223
+        },
+        {
+          "path": "results/off-m65-c16-r2.server.log",
+          "sha256": "536559751909f62dfa647c90831d8276e18fc9a41b306f226dec35beecbee83e",
+          "bytes": 101444
+        },
+        {
+          "path": "results/off-m65-c16-r2.versions.txt",
+          "sha256": "cce3be5c9edf5bd23f009d941ce6ff87266af2baebae5b97b15cc7a08927a6b0",
+          "bytes": 2071
+        }
+      ],
+      "plugin_events": [],
+      "preemption_counter": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0,
+        "scope": "Before/after client invocation, including drain; not a strict 900s counter",
+        "status": "unverified-zero-snapshot"
+      },
+      "validation": {
+        "raw_window_tokens_verified": true,
+        "raw_request_budgets_verified": true,
+        "raw_percentiles_verified": true,
+        "prefix_cache_enabled": false,
+        "owned_devices_released": null,
+        "model_quality_evaluated": false
+      }
+    },
+    {
+      "run_id": "a26cf41bbad341bcbe963d7258d224ac",
+      "point_id": "utility-victim-on-m65-c16-r2-20261002",
+      "summary": {
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 313,
+        "max_prompt_tokens_observed": 40244,
+        "prompt_tokens_p50": 12175.0,
+        "max_turn_index_reached": 29,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 4,
+        "requests_completed_in_window": 297,
+        "requests_drained": 16,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 138928,
+        "output_tokens_per_second": 154.36444444444444,
+        "output_tokens_per_second_per_chip": 77.18222222222222,
+        "decode_tokens_per_second_p90": 19.434416608347767,
+        "decode_speed_samples": 297,
+        "ttft_seconds_p95": 6.022103324346242,
+        "client_inflight_seconds": {
+          "0": 0.0002445625141263008,
+          "1": 0.0010403124615550041,
+          "2": 0.0007465686649084091,
+          "3": 0.0006638076156377792,
+          "4": 0.000629727728664875,
+          "5": 0.0009495308622717857,
+          "6": 0.0006881579756736755,
+          "7": 0.0007271282374858856,
+          "8": 0.0006937375292181969,
+          "9": 0.0006181970238685608,
+          "10": 0.0006352579221129417,
+          "11": 0.0006167376413941383,
+          "12": 0.0009114593267440796,
+          "13": 0.0006775986403226852,
+          "14": 0.0006711278110742569,
+          "15": 0.8902508988976479,
+          "16": 899.0992351891473
+        },
+        "mean_client_inflight": 15.998906588048364,
+        "full_concurrency_fraction": 0.9989991502101636,
+        "drain_seconds": 155.48904144298285,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0
+      },
+      "client": {
+        "tool_version": "0.1.2",
+        "schema": "swe-prefix-reuse/v1",
+        "run_id": "a26cf41bbad341bcbe963d7258d224ac",
+        "started_at_unix": 1790942326.4773111,
+        "model": "qwen3.5-35b-a3b",
+        "workload_sha256": "4e62e54ef47497fd916a6c2906b220b3af400f87873ea0784740fed3f61e78c8",
+        "tokenizer": {
+          "fingerprint": "319f580a2fc8d2ff1e1f48a26ea0c29eea35798d747e7188ca584e92c014bdf9",
+          "transformers": "5.18.0",
+          "enable_thinking": true
+        },
+        "concurrency": 16,
+        "data_parallel_size": null,
+        "routing_policy": "server/relay managed; X-Correlation-ID per session",
+        "duration": 900.0,
+        "chips": 2,
+        "seed": 0,
+        "timeout": 1800,
+        "server_max_context": 262144,
+        "cache_policy": "unique salt per session play; reused within session; no cross-session reuse",
+        "window_policy": "cold-start fixed duration; count streamed tokens in window; drain in-flight only",
+        "server_metadata": null
+      },
+      "metrics": {
+        "output_tps": 154.36444444444444,
+        "decode_p90_tps": 19.434416608347767,
+        "ttft_p95_ms": 6022.103324346242,
+        "completed_requests": 297
+      },
+      "package_versions": {
+        "vllm": "0.23.0+empty",
+        "vllm_ascend": "0.23.0.post1",
+        "vllm-hust-utility-victim": "0.1.0.dev2"
+      },
+      "hardware_snapshot_present": true,
+      "requests_artifact_sha256": "df44b13484cd955382c096e81587d95f13ca0e75e31153713fca8651f82779dd",
+      "source_artifacts": [
+        {
+          "path": "results/on-m65-c16-r2/config.json",
+          "sha256": "ce0fc118cba52dc9b4c87a2539106f45ef442db385b0e19faff02e436b3c5fb0",
+          "bytes": 985
+        },
+        {
+          "path": "results/on-m65-c16-r2/summary.json",
+          "sha256": "966fd61ad5358532a28e9f5be0170fae8cf94cbef57c5b715fce26376f709cbb",
+          "bytes": 1390
+        },
+        {
+          "path": "results/on-m65-c16-r2/requests.jsonl",
+          "sha256": "df44b13484cd955382c096e81587d95f13ca0e75e31153713fca8651f82779dd",
+          "bytes": 4550117
+        },
+        {
+          "path": "results/on-m65-c16-r2.after.prom",
+          "sha256": "11d0ba84f359e6bf236614fbf938c9f5300675f531641c31e38d2d452ae53cfd",
+          "bytes": 53952
+        },
+        {
+          "path": "results/on-m65-c16-r2.before.prom",
+          "sha256": "c20b17c479a2e1df936730694cb9e460e4cc2db3b98a7860400c9bc006b72629",
+          "bytes": 51223
+        },
+        {
+          "path": "results/on-m65-c16-r2.hardware.txt",
+          "sha256": "5d7e650bb2a06cd4b27b21175fdf0e2bbdaa13ac7a3a8c8ca6a389aa76b078d1",
+          "bytes": 2223
+        },
+        {
+          "path": "results/on-m65-c16-r2.server.log",
+          "sha256": "bd58ed49ef8280ae399e2277435fce7d3ae67db3785e6c0d07a709ad4fb48c7d",
+          "bytes": 100327
+        },
+        {
+          "path": "results/on-m65-c16-r2.versions.txt",
+          "sha256": "cce3be5c9edf5bd23f009d941ce6ff87266af2baebae5b97b15cc7a08927a6b0",
+          "bytes": 2071
+        }
+      ],
+      "plugin_events": [
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "runtime_effective {\"actual_kv_freed_verified\": false, \"mechanism\": \"ascend-utility-victim\", \"scope\": \"victim_selection_only\", \"selection_changed\": true, \"tokens_proxy\": 41305}"
+      ],
+      "preemption_counter": {
+        "before": 0.0,
+        "after": 184.0,
+        "delta": 184.0,
+        "scope": "Before/after client invocation, including drain; not a strict 900s counter",
+        "status": "recorded"
+      },
+      "validation": {
+        "raw_window_tokens_verified": true,
+        "raw_request_budgets_verified": true,
+        "raw_percentiles_verified": true,
+        "prefix_cache_enabled": false,
+        "owned_devices_released": null,
+        "model_quality_evaluated": false
+      }
+    },
+    {
+      "run_id": "c88a69896c4f44138574814b6d6d0f70",
+      "point_id": "utility-victim-off-m65-c16-r3-20261002",
+      "summary": {
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 337,
+        "max_prompt_tokens_observed": 40244,
+        "prompt_tokens_p50": 13086.0,
+        "max_turn_index_reached": 29,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 6,
+        "requests_completed_in_window": 321,
+        "requests_drained": 16,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 157362,
+        "output_tokens_per_second": 174.84666666666666,
+        "output_tokens_per_second_per_chip": 87.42333333333333,
+        "decode_tokens_per_second_p90": 19.4974980516671,
+        "decode_speed_samples": 321,
+        "ttft_seconds_p95": 9.86155531462282,
+        "client_inflight_seconds": {
+          "0": 0.00020624231547117233,
+          "1": 0.0009749503806233406,
+          "2": 0.0007316591218113899,
+          "3": 0.0006299074739217758,
+          "4": 0.0006316369399428368,
+          "5": 0.0009391102939844131,
+          "6": 0.0006750980392098427,
+          "7": 0.0007283389568328857,
+          "8": 0.0006947387009859085,
+          "9": 0.0006229663267731667,
+          "10": 0.0006302772089838982,
+          "11": 0.0006245281547307968,
+          "12": 0.0009065400809049606,
+          "13": 0.000683157704770565,
+          "14": 0.0006851879879832268,
+          "15": 1.0247843256220222,
+          "16": 898.964851334691
+        },
+        "mean_client_inflight": 15.998759749602112,
+        "full_concurrency_fraction": 0.9988498348163234,
+        "drain_seconds": 154.5760268094018,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0
+      },
+      "client": {
+        "tool_version": "0.1.2",
+        "schema": "swe-prefix-reuse/v1",
+        "run_id": "c88a69896c4f44138574814b6d6d0f70",
+        "started_at_unix": 1790943853.6078978,
+        "model": "qwen3.5-35b-a3b",
+        "workload_sha256": "4e62e54ef47497fd916a6c2906b220b3af400f87873ea0784740fed3f61e78c8",
+        "tokenizer": {
+          "fingerprint": "319f580a2fc8d2ff1e1f48a26ea0c29eea35798d747e7188ca584e92c014bdf9",
+          "transformers": "5.18.0",
+          "enable_thinking": true
+        },
+        "concurrency": 16,
+        "data_parallel_size": null,
+        "routing_policy": "server/relay managed; X-Correlation-ID per session",
+        "duration": 900.0,
+        "chips": 2,
+        "seed": 0,
+        "timeout": 1800,
+        "server_max_context": 262144,
+        "cache_policy": "unique salt per session play; reused within session; no cross-session reuse",
+        "window_policy": "cold-start fixed duration; count streamed tokens in window; drain in-flight only",
+        "server_metadata": null
+      },
+      "metrics": {
+        "output_tps": 174.84666666666666,
+        "decode_p90_tps": 19.4974980516671,
+        "ttft_p95_ms": 9861.55531462282,
+        "completed_requests": 321
+      },
+      "package_versions": {
+        "vllm": "0.23.0+empty",
+        "vllm_ascend": "0.23.0.post1",
+        "vllm-hust-utility-victim": "0.1.0.dev2"
+      },
+      "hardware_snapshot_present": true,
+      "requests_artifact_sha256": "da322b4c3a29eb7ccd48183d0a9ca45e4809b73770934e20a8a1c9669fe7c5b5",
+      "source_artifacts": [
+        {
+          "path": "results/off-m65-c16-r3/config.json",
+          "sha256": "f48e8716f96941e1190982492a00aaab73474b53d0cbf764c58b253af5acb27e",
+          "bytes": 985
+        },
+        {
+          "path": "results/off-m65-c16-r3/summary.json",
+          "sha256": "0f35a99566ac97699cefb54ebdc56a3fccaadcda7eb46614d0cf87787ab901dd",
+          "bytes": 1386
+        },
+        {
+          "path": "results/off-m65-c16-r3/requests.jsonl",
+          "sha256": "da322b4c3a29eb7ccd48183d0a9ca45e4809b73770934e20a8a1c9669fe7c5b5",
+          "bytes": 5187647
+        },
+        {
+          "path": "results/off-m65-c16-r3.after.prom",
+          "sha256": "773f35aac1a5cbf4d050fbe13be3c39994827a25c8e2afe931cbf82197cc08f4",
+          "bytes": 53952
+        },
+        {
+          "path": "results/off-m65-c16-r3.before.prom",
+          "sha256": "7479e427401182e800f198ec62707c6cf6562bc83b258327f7de6c26bd218b13",
+          "bytes": 51226
+        },
+        {
+          "path": "results/off-m65-c16-r3.hardware.txt",
+          "sha256": "280453484bd067d085a6fef1bf51cc243c6706bf2afdb08ec54845824701b598",
+          "bytes": 2223
+        },
+        {
+          "path": "results/off-m65-c16-r3.server.log",
+          "sha256": "eb88bbce26c2c033e237cf6ab35cfbb8ac187bc4e91c1cd46206a1a0d3185ae0",
+          "bytes": 101235
+        },
+        {
+          "path": "results/off-m65-c16-r3.versions.txt",
+          "sha256": "cce3be5c9edf5bd23f009d941ce6ff87266af2baebae5b97b15cc7a08927a6b0",
+          "bytes": 2071
+        }
+      ],
+      "plugin_events": [],
+      "preemption_counter": {
+        "before": 0.0,
+        "after": 338.0,
+        "delta": 338.0,
+        "scope": "Before/after client invocation, including drain; not a strict 900s counter",
+        "status": "recorded"
+      },
+      "validation": {
+        "raw_window_tokens_verified": true,
+        "raw_request_budgets_verified": true,
+        "raw_percentiles_verified": true,
+        "prefix_cache_enabled": false,
+        "owned_devices_released": null,
+        "model_quality_evaluated": false
+      }
+    },
+    {
+      "run_id": "fd9a0a51dfda42f5b4d853abf72c47a0",
+      "point_id": "utility-victim-on-m65-c16-r3-20261002",
+      "summary": {
+        "valid": true,
+        "measurement_seconds": 900.0,
+        "requests_started": 316,
+        "max_prompt_tokens_observed": 40244,
+        "prompt_tokens_p50": 12045.5,
+        "max_turn_index_reached": 29,
+        "distinct_trajectories_started": 8,
+        "sessions_completed": 4,
+        "requests_completed_in_window": 300,
+        "requests_drained": 16,
+        "failed_requests": 0,
+        "observed_output_tokens_in_window": 141410,
+        "output_tokens_per_second": 157.12222222222223,
+        "output_tokens_per_second_per_chip": 78.56111111111112,
+        "decode_tokens_per_second_p90": 19.15825463796741,
+        "decode_speed_samples": 300,
+        "ttft_seconds_p95": 5.5759019405115415,
+        "client_inflight_seconds": {
+          "0": 0.00020168349146842957,
+          "1": 0.0010407119989395142,
+          "2": 0.000737067312002182,
+          "3": 0.0006679687649011612,
+          "4": 0.0006270669400691986,
+          "5": 0.0009568007662892342,
+          "6": 0.0007042791694402695,
+          "7": 0.0007271673530340195,
+          "8": 0.0006932783871889114,
+          "9": 0.0006479481235146523,
+          "10": 0.0006719669327139854,
+          "11": 0.000634227879345417,
+          "12": 0.0009005004540085793,
+          "13": 0.0006965678185224533,
+          "14": 0.0007094191387295723,
+          "15": 0.911048230715096,
+          "16": 899.0783351147547
+        },
+        "mean_client_inflight": 15.998883421510044,
+        "full_concurrency_fraction": 0.998975927905283,
+        "drain_seconds": 185.93415783997625,
+        "aborted": false,
+        "planned_measurement_seconds": 900.0
+      },
+      "client": {
+        "tool_version": "0.1.2",
+        "schema": "swe-prefix-reuse/v1",
+        "run_id": "fd9a0a51dfda42f5b4d853abf72c47a0",
+        "started_at_unix": 1790945226.8899918,
+        "model": "qwen3.5-35b-a3b",
+        "workload_sha256": "4e62e54ef47497fd916a6c2906b220b3af400f87873ea0784740fed3f61e78c8",
+        "tokenizer": {
+          "fingerprint": "319f580a2fc8d2ff1e1f48a26ea0c29eea35798d747e7188ca584e92c014bdf9",
+          "transformers": "5.18.0",
+          "enable_thinking": true
+        },
+        "concurrency": 16,
+        "data_parallel_size": null,
+        "routing_policy": "server/relay managed; X-Correlation-ID per session",
+        "duration": 900.0,
+        "chips": 2,
+        "seed": 0,
+        "timeout": 1800,
+        "server_max_context": 262144,
+        "cache_policy": "unique salt per session play; reused within session; no cross-session reuse",
+        "window_policy": "cold-start fixed duration; count streamed tokens in window; drain in-flight only",
+        "server_metadata": null
+      },
+      "metrics": {
+        "output_tps": 157.12222222222223,
+        "decode_p90_tps": 19.15825463796741,
+        "ttft_p95_ms": 5575.901940511541,
+        "completed_requests": 300
+      },
+      "package_versions": {
+        "vllm": "0.23.0+empty",
+        "vllm_ascend": "0.23.0.post1",
+        "vllm-hust-utility-victim": "0.1.0.dev2"
+      },
+      "hardware_snapshot_present": true,
+      "requests_artifact_sha256": "455c90d5a4c18464b8d15714e8bd85e6cf6504a77599499cc21473d00d56c45b",
+      "source_artifacts": [
+        {
+          "path": "results/on-m65-c16-r3/config.json",
+          "sha256": "170780a2ef79067c0c66ce956d41c9801eaccba17c4ab25c8dd9ea1e33218273",
+          "bytes": 985
+        },
+        {
+          "path": "results/on-m65-c16-r3/summary.json",
+          "sha256": "5fb5b2bd911c37538dc538bb1d672ef6fc509480e6415c095bc8234511589c82",
+          "bytes": 1388
+        },
+        {
+          "path": "results/on-m65-c16-r3/requests.jsonl",
+          "sha256": "455c90d5a4c18464b8d15714e8bd85e6cf6504a77599499cc21473d00d56c45b",
+          "bytes": 4620134
+        },
+        {
+          "path": "results/on-m65-c16-r3.after.prom",
+          "sha256": "18032460d240aea569b4401e3840a5de45dbeb732a1db84eb48683cb64e2f104",
+          "bytes": 53951
+        },
+        {
+          "path": "results/on-m65-c16-r3.before.prom",
+          "sha256": "1e935d6660774f2810680f3f149cc96b49c1bce90548dfa254a3d7b02de1003a",
+          "bytes": 51227
+        },
+        {
+          "path": "results/on-m65-c16-r3.hardware.txt",
+          "sha256": "d715469ee6845fa7af9861122bd6c54d646070658d61669ff65e322bf99d9897",
+          "bytes": 2223
+        },
+        {
+          "path": "results/on-m65-c16-r3.server.log",
+          "sha256": "88686ebcf2c264550627ed955cba4f8b578cb3a00e394859771787d1904472c5",
+          "bytes": 101152
+        },
+        {
+          "path": "results/on-m65-c16-r3.versions.txt",
+          "sha256": "cce3be5c9edf5bd23f009d941ce6ff87266af2baebae5b97b15cc7a08927a6b0",
+          "bytes": 2071
+        }
+      ],
+      "plugin_events": [
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "installed {\"backend\": \"core-contract-v1\", \"mechanism\": \"ascend-utility-victim\"}",
+        "runtime_effective {\"actual_kv_freed_verified\": false, \"mechanism\": \"ascend-utility-victim\", \"scope\": \"victim_selection_only\", \"selection_changed\": true, \"tokens_proxy\": 41304}"
+      ],
+      "preemption_counter": {
+        "before": 0.0,
+        "after": 199.0,
+        "delta": 199.0,
+        "scope": "Before/after client invocation, including drain; not a strict 900s counter",
+        "status": "recorded"
+      },
+      "validation": {
+        "raw_window_tokens_verified": true,
+        "raw_request_budgets_verified": true,
+        "raw_percentiles_verified": true,
+        "prefix_cache_enabled": false,
+        "owned_devices_released": null,
+        "model_quality_evaluated": false
+      }
+    }
+  ]
+}

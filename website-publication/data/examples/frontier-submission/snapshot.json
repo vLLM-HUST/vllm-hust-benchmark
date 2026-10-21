@@ -1,0 +1,154 @@
+{
+  "schema_version": "leaderboard-frontier/v1",
+  "cohorts": [
+    {
+      "id": "qwen35-35b-a3b-bf16-agentx256k-smoke-v1",
+      "model": {
+        "id": "qwen35-35b-a3b-712cf743",
+        "label": "Qwen3.5-35B-A3B",
+        "revision": "712cf74392b05026a6db2bf213d343747d1f6d45"
+      },
+      "precision": {
+        "id": "bf16-weights-compute-kv",
+        "label": "BF16"
+      },
+      "context_tokens": 262144,
+      "workload": {
+        "id": "agentx256k-8fecd2fc-smoke900-v1",
+        "label": "AgentX 256K · 15 min smoke",
+        "contract": {
+          "profile": "smoke",
+          "measurement_seconds": 900,
+          "formal_seconds": 3600,
+          "protocol": {
+            "methodology_url": "https://inferencex.semianalysis.com/agentx/methodology",
+            "methodology_checked_utc": "2026-09-23",
+            "harness_repository": "https://github.com/SemiAnalysisAI/agentx-harness",
+            "harness_commit": "56a0cf70f4c0359454ee4bd15a17770b541a3e3e",
+            "dataset": "semianalysisai/cc-traces-weka-062126-256k",
+            "dataset_revision": "8fecd2fc56694469f758f0afbbb6335ad3043740",
+            "dataset_alias": "semianalysis_cc_traces_weka_062126_256k",
+            "dataset_sessions": 393,
+            "scenario": "inferencex-agentx-mvp",
+            "seed": 20260923,
+            "trajectory_start_min_ratio": 0.25,
+            "trajectory_start_max_ratio": 0.75,
+            "warmup_requests_per_lane": 10,
+            "profiles": {
+              "formal": {
+                "measurement_seconds": 3600
+              },
+              "smoke": {
+                "measurement_seconds": 900
+              }
+            }
+          },
+          "source_pool": {
+            "sessions": 393,
+            "requests": 68266,
+            "filtering": "No additional filtering, clipping or output-budget reduction"
+          },
+          "tokenizer_revision": "712cf74392b05026a6db2bf213d343747d1f6d45",
+          "chat_template": "Model-native; enable_thinking=false",
+          "arrival": "Official closed-loop session DAG replay; original relative delays; concurrency counts session trees, not HTTP requests; concurrent loads may be swept as distinct points",
+          "warmup": "Mandatory snapshot primers + 10 requests/lane; excluded from measurement; fresh server per arm; per-play prefix cache busting",
+          "output_policy": "Full requested outputs; ignore_eos=true; greedy benchmark-only synthetic MTP2 with matched SPEED-Bench AL2.63",
+          "acceptance": "Official harness submission_valid=true, no request errors or output-length mismatches; not model answer-quality evaluation",
+          "aggregation": "One unpooled run per point; arm comparisons use same shared-host physical pair at each load. Pair/host/configuration may differ across series or loads; consult each point. Official output throughput preserves native observation/drain accounting. Closed-loop reached mixes differ; not ABBA or repeatability evidence.",
+          "status": "Short smoke; tuning incomplete; no one-hour formal result",
+          "cost": "Not priced; output tokens/s/chip is resource productivity, not revenue",
+          "concurrency_curves_url": "./assets/frontier-qwen35-concurrency.svg?v=capacity16-20260923"
+        }
+      }
+    }
+  ],
+  "points": [
+    {
+      "id": "qwen35-agentx-smoke-betterscale-tp2-c4-20260923",
+      "cohort_id": "qwen35-35b-a3b-bf16-agentx256k-smoke-v1",
+      "label": "BetterScale (experimental) · TP2 / C4 · 15 min smoke",
+      "configuration": {
+        "engine": "vLLM + vLLM-Ascend",
+        "engine_version": "0.25.1 / 0.25.1rc1",
+        "mods": [
+          "betterscale"
+        ],
+        "hardware": {
+          "label": "Ascend 910B2",
+          "accelerator_count": 2
+        },
+        "context_capacity_tokens": 262144,
+        "parameters": {
+          "tensor_parallel_size": 2,
+          "pipeline_parallel_size": 1,
+          "data_parallel_size": 1,
+          "expert_parallel": false,
+          "max_num_seqs": 8,
+          "max_num_batched_tokens": 4096,
+          "async_scheduling": true,
+          "prefix_caching": true,
+          "mamba_cache_mode": "align",
+          "gpu_memory_utilization": 0.9,
+          "host_kv_budget_gib": 0,
+          "host_memory_allocation_gib": 502.89949131011963,
+          "host_memory_policy": "Proportional 2/8 host allocation; no host KV offload; shared-host colocation, not isolated hardware ceiling",
+          "mtp_draft_tokens": 2,
+          "synthetic_acceptance_length": 2.63,
+          "thinking": false,
+          "generation_temperature": 0,
+          "task_queue_enable": 0,
+          "graph_mode": "FULL prefill / mixed / decode",
+          "graph_capture_sizes": [
+            3,
+            6,
+            12,
+            16,
+            24,
+            32,
+            64,
+            128,
+            256,
+            512,
+            1024,
+            1536,
+            2048,
+            4096
+          ],
+          "runtime_base_commits": {
+            "vllm": "752a3a504485790a2e8491cacbb35c137339ad34",
+            "vllm-ascend": "9bf964cb4b87c8cd0d6852c41a55b3c29711fa95"
+          },
+          "source_capsule": "moe-full5 / candidate-runtime1",
+          "availability": "Experimental source capsule, not a released wheel qualification",
+          "sampler": "Shared explicit benchmark-only synthetic sampler; rank0 broadcast; no quality claim"
+        }
+      },
+      "load": {
+        "concurrency": 4,
+        "unit": "live agent session trees (not HTTP requests)"
+      },
+      "metrics": {
+        "output_tps": 84.62433838849498,
+        "tpot_ms": 14.773091788515762,
+        "ttft_p95_ms": 4189.507085499999,
+        "tpot_p95_ms": 20.08189176668113,
+        "e2e_p95_ms": 52844.168638999996,
+        "ttft_p50_ms": 806.407752,
+        "decode_per_user_p50_tps": 79.88701077122406,
+        "completed_requests": 111.0,
+        "decode_p90_tps": 97.66183282742962
+      },
+      "evidence": {
+        "status": "measured",
+        "profile": "smoke",
+        "measurement_seconds": 900,
+        "tuning_complete": false,
+        "url": "https://github.com/vLLM-HUST/vllm-hust-website/blob/main/docs/FRONTIER-QWEN35-AGENTX-SMOKE.md",
+        "run_ids": [
+          "20260923T103407Z-smoke-c4-90c340f1"
+        ],
+        "aggregation": "One unpooled run; official AIPerf metrics; 900s sending window plus official drain/observation accounting; not formal or tuned frontier"
+      }
+    }
+  ]
+}

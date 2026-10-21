@@ -1,0 +1,143 @@
+{
+  "schema_version": "plugin-workload-navigation/v1",
+  "traits": {
+    "profiling_analysis": {
+      "label_en": "Profiling / Analysis",
+      "label_zh": "性能剖析 / 分析",
+      "description_en": "Understand captured inference structure and correlate scheduling context with supported device evidence.",
+      "description_zh": "理解采集到的推理执行结构，将调度上下文与受支持的设备证据关联。"
+    },
+    "model_preparation": {
+      "label_en": "Model preparation",
+      "label_zh": "模型制备",
+      "description_en": "Prepare, transform, or validate model artifacts before they enter an inference runtime.",
+      "description_zh": "在模型进入推理运行时之前制备、转换或校验模型产物。"
+    },
+    "lifecycle_control": {
+      "label_en": "Lifecycle control",
+      "label_zh": "生命周期控制",
+      "description_en": "Observe request and KV lifecycle events or report bounded signals to an external control plane.",
+      "description_zh": "观察请求与 KV 生命周期事件，或向外部控制面报告有界信号。"
+    },
+    "service_cold_start": {
+      "label_en": "Service cold start",
+      "label_zh": "服务冷启动",
+      "description_en": "Model loading and process-to-ready latency limit deployment, elastic scale-out, or rolling replacement.",
+      "description_zh": "模型加载和进程到就绪时延限制部署、弹性扩容或滚动替换。"
+    },
+    "service_suspend_resume": {
+      "label_en": "Suspend / Resume",
+      "label_zh": "挂起 / 恢复",
+      "description_en": "Idle resource release, worker suspension, wake latency, or exact service reassembly is the target.",
+      "description_zh": "目标是空闲资源释放、worker 挂起、唤醒时延或服务精确重组。"
+    },
+    "adapter_serving": {
+      "label_en": "Adapter serving",
+      "label_zh": "适配器服务",
+      "description_en": "Heterogeneous LoRA identity, bounded residency, isolation, or adapter switching shapes the workload.",
+      "description_zh": "异构 LoRA 身份、有界驻留、隔离或适配器切换决定负载特征。"
+    },
+    "request_state_recovery": {
+      "label_en": "Request-state recovery",
+      "label_zh": "请求状态恢复",
+      "description_en": "Preemption, offload, restore, session continuation, or workflow state recovery is exercised without implying service restart.",
+      "description_zh": "覆盖抢占、卸载、恢复、会话续接或工作流状态恢复，不代表服务重启。"
+    },
+    "long_context": {
+      "label_en": "Long context",
+      "label_zh": "长上下文",
+      "description_en": "Large prompts or histories that put sustained pressure on KV capacity and movement.",
+      "description_zh": "大输入或长历史持续占用 KV 容量，并增加数据搬运压力。"
+    },
+    "prefill_heavy": {
+      "label_en": "Prefill-heavy",
+      "label_zh": "Prefill 密集",
+      "description_en": "Workloads dominated by prompt ingestion, chunking, or prefill scheduling.",
+      "description_zh": "主要瓶颈位于提示词摄入、分块或 Prefill 调度。"
+    },
+    "decode_heavy": {
+      "label_en": "Decode-heavy",
+      "label_zh": "Decode 密集",
+      "description_en": "Long generation or compute-heavy decoding paths.",
+      "description_zh": "长输出或 Decode 阶段计算占比较高。"
+    },
+    "high_concurrency": {
+      "label_en": "High concurrency",
+      "label_zh": "高并发",
+      "description_en": "Many simultaneous requests competing for scheduler and execution resources.",
+      "description_zh": "大量并发请求竞争调度与执行资源。"
+    },
+    "latency_slo": {
+      "label_en": "Latency / SLO",
+      "label_zh": "时延 / SLO",
+      "description_en": "Interactive or multi-tenant serving constrained by TTFT, TBT, or end-to-end deadlines.",
+      "description_zh": "受 TTFT、TBT 或端到端 deadline 约束的交互式、多租户服务。"
+    },
+    "repeated_prefix_agent": {
+      "label_en": "Repeated prefix / Agent",
+      "label_zh": "重复前缀 / Agent",
+      "description_en": "Repeated prompts, reusable state, or multi-step agent sessions.",
+      "description_zh": "存在重复提示、可复用状态或多步 Agent 会话。"
+    },
+    "memory_kv_pressure": {
+      "label_en": "Memory / KV pressure",
+      "label_zh": "显存 / KV 压力",
+      "description_en": "KV capacity, residency, compression, quantization, or offload is the limiting factor.",
+      "description_zh": "KV 容量、驻留、压缩、量化或卸载成为主要限制。"
+    },
+    "moe": {
+      "label_en": "MoE",
+      "label_zh": "MoE",
+      "description_en": "Expert models constrained by expert placement, transfer, or offload.",
+      "description_zh": "受专家放置、搬运或卸载限制的 MoE 模型。"
+    },
+    "distributed_pipeline": {
+      "label_en": "Distributed",
+      "label_zh": "分布式",
+      "description_en": "Cross-device communication, pipeline scheduling, or transferred KV state.",
+      "description_zh": "涉及跨设备通信、流水线调度或 KV 状态传输。"
+    }
+  },
+  "plugins": {
+    "state-scheduler": ["profiling_analysis"],
+    "vllm-hust-opset": ["decode_heavy", "prefill_heavy"],
+    "traceloom": ["profiling_analysis"],
+    "gdn-state-codec": ["decode_heavy", "repeated_prefix_agent"],
+    "stateaxis-automatic-prefix-cache": ["repeated_prefix_agent", "memory_kv_pressure"],
+    "stateaxis-async-kv-transfer": ["distributed_pipeline", "memory_kv_pressure", "request_state_recovery"],
+    "stateaxis-pipelined-weight-loading": ["service_cold_start"],
+    "ascend-quant-toolkit": ["model_preparation"],
+    "slicegpt-migration": ["model_preparation", "service_cold_start"],
+    "adm": ["distributed_pipeline"],
+    "bidkv": ["memory_kv_pressure", "high_concurrency"],
+    "diffspec": ["decode_heavy", "latency_slo"],
+    "vspec": ["decode_heavy", "latency_slo"],
+    "latchmoe": ["moe", "memory_kv_pressure"],
+    "opfuse": ["prefill_heavy", "decode_heavy"],
+    "core-attention-boundary": ["prefill_heavy", "decode_heavy"],
+    "kvcompress-ascend": ["long_context", "memory_kv_pressure"],
+    "knorm-migration": ["long_context", "memory_kv_pressure"],
+    "kv-tiering-migration": ["long_context", "memory_kv_pressure", "request_state_recovery"],
+    "mooncake-vllm-connectors": ["repeated_prefix_agent", "distributed_pipeline"],
+    "pegaflow-vllm-connectors": ["repeated_prefix_agent", "memory_kv_pressure"],
+    "quantized-kv-cache-migration": ["long_context", "memory_kv_pressure"],
+    "pyramidkv-ascend-migration": ["long_context", "memory_kv_pressure"],
+    "split-batch-full-graph-migration": ["high_concurrency", "prefill_heavy", "decode_heavy"],
+    "pipeline-microbatch-migration": ["distributed_pipeline", "high_concurrency"],
+    "betterscale": ["distributed_pipeline"],
+    "prefix-router-migration": ["repeated_prefix_agent", "high_concurrency", "latency_slo"],
+    "simllm-migration": ["repeated_prefix_agent", "prefill_heavy", "memory_kv_pressure"],
+    "request-lifecycle-profiler": ["latency_slo", "high_concurrency"],
+    "kv-transfer-observability-migration": ["lifecycle_control", "memory_kv_pressure"],
+    "clm-lifecycle": ["lifecycle_control", "repeated_prefix_agent"],
+    "request-throttling-controller": ["high_concurrency", "latency_slo", "lifecycle_control"],
+    "tricard-clm-lifecycle": ["lifecycle_control", "repeated_prefix_agent"],
+    "ride-control-plane": ["lifecycle_control"],
+    "vllm-local-control-host": ["lifecycle_control"],
+    "ride-runtime-bridge": ["lifecycle_control"],
+    "quality-bounded-inference": ["latency_slo", "high_concurrency"],
+    "llm-serving-cost-pricing-model": ["profiling_analysis"],
+    "kv-materialization-arrival-control": ["repeated_prefix_agent", "memory_kv_pressure"],
+    "unified-communication-migration": ["distributed_pipeline"]
+  }
+}

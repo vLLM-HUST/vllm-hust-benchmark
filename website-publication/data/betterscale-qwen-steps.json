@@ -1,0 +1,5005 @@
+{
+  "scope": "Same hw3 6/7 ABBA, two measured cohorts after one shape warmup pass per process. APC enabled but cold shape cohorts, no MTP, AIV both. Slower TP rank's per-cohort mean; equally weight cohorts. Ranges are observed cohort extrema, not confidence intervals.",
+  "metric": "External device execute-start to next execute-start. Forward envelope includes host submission/update waits; prepare/after-forward are not pure CPU overhead or device-idle time.",
+  "missing_cohorts": [],
+  "points": [
+    {
+      "case": {
+        "kind": "decode",
+        "batch": 1,
+        "context": 1024
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case0",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 30.171855032444,
+              "forward_ms": 28.86997753381729,
+              "prepare_ms": 0.25774875096976757,
+              "after_forward_ms": 1.0441287495195866
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1, num_reqs=1, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case0",
+            "rank": 1,
+            "count": 32,
+            "metrics": {
+              "period_ms": 30.193067610263824,
+              "forward_ms": 28.89308261871338,
+              "prepare_ms": 0.25797687470912933,
+              "after_forward_ms": 1.0420081242918968
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1, num_reqs=1, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case20",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 30.180066883563995,
+              "forward_ms": 28.8733531832695,
+              "prepare_ms": 0.25807437486946583,
+              "after_forward_ms": 1.0486393719911575
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1, num_reqs=1, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case20",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 30.202248632907867,
+              "forward_ms": 28.90018892288208,
+              "prepare_ms": 0.25700812693685293,
+              "after_forward_ms": 1.0450518727302551
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1, num_reqs=1, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case0",
+            "rank": 1,
+            "count": 32,
+            "metrics": {
+              "period_ms": 27.068403661251068,
+              "forward_ms": 25.842090606689453,
+              "prepare_ms": 0.18107875064015388,
+              "after_forward_ms": 1.0452343858778477
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case0",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 27.071461141109467,
+              "forward_ms": 25.84580558538437,
+              "prepare_ms": 0.18395062536001205,
+              "after_forward_ms": 1.0417050048708916
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case20",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 27.098533749580383,
+              "forward_ms": 25.87375235557556,
+              "prepare_ms": 0.18337062373757362,
+              "after_forward_ms": 1.0414106212556362
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case20",
+            "rank": 1,
+            "count": 32,
+            "metrics": {
+              "period_ms": 27.116401851177216,
+              "forward_ms": 25.884431183338165,
+              "prepare_ms": 0.1853493764065206,
+              "after_forward_ms": 1.0466212593019009
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 128,
+          "period_ms": {
+            "mean": 30.186809539794922,
+            "low": 30.171855032444,
+            "high": 30.202248632907867
+          },
+          "forward_ms": {
+            "mean": 28.884150564670563,
+            "low": 28.86997753381729,
+            "high": 28.90018892288208
+          },
+          "prepare_ms": {
+            "mean": 0.2577020318713039,
+            "low": 0.25700812693685293,
+            "high": 0.25807437486946583
+          },
+          "after_forward_ms": {
+            "mean": 1.044957029633224,
+            "low": 1.0420081242918968,
+            "high": 1.0486393719911575
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 128,
+          "period_ms": {
+            "mean": 27.088700100779533,
+            "low": 27.068403661251068,
+            "high": 27.116401851177216
+          },
+          "forward_ms": {
+            "mean": 25.861519932746887,
+            "low": 25.842090606689453,
+            "high": 25.884431183338165
+          },
+          "prepare_ms": {
+            "mean": 0.18343734403606504,
+            "low": 0.18107875064015388,
+            "high": 0.1853493764065206
+          },
+          "after_forward_ms": {
+            "mean": 1.043742817826569,
+            "low": 1.0414106212556362,
+            "high": 1.0466212593019009
+          }
+        }
+      },
+      "period_reduction_pct": 10.26312315294926,
+      "step_rate_gain_pct": 11.436907003618945
+    },
+    {
+      "case": {
+        "kind": "decode",
+        "batch": 2,
+        "context": 1024
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case1",
+            "rank": 1,
+            "count": 31,
+            "metrics": {
+              "period_ms": 31.429007068757087,
+              "forward_ms": 30.095150978334487,
+              "prepare_ms": 0.25865677287501676,
+              "after_forward_ms": 1.075199350234001
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=2, num_reqs=2, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case1",
+            "rank": 1,
+            "count": 31,
+            "metrics": {
+              "period_ms": 31.398918705601847,
+              "forward_ms": 30.062291606780022,
+              "prepare_ms": 0.2596974199818027,
+              "after_forward_ms": 1.0769296730718305
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=2, num_reqs=2, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case19",
+            "rank": 0,
+            "count": 30,
+            "metrics": {
+              "period_ms": 31.382282066345216,
+              "forward_ms": 30.0433754603068,
+              "prepare_ms": 0.2589686671892802,
+              "after_forward_ms": 1.079938006401062
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=2, num_reqs=2, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case19",
+            "rank": 0,
+            "count": 31,
+            "metrics": {
+              "period_ms": 31.383798107024163,
+              "forward_ms": 30.045750279580393,
+              "prepare_ms": 0.25807935480148564,
+              "after_forward_ms": 1.07996839861716
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=2, num_reqs=2, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case1",
+            "rank": 0,
+            "count": 31,
+            "metrics": {
+              "period_ms": 28.071292261923514,
+              "forward_ms": 26.809658112064486,
+              "prepare_ms": 0.18291096629634981,
+              "after_forward_ms": 1.0787232268241145
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case1",
+            "rank": 1,
+            "count": 31,
+            "metrics": {
+              "period_ms": 28.039575945946478,
+              "forward_ms": 26.785361443796464,
+              "prepare_ms": 0.18142064540616928,
+              "after_forward_ms": 1.072794195144407
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case19",
+            "rank": 1,
+            "count": 31,
+            "metrics": {
+              "period_ms": 28.138161751531786,
+              "forward_ms": 26.879236098258726,
+              "prepare_ms": 0.18553096777008427,
+              "after_forward_ms": 1.0733948330725394
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case19",
+            "rank": 1,
+            "count": 31,
+            "metrics": {
+              "period_ms": 28.137022018432617,
+              "forward_ms": 26.871856012651996,
+              "prepare_ms": 0.18610580650068098,
+              "after_forward_ms": 1.0790600046034782
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 123,
+          "period_ms": {
+            "mean": 31.398501486932076,
+            "low": 31.382282066345216,
+            "high": 31.429007068757087
+          },
+          "forward_ms": {
+            "mean": 30.061642081250426,
+            "low": 30.0433754603068,
+            "high": 30.095150978334487
+          },
+          "prepare_ms": {
+            "mean": 0.2588505537118963,
+            "low": 0.25807935480148564,
+            "high": 0.2596974199818027
+          },
+          "after_forward_ms": {
+            "mean": 1.0780088570810133,
+            "low": 1.075199350234001,
+            "high": 1.07996839861716
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 124,
+          "period_ms": {
+            "mean": 28.0965129944586,
+            "low": 28.039575945946478,
+            "high": 28.138161751531786
+          },
+          "forward_ms": {
+            "mean": 26.83652791669292,
+            "low": 26.785361443796464,
+            "high": 26.879236098258726
+          },
+          "prepare_ms": {
+            "mean": 0.1839920964933211,
+            "low": 0.18142064540616928,
+            "high": 0.18610580650068098
+          },
+          "after_forward_ms": {
+            "mean": 1.0759930649111347,
+            "low": 1.072794195144407,
+            "high": 1.0790600046034782
+          }
+        }
+      },
+      "period_reduction_pct": 10.516388795967702,
+      "step_rate_gain_pct": 11.75230710346411
+    },
+    {
+      "case": {
+        "kind": "decode",
+        "batch": 4,
+        "context": 1024
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case2",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 32.65208421904465,
+              "forward_ms": 31.280939233714136,
+              "prepare_ms": 0.2601744840885031,
+              "after_forward_ms": 1.1109703409260716
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=4, num_reqs=4, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case2",
+            "rank": 0,
+            "count": 29,
+            "metrics": {
+              "period_ms": 32.630352151804956,
+              "forward_ms": 31.258168911111767,
+              "prepare_ms": 0.25963241272959214,
+              "after_forward_ms": 1.1125503408497777
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=4, num_reqs=4, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case18",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 32.700351846629175,
+              "forward_ms": 31.32545517230856,
+              "prepare_ms": 0.26311862160419597,
+              "after_forward_ms": 1.1117786169052124
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=4, num_reqs=4, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case18",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 32.67490189650963,
+              "forward_ms": 31.30012689787766,
+              "prepare_ms": 0.26341517115461416,
+              "after_forward_ms": 1.111360003208292
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=4, num_reqs=4, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case2",
+            "rank": 0,
+            "count": 29,
+            "metrics": {
+              "period_ms": 29.281196660008924,
+              "forward_ms": 27.98716196520575,
+              "prepare_ms": 0.1820172426001779,
+              "after_forward_ms": 1.1120172327962414
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case2",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 29.267220727328596,
+              "forward_ms": 27.976119205869477,
+              "prepare_ms": 0.18158620595932007,
+              "after_forward_ms": 1.1095151654605209
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case18",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 29.301845484766467,
+              "forward_ms": 28.003813184540846,
+              "prepare_ms": 0.1867013799733129,
+              "after_forward_ms": 1.1113310353509311
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case18",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 29.301635873728785,
+              "forward_ms": 28.007087575978247,
+              "prepare_ms": 0.18673172438966817,
+              "after_forward_ms": 1.107816556404377
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 116,
+          "period_ms": {
+            "mean": 32.664422528497106,
+            "low": 32.630352151804956,
+            "high": 32.700351846629175
+          },
+          "forward_ms": {
+            "mean": 31.29117255375303,
+            "low": 31.258168911111767,
+            "high": 31.32545517230856
+          },
+          "prepare_ms": {
+            "mean": 0.26158517239422635,
+            "low": 0.25963241272959214,
+            "high": 0.26341517115461416
+          },
+          "after_forward_ms": {
+            "mean": 1.1116648254723385,
+            "low": 1.1109703409260716,
+            "high": 1.1125503408497777
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 116,
+          "period_ms": {
+            "mean": 29.287974686458192,
+            "low": 29.267220727328596,
+            "high": 29.301845484766467
+          },
+          "forward_ms": {
+            "mean": 27.99354548289858,
+            "low": 27.976119205869477,
+            "high": 28.007087575978247
+          },
+          "prepare_ms": {
+            "mean": 0.18425913823061976,
+            "low": 0.18158620595932007,
+            "high": 0.18673172438966817
+          },
+          "after_forward_ms": {
+            "mean": 1.1101699975030175,
+            "low": 1.107816556404377,
+            "high": 1.1120172327962414
+          }
+        }
+      },
+      "period_reduction_pct": 10.336774939441318,
+      "step_rate_gain_pct": 11.52844427853208
+    },
+    {
+      "case": {
+        "kind": "decode",
+        "batch": 8,
+        "context": 1024
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case3",
+            "rank": 1,
+            "count": 27,
+            "metrics": {
+              "period_ms": 35.11601045396593,
+              "forward_ms": 33.68403272275572,
+              "prepare_ms": 0.2593296302689446,
+              "after_forward_ms": 1.1726481517155964
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=8, num_reqs=8, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case3",
+            "rank": 1,
+            "count": 27,
+            "metrics": {
+              "period_ms": 35.13667466905382,
+              "forward_ms": 33.702755256935404,
+              "prepare_ms": 0.2589496296864969,
+              "after_forward_ms": 1.1749696290051495
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=8, num_reqs=8, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case17",
+            "rank": 0,
+            "count": 27,
+            "metrics": {
+              "period_ms": 35.263533980758105,
+              "forward_ms": 33.82875640304,
+              "prepare_ms": 0.25956666469573975,
+              "after_forward_ms": 1.1752111072893496
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=8, num_reqs=8, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case17",
+            "rank": 1,
+            "count": 27,
+            "metrics": {
+              "period_ms": 35.23817415590639,
+              "forward_ms": 33.80107526425962,
+              "prepare_ms": 0.26105185239403333,
+              "after_forward_ms": 1.176047404607137
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=8, num_reqs=8, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case3",
+            "rank": 0,
+            "count": 27,
+            "metrics": {
+              "period_ms": 31.859240849812824,
+              "forward_ms": 30.50364077532733,
+              "prepare_ms": 0.18285777778537185,
+              "after_forward_ms": 1.172742212260211
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case3",
+            "rank": 1,
+            "count": 27,
+            "metrics": {
+              "period_ms": 31.840665252120406,
+              "forward_ms": 30.48882802327474,
+              "prepare_ms": 0.18170814878410763,
+              "after_forward_ms": 1.1701288929692022
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case17",
+            "rank": 1,
+            "count": 27,
+            "metrics": {
+              "period_ms": 31.9165978608308,
+              "forward_ms": 30.55917987117061,
+              "prepare_ms": 0.18586740725570255,
+              "after_forward_ms": 1.1715503666136
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case17",
+            "rank": 1,
+            "count": 27,
+            "metrics": {
+              "period_ms": 31.8961919148763,
+              "forward_ms": 30.539729012383354,
+              "prepare_ms": 0.1867785177848957,
+              "after_forward_ms": 1.1696844321710091
+            },
+            "computed_min": 1032,
+            "computed_max": 1063,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 108,
+          "period_ms": {
+            "mean": 35.18859831492106,
+            "low": 35.11601045396593,
+            "high": 35.263533980758105
+          },
+          "forward_ms": {
+            "mean": 33.75415491174769,
+            "low": 33.68403272275572,
+            "high": 33.82875640304
+          },
+          "prepare_ms": {
+            "mean": 0.25972444426130364,
+            "low": 0.2589496296864969,
+            "high": 0.26105185239403333
+          },
+          "after_forward_ms": {
+            "mean": 1.174719073154308,
+            "low": 1.1726481517155964,
+            "high": 1.176047404607137
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 108,
+          "period_ms": {
+            "mean": 31.878173969410085,
+            "low": 31.840665252120406,
+            "high": 31.9165978608308
+          },
+          "forward_ms": {
+            "mean": 30.52284442053901,
+            "low": 30.48882802327474,
+            "high": 30.55917987117061
+          },
+          "prepare_ms": {
+            "mean": 0.18430296290251943,
+            "low": 0.18170814878410763,
+            "high": 0.1867785177848957
+          },
+          "after_forward_ms": {
+            "mean": 1.1710264760035056,
+            "low": 1.1696844321710091,
+            "high": 1.172742212260211
+          }
+        }
+      },
+      "period_reduction_pct": 9.407661867870566,
+      "step_rate_gain_pct": 10.384610952583472
+    },
+    {
+      "case": {
+        "kind": "decode",
+        "batch": 1,
+        "context": 4096
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case4",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 30.825960159301758,
+              "forward_ms": 29.526381134986877,
+              "prepare_ms": 0.2562943724915385,
+              "after_forward_ms": 1.0432843789458275
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1, num_reqs=1, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case4",
+            "rank": 1,
+            "count": 32,
+            "metrics": {
+              "period_ms": 30.797945857048035,
+              "forward_ms": 29.49745124578476,
+              "prepare_ms": 0.2579450001940131,
+              "after_forward_ms": 1.0425493754446507
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1, num_reqs=1, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case16",
+            "rank": 1,
+            "count": 32,
+            "metrics": {
+              "period_ms": 30.8394455909729,
+              "forward_ms": 29.535433888435364,
+              "prepare_ms": 0.26026250049471855,
+              "after_forward_ms": 1.043749377131462
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1, num_reqs=1, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case16",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 30.853094577789307,
+              "forward_ms": 29.552178025245667,
+              "prepare_ms": 0.256372501142323,
+              "after_forward_ms": 1.0445437543094158
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1, num_reqs=1, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case4",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 27.71888142824173,
+              "forward_ms": 26.49546128511429,
+              "prepare_ms": 0.18405875097960234,
+              "after_forward_ms": 1.0393612533807755
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case4",
+            "rank": 1,
+            "count": 32,
+            "metrics": {
+              "period_ms": 27.72830617427826,
+              "forward_ms": 26.503000617027283,
+              "prepare_ms": 0.18124124919995666,
+              "after_forward_ms": 1.0440643765032291
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case16",
+            "rank": 1,
+            "count": 32,
+            "metrics": {
+              "period_ms": 27.72972172498703,
+              "forward_ms": 26.50027883052826,
+              "prepare_ms": 0.1859562499448657,
+              "after_forward_ms": 1.0434868782758713
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case16",
+            "rank": 0,
+            "count": 32,
+            "metrics": {
+              "period_ms": 27.737519800662994,
+              "forward_ms": 26.512583076953888,
+              "prepare_ms": 0.18433374911546707,
+              "after_forward_ms": 1.0406031161546707
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=1, num_reqs=1, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 128,
+          "period_ms": {
+            "mean": 30.829111546278,
+            "low": 30.797945857048035,
+            "high": 30.853094577789307
+          },
+          "forward_ms": {
+            "mean": 29.527861073613167,
+            "low": 29.49745124578476,
+            "high": 29.552178025245667
+          },
+          "prepare_ms": {
+            "mean": 0.2577185935806483,
+            "low": 0.2562943724915385,
+            "high": 0.26026250049471855
+          },
+          "after_forward_ms": {
+            "mean": 1.043531721457839,
+            "low": 1.0425493754446507,
+            "high": 1.0445437543094158
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 128,
+          "period_ms": {
+            "mean": 27.728607282042503,
+            "low": 27.71888142824173,
+            "high": 27.737519800662994
+          },
+          "forward_ms": {
+            "mean": 26.50283095240593,
+            "low": 26.49546128511429,
+            "high": 26.512583076953888
+          },
+          "prepare_ms": {
+            "mean": 0.18389749980997294,
+            "low": 0.18124124919995666,
+            "high": 0.1859562499448657
+          },
+          "after_forward_ms": {
+            "mean": 1.0418789060786366,
+            "low": 1.0393612533807755,
+            "high": 1.0440643765032291
+          }
+        }
+      },
+      "period_reduction_pct": 10.057066547575621,
+      "step_rate_gain_pct": 11.181608339353687
+    },
+    {
+      "case": {
+        "kind": "decode",
+        "batch": 2,
+        "context": 4096
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case5",
+            "rank": 0,
+            "count": 29,
+            "metrics": {
+              "period_ms": 32.043185727349645,
+              "forward_ms": 30.707148255973028,
+              "prepare_ms": 0.2575462080281356,
+              "after_forward_ms": 1.0784917247706447
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=2, num_reqs=2, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case5",
+            "rank": 0,
+            "count": 29,
+            "metrics": {
+              "period_ms": 32.10968662130421,
+              "forward_ms": 30.770553851949757,
+              "prepare_ms": 0.2579606905065734,
+              "after_forward_ms": 1.081172412839429
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=2, num_reqs=2, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case15",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 32.08973897736648,
+              "forward_ms": 30.753225523850013,
+              "prepare_ms": 0.2630931056779006,
+              "after_forward_ms": 1.0734199984320278
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=2, num_reqs=2, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case15",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 32.06117814162682,
+              "forward_ms": 30.72513376433274,
+              "prepare_ms": 0.26078551699375285,
+              "after_forward_ms": 1.075258624964747
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=2, num_reqs=2, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case5",
+            "rank": 0,
+            "count": 29,
+            "metrics": {
+              "period_ms": 28.721326236067146,
+              "forward_ms": 27.461719315627526,
+              "prepare_ms": 0.18370137954580373,
+              "after_forward_ms": 1.075905520340492
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case5",
+            "rank": 0,
+            "count": 29,
+            "metrics": {
+              "period_ms": 28.712879970155914,
+              "forward_ms": 27.45645312605233,
+              "prepare_ms": 0.18331655140580802,
+              "after_forward_ms": 1.0731103420257568
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case15",
+            "rank": 1,
+            "count": 29,
+            "metrics": {
+              "period_ms": 28.81301925922262,
+              "forward_ms": 27.54824704137342,
+              "prepare_ms": 0.18629310408542896,
+              "after_forward_ms": 1.0784793064512055
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case15",
+            "rank": 0,
+            "count": 29,
+            "metrics": {
+              "period_ms": 28.801688292930866,
+              "forward_ms": 27.544557637181775,
+              "prepare_ms": 0.1833793104722582,
+              "after_forward_ms": 1.07375103440778
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=2, num_reqs=2, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 116,
+          "period_ms": {
+            "mean": 32.07594736691179,
+            "low": 32.043185727349645,
+            "high": 32.10968662130421
+          },
+          "forward_ms": {
+            "mean": 30.739015349026385,
+            "low": 30.707148255973028,
+            "high": 30.770553851949757
+          },
+          "prepare_ms": {
+            "mean": 0.25984638030159063,
+            "low": 0.2575462080281356,
+            "high": 0.2630931056779006
+          },
+          "after_forward_ms": {
+            "mean": 1.077085690251712,
+            "low": 1.0734199984320278,
+            "high": 1.081172412839429
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 116,
+          "period_ms": {
+            "mean": 28.762228439594136,
+            "low": 28.712879970155914,
+            "high": 28.81301925922262
+          },
+          "forward_ms": {
+            "mean": 27.502744280058764,
+            "low": 27.45645312605233,
+            "high": 27.54824704137342
+          },
+          "prepare_ms": {
+            "mean": 0.18417258637732473,
+            "low": 0.18331655140580802,
+            "high": 0.18629310408542896
+          },
+          "after_forward_ms": {
+            "mean": 1.0753115508063087,
+            "low": 1.0731103420257568,
+            "high": 1.0784793064512055
+          }
+        }
+      },
+      "period_reduction_pct": 10.330852864336437,
+      "step_rate_gain_pct": 11.52107853630695
+    },
+    {
+      "case": {
+        "kind": "decode",
+        "batch": 4,
+        "context": 4096
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case6",
+            "rank": 1,
+            "count": 23,
+            "metrics": {
+              "period_ms": 33.330819171407946,
+              "forward_ms": 31.9553571783978,
+              "prepare_ms": 0.2608269569666489,
+              "after_forward_ms": 1.114634783371635
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=4, num_reqs=4, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case6",
+            "rank": 1,
+            "count": 23,
+            "metrics": {
+              "period_ms": 33.30630277550739,
+              "forward_ms": 31.93342789359715,
+              "prepare_ms": 0.26128260596938757,
+              "after_forward_ms": 1.1115921839423801
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=4, num_reqs=4, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case14",
+            "rank": 0,
+            "count": 23,
+            "metrics": {
+              "period_ms": 33.4186548979386,
+              "forward_ms": 32.04077082094939,
+              "prepare_ms": 0.262030435645062,
+              "after_forward_ms": 1.1158539056777954
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=4, num_reqs=4, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case14",
+            "rank": 1,
+            "count": 23,
+            "metrics": {
+              "period_ms": 33.40538887355638,
+              "forward_ms": 32.02721985526707,
+              "prepare_ms": 0.26287391522656317,
+              "after_forward_ms": 1.1152947830117268
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=4, num_reqs=4, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case6",
+            "rank": 0,
+            "count": 23,
+            "metrics": {
+              "period_ms": 29.957851326983906,
+              "forward_ms": 28.665009540060293,
+              "prepare_ms": 0.18408434870450394,
+              "after_forward_ms": 1.1087574025859004
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case6",
+            "rank": 0,
+            "count": 23,
+            "metrics": {
+              "period_ms": 29.975558239480723,
+              "forward_ms": 28.680730487989344,
+              "prepare_ms": 0.1836834783139436,
+              "after_forward_ms": 1.111144350922626
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case14",
+            "rank": 1,
+            "count": 23,
+            "metrics": {
+              "period_ms": 29.999420000159223,
+              "forward_ms": 28.703982726387355,
+              "prepare_ms": 0.1860947829225789,
+              "after_forward_ms": 1.1093426113543303
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case14",
+            "rank": 1,
+            "count": 23,
+            "metrics": {
+              "period_ms": 29.995977235876996,
+              "forward_ms": 28.702925308890965,
+              "prepare_ms": 0.18586695647757986,
+              "after_forward_ms": 1.1071852238281914
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=4, num_reqs=4, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 92,
+          "period_ms": {
+            "mean": 33.36529142960258,
+            "low": 33.30630277550739,
+            "high": 33.4186548979386
+          },
+          "forward_ms": {
+            "mean": 31.989193937052853,
+            "low": 31.93342789359715,
+            "high": 32.04077082094939
+          },
+          "prepare_ms": {
+            "mean": 0.26175347845191543,
+            "low": 0.2608269569666489,
+            "high": 0.26287391522656317
+          },
+          "after_forward_ms": {
+            "mean": 1.1143439140008844,
+            "low": 1.1115921839423801,
+            "high": 1.1158539056777954
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 92,
+          "period_ms": {
+            "mean": 29.98220170062521,
+            "low": 29.957851326983906,
+            "high": 29.999420000159223
+          },
+          "forward_ms": {
+            "mean": 28.68816201583199,
+            "low": 28.665009540060293,
+            "high": 28.703982726387355
+          },
+          "prepare_ms": {
+            "mean": 0.18493239160465158,
+            "low": 0.1836834783139436,
+            "high": 0.1860947829225789
+          },
+          "after_forward_ms": {
+            "mean": 1.109107397172762,
+            "low": 1.1071852238281914,
+            "high": 1.111144350922626
+          }
+        }
+      },
+      "period_reduction_pct": 10.139547967430007,
+      "step_rate_gain_pct": 11.283660095271863
+    },
+    {
+      "case": {
+        "kind": "decode",
+        "batch": 8,
+        "context": 4096
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case7",
+            "rank": 1,
+            "count": 11,
+            "metrics": {
+              "period_ms": 35.95372356068004,
+              "forward_ms": 34.51996196400035,
+              "prepare_ms": 0.25840363990176807,
+              "after_forward_ms": 1.1753581762313843
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=8, num_reqs=8, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case7",
+            "rank": 0,
+            "count": 11,
+            "metrics": {
+              "period_ms": 35.93930504538796,
+              "forward_ms": 34.508536252108485,
+              "prepare_ms": 0.25761636007915845,
+              "after_forward_ms": 1.1731527176770298
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=8, num_reqs=8, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case13",
+            "rank": 1,
+            "count": 11,
+            "metrics": {
+              "period_ms": 36.078001889315516,
+              "forward_ms": 34.641084150834516,
+              "prepare_ms": 0.2609872709621083,
+              "after_forward_ms": 1.175930911844427
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=8, num_reqs=8, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case13",
+            "rank": 1,
+            "count": 11,
+            "metrics": {
+              "period_ms": 36.008750915527344,
+              "forward_ms": 34.57606922496449,
+              "prepare_ms": 0.2612945464524356,
+              "after_forward_ms": 1.1713872714476152
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=8, num_reqs=8, uniform=True, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case7",
+            "rank": 1,
+            "count": 11,
+            "metrics": {
+              "period_ms": 32.66963854703036,
+              "forward_ms": 31.315683711658824,
+              "prepare_ms": 0.18148545243523337,
+              "after_forward_ms": 1.1724690957502886
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case7",
+            "rank": 0,
+            "count": 11,
+            "metrics": {
+              "period_ms": 32.69809063998136,
+              "forward_ms": 31.340158115733754,
+              "prepare_ms": 0.1825545457276431,
+              "after_forward_ms": 1.1753781817176125
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case13",
+            "rank": 0,
+            "count": 11,
+            "metrics": {
+              "period_ms": 32.73497772216797,
+              "forward_ms": 31.374608993530273,
+              "prepare_ms": 0.18529091098091818,
+              "after_forward_ms": 1.175078186121854
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case13",
+            "rank": 1,
+            "count": 11,
+            "metrics": {
+              "period_ms": 32.66965241865678,
+              "forward_ms": 31.31803287159313,
+              "prepare_ms": 0.18553272702477194,
+              "after_forward_ms": 1.1660872481086038
+            },
+            "computed_min": 4104,
+            "computed_max": 4135,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)",
+              "install.<locals>.BankDescriptor(num_tokens=8, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 44,
+          "period_ms": {
+            "mean": 35.99494535272771,
+            "low": 35.93930504538796,
+            "high": 36.078001889315516
+          },
+          "forward_ms": {
+            "mean": 34.561412897976965,
+            "low": 34.508536252108485,
+            "high": 34.641084150834516
+          },
+          "prepare_ms": {
+            "mean": 0.2595754543488676,
+            "low": 0.25761636007915845,
+            "high": 0.2612945464524356
+          },
+          "after_forward_ms": {
+            "mean": 1.1739572693001141,
+            "low": 1.1713872714476152,
+            "high": 1.175930911844427
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 44,
+          "period_ms": {
+            "mean": 32.693089831959114,
+            "low": 32.66963854703036,
+            "high": 32.73497772216797
+          },
+          "forward_ms": {
+            "mean": 31.337120923128996,
+            "low": 31.315683711658824,
+            "high": 31.374608993530273
+          },
+          "prepare_ms": {
+            "mean": 0.18371590904214163,
+            "low": 0.18148545243523337,
+            "high": 0.18553272702477194
+          },
+          "after_forward_ms": {
+            "mean": 1.1722531779245897,
+            "low": 1.1660872481086038,
+            "high": 1.1753781817176125
+          }
+        }
+      },
+      "period_reduction_pct": 9.173108858514723,
+      "step_rate_gain_pct": 10.099551733225498
+    },
+    {
+      "case": {
+        "kind": "prefill",
+        "batch": 1,
+        "context": 128
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case8",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 369.8220520019531,
+              "forward_ms": 357.2208251953125,
+              "prepare_ms": 10.883339881896973,
+              "after_forward_ms": 1.7178599834442139
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=128, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case8",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 387.9632263183594,
+              "forward_ms": 374.3884582519531,
+              "prepare_ms": 11.714739799499512,
+              "after_forward_ms": 1.8600399494171143
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=128, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case12",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 384.1139221191406,
+              "forward_ms": 370.8360290527344,
+              "prepare_ms": 11.312419891357422,
+              "after_forward_ms": 1.9654799699783325
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=128, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case12",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 391.0176086425781,
+              "forward_ms": 377.65240478515625,
+              "prepare_ms": 11.362600326538086,
+              "after_forward_ms": 2.002619981765747
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=128, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case8",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 77.1427230834961,
+              "forward_ms": 71.09306335449219,
+              "prepare_ms": 4.981420040130615,
+              "after_forward_ms": 1.0682400465011597
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=128, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case8",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 77.6497802734375,
+              "forward_ms": 71.22673797607422,
+              "prepare_ms": 5.341060161590576,
+              "after_forward_ms": 1.0819799900054932
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=128, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case12",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 79.31774139404297,
+              "forward_ms": 73.39839935302734,
+              "prepare_ms": 4.843639850616455,
+              "after_forward_ms": 1.075700044631958
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=128, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case12",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 77.00627899169922,
+              "forward_ms": 71.16565704345703,
+              "prepare_ms": 4.768139839172363,
+              "after_forward_ms": 1.0724799633026123
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=128, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 383.2292022705078,
+            "low": 369.8220520019531,
+            "high": 391.0176086425781
+          },
+          "forward_ms": {
+            "mean": 370.02442932128906,
+            "low": 357.2208251953125,
+            "high": 377.65240478515625
+          },
+          "prepare_ms": {
+            "mean": 11.318274974822998,
+            "low": 10.883339881896973,
+            "high": 11.714739799499512
+          },
+          "after_forward_ms": {
+            "mean": 1.886499971151352,
+            "low": 1.7178599834442139,
+            "high": 2.002619981765747
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 77.77913093566895,
+            "low": 77.00627899169922,
+            "high": 79.31774139404297
+          },
+          "forward_ms": {
+            "mean": 71.7209644317627,
+            "low": 71.09306335449219,
+            "high": 73.39839935302734
+          },
+          "prepare_ms": {
+            "mean": 4.983564972877502,
+            "low": 4.768139839172363,
+            "high": 5.341060161590576
+          },
+          "after_forward_ms": {
+            "mean": 1.0746000111103058,
+            "low": 1.0682400465011597,
+            "high": 1.0819799900054932
+          }
+        }
+      },
+      "period_reduction_pct": 79.70427867321878,
+      "step_rate_gain_pct": 392.7146879379205
+    },
+    {
+      "case": {
+        "kind": "prefill",
+        "batch": 1,
+        "context": 256
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case9",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 382.6095886230469,
+              "forward_ms": 369.53973388671875,
+              "prepare_ms": 11.312919616699219,
+              "after_forward_ms": 1.7569600343704224
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=256, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case9",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 388.86041259765625,
+              "forward_ms": 375.8251647949219,
+              "prepare_ms": 11.23639965057373,
+              "after_forward_ms": 1.79885995388031
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=256, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case11",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 388.3771057128906,
+              "forward_ms": 375.14251708984375,
+              "prepare_ms": 11.255620002746582,
+              "after_forward_ms": 1.9789799451828003
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=256, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case11",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 403.2061767578125,
+              "forward_ms": 389.1768493652344,
+              "prepare_ms": 11.9989595413208,
+              "after_forward_ms": 2.030359983444214
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=256, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case9",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 104.17707824707031,
+              "forward_ms": 98.42749786376953,
+              "prepare_ms": 4.673220157623291,
+              "after_forward_ms": 1.0763599872589111
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case9",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 104.73181915283203,
+              "forward_ms": 98.52523803710938,
+              "prepare_ms": 5.1290202140808105,
+              "after_forward_ms": 1.0775599479675293
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case11",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 106.15299987792969,
+              "forward_ms": 99.94792175292969,
+              "prepare_ms": 5.119120121002197,
+              "after_forward_ms": 1.085960030555725
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case11",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 104.4600830078125,
+              "forward_ms": 98.90223693847656,
+              "prepare_ms": 4.48721981048584,
+              "after_forward_ms": 1.0706199407577515
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 390.76332092285156,
+            "low": 382.6095886230469,
+            "high": 403.2061767578125
+          },
+          "forward_ms": {
+            "mean": 377.4210662841797,
+            "low": 369.53973388671875,
+            "high": 389.1768493652344
+          },
+          "prepare_ms": {
+            "mean": 11.450974702835083,
+            "low": 11.23639965057373,
+            "high": 11.9989595413208
+          },
+          "after_forward_ms": {
+            "mean": 1.8912899792194366,
+            "low": 1.7569600343704224,
+            "high": 2.030359983444214
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 104.88049507141113,
+            "low": 104.17707824707031,
+            "high": 106.15299987792969
+          },
+          "forward_ms": {
+            "mean": 98.95072364807129,
+            "low": 98.42749786376953,
+            "high": 99.94792175292969
+          },
+          "prepare_ms": {
+            "mean": 4.852145075798035,
+            "low": 4.48721981048584,
+            "high": 5.1290202140808105
+          },
+          "after_forward_ms": {
+            "mean": 1.0776249766349792,
+            "low": 1.0706199407577515,
+            "high": 1.085960030555725
+          }
+        }
+      },
+      "period_reduction_pct": 73.1600973131975,
+      "step_rate_gain_pct": 272.57959228433106
+    },
+    {
+      "case": {
+        "kind": "prefill",
+        "batch": 1,
+        "context": 512
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case10",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 383.9526062011719,
+              "forward_ms": 371.1216125488281,
+              "prepare_ms": 11.081259727478027,
+              "after_forward_ms": 1.7497199773788452
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=512, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case10",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 399.6248474121094,
+              "forward_ms": 386.5490417480469,
+              "prepare_ms": 11.378279685974121,
+              "after_forward_ms": 1.6975200176239014
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=512, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case10",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 387.4052734375,
+              "forward_ms": 373.4448547363281,
+              "prepare_ms": 12.149519920349121,
+              "after_forward_ms": 1.8108799457550049
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=512, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case10",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 392.15399169921875,
+              "forward_ms": 378.8648986816406,
+              "prepare_ms": 11.346699714660645,
+              "after_forward_ms": 1.9423999786376953
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=512, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case10",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 153.80804443359375,
+              "forward_ms": 147.66387939453125,
+              "prepare_ms": 5.053899765014648,
+              "after_forward_ms": 1.0902600288391113
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=512, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case10",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 156.2263641357422,
+              "forward_ms": 150.28602600097656,
+              "prepare_ms": 4.853600025177002,
+              "after_forward_ms": 1.0867400169372559
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=512, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case10",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 155.1864013671875,
+              "forward_ms": 149.36807250976562,
+              "prepare_ms": 4.7246198654174805,
+              "after_forward_ms": 1.0937000513076782
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=512, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case10",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 155.36740112304688,
+              "forward_ms": 149.68325805664062,
+              "prepare_ms": 4.565340042114258,
+              "after_forward_ms": 1.1188000440597534
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=512, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 390.7841796875,
+            "low": 383.9526062011719,
+            "high": 399.6248474121094
+          },
+          "forward_ms": {
+            "mean": 377.49510192871094,
+            "low": 371.1216125488281,
+            "high": 386.5490417480469
+          },
+          "prepare_ms": {
+            "mean": 11.488939762115479,
+            "low": 11.081259727478027,
+            "high": 12.149519920349121
+          },
+          "after_forward_ms": {
+            "mean": 1.8001299798488617,
+            "low": 1.6975200176239014,
+            "high": 1.9423999786376953
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 155.14705276489258,
+            "low": 153.80804443359375,
+            "high": 156.2263641357422
+          },
+          "forward_ms": {
+            "mean": 149.25030899047852,
+            "low": 147.66387939453125,
+            "high": 150.28602600097656
+          },
+          "prepare_ms": {
+            "mean": 4.799364924430847,
+            "low": 4.565340042114258,
+            "high": 5.053899765014648
+          },
+          "after_forward_ms": {
+            "mean": 1.0973750352859497,
+            "low": 1.0867400169372559,
+            "high": 1.1188000440597534
+          }
+        }
+      },
+      "period_reduction_pct": 60.298532840055174,
+      "step_rate_gain_pct": 151.87986025083458
+    },
+    {
+      "case": {
+        "kind": "prefill",
+        "batch": 1,
+        "context": 1024
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case11",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 386.7943115234375,
+              "forward_ms": 374.92108154296875,
+              "prepare_ms": 10.74116039276123,
+              "after_forward_ms": 1.1320799589157104
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1024, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case11",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 396.8724365234375,
+              "forward_ms": 384.1890869140625,
+              "prepare_ms": 11.543600082397461,
+              "after_forward_ms": 1.139739990234375
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1024, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case9",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 395.0541687011719,
+              "forward_ms": 383.1813659667969,
+              "prepare_ms": 10.729940414428711,
+              "after_forward_ms": 1.142840027809143
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1024, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case9",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 400.46343994140625,
+              "forward_ms": 388.6310729980469,
+              "prepare_ms": 10.706700325012207,
+              "after_forward_ms": 1.1256599426269531
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1024, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case11",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 238.4500732421875,
+              "forward_ms": 232.28553771972656,
+              "prepare_ms": 5.041840076446533,
+              "after_forward_ms": 1.1226999759674072
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case11",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 240.9989776611328,
+              "forward_ms": 234.9185791015625,
+              "prepare_ms": 4.950540065765381,
+              "after_forward_ms": 1.1298600435256958
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case9",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 237.9846954345703,
+              "forward_ms": 232.42164611816406,
+              "prepare_ms": 4.4491400718688965,
+              "after_forward_ms": 1.113919973373413
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case9",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 240.77154541015625,
+              "forward_ms": 234.55050659179688,
+              "prepare_ms": 5.099380016326904,
+              "after_forward_ms": 1.1216599941253662
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 394.7960891723633,
+            "low": 386.7943115234375,
+            "high": 400.46343994140625
+          },
+          "forward_ms": {
+            "mean": 382.73065185546875,
+            "low": 374.92108154296875,
+            "high": 388.6310729980469
+          },
+          "prepare_ms": {
+            "mean": 10.930350303649902,
+            "low": 10.706700325012207,
+            "high": 11.543600082397461
+          },
+          "after_forward_ms": {
+            "mean": 1.1350799798965454,
+            "low": 1.1256599426269531,
+            "high": 1.142840027809143
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 239.55132293701172,
+            "low": 237.9846954345703,
+            "high": 240.9989776611328
+          },
+          "forward_ms": {
+            "mean": 233.5440673828125,
+            "low": 232.28553771972656,
+            "high": 234.9185791015625
+          },
+          "prepare_ms": {
+            "mean": 4.885225057601929,
+            "low": 4.4491400718688965,
+            "high": 5.099380016326904
+          },
+          "after_forward_ms": {
+            "mean": 1.1220349967479706,
+            "low": 1.113919973373413,
+            "high": 1.1298600435256958
+          }
+        }
+      },
+      "period_reduction_pct": 39.32277205703868,
+      "step_rate_gain_pct": 64.80647417512783
+    },
+    {
+      "case": {
+        "kind": "prefill",
+        "batch": 1,
+        "context": 1536,
+        "prefix": 0,
+        "source_prompt": 2048
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case12",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 389.05230712890625,
+              "forward_ms": 376.73455810546875,
+              "prepare_ms": 11.159640312194824,
+              "after_forward_ms": 1.1581000089645386
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1536, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case12",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 400.2979431152344,
+              "forward_ms": 388.0644836425781,
+              "prepare_ms": 11.080360412597656,
+              "after_forward_ms": 1.1531000137329102
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1536, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case8",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 404.4631042480469,
+              "forward_ms": 392.1244201660156,
+              "prepare_ms": 11.179699897766113,
+              "after_forward_ms": 1.1589800119400024
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1536, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case8",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 401.75201416015625,
+              "forward_ms": 389.5591735839844,
+              "prepare_ms": 11.042240142822266,
+              "after_forward_ms": 1.1505999565124512
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1536, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case12",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 338.1498107910156,
+              "forward_ms": 331.95989990234375,
+              "prepare_ms": 5.054540157318115,
+              "after_forward_ms": 1.1353600025177002
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case12",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 338.13409423828125,
+              "forward_ms": 332.0274658203125,
+              "prepare_ms": 4.95959997177124,
+              "after_forward_ms": 1.1469999551773071
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case8",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 337.3810729980469,
+              "forward_ms": 331.0507507324219,
+              "prepare_ms": 5.181980133056641,
+              "after_forward_ms": 1.148360013961792
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case8",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 337.8522033691406,
+              "forward_ms": 331.12188720703125,
+              "prepare_ms": 5.584259986877441,
+              "after_forward_ms": 1.1460399627685547
+            },
+            "computed_min": 0,
+            "computed_max": 0,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 398.89134216308594,
+            "low": 389.05230712890625,
+            "high": 404.4631042480469
+          },
+          "forward_ms": {
+            "mean": 386.6206588745117,
+            "low": 376.73455810546875,
+            "high": 392.1244201660156
+          },
+          "prepare_ms": {
+            "mean": 11.115485191345215,
+            "low": 11.042240142822266,
+            "high": 11.179699897766113
+          },
+          "after_forward_ms": {
+            "mean": 1.1551949977874756,
+            "low": 1.1505999565124512,
+            "high": 1.1589800119400024
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 337.8792953491211,
+            "low": 337.3810729980469,
+            "high": 338.1498107910156
+          },
+          "forward_ms": {
+            "mean": 331.54000091552734,
+            "low": 331.0507507324219,
+            "high": 332.0274658203125
+          },
+          "prepare_ms": {
+            "mean": 5.195095062255859,
+            "low": 4.95959997177124,
+            "high": 5.584259986877441
+          },
+          "after_forward_ms": {
+            "mean": 1.1441899836063385,
+            "low": 1.1353600025177002,
+            "high": 1.148360013961792
+          }
+        }
+      },
+      "period_reduction_pct": 15.295405130407714,
+      "step_rate_gain_pct": 18.057349963075666
+    },
+    {
+      "case": {
+        "kind": "prefill",
+        "batch": 1,
+        "context": 512,
+        "prefix": 1536,
+        "source_prompt": 2048
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case12",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 378.7027282714844,
+              "forward_ms": 367.2822570800781,
+              "prepare_ms": 9.972920417785645,
+              "after_forward_ms": 1.447540044784546
+            },
+            "computed_min": 1536,
+            "computed_max": 1536,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=512, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case12",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 391.7890319824219,
+              "forward_ms": 380.315673828125,
+              "prepare_ms": 9.951199531555176,
+              "after_forward_ms": 1.5221799612045288
+            },
+            "computed_min": 1536,
+            "computed_max": 1536,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=512, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case8",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 390.3218688964844,
+              "forward_ms": 378.27691650390625,
+              "prepare_ms": 10.399299621582031,
+              "after_forward_ms": 1.6456400156021118
+            },
+            "computed_min": 1536,
+            "computed_max": 1536,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=512, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case8",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 396.7632751464844,
+              "forward_ms": 384.2694091796875,
+              "prepare_ms": 10.691020011901855,
+              "after_forward_ms": 1.802839994430542
+            },
+            "computed_min": 1536,
+            "computed_max": 1536,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=512, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case12",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 149.2613067626953,
+              "forward_ms": 147.7617645263672,
+              "prepare_ms": 0.39621999859809875,
+              "after_forward_ms": 1.1033200025558472
+            },
+            "computed_min": 1536,
+            "computed_max": 1536,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=512, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case12",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 149.21499633789062,
+              "forward_ms": 147.72073364257812,
+              "prepare_ms": 0.40158000588417053,
+              "after_forward_ms": 1.0926799774169922
+            },
+            "computed_min": 1536,
+            "computed_max": 1536,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=512, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case8",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 160.94813537597656,
+              "forward_ms": 159.43531799316406,
+              "prepare_ms": 0.406139999628067,
+              "after_forward_ms": 1.1066800355911255
+            },
+            "computed_min": 1536,
+            "computed_max": 1536,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=512, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case8",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 149.18023681640625,
+              "forward_ms": 147.6832733154297,
+              "prepare_ms": 0.40661999583244324,
+              "after_forward_ms": 1.0903400182724
+            },
+            "computed_min": 1536,
+            "computed_max": 1536,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=512, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 389.39422607421875,
+            "low": 378.7027282714844,
+            "high": 396.7632751464844
+          },
+          "forward_ms": {
+            "mean": 377.5360641479492,
+            "low": 367.2822570800781,
+            "high": 384.2694091796875
+          },
+          "prepare_ms": {
+            "mean": 10.253609895706177,
+            "low": 9.951199531555176,
+            "high": 10.691020011901855
+          },
+          "after_forward_ms": {
+            "mean": 1.6045500040054321,
+            "low": 1.447540044784546,
+            "high": 1.802839994430542
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 152.1511688232422,
+            "low": 149.18023681640625,
+            "high": 160.94813537597656
+          },
+          "forward_ms": {
+            "mean": 150.65027236938477,
+            "low": 147.6832733154297,
+            "high": 159.43531799316406
+          },
+          "prepare_ms": {
+            "mean": 0.4026399999856949,
+            "low": 0.39621999859809875,
+            "high": 0.40661999583244324
+          },
+          "after_forward_ms": {
+            "mean": 1.0982550084590912,
+            "low": 1.0903400182724,
+            "high": 1.1066800355911255
+          }
+        }
+      },
+      "period_reduction_pct": 60.92618774623482,
+      "step_rate_gain_pct": 155.9258854768232
+    },
+    {
+      "case": {
+        "kind": "mixed",
+        "batch": 1,
+        "context": 1024,
+        "joining": 128
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case13",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 415.6731262207031,
+              "forward_ms": 406.2900085449219,
+              "prepare_ms": 7.198200225830078,
+              "after_forward_ms": 2.1849400997161865
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=129, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case13",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 423.91552734375,
+              "forward_ms": 414.67181396484375,
+              "prepare_ms": 7.276340007781982,
+              "after_forward_ms": 1.9673999547958374
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=129, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case7",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 426.2763977050781,
+              "forward_ms": 416.63427734375,
+              "prepare_ms": 7.355820178985596,
+              "after_forward_ms": 2.28629994392395
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=129, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case7",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 431.91058349609375,
+              "forward_ms": 422.1721496582031,
+              "prepare_ms": 7.455639839172363,
+              "after_forward_ms": 2.2827999591827393
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=129, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case13",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 97.01117706298828,
+              "forward_ms": 95.70136260986328,
+              "prepare_ms": 0.19266000390052795,
+              "after_forward_ms": 1.1171599626541138
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case13",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 97.31036376953125,
+              "forward_ms": 95.99579620361328,
+              "prepare_ms": 0.19709999859333038,
+              "after_forward_ms": 1.117460012435913
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case7",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 97.28949737548828,
+              "forward_ms": 95.97383880615234,
+              "prepare_ms": 0.19947999715805054,
+              "after_forward_ms": 1.1161799430847168
+            },
+            "computed_min": 0,
+            "computed_max": 1027,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case7",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 97.44120025634766,
+              "forward_ms": 96.1369400024414,
+              "prepare_ms": 0.197720006108284,
+              "after_forward_ms": 1.1065399646759033
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 424.44390869140625,
+            "low": 415.6731262207031,
+            "high": 431.91058349609375
+          },
+          "forward_ms": {
+            "mean": 414.9420623779297,
+            "low": 406.2900085449219,
+            "high": 422.1721496582031
+          },
+          "prepare_ms": {
+            "mean": 7.321500062942505,
+            "low": 7.198200225830078,
+            "high": 7.455639839172363
+          },
+          "after_forward_ms": {
+            "mean": 2.1803599894046783,
+            "low": 1.9673999547958374,
+            "high": 2.28629994392395
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 97.26305961608887,
+            "low": 97.01117706298828,
+            "high": 97.44120025634766
+          },
+          "forward_ms": {
+            "mean": 95.95198440551758,
+            "low": 95.70136260986328,
+            "high": 96.1369400024414
+          },
+          "prepare_ms": {
+            "mean": 0.19674000144004822,
+            "low": 0.19266000390052795,
+            "high": 0.19947999715805054
+          },
+          "after_forward_ms": {
+            "mean": 1.1143349707126617,
+            "low": 1.1065399646759033,
+            "high": 1.117460012435913
+          }
+        }
+      },
+      "period_reduction_pct": 77.08459053730834,
+      "step_rate_gain_pct": 336.3875765030905
+    },
+    {
+      "case": {
+        "kind": "mixed",
+        "batch": 1,
+        "context": 1024,
+        "joining": 512
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case14",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 417.6425476074219,
+              "forward_ms": 408.9750061035156,
+              "prepare_ms": 7.140140056610107,
+              "after_forward_ms": 1.5273799896240234
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=513, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case14",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 441.52630615234375,
+              "forward_ms": 432.1000061035156,
+              "prepare_ms": 7.553579807281494,
+              "after_forward_ms": 1.8726999759674072
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=513, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case6",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 432.4569091796875,
+              "forward_ms": 423.0761413574219,
+              "prepare_ms": 7.4227399826049805,
+              "after_forward_ms": 1.9580199718475342
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=513, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case6",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 422.5517883300781,
+              "forward_ms": 413.24090576171875,
+              "prepare_ms": 7.2642998695373535,
+              "after_forward_ms": 2.046600103378296
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=513, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case14",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 228.11508178710938,
+              "forward_ms": 226.75982666015625,
+              "prepare_ms": 0.19988000392913818,
+              "after_forward_ms": 1.1553800106048584
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case14",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 227.4808807373047,
+              "forward_ms": 226.13433837890625,
+              "prepare_ms": 0.19993999600410461,
+              "after_forward_ms": 1.1466000080108643
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case6",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 228.40379333496094,
+              "forward_ms": 227.04205322265625,
+              "prepare_ms": 0.20340000092983246,
+              "after_forward_ms": 1.1583399772644043
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case6",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 228.44859313964844,
+              "forward_ms": 227.10194396972656,
+              "prepare_ms": 0.2007399946451187,
+              "after_forward_ms": 1.1459200382232666
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 428.5443878173828,
+            "low": 417.6425476074219,
+            "high": 441.52630615234375
+          },
+          "forward_ms": {
+            "mean": 419.34801483154297,
+            "low": 408.9750061035156,
+            "high": 432.1000061035156
+          },
+          "prepare_ms": {
+            "mean": 7.345189929008484,
+            "low": 7.140140056610107,
+            "high": 7.553579807281494
+          },
+          "after_forward_ms": {
+            "mean": 1.8511750102043152,
+            "low": 1.5273799896240234,
+            "high": 2.046600103378296
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 228.11208724975586,
+            "low": 227.4808807373047,
+            "high": 228.44859313964844
+          },
+          "forward_ms": {
+            "mean": 226.75954055786133,
+            "low": 226.13433837890625,
+            "high": 227.10194396972656
+          },
+          "prepare_ms": {
+            "mean": 0.2009899988770485,
+            "low": 0.19988000392913818,
+            "high": 0.20340000092983246
+          },
+          "after_forward_ms": {
+            "mean": 1.1515600085258484,
+            "low": 1.1459200382232666,
+            "high": 1.1583399772644043
+          }
+        }
+      },
+      "period_reduction_pct": 46.770487787378954,
+      "step_rate_gain_pct": 87.86570803158588
+    },
+    {
+      "case": {
+        "kind": "mixed",
+        "batch": 1,
+        "context": 1024,
+        "joining": 1024
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case15",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 420.1185302734375,
+              "forward_ms": 411.73516845703125,
+              "prepare_ms": 7.222620010375977,
+              "after_forward_ms": 1.1607600450515747
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1025, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case15",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 438.5447082519531,
+              "forward_ms": 430.5163879394531,
+              "prepare_ms": 6.870220184326172,
+              "after_forward_ms": 1.158079981803894
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1025, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case5",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 434.58074951171875,
+              "forward_ms": 426.5205078125,
+              "prepare_ms": 6.904379844665527,
+              "after_forward_ms": 1.1558400392532349
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1025, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case5",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 424.11279296875,
+              "forward_ms": 415.9852294921875,
+              "prepare_ms": 6.973519802093506,
+              "after_forward_ms": 1.154039978981018
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1025, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case15",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 326.921630859375,
+              "forward_ms": 325.55609130859375,
+              "prepare_ms": 0.1994200050830841,
+              "after_forward_ms": 1.1661200523376465
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case15",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 327.96771240234375,
+              "forward_ms": 326.59271240234375,
+              "prepare_ms": 0.20020000636577606,
+              "after_forward_ms": 1.1748199462890625
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case5",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 326.6678466796875,
+              "forward_ms": 325.28472900390625,
+              "prepare_ms": 0.20518000423908234,
+              "after_forward_ms": 1.1779600381851196
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case5",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 327.6377258300781,
+              "forward_ms": 326.2580871582031,
+              "prepare_ms": 0.2050199955701828,
+              "after_forward_ms": 1.1746200323104858
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 429.33919525146484,
+            "low": 420.1185302734375,
+            "high": 438.5447082519531
+          },
+          "forward_ms": {
+            "mean": 421.18932342529297,
+            "low": 411.73516845703125,
+            "high": 430.5163879394531
+          },
+          "prepare_ms": {
+            "mean": 6.992684960365295,
+            "low": 6.870220184326172,
+            "high": 7.222620010375977
+          },
+          "after_forward_ms": {
+            "mean": 1.1571800112724304,
+            "low": 1.154039978981018,
+            "high": 1.1607600450515747
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 327.2987289428711,
+            "low": 326.6678466796875,
+            "high": 327.96771240234375
+          },
+          "forward_ms": {
+            "mean": 325.9229049682617,
+            "low": 325.28472900390625,
+            "high": 326.59271240234375
+          },
+          "prepare_ms": {
+            "mean": 0.20245500281453133,
+            "low": 0.1994200050830841,
+            "high": 0.20518000423908234
+          },
+          "after_forward_ms": {
+            "mean": 1.1733800172805786,
+            "low": 1.1661200523376465,
+            "high": 1.1779600381851196
+          }
+        }
+      },
+      "period_reduction_pct": 23.766864855846304,
+      "step_rate_gain_pct": 31.176554408924883
+    },
+    {
+      "case": {
+        "kind": "mixed",
+        "batch": 1,
+        "context": 1024,
+        "joining": 1536
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case16",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 425.5738220214844,
+              "forward_ms": 417.0509338378906,
+              "prepare_ms": 7.344260215759277,
+              "after_forward_ms": 1.1786400079727173
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1537, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case16",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 438.5858154296875,
+              "forward_ms": 429.7807312011719,
+              "prepare_ms": 7.624179840087891,
+              "after_forward_ms": 1.180899977684021
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1537, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case4",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 440.060302734375,
+              "forward_ms": 431.1686096191406,
+              "prepare_ms": 7.71373987197876,
+              "after_forward_ms": 1.177940011024475
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1537, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case4",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 425.5505676269531,
+              "forward_ms": 417.3208312988281,
+              "prepare_ms": 7.058619976043701,
+              "after_forward_ms": 1.171120047569275
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1537, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case16",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 418.1162109375,
+              "forward_ms": 416.6098327636719,
+              "prepare_ms": 0.31793999671936035,
+              "after_forward_ms": 1.1884599924087524
+            },
+            "computed_min": 0,
+            "computed_max": 1027,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2048, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case16",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 418.2210693359375,
+              "forward_ms": 416.704345703125,
+              "prepare_ms": 0.3207800090312958,
+              "after_forward_ms": 1.1959199905395508
+            },
+            "computed_min": 0,
+            "computed_max": 1027,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2048, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case4",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 418.57965087890625,
+              "forward_ms": 417.06719970703125,
+              "prepare_ms": 0.3246600031852722,
+              "after_forward_ms": 1.1877800226211548
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2048, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case4",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 417.6674499511719,
+              "forward_ms": 416.16070556640625,
+              "prepare_ms": 0.32684001326560974,
+              "after_forward_ms": 1.179900050163269
+            },
+            "computed_min": 0,
+            "computed_max": 1026,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2048, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 432.442626953125,
+            "low": 425.5505676269531,
+            "high": 440.060302734375
+          },
+          "forward_ms": {
+            "mean": 423.8302764892578,
+            "low": 417.0509338378906,
+            "high": 431.1686096191406
+          },
+          "prepare_ms": {
+            "mean": 7.435199975967407,
+            "low": 7.058619976043701,
+            "high": 7.71373987197876
+          },
+          "after_forward_ms": {
+            "mean": 1.177150011062622,
+            "low": 1.171120047569275,
+            "high": 1.180899977684021
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 418.1460952758789,
+            "low": 417.6674499511719,
+            "high": 418.57965087890625
+          },
+          "forward_ms": {
+            "mean": 416.6355209350586,
+            "low": 416.16070556640625,
+            "high": 417.06719970703125
+          },
+          "prepare_ms": {
+            "mean": 0.3225550055503845,
+            "low": 0.31793999671936035,
+            "high": 0.32684001326560974
+          },
+          "after_forward_ms": {
+            "mean": 1.1880150139331818,
+            "low": 1.179900050163269,
+            "high": 1.1959199905395508
+          }
+        }
+      },
+      "period_reduction_pct": 3.3059950120957415,
+      "step_rate_gain_pct": 3.4190279040663407
+    },
+    {
+      "case": {
+        "kind": "mixed",
+        "batch": 4,
+        "context": 1024,
+        "joining": 128
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case17",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 429.3735046386719,
+              "forward_ms": 419.9080505371094,
+              "prepare_ms": 7.243279933929443,
+              "after_forward_ms": 2.2221601009368896
+            },
+            "computed_min": 0,
+            "computed_max": 1028,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=132, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case17",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 432.5650329589844,
+              "forward_ms": 423.1751403808594,
+              "prepare_ms": 7.372759819030762,
+              "after_forward_ms": 2.0171399116516113
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=132, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case3",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 431.15960693359375,
+              "forward_ms": 421.6646728515625,
+              "prepare_ms": 7.4085798263549805,
+              "after_forward_ms": 2.086359977722168
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=132, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case3",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 423.44415283203125,
+              "forward_ms": 414.1107482910156,
+              "prepare_ms": 7.255959987640381,
+              "after_forward_ms": 2.0774600505828857
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=132, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case17",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 102.30914306640625,
+              "forward_ms": 100.95813751220703,
+              "prepare_ms": 0.19604000449180603,
+              "after_forward_ms": 1.154960036277771
+            },
+            "computed_min": 0,
+            "computed_max": 1030,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case17",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 102.54493713378906,
+              "forward_ms": 101.18488311767578,
+              "prepare_ms": 0.1954600065946579,
+              "after_forward_ms": 1.1646000146865845
+            },
+            "computed_min": 0,
+            "computed_max": 1030,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case3",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 102.45342254638672,
+              "forward_ms": 101.08381652832031,
+              "prepare_ms": 0.19968000054359436,
+              "after_forward_ms": 1.1699199676513672
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case3",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 102.78913879394531,
+              "forward_ms": 101.42595672607422,
+              "prepare_ms": 0.19947999715805054,
+              "after_forward_ms": 1.163699984550476
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=256, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 429.1355743408203,
+            "low": 423.44415283203125,
+            "high": 432.5650329589844
+          },
+          "forward_ms": {
+            "mean": 419.7146530151367,
+            "low": 414.1107482910156,
+            "high": 423.1751403808594
+          },
+          "prepare_ms": {
+            "mean": 7.320144891738892,
+            "low": 7.243279933929443,
+            "high": 7.4085798263549805
+          },
+          "after_forward_ms": {
+            "mean": 2.1007800102233887,
+            "low": 2.0171399116516113,
+            "high": 2.2221601009368896
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 102.52416038513184,
+            "low": 102.30914306640625,
+            "high": 102.78913879394531
+          },
+          "forward_ms": {
+            "mean": 101.16319847106934,
+            "low": 100.95813751220703,
+            "high": 101.42595672607422
+          },
+          "prepare_ms": {
+            "mean": 0.1976650021970272,
+            "low": 0.1954600065946579,
+            "high": 0.19968000054359436
+          },
+          "after_forward_ms": {
+            "mean": 1.1632950007915497,
+            "low": 1.154960036277771,
+            "high": 1.1699199676513672
+          }
+        }
+      },
+      "period_reduction_pct": 76.1091444020656,
+      "step_rate_gain_pct": 318.5701913858872
+    },
+    {
+      "case": {
+        "kind": "mixed",
+        "batch": 4,
+        "context": 1024,
+        "joining": 512
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case18",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 430.57281494140625,
+              "forward_ms": 421.7491760253906,
+              "prepare_ms": 7.220920085906982,
+              "after_forward_ms": 1.602720022201538
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=516, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case18",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 438.5647277832031,
+              "forward_ms": 429.32830810546875,
+              "prepare_ms": 7.549759864807129,
+              "after_forward_ms": 1.6866600513458252
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=516, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case2",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 444.8981628417969,
+              "forward_ms": 435.372314453125,
+              "prepare_ms": 7.586520195007324,
+              "after_forward_ms": 1.9393399953842163
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=516, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case2",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 428.77569580078125,
+              "forward_ms": 419.2255554199219,
+              "prepare_ms": 7.2774200439453125,
+              "after_forward_ms": 2.2727200984954834
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=516, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case18",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 232.84901428222656,
+              "forward_ms": 231.45350646972656,
+              "prepare_ms": 0.20015999674797058,
+              "after_forward_ms": 1.1953599452972412
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case18",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 231.86807250976562,
+              "forward_ms": 230.4686737060547,
+              "prepare_ms": 0.1989399939775467,
+              "after_forward_ms": 1.2004599571228027
+            },
+            "computed_min": 0,
+            "computed_max": 1030,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case2",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 232.6644744873047,
+              "forward_ms": 231.2427215576172,
+              "prepare_ms": 0.2052599936723709,
+              "after_forward_ms": 1.2165000438690186
+            },
+            "computed_min": 0,
+            "computed_max": 1030,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case2",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 232.8894805908203,
+              "forward_ms": 231.48989868164062,
+              "prepare_ms": 0.20311999320983887,
+              "after_forward_ms": 1.1964600086212158
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1024, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 435.7028503417969,
+            "low": 428.77569580078125,
+            "high": 444.8981628417969
+          },
+          "forward_ms": {
+            "mean": 426.41883850097656,
+            "low": 419.2255554199219,
+            "high": 435.372314453125
+          },
+          "prepare_ms": {
+            "mean": 7.408655047416687,
+            "low": 7.220920085906982,
+            "high": 7.586520195007324
+          },
+          "after_forward_ms": {
+            "mean": 1.8753600418567657,
+            "low": 1.602720022201538,
+            "high": 2.2727200984954834
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 232.5677604675293,
+            "low": 231.86807250976562,
+            "high": 232.8894805908203
+          },
+          "forward_ms": {
+            "mean": 231.16370010375977,
+            "low": 230.4686737060547,
+            "high": 231.48989868164062
+          },
+          "prepare_ms": {
+            "mean": 0.20186999440193176,
+            "low": 0.1989399939775467,
+            "high": 0.2052599936723709
+          },
+          "after_forward_ms": {
+            "mean": 1.2021949887275696,
+            "low": 1.1953599452972412,
+            "high": 1.2165000438690186
+          }
+        }
+      },
+      "period_reduction_pct": 46.62239177800046,
+      "step_rate_gain_pct": 87.34447520408959
+    },
+    {
+      "case": {
+        "kind": "mixed",
+        "batch": 4,
+        "context": 1024,
+        "joining": 1024
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case19",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 437.8327941894531,
+              "forward_ms": 429.59588623046875,
+              "prepare_ms": 7.035920143127441,
+              "after_forward_ms": 1.2009999752044678
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1028, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case19",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 440.72698974609375,
+              "forward_ms": 432.55865478515625,
+              "prepare_ms": 6.967740058898926,
+              "after_forward_ms": 1.2006200551986694
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1028, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case1",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 433.33984375,
+              "forward_ms": 425.2989501953125,
+              "prepare_ms": 6.814020156860352,
+              "after_forward_ms": 1.2268600463867188
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1028, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case1",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 432.2899475097656,
+              "forward_ms": 424.09521484375,
+              "prepare_ms": 6.994339942932129,
+              "after_forward_ms": 1.2003999948501587
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1028, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case19",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 331.79547119140625,
+              "forward_ms": 330.3736267089844,
+              "prepare_ms": 0.20061999559402466,
+              "after_forward_ms": 1.2212200164794922
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case19",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 330.4412841796875,
+              "forward_ms": 329.0047302246094,
+              "prepare_ms": 0.20100000500679016,
+              "after_forward_ms": 1.2355600595474243
+            },
+            "computed_min": 0,
+            "computed_max": 1030,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case1",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 331.0245666503906,
+              "forward_ms": 329.60308837890625,
+              "prepare_ms": 0.20778000354766846,
+              "after_forward_ms": 1.2137199640274048
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case1",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 331.835205078125,
+              "forward_ms": 330.40972900390625,
+              "prepare_ms": 0.20914000272750854,
+              "after_forward_ms": 1.2163399457931519
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=1536, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 436.0473937988281,
+            "low": 432.2899475097656,
+            "high": 440.72698974609375
+          },
+          "forward_ms": {
+            "mean": 427.8871765136719,
+            "low": 424.09521484375,
+            "high": 432.55865478515625
+          },
+          "prepare_ms": {
+            "mean": 6.953005075454712,
+            "low": 6.814020156860352,
+            "high": 7.035920143127441
+          },
+          "after_forward_ms": {
+            "mean": 1.2072200179100037,
+            "low": 1.2003999948501587,
+            "high": 1.2268600463867188
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 331.27413177490234,
+            "low": 330.4412841796875,
+            "high": 331.835205078125
+          },
+          "forward_ms": {
+            "mean": 329.84779357910156,
+            "low": 329.0047302246094,
+            "high": 330.40972900390625
+          },
+          "prepare_ms": {
+            "mean": 0.20463500171899796,
+            "low": 0.20061999559402466,
+            "high": 0.20914000272750854
+          },
+          "after_forward_ms": {
+            "mean": 1.2217099964618683,
+            "low": 1.2137199640274048,
+            "high": 1.2355600595474243
+          }
+        }
+      },
+      "period_reduction_pct": 24.027952812914478,
+      "step_rate_gain_pct": 31.62735993377177
+    },
+    {
+      "case": {
+        "kind": "mixed",
+        "batch": 4,
+        "context": 1024,
+        "joining": 1536
+      },
+      "arms": {
+        "baseline": [
+          {
+            "round": "0-baseline",
+            "label": "r1-case20",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 434.8547668457031,
+              "forward_ms": 426.42889404296875,
+              "prepare_ms": 7.192580223083496,
+              "after_forward_ms": 1.2332799434661865
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1540, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "0-baseline",
+            "label": "r2-case20",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 441.09405517578125,
+              "forward_ms": 432.32037353515625,
+              "prepare_ms": 7.542699813842773,
+              "after_forward_ms": 1.2309800386428833
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1540, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r1-case0",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 442.6929931640625,
+              "forward_ms": 434.1499328613281,
+              "prepare_ms": 7.322740077972412,
+              "after_forward_ms": 1.2203400135040283
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1540, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          },
+          {
+            "round": "3-baseline",
+            "label": "r2-case0",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 437.30810546875,
+              "forward_ms": 428.5362548828125,
+              "prepare_ms": 7.546440124511719,
+              "after_forward_ms": 1.2253999710083008
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "NONE"
+            ],
+            "descriptors": [
+              "BatchDescriptor(num_tokens=1540, num_reqs=None, uniform=False, has_lora=False, num_active_loras=0)"
+            ]
+          }
+        ],
+        "candidate": [
+          {
+            "round": "1-candidate",
+            "label": "r1-case20",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 420.1498107910156,
+              "forward_ms": 418.5885314941406,
+              "prepare_ms": 0.322519987821579,
+              "after_forward_ms": 1.2387399673461914
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2048, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "1-candidate",
+            "label": "r2-case20",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 420.2066650390625,
+              "forward_ms": 418.66204833984375,
+              "prepare_ms": 0.3198400139808655,
+              "after_forward_ms": 1.2247799634933472
+            },
+            "computed_min": 0,
+            "computed_max": 1028,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2048, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=1)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r1-case0",
+            "rank": 1,
+            "count": 1,
+            "metrics": {
+              "period_ms": 420.2899475097656,
+              "forward_ms": 418.7047119140625,
+              "prepare_ms": 0.3295600116252899,
+              "after_forward_ms": 1.2556999921798706
+            },
+            "computed_min": 0,
+            "computed_max": 1030,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2048, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          },
+          {
+            "round": "2-candidate",
+            "label": "r2-case0",
+            "rank": 0,
+            "count": 1,
+            "metrics": {
+              "period_ms": 420.1665344238281,
+              "forward_ms": 418.6162109375,
+              "prepare_ms": 0.32429999113082886,
+              "after_forward_ms": 1.2260199785232544
+            },
+            "computed_min": 0,
+            "computed_max": 1029,
+            "modes": [
+              "FULL"
+            ],
+            "descriptors": [
+              "install.<locals>.BankDescriptor(num_tokens=2048, num_reqs=8, uniform=False, has_lora=False, num_active_loras=0, bank=0)"
+            ]
+          }
+        ]
+      },
+      "summary": {
+        "baseline": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 438.9874801635742,
+            "low": 434.8547668457031,
+            "high": 442.6929931640625
+          },
+          "forward_ms": {
+            "mean": 430.3588638305664,
+            "low": 426.42889404296875,
+            "high": 434.1499328613281
+          },
+          "prepare_ms": {
+            "mean": 7.4011150598526,
+            "low": 7.192580223083496,
+            "high": 7.546440124511719
+          },
+          "after_forward_ms": {
+            "mean": 1.2274999916553497,
+            "low": 1.2203400135040283,
+            "high": 1.2332799434661865
+          }
+        },
+        "candidate": {
+          "cohorts": 4,
+          "steps": 4,
+          "period_ms": {
+            "mean": 420.20323944091797,
+            "low": 420.1498107910156,
+            "high": 420.2899475097656
+          },
+          "forward_ms": {
+            "mean": 418.6428756713867,
+            "low": 418.5885314941406,
+            "high": 418.7047119140625
+          },
+          "prepare_ms": {
+            "mean": 0.3240550011396408,
+            "low": 0.3198400139808655,
+            "high": 0.3295600116252899
+          },
+          "after_forward_ms": {
+            "mean": 1.236309975385666,
+            "low": 1.2247799634933472,
+            "high": 1.2556999921798706
+          }
+        }
+      },
+      "period_reduction_pct": 4.278992356605915,
+      "step_rate_gain_pct": 4.4702750858486295
+    }
+  ],
+  "status": "PASS",
+  "product_source_commit": "98f507167b5a4832481a2187e6dcb5b5e5afc85b",
+  "capsule": "/workspace/strengthen-dsv4/runs/qwen38-tp2-serving/step-matrix1",
+  "admission_exit": 0
+}

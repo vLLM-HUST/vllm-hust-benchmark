@@ -1,0 +1,1472 @@
+{
+  "status": "PASS",
+  "model": "Qwen3.8-27B",
+  "mtp_tokens": 2,
+  "sources": {
+    "vllm": "752a3a504485790a2e8491cacbb35c137339ad34",
+    "ascend": "9bf964cb4b87c8cd0d6852c41a55b3c29711fa95"
+  },
+  "profile_scope": "Sequential synthetic C8 same-pair prototype control: device APC with CPU-length fence versus device lengths. Not native baseline or SWE. Six steps / five seams per rank. Not unprofiled throughput.",
+  "profiles": [
+    {
+      "arm": "before",
+      "phase": "decode",
+      "rank": 0,
+      "capsule": "mtp-device-apc-service-20260921-v4",
+      "graph_durations_ms": [
+        {
+          "kind": "target",
+          "duration_ms": 47.614632
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.293345
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.019459000000005
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.248105
+        },
+        {
+          "kind": "target",
+          "duration_ms": 42.836816
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.311706
+        },
+        {
+          "kind": "target",
+          "duration_ms": 42.851036
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.289925
+        },
+        {
+          "kind": "target",
+          "duration_ms": 42.875116999999996
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.334067
+        },
+        {
+          "kind": "target",
+          "duration_ms": 42.940197999999995
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.268806
+        }
+      ],
+      "target_periods_ms": [
+        63.188583,
+        58.244543,
+        57.960279,
+        57.988057999999995,
+        58.281625
+      ],
+      "seams": [
+        {
+          "envelope_ms": 9.22906,
+          "kernel_memcpy_union_ms": 0.551734,
+          "no_TASK_coverage_ms": 8.677051
+        },
+        {
+          "envelope_ms": 8.937411,
+          "kernel_memcpy_union_ms": 0.55029,
+          "no_TASK_coverage_ms": 8.386668
+        },
+        {
+          "envelope_ms": 8.761626,
+          "kernel_memcpy_union_ms": 0.544351,
+          "no_TASK_coverage_ms": 8.217065
+        },
+        {
+          "envelope_ms": 8.8005,
+          "kernel_memcpy_union_ms": 0.549811,
+          "no_TASK_coverage_ms": 8.250404999999999
+        },
+        {
+          "envelope_ms": 9.005197,
+          "kernel_memcpy_union_ms": 0.559192,
+          "no_TASK_coverage_ms": 8.445728
+        }
+      ],
+      "apis": [
+        [
+          "ScatterUpdate_Tiling",
+          12,
+          334.92
+        ],
+        [
+          "aclmdlRICaptureTaskUpdateBegin",
+          12,
+          37.62
+        ],
+        [
+          "aclmdlRICaptureTaskUpdateEnd",
+          12,
+          33.49
+        ],
+        [
+          "aclmdlRIExecuteAsync",
+          12,
+          216.49
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScore",
+          18,
+          1163.31
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          18,
+          2275.62
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreTiling",
+          18,
+          785.45
+        ]
+      ]
+    },
+    {
+      "arm": "before",
+      "phase": "decode",
+      "rank": 1,
+      "capsule": "mtp-device-apc-service-20260921-v4",
+      "graph_durations_ms": [
+        {
+          "kind": "target",
+          "duration_ms": 42.886797
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.267845
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.562271
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.2411840000000005
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.374987000000004
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.3037659999999995
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.196543
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.268765999999999
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.262924
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.318546
+        },
+        {
+          "kind": "target",
+          "duration_ms": 42.945438
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.272925
+        }
+      ],
+      "target_periods_ms": [
+        57.918397,
+        58.250384,
+        58.152762,
+        57.947658000000004,
+        58.661652000000004
+      ],
+      "seams": [
+        {
+          "envelope_ms": 8.685498,
+          "kernel_memcpy_union_ms": 0.557589,
+          "no_TASK_coverage_ms": 8.127404
+        },
+        {
+          "envelope_ms": 8.39841,
+          "kernel_memcpy_union_ms": 0.533812,
+          "no_TASK_coverage_ms": 7.864096
+        },
+        {
+          "envelope_ms": 8.414084,
+          "kernel_memcpy_union_ms": 0.540812,
+          "no_TASK_coverage_ms": 7.873036000000001
+        },
+        {
+          "envelope_ms": 8.414862,
+          "kernel_memcpy_union_ms": 0.547971,
+          "no_TASK_coverage_ms": 7.8667169999999995
+        },
+        {
+          "envelope_ms": 8.999842,
+          "kernel_memcpy_union_ms": 0.551874,
+          "no_TASK_coverage_ms": 8.447565999999998
+        }
+      ],
+      "apis": [
+        [
+          "ScatterUpdate_Tiling",
+          12,
+          383.39
+        ],
+        [
+          "aclmdlRICaptureTaskUpdateBegin",
+          12,
+          38.76
+        ],
+        [
+          "aclmdlRICaptureTaskUpdateEnd",
+          12,
+          34.16
+        ],
+        [
+          "aclmdlRIExecuteAsync",
+          12,
+          199.17
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScore",
+          18,
+          1133.62
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          18,
+          2245.92
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreTiling",
+          18,
+          755.71
+        ]
+      ]
+    },
+    {
+      "arm": "before",
+      "phase": "mixed",
+      "rank": 0,
+      "capsule": "mtp-device-apc-service-20260921-v4",
+      "graph_durations_ms": [
+        {
+          "kind": "target",
+          "duration_ms": 32.124622
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.542291
+        },
+        {
+          "kind": "target",
+          "duration_ms": 32.225704
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.556431
+        },
+        {
+          "kind": "target",
+          "duration_ms": 167.386784
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 13.900798
+        },
+        {
+          "kind": "target",
+          "duration_ms": 36.968399
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.890218
+        },
+        {
+          "kind": "target",
+          "duration_ms": 36.741454
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.869657
+        },
+        {
+          "kind": "target",
+          "duration_ms": 36.826375999999996
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.8243159999999996
+        }
+      ],
+      "target_periods_ms": [
+        45.593191,
+        46.988959,
+        192.295882,
+        51.282085,
+        50.911357
+      ],
+      "seams": [
+        {
+          "envelope_ms": 8.473689,
+          "kernel_memcpy_union_ms": 0.447409,
+          "no_TASK_coverage_ms": 8.025920000000001
+        },
+        {
+          "envelope_ms": 9.74796,
+          "kernel_memcpy_union_ms": 0.52195,
+          "no_TASK_coverage_ms": 9.212545
+        },
+        {
+          "envelope_ms": 9.33549,
+          "kernel_memcpy_union_ms": 0.510274,
+          "no_TASK_coverage_ms": 8.824612
+        },
+        {
+          "envelope_ms": 8.714599,
+          "kernel_memcpy_union_ms": 0.50953,
+          "no_TASK_coverage_ms": 8.204644
+        },
+        {
+          "envelope_ms": 8.589028,
+          "kernel_memcpy_union_ms": 0.500011,
+          "no_TASK_coverage_ms": 8.088681000000001
+        }
+      ],
+      "apis": [
+        [
+          "ScatterUpdate_Tiling",
+          12,
+          307.97
+        ],
+        [
+          "aclmdlRICaptureTaskUpdateBegin",
+          12,
+          34.94
+        ],
+        [
+          "aclmdlRICaptureTaskUpdateEnd",
+          12,
+          31.36
+        ],
+        [
+          "aclmdlRIExecuteAsync",
+          12,
+          1139.43
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScore",
+          18,
+          1131.84
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          18,
+          1975.13
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreTiling",
+          18,
+          721.05
+        ]
+      ]
+    },
+    {
+      "arm": "before",
+      "phase": "mixed",
+      "rank": 1,
+      "capsule": "mtp-device-apc-service-20260921-v4",
+      "graph_durations_ms": [
+        {
+          "kind": "target",
+          "duration_ms": 32.128622
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.546471
+        },
+        {
+          "kind": "target",
+          "duration_ms": 32.310465
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.5606709999999997
+        },
+        {
+          "kind": "target",
+          "duration_ms": 167.368924
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 13.905538
+        },
+        {
+          "kind": "target",
+          "duration_ms": 37.097541
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.909658
+        },
+        {
+          "kind": "target",
+          "duration_ms": 37.223224
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.880777
+        },
+        {
+          "kind": "target",
+          "duration_ms": 37.269144999999995
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.830736
+        }
+      ],
+      "target_periods_ms": [
+        45.51309,
+        47.092081,
+        192.147059,
+        50.927257,
+        50.952738
+      ],
+      "seams": [
+        {
+          "envelope_ms": 8.384187,
+          "kernel_memcpy_union_ms": 0.45353,
+          "no_TASK_coverage_ms": 7.9301580000000005
+        },
+        {
+          "envelope_ms": 9.766956,
+          "kernel_memcpy_union_ms": 0.505472,
+          "no_TASK_coverage_ms": 9.242363000000001
+        },
+        {
+          "envelope_ms": 9.199263,
+          "kernel_memcpy_union_ms": 0.502291,
+          "no_TASK_coverage_ms": 8.696653
+        },
+        {
+          "envelope_ms": 8.227128,
+          "kernel_memcpy_union_ms": 0.501952,
+          "no_TASK_coverage_ms": 7.7248920000000005
+        },
+        {
+          "envelope_ms": 8.146266,
+          "kernel_memcpy_union_ms": 0.508932,
+          "no_TASK_coverage_ms": 7.636831000000001
+        }
+      ],
+      "apis": [
+        [
+          "ScatterUpdate_Tiling",
+          12,
+          392.01
+        ],
+        [
+          "aclmdlRICaptureTaskUpdateBegin",
+          12,
+          40.09
+        ],
+        [
+          "aclmdlRICaptureTaskUpdateEnd",
+          12,
+          36.03
+        ],
+        [
+          "aclmdlRIExecuteAsync",
+          12,
+          1292.59
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScore",
+          18,
+          1172.72
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          18,
+          2030.39
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreTiling",
+          18,
+          774.73
+        ]
+      ]
+    },
+    {
+      "arm": "after",
+      "phase": "decode",
+      "rank": 0,
+      "capsule": "mtp-device-length-service-20260921-v3",
+      "graph_durations_ms": [
+        {
+          "kind": "target",
+          "duration_ms": 44.429308
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.388848
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.386927
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.273245
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.204963000000006
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.332586
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.189743
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.272426
+        },
+        {
+          "kind": "target",
+          "duration_ms": 44.209103000000006
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.297046
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.141202
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.302046000000001
+        }
+      ],
+      "target_periods_ms": [
+        51.98899900000001,
+        50.792535,
+        50.617830999999995,
+        50.579271,
+        51.602650999999994
+      ],
+      "seams": [
+        {
+          "envelope_ms": 1.114656,
+          "kernel_memcpy_union_ms": 1.105602,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.039223,
+          "kernel_memcpy_union_ms": 1.030261,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.01667,
+          "kernel_memcpy_union_ms": 1.00764,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.022629,
+          "kernel_memcpy_union_ms": 1.0136,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.016704,
+          "kernel_memcpy_union_ms": 1.007539,
+          "no_TASK_coverage_ms": 0.0
+        }
+      ],
+      "apis": [
+        [
+          "ScatterUpdate_Tiling",
+          12,
+          350.9
+        ],
+        [
+          "aclmdlRIExecuteAsync",
+          12,
+          202.11
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScore",
+          18,
+          736.89
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          18,
+          1737.0
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreTiling",
+          12,
+          569.2
+        ]
+      ]
+    },
+    {
+      "arm": "after",
+      "phase": "decode",
+      "rank": 1,
+      "capsule": "mtp-device-length-service-20260921-v3",
+      "graph_durations_ms": [
+        {
+          "kind": "target",
+          "duration_ms": 43.380707
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.3680069999999995
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.387167
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.293346
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.210083
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.350087
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.175881999999994
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.296785
+        },
+        {
+          "kind": "target",
+          "duration_ms": 44.219443
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.317747000000001
+        },
+        {
+          "kind": "target",
+          "duration_ms": 43.159322
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 4.314126
+        }
+      ],
+      "target_periods_ms": [
+        50.939878,
+        50.787935,
+        50.636272,
+        50.548449999999995,
+        51.601431
+      ],
+      "seams": [
+        {
+          "envelope_ms": 1.111053,
+          "kernel_memcpy_union_ms": 1.102362,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.035628,
+          "kernel_memcpy_union_ms": 1.026821,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.030748,
+          "kernel_memcpy_union_ms": 1.021701,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.00435,
+          "kernel_memcpy_union_ms": 0.995221,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 0.998741,
+          "kernel_memcpy_union_ms": 0.98978,
+          "no_TASK_coverage_ms": 0.0
+        }
+      ],
+      "apis": [
+        [
+          "ScatterUpdate_Tiling",
+          12,
+          345.95
+        ],
+        [
+          "aclmdlRIExecuteAsync",
+          12,
+          186.3
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScore",
+          18,
+          710.95
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          18,
+          1784.26
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreTiling",
+          12,
+          584.78
+        ]
+      ]
+    },
+    {
+      "arm": "after",
+      "phase": "mixed",
+      "rank": 0,
+      "capsule": "mtp-device-length-service-20260921-v3",
+      "graph_durations_ms": [
+        {
+          "kind": "target",
+          "duration_ms": 34.751035
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.566911
+        },
+        {
+          "kind": "target",
+          "duration_ms": 32.271205
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.535391
+        },
+        {
+          "kind": "target",
+          "duration_ms": 166.809313
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 13.663173
+        },
+        {
+          "kind": "target",
+          "duration_ms": 37.237284
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.8861779999999997
+        },
+        {
+          "kind": "target",
+          "duration_ms": 36.985519000000004
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.831537
+        },
+        {
+          "kind": "target",
+          "duration_ms": 36.904937
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.869838
+        }
+      ],
+      "target_periods_ms": [
+        40.810976000000004,
+        38.520089,
+        183.386405,
+        43.945098,
+        43.560230000000004
+      ],
+      "seams": [
+        {
+          "envelope_ms": 1.019504,
+          "kernel_memcpy_union_ms": 1.00994,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.244809,
+          "kernel_memcpy_union_ms": 1.234124,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.220014,
+          "kernel_memcpy_union_ms": 1.210845,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.104184,
+          "kernel_memcpy_union_ms": 1.094702,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.01667,
+          "kernel_memcpy_union_ms": 1.00746,
+          "no_TASK_coverage_ms": 0.0
+        }
+      ],
+      "apis": [
+        [
+          "ScatterUpdate_Tiling",
+          18,
+          372.97
+        ],
+        [
+          "aclmdlRIExecuteAsync",
+          12,
+          210.81
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScore",
+          18,
+          739.14
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          18,
+          1491.88
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreTiling",
+          12,
+          547.11
+        ]
+      ]
+    },
+    {
+      "arm": "after",
+      "phase": "mixed",
+      "rank": 1,
+      "capsule": "mtp-device-length-service-20260921-v3",
+      "graph_durations_ms": [
+        {
+          "kind": "target",
+          "duration_ms": 32.185403
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.573571
+        },
+        {
+          "kind": "target",
+          "duration_ms": 32.313786
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.53575
+        },
+        {
+          "kind": "target",
+          "duration_ms": 166.872854
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 13.684673
+        },
+        {
+          "kind": "target",
+          "duration_ms": 37.211383000000005
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.8994180000000003
+        },
+        {
+          "kind": "target",
+          "duration_ms": 36.908318
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.841256
+        },
+        {
+          "kind": "target",
+          "duration_ms": 36.895417
+        },
+        {
+          "kind": "draft",
+          "duration_ms": 3.881118
+        }
+      ],
+      "target_periods_ms": [
+        38.202723,
+        38.498469,
+        183.47590599999998,
+        44.002339,
+        43.486269
+      ],
+      "seams": [
+        {
+          "envelope_ms": 0.980949,
+          "kernel_memcpy_union_ms": 0.97138,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.18105,
+          "kernel_memcpy_union_ms": 1.170324,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.240636,
+          "kernel_memcpy_union_ms": 1.231485,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.185375,
+          "kernel_memcpy_union_ms": 1.176224,
+          "no_TASK_coverage_ms": 0.0
+        },
+        {
+          "envelope_ms": 1.025692,
+          "kernel_memcpy_union_ms": 1.016401,
+          "no_TASK_coverage_ms": 0.0
+        }
+      ],
+      "apis": [
+        [
+          "ScatterUpdate_Tiling",
+          18,
+          408.64
+        ],
+        [
+          "aclmdlRIExecuteAsync",
+          12,
+          215.09
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScore",
+          18,
+          765.18
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreGetWorkspaceSize",
+          18,
+          1603.04
+        ],
+        [
+          "aclnnInnerFusedInferAttentionScoreTiling",
+          12,
+          539.84
+        ]
+      ]
+    }
+  ],
+  "date": "2026-09-21",
+  "service_capsule": "mtp-swe-acceptance-20260921",
+  "end_to_end": {
+    "scope": "Same hw3 physical6/7 ABBA; MTP2/APC/AIV both arms; native SD/V1 ABI bridge only vs full candidate stack. No profiler.",
+    "concurrencies": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "prefix_caching": true,
+    "mtp_tokens": 2,
+    "fixture": {
+      "dataset": "nvidia/Open-SWE-Traces",
+      "revision": "fb0c0dccc7a5cce79b3f6de891848acdede36685",
+      "subset": "data/minisweagent/qwen38_27b",
+      "scanned": 15525,
+      "selection": {
+        "min_turns": 2,
+        "max_turns": 12,
+        "max_context": 8192,
+        "max_output_total": 8192
+      },
+      "transforms": {
+        "truncated": false,
+        "tool_arguments": "JSON strings parsed to mappings",
+        "history": "original recorded messages, not generated responses",
+        "output_budget": "Qwen-tokenized complete assistant serialization suffix (BPE at suffix boundary is independent)",
+        "tool_execution": false,
+        "tool_wait_seconds": 0,
+        "arrival_policy": "one initially ready call per session; next turn after previous completion"
+      },
+      "trajectories": [
+        "7aef38cd-40e8-4d73-bf84-5fb601845f9d",
+        "85d1d00c-dec6-426c-a7c8-d55e307316e8",
+        "41094c57-7aa3-4637-8e61-51148ed2ccf4",
+        "f716c9d4-0e7b-4e36-917f-2a044634d5ed",
+        "19d9e7fc-2c25-4710-a0d1-b3f6b2167a97",
+        "494f7e35-04ec-44fb-a3df-ab508b17b6ed",
+        "ef07f321-97f0-4923-9ac6-a25625ff08b9",
+        "a3969e81-77d8-4f2b-8a58-448704fa890a"
+      ]
+    },
+    "rounds": [
+      {
+        "repeat": 0,
+        "arm": "baseline",
+        "devices": "6,7",
+        "concurrency": 1,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 395.4467005999759,
+        "tokens_per_s": 52.21436913918522,
+        "mean_ttft_ms": 983.3920517016967,
+        "p95_ttft_ms": 1483.5439738817513,
+        "mean_latency_s": 5.068818590144078,
+        "p95_latency_s": 10.04059500200674,
+        "mean_tpot_ms": 15.516823452276494,
+        "p95_tpot_ms": 16.543287168903888,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 147456,
+        "cached_prompt_fraction": 0.411383805891658
+      },
+      {
+        "repeat": 0,
+        "arm": "baseline",
+        "devices": "6,7",
+        "concurrency": 2,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 259.7652381900698,
+        "tokens_per_s": 79.48715595614796,
+        "mean_ttft_ms": 1248.5213868696098,
+        "p95_ttft_ms": 2032.2814860846847,
+        "mean_latency_s": 6.379787502082017,
+        "p95_latency_s": 12.282767650904134,
+        "mean_tpot_ms": 19.754708079688633,
+        "p95_tpot_ms": 28.090573056100833,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 147456,
+        "cached_prompt_fraction": 0.411383805891658
+      },
+      {
+        "repeat": 0,
+        "arm": "baseline",
+        "devices": "6,7",
+        "concurrency": 4,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 196.97739612404257,
+        "tokens_per_s": 104.8242103220683,
+        "mean_ttft_ms": 1527.3427087724065,
+        "p95_ttft_ms": 2175.1999240368605,
+        "mean_latency_s": 9.366276793131151,
+        "p95_latency_s": 21.03593176114373,
+        "mean_tpot_ms": 31.080448805744133,
+        "p95_tpot_ms": 49.69676814277421,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 147456,
+        "cached_prompt_fraction": 0.411383805891658
+      },
+      {
+        "repeat": 0,
+        "arm": "baseline",
+        "devices": "6,7",
+        "concurrency": 8,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 207.3906169719994,
+        "tokens_per_s": 99.56091698588159,
+        "mean_ttft_ms": 2528.3037844048336,
+        "p95_ttft_ms": 4268.702314002439,
+        "mean_latency_s": 18.4298171812358,
+        "p95_latency_s": 38.61980007006787,
+        "mean_tpot_ms": 60.74571540417758,
+        "p95_tpot_ms": 96.78960602486325,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 39936,
+        "cached_prompt_fraction": 0.1114164474289907
+      },
+      {
+        "repeat": 0,
+        "arm": "candidate",
+        "devices": "6,7",
+        "concurrency": 1,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 296.52173939417116,
+        "tokens_per_s": 69.63401753337308,
+        "mean_ttft_ms": 502.57839961275937,
+        "p95_ttft_ms": 761.8429949507117,
+        "mean_latency_s": 3.800585469317575,
+        "p95_latency_s": 7.7313425180036575,
+        "mean_tpot_ms": 12.501580260544305,
+        "p95_tpot_ms": 13.32319232827152,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 247296,
+        "cached_prompt_fraction": 0.6899249244641348
+      },
+      {
+        "repeat": 0,
+        "arm": "candidate",
+        "devices": "6,7",
+        "concurrency": 2,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 185.09849997400306,
+        "tokens_per_s": 111.55141723406724,
+        "mean_ttft_ms": 603.047279933563,
+        "p95_ttft_ms": 932.9560031183064,
+        "mean_latency_s": 4.516670605857284,
+        "p95_latency_s": 9.150838079163805,
+        "mean_tpot_ms": 15.003906679437787,
+        "p95_tpot_ms": 18.68815667902319,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 247296,
+        "cached_prompt_fraction": 0.6899249244641348
+      },
+      {
+        "repeat": 0,
+        "arm": "candidate",
+        "devices": "6,7",
+        "concurrency": 4,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 120.99385104398243,
+        "tokens_per_s": 170.6533003275865,
+        "mean_ttft_ms": 688.9715317774038,
+        "p95_ttft_ms": 1031.1363278888166,
+        "mean_latency_s": 5.715994884227164,
+        "p95_latency_s": 12.190449924208224,
+        "mean_tpot_ms": 19.821266130061897,
+        "p95_tpot_ms": 27.972073225356954,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 247296,
+        "cached_prompt_fraction": 0.6899249244641348
+      },
+      {
+        "repeat": 0,
+        "arm": "candidate",
+        "devices": "6,7",
+        "concurrency": 8,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 146.92641185596585,
+        "tokens_per_s": 140.53293576815543,
+        "mean_ttft_ms": 1789.6603695206488,
+        "p95_ttft_ms": 3539.532294962555,
+        "mean_latency_s": 13.12243460617267,
+        "p95_latency_s": 26.738058359827846,
+        "mean_tpot_ms": 42.88327327044234,
+        "p95_tpot_ms": 69.62412511166491,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 67584,
+        "cached_prompt_fraction": 0.18855091103367658
+      },
+      {
+        "repeat": 1,
+        "arm": "baseline",
+        "devices": "6,7",
+        "concurrency": 8,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 177.03681814391166,
+        "tokens_per_s": 116.63110654878254,
+        "mean_ttft_ms": 2221.433303787564,
+        "p95_ttft_ms": 4062.1491419151425,
+        "mean_latency_s": 15.601433036442941,
+        "p95_latency_s": 33.164901653071865,
+        "mean_tpot_ms": 51.38156006568552,
+        "p95_tpot_ms": 79.83232482000575,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 44544,
+        "cached_prompt_fraction": 0.12427219136310502
+      },
+      {
+        "repeat": 1,
+        "arm": "baseline",
+        "devices": "6,7",
+        "concurrency": 4,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 186.0770371290855,
+        "tokens_per_s": 110.96479349935078,
+        "mean_ttft_ms": 1380.622490001723,
+        "p95_ttft_ms": 2232.484068023041,
+        "mean_latency_s": 8.817471221853525,
+        "p95_latency_s": 19.284841044107452,
+        "mean_tpot_ms": 29.46823810299754,
+        "p95_tpot_ms": 44.73616777567002,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 147456,
+        "cached_prompt_fraction": 0.411383805891658
+      },
+      {
+        "repeat": 1,
+        "arm": "baseline",
+        "devices": "6,7",
+        "concurrency": 2,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 279.31721402099356,
+        "tokens_per_s": 73.92312025011137,
+        "mean_ttft_ms": 1481.7557678862404,
+        "p95_ttft_ms": 2242.7834449335933,
+        "mean_latency_s": 6.8669167117287335,
+        "p95_latency_s": 13.06758905085735,
+        "mean_tpot_ms": 20.644773115710347,
+        "p95_tpot_ms": 29.92273008629204,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 147456,
+        "cached_prompt_fraction": 0.411383805891658
+      },
+      {
+        "repeat": 1,
+        "arm": "baseline",
+        "devices": "6,7",
+        "concurrency": 1,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 409.6154561538715,
+        "tokens_per_s": 50.40825410709992,
+        "mean_ttft_ms": 1170.5531304737983,
+        "p95_ttft_ms": 1744.8550548870116,
+        "mean_latency_s": 5.250489892032093,
+        "p95_latency_s": 10.375875266967341,
+        "mean_tpot_ms": 15.5022751293516,
+        "p95_tpot_ms": 16.48870341202436,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 147456,
+        "cached_prompt_fraction": 0.411383805891658
+      },
+      {
+        "repeat": 1,
+        "arm": "candidate",
+        "devices": "6,7",
+        "concurrency": 8,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 146.70650675706565,
+        "tokens_per_s": 140.74358701888698,
+        "mean_ttft_ms": 1783.3769177086651,
+        "p95_ttft_ms": 3304.233524017036,
+        "mean_latency_s": 13.05844215140081,
+        "p95_latency_s": 26.883145102998242,
+        "mean_tpot_ms": 42.465231944204355,
+        "p95_tpot_ms": 69.28125129648078,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 69120,
+        "cached_prompt_fraction": 0.1928361590117147
+      },
+      {
+        "repeat": 1,
+        "arm": "candidate",
+        "devices": "6,7",
+        "concurrency": 4,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 121.07501121400855,
+        "tokens_per_s": 170.53890636031588,
+        "mean_ttft_ms": 693.7165220435231,
+        "p95_ttft_ms": 1379.168186103925,
+        "mean_latency_s": 5.723224143763312,
+        "p95_latency_s": 12.046854499960318,
+        "mean_tpot_ms": 19.894228677050364,
+        "p95_tpot_ms": 28.421192173249064,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 247296,
+        "cached_prompt_fraction": 0.6899249244641348
+      },
+      {
+        "repeat": 1,
+        "arm": "candidate",
+        "devices": "6,7",
+        "concurrency": 2,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 185.29715652787127,
+        "tokens_per_s": 111.43182327730028,
+        "mean_ttft_ms": 622.3244053663877,
+        "p95_ttft_ms": 926.7194238491356,
+        "mean_latency_s": 4.51972847555776,
+        "p95_latency_s": 9.187041226075962,
+        "mean_tpot_ms": 14.955919213684542,
+        "p95_tpot_ms": 18.737065329332836,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 247296,
+        "cached_prompt_fraction": 0.6899249244641348
+      },
+      {
+        "repeat": 1,
+        "arm": "candidate",
+        "devices": "6,7",
+        "concurrency": 1,
+        "requests": 78,
+        "output_tokens": 20648,
+        "elapsed_s": 296.74003749503754,
+        "tokens_per_s": 69.58279096512314,
+        "mean_ttft_ms": 502.0467436556012,
+        "p95_ttft_ms": 762.0978399645537,
+        "mean_latency_s": 3.8033937158074993,
+        "p95_latency_s": 7.73953991709277,
+        "mean_tpot_ms": 12.512401928775196,
+        "p95_tpot_ms": 13.340940725641282,
+        "prompt_tokens": 358439,
+        "cached_prompt_tokens": 247296,
+        "cached_prompt_fraction": 0.6899249244641348
+      }
+    ],
+    "pooled": {
+      "baseline": {
+        "1": {
+          "requests": 156,
+          "output_tokens": 41296,
+          "elapsed_s": 805.0621567538474,
+          "tokens_per_s": 51.29541819045719,
+          "mean_ttft_ms": 1076.9725910877476,
+          "p95_ttft_ms": 1536.4816039800644,
+          "mean_latency_s": 5.159654241088085,
+          "p95_latency_s": 10.375875266967341,
+          "mean_tpot_ms": 15.509549290814046,
+          "p95_tpot_ms": 16.51565889998531,
+          "prompt_tokens": 716878,
+          "cached_prompt_tokens": 294912,
+          "cached_prompt_fraction": 0.411383805891658
+        },
+        "2": {
+          "requests": 156,
+          "output_tokens": 41296,
+          "elapsed_s": 539.0824522110634,
+          "tokens_per_s": 76.60423712666434,
+          "mean_ttft_ms": 1365.1385773779252,
+          "p95_ttft_ms": 2224.436003016308,
+          "mean_latency_s": 6.623352106905375,
+          "p95_latency_s": 12.962192058097571,
+          "mean_tpot_ms": 20.19974059769949,
+          "p95_tpot_ms": 29.111593161829777,
+          "prompt_tokens": 716878,
+          "cached_prompt_tokens": 294912,
+          "cached_prompt_fraction": 0.411383805891658
+        },
+        "4": {
+          "requests": 156,
+          "output_tokens": 41296,
+          "elapsed_s": 383.0544332531281,
+          "tokens_per_s": 107.80713239444742,
+          "mean_ttft_ms": 1453.9825993870647,
+          "p95_ttft_ms": 2188.4388600010425,
+          "mean_latency_s": 9.091874007492338,
+          "p95_latency_s": 20.922895105089992,
+          "mean_tpot_ms": 30.274343454370836,
+          "p95_tpot_ms": 47.105036337950054,
+          "prompt_tokens": 716878,
+          "cached_prompt_tokens": 294912,
+          "cached_prompt_fraction": 0.411383805891658
+        },
+        "8": {
+          "requests": 156,
+          "output_tokens": 41296,
+          "elapsed_s": 384.42743511591107,
+          "tokens_per_s": 107.42209381478871,
+          "mean_ttft_ms": 2374.868544096199,
+          "p95_ttft_ms": 4158.148737158626,
+          "mean_latency_s": 17.01562510883937,
+          "p95_latency_s": 38.61980007006787,
+          "mean_tpot_ms": 56.063637734931554,
+          "p95_tpot_ms": 91.74318895251913,
+          "prompt_tokens": 716878,
+          "cached_prompt_tokens": 84480,
+          "cached_prompt_fraction": 0.11784431939604786
+        }
+      },
+      "candidate": {
+        "1": {
+          "requests": 156,
+          "output_tokens": 41296,
+          "elapsed_s": 593.2617768892087,
+          "tokens_per_s": 69.60839482451944,
+          "mean_ttft_ms": 502.31257163418024,
+          "p95_ttft_ms": 762.0978399645537,
+          "mean_latency_s": 3.801989592562537,
+          "p95_latency_s": 7.73953991709277,
+          "mean_tpot_ms": 12.50699109465975,
+          "p95_tpot_ms": 13.325324980542064,
+          "prompt_tokens": 716878,
+          "cached_prompt_tokens": 494592,
+          "cached_prompt_fraction": 0.6899249244641348
+        },
+        "2": {
+          "requests": 156,
+          "output_tokens": 41296,
+          "elapsed_s": 370.3956565018743,
+          "tokens_per_s": 111.49158818440688,
+          "mean_ttft_ms": 612.6858426499754,
+          "p95_ttft_ms": 931.7125838715583,
+          "mean_latency_s": 4.5181995407075215,
+          "p95_latency_s": 9.187041226075962,
+          "mean_tpot_ms": 14.979912946561164,
+          "p95_tpot_ms": 18.737065329332836,
+          "prompt_tokens": 716878,
+          "cached_prompt_tokens": 494592,
+          "cached_prompt_fraction": 0.6899249244641348
+        },
+        "4": {
+          "requests": 156,
+          "output_tokens": 41296,
+          "elapsed_s": 242.068862257991,
+          "tokens_per_s": 170.59608416710674,
+          "mean_ttft_ms": 691.3440269104635,
+          "p95_ttft_ms": 1278.4877519588917,
+          "mean_latency_s": 5.719609513995238,
+          "p95_latency_s": 12.190449924208224,
+          "mean_tpot_ms": 19.857747403556132,
+          "p95_tpot_ms": 28.382685807091782,
+          "prompt_tokens": 716878,
+          "cached_prompt_tokens": 494592,
+          "cached_prompt_fraction": 0.6899249244641348
+        },
+        "8": {
+          "requests": 156,
+          "output_tokens": 41296,
+          "elapsed_s": 293.6329186130315,
+          "tokens_per_s": 140.63818251393857,
+          "mean_ttft_ms": 1786.5186436146569,
+          "p95_ttft_ms": 3431.235663825646,
+          "mean_latency_s": 13.09043837878674,
+          "p95_latency_s": 26.883145102998242,
+          "mean_tpot_ms": 42.674252607323346,
+          "p95_tpot_ms": 69.49889830191482,
+          "prompt_tokens": 716878,
+          "cached_prompt_tokens": 136704,
+          "cached_prompt_fraction": 0.19069353502269562
+        }
+      }
+    },
+    "throughput_gain_percent": {
+      "1": 35.700998802791936,
+      "2": 45.542325550552306,
+      "4": 58.241927392081564,
+      "8": 30.921095949236687
+    },
+    "limits": "Eight selected <=8K trajectories, APC setting recorded separately, MTP tokens=2, fixed output budgets, no tool latency. Two repeats per arm (ordering/arms in scope), not population or confidence evidence. No fresh baseline comparison is implied for candidate-only runs. Profile excluded. TPOT is HTTP completion-minus-first-content per remaining output token, not SSE event gaps."
+  },
+  "c8_observation": "Prefix hits decrease in both arms at C8; candidate throughput falls versus C4. Native C8 repeats vary. Eviction/reschedule without restored reusable state is an unverified hypothesis, outside this increment."
+}

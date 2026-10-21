@@ -1,0 +1,917 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vllm-hust.sage.org.ai/schemas/leaderboard_v1.schema.json",
+  "title": "LLM Engine Leaderboard Schema v1",
+  "description": "MVP schema for leaderboard data used by vllm-hust-website",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/entry"
+    },
+    {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    }
+  ],
+  "$defs": {
+    "versionOrNA": {
+      "type": "string",
+      "pattern": "^(\\d+\\.\\d+[\\w.\\-+]*|N/A)$"
+    },
+    "tokenLengthDistributionOrNull": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "count",
+            "min",
+            "p50",
+            "p95",
+            "p99",
+            "max",
+            "total"
+          ],
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "min": {
+              "type": "number",
+              "minimum": 1
+            },
+            "p50": {
+              "type": "number",
+              "minimum": 1
+            },
+            "p95": {
+              "type": "number",
+              "minimum": 1
+            },
+            "p99": {
+              "type": "number",
+              "minimum": 1
+            },
+            "max": {
+              "type": "number",
+              "minimum": 1
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "entry": {
+      "type": "object",
+      "required": [
+        "entry_id",
+        "engine",
+        "engine_version",
+        "config_type",
+        "hardware",
+        "model",
+        "workload",
+        "metrics",
+        "constraints",
+        "versions",
+        "environment",
+        "metadata"
+      ],
+      "properties": {
+        "entry_id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+        },
+        "engine": {
+          "type": "string"
+        },
+        "engine_version": {
+          "type": "string"
+        },
+        "canonical_path": {
+          "type": "string"
+        },
+        "config_type": {
+          "type": "string",
+          "enum": [
+            "single_gpu",
+            "multi_gpu",
+            "multi_node"
+          ]
+        },
+        "hardware": {
+          "type": "object",
+          "required": [
+            "vendor",
+            "chip_model",
+            "chip_count"
+          ],
+          "properties": {
+            "vendor": {
+              "type": "string",
+              "enum": [
+                "Intel",
+                "AMD",
+                "NVIDIA",
+                "Huawei",
+                "Unknown",
+                "Other"
+              ]
+            },
+            "chip_model": {
+              "type": "string"
+            },
+            "chip_count": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "interconnect": {
+              "type": "string"
+            },
+            "chips_per_node": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "intra_node_interconnect": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "memory_per_chip_gb": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "total_memory_gb": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            }
+          },
+          "anyOf": [
+            {
+              "required": [
+                "interconnect"
+              ]
+            },
+            {
+              "required": [
+                "intra_node_interconnect"
+              ]
+            }
+          ],
+          "additionalProperties": true
+        },
+        "model": {
+          "type": "object",
+          "required": [
+            "canonical_id",
+            "repo_id",
+            "short_name",
+            "display_name",
+            "name",
+            "parameters",
+            "precision"
+          ],
+          "properties": {
+            "canonical_id": {
+              "type": "string"
+            },
+            "repo_id": {
+              "type": "string"
+            },
+            "short_name": {
+              "type": "string"
+            },
+            "display_name": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "parameters": {
+              "type": "string"
+            },
+            "precision": {
+              "type": "string",
+              "enum": [
+                "FP32",
+                "FP16",
+                "BF16",
+                "INT8",
+                "INT4",
+                "FP8",
+                "fp32",
+                "fp16",
+                "bf16",
+                "int8",
+                "int4",
+                "fp8"
+              ]
+            },
+            "quantization": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "workload": {
+          "type": "object",
+          "required": [
+            "name",
+            "input_length",
+            "output_length"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "input_length": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "output_length": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "batch_size": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "concurrent_requests": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "dataset": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "input_token_distribution": {
+              "$ref": "#/$defs/tokenLengthDistributionOrNull"
+            },
+            "output_token_distribution": {
+              "$ref": "#/$defs/tokenLengthDistributionOrNull"
+            },
+            "cohort_setting_signature": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "arrival_transform": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "time_scale",
+                    "max_interarrival_s"
+                  ],
+                  "properties": {
+                    "time_scale": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "max_interarrival_s": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "metrics": {
+          "type": "object",
+          "required": [
+            "ttft_ms",
+            "throughput_tps",
+            "peak_mem_mb",
+            "error_rate"
+          ],
+          "properties": {
+            "ttft_ms": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "tbt_ms": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "tpot_ms": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "throughput_tps": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "peak_mem_mb": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "error_rate": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "prefix_hit_rate": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "kv_used_tokens": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "kv_used_bytes": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "evict_count": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "evict_ms": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "spec_accept_rate": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        "constraints": {
+          "type": "object",
+          "required": [
+            "scenario_source",
+            "accountable_scope",
+            "metrics"
+          ],
+          "properties": {
+            "scenario_source": {
+              "type": "string",
+              "enum": [
+                "vllm-benchmark"
+              ]
+            },
+            "accountable_scope": {
+              "type": "object",
+              "required": [
+                "domestic_chip_class",
+                "representative_model_band",
+                "representative_business_scenario",
+                "baseline_engine"
+              ],
+              "properties": {
+                "domestic_chip_class": {
+                  "type": "string"
+                },
+                "representative_model_band": {
+                  "type": "string",
+                  "enum": [
+                    "7B-13B",
+                    "27B"
+                  ]
+                },
+                "representative_business_scenario": {
+                  "type": "string"
+                },
+                "baseline_engine": {
+                  "type": "string"
+                },
+                "owner_confirmed": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "notes": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "required": [
+                "single_chip_effective_utilization_pct",
+                "typical_throughput_ratio_vs_baseline",
+                "typical_ttft_reduction_pct_vs_baseline",
+                "typical_tpot_reduction_pct_vs_baseline",
+                "long_context_length",
+                "long_context_throughput_stable",
+                "long_context_ttft_p95_ms",
+                "long_context_ttft_p99_ms",
+                "long_context_tpot_p95_ms",
+                "long_context_tpot_p99_ms",
+                "long_context_ttft_p95_stable",
+                "long_context_ttft_p99_stable",
+                "long_context_tpot_p95_stable",
+                "long_context_tpot_p99_stable",
+                "unit_token_cost_reduction_pct",
+                "multi_tenant_high_utilization"
+              ],
+              "properties": {
+                "single_chip_effective_utilization_pct": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 100
+                },
+                "typical_throughput_ratio_vs_baseline": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "typical_ttft_reduction_pct_vs_baseline": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "typical_tpot_reduction_pct_vs_baseline": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "long_context_length": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 1
+                },
+                "long_context_throughput_stable": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "long_context_ttft_p95_ms": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "long_context_ttft_p99_ms": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "long_context_tpot_p95_ms": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "long_context_tpot_p99_ms": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "long_context_ttft_p95_stable": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "long_context_ttft_p99_stable": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "long_context_tpot_p95_stable": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "long_context_tpot_p99_stable": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                },
+                "unit_token_cost_reduction_pct": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "multi_tenant_high_utilization": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        },
+        "cluster": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "node_count",
+                "comm_backend",
+                "topology_type"
+              ],
+              "properties": {
+                "node_count": {
+                  "type": "integer",
+                  "minimum": 2
+                },
+                "comm_backend": {
+                  "type": "string"
+                },
+                "inter_node_network": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "network_bandwidth_gbps": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "topology_type": {
+                  "type": "string"
+                },
+                "parallelism": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "tensor_parallel": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1
+                    },
+                    "pipeline_parallel": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1
+                    },
+                    "data_parallel": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ],
+                      "minimum": 1
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              },
+              "additionalProperties": true
+            }
+          ]
+        },
+        "versions": {
+          "type": "object",
+          "required": [
+            "protocol",
+            "backend",
+            "core"
+          ],
+          "properties": {
+            "protocol": {
+              "$ref": "#/$defs/versionOrNA"
+            },
+            "backend": {
+              "$ref": "#/$defs/versionOrNA"
+            },
+            "core": {
+              "$ref": "#/$defs/versionOrNA"
+            },
+            "control_plane": {
+              "$ref": "#/$defs/versionOrNA"
+            },
+            "gateway": {
+              "$ref": "#/$defs/versionOrNA"
+            },
+            "kv_cache": {
+              "$ref": "#/$defs/versionOrNA"
+            },
+            "comm": {
+              "$ref": "#/$defs/versionOrNA"
+            },
+            "compression": {
+              "$ref": "#/$defs/versionOrNA"
+            },
+            "benchmark": {
+              "$ref": "#/$defs/versionOrNA"
+            }
+          },
+          "additionalProperties": true
+        },
+        "environment": {
+          "type": "object",
+          "required": [
+            "os",
+            "python_version"
+          ],
+          "properties": {
+            "os": {
+              "type": "string"
+            },
+            "python_version": {
+              "type": "string"
+            },
+            "pytorch_version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cuda_version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cann_version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "driver_version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "kv_cache_config": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "eviction_policy": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "budget_tokens": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 0
+            },
+            "prefix_cache_enabled": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": true
+        },
+        "metadata": {
+          "type": "object",
+          "required": [
+            "submitted_at",
+            "submitter",
+            "data_source"
+          ],
+          "properties": {
+            "submitted_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "submitter": {
+              "type": "string"
+            },
+            "data_source": {
+              "type": "string"
+            },
+            "engine": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "engine_version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "reproducible_cmd": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "git_commit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "github_user": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "github_commit_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "github_repository": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "github_ref": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "github_event_name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "github_pr_number": {
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "github_pr_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "release_date": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "date"
+            },
+            "changelog_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "notes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "verified": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "idempotency_key": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "canonical_artifact_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "canonical_artifact_kind": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "manifest_source": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
