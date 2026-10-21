@@ -31,6 +31,9 @@ python verify_aligned_pair.py "$work/20261019-midterm-aligned" mmlu-b0-r2 mmlu-b
 10月21日的[恢复环境同工况计量](m01-recovery/model-runtime-20261021/archive.json)包含两轮MMLU-Pro完整模型运行，每轮200请求全部成功。第二轮360秒硬件采样覆盖请求、末次前向事件及全部导出同步三个区间。原始硬件数据库、请求记录和源码保存在benchmark
 Release，逐文件校验清单与便携复核包入库。插桩吞吐不替换第五章性能数据；完整有效F、跨流依赖及匹配参考容量尚未闭合，M01仍未判定。
 
+新增的[GDN 元数据发布与预处理图重放验证](m01-recovery/preprocess-publication-20261021/archive.json)覆盖两卡、两个元数据
+bank、四档图容量及变更元数据重放，保存原始张量和独立 CPU 复算证据。该项为局部链路验证，不等于完整模型并发执行流闭合或 M01 验收通过；具体配置、误差和限制见主报告。
+
 ## 合成长输入诊断
 
 2026年10月19日完成Qwen3.5-35B-A3B BF16、TP2、C8合成长输入B0补测： 每条实际输入16,384 token，60秒资格检查后测量300秒，窗口内输出79,437
