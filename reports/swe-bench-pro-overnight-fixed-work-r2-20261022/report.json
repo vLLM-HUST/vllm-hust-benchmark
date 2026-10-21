@@ -1,0 +1,52 @@
+{
+  "run_id": "swe-pro-v1-overnight-performance-20261022-r2",
+  "type": "frozen-history finite complete-work replay",
+  "same_complete_work": true,
+  "runtime_verified": true,
+  "makespan_reduction_fraction": 0.20627363039829394,
+  "configuration": {
+    "programs": 128,
+    "rounds": 6,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "inter_round_wait_seconds": 0,
+    "output_tokens_per_request": 64,
+    "request_timeout_seconds": 3600,
+    "kv_cache_bytes_per_rank": 17179869184,
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 8192,
+    "context_tokens": 262144,
+    "tensor_parallel_size": 2,
+    "async_scheduling": true,
+    "capacity_tokens": 1654784,
+    "per_program_buffer_tokens": 14335,
+    "aging": false,
+    "continuation_yield": false,
+    "pause_projection": false
+  },
+  "archive": {
+    "bytes": 19160594,
+    "files": 24,
+    "sha256": "bc105e591ca108013dd0143082b6bcefab70e5046972e7ae3b34f5263ab95438",
+    "whole_archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "source_report_scripts_sha256": {
+    "write_agent_layered_report.py": "878c5a9c193abed5c7c3eb812d0c077cb2ed1325d5012bb9d3e3ad614746c58b",
+    "plot_run.py": "d7a427a7a94120d9737fec1bad26f25ef0e5bfc2cbc0219b4d1e033319b448d0",
+    "report_fixed_work.py": "ed7153f94a2871404e99110686bb38fe2b192c8f2dcc89adb29bfa7d81090a21",
+    "report_agent_devices.py": "b04808dbfe20a348f89611a8d484ca8db6067ecd96df4af27c763a47b3f342bc",
+    "agent_report_data.py": "c8bfa59a2bdc5d4cc1d6af88fa073643dded2f29878b32b15efbaabb7357f8d6",
+    "analyze_fixed_work.py": "70c374d2a001a3477fee6a520422072ecb366c10743ff495e6a534c04fc53929"
+  },
+  "runtime_probe_commit": "7ff991d",
+  "upstream_commit": "7ddc8610270e56d3b109eed8796b3a4360fc67c9",
+  "remote_ci": "NOT_CHECKED",
+  "public_precommit": "NOT_RUN",
+  "limits": [
+    "Single paired replay is not stable or generalized speedup.",
+    "Backend time includes engine queue, execution and transport; it is not kernel time.",
+    "Device and scheduler snapshots are sampled and non-atomic; absence is not zero.",
+    "Request waiting tails must be reported even when complete-work makespan improves."
+  ]
+}
