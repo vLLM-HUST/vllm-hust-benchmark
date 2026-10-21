@@ -1,0 +1,54 @@
+{
+  "schema_version": "vllm-hust-mod-metadata-v1",
+  "mod_id": "org.vllm-hust.stateaxis-prefix-cache-policy",
+  "repository": "stateaxis-prefix-cache-policy",
+  "display_name": "StateAxis Prefix Cache Policy",
+  "canonical_repository": "https://github.com/vLLM-HUST/stateaxis-prefix-cache-policy",
+  "responsibility": {
+    "organization": "vLLM-HUST",
+    "maintainers": [
+      {"name": "Shuhao Zhang (Tony)", "github": "ShuhaoZhangTony"}
+    ],
+    "advisor_status": "none",
+    "advisors": []
+  },
+  "lifecycle": {
+    "status": "experimental",
+    "default_enabled": false,
+    "activation_contract": "Extension Manager removes the explicit OFF flag and appends --enable-prefix-caching only for an enabled MOD.",
+    "rollback_contract": "Disable the extension; the caller's --no-enable-prefix-caching baseline remains unchanged."
+  },
+  "scope": {
+    "mechanism": "vllm_builtin_prefix_cache_activation_policy",
+    "supported_workloads": ["requests whose repeated token prefix reaches at least one effective host cache page"],
+    "out_of_scope": [
+      "novel prefix-cache algorithms",
+      "the Native Engine lease-safe bounded-LRU APC implementation",
+      "general performance claims"
+    ]
+  },
+  "evidence": {
+    "qualification": "real-online-repeated-workload-scoped-positive-experimental",
+    "performance_claims": [
+      {
+        "workload": "materialized MMLU-Pro performance prompts",
+        "model": "Qwen3-8B",
+        "hardware": "1x Ascend 910B2",
+        "repetitions": 3,
+        "median_output_throughput_delta_pct": 11.002,
+        "median_mean_ttft_delta_pct": -15.394,
+        "median_mean_tpot_delta_pct": -5.676,
+        "boundary": "Experimental and workload-scoped; not Qwen3.5-35B, an accuracy result, a general claim, or official qualification."
+      },
+      {
+        "workload": "official materialized MMLU-Pro performance prompts",
+        "model": "Qwen3.5-35B-A3B",
+        "hardware": "2x Ascend 910B2 (TP2)",
+        "repetitions": "OFF/ON/OFF smoke bracket, 8 prompts per successful arm",
+        "local_prefix_cache_hits": 0,
+        "eligibility_audit": "0/200 prompts can reuse a complete 2048-token aligned prefix page",
+        "boundary": "Mechanism not exercised; no performance claim. The cold-first apparent gain is rejected by the trailing OFF arm."
+      }
+    ]
+  }
+}

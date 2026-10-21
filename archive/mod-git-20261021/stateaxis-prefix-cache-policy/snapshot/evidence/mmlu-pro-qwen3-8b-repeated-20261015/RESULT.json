@@ -1,0 +1,79 @@
+{
+  "schema_version": "stateaxis-mod-evidence/v1",
+  "evidence_label": "real-online-repeated-workload-scoped-positive-experimental",
+  "date_utc": "2026-10-15",
+  "mod_id": "org.vllm-hust.stateaxis-prefix-cache-policy",
+  "commits": {
+    "stateaxis_vllm": "0eba2c879463c3731f265921ee92651e0d4b0de6",
+    "vllm_ascend": "913841ce6cbeed2e23a29ea40a8d91b158a9ebe0",
+    "extension_manager_candidate": "a9af029e3fec3bd81cbd41dc36311e77093eba1d",
+    "mod_parent": "ca1dfa1ebd1b5c9fec2e38ce69a01c2b2fcafb7a",
+    "mmlu_pro_client": "1bfd58a4a20811d5bc5dc81b1ae997d1196b5e33"
+  },
+  "inputs": {
+    "dataset_path": "/root/stateaxis-workloads/plans/mmlu-pro-qwen35-b0-1bfd58a4a208/bench-prompts.200.jsonl",
+    "dataset_sha256": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+    "model": "Qwen/Qwen3-8B",
+    "model_config_sha256": "f7c4eadfbbf522470667b797a3c89be2524832d2d599797248dc304fff447c30"
+  },
+  "environment": {
+    "hardware": "1x Ascend 910B2",
+    "execution_mode": "eager",
+    "max_model_len": 4096,
+    "max_num_batched_tokens": 8192,
+    "max_num_seqs": 16,
+    "num_prompts": 40,
+    "output_len": 64,
+    "request_rate": "inf",
+    "off": "explicit --no-enable-prefix-caching",
+    "on": "Extension Manager v0.3 activation of vLLM built-in prefix caching"
+  },
+  "pairs": [
+    {
+      "order": ["off", "on"],
+      "off": {"output_throughput": 126.5042, "mean_ttft_ms": 6546.06, "mean_tpot_ms": 96.1466},
+      "on": {"output_throughput": 146.4765, "mean_ttft_ms": 5186.10, "mean_tpot_ms": 85.7340},
+      "delta_pct": {"output_throughput": 15.788, "mean_ttft": -20.775, "mean_tpot": -10.830},
+      "sha256sums_file_sha256": "d678fe82cea3c3b1235846a020f17c4fc4b9fd10d1b9cd3c169d63db17c0d2a1"
+    },
+    {
+      "order": ["on", "off"],
+      "off": {"output_throughput": 130.9286, "mean_ttft_ms": 6305.73, "mean_tpot_ms": 91.6655},
+      "on": {"output_throughput": 144.7397, "mean_ttft_ms": 5368.40, "mean_tpot_ms": 86.7927},
+      "delta_pct": {"output_throughput": 10.549, "mean_ttft": -14.865, "mean_tpot": -5.316},
+      "sha256sums_file_sha256": "63a8d99b362970b906eb9988efca151d5e0d5f1b2046c802fe5c680832e9cdf4"
+    },
+    {
+      "order": ["off", "on"],
+      "off": {"output_throughput": 124.7771, "mean_ttft_ms": 6594.91, "mean_tpot_ms": 96.8593},
+      "on": {"output_throughput": 138.5048, "mean_ttft_ms": 5579.67, "mean_tpot_ms": 91.3614},
+      "delta_pct": {"output_throughput": 11.002, "mean_ttft": -15.394, "mean_tpot": -5.676},
+      "sha256sums_file_sha256": "85404ba53d93c0684c16a38924f357ea020d8be66948334c1ca10e0709fef7e2"
+    }
+  ],
+  "aggregate": {
+    "median_output_throughput_delta_pct": 11.002,
+    "median_mean_ttft_delta_pct": -15.394,
+    "median_mean_tpot_delta_pct": -5.676,
+    "all_arms_successful_requests": "40/40",
+    "failed_requests_per_arm": 0,
+    "on_prefix_cache_token_queries": 55102,
+    "on_prefix_cache_token_hits": 40960,
+    "on_prefix_cache_token_hit_rate_pct": 74.34,
+    "on_prefix_cache_block_queries": 413,
+    "on_prefix_cache_block_hits": 320,
+    "on_prefix_cache_blocks_cached": 109,
+    "fresh_service_per_arm": true,
+    "lifecycle_and_release_verified": true
+  },
+  "raw_evidence_roots": [
+    "/root/stateaxis-workloads/evidence/dataset-mod-campaign-20261015/mmlu-pro/mmlu-qwen8-prefix-cache-pair1-off-on-20261015",
+    "/root/stateaxis-workloads/evidence/dataset-mod-campaign-20261015/mmlu-pro/mmlu-qwen8-prefix-cache-pair2-on-off-20261015",
+    "/root/stateaxis-workloads/evidence/dataset-mod-campaign-20261015/mmlu-pro/mmlu-qwen8-prefix-cache-pair3-off-on-20261015"
+  ],
+  "boundaries": [
+    "This is not an official Qwen3.5-35B-A3B TP2 result.",
+    "The performance client verifies request completion but this result is not an accuracy score or deterministic output exactness proof.",
+    "No general performance claim is made outside this repeated-prefix workload and configuration."
+  ]
+}

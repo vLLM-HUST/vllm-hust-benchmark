@@ -1,0 +1,46 @@
+{
+  "schema_version": "vllm-hust-mod-metadata-v1",
+  "mod_id": "org.vllm-hust.stateaxis-async-kv-transfer",
+  "repository": "stateaxis-async-kv-transfer",
+  "display_name": "stateaxis-async-kv-transfer",
+  "canonical_repository": "https://github.com/vLLM-HUST/stateaxis-async-kv-transfer",
+  "responsibility": {
+    "organization": "vLLM-HUST",
+    "maintainers": [
+      {
+        "name": "Shuhao Zhang (Tony)",
+        "github": "ShuhaoZhangTony"
+      }
+    ],
+    "advisor_status": "none",
+    "advisors": []
+  },
+  "lifecycle": {
+    "status": "experimental",
+    "default_enabled": false,
+    "activation_contract": "Manifest 0.3 active, default-off, ECPA-only activation of the hash-bound bounded transfer contract.",
+    "rollback_contract": "Omit this MOD from the Extension Manager plan; StateAxis keeps its serialized transfer path and no MOD identity."
+  },
+  "scope": {
+    "mechanism": "bounded_async_kv_transfer_lane",
+    "supported_workloads": [
+      "host-tier KV restore with reusable snapshots and compute/transfer overlap"
+    ],
+    "out_of_scope": [
+      "general performance claims",
+      "automatic inheritance from StateAxis aggregate evidence"
+    ]
+  },
+  "evidence": {
+    "qualification": "historical_matched_real_npu_component_positive_active_version_performance_unqualified",
+    "latest_result": "evidence/issue76-async-transfer-20260815-r5/result.json",
+    "index": "EVIDENCE.md",
+    "performance_claims": [
+      {
+        "label": "historical-matched-real-npu-component-positive",
+        "scope": "frozen StateAxis issue #76 R5; Qwen2.5-14B BF16; Ascend 910B2; TP1; one host-tier restore concurrent with unrelated compute; three fresh processes per arm",
+        "result": "All six runs passed exactness and lifecycle checks. Host-tier-hit p50 changed from 592.597 ms to 333.716 ms (-43.686%), pair makespan p50 from 607.648 ms to 355.473 ms, and pair throughput from 3.291 to 5.626 ops/s; overlap was proven in 3/3 candidate runs and peak HBM was unchanged within measurement granularity. This historical component result does not qualify active version 0.2.0 or establish general serving speedup."
+      }
+    ]
+  }
+}

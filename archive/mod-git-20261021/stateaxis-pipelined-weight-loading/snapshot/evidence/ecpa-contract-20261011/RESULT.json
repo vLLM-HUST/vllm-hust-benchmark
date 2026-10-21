@@ -1,0 +1,58 @@
+{
+  "schema_version": "stateaxis-mod-on-off/v1",
+  "date_utc": "2026-10-11",
+  "mod_id": "org.vllm-hust.stateaxis-pipelined-weight-loading",
+  "mod_version": "0.2.0",
+  "research_manifest_sha256": "b7ee1bc4412e094cc35ab627e980e6fbb5fa7bda2ff750713a0e5167b8832096",
+  "evidence_label": "manager-contract-artifact-binding-non-performance",
+  "performance_qualified": false,
+  "hardware_execution": false,
+  "manager": {
+    "check": "passed",
+    "plan": "passed",
+    "dry_run": "passed",
+    "managed_assembly_check_process": "passed",
+    "assembly_identity_sha256": "31aac7bc09c0517fc04a62184bfcf2a415ca38d898e5262f44ac0bdf10cb27ee"
+  },
+  "validation": {
+    "python_tests": "3 passed",
+    "rust_weight_loader_tests": "4 passed",
+    "rust_library_tests": "412 passed",
+    "cargo_check_lib_bins": "passed",
+    "native_state_engine_build": "passed"
+  },
+  "on_effects": {
+    "weight_load_authority_requests": 1,
+    "weight_load_authority_applied": 1,
+    "weight_load_authority_fallbacks": 0,
+    "canonical_plan_injected_into_worker": true,
+    "execution_artifact_v6_binding_required": true
+  },
+  "off_effects": {
+    "serial_pageable_sync_default_preserved": true,
+    "ambient_plan_removed_from_worker": true,
+    "weight_load_authority_requests": 1,
+    "weight_load_authority_applied": 0,
+    "weight_load_authority_fallbacks": 1
+  },
+  "historical_real_npu_result": {
+    "qwen_model": "Qwen2.5-14B BF16",
+    "qwen_cold_fresh_process_arms": 6,
+    "qwen_warm_fresh_process_arms": 6,
+    "qwen_cold_process_to_ready_delta_percent": -84.340,
+    "qwen_warm_process_to_ready_delta_percent": -88.796,
+    "qwen_cold_tpot_p50_delta_percent": 0.043,
+    "qwen_warm_tpot_p50_delta_percent": -0.685,
+    "qwen_peak_hbm_delta_mib": 0,
+    "ep8_model": "MiniMax-M2.5 W8A8 QuaRot layer-0",
+    "ep8_rank_count": 8,
+    "ep8_process_elapsed_delta_percent_point_estimate": -54.748,
+    "exact_and_transactional_ready": true,
+    "claim": "workload-scoped startup-loader benefit only"
+  },
+  "limitations": [
+    "current activation-contract checks use a CPU protocol mock worker",
+    "EP8 evidence is loader-only, not full-model serving",
+    "performance remains unqualified outside the frozen cells"
+  ]
+}

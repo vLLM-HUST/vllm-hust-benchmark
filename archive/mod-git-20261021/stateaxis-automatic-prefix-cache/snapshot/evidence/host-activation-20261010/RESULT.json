@@ -1,0 +1,74 @@
+{
+  "schema_version": "stateaxis-automatic-prefix-cache.host-activation/v1",
+  "date": "2026-10-10",
+  "evidence_label": "host_integration_and_ecpa_activation_non_performance",
+  "mod": {
+    "id": "org.vllm-hust.stateaxis-automatic-prefix-cache",
+    "version": "0.2.0",
+    "commit": "e19c09938b2c6a7f8ad5a911a21791b5fa6ad3ef",
+    "research_manifest_sha256": "e75c7114818bec1f2a455143afe240fa31c9bf75282b6659b11eb49df8c347a2"
+  },
+  "stateaxis": {
+    "pull_request": "https://github.com/Qixin-Gaoke/stateaxis/pull/484",
+    "merge_commit": "cfb2568fa3f68a7e10576910f0eb9c7096ca5de9",
+    "cargo_dependency_pinned": true,
+    "legacy_direct_activation_rejected": true,
+    "mod_identity_in_runtime_stats": true,
+    "mod_manifest_digest_in_assembly_identity": true
+  },
+  "extension_manager": {
+    "commit": "00d1b940dc6ce8d60e2cd28708b80d80e9c33a09",
+    "states": [
+      "installed",
+      "discovered",
+      "compatible",
+      "configured",
+      "enabled",
+      "degraded"
+    ],
+    "degraded_reason": "experimental activation is configured without performance qualification",
+    "additional_config_appended": true,
+    "enabled_bundle_environment": "org.vllm-hust.stateaxis-automatic-prefix-cache"
+  },
+  "tests": {
+    "stateaxis_rust_lib": {
+      "passed": 397,
+      "failed": 0
+    },
+    "stateaxis_topic_registry": {
+      "passed": 3,
+      "failed": 0
+    },
+    "native_state_engine_check": "passed",
+    "standalone_native_crate": {
+      "passed": 3,
+      "failed": 0
+    },
+    "standalone_python": {
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "external_evidence_sha256": {
+    "configure_json": "49fb33fbb81715783c3a743f9a52067f937e02faf54edd28ed72d49ed8cea461",
+    "manager_result_json": "8614de2a80501cb07469b959cd70effe704acd672e4f984c9b6f0dcfa608bfd3",
+    "manager_state_config_json": "2a5afef5e9f5e7b3aca979b16ea26015eee50dd810ed35e0f43095904f64ae4f"
+  },
+  "real_npu_campaign": {
+    "status": "blocked_pending_regenerated_native_assets",
+    "available": [
+      "2x idle visible Ascend 910B2",
+      "raw /models/Qwen2.5-14B-Instruct checkpoint"
+    ],
+    "missing": [
+      "custom Native Qwen2.5-14B layer and global weight packs",
+      "operator fixture",
+      "full-model oracle",
+      "decode oracle"
+    ],
+    "required_workload_change": "stable repeated-prefix cache salt producing nonzero APC hits"
+  },
+  "performance_qualified": false,
+  "performance_claim": false,
+  "result": "pass"
+}

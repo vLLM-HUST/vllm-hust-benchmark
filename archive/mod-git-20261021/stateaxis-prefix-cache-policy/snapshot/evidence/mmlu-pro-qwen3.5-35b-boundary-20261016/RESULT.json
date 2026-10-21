@@ -1,0 +1,114 @@
+{
+  "schema_version": "stateaxis-mod-evidence/v1",
+  "evidence_label": "real-online-smoke-zero-eligible-prefix-pages-no-effect-boundary",
+  "date_utc": "2026-10-16",
+  "mod_id": "org.vllm-hust.stateaxis-prefix-cache-policy",
+  "commits": {
+    "stateaxis": "3ecc3624bd8210b1cbf9b4bb6a1006440d7bfb5d",
+    "vllm": "752a3a504485790a2e8491cacbb35c137339ad34",
+    "vllm_ascend": "03766ac696fde5ab1980d80ca0b8543d3580c989",
+    "extension_manager_candidate": "a9af029e3fec3bd81cbd41dc36311e77093eba1d",
+    "mod_parent": "72dba8857d7b91e62ae1576e4d475d798a827fa0",
+    "mmlu_pro_client": "1bfd58a4a20811d5bc5dc81b1ae997d1196b5e33"
+  },
+  "inputs": {
+    "dataset_path": "/root/stateaxis-workloads/plans/mmlu-pro-qwen35-b0-1bfd58a4a208/bench-prompts.200.jsonl",
+    "dataset_sha256": "fb79b6fa98f232282a948e4a17f404f80c03dc2bae05af57b95b9cc0651b3506",
+    "model": "Qwen/Qwen3.5-35B-A3B",
+    "hardware": "2x Ascend 910B2",
+    "tensor_parallel_size": 2,
+    "graph_mode": "FULL_AND_PIECEWISE",
+    "mamba_cache_mode": "align",
+    "effective_attention_page_tokens": 2048,
+    "num_prompts_per_smoke_arm": 8,
+    "output_len": 32,
+    "request_rate": "inf"
+  },
+  "eligibility_audit": {
+    "official_prompt_count": 200,
+    "prompt_tokens": {
+      "min": 918,
+      "median": 1341.5,
+      "max": 2495,
+      "mean": 1404.325,
+      "at_least_2048": 6
+    },
+    "adjacent_common_prefix_tokens": {
+      "min": 14,
+      "median": 1111,
+      "max": 1947,
+      "mean": 1107.4522613065326,
+      "at_least_2048": 0
+    },
+    "optimistic_sequential_cache_simulation": {
+      "requests_with_complete_2048_token_hits": 0,
+      "hit_tokens": 0,
+      "query_tokens": 280865,
+      "hit_ratio": 0.0
+    }
+  },
+  "successful_bracket": [
+    {
+      "arm": "off-before-cold",
+      "completed": 8,
+      "failed": 0,
+      "request_throughput": 1.5512830284667551,
+      "mean_ttft_ms": 3648.1838694307953,
+      "mean_tpot_ms": 47.83377791905115,
+      "local_cache_hit_tokens": 0,
+      "sha256sums_file_sha256": "aa47032e55ce3ea8b03e46643d09fb9181ce885a51bbe32e9ef8b744662c7499"
+    },
+    {
+      "arm": "on",
+      "completed": 8,
+      "failed": 0,
+      "request_throughput": 3.3342045773271587,
+      "mean_ttft_ms": 1210.7015566434711,
+      "mean_tpot_ms": 37.514278642652975,
+      "local_cache_query_tokens": 11868,
+      "local_cache_hit_tokens": 0,
+      "sha256sums_file_sha256": "79754c600aa9d76c46c3c4f6074f8e740cf28745911777fb45199660f38fea68"
+    },
+    {
+      "arm": "off-after-warm",
+      "completed": 8,
+      "failed": 0,
+      "request_throughput": 4.043037940378141,
+      "mean_ttft_ms": 976.0030629113317,
+      "mean_tpot_ms": 31.776840745982145,
+      "local_cache_hit_tokens": 0,
+      "sha256sums_file_sha256": "c351841a9297fb450ffe03e46acaeead69c168c0340e844a6c82ff9499f8f586"
+    }
+  ],
+  "interpretation": {
+    "on_vs_cold_off_request_throughput_delta_pct": 114.932,
+    "on_vs_warm_off_request_throughput_delta_pct": -17.532,
+    "on_vs_warm_off_mean_ttft_delta_pct": 24.047,
+    "on_vs_warm_off_mean_tpot_delta_pct": 18.055,
+    "causal_result": "no effect can be attributed because the ON arm had zero complete-page hits; the bracket exposes warmup/order confounding"
+  },
+  "retained_failure": {
+    "cell": "mmlu-qwen35-prefix-cache-off-r12-runtime0251-smoke-after-20261016",
+    "reason": "spawned worker observed an inconsistent NumPy and failed before model load",
+    "remediation": "installed NumPy 1.26.4 into the private runtime and verified fork, spawn, and forkserver imports",
+    "sha256sums_file_sha256": "46ead2687c7a2d61652b81b9c4bd65b1aa291c3c5cd38245ed2582a7bc5a190e"
+  },
+  "validation": {
+    "official_client_completed_all_requests": true,
+    "evidence_hashes_verified": true,
+    "clean_device_release_after_each_successful_arm": true,
+    "full_200_prompt_run_skipped": "The exact-token audit proves zero reusable 2048-token prefix pages, so a full run cannot exercise this MOD."
+  },
+  "raw_evidence_roots": [
+    "/root/stateaxis-workloads/evidence/dataset-mod-campaign-20261015/mmlu-pro/mmlu-qwen35-prefix-cache-off-r11-runtime0251-smoke-20261016",
+    "/root/stateaxis-workloads/evidence/dataset-mod-campaign-20261015/mmlu-pro/mmlu-qwen35-prefix-cache-on-r1-runtime0251-smoke-20261016",
+    "/root/stateaxis-workloads/evidence/dataset-mod-campaign-20261015/mmlu-pro/mmlu-qwen35-prefix-cache-off-r12-runtime0251-smoke-after-20261016",
+    "/root/stateaxis-workloads/evidence/dataset-mod-campaign-20261015/mmlu-pro/mmlu-qwen35-prefix-cache-off-r13-runtime0251-smoke-after-numpypin-20261016"
+  ],
+  "boundaries": [
+    "This is an 8-request smoke bracket, not a full official score.",
+    "No performance effect is attributed to an activation that produced zero cache hits.",
+    "The Qwen3-8B positive result does not transfer automatically to Qwen3.5-35B-A3B.",
+    "A workload with at least one repeated 2048-token aligned prefix page is required to test this mechanism on this model/runtime."
+  ]
+}
