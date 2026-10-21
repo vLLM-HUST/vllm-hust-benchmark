@@ -8,10 +8,10 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "9e0b8615c9c0898d18f8f20c2daaf5fc7ce4c3a2"  # pragma: allowlist secret
+REVISION = "2c7a7de9b77ad6e3a56dd1434e7079ab8ab90151"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v057.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v058.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
@@ -28,6 +28,10 @@ EVIDENCE = {
     ],
     "quality": ["quality-regression/raw", "quality-regression/finish-breakdown.json"],
     "recovered-quality": ["quality-regression/recovered-20261021"],
+    "native-paired-quality": [
+        "quality-regression/native-recovered-20261021",
+        "quality-regression/recovered-20261021",
+    ],
     "long-context": ["long-context-originals.tar.gz", "long-context-originals.json"],
     "current-b1-long-context": ["long-context-current-b1-20261021"],
     "long-diagnostic": [
@@ -168,7 +172,7 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.57" in text
+    assert "报告版本：V0.58" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
         (
@@ -188,6 +192,12 @@ def build():
             "恢复环境质量复核 / Recovered-runtime quality",
             "### 5.8 恢复环境完整回答质量复核",
             "同一200题、原评分器、out8192，新服务与空编译缓存，计量观察器关闭。保存全部SSE和截断，按固定分母评分；与既有B0及Microflow结果分别比较，不冒充同环境新增性能配对或统计非劣性结论。",
+        ),
+        (
+            "native-paired-quality",
+            "恢复环境配对质量 / Recovered native-paired quality",
+            "### 5.9 恢复环境 Native 与优化方案配对质量",
+            "同一恢复基础运行栈、200题、原评分器、out8192，独立服务和空缓存。Native恢复五个原生源码模块，禁用候选插件；两臂请求与分词逐题一致。完整分母包含截断，逐题差异见中文报告，不宣称全集质量或统计非劣性，不替换正式吞吐。",
         ),
         (
             "long-context",
@@ -286,7 +296,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.57",
+        "version": "V0.58",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
