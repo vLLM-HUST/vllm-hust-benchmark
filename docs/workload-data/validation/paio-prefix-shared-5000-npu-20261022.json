@@ -1,0 +1,136 @@
+{
+  "schema_version": "workload-server-validation/v1",
+  "source_id": "PAIO-PREFIX-SHARED-5000",
+  "validation_kind": "PROVIDED_REQUEST_AND_DECLARED_FORMAT_INTEGRITY_NOT_TASK_ACCURACY",
+  "status": "REQUESTS_EXECUTED_AND_INTEGRITY_VALIDATED_NO_QUALITY_ORACLE",
+  "scoring": "NON_SCORING_INTEGRITY_VERIFIED",
+  "quality_claim": false,
+  "quality_oracle": "NO_INDEPENDENT_GOLD_OR_OFFICIAL_TASK_SCORER_SUPPLIED",
+  "selected_samples": [
+    "6aa6bdb29d7c5dad1d6b42ce34c91316bb2c25b4278c002a7ed9840b9e9411a8",
+    "b51a96088a901867271ec4048a5f27b328751d756da1b843d2704aa0765577c6",
+    "fb794942e46630af90c4d4b276f9891a67512dfdfec3b805d1998eeff1d7263c"
+  ],
+  "completed_samples": [
+    "6aa6bdb29d7c5dad1d6b42ce34c91316bb2c25b4278c002a7ed9840b9e9411a8",
+    "b51a96088a901867271ec4048a5f27b328751d756da1b843d2704aa0765577c6",
+    "fb794942e46630af90c4d4b276f9891a67512dfdfec3b805d1998eeff1d7263c"
+  ],
+  "sample_count": 3,
+  "selection": "FIRST_THREE_NATIVE_RECORDS_BEFORE_EXECUTION_NO_OUTCOME_SELECTION",
+  "input_construction": "PROVIDER_CONSTRUCTED_OR_GENERATED_MESSAGES_PROJECTED_TO_API_FIELDS_WITH_EXPLICIT_MODEL_ROUTE",
+  "production_trace_representativity": "NOT_ESTABLISHED",
+  "source_asset": {
+    "revision": "v2",
+    "file": "prefix_shared.jsonl",
+    "bytes": 171146840,
+    "sha256": "355ed42e0050bd178bee74f616d16c6036117f2eea338bb30eff0f941b86027e",
+    "matches_catalog_file_sha256": true
+  },
+  "model_artifact_record": "qwen35-27b-deployable-artifact-20261022.json",
+  "service_profile": "text-only-128k-nonthinking/v1",
+  "served_model": "workload-qwen35-27b-128k-nonthinking",
+  "model_max_length": 131072,
+  "default_chat_template_kwargs": {
+    "enable_thinking": false
+  },
+  "request_changes": "EXPLICIT_MODEL_ROUTING_ONLY; original content, stream and explicit budgets retained",
+  "omitted_request_budget_policy": "kept absent; provider metadata output targets never promoted to API max_tokens",
+  "server_inventory": {
+    "accelerator": "Ascend 910B2",
+    "chips": 2,
+    "nodes": 1,
+    "backend": "vllm-ascend",
+    "precision": "bfloat16",
+    "mode": "graph",
+    "text_only": true
+  },
+  "engine_versions": {
+    "vllm": "0.23.0+empty",
+    "vllm-ascend": "0.23.0",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "transformers": "5.5.4"
+  },
+  "software_provenance": {
+    "execution_provider_archive_sha256": "d1573536ed6f1d4cc21ce330a69717e0137073f7aca6fdbe9b87f5f59e2a7e5f",
+    "execution_provider_archive_audited_against_all_preparation_manifests": true,
+    "verification_provider_source_commit": "912eaee621a7c7e37a47d59864f01c0e5b81e3fd",
+    "verification_provider_ci_wheel_sha256": "d0677151e9d71384b58b77a51605e011afbdf501dd7592f6706b30e3edbf327a",
+    "model_execution_helper_sha256": "a18cee83e0ebea98ec72b7b6638ff16a7055c4c230e42e6df2249d07d400da63",
+    "response_validator_sha256": "115a15a71c05d6aa3d3c05e78c23967a8782122a5a3e9e1925e29a91c9d1ad5e",
+    "validator_wheel_sha256": "909dbbaba17cd4fa468977f0fdf02ec93b0bbda22ff0c440843bf51e21ead1eb",
+    "response_revalidation": "current pinned checker on these fresh NPU responses; not new model tasks",
+    "verification_versions": {
+      "vllm-hust-benchmark": "0.1.0",
+      "vllm-hust-workload-data": "0.1.0",
+      "pyarrow": "19.0.1",
+      "jsonschema": "4.26.0"
+    }
+  },
+  "samples": [
+    {
+      "record_id": "6aa6bdb29d7c5dad1d6b42ce34c91316bb2c25b4278c002a7ed9840b9e9411a8",
+      "row_index": 0,
+      "finish_reasons": [
+        "stop"
+      ],
+      "original_stream": null,
+      "original_max_tokens": null,
+      "response_validation": {
+        "scope": "ORIGINAL_REQUEST_PROTOCOL_AND_DECLARED_FORMAT_ONLY",
+        "semantic_quality": "NOT_EVALUATED_NO_INDEPENDENT_ORACLE",
+        "status": "RESPONSE_INTEGRITY_VERIFIED",
+        "choices": 1,
+        "declared_format": "text"
+      },
+      "preflight_prompt_tokens": 4004,
+      "server_prompt_tokens": 4004,
+      "full_prompt_token_check": "MATCHED_SERVER_USAGE"
+    },
+    {
+      "record_id": "b51a96088a901867271ec4048a5f27b328751d756da1b843d2704aa0765577c6",
+      "row_index": 1,
+      "finish_reasons": [
+        "stop"
+      ],
+      "original_stream": null,
+      "original_max_tokens": null,
+      "response_validation": {
+        "scope": "ORIGINAL_REQUEST_PROTOCOL_AND_DECLARED_FORMAT_ONLY",
+        "semantic_quality": "NOT_EVALUATED_NO_INDEPENDENT_ORACLE",
+        "status": "RESPONSE_INTEGRITY_VERIFIED",
+        "choices": 1,
+        "declared_format": "text"
+      },
+      "preflight_prompt_tokens": 4020,
+      "server_prompt_tokens": 4020,
+      "full_prompt_token_check": "MATCHED_SERVER_USAGE"
+    },
+    {
+      "record_id": "fb794942e46630af90c4d4b276f9891a67512dfdfec3b805d1998eeff1d7263c",
+      "row_index": 2,
+      "finish_reasons": [
+        "stop"
+      ],
+      "original_stream": null,
+      "original_max_tokens": null,
+      "response_validation": {
+        "scope": "ORIGINAL_REQUEST_PROTOCOL_AND_DECLARED_FORMAT_ONLY",
+        "semantic_quality": "NOT_EVALUATED_NO_INDEPENDENT_ORACLE",
+        "status": "RESPONSE_INTEGRITY_VERIFIED",
+        "choices": 1,
+        "declared_format": "text"
+      },
+      "preflight_prompt_tokens": 2311,
+      "server_prompt_tokens": 2311,
+      "full_prompt_token_check": "MATCHED_SERVER_USAGE"
+    }
+  ],
+  "private_run_directory": "paio-prefix-shared-001",
+  "private_response_bundle_sha256": "bc0e8241fccc9377aee5c8610c5bbb96aa382f9883ad69d1fbd60997541c5091",
+  "model_execution_batch_started_at_utc": "2026-10-21T19:38:49.326273+00:00",
+  "model_execution_batch_finished_at_utc": "2026-10-21T19:47:38.265498+00:00",
+  "raw_data_or_answers_published": false,
+  "verified_at_utc": "2026-10-21T20:50:40.440065+00:00"
+}
