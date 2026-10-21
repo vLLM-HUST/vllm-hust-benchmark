@@ -17,7 +17,7 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     assert hashlib.sha256(raw).hexdigest() == actual["report_sha256"]
     monkeypatch.setattr(module, "pinned", lambda path: raw)
     assert actual == module.build()
-    assert actual["version"] == "V0.57"
+    assert actual["version"] == "V0.58"
     assert module.REVISION in actual["report_url"]
     sections = {s["id"]: s for s in actual["sections"]}
     historical = json.loads(
@@ -90,6 +90,10 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
         == f"{result['correct']}/{result['total']}"
     )
     assert "不冒充同环境新增性能配对" in recovered_quality["scope"]
+    native = sections["native-paired-quality"]
+    assert [row[2] for row in native["tables"][0]["rows"]] == ["147/200", "146/200"]
+    assert [row[4] for row in native["tables"][0]["rows"]] == ["19", "22"]
+    assert "不宣称全集质量或统计非劣性" in native["scope"]
     assert len(actual["kv_audit"]["runs"]) == 2
     adjacent = (
         "| A | B |\n| --- | ---: |\n| 1 | 2 |\n\n| C | D |\n| --- | --- |\n| 3 | 4 |\n"
