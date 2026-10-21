@@ -1,5 +1,8 @@
 # vllm-hust-benchmark
 
+可选的原始数据目录、读取适配与准备入口见 [Workload Data 使用说明](workload-preparation/README.md)；逐来源实际验证进度见
+[数据集清单](docs/workload-data/DATASET_CHECKLIST.zh-CN.md)。目录登记不代表任务或性能已验证，不改变现有测试规范与结果。
+
 SWE-bench Pro V1 真实 Agent 的独立环境与运行入口： [用户指南](docs/SWE_BENCH_PRO.zh-CN.md)（从一个 ARM 任务开始，无需
 Controller）。
 

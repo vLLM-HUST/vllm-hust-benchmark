@@ -1,0 +1,928 @@
+{
+  "version": "testing-outline-workload-index/v1",
+  "updated_at": "2026-09-06",
+  "scope": "严格按用户给定九类对应表，对现有分类分组；不是把全部方向塞进九类，不新增38小类体系。无直接对应的维度/对照/来源单列，条件映射只适用于合格子集。",
+  "categories": [
+    {
+      "id": "dialogue",
+      "name": "通用问答／对话",
+      "subtypes": [
+        {
+          "name": "通用单次助手",
+          "families": [
+            "general-single-turn-assistant"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "WILDCHAT",
+            "LMSYS_CHAT",
+            "DOLLY",
+            "ULTRACHAT",
+            "TULU3",
+            "NATURAL_INSTRUCTIONS",
+            "DUREADER",
+            "NATURALQUESTIONS"
+          ],
+          "enterprise": [
+            "PAIO-CHAT-1000"
+          ],
+          "boundary": "来源为候选取材入口，需逐任务/字段确认适用；不把数据集全部记录自动归入。"
+        },
+        {
+          "name": "对话续接",
+          "families": [
+            "conversation-continuation"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "WILDCHAT",
+            "LMSYS_CHAT",
+            "OASST1",
+            "ULTRACHAT"
+          ],
+          "enterprise": [
+            "PAIO-CHAT-1000"
+          ],
+          "boundary": "来源为候选取材入口，需逐任务/字段确认适用；不把数据集全部记录自动归入。"
+        },
+        {
+          "name": "检索问答与跟进",
+          "families": [
+            "rag-followup"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "QRECC",
+            "QASPER",
+            "NARRATIVEQA",
+            "DUREADER",
+            "NATURALQUESTIONS",
+            "LONGBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "来源为候选取材入口，需逐任务/字段确认适用；不把数据集全部记录自动归入。"
+        },
+        {
+          "name": "记忆写读",
+          "families": [
+            "memory-write-read"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "LONGMEMEVAL",
+            "LONGMEMEVAL_V2",
+            "LOCOMO"
+          ],
+          "enterprise": [],
+          "boundary": "须有记忆写入/读取或可定位会话身份；构造组标签本身不足。"
+        },
+        {
+          "name": "文本转换（对应问答／对话的子集）",
+          "families": [
+            "text-transformation"
+          ],
+          "mapping_kind": "CONDITIONAL_SUBSET",
+          "sources": [
+            "DOLLY",
+            "XSUM",
+            "MULTINEWS",
+            "BILLSUM",
+            "XLSUM",
+            "FLORES200",
+            "NATURAL_INSTRUCTIONS"
+          ],
+          "enterprise": [],
+          "boundary": "仅取具有问答/对话交互语义的子集，不把所有转换或单段音频都归入。"
+        },
+        {
+          "name": "音频流交互（对应问答／对话的子集）",
+          "families": [
+            "audio-streaming-interaction"
+          ],
+          "mapping_kind": "CONDITIONAL_SUBSET",
+          "sources": [
+            "SPOKENWOZ",
+            "DAILYTALK"
+          ],
+          "enterprise": [],
+          "boundary": "仅取具有问答/对话交互语义的子集，不把所有转换或单段音频都归入。"
+        }
+      ]
+    },
+    {
+      "id": "tool_agent",
+      "name": "工具调用／Agent",
+      "subtypes": [
+        {
+          "name": "工具交互与任务执行",
+          "families": [
+            "tool-interaction"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "BFCL",
+            "XLAM_TOOL",
+            "TOOLACE",
+            "TOOLBENCH",
+            "AGENTBENCH",
+            "MIND2WEB",
+            "WEBARENA",
+            "VISUALWEBARENA",
+            "OSWORLD",
+            "WORKARENA",
+            "APPWORLD",
+            "TAUBENCH",
+            "GAIA"
+          ],
+          "enterprise": [],
+          "boundary": "按实际任务分函数、网页、桌面、应用、数据库、客服或证据交互；来源子任务不是新增大类。默认使用官方原始任务；753/165/solo114 仅为历史派生登记，不是当前已接入资产。"
+        },
+        {
+          "name": "长程仓库 Agent",
+          "families": [
+            "repository-agent-loop"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "SWE_BENCH",
+            "SWE_VERIFIED",
+            "SWESMITH",
+            "TRACELAB"
+          ],
+          "enterprise": [],
+          "boundary": "来源为候选取材入口，需逐任务/字段确认适用；不把数据集全部记录自动归入。"
+        },
+        {
+          "name": "演化语料检索",
+          "families": [
+            "evolving-corpus-rag"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "QRECC",
+            "LONGMEMEVAL_V2",
+            "TRACELAB"
+          ],
+          "enterprise": [],
+          "boundary": "所列为相关来源；必须存在语料更新及检索状态证据，静态文档不能冒充演化语料。"
+        },
+        {
+          "name": "记忆写读",
+          "families": [
+            "memory-write-read"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "LONGMEMEVAL",
+            "LONGMEMEVAL_V2",
+            "LOCOMO"
+          ],
+          "enterprise": [],
+          "boundary": "须有记忆写入/读取或可定位会话身份；构造组标签本身不足。"
+        },
+        {
+          "name": "科学实验规划",
+          "families": [
+            "scientific-experiment-planning"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "DISCOVERYBENCH",
+            "SCIENCEWORLD",
+            "MLAGENTBENCH",
+            "PAPERBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "需要科学规划/实验任务；一般科学知识问答不作为本分类。"
+        },
+        {
+          "name": "仿真／分析／验证流水线",
+          "families": [
+            "simulation-analysis-verification"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "SCIENCEWORLD",
+            "DISCOVERYBENCH",
+            "BIXBENCH",
+            "SCIENCEAGENTBENCH",
+            "NATUREBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "任务、环境和执行记录分别保留；知识问答不等于仿真验证。"
+        },
+        {
+          "name": "科学代码工作流",
+          "families": [
+            "scientific-coding-workflow"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "SCIENCEAGENTBENCH",
+            "NATUREBENCH",
+            "MLEBENCH",
+            "MLAGENTBENCH",
+            "BIXBENCH",
+            "PAPERBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "只采用科学代码/研究工作流；单题库调用不自动归入。"
+        }
+      ]
+    },
+    {
+      "id": "reasoning",
+      "name": "推理",
+      "subtypes": [
+        {
+          "name": "独立推理",
+          "families": [
+            "standalone-reasoning"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "GSM8K",
+            "MATH500",
+            "BBH",
+            "OPENMATH2",
+            "OPENTHOUGHTS3",
+            "GPQA",
+            "MMLU_PRO",
+            "AI2_ARC",
+            "GAIA",
+            "LABBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "按独立题目及评分规则取子集；GAIA只选无需工具的对应子集，人工与合成数据分别统计。"
+        },
+        {
+          "name": "代码评判（推理型子集）",
+          "families": [
+            "code-evaluation"
+          ],
+          "mapping_kind": "CONDITIONAL_SUBSET",
+          "sources": [
+            "LIVECODEBENCH",
+            "OPENCODE"
+          ],
+          "enterprise": [
+            "PAIO-CODE-EVAL-1000"
+          ],
+          "boundary": "只取代码评判中的推理型请求；代码评判全集不自动归为推理。"
+        }
+      ]
+    },
+    {
+      "id": "structured_output",
+      "name": "结构化输出",
+      "subtypes": [
+        {
+          "name": "结构化生成与转换",
+          "families": [
+            "structured-generation"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "JSONSCHEMABENCH",
+            "SCHEMASTORE",
+            "STRUCTEVAL",
+            "BFCL",
+            "XLAM_TOOL",
+            "TOOLACE",
+            "SPIDER"
+          ],
+          "enterprise": [
+            "PAIO-JSON-500"
+          ],
+          "boundary": "来源为候选取材入口，需逐任务/字段确认适用；不把数据集全部记录自动归入。"
+        },
+        {
+          "name": "文本转换（明确格式约束子集）",
+          "families": [
+            "text-transformation"
+          ],
+          "mapping_kind": "CONDITIONAL_SUBSET",
+          "sources": [
+            "STRUCTEVAL",
+            "NATURAL_INSTRUCTIONS",
+            "DOLLY"
+          ],
+          "enterprise": [],
+          "boundary": "只取明确要求输出格式/schema的转换；普通摘要、翻译、改写不能整体归入。"
+        }
+      ]
+    },
+    {
+      "id": "long_context",
+      "name": "长上下文",
+      "subtypes": [
+        {
+          "name": "文档分析（满足输入长度条件）",
+          "families": [
+            "document-grounded-analysis"
+          ],
+          "mapping_kind": "CONDITIONAL_SUBSET",
+          "sources": [
+            "LONGBENCH",
+            "LONGBENCH_V2",
+            "INFINITEBENCH",
+            "QUALITY",
+            "QASPER",
+            "NARRATIVEQA",
+            "LONGALPACA",
+            "NATURALQUESTIONS",
+            "DUREADER"
+          ],
+          "enterprise": [
+            "PAIO-LONG-PREFILL-5000",
+            "PAIO-LONGTEXT-4000"
+          ],
+          "boundary": "只取实际输入满足长度条件的子集；不能把该family的全部数据自动归为长上下文。企业长文本只证明输入载体，具体是否文档分析需检查任务语义。"
+        },
+        {
+          "name": "检索问答与跟进（满足输入长度条件）",
+          "families": [
+            "rag-followup"
+          ],
+          "mapping_kind": "CONDITIONAL_SUBSET",
+          "sources": [
+            "QRECC",
+            "QASPER",
+            "NARRATIVEQA",
+            "DUREADER",
+            "NATURALQUESTIONS",
+            "LONGBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "只取实际输入满足长度条件的子集；不能把该family的全部数据自动归为长上下文。"
+        },
+        {
+          "name": "演化语料检索（满足输入长度条件）",
+          "families": [
+            "evolving-corpus-rag"
+          ],
+          "mapping_kind": "CONDITIONAL_SUBSET",
+          "sources": [
+            "QRECC",
+            "LONGMEMEVAL_V2",
+            "TRACELAB"
+          ],
+          "enterprise": [],
+          "boundary": "只取实际输入满足长度条件的子集；不能把该family的全部数据自动归为长上下文。所列为相关来源；必须存在语料更新及检索状态证据，静态文档不能冒充演化语料。"
+        },
+        {
+          "name": "文本转换（满足输入长度条件）",
+          "families": [
+            "text-transformation"
+          ],
+          "mapping_kind": "CONDITIONAL_SUBSET",
+          "sources": [
+            "DOLLY",
+            "XSUM",
+            "MULTINEWS",
+            "BILLSUM",
+            "XLSUM",
+            "FLORES200",
+            "NATURAL_INSTRUCTIONS"
+          ],
+          "enterprise": [],
+          "boundary": "只取实际输入满足长度条件的子集；不能把该family的全部数据自动归为长上下文。"
+        }
+      ]
+    },
+    {
+      "id": "high_kv_reuse",
+      "name": "高 KV 复用",
+      "subtypes": [
+        {
+          "name": "精确前缀共享",
+          "families": [],
+          "profiles": [
+            "exact-prefix-sharing"
+          ],
+          "mapping_kind": "CROSS_CLASS_DIMENSION",
+          "sources": [
+            "MOONCAKE",
+            "WILDCHAT",
+            "LMSYS_CHAT",
+            "TRACELAB"
+          ],
+          "enterprise": [
+            "PAIO-PREFIX-SHARED-5000"
+          ],
+          "boundary": "可叠加于对话、工具、文档等任务；按实际token前缀核验，不宣称已发生运行时命中。"
+        },
+        {
+          "name": "工作集回访",
+          "families": [],
+          "profiles": [
+            "working-set-revisit"
+          ],
+          "mapping_kind": "CROSS_CLASS_DIMENSION",
+          "sources": [
+            "MOONCAKE",
+            "TRACELAB",
+            "LONGMEMEVAL",
+            "LOCOMO"
+          ],
+          "enterprise": [
+            "PAIO-REUSE-CONV-5000"
+          ],
+          "boundary": "可叠加于对话、工具、文档等任务；回访身份与顺序需核验，构造组不等于生产会话。"
+        }
+      ]
+    },
+    {
+      "id": "code",
+      "name": "代码",
+      "subtypes": [
+        {
+          "name": "单题代码生成与测试",
+          "families": [
+            "code-generation-with-tests"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "HUMANEVAL",
+            "MBPP",
+            "BIGCODEBENCH",
+            "DS1000",
+            "LIVECODEBENCH",
+            "OPENCODE",
+            "OPENTHOUGHTS3"
+          ],
+          "enterprise": [],
+          "boundary": "来源为候选取材入口，需逐任务/字段确认适用；不把数据集全部记录自动归入。"
+        },
+        {
+          "name": "代码评判",
+          "families": [
+            "code-evaluation"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "LIVECODEBENCH",
+            "OPENCODE"
+          ],
+          "enterprise": [
+            "PAIO-CODE-EVAL-1000"
+          ],
+          "boundary": "公开评分标签仅为辅助，需核对Judge输入/输出字段；PAIO为直接请求载体。"
+        },
+        {
+          "name": "交互式仓库助手",
+          "families": [
+            "interactive-repository-assistance"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "REPOBENCH",
+            "CROSSCODEEVAL",
+            "SWE_BENCH",
+            "SWE_VERIFIED"
+          ],
+          "enterprise": [],
+          "boundary": "来源为候选取材入口，需逐任务/字段确认适用；不把数据集全部记录自动归入。"
+        },
+        {
+          "name": "长程仓库 Agent",
+          "families": [
+            "repository-agent-loop"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "SWE_BENCH",
+            "SWE_VERIFIED",
+            "SWESMITH",
+            "TRACELAB"
+          ],
+          "enterprise": [],
+          "boundary": "来源为候选取材入口，需逐任务/字段确认适用；不把数据集全部记录自动归入。"
+        },
+        {
+          "name": "科学代码工作流",
+          "families": [
+            "scientific-coding-workflow"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "SCIENCEAGENTBENCH",
+            "NATUREBENCH",
+            "MLEBENCH",
+            "MLAGENTBENCH",
+            "BIXBENCH",
+            "PAPERBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "只采用科学代码/研究工作流；单题库调用不自动归入。"
+        }
+      ]
+    },
+    {
+      "id": "multimodal",
+      "name": "多模态",
+      "subtypes": [
+        {
+          "name": "多模态内容理解",
+          "families": [
+            "multimodal-understanding"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "VISIONARENA",
+            "MMMU",
+            "CHARTQA",
+            "VISUALWEBARENA",
+            "OSWORLD",
+            "LABBENCH",
+            "VIDEOMME",
+            "VIDEOMME_V2",
+            "MVBENCH",
+            "LONGVIDEOBENCH",
+            "LIBRISPEECH",
+            "FLEURS",
+            "WAVCAPS"
+          ],
+          "enterprise": [],
+          "boundary": "分别核验真实图像、音频、视频及任务绑定；纯文本媒体代理不计入。"
+        },
+        {
+          "name": "音频流交互",
+          "families": [
+            "audio-streaming-interaction"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "SPOKENWOZ",
+            "DAILYTALK"
+          ],
+          "enterprise": [],
+          "boundary": "核验实际音频及交互轮次；有录音不自动证明双工打断/服务时序。"
+        }
+      ]
+    },
+    {
+      "id": "ai4science",
+      "name": "AI4Science",
+      "subtypes": [
+        {
+          "name": "科学实验规划",
+          "families": [
+            "scientific-experiment-planning"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "DISCOVERYBENCH",
+            "SCIENCEWORLD",
+            "MLAGENTBENCH",
+            "PAPERBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "需要科学规划/实验任务；一般科学知识问答不作为本分类。"
+        },
+        {
+          "name": "仿真／分析／验证流水线",
+          "families": [
+            "simulation-analysis-verification"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "SCIENCEWORLD",
+            "DISCOVERYBENCH",
+            "BIXBENCH",
+            "SCIENCEAGENTBENCH",
+            "NATUREBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "任务、环境和执行记录分别保留；知识问答不等于仿真验证。"
+        },
+        {
+          "name": "科学代码工作流",
+          "families": [
+            "scientific-coding-workflow"
+          ],
+          "mapping_kind": "DIRECT",
+          "sources": [
+            "SCIENCEAGENTBENCH",
+            "NATUREBENCH",
+            "MLEBENCH",
+            "MLAGENTBENCH",
+            "BIXBENCH",
+            "PAPERBENCH"
+          ],
+          "enterprise": [],
+          "boundary": "只采用科学代码/研究工作流；单题库调用不自动归入。"
+        }
+      ]
+    }
+  ],
+  "cross_cutting": [
+    {
+      "name": "到达、突发、多租户与持续压力",
+      "sources": [
+        "BURSTGPT",
+        "AZURE_LLM",
+        "MOONCAKE",
+        "TRACELAB"
+      ],
+      "profiles": [
+        "bursty-arrival",
+        "multi-tenant-soak",
+        "overload-recovery"
+      ],
+      "boundary": "跨九类使用；长度/时间元数据不能恢复原始问题内容。"
+    },
+    {
+      "name": "生命周期、取消恢复、异步依赖与执行拓扑",
+      "sources": [
+        "TRACELAB",
+        "MOONCAKE",
+        "AZURE_LLM"
+      ],
+      "profiles": [
+        "maintenance-resume",
+        "async-batch",
+        "preemption-resume",
+        "prefill-decode-mix",
+        "cancel-timeout-retry",
+        "pd-disaggregation"
+      ],
+      "boundary": "这些来源只是进一步检查入口；若没有取消、恢复、KV handoff事件就标字段缺口，不伪造。"
+    },
+    {
+      "name": "语义相似／非精确前缀对照（不归高KV复用小类）",
+      "sources": [
+        "PAWS",
+        "QRECC"
+      ],
+      "profiles": [
+        "semantic-near-duplicate"
+      ],
+      "enterprise": [
+        "PAIO-SEMANTIC-SIMILAR-5000"
+      ],
+      "boundary": "是独立对照研究材料，不算九类之一或精确KV复用正例。"
+    },
+    {
+      "name": "长输出／Decode压力（不新增九类小类）",
+      "sources": [
+        "LONGWRITER"
+      ],
+      "profiles": [
+        "prefill-decode-mix"
+      ],
+      "boundary": "保留已下载数据；长输出特征本身不决定应用分类，具体写作任务再按任务语义归类。"
+    },
+    {
+      "name": "工具schema共享（不单独列作高KV复用小类）",
+      "sources": [
+        "BFCL",
+        "XLAM_TOOL",
+        "TOOLACE",
+        "TRACELAB"
+      ],
+      "profiles": [
+        "tool-schema-reuse"
+      ],
+      "boundary": "共享schema是附加特征；只有实际满足精确前缀共享/工作集回访条件的实例才关联高KV复用。"
+    },
+    {
+      "name": "受控长度压力探针（不作为真实应用小类）",
+      "sources": [
+        "RULER"
+      ],
+      "profiles": [
+        "long-context"
+      ],
+      "boundary": "合成压力对照另存，不因名称包含long-context就硬放入文档/检索分类。"
+    }
+  ],
+  "enterprise": [
+    {
+      "id": "PAIO-CHAT-1000",
+      "rows": 1000,
+      "primary": "dialogue",
+      "use": "单轮/请求内多轮历史",
+      "boundary": "无明确跨请求session；按messages分组分析。"
+    },
+    {
+      "id": "PAIO-CODE-EVAL-1000",
+      "rows": 1000,
+      "primary": "code",
+      "use": "代码Judge；推理类可交叉引用",
+      "boundary": "不是代码生成任务库；输出预算不等于实际输出。"
+    },
+    {
+      "id": "PAIO-JSON-500",
+      "rows": 500,
+      "primary": "structured_output",
+      "use": "328 json_object、172 json_schema请求",
+      "boundary": "有请求格式，不代表已有输出合规结论。"
+    },
+    {
+      "id": "PAIO-LONG-PREFILL-5000",
+      "rows": 5000,
+      "primary": "long_context",
+      "use": "长输入/Prefill压力",
+      "boundary": "每条单message；任务语义需分层，不能据文件名归为文档问答。"
+    },
+    {
+      "id": "PAIO-PREFIX-SHARED-5000",
+      "rows": 5000,
+      "primary": "high_kv_reuse",
+      "use": "1000组×5条的共享前缀候选",
+      "boundary": "需精确token前缀分析；不宣称实测KV命中。"
+    },
+    {
+      "id": "PAIO-REUSE-CONV-5000",
+      "rows": 5000,
+      "primary": "high_kv_reuse",
+      "use": "1000组×5条的组内内容回访",
+      "boundary": "每条单message；不因名称算真实多轮对话。"
+    },
+    {
+      "id": "PAIO-SEMANTIC-SIMILAR-5000",
+      "rows": 5000,
+      "primary": null,
+      "use": "另列：语义相似／非精确共享对照，不归九类",
+      "boundary": "不算精确KV复用正例。"
+    },
+    {
+      "id": "PAIO-LONGTEXT-4000",
+      "rows": 4000,
+      "primary": "long_context",
+      "use": "超长文本输入载体",
+      "boundary": "API生成文本；不是原始生产trace，也无独立输出gold。"
+    }
+  ],
+  "qbi_reuse": [
+    {
+      "id": "QBI-AGENTBENCH-753",
+      "source_id": "AGENTBENCH",
+      "rows": 753,
+      "scope": "ALFWorld109 / DBBench300 / OS144 / WebShop200；source903，KG150排除",
+      "request_files": [
+        "agentbench_nonos609_requests.jsonl",
+        "agentbench_os144_v3_requests.jsonl"
+      ],
+      "outcome_file": "agentbench_native_results.jsonl",
+      "driver": "src/vllm_quality_bounded_inference/agentbench_official_driver.py",
+      "status": "HISTORICAL_DERIVED_REFERENCE_ONLY",
+      "current_provider_supported": false,
+      "default_source": false,
+      "validation": "NOT_REPRODUCED_IN_THIS_MIGRATION"
+    },
+    {
+      "id": "QBI-GAIA-V25-165",
+      "source_id": "GAIA",
+      "rows": 165,
+      "scope": "官方validation165，v25 answer-blind受控工具派生；私有答案仅scorer侧",
+      "request_files": [
+        "gaia_formal165_requests.jsonl"
+      ],
+      "outcome_file": "gaia_native_results.jsonl",
+      "driver": "src/vllm_quality_bounded_inference/gaia_controlled_driver.py",
+      "status": "HISTORICAL_DERIVED_REFERENCE_ONLY",
+      "current_provider_supported": false,
+      "default_source": false,
+      "validation": "NOT_REPRODUCED_IN_THIS_MIGRATION"
+    },
+    {
+      "id": "QBI-TAU2-SOLO-114",
+      "source_id": "TAUBENCH",
+      "rows": 114,
+      "scope": "Telecom no-user solo114；385只说明上游来源，不导入旧interactive结果",
+      "request_files": [
+        "tau2_solo114_requests.jsonl"
+      ],
+      "outcome_file": "tau2_solo114_formal_results.jsonl",
+      "driver": "src/vllm_quality_bounded_inference/tau2_official_driver.py",
+      "status": "HISTORICAL_DERIVED_REFERENCE_ONLY",
+      "current_provider_supported": false,
+      "default_source": false,
+      "validation": "NOT_REPRODUCED_IN_THIS_MIGRATION"
+    }
+  ],
+  "source_notes": {
+    "TULU3": {
+      "scale": "约939k条混合指令，保留逐条来源",
+      "url": "https://huggingface.co/datasets/allenai/tulu-3-sft-mixture",
+      "boundary": "混合真实/合成来源，与既有语料可能重合。"
+    },
+    "NATURAL_INSTRUCTIONS": {
+      "scale": "1600+ NLP任务；任务实例规模按发布文件统计",
+      "url": "https://github.com/allenai/natural-instructions",
+      "boundary": "多原始数据集合并；逐task原始许可，不能算1600个独立来源。"
+    },
+    "OPENMATH2": {
+      "scale": "13,972,791题解对（约14M）；论文约600k独立问题",
+      "url": "https://arxiv.org/abs/2410.01560",
+      "boundary": "GSM8K/MATH派生及生成题；train_1M/2M/5M不得与全集相加。"
+    },
+    "OPENTHOUGHTS3": {
+      "scale": "约1.2M条推理样本",
+      "url": "https://huggingface.co/datasets/open-thoughts/OpenThoughts3-1.2M",
+      "boundary": "作者发布的生成推理语料，不是线上用户请求。"
+    },
+    "OPENCODE": {
+      "scale": "作者声明约5M代码题答对，约6.4GB下载",
+      "url": "https://huggingface.co/datasets/nvidia/OpenCodeInstruct",
+      "boundary": "有unit_tests、测试状态与llm_judgement；这些不等于Judge原始调用轨迹。"
+    },
+    "SWESMITH": {
+      "scale": "50k+生成仓库任务；另有执行轨迹发布",
+      "url": "https://github.com/SWE-bench/SWE-smith",
+      "boundary": "生成变异任务；任务与多次轨迹不能相加。"
+    },
+    "WORKARENA": {
+      "scale": "L1:19,912实例/33任务类型；++:682组合任务",
+      "url": "https://github.com/ServiceNow/WorkArena",
+      "boundary": "L1和++不同配置，需运行环境；不是已抓取生产trace。"
+    },
+    "APPWORLD": {
+      "scale": "9个应用、457个API；任务数按版本下载后统计",
+      "url": "https://appworld.dev/",
+      "boundary": "模拟应用世界，不是真实企业API流量；API数不等于任务数。"
+    },
+    "SCIENCEWORLD": {
+      "scale": "30类科学任务，各自含多个参数变体",
+      "url": "https://github.com/allenai/ScienceWorld",
+      "boundary": "文本仿真环境；参数变体不等于独立现实实验。"
+    },
+    "BIXBENCH": {
+      "scale": "v1.5:205问题/60 notebooks；原论文另有2,120条轨迹",
+      "url": "https://github.com/Future-House/BixBench",
+      "boundary": "版本范围不同，不把旧约300问题和v1.5相加。"
+    },
+    "LABBENCH": {
+      "scale": "论文2400+题；公开仓库约80%，8大类/30子任务",
+      "url": "https://github.com/Future-House/LAB-Bench",
+      "boundary": "部分私有；科学知识/能力问答不等于wet-lab执行。"
+    },
+    "PAPERBENCH": {
+      "scale": "20篇论文复现任务；8316评分子项",
+      "url": "https://openai.com/index/paperbench/",
+      "boundary": "8316不是独立论文任务；评分需保留原rubric。"
+    },
+    "SPOKENWOZ": {
+      "scale": "5.7k对话、203k轮、249小时音频",
+      "url": "https://spokenwoz.github.io/",
+      "boundary": "真实人际语音；音频与文本/状态标注需绑定，不推断LLM服务时序。"
+    },
+    "DAILYTALK": {
+      "scale": "2,541段录制对话",
+      "url": "https://github.com/keonlee9420/DailyTalk",
+      "boundary": "DailyDialog改编录制；非原始线上对话，不能推断双工打断。"
+    },
+    "LONGWRITER": {
+      "scale": "约6k长输出指令样本",
+      "url": "https://github.com/THUDM/LongWriter",
+      "boundary": "长输出而非必然长输入；AgentWrite生成。"
+    },
+    "LONGALPACA": {
+      "scale": "12k：9k长QA+3k短QA",
+      "url": "https://github.com/dvlab-research/LongLoRA",
+      "boundary": "含Alpaca派生；不能把12k全部归长上下文。"
+    },
+    "TOOLACE": {
+      "scale": "公开子集约11.3k条",
+      "url": "https://huggingface.co/Team-ACE",
+      "boundary": "合成工具对话；公开子集不等于全部训练数据。"
+    },
+    "DUREADER": {
+      "scale": "原始论文200k问题、420k答案、1M文档；系列版本分别取用",
+      "url": "https://arxiv.org/abs/1711.05073",
+      "boundary": "中文真实搜索问题/人工答案；不同版本不相加，非在线LLM轨迹。"
+    },
+    "SPIDER": {
+      "scale": "跨数据库问题/SQL/schema，具体公开范围按资产统计",
+      "url": "https://github.com/taoyds/spider",
+      "boundary": "自然语言到SQL；不是数据库交互loop。"
+    },
+    "NATURALQUESTIONS": {
+      "scale": "307,372公开训练样本+7,830开发样本；另7,842隐藏测试",
+      "url": "https://github.com/google-research-datasets/natural-questions",
+      "boundary": "Google搜索问题+Wikipedia；隐藏测试不计可下载规模。"
+    },
+    "MOONCAKE": {
+      "scale": "使用作者公开trace子资产，按固定文件统计请求数",
+      "url": "https://github.com/kvcache-ai/Mooncake",
+      "boundary": "代码仓库本身不是数据；使用timestamp/长度/hash等实际公布字段。"
+    },
+    "TRACELAB": {
+      "scale": "公开coding-agent trace数据入口；按发布批次统计",
+      "url": "https://github.com/uw-syfi/TraceLab",
+      "boundary": "trace、工具包、API调用与任务数分别计量。"
+    },
+    "JSONSCHEMABENCH": {
+      "scale": "10k真实JSON schemas",
+      "url": "https://arxiv.org/abs/2501.10868",
+      "boundary": "与SchemaStore等存在底层来源关系；schema数量不是请求数。"
+    },
+    "AZURE_LLM": {
+      "scale": "2023/2024 LLM与2025公开LMM trace子资产分别统计",
+      "url": "https://github.com/Azure/AzurePublicDataset/blob/master/README.md",
+      "boundary": "长度/到达/图像数量等元数据，不含可直接替代的原始请求/媒体。"
+    }
+  }
+}

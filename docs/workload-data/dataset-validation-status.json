@@ -1,0 +1,1649 @@
+{
+  "schema_version": "workload-validation-checklist/v1",
+  "updated_at": "2026-10-22",
+  "scope": "Per-source integration validation; not performance or full-suite acceptance",
+  "completion_rule": {
+    "minimum_preselected_samples": 3,
+    "server": "root@36.140.239.91:32066",
+    "accelerator": "NPU_ONLY",
+    "requires": [
+      "original_input",
+      "complete_applicable_execution_protocol",
+      "applicable_scorer_or_declared_non_scoring_integrity_check",
+      "redacted_receipt"
+    ],
+    "model_answer_correctness_is_separate": true
+  },
+  "sources": [
+    {
+      "source_id": "AGENTBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "stateful-environment-interaction",
+        "database-query-update",
+        "knowledge-graph-traversal",
+        "web-navigation-interaction",
+        "os-command-execution"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "AI2_ARC",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "APPWORLD",
+      "scope": "public",
+      "workload_class_ids": [
+        "application-api-workflow"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "AZURE_LLM",
+      "scope": "public",
+      "workload_class_ids": [],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "BBH",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "BFCL",
+      "scope": "public",
+      "workload_class_ids": [
+        "structured-generation",
+        "application-api-workflow",
+        "tool-call-generation",
+        "evidence-search-synthesis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "BIGCODEBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "code-generation-with-tests",
+        "code-evaluation"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "BILLSUM",
+      "scope": "public",
+      "workload_class_ids": [
+        "text-summarization"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "BIXBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "simulation-analysis-verification",
+        "scientific-coding-workflow"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "BURSTGPT",
+      "scope": "public",
+      "workload_class_ids": [
+        "conversation-continuation"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "CHARTQA",
+      "scope": "public",
+      "workload_class_ids": [
+        "visual-document-chart"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "CROSSCODEEVAL",
+      "scope": "public",
+      "workload_class_ids": [
+        "repository-completion"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "DAILYTALK",
+      "scope": "public",
+      "workload_class_ids": [
+        "conversation-continuation",
+        "audio-streaming-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "DISCOVERYBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "scientific-experiment-planning",
+        "simulation-analysis-verification"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "DOLLY",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "document-grounded-analysis",
+        "text-summarization",
+        "text-extraction-classification",
+        "text-rewriting"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "DS1000",
+      "scope": "public",
+      "workload_class_ids": [
+        "code-generation-with-tests",
+        "scientific-coding-workflow"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "DUREADER",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "rag-followup",
+        "document-grounded-analysis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "FLEURS",
+      "scope": "public",
+      "workload_class_ids": [
+        "offline-audio-understanding",
+        "audio-streaming-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "FLORES200",
+      "scope": "public",
+      "workload_class_ids": [
+        "text-translation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "GAIA",
+      "scope": "public",
+      "workload_class_ids": [
+        "evidence-search-synthesis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "GPQA",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "GSM8K",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning"
+      ],
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED",
+      "server_execution": "COMPLETED",
+      "scoring": "COMPLETED",
+      "selected_samples": [
+        "test:0",
+        "test:1",
+        "test:2"
+      ],
+      "completed_samples": [
+        "test:0",
+        "test:1",
+        "test:2"
+      ],
+      "checked": true,
+      "receipt": "docs/workload-data/validation/gsm8k-npu-20261022.json",
+      "blocker": null,
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "HUMANEVAL",
+      "scope": "public",
+      "workload_class_ids": [
+        "code-generation-with-tests"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "INFINITEBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "document-grounded-analysis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "JSONSCHEMABENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "structured-generation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LABBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning",
+        "scientific-experiment-planning"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LIBRISPEECH",
+      "scope": "public",
+      "workload_class_ids": [
+        "offline-audio-understanding",
+        "audio-streaming-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LIVECODEBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "code-generation-with-tests",
+        "code-evaluation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LMSYS_CHAT",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "conversation-continuation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LOCOMO",
+      "scope": "public",
+      "workload_class_ids": [
+        "conversation-memory-recall"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LONGALPACA",
+      "scope": "public",
+      "workload_class_ids": [
+        "document-grounded-analysis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LONGBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "rag-followup",
+        "document-grounded-analysis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LONGBENCH_V2",
+      "scope": "public",
+      "workload_class_ids": [
+        "document-grounded-analysis"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "LONGMEMEVAL",
+      "scope": "public",
+      "workload_class_ids": [
+        "rag-followup",
+        "conversation-memory-recall"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LONGMEMEVAL_V2",
+      "scope": "public",
+      "workload_class_ids": [
+        "evolving-corpus-rag",
+        "experience-memory-recall"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LONGVIDEOBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "video-understanding"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "LONGWRITER",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "MATH500",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "MBPP",
+      "scope": "public",
+      "workload_class_ids": [
+        "code-generation-with-tests"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "MIND2WEB",
+      "scope": "public",
+      "workload_class_ids": [
+        "web-navigation-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "MLAGENTBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "scientific-experiment-planning",
+        "scientific-coding-workflow"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "MLEBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "scientific-coding-workflow"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "MMLU_PRO",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "MMMU",
+      "scope": "public",
+      "workload_class_ids": [
+        "image-understanding",
+        "visual-document-chart"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "MOONCAKE",
+      "scope": "public",
+      "workload_class_ids": [],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "MULTINEWS",
+      "scope": "public",
+      "workload_class_ids": [
+        "text-summarization"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "MVBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "video-understanding"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "NARRATIVEQA",
+      "scope": "public",
+      "workload_class_ids": [
+        "rag-followup",
+        "document-grounded-analysis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "NATURAL_INSTRUCTIONS",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "structured-generation",
+        "text-translation",
+        "text-extraction-classification",
+        "text-rewriting"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "NATURALQUESTIONS",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "rag-followup",
+        "document-grounded-analysis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "NATUREBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "simulation-analysis-verification",
+        "scientific-coding-workflow"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "OASST1",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "conversation-continuation"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "OPENCODE",
+      "scope": "public",
+      "workload_class_ids": [
+        "code-generation-with-tests",
+        "code-evaluation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "OPENMATH2",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "OPENTHOUGHTS3",
+      "scope": "public",
+      "workload_class_ids": [
+        "standalone-reasoning",
+        "code-generation-with-tests"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "OSWORLD",
+      "scope": "public",
+      "workload_class_ids": [
+        "desktop-gui-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "PAIO-CHAT-1000",
+      "scope": "enterprise_private",
+      "workload_class_ids": [],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "PARTIAL_OR_FAILED",
+      "scoring": "NO_INDEPENDENT_ORACLE_SUPPLIED",
+      "selected_samples": [
+        "bba4bb0d6e10457df53453041058238f3540ec2cadd7ffb47156090f5173ae81",
+        "dd84642aa6b222fa905a68f486e5b4d2f1d861cfeb7c219bc88b0c6e6323bfe9",
+        "f0e6c7fe2e22187bc2d13c39b28e7518881c088dfe143fd2dc3b44adcfd1d5f3"
+      ],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "原始请求出现预算耗尽或超过当前16384上下文余量，任务质量未验证。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "attempt_receipt": "docs/workload-data/validation/enterprise-v1-attempts-20261022.json"
+    },
+    {
+      "source_id": "PAIO-CODE-EVAL-1000",
+      "scope": "enterprise_private",
+      "workload_class_ids": [],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "REQUEST_PROTOCOL_COMPLETED_NO_TASK_QUALITY_CLAIM",
+      "scoring": "NO_INDEPENDENT_ORACLE_SUPPLIED",
+      "selected_samples": [
+        "8bc0c8a73856d4479a0d1f8828e7edb0137d20d7d618fbae72785719a0698e8e",
+        "1a9fb02960cb282d394a1b9c4cca53b34e50915df9aa2f970ef25d06f5419f0b",
+        "f2098e3f4a3b7263b624858dc2ccdae48ab1b672adfdc82c645358f25250a0bc"
+      ],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "原始8-token预算耗尽，任务质量未验证。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "attempt_receipt": "docs/workload-data/validation/enterprise-v1-attempts-20261022.json"
+    },
+    {
+      "source_id": "PAIO-JSON-500",
+      "scope": "enterprise_private",
+      "workload_class_ids": [],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "PARTIAL_OR_FAILED",
+      "scoring": "NO_INDEPENDENT_ORACLE_SUPPLIED",
+      "selected_samples": [
+        "d3dd20f96540a871e6a8677cd9872dbc20c8cc5f818a8fa8fa7feca6dff92df4",
+        "14b18d0c55e4da6d7bcd5b456a7a8cf6b5dc1b72671cceb4b3d995143287d040",
+        "4d634d1f990ab8fc59ffdc3147fc6d02200c3b30ff3e6059fada29499de0b9c4"
+      ],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "原始请求出现预算耗尽或超过当前16384上下文余量，任务质量未验证。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json",
+      "attempt_receipt": "docs/workload-data/validation/enterprise-v1-attempts-20261022.json"
+    },
+    {
+      "source_id": "PAIO-LONG-PREFILL-5000",
+      "scope": "enterprise_private",
+      "workload_class_ids": [],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "PAIO-LONGTEXT-4000",
+      "scope": "enterprise_private",
+      "workload_class_ids": [],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "PAIO-PREFIX-SHARED-5000",
+      "scope": "enterprise_private",
+      "workload_class_ids": [],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "PAIO-REUSE-CONV-5000",
+      "scope": "enterprise_private",
+      "workload_class_ids": [],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "PAIO-SEMANTIC-SIMILAR-5000",
+      "scope": "enterprise_private",
+      "workload_class_ids": [],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "PAPERBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "scientific-experiment-planning",
+        "scientific-coding-workflow"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "PAWS",
+      "scope": "public",
+      "workload_class_ids": [],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "QASPER",
+      "scope": "public",
+      "workload_class_ids": [
+        "rag-followup",
+        "document-grounded-analysis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "QRECC",
+      "scope": "public",
+      "workload_class_ids": [
+        "rag-followup",
+        "evolving-corpus-rag"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "QUALITY",
+      "scope": "public",
+      "workload_class_ids": [
+        "document-grounded-analysis"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "REPOBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "repository-completion"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "RULER",
+      "scope": "public",
+      "workload_class_ids": [],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "SCHEMASTORE",
+      "scope": "public",
+      "workload_class_ids": [
+        "structured-generation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "SCIENCEAGENTBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "scientific-experiment-planning",
+        "simulation-analysis-verification",
+        "scientific-coding-workflow"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "SCIENCEWORLD",
+      "scope": "public",
+      "workload_class_ids": [
+        "scientific-experiment-planning",
+        "simulation-analysis-verification"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "SPIDER",
+      "scope": "public",
+      "workload_class_ids": [
+        "structured-generation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "SPOKENWOZ",
+      "scope": "public",
+      "workload_class_ids": [
+        "conversation-continuation",
+        "audio-streaming-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "STRUCTEVAL",
+      "scope": "public",
+      "workload_class_ids": [
+        "structured-generation"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "SWE_BENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "repository-agent-loop"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "SWE_VERIFIED",
+      "scope": "public",
+      "workload_class_ids": [
+        "repository-agent-loop"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "SWESMITH",
+      "scope": "public",
+      "workload_class_ids": [
+        "repository-agent-loop"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "TAUBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "policy-constrained-service"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "TOOLACE",
+      "scope": "public",
+      "workload_class_ids": [
+        "structured-generation",
+        "tool-call-generation"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "TOOLBENCH",
+      "scope": "public",
+      "workload_class_ids": [
+        "application-api-workflow"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "TRACELAB",
+      "scope": "public",
+      "workload_class_ids": [
+        "interactive-code-editing",
+        "evolving-corpus-rag",
+        "repository-agent-loop"
+      ],
+      "acquisition": "VERIFIED_LOCAL",
+      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
+    },
+    {
+      "source_id": "TULU3",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "text-extraction-classification",
+        "text-rewriting"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "ULTRACHAT",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "conversation-continuation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "VIDEOMME",
+      "scope": "public",
+      "workload_class_ids": [
+        "video-understanding"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "VIDEOMME_V2",
+      "scope": "public",
+      "workload_class_ids": [
+        "video-understanding"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "VISIONARENA",
+      "scope": "public",
+      "workload_class_ids": [
+        "image-understanding"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "VISUALWEBARENA",
+      "scope": "public",
+      "workload_class_ids": [
+        "web-navigation-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "WAVCAPS",
+      "scope": "public",
+      "workload_class_ids": [
+        "offline-audio-understanding",
+        "audio-streaming-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "WEBARENA",
+      "scope": "public",
+      "workload_class_ids": [
+        "web-navigation-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "WILDCHAT",
+      "scope": "public",
+      "workload_class_ids": [
+        "general-single-turn-assistant",
+        "conversation-continuation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "WORKARENA",
+      "scope": "public",
+      "workload_class_ids": [
+        "web-navigation-interaction"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "XLAM_TOOL",
+      "scope": "public",
+      "workload_class_ids": [
+        "structured-generation",
+        "tool-call-generation"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "XLSUM",
+      "scope": "public",
+      "workload_class_ids": [
+        "text-summarization"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    },
+    {
+      "source_id": "XSUM",
+      "scope": "public",
+      "workload_class_ids": [
+        "text-summarization"
+      ],
+      "acquisition": "NOT_RECHECKED",
+      "read_adapter": "NOT_RECHECKED",
+      "server_execution": "NOT_RUN",
+      "scoring": "NOT_RUN",
+      "selected_samples": [],
+      "completed_samples": [],
+      "checked": false,
+      "receipt": null,
+      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+    }
+  ]
+}

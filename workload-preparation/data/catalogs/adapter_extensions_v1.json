@@ -1,0 +1,571 @@
+{
+  "version": "adapter-extensions/v1",
+  "boundary": "Field contracts from publisher metadata/docs. No real source payload downloaded or full adapter validation claimed.",
+  "adapters": {
+    "LONGMEMEVAL": {
+      "kind": "task_dataset",
+      "mapping": "longmemeval_history",
+      "input_fields": ["question","question_date","haystack_sessions","haystack_dates","haystack_session_ids"],
+      "required_fields": ["question_id","question","haystack_sessions","haystack_dates","haystack_session_ids"],
+      "outcome_fields": ["answer","answer_session_ids"],
+      "annotation_fields": ["question_id","question_type"],
+      "id_field": "question_id",
+      "requirements": ["Remove has_answer annotations from input turns; retain them only on evaluation side", "History dates are source labels, not measured serving arrivals; oracle ordering differs from s/m", "Use cleaned v1 source; do not silently map v2 to this contract"],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {"kind":"publisher_readme_schema", "url":"https://github.com/xiaowu0162/LongMemEval#-dataset-format", "reviewed_at":"2026-09-07"},
+      "normalization": {}
+    },
+    "WILDCHAT": {
+      "kind": "historical_dialogue",
+      "mapping": "native_fields",
+      "input_fields": [
+        "conversation"
+      ],
+      "required_fields": [
+        "conversation"
+      ],
+      "outcome_fields": [
+        "detoxify_moderation",
+        "openai_moderation"
+      ],
+      "annotation_fields": [
+        "conversation_hash",
+        "timestamp",
+        "model",
+        "language",
+        "country",
+        "state",
+        "redacted",
+        "turn",
+        "toxic",
+        "hashed_ip",
+        "header"
+      ],
+      "id_field": "conversation_hash",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "WILDCHAT"
+      },
+      "normalization": {}
+    },
+    "LMSYS_CHAT": {
+      "kind": "historical_dialogue",
+      "mapping": "native_fields",
+      "input_fields": [
+        "conversation"
+      ],
+      "required_fields": [
+        "conversation",
+        "conversation_id"
+      ],
+      "outcome_fields": [
+        "openai_moderation"
+      ],
+      "annotation_fields": [
+        "conversation_id",
+        "language",
+        "model",
+        "redacted",
+        "turn"
+      ],
+      "id_field": "conversation_id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "LMSYS_CHAT"
+      },
+      "normalization": {}
+    },
+    "ULTRACHAT": {
+      "kind": "historical_dialogue",
+      "mapping": "native_fields",
+      "input_fields": [
+        "messages"
+      ],
+      "required_fields": [
+        "messages"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "prompt",
+        "prompt_id"
+      ],
+      "id_field": "prompt_id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "ULTRACHAT"
+      },
+      "normalization": {}
+    },
+    "NARRATIVEQA": {
+      "native_structured_fields": ["document", "question"],
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "document",
+        "question"
+      ],
+      "required_fields": [
+        "document",
+        "question"
+      ],
+      "outcome_fields": [
+        "answers"
+      ],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "NARRATIVEQA"
+      },
+      "normalization": {}
+    },
+    "SWE_BENCH": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "problem_statement"
+      ],
+      "required_fields": [
+        "instance_id",
+        "repo",
+        "base_commit",
+        "problem_statement"
+      ],
+      "outcome_fields": [
+        "patch",
+        "test_patch",
+        "FAIL_TO_PASS",
+        "PASS_TO_PASS",
+        "hints_text"
+      ],
+      "annotation_fields": [
+        "instance_id",
+        "repo",
+        "base_commit",
+        "environment_setup_commit",
+        "created_at",
+        "version"
+      ],
+      "id_field": "instance_id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "SWE_BENCH"
+      },
+      "normalization": {}
+    },
+    "VISIONARENA": {
+      "kind": "historical_dialogue",
+      "mapping": "native_fields",
+      "input_fields": [
+        "conversation",
+        "images"
+      ],
+      "required_fields": [
+        "conversation",
+        "conversation_id",
+        "images"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "conversation_id",
+        "categories",
+        "is_preset",
+        "language",
+        "model",
+        "num_turns",
+        "preset_dataset",
+        "tstamp",
+        "user_id"
+      ],
+      "id_field": "conversation_id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "VISIONARENA"
+      },
+      "normalization": {}
+    },
+    "MMMU": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "question",
+        "options",
+        "image_1",
+        "image_2",
+        "image_3",
+        "image_4",
+        "image_5",
+        "image_6",
+        "image_7"
+      ],
+      "required_fields": [
+        "id",
+        "question",
+        "options"
+      ],
+      "outcome_fields": [
+        "answer",
+        "explanation"
+      ],
+      "annotation_fields": [
+        "id",
+        "img_type",
+        "question_type",
+        "subfield",
+        "topic_difficulty"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "MMMU"
+      },
+      "normalization": {}
+    },
+    "LIBRISPEECH": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "audio"
+      ],
+      "required_fields": [
+        "audio",
+        "id"
+      ],
+      "outcome_fields": [
+        "text"
+      ],
+      "annotation_fields": [
+        "id",
+        "speaker_id",
+        "chapter_id",
+        "file"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "LIBRISPEECH"
+      },
+      "normalization": {}
+    },
+    "FLEURS": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "audio"
+      ],
+      "required_fields": [
+        "audio",
+        "id"
+      ],
+      "outcome_fields": [
+        "transcription",
+        "raw_transcription"
+      ],
+      "annotation_fields": [
+        "id",
+        "gender",
+        "lang_group_id",
+        "lang_id",
+        "language",
+        "num_samples",
+        "path"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "FLEURS"
+      },
+      "normalization": {}
+    },
+    "PAWS": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "sentence1",
+        "sentence2"
+      ],
+      "required_fields": [
+        "id",
+        "sentence1",
+        "sentence2"
+      ],
+      "outcome_fields": [
+        "label"
+      ],
+      "annotation_fields": [
+        "id"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "PAWS"
+      },
+      "normalization": {}
+    },
+    "TULU3": {
+      "kind": "historical_dialogue",
+      "mapping": "native_fields",
+      "input_fields": [
+        "messages"
+      ],
+      "required_fields": [
+        "messages",
+        "id"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "id",
+        "source"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "TULU3"
+      },
+      "normalization": {}
+    },
+    "OPENMATH2": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "problem"
+      ],
+      "required_fields": [
+        "problem"
+      ],
+      "outcome_fields": [
+        "expected_answer",
+        "generated_solution"
+      ],
+      "annotation_fields": [
+        "problem_source"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "OPENMATH2"
+      },
+      "normalization": {}
+    },
+    "OPENTHOUGHTS3": {
+      "kind": "historical_dialogue",
+      "mapping": "native_fields",
+      "input_fields": [
+        "conversations"
+      ],
+      "required_fields": [
+        "conversations"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "difficulty",
+        "domain",
+        "source"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "OPENTHOUGHTS3"
+      },
+      "normalization": {}
+    },
+    "OPENCODE": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "input"
+      ],
+      "required_fields": [
+        "input",
+        "id"
+      ],
+      "outcome_fields": [
+        "output",
+        "average_test_score",
+        "llm_judgement",
+        "tests_execution_status",
+        "unit_tests"
+      ],
+      "annotation_fields": [
+        "id",
+        "domain",
+        "generation_algorithm"
+      ],
+      "id_field": "id",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_metadata_snapshot",
+        "path": "evidence/publisher-fields-v1.json", "original_snapshot": "public-source-metadata-v0.5.json",
+        "source_id": "OPENCODE"
+      },
+      "normalization": {}
+    },
+    "QRECC": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "input_fields": [
+        "Context",
+        "Question"
+      ],
+      "required_fields": [
+        "Context",
+        "Question",
+        "Conversation_no",
+        "Turn_no"
+      ],
+      "outcome_fields": [
+        "Rewrite",
+        "Answer",
+        "Answer_URL"
+      ],
+      "annotation_fields": [
+        "Conversation_no",
+        "Turn_no",
+        "Conversation_source"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Source-native fields only; no runtime/scorer execution or implied production timing"
+      ],
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_readme_schema",
+        "url": "https://github.com/apple/ml-qrecc#dataset",
+        "reviewed_at": "2026-09-07"
+      },
+      "normalization": {
+        "session_field": "Conversation_no",
+        "turn_field": "Turn_no"
+      }
+    },
+    "MOONCAKE": {
+      "kind": "request_metadata",
+      "mapping": "native_request_metadata",
+      "input_fields": [],
+      "required_fields": [
+        "timestamp",
+        "input_length",
+        "output_length",
+        "hash_ids"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "timestamp",
+        "input_length",
+        "output_length",
+        "hash_ids"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Only pinned trace files; preserve prefix block IDs; no prompt content, routing or cache-hit inference"
+      ],
+      "normalization": {
+        "timestamp_unit": "ms",
+        "timestamp_basis": "source_trace_relative_start",
+        "prefix_block_tokens": 512,
+        "evidence_url": "https://github.com/kvcache-ai/Mooncake/blob/9b5adcd4db46849104c3d3d654bc688dfe22d389/FAST25-release/README.md"
+      },
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_readme_schema",
+        "url": "https://github.com/kvcache-ai/Mooncake/blob/9b5adcd4db46849104c3d3d654bc688dfe22d389/FAST25-release/README.md"
+      }
+    },
+    "AZURE_LLM": {
+      "kind": "request_metadata",
+      "mapping": "native_request_metadata",
+      "input_fields": [],
+      "required_fields": [
+        "TIMESTAMP",
+        "ContextTokens",
+        "GeneratedTokens"
+      ],
+      "outcome_fields": [],
+      "annotation_fields": [
+        "TIMESTAMP",
+        "ContextTokens",
+        "GeneratedTokens"
+      ],
+      "id_field": "",
+      "requirements": [
+        "Azure 2023 code/conversation CSV only; timezone absent, absolute arrival remains unknown; no prompt synthesis"
+      ],
+      "normalization": {
+        "timestamp_basis": "unknown"
+      },
+      "status": "CONTRACT_MAPPED_ASSET_VALIDATION_PENDING",
+      "evidence": {
+        "kind": "publisher_readme_schema",
+        "url": "https://github.com/Azure/AzurePublicDataset/blob/207bed67dd10090b28ad4f745b2cfd41a11aace4/AzureLLMInferenceDataset2023.md"
+      }
+    }
+  }
+}
