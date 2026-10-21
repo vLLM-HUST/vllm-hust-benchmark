@@ -1,0 +1,87 @@
+{
+  "run_id": "swe-pro-v1-overnight-agent128-20261022-r2",
+  "runtime_controller_commit": "5d510b019eccd600c8889f946629d1893a20112c",
+  "runtime_benchmark_commit": "6a0fe19c5372523134cf69fdfee786e6f4882634",
+  "report_generator_commit": "88a7ad7",
+  "configuration": {
+    "programs_per_group": 128,
+    "unique_tasks": 8,
+    "replicas_per_task": 16,
+    "arrival_time": 0,
+    "client_concurrency_limit": null,
+    "window_seconds": 7200,
+    "step_limit": 200,
+    "context_tokens": 262144,
+    "output_limit": 4096,
+    "tool_timeout_seconds": 60,
+    "max_num_batched_tokens": 8192,
+    "max_num_seqs": 256,
+    "kv_bytes_per_rank": 17179869184,
+    "tensor_parallel_size": 2,
+    "async_scheduling": true,
+    "resume_timeout_seconds": 7200,
+    "downstream_http_timeout_seconds": 7200,
+    "controller_policy": "original ordering plus timeout adaptation; no aging, continuation yield or pause projection",
+    "capacity": 1654784,
+    "decode_buffer": 14335,
+    "capacity_validity": "limited static hardware heuristic; not proven async physical upper bound"
+  },
+  "normally_returned_calls": {
+    "native": {
+      "returns": 5312,
+      "output_tokens": 869078,
+      "mean_latency_s": 168.96453319291024,
+      "p50_latency_s": 172.10447202739306,
+      "p95_latency_s": 393.65775566645885,
+      "mean_input_tokens": 17764.242846385543
+    },
+    "controller": {
+      "returns": 6187,
+      "output_tokens": 829774,
+      "mean_latency_s": 131.90819949303253,
+      "p50_latency_s": 35.495837344788015,
+      "p95_latency_s": 618.6793578897136,
+      "mean_input_tokens": 18228.67092290286
+    }
+  },
+  "terminal": {
+    "native": {
+      "reports": 128,
+      "expected": 128,
+      "statuses": {
+        "RetryError": 128
+      },
+      "submitted": 0,
+      "grading": "DEFERRED",
+      "score": null,
+      "error_markers": {
+        "AgentWallBudgetExceeded": 128
+      }
+    },
+    "controller": {
+      "reports": 128,
+      "expected": 128,
+      "statuses": {
+        "RetryError": 128
+      },
+      "submitted": 0,
+      "grading": "DEFERRED",
+      "score": null,
+      "error_markers": {
+        "AgentWallBudgetExceeded": 128
+      }
+    }
+  },
+  "archive": {
+    "bytes": 166609070,
+    "files": 4232,
+    "sha256": "35e1669cdddc3af4da0f640a078c8a00bec4a772c2f5ff567eadb22996fe9405",
+    "whole_archive_verification": "PASS",
+    "individual_file_verification": "PASS"
+  },
+  "complete_batch_speedup_eligible": false,
+  "raw_problem_answers_patches_published": false,
+  "local_checks": "Python3.11/3.12 each247PASS5SKIP; CLI/build PASS",
+  "remote_ci": "NOT_CHECKED",
+  "public_precommit": "NOT_RUN"
+}
