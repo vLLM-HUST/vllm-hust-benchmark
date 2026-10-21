@@ -147,6 +147,40 @@ def test_final_receipt_uses_stable_destination_api_ids():
         )
 
 
+def test_source_release_cleanup_retains_one_verified_destination_copy():
+    root = Path(__file__).resolve().parents[1]
+    cleanup = json.loads(
+        (
+            root / "archive/dev-hub-releases-20261020/source-cleanup-verification.json"
+        ).read_text()
+    )
+    final = json.loads(
+        (root / "archive/dev-hub-releases-20261020/final-verification.json").read_text()
+    )
+
+    assert cleanup["schema"] == "release-source-cleanup/v1"
+    assert cleanup["totals"] == {
+        "source_assets_deleted": 78,
+        "source_bytes_deleted": 446126110,
+        "source_assets_remaining": 0,
+        "destination_assets_remaining": 78,
+        "destination_bytes_remaining": 446126110,
+    }
+    final_by_tag = {row["tag"]: row for row in final["releases"]}
+    assert {row["tag"] for row in cleanup["releases"]} == set(final_by_tag)
+    for row in cleanup["releases"]:
+        migrated = final_by_tag[row["tag"]]
+        assert row["source_release_id"] == migrated["source_release_id"]
+        assert row["destination_release_id"] == migrated["destination_release_id"]
+        assert row["source_assets_before"] == migrated["assets_verified"]
+        assert row["destination_assets_after"] == len(migrated["assets"])
+        assert row["source_assets_after"] == 0
+        assert row["draft"] == migrated["source_draft"]
+        assert row["draft"] == migrated["destination_draft"]
+        assert row["prerelease"] == migrated["source_prerelease"]
+        assert row["prerelease"] == migrated["destination_prerelease"]
+
+
 def test_draft_cache_must_be_private(tmp_path, monkeypatch):
     record = source(tmp_path)
     (tmp_path / "cache").chmod(0o755)
