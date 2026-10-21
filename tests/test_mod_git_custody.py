@@ -84,3 +84,37 @@ def test_source_cleanup_has_complete_archive_and_green_merge_receipts():
         retained_count += len(retained)
         downloaded_count += verified["verified_files"]
     assert (deleted_count, retained_count, downloaded_count) == (240, 3, 264)
+
+
+def test_published_stateaxis_links_resolve_to_frozen_benchmark_originals():
+    registry = json.loads(
+        (ROOT / "website-publication/data/ecosystem.json").read_text()
+    )
+    expected = {
+        "stateaxis-automatic-prefix-cache",
+        "stateaxis-async-kv-transfer",
+        "stateaxis-pipelined-weight-loading",
+    }
+    found = set()
+    prefix = (
+        "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/"
+        "ddc4f6a3290e447260fc8f6c03ea36d3ca514e23/"
+    )
+    for component in registry["components"]:
+        if component["id"] not in expected:
+            continue
+        found.add(component["id"])
+        url = component["public_effect_url"]
+        assert url.startswith(prefix)
+        assert component["latest_result"] in url
+        relative = url.removeprefix(prefix)
+        assert (ROOT / relative).is_file()
+        manifest = json.loads(
+            (
+                ROOT / "archive/mod-git-20261021" / component["id"] / "manifest.json"
+            ).read_text()
+        )
+        assert component["latest_result"] in {
+            record["path"] for record in manifest["files"]
+        }
+    assert found == expected
