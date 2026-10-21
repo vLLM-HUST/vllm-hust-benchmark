@@ -1,0 +1,9 @@
+{
+  "scope": "negative input-guard probe using actual frozen V2 parquet and unmodified V1 runner; not an Agent or sandbox run",
+  "expected": "V1 runner rejects V2 parquet before model/tool/image work",
+  "observed_exception": "AssertionError",
+  "source": "src/vllm_hust_benchmark/swe_bench_pro_inputs.py",
+  "line": 98,
+  "expression": "assert digest(paths[\"dataset_parquet\"]) == lock[\"dataset\"][\"parquet_sha256\"]",
+  "passed": true
+}
