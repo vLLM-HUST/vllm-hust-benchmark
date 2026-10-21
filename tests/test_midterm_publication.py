@@ -25,7 +25,15 @@ def test_publication_rebuilds_from_pinned_report_and_verified_archives(monkeypat
     )
     for prior in historical["sections"]:
         if prior["id"] != "m01":
-            assert sections[prior["id"]] == prior
+            assert {
+                k: v for k, v in sections[prior["id"]].items() if k != "evidence"
+            } == prior
+    for section in sections.values():
+        assert section["evidence"]
+        for locator in section["evidence"]:
+            path = ROOT / locator["path"]
+            assert path.exists()
+            assert locator["kind"] == ("tree" if path.is_dir() else "blob")
     assert actual["kv_audit"] == historical["kv_audit"]
     assert len(sections["runtime-recovery"]["tables"][0]["rows"]) == 2
     state = sections["state-commit"]

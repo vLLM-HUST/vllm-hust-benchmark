@@ -13,6 +13,49 @@ REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
 OUTPUT = ROOT / "website-publication/data/midterm-v052.json"
 
+# Repository-relative locators are resolved against the website's exact benchmark
+# publication commit, not a moving main branch or a local acquisition path.
+EVIDENCE = {
+    "candidates": [
+        "aligned-mmlu-b0.tar.gz",
+        "aligned-mmlu-b1.tar.gz",
+        "b1-e32-screen-evidence.tar.gz",
+        "b1-e24-screen-evidence.tar.gz",
+        "b1-kvmat-screen-evidence.tar.gz",
+        "b1-kvmat-e24-screen-evidence.tar.gz",
+        "microflow-school028",
+        "vspec-school028",
+    ],
+    "quality": ["quality-regression/raw", "quality-regression/finish-breakdown.json"],
+    "long-context": ["long-context-originals.tar.gz", "long-context-originals.json"],
+    "long-diagnostic": [
+        ".",
+        "synthetic-b0-evidence.tar.gz",
+        "synthetic-b1-evidence.tar.gz",
+    ],
+    "resources": [
+        ".",
+        "aligned-mmlu-b0.tar.gz",
+        "aligned-mmlu-b1.tar.gz",
+        "aligned-mmlu-common.tar.gz",
+    ],
+    "m01": ["m01-recovery/r21-device-maps"],
+    "runtime-recovery": ["m01-recovery/runtime-recovery"],
+    "state-commit": ["m01-recovery/state-commit-recovery"],
+}
+
+
+def evidence_locator(relative):
+    path = ROOT / REPORT_DIR / relative
+    assert path.exists(), relative
+    return {
+        "path": path.relative_to(ROOT).as_posix(),
+        "kind": "tree" if path.is_dir() else "blob",
+        "label": "B0 + B1 原始归档 / original archives"
+        if relative == "."
+        else relative,
+    }
+
 
 def pinned(path):
     return subprocess.check_output(["git", "show", f"{REVISION}:{path}"], cwd=ROOT)
@@ -176,6 +219,7 @@ def build():
                 "scope": note,
                 "tables": selected,
                 "source_heading": heading.lstrip("# "),
+                "evidence": [evidence_locator(path) for path in EVIDENCE[ident]],
             }
         )
     return {
