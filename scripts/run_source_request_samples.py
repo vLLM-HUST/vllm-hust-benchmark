@@ -13,6 +13,7 @@ from vllm_hust_workload_data.bindings import bind_source
 from vllm_hust_workload_data.consumer import resolve_input
 from vllm_hust_workload_data.execution import replay_request
 from vllm_hust_workload_data.pipeline import prepared_rows, run
+from vllm_hust_benchmark.workload_response_validation import check_response
 
 
 def main():
@@ -24,6 +25,16 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--endpoint", required=True)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--service-profile",
+        help="Declared server configuration identity; not hardware proof",
+    )
+    parser.add_argument(
+        "--timeout",
+        type=float,
+        default=180,
+        help="Socket read timeout, not an end-to-end performance deadline",
+    )
     args = parser.parse_args()
     binding = bind_source(
         args.source_id,
@@ -60,6 +71,7 @@ def main():
             "only original request_replay sources; no task renderer fallback"
         )
     receipt = {
+        "schema_version": "source-request-validation/v1",
         "source_id": args.source_id,
         "selection": "FIRST_3_ORIGINAL_RECORDS_BEFORE_EXECUTION",
         "selected_samples": [row["record_id"] for row in selected],
@@ -68,6 +80,8 @@ def main():
         "scoring": "NO_INDEPENDENT_ORACLE_SUPPLIED",
         "status": "STARTED",
         "samples": [],
+        "service_profile": args.service_profile or "NOT_DECLARED",
+        "quality_claim": False,
     }
     target = args.output / "receipt.json"
     target.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
@@ -76,11 +90,14 @@ def main():
             "record_id": row["record_id"],
             "original_model": record.request_body().get("model"),
             "original_stream": record.request_body().get("stream"),
+            "original_max_tokens": record.request_body().get(
+                "max_tokens", record.request_body().get("max_completion_tokens")
+            ),
             "status": "NOT_RUN",
         }
         try:
             response = replay_request(
-                record, endpoint=args.endpoint, model=args.model, timeout=180
+                record, endpoint=args.endpoint, model=args.model, timeout=args.timeout
             )
             with (args.output / (row["record_id"] + ".private.json")).open(
                 "x", encoding="utf-8"
@@ -93,13 +110,14 @@ def main():
                 for choice in event.get("choices", [])
                 if choice.get("finish_reason")
             ]
-            if not reasons:
-                raise ValueError("no model finish reason")
             item.update(
-                status="REQUEST_PROTOCOL_COMPLETED",
+                status="REQUEST_PROTOCOL_COMPLETED"
+                if reasons
+                else "RESPONSE_WITHOUT_TERMINATION",
                 finish_reasons=reasons,
                 model_quality="NOT_EVALUATED",
                 budget_exhausted="length" in reasons,
+                response_validation=check_response(response, record.request_body()),
             )
         except HTTPError as error:
             # Keep the server error private; it may echo original input.
@@ -116,11 +134,19 @@ def main():
             )
         receipt["samples"].append(item)
         target.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
+    verified = all(
+        s["status"] == "REQUEST_PROTOCOL_COMPLETED"
+        and s.get("response_validation", {}).get("status")
+        == "RESPONSE_INTEGRITY_VERIFIED"
+        for s in receipt["samples"]
+    )
     receipt["status"] = (
-        "REQUEST_PROTOCOL_COMPLETED_NO_TASK_QUALITY_CLAIM"
-        if all(s["status"] == "REQUEST_PROTOCOL_COMPLETED" for s in receipt["samples"])
+        "REQUESTS_EXECUTED_AND_INTEGRITY_VALIDATED_NO_QUALITY_ORACLE"
+        if verified
         else "PARTIAL_OR_FAILED"
     )
+    if verified:
+        receipt["scoring"] = "NON_SCORING_INTEGRITY_VERIFIED"
     target.write_text(json.dumps(receipt, indent=2), encoding="utf-8")
     print(
         json.dumps(
@@ -131,7 +157,8 @@ def main():
             }
         )
     )
+    return 0 if verified else 2
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
