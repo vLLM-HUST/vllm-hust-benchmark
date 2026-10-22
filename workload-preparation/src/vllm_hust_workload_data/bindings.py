@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .assets import asset_path, iter_rows, sha256
+from .assets import asset_path, sha256
+from .adapters import iter_source_rows
 from .registry import adapter_spec, source_spec
 
 
@@ -63,12 +64,7 @@ def bind_source(
                 "file differs from pinned publisher/previous identity; do not overwrite its revision"
             )
         count = 0
-        for row in iter_rows(
-            path,
-            records_path=spec.get("records_path", []),
-            row_format=spec.get("row_format"),
-            root_fields=spec.get("root_fields", []),
-        ):
+        for row in iter_source_rows(path, spec):
             if mapping is not None:
                 from .adapters import adapt_row
 

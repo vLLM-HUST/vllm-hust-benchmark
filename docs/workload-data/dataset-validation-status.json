@@ -447,15 +447,15 @@
       "workload_class_ids": [
         "structured-generation"
       ],
-      "acquisition": "NOT_RECHECKED",
-      "read_adapter": "NOT_RECHECKED",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
+      "acquisition": "VERIFIED_THREE_ORIGINAL_GITHUB_EASY_SCHEMAS",
+      "read_adapter": "VERIFIED_INSTALLED_CANDIDATE_THREE_ROUNDTRIPS",
+      "server_execution": "COMPLETED_THREE_ORIGINAL_SCHEMA_TASKS",
+      "scoring": "ORIGINAL_VALIDATOR_COMPLETED_ONE_OF_THREE_CONFORMS",
+      "selected_samples": ["o10008.json", "o10009.json", "o10010.json"],
+      "completed_samples": ["o10008.json", "o10009.json", "o10010.json"],
       "checked": false,
-      "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "receipt": "docs/workload-data/validation/jsonschemabench-original-schema-npu-20261023.json",
+      "blocker": "Final CI artifact and research-consumer validation pending; original constraint profile, not reference OpenAIEngine/full suite. Two outputs fail maxLength; failures retained."
     },
     {
       "source_id": "LABBENCH",
@@ -1265,15 +1265,16 @@
       "workload_class_ids": [
         "document-grounded-analysis"
       ],
-      "acquisition": "NOT_RECHECKED",
-      "read_adapter": "NOT_RECHECKED",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
+      "acquisition": "VERIFIED_PUBLISHER_HTMLSTRIPPED_DEV",
+      "read_adapter": "VERIFIED_INSTALLED_2086_QUESTIONS_AND_3_ROUNDTRIPS",
+      "server_execution": "COMPLETED_ORIGINAL_MC_3_QUESTIONS",
+      "scoring": "PINNED_LM_EVAL_MC_SCORING_COMPLETED_NOT_PUBLISHER_BASELINE",
+      "selected_samples": ["52845_75VB1ISR_1", "30029_F5N22U40_1", "62139_J05FWZR6_1"],
+      "completed_samples": ["52845_75VB1ISR_1", "30029_F5N22U40_1", "62139_J05FWZR6_1"],
       "checked": false,
-      "receipt": null,
-      "blocker": "待在当前数据-only版本重新核验；目录登记不代表已接入。"
+      "receipt": "docs/workload-data/validation/quality-original-mc-npu-20261023.json",
+      "reader_receipt": "docs/workload-data/validation/quality-original-reader-20261023.json",
+      "blocker": "原dev2086问题已读/索引，三篇原首题NPU似然执行与固定harness评分完成：原始acc1/3、字符长度归一化2/3；公开入口同三题复验。不是发布方基线复现/SCROLLS数据/自由生成；待最终CI工件、研究消费及全量，来源仍不勾选。"
     },
     {
       "source_id": "REPOBENCH",
