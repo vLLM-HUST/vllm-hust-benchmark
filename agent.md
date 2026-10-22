@@ -1,5 +1,13 @@
 # Agent Operating Constraints
 
+## Data navigation
+
+Before reading, adding, or editing data, use [DATA_INDEX.md](DATA_INDEX.md) and the generated
+[collection index](docs/data-index.json). Distinguish immutable originals, versioned analysis,
+contracts, publication sources, and synthetic fixtures. After adding/removing tracked data paths,
+regenerate the index with `python scripts/data_index.py --write` and validate with `--check`. An
+index entry is not experimental acceptance or permission to overwrite evidence or run devices.
+
 This repository is the source of truth for vllm-hust benchmark specs, raw submissions, leaderboard
 snapshots, and CI performance-gate inputs. Agents must preserve the distinction between public
 benchmark data and private/CI smoke tests. When in doubt, stop and ask for clarification instead of
