@@ -37,6 +37,62 @@ BFCL_SIMPLE_MEMBERS = {
 QRECC_ARCHIVE_SHA256 = "6ed52a0b0e495f752424b15742119a5f8f33ca7a029c07122be1b849de19a308"  # pragma: allowlist secret - official archive checksum
 QRECC_TEST_SHA256 = "a4d8ef686827feb00c90997e0d6ff135928bf6f4bcb26fb523b5fac025d58f84"  # pragma: allowlist secret - official test member checksum
 
+BBH_ARCHIVE_SHA256 = "8406fd092f7050638d60e7560952a62f78eeea38ac5a2e5755dff1e12efe44fc"  # pragma: allowlist secret - official publisher archive checksum
+
+
+def prepare_bbh_boolean(*, data_archive, output):
+    """Prepare two byte-preserved publisher assets, not a model run or full BBH."""
+    archive = Path(data_archive)
+    if hashlib.sha256(archive.read_bytes()).hexdigest() != BBH_ARCHIVE_SHA256:
+        raise ValueError("original BBH archive identity mismatch")
+    spec = source_spec("BBH")
+    if len(spec["files"]) != 2 or {
+        asset["path"]: asset["role"] for asset in spec["files"]
+    } != {
+        "boolean_expressions.json": "data",
+        "cot-prompts/boolean_expressions.txt": "publisher_prompt",
+    }:
+        raise ValueError("unexpected fixed BBH preparation asset contract")
+    contents = {}
+    with zipfile.ZipFile(archive) as bundle:
+        for asset in spec["files"]:
+            relative = asset["path"]
+            suffix = (
+                "/bbh/boolean_expressions.json"
+                if asset["role"] == "data"
+                else "/cot-prompts/boolean_expressions.txt"
+            )
+            names = [name for name in bundle.namelist() if name.endswith(suffix)]
+            if len(names) != 1:
+                raise ValueError("missing or ambiguous original BBH member")
+            raw = bundle.read(names[0])
+            if hashlib.sha256(raw).hexdigest() != asset["sha256"]:
+                raise ValueError("original BBH member identity mismatch")
+            if asset["role"] == "data":
+                rows = json.loads(raw).get("examples")
+                if not isinstance(rows, list) or len(rows) != asset["rows"]:
+                    raise ValueError("original BBH example count mismatch")
+            contents[relative] = raw
+    target = Path(output)
+    target.mkdir(mode=0o700, parents=True, exist_ok=False)
+    for relative, raw in contents.items():
+        path = target / relative
+        path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+        path.write_bytes(raw)
+        path.chmod(0o600)
+    return {
+        "source_id": "BBH",
+        "subsuite": "boolean_expressions",
+        "status": "ORIGINAL_FILES_PREPARED_NOT_EXECUTED",
+        "revision": spec["revision"],
+        "files": [
+            {"path": name, "sha256": hashlib.sha256(raw).hexdigest()}
+            for name, raw in contents.items()
+        ],
+        "model_calls": 0,
+        "scorer_runs": 0,
+    }
+
 
 def prepare_qrecc_test(*, data_archive, output):
     """Copy unchanged original test tasks only, not retrieval passages or a runner."""

@@ -62,6 +62,9 @@ def main(argv=None):
     qrecc = commands.add_parser("prepare-qrecc-test")
     qrecc.add_argument("--data-archive", type=Path, required=True)
     qrecc.add_argument("--output", type=Path, required=True)
+    bbh = commands.add_parser("prepare-bbh-boolean")
+    bbh.add_argument("--data-archive", type=Path, required=True)
+    bbh.add_argument("--output", type=Path, required=True)
     for name in ("catalog", "pipeline", "replay"):
         passthrough = commands.add_parser(name, add_help=False)
         passthrough.add_argument("arguments", nargs=argparse.REMAINDER)
@@ -126,6 +129,12 @@ def main(argv=None):
                 )
             value = provider.prepare_bfcl_simple_python(
                 official_archive=args.official_archive, output=args.output
+            )
+        elif args.command == "prepare-bbh-boolean":
+            if not hasattr(provider, "prepare_bbh_boolean"):
+                raise RuntimeError("Install the pinned BBH-capable data component")
+            value = provider.prepare_bbh_boolean(
+                data_archive=args.data_archive, output=args.output
             )
         elif args.command == "prepare-qrecc-test":
             if not hasattr(provider, "prepare_qrecc_test"):

@@ -2,6 +2,18 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "BBH": {
+      "kind": "task_dataset",
+      "mapping": "native_fields",
+      "records_path": ["examples"],
+      "input_fields": ["input"],
+      "required_fields": ["input", "target"],
+      "outcome_fields": ["target"],
+      "annotation_fields": [],
+      "id_field": "",
+      "requirements": ["Original publisher Examples array and unchanged task text; target remains reference-only", "Current fixed asset scope is boolean_expressions; file index is not an arrival timestamp", "Publisher CoT demonstrations are separate prompt assets, never selected evaluation targets; harness scoring and paper equivalence are separate claims"],
+      "status": "READER_IMPLEMENTED_NATIVE_VALIDATION_SEPARATE"
+    },
     "NATURAL_INSTRUCTIONS": {
       "kind": "task_dataset",
       "mapping": "native_instruction_instance",
