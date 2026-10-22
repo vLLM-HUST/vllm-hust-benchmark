@@ -1,0 +1,51 @@
+{
+  "checked_at_utc": "2026-10-21T19:03:19.868103+00:00",
+  "benchmark_revision": "08e20fd6e5ad25badb8eb1c44340e6e48297e48e",
+  "scope": "source/input compatibility audit; no SWE Agent execution or task score",
+  "source_sha256": {
+    "src/vllm_hust_benchmark/swe_bench_pro.py": "5e5bda20aa0e81458b0c4064156ecffc4549ab10fb66737bc53bea9d1d6631dd",
+    "src/vllm_hust_benchmark/swe_bench_pro_inputs.py": "fbfcb5e6604426b49137fccffaf2cb5fc6b0b3a4645fd76d4814ea7f6f5d68e3",
+    "src/vllm_hust_benchmark/data/swe_bench_pro_v1_lock.json": "2976327798028fc6793ececca8743f46497b1396a46bfd27e4cb48be8cfe4179",
+    "docs/SWE_BENCH_PRO.zh-CN.md": "2b49ae6d35667f1f83a60e276917d89a2e1127a04e97c0a5f5085844a78d6e79"
+  },
+  "pyramidkv_frozen_swe": {
+    "config": "v2",
+    "revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+    "parquet_sha256": "1067f72c1f43bbc578276888625db3b836cebb535546c9eaf824c5d5dd104a7f",
+    "tasks": 642,
+    "image_platform": "linux/amd64",
+    "harness_revision": "66f92766bba642462d4bbe5479e83f91f9211862"
+  },
+  "new_shared_runner": {
+    "dataset": {
+      "repository": "ScaleAI/SWE-bench_Pro",
+      "config": "v1",
+      "revision": "2d52cb3df914a3fcf80c7f66738b3a88ae37fc50",
+      "parquet_sha256": "c8cd7115496ad4e9a8b21d088cef576a65bf821bb542b24336f13f714cef13f8"
+    },
+    "image_platform": "linux/arm64",
+    "official_source_revision": "66f92766bba642462d4bbe5479e83f91f9211862",
+    "scope": "V1 files only; no V2 task or evaluator used",
+    "agent_source_revision": "d74716a3c8104a113f77cc9ab94cf407ecdcf1e9"
+  },
+  "directly_compatible": false,
+  "reasons": [
+    "Different pinned parquet despite identical dataset repository revision",
+    "Runner verifies exact V1 parquet hash before task execution",
+    "Runner verifies arm64 image architecture, not the frozen AMD64 images",
+    "V1 evaluator and source coverage do not qualify V2 task scoring"
+  ],
+  "reusable_design": [
+    "Independent Agent entry without Controller",
+    "Pinned source and input identity verification",
+    "Per-step trajectory and failure records",
+    "Fresh-container independent grading"
+  ],
+  "remaining": [
+    "Accessible isolated linux/amd64 backend and model-network route",
+    "V2-specific runner, evaluator, image and task contract qualification",
+    "Task/scaffold/tool/budget and rights review"
+  ],
+  "judge_decision": "retain prior calibration requirements; no same-model uncalibrated scoring authorization",
+  "scores": null
+}

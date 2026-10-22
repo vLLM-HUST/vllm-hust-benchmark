@@ -1,0 +1,62 @@
+{
+  "series_id": "swe-v018-native-text-only-backport-20261001",
+  "qualification": false,
+  "runtime": {
+    "vllm_release": "0.18.0",
+    "vllm_release_commit": "bcf2be96120005e9aea171927f85055a6a5c0cf6",
+    "vllm_applied_commit": "9878e0432107e69082f8837b1f275d3aad71fd4e",
+    "vllm_ascend_release": "0.18.0",
+    "vllm_ascend_release_commit": "e18643f8a4d5bd9990727654318ad069ea0b56e2",
+    "vllm_ascend_applied_commit": "0f40ff06f1c6b7e6efb8ae4850eb72bd35a47762",
+    "cann": "8.5.1",
+    "official_image": "quay.io/ascend/vllm-ascend:v0.18.0",
+    "official_image_index_digest": "sha256:697175418772c65b56afc04a7ccde7c24e7ad15a988a852eb8239fa9b6298e24",
+    "official_image_arm64_digest": "sha256:2467d259ff068ca4edd7b50b849152910f3c05e435f314639fc06bcc7a00f9fa"
+  },
+  "model": {
+    "name": "Qwen3.5-35B-A3B",
+    "source_revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+    "source_path": "/models/Qwen3.5-35B-A3B",
+    "config_view_path": "/root/gennova-qwen35-v018-native/model-view-qwen35-59d61-text-only",
+    "config_view_sha256": "5abb937cfa1f8a4089e37e34b25a7a3d7a5567bbde471875cf5734a19dd08521",
+    "config_view_note": "Text-only config derived from the checkpoint text_config; all tokenizer and weight files are symlinks to the exact source checkpoint. No weights were changed."
+  },
+  "workload": {
+    "protocol": "swe-prefix-reuse/v1",
+    "prepared_sha256": "8044561ffa1bb430bea8f778ef814d96649321e1a92654b95f64263b996d5e85",
+    "tokenizer_fingerprint": "3f9ca78537850303ee04bfa6640c020be89723c62f37121c0f27a4c0babc53e0",
+    "duration_seconds": 900,
+    "concurrency": 2,
+    "seed": 17
+  },
+  "contract": {
+    "dtype": "bfloat16",
+    "device": "Ascend 910B2",
+    "visible_devices": [
+      2,
+      3
+    ],
+    "tensor_parallel": 2,
+    "pipeline_parallel": 1,
+    "data_parallel": 1,
+    "expert_parallel": false,
+    "max_model_len": 262144,
+    "max_num_seqs": 16,
+    "max_num_batched_tokens": 4096,
+    "prefix_caching": true,
+    "async_scheduling": true,
+    "mamba_cache_mode": "align",
+    "mtp_draft_tokens": 2,
+    "thinking": true,
+    "temperature": 0,
+    "requested_graph_mode": "FULL_AND_PIECEWISE",
+    "effective_graph_mode": "PIECEWISE ACL Graph",
+    "requested_kv_cache_bytes_per_device": 26038239232,
+    "effective_available_kv_cache_gib_per_device": 23.37,
+    "effective_gpu_kv_cache_tokens": 544768
+  },
+  "compatibility_note": "The official 0.18.0 releases predate complete Qwen3.5 text-only serving support. Minimal upstream-derived model registration, MTP config, and conditional multimodal-RoPE compatibility backports are recorded by exact commits and patch bundles in this evidence directory. This is not an untouched 0.18.0 binary.",
+  "server_endpoint": "http://127.0.0.1:33818/v1/completions",
+  "formal": true,
+  "window_label": "C2/900"
+}

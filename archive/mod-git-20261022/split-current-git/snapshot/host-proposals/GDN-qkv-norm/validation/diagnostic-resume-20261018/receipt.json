@@ -1,0 +1,103 @@
+{
+  "schema": "gdn-diagnostic-resume.v1",
+  "base_head": "e401217ade51e1cd7654f5ba7b3c54388d903d2c",
+  "scope": {
+    "candidate": "gdn-unpack-qk-l2norm-fusion",
+    "base_head": "e401217ade51e1cd7654f5ba7b3c54388d903d2c",
+    "branch": "fix/husk-carrier-visible",
+    "question": "Does repaired same-input probe find Q/K/V divergence before recurrent state?",
+    "changes": "Continue existing uncommitted binding/inference-mode/bitwise-V/coverage metadata repairs; no arithmetic change or test rewrite",
+    "shape": {
+      "T": 16,
+      "packed_width": 4096,
+      "q_heads": 8,
+      "k_heads": 8,
+      "v_heads": 16,
+      "head_dim": 128,
+      "phase": "pure non-spec decode"
+    },
+    "weights": {
+      "model": "Qwen3.5-35B-A3B",
+      "precision": "bf16",
+      "format": "ND",
+      "tp": 2,
+      "graph": "FULL"
+    },
+    "serve_starts_this_session": 1,
+    "performance_collections": 0,
+    "rollback": "Stop diagnostic service; omit diagnostic worker/env; VLLM_HUST_GDN_QKV_NORM defaults to 0",
+    "stop": "Retain blocked on divergence or infrastructure failure; no performance promotion",
+    "existing_drift": "W1R append drift already explained in 20261018T160300Z_gdn_first_divergence_plan.json; preserve and do not repin"
+  },
+  "status": "blocked",
+  "diagnostic": {
+    "ranks": 2,
+    "covered_steps_per_rank": 123,
+    "layers_per_rank": 30,
+    "scheduler_steps": 128,
+    "result": "NO_DIVERGENCE",
+    "qk": "exact numeric equality with equal NaNs",
+    "v": "bitwise equality"
+  },
+  "l3": {
+    "standard": "8/8 identical PASS",
+    "fixed_batch_vs_A": "2/16 identical; 14/16 DIFFERENT; FAIL exit1",
+    "fixed_batch_vs_B": "16/16 identical PASS"
+  },
+  "cpu": "837 passed, 11 skipped; Ruff PASS",
+  "coverage": "exit0; FAIL0 WARN58; startup drift was not repinned or repaired by this session",
+  "limits": [
+    "Diagnostic modifies graph with shadow operations; not a performance measurement",
+    "Only covered same-input calls: not proof of cross-arm recurrent-state equivalence",
+    "Prior fixed-batch wording 2/16 FAIL means 2 identical and 14 different, as original compare log shows",
+    "No new L0 or L4; existing L3 FAIL remains blocking"
+  ],
+  "next_action": "Capture recurrent consumer inputs including layout/strides and initial state, then compare native/fused recurrent outputs and state updates on identical inputs under graph replay. Do not change arithmetic before locating first divergence.",
+  "rollback": "opt bench stop completed; omit diagnostic worker and GDN_DIAGNOSTIC_*; fusion remains default-off",
+  "evidence": [
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_resume_plan.json",
+      "sha256": "c51218448a84438266d1a615a2cfdfb21f39a6b6384b8055d2fe5327c0375947"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_cpu.log",
+      "sha256": "fe6b224eb23d4e27faf643bfad8da7f5e90585aa5e5d4082a0d107d84ce6501b"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_r3.json",
+      "sha256": "312b5644dbdd52df5bde61e757563c31a63a939a8c1771c3bdda8341b0a0a1c3"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_compare_A.log",
+      "sha256": "0849d9b90da319f108f961705d504412b533d255fcbe2d7ab71008e966f2a002"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_batch_compare_B.log",
+      "sha256": "06d6ad679db0a961b38f0e86850203945ac647dbad73d26efff73a3c6f4fac9a"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_standard_compare.log",
+      "sha256": "a077f1b23b093a4ed12e90d74d6306f82ffce795dbdee8a969cef3a016691dc2"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_coverage.log",
+      "sha256": "671eee0c49763c1a812a589497a0cb6d91e74b7425f44b278fe83d1b3c149542"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_serve_r3.log",
+      "sha256": "59715af4da7b6f172f52cec0337570f794cf191ad1b4ba9c1719cae89a8c396c"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_first_divergence_r3/rank0-summary.json",
+      "sha256": "bcaa51435ff748b71d73ee6be6166a140a5d69d3ed12970b404c9ff07a91ddd3"
+    },
+    {
+      "path": "/root/包体恢复/records/probes/20261018T163000Z_gdn_first_divergence_r3/rank1-summary.json",
+      "sha256": "daac52182dd5ae2ec432bfabe293a45b9d5d2da65a3e924e04a27e1b3bd4be14"
+    },
+    {
+      "path": "/root/包体恢复/records/ladder/1018-162922-l3.json",
+      "sha256": "cedec6f60037f57447c7ffa4067489a27376c21971d9452ea61ce6022e0f9700"
+    }
+  ]
+}

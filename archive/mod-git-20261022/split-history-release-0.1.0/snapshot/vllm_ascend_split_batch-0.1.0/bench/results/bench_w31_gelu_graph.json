@@ -1,0 +1,356 @@
+[
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "native_chain(fp32_cast+gelu+mul)",
+    "mode": "eager",
+    "us": 228.6,
+    "us_median": null,
+    "vs_native": 1.0,
+    "vs_copy_floor": 6.948,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "two_step_bf16(npu_gelu+mul)",
+    "mode": "eager",
+    "us": 130.8,
+    "us_median": null,
+    "vs_native": 0.572,
+    "vs_copy_floor": 3.976,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "fi_gelu_fused(triton,out=prealloc)",
+    "mode": "eager",
+    "us": 140.2,
+    "us_median": null,
+    "vs_native": 0.613,
+    "vs_copy_floor": 4.261,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "vllm_native_bf16(F.gelu*mul,ref)",
+    "mode": "eager",
+    "us": 121.7,
+    "us_median": null,
+    "vs_native": 0.532,
+    "vs_copy_floor": 3.699,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "copy_floor(x.clone())",
+    "mode": "eager",
+    "us": 32.9,
+    "us_median": null,
+    "vs_native": 0.144,
+    "vs_copy_floor": 1.0,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "native_chain(fp32_cast+gelu+mul)",
+    "mode": "graph",
+    "us": 53.5,
+    "us_median": 53.5,
+    "vs_native": 1.0,
+    "vs_copy_floor": 4.385,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "two_step_bf16(npu_gelu+mul)",
+    "mode": "graph",
+    "us": 39.4,
+    "us_median": 39.4,
+    "vs_native": 0.736,
+    "vs_copy_floor": 3.23,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "fi_gelu_fused(triton,out=prealloc)",
+    "mode": "graph",
+    "us": 23.7,
+    "us_median": 23.7,
+    "vs_native": 0.443,
+    "vs_copy_floor": 1.943,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "vllm_native_bf16(F.gelu*mul,ref)",
+    "mode": "graph",
+    "us": 34.2,
+    "us_median": 34.2,
+    "vs_native": 0.639,
+    "vs_copy_floor": 2.803,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "copy_floor(x.clone())",
+    "mode": "graph",
+    "us": 12.2,
+    "us_median": 12.4,
+    "vs_native": 0.228,
+    "vs_copy_floor": 1.0,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "native_chain(fp32_cast+gelu+mul)",
+    "mode": "eager",
+    "us": 222.7,
+    "us_median": null,
+    "vs_native": 1.0,
+    "vs_copy_floor": 6.769,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "two_step_bf16(npu_gelu+mul)",
+    "mode": "eager",
+    "us": 128.6,
+    "us_median": null,
+    "vs_native": 0.577,
+    "vs_copy_floor": 3.909,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "fi_gelu_fused(triton,out=prealloc)",
+    "mode": "eager",
+    "us": 141.7,
+    "us_median": null,
+    "vs_native": 0.636,
+    "vs_copy_floor": 4.307,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "vllm_native_bf16(F.gelu*mul,ref)",
+    "mode": "eager",
+    "us": 125.6,
+    "us_median": null,
+    "vs_native": 0.564,
+    "vs_copy_floor": 3.818,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "copy_floor(x.clone())",
+    "mode": "eager",
+    "us": 32.9,
+    "us_median": null,
+    "vs_native": 0.148,
+    "vs_copy_floor": 1.0,
+    "matched_ratio": null,
+    "max_abs_error": null
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "native_chain(fp32_cast+gelu+mul)",
+    "mode": "graph",
+    "us": 83.6,
+    "us_median": 83.6,
+    "vs_native": 1.0,
+    "vs_copy_floor": 5.067,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "two_step_bf16(npu_gelu+mul)",
+    "mode": "graph",
+    "us": 74.8,
+    "us_median": 74.9,
+    "vs_native": 0.895,
+    "vs_copy_floor": 4.533,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "fi_gelu_fused(triton,out=prealloc)",
+    "mode": "graph",
+    "us": 60.5,
+    "us_median": 60.5,
+    "vs_native": 0.724,
+    "vs_copy_floor": 3.667,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "vllm_native_bf16(F.gelu*mul,ref)",
+    "mode": "graph",
+    "us": 60.5,
+    "us_median": 60.6,
+    "vs_native": 0.724,
+    "vs_copy_floor": 3.667,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "copy_floor(x.clone())",
+    "mode": "graph",
+    "us": 16.5,
+    "us_median": 16.5,
+    "vs_native": 0.197,
+    "vs_copy_floor": 1.0,
+    "matched_ratio": 1.0,
+    "max_abs_error": 0.0
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "native_chain(fp32_cast+gelu+mul)",
+    "mode": "capture",
+    "capture_us": 5737.4
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "two_step_bf16(npu_gelu+mul)",
+    "mode": "capture",
+    "capture_us": 4201.4
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "fi_gelu_fused(triton,out=prealloc)",
+    "mode": "capture",
+    "capture_us": 3719.9
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "vllm_native_bf16(F.gelu*mul,ref)",
+    "mode": "capture",
+    "capture_us": 4236.1
+  },
+  {
+    "batch": 64,
+    "inter": 13824,
+    "op": "copy_floor(x.clone())",
+    "mode": "capture",
+    "capture_us": 3919.8
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "native_chain(fp32_cast+gelu+mul)",
+    "mode": "capture",
+    "capture_us": 4331.8
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "two_step_bf16(npu_gelu+mul)",
+    "mode": "capture",
+    "capture_us": 4477.5
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "fi_gelu_fused(triton,out=prealloc)",
+    "mode": "capture",
+    "capture_us": 3984.4
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "vllm_native_bf16(F.gelu*mul,ref)",
+    "mode": "capture",
+    "capture_us": 4274.1
+  },
+  {
+    "batch": 256,
+    "inter": 13824,
+    "op": "copy_floor(x.clone())",
+    "mode": "capture",
+    "capture_us": 4017.4
+  },
+  {
+    "op": "triton_ingraph",
+    "mode": "meta",
+    "captured": true,
+    "error_type": null,
+    "error": null,
+    "traceback": null,
+    "batches": [
+      {
+        "batch": 64,
+        "capture_us": 3719.9,
+        "us_best": 23.7,
+        "us_median": 23.7,
+        "matched_ratio": 1.0,
+        "max_abs_error": 0.0,
+        "repeat_replay_stable": true,
+        "eager_after_capture": {
+          "matched_ratio": 1.0,
+          "max_abs_error": 0.0
+        },
+        "vs_bf16_golden": {
+          "matched_ratio": 1.0,
+          "max_abs_error": 0.015625
+        }
+      },
+      {
+        "batch": 256,
+        "capture_us": 3984.4,
+        "us_best": 60.5,
+        "us_median": 60.5,
+        "matched_ratio": 1.0,
+        "max_abs_error": 0.0,
+        "repeat_replay_stable": true,
+        "eager_after_capture": {
+          "matched_ratio": 1.0,
+          "max_abs_error": 0.0
+        },
+        "vs_bf16_golden": {
+          "matched_ratio": 1.0,
+          "max_abs_error": 0.015625
+        }
+      }
+    ]
+  }
+]

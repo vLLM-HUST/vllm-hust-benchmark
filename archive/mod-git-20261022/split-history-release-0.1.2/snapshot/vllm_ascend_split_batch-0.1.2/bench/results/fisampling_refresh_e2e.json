@@ -1,0 +1,513 @@
+{
+  "experiment": "W2b fi_sampling e2e A/B refresh (new baseline 2026-09-10)",
+  "meta": {
+    "preregistration": {
+      "date": "2026-09-10",
+      "subject": "W2b fi_sampling e2e evidence refresh on the new baseline",
+      "arms": {
+        "OFF": "no env (default-off)",
+        "ON": "VLLM_HUST_FI_SAMPLING=1"
+      },
+      "cases": {
+        "api1": "untruncated sampling (main win region), 3 ON / 3 OFF alternating",
+        "joint": "k=50/p=0.95 large-concurrency reachability probe, 1 ON leg"
+      },
+      "decision_rule": "delta_frac = (median_on - median_off) / median_off over the 3 repeats per arm (negative => ON faster, the W2b sign convention); spread_arm = (max - min) / median within an arm; noise_band = max(spread_off, spread_on). |delta_frac| < noise_band => NOISE-BAND / NOT DECIDABLE (same\u53e3\u5f84 as W2b). Otherwise WIN (delta_frac < 0) / LOSS (delta_frac > 0).",
+      "projection": "W2 single-op bench @B=64: fork chain ~1.27 ms vs FI api1 ~0.35 ms/step => ~0.9 ms/step saved; the new-baseline TPOT median measured here sets the projector. If sampling is still ~1% of step time the expected |\u0394| stays inside the run-to-run noise band (W2b precedent).",
+      "health_gates": [
+        "0 TypeError lines in every leg log",
+        "OFF legs: zero 'fi_sampling sampling path is ACTIVE' lines (and zero fi_sampling runtime traces)",
+        "ON legs: >=1 ACTIVE line and a fi_api1 route histogram for api1",
+        "port slot free before and after every leg"
+      ],
+      "no_retuning": "no re-tuning / re-running to chase significance; extra repeats require a new pre-registration"
+    },
+    "baseline": {
+      "vllm": "0.28.1.post1.dev143+gf18cf803c.empty",
+      "vllm_ascend": "0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27",
+      "torch": "2.13.0+cpu",
+      "torch_npu": "2.13.0rc1",
+      "triton_ascend": "3.2.2",
+      "cann": {
+        "version": "9.1.0",
+        "innerversion": "V100R001C11SPC001B243",
+        "path": "/usr/local/ascend91/Ascend/cann-9.1.0"
+      }
+    },
+    "plugin_git": {
+      "head": "879e0ffaae8c6bf98248be40722c902166e43fba",
+      "short": "879e0ff",
+      "branch": "feat/cascade-attention-plug",
+      "dirty_tracked": false,
+      "modified_tracked": [],
+      "untracked": [
+        "?? bench/bench_fisampling_refresh_e2e.py",
+        "?? bench/bench_fisampling_refresh_e2e.sh",
+        "?? bench/results/fisampling_refresh_e2e.json",
+        "?? bench/results/logs_fisampling_refresh/",
+        "?? docs/evidence/w2b-fi-sampling/EVIDENCE-refresh-2026-09-10.md",
+        "?? docs/evidence/w2b-fi-sampling/logs/logs_smoke_npu_refresh-2026-09-10.txt"
+      ],
+      "subject": "fix(fi-sampling): tolerate removed ascend-config knobs in _fallback_flags"
+    },
+    "env_at_launch": {
+      "ASCEND_RT_VISIBLE_DEVICES": "7",
+      "VLLM_DISABLE_COMPILE_CACHE": "1 (forced per leg)",
+      "HF_HUB_OFFLINE": "1 (forced per leg)"
+    },
+    "written_at": "2026-09-10T17:20:03"
+  },
+  "fixture": {
+    "server": {
+      "model": "/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct",
+      "served_model_name": "qwen14b",
+      "generation_config": "vllm",
+      "gpu_memory_utilization": "0.85",
+      "compilation_config": "{\"cudagraph_mode\":\"FULL\"}"
+    },
+    "api1": {
+      "server_args": [
+        "--max-model-len",
+        "4096",
+        "--max-num-seqs",
+        "512"
+      ],
+      "client_args": [
+        "--dataset-name",
+        "random",
+        "--random-input-len",
+        "1024",
+        "--random-output-len",
+        "256",
+        "--num-prompts",
+        "256",
+        "--max-concurrency",
+        "64"
+      ],
+      "leg_order": [
+        "off_a",
+        "on_a",
+        "off_b",
+        "on_b",
+        "off_c",
+        "on_c"
+      ],
+      "port_slots": [
+        8351,
+        8352,
+        8353,
+        8354,
+        8355,
+        8356
+      ]
+    },
+    "joint": {
+      "server_args": [
+        "--max-model-len",
+        "512",
+        "--max-num-seqs",
+        "512"
+      ],
+      "client_args": [
+        "--dataset-name",
+        "random",
+        "--random-input-len",
+        "128",
+        "--random-output-len",
+        "64",
+        "--num-prompts",
+        "512",
+        "--max-concurrency",
+        "512",
+        "--top-k",
+        "50",
+        "--top-p",
+        "0.95"
+      ],
+      "leg_order": [
+        "on_j"
+      ]
+    },
+    "note": "offline? NO -- this is the W2b serve protocol (vllm bench serve, openai-chat), kept verbatim except for the graph-mode + cache-disable pair, applied to both arms."
+  },
+  "legs": [
+    {
+      "kind": "api1",
+      "leg": "off_a",
+      "mode": "off",
+      "port": 8351,
+      "ok": true,
+      "server_log": "bench/results/logs_fisampling_refresh/serve_api1_off_a.log",
+      "client_log": "bench/results/logs_fisampling_refresh/client_api1_off_a.log",
+      "result_json": "bench/results/logs_fisampling_refresh/serve_api1_off_a.json",
+      "ready_s": 175.0,
+      "client_wall_s": 120.2,
+      "client_rc": 0,
+      "metrics": {
+        "median_tpot_ms": 74.97977736935604,
+        "mean_tpot_ms": 72.15728823652813,
+        "p95_tpot_ms": 75.6509826262938,
+        "p99_tpot_ms": 77.28970860094563,
+        "median_ttft_ms": 1010.6263398192823,
+        "output_throughput": 808.522574909989,
+        "completed": 256,
+        "failed": 0,
+        "num_prompts": 256,
+        "max_concurrency": 64,
+        "duration": 81.05648751650006
+      },
+      "port_free_after": true,
+      "total_wall_s": 296.9,
+      "index": 1,
+      "subprocess_rc": 0,
+      "port_free_before": true,
+      "traces": {
+        "active_lines": 0,
+        "fi_sampling_mentions": 0,
+        "type_error_lines": 0,
+        "route_trace_counts": {},
+        "route_histogram": null,
+        "max_B": null,
+        "leg_log_fi_sampling_mentions": 0,
+        "leg_log_type_error_lines": 0
+      },
+      "leg_log": "bench/results/logs_fisampling_refresh/leg_api1_off_a.log"
+    },
+    {
+      "kind": "api1",
+      "leg": "on_a",
+      "mode": "on",
+      "port": 8352,
+      "ok": true,
+      "server_log": "bench/results/logs_fisampling_refresh/serve_api1_on_a.log",
+      "client_log": "bench/results/logs_fisampling_refresh/client_api1_on_a.log",
+      "result_json": "bench/results/logs_fisampling_refresh/serve_api1_on_a.json",
+      "ready_s": 180.0,
+      "client_wall_s": 120.0,
+      "client_rc": 0,
+      "metrics": {
+        "median_tpot_ms": 75.02056184206523,
+        "mean_tpot_ms": 72.2449319751867,
+        "p95_tpot_ms": 76.11280991969741,
+        "p99_tpot_ms": 77.34673576082523,
+        "median_ttft_ms": 1008.5741896182299,
+        "output_throughput": 807.1233506542316,
+        "completed": 256,
+        "failed": 0,
+        "num_prompts": 256,
+        "max_concurrency": 64,
+        "duration": 81.19700656272471
+      },
+      "port_free_after": true,
+      "total_wall_s": 301.6,
+      "index": 2,
+      "subprocess_rc": 0,
+      "port_free_before": true,
+      "traces": {
+        "active_lines": 1,
+        "fi_sampling_mentions": 2,
+        "type_error_lines": 0,
+        "route_trace_counts": {
+          "fi_api1": 20
+        },
+        "route_histogram": {
+          "fi_api1": 1300
+        },
+        "max_B": 64,
+        "leg_log_fi_sampling_mentions": 0,
+        "leg_log_type_error_lines": 0
+      },
+      "leg_log": "bench/results/logs_fisampling_refresh/leg_api1_on_a.log"
+    },
+    {
+      "kind": "api1",
+      "leg": "off_b",
+      "mode": "off",
+      "port": 8353,
+      "ok": true,
+      "server_log": "bench/results/logs_fisampling_refresh/serve_api1_off_b.log",
+      "client_log": "bench/results/logs_fisampling_refresh/client_api1_off_b.log",
+      "result_json": "bench/results/logs_fisampling_refresh/serve_api1_off_b.json",
+      "ready_s": 165.0,
+      "client_wall_s": 120.5,
+      "client_rc": 0,
+      "metrics": {
+        "median_tpot_ms": 74.93840697239719,
+        "mean_tpot_ms": 72.09700135501015,
+        "p95_tpot_ms": 75.74721473616128,
+        "p99_tpot_ms": 77.21050908606426,
+        "median_ttft_ms": 1013.2791153155267,
+        "output_throughput": 808.698592073415,
+        "completed": 256,
+        "failed": 0,
+        "num_prompts": 256,
+        "max_concurrency": 64,
+        "duration": 81.0388451796025
+      },
+      "port_free_after": true,
+      "total_wall_s": 287.1,
+      "index": 3,
+      "subprocess_rc": 0,
+      "port_free_before": true,
+      "traces": {
+        "active_lines": 0,
+        "fi_sampling_mentions": 0,
+        "type_error_lines": 0,
+        "route_trace_counts": {},
+        "route_histogram": null,
+        "max_B": null,
+        "leg_log_fi_sampling_mentions": 0,
+        "leg_log_type_error_lines": 0
+      },
+      "leg_log": "bench/results/logs_fisampling_refresh/leg_api1_off_b.log"
+    },
+    {
+      "kind": "api1",
+      "leg": "on_b",
+      "mode": "on",
+      "port": 8354,
+      "ok": true,
+      "server_log": "bench/results/logs_fisampling_refresh/serve_api1_on_b.log",
+      "client_log": "bench/results/logs_fisampling_refresh/client_api1_on_b.log",
+      "result_json": "bench/results/logs_fisampling_refresh/serve_api1_on_b.json",
+      "ready_s": 185.0,
+      "client_wall_s": 118.5,
+      "client_rc": 0,
+      "metrics": {
+        "median_tpot_ms": 74.92176079757365,
+        "mean_tpot_ms": 72.05040596651516,
+        "p95_tpot_ms": 75.90433991988938,
+        "p99_tpot_ms": 77.27040391780582,
+        "median_ttft_ms": 1011.5895797498524,
+        "output_throughput": 809.0970577597352,
+        "completed": 256,
+        "failed": 0,
+        "num_prompts": 256,
+        "max_concurrency": 64,
+        "duration": 80.99893501214683
+      },
+      "port_free_after": true,
+      "total_wall_s": 305.2,
+      "index": 4,
+      "subprocess_rc": 0,
+      "port_free_before": true,
+      "traces": {
+        "active_lines": 1,
+        "fi_sampling_mentions": 2,
+        "type_error_lines": 0,
+        "route_trace_counts": {
+          "fi_api1": 20
+        },
+        "route_histogram": {
+          "fi_api1": 1300
+        },
+        "max_B": 64,
+        "leg_log_fi_sampling_mentions": 0,
+        "leg_log_type_error_lines": 0
+      },
+      "leg_log": "bench/results/logs_fisampling_refresh/leg_api1_on_b.log"
+    },
+    {
+      "kind": "api1",
+      "leg": "off_c",
+      "mode": "off",
+      "port": 8355,
+      "ok": true,
+      "server_log": "bench/results/logs_fisampling_refresh/serve_api1_off_c.log",
+      "client_log": "bench/results/logs_fisampling_refresh/client_api1_off_c.log",
+      "result_json": "bench/results/logs_fisampling_refresh/serve_api1_off_c.json",
+      "ready_s": 165.0,
+      "client_wall_s": 118.1,
+      "client_rc": 0,
+      "metrics": {
+        "median_tpot_ms": 74.96148806394024,
+        "mean_tpot_ms": 72.14348774326865,
+        "p95_tpot_ms": 75.67935084796274,
+        "p99_tpot_ms": 77.29515089562126,
+        "median_ttft_ms": 1019.1107476130128,
+        "output_throughput": 807.981616219752,
+        "completed": 256,
+        "failed": 0,
+        "num_prompts": 256,
+        "max_concurrency": 64,
+        "duration": 81.11075633950531
+      },
+      "port_free_after": true,
+      "total_wall_s": 284.7,
+      "index": 5,
+      "subprocess_rc": 0,
+      "port_free_before": true,
+      "traces": {
+        "active_lines": 0,
+        "fi_sampling_mentions": 0,
+        "type_error_lines": 0,
+        "route_trace_counts": {},
+        "route_histogram": null,
+        "max_B": null,
+        "leg_log_fi_sampling_mentions": 0,
+        "leg_log_type_error_lines": 0
+      },
+      "leg_log": "bench/results/logs_fisampling_refresh/leg_api1_off_c.log"
+    },
+    {
+      "kind": "api1",
+      "leg": "on_c",
+      "mode": "on",
+      "port": 8356,
+      "ok": true,
+      "server_log": "bench/results/logs_fisampling_refresh/serve_api1_on_c.log",
+      "client_log": "bench/results/logs_fisampling_refresh/client_api1_on_c.log",
+      "result_json": "bench/results/logs_fisampling_refresh/serve_api1_on_c.json",
+      "ready_s": 175.0,
+      "client_wall_s": 118.2,
+      "client_rc": 0,
+      "metrics": {
+        "median_tpot_ms": 74.74515728798566,
+        "mean_tpot_ms": 71.92669369322567,
+        "p95_tpot_ms": 75.42699940192203,
+        "p99_tpot_ms": 77.08587188547587,
+        "median_ttft_ms": 1012.9498648457229,
+        "output_throughput": 809.814743556658,
+        "completed": 256,
+        "failed": 0,
+        "num_prompts": 256,
+        "max_concurrency": 64,
+        "duration": 80.92715095821768
+      },
+      "port_free_after": true,
+      "total_wall_s": 294.9,
+      "index": 6,
+      "subprocess_rc": 0,
+      "port_free_before": true,
+      "traces": {
+        "active_lines": 1,
+        "fi_sampling_mentions": 2,
+        "type_error_lines": 0,
+        "route_trace_counts": {
+          "fi_api1": 20
+        },
+        "route_histogram": {
+          "fi_api1": 1300
+        },
+        "max_B": 64,
+        "leg_log_fi_sampling_mentions": 0,
+        "leg_log_type_error_lines": 0
+      },
+      "leg_log": "bench/results/logs_fisampling_refresh/leg_api1_on_c.log"
+    },
+    {
+      "kind": "joint",
+      "leg": "on_j",
+      "mode": "on",
+      "port": 8451,
+      "ok": true,
+      "server_log": "bench/results/logs_fisampling_refresh/serve_joint_on_j.log",
+      "client_log": "bench/results/logs_fisampling_refresh/client_joint_on_j.log",
+      "result_json": "bench/results/logs_fisampling_refresh/serve_joint_on_j.json",
+      "ready_s": 175.0,
+      "client_wall_s": 53.5,
+      "client_rc": 0,
+      "metrics": {
+        "median_tpot_ms": 223.12986531427927,
+        "mean_tpot_ms": 216.73993025283306,
+        "p95_tpot_ms": 267.2745351465271,
+        "p99_tpot_ms": 269.11986139706437,
+        "median_ttft_ms": 7038.396275602281,
+        "output_throughput": 1430.252711109967,
+        "completed": 512,
+        "failed": 0,
+        "num_prompts": 512,
+        "max_concurrency": 512,
+        "duration": 22.91063652280718
+      },
+      "port_free_after": true,
+      "total_wall_s": 283.2,
+      "index": 1,
+      "subprocess_rc": 0,
+      "port_free_before": true,
+      "traces": {
+        "active_lines": 1,
+        "fi_sampling_mentions": 2,
+        "type_error_lines": 0,
+        "route_trace_counts": {
+          "fork": 20
+        },
+        "route_histogram": {
+          "fork": 136,
+          "fi_joint": 64
+        },
+        "max_B": 504,
+        "leg_log_fi_sampling_mentions": 0,
+        "leg_log_type_error_lines": 0
+      },
+      "leg_log": "bench/results/logs_fisampling_refresh/leg_joint_on_j.log"
+    }
+  ],
+  "summaries": [
+    {
+      "n_legs": 6,
+      "n_ok": 6,
+      "health": {
+        "type_error_lines_total": 0,
+        "off_legs_active_lines": [
+          0,
+          0,
+          0
+        ],
+        "on_legs_active_lines": [
+          1,
+          1,
+          1
+        ],
+        "all_ports_free_after": true
+      },
+      "off_tpot_medians_ms": [
+        74.94,
+        74.96,
+        74.98
+      ],
+      "off_tpot_median_ms": 74.961,
+      "off_tpot_spread_ms": 0.041,
+      "off_tpot_spread_frac": 0.00055,
+      "on_tpot_medians_ms": [
+        74.75,
+        74.92,
+        75.02
+      ],
+      "on_tpot_median_ms": 74.922,
+      "on_tpot_spread_ms": 0.275,
+      "on_tpot_spread_frac": 0.00368,
+      "delta_median_ms": -0.039,
+      "delta_median_pct": -0.052,
+      "noise_band_frac": 0.00368,
+      "noise_band_pct": 0.368,
+      "within_noise_band": true,
+      "verdict": "NOISE-BAND / NOT DECIDABLE (|\u0394median| < max(spread_off, spread_on))",
+      "projection": {
+        "saved_ms_per_step_w2_bench_b64": 0.9,
+        "projected_delta_pct": -1.201,
+        "note": "|-0.9/TPOT| is the analytical ceiling of the e2e effect"
+      },
+      "case": "api1"
+    },
+    {
+      "n_legs": 1,
+      "n_ok": 1,
+      "health": {
+        "type_error_lines_total": 0,
+        "off_legs_active_lines": [],
+        "on_legs_active_lines": [
+          1
+        ],
+        "all_ports_free_after": true
+      },
+      "on_tpot_medians_ms": [
+        223.13
+      ],
+      "on_tpot_median_ms": 223.13,
+      "on_tpot_spread_ms": 0.0,
+      "on_tpot_spread_frac": 0.0,
+      "case": "joint"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "opt-toolchain-repair-validation.v1",
+  "base_head": "4d92559ea85b8d223a5c8fd9631e6e68ac46721d",
+  "evidence_root": "/root/包体恢复/records/probes/20261019T042000Z_opt_repair",
+  "tests": {
+    "full_repository": "855 passed, 11 skipped, exit 0",
+    "workbench_regression": "39 passed, exit 0",
+    "ruff": "PASS, exit 0",
+    "patch_roundtrip": "deployed SHA checked; reverse/apply on temporary tree reproduces before/after SHA",
+    "real_pin_guard": "exit 2 before pin mutation when stdout is inside archive; pin SHA unchanged",
+    "coverage": "exit 0; FAIL 0 / WARN 61; empty-card issue resolved"
+  },
+  "coverage_boundary": "Correction: opt status aggregates coverage and drift separately. Current coverage does not include archive drift. A coverage PASS is not an archive integrity PASS; no criterion definition changed in this task.",
+  "remaining_drift": {
+    "files": [
+      {
+        "path": "probes/20261018T094700Z_w1r_t5_armB_n32.log",
+        "pinned_size": 757,
+        "current_size": 844,
+        "finding": "long-running serve log later contains health timeout; file grew after pin"
+      },
+      {
+        "path": "probes/20261018T101359Z_w1r_close_pin_final.txt",
+        "pinned_size": 0,
+        "current_size": 257,
+        "finding": "pin captured its own incomplete redirected stdout"
+      }
+    ],
+    "pin_sha256": "2c51e8996e58714f628c2621ebf4bcc8c34b19b9f97ea16ecc6fbcf8470401f9",
+    "action": "Preserve evidence and baseline. No repin or automatic waiver; any baseline decision requires authorization."
+  },
+  "delivery_contract": "Strict default retained. Optional capture-dirty-baseline at startup records only explicit unstaged tracked regular files, refuses overwrite. Check binds repo/base and compares a conflict-free three-way merge byte-for-byte with current file; new unstaged edits/staged changes/conflicts still block. Does not authenticate an externally forged snapshot or replace task-scope review; never retrofit a baseline for historical work.",
+  "card_repair": "opt note update restored nonempty GDN acceptance summary from already committed L0/L3/L4 receipts, preserving lifecycle and history. No new operator acceptance.",
+  "gdn": "No reachable narrow registration boundary proved; withdraw bundle entries and preflight loader, retain accepted kernel/default-off tier-2 proposal and diagnostic probe. No host/env changes, no serve/NPU execution.",
+  "wheel_sha256": "552b2dccf0cd6de7d75d73ebfd97068cef3a3ccf2ad1ffc8067cffec509f7221",
+  "workspace": "No current-task service. Existing five W1R dirty paths retained and not included in commits; startup dirty-baseline captures their original bytes. Generated wheels/large logs remain only in L2, no install into serving environment.",
+  "remote": "NOT_PUSHED"
+}

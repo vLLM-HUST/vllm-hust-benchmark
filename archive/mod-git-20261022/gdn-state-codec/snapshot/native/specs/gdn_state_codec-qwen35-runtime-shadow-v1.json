@@ -1,0 +1,68 @@
+{
+  "schema": "gdn-state-codec-qwen35-runtime-shadow-v1",
+  "version": "0.1.0",
+  "status": "workload-qualified-experiment",
+  "base_commit": "e74e9ece60e32a7a6e6a93f9f35c0e9ec4434596",
+  "model": "Qwen3.5-35B-A3B",
+  "device": "Ascend 910B2",
+  "geometry": {
+    "key_dimension": 128,
+    "value_dimension": 128,
+    "window_size": 16,
+    "compensator_rank": 4,
+    "quantization": "symmetric-int8"
+  },
+  "admission": {
+    "enforce_eager": true,
+    "speculative_decode": false,
+    "max_decode_requests": 1,
+    "window_size": 16,
+    "boundary_power_iterations": "0 for quant-only rebase, otherwise explicit integer in [1,32]"
+  },
+  "initialization_modes": {
+    "exact_svd": "device-side correctness oracle",
+    "quant_only": "fast symmetric-INT8 boundary with zero initial compensators"
+  },
+  "decode_backends": {
+    "vector": "direct AscendC vector readout and recurrence path",
+    "cube": "paired key/query INT8 Cube projections with BF16 preparation and finish kernels"
+  },
+  "steady_state": "native AscendC compressed window step",
+  "shadow_relative_rms_limit": 0.02,
+  "kernel_library_sha256": "ff8220f08b904e49208d9f7ee0ca0deb7ac7c55e75429d84d143baf61fb27254",
+  "decode_runtime_library_sha256": "a26b5bc46b795d1421691b6f030b13a77cab90e57a2105b91a7b5da0754af266",
+  "boundary_library_sha256": "42b185687b79fecd6bfa8b5183de3b417c249b319b7d48836931e8bb51348ef5",
+  "boundary_cube_library_sha256": "2f14f3d36bfec9343fa39d5c551cc3963226b366a3cabd5dabc56c345c2dd7d3",
+  "boundary_runtime_library_sha256": "e342caa4640b253197504c060644b0de84f76ad89d5eb3153b6d7a1d9729bfa2",
+  "boundary_workspace": "quant-only rebase scales the 16 record keys in an AscendC vector kernel, merges correction-transpose times scaled keys with one FP16-input/FP32-output Cube GEMM per state, then requantizes from the FP32 128x128 workspace",
+  "decode_projection": "single AscendC vector kernel consumes and emits Qwen3.5 BF16 tensors directly, applies FP32 log-decay internally, splits each TP-local 16-head state over two column shards, reads residuals in eight-column tiles, batches sixteen boundary products into one reduction, bulk-loads metadata and record tensors into UB, compile-specializes the quant-only zero-compensator path, and preserves the p=16 exact-update window",
+  "lifecycle": "boundary output buffers, FP32 Cube workspace, scaled-record workspace, and Cube tiling handle are allocated when the encoded slot is created and reused across p=16 refits",
+  "evidence_boundary": {
+    "supports": [
+      "runtime wiring correctness",
+      "matched per-layer shadow output checks",
+      "p=16 boundary refit lifecycle checks",
+      "Qwen3.5-35B-A3B TP2 eager AgentX first-turn 649-prompt/128-output matched comparison"
+    ],
+    "does_not_support": [
+      "performance outside the recorded AgentX first-turn workload",
+      "speculative decoding",
+      "multi-request decode",
+      "graph capture"
+    ],
+    "matched_e2e_result": {
+      "evidence_label": "real-online-single-request-workload-qualified",
+      "candidate_lifecycles": 2,
+      "candidate_measurements": 12,
+      "baseline_lifecycles": 1,
+      "baseline_measurements": 6,
+      "candidate_total_seconds_median": 28.416406604461372,
+      "baseline_total_seconds_median": 28.68074907315895,
+      "total_seconds_delta_percent": -0.9216721223817781,
+      "candidate_itl_median_ms": 219.94092408567667,
+      "baseline_itl_median_ms": 222.36076090484858,
+      "itl_delta_percent": -1.0882481285479084,
+      "content_sha256": "2035b0e9d6d6de9c4fcc6a4adeb0574e198ddbfb66c3cc93c257377659e465ee"
+    }
+  }
+}

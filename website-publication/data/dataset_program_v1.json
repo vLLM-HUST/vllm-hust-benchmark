@@ -1,6 +1,6 @@
 {
   "contract_version": "dataset-program-v1",
-  "updated_at": "2026-10-10",
+  "updated_at": "2026-10-22",
   "test_plan": {
     "test_plan_version": "V5.5",
     "contract_url": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/main/docs/ACCEPTANCE_V5_5.md",
@@ -43,7 +43,7 @@
       "evaluation_class": "knowledge-reasoning",
       "primary_metric": "Task accuracy under a pinned evaluator",
       "primary_metric_zh": "固定评分器下的任务准确率",
-      "status": "serving-evidence-only",
+      "status": "subset-measured",
       "source_url": "https://huggingface.co/datasets/TIGER-Lab/MMLU-Pro",
       "version_policy": "Use the frozen dataset snapshot and freeze the evaluator before publishing task-quality scores.",
       "readiness": {
@@ -88,10 +88,10 @@
         "manifest_sha256": "2666f482a6f6c974cde19b6549f72ee37df82a93c9dc032754005af3a839299b",
         "scorer": null,
         "runtime_dependencies": ["Parquet reader used by the preparation note", "vLLM bench serve for serving telemetry"],
-        "blockers": ["Extract and freeze the full task manifest, row counts, sampling rule, pinned scorer, and execution environment from the verified snapshot.", "Produce task-accuracy evidence; the existing artifact contains serving telemetry only."]
+        "blockers": ["Extract and freeze the full task manifest, row counts, sampling rule, pinned scorer, and execution environment from the verified snapshot.", "The fixed 200-task quality subset is measured; full-dataset quality and formal V5.5 admission remain outside that result."]
       },
-      "note": "The source snapshot is revision- and checksum-frozen; serving B0 evidence exists but is not a task-accuracy result.",
-      "note_zh": "源数据快照已按 revision 与校验和冻结；已有服务侧 B0 证据，但不能将其当作任务准确率结果。"
+      "note": "Fixed 200-task quality subset measured with the original scorer: recovered Native B0 147/200 and vLLM-HUST E24/R36 + KV materialization + FA Microflow B1 146/200; zero transport failures, 19/22 truncated responses. Not full-dataset accuracy, non-inferiority, or formal V5.5 admission. Evidence: midterm report section 5.9 and quality-regression/native-recovered-20261021 and recovered-20261021 archives.",
+      "note_zh": "固定200题已按原评分器完成质量配对：恢复环境Native B0为147/200，vLLM-HUST E24/R36 + KV materialization + FA Microflow B1为146/200；均零传输失败，分别19/22题截断。不代表全集准确率、质量非劣或正式V5.5验收。证据见中期报告5.9节及quality-regression下native-recovered-20261021、recovered-20261021归档。"
     },
     {
       "id": "hle-verified",

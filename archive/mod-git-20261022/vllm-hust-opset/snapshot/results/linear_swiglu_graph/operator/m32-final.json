@@ -1,0 +1,33 @@
+{
+  "shape": {
+    "m": 32,
+    "n": 18944,
+    "k": 3584
+  },
+  "dtype": "bfloat16",
+  "warmup": 10,
+  "repeats": 50,
+  "correctness": {
+    "all_finite": true,
+    "repeat_exact": true,
+    "max_abs_error": 0.001953125,
+    "mean_abs_error": 3.480207669781521e-05,
+    "relative_l2_error": 0.0033453013747930527
+  },
+  "baseline": {
+    "mean_ms": 0.49885268,
+    "stdev_ms": 0.012649705555079301,
+    "median_ms": 0.49798200000000004,
+    "min_ms": 0.44324,
+    "max_ms": 0.535634
+  },
+  "candidate": {
+    "mean_ms": 0.40948172,
+    "stdev_ms": 0.009978169201505729,
+    "median_ms": 0.4088185,
+    "min_ms": 0.392007,
+    "max_ms": 0.438449
+  },
+  "speedup": 1.218253845373122,
+  "latency_reduction_percent": 17.915301166669096
+}

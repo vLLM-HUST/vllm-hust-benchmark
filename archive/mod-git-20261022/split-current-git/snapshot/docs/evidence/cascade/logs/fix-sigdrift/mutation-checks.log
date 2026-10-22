@@ -1,0 +1,123 @@
+===== baseline (unmutated) =====
+### MUTATION baseline_all -> pytest -k test_host_signature_drift
+.............                                                            [100%]
+=============================== warnings summary ===============================
+../../opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+13 passed, 14 warnings in 23.47s
+
+===== D1: restore the pre-fix capture signature =====
+### MUTATION D1 -> pytest -k test_capture_wrapper_accepts_every_keyword_the_host_call_site_passes
+        wrapper = runner_patch._make_capture_cudagraphs_wrapper(
+            _SigRecorder(_CAPTURE_SIG)
+        )
+        for names in call_keywords:
+            recorder = _SigRecorder(_CAPTURE_SIG)
+            wrapper_under_test = runner_patch._make_capture_cudagraphs_wrapper(
+                recorder
+            )
+>           assert wrapper_under_test(None, **{name: None for name in names}) is None
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           TypeError: _make_capture_cudagraphs_wrapper.<locals>._capture_cudagraphs() got an unexpected keyword argument 'profiler'
+
+tests/test_host_signature_drift.py:204: TypeError
+=============================== warnings summary ===============================
+../../opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_host_signature_drift.py::test_capture_wrapper_accepts_every_keyword_the_host_call_site_passes
+1 failed, 12 deselected, 14 warnings in 23.52s
+
+===== D2: pre-model update passes the dropped positions =====
+### MUTATION D2 -> pytest -k test_model_forward_pre_update_passes_only_accepted_params
+        wrapper = runner_patch._make_model_forward_wrapper(orig)
+    
+        assert wrapper(fake_runner, 128) == "model-output"
+    
+>       assert update_recorder.signature_errors == []
+E       AssertionError: assert ['too many po...al arguments'] == []
+E         
+E         Left contains one more item: 'too many positional arguments'
+E         Use -v to get more diff
+
+tests/test_host_signature_drift.py:246: AssertionError
+------------------------------ Captured log call -------------------------------
+WARNING  vllm_ascend_split_batch.cascade_runner_patch:cascade_runner_patch.py:101 cascade graph: pre-model graph param update could not run on this host build (TypeError: too many positional arguments); delegating to the original implementation (fail-open, stock behavior for this path)
+=============================== warnings summary ===============================
+../../opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_host_signature_drift.py::test_model_forward_pre_update_passes_only_accepted_params
+1 failed, 12 deselected, 14 warnings in 22.99s
+
+===== D3: update_graph_params forwards 7 positionals =====
+### MUTATION D3 -> pytest -k test_update_graph_params_forwards_host_convention_verbatim
+                                argtype = ''
+                            msg = 'missing a required{argtype} argument: {arg!r}'
+                            msg = msg.format(arg=param.name, argtype=argtype)
+                            raise TypeError(msg) from None
+            else:
+                # We have a positional argument to process
+                try:
+                    param = next(parameters)
+                except StopIteration:
+>                   raise TypeError('too many positional arguments') from None
+E                   TypeError: too many positional arguments
+
+/opt/miniconda3/envs/hust/lib/python3.12/inspect.py:3199: TypeError
+=============================== warnings summary ===============================
+../../opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_host_signature_drift.py::test_update_graph_params_forwards_host_convention_verbatim
+1 failed, 12 deselected, 14 warnings in 23.17s
+
+===== D4: _model_forward requires num_tokens_padded =====
+### MUTATION D4 -> pytest -k test_model_forward_wrapper_supports_host_keyword_only_convention
+        orig = _SigRecorder(_MODEL_FORWARD_UPSTREAM_SIG, result="ok")
+        wrapper = runner_patch._make_model_forward_wrapper(orig)
+    
+>       result = wrapper(
+            fake_runner,
+            input_ids=None,
+            positions=None,
+            intermediate_tensors=None,
+            inputs_embeds=None,
+        )
+E       TypeError: _make_model_forward_wrapper.<locals>._model_forward() missing 1 required positional argument: 'num_tokens_padded'
+
+tests/test_host_signature_drift.py:275: TypeError
+=============================== warnings summary ===============================
+../../opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_host_signature_drift.py::test_model_forward_wrapper_supports_host_keyword_only_convention
+1 failed, 12 deselected, 14 warnings in 22.89s
+
+===== restored: full new-test module =====
+### MUTATION restored -> pytest -k test_host_signature_drift
+.............                                                            [100%]
+=============================== warnings summary ===============================
+../../opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: 14 warnings
+  /opt/miniconda3/envs/hust/lib/python3.12/site-packages/torch/jit/_script.py:365: DeprecationWarning: `torch.jit.script_method` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+13 passed, 14 warnings in 23.49s
+
+===== DONE =====

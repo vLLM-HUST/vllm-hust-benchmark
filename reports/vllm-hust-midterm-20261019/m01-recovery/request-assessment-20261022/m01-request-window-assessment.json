@@ -1,0 +1,242 @@
+{
+  "status": "instrumented_request_window_empirical_assessment",
+  "request_seconds": 135.3401261921972,
+  "basic_operations": 1901558663879214,
+  "basic_operations_per_second": 14050220857477.264,
+  "resource_mean_seconds": {
+    "lower": {
+      "compute": 40.34883570728195,
+      "communication": 40.93264655867747,
+      "hbm_directional": 26.67956510223796
+    },
+    "upper": {
+      "compute": 40.34883570728195,
+      "communication": 40.9411050300118,
+      "hbm_directional": 26.679574769918183
+    }
+  },
+  "empirical_attainment_percent": {
+    "lower": 30.24427988233793,
+    "upper": 30.250529670610124
+  },
+  "hbm_directional_repetitions_seconds": {
+    "lower": [
+      26.690702007061514,
+      26.67655404104526,
+      26.671439258607098
+    ],
+    "upper": [
+      26.690711678777337,
+      26.67656370763439,
+      26.67144892334282
+    ]
+  },
+  "threshold_percent": 50,
+  "threshold_met": false,
+  "verdict": "below_internal_threshold",
+  "uninstrumented_attainment": null,
+  "formal_b1_admission": false,
+  "limitations": [
+    "Calibrations use synthetic inputs and hot replay; they are empirical workload-shaped references, not guaranteed hardware maxima or the exact model critical path.",
+    "HBM physical read/write mix differs from the logical target by about 3.6%; both pooled and direction-constrained terms are retained. Neither dominates this resource maximum.",
+    "Special functions, division, comparisons, unary negation, parameter transforms, graph padding and redundant TP arithmetic retain the frozen exclusions; no arbitrary FLOP weights are assigned.",
+    "Numerical qualification mixes full output/state checks and sampled CPU checks by operator; it does not replace dataset quality validation.",
+    "Trace instrumentation remains present; request-window accounting excludes client startup before the first request, but is not an uninstrumented score.",
+    "Request interval replaces the device envelope only in this new derivation.",
+    "HBM lower bounds contract and upper bounds expand the request window by 2ms on each side; communication uses its separately retained sampling bounds.",
+    "Bounds describe sampling boundaries, not confidence intervals or reference repeat uncertainty.",
+    "Observed TASK capture coverage does not prove profiler implementation completeness."
+  ],
+  "hbm_expanded_window": [
+    {
+      "channels": [
+        {
+          "device": 0,
+          "channel": 0,
+          "direction": "read",
+          "fully_contained_bytes": 7244704046720,
+          "intersecting_interval_bytes": 7244704989312,
+          "prorated_bytes": 7244704536693.359,
+          "coverage": 1.0,
+          "largest_interval_ns": 57296896
+        },
+        {
+          "device": 0,
+          "channel": 0,
+          "direction": "write",
+          "fully_contained_bytes": 1084588901312,
+          "intersecting_interval_bytes": 1084589563008,
+          "prorated_bytes": 1084589204812.1566,
+          "coverage": 1.0,
+          "largest_interval_ns": 57296896
+        },
+        {
+          "device": 0,
+          "channel": 1,
+          "direction": "read",
+          "fully_contained_bytes": 7239007303936,
+          "intersecting_interval_bytes": 7239008002304,
+          "prorated_bytes": 7239007644955.681,
+          "coverage": 1.0,
+          "largest_interval_ns": 57296896
+        },
+        {
+          "device": 0,
+          "channel": 1,
+          "direction": "write",
+          "fully_contained_bytes": 1084235442944,
+          "intersecting_interval_bytes": 1084235907840,
+          "prorated_bytes": 1084235676546.9337,
+          "coverage": 1.0,
+          "largest_interval_ns": 57296896
+        },
+        {
+          "device": 0,
+          "channel": 2,
+          "direction": "read",
+          "fully_contained_bytes": 7238510841664,
+          "intersecting_interval_bytes": 7238511513664,
+          "prorated_bytes": 7238511176517.209,
+          "coverage": 1.0,
+          "largest_interval_ns": 57296896
+        },
+        {
+          "device": 0,
+          "channel": 2,
+          "direction": "write",
+          "fully_contained_bytes": 1083718986944,
+          "intersecting_interval_bytes": 1083719487232,
+          "prorated_bytes": 1083719160825.2694,
+          "coverage": 1.0,
+          "largest_interval_ns": 57296896
+        },
+        {
+          "device": 0,
+          "channel": 3,
+          "direction": "read",
+          "fully_contained_bytes": 7237236337792,
+          "intersecting_interval_bytes": 7237237028032,
+          "prorated_bytes": 7237236676476.121,
+          "coverage": 1.0,
+          "largest_interval_ns": 57296896
+        },
+        {
+          "device": 0,
+          "channel": 3,
+          "direction": "write",
+          "fully_contained_bytes": 1083717218624,
+          "intersecting_interval_bytes": 1083717586752,
+          "prorated_bytes": 1083717367323.5049,
+          "coverage": 1.0,
+          "largest_interval_ns": 57296896
+        }
+      ],
+      "fully_contained_bytes": 33295719079936,
+      "intersecting_interval_bytes": 33295724078144,
+      "prorated_bytes": 33295721444150.23,
+      "minimum_channel_coverage": 1.0,
+      "bounds_scope": "contracted-contained lower; expanded-intersecting upper"
+    },
+    {
+      "channels": [
+        {
+          "device": 1,
+          "channel": 0,
+          "direction": "read",
+          "fully_contained_bytes": 7243180157504,
+          "intersecting_interval_bytes": 7243180916480,
+          "prorated_bytes": 7243180622525.8,
+          "coverage": 1.0,
+          "largest_interval_ns": 73596928
+        },
+        {
+          "device": 1,
+          "channel": 0,
+          "direction": "write",
+          "fully_contained_bytes": 1083379012032,
+          "intersecting_interval_bytes": 1083379494464,
+          "prorated_bytes": 1083379291996.0175,
+          "coverage": 1.0,
+          "largest_interval_ns": 73596928
+        },
+        {
+          "device": 1,
+          "channel": 1,
+          "direction": "read",
+          "fully_contained_bytes": 7236848419456,
+          "intersecting_interval_bytes": 7236848969088,
+          "prorated_bytes": 7236848757151.622,
+          "coverage": 1.0,
+          "largest_interval_ns": 73596928
+        },
+        {
+          "device": 1,
+          "channel": 1,
+          "direction": "write",
+          "fully_contained_bytes": 1082976295616,
+          "intersecting_interval_bytes": 1082976765248,
+          "prorated_bytes": 1082976592884.3755,
+          "coverage": 1.0,
+          "largest_interval_ns": 73596928
+        },
+        {
+          "device": 1,
+          "channel": 2,
+          "direction": "read",
+          "fully_contained_bytes": 7236379454272,
+          "intersecting_interval_bytes": 7236380010176,
+          "prorated_bytes": 7236379794769.57,
+          "coverage": 1.0,
+          "largest_interval_ns": 73596928
+        },
+        {
+          "device": 1,
+          "channel": 2,
+          "direction": "write",
+          "fully_contained_bytes": 1082654545792,
+          "intersecting_interval_bytes": 1082654843904,
+          "prorated_bytes": 1082654730089.8677,
+          "coverage": 1.0,
+          "largest_interval_ns": 73596928
+        },
+        {
+          "device": 1,
+          "channel": 3,
+          "direction": "read",
+          "fully_contained_bytes": 7235055062272,
+          "intersecting_interval_bytes": 7235055630336,
+          "prorated_bytes": 7235055411251.975,
+          "coverage": 1.0,
+          "largest_interval_ns": 73596928
+        },
+        {
+          "device": 1,
+          "channel": 3,
+          "direction": "write",
+          "fully_contained_bytes": 1082561362432,
+          "intersecting_interval_bytes": 1082561681856,
+          "prorated_bytes": 1082561554858.7922,
+          "coverage": 1.0,
+          "largest_interval_ns": 73596928
+        }
+      ],
+      "fully_contained_bytes": 33283034309376,
+      "intersecting_interval_bytes": 33283038311552,
+      "prorated_bytes": 33283036755528.02,
+      "minimum_channel_coverage": 1.0,
+      "bounds_scope": "contracted-contained lower; expanded-intersecting upper"
+    }
+  ],
+  "source_sha256": {
+    "/workspace/m01-request-task-boundaries.json": "fb432032897826cffac80818a548bcf7447889993fde0c7e2df56a28a9525a04",
+    "/workspace/m01-request-outside-task-identities.json": "8516d3ae38d3c4b54f1b7cbdd1b64e5067deffb351a701cd9e4bd68fade71c5a",
+    "/workspace/m01-worker-composition-review.json": "04119521949da54beec5156c8776b967e85b598c3b3bf2ed71ebc49145aca99f",
+    "/workspace/m01-worker-final-accounting.json": "292663ab8e19bef580320d37660ded8c31069674351a9e340a84fbc983afcdb4",
+    "/workspace/m01-worker-window-review.json": "f415a9a3ecbb539e4fac9ff908229a28a21824eaa954396925c376d7b58443c8",
+    "/workspace/m01-hbm-reference-worker-r1/audit.json": "1a70fed3dedebde14fe7aa8fea8442a5720995e4ba5104be96c924d130725fac",
+    "/workspace/m01-worker-r1-envelope-hardware.json": "bb6904f9e2385dfcf3ab7a0ce442ad5bf7882fb2b61a46902bc8bf7e4a08ca20",
+    "/workspace/assess_m01_request_window.py": "7f83c8f2165b1b209fa09abdcb6dff8d9c03abc6b99ea904abda7d77f0b0b632",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/system/profiler/PROF_000001_20261022013344621_01520198MFCKIGIQ/device_0/sqlite/hbm.db": "3b59ef291b5f31e8a586cc2564b60de792c8dc61b38af241de80bb29449898c3",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/system/profiler/PROF_000001_20261022013344621_01520198MFCKIGIQ/device_1/sqlite/hbm.db": "7d6443dc6c9ed37533783debeb96ecf0d167309565f37e4312ee846d4087a73d"
+  }
+}

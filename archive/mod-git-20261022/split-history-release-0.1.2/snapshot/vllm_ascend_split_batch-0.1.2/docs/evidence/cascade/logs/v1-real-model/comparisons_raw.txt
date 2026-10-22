@@ -1,0 +1,44 @@
+############ Evidence #2 REAL-MODEL re-run (Qwen2.5-14B-Instruct, natural EOS) ############
+############ comparator: ev2_compare.py (byte-identical口径 to c3_compare.py) ############
+
+### LANE G (graph) B=64 shared~4224 gen128 natural EOS ###
+[G B64 graph on(bf16) vs off  [MAIN ACCEPTANCE]] total_arms=64 diverged=6 (6/64)
+  diverged_arms=[22, 32, 42, 47, 58, 60]
+  arm 22: first_diff_step=121 lenA=128 lenB=128
+  arm 32: first_diff_step=98 lenA=128 lenB=128
+  arm 42: first_diff_step=6 lenA=128 lenB=128
+  arm 47: first_diff_step=3 lenA=128 lenB=128
+  arm 58: first_diff_step=98 lenA=128 lenB=128
+  arm 60: first_diff_step=4 lenA=9 lenB=128
+[G B64 graph on_run2 vs on    [DETERMINISM]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+
+### LANE G B=32 ###
+[G B32 graph on(bf16) vs off] total_arms=32 diverged=1 (1/32)
+  diverged_arms=[22]
+  arm 22: first_diff_step=36 lenA=128 lenB=128
+
+### LANE E (eager, bf16 reference frame) B=64 ###
+[E B64 eager on(bf16) vs off] total_arms=64 diverged=8 (8/64)
+  diverged_arms=[22, 32, 39, 47, 52, 54, 57, 60]
+  arm 22: first_diff_step=82 lenA=128 lenB=128
+  arm 32: first_diff_step=127 lenA=128 lenB=128
+  arm 39: first_diff_step=69 lenA=128 lenB=128
+  arm 47: first_diff_step=3 lenA=128 lenB=128
+  arm 52: first_diff_step=11 lenA=35 lenB=65
+  arm 54: first_diff_step=8 lenA=9 lenB=35
+  arm 57: first_diff_step=14 lenA=128 lenB=128
+  arm 60: first_diff_step=4 lenA=9 lenB=128
+[E B64 eager off vs off2      [NOISE FLOOR]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+
+### CROSS-MODE control (diagnostic only) ###
+[CTRL B64 eager-off vs graph-off] total_arms=64 diverged=7 (7/64)
+  diverged_arms=[22, 32, 39, 42, 52, 54, 58]
+  arm 22: first_diff_step=87 lenA=128 lenB=128
+  arm 32: first_diff_step=98 lenA=128 lenB=128
+  arm 39: first_diff_step=69 lenA=128 lenB=128
+  arm 42: first_diff_step=6 lenA=128 lenB=128
+  arm 52: first_diff_step=11 lenA=65 lenB=35
+  arm 54: first_diff_step=8 lenA=35 lenB=9
+  arm 58: first_diff_step=98 lenA=128 lenB=128

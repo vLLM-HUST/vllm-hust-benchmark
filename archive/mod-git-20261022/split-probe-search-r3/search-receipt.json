@@ -1,0 +1,71 @@
+{
+  "schema": "split-probe-search-receipt/v2",
+  "date": "2026-10-22",
+  "previous_search": {
+    "commit": "aab39a2f59dd886c62cada90311acfd9f6058698",
+    "path": "archive/mod-git-20261022/split-probe-search-r2/search-receipt.json",
+    "sha256": "0e0f8617bb9a89061eff78e14450489494167aff587159864acb7728646dc788"
+  },
+  "reference_audit": {
+    "commit": "6864562eb2feb741a904ca18822cc2481983e039",
+    "path": "archive/mod-git-20261022/split-probe-recovery/local-reference-audit.json",
+    "sha256": "0501afbd761229778ca66efc986cf68164262908860f39d34858bfad1ae60554"
+  },
+  "target_occurrences": 33,
+  "newly_recovered_occurrences": 0,
+  "remaining_occurrences": 33,
+  "promisor_search": {
+    "repository": "vLLM-HUST/vllm-hust-benchmark",
+    "enumeration": "git rev-list --objects --all --reflog --missing=print against locally known refs/reflogs",
+    "missing_before": 2872,
+    "missing_after_fetch": 0,
+    "fetch": "Explicit object-ID batch from the configured origin, with automatic maintenance disabled; no ref rewriting or GC.",
+    "objects_at_scan": 19547,
+    "hashed_blobs": 10753,
+    "oversize_blobs_skipped": 0,
+    "known_sha256_matches": [],
+    "json_source_maps": 8,
+    "recoverable_source_maps": 0,
+    "basename_false_positive": "reports/qwen35-b0-xlsx-cross-validation-20261008/assessment.json",
+    "limits": "Completes objects missing from this local ref/reflog traversal, not deleted remote refs, pruned objects, or unknown clones. No original is inferred from a generic basename."
+  },
+  "older_mounted_clone": {
+    "repository": "vLLM-HUST/vllm-hust-benchmark",
+    "objects": 3075,
+    "hashed_blobs": 1264,
+    "oversize_blobs_skipped": 0,
+    "known_sha256_matches": [],
+    "recoverable_source_maps": 0
+  },
+  "nested_archive_search": {
+    "inputs": "The same eight digest-verified public Release assets enumerated in previous_search.release_search.assets.",
+    "method": "Read nested tar, zip/torch zip, and gzip payloads in memory; hash regular member bytes and search target basenames plus original paths in UTF-8/JSON-escaped forms. No filesystem extraction or execution; links are not followed.",
+    "max_depth": 4,
+    "max_member_bytes": 134217728,
+    "max_nested_bytes_per_input": 2147483648,
+    "recognized_suffixes": [".tar", ".tar.gz", ".tgz", ".zip", ".whl", ".gz", ".pt"],
+    "nested_containers": 34,
+    "nested_regular_members": 14607,
+    "nested_bytes": 159960888,
+    "matches": [],
+    "limit_skips": [],
+    "per_input": [
+      {"name": "devhub-evidence-20261020.tar.gz", "containers": 13, "members": 13, "bytes": 3088838},
+      {"name": "frontier-recovered-capsules-20261021.tar.gz", "containers": 17, "members": 14526, "bytes": 39401713},
+      {"name": "frontier-recovered-receipts-20261021.tar.gz", "containers": 0, "members": 0, "bytes": 0},
+      {"name": "terminal-history.tar.gz", "containers": 4, "members": 68, "bytes": 117470337},
+      {"name": "vllm_ascend_split_batch-0.1.0.tar.gz", "containers": 0, "members": 0, "bytes": 0},
+      {"name": "vllm_ascend_split_batch-0.1.1.tar.gz", "containers": 0, "members": 0, "bytes": 0},
+      {"name": "vllm_ascend_split_batch-0.1.2.tar.gz", "containers": 0, "members": 0, "bytes": 0},
+      {"name": "vllm_ascend_split_batch-0.1.3.tar.gz", "containers": 0, "members": 0, "bytes": 0}
+    ],
+    "limits": "No size/depth skips among recognized members. This does not cover arbitrary unrecognized extensions, encryption, unsupported formats, offline backups, or other Release assets."
+  },
+  "access_blockers": [
+    {"target": "unmounted bare-metal volumes", "status": "blocked", "reason": "Host block inventory is visible but relevant block-device nodes are not exposed in this container. No volume mounted, raw-device recovery attempted, or filesystem repaired."},
+    {"target": "configured storage host", "status": "blocked", "reason": "Batch-mode SSH with strict host-key checking rejected the configured private key permissions, then public-key authentication failed. Shared key permissions and trust settings were not changed."},
+    {"target": "original machine or backup location", "status": "unknown", "reason": "User does not know the original location; provided a read-only bare-metal discovery handoff. No arbitrary host scanning."}
+  ],
+  "admission": "No new original recovered. Keep all 33 references unavailable; a negative search is not permanent-loss proof. Do not replace missing probes with reports, reconstructed logs, or new runs.",
+  "hardware_and_review_gates": "Unchanged; no device execution or approval-label changes."
+}

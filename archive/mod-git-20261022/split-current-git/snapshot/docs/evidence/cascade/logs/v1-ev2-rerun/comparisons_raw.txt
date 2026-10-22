@@ -1,0 +1,203 @@
+############ Evidence #2 RE-RUN comparisons (fixed build ddc0120, unshimmed) ############
+############ comparator: ev2_compare.py (byte-identical口径 to c3_compare.py) ############
+
+### LANE G (graph, UNSHIMMED) B=64 shared~4356 gen128 ignore_eos ###
+[G-ie B64 graph on(bf16) vs off  [MAIN ACCEPTANCE]] total_arms=64 diverged=22 (22/64)
+  diverged_arms=[1, 7, 8, 9, 18, 22, 26, 27, 28, 29, 30, 36, 38, 42, 47, 53, 56, 57, 58, 59, 62, 63]
+  arm 1: first_diff_step=53 lenA=128 lenB=128
+  arm 7: first_diff_step=13 lenA=128 lenB=128
+  arm 8: first_diff_step=13 lenA=128 lenB=128
+  arm 9: first_diff_step=13 lenA=128 lenB=128
+  arm 18: first_diff_step=13 lenA=128 lenB=128
+  arm 22: first_diff_step=6 lenA=128 lenB=128
+  arm 26: first_diff_step=6 lenA=128 lenB=128
+  arm 27: first_diff_step=83 lenA=128 lenB=128
+  arm 28: first_diff_step=6 lenA=128 lenB=128
+  arm 29: first_diff_step=54 lenA=128 lenB=128
+  arm 30: first_diff_step=56 lenA=128 lenB=128
+  arm 36: first_diff_step=7 lenA=128 lenB=128
+  arm 38: first_diff_step=55 lenA=128 lenB=128
+  arm 42: first_diff_step=55 lenA=128 lenB=128
+  arm 47: first_diff_step=13 lenA=128 lenB=128
+  arm 53: first_diff_step=15 lenA=128 lenB=128
+  arm 56: first_diff_step=15 lenA=128 lenB=128
+  arm 57: first_diff_step=15 lenA=128 lenB=128
+  arm 58: first_diff_step=15 lenA=128 lenB=128
+  arm 59: first_diff_step=15 lenA=128 lenB=128
+  arm 62: first_diff_step=8 lenA=128 lenB=128
+  arm 63: first_diff_step=62 lenA=128 lenB=128
+[G-ie B64 graph on_run2 vs on  [DETERMINISM]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[G-ie B64 graph off vs off2    [NOISE FLOOR]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[G-ie B64 graph on_fp32 vs on(bf16)] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[G-ie B64 graph on_fp32 vs off] total_arms=64 diverged=22 (22/64)
+  diverged_arms=[1, 7, 8, 9, 18, 22, 26, 27, 28, 29, 30, 36, 38, 42, 47, 53, 56, 57, 58, 59, 62, 63]
+  arm 1: first_diff_step=53 lenA=128 lenB=128
+  arm 7: first_diff_step=13 lenA=128 lenB=128
+  arm 8: first_diff_step=13 lenA=128 lenB=128
+  arm 9: first_diff_step=13 lenA=128 lenB=128
+  arm 18: first_diff_step=13 lenA=128 lenB=128
+  arm 22: first_diff_step=6 lenA=128 lenB=128
+  arm 26: first_diff_step=6 lenA=128 lenB=128
+  arm 27: first_diff_step=83 lenA=128 lenB=128
+  arm 28: first_diff_step=6 lenA=128 lenB=128
+  arm 29: first_diff_step=54 lenA=128 lenB=128
+  arm 30: first_diff_step=56 lenA=128 lenB=128
+  arm 36: first_diff_step=7 lenA=128 lenB=128
+  arm 38: first_diff_step=55 lenA=128 lenB=128
+  arm 42: first_diff_step=55 lenA=128 lenB=128
+  arm 47: first_diff_step=13 lenA=128 lenB=128
+  arm 53: first_diff_step=15 lenA=128 lenB=128
+  arm 56: first_diff_step=15 lenA=128 lenB=128
+  arm 57: first_diff_step=15 lenA=128 lenB=128
+  arm 58: first_diff_step=15 lenA=128 lenB=128
+  arm 59: first_diff_step=15 lenA=128 lenB=128
+  arm 62: first_diff_step=8 lenA=128 lenB=128
+  arm 63: first_diff_step=62 lenA=128 lenB=128
+
+### LANE G B=32 ###
+[G-ie B32 graph on(bf16) vs off] total_arms=32 diverged=7 (7/32)
+  diverged_arms=[1, 21, 22, 26, 27, 29, 30]
+  arm 1: first_diff_step=103 lenA=128 lenB=128
+  arm 21: first_diff_step=54 lenA=128 lenB=128
+  arm 22: first_diff_step=62 lenA=128 lenB=128
+  arm 26: first_diff_step=72 lenA=128 lenB=128
+  arm 27: first_diff_step=12 lenA=128 lenB=128
+  arm 29: first_diff_step=54 lenA=128 lenB=128
+  arm 30: first_diff_step=56 lenA=128 lenB=128
+
+### LANE G literal C3 config (graph, UNSHIMMED, no ignore_eos) ###
+[G-lit B64 graph on(bf16) vs off] total_arms=64 diverged=1 (1/64)
+  diverged_arms=[1]
+  arm 1: first_diff_step=53 lenA=128 lenB=128
+[G-lit B64 graph on_run2 vs on [DETERMINISM]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[G-lit B32 graph on(bf16) vs off] total_arms=32 diverged=1 (1/32)
+  diverged_arms=[1]
+  arm 1: first_diff_step=103 lenA=128 lenB=128
+
+### LANE G extra: trace-invariance of the determinism leg ###
+[G-ie B64 graph on_run2(trace) vs on(trace) [DETERMINISM, both traced]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[G-ie B64 graph on_run2(trace) vs on_run2(no-trace) [TRACE INVARIANCE]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+
+### LANE E (eager) B=64 shared~4356 gen128 ignore_eos ###
+[E-ie B64 eager on(bf16) vs off] total_arms=64 diverged=22 (22/64)
+  diverged_arms=[1, 7, 8, 9, 18, 22, 26, 27, 28, 29, 30, 36, 37, 42, 47, 53, 56, 57, 58, 59, 62, 63]
+  arm 1: first_diff_step=53 lenA=128 lenB=128
+  arm 7: first_diff_step=13 lenA=128 lenB=128
+  arm 8: first_diff_step=13 lenA=128 lenB=128
+  arm 9: first_diff_step=13 lenA=128 lenB=128
+  arm 18: first_diff_step=13 lenA=128 lenB=128
+  arm 22: first_diff_step=6 lenA=128 lenB=128
+  arm 26: first_diff_step=6 lenA=128 lenB=128
+  arm 27: first_diff_step=83 lenA=128 lenB=128
+  arm 28: first_diff_step=6 lenA=128 lenB=128
+  arm 29: first_diff_step=54 lenA=128 lenB=128
+  arm 30: first_diff_step=56 lenA=128 lenB=128
+  arm 36: first_diff_step=7 lenA=128 lenB=128
+  arm 37: first_diff_step=55 lenA=128 lenB=128
+  arm 42: first_diff_step=55 lenA=128 lenB=128
+  arm 47: first_diff_step=13 lenA=128 lenB=128
+  arm 53: first_diff_step=15 lenA=128 lenB=128
+  arm 56: first_diff_step=15 lenA=128 lenB=128
+  arm 57: first_diff_step=15 lenA=128 lenB=128
+  arm 58: first_diff_step=15 lenA=128 lenB=128
+  arm 59: first_diff_step=15 lenA=128 lenB=128
+  arm 62: first_diff_step=8 lenA=128 lenB=128
+  arm 63: first_diff_step=62 lenA=128 lenB=128
+[E-ie B64 eager on_run2 vs on [DETERMINISM]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[E-ie B64 eager off vs off2   [NOISE FLOOR]] total_arms=64 diverged=1 (1/64)
+  diverged_arms=[42]
+  arm 42: first_diff_step=55 lenA=128 lenB=128
+[E-ie B64 eager on_fp32 vs off] total_arms=64 diverged=14 (14/64)
+  diverged_arms=[1, 8, 9, 13, 21, 22, 27, 29, 30, 37, 38, 42, 56, 63]
+  arm 1: first_diff_step=53 lenA=128 lenB=128
+  arm 8: first_diff_step=13 lenA=128 lenB=128
+  arm 9: first_diff_step=13 lenA=128 lenB=128
+  arm 13: first_diff_step=47 lenA=128 lenB=128
+  arm 21: first_diff_step=54 lenA=128 lenB=128
+  arm 22: first_diff_step=6 lenA=128 lenB=128
+  arm 27: first_diff_step=12 lenA=128 lenB=128
+  arm 29: first_diff_step=54 lenA=128 lenB=128
+  arm 30: first_diff_step=56 lenA=128 lenB=128
+  arm 37: first_diff_step=55 lenA=128 lenB=128
+  arm 38: first_diff_step=55 lenA=128 lenB=128
+  arm 42: first_diff_step=55 lenA=128 lenB=128
+  arm 56: first_diff_step=15 lenA=128 lenB=128
+  arm 63: first_diff_step=15 lenA=128 lenB=128
+[E-ie B64 eager on_fp32 vs on(bf16)] total_arms=64 diverged=17 (17/64)
+  diverged_arms=[7, 13, 18, 21, 22, 26, 27, 28, 36, 38, 47, 53, 57, 58, 59, 62, 63]
+  arm 7: first_diff_step=13 lenA=128 lenB=128
+  arm 13: first_diff_step=47 lenA=128 lenB=128
+  arm 18: first_diff_step=13 lenA=128 lenB=128
+  arm 21: first_diff_step=54 lenA=128 lenB=128
+  arm 22: first_diff_step=12 lenA=128 lenB=128
+  arm 26: first_diff_step=6 lenA=128 lenB=128
+  arm 27: first_diff_step=12 lenA=128 lenB=128
+  arm 28: first_diff_step=6 lenA=128 lenB=128
+  arm 36: first_diff_step=7 lenA=128 lenB=128
+  arm 38: first_diff_step=55 lenA=128 lenB=128
+  arm 47: first_diff_step=13 lenA=128 lenB=128
+  arm 53: first_diff_step=15 lenA=128 lenB=128
+  arm 57: first_diff_step=15 lenA=128 lenB=128
+  arm 58: first_diff_step=15 lenA=128 lenB=128
+  arm 59: first_diff_step=15 lenA=128 lenB=128
+  arm 62: first_diff_step=8 lenA=128 lenB=128
+  arm 63: first_diff_step=15 lenA=128 lenB=128
+[E-ie B64 eager torchmerge-on vs kernelmerge-on [ABLATION]] total_arms=64 diverged=0 (0/64)
+  diverged_arms=[]
+[E-ie B64 eager torchmerge-on vs off] total_arms=64 diverged=22 (22/64)
+  diverged_arms=[1, 7, 8, 9, 18, 22, 26, 27, 28, 29, 30, 36, 37, 42, 47, 53, 56, 57, 58, 59, 62, 63]
+  arm 1: first_diff_step=53 lenA=128 lenB=128
+  arm 7: first_diff_step=13 lenA=128 lenB=128
+  arm 8: first_diff_step=13 lenA=128 lenB=128
+  arm 9: first_diff_step=13 lenA=128 lenB=128
+  arm 18: first_diff_step=13 lenA=128 lenB=128
+  arm 22: first_diff_step=6 lenA=128 lenB=128
+  arm 26: first_diff_step=6 lenA=128 lenB=128
+  arm 27: first_diff_step=83 lenA=128 lenB=128
+  arm 28: first_diff_step=6 lenA=128 lenB=128
+  arm 29: first_diff_step=54 lenA=128 lenB=128
+  arm 30: first_diff_step=56 lenA=128 lenB=128
+  arm 36: first_diff_step=7 lenA=128 lenB=128
+  arm 37: first_diff_step=55 lenA=128 lenB=128
+  arm 42: first_diff_step=55 lenA=128 lenB=128
+  arm 47: first_diff_step=13 lenA=128 lenB=128
+  arm 53: first_diff_step=15 lenA=128 lenB=128
+  arm 56: first_diff_step=15 lenA=128 lenB=128
+  arm 57: first_diff_step=15 lenA=128 lenB=128
+  arm 58: first_diff_step=15 lenA=128 lenB=128
+  arm 59: first_diff_step=15 lenA=128 lenB=128
+  arm 62: first_diff_step=8 lenA=128 lenB=128
+  arm 63: first_diff_step=62 lenA=128 lenB=128
+
+### LANE E literal C3 config (no ignore_eos, stand-in EOS-diluted) ###
+[E-lit B64 eager on(bf16) vs off] total_arms=64 diverged=1 (1/64)
+  diverged_arms=[1]
+  arm 1: first_diff_step=103 lenA=128 lenB=128
+
+### LANE E B=32 ###
+[E-ie B32 eager on(bf16) vs off] total_arms=32 diverged=7 (7/32)
+  diverged_arms=[1, 21, 22, 26, 27, 29, 30]
+  arm 1: first_diff_step=103 lenA=128 lenB=128
+  arm 21: first_diff_step=54 lenA=128 lenB=128
+  arm 22: first_diff_step=62 lenA=128 lenB=128
+  arm 26: first_diff_step=72 lenA=128 lenB=128
+  arm 27: first_diff_step=12 lenA=128 lenB=128
+  arm 29: first_diff_step=54 lenA=128 lenB=128
+  arm 30: first_diff_step=56 lenA=128 lenB=128
+
+### CROSS-MODE controls (diagnostic only) ###
+[CTRL B64 eager-off vs graph-off] total_arms=64 diverged=3 (3/64)
+  diverged_arms=[36, 37, 38]
+  arm 36: first_diff_step=7 lenA=128 lenB=128
+  arm 37: first_diff_step=55 lenA=128 lenB=128
+  arm 38: first_diff_step=55 lenA=128 lenB=128
+[CTRL B64 eager-on vs graph-on] total_arms=64 diverged=1 (1/64)
+  diverged_arms=[36]
+  arm 36: first_diff_step=7 lenA=128 lenB=128

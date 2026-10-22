@@ -1,0 +1,54 @@
+{
+  "status": "current_wy_cases_runtime_cpu_oracle_and_repetitions_checked",
+  "ranks": [
+    {
+      "rank": 0,
+      "cases": 135,
+      "max_abs": {
+        "w": 0.00048828125,
+        "u": 0.001953125,
+        "g": 1.6689300537109375e-06
+      },
+      "weighted_reference_ms": [
+        3541.587875366211,
+        3530.021842956543,
+        3529.814489364624
+      ],
+      "median_ms": 3530.021842956543,
+      "stdev_ms": 6.7383073932545585
+    },
+    {
+      "rank": 1,
+      "cases": 135,
+      "max_abs": {
+        "w": 0.00048828125,
+        "u": 0.0009765625,
+        "g": 1.6689300537109375e-06
+      },
+      "weighted_reference_ms": [
+        3575.2787532806396,
+        3554.757432937622,
+        3554.8417205810547
+      ],
+      "median_ms": 3554.8417205810547,
+      "stdev_ms": 11.823733185077993
+    }
+  ],
+  "calls_per_rank": 4230,
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/worker-wy-reference-plan-r2.json": "89ae25a089de750cf2317c796fdcd8a0d3ea21eb2a0e4415f3d0a712a1e30a77",
+    "/workspace/audit_m01_worker_wy_r2.py": "a8cd88607623953abf250fdefb921d600d31ba0fc794a80bde74ffa1c548e76a",
+    "/workspace/m01-wy-reference-worker-r2/receipt.json": "f9dca6783fb2303687ddfdef47cebb3a87edb7b75563a4ff5f4cd363507c268f",
+    "/workspace/m01-wy-reference-worker-r2/results/rank-0.json": "72893dac617a69351fb776ee25a16264fc6e555acb1ffa4d8da2a13ec23e5702",
+    "/workspace/m01-wy-reference-worker-r2/results/rank-1.json": "a261da2bef6b901aba9f94153b620e24473fdaa9831fcfae59600dd0ac224239"
+  },
+  "limitations": [
+    "Synthetic activations with observed sequence partitions.",
+    "Hot graph replay within each independent fresh-cache reference run.",
+    "Not a serving result or a standalone M01 acceptance conclusion.",
+    "CPU comparisons retain aggregate errors, not all tensors for offline replay.",
+    "Synchronous component sums are not application critical-path latency."
+  ],
+  "model_effective_flops": null,
+  "m01_attainment": null
+}

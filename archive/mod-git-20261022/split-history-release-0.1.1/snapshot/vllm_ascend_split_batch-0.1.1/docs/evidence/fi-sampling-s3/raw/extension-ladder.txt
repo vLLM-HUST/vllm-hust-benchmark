@@ -1,0 +1,144 @@
+=== npu-smi card7 HBM before ===
+	HBM Usage Rate(%)              : 5
+=== extension list ===
+org.vllm-hust.fia-demask 0.1.0.dev0 enabled
+org.vllm-hust.split-batch-full-graph 0.1.0.dev0 enabled
+=== extension inspect ===
+{
+  "activation": {
+    "additional_config": [],
+    "entry_points": [],
+    "environment": [
+      [
+        "VLLM_ASCEND_ENABLE_CASCADE_DECODE",
+        "1"
+      ],
+      [
+        "VLLM_ASCEND_ENABLE_CASCADE_GRAPH",
+        "1"
+      ]
+    ]
+  },
+  "activation_blocker": null,
+  "activation_ready": true,
+  "bundle_id": "org.vllm-hust.split-batch-full-graph",
+  "bundle_version": "0.1.0.dev0",
+  "components": [
+    {
+      "component_id": "dual-pad-planner",
+      "contracts": [
+        "vllm.graph.runtime-key.v1",
+        "vllm.forward.split-context.v1",
+        "vllm.worker.split-executor.v1"
+      ],
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "implementation_ref": "vllm_ascend_split_batch.planner:plan_dual_pad",
+      "isolation": "trusted_in_process",
+      "permissions": [
+        "device_access"
+      ]
+    },
+    {
+      "component_id": "cascade-two-stage-decode",
+      "contracts": [
+        "vllm.general_plugins",
+        "vllm.ascend.graph-pool.v1",
+        "vllm.graph.runtime-key.v1"
+      ],
+      "execution_planes": [
+        "worker",
+        "device"
+      ],
+      "implementation_ref": "vllm_ascend_split_batch.cascade_plugin:load",
+      "isolation": "trusted_in_process",
+      "permissions": [
+        "device_access"
+      ]
+    }
+  ],
+  "distribution": "vllm-ascend-split-batch",
+  "distribution_version": "0.1.0.dev0",
+  "enabled": true,
+  "experimental": true,
+  "host": {
+    "api_range": null,
+    "name": "vllm-ascend",
+    "provider": "vllm",
+    "version_range": "==0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27"
+  },
+  "implementation": [
+    {
+      "module": "vllm_ascend_split_batch.planner",
+      "object": "plan_dual_pad",
+      "status": "import_only",
+      "type": "python_module"
+    },
+    {
+      "module": "vllm_ascend_split_batch.cascade_plugin",
+      "object": "load",
+      "status": "active",
+      "type": "python_module"
+    },
+    {
+      "module": "vllm_ascend_split_batch.cascade_graph_plugin",
+      "object": "install",
+      "status": "active",
+      "type": "python_module"
+    }
+  ],
+  "kind": "in_process_plugin",
+  "lifecycle_owner": "vllm",
+  "manifest_path": "/vllm-workspace/vllm-ascend-split-batch-hust/src/vllm_ascend_split_batch/vllm-hust-extension-v0.2.json",
+  "protocols": [
+    {
+      "name": "vllm.graph.runtime-key",
+      "version_range": null
+    },
+    {
+      "name": "vllm.forward.split-context",
+      "version_range": null
+    },
+    {
+      "name": "vllm.ascend.graph-pool",
+      "version_range": null
+    },
+    {
+      "name": "vllm.worker.split-executor",
+      "version_range": null
+    }
+  ],
+  "requires_services": [],
+  "runtime": {
+    "isolation": "trusted_in_process",
+    "process_scope": "vllm-processes",
+    "type": "python"
+  }
+}
+=== extension check ===
+INFO 09-11 14:55:50 [__init__.py:52] Available plugins for group vllm.platform_plugins:
+INFO 09-11 14:55:50 [__init__.py:54] - ascend -> vllm_ascend:register
+INFO 09-11 14:55:50 [__init__.py:57] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-11 14:55:50 [__init__.py:272] Platform plugin ascend is activated
+INFO 09-11 14:55:51 [platform.py:70] Breakable CUDAGraph on Ascend is opt-in; using VLLM_USE_BREAKABLE_CUDAGRAPH=0.
+{
+  "extension_id": "org.vllm-hust.split-batch-full-graph",
+  "provider": "vllm",
+  "states": [
+    "installed",
+    "discovered",
+    "compatible",
+    "configured",
+    "enabled"
+  ],
+  "evidence": [
+    "host version 0.25.1rc2.dev125+hust.20260903.4.g74f0c0a27 satisfies the declared range",
+    "protocol vllm.graph.runtime-key is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+    "protocol vllm.forward.split-context is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+    "protocol vllm.ascend.graph-pool is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+    "protocol vllm.worker.split-executor is not independently versioned; compatibility is governed by host ranges and acceptance evidence",
+    "vLLM launch configuration can be rendered"
+  ]
+}

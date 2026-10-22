@@ -1,0 +1,17 @@
+=== 2026-09-09T07:52:46+00:00 default-off serve smoke (card 6, port 8325) ===
+--- /health ---
+
+HTTP 200
+--- prompt: hello ---
+{"id":"chatcmpl-a0d4771f3e675261","object":"chat.completion","created":1788940366,"model":"/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct","choices":[{"index":0,"message":{"role":"assistant","content":"Hello! How can I assist you today?","refusal":null,"annotations":null,"audio":null,"function_call":null,"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.23.0-523931a2","usage":{"prompt_tokens":30,"total_tokens":40,"completion_tokens":10,"prompt_tokens_details":null,"completion_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}
+--- prompt: what is 2+2? ---
+{"id":"chatcmpl-866cd57dc35d08b0","object":"chat.completion","created":1788940369,"model":"/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct","choices":[{"index":0,"message":{"role":"assistant","content":"2 + 2 equals 4.","refusal":null,"annotations":null,"audio":null,"function_call":null,"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.23.0-523931a2","usage":{"prompt_tokens":36,"total_tokens":45,"completion_tokens":9,"prompt_tokens_details":null,"completion_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}
+--- prompt: write a haiku about autumn ---
+{"id":"chatcmpl-b1f2d117156459a9","object":"chat.completion","created":1788940370,"model":"/data/shared_models/Qwen--Qwen2.5-Coder-14B-Instruct","choices":[{"index":0,"message":{"role":"assistant","content":"Leaves whisper to ground,\nCrisp air dances, sun bows low,\nAutumn's embrace tightens.","refusal":null,"annotations":null,"audio":null,"function_call":null,"reasoning":null},"logprobs":null,"finish_reason":"stop","stop_reason":null,"token_ids":null,"routed_experts":null}],"service_tier":null,"system_fingerprint":"vllm-0.23.0-523931a2","usage":{"prompt_tokens":35,"total_tokens":59,"completion_tokens":24,"prompt_tokens_details":null,"completion_tokens_details":null},"prompt_logprobs":null,"prompt_token_ids":null,"prompt_text":null,"kv_transfer_params":null}
+=== startup marker grep ===
+7:INFO 09-09 07:49:19 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+38:(EngineCore pid=2377684) INFO 09-09 07:49:45 [cascade_plugin.py:147] cascade plugin loaded (gate=0, graph_gate=0, kernel_wheel=ok)
+
+cascade-active count: 0
+wheel-unavailable count: 0
+startup marker count: 2

@@ -1,0 +1,34 @@
+{
+  "schema": "opt-toolchain-repair.v1",
+  "base_head": "4d92559ea85b8d223a5c8fd9631e6e68ac46721d",
+  "files": [
+    {
+      "target": "opt-ops/scripts/kbctl.py",
+      "before_sha256": "146ad4b8f77cf99ab98d065ebf1e3c7d1540806cd557d6f270a4f7f8a3459d09",
+      "after_sha256": "4f2b9e6f6137f7ef3db40f3434fec5615d5e686384ada092de0aa95f6531a3b9"
+    },
+    {
+      "target": "opt-ops/scripts/opt.py",
+      "before_sha256": "bb231c287aac1578c52df7339f5a5b47bb00ea1d45454508de806a500d853c6a",
+      "after_sha256": "965d7fbbe8deebfbecd604037c1ad0c3a255ee4f691298195c90a64b0ade1c7b"
+    },
+    {
+      "target": "opt-ops/README.md",
+      "before_sha256": "8517e6a684b84bffa8b9ce150586ac69aa4376394718749f17f1af9a32e39982",
+      "after_sha256": "990ff3bd736a2968fabf21dd4d2df7fbb20cf07129ce849953ff6500fb226be3"
+    }
+  ],
+  "apply": "patch --dry-run -p1 -d /root < patch.diff && patch -p1 -d /root < patch.diff",
+  "rollback": "patch --dry-run -R -p1 -d /root < patch.diff && patch -R -p1 -d /root < patch.diff",
+  "tests": [
+    "tests/test_operator_delivery.py",
+    "tests/test_opt_delivery_integration.py",
+    "tests/test_opt_toolchain_repair.py"
+  ],
+  "boundaries": [
+    "Default delivery checks remain strict; optional startup baseline proves preserved dirty bytes via conflict-free merge.",
+    "No automatic re-pin, evidence rewrite or archive exclusion.",
+    "No NPU execution or numerical-acceptance changes."
+  ],
+  "evidence_root": "/root/包体恢复/records/probes/20261019T042000Z_opt_repair"
+}

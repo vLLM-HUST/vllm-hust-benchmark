@@ -1,0 +1,24 @@
+## OFF leg (stock): zerocost traces (expect empty)
+  <none>
+## OFF leg: Traceback/ERROR (expect empty)
+150:(APIServer pid=105465) ERROR 09-13 07:27:55 [async_llm.py:829] AsyncLLM output_handler failed.
+151:(APIServer pid=105465) ERROR 09-13 07:27:55 [async_llm.py:829] Traceback (most recent call last):
+152:(APIServer pid=105465) ERROR 09-13 07:27:55 [async_llm.py:829]   File "/vllm-workspace/vllm-hust/vllm/v1/engine/async_llm.py", line 775, in output_handler
+153:(APIServer pid=105465) ERROR 09-13 07:27:55 [async_llm.py:829]     outputs = await engine_core.get_output_async()
+154:(APIServer pid=105465) ERROR 09-13 07:27:55 [async_llm.py:829]               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+155:(APIServer pid=105465) ERROR 09-13 07:27:55 [async_llm.py:829]   File "/vllm-workspace/vllm-hust/vllm/v1/engine/core_client.py", line 1175, in get_output_async
+156:(APIServer pid=105465) ERROR 09-13 07:27:55 [async_llm.py:829]     raise self._format_exception(outputs) from None
+157:(APIServer pid=105465) ERROR 09-13 07:27:55 [async_llm.py:829] vllm.v1.engine.exceptions.EngineDeadError: EngineCore encountered an issue. See stack trace (above) for the root cause.
+## ON leg: zerocost ACTIVE lines
+15:zero-cost wiring ① refused (VLLM_HUST_FI_PREFILL_OUT=1): a host anchor moved; the process stays on the stock FIA call + copy path
+61:(EngineCore pid=135571) zero-cost wiring ① refused (VLLM_HUST_FI_PREFILL_OUT=1): a host anchor moved; the process stays on the stock FIA call + copy path
+73:(EngineCore pid=135571) zero-cost wiring ② is ACTIVE (VLLM_HUST_SKIP_COS_SIN=1): update_cos_sin now records positions only and get_cos_and_sin_slice() materialises the rope buffers on demand.
+## ON leg: injected keys visible in process env line
+15:zero-cost wiring ① refused (VLLM_HUST_FI_PREFILL_OUT=1): a host anchor moved; the process stays on the stock FIA call + copy path
+37:(APIServer pid=128153) WARNING 09-13 07:28:41 [envs.py:2296] Unknown vLLM environment variable detected: VLLM_HUST_FI_PREFILL_OUT
+38:(APIServer pid=128153) WARNING 09-13 07:28:41 [envs.py:2296] Unknown vLLM environment variable detected: VLLM_HUST_SKIP_COS_SIN
+61:(EngineCore pid=135571) zero-cost wiring ① refused (VLLM_HUST_FI_PREFILL_OUT=1): a host anchor moved; the process stays on the stock FIA call + copy path
+73:(EngineCore pid=135571) zero-cost wiring ② is ACTIVE (VLLM_HUST_SKIP_COS_SIN=1): update_cos_sin now records positions only and get_cos_and_sin_slice() materialises the rope buffers on demand.
+## ON leg: Traceback (expect empty)
+16:Traceback (most recent call last):
+62:(EngineCore pid=135571) Traceback (most recent call last):

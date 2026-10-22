@@ -8,14 +8,32 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "9e0b8615c9c0898d18f8f20c2daaf5fc7ce4c3a2"  # pragma: allowlist secret
+REVISION = "49eafdd80b48685212e5f4962b02531274c0e2d1"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v057.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v068.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "baseline018": ["baseline018-sweprefix", "BASELINE-IDENTITY-AUDIT-20261022.md"],
+    "dataset-quality-inventory": [
+        "../../website-publication/data/hle-verified-20261015/report.json",
+        "../../website-publication/data/frontierscience-20261013/report.json",
+        "../../website-publication/data/mmlu-pro-20261012/report.json",
+        "../../website-publication/data/dataset-matrix-campaign-20261016/report.json",
+        "../../website-publication/data/betterscale-school-runtime-20261016/report.json",
+        "../../website-publication/data/request-throttling-dataset-matrix-20261018/mmlu-pro.json",
+        "../../website-publication/data/request-throttling-dataset-matrix-20261018/frontierscience.json",
+        "../../website-publication/data/request-throttling-dataset-matrix-20261018/hle-gold.json",
+        "../../website-publication/data/request-throttling-dataset-matrix-20261018/hle-revision.json",
+    ],
+    "reference-closure": ["m01-recovery/reference-closure-20261022"],
+    "worker-model": ["m01-recovery/worker-model-20261022"],
+    "fenced-model": ["m01-recovery/fenced-model-20261022"],
+    "trace-qualification": ["m01-recovery/trace-qualification-20261021"],
+    "long-context-parser": ["m05-parser-confirmation-20261021"],
+    "paired-lifecycle": ["m06-paired-20261021"],
     "candidates": [
         "aligned-mmlu-b0.tar.gz",
         "aligned-mmlu-b1.tar.gz",
@@ -28,6 +46,10 @@ EVIDENCE = {
     ],
     "quality": ["quality-regression/raw", "quality-regression/finish-breakdown.json"],
     "recovered-quality": ["quality-regression/recovered-20261021"],
+    "native-paired-quality": [
+        "quality-regression/native-recovered-20261021",
+        "quality-regression/recovered-20261021",
+    ],
     "long-context": ["long-context-originals.tar.gz", "long-context-originals.json"],
     "current-b1-long-context": ["long-context-current-b1-20261021"],
     "long-diagnostic": [
@@ -51,6 +73,10 @@ EVIDENCE = {
         "m01-recovery/logits-collective-reference-20261021"
     ],
     "m01-verdict": [
+        "m01-recovery/request-assessment-20261022",
+        "m01-recovery/accounting-assessment-20261022",
+        "m01-recovery/reference-closure-20261022",
+        "m01-recovery/worker-model-20261022",
         "m01-recovery/model-runtime-20261021",
         "m01-recovery/logits-collective-reference-20261021",
     ],
@@ -58,7 +84,7 @@ EVIDENCE = {
 
 
 def evidence_locator(relative):
-    path = ROOT / REPORT_DIR / relative
+    path = (ROOT / REPORT_DIR / relative).resolve()
     assert path.exists(), relative
     return {
         "path": path.relative_to(ROOT).as_posix(),
@@ -168,9 +194,57 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.57" in text
+    assert "报告版本：V0.68" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "baseline018",
+            "0.18系列基线 / 0.18 baseline evidence",
+            "### 3.3 0.18系列基线证据",
+            "已有Qwen3.5 SWE-prefix-reuse五个900秒正式窗口，零失败，保留0.18/0.18及text-only兼容补丁身份。第五章主要性能及200题配对为0.28.1 / Ascend 0.25.1rc2开发栈对照，5.11节另列0.23/0.23配对；这些收益不代表相对0.18的收益，不同工况不互相代替。",
+        ),
+        (
+            "dataset-quality-inventory",
+            "既有任务质量与配对缺项 / Existing task quality and pairing gaps",
+            "### 5.11 既有任务质量与配置配对",
+            "三项数据集已有多方案质量观测：MMLU-Pro完整12032题与200题回归分列，HLE/FrontierScience含BetterScale评分及Controller 0.23/0.23同工况配对。Qwen替代裁判、单次运行，未决项保留完整分母；不是官方评分复现。指定0.18及本轮具体组合的对应配对仍未完成，不等于所有优化方案缺测。独立限长压测不代替任务质量；公开投影不能独立重评全部私有问答。",
+        ),
+        (
+            "reference-closure",
+            "同工况参考补测汇总 / Matched reference measurements",
+            "#### 同工况参考补测汇总",
+            "GDN递归、WY/KKT、卷积、HBM及同API通信参考已完成；设备映射已核验。HBM物理读写比例偏差约3.6%，参考分量时间不等于模型关键路径。请求窗口核算见M01本轮判定，不替换正式B1。",
+        ),
+        (
+            "worker-model",
+            "双worker采集与参考补测 / Dual-worker capture and references",
+            "#### 双worker采集修复与实际形状参考补测",
+            "同工况200请求全部完成，双worker任务轨迹已取得，四卡释放。实际75种通信载荷各有三次参考；跨接口264个不一致样本保留，同API通信参考已完成。请求窗口核算见M01本轮判定，不替换正式B1。",
+        ),
+        (
+            "fenced-model",
+            "完整模型同步边界补采 / Full-model device fences",
+            "#### 完整模型设备同步边界补采",
+            "此前fenced-r1记录：同工况35B模型200请求全部完成，两卡同步回执通过；rank 0缺设备任务轨迹，服务管理进程exit 130。此采集问题已在上方worker-r1补测修复，旧证据保留。完整有效F与匹配参考仍未闭合，M01未通过本轮验收，不替换正式B1。",
+        ),
+        (
+            "trace-qualification",
+            "M01采集资格 / M01 collection qualification",
+            "#### 应用级采集与原生事件身份验证",
+            "两卡BF16合成资格，非35B模型性能复测。原生日志与profiler计数一致，16条已知探针依赖配对通过；整模型事件代次、图内事件与HCCL通知尚未全覆盖。插桩计时不代替未插桩性能，M01仍未通过本轮验收。",
+        ),
+        (
+            "long-context-parser",
+            "长输入接口修复确认 / Long-input API repair confirmation",
+            "### 7.3 思考字段分离后的独立确认",
+            "同一恢复运行栈及原六题，启用原生qwen3思考解析器，正文严格匹配6/6、零失败；独立思考字段另存。固定资格请求不计入六题，输出token包含思考生成。新服务、空编译缓存和独立请求盐，OS文件页缓存未全局清空。原0/6记录保留，不代表主数据集质量或性能增益。",
+        ),
+        (
+            "paired-lifecycle",
+            "恢复环境配对性能与成本 / Recovered paired performance and lifecycle cost",
+            "### 5.10 恢复环境配对性能与全流程成本",
+            "同一200条输入、out256、每臂一次预检查，独立服务和空编译缓存。操作系统文件页缓存未全局清空。请求阶段与启动至释放的全流程分别统计；保留P99退化、协议偏差及退出日志，不推断长期摊销、统计显著性或任务准确率。",
+        ),
         (
             "candidates",
             "同工况性能候选 / Performance candidates",
@@ -188,6 +262,12 @@ def build():
             "恢复环境质量复核 / Recovered-runtime quality",
             "### 5.8 恢复环境完整回答质量复核",
             "同一200题、原评分器、out8192，新服务与空编译缓存，计量观察器关闭。保存全部SSE和截断，按固定分母评分；与既有B0及Microflow结果分别比较，不冒充同环境新增性能配对或统计非劣性结论。",
+        ),
+        (
+            "native-paired-quality",
+            "恢复环境配对质量 / Recovered native-paired quality",
+            "### 5.9 恢复环境 Native 与优化方案配对质量",
+            "同一恢复基础运行栈、200题、原评分器、out8192，独立服务和空缓存。Native恢复五个原生源码模块，禁用候选插件；两臂请求与分词逐题一致。完整分母包含截断，逐题差异见中文报告，不宣称全集质量或统计非劣性，不替换正式吞吐。",
         ),
         (
             "long-context",
@@ -267,7 +347,7 @@ def build():
                 "m01-verdict",
                 "M01 本轮判定 / M01 acceptance verdict",
                 "#### M01 本轮验收判定",
-                "证据受限，未通过本轮验收；不是实测有效算力低于50%。F及达成率保持未赋值，缺口限定为同窗口覆盖、运算量口径及匹配参考，不影响按各自边界保留的正式B0/B1结果。",
+                "测试方案为vLLM-HUST E24/R36 + KV materialization请求重计算 + Prefill Microflow FA；Qwen3.5-35B-A3B BF16/TP2、FULL、MTP2、每卡20 GiB KV。恢复环境worker-r1单独计量，与第五章824.894609 token/s吞吐中位数不是同一轮联合成绩。本次插桩请求窗口135.340126192秒，基础运算口径经验参考达成率30.2443%–30.2505%，低于内部50%阈值。计数范围反映采样边界，不是置信区间。两卡任务边界、同窗口HBM和通信计数已核验；不外推为未插桩服务结果，不替换正式B0/B1。186.80秒设备包络的21.92%仅为诊断值。",
             ),
         ]
     )
@@ -286,7 +366,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.57",
+        "version": "V0.68",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,

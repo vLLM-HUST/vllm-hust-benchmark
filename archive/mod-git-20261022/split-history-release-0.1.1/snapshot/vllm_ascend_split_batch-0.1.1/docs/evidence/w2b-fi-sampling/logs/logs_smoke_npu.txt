@@ -1,0 +1,16 @@
+INFO 09-09 07:12:10 [__init__.py:44] Available plugins for group vllm.platform_plugins:
+INFO 09-09 07:12:10 [__init__.py:46] - ascend -> vllm_ascend:register
+INFO 09-09 07:12:10 [__init__.py:49] All plugins in this group will be loaded. Set `VLLM_PLUGINS` to control which plugins to load.
+INFO 09-09 07:12:10 [__init__.py:238] Platform plugin ascend is activated
+INFO 09-09 07:12:10 [platform.py:62] Breakable cudagraph is force disabled on Ascend because DeepSeek V4 PIECEWISE cudagraph is not supported yet.
+fi_sampling sampling path is ACTIVE (VLLM_HUST_FI_SAMPLING=1): untruncated sampling uses the flashinfer-semantics triton-ascend kernel, joint top-k/top-p at B>=256 with k>=32 uses the joint kernel and k=1 rows use argmax; every other case falls back to the fork chain. Output distribution matches flashinfer semantics, not the fork's exponential-race chain (see docs/fi-sampling.md).
+/vllm-workspace/vllm-ascend/vllm_ascend/sample/sampler.py:33: UserWarning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (Triggered internally at ../torch_npu/csrc/aten/common/TensorFactories.cpp:340.)
+  q = torch.empty_like(probs)
+[PASS] default-off: load() is a no-op           load()=False, cls_unchanged=True
+[PASS] on: subclass installed                   installed=True, cls=FiSamplingTopKTopPSampler
+[PASS] on: untruncated route (B=8)              tokens=[140960, 18502, 62657, 85000, 77637, 16619, 31978, 130289]
+[PASS] on: joint route (k=50/p=0.95, B=256)     tokens[:8]=[147991, 35153, 56874, 30089, 134764, 23180, 9649, 48082]
+[PASS] on: k=1 route == argmax (B=256)          tokens[:8]=[50763, 5543, 100291, 133532, 85577, 144385, 55926, 84507], argmax[:8]=[50763, 5543, 100291, 133532, 85577, 144385, 55926, 84507]
+[PASS] on: per-request generator -> fork chain  tokens=[99643, 107670, 125229, 69669, 28257, 106463, 104673, 138623] (fork chain, generator not advanced)
+
+==== SMOKE PASS ====
