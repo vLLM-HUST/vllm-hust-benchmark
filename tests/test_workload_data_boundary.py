@@ -11,6 +11,7 @@ DATA_MODULES = {
     "bindings",
     "catalog",
     "consumer",
+    "conversations",  # Original parent-link input restoration, no research analysis.
     "execution",
     "identity",
     "input_views",
