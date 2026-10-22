@@ -1,0 +1,102 @@
+{
+  "schema": "gdn-progress.v1",
+  "candidate": "gdn-unpack-qk-l2norm-fusion",
+  "stage": "accepted",
+  "deployment": "default-off; reversible runtime patch deployed for paired validation; both services stopped; bundle activation is a separate release gate",
+  "shape": {
+    "T": 16,
+    "row_stride": 4096,
+    "q": 1024,
+    "k": 1024,
+    "v": 2048,
+    "head_dim": 128,
+    "phase": "pure non-spec decode"
+  },
+  "weight_labels": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "tp": 2
+  },
+  "local_results": {
+    "l0": "PASS; five correctness cases; Q/K exact numeric, V bitwise",
+    "eager_chain_median_us": {
+      "baseline": 842.9089546203613,
+      "candidate": 262.01748847961426
+    },
+    "kernel_active_mean_us_per_call": {
+      "baseline": 12.932,
+      "candidate": 2.792
+    },
+    "kernels_per_call": {
+      "baseline": 6,
+      "candidate": 1
+    },
+    "cpu": "776 passed, 11 skipped",
+    "offline_compile_and_cpu": "38 passed",
+    "ruff": "PASS"
+  },
+  "interpretation": "Eager and kernel times are independent measurements. Diagnostic trace has five calls per arm, not model L4. No model throughput claim.",
+  "full_model_results": {
+    "cpu": "782 passed, 11 skipped; Ruff PASS",
+    "isolated_graph_replay": "PASS: 8 changing-input replays",
+    "standard_l3": "PASS: 8/8",
+    "mmlu_profile_responses": "PASS: 16/16 exact responses; matching prompt/doc hashes",
+    "fixed_batch_l3": "FAIL: A/B 2/16; A/A and B/B 16/16; candidate across independent plain/profile services 16/16",
+    "l4": "Collected both ranks and both arms; 540 target calls/rank/arm, 6 kernels -> 1",
+    "rank0_target_kernel_mean_us": [
+      30.304666666666666,
+      10.519962962962962
+    ],
+    "rank1_target_kernel_mean_us": [
+      29.43311111111111,
+      9.647444444444444
+    ],
+    "acceptance": "BLOCKED by fixed-batch numerical regression; L4 timing is diagnostic, not an accepted optimization"
+  },
+  "missing_gates": [
+    "Bundle release gate: manifest import_only -> active requires default-off smoke, correctness and performance evidence bundle sign-off; plugin stays default-off until then"
+  ],
+  "prior_method": {
+    "id": "gdn-qkv-unpack-single-pass",
+    "stage": "rejected",
+    "disposition": "Retained only as inactive experiment, reference and regression tests; not registered or deployed",
+    "result": "T16 repaired copy is numerically correct but eager-chain slower:284.635 ->308.525us",
+    "not_retried": true
+  },
+  "next_action": "Optimization accepted; no further operator work. Release-gate material (activation decision, host proposal refresh for upstream tree versions) is owned outside this candidate.",
+  "model_validation_evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/67505eee3dc71fa3dbbc0fc365620f0a2e5658f4/archive/mod-git-20261022/split-current-git/snapshot/host-proposals/GDN-qkv-norm/validation/model-validation/manifest.json",
+  "evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/67505eee3dc71fa3dbbc0fc365620f0a2e5658f4/archive/mod-git-20261022/split-current-git/snapshot/host-proposals/GDN-qkv-norm/validation/manifest.json",
+  "evidence_limits": "Compact original JSON/log/CSV snapshots are bundled. Raw full profiler timelines and larger L2 archive remain at source paths in manifest; receipt commit_push field describes pre-publication state.",
+  "resolution": {
+    "root_cause": "fused unpack_norm_kernel without multibuffer produced a stable but different trajectory from native; launching the same kernel with multibuffer=True removes it",
+    "attribution": "single-variable: multibuffer=True alone, production FULL cohort, no deterministic env; deterministic PIECEWISE protocol additionally equalizes arms but changes global numerics",
+    "fixed_batch_l3": "PASS 16/16 identical vs fresh baseline; both arm captures byte-identical (sha 312b5644dbdd)",
+    "standard_l3": "PASS 8/8 identical",
+    "l4_paired": {
+      "A_kernels_per_call": 6,
+      "B_kernels_per_call": 1,
+      "per_call_active_us": {
+        "rank0": [
+          29.888,
+          9.212
+        ],
+        "rank1": [
+          29.735,
+          9.645
+        ]
+      },
+      "reduction_pct": {
+        "rank0": 69.2,
+        "rank1": 67.6
+      },
+      "windows": {
+        "A": "/root/prof/ladder-1019-021225",
+        "B": "/root/prof/ladder-1019-022857"
+      },
+      "limits": "540 vs 570 captured calls (32-iteration truncation); per-call comparison only; totals not compared"
+    },
+    "evidence": "https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/67505eee3dc71fa3dbbc0fc365620f0a2e5658f4/archive/mod-git-20261022/split-current-git/snapshot/host-proposals/GDN-qkv-norm/validation/l4-multibuffer-20261019/receipt.json"
+  },
+  "toolchain_note": "Triton kernel signatures with extra pointer parameters (optional K=None/V=None or a separate 4-pointer kernel) segfault triton-ascend ttir_to_linalg; see docs/pitfalls.md"
+}

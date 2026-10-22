@@ -1,0 +1,76 @@
+{
+  "schema": "gdn-registration-assessment.v1",
+  "base_head": "2c10970d74df573d2f6046eb58f198ba011c66ea",
+  "branch": "fix/husk-carrier-visible",
+  "decision": "registration preferred; direct outer-FX replacement blocked at opaque core; release remains import_only",
+  "scope": {
+    "model": "Qwen3.5-35B-A3B",
+    "precision": "bf16",
+    "format": "ND",
+    "shape": "T16 width4096 stride4096 Q/K/V1024/1024/2048 head128",
+    "phase": "pure non-spec decode, TP2, PCP1, inference, FULL",
+    "callsite": "post-CausalConv1d before RecurrentGatedDeltaRule"
+  },
+  "findings": [
+    {
+      "route": "vLLM IR",
+      "status": "API_PRESENT_NO_EXISTING_TARGET_IR_CALL",
+      "detail": "register_op/register_impl exist; this probe's loaded IR registry contains rms_norm and fused_add_rms_norm, not GDN unpack/L2norm. Registering a new semantic op alone does not redirect the existing core."
+    },
+    {
+      "route": "npugraph_ex.register_replacement",
+      "status": "API_PRESENT_OUTER_GRAPH_OPAQUE",
+      "detail": "Import torch_npu first. CPU export of the actual vllm.qwen_gdn_attention_core call contains only that opaque call; no internal unpack/norm nodes. This is not a production serving graph dump or a blanket impossibility claim."
+    },
+    {
+      "route": "CustomOp/PluggableLayer",
+      "status": "LAYER_REGISTRATION_PRESENT_NOT_FINE_GRAINED",
+      "detail": "GatedDeltaNetAttention is a PluggableLayer. Ascend already registers a replacement and its worker patch assigns Qwen GDN forward/_forward_core. Registration order, actual instance class and duplicate-registry rules must be verified; do not overwrite registries or copy whole forward."
+    },
+    {
+      "route": "torch.ops._C_ascend",
+      "status": "KERNEL_CARRIER_NOT_CALLSITE_REDIRECTION",
+      "detail": "Does not expose the unpack-plus-norm combination inside qwen_gdn_attention_core. Existing Triton kernel need not be rewritten as aclnn just to register it."
+    }
+  ],
+  "implementation": {
+    "probe": "tools/probe_gdn_registration.py",
+    "tests": "tests/test_gdn_registration_probe.py",
+    "development_carrier": "src/vllm_ascend_split_batch/gdn_qkv_norm_plugin.py",
+    "carrier_limit": "read-only tier-2 preflight only, no fusion registration or host writes; hash is not the long-term public contract",
+    "kernel_changed": false,
+    "host_changed": false,
+    "serve_starts": 0,
+    "device_experiments": 0
+  },
+  "checks": {
+    "cpu_export": "PASS; actual op remains opaque",
+    "pytest": "861 passed, 11 skipped; exit 0",
+    "ruff": "PASS; exit 0",
+    "wheel_build": "PASS; hatchling via rv1 Python",
+    "isolated_wheel": "PASS; extracted-wheel entrypoints, disabled no heavy imports, enabled read-only preflight, import_only activation blocker",
+    "wheel_sha256": "a8624f69d03e81f7181a0d0d46d0c86795ee63605d1d70357cc2226b06267ba4",
+    "coverage": "FAIL; pre-existing empty GDN knowledge card and changed W1R archived evidence",
+    "new_carrier_l3_compare": "NOT_RUN",
+    "managed_lifecycle": "NOT_RUN",
+    "production_pattern_match": "NOT_PROVEN"
+  },
+  "evidence_root": "/root/包体恢复/records/probes/20261019T034200Z_gdn_registration",
+  "evidence_files": [
+    "probe-final.json", "probe-final.log", "probe-source.py",
+    "pytest-final.log", "ruff-final.log", "wheel-smoke-resolved.log", "coverage.log"
+  ],
+  "retained_failures": [
+    "Initial npugraph_ex lookup before importing torch_npu failed; corrected initialization resolves the installed module.",
+    "wheel-smoke.log and wheel-smoke-final.log fail an unnormalized symlink-path assertion; corrected resolve-based isolation assertion passes. Earlier failures retained."
+  ],
+  "environment_correction": "Serving Python /usr/local/python3.12.13/bin/python has pytest 8.3.2; earlier shell-python unavailability was not a missing-pytest blocker.",
+  "next_action": "Verify a narrow inner compilation/dispatch boundary reachable through supported registration without whole-layer copying or moving KV/communication side effects. If unavailable, record the minimal local host boundary proposal instead of installing a non-matching outer rule. New serving probes require a separately declared budget beyond this offline assessment.",
+  "stop_condition": "No proven callsite reachability, semantic/aliasing change, registry collision, graph replay or L3 mismatch: keep default-off/import_only. Do not register a fictitious rule merely to claim plugin-only deployment.",
+  "acceptance": {
+    "existing_operator": "accepted evidence unchanged; no new performance claim",
+    "registration_integration": "blocked pending reachable inner boundary",
+    "release": "blocked",
+    "remote_publication": "not authorized"
+  }
+}
