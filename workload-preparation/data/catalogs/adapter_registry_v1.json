@@ -2,6 +2,18 @@
   "version": "source-adapters/v1",
   "status_policy": "Implementation, asset verification and runtime reproduction are independent. All other registered sources remain NOT_IMPLEMENTED.",
   "adapters": {
+    "QUALITY": {
+      "kind": "task_dataset",
+      "mapping": "quality_questions",
+      "row_format": "jsonl",
+      "input_fields": ["article", "question", "options"],
+      "required_fields": ["article", "article_id", "set_unique_id", "question_unique_id", "question", "options", "gold_label"],
+      "outcome_fields": ["gold_label", "writer_label", "validation", "speed_validation"],
+      "annotation_fields": ["article_id", "set_unique_id", "title", "source", "author", "year", "topic", "url", "license", "difficult", "source_parent_row_index", "source_question_index"],
+      "id_field": "question_unique_id",
+      "requirements": ["Original publisher HTML-stripped dev release; one question per record, not an entire writer question-set", "Release-order flat reference plus original JSONL parent/question positions; repeated article IDs are not separate articles", "Gold/writer/validation labels never enter input; no shortening of the article or options"],
+      "status": "QUESTION_READER_IMPLEMENTED_NATIVE_EXECUTION_NOT_VALIDATED"
+    },
     "BBH": {
       "kind": "task_dataset",
       "mapping": "native_fields",

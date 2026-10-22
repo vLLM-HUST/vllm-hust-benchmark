@@ -11,6 +11,25 @@ from .records import WorkloadRecord
 from .registry import adapter_spec, source_spec
 
 
+def iter_source_rows(path, spec):
+    """Use one source view for reading, binding and index resolution."""
+    rows = iter_rows(
+        path,
+        records_path=spec.get("records_path", []),
+        row_format=spec.get("row_format"),
+        root_fields=spec.get("root_fields", []),
+    )
+    try:
+        if spec["mapping"] == "quality_questions":
+            from .quality import question_rows
+
+            yield from question_rows(rows)
+        else:
+            yield from rows
+    finally:
+        rows.close()
+
+
 def adapt_row(
     source_id: str, row: dict, *, source: dict, spec: dict, index: int
 ) -> WorkloadRecord:
@@ -53,6 +72,22 @@ def adapt_row(
             raise ValueError(
                 f"{source_id}: invalid text field at row {index}; payload suppressed"
             )
+    if source_id == "QUALITY" and (
+        any(
+            not isinstance(row[key], str) or not row[key].strip()
+            for key in ("article", "question", "question_unique_id")
+        )
+        or not isinstance(row["options"], list)
+        or len(row["options"]) != 4
+        or any(
+            not isinstance(value, str) or not value.strip() for value in row["options"]
+        )
+        or type(row["gold_label"]) is not int
+        or row["gold_label"] not in {1, 2, 3, 4}
+    ):
+        raise ValueError(
+            "QuALITY requires original article/question/four options and 1-based gold"
+        )
     if source_id == "BBH" and any(
         not isinstance(row[key], str) or not row[key].strip()
         for key in ("input", "target")
@@ -368,12 +403,7 @@ def iter_workload(
             "unit": manifest["unit"],
             "provenance_kind": manifest["provenance_kind"],
         }
-        rows = iter_rows(
-            asset_path(Path(data_root), name),
-            records_path=spec.get("records_path", []),
-            row_format=spec.get("row_format"),
-            root_fields=spec.get("root_fields", []),
-        )
+        rows = iter_source_rows(asset_path(Path(data_root), name), spec)
         remaining = None if limit is None else limit - emitted
         try:
             if history_targets is not None:
