@@ -21,7 +21,7 @@
 
 | 范围         | 已登记 | 当前版本已抽样验证闭环 |
 | ------------ | -----: | ---------------------: |
-| 公开候选来源 |     89 |                      5 |
+| 公开候选来源 |     89 |                      6 |
 | 企业私有来源 |      8 |                      8 |
 
 每次验证更新本文件和 [机器可读台账](dataset-validation-status.json)；记录样本
@@ -45,7 +45,7 @@ ID、数据版本、模型、执行器、评分器、终态、失败原因和脱
 | [ ]  | CROSSCODEEVAL        | repository-completion                                                                                                                        | 待复核            | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                       |
 | [ ]  | DAILYTALK            | conversation-continuation<br>audio-streaming-interaction                                                                                     | 待复核            | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                       |
 | [ ]  | DISCOVERYBENCH       | scientific-experiment-planning<br>simulation-analysis-verification                                                                           | 待复核            | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                       |
-| [ ]  | DOLLY                | general-single-turn-assistant<br>document-grounded-analysis<br>text-summarization<br>text-extraction-classification<br>text-rewriting        | 本地已取得        | 本地 3 条已回查          | 未跑                              | 未跑                               | [本地读取记录](validation/local-read-24sources-20261022.json)，服务器未验证                      |
+| [x]  | DOLLY                | general-single-turn-assistant<br>document-grounded-analysis<br>text-summarization<br>text-extraction-classification<br>text-rewriting        | 完整文件SHA已核验 | 原前三条字段回查         | NPU生成3条stop                    | 响应完整性，未评语义正确性         | [来源与接入边界](DOLLY_ORIGINAL_INSTRUCTIONS.zh-CN.md)，3/15011；未覆盖其他类别与全量            |
 | [ ]  | DS1000               | code-generation-with-tests<br>scientific-coding-workflow                                                                                     | 本地已取得        | 本地 3 条已回查          | 未跑                              | 未跑                               | [本地读取记录](validation/local-read-24sources-20261022.json)，服务器未验证                      |
 | [ ]  | DUREADER             | general-single-turn-assistant<br>rag-followup<br>document-grounded-analysis                                                                  | 待复核            | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                       |
 | [ ]  | FLEURS               | offline-audio-understanding<br>audio-streaming-interaction                                                                                   | 待复核            | 待复核                   | 未跑                              | 未跑                               | 待重新核验                                                                                       |

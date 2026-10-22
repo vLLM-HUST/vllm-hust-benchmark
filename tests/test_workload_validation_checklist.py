@@ -86,10 +86,10 @@ def test_checked_sources_require_execution_and_scoring_evidence():
         if row["scoring"] == "COMPLETED":
             assert evidence["status"] == "END_TO_END_EXECUTED_AND_SCORED"
         else:
-            assert (
-                evidence["status"]
-                == "REQUESTS_EXECUTED_AND_INTEGRITY_VALIDATED_NO_QUALITY_ORACLE"
-            )
+            assert evidence["status"] in {
+                "REQUESTS_EXECUTED_AND_INTEGRITY_VALIDATED_NO_QUALITY_ORACLE",
+                "ORIGINAL_FIELDS_GENERATED_AND_INTEGRITY_VERIFIED_NO_QUALITY_SCORE",
+            }
             assert evidence["quality_claim"] is False
             assert evidence["scoring"] == "NON_SCORING_INTEGRITY_VERIFIED"
             assert len(evidence["samples"]) == 3
