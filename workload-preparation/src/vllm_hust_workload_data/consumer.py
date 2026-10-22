@@ -4,8 +4,8 @@ from itertools import islice
 import json
 from pathlib import Path
 
-from .adapters import adapt_row
-from .assets import asset_path, iter_rows, verify_file
+from .adapters import adapt_row, iter_source_rows
+from .assets import asset_path, verify_file
 from .pipeline import connect_readonly
 
 
@@ -24,12 +24,7 @@ def resolve_input(database: Path, record_id: str, *, data_root: Path):
     source, task, spec = map(json.loads, row)
     reference = task["input_ref"]
     verify_file(data_root, {"path": reference["file"], "sha256": reference["sha256"]})
-    rows = iter_rows(
-        asset_path(data_root, reference["file"]),
-        records_path=spec.get("records_path", []),
-        row_format=spec.get("row_format"),
-        root_fields=spec.get("root_fields", []),
-    )
+    rows = iter_source_rows(asset_path(data_root, reference["file"]), spec)
     try:
         if spec.get("history_targets") is not None:
             from .conversations import history_record
