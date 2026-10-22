@@ -89,6 +89,7 @@ def test_checked_sources_require_execution_and_scoring_evidence():
             assert evidence["status"] in {
                 "REQUESTS_EXECUTED_AND_INTEGRITY_VALIDATED_NO_QUALITY_ORACLE",
                 "ORIGINAL_FIELDS_GENERATED_AND_INTEGRITY_VERIFIED_NO_QUALITY_SCORE",
+                "ORIGINAL_MESSAGES_GENERATED_AND_INTEGRITY_VERIFIED_NO_QUALITY_SCORE",
             }
             assert evidence["quality_claim"] is False
             assert evidence["scoring"] == "NON_SCORING_INTEGRITY_VERIFIED"
