@@ -45,13 +45,13 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
         s for s in publication["sections"] if s["id"] == "dataset-quality-inventory"
     )
     assert section["tables"][0]["rows"] == rows
-    assert len(section["evidence"]) == 9
+    assert len(section["evidence"]) == 11
     for locator in section["evidence"]:
         assert ".." not in Path(locator["path"]).parts
         assert (ROOT / locator["path"]).is_file()
 
     all_tables = module.tables(selected)
-    assert len(all_tables) == 4
+    assert len(all_tables) == 5
     matrix = json.loads(
         (ROOT / "website-publication/data/dataset-matrix-v1.json").read_text()
     )
@@ -101,3 +101,18 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
                 ]
             )
     assert [row[1:] for row in all_tables[3]["rows"]] == pairs
+    combination = json.loads(
+        (
+            ROOT / "reports/frontierscience-combination-quality-20261022/summary.json"
+        ).read_text()
+    )
+    for row, name in zip(all_tables[4]["rows"], ("olympiad", "research")):
+        result = combination["tracks"][name]
+        assert row[1:] == [
+            f"{result['successes']} / {result['total']}",
+            str(result["graded"]),
+            str(result["judge_unresolved"]),
+            str(result["solver_truncated"]),
+            str(result["judge_truncated"]),
+        ]
+    assert section["tables"][4] == all_tables[4]
