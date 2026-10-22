@@ -21,7 +21,7 @@ SPEC.loader.exec_module(RUNNER)
     [
         "https://127.0.0.1/v1",
         "http://example.com/v1",
-        "http://user:password@localhost/v1",
+        "http://user:password@localhost/v1",  # pragma: allowlist secret - invented rejected URL fixture
         "http://localhost/v1?x=1",
         "http://localhost/v1#fragment",
         "http://localhost/other",
