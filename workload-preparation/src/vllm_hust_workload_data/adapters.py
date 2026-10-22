@@ -57,6 +57,18 @@ def adapt_row(
         not isinstance(row["options"], list) or not row["options"]
     ):
         raise ValueError("MMLU_PRO requires source options")
+    if source_id == "LONGBENCH" and (
+        row["dataset"] != "qasper"
+        or any(
+            not isinstance(row[key], str) or not row[key].strip()
+            for key in ("context", "input")
+        )
+        or not isinstance(row["answers"], list)
+        or not row["answers"]
+        or not all(isinstance(answer, str) for answer in row["answers"])
+        or (row["all_classes"] is not None and not isinstance(row["all_classes"], list))
+    ):
+        raise ValueError("LONGBENCH adapter currently requires original qasper fields")
     if source_id == "AI2_ARC":
         choices = row["choices"]
         if (

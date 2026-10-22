@@ -24,6 +24,47 @@ AGENTBENCH_GAME_ARCHIVES = {
 }
 
 
+LONGBENCH_V1_DATA_ARCHIVE_SHA256 = "cb45b11a4133c6bc1d6a44b0f8e701335ff1e543195db1103472e575857f7f64"  # pragma: allowlist secret - official archive checksum
+LONGBENCH_QASPER_SHA256 = "29aa07d2a63f36f4fb8e8cd200a3428ee3126d750bde6af1c8f9bc41c2366854"  # pragma: allowlist secret - original data checksum
+
+
+def prepare_longbench_qasper(*, data_archive, output):
+    """Copy the one fixed publisher member, byte unchanged, to a fresh data root.
+
+    No network, model calls, prompt construction, feature extraction or scoring.
+    All other LongBench members are deliberately outside this preparation scope.
+    """
+    archive = Path(data_archive)
+    if (
+        hashlib.sha256(archive.read_bytes()).hexdigest()
+        != LONGBENCH_V1_DATA_ARCHIVE_SHA256
+    ):
+        raise ValueError("original LongBench v1 data archive identity mismatch")
+    with zipfile.ZipFile(archive) as bundle:
+        if bundle.namelist().count("data/qasper.jsonl") != 1:
+            raise ValueError("missing or ambiguous original qasper member")
+        raw = bundle.read("data/qasper.jsonl")
+    if hashlib.sha256(raw).hexdigest() != LONGBENCH_QASPER_SHA256:
+        raise ValueError("original qasper file identity mismatch")
+    if len(raw.splitlines()) != 200:
+        raise ValueError("original qasper row count mismatch")
+    target = Path(output)
+    target.mkdir(mode=0o700, parents=True, exist_ok=False)
+    path = target / "qasper.jsonl"
+    path.write_bytes(raw)
+    path.chmod(0o600)
+    return {
+        "source_id": "LONGBENCH",
+        "subsuite": "qasper",
+        "status": "ORIGINAL_FILE_PREPARED_NOT_EXECUTED",
+        "file": "qasper.jsonl",
+        "sha256": LONGBENCH_QASPER_SHA256,
+        "rows": 200,
+        "model_calls": 0,
+        "scorer_runs": 0,
+    }
+
+
 def agentbench_task_references(*, official_archive, game_archives, data_root, indices):
     """Original ALFWorld FC indices and verified file references, no task payload.
 

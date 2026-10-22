@@ -9,6 +9,53 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_qasper_public_handoff_is_original_three_not_full_suite_or_raw_diagnostic():
+    directory = ROOT / "docs/workload-data/validation"
+    receipt = json.loads(
+        (directory / "longbench-v1-qasper-public-handoff-npu-20261023.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    raw = json.loads(
+        (directory / "longbench-v1-qasper-raw-diagnostic-npu-20261023.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert receipt["status"] == "END_TO_END_EXECUTED_AND_SCORED"
+    assert receipt["unique_original_tasks"] == 3
+    assert receipt["full_suite_claim"] is receipt["performance_claim"] is False
+    assert receipt["official_f1_percent"] == 22.52
+    assert [s["preflight_prompt_tokens"] for s in receipt["samples"]] == [
+        4103,
+        3440,
+        4461,
+    ]
+    assert all(
+        s["finish_reason"] == "stop"
+        and s["usage"]["prompt_tokens"] == s["preflight_prompt_tokens"]
+        for s in receipt["samples"]
+    )
+    assert (
+        receipt["generation_config"]["max_tokens"]
+        == raw["generation_config"]["max_tokens"]
+        == 128
+    )
+    assert receipt["selected_ids"] == raw["selected_ids"]
+    assert [s["prompt_sha256"] for s in receipt["samples"]] == [
+        s["prompt_sha256"] for s in raw["samples"]
+    ]
+    assert raw["source_checkbox_eligible"] is False
+    assert all(s["finish_reason"] == "length" for s in raw["samples"])
+    assert (
+        receipt["helper_sha256"]
+        == hashlib.sha256(
+            (ROOT / "scripts/run_longbench_v1_qasper_original.py")
+            .read_bytes()
+            .replace(b"\r\n", b"\n")
+        ).hexdigest()
+    )
+
+
 def test_external_endpoint_rejected_before_loading_original_data(tmp_path):
     result = subprocess.run(
         [

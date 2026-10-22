@@ -60,7 +60,19 @@ def get_workload(family_id, root=None):
 def download_plan(source_id, root=None):
     source = source_spec(source_id, root)
     files = [
-        {k: f[k] for k in ("path", "url", "sha256", "bytes", "rows", "role") if k in f}
+        {
+            k: f[k]
+            for k in (
+                "path",
+                "url",
+                "sha256",
+                "bytes",
+                "rows",
+                "role",
+                "archive_member",
+            )
+            if k in f
+        }
         for f in source["files"]
     ]
     return {
@@ -69,6 +81,7 @@ def download_plan(source_id, root=None):
         "revision": source.get("revision"),
         "access": source["access"],
         "files": files,
+        "preparation_command": source.get("preparation_command"),
         "method": "EXTERNAL_AUTHORIZED_ASSET"
         if source_id.startswith("PAIO-")
         else ("PINNED_FILE_URLS" if files else "PUBLISHER_DATA_DOWNLOAD_SECTION"),
