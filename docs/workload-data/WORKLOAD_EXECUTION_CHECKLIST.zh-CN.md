@@ -2,6 +2,9 @@
 
 ## 增量验证快照
 
+- [x] LongWriter-6k原train行0–2：原消息/参考隔离回查、双卡NPU生成和响应完整性完成，三条stop，实际输出2168/3064/5497
+  token。[回执](validation/longwriter-original-npu-20261022.json)。属于单轮助手任务的长输出运行维度，不新增任务类别；未验证原题篇幅达标、质量、完整6000条或LongBench-Write评测。
+
 - [x] Dolly原train行0–2：原instruction/context回查、双卡NPU生成和响应完整性已完成，三条stop；固定发布方训练前缀并披露chat传输，不是官方评分协议。[回执](validation/dolly-original-npu-20261022.json)。原数据有参考回答，但未验证语义正确性；只覆盖3/15011，不将其他任务类别同步勾选。
 
 - [x] LongBench
@@ -39,7 +42,7 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 | OASST1               | L：3条                              | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
 | TULU3                | 待核                                | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
 | ULTRACHAT            | 待核                                | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
-| LONGWRITER           | L：3条                              | [ ] 未完成 | 原生子集/协议、服务器执行及适用核验 |
+| LONGWRITER           | G：原消息3条NPU生成/完整性          | [ ] 未完成 | 全量、语义/篇幅达标及性能未评估     |
 
 ## [ ] 对话续接 · conversation-continuation
 
@@ -488,14 +491,14 @@ GSM8K历史[分批汇总](validation/gsm8k-incremental-progress-20261022.json)�
 
 ## 跨任务特征与轨迹资产
 
-| 完成 | 项目          | 来源                                                            | 已有证据及缺项                        |
-| ---- | ------------- | --------------------------------------------------------------- | ------------------------------------- |
-| [ ]  | 长输入        | PAIO-LONG-PREFILL-5000、PAIO-LONGTEXT-4000、LONGBENCH_V2、RULER | 企业两源R；公开任务、受控测试分别待跑 |
-| [ ]  | 长输出        | LONGWRITER                                                      | L；实际生成与评分待做                 |
-| [ ]  | 前缀共享      | PAIO-PREFIX-SHARED-5000                                         | R；实际token前缀待核，不代表KV命中    |
-| [ ]  | 会话重用      | PAIO-REUSE-CONV-5000、PAIO-CHAT-1000                            | R；原始会话关系待核                   |
-| [ ]  | 语义相似      | PAIO-SEMANTIC-SIMILAR-5000、PAWS                                | 企业R；语义相似不等于KV重用           |
-| [ ]  | 到达/尺寸轨迹 | AZURE_LLM、MOONCAKE、BURSTGPT                                   | BURSTGPT为L；元数据不能伪造模型输入   |
+| 完成 | 项目          | 来源                                                            | 已有证据及缺项                                        |
+| ---- | ------------- | --------------------------------------------------------------- | ----------------------------------------------------- |
+| [ ]  | 长输入        | PAIO-LONG-PREFILL-5000、PAIO-LONGTEXT-4000、LONGBENCH_V2、RULER | 企业两源R；公开任务、受控测试分别待跑                 |
+| [ ]  | 长输出        | LONGWRITER                                                      | G：3条生成/完整性；篇幅达标、长输出稳定性及性能未评估 |
+| [ ]  | 前缀共享      | PAIO-PREFIX-SHARED-5000                                         | R；实际token前缀待核，不代表KV命中                    |
+| [ ]  | 会话重用      | PAIO-REUSE-CONV-5000、PAIO-CHAT-1000                            | R；原始会话关系待核                                   |
+| [ ]  | 语义相似      | PAIO-SEMANTIC-SIMILAR-5000、PAWS                                | 企业R；语义相似不等于KV重用                           |
+| [ ]  | 到达/尺寸轨迹 | AZURE_LLM、MOONCAKE、BURSTGPT                                   | BURSTGPT为L；元数据不能伪造模型输入                   |
 
 ## 企业来源分配（保留原回执）
 

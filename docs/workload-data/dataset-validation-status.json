@@ -650,15 +650,15 @@
       "workload_class_ids": [
         "general-single-turn-assistant"
       ],
-      "acquisition": "VERIFIED_LOCAL",
-      "read_adapter": "VERIFIED_LOCAL_3_SAMPLES",
-      "server_execution": "NOT_RUN",
-      "scoring": "NOT_RUN",
-      "selected_samples": [],
-      "completed_samples": [],
-      "checked": false,
-      "receipt": null,
-      "blocker": "当前安装包已本地读取回查3条；尚未完成服务器任务执行与适用评分。",
+      "acquisition": "VERIFIED",
+      "read_adapter": "VERIFIED",
+      "server_execution": "COMPLETED",
+      "scoring": "NON_SCORING_INTEGRITY_VERIFIED",
+      "selected_samples": ["eccc36d6a95e516516e086b81752f54b005a44433a603d1023f59b6cd0b1e07a", "9df03651b495ed28d145dac177df47415294e02335ff8ab6b2e55aa2e0afce96", "5b467cbcc3b95fad3bd0a9de996c97f9694f679b09f42d64f1a5cf1b7323a347"],
+      "completed_samples": ["eccc36d6a95e516516e086b81752f54b005a44433a603d1023f59b6cd0b1e07a", "9df03651b495ed28d145dac177df47415294e02335ff8ab6b2e55aa2e0afce96", "5b467cbcc3b95fad3bd0a9de996c97f9694f679b09f42d64f1a5cf1b7323a347"],
+      "checked": true,
+      "receipt": "docs/workload-data/validation/longwriter-original-npu-20261022.json",
+      "blocker": "原LongWriter-6k训练行0–2消息回查、NPU生成及响应完整性完成，三条stop；不是LongBench-Write评估。实际输出2168/3064/5497 token，未评估原题篇幅达标、质量、全6000条或长输出性能。",
       "local_read_receipt": "docs/workload-data/validation/local-read-24sources-20261022.json"
     },
     {
