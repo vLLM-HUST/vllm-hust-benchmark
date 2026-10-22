@@ -40,6 +40,16 @@ messages = view["messages"]  # 仅此字段作为历史消息输入
 
 ## 已验证范围
 
+可复用脚本已在服务器使用安装包复跑同三点：全部stop，输入哈希与先前运行相同，仍只计三个唯一续接点。脚本 SHA-256 为 `f6ddc2eee93d2a4449c09d42fbbb5676fef315c478aff23d83700011d60acf03`；私有回执 SHA-256 为 `c2ebadba256d1d05ed0cd59d0ae7e59fefb1a0348f12ffafafac045e9dcfc098`。此复验不新增质量或性能结论。
+
+可复用生成命令（输出目录必须不存在，所有输出留在仓库外）：
+
+```sh
+python scripts/run_oasst_original_continuation.py --data-file /data/oasst1/validation.parquet --output /data/private/oasst-run-001 --endpoint http://127.0.0.1:19466/v1 --model workload-qwen35-27b-128k-nonthinking
+```
+
+该入口固定下述三个目标和原始 validation SHA，预检完整输入 token 预算（128K、输出2048），不修改题目、不裁剪祖先链。只允许本地模型 endpoint。运行依赖数据组件 `[data]`，无额外 Agent 框架；原始请求和回答仅写入私有输出目录，不写入 Git。这是历史续接生成入口，不是官方质量评测器。
+
 在既有双 NPU Qwen3.5-27B 服务上，按执行前规则选取发布顺序中前三个不同 parent 的续接点：英文 assistant 目标，完整交替路径至少四节点，路径各行 deleted=false/synthetic=false。符合规则的 distinct parent 共 288 个；本次只执行三个，不代表全量 4401 行或 288 个点。
 
 | 原始目标行（零起始） | 目标 message_id | 输入 token | 输出 token | 终止 |
