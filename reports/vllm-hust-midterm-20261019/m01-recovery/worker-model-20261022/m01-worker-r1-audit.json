@@ -1,0 +1,119 @@
+{
+  "status": "dual_worker_tasks_and_system_samples_verified",
+  "completed": 200,
+  "failed": 0,
+  "output_tokens": 51200,
+  "request_seconds": 135.34325635712594,
+  "instrumented_output_throughput": 378.29738531560224,
+  "formal_b1_admission": false,
+  "device_envelope_seconds": 186.802958029,
+  "includes_client_startup_and_control_overhead": true,
+  "clock_bridge": {
+    "offsets_ns": [
+      1784284296542311100,
+      1784284296542308290,
+      1784284296542313774,
+      1784284296542313553
+    ],
+    "observed_spread_ns": 5484,
+    "tolerance_ns": 2000000,
+    "start_wall_ns": 1792632830021805518,
+    "end_wall_ns": 1792633016824763547,
+    "scope": "Observed clock pairs and explicit tolerance, not a proven absolute clock-error bound"
+  },
+  "ranks": [
+    {
+      "rank": 0,
+      "pid": 1477342,
+      "rows": {
+        "TASK": {
+          "entire_capture": 3245472,
+          "fully_inside_envelope": 3245470,
+          "with_2ms_boundary_tolerance": 3245470
+        },
+        "CANN_API": {
+          "entire_capture": 1781608,
+          "fully_inside_envelope": 1781603,
+          "with_2ms_boundary_tolerance": 1781604
+        },
+        "COMMUNICATION_OP": {
+          "entire_capture": 83096,
+          "fully_inside_envelope": 83096,
+          "with_2ms_boundary_tolerance": 83096
+        }
+      }
+    },
+    {
+      "rank": 1,
+      "pid": 1477343,
+      "rows": {
+        "TASK": {
+          "entire_capture": 3246375,
+          "fully_inside_envelope": 3246373,
+          "with_2ms_boundary_tolerance": 3246373
+        },
+        "CANN_API": {
+          "entire_capture": 1779444,
+          "fully_inside_envelope": 1779439,
+          "with_2ms_boundary_tolerance": 1779440
+        },
+        "COMMUNICATION_OP": {
+          "entire_capture": 83096,
+          "fully_inside_envelope": 83096,
+          "with_2ms_boundary_tolerance": 83096
+        }
+      }
+    }
+  ],
+  "hardware": [
+    {
+      "table": "HBM",
+      "device": 0,
+      "rows_inside_envelope": 74720,
+      "maximum_sample_gap_ns": 57296896
+    },
+    {
+      "table": "HBM",
+      "device": 1,
+      "rows_inside_envelope": 74720,
+      "maximum_sample_gap_ns": 73596928
+    },
+    {
+      "table": "HCCS",
+      "device": 0,
+      "rows_inside_envelope": 9251,
+      "maximum_sample_gap_ns": 71088520
+    },
+    {
+      "table": "HCCS",
+      "device": 1,
+      "rows_inside_envelope": 9229,
+      "maximum_sample_gap_ns": 79454580
+    }
+  ],
+  "child_exit_codes": [
+    0,
+    130,
+    0
+  ],
+  "all_devices_released": true,
+  "warnings": [
+    "Native profiler warned about stopping in RECORD state; raw data preserved and tables audited",
+    "Shutdown recorded EngineDeadError and manager exit 130"
+  ],
+  "full_arithmetic_coverage_proven": false,
+  "matching_reference_complete": false,
+  "model_effective_flops": null,
+  "m01_attainment": null,
+  "source_sha256": {
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/receipt.json": "5be7b32992642def8fb52c40681169945df34886a72078dfaeba1c24a72c7c07",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/mmlu-pro.json": "a6f21ecafac3e322a7659eee1c1e4cbb1e0a19cc4cb1d17620706172446cdf50",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/device-envelope.json": "eedf6172e13d0510d8802cdec8dd0f91ba9f487e2be1cf71a70d724b84ae2484",
+    "/root/gennova-evidence/20261019-midterm-aligned/m01-recovery-model-worker-r1/worker-capture.json": "8575acf8570bb6543ac3a517edd8e6c1210a0144baab0e5f5535730bcefa0e40",
+    "/workspace/m01-worker-r1-profiler/rank-0-pid-1477342/m01-rank-0_1477342_20261022013349605_ascend_pt/profiler_info_0.json": "10f0eab03529c58e6a207e1e141c9cb418b110a0db1014aeab559afb0c291d91",
+    "/workspace/m01-worker-r1-profiler/rank-1-pid-1477343/m01-rank-1_1477343_20261022013349604_ascend_pt/profiler_info_1.json": "52b3abf33219e9bc4258a3d186209dba4d7e19f466f84ac21080836a91a0764b",
+    "/workspace/m01-worker-r1-offline-export/rank-0/m01-rank-0_1477342_20261022013349605_ascend_pt/PROF_000001_20261022013349659_01477342DDFRKPCN/msprof_20261022015137.db": "15bac53a4aaeecd0644c37f2a247233f5ae8ced24b5b6d450af402c11efee54f",
+    "/workspace/m01-worker-r1-offline-export/rank-1/m01-rank-1_1477343_20261022013349604_ascend_pt/PROF_000001_20261022013349653_01477343DJOORMFI/msprof_20261022015448.db": "40b07e83990a0f2274b6d57fa6d32c31dc3f7f164cd147415d3f47d91b689d76",
+    "/workspace/m01-worker-r1-offline-export/system/PROF_000001_20261022013344621_01520198MFCKIGIQ/msprof_20261022014658.db": "75bf7e17158ee17d6c3e4c9e5b18a38537268cd2151166653555d4075e8b70f7"
+  }
+}
