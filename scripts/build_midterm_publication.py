@@ -8,14 +8,18 @@ import tarfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REVISION = "9c184c6b5836b71099450d3cd4c20071f5d5d6a9"  # pragma: allowlist secret
+REVISION = "15ad285b06f40a9f89ddf63b95bd80ecce17e5d8"  # pragma: allowlist secret
 REPORT_DIR = "reports/vllm-hust-midterm-20261019"
 REPORT = REPORT_DIR + "/中期测试报告.md"
-OUTPUT = ROOT / "website-publication/data/midterm-v065.json"
+OUTPUT = ROOT / "website-publication/data/midterm-v066.json"
 
 # Repository-relative locators are resolved against the website's exact benchmark
 # publication commit, not a moving main branch or a local acquisition path.
 EVIDENCE = {
+    "dataset-quality-inventory": [
+        "../../website-publication/data/hle-verified-20261015/report.json",
+        "../../website-publication/data/frontierscience-20261013/report.json",
+    ],
     "reference-closure": ["m01-recovery/reference-closure-20261022"],
     "worker-model": ["m01-recovery/worker-model-20261022"],
     "fenced-model": ["m01-recovery/fenced-model-20261022"],
@@ -72,7 +76,7 @@ EVIDENCE = {
 
 
 def evidence_locator(relative):
-    path = ROOT / REPORT_DIR / relative
+    path = (ROOT / REPORT_DIR / relative).resolve()
     assert path.exists(), relative
     return {
         "path": path.relative_to(ROOT).as_posix(),
@@ -182,9 +186,15 @@ def kv_audit():
 def build():
     raw = pinned(REPORT)
     text = raw.decode()
-    assert "报告版本：V0.65" in text
+    assert "报告版本：V0.66" in text
     url = f"https://github.com/vLLM-HUST/vllm-hust-benchmark/blob/{REVISION}/{REPORT}"
     specs = [
+        (
+            "dataset-quality-inventory",
+            "既有任务质量与配对缺项 / Existing task quality and pairing gaps",
+            "### 5.11 HLE-Verified与FrontierScience既有任务质量",
+            "HLE与FrontierScience已有任务质量观测，不仅是性能遥测。Qwen替代裁判、单次运行，未决项保留完整分母；不是官方评分复现。当前B1组合配对为空，未决及截断评分仍需复核，不宣称质量改善。HLE公开归档未包含全部问答载荷，不能独立重评。",
+        ),
         (
             "reference-closure",
             "同工况参考补测汇总 / Matched reference measurements",
@@ -342,7 +352,7 @@ def build():
         )
     return {
         "schema": "midterm-publication/v1",
-        "version": "V0.65",
+        "version": "V0.66",
         "report_url": url,
         "report_sha256": hashlib.sha256(raw).hexdigest(),
         "source_commit": REVISION,
