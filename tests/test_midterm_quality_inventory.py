@@ -45,13 +45,13 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
         s for s in publication["sections"] if s["id"] == "dataset-quality-inventory"
     )
     assert section["tables"][0]["rows"] == rows
-    assert len(section["evidence"]) == 11
+    assert len(section["evidence"]) == 12
     for locator in section["evidence"]:
         assert ".." not in Path(locator["path"]).parts
         assert (ROOT / locator["path"]).is_file()
 
     all_tables = module.tables(selected)
-    assert len(all_tables) == 5
+    assert len(all_tables) == 6
     matrix = json.loads(
         (ROOT / "website-publication/data/dataset-matrix-v1.json").read_text()
     )
@@ -116,3 +116,25 @@ def test_quality_inventory_matches_original_tracks_and_preserves_limits():
             str(result["judge_truncated"]),
         ]
     assert section["tables"][4] == all_tables[4]
+    native018 = json.loads(
+        (
+            ROOT / "reports/mmlu-quality018-20261022/quality018-completed-audit-r1.json"
+        ).read_text()
+    )
+    rows018 = all_tables[5]["rows"]
+    assert rows018[0][1:4] == [
+        f"{native018['counts']['correct']} / {native018['counts']['total']}",
+        str(native018["counts"]["failed"]),
+        str(native018["counts"]["truncated"]),
+    ]
+    comparisons = native018["comparisons"]
+    for row, result in zip(
+        rows018[1:], (comparisons[1], comparisons[2], comparisons[0]), strict=True
+    ):
+        assert row[1:] == [
+            f"{result['candidate_correct']} / 200",
+            str(result["candidate_failed"]),
+            str(result["candidate_truncated"]),
+            f"{result['accuracy_delta_percentage_points']:+.1f}个百分点",
+        ]
+    assert section["tables"][5] == all_tables[5]
